@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { convertFiltersToESQLExpression } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
@@ -16,7 +17,6 @@ import { processGroupFilters } from '../../entities_table/entities_table_section
 import type { EntityURLStateResult } from '../../entities_table/hooks/use_entity_url_state';
 import { TEST_SUBJ_GROUPING, TEST_SUBJ_GROUPING_LOADING } from '../../entities_table/constants';
 import { EntitiesGrid } from './entities_grid';
-import { CHILD_ROWS_COLUMNS } from '../grid_columns';
 import type { ReadAccess } from '../grid_columns';
 import { RISK_SCORE_NORM_FIELD } from '../common';
 import { joinAnd } from '../queries/esql';
@@ -53,6 +53,7 @@ interface GroupViewProps {
   timeRange: TimeRange;
   watchlistNames: Map<string, string>;
   rowsMode: RowsMode;
+  columns: readonly EuiDataGridColumn[];
   /** The page's active filters, as the flat grid gets them; leaf grids add their group. */
   searchExpression?: string;
   entityExpression?: string;
@@ -322,6 +323,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
   timeRange,
   watchlistNames,
   rowsMode,
+  columns,
   searchExpression,
   entityExpression,
   cellHandlers,
@@ -350,7 +352,7 @@ const LeafGrid: React.FC<LeafGridProps> = ({
 
   return (
     <EntitiesGrid
-      columns={CHILD_ROWS_COLUMNS}
+      columns={columns}
       searchExpression={leafExpressions.searchExpression}
       entityExpression={leafExpressions.entityExpression}
       timeRange={timeRange}

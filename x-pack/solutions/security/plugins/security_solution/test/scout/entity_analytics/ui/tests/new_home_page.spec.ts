@@ -29,9 +29,14 @@ const RUN_ID = randomUUID().slice(0, 8);
 const NEW_RISKY_HOST = `scout-new-risky-host-${RUN_ID}`;
 // No risk score, so not on the tile.
 const OTHER_HOST = `scout-other-host-${RUN_ID}`;
+// A resolved entity: this host and two aliases resolve to it, so its group has three records.
+const RESOLVED_HOST = `scout-resolved-host-${RUN_ID}`;
+const RESOLVED_ALIASES = [`scout-resolved-alias-a-${RUN_ID}`, `scout-resolved-alias-b-${RUN_ID}`];
 // Narrows the grid to this suite's hosts, so other entities on a shared deployment can't push them
 // out of the rendered rows.
-const SEEDED_HOSTS_QUERY = `entity.name: "${NEW_RISKY_HOST}" or entity.name: "${OTHER_HOST}"`;
+const SEEDED_HOSTS_QUERY = [NEW_RISKY_HOST, OTHER_HOST, RESOLVED_HOST]
+  .map((name) => `entity.name: "${name}"`)
+  .join(' or ');
 
 test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic] }, () => {
   // Another suite may already run the host engine: then this suite only removes its own entities.
@@ -50,6 +55,12 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
       { risk: { score: 80, level: 'High' } }
     );
     await apiServices.entityAnalytics.indexEntityStoreEntry(`host:${OTHER_HOST}`, OTHER_HOST);
+    await apiServices.entityAnalytics.indexEntityStoreEntry(`host:${RESOLVED_HOST}`, RESOLVED_HOST);
+    for (const alias of RESOLVED_ALIASES) {
+      await apiServices.entityAnalytics.indexEntityStoreEntry(`host:${alias}`, alias, {
+        resolvedTo: `host:${RESOLVED_HOST}`,
+      });
+    }
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -66,6 +77,8 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
       await apiServices.entityAnalytics.deleteEntityStoreEntries([
         `host:${NEW_RISKY_HOST}`,
         `host:${OTHER_HOST}`,
+        `host:${RESOLVED_HOST}`,
+        ...RESOLVED_ALIASES.map((alias) => `host:${alias}`),
       ]);
     }
     await apiServices.core.settings({
@@ -81,6 +94,34 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
     }
     await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
     await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeVisible();
+  });
+
+  test('a resolved entity can be expanded and collapsed inside a group', async ({
+    pageObjects,
+  }) => {
+    const { entityAnalyticsHomePage } = pageObjects;
+
+    await test.step('grouping by entity type lists the hosts in their bucket', async () => {
+      await entityAnalyticsHomePage.groupBy('entity.EngineMetadata.Type');
+      await entityAnalyticsHomePage.groupBucket('host').click();
+      await expect(entityAnalyticsHomePage.gridRow(RESOLVED_HOST)).toBeVisible();
+    });
+
+    await test.step('only the entity with several records has an expander', async () => {
+      await expect(entityAnalyticsHomePage.expandToggle(RESOLVED_HOST)).toBeVisible();
+      await expect(entityAnalyticsHomePage.expandToggle(OTHER_HOST)).toBeHidden();
+    });
+
+    await test.step('expanding it lists its records, and collapsing hides them', async () => {
+      const [alias] = RESOLVED_ALIASES;
+      const aliasRecord = entityAnalyticsHomePage.grid.getByText(alias, { exact: true });
+
+      await entityAnalyticsHomePage.expandToggle(RESOLVED_HOST).click();
+      await expect(aliasRecord).toBeVisible();
+
+      await entityAnalyticsHomePage.expandToggle(RESOLVED_HOST).click();
+      await expect(aliasRecord).toBeHidden();
+    });
   });
 
   test('a tile filters the grid to its entities, and a second click clears it', async ({

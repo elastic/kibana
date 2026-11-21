@@ -15,6 +15,7 @@ import { useResolvedValueGroups } from '../hooks/use_resolved_value_groups';
 import { useEntityFilterOverrides } from '../hooks/use_entity_grid_data';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import type { RowsMode } from '../common';
+import { INDIVIDUAL_ROWS_COLUMNS, RESOLVED_ROWS_COLUMNS } from '../grid_columns';
 import { EntitiesGroups } from './entities_groups';
 import { EntitiesGrid } from './entities_grid';
 
@@ -65,6 +66,7 @@ const renderGroups = (rowsMode: RowsMode, groupsSelected: string[]) =>
       timeRange="7d"
       watchlistNames={new Map()}
       rowsMode={rowsMode}
+      columns={rowsMode === 'individual' ? INDIVIDUAL_ROWS_COLUMNS : RESOLVED_ROWS_COLUMNS}
       searchExpression='KQL("""entity.name: web*""")'
       entityExpression='entity.EngineMetadata.Type IN ("host")'
       readAccess={{} as never}

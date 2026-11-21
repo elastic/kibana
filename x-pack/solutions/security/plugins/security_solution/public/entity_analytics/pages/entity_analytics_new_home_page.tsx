@@ -1695,6 +1695,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
                 timeRange={timeRange}
                 watchlistNames={watchlistNames}
                 rowsMode={rowsMode}
+                columns={activeColumns}
                 searchExpression={gridSearchExpression}
                 entityExpression={gridEntityExpression}
                 isQueryReady={isGroupingQueryReady}
