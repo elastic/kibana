@@ -132,6 +132,25 @@ const noApplicationsPrompt = (
   />
 );
 
+const ShowAllEnvironmentsButton = ({
+  onShowAllEnvironments,
+}: {
+  onShowAllEnvironments: () => void;
+}) => (
+  <EuiButton
+    data-test-subj="digitalExperienceShowAllEnvironments"
+    {...getEbtProps({
+      action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+      element: APPLICATIONS_LIST_EBT_ELEMENTS.SHOW_ALL_ENVIRONMENTS,
+    })}
+    onClick={onShowAllEnvironments}
+  >
+    {i18n.translate('xpack.digitalExperience.applications.emptyInEnvironment.showAll', {
+      defaultMessage: 'Show all environments',
+    })}
+  </EuiButton>
+);
+
 const NoApplicationsInEnvironmentPrompt = ({
   onShowAllEnvironments,
 }: {
@@ -155,20 +174,7 @@ const NoApplicationsInEnvironmentPrompt = ({
         })}
       </p>
     }
-    actions={
-      <EuiButton
-        data-test-subj="digitalExperienceShowAllEnvironments"
-        {...getEbtProps({
-          action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
-          element: APPLICATIONS_LIST_EBT_ELEMENTS.SHOW_ALL_ENVIRONMENTS,
-        })}
-        onClick={onShowAllEnvironments}
-      >
-        {i18n.translate('xpack.digitalExperience.applications.emptyInEnvironment.showAll', {
-          defaultMessage: 'Show all environments',
-        })}
-      </EuiButton>
-    }
+    actions={<ShowAllEnvironmentsButton onShowAllEnvironments={onShowAllEnvironments} />}
   />
 );
 
@@ -279,9 +285,9 @@ export function ApplicationsListPage() {
       : APPLICATION_TYPE.web);
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
   // Nothing matched in the indices the user can read, without full access: the prompt says so in
-  // place of the setup docs and the partial access warning.
+  // place of the setup docs or the environment's empty state, and of the partial access warning.
   const showsMobileUnreadableDataPrompt =
-    mobileAvailability === 'partial' && !hasMobileApplications && !environment;
+    mobileAvailability === 'partial' && !hasMobileApplications;
 
   const mobileItems = useMemo(
     () =>
@@ -403,16 +409,22 @@ export function ApplicationsListPage() {
     if (hasMobileApplications) {
       return NO_MOBILE_MATCHES_MESSAGE;
     }
-    if (environment) {
-      return noApplicationsInEnvironmentPrompt;
-    }
     if (showsMobileUnreadableDataPrompt) {
       return (
         <MobileUnreadableDataPrompt
           data-test-subj="digitalExperienceMobileApplicationsUnreadableData"
           title={NO_READABLE_MOBILE_APPLICATIONS_TITLE}
+          isFiltered={environment !== undefined}
+          actions={
+            environment ? (
+              <ShowAllEnvironmentsButton onShowAllEnvironments={() => setEnvironment(undefined)} />
+            ) : undefined
+          }
         />
       );
+    }
+    if (environment) {
+      return noApplicationsInEnvironmentPrompt;
     }
     return (
       <MobileOnboardingPrompt

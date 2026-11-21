@@ -75,5 +75,24 @@ apiTest.describe(
         });
       }
     );
+
+    apiTest(
+      'reports the KPIs as partial without data when all of the application is in unreadable indices',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NO_OTEL_LOGS_ROLE);
+
+        // Its one event is a log.
+        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.legacyAndroid), {
+          headers: { ...COMMON_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body as MobileKpisResponse).toMatchObject({
+          isPartial: true,
+          hasData: false,
+        });
+      }
+    );
   }
 );

@@ -175,6 +175,19 @@ describe('MobileOverview', () => {
     expect(screen.queryByTestId('digitalExperienceMobileEmpty')).toBeNull();
     expect(screen.queryByTestId('digitalExperienceMobileAndroidDocsLink')).toBeNull();
     expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
+    expect(screen.getByTestId('digitalExperienceMobileUnreadableData')).not.toHaveTextContent(
+      'Nothing matched the filters'
+    );
+  });
+
+  it('names both the filters and the access when nothing readable matched the filters', async () => {
+    mockParams({ release: '9.9.9' });
+    fetch.mockResolvedValue({ ...KPIS, hasData: false, isPartial: true });
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceMobileUnreadableData')).toHaveTextContent(
+      'Nothing matched the filters in the indices you can read. Change the filters'
+    );
   });
 
   it('shows no access warning when the user reads every index', async () => {

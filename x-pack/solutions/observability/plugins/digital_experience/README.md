@@ -94,7 +94,9 @@ on serverless and stateful.
   warning shows when the user can't read every OTel index, as the counts may then miss data.
   Without mobile data it links to the EDOT Android and iOS setup docs, unless the user can't read
   every OTel index: then it says nothing matched in the indices they can read and asks them to
-  check their access, on this page and on the list's Mobile tab.
+  check their access, on this page and on the list's Mobile tab. With a filter set (environment,
+  OS or release), either can be the cause, so it names both, and the list keeps its "Show all
+  environments" action.
 - **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
   optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
   OS) and environments for the pickers.

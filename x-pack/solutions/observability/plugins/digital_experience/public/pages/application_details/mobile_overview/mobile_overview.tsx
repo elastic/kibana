@@ -339,6 +339,9 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
             <MobileUnreadableDataPrompt
               data-test-subj="digitalExperienceMobileUnreadableData"
               title={UNREADABLE_DATA_TITLE}
+              isFiltered={
+                environment !== undefined || osName !== undefined || release !== undefined
+              }
             />
           ) : (
             <MobileOnboardingPrompt

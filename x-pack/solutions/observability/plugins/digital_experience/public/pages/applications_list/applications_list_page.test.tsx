@@ -330,6 +330,21 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperiencePartiallyAvailableMobile')).toBeNull();
   });
 
+  it('names both the environment and the access, and shows all environments, when no readable mobile data matched one', async () => {
+    mockEnvironment('production');
+    respondWith([], ['production'], [], null, [], 'partial');
+    mockApplicationType('mobile');
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceMobileApplicationsUnreadableData')
+    ).toHaveTextContent('Nothing matched the filters in the indices you can read');
+    expect(screen.queryByTestId('digitalExperienceApplicationsEmptyInEnvironment')).toBeNull();
+
+    fireEvent.click(screen.getByTestId('digitalExperienceShowAllEnvironments'));
+    expect(setEnvironment).toHaveBeenCalledWith(undefined);
+  });
+
   it('keeps the tabs on the web tab, and offers a retry, when every web search failed', async () => {
     respondWith([mobileApp()], [], ['otel', 'classic']);
     renderPage();
