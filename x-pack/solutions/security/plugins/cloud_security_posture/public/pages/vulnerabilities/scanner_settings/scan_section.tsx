@@ -61,6 +61,7 @@ const FEED_COLORS: Record<SummaryFeedStatus, string> = {
   matched: 'success',
   unavailable: 'default',
   failed: 'danger',
+  skipped: 'accent',
 };
 
 const FEED_COLUMNS: Array<EuiBasicTableColumn<SummaryFeed>> = [

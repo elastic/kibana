@@ -722,6 +722,26 @@ describe('ScannerSettingsPage', () => {
       expect(screen.queryByTestId(SCANNER_SETTINGS_TEST_SUBJECTS.VIEW_RUN_LINK)).toBeNull();
     });
 
+    it('labels a skipped release "Skipped", not "Failed"', async () => {
+      setup({
+        status: createStatus({
+          lastScan: {
+            ...lastScan,
+            scope: 'refresh',
+            feeds: [
+              { release: 'ubuntu:noble', status: 'matched' },
+              { release: 'rhel:9', status: 'skipped' },
+            ],
+          },
+        }),
+      });
+
+      const ubuntuRow = await screen.findByTestId('feed-ubuntu:noble');
+      expect(within(ubuntuRow).queryByText('Failed')).toBeNull();
+      const rhelRow = screen.getByTestId('feed-rhel:9');
+      expect(within(rhelRow).getByText('Skipped')).toBeInTheDocument();
+    });
+
     it.each([
       ['no workflows privileges', () => ({})],
       ...Object.keys(WORKFLOWS_READ_CAPABILITIES).map((missing) => [

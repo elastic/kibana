@@ -181,8 +181,11 @@ export const getFeedStatusLabel = (status: SummaryFeedStatus): string => {
       return i18n.translate('xpack.csp.nativeVulnScanner.feedStatus.unavailable', {
         defaultMessage: 'No feed',
       });
+    case 'skipped':
+      return i18n.translate('xpack.csp.nativeVulnScanner.feedStatus.skipped', {
+        defaultMessage: 'Skipped',
+      });
     case 'failed':
-    default:
       return i18n.translate('xpack.csp.nativeVulnScanner.feedStatus.failed', {
         defaultMessage: 'Failed',
       });
