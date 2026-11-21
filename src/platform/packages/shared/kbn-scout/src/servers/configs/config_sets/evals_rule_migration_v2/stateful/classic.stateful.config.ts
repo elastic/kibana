@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
+import { servers as evalsSecurityConfig } from '../../evals_security/stateful/classic.stateful.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
 /**
  * Custom Scout stateful server configuration for the Rule Migration v2 agent evals.
- * Extends `evals_tracing` and additionally enables the `ruleMigrationGraphv2`
+ * Extends `evals_security` and additionally enables the `ruleMigrationGraphv2`
  * experimental feature flag, which switches the SIEM rule migration task runner
  * from `getRuleMigrationAgent` (v1) to `getRuleMigrationAgentV2` (v2).
  *
@@ -22,11 +22,11 @@ import type { ScoutServerConfig } from '../../../../../types';
  *   node scripts/evals start --suite security-automatic-migrations --profile local --skip-server
  */
 export const servers: ScoutServerConfig = {
-  ...evalsTracingConfig,
+  ...evalsSecurityConfig,
   kbnTestServer: {
-    ...evalsTracingConfig.kbnTestServer,
+    ...evalsSecurityConfig.kbnTestServer,
     serverArgs: [
-      ...evalsTracingConfig.kbnTestServer.serverArgs,
+      ...evalsSecurityConfig.kbnTestServer.serverArgs,
       `--xpack.securitySolution.enableExperimental=["ruleMigrationGraphv2"]`,
     ],
   },

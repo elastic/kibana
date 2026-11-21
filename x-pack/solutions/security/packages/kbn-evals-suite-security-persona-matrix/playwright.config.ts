@@ -26,7 +26,7 @@ const WORKERS = resolveWorkers(process.env.PERSONA_MATRIX_WORKERS, (message) =>
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
   // The co-located Attack Discovery spec runs under its own config
-  // (attack_discovery.playwright.config.ts) with the evals_tracing server config.
+  // (attack_discovery.playwright.config.ts) with the evals_security server config.
   testIgnore: '**/attack_discovery.spec.ts',
   timeout: TIMEOUT_MINUTES * 60_000,
   workers: WORKERS,
