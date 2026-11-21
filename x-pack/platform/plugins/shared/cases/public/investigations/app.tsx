@@ -21,6 +21,7 @@ import { CasesProvider } from '../components/cases_context';
 import type { CasesPublicStartDependencies } from '../types';
 import { DetailPage } from './components/detail/detail_page';
 import { QueuePage } from './components/queue/queue_page';
+import { SettingsPage } from './components/settings/settings_page';
 
 export interface InvestigationsAppProps {
   coreStart: CoreStart;
@@ -86,6 +87,7 @@ export const InvestigationsApp: React.FC<InvestigationsAppProps> = ({
             <div css={rootStyles} data-test-subj="investigationsApp">
               <Routes>
                 <Route exact path="/" component={QueuePage} />
+                <Route exact path="/settings" component={SettingsPage} />
                 <Route exact path="/:id" component={DetailPage} />
                 <Route path="*">
                   <Redirect to="/" />

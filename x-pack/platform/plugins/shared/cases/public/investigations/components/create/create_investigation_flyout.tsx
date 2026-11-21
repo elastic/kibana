@@ -25,7 +25,6 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
-  EuiTextArea,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -33,10 +32,10 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
+import { CaseSeverity } from '../../../../common/types/domain';
 import type {
   CreateRecordRequest,
   InvestigationPriority,
-  InvestigationSeverity,
   RelatedRecord,
 } from '../../../../common/investigations/types';
 import { parseCaseFieldErrors } from '../../../../common/investigations/template_fields';
@@ -49,26 +48,37 @@ import {
   useDuplicateCheck,
   useInvestigationTypes,
 } from '../../hooks';
+import { SeveritySelector } from '../../../components/severity/selector';
 import { useInvestigationsServices } from '../../services';
 import { collectExtendedFieldValues } from '../fields/field_utils';
 import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
 import { ManageTypesLink } from '../fields/manage_types_link';
 import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ConfirmModal } from '../shared/confirm_modal';
-import * as sharedI18n from '../shared/translations';
 import { DuplicateStatus } from './duplicate_callout';
 import { TypeFieldsSection } from './type_fields_section';
+import { MarkdownEditor } from '../../../components/markdown_editor';
 import * as i18n from './translations';
 import { EMPTY_FORM, hasErrors, validateForm } from './validation';
 import type { CreateFormValues } from './validation';
 
 const DUPLICATE_DEBOUNCE_MS = 500;
+/** Lens visualisations are not offered in the description. */
+const DISABLED_UI_PLUGINS = ['lens'];
 
-const LEVEL_VALUES = ['low', 'medium', 'high', 'critical'] as const;
-const LEVEL_OPTIONS = LEVEL_VALUES.map((value) => ({
-  value,
-  text: sharedI18n.PRIORITY_LABELS[value],
-}));
+/** Priority is the case severity: the form uses the Cases severity selector and its words. */
+const SEVERITY_BY_PRIORITY: Record<InvestigationPriority, CaseSeverity> = {
+  low: CaseSeverity.LOW,
+  medium: CaseSeverity.MEDIUM,
+  high: CaseSeverity.HIGH,
+  critical: CaseSeverity.CRITICAL,
+};
+const PRIORITY_BY_SEVERITY: Record<CaseSeverity, InvestigationPriority> = {
+  [CaseSeverity.LOW]: 'low',
+  [CaseSeverity.MEDIUM]: 'medium',
+  [CaseSeverity.HIGH]: 'high',
+  [CaseSeverity.CRITICAL]: 'critical',
+};
 
 const toOptions = (values: string[]): Array<EuiComboBoxOptionOption<string>> =>
   values.map((value) => ({ label: value }));
@@ -95,6 +105,7 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
 }) => {
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'investigationCreateTitle' });
+  const descriptionEditorId = useGeneratedHtmlId({ prefix: 'investigationCreateDescription' });
   const { http } = useInvestigationsServices();
   const queryClient = useQueryClient();
   const {
@@ -171,7 +182,6 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
     template_id: values.templateId,
     extended_fields: collectExtendedFieldValues(fieldsFormRef.current?.getValues() ?? {}),
     priority: values.priority,
-    severity: values.severity,
     tags: values.tags,
     ai_enabled: values.aiEnabled && !agentUnavailable,
   });
@@ -292,13 +302,16 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
               isInvalid={Boolean(showError(errors.description))}
               error={showError(errors.description)}
             >
-              <EuiTextArea
-                fullWidth
-                rows={6}
+              <MarkdownEditor
+                ariaLabel={i18n.DESCRIPTION_LABEL}
+                editorId={descriptionEditorId}
                 value={values.description}
-                placeholder={i18n.DESCRIPTION_PLACEHOLDER}
-                isInvalid={Boolean(showError(errors.description))}
-                onChange={(event) => update({ description: event.target.value })}
+                onChange={(description) => update({ description })}
+                height={160}
+                disabledUiPlugins={DISABLED_UI_PLUGINS}
+                errors={
+                  showError(errors.description) ? [String(showError(errors.description))] : []
+                }
                 data-test-subj="investigationCreateDescription"
               />
             </EuiFormRow>
@@ -336,34 +349,16 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
                 data-test-subj="investigationCreateNoTypes"
               />
             ) : null}
-            <EuiFlexGroup gutterSize="m" responsive={false}>
-              <EuiFlexItem>
-                <EuiFormRow label={i18n.PRIORITY_LABEL} fullWidth>
-                  <EuiSelect
-                    fullWidth
-                    options={LEVEL_OPTIONS}
-                    value={values.priority}
-                    onChange={(event) =>
-                      update({ priority: event.target.value as InvestigationPriority })
-                    }
-                    data-test-subj="investigationCreatePriority"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow label={i18n.SEVERITY_LABEL} fullWidth>
-                  <EuiSelect
-                    fullWidth
-                    options={LEVEL_OPTIONS}
-                    value={values.severity}
-                    onChange={(event) =>
-                      update({ severity: event.target.value as InvestigationSeverity })
-                    }
-                    data-test-subj="investigationCreateSeverity"
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiFormRow label={i18n.PRIORITY_LABEL} fullWidth>
+              <SeveritySelector
+                selectedSeverity={SEVERITY_BY_PRIORITY[values.priority]}
+                onSeverityChange={(severity) =>
+                  update({ priority: PRIORITY_BY_SEVERITY[severity] })
+                }
+                isLoading={false}
+                isDisabled={false}
+              />
+            </EuiFormRow>
             <EuiFormRow
               label={i18n.TAGS_LABEL}
               fullWidth

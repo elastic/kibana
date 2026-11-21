@@ -12,17 +12,17 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiMarkdownEditor,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiToolTip,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CommentItem } from '../../../../../common/investigations/types';
 import { INVESTIGATION_LIMITS } from '../../../../../common/investigations/constants';
+import { MarkdownEditor, MarkdownRenderer } from '../../../../components/markdown_editor';
 import {
   useBulkCreateItems,
   useBulkDeleteItems,
@@ -38,6 +38,8 @@ import { LoadingState } from '../../shared/loading_state';
 import { useCurrentUsername, useItemComments } from '../use_evidence_queries';
 import * as i18n from '../translations';
 
+const DISABLED_UI_PLUGINS = ['lens'];
+
 const clamp = (value: string): string => value.slice(0, INVESTIGATION_LIMITS.maxTextLength);
 
 const CommentRow: React.FC<{
@@ -46,6 +48,7 @@ const CommentRow: React.FC<{
   isOwn: boolean;
 }> = ({ comment, recordId, isOwn }) => {
   const { euiTheme } = useEuiTheme();
+  const editorId = useGeneratedHtmlId({ prefix: 'investigationEvidenceCommentEditorId' });
   const updateItem = useUpdateItem(recordId);
   const bulkDelete = useBulkDeleteItems(recordId);
   const { showSuccess } = useInvestigationToasts();
@@ -129,11 +132,13 @@ const CommentRow: React.FC<{
       >
         {isEditing ? (
           <>
-            <EuiMarkdownEditor
-              aria-label={i18n.EDIT_COMMENT}
+            <MarkdownEditor
+              ariaLabel={i18n.EDIT_COMMENT}
+              editorId={editorId}
               value={draft}
               onChange={(value) => setDraft(clamp(value))}
               height={140}
+              disabledUiPlugins={DISABLED_UI_PLUGINS}
               data-test-subj="investigationEvidenceCommentEditor"
             />
             <EuiSpacer size="s" />
@@ -162,7 +167,7 @@ const CommentRow: React.FC<{
             </EuiFlexGroup>
           </>
         ) : (
-          <EuiMarkdownFormat textSize="s">{comment.text ?? ''}</EuiMarkdownFormat>
+          <MarkdownRenderer textSize="s">{comment.text ?? ''}</MarkdownRenderer>
         )}
       </div>
       {isDeleting ? (
@@ -192,6 +197,7 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({ recordId, itemId }
   const username = useCurrentUsername();
   const bulkCreate = useBulkCreateItems(recordId);
   const { showSuccess } = useInvestigationToasts();
+  const composerId = useGeneratedHtmlId({ prefix: 'investigationEvidenceCommentComposerId' });
   const [draft, setDraft] = useState('');
 
   const post = () => {
@@ -235,12 +241,13 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({ recordId, itemId }
         </EuiFlexGroup>
       )}
       <EuiSpacer size="m" />
-      <EuiMarkdownEditor
-        aria-label={i18n.ADD_COMMENT}
+      <MarkdownEditor
+        ariaLabel={i18n.ADD_COMMENT}
+        editorId={composerId}
         value={draft}
         onChange={(value) => setDraft(clamp(value))}
         height={140}
-        placeholder={i18n.ADD_COMMENT}
+        disabledUiPlugins={DISABLED_UI_PLUGINS}
         data-test-subj="investigationEvidenceCommentComposer"
       />
       <EuiSpacer size="s" />

@@ -45,6 +45,7 @@ import type { InvestigationsService } from './service';
 import type { StatusesConfiguration } from '../../common/investigations/statuses';
 import {
   addCommentBody,
+  reorderTasksBody,
   findCommentsQuery,
   recordCommentParams,
   updateCommentBody,
@@ -186,14 +187,14 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
     }),
     route({
       method: 'put',
-      path: `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/{type}`,
+      path: `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/{template_id}`,
       params: { params: procedureTemplateParams, body: procedureTemplateBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const { type } = request.params as { type: string };
+        const { template_id: templateId } = request.params as { template_id: string };
         const { tasks } = request.body as { tasks: ProcedureTemplateTask[] };
         return response.ok({
-          body: { template: await service.saveProcedureTemplate(type, tasks) },
+          body: { template: await service.saveProcedureTemplate(templateId, tasks) },
         });
       },
     }),
@@ -316,6 +317,17 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
     }),
     route({
       method: 'post',
+      path: `${base}/{id}/tasks/_reorder`,
+      params: { params: recordIdParams, body: reorderTasksBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id } = request.params as { id: string };
+        const { task_ids: taskIds } = request.body as { task_ids: string[] };
+        return response.ok({ body: { tasks: await service.reorderTasks(id, taskIds) } });
+      },
+    }),
+    route({
+      method: 'post',
       path: `${base}/{id}/_reopen`,
       params: { params: recordIdParams },
       handler: async ({ context, request, response }) => {
@@ -346,12 +358,15 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       params: { params: recordIdParams, body: applyProcedureBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const { type, replace } = request.body as { type: string; replace: boolean };
+        const { template_id: templateId, replace } = request.body as {
+          template_id?: string | null;
+          replace: boolean;
+        };
         return response.ok({
           body: {
             tasks: await service.applyProcedure(
               (request.params as { id: string }).id,
-              type,
+              templateId ?? null,
               replace
             ),
           },
@@ -504,6 +519,16 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
           }
           throw error;
         }
+      },
+    }),
+    route({
+      method: 'post',
+      path: `${base}/{id}/items/{item_id}/_run_workflow`,
+      params: { params: recordItemParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id, item_id: itemId } = request.params as { id: string; item_id: string };
+        return response.ok({ body: { task: await service.runTaskWorkflow(id, itemId) } });
       },
     }),
     route({

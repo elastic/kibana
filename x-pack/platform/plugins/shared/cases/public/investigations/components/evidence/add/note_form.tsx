@@ -6,8 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormRow, EuiMarkdownEditor } from '@elastic/eui';
+import { EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
 import { INVESTIGATION_LIMITS } from '../../../../../common/investigations/constants';
+import { MarkdownEditor } from '../../../../components/markdown_editor';
 import { AddFormLayout } from './add_form_layout';
 import type { AddFormProps } from './add_form_layout';
 import { SharedFields, TitleField } from './common_fields';
@@ -16,8 +17,10 @@ import { useSharedFields } from './use_shared_fields';
 import * as i18n from '../translations';
 
 const FORM_ID = 'investigationEvidenceAddNote';
+const DISABLED_UI_PLUGINS = ['lens'];
 
 export const NoteForm: React.FC<AddFormProps> = ({ recordId, onDone, onBack }) => {
+  const editorId = useGeneratedHtmlId({ prefix: 'investigationEvidenceAddNoteEditor' });
   const shared = useSharedFields(recordId);
   const { create, isLoading: isSaving } = useCreateEvidence(recordId);
   const [title, setTitle] = useState('');
@@ -74,12 +77,13 @@ export const NoteForm: React.FC<AddFormProps> = ({ recordId, onDone, onBack }) =
         error={textError}
         fullWidth
       >
-        <EuiMarkdownEditor
-          aria-label={i18n.NOTE_LABEL}
+        <MarkdownEditor
+          ariaLabel={i18n.NOTE_LABEL}
+          editorId={editorId}
           value={text}
           onChange={(value) => setText(value.slice(0, INVESTIGATION_LIMITS.maxTextLength))}
           height={180}
-          placeholder={i18n.NOTE_PLACEHOLDER}
+          disabledUiPlugins={DISABLED_UI_PLUGINS}
           data-test-subj="investigationEvidenceAddNoteText"
         />
       </EuiFormRow>

@@ -37,7 +37,7 @@ export interface TeamConversationProps {
 export const TeamConversation: React.FC<TeamConversationProps> = ({ record, explanation }) => {
   const { euiTheme } = useEuiTheme();
   const { ref, height } = useFillViewportHeight(MIN_HEIGHT, PAGE_BOTTOM_GAP);
-  const { messageCount } = useTeamDiscussion(record);
+  const { total: messageCount } = useTeamDiscussion(record);
 
   return (
     <div

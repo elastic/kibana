@@ -11,11 +11,13 @@ import type { InvestigationRecord, Verdict } from '../../../../common/investigat
 import { VERDICT_LABELS } from '../../../../common/investigations/types';
 import * as i18n from './translations';
 
-const VERDICT_COLORS = {
+const VERDICT_COLORS: Record<Verdict, 'danger' | 'success' | 'warning' | 'hollow'> = {
   true_positive: 'danger',
-  benign: 'success',
-  inconclusive: 'warning',
-} as const;
+  false_positive: 'hollow',
+  benign_positive: 'success',
+  suspicious: 'warning',
+  undetermined: 'hollow',
+};
 
 export interface EffectiveVerdict {
   /** Text for the badge. */
@@ -25,29 +27,37 @@ export interface EffectiveVerdict {
   source: 'analyst' | 'agent' | null;
 }
 
-/** The analyst verdict when set, otherwise the agent verdict, otherwise nothing. */
+/**
+ * The human verdict when set (by a person or by closing), otherwise the agent verdict, otherwise
+ * nothing.
+ */
 export const getEffectiveVerdict = (
-  record: Pick<InvestigationRecord, 'analyst_verdict' | 'agent_verdict'> &
+  record: Pick<
+    InvestigationRecord,
+    'analyst_verdict' | 'agent_verdict' | 'human_verdict' | 'ai_verdict'
+  > &
     Partial<Pick<InvestigationRecord, 'close_outcome'>>
 ): EffectiveVerdict => {
-  const { analyst_verdict: analyst, agent_verdict: agent, close_outcome: outcome } = record;
-  // The verdict chosen when closing is the final one.
-  if (outcome) {
+  const {
+    analyst_verdict: analyst,
+    agent_verdict: agent,
+    human_verdict: human,
+    ai_verdict: ai,
+    close_outcome: outcome,
+  } = record;
+  const humanVerdict = analyst?.verdict ?? human ?? outcome?.human_verdict ?? null;
+  if (humanVerdict) {
     return {
-      label: VERDICT_LABELS[outcome.verdict],
-      classification: outcome.verdict,
-      source: 'analyst',
-    };
-  }
-  if (analyst) {
-    return {
-      label: VERDICT_LABELS[analyst.verdict],
-      classification: analyst.verdict,
+      label: VERDICT_LABELS[humanVerdict],
+      classification: humanVerdict,
       source: 'analyst',
     };
   }
   if (agent) {
     return { label: agent.label, classification: agent.classification, source: 'agent' };
+  }
+  if (ai) {
+    return { label: VERDICT_LABELS[ai.verdict], classification: ai.verdict, source: 'agent' };
   }
   return { label: i18n.VERDICT_NOT_SET, classification: null, source: null };
 };

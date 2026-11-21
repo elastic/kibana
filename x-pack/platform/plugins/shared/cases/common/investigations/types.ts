@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DefaultCloseReasonSchema } from '../types/domain/case/v1';
+
 /*
  * Shared contract for the Unified Investigation View POC. Server, browser, agent tools and
  * scripts all code against these shapes. Field names are snake_case because they are stored
@@ -36,13 +38,35 @@ export interface Actor {
 /** Mirrors the case status. The UI shows `open` without an owner as "Needs owner". */
 export type InvestigationStatus = 'open' | 'in-progress' | 'closed';
 export type InvestigationPriority = 'low' | 'medium' | 'high' | 'critical';
-export type InvestigationSeverity = 'low' | 'medium' | 'high' | 'critical';
-export type Verdict = 'true_positive' | 'benign' | 'inconclusive';
+/** Same values and words as the Cases verdict. */
+export type Verdict =
+  | 'true_positive'
+  | 'false_positive'
+  | 'benign_positive'
+  | 'suspicious'
+  | 'undetermined';
 export const VERDICT_LABELS: Record<Verdict, string> = {
   true_positive: 'True positive',
-  benign: 'Benign',
-  inconclusive: 'Inconclusive',
+  false_positive: 'False positive',
+  benign_positive: 'Benign positive',
+  suspicious: 'Suspicious',
+  undetermined: 'Undetermined',
 };
+export const VERDICTS = Object.keys(VERDICT_LABELS) as Verdict[];
+
+/** Default close reasons, taken from the Cases schema; any other non-empty string is a custom reason. */
+export const CLOSE_REASONS: readonly string[] = DefaultCloseReasonSchema.options.map(
+  (option) => option.value
+);
+/** Close reasons that set the analyst (human) verdict, as in Cases. */
+export const CLOSE_REASON_TO_VERDICT: Readonly<Record<string, Verdict>> = {
+  true_positive: 'true_positive',
+  false_positive: 'false_positive',
+  benign_positive: 'benign_positive',
+};
+export const MAX_CLOSE_REASON_LENGTH = 256;
+/** Where an investigation came from (the Cases `source` values this POC can produce). */
+export type InvestigationSource = 'user' | 'rule' | 'workflow' | 'agent' | 'api';
 
 export type ItemKind =
   | 'evidence'
@@ -135,7 +159,22 @@ export const LINK_KIND_LABELS: Record<LinkKind, string> = {
   lateral_movement: 'Lateral movement',
 };
 export type LinkStatus = 'confirmed' | 'suspected' | 'dismissed';
-export type TaskStatus = 'todo' | 'doing' | 'done' | 'skipped';
+/** Same values as Cases task lists. Skipping a task is `cancelled` with a reason. */
+export type TaskStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
+export const isTaskFinished = (status: string | null | undefined): boolean =>
+  status === 'completed' || status === 'cancelled';
+export interface DueWithin {
+  value: number;
+  unit: 'minutes' | 'hours' | 'days';
+}
+export interface TaskWorkflowRun {
+  execution_id: string;
+  status: 'running' | 'succeeded' | 'failed';
+  started_at: string;
+  finished_at: string | null;
+  error?: string | null;
+}
 export type TaskOwnerType = 'person' | 'team' | 'agent' | 'automation';
 export const PROCEDURE_PHASES = [
   'Triage',
@@ -155,22 +194,6 @@ export const PROPOSAL_CATEGORIES = [
 ] as const;
 export type ProposalCategory = (typeof PROPOSAL_CATEGORIES)[number];
 export type Disruption = 'high' | 'medium' | 'low';
-export const CLOSE_REASONS = [
-  'Resolved and remediated',
-  'Contained, monitoring',
-  'False positive',
-  'Duplicate',
-  'Not enough data',
-  'Authorized activity',
-] as const;
-export const ROOT_CAUSES = [
-  'Malicious code executed through a signed binary',
-  'Phishing email',
-  'Compromised credentials',
-  'Authorized activity',
-  'Misconfiguration',
-  'Unknown',
-] as const;
 
 /* ------------------------------------------------------------------ */
 /* Argument (chain / map / balance views)                              */
@@ -230,6 +253,7 @@ export interface AgentVerdictAlternative {
 
 export interface AgentVerdict {
   label: string;
+  /** 0-100. */
   confidence: number;
   classification: Verdict;
   alternatives: AgentVerdictAlternative[];
@@ -245,11 +269,22 @@ export interface AnalystVerdict {
   set_at: string;
 }
 
-export interface CloseOutcome {
+/** The Cases `ai_verdict` shape, derived from the agent verdict. */
+export interface AiVerdict {
   verdict: Verdict;
-  reason: string;
-  root_cause: string;
-  summary: string;
+  /** 0-1. */
+  confidence?: number | null;
+  summary?: string | null;
+  actor?: { type: string; id?: string | null; name?: string | null; run_id?: string | null } | null;
+  updated_at?: string | null;
+}
+
+export interface CloseOutcome {
+  close_reason: string;
+  /** Analyst verdict at close time; null for reasons that are not a verdict. */
+  human_verdict: Verdict | null;
+  /** Closing notes, also added to the case as a comment. */
+  summary: string | null;
   closed_by: Actor;
   closed_at: string;
   alerts_closed: number;
@@ -289,6 +324,10 @@ export interface RecordCounters {
   tasks: number;
   tasks_done: number;
   tasks_skipped: number;
+  /** Unfinished tasks whose due date has passed. */
+  tasks_overdue?: number;
+  /** Record-level discussion (case comments); filled when a single record is read. */
+  discussion_comments?: number;
   required_tasks_left: number;
   proposals: number;
   proposals_pending: number;
@@ -318,9 +357,14 @@ export interface InvestigationRecord {
   pause_reason?: string | null;
   /** Status the record was paused from. */
   resume_to_status_key?: string | null;
-  severity: InvestigationSeverity;
+  /** The case severity, shown as Priority. */
   priority: InvestigationPriority;
   priority_note?: string | null;
+  /** Outcome fields named as in Cases. */
+  close_reason?: string | null;
+  human_verdict?: Verdict | null;
+  ai_verdict?: AiVerdict | null;
+  source?: InvestigationSource | null;
   tags: string[];
   /** Case assignees (user profile uids). */
   assignees: string[];
@@ -516,12 +560,24 @@ export interface TaskDetails {
   owner: { type: TaskOwnerType; id: string | null; name?: string | null };
   depends_on?: string | null;
   auto?: TaskAutoRule | null;
-  skip_reason?: string | null;
+  /** Why the task was cancelled (skipped). */
+  cancel_reason?: string | null;
   note?: string | null;
   completed_by?: Actor | null;
+  started_at?: string | null;
   completed_at?: string | null;
   template_ref?: string | null;
-  order: number;
+  priority: TaskPriority;
+  /** User profile uids. */
+  assignees: string[];
+  due_date: string | null;
+  /** Gap of 1000 between siblings; subtasks order among their parent's subtasks. */
+  sort_order: number;
+  /** One level of subtasks: the parent is a root task of the same record. */
+  parent_task_id: string | null;
+  /** Workflow an automation-owned task runs. */
+  workflow_id?: string | null;
+  workflow_run?: TaskWorkflowRun | null;
 }
 
 export interface ProposalDetails {
@@ -765,6 +821,14 @@ export interface ActivityEntry {
 /* Procedure templates                                                 */
 /* ------------------------------------------------------------------ */
 
+export interface ProcedureTemplateSubtask {
+  title: string;
+  description?: string | null;
+  priority?: TaskPriority;
+  required: boolean;
+  due_within?: DueWithin | null;
+}
+
 export interface ProcedureTemplateTask {
   title: string;
   phase: ProcedurePhase;
@@ -775,14 +839,25 @@ export interface ProcedureTemplateTask {
   auto?: TaskAutoRule | null;
   /** Title of the task this one depends on. */
   after?: string | null;
+  priority?: TaskPriority;
+  /** Relative deadline, turned into a due date when the procedure is applied. */
+  due_within?: DueWithin | null;
+  /** Workflow an automation-owned task runs. */
+  workflow_id?: string | null;
+  subtasks?: ProcedureTemplateSubtask[];
 }
 
+/** A reusable task list, keyed by the Cases template (investigation type) that points at it. */
 export interface ProcedureTemplate {
-  /** Investigation type name, e.g. "Malware". */
+  /** Cases template id. */
+  template_id: string;
+  /** Type (template) name, for display. */
   type: string;
   tasks: ProcedureTemplateTask[];
-  updated_at: string;
-  updated_by: Actor;
+  updated_at: string | null;
+  updated_by: Actor | null;
+  /** False while the type still uses the built-in default procedure. */
+  saved: boolean;
   version?: string;
 }
 
@@ -834,7 +909,6 @@ export interface CreateRecordRequest {
   /** Only used when no template is given (records without a type). */
   investigation_type?: string;
   priority?: InvestigationPriority;
-  severity?: InvestigationSeverity;
   tags?: string[];
   summary?: string | null;
   origin?: RecordOrigin;
@@ -863,7 +937,6 @@ export interface FindRecordsRequest {
   /** Case assignee profile uids; `none` = unassigned, `me` = the current user. */
   assignees?: string[];
   priority?: InvestigationPriority[];
-  severity?: InvestigationSeverity[];
   investigation_type?: string[];
   owner?: string;
   /** 'unassigned' matches records with no owner. */
@@ -894,7 +967,7 @@ export interface GetRecordResponse {
     status: InvestigationStatus;
     title: string;
     description: string;
-    severity: InvestigationSeverity;
+    severity: InvestigationPriority;
     tags: string[];
     assignees: Array<{ uid: string }>;
     created_at: string;
@@ -917,7 +990,6 @@ export interface UpdateRecordRequest {
   summary?: string | null;
   priority?: InvestigationPriority;
   priority_note?: string | null;
-  severity?: InvestigationSeverity;
   tags?: string[];
   /** Case `extended_fields` to merge (`''` clears a value). Cases validates every rule. */
   extended_fields?: Record<string, string>;
@@ -950,12 +1022,19 @@ export interface CloseRecordRequest {
   status_key?: string;
   /** Values for close-required fields, saved to the case before it closes. */
   extended_fields?: Record<string, string>;
-  verdict: Verdict;
-  reason: string;
-  root_cause: string;
-  summary: string;
+  /** A Cases default close reason or a custom one. */
+  close_reason: string;
+  /** Overrides the verdict the close reason implies. */
+  human_verdict?: Verdict | null;
+  /** Closing notes: kept as the outcome summary and added to the case as a comment. */
+  summary?: string | null;
   actor?: Actor;
   closed_at?: string;
+}
+
+export interface ReorderTasksRequest {
+  /** Sibling task ids (all roots, or all subtasks of one parent) in their new order. */
+  task_ids: string[];
 }
 
 export interface MergeRecordRequest {
@@ -1235,4 +1314,9 @@ export interface AddCommentRequest {
 export interface UpdateCommentRequest {
   content: string;
   version: string;
+}
+
+/** Result of starting a task's workflow run. */
+export interface RunTaskWorkflowResponse {
+  task: TaskItem;
 }

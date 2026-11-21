@@ -12,17 +12,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiMarkdownEditor,
-  EuiMarkdownFormat,
   EuiSpacer,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
+import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
 import type { CommentItem, InvestigationItem } from '../../../../common/investigations/types';
+import { MarkdownEditor, MarkdownRenderer } from '../../../components/markdown_editor';
 import { useBulkCreateItems, useItems } from '../../hooks';
 import { ICONS } from '../../icons';
 import { ActorBadge } from '../shared/actor_badge';
 import { RelativeTime } from '../shared/relative_time';
 import * as i18n from './translations';
+
+const DISABLED_UI_PLUGINS = ['lens'];
 
 const isComment = (item: InvestigationItem): item is CommentItem => item.kind === 'comment';
 
@@ -35,6 +38,7 @@ export interface ClaimCommentsProps {
 
 /** Formatted comments on a claim, oldest first, with a Markdown composer. */
 export const ClaimComments: React.FC<ClaimCommentsProps> = ({ recordId, claimId, canComment }) => {
+  const editorId = useGeneratedHtmlId({ prefix: 'investigationClaimCommentEditorId' });
   const [draft, setDraft] = useState('');
   const { data, isLoading, isError } = useItems(recordId, {
     kind: ['comment'],
@@ -86,22 +90,20 @@ export const ClaimComments: React.FC<ClaimCommentsProps> = ({ recordId, claimId,
                 </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiMarkdownFormat textSize="s">{comment.text ?? ''}</EuiMarkdownFormat>
+            <MarkdownRenderer textSize="s">{comment.text ?? ''}</MarkdownRenderer>
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
       {canComment ? (
         <>
           <EuiSpacer size="m" />
-          <EuiMarkdownEditor
-            aria-label={i18n.COMMENT_ARIA}
-            placeholder={i18n.COMMENT_PLACEHOLDER}
+          <MarkdownEditor
+            ariaLabel={i18n.COMMENT_ARIA}
+            editorId={editorId}
             value={draft}
-            onChange={setDraft}
+            onChange={(value) => setDraft(value.slice(0, INVESTIGATION_LIMITS.maxTextLength))}
             height={140}
-            maxHeight={300}
-            autoExpandPreview={false}
-            initialViewMode="editing"
+            disabledUiPlugins={DISABLED_UI_PLUGINS}
             data-test-subj="investigationClaimCommentEditor"
           />
           <EuiSpacer size="s" />

@@ -45,10 +45,6 @@ export const DESCRIPTION_HELP = i18n.translate(
     defaultMessage: 'Markdown is supported.',
   }
 );
-export const DESCRIPTION_PLACEHOLDER = i18n.translate(
-  'xpack.cases.investigations.create.descriptionPlaceholder',
-  { defaultMessage: 'What happened, what you know so far and what you want to find out.' }
-);
 export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.cases.investigations.create.descriptionRequired',
   { defaultMessage: 'Enter a description.' }
@@ -83,9 +79,6 @@ export const TYPES_ERROR = i18n.translate('xpack.cases.investigations.create.typ
 
 export const PRIORITY_LABEL = i18n.translate('xpack.cases.investigations.create.priorityLabel', {
   defaultMessage: 'Priority',
-});
-export const SEVERITY_LABEL = i18n.translate('xpack.cases.investigations.create.severityLabel', {
-  defaultMessage: 'Severity',
 });
 export const TAGS_LABEL = i18n.translate('xpack.cases.investigations.create.tagsLabel', {
   defaultMessage: 'Tags',

@@ -162,3 +162,26 @@ export const CONFIRM_DEFAULT = i18n.translate('xpack.cases.investigations.shared
 export const CANCEL = i18n.translate('xpack.cases.investigations.shared.cancel', {
   defaultMessage: 'Cancel',
 });
+
+export const PAUSED_BADGE = (reason: string, duration: string) =>
+  i18n.translate('xpack.cases.investigations.shared.pausedBadge', {
+    defaultMessage: 'Paused: {reason} · {duration}',
+    values: { reason, duration },
+  });
+
+export const PAUSED_BADGE_NO_REASON = (duration: string) =>
+  i18n.translate('xpack.cases.investigations.shared.pausedBadgeNoReason', {
+    defaultMessage: 'Paused · {duration}',
+    values: { duration },
+  });
+
+export const CLOSED_WITHOUT_VERDICT = i18n.translate(
+  'xpack.cases.investigations.shared.closedWithoutVerdict',
+  { defaultMessage: 'Closed' }
+);
+
+export const CLOSED_REASON_LINE = (reason: string) =>
+  i18n.translate('xpack.cases.investigations.shared.closedReasonLine', {
+    defaultMessage: 'Reason: {reason}.',
+    values: { reason },
+  });

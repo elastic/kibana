@@ -239,9 +239,9 @@ const setTaskStatusSchema = lazySchema(() =>
     record_id: recordIdArg,
     task_ref: z.string().max(32).optional(),
     task_title: z.string().max(512).optional(),
-    status: z.enum(['todo', 'doing', 'done', 'skipped']),
+    status: z.enum(['open', 'in_progress', 'completed', 'cancelled']),
     note: z.string().max(2048).optional(),
-    skip_reason: z.string().max(2048).optional(),
+    cancel_reason: z.string().max(2048).optional().describe('Required when cancelling a task.'),
   })
 );
 
@@ -438,7 +438,7 @@ export const createInvestigationTools = (getService: GetService) => {
     id: platformCoreCasesTools.investigationSetTaskStatus,
     type: ToolType.builtin,
     description:
-      'Set the status of a procedure task by ref (T5) or exact title: todo, doing, done, or skipped (skipped needs a reason).',
+      'Set the status of a procedure task by ref (T5) or exact title: open, in_progress, completed or cancelled (cancelled needs a reason).',
     annotations: annotations('Set a task status', false),
     schema: setTaskStatusSchema,
     tags: ['cases', 'investigations'],
@@ -465,7 +465,7 @@ export const createInvestigationTools = (getService: GetService) => {
           status: args.status,
           task: {
             ...(args.note ? { note: args.note } : {}),
-            ...(args.skip_reason ? { skip_reason: args.skip_reason } : {}),
+            ...(args.cancel_reason ? { cancel_reason: args.cancel_reason } : {}),
           },
         },
       });

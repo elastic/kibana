@@ -255,10 +255,15 @@ export const FLYOUT_WHY_RELATED = (displayId: string) =>
 export const FLYOUT_OUTCOME = i18n.translate('xpack.cases.investigations.detail.flyoutOutcome', {
   defaultMessage: 'Outcome',
 });
-export const FLYOUT_OUTCOME_TEXT = (verdict: string, reason: string, rootCause: string) =>
+export const FLYOUT_OUTCOME_TEXT = (verdict: string, reason: string) =>
   i18n.translate('xpack.cases.investigations.detail.flyoutOutcomeText', {
-    defaultMessage: 'Closed as {verdict}. Reason: {reason}. Root cause: {rootCause}.',
-    values: { verdict, reason, rootCause },
+    defaultMessage: 'Closed as {verdict}. Reason: {reason}.',
+    values: { verdict, reason },
+  });
+export const FLYOUT_OUTCOME_TEXT_NO_VERDICT = (reason: string) =>
+  i18n.translate('xpack.cases.investigations.detail.flyoutOutcomeTextNoVerdict', {
+    defaultMessage: 'Closed. Reason: {reason}.',
+    values: { reason },
   });
 export const FLYOUT_SUMMARY = i18n.translate('xpack.cases.investigations.detail.flyoutSummary', {
   defaultMessage: 'Summary',
@@ -316,4 +321,95 @@ export const BACK_TO_QUEUE = i18n.translate('xpack.cases.investigations.detail.b
 export const LOADING_INVESTIGATION = i18n.translate(
   'xpack.cases.investigations.detail.loadingInvestigation',
   { defaultMessage: 'Loading investigation' }
+);
+
+/* People, priority and status controls */
+export const ASSIGNEES = i18n.translate('xpack.cases.investigations.detail.assignees', {
+  defaultMessage: 'Assignees',
+});
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.investigations.detail.assignYourself', {
+  defaultMessage: 'Assign yourself',
+});
+export const UNASSIGN = i18n.translate('xpack.cases.investigations.detail.unassign', {
+  defaultMessage: 'Unassign',
+});
+export const UNASSIGN_ARIA = i18n.translate('xpack.cases.investigations.detail.unassignAria', {
+  defaultMessage: 'Unassign yourself',
+});
+export const EDIT_ASSIGNEES = i18n.translate('xpack.cases.investigations.detail.editAssignees', {
+  defaultMessage: 'Edit assignees',
+});
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.investigations.detail.noAssignees', {
+  defaultMessage: 'No users are assigned',
+});
+export const OWNER_STAYS_ASSIGNED = i18n.translate(
+  'xpack.cases.investigations.detail.ownerStaysAssigned',
+  {
+    defaultMessage:
+      'The owner stays an assignee while they own this investigation. Change the owner to remove them.',
+  }
+);
+export const OWNER_STAYS_ASSIGNED_TOAST = (name: string) =>
+  i18n.translate('xpack.cases.investigations.detail.ownerStaysAssignedToast', {
+    defaultMessage: '{name} stays an assignee while they own this investigation.',
+    values: { name },
+  });
+export const OWNER_FALLBACK_NAME = i18n.translate(
+  'xpack.cases.investigations.detail.ownerFallbackName',
+  { defaultMessage: 'The owner' }
+);
+export const ASSIGNEES_SAVED = i18n.translate('xpack.cases.investigations.detail.assigneesSaved', {
+  defaultMessage: 'Assignees updated.',
+});
+
+export const PRIORITY_WHY = i18n.translate('xpack.cases.investigations.detail.priorityWhy', {
+  defaultMessage: 'Why?',
+});
+export const PRIORITY_WHY_PLACEHOLDER = i18n.translate(
+  'xpack.cases.investigations.detail.priorityWhyPlaceholder',
+  { defaultMessage: 'What changed?' }
+);
+export const OPTIONAL = i18n.translate('xpack.cases.investigations.detail.optional', {
+  defaultMessage: 'Optional',
+});
+export const PRIORITY_SAVE = i18n.translate('xpack.cases.investigations.detail.prioritySave', {
+  defaultMessage: 'Save priority',
+});
+export const PRIORITY_SAVED = i18n.translate('xpack.cases.investigations.detail.prioritySaved', {
+  defaultMessage: 'Priority changed.',
+});
+export const PRIORITY_CHANGE_TITLE = (priority: string) =>
+  i18n.translate('xpack.cases.investigations.detail.priorityChangeTitle', {
+    defaultMessage: 'Change the priority to {priority}',
+    values: { priority },
+  });
+
+export const STATUS = i18n.translate('xpack.cases.investigations.detail.status', {
+  defaultMessage: 'Status',
+});
+export const CHANGE_STATUS_ARIA = (status: string) =>
+  i18n.translate('xpack.cases.investigations.detail.changeStatusAria', {
+    defaultMessage: 'Status: {status}. Change status.',
+    values: { status },
+  });
+export const STATUS_PAUSES = i18n.translate('xpack.cases.investigations.detail.statusPauses', {
+  defaultMessage: 'Pauses time tracking',
+});
+export const RESUME = i18n.translate('xpack.cases.investigations.detail.resume', {
+  defaultMessage: 'Resume',
+});
+export const RESUME_TO = (status: string) =>
+  i18n.translate('xpack.cases.investigations.detail.resumeTo', {
+    defaultMessage: 'Resume to {status}',
+    values: { status },
+  });
+export const RESUMED = i18n.translate('xpack.cases.investigations.detail.resumed', {
+  defaultMessage: 'Time tracking resumed.',
+});
+export const OPEN_AS_CASE = i18n.translate('xpack.cases.investigations.detail.openAsCase', {
+  defaultMessage: 'Open as case',
+});
+export const REOPEN_TO_CHANGE_STATUS = i18n.translate(
+  'xpack.cases.investigations.detail.reopenToChangeStatus',
+  { defaultMessage: 'Reopen the investigation to change its status.' }
 );

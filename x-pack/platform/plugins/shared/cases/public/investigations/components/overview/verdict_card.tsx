@@ -443,7 +443,9 @@ export const VerdictCard: React.FC<VerdictCardProps> = ({ record, onNavigateTab,
       isClosed={isClosed}
       onOpenModal={onOpenModal}
       closedVerdict={
-        record.close_outcome ? VERDICT_LABELS[record.close_outcome.verdict] : undefined
+        record.close_outcome?.human_verdict
+          ? VERDICT_LABELS[record.close_outcome.human_verdict]
+          : undefined
       }
     />
   );

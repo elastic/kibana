@@ -272,6 +272,14 @@ export class CasePlugin
           getCasesClient: (request, options) => getCasesClient('agent_builder')(request, options),
           getSpaceId,
           agentBuilder: plugins.agentBuilder,
+          workflowRun:
+            workflowRunService && getWorkflowRunContext && plugins.workflowsManagement
+              ? {
+                  service: workflowRunService,
+                  management: plugins.workflowsManagement.management,
+                  getWorkflowRunContext,
+                }
+              : undefined,
         })
       : undefined;
 

@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -22,85 +23,73 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiButtonIconProps } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type {
   InvestigationItem,
   InvestigationRecord,
   TaskItem,
+  TaskPriority as TaskPriorityValue,
 } from '../../../../common/investigations/types';
-import { ICONS, PROPOSAL_CATEGORY_ICONS, TASK_OWNER_ICONS, TASK_STATUS_ICONS } from '../../icons';
+import type { CurrentUserProfile } from '../../../components/types';
+import { ICONS, PROPOSAL_CATEGORY_ICONS, TASK_OWNER_ICONS } from '../../icons';
 import { RelativeTime } from '../shared';
 import type { TabProps } from '../tabs/tab_props';
-import { ClaimComments } from '../claims/claim_comments';
-import { AssignPopover } from './assign_popover';
 import {
   OWNER_TYPE_LABELS,
-  STATUS_LABELS,
   getActorKindLabel,
-  isTaskUnassigned,
+  getWorkflowRunState,
+  isOwnerUnnamed,
+  isTaskFinished,
+  isTaskOverdue,
 } from './procedure_helpers';
-import type { CurrentUser, EffectiveTaskStatus } from './procedure_helpers';
+import type { EffectiveTaskStatus } from './procedure_helpers';
+import { TaskAssignees } from './task_assignees';
+import { TaskComments } from './task_comments';
+import { DueDateLabel, TaskDueDate } from './task_due_date';
+import { PriorityHealth, TaskPriority } from './task_priority';
 import * as i18n from './translations';
 
-type Owner = TaskItem['task']['owner'];
-
-export interface TaskRowProps {
-  task: TaskItem;
-  record: InvestigationRecord;
-  effectiveStatus: EffectiveTaskStatus;
-  dependency?: TaskItem;
-  claim?: InvestigationItem;
-  currentUser: CurrentUser | undefined;
-  isHighlighted: boolean;
-  isBusy: boolean;
-  /** An agent owns the task, it has no automatic rule and the record has a conversation. */
-  canRunWithAgent: boolean;
-  isRunningWithAgent: boolean;
-  onRunWithAgent: (task: TaskItem) => void;
+export interface TaskRowHandlers {
   onToggleDone: (task: TaskItem) => void;
-  onStart: (task: TaskItem) => void;
+  onMarkInProgress: (task: TaskItem) => void;
   onReopen: (task: TaskItem) => void;
-  onSkip: (task: TaskItem) => void;
-  onAssign: (task: TaskItem, owner: Owner) => void;
+  onCancel: (task: TaskItem) => void;
+  onPriorityChange: (task: TaskItem, priority: TaskPriorityValue) => void;
+  onDueDateChange: (task: TaskItem, dueDate: string | null) => void;
+  onAssigneesChange: (task: TaskItem, uids: string[]) => void;
+  onAddSubtask: (task: TaskItem) => void;
+  onDelete: (task: TaskItem) => void;
+  onRunWorkflow: (task: TaskItem) => void;
+  onRunWithAgent: (task: TaskItem) => void;
   onNavigateTab: TabProps['onNavigateTab'];
 }
 
-const STATUS_BADGE_COLORS: Record<
-  EffectiveTaskStatus,
-  'success' | 'primary' | 'danger' | 'hollow'
-> = {
-  todo: 'hollow',
-  doing: 'primary',
-  done: 'success',
-  skipped: 'hollow',
-  waiting: 'hollow',
-  blocked: 'danger',
-};
-
-const getStatusIcon = (status: EffectiveTaskStatus): string => {
-  switch (status) {
-    case 'waiting':
-      return ICONS.lock;
-    case 'blocked':
-      return ICONS.error;
-    default:
-      return TASK_STATUS_ICONS[status];
-  }
-};
-
-const getStatusIconColor = (status: EffectiveTaskStatus): EuiButtonIconProps['color'] => {
-  switch (status) {
-    case 'done':
-      return 'success';
-    case 'doing':
-      return 'primary';
-    case 'blocked':
-      return 'danger';
-    default:
-      return 'text';
-  }
-};
+export interface TaskRowProps extends TaskRowHandlers {
+  task: TaskItem;
+  record: InvestigationRecord;
+  isSubtask: boolean;
+  effectiveStatus: EffectiveTaskStatus;
+  dependency?: TaskItem;
+  claim?: InvestigationItem;
+  userProfiles: Map<string, UserProfileWithAvatar>;
+  currentUserProfile: CurrentUserProfile;
+  now: number;
+  isHighlighted: boolean;
+  isBusy: boolean;
+  /** The user may change tasks (Cases update privilege). */
+  canEdit: boolean;
+  canAssign: boolean;
+  /** A root task, the record has room for another task and the user may change tasks. */
+  canAddSubtask: boolean;
+  /** An agent owns the task, it has no automatic rule and the record has a conversation. */
+  canRunWithAgent: boolean;
+  isRunningWithAgent: boolean;
+  /** Why the workflow cannot run now; null when it can. */
+  workflowDisabledReason: string | null;
+  /** The drag handle, when the row can be reordered. */
+  dragHandle: React.ReactNode;
+}
 
 const CompletionLine: React.FC<{ task: TaskItem }> = ({ task }) => {
   const completedBy = task.task.completed_by;
@@ -112,7 +101,7 @@ const CompletionLine: React.FC<{ task: TaskItem }> = ({ task }) => {
     </>
   ) : null;
 
-  if (task.status === 'done' && completedBy) {
+  if (task.status === 'completed' && completedBy) {
     return (
       <EuiText size="xs" color="subdued" data-test-subj="investigationTaskCompletion">
         {i18n.COMPLETED_BY(completedBy.name, getActorKindLabel(completedBy))}
@@ -122,11 +111,11 @@ const CompletionLine: React.FC<{ task: TaskItem }> = ({ task }) => {
       </EuiText>
     );
   }
-  if (task.status === 'skipped') {
+  if (task.status === 'cancelled') {
     return (
       <EuiText size="xs" color="subdued" data-test-subj="investigationTaskCompletion">
-        {i18n.NOT_APPLICABLE_NOTE(task.task.skip_reason ?? '')}
-        {completedBy ? ` ${i18n.NOT_APPLICABLE_BY(completedBy.name)}` : ''}
+        {i18n.CANCELLED_NOTE(task.task.cancel_reason ?? '')}
+        {completedBy ? ` ${i18n.CANCELLED_BY(completedBy.name)}` : ''}
         {when}
       </EuiText>
     );
@@ -173,66 +162,88 @@ AutoRule.displayName = 'AutoRule';
 
 const TaskMenu: React.FC<{
   task: TaskItem;
-  effectiveStatus: EffectiveTaskStatus;
+  isSubtask: boolean;
   isBusy: boolean;
-  onToggleDone: (task: TaskItem) => void;
-  onStart: (task: TaskItem) => void;
+  canAddSubtask: boolean;
+  onMarkInProgress: (task: TaskItem) => void;
   onReopen: (task: TaskItem) => void;
-  onSkip: (task: TaskItem) => void;
-}> = ({ task, effectiveStatus, isBusy, onToggleDone, onStart, onReopen, onSkip }) => {
+  onCancel: (task: TaskItem) => void;
+  onAddSubtask: (task: TaskItem) => void;
+  onDelete: (task: TaskItem) => void;
+}> = ({
+  task,
+  isSubtask,
+  isBusy,
+  canAddSubtask,
+  onMarkInProgress,
+  onReopen,
+  onCancel,
+  onAddSubtask,
+  onDelete,
+}) => {
   const menuId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState(false);
-  const isFinished = task.status === 'done' || task.status === 'skipped';
+  const isFinished = isTaskFinished(task);
   const run = (action: (target: TaskItem) => void) => () => {
     setIsOpen(false);
     action(task);
   };
 
-  const items = isFinished
-    ? [
-        <EuiContextMenuItem
-          key="reopen"
-          icon={ICONS.refresh}
-          onClick={run(onReopen)}
-          data-test-subj="investigationTaskMenuReopen"
-        >
-          {i18n.REOPEN}
-        </EuiContextMenuItem>,
-      ]
-    : [
-        ...(effectiveStatus === 'todo'
-          ? [
-              <EuiContextMenuItem
-                key="start"
-                icon={TASK_STATUS_ICONS.doing}
-                onClick={run(onStart)}
-                data-test-subj="investigationTaskMenuStart"
-              >
-                {i18n.START}
-              </EuiContextMenuItem>,
-            ]
-          : []),
-        ...(effectiveStatus === 'waiting'
-          ? []
-          : [
-              <EuiContextMenuItem
-                key="done"
-                icon={TASK_STATUS_ICONS.done}
-                onClick={run(onToggleDone)}
-                data-test-subj="investigationTaskMenuDone"
-              >
-                {i18n.MARK_DONE}
-              </EuiContextMenuItem>,
-            ]),
-        <EuiContextMenuItem
-          key="skip"
-          icon={TASK_STATUS_ICONS.skipped}
-          onClick={run(onSkip)}
-          data-test-subj="investigationTaskMenuSkip"
-        >
-          {i18n.NOT_APPLICABLE_ACTION}
-        </EuiContextMenuItem>,
-      ];
+  const items = [
+    ...(task.status === 'open'
+      ? [
+          <EuiContextMenuItem
+            key="progress"
+            icon={ICONS.resume}
+            onClick={run(onMarkInProgress)}
+            data-test-subj="investigationTaskMenuInProgress"
+          >
+            {i18n.MARK_IN_PROGRESS}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    ...(!isFinished
+      ? [
+          <EuiContextMenuItem
+            key="cancel"
+            icon={ICONS.close}
+            onClick={run(onCancel)}
+            data-test-subj="investigationTaskMenuCancel"
+          >
+            {i18n.CANCEL_TASK}
+          </EuiContextMenuItem>,
+        ]
+      : [
+          <EuiContextMenuItem
+            key="reopen"
+            icon={ICONS.refresh}
+            onClick={run(onReopen)}
+            data-test-subj="investigationTaskMenuReopen"
+          >
+            {i18n.REOPEN_TASK}
+          </EuiContextMenuItem>,
+        ]),
+    ...(!isSubtask && canAddSubtask
+      ? [
+          <EuiContextMenuItem
+            key="subtask"
+            icon={ICONS.add}
+            onClick={run(onAddSubtask)}
+            data-test-subj="investigationTaskMenuAddSubtask"
+          >
+            {i18n.ADD_SUBTASK}
+          </EuiContextMenuItem>,
+        ]
+      : []),
+    <EuiContextMenuItem
+      key="delete"
+      icon={ICONS.trash}
+      onClick={run(onDelete)}
+      data-test-subj="investigationTaskMenuDelete"
+    >
+      {i18n.DELETE_TASK}
+    </EuiContextMenuItem>,
+  ];
 
   return (
     <EuiPopover
@@ -247,7 +258,7 @@ const TaskMenu: React.FC<{
           <EuiButtonIcon
             iconType={ICONS.menu}
             color="text"
-            aria-label={i18n.MORE_ACTIONS}
+            aria-label={i18n.MORE_ACTIONS_ARIA(task.title)}
             aria-haspopup="true"
             isDisabled={isBusy}
             onClick={() => setIsOpen((open) => !open)}
@@ -262,156 +273,99 @@ const TaskMenu: React.FC<{
 };
 TaskMenu.displayName = 'TaskMenu';
 
-const TaskActions: React.FC<TaskRowProps> = ({
-  task,
-  record,
-  effectiveStatus,
-  dependency,
-  currentUser,
-  isBusy,
-  canRunWithAgent,
-  isRunningWithAgent,
-  onRunWithAgent,
-  onToggleDone,
-  onStart,
-  onReopen,
-  onSkip,
-  onAssign,
-}) => {
-  const isFinished = task.status === 'done' || task.status === 'skipped';
-  const isWaiting = effectiveStatus === 'waiting';
-  const waitingTitle = dependency ? i18n.FINISH_FIRST(dependency.title) : undefined;
-
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-      {isFinished ? (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType={ICONS.refresh}
-            isDisabled={isBusy}
-            onClick={() => onReopen(task)}
-            data-test-subj={`investigationTaskReopen-${task.id}`}
-          >
-            {i18n.REOPEN}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      ) : (
-        <>
-          {canRunWithAgent && !isWaiting ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType={ICONS.agent}
-                isLoading={isRunningWithAgent}
-                isDisabled={isBusy}
-                onClick={() => onRunWithAgent(task)}
-                data-test-subj={`investigationTaskRunWithAgent-${task.id}`}
-              >
-                {isRunningWithAgent ? i18n.RUNNING_WITH_AGENT : i18n.RUN_WITH_AGENT}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-          {effectiveStatus === 'todo' ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                isDisabled={isBusy}
-                onClick={() => onStart(task)}
-                data-test-subj={`investigationTaskStart-${task.id}`}
-              >
-                {i18n.START}
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={waitingTitle}>
-              <EuiButton
-                size="s"
-                fill
-                isDisabled={isWaiting || isBusy}
-                onClick={() => onToggleDone(task)}
-                data-test-subj={`investigationTaskDone-${task.id}`}
-              >
-                {i18n.MARK_DONE}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </>
-      )}
-      <EuiFlexItem grow={false}>
-        <AssignPopover
-          task={task}
-          record={record}
-          currentUser={currentUser}
-          isDisabled={isBusy}
-          onAssign={onAssign}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <TaskMenu
-          task={task}
-          effectiveStatus={effectiveStatus}
-          isBusy={isBusy}
-          onToggleDone={onToggleDone}
-          onStart={onStart}
-          onReopen={onReopen}
-          onSkip={onSkip}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-TaskActions.displayName = 'TaskActions';
-
 export const TaskRow: React.FC<TaskRowProps> = (props) => {
-  const { task, effectiveStatus, dependency, claim, isHighlighted, isBusy, onNavigateTab, record } =
-    props;
-  const { onToggleDone, onReopen } = props;
+  const {
+    task,
+    record,
+    isSubtask,
+    effectiveStatus,
+    dependency,
+    claim,
+    userProfiles,
+    currentUserProfile,
+    now,
+    isHighlighted,
+    isBusy,
+    canEdit,
+    canAssign,
+    canAddSubtask,
+    canRunWithAgent,
+    isRunningWithAgent,
+    workflowDisabledReason,
+    dragHandle,
+    onToggleDone,
+    onMarkInProgress,
+    onReopen,
+    onCancel,
+    onPriorityChange,
+    onDueDateChange,
+    onAssigneesChange,
+    onAddSubtask,
+    onDelete,
+    onRunWorkflow,
+    onRunWithAgent,
+    onNavigateTab,
+  } = props;
   const { euiTheme } = useEuiTheme();
+  const checkboxId = useGeneratedHtmlId({ prefix: 'investigationTaskDone' });
   const [showComments, setShowComments] = useState(false);
   const { owner } = task.task;
-  const isFinished = task.status === 'done' || task.status === 'skipped';
+  const isFinished = isTaskFinished(task);
+  const isCompleted = task.status === 'completed';
   const isWaiting = effectiveStatus === 'waiting';
-  const unassigned = isTaskUnassigned(task);
+  const isOverdue = isTaskOverdue(task, now);
+  const runState = getWorkflowRunState(task);
+  const isRunning = runState === 'running';
+  const hasWorkflow = Boolean(task.task.workflow_id);
   const waitingTitle = dependency ? i18n.FINISH_FIRST(dependency.title) : undefined;
-
-  const statusButton = (
-    <EuiToolTip
-      content={waitingTitle ?? (isFinished ? i18n.REOPEN : i18n.MARK_DONE)}
-      disableScreenReaderOutput
-    >
-      <EuiButtonIcon
-        iconType={getStatusIcon(effectiveStatus)}
-        color={getStatusIconColor(effectiveStatus)}
-        size="m"
-        display="empty"
-        isDisabled={isWaiting || isBusy}
-        aria-label={isFinished ? i18n.REOPEN_ARIA(task.title) : i18n.MARK_DONE_ARIA(task.title)}
-        onClick={() => (isFinished ? onReopen(task) : onToggleDone(task))}
-        data-test-subj={`investigationTaskStatus-${task.id}`}
-      />
-    </EuiToolTip>
-  );
+  const checkboxTooltip = isRunning
+    ? i18n.COMPLETES_WHEN_WORKFLOW_SUCCEEDS
+    : isWaiting
+    ? waitingTitle
+    : undefined;
+  const ownerName = owner.name ?? owner.id;
+  const showOwner = owner.type !== 'person' || !isOwnerUnnamed(task);
 
   return (
     <div
       id={`investigation-task-${task.id}`}
       data-test-subj={`investigationTask-${task.id}`}
       data-status={effectiveStatus}
+      data-task-status={task.status}
+      data-overdue={isOverdue}
+      data-subtask={isSubtask}
       data-highlighted={isHighlighted}
       css={css`
-        padding: ${euiTheme.size.m};
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        padding-inline-start: ${isSubtask ? euiTheme.size.xxxl : euiTheme.size.m};
         border-block-end: ${euiTheme.border.thin};
-        background-color: ${isHighlighted ? euiTheme.colors.backgroundLightPrimary : 'transparent'};
+        background-color: ${isHighlighted
+          ? euiTheme.colors.backgroundLightPrimary
+          : euiTheme.colors.emptyShade};
         transition: background-color ${euiTheme.animation.normal} ease-out;
-        &:last-child {
-          border-block-end: 0;
-        }
       `}
     >
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false}>{statusButton}</EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        {dragHandle ? <EuiFlexItem grow={false}>{dragHandle}</EuiFlexItem> : null}
+        {isSubtask ? (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={ICONS.scope} color="subdued" aria-hidden="true" />
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={checkboxTooltip}>
+            <EuiCheckbox
+              id={checkboxId}
+              checked={isCompleted}
+              disabled={!canEdit || isBusy || isRunning || (isWaiting && !isFinished)}
+              aria-label={
+                isCompleted ? i18n.REOPEN_ARIA(task.title) : i18n.MARK_DONE_ARIA(task.title)
+              }
+              onChange={() => (isCompleted ? onReopen(task) : onToggleDone(task))}
+              data-test-subj={`investigationTaskStatus-${task.id}`}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem
           css={css`
             min-width: 0;
@@ -420,22 +374,79 @@ export const TaskRow: React.FC<TaskRowProps> = (props) => {
           <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <strong data-test-subj="investigationTaskTitle">{task.title}</strong>
+                <strong
+                  data-test-subj="investigationTaskTitle"
+                  css={css`
+                    text-decoration: ${isFinished ? 'line-through' : 'none'};
+                    color: ${isFinished ? euiTheme.colors.textSubdued : 'inherit'};
+                  `}
+                >
+                  {task.title}
+                </strong>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={task.task.required ? 'warning' : 'hollow'}>
-                {task.task.required ? i18n.REQUIRED : i18n.OPTIONAL}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge
-                color={STATUS_BADGE_COLORS[effectiveStatus]}
-                data-test-subj="investigationTaskStatusBadge"
-              >
-                {STATUS_LABELS[effectiveStatus]}
-              </EuiBadge>
-            </EuiFlexItem>
+            {task.task.required ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning" data-test-subj="investigationTaskRequiredBadge">
+                  {i18n.REQUIRED}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {task.status === 'in_progress' ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary" data-test-subj="investigationTaskStatusBadge">
+                  {i18n.STATUS_IN_PROGRESS}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {task.status === 'cancelled' ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="investigationTaskStatusBadge">
+                  {i18n.STATUS_CANCELLED}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {isWaiting ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="investigationTaskStatusBadge">
+                  {i18n.STATUS_WAITING}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {effectiveStatus === 'blocked' ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="danger" data-test-subj="investigationTaskStatusBadge">
+                  {i18n.STATUS_BLOCKED}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {isRunning ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="primary"
+                  iconType={ICONS.automation}
+                  data-test-subj="investigationTaskRunningBadge"
+                >
+                  {i18n.WORKFLOW_RUNNING}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+            {runState === 'failed' ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={task.task.workflow_run?.error ?? i18n.WORKFLOW_FAILED_NO_ERROR}
+                >
+                  <EuiBadge
+                    color="danger"
+                    iconType={ICONS.error}
+                    tabIndex={0}
+                    data-test-subj="investigationTaskWorkflowFailedBadge"
+                  >
+                    {i18n.WORKFLOW_FAILED}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
           </EuiFlexGroup>
           {task.task.description ? (
             <EuiText size="xs" color="subdued">
@@ -443,25 +454,65 @@ export const TaskRow: React.FC<TaskRowProps> = (props) => {
             </EuiText>
           ) : null}
           <EuiFlexGroup
-            gutterSize="s"
+            gutterSize="m"
             alignItems="center"
             wrap
             responsive={false}
             css={css`
-              margin-block-start: ${euiTheme.size.xs};
+              margin-block-start: ${euiTheme.size.xxs};
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiBadge
-                color="hollow"
-                iconType={unassigned ? ICONS.user : TASK_OWNER_ICONS[owner.type]}
-                data-test-subj="investigationTaskOwner"
-              >
-                {unassigned
-                  ? i18n.UNASSIGNED
-                  : `${owner.name ?? owner.id} · ${OWNER_TYPE_LABELS[owner.type]}`}
-              </EuiBadge>
+              {canEdit ? (
+                <TaskPriority
+                  priority={task.task.priority}
+                  title={task.title}
+                  isDisabled={isBusy}
+                  onChange={(priority) => onPriorityChange(task, priority)}
+                  data-test-subj={`investigationTaskPriority-${task.id}`}
+                />
+              ) : (
+                <PriorityHealth priority={task.task.priority} />
+              )}
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <TaskAssignees
+                assigneeUids={task.task.assignees}
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
+                canAssign={canEdit && canAssign}
+                isLoading={isBusy}
+                onChange={(uids) => onAssigneesChange(task, uids)}
+                data-test-subj={`investigationTaskAssignees-${task.id}`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {canEdit ? (
+                <TaskDueDate
+                  dueDate={task.task.due_date}
+                  isOverdue={isOverdue}
+                  title={task.title}
+                  isDisabled={isBusy}
+                  onChange={(dueDate) => onDueDateChange(task, dueDate)}
+                  data-test-subj={`investigationTaskDue-${task.id}`}
+                />
+              ) : task.task.due_date ? (
+                <DueDateLabel dueDate={task.task.due_date} isOverdue={isOverdue} />
+              ) : null}
+            </EuiFlexItem>
+            {showOwner ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="hollow"
+                  iconType={TASK_OWNER_ICONS[owner.type]}
+                  data-test-subj="investigationTaskOwner"
+                >
+                  {ownerName
+                    ? `${ownerName} · ${OWNER_TYPE_LABELS[owner.type]}`
+                    : OWNER_TYPE_LABELS[owner.type]}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem grow={false}>
               <AutoRule task={task} claim={claim} onNavigateTab={onNavigateTab} />
             </EuiFlexItem>
@@ -484,31 +535,81 @@ export const TaskRow: React.FC<TaskRowProps> = (props) => {
             </EuiText>
           ) : null}
           <CompletionLine task={task} />
-          <div
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            wrap
+            responsive={false}
             css={css`
-              margin-block-start: ${euiTheme.size.s};
+              margin-block-start: ${euiTheme.size.xs};
             `}
           >
-            <TaskActions {...props} />
-          </div>
-          <EuiButtonEmpty
-            size="xs"
-            iconType={ICONS.conversation}
-            flush="left"
-            onClick={() => setShowComments((open) => !open)}
-            aria-expanded={showComments}
-            data-test-subj={`investigationTaskComments-${task.id}`}
-          >
-            {showComments ? i18n.HIDE_COMMENTS : i18n.SHOW_COMMENTS}
-          </EuiButtonEmpty>
+            {canEdit && hasWorkflow && !isFinished ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={workflowDisabledReason ?? undefined}>
+                  <EuiButton
+                    size="s"
+                    iconType={ICONS.resume}
+                    isLoading={isRunning}
+                    isDisabled={isBusy || isRunning || workflowDisabledReason !== null}
+                    aria-label={i18n.RUN_WORKFLOW_ARIA(task.title)}
+                    onClick={() => onRunWorkflow(task)}
+                    data-test-subj={`investigationTaskRunWorkflow-${task.id}`}
+                  >
+                    {i18n.RUN_WORKFLOW}
+                  </EuiButton>
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+            {canRunWithAgent && !isWaiting ? (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  iconType={ICONS.agent}
+                  isLoading={isRunningWithAgent}
+                  isDisabled={isBusy}
+                  onClick={() => onRunWithAgent(task)}
+                  data-test-subj={`investigationTaskRunWithAgent-${task.id}`}
+                >
+                  {isRunningWithAgent ? i18n.RUNNING_WITH_AGENT : i18n.RUN_WITH_AGENT}
+                </EuiButton>
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType={ICONS.conversation}
+                onClick={() => setShowComments((open) => !open)}
+                aria-expanded={showComments}
+                data-test-subj={`investigationTaskComments-${task.id}`}
+              >
+                {showComments ? i18n.HIDE_COMMENTS : i18n.SHOW_COMMENTS}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           {showComments ? (
-            <ClaimComments
+            <TaskComments
               recordId={record.id}
-              claimId={task.id}
+              taskId={task.id}
               canComment={record.status !== 'closed'}
             />
           ) : null}
         </EuiFlexItem>
+        {canEdit ? (
+          <EuiFlexItem grow={false}>
+            <TaskMenu
+              task={task}
+              isSubtask={isSubtask}
+              isBusy={isBusy}
+              canAddSubtask={canAddSubtask}
+              onMarkInProgress={onMarkInProgress}
+              onReopen={onReopen}
+              onCancel={onCancel}
+              onAddSubtask={onAddSubtask}
+              onDelete={onDelete}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
     </div>
   );

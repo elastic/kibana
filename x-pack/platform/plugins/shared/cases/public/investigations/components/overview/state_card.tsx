@@ -13,12 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
+import { MarkdownRenderer } from '../../../components/markdown_editor';
 import { VERDICT_LABELS } from '../../../../common/investigations/types';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
@@ -26,6 +27,7 @@ import { useActivity, useItems } from '../../hooks';
 import { ICONS } from '../../icons';
 import type { ModalName } from '../modals/modal_props';
 import { RelativeTime } from '../shared/relative_time';
+import * as sharedI18n from '../shared/translations';
 import { useNow } from '../shared/use_now';
 import type { TabId } from '../tabs/tab_props';
 import { OverviewCard } from './overview_card';
@@ -139,12 +141,16 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiText size="s">
-                <strong>{i18n.CLOSED_AS(VERDICT_LABELS[outcome.verdict].toLowerCase())}</strong>
+                <strong>
+                  {outcome.human_verdict
+                    ? i18n.CLOSED_AS(VERDICT_LABELS[outcome.human_verdict].toLowerCase())
+                    : sharedI18n.CLOSED_WITHOUT_VERDICT}
+                </strong>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">
-                {i18n.CLOSED_REASON(outcome.reason, outcome.root_cause)}{' '}
+                {sharedI18n.CLOSED_REASON_LINE(getDefaultClosingReasonLabel(outcome.close_reason))}{' '}
                 <EuiText component="span" size="xs" color="subdued">
                   {i18n.CLOSED_PRESERVED}
                 </EuiText>
@@ -183,7 +189,7 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
         `}
       >
         <StateCell label={i18n.WHAT_THIS_IS} wide testSubj="investigationStateWhatThisIs">
-          <EuiMarkdownFormat textSize="s">{description}</EuiMarkdownFormat>
+          <MarkdownRenderer textSize="s">{description}</MarkdownRenderer>
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               {link(

@@ -13,6 +13,7 @@ import {
   INVESTIGATIONS_INDICATOR_LOOKUP_URL,
   INVESTIGATIONS_INTERNAL_URL,
   INVESTIGATIONS_PROCEDURE_TEMPLATES_URL,
+  INVESTIGATIONS_STATUSES_URL,
   INVESTIGATIONS_TYPES_URL,
   getRecordActivityUrl,
   getRecordItemUrl,
@@ -21,6 +22,7 @@ import {
 } from '../../../common/investigations/constants';
 import type {
   ActivityEntry,
+  AddCommentRequest,
   BulkCreateItemsRequest,
   BulkCreateItemsResponse,
   BulkDeleteItemsRequest,
@@ -37,6 +39,8 @@ import type {
   ExportItemsRequest,
   FindActivityRequest,
   FindActivityResponse,
+  FindCommentsRequest,
+  FindCommentsResponse,
   FindItemsRequest,
   FindItemsResponse,
   FindRecordsRequest,
@@ -52,15 +56,20 @@ import type {
   MergeRecordResponse,
   ProcedureTemplate,
   ProcedureTemplateTask,
+  RecordComment,
   RelatedRecord,
   RelatedRecordsResponse,
+  ReorderTasksRequest,
   ReportResponse,
+  RunTaskWorkflowResponse,
   SinceLastHandoffResponse,
   TaskItem,
   ThreadRef,
+  UpdateCommentRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
 } from '../../../common/investigations/types';
+import type { StatusesConfiguration } from '../../../common/investigations/statuses';
 
 /**
  * Flattens a request object into an HTTP query. Arrays are sent as repeated parameters and
@@ -126,16 +135,6 @@ export const getProcedureTemplates = (http: HttpStart) =>
     method: 'GET',
   });
 
-export const updateProcedureTemplate = (
-  http: HttpStart,
-  type: string,
-  body: { tasks: ProcedureTemplateTask[] }
-) =>
-  http.fetch<{ template: ProcedureTemplate }>(
-    `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/${encodeURIComponent(type)}`,
-    { method: 'PUT', body: JSON.stringify(body) }
-  );
-
 export const getCapabilities = (http: HttpStart) =>
   http.fetch<CapabilitiesResponse>(INVESTIGATIONS_CAPABILITIES_URL, { method: 'GET' });
 
@@ -161,16 +160,6 @@ export const reopenRecord = (http: HttpStart, recordId: string) =>
 
 export const mergeRecord = (http: HttpStart, recordId: string, body: MergeRecordRequest) =>
   http.fetch<MergeRecordResponse>(recordPath(recordId, '/_merge'), {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-
-export const applyProcedure = (
-  http: HttpStart,
-  recordId: string,
-  body: { type: string; replace?: boolean }
-) =>
-  http.fetch<{ tasks: TaskItem[] }>(recordPath(recordId, '/_apply_procedure'), {
     method: 'POST',
     body: JSON.stringify(body),
   });
@@ -310,4 +299,108 @@ export const createActivity = (http: HttpStart, recordId: string, body: CreateAc
   http.fetch<{ entry: ActivityEntry }>(getRecordActivityUrl(recordId), {
     method: 'POST',
     body: JSON.stringify(body),
+  });
+
+/* ------------------------------------------------------------------ */
+/* Record discussion (Cases comments)                                  */
+/* ------------------------------------------------------------------ */
+
+const getRecordCommentsUrl = (recordId: string): string => recordPath(recordId, '/comments');
+const getRecordCommentUrl = (recordId: string, commentId: string): string =>
+  recordPath(recordId, `/comments/${encodeURIComponent(commentId)}`);
+
+export const findComments = (http: HttpStart, recordId: string, request: FindCommentsRequest) =>
+  http.fetch<FindCommentsResponse>(getRecordCommentsUrl(recordId), {
+    method: 'GET',
+    query: toQuery(request),
+  });
+
+export const addComment = (http: HttpStart, recordId: string, body: AddCommentRequest) =>
+  http.fetch<{ comment: RecordComment }>(getRecordCommentsUrl(recordId), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+export const updateComment = (
+  http: HttpStart,
+  recordId: string,
+  commentId: string,
+  body: UpdateCommentRequest
+) =>
+  http.fetch<{ comment: RecordComment }>(getRecordCommentUrl(recordId, commentId), {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+
+export const deleteComment = (http: HttpStart, recordId: string, commentId: string) =>
+  http.fetch<void>(getRecordCommentUrl(recordId, commentId), { method: 'DELETE' });
+
+/* ------------------------------------------------------------------ */
+/* Statuses                                                            */
+/* ------------------------------------------------------------------ */
+
+export const getStatuses = (http: HttpStart) =>
+  http.fetch<StatusesConfiguration>(INVESTIGATIONS_STATUSES_URL, { method: 'GET' });
+
+/** Rejects with HTTP 400 (rule broken), 403 (no settings privilege) or 409 (stale `version`). */
+export const saveStatuses = (http: HttpStart, body: StatusesConfiguration) =>
+  http.fetch<StatusesConfiguration>(INVESTIGATIONS_STATUSES_URL, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+
+/* ------------------------------------------------------------------ */
+/* Task lists (procedure)                                              */
+/* ------------------------------------------------------------------ */
+
+/** Sibling task ids in their new order (all roots, or all subtasks of one parent). */
+export const reorderTasks = (http: HttpStart, recordId: string, body: ReorderTasksRequest) =>
+  http.fetch<{ tasks: TaskItem[] }>(recordPath(recordId, '/tasks/_reorder'), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+/** Starts the workflow of an automation task. Rejects with 403 without the Workflows execute privilege. */
+export const runTaskWorkflow = (http: HttpStart, recordId: string, taskId: string) =>
+  http.fetch<RunTaskWorkflowResponse>(
+    itemsPath(recordId, `/${encodeURIComponent(taskId)}/_run_workflow`),
+    {
+      method: 'POST',
+    }
+  );
+
+/** Applies the procedure of the record's type (or `template_id`). */
+export const applyRecordProcedure = (
+  http: HttpStart,
+  recordId: string,
+  body: { template_id?: string | null; replace: boolean }
+) =>
+  http.fetch<{ tasks: TaskItem[] }>(recordPath(recordId, '/_apply_procedure'), {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+/** Saves the task list of one investigation type. Rejects with 403 without the settings privilege. */
+export const saveProcedureTemplate = (
+  http: HttpStart,
+  templateId: string,
+  body: { tasks: ProcedureTemplateTask[] }
+) =>
+  http.fetch<{ template: ProcedureTemplate }>(
+    `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/${encodeURIComponent(templateId)}`,
+    { method: 'PUT', body: JSON.stringify(body) }
+  );
+
+export interface WorkflowListItem {
+  id: string;
+  name: string;
+  enabled: boolean;
+  valid: boolean;
+}
+
+/** Enabled workflows of the space (Workflows API). Rejects when Workflows is not available. */
+export const getWorkflows = (http: HttpStart) =>
+  http.fetch<{ results: WorkflowListItem[]; total: number }>('/api/workflows', {
+    method: 'GET',
+    query: { size: 100, enabled: true },
   });

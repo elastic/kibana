@@ -42,9 +42,11 @@ const STATUS_COLORS = {
 export interface StatusBadgeProps {
   status: InvestigationStatus;
   owner: Actor | null | undefined;
+  /** The label of the configured status; defaults to the label of the display status. */
+  label?: string;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, owner }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, owner, label }) => {
   const displayStatus = getDisplayStatus(status, owner);
 
   return (
@@ -53,7 +55,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, owner }) => {
       iconType={ICONS.graphNode}
       data-test-subj={`investigationStatusBadge-${displayStatus}`}
     >
-      {DISPLAY_STATUS_LABELS[displayStatus]}
+      {label ?? DISPLAY_STATUS_LABELS[displayStatus]}
     </EuiBadge>
   );
 };

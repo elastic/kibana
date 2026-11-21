@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import type {
   IndicatorType,
   InvestigationPriority,
-  InvestigationSeverity,
 } from '../../common/investigations/types';
 
 export const encodeVersion = (seqNo?: number, primaryTerm?: number): string | undefined =>
@@ -50,7 +49,6 @@ export const PRIORITY_RANK: Record<InvestigationPriority, number> = {
   high: 3,
   critical: 4,
 };
-export const SEVERITY_RANK: Record<InvestigationSeverity, number> = PRIORITY_RANK;
 
 const IPV4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
 const IPV6 = /^[0-9a-f:]+:[0-9a-f:]*$/i;

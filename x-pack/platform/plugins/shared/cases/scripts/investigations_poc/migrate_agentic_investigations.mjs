@@ -68,7 +68,8 @@ const guessInvestigationType = (text) => {
   return 'Alert triage';
 };
 
-const SEVERITIES = ['low', 'medium', 'high', 'critical'];
+// The legacy conversation's severity becomes the record's priority (the case severity).
+const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
 // The record's type is a Cases template (an investigation type) tagged `investigation-type`.
 let typesByName;
@@ -335,15 +336,20 @@ const listItems = async (recordId) => {
   }
 };
 
+// Cases close reasons: true_positive, false_positive, benign_positive, other (or any custom text). The root cause is
+// not a close field any more; it goes into the template's "Root cause notes" field on the close.
 const inferClose = (verdictText = '', summary = '') => {
   const text = `${verdictText} ${summary}`;
-  if (/benign|false positive|expected|no action|test/i.test(text)) {
-    return { verdict: 'benign', reason: 'False positive', root_cause: 'Authorized activity' };
+  if (/false positive/i.test(text)) {
+    return { close_reason: 'false_positive', human_verdict: 'false_positive', root_cause: 'Detection fired on activity that was not a threat' };
+  }
+  if (/benign|expected|no action|test/i.test(text)) {
+    return { close_reason: 'benign_positive', human_verdict: 'benign_positive', root_cause: 'Authorized activity' };
   }
   if (/malware|compromise|phishing|exposed/i.test(text)) {
-    return { verdict: 'true_positive', reason: 'Resolved and remediated', root_cause: 'Unknown' };
+    return { close_reason: 'true_positive', human_verdict: 'true_positive', root_cause: 'Unknown' };
   }
-  return { verdict: 'inconclusive', reason: 'Not enough data', root_cause: 'Unknown' };
+  return { close_reason: 'other', human_verdict: 'undetermined', root_cause: 'Unknown' };
 };
 
 // --- main ---------------------------------------------------------------------------------------
@@ -412,15 +418,14 @@ const migrateConversation = async (hit) => {
     const type = await getType(guessInvestigationType(text));
     const investigationType = type.name;
     typeName = type.name;
-    const severity = SEVERITIES.includes(metadata.severity) ? metadata.severity : 'medium';
+    const priority = PRIORITIES.includes(metadata.severity) ? metadata.severity : 'medium';
     const body = {
       title: clip(conversation.title?.trim() || `Agentic investigation ${conversationId.slice(0, 8)}`, MAX_TITLE),
       description: clip(metadata.summary || 'Migrated from an agentic investigation.', MAX_TEXT),
       summary: metadata.summary ? clip(metadata.summary, MAX_TEXT) : null,
       template_id: type.template_id,
       extended_fields: { impact_as_keyword: impactOf(plannedItems) },
-      priority: severity,
-      severity,
+      priority,
       ai_enabled: true,
       create_conversation: false,
       apply_procedure: false,
@@ -431,13 +436,13 @@ const migrateConversation = async (hit) => {
       actor: MIGRATION_ACTOR,
     };
     if (dryRun) {
-      log(`[dry-run] would create record ${body.display_id} "${body.title}" (${investigationType}, ${severity})`);
+      log(`[dry-run] would create record ${body.display_id} "${body.title}" (${investigationType}, ${priority})`);
       report.records.created++;
     } else {
       const { json } = await kbn('POST', BASE, body);
       recordId = json.record.id;
       report.records.created++;
-      log(`created record ${recordId} ${body.display_id} "${body.title}" (${investigationType}, ${severity})`);
+      log(`created record ${recordId} ${body.display_id} "${body.title}" (${investigationType}, ${priority})`);
     }
   }
 
@@ -517,13 +522,14 @@ const migrateConversation = async (hit) => {
         ...(closeKey && { [closeKey]: closeValue }),
         root_cause_notes_as_keyword: closeNotes(close, closeSummary),
       },
-      ...close,
+      close_reason: close.close_reason,
+      human_verdict: close.human_verdict,
       summary: closeSummary,
       actor: MIGRATION_ACTOR,
       ...(conversation.updated_at && { closed_at: conversation.updated_at }),
     });
     report.closed++;
-    log(`closed record ${recordId} (${close.verdict})`);
+    log(`closed record ${recordId} (${close.close_reason})`);
   }
 };
 

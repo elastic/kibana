@@ -77,23 +77,10 @@ export const FILTER_ACTIVE_COUNT = (label: string, count: number) =>
   });
 
 export const OWNER_UNASSIGNED = i18n.translate('xpack.cases.investigations.queue.ownerUnassigned', {
-  defaultMessage: 'Unassigned',
+  defaultMessage: 'No owner',
 });
 export const OWNER_ME = i18n.translate('xpack.cases.investigations.queue.ownerMe', {
   defaultMessage: 'Me',
-});
-
-export const STATUS_OPEN = i18n.translate('xpack.cases.investigations.queue.statusOpen', {
-  defaultMessage: 'Open',
-});
-export const STATUS_IN_PROGRESS = i18n.translate(
-  'xpack.cases.investigations.queue.statusInProgress',
-  {
-    defaultMessage: 'In progress',
-  }
-);
-export const STATUS_CLOSED = i18n.translate('xpack.cases.investigations.queue.statusClosed', {
-  defaultMessage: 'Closed',
 });
 
 export const COLUMN_ID = i18n.translate('xpack.cases.investigations.queue.columnId', {
@@ -143,7 +130,7 @@ export const COLUMN_CREATED = i18n.translate('xpack.cases.investigations.queue.c
   defaultMessage: 'Created',
 });
 export const UNASSIGNED = i18n.translate('xpack.cases.investigations.queue.unassigned', {
-  defaultMessage: 'Unassigned',
+  defaultMessage: 'No owner',
 });
 export const VERDICT_AGENT_SUFFIX = i18n.translate(
   'xpack.cases.investigations.queue.verdictAgentSuffix',
@@ -236,3 +223,57 @@ export const COLUMNS_ACTIVE_COUNT = (count: number) =>
     defaultMessage: 'Columns, {count} shown',
     values: { count },
   });
+
+export const STATUS_ALL_IN_CATEGORY = (category: string) =>
+  i18n.translate('xpack.cases.investigations.queue.statusAllInCategory', {
+    defaultMessage: 'All {category}',
+    values: { category },
+  });
+export const STATUS_DISABLED_LABEL = (label: string) =>
+  i18n.translate('xpack.cases.investigations.queue.statusDisabledLabel', {
+    defaultMessage: '{label} (disabled)',
+    values: { label },
+  });
+export const FILTER_ASSIGNEES = i18n.translate('xpack.cases.investigations.queue.filterAssignees', {
+  defaultMessage: 'Assignees',
+});
+export const ASSIGNEES_ME = i18n.translate('xpack.cases.investigations.queue.assigneesMe', {
+  defaultMessage: 'Assigned to me',
+});
+export const ASSIGNEES_NONE = i18n.translate('xpack.cases.investigations.queue.assigneesNone', {
+  defaultMessage: 'Unassigned',
+});
+export const ASSIGNEES_SEARCH = i18n.translate('xpack.cases.investigations.queue.assigneesSearch', {
+  defaultMessage: 'Search users',
+});
+export const FILTER_TAGS = i18n.translate('xpack.cases.investigations.queue.filterTags', {
+  defaultMessage: 'Tags',
+});
+export const COLUMN_ASSIGNEES = i18n.translate('xpack.cases.investigations.queue.columnAssignees', {
+  defaultMessage: 'Assignees',
+});
+export const PAUSED = i18n.translate('xpack.cases.investigations.queue.paused', {
+  defaultMessage: 'Paused',
+});
+export const PAUSED_TOOLTIP = (reason: string) =>
+  i18n.translate('xpack.cases.investigations.queue.pausedTooltip', {
+    defaultMessage: 'Paused: {reason}. The time paused is left out of the age.',
+    values: { reason },
+  });
+export const PAUSED_TOOLTIP_NO_REASON = i18n.translate(
+  'xpack.cases.investigations.queue.pausedTooltipNoReason',
+  { defaultMessage: 'Paused. The time paused is left out of the age.' }
+);
+export const COLUMN_AGE = i18n.translate('xpack.cases.investigations.queue.columnAge', {
+  defaultMessage: 'Age',
+});
+export const AGE_TOOLTIP = i18n.translate('xpack.cases.investigations.queue.ageTooltip', {
+  defaultMessage: 'Time since the investigation was created, without the time it was paused.',
+});
+export const INVESTIGATION_SETTINGS = i18n.translate(
+  'xpack.cases.investigations.queue.investigationSettings',
+  { defaultMessage: 'Investigation settings' }
+);
+export const USER_UNKNOWN = i18n.translate('xpack.cases.investigations.queue.userUnknown', {
+  defaultMessage: 'Unknown user',
+});

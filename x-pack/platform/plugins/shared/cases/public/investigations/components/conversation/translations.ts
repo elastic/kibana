@@ -337,17 +337,11 @@ export const REPLIES = (count: number) =>
     values: { count },
   });
 export const REPLY = i18n.translate(`${PREFIX}.reply`, { defaultMessage: 'Reply' });
-export const REPLY_IN_THREAD = i18n.translate(`${PREFIX}.replyInThread`, {
-  defaultMessage: 'Reply in thread',
-});
 export const REPLY_PLACEHOLDER = i18n.translate(`${PREFIX}.replyPlaceholder`, {
   defaultMessage: 'Write a reply',
 });
 export const WRITE_MESSAGE = i18n.translate(`${PREFIX}.writeMessage`, {
   defaultMessage: 'Write a message to your team',
-});
-export const COMPOSER_PLACEHOLDER = i18n.translate(`${PREFIX}.composerPlaceholder`, {
-  defaultMessage: 'Write a message. Use @ to mention a teammate.',
 });
 export const SEND = i18n.translate(`${PREFIX}.send`, { defaultMessage: 'Send' });
 export const SEND_ARIA = i18n.translate(`${PREFIX}.sendAria`, { defaultMessage: 'Send message' });
@@ -375,8 +369,55 @@ export const COPY_MESSAGE = i18n.translate(`${PREFIX}.copyMessage`, {
   defaultMessage: 'Copy message',
 });
 export const COPIED = i18n.translate(`${PREFIX}.copied`, { defaultMessage: 'Copied.' });
-export const SHOWING_LATEST = (shown: number, total: number) =>
-  i18n.translate(`${PREFIX}.showingLatest`, {
-    defaultMessage: 'Showing the first {shown} of {total} messages.',
-    values: { shown, total },
+export const SAVE = i18n.translate(`${PREFIX}.save`, { defaultMessage: 'Save' });
+export const DELETE = i18n.translate(`${PREFIX}.delete`, { defaultMessage: 'Delete' });
+export const EDITED = i18n.translate(`${PREFIX}.edited`, { defaultMessage: 'Edited' });
+export const UNKNOWN_AUTHOR = i18n.translate(`${PREFIX}.unknownAuthor`, {
+  defaultMessage: 'Unknown user',
+});
+export const REPLYING_TO = (author: string) =>
+  i18n.translate(`${PREFIX}.replyingTo`, {
+    defaultMessage: 'Replying to {author}',
+    values: { author },
+  });
+export const CANCEL_REPLY = i18n.translate(`${PREFIX}.cancelReply`, {
+  defaultMessage: 'Cancel reply',
+});
+export const QUOTE = i18n.translate(`${PREFIX}.quote`, { defaultMessage: 'Quote' });
+export const QUOTE_ARIA = i18n.translate(`${PREFIX}.quoteAria`, {
+  defaultMessage: 'Quote this comment in your reply',
+});
+export const EDIT_COMMENT = i18n.translate(`${PREFIX}.editComment`, {
+  defaultMessage: 'Edit comment',
+});
+export const DELETE_COMMENT = i18n.translate(`${PREFIX}.deleteComment`, {
+  defaultMessage: 'Delete comment',
+});
+export const DELETE_COMMENT_TITLE = i18n.translate(`${PREFIX}.deleteCommentTitle`, {
+  defaultMessage: 'Delete this comment?',
+});
+export const DELETE_COMMENT_BODY = i18n.translate(`${PREFIX}.deleteCommentBody`, {
+  defaultMessage:
+    'The comment is removed from the discussion and from the case. This cannot be undone.',
+});
+export const COMMENT_UPDATED = i18n.translate(`${PREFIX}.commentUpdated`, {
+  defaultMessage: 'Comment updated.',
+});
+export const COMMENT_DELETED = i18n.translate(`${PREFIX}.commentDeleted`, {
+  defaultMessage: 'Comment deleted.',
+});
+export const COMMENT_CONFLICT_TITLE = i18n.translate(`${PREFIX}.commentConflictTitle`, {
+  defaultMessage: 'This comment changed while you were editing it',
+});
+export const COMMENT_CONFLICT_BODY = i18n.translate(`${PREFIX}.commentConflictBody`, {
+  defaultMessage:
+    'Someone else edited it, so your change was not saved. Copy what you wrote if you need it, then discard your edit to see the latest version.',
+});
+export const COMMENT_CONFLICT_DISCARD = i18n.translate(`${PREFIX}.commentConflictDiscard`, {
+  defaultMessage: 'Discard my edit',
+});
+export const LOAD_EARLIER = (remaining: number) =>
+  i18n.translate(`${PREFIX}.loadEarlier`, {
+    defaultMessage: 'Load earlier comments ({remaining} more)',
+    values: { remaining },
   });

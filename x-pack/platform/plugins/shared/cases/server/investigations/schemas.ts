@@ -7,9 +7,17 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { INVESTIGATION_LIMITS as L } from '../../common/investigations/constants';
+import {
+  INVESTIGATION_LIMITS as L,
+  MAX_TASKS_PER_CASE,
+} from '../../common/investigations/constants';
 import { MAX_TITLE_LENGTH as CASE_TITLE_MAX } from '../../common/constants';
-import { PROCEDURE_PHASES, PROPOSAL_CATEGORIES } from '../../common/investigations/types';
+import {
+  MAX_CLOSE_REASON_LENGTH,
+  PROCEDURE_PHASES,
+  PROPOSAL_CATEGORIES,
+  VERDICTS,
+} from '../../common/investigations/types';
 
 /*
  * Request validation for the investigation routes. Every string and array is bounded.
@@ -57,7 +65,12 @@ export const actorSchema = schema.object({
   profile_uid: optStr(512),
 });
 
-const verdictSchema = lits(['true_positive', 'benign', 'inconclusive'] as const);
+const verdictSchema = lits(VERDICTS);
+const taskPrioritySchema = lits(['low', 'medium', 'high', 'critical'] as const);
+const dueWithinSchema = schema.object({
+  value: schema.number({ min: 1, max: 100000 }),
+  unit: lits(['minutes', 'hours', 'days'] as const),
+});
 const prioritySchema = lits(['low', 'medium', 'high', 'critical'] as const);
 /** Case `extended_fields`: `<name>_as_<type>` -> string value; Cases validates the content. */
 const extendedFieldsSchema = schema.recordOf(
@@ -273,12 +286,18 @@ const taskFields = {
   }),
   depends_on: optStr(512),
   auto: schema.maybe(schema.nullable(taskAutoSchema)),
-  skip_reason: optStr(L.maxShortTextLength),
+  cancel_reason: optStr(L.maxShortTextLength),
   note: optStr(L.maxShortTextLength),
   completed_by: schema.maybe(schema.nullable(actorSchema)),
+  started_at: schema.maybe(schema.nullable(isoDate())),
   completed_at: schema.maybe(schema.nullable(isoDate())),
   template_ref: optStr(256),
-  order: schema.number({ min: 0, max: 100000, defaultValue: 0 }),
+  priority: taskPrioritySchema,
+  assignees: schema.arrayOf(str(512, 1), { maxSize: 10, defaultValue: [] }),
+  due_date: schema.maybe(schema.nullable(isoDate())),
+  sort_order: schema.maybe(schema.number({ min: 0, max: 10000000 })),
+  parent_task_id: schema.maybe(schema.nullable(id())),
+  workflow_id: optStr(512),
 };
 
 const decisionSchema = schema.object({
@@ -357,7 +376,7 @@ export const itemInputSchema = schema.oneOf([
   schema.object({
     ...envelope,
     kind: schema.literal('task'),
-    status: lits(['todo', 'doing', 'done', 'skipped'] as const),
+    status: lits(['open', 'in_progress', 'completed', 'cancelled'] as const),
     task: schema.object(taskFields),
   }),
   schema.object({
@@ -419,7 +438,6 @@ export const createRecordBody = schema.object({
   template_id: schema.maybe(schema.nullable(str(512, 1))),
   extended_fields: schema.maybe(extendedFieldsSchema),
   priority: schema.maybe(prioritySchema),
-  severity: schema.maybe(prioritySchema),
   tags: schema.maybe(tagsSchema),
   summary: optStr(L.maxTextLength),
   origin: schema.maybe(originSchema),
@@ -439,7 +457,6 @@ export const findRecordsQuery = schema.object({
   status_key: queryArray(str(50)),
   assignees: queryArray(str(512)),
   priority: queryArray(prioritySchema),
-  severity: queryArray(prioritySchema),
   investigation_type: queryArray(str(256)),
   owner: schema.maybe(str(512)),
   verdict: queryArray(verdictSchema),
@@ -476,7 +493,6 @@ export const updateRecordBody = schema.object({
   summary: optStr(L.maxTextLength),
   priority: schema.maybe(prioritySchema),
   priority_note: optStr(512),
-  severity: schema.maybe(prioritySchema),
   tags: schema.maybe(tagsSchema),
   extended_fields: schema.maybe(extendedFieldsSchema),
   template: schema.maybe(schema.nullable(templateRefSchema)),
@@ -502,10 +518,9 @@ export const updateRecordBody = schema.object({
 export const closeRecordBody = schema.object({
   status_key: schema.maybe(statusKeySchema),
   extended_fields: schema.maybe(extendedFieldsSchema),
-  verdict: verdictSchema,
-  reason: str(256, 1),
-  root_cause: str(256, 1),
-  summary: str(L.maxTextLength, 1),
+  close_reason: str(MAX_CLOSE_REASON_LENGTH, 1),
+  human_verdict: schema.maybe(schema.nullable(verdictSchema)),
+  summary: schema.maybe(schema.nullable(str(L.maxTextLength))),
   actor: schema.maybe(actorSchema),
   closed_at: schema.maybe(isoDate()),
 });
@@ -516,7 +531,8 @@ export const mergeRecordBody = schema.object({
 });
 
 export const applyProcedureBody = schema.object({
-  type: str(256, 1),
+  /** Cases template id; defaults to the record's type. */
+  template_id: schema.maybe(schema.nullable(str(512, 1))),
   replace: schema.boolean({ defaultValue: false }),
 });
 
@@ -654,7 +670,7 @@ export const indicatorLookupQuery = schema.object({
   exclude_record_id: schema.maybe(id()),
 });
 
-export const procedureTemplateParams = schema.object({ type: str(256, 1) });
+export const procedureTemplateParams = schema.object({ template_id: str(512, 1) });
 export const procedureTemplateBody = schema.object({
   tasks: schema.arrayOf(
     schema.object({
@@ -666,9 +682,28 @@ export const procedureTemplateBody = schema.object({
       owner: optStr(512),
       auto: schema.maybe(schema.nullable(taskAutoSchema)),
       after: optStr(L.maxTitleLength),
+      priority: schema.maybe(taskPrioritySchema),
+      due_within: schema.maybe(schema.nullable(dueWithinSchema)),
+      workflow_id: optStr(512),
+      subtasks: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            title: str(L.maxTitleLength, 1),
+            description: optStr(L.maxShortTextLength),
+            priority: schema.maybe(taskPrioritySchema),
+            required: schema.boolean(),
+            due_within: schema.maybe(schema.nullable(dueWithinSchema)),
+          }),
+          { maxSize: 20 }
+        )
+      ),
     }),
-    { maxSize: 200 }
+    { maxSize: MAX_TASKS_PER_CASE }
   ),
+});
+
+export const reorderTasksBody = schema.object({
+  task_ids: schema.arrayOf(id(), { minSize: 1, maxSize: MAX_TASKS_PER_CASE }),
 });
 
 export const toArray = <T>(v: T | T[] | undefined): T[] | undefined =>

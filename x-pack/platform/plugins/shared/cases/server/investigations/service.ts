@@ -25,10 +25,18 @@ import {
   INVESTIGATION_RECORDS_INDEX,
   INVESTIGATIONS_OWNER,
   ITEM_REF_PREFIX,
+  MAX_TASKS_PER_CASE,
+  MAX_COMMENTS_PER_TASK,
+  TASK_SORT_ORDER_GAP,
 } from '../../common/investigations/constants';
 import type {
   ActivityEntry,
   ActivityOrigin,
+  AgentVerdict,
+  AiVerdict,
+  DueWithin,
+  InvestigationSource,
+  RecordOrigin,
   AddCommentRequest,
   FindCommentsRequest,
   FindCommentsResponse,
@@ -75,6 +83,7 @@ import type {
   ReportResponse,
   SinceLastHandoffResponse,
   TaskItem,
+  TaskWorkflowRun,
   ThreadRef,
   UpdateItemRequest,
   UpdateRecordRequest,
@@ -83,6 +92,8 @@ import type {
 import {
   VERDICT_LABELS,
   INDICATOR_TYPE_LABELS,
+  CLOSE_REASON_TO_VERDICT,
+  isTaskFinished,
   EVIDENCE_TYPE_LABELS,
 } from '../../common/investigations/types';
 import { DEFAULT_PROCEDURE_TEMPLATES } from './default_templates';
@@ -105,10 +116,10 @@ import {
   buildFieldsMirror,
   getMirrorKey,
   INVESTIGATION_TYPE_TEMPLATE_TAG,
+  parseCaseFieldErrors,
 } from '../../common/investigations/template_fields';
 import {
   PRIORITY_RANK,
-  SEVERITY_RANK,
   clip,
   decodeCursor,
   decodeVersion,
@@ -128,7 +139,6 @@ type StoredRecord = Omit<InvestigationRecord, 'version'> & {
   ref_counters?: Record<string, number>;
   verdict_effective?: Verdict | null;
   priority_rank?: number;
-  severity_rank?: number;
 };
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 type StoredItem = DistributiveOmit<InvestigationItem, 'version'> & { ref_num: number };
@@ -172,7 +182,29 @@ export interface InvestigationsServiceDeps {
     agentId: string;
     agentName: string;
   };
+  /** Cases' workflow execution, for tasks that run a workflow. Unset when Workflows is not installed. */
+  workflows?: TaskWorkflowDeps;
 }
+
+export interface TaskWorkflowExecution {
+  status: 'running' | 'succeeded' | 'failed';
+  error?: string | null;
+  workflowName?: string | null;
+  finishedAt?: string | null;
+}
+
+export interface TaskWorkflowDeps {
+  isAvailable: () => boolean;
+  /** Whether the caller holds the Workflows execute privilege (the one the Cases run-workflow route needs). */
+  canExecute: () => Promise<boolean>;
+  /** Starts the workflow for the case through the same path as the Cases run-workflow route. */
+  run: (args: { workflowId: string; caseId: string }) => Promise<{ executionId: string }>;
+  /** Null when the execution cannot be found or read. */
+  getExecution: (executionId: string) => Promise<TaskWorkflowExecution | null>;
+}
+
+/** A run that can no longer be found after this long is reported as failed. */
+const TASK_WORKFLOW_LOST_AFTER_MS = 10 * 60_000;
 
 const now = (): string => new Date().toISOString();
 const sameEntries = (a: Record<string, unknown>, b: Record<string, unknown>): boolean => {
@@ -189,6 +221,8 @@ interface OwnCaseWrite {
   ts: string;
   /** Action types already described by a record-level activity entry. */
   skipTypes?: string[];
+  /** Details to attach to the entry of an action type (e.g. the priority note). */
+  details?: Record<string, string>;
 }
 const commentContent = (attachment: unknown): string | null => {
   const value = attachment as { data?: { content?: unknown }; comment?: unknown };
@@ -224,6 +258,67 @@ const CASE_STATUS_WORDS: Record<string, string> = {
   open: 'Open',
   'in-progress': 'In progress',
   closed: 'Closed',
+};
+const TASK_STATUSES: ReadonlyArray<TaskItem['status']> = [
+  'open',
+  'in_progress',
+  'completed',
+  'cancelled',
+];
+/** Reads leave very recent case actions to the investigation write that made them. */
+const OWN_WRITE_GRACE_MS = 5000;
+const DUE_WITHIN_MS: Record<DueWithin['unit'], number> = {
+  minutes: 60_000,
+  hours: 3_600_000,
+  days: 86_400_000,
+};
+/** A relative deadline resolved against the moment the procedure is applied. */
+const dueDateFrom = (dueWithin: DueWithin | null | undefined, anchor: string): string | null =>
+  dueWithin && dueWithin.value > 0
+    ? new Date(Date.parse(anchor) + dueWithin.value * DUE_WITHIN_MS[dueWithin.unit]).toISOString()
+    : null;
+/** Roots by `sort_order`, each followed by its subtasks by `sort_order` (as Cases orders tasks). */
+const orderTasks = (tasks: TaskItem[]): TaskItem[] => {
+  const bySort = (a: TaskItem, b: TaskItem) => (a.task.sort_order ?? 0) - (b.task.sort_order ?? 0);
+  const roots = tasks.filter((t) => !t.task.parent_task_id).sort(bySort);
+  const rootIds = new Set(roots.map((t) => t.id));
+  const orphans = tasks.filter((t) => t.task.parent_task_id && !rootIds.has(t.task.parent_task_id));
+  return [
+    ...roots.flatMap((root) => [
+      root,
+      ...tasks.filter((t) => t.task.parent_task_id === root.id).sort(bySort),
+    ]),
+    ...orphans,
+  ];
+};
+const closeReasonLabel = (reason: string): string => reason.replace(/_/g, ' ');
+const closeBlockedMessage = (tasks: string[], fields: string[]): string =>
+  [
+    'The investigation cannot close yet.',
+    tasks.length ? `Required tasks still open: ${tasks.join('; ')}.` : '',
+    fields.length ? `Required fields still empty: ${fields.join('; ')}.` : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+const caseErrorMessage = (error: unknown): string => {
+  const wrapped = (error as { wrappedError?: { message?: string } })?.wrappedError?.message;
+  return wrapped ?? (error instanceof Error ? error.message : String(error));
+};
+const toAiVerdict = (verdict: AgentVerdict | null | undefined): AiVerdict | null =>
+  verdict
+    ? {
+        verdict: verdict.classification,
+        confidence: Math.round(verdict.confidence) / 100,
+        summary: verdict.label,
+        actor: { type: verdict.set_by.type, id: verdict.set_by.id, name: verdict.set_by.name },
+        updated_at: verdict.set_at,
+      }
+    : null;
+const SOURCE_BY_ORIGIN: Record<RecordOrigin['type'], InvestigationSource> = {
+  user: 'user',
+  rule: 'rule',
+  agent: 'agent',
+  automation: 'workflow',
 };
 const CASE_CREATE_ACTION_TYPES = [
   'create_case',
@@ -274,6 +369,7 @@ const emptyCounters = (): RecordCounters => ({
   tasks: 0,
   tasks_done: 0,
   tasks_skipped: 0,
+  tasks_overdue: 0,
   required_tasks_left: 0,
   proposals: 0,
   proposals_pending: 0,
@@ -309,7 +405,6 @@ const RECORD_SORT_FIELDS: Record<string, string> = {
   display_num: 'display_num',
   title: 'title.keyword',
   priority: 'priority_rank',
-  severity: 'severity_rank',
   status: 'status',
   investigation_type: 'investigation_type',
   created_at: 'created_at',
@@ -511,7 +606,6 @@ export class InvestigationsService {
       ref_counters: _refCounters,
       verdict_effective: _v,
       priority_rank: _p,
-      severity_rank: _s,
       ...rest
     } = source;
     return {
@@ -675,7 +769,15 @@ export class InvestigationsService {
                 filter: {
                   bool: {
                     filter: [term('task.required', true)],
-                    must_not: [terms('status', ['done', 'skipped'])],
+                    must_not: [terms('status', ['completed', 'cancelled'])],
+                  },
+                },
+              },
+              overdue: {
+                filter: {
+                  bool: {
+                    filter: [{ range: { 'task.due_date': { lt: 'now' } } }],
+                    must_not: [terms('status', ['completed', 'cancelled'])],
                   },
                 },
               },
@@ -721,8 +823,9 @@ export class InvestigationsService {
       entities_suspected: filterCount(entitiesAgg?.suspected),
       links: kinds.link ?? 0,
       tasks: kinds.task ?? 0,
-      tasks_done: taskStatus.done ?? 0,
-      tasks_skipped: taskStatus.skipped ?? 0,
+      tasks_done: taskStatus.completed ?? 0,
+      tasks_skipped: taskStatus.cancelled ?? 0,
+      tasks_overdue: filterCount(tasksAgg?.overdue),
       required_tasks_left: filterCount(tasksAgg?.required_left),
       proposals: kinds.proposal ?? 0,
       proposals_pending: filterCount(proposalsAgg?.pending),
@@ -863,8 +966,7 @@ export class InvestigationsService {
       displayNum = await this.nextDisplayNum();
       displayId = `INV-${displayNum}`;
     }
-    const severity = req.severity ?? req.priority ?? 'medium';
-    const priority = req.priority ?? severity;
+    const priority = req.priority ?? 'medium';
     const template = req.template_id ? await this.getInvestigationTemplate(req.template_id) : null;
     const investigationType = template?.name ?? req.investigation_type ?? 'Investigation';
     const theCase = await this.deps.casesClient.cases.create({
@@ -872,7 +974,7 @@ export class InvestigationsService {
       description: req.description,
       tags: Array.from(new Set(['investigation', ...(req.tags ?? [])])),
       owner: INVESTIGATIONS_OWNER,
-      severity,
+      severity: priority,
       category: investigationType.slice(0, 50),
       connector: { id: 'none', name: 'none', type: '.none' as const, fields: null },
       settings: { syncAlerts: true },
@@ -896,8 +998,6 @@ export class InvestigationsService {
       time_paused: 0,
       pause_reason: null,
       resume_to_status_key: null,
-      severity,
-      severity_rank: SEVERITY_RANK[severity],
       priority,
       priority_rank: PRIORITY_RANK[priority],
       priority_note: null,
@@ -916,6 +1016,9 @@ export class InvestigationsService {
       stage: 'Triage',
       summary: req.summary ?? null,
       fields: buildFieldsMirror(theCase.extended_fields, theCase.extended_fields_controls),
+      close_reason: null,
+      human_verdict: null,
+      ai_verdict: null,
       agent_verdict: null,
       analyst_verdict: null,
       verdict_effective: null,
@@ -925,6 +1028,7 @@ export class InvestigationsService {
         label: `Started by ${actor.name}`,
         actor,
       },
+      source: SOURCE_BY_ORIGIN[req.origin?.type ?? (actor.type === 'agent' ? 'agent' : 'user')],
       conversation_id: null,
       conversation_ids: [],
       threads: [],
@@ -981,7 +1085,13 @@ export class InvestigationsService {
     ]);
 
     if (req.apply_procedure ?? true) {
-      await this.applyProcedureInternal(record, investigationType, false, actor, createdAt);
+      await this.applyProcedureInternal(
+        record,
+        record.template_id ?? null,
+        false,
+        actor,
+        createdAt
+      );
     }
     if (req.alerts?.length) {
       await this.bulkCreateItemsInternal(
@@ -1051,7 +1161,6 @@ export class InvestigationsService {
     const mustNot: QueryDslQueryContainer[] = [];
     if (req.status?.length) filter.push(terms('status', req.status));
     if (req.priority?.length) filter.push(terms('priority', req.priority));
-    if (req.severity?.length) filter.push(terms('severity', req.severity));
     if (req.status_key?.length) filter.push(terms('status_key', req.status_key));
     if (req.assignees?.length) {
       const uids = req.assignees
@@ -1184,8 +1293,14 @@ export class InvestigationsService {
       );
       if (older !== -1 || res.userActions.length < 100) break;
     }
+    if (!ownWrite) {
+      const cutoff = Date.now() - OWN_WRITE_GRACE_MS;
+      const settled = collected.filter((action) => Date.parse(action.created_at) < cutoff);
+      collected.splice(0, collected.length, ...settled);
+    }
     if (!collected.length) return;
     const newest = collected[0].created_at;
+    await this.addFileEvidenceFromCase(record, collected, ownWrite);
     const entries = await this.describeCaseUserActions(record, [...collected].reverse(), ownWrite);
     if (entries.length) {
       await this.es.bulk({
@@ -1212,6 +1327,83 @@ export class InvestigationsService {
         ids_at: newest === since ? [...seenAtSince, ...idsAtNewest] : idsAtNewest,
       },
     });
+  }
+
+  /** Files attached in classic Cases become file evidence (once per attachment). */
+  private async addFileEvidenceFromCase(
+    record: StoredRecord,
+    actions: CaseUserAction[],
+    ownWrite?: OwnCaseWrite
+  ): Promise<void> {
+    const files = actions.filter((action) => {
+      if (action.type !== 'comment' || action.action !== 'create' || !action.comment_id)
+        return false;
+      if (ownWrite && action.created_at >= ownWrite.startedAt) return false;
+      const comment = (action.payload as { comment?: Record<string, unknown> }).comment ?? {};
+      return (
+        comment.type === 'file' ||
+        comment.externalReferenceAttachmentTypeId === '.files' ||
+        comment.type === '.files'
+      );
+    });
+    if (!files.length) return;
+    const known = await this.searchItems<EvidenceItem>(
+      record.id,
+      {
+        bool: {
+          filter: [
+            term('kind', 'evidence'),
+            terms(
+              'evidence.source.id',
+              files.map((action) => action.comment_id as string)
+            ),
+          ],
+        },
+      },
+      files.length
+    );
+    const knownIds = new Set(known.map((item) => item.evidence.source?.id));
+    const fresh = files.filter((action) => !knownIds.has(action.comment_id as string));
+    for (const action of fresh) {
+      const comment = (action.payload as { comment?: Record<string, unknown> }).comment ?? {};
+      const metadata = (comment.metadata ?? comment.externalReferenceMetadata ?? {}) as {
+        files?: Array<{ name?: string; extension?: string }>;
+      };
+      const meta = metadata.files?.[0] ?? {};
+      const attachmentIds = (comment.attachmentId ?? comment.externalReferenceId) as
+        | string
+        | string[]
+        | undefined;
+      const fileId = Array.isArray(attachmentIds) ? attachmentIds[0] : attachmentIds;
+      const name = [meta.name, meta.extension].filter(Boolean).join('.') || 'File';
+      const person = action.created_by?.full_name || action.created_by?.username || 'Unknown user';
+      const actor: Actor = {
+        type: 'user',
+        id: action.created_by?.username ?? 'unknown',
+        name: person,
+      };
+      await this.bulkCreateItemsInternal(
+        record,
+        [
+          {
+            kind: 'evidence',
+            title: name,
+            evidence: {
+              type: 'file',
+              why: 'Attached in Cases',
+              source: {
+                label: 'Cases',
+                kind: 'file',
+                file_id: fileId ?? null,
+                id: action.comment_id as string,
+              },
+            },
+            created_at: action.created_at,
+          },
+        ],
+        actor
+      );
+    }
   }
 
   private async describeCaseUserActions(
@@ -1429,6 +1621,9 @@ export class InvestigationsService {
         links: [],
         details: null,
         ...entry,
+        ...(own && ownWrite.details?.[action.type]
+          ? { details: ownWrite.details[action.type] }
+          : {}),
         origin: own && ownWrite.actor.type === 'agent' ? 'agent' : origin,
         case_action_id: action.id,
       };
@@ -1532,6 +1727,7 @@ export class InvestigationsService {
     await this.ingestCaseUserActions(record).catch((error) =>
       this.deps.logger.warn(`Investigation ${recordId}: case history sync failed: ${error}`)
     );
+    synced.counters = { ...synced.counters, discussion_comments: theCase.totalComment ?? 0 };
     const { available } = await this.deps.agent.isAvailable().catch(() => ({ available: false }));
     return {
       record: synced,
@@ -1576,6 +1772,17 @@ export class InvestigationsService {
       const target = getDefaultStatus(config.statuses, theCase.status as StoredRecord['status']);
       patch.status = target.category;
       patch.status_key = target.key;
+      if (record.status === 'closed' && target.category !== 'closed') {
+        // Reopened (here or in classic Cases): clear the close reason and the analyst verdict.
+        Object.assign(patch, {
+          closed_at: null,
+          close_outcome: null,
+          close_reason: null,
+          human_verdict: null,
+          analyst_verdict: null,
+          verdict_effective: record.agent_verdict?.classification ?? null,
+        });
+      }
       try {
         Object.assign(
           patch,
@@ -1591,9 +1798,9 @@ export class InvestigationsService {
         this.deps.logger.warn(`Investigation ${record.id}: pause bookkeeping failed: ${error}`);
       }
     }
-    if (theCase.severity !== record.severity) {
-      patch.severity = theCase.severity as StoredRecord['severity'];
-      patch.severity_rank = SEVERITY_RANK[patch.severity];
+    if (theCase.severity !== record.priority) {
+      patch.priority = theCase.severity as StoredRecord['priority'];
+      patch.priority_rank = PRIORITY_RANK[patch.priority];
     }
     if (JSON.stringify(tags) !== JSON.stringify(record.tags ?? [])) patch.tags = tags;
     const assignees = (theCase.assignees ?? []).map(({ uid }) => uid);
@@ -1706,26 +1913,12 @@ export class InvestigationsService {
       });
     }
     if (req.priority !== undefined && req.priority !== record.priority) {
+      // Priority is the case severity: the change reaches Activity from the case user action.
       patch.priority = req.priority;
       patch.priority_rank = PRIORITY_RANK[req.priority];
-      const verb =
-        PRIORITY_RANK[req.priority] > PRIORITY_RANK[record.priority] ? 'Raised' : 'Lowered';
-      log(
-        'record.priority_changed',
-        `${verb} the priority from ${record.priority} to ${req.priority}`,
-        {
-          details: req.priority_note ?? null,
-          before: record.priority,
-          after: req.priority,
-        }
-      );
+      casePatch.severity = req.priority;
     }
     if (req.priority_note !== undefined) patch.priority_note = req.priority_note;
-    if (req.severity !== undefined && req.severity !== record.severity) {
-      patch.severity = req.severity;
-      patch.severity_rank = SEVERITY_RANK[req.severity];
-      casePatch.severity = req.severity;
-    }
     if (req.assignees !== undefined) {
       const ownerUid = record.owner?.type === 'user' ? record.owner.profile_uid : null;
       const next = Array.from(new Set([...req.assignees, ...(ownerUid ? [ownerUid] : [])]));
@@ -1949,12 +2142,18 @@ export class InvestigationsService {
           : 'Disabled agents on this investigation'
       );
     }
+    if (patch.analyst_verdict !== undefined) {
+      patch.human_verdict = patch.analyst_verdict?.verdict ?? null;
+    }
+    if (patch.agent_verdict !== undefined) {
+      patch.ai_verdict = toAiVerdict(patch.agent_verdict);
+    }
     if (patch.analyst_verdict !== undefined || patch.agent_verdict !== undefined) {
       const analyst =
         patch.analyst_verdict !== undefined ? patch.analyst_verdict : record.analyst_verdict;
       const agent = patch.agent_verdict !== undefined ? patch.agent_verdict : record.agent_verdict;
       patch.verdict_effective =
-        record.close_outcome?.verdict ?? analyst?.verdict ?? agent?.classification ?? null;
+        record.close_outcome?.human_verdict ?? analyst?.verdict ?? agent?.classification ?? null;
     }
     if (casePatch.extended_fields && !Object.keys(casePatch.extended_fields).length) {
       delete casePatch.extended_fields;
@@ -1970,6 +2169,16 @@ export class InvestigationsService {
       } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
       if (updatedCase && (casePatch.extended_fields || casePatch.template !== undefined)) {
         Object.assign(patch, await this.templatePatchFromCase(record, updatedCase));
+      }
+      // Choosing a type sets both the fields and the procedure (when none was applied yet).
+      if (casePatch.template && !(record.counters?.tasks ?? 0)) {
+        await this.applyProcedureInternal(
+          { ...record, ...patch } as StoredRecord,
+          (casePatch.template as { id: string }).id,
+          false,
+          actor,
+          ts
+        );
       }
     }
     patch.updated_at = ts;
@@ -2005,6 +2214,7 @@ export class InvestigationsService {
           ...(statusLogged || patch.owner !== undefined ? ['status'] : []),
           ...(patch.owner !== undefined ? ['assignees'] : []),
         ],
+        details: req.priority_note ? { severity: req.priority_note } : undefined,
       });
     }
     await this.refreshCounters(recordId, actor, { touch: false });
@@ -2022,21 +2232,34 @@ export class InvestigationsService {
     if (record.status === 'closed') throw Boom.badRequest('The investigation is already closed.');
     const actor = this.actor(req.actor);
     const ts = this.ts(req.closed_at);
+    await this.settleTaskWorkflows(
+      recordId,
+      await this.searchItems<TaskItem>(
+        recordId,
+        { bool: { filter: [term('kind', 'task'), term('task.workflow_run.status', 'running')] } },
+        MAX_TASKS_PER_CASE
+      )
+    );
     const left = await this.searchItems<TaskItem>(
       recordId,
       {
         bool: {
           filter: [term('kind', 'task'), term('task.required', true)],
-          must_not: [terms('status', ['done', 'skipped'])],
+          must_not: [terms('status', ['completed', 'cancelled'])],
         },
       },
-      100
+      MAX_TASKS_PER_CASE
     );
     if (left.length) {
+      const values = { ...(theCase.extended_fields ?? {}), ...(req.extended_fields ?? {}) };
+      const emptyFields = (await this.emptyRequiredFields(record, values))
+        .filter((field) => field.onClose)
+        .map((field) => field.label);
       throw Boom.badRequest(
-        `${plural(left.length, 'required task')} must be done first: ${left
-          .map((t) => t.title)
-          .join('; ')}`
+        closeBlockedMessage(
+          left.map((t) => t.title),
+          emptyFields
+        )
       );
     }
 
@@ -2069,25 +2292,43 @@ export class InvestigationsService {
       caseVersion = updatedCase.version;
     }
 
-    await this.deps.casesClient.cases.bulkUpdate({
-      cases: [
-        {
-          id: recordId,
-          version: caseVersion,
-          status: CaseStatuses.closed,
-          ...(theCase.settings?.syncAlerts
-            ? {
-                closeReason:
-                  req.verdict === 'true_positive'
-                    ? 'true_positive'
-                    : req.verdict === 'benign'
-                    ? 'benign_positive'
-                    : 'other',
-              }
-            : {}),
+    const closeReason = req.close_reason.trim();
+    const humanVerdict =
+      req.human_verdict !== undefined
+        ? req.human_verdict
+        : CLOSE_REASON_TO_VERDICT[closeReason] ?? null;
+    try {
+      await this.deps.casesClient.cases.bulkUpdate({
+        cases: [
+          {
+            id: recordId,
+            version: caseVersion,
+            status: CaseStatuses.closed,
+            ...(theCase.settings?.syncAlerts ? { closeReason } : {}),
+          },
+        ],
+      } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+    } catch (error) {
+      const fieldErrors = parseCaseFieldErrors(caseErrorMessage(error));
+      if (!fieldErrors.length) throw error;
+      throw Boom.badRequest(
+        closeBlockedMessage(
+          [],
+          fieldErrors.map((e) => e.label ?? e.message)
+        )
+      );
+    }
+    const closingNotes = req.summary?.trim() ?? '';
+    if (closingNotes) {
+      await this.deps.casesClient.attachments.add({
+        caseId: recordId,
+        comment: {
+          type: COMMENT_ATTACHMENT_TYPE,
+          owner: INVESTIGATIONS_OWNER,
+          data: { content: closingNotes },
         },
-      ],
-    } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+      });
+    }
 
     // Withdraw pending proposals.
     const pending = await this.searchItems<ProposalItem>(
@@ -2117,10 +2358,9 @@ export class InvestigationsService {
     const alertsClosed = await this.setAlertsStatus(recordId, 'closed');
 
     const outcome = {
-      verdict: req.verdict,
-      reason: req.reason,
-      root_cause: req.root_cause,
-      summary: req.summary,
+      close_reason: closeReason,
+      human_verdict: humanVerdict,
+      summary: closingNotes || null,
       closed_by: actor,
       closed_at: ts,
       alerts_closed: alertsClosed,
@@ -2137,7 +2377,23 @@ export class InvestigationsService {
         ...closePause,
         closed_at: ts,
         close_outcome: outcome,
-        verdict_effective: req.verdict,
+        close_reason: closeReason,
+        human_verdict: humanVerdict ?? record.analyst_verdict?.verdict ?? null,
+        ...(humanVerdict
+          ? {
+              analyst_verdict: {
+                verdict: humanVerdict,
+                reason: `Closed as ${closeReasonLabel(closeReason)}`,
+                set_by: actor,
+                set_at: ts,
+              },
+            }
+          : {}),
+        verdict_effective:
+          humanVerdict ??
+          record.analyst_verdict?.verdict ??
+          record.agent_verdict?.classification ??
+          null,
         stage: 'Close out',
         updated_at: ts,
         updated_by: actor,
@@ -2149,13 +2405,13 @@ export class InvestigationsService {
         actor,
         action: 'record.closed',
         target: { kind: 'record', id: recordId, title: record.title },
-        message: `Closed the investigation as ${VERDICT_LABELS[
-          req.verdict
-        ].toLowerCase()} (${req.reason.toLowerCase()})`,
-        details: req.summary,
+        message: `Closed the investigation: ${closeReasonLabel(closeReason)}${
+          humanVerdict ? ` (${VERDICT_LABELS[humanVerdict].toLowerCase()})` : ''
+        }`,
+        details: closingNotes || null,
         links: [{ kind: 'tab', id: 'overview', label: 'Outcome' }],
         before: record.close_outcome?.summary ?? null,
-        after: req.summary,
+        after: closingNotes || null,
       },
     ];
     const automation: Actor = {
@@ -2187,7 +2443,7 @@ export class InvestigationsService {
       startedAt: caseWriteStartedAt,
       actor,
       ts,
-      skipTypes: ['status'],
+      skipTypes: ['status', ...(closingNotes ? ['comment'] : [])],
     });
     await this.refreshCounters(recordId, actor, { touch: false });
     return (await this.getRecord(recordId)).record;
@@ -2264,8 +2520,10 @@ export class InvestigationsService {
         time_paused: 0,
         closed_at: null,
         close_outcome: null,
-        verdict_effective:
-          record.analyst_verdict?.verdict ?? record.agent_verdict?.classification ?? null,
+        close_reason: null,
+        human_verdict: null,
+        analyst_verdict: null,
+        verdict_effective: record.agent_verdict?.classification ?? null,
         updated_at: ts,
         updated_by: actor,
       },
@@ -2309,6 +2567,28 @@ export class InvestigationsService {
 
     // Move items in pages, renumbering refs so they stay unique on the primary.
     let moved = 0;
+    // Close the merged case first: if Cases refuses (close-required fields), nothing has moved.
+    try {
+      await this.deps.casesClient.cases.bulkUpdate({
+        cases: [
+          {
+            id: merged.record.id,
+            version: merged.theCase.version,
+            status: CaseStatuses.closed,
+            ...(merged.theCase.settings?.syncAlerts ? { closeReason: 'duplicate' } : {}),
+          },
+        ],
+      } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+    } catch (error) {
+      const fieldErrors = parseCaseFieldErrors(caseErrorMessage(error));
+      if (!fieldErrors.length) throw error;
+      throw Boom.badRequest(
+        `${merged.record.display_id} cannot be merged and closed yet. ${closeBlockedMessage(
+          [],
+          fieldErrors.map((e) => e.label ?? e.message)
+        ).replace('The investigation cannot close yet. ', '')}`
+      );
+    }
     const kindCounts = await this.es.search({
       index: INVESTIGATION_ITEMS_INDEX,
       size: 0,
@@ -2352,16 +2632,6 @@ export class InvestigationsService {
     );
     await this.es.indices.refresh({ index: INVESTIGATION_ITEMS_INDEX });
 
-    await this.deps.casesClient.cases.bulkUpdate({
-      cases: [
-        {
-          id: merged.record.id,
-          version: merged.theCase.version,
-          status: CaseStatuses.closed,
-          ...(merged.theCase.settings?.syncAlerts ? { closeReason: 'duplicate' } : {}),
-        },
-      ],
-    } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
     await this.es.update({
       index: INVESTIGATION_RECORDS_INDEX,
       id: merged.record.id,
@@ -2546,107 +2816,146 @@ export class InvestigationsService {
     );
   }
 
+  /** One procedure (task list) per investigation type, keyed by the Cases template id. */
   public async listProcedureTemplates(): Promise<ProcedureTemplate[]> {
     await this.ensureCanReadOwner();
-    const res = await this.es.search<{
-      type: string;
-      tasks: ProcedureTemplateTask[];
-      updated_at: string;
-      updated_by: Actor;
-    }>({
-      index: INVESTIGATION_CONFIG_INDEX,
-      size: 100,
-      seq_no_primary_term: true,
-      query: {
-        bool: {
-          filter: [term('doc_type', 'procedure_template'), term('space_id', this.deps.spaceId)],
+    const [types, res] = await Promise.all([
+      this.listTypes(),
+      this.es.search<{
+        template_id: string;
+        tasks: ProcedureTemplateTask[];
+        updated_at: string;
+        updated_by: Actor;
+      }>({
+        index: INVESTIGATION_CONFIG_INDEX,
+        size: 100,
+        seq_no_primary_term: true,
+        query: {
+          bool: {
+            filter: [term('doc_type', 'procedure_template'), term('space_id', this.deps.spaceId)],
+          },
         },
-      },
-    });
-    const stored = new Map(res.hits.hits.map((h) => [h._source?.type ?? '', h]));
-    const system: Actor = { type: 'automation', id: 'defaults', name: 'Default template' };
-    const names = Array.from(
-      new Set([...Object.keys(DEFAULT_PROCEDURE_TEMPLATES), ...stored.keys()])
-    ).filter(Boolean);
-    return names.map((type) => {
-      const hit = stored.get(type);
+      }),
+    ]);
+    const stored = new Map(res.hits.hits.map((h) => [h._source?.template_id ?? '', h]));
+    return types.map((type) => {
+      const hit = stored.get(type.template_id);
       if (hit?._source) {
         return {
-          type,
+          template_id: type.template_id,
+          type: type.name,
           tasks: hit._source.tasks,
           updated_at: hit._source.updated_at,
           updated_by: hit._source.updated_by,
+          saved: true,
           version: encodeVersion(hit._seq_no, hit._primary_term),
         };
       }
       return {
-        type,
-        tasks: DEFAULT_PROCEDURE_TEMPLATES[type] ?? [],
-        updated_at: '1970-01-01T00:00:00.000Z',
-        updated_by: system,
+        template_id: type.template_id,
+        type: type.name,
+        tasks: DEFAULT_PROCEDURE_TEMPLATES[type.name] ?? [],
+        updated_at: null,
+        updated_by: null,
+        saved: false,
       };
     });
   }
 
   public async saveProcedureTemplate(
-    type: string,
+    templateId: string,
     tasks: ProcedureTemplateTask[]
   ): Promise<ProcedureTemplate> {
     await this.ensureCanReadOwner();
-    await this.ensureCanWrite();
+    if (!(await this.deps.canManageSettings())) {
+      throw Boom.forbidden('You need the Cases settings privilege to change procedures.');
+    }
+    const template = await this.getInvestigationTemplate(templateId);
+    const total = tasks.reduce((n, t) => n + 1 + (t.subtasks?.length ?? 0), 0);
+    if (total > MAX_TASKS_PER_CASE) {
+      throw Boom.badRequest(`A procedure can have at most ${MAX_TASKS_PER_CASE} tasks`);
+    }
     const actor = this.actor();
     const ts = now();
-    const id = `procedure_template:${this.deps.spaceId}:${type}`;
     const res = await this.es.index({
       index: INVESTIGATION_CONFIG_INDEX,
-      id,
+      id: `procedure_template:${this.deps.spaceId}:${template.id}`,
       refresh: true,
       document: {
         doc_type: 'procedure_template',
         space_id: this.deps.spaceId,
-        type,
+        template_id: template.id,
+        type: template.name,
         tasks,
         updated_at: ts,
         updated_by: actor,
       },
     });
     return {
-      type,
+      template_id: template.id,
+      type: template.name,
       tasks,
       updated_at: ts,
       updated_by: actor,
+      saved: true,
       version: encodeVersion(res._seq_no, res._primary_term),
     };
   }
 
+  /** The procedure for a record: its type's task list, or the built-in default for its type name. */
+  private async procedureFor(
+    templateId: string | null | undefined,
+    typeName: string
+  ): Promise<{ name: string; tasks: ProcedureTemplateTask[] } | null> {
+    if (templateId) {
+      const found = (await this.listProcedureTemplates()).find((t) => t.template_id === templateId);
+      if (found) return { name: found.type, tasks: found.tasks };
+    }
+    const fallback = DEFAULT_PROCEDURE_TEMPLATES[typeName];
+    return fallback ? { name: typeName, tasks: fallback } : null;
+  }
+
   public async applyProcedure(
     recordId: string,
-    type: string,
+    templateId: string | null,
     replace: boolean
   ): Promise<TaskItem[]> {
     const { record } = await this.loadForWrite(recordId);
     const actor = this.actor();
-    const tasks = await this.applyProcedureInternal(record, type, replace, actor, now());
+    const tasks = await this.applyProcedureInternal(
+      record,
+      templateId ?? record.template_id ?? null,
+      replace,
+      actor,
+      now()
+    );
     await this.refreshCounters(recordId, actor);
     return tasks;
   }
 
   private async applyProcedureInternal(
     record: StoredRecord,
-    type: string,
+    templateId: string | null,
     replace: boolean,
     actor: Actor,
     ts: string
   ): Promise<TaskItem[]> {
-    const templates = await this.listProcedureTemplates();
-    const template = templates.find((t) => t.type === type);
-    if (!template) throw Boom.badRequest(`No procedure template for "${type}"`);
-    const existing = await this.searchItems<TaskItem>(record.id, term('kind', 'task'), 1000);
+    const template = await this.procedureFor(templateId, record.investigation_type);
+    if (!template) {
+      this.deps.logger.debug(`No procedure for investigation type "${record.investigation_type}"`);
+      return [];
+    }
+    const type = template.name;
+    const existing = await this.searchItems<TaskItem>(
+      record.id,
+      term('kind', 'task'),
+      MAX_TASKS_PER_CASE
+    );
     const keptTitles = new Set<string>();
     if (replace) {
-      const removable = existing.filter((t) => t.status !== 'done' && t.status !== 'skipped');
+      const removable = existing.filter((t) => !isTaskFinished(t.status));
       existing
-        .filter((t) => t.status === 'done' || t.status === 'skipped')
+        .filter((t) => isTaskFinished(t.status))
         .forEach((t) => keptTitles.add(t.title.toLowerCase()));
       if (removable.length) {
         await this.es.deleteByQuery({
@@ -2670,6 +2979,15 @@ export class InvestigationsService {
     }
     const claims = await this.searchItems<ClaimItem>(record.id, term('kind', 'claim'), 1000);
     const toCreate = template.tasks.filter((t) => !keptTitles.has(t.title.toLowerCase()));
+    const kept = replace ? existing.filter((t) => isTaskFinished(t.status)) : existing;
+    const newCount = toCreate.reduce((n, t) => n + 1 + (t.subtasks?.length ?? 0), 0);
+    if (kept.length + newCount > MAX_TASKS_PER_CASE) {
+      throw Boom.badRequest(`An investigation can have at most ${MAX_TASKS_PER_CASE} tasks`);
+    }
+    const lastRoot = Math.max(
+      0,
+      ...kept.filter((t) => !t.task.parent_task_id).map((t) => t.task.sort_order ?? 0)
+    );
     const ids = toCreate.map(() => uuidv4());
     const idByTitle = new Map<string, string>();
     toCreate.forEach((t, i) => idByTitle.set(t.title.toLowerCase(), ids[i]));
@@ -2701,7 +3019,7 @@ export class InvestigationsService {
         _id: ids[i],
         kind: 'task',
         title: t.title,
-        status: 'todo',
+        status: 'open',
         task: {
           phase: t.phase,
           description: t.description ?? null,
@@ -2709,27 +3027,55 @@ export class InvestigationsService {
           owner,
           depends_on: t.after ? idByTitle.get(t.after.toLowerCase()) ?? null : null,
           auto,
-          skip_reason: null,
+          cancel_reason: null,
           note: null,
           completed_by: null,
+          started_at: null,
           completed_at: null,
-          template_ref: type,
-          order: i + 1,
+          template_ref: template.name,
+          priority: t.priority ?? 'medium',
+          assignees: [],
+          due_date: dueDateFrom(t.due_within, ts),
+          sort_order: lastRoot + (i + 1) * TASK_SORT_ORDER_GAP,
+          parent_task_id: null,
+          workflow_id: t.owner_type === 'automation' ? t.workflow_id ?? null : null,
+          workflow_run: null,
         },
       };
     });
-    const created = inputs.length
-      ? (await this.bulkCreateItemsInternal(record, inputs, actor, { silent: true, ts })).items
+    const subtaskInputs: Array<ItemInput & { _id?: string }> = toCreate.flatMap((t, i) =>
+      (t.subtasks ?? []).map((sub, j) => ({
+        _id: uuidv4(),
+        kind: 'task' as const,
+        title: sub.title,
+        status: 'open' as const,
+        task: {
+          phase: t.phase,
+          description: sub.description ?? null,
+          required: sub.required,
+          owner: { type: 'person' as const, id: null, name: null },
+          depends_on: null,
+          auto: null,
+          cancel_reason: null,
+          note: null,
+          completed_by: null,
+          started_at: null,
+          completed_at: null,
+          template_ref: template.name,
+          priority: sub.priority ?? t.priority ?? 'medium',
+          assignees: [],
+          due_date: dueDateFrom(sub.due_within, ts),
+          sort_order: (j + 1) * TASK_SORT_ORDER_GAP,
+          parent_task_id: ids[i],
+          workflow_id: null,
+          workflow_run: null,
+        },
+      }))
+    );
+    const all = [...inputs, ...subtaskInputs];
+    const created = all.length
+      ? (await this.bulkCreateItemsInternal(record, all, actor, { silent: true, ts })).items
       : [];
-    if (record.investigation_type !== type) {
-      await this.es.update({
-        index: INVESTIGATION_RECORDS_INDEX,
-        id: record.id,
-        refresh: true,
-        retry_on_conflict: 3,
-        doc: { investigation_type: type },
-      });
-    }
     const required = template.tasks.filter((t) => t.required).length;
     await this.appendActivity(record.id, [
       {
@@ -2749,6 +3095,291 @@ export class InvestigationsService {
   /* ---------------------------------------------------------------- */
   /* Items                                                             */
   /* ---------------------------------------------------------------- */
+
+  /** Task-list limits: 100 tasks per record, one level of subtasks, 100 comments per task. */
+  private async ensureTaskLimits(
+    recordId: string,
+    inputs: Array<ItemInput & { _id?: string }>
+  ): Promise<void> {
+    const newTasks = inputs.filter(
+      (input): input is Extract<ItemInput, { kind: 'task' }> & { _id?: string } =>
+        input.kind === 'task'
+    );
+    const taskComments = inputs.filter(
+      (input): input is Extract<ItemInput, { kind: 'comment' }> => input.kind === 'comment'
+    );
+    if (!newTasks.length && !taskComments.length) return;
+    const existing = await this.searchItems<TaskItem>(
+      recordId,
+      term('kind', 'task'),
+      MAX_TASKS_PER_CASE + 1
+    );
+    if (newTasks.length && existing.length + newTasks.length > MAX_TASKS_PER_CASE) {
+      throw Boom.badRequest(`An investigation can have at most ${MAX_TASKS_PER_CASE} tasks`);
+    }
+    const byId = new Map<string, { parent: string | null }>(
+      existing.map((t) => [t.id, { parent: t.task.parent_task_id ?? null }])
+    );
+    for (const task of newTasks) {
+      if (task._id) byId.set(task._id, { parent: task.task.parent_task_id ?? null });
+    }
+    for (const task of newTasks) {
+      const parentId = task.task.parent_task_id;
+      if (parentId) {
+        const parent = byId.get(parentId);
+        if (!parent) throw Boom.badRequest(`Parent task ${parentId} is not in this investigation`);
+        if (parent.parent) throw Boom.badRequest('Sub-tasks cannot have their own sub-tasks');
+      }
+    }
+    const lastSortOrder = new Map<string | null, number>();
+    for (const t of existing) {
+      const key = t.task.parent_task_id ?? null;
+      lastSortOrder.set(key, Math.max(lastSortOrder.get(key) ?? 0, t.task.sort_order ?? 0));
+    }
+    for (const task of newTasks) {
+      if (!task.task.sort_order) {
+        const key = task.task.parent_task_id ?? null;
+        const next = (lastSortOrder.get(key) ?? 0) + TASK_SORT_ORDER_GAP;
+        task.task.sort_order = next;
+        lastSortOrder.set(key, next);
+      }
+    }
+    const taskIds = new Set(existing.map((t) => t.id));
+    const perTask = new Map<string, number>();
+    for (const comment of taskComments) {
+      const target = comment.comment.target_id;
+      if (taskIds.has(target)) perTask.set(target, (perTask.get(target) ?? 0) + 1);
+    }
+    for (const [taskId, adding] of perTask) {
+      const { count } = await this.es.count({
+        index: INVESTIGATION_ITEMS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              term('record_id', recordId),
+              term('kind', 'comment'),
+              term('comment.target_id', taskId),
+            ],
+          },
+        },
+      });
+      if (count + adding > MAX_COMMENTS_PER_TASK) {
+        throw Boom.badRequest(`A task can have at most ${MAX_COMMENTS_PER_TASK} comments`);
+      }
+    }
+  }
+
+  /** Sets `sort_order` for sibling tasks (all roots, or the subtasks of one parent). */
+  public async reorderTasks(recordId: string, taskIds: string[]): Promise<TaskItem[]> {
+    await this.loadForWrite(recordId);
+    const tasks = await this.searchItems<TaskItem>(
+      recordId,
+      { bool: { filter: [term('kind', 'task'), terms('id', taskIds)] } },
+      MAX_TASKS_PER_CASE
+    );
+    const found = new Set(tasks.map((t) => t.id));
+    const foreign = taskIds.filter((taskId) => !found.has(taskId));
+    if (foreign.length) {
+      throw Boom.badRequest(`Tasks ${foreign.join(', ')} do not belong to this investigation`);
+    }
+    const parents = new Set(tasks.map((t) => t.task.parent_task_id ?? null));
+    if (parents.size > 1) throw Boom.badRequest('Reorder tasks that share the same parent');
+    await this.es.bulk({
+      refresh: true,
+      operations: taskIds.flatMap((taskId, index) => [
+        { update: { _index: INVESTIGATION_ITEMS_INDEX, _id: taskId } },
+        { doc: { task: { sort_order: (index + 1) * TASK_SORT_ORDER_GAP } } },
+      ]),
+    });
+    await this.appendActivity(recordId, [
+      {
+        ts: now(),
+        actor: this.actor(),
+        action: 'procedure.reordered',
+        message: `Reordered ${plural(taskIds.length, 'task')}`,
+        links: [{ kind: 'tab', id: 'procedure', label: 'Procedure' }],
+      },
+    ]);
+    return orderTasks(
+      await this.searchItems<TaskItem>(recordId, term('kind', 'task'), MAX_TASKS_PER_CASE)
+    );
+  }
+
+  /** Starts the workflow of an automation task; the task completes when the run succeeds. */
+  public async runTaskWorkflow(recordId: string, taskId: string): Promise<TaskItem> {
+    const { record } = await this.loadForWrite(recordId);
+    const found = await this.getItemUnchecked(recordId, taskId);
+    if (found.kind !== 'task') throw Boom.badRequest('Only tasks can run a workflow.');
+    const task = await this.refreshTaskWorkflow(recordId, found as TaskItem);
+    if (isTaskFinished(task.status)) {
+      throw Boom.badRequest(`Task "${task.title}" is already finished.`);
+    }
+    if (task.task.workflow_run?.status === 'running') {
+      throw Boom.conflict(`Task "${task.title}" already has a workflow run in progress.`);
+    }
+    const workflowId = task.task.workflow_id;
+    if (!workflowId) throw Boom.badRequest(`Task "${task.title}" has no workflow to run.`);
+    const { workflows } = this.deps;
+    if (!workflows?.isAvailable()) throw Boom.forbidden('Workflows are not available.');
+    if (!(await workflows.canExecute())) {
+      throw Boom.forbidden('You need the Workflows execute privilege to run this workflow.');
+    }
+    const { executionId } = await workflows.run({ workflowId, caseId: record.case_id });
+    const actor = this.actor();
+    const ts = now();
+    const workflowRun: TaskWorkflowRun = {
+      execution_id: executionId,
+      status: 'running',
+      started_at: ts,
+      finished_at: null,
+      error: null,
+    };
+    const updated = await this.writeTaskWorkflowRun(
+      task,
+      { updated_at: ts, updated_by: actor, task: { workflow_run: workflowRun } },
+      {
+        ...task,
+        updated_at: ts,
+        updated_by: actor,
+        task: { ...task.task, workflow_run: workflowRun },
+      }
+    );
+    if (!updated) {
+      throw Boom.conflict(
+        `Task "${task.title}" was changed by someone else. Reload it and try again.`
+      );
+    }
+    await this.appendActivity(recordId, [
+      {
+        ts,
+        actor,
+        action: 'task.workflow_run',
+        target: { kind: 'task', id: task.id, ref: task.ref, title: task.title },
+        message: `Started the workflow for task "${clip(task.title, 120)}"`,
+        details: `Workflow ${workflowId}, execution ${executionId}.`,
+        links: [{ kind: 'task', id: task.id, label: task.ref }],
+      },
+    ]);
+    return updated;
+  }
+
+  /** Partial update of a task guarded by its version; null when someone else changed it first. */
+  private async writeTaskWorkflowRun(
+    task: TaskItem,
+    doc: Record<string, unknown>,
+    base: TaskItem
+  ): Promise<TaskItem | null> {
+    try {
+      const res = await this.es.update<StoredItem, Record<string, unknown>>({
+        index: INVESTIGATION_ITEMS_INDEX,
+        id: task.id,
+        refresh: true,
+        ...decodeVersion(task.version ?? ''),
+        doc,
+      });
+      return { ...base, version: encodeVersion(res._seq_no, res._primary_term) };
+    } catch (error) {
+      if (error?.meta?.statusCode === 409) return null;
+      throw error;
+    }
+  }
+
+  /**
+   * Reads the status of a running workflow. A succeeded run completes the task (by an automation
+   * actor naming the workflow); a failed run records the error and leaves the task unfinished.
+   */
+  public async refreshTaskWorkflow(recordId: string, task: TaskItem): Promise<TaskItem> {
+    const run = task.task.workflow_run;
+    const { workflows } = this.deps;
+    if (run?.status !== 'running' || !workflows) return task;
+    let execution: TaskWorkflowExecution | null = null;
+    try {
+      execution = await workflows.getExecution(run.execution_id);
+    } catch (error) {
+      this.deps.logger.warn(`Could not read workflow execution ${run.execution_id}: ${error}`);
+      return task;
+    }
+    if (!execution) {
+      if (Date.now() - Date.parse(run.started_at) < TASK_WORKFLOW_LOST_AFTER_MS) return task;
+      execution = { status: 'failed', error: 'The workflow run could not be found.' };
+    }
+    if (execution.status === 'running') return task;
+    const ts = now();
+    const finishedAt = execution.finishedAt || ts;
+    const workflowId = task.task.workflow_id ?? 'workflow';
+    const workflowName = execution.workflowName ?? workflowId;
+    const automation: Actor = { type: 'automation', id: workflowId, name: workflowName };
+    const succeeded = execution.status === 'succeeded';
+    const completes = succeeded && !isTaskFinished(task.status);
+    const nextRun = {
+      ...run,
+      status: execution.status,
+      finished_at: finishedAt,
+      error: succeeded ? null : execution.error || 'The workflow run failed.',
+    };
+    const completion = completes
+      ? {
+          completed_by: automation,
+          completed_at: finishedAt,
+          cancel_reason: null,
+          note: `Completed when the run of the workflow "${workflowName}" succeeded.`,
+        }
+      : {};
+    const updated = await this.writeTaskWorkflowRun(
+      task,
+      {
+        updated_at: ts,
+        updated_by: automation,
+        ...(completes ? { status: 'completed' } : {}),
+        task: { workflow_run: nextRun, ...completion },
+      },
+      {
+        ...task,
+        ...(completes ? { status: 'completed' as const } : {}),
+        updated_at: ts,
+        updated_by: automation,
+        task: { ...task.task, workflow_run: nextRun, ...completion },
+      }
+    );
+    if (!updated) return task;
+    await this.appendActivity(recordId, [
+      {
+        ts,
+        actor: automation,
+        action: 'task.workflow_run',
+        target: { kind: 'task', id: task.id, ref: task.ref, title: task.title },
+        message: succeeded
+          ? `Workflow "${clip(workflowName, 100)}" ${
+              completes ? 'completed' : 'succeeded for'
+            } task "${clip(task.title, 120)}"`
+          : `Workflow "${clip(workflowName, 100)}" failed for task "${clip(task.title, 120)}"`,
+        details: succeeded ? null : nextRun.error,
+        links: [{ kind: 'task', id: task.id, label: task.ref }],
+      },
+    ]);
+    if (completes) await this.refreshCounters(recordId, automation);
+    return updated;
+  }
+
+  /** Refreshes the running workflow of every task in `items`; other items pass through. */
+  private async settleTaskWorkflows<T extends InvestigationItem>(
+    recordId: string,
+    items: T[]
+  ): Promise<T[]> {
+    if (!this.deps.workflows) return items;
+    const running = items.filter(
+      (item): item is T & TaskItem =>
+        item.kind === 'task' && (item as TaskItem).task.workflow_run?.status === 'running'
+    );
+    if (!running.length) return items;
+    const settled = new Map<string, TaskItem>();
+    await Promise.all(
+      running.map(async (item) => {
+        settled.set(item.id, await this.refreshTaskWorkflow(recordId, item));
+      })
+    );
+    return items.map((item) => (settled.get(item.id) as T | undefined) ?? item);
+  }
 
   private async searchItems<T extends InvestigationItem>(
     recordId: string,
@@ -2938,7 +3569,10 @@ export class InvestigationsService {
       };
     }
     return {
-      items: hits.map((h) => this.toItem(h)),
+      items: await this.settleTaskWorkflows(
+        recordId,
+        hits.map((h) => this.toItem(h))
+      ),
       total: typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0,
       page,
       per_page: perPage,
@@ -2998,6 +3632,7 @@ export class InvestigationsService {
     if (!inputs.length) return { items: [], errors: [] };
     const counts: Partial<Record<ItemKind, number>> = {};
     for (const input of inputs) counts[input.kind] = (counts[input.kind] ?? 0) + 1;
+    await this.ensureTaskLimits(record.id, inputs);
     const starts = await this.reserveRefs(record.id, counts);
     const next: Record<string, number> = { ...starts };
     const docs: StoredItem[] = inputs.map((input) => {
@@ -3167,8 +3802,15 @@ export class InvestigationsService {
       doc.entity.tags = doc.entity.tags ?? [];
       doc.title = doc.entity.name;
     }
-    if (doc.kind === 'task' && doc.status === 'skipped' && !doc.task.skip_reason) {
-      throw Boom.badRequest(`Task "${doc.title}" needs a reason to be marked not applicable`);
+    if (doc.kind === 'task') {
+      if (doc.status === 'cancelled' && !doc.task.cancel_reason) {
+        throw Boom.badRequest(`Task "${doc.title}" needs a reason to be cancelled`);
+      }
+      doc.task.priority = doc.task.priority ?? 'medium';
+      doc.task.assignees = doc.task.assignees ?? [];
+      doc.task.due_date = doc.task.due_date ?? null;
+      doc.task.parent_task_id = doc.task.parent_task_id ?? null;
+      doc.task.sort_order = doc.task.sort_order ?? 0;
     }
     return doc;
   }
@@ -3304,7 +3946,7 @@ export class InvestigationsService {
       {
         bool: {
           filter: [term('kind', 'task'), term('task.auto.type', 'claim')],
-          must_not: [terms('status', ['done', 'skipped'])],
+          must_not: [terms('status', ['completed', 'cancelled'])],
           should: [
             term('task.auto.claim_id', claim.id),
             ...(question ? [term('task.auto.question', question)] : []),
@@ -3338,7 +3980,7 @@ export class InvestigationsService {
             term('task.auto.type', 'action'),
             term('task.auto.category', proposal.proposal.category),
           ],
-          must_not: [terms('status', ['done', 'skipped'])],
+          must_not: [terms('status', ['completed', 'cancelled'])],
         },
       },
       50
@@ -3375,7 +4017,7 @@ export class InvestigationsService {
         { update: { _index: INVESTIGATION_ITEMS_INDEX, _id: t.id } },
         {
           doc: {
-            status: 'done',
+            status: 'completed',
             updated_at: when,
             updated_by: automation,
             task: { completed_by: automation, completed_at: when, note },
@@ -3435,15 +4077,27 @@ export class InvestigationsService {
     next.updated_by = actor;
 
     if (item.kind === 'task') {
+      if (patch.status && !TASK_STATUSES.includes(patch.status as TaskItem['status'])) {
+        throw Boom.badRequest(`Task status must be one of: ${TASK_STATUSES.join(', ')}`);
+      }
       const task = next as unknown as TaskItem;
-      if (patch.status === 'done' && item.status !== 'done') {
+      const previous = item as unknown as TaskItem;
+      if (patch.status === 'completed' && previous.task.workflow_run?.status === 'running') {
+        throw Boom.conflict(
+          `Task "${item.title}" completes when its workflow run succeeds. Wait for the run to end.`
+        );
+      }
+      if (patch.status === 'in_progress' && !task.task.started_at) {
+        task.task = { ...task.task, started_at: ts };
+      }
+      if (patch.status && isTaskFinished(patch.status) && !isTaskFinished(item.status)) {
         task.task = { ...task.task, completed_by: actor, completed_at: ts };
       }
-      if (patch.status && patch.status !== 'done' && patch.status !== 'skipped') {
-        task.task = { ...task.task, completed_by: null, completed_at: null, skip_reason: null };
+      if (patch.status && !isTaskFinished(patch.status)) {
+        task.task = { ...task.task, completed_by: null, completed_at: null, cancel_reason: null };
       }
-      if (patch.status === 'skipped') {
-        task.task = { ...task.task, completed_by: actor, completed_at: ts };
+      if (task.status === 'cancelled' && !task.task.cancel_reason) {
+        throw Boom.badRequest(`Task "${item.title}" needs a reason to be cancelled`);
       }
     }
     if (item.kind === 'proposal' && patch.status && patch.status !== item.status) {
@@ -3551,16 +4205,16 @@ export class InvestigationsService {
       const a = after as unknown as TaskItem;
       if (a.status !== before.status) {
         const msg: Record<string, string> = {
-          done: `Completed task "${clip(a.title, 120)}"`,
-          skipped: `Marked "${clip(a.title, 120)}" as not applicable`,
-          doing: `Started task "${clip(a.title, 120)}"`,
-          todo: `Reopened task "${clip(a.title, 120)}"`,
+          completed: `Completed task "${clip(a.title, 120)}"`,
+          cancelled: `Cancelled task "${clip(a.title, 120)}"`,
+          in_progress: `Started task "${clip(a.title, 120)}"`,
+          open: `Reopened task "${clip(a.title, 120)}"`,
         };
         return {
           ...base,
           action: 'task.status_changed',
-          message: msg[a.status ?? 'todo'],
-          details: a.task.skip_reason ?? a.task.note ?? null,
+          message: msg[a.status ?? 'open'],
+          details: a.task.cancel_reason ?? a.task.note ?? null,
         };
       }
       const b = before as unknown as TaskItem;
@@ -4764,7 +5418,7 @@ export class InvestigationsService {
       counters,
       claims,
       proposals,
-      tasks: tasks.sort((a, b) => a.task.order - b.task.order),
+      tasks: orderTasks(tasks),
       timeline: timeline.hits.hits.map((h) => this.toItem(h)) as InvestigationItem[],
       activity: activity.hits.hits.map((h) => h._source as ActivityEntry),
     });
@@ -4911,7 +5565,9 @@ export class InvestigationsService {
         c.entities_suspected
       } suspected | Tasks: ${c.tasks_done}/${c.tasks - c.tasks_skipped} done, ${
         c.required_tasks_left
-      } required left | Proposals pending: ${c.proposals_pending}`,
+      } required left${
+        c.tasks_overdue ? `, ${c.tasks_overdue} overdue` : ''
+      } | Proposals pending: ${c.proposals_pending}`,
       ...(emptyFields.length
         ? [
             `Empty required fields: ${emptyFields

@@ -75,11 +75,15 @@ const RequiredFieldsForm: React.FC<RequiredFieldsFormProps> = ({
 };
 RequiredFieldsForm.displayName = 'RequiredFieldsForm';
 
+const MISSING_POLL_MS = 400;
+
 export interface CloseRequiredFieldsProps {
   recordId: string;
   formApiRef: MutableRefObject<ExtendedFieldsFormApi | null>;
   /** True until the template and the saved values are loaded and the missing fields are known. */
   onLoadingChange: (isLoading: boolean) => void;
+  /** Labels of the fields that are still empty, kept up to date while the fields are filled. */
+  onMissingChange?: (labels: string[]) => void;
 }
 
 /**
@@ -91,6 +95,7 @@ export const CloseRequiredFields: React.FC<CloseRequiredFieldsProps> = ({
   recordId,
   formApiRef,
   onLoadingChange,
+  onMissingChange,
 }) => {
   const { data, isLoading: isLoadingRecord } = useRecord(recordId);
   const template = data?.case.template ?? null;
@@ -109,6 +114,28 @@ export const CloseRequiredFields: React.FC<CloseRequiredFieldsProps> = ({
   useEffect(() => {
     onLoadingChange(missing === null);
   }, [missing, onLoadingChange]);
+
+  useEffect(() => {
+    if (!missing || !onMissingChange) {
+      return;
+    }
+    let lastReported: string | null = null;
+    const report = () => {
+      const current = formApiRef.current?.getValues() ?? {};
+      const labels = missing
+        .filter((field) => isEmptyFieldValue(current[getFieldKey(field)]))
+        .map((field) => field.label ?? field.name);
+      const signature = JSON.stringify(labels);
+      if (signature !== lastReported) {
+        lastReported = signature;
+        onMissingChange(labels);
+      }
+    };
+    report();
+    // The field components keep their values inside the form, so the list is read from it.
+    const timer = setInterval(report, MISSING_POLL_MS);
+    return () => clearInterval(timer);
+  }, [missing, formApiRef, onMissingChange]);
 
   if (!missing || missing.length === 0 || !values) {
     return null;

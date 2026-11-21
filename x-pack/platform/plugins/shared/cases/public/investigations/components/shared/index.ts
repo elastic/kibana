@@ -16,6 +16,8 @@ export type { ErrorStateProps } from './error_state';
 export { formatAbsoluteUtc, formatAge, formatDuration, formatRelativeTime } from './formatters';
 export { LoadingState } from './loading_state';
 export type { LoadingStateProps } from './loading_state';
+export { PausedBadge } from './paused_badge';
+export type { PausedBadgeProps } from './paused_badge';
 export { PriorityBadge } from './priority_badge';
 export type { PriorityBadgeProps } from './priority_badge';
 export { RelativeTime } from './relative_time';

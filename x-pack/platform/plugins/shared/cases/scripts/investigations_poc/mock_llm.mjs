@@ -266,9 +266,9 @@ const SCRIPTS = [
     },
   },
   {
-    name: 'mark_task_done',
+    name: 'complete_task',
     match: (text) => {
-      if (!/\bmark\s+(task\s+)?T\d+\s+(as\s+)?done|\bcomplete\s+task/i.test(text) && !/\bmark\s+task\b.*\bdone/i.test(text)) return null;
+      if (!/\bmark\s+(task\s+)?T\d+\s+(as\s+)?(done|completed)|\bcomplete\s+task/i.test(text) && !/\bmark\s+task\b.*\b(done|completed)/i.test(text)) return null;
       const ref = text.match(/\bT(\d+)\b/i);
       const title = text.match(/["\u201c'](.+?)["\u201d']/s)?.[1];
       if (!ref && !title) return null;
@@ -278,13 +278,36 @@ const SCRIPTS = [
       suffix: 'set_task_status',
       args: {
         ...(taskRef ? { task_ref: taskRef } : { task_title: taskTitle }),
-        status: 'done',
+        status: 'completed',
         note: 'Completed by the agent.',
       },
     }),
     reply: ({ taskRef, taskTitle }, { data }) => {
       const task = data?.task ?? deepFind(data, 'task') ?? {};
-      return `I marked ${task.ref ?? taskRef ?? 'the task'} done: ${task.title ?? taskTitle ?? 'task'}.`;
+      return `I marked ${task.ref ?? taskRef ?? 'the task'} completed: ${task.title ?? taskTitle ?? 'task'}.`;
+    },
+  },
+  {
+    name: 'cancel_task',
+    match: (text) => {
+      if (!/\bcancel\s+(task\s+)?T\d+/i.test(text) && !/\bcancel\s+task\b/i.test(text)) return null;
+      const ref = text.match(/\bT(\d+)\b/i);
+      const title = text.match(/["\u201c'](.+?)["\u201d']/s)?.[1];
+      if (!ref && !title) return null;
+      const because = text.match(/\b(?:because|reason:)\s+(.+)$/is)?.[1]?.trim();
+      return { taskRef: ref ? `T${ref[1]}` : undefined, taskTitle: ref ? undefined : title, reason: because || 'Not needed for this investigation.' };
+    },
+    call: ({ taskRef, taskTitle, reason }) => ({
+      suffix: 'set_task_status',
+      args: {
+        ...(taskRef ? { task_ref: taskRef } : { task_title: taskTitle }),
+        status: 'cancelled',
+        cancel_reason: reason,
+      },
+    }),
+    reply: ({ taskRef, taskTitle }, { data }) => {
+      const task = data?.task ?? deepFind(data, 'task') ?? {};
+      return `I cancelled ${task.ref ?? taskRef ?? 'the task'}: ${task.title ?? taskTitle ?? 'task'}.`;
     },
   },
   {
@@ -345,7 +368,7 @@ const SCRIPTS = [
 ];
 
 const FALLBACK_REPLY =
-  'I can summarise what is unresolved, add an indicator, open or settle a claim, mark a task done, propose an action, or add an entity to the scope.';
+  'I can summarise what is unresolved, add an indicator, open or settle a claim, mark a task completed or cancel it, propose an action, or add an entity to the scope.';
 
 const COMPACTION = {
   discussion_summary:

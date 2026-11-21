@@ -109,3 +109,20 @@ export const UPDATE_TEMPLATE_SUCCESS = i18n.translate(
   'xpack.cases.investigations.hooks.updateTemplateSuccess',
   { defaultMessage: 'Procedure template saved.' }
 );
+
+export const ADD_COMMENT_ERROR = i18n.translate(
+  'xpack.cases.investigations.hooks.addCommentError',
+  {
+    defaultMessage: 'Could not add the comment',
+  }
+);
+
+export const UPDATE_COMMENT_ERROR = i18n.translate(
+  'xpack.cases.investigations.hooks.updateCommentError',
+  { defaultMessage: 'Could not edit the comment' }
+);
+
+export const DELETE_COMMENT_ERROR = i18n.translate(
+  'xpack.cases.investigations.hooks.deleteCommentError',
+  { defaultMessage: 'Could not delete the comment' }
+);

@@ -14,19 +14,22 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { VERDICT_LABELS } from '../../../../common/investigations/types';
+import { VERDICTS, VERDICT_LABELS } from '../../../../common/investigations/types';
+import type { CaseStatusConfiguration } from '../../../../common/investigations/statuses';
 import type {
   InvestigationPriority,
   InvestigationRecord,
-  InvestigationStatus,
   Verdict,
 } from '../../../../common/investigations/types';
+import { useGetTags } from '../../../containers/use_get_tags';
 import { useInvestigationTypes } from '../../hooks';
 import { useInvestigationsServices } from '../../services';
 import * as sharedI18n from '../shared/translations';
+import { AssigneesFilter } from './assignees_filter';
 import { ColumnsPicker, FieldsFilter } from './fields_filter';
 import { FilterPopover } from './filter_popover';
 import type { FilterOption } from './filter_popover';
+import { StatusFilter } from './status_filter';
 import type { QueueFieldDef } from './use_queue_fields';
 import * as i18n from './translations';
 import { hasActiveFilters } from './use_queue_url_state';
@@ -35,19 +38,16 @@ import type { QueueState } from './use_queue_url_state';
 const SEARCH_DEBOUNCE_MS = 300;
 export const OWNER_UNASSIGNED_VALUE = 'unassigned';
 
-const STATUS_OPTIONS: FilterOption[] = [
-  { value: 'open', label: i18n.STATUS_OPEN },
-  { value: 'in-progress', label: i18n.STATUS_IN_PROGRESS },
-  { value: 'closed', label: i18n.STATUS_CLOSED },
-];
-
 const PRIORITY_OPTIONS: FilterOption[] = (['critical', 'high', 'medium', 'low'] as const).map(
   (value) => ({ value, label: sharedI18n.PRIORITY_LABELS[value] })
 );
 
-const VERDICT_OPTIONS: FilterOption[] = (['true_positive', 'benign', 'inconclusive'] as const).map(
-  (value) => ({ value, label: VERDICT_LABELS[value] })
-);
+const VERDICT_OPTIONS: FilterOption[] = VERDICTS.map((value) => ({
+  value,
+  label: VERDICT_LABELS[value],
+}));
+/** Added to every record by the server; not a tag the user chose. */
+const INTERNAL_TAG = 'investigation';
 
 export interface QueueFiltersProps {
   state: QueueState;
@@ -57,6 +57,8 @@ export interface QueueFiltersProps {
   records: InvestigationRecord[];
   /** Form fields of the investigation types, for the Fields filter and the optional columns. */
   fields: QueueFieldDef[];
+  /** The configured statuses, grouped by category in the Status filter. */
+  statuses: CaseStatusConfiguration[];
 }
 
 const useCurrentUsername = (): string | undefined => {
@@ -85,8 +87,10 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
   onClear,
   records,
   fields,
+  statuses,
 }) => {
   const { data: typesData } = useInvestigationTypes();
+  const { data: allTags } = useGetTags();
   const username = useCurrentUsername();
   const [searchText, setSearchText] = useState(state.search);
   const onChangeRef = useRef(onChange);
@@ -119,6 +123,14 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
     });
     return names.map((name) => ({ value: name, label: name }));
   }, [typesData, state.investigationType]);
+
+  const tagOptions = useMemo<FilterOption[]>(() => {
+    const names = (allTags ?? []).filter((tag) => tag !== INTERNAL_TAG);
+    state.tags.forEach((tag) => {
+      if (!names.includes(tag)) names.push(tag);
+    });
+    return names.sort((a, b) => a.localeCompare(b)).map((name) => ({ value: name, label: name }));
+  }, [allTags, state.tags]);
 
   const ownerOptions = useMemo<FilterOption[]>(() => {
     const options: FilterOption[] = [
@@ -169,12 +181,11 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <FilterPopover
-            label={i18n.FILTER_STATUS}
-            options={STATUS_OPTIONS}
-            selected={state.status}
-            onChange={(selected) => onChange({ status: selected as InvestigationStatus[] })}
-            data-test-subj="investigationsFilterStatus"
+          <StatusFilter
+            statuses={statuses}
+            categories={state.status}
+            keys={state.statusKeys}
+            onChange={({ categories, keys }) => onChange({ status: categories, statusKeys: keys })}
           />
           <FilterPopover
             label={i18n.FILTER_PRIORITY}
@@ -197,6 +208,18 @@ export const QueueFilters: React.FC<QueueFiltersProps> = ({
             selected={state.verdict}
             onChange={(selected) => onChange({ verdict: selected as Verdict[] })}
             data-test-subj="investigationsFilterVerdict"
+          />
+          <AssigneesFilter
+            selected={state.assignees}
+            onChange={(assignees) => onChange({ assignees })}
+          />
+          <FilterPopover
+            label={i18n.FILTER_TAGS}
+            options={tagOptions}
+            selected={state.tags}
+            onChange={(selected) => onChange({ tags: selected })}
+            searchable
+            data-test-subj="investigationsFilterTags"
           />
           <FilterPopover
             label={i18n.FILTER_OWNER}

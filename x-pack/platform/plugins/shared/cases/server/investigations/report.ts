@@ -68,7 +68,11 @@ export const buildReport = ({
   if (record.close_outcome) {
     ln.push(
       '',
-      `Closed as ${VERDICT_LABELS[record.close_outcome.verdict]} by ${record.close_outcome.closed_by.name}. Closing reason: ${record.close_outcome.reason}. Root cause: ${record.close_outcome.root_cause}.`
+      `Closed by ${record.close_outcome.closed_by.name}. Close reason: ${record.close_outcome.close_reason.replace(/_/g, ' ')}.${
+        record.close_outcome.human_verdict
+          ? ` Verdict: ${VERDICT_LABELS[record.close_outcome.human_verdict]}.`
+          : ''
+      }${record.close_outcome.summary ? ` Notes: ${record.close_outcome.summary}` : ''}`
     );
   }
   ln.push('');
@@ -106,8 +110,8 @@ export const buildReport = ({
   ln.push('', `## Procedure (${record.investigation_type})`, '');
   if (!tasks.length) ln.push('- No procedure applied.');
   for (const t of tasks) {
-    const box = t.status === 'done' ? '[x]' : t.status === 'skipped' ? '[n/a]' : '[ ]';
-    const by = t.task.completed_by ? ` (${t.task.completed_by.name}${t.task.note ? `: ${t.task.note}` : ''}${t.task.skip_reason ? `: ${t.task.skip_reason}` : ''})` : '';
+    const box = t.status === 'completed' ? '[x]' : t.status === 'cancelled' ? '[n/a]' : '[ ]';
+    const by = t.task.completed_by ? ` (${t.task.completed_by.name}${t.task.note ? `: ${t.task.note}` : ''}${t.task.cancel_reason ? `: ${t.task.cancel_reason}` : ''})` : '';
     ln.push(`- ${box} ${t.title}${t.task.required ? '' : ' (optional)'}${by}`);
   }
   const byType = Object.entries(counters.evidence_by_type)

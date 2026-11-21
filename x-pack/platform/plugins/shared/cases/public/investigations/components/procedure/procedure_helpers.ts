@@ -5,28 +5,38 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
-import { PROCEDURE_PHASES } from '../../../../common/investigations/types';
+import {
+  INVESTIGATION_LIMITS,
+  MAX_COMMENTS_PER_TASK,
+  MAX_TASKS_PER_CASE,
+} from '../../../../common/investigations/constants';
+import {
+  PROCEDURE_PHASES,
+  isTaskFinished as isStatusFinished,
+} from '../../../../common/investigations/types';
 import type {
   Actor,
   InvestigationItem,
-  InvestigationRecord,
   TaskItem,
   TaskOwnerType,
+  TaskPriority,
+  TaskStatus,
 } from '../../../../common/investigations/types';
-import { useInvestigationsServices } from '../../services';
 import * as i18n from './translations';
 
-export const MAX_TASKS = 400;
-export const MAX_REASON_LENGTH = 2048;
-export const MAX_NAME_LENGTH = 512;
+export const MAX_TASKS = MAX_TASKS_PER_CASE;
+export const MAX_TASK_COMMENTS = MAX_COMMENTS_PER_TASK;
+export const MAX_REASON_LENGTH = INVESTIGATION_LIMITS.maxShortTextLength;
+export const MAX_ASSIGNEES = 10;
 
 export const PHASES = PROCEDURE_PHASES;
 
-export type EffectiveTaskStatus = 'todo' | 'doing' | 'done' | 'skipped' | 'waiting' | 'blocked';
+/** What a person sees: the stored status, or waiting on another task / blocked by a claim. */
+export type EffectiveTaskStatus = TaskStatus | 'waiting' | 'blocked';
 export type TaskFilter = 'all' | 'mine' | 'open' | 'required';
 
 export const OWNER_TYPES: readonly TaskOwnerType[] = ['person', 'team', 'agent', 'automation'];
+export const TASK_PRIORITIES: readonly TaskPriority[] = ['low', 'medium', 'high', 'critical'];
 
 export const OWNER_TYPE_LABELS: Record<TaskOwnerType, string> = {
   person: i18n.OWNER_PERSON,
@@ -35,20 +45,58 @@ export const OWNER_TYPE_LABELS: Record<TaskOwnerType, string> = {
   automation: i18n.OWNER_AUTOMATION,
 };
 
-export const STATUS_LABELS: Record<EffectiveTaskStatus, string> = {
-  todo: i18n.STATUS_TODO,
-  doing: i18n.STATUS_DOING,
-  done: i18n.STATUS_DONE,
-  skipped: i18n.STATUS_SKIPPED,
-  waiting: i18n.STATUS_WAITING,
-  blocked: i18n.STATUS_BLOCKED,
+/**
+ * The icon of the drag handle. `icons.ts` has no handle icon yet, so it lives here until it is
+ * added there.
+ */
+
+export const isTaskFinished = (task: TaskItem): boolean => isStatusFinished(task.status);
+
+/** Unfinished and past its due date (the Cases rule). */
+export const isTaskOverdue = (task: TaskItem, now: number): boolean => {
+  const { due_date: dueDate } = task.task;
+  if (!dueDate || isTaskFinished(task)) {
+    return false;
+  }
+  const due = Date.parse(dueDate);
+  return !Number.isNaN(due) && due < now;
 };
 
-export const isTaskFinished = (task: TaskItem): boolean =>
-  task.status === 'done' || task.status === 'skipped';
+export const isSubtask = (task: TaskItem): boolean => Boolean(task.task.parent_task_id);
 
-export const isTaskUnassigned = (task: TaskItem): boolean =>
-  !task.task.owner.id && !task.task.owner.name;
+const bySortOrder = (a: TaskItem, b: TaskItem): number =>
+  (a.task.sort_order ?? 0) - (b.task.sort_order ?? 0) ||
+  a.ref.localeCompare(b.ref, undefined, { numeric: true });
+
+export interface TaskGroup {
+  root: TaskItem;
+  subtasks: TaskItem[];
+}
+
+/** Roots by `sort_order`, each with its subtasks by `sort_order` (as Cases orders tasks). */
+export const groupTasks = (tasks: readonly TaskItem[]): TaskGroup[] => {
+  const roots = tasks.filter((task) => !isSubtask(task)).sort(bySortOrder);
+  const rootIds = new Set(roots.map((root) => root.id));
+  const children = new Map<string, TaskItem[]>();
+  tasks.forEach((task) => {
+    const parentId = task.task.parent_task_id;
+    if (parentId) {
+      children.set(parentId, [...(children.get(parentId) ?? []), task]);
+    }
+  });
+  const groups = roots.map((root) => ({
+    root,
+    subtasks: (children.get(root.id) ?? []).sort(bySortOrder),
+  }));
+  // A subtask whose parent is gone is shown as a root so it stays reachable.
+  const orphans = tasks.filter(
+    (task) => isSubtask(task) && !rootIds.has(task.task.parent_task_id ?? '')
+  );
+  return [...groups, ...orphans.map((root) => ({ root, subtasks: [] }))];
+};
+
+export const sortTasks = (tasks: readonly TaskItem[]): TaskItem[] =>
+  groupTasks(tasks).flatMap(({ root, subtasks }) => [root, ...subtasks]);
 
 /** The status a person sees: waiting on another task, blocked by a claim, or the stored one. */
 export const getEffectiveStatus = (
@@ -73,73 +121,11 @@ export const getEffectiveStatus = (
       return 'blocked';
     }
   }
-  return task.status === 'doing' ? 'doing' : 'todo';
+  return task.status;
 };
 
-export const sortTasks = (tasks: readonly TaskItem[]): TaskItem[] =>
-  [...tasks].sort(
-    (a, b) =>
-      a.task.order - b.task.order || a.ref.localeCompare(b.ref, undefined, { numeric: true })
-  );
-
-export interface CurrentUser {
-  username: string;
-  fullName: string;
-}
-
-/** The signed-in user, once known. */
-export const useCurrentUser = (): CurrentUser | undefined => {
-  const { security } = useInvestigationsServices();
-  const [user, setUser] = useState<CurrentUser | undefined>();
-
-  useEffect(() => {
-    let isMounted = true;
-    security.authc
-      .getCurrentUser()
-      .then((current) => {
-        if (isMounted) {
-          setUser({ username: current.username, fullName: current.full_name ?? current.username });
-        }
-      })
-      .catch(() => undefined);
-    return () => {
-      isMounted = false;
-    };
-  }, [security]);
-
-  return user;
-};
-
-export const isOwnedBy = (task: TaskItem, user: CurrentUser | undefined): boolean => {
-  const { owner } = task.task;
-  if (!user || owner.type !== 'person') {
-    return false;
-  }
-  return owner.id === user.username || owner.name === user.fullName || owner.name === user.username;
-};
-
-export const personOwner = (user: CurrentUser): TaskItem['task']['owner'] => ({
-  type: 'person',
-  id: user.username,
-  name: user.fullName,
-});
-
-export const getAgentOwner = (record: InvestigationRecord): TaskItem['task']['owner'] | null =>
-  record.ai_enabled && record.agent_id
-    ? { type: 'agent', id: record.agent_id, name: record.agent_name ?? record.agent_id }
-    : null;
-
-export const AUTOMATION_OWNER: TaskItem['task']['owner'] = {
-  type: 'automation',
-  id: 'workflow',
-  name: 'Workflow',
-};
-
-export const UNASSIGNED_OWNER: TaskItem['task']['owner'] = {
-  type: 'person',
-  id: null,
-  name: null,
-};
+export const isAssignedTo = (task: TaskItem, profileUid: string | undefined): boolean =>
+  Boolean(profileUid) && task.task.assignees.includes(profileUid ?? '');
 
 export const getActorKindLabel = (actor: Actor): string =>
   actor.type === 'agent'
@@ -147,3 +133,15 @@ export const getActorKindLabel = (actor: Actor): string =>
     : actor.type === 'automation'
     ? i18n.OWNER_AUTOMATION.toLowerCase()
     : i18n.OWNER_PERSON.toLowerCase();
+
+/** An owner that still needs naming: a person with no name. */
+export const isOwnerUnnamed = (task: TaskItem): boolean =>
+  task.task.owner.type === 'person' && !task.task.owner.id && !task.task.owner.name;
+
+/** Whether a run of the task's workflow is going or failed. */
+export const getWorkflowRunState = (
+  task: TaskItem
+): 'none' | 'running' | 'failed' | 'succeeded' => {
+  const status = task.task.workflow_run?.status;
+  return status === 'running' || status === 'failed' || status === 'succeeded' ? status : 'none';
+};

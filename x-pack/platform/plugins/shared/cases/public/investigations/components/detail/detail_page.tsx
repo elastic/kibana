@@ -20,7 +20,7 @@ import { ICONS } from '../../icons';
 import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
 import { FROM_PARAM, SIDE_CHAT_VALUE, SIDE_PARAM } from '../conversation/side_chat_url';
-import type { ModalName } from '../modals/modal_props';
+import type { ModalName, ModalOptions } from '../modals/modal_props';
 import { ActivityTab } from '../tabs/activity_tab';
 import { ConversationTab } from '../tabs/conversation_tab';
 import { EvidenceTab } from '../tabs/evidence_tab';
@@ -103,7 +103,14 @@ export const DetailPage: React.FC = () => {
   const history = useHistory();
   const { search } = useLocation();
   const { data, isLoading, error, refetch } = useRecord(id);
-  const [openModal, setOpenModal] = useState<ModalName | null>(null);
+  const [openModalState, setOpenModalState] = useState<{
+    name: ModalName;
+    options?: ModalOptions;
+  } | null>(null);
+  const setOpenModal = useCallback(
+    (name: ModalName, options?: ModalOptions) => setOpenModalState({ name, options }),
+    []
+  );
   const [isSidePanelOpen, setIsSidePanelOpen] = useSidePanelOpen();
 
   const searchParams = useMemo(() => new URLSearchParams(search), [search]);
@@ -271,7 +278,12 @@ export const DetailPage: React.FC = () => {
           </div>
         ) : null}
       </div>
-      <ModalHost name={openModal} record={record} onClose={() => setOpenModal(null)} />
+      <ModalHost
+        name={openModalState?.name ?? null}
+        options={openModalState?.options}
+        record={record}
+        onClose={() => setOpenModalState(null)}
+      />
     </div>
   );
 };

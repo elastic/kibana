@@ -21,11 +21,11 @@ export interface AtAGlanceCardProps {
 
 /**
  * Messages in the record's discussion: the main agent conversation for AI records, otherwise the
- * comment counter (team discussion).
+ * team discussion (case comments).
  */
 export const useMessageCount = (record: InvestigationRecord): number => {
   const { count } = useConversationMessageCount(record);
-  return record.conversation_id ? count ?? 0 : record.counters.comments;
+  return record.conversation_id ? count ?? 0 : record.counters.discussion_comments ?? 0;
 };
 
 export const AtAGlanceCard: React.FC<AtAGlanceCardProps> = ({ record, onNavigateTab }) => {

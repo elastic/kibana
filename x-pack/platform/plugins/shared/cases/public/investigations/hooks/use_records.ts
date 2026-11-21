@@ -17,7 +17,6 @@ import type {
   UpdateRecordRequest,
 } from '../../../common/investigations/types';
 import {
-  applyProcedure,
   checkDuplicates,
   closeRecord,
   createRecord,
@@ -181,22 +180,6 @@ export const useMergeRecord = (recordId: string) => {
     },
     onError: (error) => showError(error, i18n.MERGE_RECORD_ERROR),
   });
-};
-
-export const useApplyProcedure = (recordId: string) => {
-  const { http } = useInvestigationsServices();
-  const queryClient = useQueryClient();
-  const { showError } = useInvestigationToasts();
-
-  return useMutation(
-    (body: { type: string; replace?: boolean }) => applyProcedure(http, recordId, body),
-    {
-      onSuccess: () => {
-        void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
-      },
-      onError: (error) => showError(error, i18n.APPLY_PROCEDURE_ERROR),
-    }
-  );
 };
 
 export const useCreateThread = (recordId: string) => {

@@ -6,7 +6,6 @@
  */
 
 export {
-  useApplyProcedure,
   useCloseRecord,
   useCreateRecord,
   useCreateThread,
@@ -31,12 +30,15 @@ export {
   useUploadFile,
 } from './use_items';
 export type { UpdateItemVariables } from './use_items';
+export { useAddComment, useComments, useDeleteComment, useUpdateComment } from './use_comments';
 export { useActivity, useCreateActivity, useLivePolling } from './use_activity';
 export {
   useCapabilities,
   useInvestigationTypes,
   useProcedureTemplates,
-  useUpdateProcedureTemplate,
+  useReloadStatuses,
+  useSaveStatuses,
+  useStatuses,
 } from './use_config';
 export { getHttpErrorMessage, getHttpErrorStatus } from './errors';
 export { useInvestigationToasts } from './use_investigation_toasts';

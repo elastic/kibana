@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -24,6 +25,7 @@ import { ICONS } from '../../icons';
 import { ActorAvatar, ActorBadge, RelativeTime, formatAbsoluteUtc } from '../shared';
 import type { TabProps } from '../tabs/tab_props';
 import { ACTOR_KIND_ICONS, formatClock, formatOffset } from './activity_helpers';
+import { formatChange, getActionIcon, getOriginLabel } from './entry_format';
 import { LinkChips } from './link_chips';
 import * as i18n from './translations';
 
@@ -241,8 +243,7 @@ export const SecurityEventRow: React.FC<SecurityEventRowProps> = ({
 };
 SecurityEventRow.displayName = 'SecurityEventRow';
 
-const formatChange = (value: unknown): string =>
-  typeof value === 'string' ? value : JSON.stringify(value, null, 2) ?? '';
+const isUrl = (value: string): boolean => /^https?:\/\/\S+$/.test(value);
 
 export interface ResponseEntryRowProps {
   entry: ActivityEntry;
@@ -267,6 +268,7 @@ export const ResponseEntryRow: React.FC<ResponseEntryRowProps> = ({
   const canExpand = hasChange || isLongDetails;
   const shownDetails =
     isLongDetails && !isExpanded ? `${details.slice(0, DETAILS_CLAMP_LENGTH)}...` : details;
+  const originLabel = getOriginLabel(entry.origin);
 
   return (
     <RowFrame
@@ -280,12 +282,39 @@ export const ResponseEntryRow: React.FC<ResponseEntryRowProps> = ({
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder color="subdued">
         <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
           <EuiFlexItem>
-            <EuiText size="s">
-              <strong data-test-subj="investigationTimelineTitle">{entry.message}</strong>
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  type={getActionIcon(entry.action)}
+                  size="s"
+                  color="subdued"
+                  aria-hidden="true"
+                  data-test-subj="investigationTimelineActionIcon"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong data-test-subj="investigationTimelineTitle">{entry.message}</strong>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {shownDetails ? (
               <EuiText size="s" color="subdued" data-test-subj="investigationTimelineDetails">
-                <p>{shownDetails}</p>
+                {isUrl(details) ? (
+                  <p>
+                    <EuiLink
+                      href={details}
+                      target="_blank"
+                      external
+                      aria-label={i18n.OPEN_EXTERNAL_TICKET}
+                      data-test-subj="investigationTimelineExternalLink"
+                    >
+                      {details}
+                    </EuiLink>
+                  </p>
+                ) : (
+                  <p>{shownDetails}</p>
+                )}
               </EuiText>
             ) : null}
           </EuiFlexItem>
@@ -322,7 +351,7 @@ export const ResponseEntryRow: React.FC<ResponseEntryRowProps> = ({
                   {i18n.BEFORE}
                 </EuiText>
                 <EuiCodeBlock paddingSize="s" fontSize="s" whiteSpace="pre-wrap" isCopyable={false}>
-                  {formatChange(entry.before)}
+                  {formatChange(entry.action, entry.before)}
                 </EuiCodeBlock>
               </EuiFlexItem>
             ) : null}
@@ -332,7 +361,7 @@ export const ResponseEntryRow: React.FC<ResponseEntryRowProps> = ({
                   {i18n.AFTER}
                 </EuiText>
                 <EuiCodeBlock paddingSize="s" fontSize="s" whiteSpace="pre-wrap" isCopyable={false}>
-                  {formatChange(entry.after)}
+                  {formatChange(entry.action, entry.after)}
                 </EuiCodeBlock>
               </EuiFlexItem>
             ) : null}
@@ -353,6 +382,13 @@ export const ResponseEntryRow: React.FC<ResponseEntryRowProps> = ({
           <EuiFlexItem grow={false}>
             <ActorBadge actor={entry.actor} />
           </EuiFlexItem>
+          {originLabel ? (
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="investigationTimelineOrigin">
+                {originLabel}
+              </EuiText>
+            </EuiFlexItem>
+          ) : null}
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued">
               <RelativeTime value={entry.ts} />

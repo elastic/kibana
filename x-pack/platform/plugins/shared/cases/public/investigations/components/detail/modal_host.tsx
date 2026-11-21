@@ -13,7 +13,8 @@ import { CloseModal } from '../modals/close_modal';
 import { DeterminationModal } from '../modals/determination_modal';
 import { HistoryModal } from '../modals/history_modal';
 import { MergeModal } from '../modals/merge_modal';
-import type { ModalName } from '../modals/modal_props';
+import type { ModalName, ModalOptions } from '../modals/modal_props';
+import { PauseModal } from '../modals/pause_modal';
 import * as modalI18n from '../modals/translations';
 import { ReportModal } from '../modals/report_modal';
 import { RestrictModal } from '../modals/restrict_modal';
@@ -25,6 +26,8 @@ const FOCUS_RETURN_DELAY_MS = 100;
 export interface ModalHostProps {
   /** The open modal, or null when none is open. */
   name: ModalName | null;
+  /** Input of the open modal, such as the status it moves to. */
+  options?: ModalOptions;
   record: InvestigationRecord;
   onClose: () => void;
 }
@@ -34,7 +37,7 @@ export interface ModalHostProps {
  * modal closes and focus has nowhere to go (the menu item that opened it is gone), focus returns
  * to the Take action button.
  */
-export const ModalHost: React.FC<ModalHostProps> = ({ name, record, onClose }) => {
+export const ModalHost: React.FC<ModalHostProps> = ({ name, options, record, onClose }) => {
   const { mutate: reopen, isLoading: isReopening } = useReopenRecord(record.id);
 
   const handleClose = useCallback(() => {
@@ -57,7 +60,9 @@ export const ModalHost: React.FC<ModalHostProps> = ({ name, record, onClose }) =
     case 'merge':
       return <MergeModal record={record} onClose={handleClose} />;
     case 'close':
-      return <CloseModal record={record} onClose={handleClose} />;
+      return <CloseModal record={record} onClose={handleClose} statusKey={options?.statusKey} />;
+    case 'pause':
+      return <PauseModal record={record} onClose={handleClose} statusKey={options?.statusKey} />;
     case 'restrict':
       return <RestrictModal record={record} onClose={handleClose} />;
     case 'changeType':

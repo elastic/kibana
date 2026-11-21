@@ -12,7 +12,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiMarkdownFormat,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { INDICATOR_TYPE_LABELS } from '../../../../../common/investigations/types';
 import type { EvidenceItem, EvidenceSnapshot } from '../../../../../common/investigations/types';
+import { MarkdownRenderer } from '../../../../components/markdown_editor';
 import { ICONS } from '../../../icons';
 import { formatAbsoluteUtc } from '../../shared/formatters';
 import { SeenElsewhereList } from '../seen_elsewhere';
@@ -362,7 +362,7 @@ export const DetailBody: React.FC<DetailBodyProps> = ({
       return (
         <div data-test-subj="investigationEvidenceDetail-note">
           <DetailSection title={i18n.DETAIL_NOTE}>
-            <EuiMarkdownFormat textSize="s">{snapshot.text}</EuiMarkdownFormat>
+            <MarkdownRenderer textSize="s">{snapshot.text}</MarkdownRenderer>
           </DetailSection>
         </div>
       );
@@ -414,7 +414,7 @@ export const DetailBody: React.FC<DetailBodyProps> = ({
             <EuiText size="xs" color="subdued">
               {snapshot.author}
             </EuiText>
-            <EuiMarkdownFormat textSize="s">{snapshot.message}</EuiMarkdownFormat>
+            <MarkdownRenderer textSize="s">{snapshot.message}</MarkdownRenderer>
           </DetailSection>
         </div>
       );
@@ -460,7 +460,7 @@ const NoSnapshot: React.FC<{
       ) : null}
       {item.text ? (
         <DetailSection title={i18n.DETAIL_NOTE}>
-          <EuiMarkdownFormat textSize="s">{item.text}</EuiMarkdownFormat>
+          <MarkdownRenderer textSize="s">{item.text}</MarkdownRenderer>
         </DetailSection>
       ) : null}
       {pairs.length > 0 ? (

@@ -7,7 +7,10 @@ import fs from 'node:fs';
 import { kbn, es, log, sleep } from '../client.mjs';
 import { cleanAlerts } from '../alerts.mjs';
 
-export const DATA = JSON.parse(fs.readFileSync(new URL('./prototype_data.json', import.meta.url), 'utf8'));
+// The prototype says "inconclusive"; the Cases verdict for it is "undetermined".
+export const DATA = JSON.parse(
+  fs.readFileSync(new URL('./prototype_data.json', import.meta.url), 'utf8').replace(/verdict at inconclusive/g, 'verdict at undetermined')
+);
 export const BASE = '/internal/cases/investigations';
 export const OWNER = 'securitySolution';
 export const AGENT_ID = 'cases-investigation-agent';
@@ -252,7 +255,8 @@ export const recordTemplateFields = async (ctx) => {
 export const createRecordApi = async (body) => (await kbn('POST', BASE, body)).json.record;
 export const getRecordApi = async (id) => (await kbn('GET', `${BASE}/${id}`)).json;
 export const patchRecord = async (id, body) => (await kbn('PATCH', `${BASE}/${id}`, body)).json.record;
-export const closeRecordApi = async (id, body) => (await kbn('POST', `${BASE}/${id}/_close`, body)).json.record;
+/** Closes a record. `auth` ("user:password") makes the closing note a case comment by that person. */
+export const closeRecordApi = async (id, body, auth) => (await kbn('POST', `${BASE}/${id}/_close`, body, auth ? { auth } : {})).json.record;
 export const postActivity = async (id, body) => (await kbn('POST', `${BASE}/${id}/activity`, body)).json.entry;
 export const bulkUpdateItems = async (id, items, actor) => {
   const out = [];
@@ -302,6 +306,24 @@ export const createOrdered = async (recordId, entries, opts = {}) => {
     out.push(...(await bulkCreate(recordId, run.entries.map((e) => e.input), run.actor, opts)));
   }
   return out;
+};
+
+/* ------------------------------------------------------------------ */
+/* Case comments and assignees                                         */
+/* ------------------------------------------------------------------ */
+
+/** Posts a case comment as the seeded person (basic auth), so the comment's author is that user. `replyTo` quotes a parent. */
+export const postCaseComment = async (recordId, code, content, replyTo) => {
+  const body = { content, ...(replyTo ? { reply_to: replyTo } : {}) };
+  const res = await kbn('POST', `${BASE}/${recordId}/comments`, body, { auth: userAuth(code) });
+  return res.json.comment;
+};
+
+/** Sets the case assignees (person codes). A person owner stays assigned on the server. */
+export const assigneesStep = async (ctx, codes, { actor, tsMs }) => {
+  const assignees = await profileUids(codes);
+  await patchRecord(ctx.recordId, { assignees, actor, ...(tsMs ? { ts: new Date(tsMs).toISOString() } : {}) });
+  return assignees.length;
 };
 
 /* ------------------------------------------------------------------ */
@@ -421,10 +443,12 @@ const SOURCE_KIND = {
   conversation: 'conversation',
 };
 const LINK_KIND = { own: 'ownership', net: 'network', auth: 'authentication', lat: 'lateral_movement', exec: 'execution' };
-const CLASSIFICATION = { Inconclusive: 'inconclusive', Benign: 'benign', 'True positive': 'true_positive' };
-const VERDICT_ENUM = { Benign: 'benign', 'True positive': 'true_positive', Inconclusive: 'inconclusive' };
-export const classificationOf = (cls) => CLASSIFICATION[cls] ?? 'inconclusive';
-export const verdictEnumOf = (v) => VERDICT_ENUM[v] ?? 'inconclusive';
+// Verdict values are the Cases ones: true_positive, false_positive, benign_positive, suspicious, undetermined.
+const CLASSIFICATION = { Inconclusive: 'undetermined', Benign: 'benign_positive', 'True positive': 'true_positive' };
+const VERDICT_ENUM = { Benign: 'benign_positive', 'True positive': 'true_positive', Inconclusive: 'undetermined' };
+/** Verdict value for a prototype class; a "False positive" label wins over the generic "Benign" class. */
+export const classificationOf = (cls, label = '') => (/false positive/i.test(label) ? 'false_positive' : (CLASSIFICATION[cls] ?? 'undetermined'));
+export const verdictEnumOf = (v) => VERDICT_ENUM[v] ?? 'undetermined';
 
 const mimeOf = (name) => {
   const ext = String(name).split('.').pop()?.toLowerCase();
@@ -467,7 +491,7 @@ export const verdictOf = (ctx) => {
   return {
     label: v.v,
     confidence: v.pct,
-    classification: classificationOf(v.cls),
+    classification: classificationOf(v.cls, v.v),
     alternatives: v.alts.map((x) => ({ badge: x.badge, headline: x.h, text: x.t, evidence: x.ev })),
     argument: argumentOf(ctx, ctx.d.arg.V),
   };
@@ -662,7 +686,6 @@ export const createRecordStep = async (ctx, { createdProto, creator, description
     summary: ctx.clock.text(sc.what),
     ...templateFields,
     priority: sc.priority.l.toLowerCase(),
-    severity: sc.priority.l.toLowerCase(),
     tags: ['uipoc-seed', `uipoc-seed-${ctx.id}`, ...(sc.tag ? [sc.tag] : []), ...tagsExtra],
     origin: { type: sc.originAgent ? 'agent' : 'user', label: sc.origin, actor: creator },
     ai_enabled: sc.ai,
@@ -872,15 +895,39 @@ const ownerOf = (t) => {
   }
 };
 
-export const tasksStep = async (ctx, { actor, createdAt }) => {
+// Task status words are the Cases task list ones.
+const TASK_STATUS = { todo: 'open', doing: 'in_progress', done: 'completed', skipped: 'cancelled' };
+const PHASE_PRIORITY = { Triage: 'medium', Investigate: 'high', Contain: 'critical', 'Eradicate and recover': 'high', 'Close out': 'low' };
+const LOWER_PRIORITY = { critical: 'high', high: 'medium', medium: 'low', low: 'low' };
+const taskPriorityOf = (t) => {
+  const base = PHASE_PRIORITY[t.phase] ?? 'medium';
+  return t.required ? base : LOWER_PRIORITY[base];
+};
+
+/** Profile uids for person codes (BW, PK ...), in order, without duplicates. */
+export const profileUids = async (codes) => [...new Set(await Promise.all(codes.map(async (code) => (await resolveProfile(WHO_MAP[code].id)).uid)))];
+
+/**
+ * Tasks as task-list items. `extras[protoId]`: { due: ms from now (negative is overdue), assignees: [person codes],
+ * subtasks: [{ title, description, priority, assignees, due }] }. Person-owned tasks are assigned to their owner unless
+ * `assignees` says otherwise; open and in-progress tasks may carry a due date.
+ */
+export const tasksStep = async (ctx, { actor, createdAt, extras = {} }) => {
   const tasks = ctx.d.state.tasks;
-  const entries = tasks.map((t, i) => {
+  const dueIso = (offset) => (offset === undefined ? null : new Date(ctx.clock.realNow + offset).toISOString());
+  const entries = [];
+  for (const t of tasks) {
+    const status = TASK_STATUS[t.status] ?? 'open';
+    const extra = extras[t.id] ?? {};
+    const assigneeCodes = extra.assignees ?? (t.ownerT === 'person' && t.owner && isUserCode(t.owner) ? [t.owner] : []);
     const task = {
       phase: t.phase,
       description: t.desc,
       required: !!t.required,
       owner: ownerOf(t),
-      order: i + 1,
+      priority: taskPriorityOf(t),
+      assignees: await profileUids(assigneeCodes),
+      due_date: status === 'open' || status === 'in_progress' ? dueIso(extra.due) : null,
     };
     if (t.auto) {
       task.auto =
@@ -888,23 +935,51 @@ export const tasksStep = async (ctx, { actor, createdAt }) => {
           ? { type: 'claim', claim_id: (t.claim && ctx.claimId[t.claim]) || null, question: t.auto.q }
           : { type: 'action', category: t.auto.cat };
     }
-    if (t.status === 'done' || t.status === 'skipped') {
+    if (status === 'completed' || status === 'cancelled') {
       task.completed_by = actorOf(t.doneBy, ctx.obo);
       task.completed_at = ctx.clock.iso(t.doneAt);
-      if (t.status === 'skipped') task.skip_reason = ctx.clock.text(t.note);
+      if (status === 'cancelled') task.cancel_reason = ctx.clock.text(t.note);
       else task.note = t.note ? ctx.clock.text(t.note) : null;
-    } else if (t.note) {
-      task.note = ctx.clock.text(t.note);
+    } else {
+      if (status === 'in_progress') task.started_at = new Date(ctx.clock.realNow - 45 * MIN).toISOString();
+      if (t.note) task.note = ctx.clock.text(t.note);
     }
-    return { actor, input: { kind: 'task', title: t.title, status: t.status, task, created_at: createdAt }, protoId: t.id };
-  });
+    entries.push({ actor, input: { kind: 'task', title: t.title, status, task, created_at: createdAt }, protoId: t.id });
+  }
   const created = await createOrdered(ctx.recordId, entries);
   created.forEach((item, i) => {
     ctx.taskId[entries[i].protoId] = item.id;
   });
   const deps = tasks.filter((t) => t.after && ctx.taskId[t.after]).map((t) => ({ id: ctx.taskId[t.id], patch: { task: { depends_on: ctx.taskId[t.after] } } }));
   if (deps.length) await bulkUpdateItems(ctx.recordId, deps, actor);
-  return created.length;
+
+  // Subtasks (one level) once their parents exist.
+  const subEntries = [];
+  for (const t of tasks) {
+    for (const sub of extras[t.id]?.subtasks ?? []) {
+      subEntries.push({
+        actor,
+        input: {
+          kind: 'task',
+          title: sub.title,
+          status: 'open',
+          task: {
+            phase: t.phase,
+            description: sub.description ?? null,
+            required: false,
+            owner: { type: 'person', id: null, name: null },
+            priority: sub.priority ?? 'medium',
+            assignees: await profileUids(sub.assignees ?? []),
+            due_date: dueIso(sub.due),
+            parent_task_id: ctx.taskId[t.id],
+          },
+          created_at: createdAt,
+        },
+      });
+    }
+  }
+  if (subEntries.length) await createOrdered(ctx.recordId, subEntries);
+  return created.length + subEntries.length;
 };
 
 /**
@@ -1141,12 +1216,25 @@ export const conversationsStep = async (ctx, { prompts = {}, prompter, prompterO
 /* Related investigations (SIM / SIMD)                                 */
 /* ------------------------------------------------------------------ */
 
-const outcomeOf = (text) => {
+/**
+ * How each related investigation closed: Cases close reasons (true_positive, false_positive, benign_positive), and one
+ * custom reason. The prototype text only says "benign" or "true positive", so the scanner-noise record is a false positive.
+ */
+const RELATED_CLOSE = {
+  'INV-198': { close_reason: 'benign_positive' },
+  'INV-203': { close_reason: 'false_positive' },
+  'INV-190': { close_reason: 'benign_positive' },
+  'INV-171': { close_reason: 'true_positive' },
+  'INV-1102': { close_reason: 'Resolved and remediated', human_verdict: 'true_positive' },
+  'INV-0955': { close_reason: 'benign_positive' },
+};
+
+const outcomeOf = (id, text) => {
   const m = String(text).match(/^Closed as ([a-z ]+)\. Reason: ([^.]+)\. Root cause: ([^.]+)\./i);
   if (!m) return null;
-  const verdict = { benign: 'benign', 'true positive': 'true_positive', inconclusive: 'inconclusive' }[m[1].toLowerCase()] ?? 'inconclusive';
-  const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-  return { verdict, reason: cap(m[2]), root_cause: cap(m[3]) };
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  const fallback = m[1].toLowerCase() === 'true positive' ? { close_reason: 'true_positive' } : { close_reason: 'benign_positive' };
+  return { ...(RELATED_CLOSE[id] ?? fallback), root_cause: cap(m[3]) };
 };
 
 export const relatedStep = async (ctx) => {
@@ -1185,20 +1273,24 @@ export const relatedStep = async (ctx) => {
       created_at: ctx.clock.iso(createdMs + MIN),
     }));
     await bulkCreate(rec.id, entities, creator);
-    const closed = /^Closed/.test(row.st) ? outcomeOf(detail.outcome) : null;
+    const closed = /^Closed/.test(row.st) ? outcomeOf(row.id, detail.outcome) : null;
     if (closed) {
-      await closeRecordApi(rec.id, {
-        extended_fields: await buildExtendedFields(typeName, {
-          ...CLOSE_VALUES[typeName],
-          root_cause_notes: `${closed.root_cause}. ${ctx.clock.text(detail.summary)}`,
-        }),
-        verdict: closed.verdict,
-        reason: closed.reason,
-        root_cause: closed.root_cause,
-        summary: ctx.clock.text(detail.summary),
-        actor: creator,
-        closed_at: ctx.clock.iso(parseLabel(detail.updated, ctx.sc.now)),
-      });
+      const { root_cause: rootCause, ...outcome } = closed;
+      await closeRecordApi(
+        rec.id,
+        {
+          // The close-required fields (root cause notes and the type's own) are filled on the close itself.
+          extended_fields: await buildExtendedFields(typeName, {
+            ...CLOSE_VALUES[typeName],
+            root_cause_notes: `${rootCause}. ${ctx.clock.text(detail.summary)}`,
+          }),
+          ...outcome,
+          summary: ctx.clock.text(detail.summary),
+          actor: creator,
+          closed_at: ctx.clock.iso(parseLabel(detail.updated, ctx.sc.now)),
+        },
+        isUserCode(detail.who[0]) ? userAuth(detail.who[0]) : undefined
+      );
     } else {
       await patchRecord(rec.id, { owner: creator, actor: creator, ts: ctx.clock.iso(createdMs + 2 * MIN) });
     }
@@ -1250,7 +1342,11 @@ export const runStandard = async (ctx, cfg, { ensureAlerts }) => {
   const scopeActor = actorOf(cfg.scopeActor, ctx.obo);
   await scopeStep(ctx, { actor: scopeActor, createdAt: ctx.clock.iso(cfg.scopeCreatedProto), linkEntityEvidence: cfg.linkEntityEvidence ?? true });
   await claimsStep(ctx);
-  await tasksStep(ctx, { actor: actorOf(cfg.taskActorCode ?? cfg.scopeActor, ctx.obo), createdAt: ctx.clock.iso(cfg.taskCreatedProto) });
+  await tasksStep(ctx, {
+    actor: actorOf(cfg.taskActorCode ?? cfg.scopeActor, ctx.obo),
+    createdAt: ctx.clock.iso(cfg.taskCreatedProto),
+    extras: cfg.taskExtras ?? {},
+  });
   if (cfg.proposals) await proposalsStep(ctx, cfg.proposals);
   await timelineStep(ctx, { actor: actorOf(cfg.timelineActor, ctx.obo), createdAt: ctx.clock.iso(cfg.timelineCreatedProto) });
   if (cfg.recordComments) await cfg.recordComments(ctx);
@@ -1260,6 +1356,7 @@ export const runStandard = async (ctx, cfg, { ensureAlerts }) => {
   const patches = cfg.patches ? cfg.patches(ctx) : [];
   patches.sort((a, b) => a.tsMs - b.tsMs);
   for (const p of patches) await patchRecord(ctx.recordId, { ...p.body, ts: new Date(p.tsMs).toISOString() });
+  if (cfg.assignees) await assigneesStep(ctx, cfg.assignees.codes, { actor: actorOf(cfg.assignees.actor, ctx.obo), tsMs: cfg.assignees.tsMs });
 
   let conv = null;
   if (cfg.conversations && ctx.convId) {
@@ -1279,6 +1376,8 @@ export const runStandard = async (ctx, cfg, { ensureAlerts }) => {
   else if (cfg.finalTouch) {
     await patchRecord(ctx.recordId, { priority_note: ctx.clock.text(sc.priority.note), actor: cfg.finalTouch.actor, ts: new Date(cfg.finalTouch.tsMs).toISOString() });
   }
+  // Last: a status change that must come after everything else (scenario C pauses here).
+  if (cfg.afterAll) await cfg.afterAll(ctx);
   return { related, conv, ms: Date.now() - t0, alerts: descs.length };
 };
 
@@ -1327,6 +1426,8 @@ export const cleanScenario = async (id) => {
 /* Summary                                                             */
 /* ------------------------------------------------------------------ */
 
+const countCaseComments = async (recordId) => (await kbn('GET', `${BASE}/${recordId}/comments?per_page=1`)).json.total ?? '';
+
 export const summarize = async (ctx, extra = {}) => {
   const { record } = await getRecordApi(ctx.recordId);
   const c = record.counters;
@@ -1334,18 +1435,21 @@ export const summarize = async (ctx, extra = {}) => {
     scenario: ctx.id,
     id: record.id,
     display_id: record.display_id,
-    status: record.status,
+    status: record.status_key && record.status_key !== record.status ? `${record.status} (${record.status_key})` : record.status,
+    priority: record.priority,
     owner: record.owner?.name ?? null,
+    assignees: (record.assignees ?? []).length,
     evidence: c.evidence,
     alerts: c.alerts,
     indicators: c.indicators,
     claims: c.claims,
-    tasks: `${c.tasks_done}/${c.tasks}`,
+    tasks: `${c.tasks_done}/${c.tasks}${c.tasks_overdue ? ` (${c.tasks_overdue} overdue)` : ''}`,
     proposals: c.proposals,
     entities: c.entities,
     links: c.links,
     timeline: c.timeline_events,
     comments: c.comments,
+    case_comments: await countCaseComments(ctx.recordId),
     activity: c.activity,
     threads: record.threads.length,
     url: `${KIBANA_PUBLIC_URL}/app/investigations/${record.id}`,

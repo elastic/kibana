@@ -23,6 +23,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getDefaultClosingReasonLabel } from '@kbn/response-ops-detections-close-reason';
 import { VERDICT_LABELS } from '../../../../common/investigations/types';
 import type { RelatedRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
@@ -118,11 +119,16 @@ export const RelatedFlyout: React.FC<RelatedFlyoutProps> = ({
               size="s"
               color="success"
               iconType={ICONS.check}
-              title={i18n.FLYOUT_OUTCOME_TEXT(
-                VERDICT_LABELS[record.close_outcome.verdict],
-                record.close_outcome.reason,
-                record.close_outcome.root_cause
-              )}
+              title={
+                record.close_outcome.human_verdict
+                  ? i18n.FLYOUT_OUTCOME_TEXT(
+                      VERDICT_LABELS[record.close_outcome.human_verdict],
+                      getDefaultClosingReasonLabel(record.close_outcome.close_reason)
+                    )
+                  : i18n.FLYOUT_OUTCOME_TEXT_NO_VERDICT(
+                      getDefaultClosingReasonLabel(record.close_outcome.close_reason)
+                    )
+              }
             />
           </>
         ) : null}

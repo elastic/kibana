@@ -7,6 +7,7 @@ import {
   actorOf,
   verdictOf,
   closeRecordApi,
+  userAuth,
   buildExtendedFields,
   CLOSE_VALUES,
   verdictEnumOf,
@@ -111,20 +112,26 @@ export const run = async () => {
       skipLog: (l) => /^Closed the (investigation|\d+ alerts?)/.test(l.t) || l === analystLog || l === concludeLog,
       skipHistory: (h) => h === finalClosing,
       conversations: { prompts: PROMPTS, prompter: 'BW', mainActor: 'BW' },
+      // The two analysts who worked it, assigned before the close.
+      assignees: { codes: ['BW', 'DR'], actor: 'BW', tsMs: ctx.clock.ms(t(3, 0, 0)) },
       close: async (c) => {
-        await closeRecordApi(c.recordId, {
-          // Close-required fields are filled before the case closes.
-          extended_fields: await buildExtendedFields(st.procType, {
-            ...CLOSE_VALUES[st.procType],
-            root_cause_notes: `${closed.cause}. ${c.clock.text(closed.summary)}`,
-          }),
-          verdict: verdictEnumOf(closed.verdict),
-          reason: closed.reason,
-          root_cause: closed.cause,
-          summary: c.clock.text(closed.summary),
-          actor: bw,
-          closed_at: new Date(realNow - 182 * DAY).toISOString(),
-        });
+        // Closed as Braxton, so the closing note is his case comment.
+        await closeRecordApi(
+          c.recordId,
+          {
+            // Close-required fields are passed on the close: the template's own plus the root cause notes.
+            extended_fields: await buildExtendedFields(st.procType, {
+              ...CLOSE_VALUES[st.procType],
+              root_cause_notes: `${closed.cause}. ${c.clock.text(closed.summary)}`,
+            }),
+            // The Cases reason sets the human verdict; the prototype's "Authorized activity" is the summary's story.
+            close_reason: 'benign_positive',
+            summary: c.clock.text(closed.summary),
+            actor: bw,
+            closed_at: new Date(realNow - 182 * DAY).toISOString(),
+          },
+          userAuth('BW')
+        );
       },
     },
     { ensureAlerts }

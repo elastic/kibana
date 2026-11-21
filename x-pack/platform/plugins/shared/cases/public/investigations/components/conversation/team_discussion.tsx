@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { CommentItem, InvestigationRecord } from '../../../../common/investigations/types';
+import type { InvestigationRecord, RecordComment } from '../../../../common/investigations/types';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { ICONS } from '../../icons';
+import { useCurrentActor } from '../proposals/use_current_actor';
 import { EmptyState, ErrorState, LoadingState } from '../shared';
 import { ClaimFromMessageModal } from './claim_from_message_modal';
+import { appendQuote } from './quote';
 import { TeamComposer } from './team_composer';
+import type { TeamComposerHandle } from './team_composer';
 import { TeamMessage } from './team_message';
 import { usePinnedClaims } from './use_claim_sources';
 import type { ClaimSource } from './use_claim_sources';
@@ -25,33 +29,65 @@ export interface TeamDiscussionProps {
   compact?: boolean;
 }
 
+const getAuthorName = (comment: RecordComment): string =>
+  comment.created_by.full_name || comment.created_by.username || i18n.UNKNOWN_AUTHOR;
+
 /**
- * The discussion of a record without an agent: record-level comments with replies grouped under
- * their message, @mentions of people, and pinning a message as a claim.
+ * The discussion of a record without an agent: the case's comments in a flat list, newest at the
+ * bottom, with reply, quote, edit, delete, @mentions and pinning a comment as a claim.
  */
 export const TeamDiscussion: React.FC<TeamDiscussionProps> = ({ record, compact = false }) => {
   const { euiTheme } = useEuiTheme();
-  const { threads, messageCount, total, isLoading, error, refetch } = useTeamDiscussion(record);
+  const { comments, total, hasOlder, isFetchingOlder, fetchOlder, isLoading, error, refetch } =
+    useTeamDiscussion(record);
   const pinnedClaims = usePinnedClaims(record);
+  const currentActor = useCurrentActor();
   const [claimSource, setClaimSource] = useState<ClaimSource | null>(null);
+  const [draft, setDraft] = useState('');
+  const [replyTo, setReplyTo] = useState<RecordComment | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<TeamComposerHandle | null>(null);
+  const newestId = comments.length > 0 ? comments[comments.length - 1].id : null;
 
+  const uids = useMemo(
+    () => [
+      ...new Set(
+        comments.flatMap(({ created_by: author }) =>
+          author.profile_uid ? [author.profile_uid] : []
+        )
+      ),
+    ],
+    [comments]
+  );
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids });
+
+  // Scroll to the newest comment when the discussion opens and when a new one arrives.
   useEffect(() => {
     const list = listRef.current;
     if (list) {
       list.scrollTop = list.scrollHeight;
     }
-  }, [messageCount]);
+  }, [newestId]);
 
-  const pin = (comment: CommentItem) =>
+  const pin = (comment: RecordComment) =>
     setClaimSource({
       conversationId: record.id,
       messageId: comment.id,
-      label: i18n.MESSAGE_BY_LABEL(comment.created_by.name),
-      authorName: comment.created_by.name,
+      label: i18n.MESSAGE_BY_LABEL(getAuthorName(comment)),
+      authorName: getAuthorName(comment),
       ts: comment.created_at,
-      text: comment.text ?? '',
+      text: comment.content,
     });
+
+  const reply = (comment: RecordComment) => {
+    setReplyTo(comment);
+    composerRef.current?.focus();
+  };
+
+  const quote = (comment: RecordComment) => {
+    setDraft((current) => appendQuote(current, comment.content));
+    composerRef.current?.focus();
+  };
 
   const renderList = () => {
     if (isLoading) {
@@ -60,7 +96,7 @@ export const TeamDiscussion: React.FC<TeamDiscussionProps> = ({ record, compact 
     if (error) {
       return <ErrorState title={i18n.TEAM_DISCUSSION_ERROR} error={error} onRetry={refetch} />;
     }
-    if (threads.length === 0) {
+    if (comments.length === 0) {
       return (
         <EmptyState
           iconType={ICONS.conversation}
@@ -72,21 +108,35 @@ export const TeamDiscussion: React.FC<TeamDiscussionProps> = ({ record, compact 
     }
     return (
       <>
-        {threads.map((thread) => (
+        {hasOlder ? (
+          <EuiButtonEmpty
+            size="s"
+            iconType={ICONS.chevronUp}
+            isLoading={isFetchingOlder}
+            onClick={fetchOlder}
+            data-test-subj="investigationTeamLoadEarlier"
+          >
+            {i18n.LOAD_EARLIER(Math.max(total - comments.length, 0))}
+          </EuiButtonEmpty>
+        ) : null}
+        {comments.map((comment) => (
           <TeamMessage
-            key={thread.message.id}
+            key={comment.id}
             record={record}
-            thread={thread}
-            pinnedClaims={pinnedClaims}
+            comment={comment}
+            userProfiles={userProfiles}
+            isOwn={
+              currentActor !== null &&
+              Boolean(comment.created_by.username) &&
+              comment.created_by.username === currentActor.id
+            }
+            pinned={pinnedClaims.get(comment.id)}
             onPin={pin}
+            onReply={reply}
+            onQuote={quote}
             compact={compact}
           />
         ))}
-        {total > messageCount ? (
-          <EuiText size="xs" color="subdued">
-            <p>{i18n.SHOWING_LATEST(messageCount, total)}</p>
-          </EuiText>
-        ) : null}
       </>
     );
   };
@@ -119,7 +169,15 @@ export const TeamDiscussion: React.FC<TeamDiscussionProps> = ({ record, compact 
           flex: 0 0 auto;
         `}
       >
-        <TeamComposer record={record} />
+        <TeamComposer
+          ref={composerRef}
+          record={record}
+          draft={draft}
+          onDraftChange={setDraft}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
+          onSent={() => setReplyTo(null)}
+        />
       </div>
       {claimSource ? (
         <ClaimFromMessageModal

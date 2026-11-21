@@ -1,6 +1,6 @@
 // Scenario A: shift start, the Triage worker concluded false positive on 40 grouped port scan alerts (INV-226).
 import { ensureAlerts } from '../alerts.mjs';
-import { newCtx, runStandard, actorOf, verdictOf, summarize } from './common.mjs';
+import { newCtx, runStandard, actorOf, verdictOf, summarize, DAY } from './common.mjs';
 
 export const id = 'A';
 
@@ -52,6 +52,9 @@ export const run = async () => {
       scopeCreatedProto: t(2, 5, 10),
       taskActorCode: 'TW',
       taskCreatedProto: t(2, 3, 10),
+      // The last required task (close out) is open and due tomorrow; the optional scanner-log task has no date.
+      taskExtras: { t5: { due: DAY, assignees: ['PK'] } },
+      assignees: { codes: ['PK'], actor: 'PK' },
       proposals: { actorCode: 'TW', meta: { default: { createdProto: t(7, 45, 0) } } },
       timelineActor: 'TW',
       timelineCreatedProto: t(2, 5, 0),

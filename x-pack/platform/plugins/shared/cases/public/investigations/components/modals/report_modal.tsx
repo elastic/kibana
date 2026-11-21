@@ -13,7 +13,6 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiMarkdownFormat,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -37,6 +36,7 @@ import { useInvestigationsServices } from '../../services';
 import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
 import type { InvestigationModalProps } from './modal_props';
+import { MarkdownRenderer } from '../../../components/markdown_editor';
 import * as i18n from './translations';
 
 type ReportView = 'preview' | 'raw';
@@ -143,7 +143,7 @@ export const ReportModal: React.FC<InvestigationModalProps> = ({ record, onClose
             `}
             data-test-subj="investigationReportPreview"
           >
-            <EuiMarkdownFormat textSize="s">{data.markdown}</EuiMarkdownFormat>
+            <MarkdownRenderer textSize="s">{data.markdown}</MarkdownRenderer>
           </EuiPanel>
         ) : (
           <EuiCodeBlock

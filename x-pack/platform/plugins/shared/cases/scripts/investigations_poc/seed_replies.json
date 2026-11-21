@@ -39,7 +39,7 @@
     "reply": "An emergency change was approved at 01:52. I cannot confirm the login belongs to it without the DBA."
   },
   "What verdict do you hold until someone reviews the session content?": {
-    "reply": "I will keep the verdict at inconclusive, 55%, until someone reviews the session content."
+    "reply": "I will keep the verdict at undetermined, 55%, until someone reviews the session content."
   },
   "On spray sources: Add the other 24 to the block.": {
     "reply": "Noted. I will update the claim if this changes anything."

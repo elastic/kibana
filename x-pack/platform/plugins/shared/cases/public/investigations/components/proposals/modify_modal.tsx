@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiMarkdownFormat,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -28,6 +27,7 @@ import {
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { MarkdownRenderer } from '../../../components/markdown_editor';
 import type { InvestigationRecord, ProposalItem } from '../../../../common/investigations/types';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
 import { getHttpErrorMessage } from '../../hooks';
@@ -296,9 +296,9 @@ export const ModifyModal: React.FC<ModifyModalProps> = ({
                 </EuiFlexGroup>
               ) : null}
               {reply.status === 'replied' ? (
-                <EuiMarkdownFormat textSize="s">
+                <MarkdownRenderer textSize="s">
                   {reply.message || i18n.AGENT_NO_REPLY}
-                </EuiMarkdownFormat>
+                </MarkdownRenderer>
               ) : null}
               {reply.status === 'failed' ? (
                 <EuiCallOut

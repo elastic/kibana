@@ -108,7 +108,6 @@ const buildRecordBody = (rand, index) => {
     description: `Synthetic load-test investigation ${index} of type ${type}.`,
     template_id: TEMPLATE_IDS.get(type),
     priority,
-    severity: priority,
     tags: [LOAD_TAG],
     extended_fields: {
       business_unit_as_keyword: unit,
@@ -207,12 +206,13 @@ const buildItem = (rand, recordIndex, j, usedValues) => {
     return {
       kind: 'task',
       title: `Task ${j}: ${pick(rand, ['collect logs', 'isolate host', 'reset credentials', 'review mail trace'])}`,
-      status: 'todo',
+      status: 'open',
       task: {
         phase: pick(rand, PHASES),
         required: false,
         owner: { type: 'person', id: null },
-        order: j,
+        priority: pick(rand, PRIORITIES),
+        assignees: [],
       },
     };
   }

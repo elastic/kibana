@@ -70,6 +70,11 @@ export const INVESTIGATION_LIMITS = {
   maxDeepPageFrom: MAX_DOCS_PER_PAGE,
 } as const;
 
+/** Task-list limits (same names and values as Cases task lists, which are not on main yet). */
+export const MAX_TASKS_PER_CASE = 100;
+export const MAX_COMMENTS_PER_TASK = 100;
+export const TASK_SORT_ORDER_GAP = 1000;
+
 /** Display prefixes for item `ref` values (E12, C3, P1, T4, N2, L5, S7). */
 export const ITEM_REF_PREFIX = {
   evidence: 'E',

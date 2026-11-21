@@ -10,58 +10,78 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonGroup,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiProgress,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import type { DropResult } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { INVESTIGATION_AGENT_ID } from '../../../../common/investigations/types';
-import type { ItemPatch, TaskItem, TaskOwnerType } from '../../../../common/investigations/types';
+import type {
+  ItemPatch,
+  TaskItem,
+  TaskPriority as TaskPriorityValue,
+  ProcedurePhase,
+} from '../../../../common/investigations/types';
+import { useCasesContext } from '../../../components/cases_context/use_cases_context';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import {
+  useBulkDeleteItems,
   useInvestigationToasts,
-  useInvestigationTypes,
   useProcedureTemplates,
   useUpdateItem,
 } from '../../hooks';
+import { useReorderTasks, useRunTaskWorkflow, useWorkflowList } from '../../hooks/use_tasks';
 import { investigationKeys } from '../../api/query_keys';
 import { ICONS } from '../../icons';
 import { useInvestigationsServices } from '../../services';
 import { converse } from '../conversation/conversation_api';
-import { EmptyState, ErrorState, LoadingState } from '../shared';
+import { ConfirmModal, EmptyState, ErrorState, LoadingState, useNow } from '../shared';
 import { isTaskItem, useAllItems } from '../scope/use_all_items';
 import { useItemsByIds } from '../scope/use_items_by_ids';
 import type { TabProps } from '../tabs/tab_props';
 import { ApplyProcedureModal } from './apply_procedure_modal';
+import { CancelTaskModal } from './cancel_task_modal';
 import {
   MAX_TASKS,
   OWNER_TYPES,
   OWNER_TYPE_LABELS,
   PHASES,
   getEffectiveStatus,
-  isOwnedBy,
+  groupTasks,
+  isAssignedTo,
   isTaskFinished,
-  isTaskUnassigned,
-  personOwner,
-  sortTasks,
-  useCurrentUser,
+  isTaskOverdue,
 } from './procedure_helpers';
-import type { TaskFilter } from './procedure_helpers';
-import { SkipModal } from './skip_modal';
+import type { TaskFilter, TaskGroup } from './procedure_helpers';
+import { TaskFormModal } from './task_form_modal';
 import { TaskRow } from './task_row';
+import type { TaskRowHandlers } from './task_row';
 import { TemplateEditor } from './template_editor';
 import * as i18n from './translations';
 
-type Owner = TaskItem['task']['owner'];
-
 const HIGHLIGHT_MS = 3500;
+const RUNNING_REFRESH_MS = 4000;
+
+interface FormTarget {
+  parent?: TaskItem;
+  phase?: ProcedurePhase;
+}
 
 export const ProcedurePanel: React.FC<TabProps> = ({
   record,
@@ -75,22 +95,31 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const { showSuccess, showError } = useInvestigationToasts();
   const { http } = useInvestigationsServices();
   const queryClient = useQueryClient();
-  const currentUser = useCurrentUser();
+  const { permissions } = useCasesContext();
+  const now = useNow();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const tasksQuery = useAllItems(recordId, 'task', isTaskItem, MAX_TASKS);
   const templatesQuery = useProcedureTemplates();
-  const typesQuery = useInvestigationTypes();
   const updateItem = useUpdateItem(recordId);
+  const deleteItems = useBulkDeleteItems(recordId);
+  const reorderTasks = useReorderTasks(recordId);
+  const runWorkflow = useRunTaskWorkflow(recordId);
 
   const [filter, setFilter] = useState<TaskFilter>('all');
-  const [ownerFilter, setOwnerFilter] = useState<TaskOwnerType | 'any'>('any');
-  const [skipTask, setSkipTask] = useState<TaskItem | null>(null);
+  const [ownerFilter, setOwnerFilter] = useState<(typeof OWNER_TYPES)[number] | 'any'>('any');
+  const [cancelTask, setCancelTask] = useState<TaskItem | null>(null);
+  const [deleteTask, setDeleteTask] = useState<TaskItem | null>(null);
+  const [formTarget, setFormTarget] = useState<FormTarget | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
-  const [applyType, setApplyType] = useState<string | null>(null);
+  const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [agentRunTaskId, setAgentRunTaskId] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
   const handledItemIdRef = useRef<string | undefined>(undefined);
 
-  const tasks = useMemo(() => sortTasks(tasksQuery.data?.items ?? []), [tasksQuery.data]);
+  const tasks = useMemo(() => tasksQuery.data?.items ?? [], [tasksQuery.data]);
+  const groups = useMemo(() => groupTasks(tasks), [tasks]);
   const tasksById = useMemo(() => new Map(tasks.map((task) => [task.id, task])), [tasks]);
   const claimIds = useMemo(
     () =>
@@ -100,20 +129,39 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     [tasks]
   );
   const { itemsById: claimsById } = useItemsByIds(recordId, 'claim', claimIds);
+  const assigneeUids = useMemo(
+    () => Array.from(new Set(tasks.flatMap((task) => task.task.assignees))),
+    [tasks]
+  );
+  const { data: userProfiles } = useBulkGetUserProfiles({ uids: assigneeUids });
+  const profiles = useMemo(() => userProfiles ?? new Map(), [userProfiles]);
 
-  const typeNames = useMemo(() => {
-    const names = new Set<string>();
-    if (record.investigation_type) {
-      names.add(record.investigation_type);
+  const hasWorkflowTasks = tasks.some((task) => Boolean(task.task.workflow_id));
+  const workflows = useWorkflowList(hasWorkflowTasks);
+  const hasRunningWorkflow = tasks.some((task) => task.task.workflow_run?.status === 'running');
+
+  const templates = templatesQuery.data?.templates ?? [];
+  const template = templates.find(
+    (candidate) =>
+      (record.template_id && candidate.template_id === record.template_id) ||
+      candidate.type === record.investigation_type
+  );
+  const hasTaskList = (template?.tasks.length ?? 0) > 0;
+  const isClosed = record.status === 'closed';
+  const canEdit = permissions.update;
+  const canAdd = canEdit && !isClosed && tasks.length < MAX_TASKS;
+  const isAtLimit = tasks.length >= MAX_TASKS;
+
+  // The server settles a workflow run when the tasks are read, so refresh while one is going.
+  useEffect(() => {
+    if (!hasRunningWorkflow) {
+      return;
     }
-    templatesQuery.data?.templates.forEach((template) => names.add(template.type));
-    return Array.from(names);
-  }, [record.investigation_type, templatesQuery.data]);
-  const applicableTypeNames = useMemo(() => {
-    const names = new Set<string>(typeNames);
-    typesQuery.data?.types.forEach((type) => names.add(type.name));
-    return Array.from(names);
-  }, [typeNames, typesQuery.data]);
+    const timer = setInterval(() => {
+      void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
+    }, RUNNING_REFRESH_MS);
+    return () => clearInterval(timer);
+  }, [hasRunningWorkflow, queryClient, recordId]);
 
   // Scroll to and highlight the task another tab or an activity link points to.
   useEffect(() => {
@@ -142,14 +190,6 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     [updateItem]
   );
 
-  const handleToggleDone = (task: TaskItem) => patchTask(task, { status: 'done' });
-  const handleStart = (task: TaskItem) =>
-    patchTask(task, {
-      status: 'doing',
-      ...(isTaskUnassigned(task) && currentUser
-        ? { task: { owner: personOwner(currentUser) } }
-        : {}),
-    });
   const conversationId = record.conversation_id;
   const handleRunWithAgent = async (task: TaskItem) => {
     if (!conversationId) {
@@ -157,7 +197,11 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     }
     setAgentRunTaskId(task.id);
     const started = await updateItem
-      .mutateAsync({ itemId: task.id, version: task.version ?? '', patch: { status: 'doing' } })
+      .mutateAsync({
+        itemId: task.id,
+        version: task.version ?? '',
+        patch: { status: 'in_progress' },
+      })
       .then(() => true)
       .catch(() => false);
     if (started) {
@@ -176,18 +220,145 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     await queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
     setAgentRunTaskId(null);
   };
-  const handleReopen = (task: TaskItem) =>
-    patchTask(task, { status: 'todo', task: { note: null, skip_reason: null } });
-  const handleAssign = (task: TaskItem, owner: Owner) => patchTask(task, { task: { owner } });
-  const handleSkip = (reason: string) => {
-    if (!skipTask) {
+
+  const handleCancel = (reason: string) => {
+    if (!cancelTask) {
       return;
     }
-    const target = skipTask;
-    patchTask(target, { status: 'skipped', task: { skip_reason: reason } }, () => {
-      showSuccess(i18n.SKIP_SUCCESS(target.title));
-      setSkipTask(null);
+    const target = cancelTask;
+    patchTask(target, { status: 'cancelled', task: { cancel_reason: reason } }, () => {
+      showSuccess(i18n.CANCEL_SUCCESS(target.title));
+      setCancelTask(null);
     });
+  };
+
+  const handleDelete = () => {
+    if (!deleteTask) {
+      return;
+    }
+    const target = deleteTask;
+    const subtaskIds = tasks
+      .filter((task) => task.task.parent_task_id === target.id)
+      .map((task) => task.id);
+    deleteItems.mutate(
+      { ids: [target.id, ...subtaskIds] },
+      {
+        onSuccess: () => {
+          showSuccess(i18n.DELETE_SUCCESS(target.title));
+          setDeleteTask(null);
+        },
+      }
+    );
+  };
+
+  const handlers: TaskRowHandlers = {
+    onToggleDone: (task) => patchTask(task, { status: 'completed' }),
+    onMarkInProgress: (task) => patchTask(task, { status: 'in_progress' }),
+    onReopen: (task) => patchTask(task, { status: 'open' }),
+    onCancel: setCancelTask,
+    onPriorityChange: (task: TaskItem, priority: TaskPriorityValue) =>
+      patchTask(task, { task: { priority } }),
+    onDueDateChange: (task, dueDate) => patchTask(task, { task: { due_date: dueDate } }),
+    onAssigneesChange: (task, uids) => patchTask(task, { task: { assignees: uids } }),
+    onAddSubtask: (task) => setFormTarget({ parent: task }),
+    onDelete: setDeleteTask,
+    onRunWorkflow: (task) => runWorkflow.mutate(task.id),
+    onRunWithAgent: (task) => void handleRunWithAgent(task),
+    onNavigateTab,
+  };
+
+  const getWorkflowDisabledReason = (task: TaskItem): string | null => {
+    if (workflows.isError) {
+      return i18n.WORKFLOWS_UNAVAILABLE_REASON;
+    }
+    if (workflows.isLoading) {
+      return i18n.WORKFLOWS_LOADING_REASON;
+    }
+    const available = workflows.data?.results ?? [];
+    if (available.length === 0) {
+      return i18n.NO_WORKFLOWS_REASON;
+    }
+    if (!available.some((workflow) => workflow.id === task.task.workflow_id)) {
+      return i18n.WORKFLOW_NOT_FOUND_REASON;
+    }
+    if (!canExecuteWorkflow) {
+      return i18n.NO_EXECUTE_PRIVILEGE_REASON;
+    }
+    return null;
+  };
+
+  const matchesFilters = useCallback(
+    (task: TaskItem): boolean => {
+      if (ownerFilter !== 'any' && task.task.owner.type !== ownerFilter) {
+        return false;
+      }
+      switch (filter) {
+        case 'mine':
+          return isAssignedTo(task, currentUserProfile?.uid);
+        case 'open':
+          return !isTaskFinished(task);
+        case 'required':
+          return task.task.required;
+        default:
+          return true;
+      }
+    },
+    [currentUserProfile?.uid, filter, ownerFilter]
+  );
+
+  const isFiltered = filter !== 'all' || ownerFilter !== 'any';
+  const canReorder = canEdit && !isFiltered && !reorderTasks.isLoading;
+  const visibleGroups: TaskGroup[] = useMemo(
+    () =>
+      groups
+        .filter(({ root, subtasks }) => matchesFilters(root) || subtasks.some(matchesFilters))
+        .map(({ root, subtasks }) => ({
+          root,
+          subtasks: matchesFilters(root) ? subtasks : subtasks.filter(matchesFilters),
+        })),
+    [groups, matchesFilters]
+  );
+
+  const handleDragEnd = ({ source, destination }: DropResult) => {
+    if (!destination || destination.droppableId !== source.droppableId) {
+      return;
+    }
+    if (destination.index === source.index) {
+      return;
+    }
+    const move = (ids: string[]): string[] => {
+      const next = [...ids];
+      const [moved] = next.splice(source.index, 1);
+      next.splice(destination.index, 0, moved);
+      return next;
+    };
+    let siblings: TaskItem[];
+    let taskIds: string[];
+    if (source.droppableId.startsWith('phase:')) {
+      const phase = source.droppableId.slice('phase:'.length);
+      const phaseIds = groups
+        .filter(({ root }) => root.task.phase === phase)
+        .map(({ root }) => root.id);
+      const reordered = move(phaseIds);
+      // Roots of other phases keep their slots; the phase's roots refill theirs in the new order.
+      const queue = [...reordered];
+      taskIds = groups.map(({ root }) =>
+        root.task.phase === phase ? queue.shift() ?? root.id : root.id
+      );
+      siblings = reordered.flatMap((id) => tasksById.get(id) ?? []);
+    } else {
+      const parentId = source.droppableId.slice('sub:'.length);
+      const subtaskIds = (groups.find(({ root }) => root.id === parentId)?.subtasks ?? []).map(
+        (task) => task.id
+      );
+      taskIds = move(subtaskIds);
+      siblings = taskIds.flatMap((id) => tasksById.get(id) ?? []);
+    }
+    const moved = siblings[destination.index];
+    if (moved) {
+      setAnnouncement(i18n.MOVED_ANNOUNCEMENT(moved.title, destination.index + 1, siblings.length));
+    }
+    reorderTasks.mutate(taskIds);
   };
 
   if (tasksQuery.isLoading) {
@@ -203,58 +374,104 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     );
   }
 
-  const templates = templatesQuery.data?.templates ?? [];
-  const applicable = tasks.filter((task) => task.status !== 'skipped');
-  const doneCount = applicable.filter((task) => task.status === 'done').length;
+  const applicable = tasks.filter((task) => task.status !== 'cancelled');
+  const doneCount = applicable.filter((task) => task.status === 'completed').length;
   const requiredLeft = tasks.filter((task) => task.task.required && !isTaskFinished(task)).length;
+  const overdueCount = tasks.filter((task) => isTaskOverdue(task, now)).length;
   const progress = applicable.length > 0 ? Math.round((doneCount / applicable.length) * 100) : 0;
+  const openCount = tasks.filter((task) => !isTaskFinished(task)).length;
 
   const counts = {
     all: tasks.length,
-    mine: tasks.filter((task) => isOwnedBy(task, currentUser)).length,
-    open: tasks.filter((task) => !isTaskFinished(task)).length,
+    mine: tasks.filter((task) => isAssignedTo(task, currentUserProfile?.uid)).length,
+    open: openCount,
     required: tasks.filter((task) => task.task.required).length,
   };
-  const visibleTasks = tasks.filter((task) => {
-    if (ownerFilter !== 'any' && task.task.owner.type !== ownerFilter) {
-      return false;
-    }
-    switch (filter) {
-      case 'mine':
-        return isOwnedBy(task, currentUser);
-      case 'open':
-        return !isTaskFinished(task);
-      case 'required':
-        return task.task.required;
-      default:
-        return true;
-    }
-  });
 
   const modals = (
     <>
-      {skipTask ? (
-        <SkipModal
-          task={skipTask}
+      {cancelTask ? (
+        <CancelTaskModal
+          task={cancelTask}
           isLoading={updateItem.isLoading}
-          onConfirm={handleSkip}
-          onClose={() => setSkipTask(null)}
+          onConfirm={handleCancel}
+          onClose={() => setCancelTask(null)}
+        />
+      ) : null}
+      {deleteTask ? (
+        <ConfirmModal
+          title={i18n.DELETE_TASK_TITLE(deleteTask.title)}
+          body={
+            <p>
+              {i18n.DELETE_TASK_BODY(
+                tasks.filter((task) => task.task.parent_task_id === deleteTask.id).length
+              )}
+            </p>
+          }
+          confirmLabel={i18n.DELETE_TASK}
+          destructive
+          isLoading={deleteItems.isLoading}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTask(null)}
+          data-test-subj="investigationDeleteTaskModal"
+        />
+      ) : null}
+      {formTarget ? (
+        <TaskFormModal
+          record={record}
+          parent={formTarget.parent}
+          defaultPhase={formTarget.phase}
+          currentUserProfile={currentUserProfile}
+          onClose={() => setFormTarget(null)}
         />
       ) : null}
       {isEditorOpen ? (
-        <TemplateEditor record={record} tasks={tasks} onClose={() => setIsEditorOpen(false)} />
+        <TemplateEditor record={record} onClose={() => setIsEditorOpen(false)} />
       ) : null}
-      {applyType ? (
+      {isApplyOpen ? (
         <ApplyProcedureModal
           record={record}
           tasks={tasks}
-          templates={templates}
-          typeNames={applicableTypeNames}
-          initialType={applyType}
-          onClose={() => setApplyType(null)}
+          template={template}
+          onClose={() => setIsApplyOpen(false)}
         />
       ) : null}
     </>
+  );
+
+  const applyButton = (
+    <EuiToolTip content={hasTaskList ? undefined : i18n.NO_TEMPLATE_FOR_TYPE}>
+      <EuiButton
+        size="s"
+        fill={tasks.length === 0}
+        iconType={ICONS.refresh}
+        isDisabled={!hasTaskList || !canEdit || isClosed}
+        onClick={() => setIsApplyOpen(true)}
+        data-test-subj="investigationProcedureApply"
+      >
+        {i18n.APPLY_PROCEDURE}
+      </EuiButton>
+    </EuiToolTip>
+  );
+  const addTaskButton = canAdd ? (
+    <EuiButton
+      size="s"
+      iconType={ICONS.add}
+      onClick={() => setFormTarget({})}
+      data-test-subj="investigationProcedureAddTask"
+    >
+      {i18n.ADD_TASK}
+    </EuiButton>
+  ) : null;
+  const configureButton = (
+    <EuiButton
+      size="s"
+      iconType={ICONS.template}
+      onClick={() => setIsEditorOpen(true)}
+      data-test-subj="investigationProcedureConfigure"
+    >
+      {i18n.CONFIGURE}
+    </EuiButton>
   );
 
   if (tasks.length === 0) {
@@ -263,29 +480,12 @@ export const ProcedurePanel: React.FC<TabProps> = ({
         <EmptyState
           iconType={ICONS.procedure}
           title={i18n.EMPTY_TITLE}
-          body={i18n.EMPTY_BODY}
+          body={i18n.EMPTY_BODY(record.investigation_type || i18n.TYPE_NOT_SET)}
           actions={
-            <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  onClick={() =>
-                    setApplyType(record.investigation_type || applicableTypeNames[0] || '')
-                  }
-                  data-test-subj="investigationProcedureApply"
-                >
-                  {i18n.APPLY_PROCEDURE}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType={ICONS.template}
-                  onClick={() => setIsEditorOpen(true)}
-                  data-test-subj="investigationProcedureConfigure"
-                >
-                  {i18n.CONFIGURE}
-                </EuiButton>
-              </EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>{applyButton}</EuiFlexItem>
+              {addTaskButton ? <EuiFlexItem grow={false}>{addTaskButton}</EuiFlexItem> : null}
+              <EuiFlexItem grow={false}>{configureButton}</EuiFlexItem>
             </EuiFlexGroup>
           }
           data-test-subj="investigationProcedureEmpty"
@@ -302,6 +502,71 @@ export const ProcedurePanel: React.FC<TabProps> = ({
     { id: 'required', label: i18n.FILTER_REQUIRED(counts.required) },
   ];
 
+  const renderTask = (
+    task: TaskItem,
+    isSubtask: boolean,
+    dragHandle: React.ReactNode
+  ): React.ReactElement => {
+    const dependency = task.task.depends_on ? tasksById.get(task.task.depends_on) : undefined;
+    const claimId = task.task.auto?.type === 'claim' ? task.task.auto.claim_id : undefined;
+    const claim = claimId ? claimsById.get(claimId) : undefined;
+    return (
+      <TaskRow
+        key={task.id}
+        {...handlers}
+        task={task}
+        record={record}
+        isSubtask={isSubtask}
+        effectiveStatus={getEffectiveStatus(task, tasksById, claimsById)}
+        dependency={dependency}
+        claim={claim}
+        userProfiles={profiles}
+        currentUserProfile={currentUserProfile}
+        now={now}
+        isHighlighted={highlightedId === task.id}
+        isBusy={
+          (updateItem.isLoading && updateItem.variables?.itemId === task.id) ||
+          (runWorkflow.isLoading && runWorkflow.variables === task.id) ||
+          agentRunTaskId === task.id
+        }
+        canEdit={canEdit}
+        canAssign={permissions.assign}
+        canAddSubtask={canAdd && !isSubtask}
+        canRunWithAgent={
+          agentAvailable &&
+          Boolean(conversationId) &&
+          !isClosed &&
+          task.task.owner.type === 'agent' &&
+          !task.task.auto &&
+          !isTaskFinished(task)
+        }
+        isRunningWithAgent={agentRunTaskId === task.id}
+        workflowDisabledReason={getWorkflowDisabledReason(task)}
+        dragHandle={dragHandle}
+      />
+    );
+  };
+
+  const renderHandle = (
+    task: TaskItem,
+    dragHandleProps: React.HTMLAttributes<HTMLDivElement> | null | undefined
+  ): React.ReactNode =>
+    canReorder ? (
+      <div
+        {...dragHandleProps}
+        aria-label={i18n.DRAG_TO_REORDER}
+        data-test-subj={`investigationTaskDrag-${task.id}`}
+        css={css`
+          display: flex;
+          align-items: center;
+          padding-block: ${euiTheme.size.xs};
+          cursor: grab;
+        `}
+      >
+        <EuiIcon type={ICONS.dragHandle} color="subdued" aria-hidden="true" />
+      </div>
+    ) : null;
+
   return (
     <div data-test-subj="investigationProcedureTab">
       <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
@@ -316,38 +581,35 @@ export const ProcedurePanel: React.FC<TabProps> = ({
                   <h2>{i18n.TITLE}</h2>
                 </EuiTitle>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow" data-test-subj="investigationProcedureType">
+                  {record.investigation_type || i18n.TYPE_NOT_SET}
+                </EuiBadge>
+              </EuiFlexItem>
+              {overdueCount > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="danger" data-test-subj="investigationProcedureOverdue">
+                    {i18n.OVERDUE_COUNT(overdueCount)}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow />
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  compressed
-                  prepend={i18n.INVESTIGATION_TYPE}
-                  aria-label={i18n.INVESTIGATION_TYPE}
-                  value={record.investigation_type}
-                  options={[
-                    ...(applicableTypeNames.includes(record.investigation_type)
-                      ? []
-                      : [{ value: record.investigation_type, text: i18n.TYPE_NOT_SET }]),
-                    ...applicableTypeNames.map((name) => ({ value: name, text: name })),
-                  ]}
-                  onChange={(event) => {
-                    if (event.target.value !== record.investigation_type) {
-                      setApplyType(event.target.value);
-                    }
-                  }}
-                  data-test-subj="investigationProcedureType"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  iconType={ICONS.template}
-                  onClick={() => setIsEditorOpen(true)}
-                  data-test-subj="investigationProcedureConfigure"
-                >
-                  {i18n.CONFIGURE}
-                </EuiButton>
-              </EuiFlexItem>
+              {addTaskButton ? <EuiFlexItem grow={false}>{addTaskButton}</EuiFlexItem> : null}
+              <EuiFlexItem grow={false}>{applyButton}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{configureButton}</EuiFlexItem>
             </EuiFlexGroup>
+            {isAtLimit ? (
+              <EuiText
+                size="xs"
+                color="subdued"
+                css={css`
+                  margin-block-start: ${euiTheme.size.xs};
+                `}
+                data-test-subj="investigationProcedureMaxTasks"
+              >
+                {i18n.MAX_TASKS_REACHED(MAX_TASKS)}
+              </EuiText>
+            ) : null}
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               <EuiFlexItem>
@@ -404,7 +666,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {record.status === 'closed' ? (
+                {isClosed ? (
                   <EuiBadge color="hollow">{i18n.CLOSED}</EuiBadge>
                 ) : (
                   <EuiButton
@@ -453,90 +715,107 @@ export const ProcedurePanel: React.FC<TabProps> = ({
                   data-test-subj="investigationTaskOwnerFilter"
                 />
               </EuiFlexItem>
+              {canEdit && isFiltered ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    data-test-subj="investigationProcedureReorderHint"
+                  >
+                    {i18n.REORDER_NEEDS_ALL}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiPanel>
         </EuiFlexItem>
-        {PHASES.map((phase) => {
-          const rows = visibleTasks.filter((task) => task.task.phase === phase);
-          if (rows.length === 0) {
-            return null;
-          }
-          const phaseTasks = tasks.filter((task) => task.task.phase === phase);
-          const phaseApplicable = phaseTasks.filter((task) => task.status !== 'skipped');
-          const phaseDone = phaseApplicable.filter((task) => task.status === 'done').length;
-          return (
-            <EuiFlexItem grow={false} key={phase}>
-              <EuiPanel
-                paddingSize="none"
-                hasShadow={false}
-                hasBorder
-                data-test-subj={`investigationProcedurePhase-${phase}`}
-              >
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  css={css`
-                    padding: ${euiTheme.size.m};
-                    border-block-end: ${euiTheme.border.thin};
-                  `}
+        <EuiDragDropContext onDragEnd={handleDragEnd}>
+          {PHASES.map((phase) => {
+            const rows = visibleGroups.filter(({ root }) => root.task.phase === phase);
+            if (rows.length === 0) {
+              return null;
+            }
+            const phaseTasks = tasks.filter((task) => task.task.phase === phase);
+            const phaseApplicable = phaseTasks.filter((task) => task.status !== 'cancelled');
+            const phaseDone = phaseApplicable.filter((task) => task.status === 'completed').length;
+            return (
+              <EuiFlexItem grow={false} key={phase}>
+                <EuiPanel
+                  paddingSize="none"
+                  hasShadow={false}
+                  hasBorder
+                  data-test-subj={`investigationProcedurePhase-${phase}`}
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h3>{phase}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow">
-                      {i18n.PHASE_COUNT(phaseDone, phaseApplicable.length)}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                {rows.map((task) => {
-                  const dependency = task.task.depends_on
-                    ? tasksById.get(task.task.depends_on)
-                    : undefined;
-                  const claimId =
-                    task.task.auto?.type === 'claim' ? task.task.auto.claim_id : undefined;
-                  const claim = claimId ? claimsById.get(claimId) : undefined;
-                  return (
-                    <TaskRow
-                      key={task.id}
-                      task={task}
-                      record={record}
-                      effectiveStatus={getEffectiveStatus(task, tasksById, claimsById)}
-                      dependency={dependency}
-                      claim={claim}
-                      currentUser={currentUser}
-                      isHighlighted={highlightedId === task.id}
-                      isBusy={
-                        (updateItem.isLoading && updateItem.variables?.itemId === task.id) ||
-                        agentRunTaskId === task.id
-                      }
-                      canRunWithAgent={
-                        agentAvailable &&
-                        Boolean(conversationId) &&
-                        record.status !== 'closed' &&
-                        task.task.owner.type === 'agent' &&
-                        !task.task.auto &&
-                        !isTaskFinished(task)
-                      }
-                      isRunningWithAgent={agentRunTaskId === task.id}
-                      onRunWithAgent={handleRunWithAgent}
-                      onToggleDone={handleToggleDone}
-                      onStart={handleStart}
-                      onReopen={handleReopen}
-                      onSkip={setSkipTask}
-                      onAssign={handleAssign}
-                      onNavigateTab={onNavigateTab}
-                    />
-                  );
-                })}
-              </EuiPanel>
-            </EuiFlexItem>
-          );
-        })}
-        {visibleTasks.length === 0 ? (
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    css={css`
+                      padding: ${euiTheme.size.m};
+                      border-block-end: ${euiTheme.border.thin};
+                    `}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xxs">
+                        <h3>{phase}</h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        {i18n.PHASE_COUNT(phaseDone, phaseApplicable.length)}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiDroppable droppableId={`phase:${phase}`} type="root" spacing="none">
+                    {rows.map(({ root, subtasks }, index) => (
+                      <EuiDraggable
+                        key={root.id}
+                        draggableId={root.id}
+                        index={index}
+                        spacing="none"
+                        customDragHandle
+                        isDragDisabled={!canReorder}
+                      >
+                        {(provided) => (
+                          <div>
+                            {renderTask(root, false, renderHandle(root, provided.dragHandleProps))}
+                            {subtasks.length > 0 ? (
+                              <EuiDroppable
+                                droppableId={`sub:${root.id}`}
+                                type={`sub:${root.id}`}
+                                spacing="none"
+                              >
+                                {subtasks.map((subtask, subIndex) => (
+                                  <EuiDraggable
+                                    key={subtask.id}
+                                    draggableId={subtask.id}
+                                    index={subIndex}
+                                    spacing="none"
+                                    customDragHandle
+                                    isDragDisabled={!canReorder}
+                                  >
+                                    {(subProvided) =>
+                                      renderTask(
+                                        subtask,
+                                        true,
+                                        renderHandle(subtask, subProvided.dragHandleProps)
+                                      )
+                                    }
+                                  </EuiDraggable>
+                                ))}
+                              </EuiDroppable>
+                            ) : null}
+                          </div>
+                        )}
+                      </EuiDraggable>
+                    ))}
+                  </EuiDroppable>
+                </EuiPanel>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiDragDropContext>
+        {visibleGroups.length === 0 ? (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="investigationProcedureNoMatch">
               <p>{i18n.NO_TASKS_MATCH}</p>
@@ -544,6 +823,11 @@ export const ProcedurePanel: React.FC<TabProps> = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
+      <EuiScreenReaderOnly>
+        <div role="status" aria-live="polite" data-test-subj="investigationProcedureAnnouncement">
+          {announcement}
+        </div>
+      </EuiScreenReaderOnly>
       {modals}
     </div>
   );

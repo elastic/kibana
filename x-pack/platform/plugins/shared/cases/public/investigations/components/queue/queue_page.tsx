@@ -6,13 +6,22 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiButton, EuiPageHeader, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiPageHeader,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
+import { getEffectiveStatuses } from '../../../../common/investigations/statuses';
 import {
   useFindRecords,
   useInvestigationBreadcrumbs,
   useInvestigationsNavigation,
+  useStatuses,
 } from '../../hooks';
 import { ICONS } from '../../icons';
 import { CreateInvestigationFlyout } from '../create/create_investigation_flyout';
@@ -25,10 +34,12 @@ import { useQueueFields } from './use_queue_fields';
 import * as i18n from './translations';
 import { hasActiveFilters, toFindRequest, useQueueUrlState } from './use_queue_url_state';
 
+const SETTINGS_PATH = '/settings';
+
 export const QueuePage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { state, update, clearFilters } = useQueueUrlState();
-  const { goToRecord } = useInvestigationsNavigation();
+  const { goToRecord, navigate } = useInvestigationsNavigation();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useInvestigationBreadcrumbs();
@@ -38,6 +49,8 @@ export const QueuePage: React.FC = () => {
   );
 
   const { fields } = useQueueFields();
+  const { data: statusesData } = useStatuses();
+  const statuses = useMemo(() => getEffectiveStatuses(statusesData?.statuses), [statusesData]);
   const fieldColumns = useMemo(
     () =>
       state.columns.flatMap((key) => {
@@ -50,6 +63,16 @@ export const QueuePage: React.FC = () => {
   const records = data?.records ?? [];
   const total = data?.total ?? 0;
   const filtered = hasActiveFilters(state);
+
+  const settingsButton = (
+    <EuiButtonEmpty
+      iconType={ICONS.settings}
+      onClick={() => navigate(SETTINGS_PATH)}
+      data-test-subj="investigationsSettingsButton"
+    >
+      {i18n.INVESTIGATION_SETTINGS}
+    </EuiButtonEmpty>
+  );
 
   const newInvestigationButton = (
     <EuiButton
@@ -99,7 +122,7 @@ export const QueuePage: React.FC = () => {
       <EuiPageHeader
         pageTitle={i18n.PAGE_TITLE}
         description={i18n.PAGE_DESCRIPTION}
-        rightSideItems={[newInvestigationButton]}
+        rightSideItems={[newInvestigationButton, settingsButton]}
         bottomBorder={false}
       />
       <EuiSpacer size="m" />
@@ -109,6 +132,7 @@ export const QueuePage: React.FC = () => {
         onClear={clearFilters}
         records={records}
         fields={fields}
+        statuses={statuses}
       />
       <EuiSpacer size="m" />
       {isError ? (
@@ -132,6 +156,7 @@ export const QueuePage: React.FC = () => {
             state={state}
             isLoading={isFetching}
             noItemsMessage={noItemsMessage}
+            statuses={statuses}
             fieldColumns={fieldColumns}
             onChange={update}
           />

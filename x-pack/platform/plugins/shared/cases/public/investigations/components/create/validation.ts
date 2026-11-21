@@ -6,10 +6,7 @@
  */
 
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
-import type {
-  InvestigationPriority,
-  InvestigationSeverity,
-} from '../../../../common/investigations/types';
+import type { InvestigationPriority } from '../../../../common/investigations/types';
 import * as i18n from './translations';
 import { MAX_TITLE_LENGTH } from '../../../../common/constants';
 
@@ -19,7 +16,6 @@ export interface CreateFormValues {
   /** Template id of the chosen investigation type. */
   templateId: string;
   priority: InvestigationPriority;
-  severity: InvestigationSeverity;
   tags: string[];
   entities: string[];
   alertIds: string[];
@@ -38,7 +34,6 @@ export const EMPTY_FORM: CreateFormValues = {
   description: '',
   templateId: '',
   priority: 'medium',
-  severity: 'medium',
   tags: [],
   entities: [],
   alertIds: [],

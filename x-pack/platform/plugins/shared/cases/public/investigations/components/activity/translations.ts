@@ -234,3 +234,31 @@ export const TAB_PROCEDURE = i18n.translate('xpack.cases.investigations.activity
 export const TAB_ACTIVITY = i18n.translate('xpack.cases.investigations.activity.tabActivity', {
   defaultMessage: 'Activity',
 });
+
+/* Origin of an entry written by something other than a person */
+export const ORIGIN_AGENT = i18n.translate('xpack.cases.investigations.activity.originAgent', {
+  defaultMessage: 'via agent',
+});
+export const ORIGIN_WORKFLOW = i18n.translate(
+  'xpack.cases.investigations.activity.originWorkflow',
+  { defaultMessage: 'via workflow' }
+);
+export const ORIGIN_RULE = i18n.translate('xpack.cases.investigations.activity.originRule', {
+  defaultMessage: 'via rule',
+});
+export const ORIGIN_API = i18n.translate('xpack.cases.investigations.activity.originApi', {
+  defaultMessage: 'via API',
+});
+export const ORIGIN_CONNECTOR = i18n.translate(
+  'xpack.cases.investigations.activity.originConnector',
+  { defaultMessage: 'via connector' }
+);
+export const STATUS_WITH_PAUSE_REASON = (label: string, reason: string) =>
+  i18n.translate('xpack.cases.investigations.activity.statusWithPauseReason', {
+    defaultMessage: '{label} (paused: {reason})',
+    values: { label, reason },
+  });
+export const OPEN_EXTERNAL_TICKET = i18n.translate(
+  'xpack.cases.investigations.activity.openExternalTicket',
+  { defaultMessage: 'Open the external ticket' }
+);

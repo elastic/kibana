@@ -8,24 +8,36 @@
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ExecutionStatus, isTerminalStatus, WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { CasesClient } from '../client';
 import type { ConfigType } from '../config';
-import type { CasesServerStartDependencies } from '../types';
+import type { CasesServerStartDependencies, CasesRequestHandlerContext } from '../types';
 import type { CaseRoute } from '../routes/api/types';
+import type { CasesWorkflowRunContext } from '../client/workflows/operations';
+import type { CasesWorkflowRunService } from '../workflows/execution/service';
 import type { Actor } from '../../common/investigations/types';
 import {
   INVESTIGATION_AGENT_ID,
   INVESTIGATION_CONVERSATION_TEMPLATE_ID,
 } from '../../common/investigations/types';
 import { INVESTIGATIONS_OWNER } from '../../common/investigations/constants';
+import { CASE_WORKFLOW_ORIGIN_TYPE } from '../../common/constants/workflow';
 import { ensureInvestigationIndices } from './indices';
 import { InvestigationsService } from './service';
-import type { AlertsClientLike } from './service';
+import type { AlertsClientLike, InvestigationsServiceDeps } from './service';
 import { getInvestigationRoutes } from './routes';
 import type { GetCasesClientFn } from '../client/types';
 import { toActionSource } from '../../common/types/domain/user_action/source/v1';
 
 export { InvestigationsService } from './service';
+
+/** Cases' workflow execution, handed in by the plugin so tasks can run workflows. */
+export interface TaskWorkflowRunner {
+  service: CasesWorkflowRunService;
+  management: WorkflowsServerPluginSetup['management'];
+  getWorkflowRunContext: (request: KibanaRequest) => Promise<CasesWorkflowRunContext>;
+}
 
 export interface InvestigationsSetup {
   routes: CaseRoute[];
@@ -45,6 +57,7 @@ export const setupInvestigations = ({
   getCasesClient,
   getSpaceId,
   agentBuilder,
+  workflowRun,
 }: {
   core: CoreSetup<CasesServerStartDependencies>;
   config: ConfigType;
@@ -52,6 +65,7 @@ export const setupInvestigations = ({
   getCasesClient: GetCasesClientFn;
   getSpaceId: (request?: KibanaRequest) => string;
   agentBuilder?: AgentBuilderPluginSetup;
+  workflowRun?: TaskWorkflowRunner;
 }): InvestigationsSetup => {
   const log = logger.get('investigations');
 
@@ -74,7 +88,8 @@ export const setupInvestigations = ({
   const buildService = async (
     request: KibanaRequest,
     casesClient: CasesClient,
-    asAgent?: { id: string; name: string }
+    asAgent?: { id: string; name: string },
+    handlerContext?: CasesRequestHandlerContext
   ): Promise<InvestigationsService> => {
     const [coreStart, pluginsStart] = await core.getStartServices();
     const user = coreStart.security.authc.getCurrentUser(request);
@@ -117,12 +132,75 @@ export const setupInvestigations = ({
       });
       return availability;
     };
+    const spaceId = getSpaceId(request);
+    const workflows: InvestigationsServiceDeps['workflows'] = workflowRun
+      ? {
+          isAvailable: () => workflowRun.management.isWorkflowsAvailable && !!handlerContext,
+          canExecute: async () => {
+            const { authz } = pluginsStart.security;
+            if (!authz.mode.useRbacForRequest(request)) return true;
+            const check = authz.checkPrivilegesDynamicallyWithRequest(request);
+            const { hasAllRequested } = await check({
+              kibana: [authz.actions.api.get(WorkflowsManagementApiActions.execute)],
+            });
+            return hasAllRequested;
+          },
+          run: async ({ workflowId, caseId }) => {
+            if (!handlerContext) throw new Error('Workflows can only be run from a request.');
+            const { casesClient: runCasesClient, workflowOperations } =
+              await workflowRun.getWorkflowRunContext(request);
+            const result = await workflowRun.service.run({
+              workflowId,
+              body: {
+                caseIds: [caseId],
+                inputs: {},
+                origin: { type: CASE_WORKFLOW_ORIGIN_TYPE, caseId },
+              },
+              request,
+              context: handlerContext,
+              casesClient: runCasesClient,
+              workflowOperations,
+              spaceId,
+            });
+            return { executionId: result.workflowExecutionId };
+          },
+          getExecution: async (executionId) => {
+            const execution = await workflowRun.management.getWorkflowExecution(
+              executionId,
+              spaceId,
+              { request, omitStepExecutions: true }
+            );
+            if (!execution) return null;
+            const { status } = execution;
+            // The finished run is named after the workflow as people know it, not its slug.
+            const workflow =
+              isTerminalStatus(status) && execution.workflowId
+                ? await workflowRun.management
+                    .getWorkflow(execution.workflowId, spaceId, request)
+                    .catch(() => null)
+                : null;
+            return {
+              status: !isTerminalStatus(status)
+                ? 'running'
+                : status === ExecutionStatus.COMPLETED
+                ? 'succeeded'
+                : 'failed',
+              error:
+                execution.error?.message ??
+                (status === ExecutionStatus.COMPLETED ? null : `The workflow run ${status}.`),
+              workflowName: workflow?.name ?? execution.workflowName ?? null,
+              finishedAt: execution.finishedAt || null,
+            };
+          },
+        }
+      : undefined;
     return new InvestigationsService({
+      workflows,
       esClient: coreStart.elasticsearch.client.asInternalUser,
       scopedEsClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
       casesClient,
       logger: log,
-      spaceId: getSpaceId(request),
+      spaceId,
       user: {
         username,
         fullName: user?.full_name || username,
@@ -187,7 +265,7 @@ export const setupInvestigations = ({
 
   const routes = getInvestigationRoutes(async ({ context, request }) => {
     const casesContext = await context.cases;
-    return buildService(request, await casesContext.getCasesClient());
+    return buildService(request, await casesContext.getCasesClient(), undefined, context);
   });
 
   return {

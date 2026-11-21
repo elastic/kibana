@@ -28,18 +28,23 @@ import type {
   RecordCounters,
 } from '../../../../common/investigations/types';
 import { useInvestigationsNavigation, useRecord, useUpdateRecord } from '../../hooks';
+import { useInvestigationsServices } from '../../services';
 import { ICONS } from '../../icons';
 import { ActorAvatar, ActorBadge } from '../shared/actor_badge';
 import { formatAge } from '../shared/formatters';
-import { PriorityBadge } from '../shared/priority_badge';
-import { StatusBadge } from '../shared/status_badge';
 import { VerdictBadge, getEffectiveVerdict } from '../shared/verdict_badge';
 import * as sharedI18n from '../shared/translations';
-import type { ModalName } from '../modals/modal_props';
+import type { OpenModal } from '../modals/modal_props';
 import * as modalsI18n from '../modals/translations';
+import { AssigneesControl } from './assignees_control';
+import { PriorityControl } from './priority_control';
+import { StatusControl } from './status_control';
 import * as i18n from './translations';
 
 const MAX_VISIBLE_PARTICIPANTS = 5;
+const SECURITY_APP_ID = 'securitySolutionUI';
+
+const getCasePath = (caseId: string): string => `/cases/${encodeURIComponent(caseId)}`;
 
 export interface ScopeSummary {
   text: string;
@@ -200,7 +205,8 @@ interface ActionPanelsOptions {
   hasType: boolean;
   isClosed: boolean;
   isMerged: boolean;
-  openModal: (name: ModalName) => void;
+  openModal: OpenModal;
+  openAsCase: () => void;
   closeMenu: () => void;
 }
 
@@ -214,10 +220,11 @@ const useActionPanels = ({
   isClosed,
   isMerged,
   openModal,
+  openAsCase,
   closeMenu,
 }: ActionPanelsOptions): EuiContextMenuPanelDescriptor[] =>
   useMemo(() => {
-    const choose = (name: ModalName) => () => {
+    const choose = (name: Parameters<OpenModal>[0]) => () => {
       closeMenu();
       openModal(name);
     };
@@ -232,6 +239,15 @@ const useActionPanels = ({
             icon: ICONS.verdict,
             onClick: choose('determination'),
             'data-test-subj': 'investigationActionDetermination',
+          },
+          {
+            name: i18n.OPEN_AS_CASE,
+            icon: ICONS.case,
+            onClick: () => {
+              closeMenu();
+              openAsCase();
+            },
+            'data-test-subj': 'investigationActionOpenAsCase',
           },
           {
             name: i18n.GENERATE_REPORT,
@@ -285,15 +301,16 @@ const useActionPanels = ({
         ],
       },
     ];
-  }, [hasDetermination, hasType, isClosed, isMerged, openModal, closeMenu]);
+  }, [hasDetermination, hasType, isClosed, isMerged, openModal, openAsCase, closeMenu]);
 
 export interface DetailHeaderProps {
   record: InvestigationRecord;
-  openModal: (name: ModalName) => void;
+  openModal: OpenModal;
 }
 
 export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal }) => {
   const { euiTheme } = useEuiTheme();
+  const { application } = useInvestigationsServices();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { mutate: updateRecord, isLoading: isTakingOwnership } = useUpdateRecord(record.id, {
     successMessage: i18n.TAKE_OWNERSHIP_SUCCESS,
@@ -313,12 +330,17 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
       : ICONS.user;
 
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
+  const caseId = record.case_id;
+  const openAsCase = useCallback(() => {
+    void application.navigateToApp(SECURITY_APP_ID, { path: getCasePath(caseId) });
+  }, [application, caseId]);
   const panels = useActionPanels({
-    hasDetermination: Boolean(record.analyst_verdict),
+    hasDetermination: Boolean(record.analyst_verdict ?? record.human_verdict),
     hasType: Boolean(record.template_id),
     isClosed,
     isMerged,
     openModal,
+    openAsCase,
     closeMenu,
   });
 
@@ -399,7 +421,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
         data-test-subj="investigationMeta"
       >
         <EuiFlexItem grow={false}>
-          <StatusBadge status={record.status} owner={record.owner} />
+          <StatusControl record={record} openModal={openModal} isDisabled={isMerged} />
         </EuiFlexItem>
         {typeof flag === 'string' && flag.length > 0 ? (
           <EuiFlexItem grow={false}>
@@ -442,6 +464,9 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
             </EuiFlexGroup>
           )}
         </MetaItem>
+        <MetaItem label={i18n.ASSIGNEES}>
+          <AssigneesControl record={record} isDisabled={isMerged} />
+        </MetaItem>
         <MetaItem label={i18n.VERDICT}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -463,7 +488,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
           </EuiFlexGroup>
         </MetaItem>
         <MetaItem label={i18n.PRIORITY}>
-          <PriorityBadge priority={record.priority} note={record.priority_note} />
+          <PriorityControl record={record} isDisabled={isMerged} />
         </MetaItem>
         <MetaItem label={i18n.PARTICIPANTS}>
           <ParticipantsStack actors={getParticipants(record)} />

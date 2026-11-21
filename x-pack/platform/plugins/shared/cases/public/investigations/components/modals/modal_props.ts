@@ -15,9 +15,20 @@ export type ModalName =
   | 'close'
   | 'reopen'
   | 'restrict'
-  | 'changeType';
+  | 'changeType'
+  | 'pause';
+
+/** Extra input for the modals that act on a chosen status. */
+export interface ModalOptions {
+  /** The status the modal moves the investigation to (the `pause` and `close` modals). */
+  statusKey?: string;
+}
+
+/** Opens a modal. Modals that do not need options ignore them. */
+export type OpenModal = (name: ModalName, options?: ModalOptions) => void;
 
 export interface InvestigationModalProps {
   record: InvestigationRecord;
   onClose: () => void;
+  statusKey?: string;
 }

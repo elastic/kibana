@@ -23,23 +23,29 @@ import type { TaskItem } from '../../../../common/investigations/types';
 import { MAX_REASON_LENGTH } from './procedure_helpers';
 import * as i18n from './translations';
 
-export interface SkipModalProps {
+export interface CancelTaskModalProps {
   task: TaskItem;
   isLoading: boolean;
   onConfirm: (reason: string) => void;
   onClose: () => void;
 }
 
-export const SkipModal: React.FC<SkipModalProps> = ({ task, isLoading, onConfirm, onClose }) => {
+/** Cancels a task. The reason is required so the record explains why the task did not happen. */
+export const CancelTaskModal: React.FC<CancelTaskModalProps> = ({
+  task,
+  isLoading,
+  onConfirm,
+  onClose,
+}) => {
   const titleId = useGeneratedHtmlId();
   const [reason, setReason] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const trimmed = reason.trim();
   const error =
     trimmed.length === 0
-      ? i18n.SKIP_REASON_REQUIRED
+      ? i18n.CANCEL_REASON_REQUIRED
       : trimmed.length > MAX_REASON_LENGTH
-      ? i18n.SKIP_REASON_TOO_LONG
+      ? i18n.CANCEL_REASON_TOO_LONG
       : null;
 
   const submit = () => {
@@ -50,9 +56,13 @@ export const SkipModal: React.FC<SkipModalProps> = ({ task, isLoading, onConfirm
   };
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={titleId} data-test-subj="investigationSkipModal">
+    <EuiModal
+      onClose={onClose}
+      aria-labelledby={titleId}
+      data-test-subj="investigationCancelTaskModal"
+    >
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={titleId}>{i18n.SKIP_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={titleId}>{i18n.CANCEL_TASK}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="s">
@@ -60,15 +70,15 @@ export const SkipModal: React.FC<SkipModalProps> = ({ task, isLoading, onConfirm
             <strong>{task.title}</strong>
           </p>
           {task.task.required ? (
-            <p data-test-subj="investigationSkipRequiredWarning">
+            <p data-test-subj="investigationCancelTaskRequiredNote">
               <EuiText size="s" color="warning" component="span">
-                {i18n.SKIP_REQUIRED_WARNING}
+                {i18n.CANCEL_REQUIRED_NOTE}
               </EuiText>
             </p>
           ) : null}
         </EuiText>
         <EuiFormRow
-          label={i18n.SKIP_REASON_LABEL}
+          label={i18n.CANCEL_REASON_LABEL}
           isInvalid={submitted && error !== null}
           error={error ?? undefined}
           fullWidth
@@ -79,26 +89,27 @@ export const SkipModal: React.FC<SkipModalProps> = ({ task, isLoading, onConfirm
             rows={4}
             value={reason}
             isInvalid={submitted && error !== null}
-            placeholder={i18n.SKIP_REASON_PLACEHOLDER}
+            placeholder={i18n.CANCEL_REASON_PLACEHOLDER}
             onChange={(event) => setReason(event.target.value)}
-            data-test-subj="investigationSkipReason"
+            data-test-subj="investigationCancelTaskReason"
           />
         </EuiFormRow>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="investigationSkipCancel">
-          {i18n.CANCEL}
+        <EuiButtonEmpty onClick={onClose} data-test-subj="investigationCancelTaskKeep">
+          {i18n.KEEP_TASK}
         </EuiButtonEmpty>
         <EuiButton
           fill
+          color="warning"
           isLoading={isLoading}
           onClick={submit}
-          data-test-subj="investigationSkipSubmit"
+          data-test-subj="investigationCancelTaskSubmit"
         >
-          {i18n.SKIP_SUBMIT}
+          {i18n.CANCEL_TASK}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
 };
-SkipModal.displayName = 'SkipModal';
+CancelTaskModal.displayName = 'CancelTaskModal';

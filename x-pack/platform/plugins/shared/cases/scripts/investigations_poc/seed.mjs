@@ -71,7 +71,7 @@ const preflightMock = async () => {
 
 const printTable = (rows) => {
   if (!rows.length) return;
-  const cols = ['scenario', 'display_id', 'id', 'status', 'owner', 'evidence', 'alerts', 'indicators', 'claims', 'tasks', 'proposals', 'entities', 'links', 'timeline', 'comments', 'activity', 'threads', 'seconds'];
+  const cols = ['scenario', 'display_id', 'id', 'status', 'priority', 'owner', 'assignees', 'evidence', 'alerts', 'indicators', 'claims', 'tasks', 'proposals', 'entities', 'links', 'timeline', 'comments', 'case_comments', 'activity', 'threads', 'seconds'];
   console.log(`\n${cols.join(' | ')}`);
   for (const r of rows) console.log(cols.map((c) => String(r[c] ?? '')).join(' | '));
 };
@@ -96,6 +96,17 @@ const main = async () => {
       log('removed the seed rule, its alerts and the uipoc-events index');
     }
     return;
+  }
+
+  // The scenarios rely on the POC status configuration (built-in defaults, "Waiting on the employee" enabled).
+  const { json: statusConfig } = await kbn('GET', '/internal/cases/investigations/_statuses');
+  const builtInsAreDefaults = ['open', 'in-progress', 'closed'].every((key) =>
+    (statusConfig.statuses ?? []).some((s) => s.key === key && s.isDefault && !s.disabled)
+  );
+  const waiting = (statusConfig.statuses ?? []).find((s) => s.key === 'waiting_on_the_employee');
+  if (!builtInsAreDefaults || !waiting || waiting.disabled) {
+    console.error('The status configuration is not the POC one (built-ins as defaults, "Waiting on the employee" enabled). Run: node setup.mjs');
+    process.exit(1);
   }
 
   const agent = await kbn('GET', `/api/agent_builder/agents/${AGENT_ID}`, undefined, { okStatuses: [200, 404] });

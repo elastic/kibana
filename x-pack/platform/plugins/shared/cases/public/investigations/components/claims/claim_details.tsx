@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiMarkdownFormat, EuiProgress, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiProgress, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ClaimItem } from '../../../../common/investigations/types';
+import { MarkdownRenderer } from '../../../components/markdown_editor';
 import { ICONS } from '../../icons';
 import { ClaimSection } from './claim_section';
 import * as i18n from './translations';
@@ -46,9 +47,9 @@ export const ClaimDetails: React.FC<ClaimDetailsProps> = ({ claim, onOpenConvers
       ) : null}
       {details.reasoning ? (
         <ClaimSection title={i18n.FIELD_REASONING}>
-          <EuiMarkdownFormat textSize="s" data-test-subj="investigationClaimReasoning">
-            {details.reasoning}
-          </EuiMarkdownFormat>
+          <div data-test-subj="investigationClaimReasoning">
+            <MarkdownRenderer textSize="s">{details.reasoning}</MarkdownRenderer>
+          </div>
         </ClaimSection>
       ) : null}
       {details.confidence !== null && details.confidence !== undefined ? (

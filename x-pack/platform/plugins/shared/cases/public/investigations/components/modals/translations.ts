@@ -32,11 +32,20 @@ export const DETERMINATION_TRUE_POSITIVE_HELP = i18n.translate(
   `${PREFIX}.determinationTruePositiveHelp`,
   { defaultMessage: 'Confirmed malicious activity.' }
 );
-export const DETERMINATION_BENIGN_HELP = i18n.translate(`${PREFIX}.determinationBenignHelp`, {
-  defaultMessage: 'Expected or authorized activity.',
-});
-export const DETERMINATION_INCONCLUSIVE_HELP = i18n.translate(
-  `${PREFIX}.determinationInconclusiveHelp`,
+export const DETERMINATION_FALSE_POSITIVE_HELP = i18n.translate(
+  `${PREFIX}.determinationFalsePositiveHelp`,
+  { defaultMessage: 'The alert fired, but nothing harmful happened.' }
+);
+export const DETERMINATION_BENIGN_POSITIVE_HELP = i18n.translate(
+  `${PREFIX}.determinationBenignPositiveHelp`,
+  { defaultMessage: 'Real activity that was expected or authorized.' }
+);
+export const DETERMINATION_SUSPICIOUS_HELP = i18n.translate(
+  `${PREFIX}.determinationSuspiciousHelp`,
+  { defaultMessage: 'Looks wrong, but it is not confirmed.' }
+);
+export const DETERMINATION_UNDETERMINED_HELP = i18n.translate(
+  `${PREFIX}.determinationUndeterminedHelp`,
   { defaultMessage: 'Not enough evidence to decide.' }
 );
 export const DETERMINATION_REASON_LABEL = i18n.translate(`${PREFIX}.determinationReasonLabel`, {
@@ -66,6 +75,11 @@ export const CLOSE_TITLE = i18n.translate(`${PREFIX}.closeTitle`, {
 export const CLOSE_CONFIRM = i18n.translate(`${PREFIX}.closeConfirm`, {
   defaultMessage: 'Close investigation',
 });
+export const CLOSE_STATUS_AFTER = (status: string) =>
+  i18n.translate(`${PREFIX}.closeStatusAfter`, {
+    defaultMessage: 'The investigation moves to {status}.',
+    values: { status },
+  });
 export const CLOSE_TASKS_LOADING = i18n.translate(`${PREFIX}.closeTasksLoading`, {
   defaultMessage: 'Checking required tasks',
 });
@@ -74,12 +88,11 @@ export const CLOSE_TASKS_ERROR = i18n.translate(`${PREFIX}.closeTasksError`, {
 });
 export const CLOSE_TASKS_BLOCKED = (count: number) =>
   i18n.translate(`${PREFIX}.closeTasksBlocked`, {
-    defaultMessage:
-      '{count, plural, one {# required task must} other {# required tasks must}} be done first',
+    defaultMessage: '{count, plural, one {# required task is} other {# required tasks are}} open',
     values: { count },
   });
-export const CLOSE_TASKS_DONE = i18n.translate(`${PREFIX}.closeTasksDone`, {
-  defaultMessage: 'All required tasks are done.',
+export const CLOSE_TASKS_BLOCKED_BODY = i18n.translate(`${PREFIX}.closeTasksBlockedBody`, {
+  defaultMessage: 'These must be done before the investigation closes.',
 });
 export const CLOSE_TASKS_MORE = (count: number) =>
   i18n.translate(`${PREFIX}.closeTasksMore`, {
@@ -98,57 +111,68 @@ export const CLOSE_PROPOSALS_PENDING = (count: number) =>
       '{count, plural, one {# pending proposal} other {# pending proposals}} will be withdrawn when you close.',
     values: { count },
   });
-export const CLOSE_VERDICT_LABEL = i18n.translate(`${PREFIX}.closeVerdictLabel`, {
-  defaultMessage: 'Verdict',
-});
-export const CLOSE_VERDICT_PLACEHOLDER = i18n.translate(`${PREFIX}.closeVerdictPlaceholder`, {
-  defaultMessage: 'Choose a verdict',
-});
-export const CLOSE_REASON_LABEL = i18n.translate(`${PREFIX}.closeReasonLabel`, {
-  defaultMessage: 'Closing reason',
-});
-export const CLOSE_REASON_PLACEHOLDER = i18n.translate(`${PREFIX}.closeReasonPlaceholder`, {
-  defaultMessage: 'Choose a reason',
-});
-export const CLOSE_CAUSE_LABEL = i18n.translate(`${PREFIX}.closeCauseLabel`, {
-  defaultMessage: 'Root cause',
-});
-export const CLOSE_CAUSE_PLACEHOLDER = i18n.translate(`${PREFIX}.closeCausePlaceholder`, {
-  defaultMessage: 'Choose a root cause',
-});
-export const CLOSE_SUMMARY_LABEL = i18n.translate(`${PREFIX}.closeSummaryLabel`, {
-  defaultMessage: 'Summary for readers outside the SOC',
-});
-export const CLOSE_SUMMARY_HELP = i18n.translate(`${PREFIX}.closeSummaryHelp`, {
-  defaultMessage: 'Plain language. This is what an auditor or manager reads first.',
-});
 export const CLOSE_ALERTS_NOTE = (count: number) =>
   i18n.translate(`${PREFIX}.closeAlertsNote`, {
     defaultMessage:
       'The {count, plural, one {# alert} other {# alerts}} in this investigation close when you close it.',
     values: { count },
   });
-export const CLOSE_REQUIRED_FIELD = i18n.translate(`${PREFIX}.closeRequiredField`, {
-  defaultMessage: 'This is required.',
+export const CLOSE_REASON_LABEL = i18n.translate(`${PREFIX}.closeReasonLabel`, {
+  defaultMessage: 'Reason for closing',
 });
-export const CLOSE_FORM_INCOMPLETE = i18n.translate(`${PREFIX}.closeFormIncomplete`, {
-  defaultMessage: 'Verdict, closing reason, root cause and a summary are required.',
+export const CLOSE_REASON_SEARCH_PLACEHOLDER = i18n.translate(
+  `${PREFIX}.closeReasonSearchPlaceholder`,
+  { defaultMessage: 'Select a close reason' }
+);
+export const CLOSE_VERDICT_LINE_NONE = i18n.translate(`${PREFIX}.closeVerdictLineNone`, {
+  defaultMessage: 'No human verdict is set for this reason. You can set one on the investigation.',
+});
+export const CLOSE_VERDICT_LINE_SETS = (verdict: string) =>
+  i18n.translate(`${PREFIX}.closeVerdictLineSets`, {
+    defaultMessage: 'Sets the human verdict to {verdict}.',
+    values: { verdict },
+  });
+export const CLOSE_VERDICT_LINE_AGREES = (verdict: string) =>
+  i18n.translate(`${PREFIX}.closeVerdictLineAgrees`, {
+    defaultMessage: 'Sets the human verdict to {verdict}. That agrees with the AI verdict.',
+    values: { verdict },
+  });
+export const CLOSE_VERDICT_LINE_DIFFERS = (verdict: string, aiVerdict: string) =>
+  i18n.translate(`${PREFIX}.closeVerdictLineDiffers`, {
+    defaultMessage:
+      'Sets the human verdict to {verdict}. That differs from the AI verdict ({aiVerdict}).',
+    values: { verdict, aiVerdict },
+  });
+export const CLOSE_NOTES_LABEL = i18n.translate(`${PREFIX}.closeNotesLabel`, {
+  defaultMessage: 'Closing notes',
+});
+export const CLOSE_NOTES_HELP = i18n.translate(`${PREFIX}.closeNotesHelp`, {
+  defaultMessage: 'Added to the investigation as a comment.',
+});
+export const CLOSE_NOTES_PLACEHOLDER = i18n.translate(`${PREFIX}.closeNotesPlaceholder`, {
+  defaultMessage: 'What happened and what you did',
+});
+export const CLOSE_MISSING_TITLE = i18n.translate(`${PREFIX}.closeMissingTitle`, {
+  defaultMessage: 'To close the investigation:',
+});
+export const CLOSE_MISSING_REASON = i18n.translate(`${PREFIX}.closeMissingReason`, {
+  defaultMessage: 'Choose a reason for closing',
+});
+export const CLOSE_MISSING_TASKS = (count: number) =>
+  i18n.translate(`${PREFIX}.closeMissingTasks`, {
+    defaultMessage: 'Finish {count, plural, one {# required task} other {# required tasks}}',
+    values: { count },
+  });
+export const CLOSE_MISSING_FIELD = (label: string) =>
+  i18n.translate(`${PREFIX}.closeMissingField`, {
+    defaultMessage: 'Fill in {label}',
+    values: { label },
+  });
+export const CLOSE_MISSING_CHECKING = i18n.translate(`${PREFIX}.closeMissingChecking`, {
+  defaultMessage: 'Wait while the required tasks and fields are checked',
 });
 export const CLOSE_SERVER_ERROR_TITLE = i18n.translate(`${PREFIX}.closeServerErrorTitle`, {
   defaultMessage: 'The investigation could not be closed',
-});
-export const CLOSE_DRAFT_TRUE_POSITIVE = i18n.translate(`${PREFIX}.closeDraftTruePositive`, {
-  defaultMessage: 'The activity was confirmed as malicious.',
-});
-export const CLOSE_DRAFT_BENIGN = i18n.translate(`${PREFIX}.closeDraftBenign`, {
-  defaultMessage: 'The activity was authorized and benign.',
-});
-export const CLOSE_DRAFT_INCONCLUSIVE = i18n.translate(`${PREFIX}.closeDraftInconclusive`, {
-  defaultMessage: 'The activity could not be confirmed as malicious.',
-});
-export const CLOSE_DRAFT_TAIL = i18n.translate(`${PREFIX}.closeDraftTail`, {
-  defaultMessage:
-    'The affected systems and accounts are listed in the record, with the actions taken and who approved them.',
 });
 
 /* Reopen */
@@ -462,4 +486,41 @@ export const CLOSE_FIELDS_TITLE = i18n.translate(`${PREFIX}.closeFieldsTitle`, {
 });
 export const CLOSE_FIELDS_HELP = i18n.translate(`${PREFIX}.closeFieldsHelp`, {
   defaultMessage: 'The type of this investigation needs these fields filled in to close it.',
+});
+
+/* Pause time tracking */
+export const PAUSE_TITLE = i18n.translate(`${PREFIX}.pauseTitle`, {
+  defaultMessage: 'Pause time tracking',
+});
+export const PAUSE_BODY = (status: string) =>
+  i18n.translate(`${PREFIX}.pauseBody`, {
+    defaultMessage:
+      'Pick why this investigation is waiting. Time in {status} is left out of its age and timings.',
+    values: { status },
+  });
+export const PAUSE_REASON_LABEL = i18n.translate(`${PREFIX}.pauseReasonLabel`, {
+  defaultMessage: 'Pause reason',
+});
+export const PAUSE_CONFIRM = (status: string) =>
+  i18n.translate(`${PREFIX}.pauseConfirm`, {
+    defaultMessage: 'Move to {status}',
+    values: { status },
+  });
+export const PAUSE_REASON_REQUIRED = i18n.translate(`${PREFIX}.pauseReasonRequired`, {
+  defaultMessage: 'Pick a reason to continue.',
+});
+export const PAUSE_NO_REASONS = i18n.translate(`${PREFIX}.pauseNoReasons`, {
+  defaultMessage: 'No pause reasons are configured. Add one in the Cases settings.',
+});
+export const PAUSE_LOADING = i18n.translate(`${PREFIX}.pauseLoading`, {
+  defaultMessage: 'Loading the pause reasons',
+});
+export const PAUSE_ERROR = i18n.translate(`${PREFIX}.pauseError`, {
+  defaultMessage: 'Could not load the pause reasons',
+});
+export const PAUSE_UNKNOWN_STATUS = i18n.translate(`${PREFIX}.pauseUnknownStatus`, {
+  defaultMessage: 'This status is no longer configured.',
+});
+export const PAUSE_SERVER_ERROR_TITLE = i18n.translate(`${PREFIX}.pauseServerErrorTitle`, {
+  defaultMessage: 'The status could not be changed',
 });

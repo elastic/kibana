@@ -34,8 +34,10 @@ import * as i18n from './translations';
 
 const VERDICT_OPTIONS: ReadonlyArray<{ verdict: Verdict; help: string }> = [
   { verdict: 'true_positive', help: i18n.DETERMINATION_TRUE_POSITIVE_HELP },
-  { verdict: 'benign', help: i18n.DETERMINATION_BENIGN_HELP },
-  { verdict: 'inconclusive', help: i18n.DETERMINATION_INCONCLUSIVE_HELP },
+  { verdict: 'false_positive', help: i18n.DETERMINATION_FALSE_POSITIVE_HELP },
+  { verdict: 'benign_positive', help: i18n.DETERMINATION_BENIGN_POSITIVE_HELP },
+  { verdict: 'suspicious', help: i18n.DETERMINATION_SUSPICIOUS_HELP },
+  { verdict: 'undetermined', help: i18n.DETERMINATION_UNDETERMINED_HELP },
 ];
 
 /** Sets or edits the analyst determination, which becomes the final verdict. */
@@ -46,7 +48,11 @@ export const DeterminationModal: React.FC<InvestigationModalProps> = ({ record, 
   const { analyst_verdict: current, agent_verdict: agent } = record;
 
   const [verdict, setVerdict] = useState<Verdict>(
-    current?.verdict ?? agent?.classification ?? 'inconclusive'
+    current?.verdict ??
+      record.human_verdict ??
+      agent?.classification ??
+      record.ai_verdict?.verdict ??
+      'undetermined'
   );
   const [reason, setReason] = useState(current?.reason ?? '');
 

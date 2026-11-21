@@ -1,6 +1,6 @@
 // Scenario B: the Hunt worker worked INV-218 for six hours and handed it to Tier 2 (the baseline scenario).
 import { ensureAlerts } from '../alerts.mjs';
-import { newCtx, runStandard, actorOf, verdictOf, summarize } from './common.mjs';
+import { newCtx, runStandard, actorOf, verdictOf, summarize, postCaseComment, HOUR, DAY } from './common.mjs';
 
 export const id = 'B';
 
@@ -50,6 +50,29 @@ export const run = async () => {
       scopeCreatedProto: t(3, 16, 10),
       taskActorCode: 'HW',
       taskCreatedProto: t(3, 12, 41),
+      taskExtras: {
+        // Open for hours with nobody on it: overdue, with a subtask for the part Braxton took.
+        t6: {
+          due: -2 * HOUR,
+          assignees: ['BW'],
+          subtasks: [
+            {
+              title: 'Check the authentication logs for the svc-build account',
+              description: 'Look for sign-ins from hosts other than the build agents in the last 7 days.',
+              priority: 'high',
+              assignees: ['BW'],
+              due: 3 * HOUR,
+            },
+          ],
+        },
+        t9: { due: 4 * HOUR, assignees: ['PK'] },
+        t12: { due: 2 * DAY },
+      },
+      assignees: { codes: ['BW', 'PK'], actor: 'BW' },
+      recordComments: async (c) => {
+        // A record note from the person who took the handoff, posted as that person.
+        await postCaseComment(c.recordId, 'PK', 'Taking this over from the Hunt worker. First the LSASS access, then the build owner for the upd.dll question.');
+      },
       proposals: { actorCode: 'HW', meta: { default: { createdProto: t(8, 18, 30) } } },
       timelineActor: 'HW',
       timelineCreatedProto: t(3, 15, 2),

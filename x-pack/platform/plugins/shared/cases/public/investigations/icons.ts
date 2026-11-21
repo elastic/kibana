@@ -24,6 +24,12 @@ import type {
 export const ICONS = {
   // Generic controls
   search: 'search',
+  dragHandle: 'dragVertical',
+  quote: 'quote',
+  priority: 'flag',
+  status: 'dotInCircle',
+  paused: 'pause',
+  settings: 'gear',
   close: 'cross',
   add: 'plus',
   check: 'check',
@@ -91,6 +97,9 @@ export const ICONS = {
   template: 'gear',
   reviewNeeded: 'eye',
   stale: 'clockCounter',
+  pause: 'pause',
+  resume: 'play',
+  case: 'briefcase',
 } as const;
 
 export const ACTOR_ICONS: Record<ActorType, string> = {
@@ -136,10 +145,10 @@ export const CLAIM_STATUS_ICONS: Record<ClaimStatus, string> = {
 };
 
 export const TASK_STATUS_ICONS: Record<TaskStatus, string> = {
-  todo: 'dashedCircle',
-  doing: 'clock',
-  done: 'checkCircleFill',
-  skipped: 'minusCircle',
+  open: 'dashedCircle',
+  in_progress: 'clock',
+  completed: 'checkCircleFill',
+  cancelled: 'minusCircle',
 };
 
 export const TASK_OWNER_ICONS: Record<TaskOwnerType, string> = {

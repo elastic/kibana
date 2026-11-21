@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { VERDICTS } from '../../../../common/investigations/types';
 import type {
   FindRecordsRequest,
   InvestigationPriority,
@@ -22,10 +23,22 @@ export const DEFAULT_SORT_FIELD = 'updated_at';
 /** Mirror keys look like `<name>_keyword`; anything else in the URL is ignored. */
 const MIRROR_KEY_PATTERN = /^[a-z0-9_]+$/i;
 const FIELD_SORT_PATTERN = /^fields\.[a-z0-9_]+$/i;
+/** Status keys are lower case letters, digits, `_` and `-` (same rule as the configuration). */
+const STATUS_KEY_PATTERN = /^[a-z0-9_-]{1,50}$/;
+/** `me`, `none` or a user profile uid. */
+export const ASSIGNED_TO_ME = 'me';
+export const UNASSIGNED = 'none';
+const MAX_URL_VALUE_LENGTH = 512;
 
 export interface QueueState {
   search: string;
+  /** Whole categories (`status=<category>`). Kept apart from `statusKeys`: the two exclude each other. */
   status: InvestigationStatus[];
+  /** Configured statuses (`status_key=<key>`). */
+  statusKeys: string[];
+  /** `me`, `none` (unassigned) and user profile uids. */
+  assignees: string[];
+  tags: string[];
   priority: InvestigationPriority[];
   investigationType: string[];
   verdict: Verdict[];
@@ -45,6 +58,9 @@ export interface QueueState {
 export const DEFAULT_QUEUE_STATE: QueueState = {
   search: '',
   status: [],
+  statusKeys: [],
+  assignees: [],
+  tags: [],
   priority: [],
   investigationType: [],
   verdict: [],
@@ -59,7 +75,6 @@ export const DEFAULT_QUEUE_STATE: QueueState = {
 
 const STATUSES: readonly InvestigationStatus[] = ['open', 'in-progress', 'closed'];
 const PRIORITIES: readonly InvestigationPriority[] = ['low', 'medium', 'high', 'critical'];
-const VERDICTS: readonly Verdict[] = ['true_positive', 'benign', 'inconclusive'];
 
 /** Fields the server accepts for sorting. Other values in the URL fall back to the default. */
 export const SORTABLE_FIELDS: readonly string[] = [
@@ -99,6 +114,19 @@ export const parseQueueState = (search: string): QueueState => {
   return {
     search: params.get('q') ?? '',
     status: pickAllowed(params.getAll('status'), STATUSES),
+    statusKeys: Array.from(
+      new Set(params.getAll('status_key').filter((key) => STATUS_KEY_PATTERN.test(key)))
+    ),
+    assignees: Array.from(
+      new Set(
+        params
+          .getAll('assignees')
+          .filter((value) => value.length > 0 && value.length <= MAX_URL_VALUE_LENGTH)
+      )
+    ),
+    tags: Array.from(
+      new Set(params.getAll('tag').filter((tag) => tag.length > 0 && tag.length <= 256))
+    ),
     priority: pickAllowed(params.getAll('priority'), PRIORITIES),
     investigationType: params.getAll('type'),
     verdict: pickAllowed(params.getAll('verdict'), VERDICTS),
@@ -126,6 +154,9 @@ export const serializeQueueState = (state: QueueState): string => {
   const params = new URLSearchParams();
   if (state.search) params.set('q', state.search);
   state.status.forEach((value) => params.append('status', value));
+  state.statusKeys.forEach((value) => params.append('status_key', value));
+  state.assignees.forEach((value) => params.append('assignees', value));
+  state.tags.forEach((value) => params.append('tag', value));
   state.priority.forEach((value) => params.append('priority', value));
   state.investigationType.forEach((value) => params.append('type', value));
   state.verdict.forEach((value) => params.append('verdict', value));
@@ -147,6 +178,9 @@ export const serializeQueueState = (state: QueueState): string => {
 export const toFindRequest = (state: QueueState): FindRecordsRequest => ({
   search: state.search.trim() || undefined,
   status: state.status.length ? state.status : undefined,
+  status_key: state.statusKeys.length ? state.statusKeys : undefined,
+  assignees: state.assignees.length ? state.assignees : undefined,
+  tags: state.tags.length ? state.tags : undefined,
   priority: state.priority.length ? state.priority : undefined,
   investigation_type: state.investigationType.length ? state.investigationType : undefined,
   verdict: state.verdict.length ? state.verdict : undefined,
@@ -163,6 +197,9 @@ export const toFindRequest = (state: QueueState): FindRecordsRequest => ({
 export const hasActiveFilters = (state: QueueState): boolean =>
   state.search.trim().length > 0 ||
   state.status.length > 0 ||
+  state.statusKeys.length > 0 ||
+  state.assignees.length > 0 ||
+  state.tags.length > 0 ||
   state.priority.length > 0 ||
   state.investigationType.length > 0 ||
   state.verdict.length > 0 ||

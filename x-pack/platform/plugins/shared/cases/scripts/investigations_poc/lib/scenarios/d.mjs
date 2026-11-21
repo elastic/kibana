@@ -22,6 +22,8 @@ import {
   proposalsStep,
   timelineStep,
   patchRecord,
+  assigneesStep,
+  postCaseComment,
   conversationsStep,
   claimHistoryActivity,
   responseLogActivity,
@@ -285,7 +287,16 @@ export const run = async () => {
   /* 4. Scope, claims, tasks, proposals, timeline */
   const scope = await scopeStep(ctx, { actor: hw, createdAt: ctx.clock.iso(t(4, 30, 0, 0, 0)), extraNodes: extraNodes(ctx) });
   await claimsStep(ctx);
-  await tasksStep(ctx, { actor: hw, createdAt: ctx.clock.iso(t(3, 50, 0, 0, 0)) });
+  await tasksStep(ctx, {
+    actor: hw,
+    createdAt: ctx.clock.iso(t(3, 50, 0, 0, 0)),
+    extras: {
+      // Containment has waited since the isolation was rejected: overdue by a day.
+      t5: { due: -DAY, assignees: ['JT'] },
+      t8: { due: 2 * DAY, assignees: ['JT', 'AL'] },
+      t9: { due: 3 * DAY },
+    },
+  });
   await proposalsStep(ctx, {
     actorCode: 'HW',
     meta: {
@@ -314,7 +325,10 @@ export const run = async () => {
     { tsMs: ms(t(10, 0, 0, 0, 20)), body: { agent_verdict: verdictOf(ctx), actor: hw } },
   ].sort((a, b) => a.tsMs - b.tsMs);
   for (const p of patches) await patchRecord(ctx.recordId, { ...p.body, ts: new Date(p.tsMs).toISOString() });
-  log(`  owner history and verdict history applied`);
+  await assigneesStep(ctx, ['JT', 'AL'], { actor: jt });
+  // The handoff note, also left as a record note by the person who wrote it.
+  await postCaseComment(ctx.recordId, 'JT', 'Handoff: finance-fs-02 staging is confirmed. Check the egress for the upload before anything else.');
+  log(`  owner history, verdict history, assignees and a record note applied`);
 
   /* 6. Conversations: 12 threads and the main conversation */
   const topics = st.msgs.map((m) => m.t.split(': ')[0]);

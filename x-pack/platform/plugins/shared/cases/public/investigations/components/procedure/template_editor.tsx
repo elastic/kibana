@@ -7,9 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -17,51 +21,63 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiIcon,
+  EuiScreenReaderOnly,
   EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { InvestigationRecord, TaskItem } from '../../../../common/investigations/types';
+import type { DropResult } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { InvestigationRecord } from '../../../../common/investigations/types';
+import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import {
-  useApplyProcedure,
+  getHttpErrorMessage,
+  getHttpErrorStatus,
   useInvestigationToasts,
-  useInvestigationTypes,
   useProcedureTemplates,
-  useUpdateProcedureTemplate,
 } from '../../hooks';
+import { useSaveProcedureTemplate, useWorkflowList } from '../../hooks/use_tasks';
 import { ICONS } from '../../icons';
 import { ConfirmModal, ErrorState, LoadingState } from '../shared';
-import { isTaskFinished } from './procedure_helpers';
 import { TemplateTaskRow } from './template_task_row';
 import {
+  MAX_SUBTASKS_PER_TASK,
   MAX_TEMPLATE_TASKS,
+  countDraftTasks,
   createBlankDraft,
+  createBlankSubtask,
   createDraftKey,
   serializeDraft,
   toDraft,
   toTemplateTasks,
   validateDraft,
 } from './template_draft';
-import type { DraftTask } from './template_draft';
+import type { DraftSubtask, DraftTask } from './template_draft';
 import * as i18n from './translations';
 
 export interface TemplateEditorProps {
   record: InvestigationRecord;
-  tasks: readonly TaskItem[];
   onClose: () => void;
 }
 
-type PendingAction = 'discard-close' | 'discard-type' | 'apply';
+type PendingAction = 'discard-close' | 'discard-type';
 
-export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, onClose }) => {
+/**
+ * Edits the reusable task list of an investigation type: one list per Cases template, with the
+ * built-in default shown until a list is saved.
+ */
+export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
   const { showSuccess } = useInvestigationToasts();
+  const { permissions } = useCasesContext();
   const templatesQuery = useProcedureTemplates();
-  const typesQuery = useInvestigationTypes();
-  const saveTemplate = useUpdateProcedureTemplate();
-  const applyProcedure = useApplyProcedure(record.id);
+  const workflowsQuery = useWorkflowList();
+  const saveTemplate = useSaveProcedureTemplate();
 
   const counter = useRef(0);
   const nextKey = useCallback(() => {
@@ -69,54 +85,59 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
     return createDraftKey(counter.current);
   }, []);
 
-  const [type, setType] = useState(record.investigation_type);
-  const [loadedType, setLoadedType] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(null);
+  const [loadedId, setLoadedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<DraftTask[]>([]);
   const [baseline, setBaseline] = useState('[]');
   const [showErrors, setShowErrors] = useState(false);
   const [pending, setPending] = useState<PendingAction | null>(null);
-  const [pendingType, setPendingType] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [isForbidden, setIsForbidden] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
 
   const templates = templatesQuery.data?.templates;
-  const typeOptions = useMemo(() => {
-    const names = new Set<string>([record.investigation_type]);
-    templates?.forEach((template) => names.add(template.type));
-    typesQuery.data?.types.forEach((investigationType) => names.add(investigationType.name));
-    return Array.from(names).filter((name) => name.length > 0);
-  }, [record.investigation_type, templates, typesQuery.data]);
+  const readOnly = !permissions.settings || isForbidden;
 
-  // Load the draft for the chosen type once, not on every refetch of the templates.
+  // Start on the task list of the record's type once the lists are known.
   useEffect(() => {
-    if (!templates || loadedType === type) {
+    if (!templates || templateId !== null) {
       return;
     }
-    const template = templates.find((candidate) => candidate.type === type);
+    const initial =
+      templates.find(
+        (template) =>
+          (record.template_id && template.template_id === record.template_id) ||
+          template.type === record.investigation_type
+      ) ?? templates[0];
+    if (initial) {
+      setTemplateId(initial.template_id);
+    }
+  }, [templates, templateId, record.template_id, record.investigation_type]);
+
+  // Load the draft for the chosen list once, not on every refetch of the lists.
+  useEffect(() => {
+    if (!templates || templateId === null || loadedId === templateId) {
+      return;
+    }
+    const template = templates.find((candidate) => candidate.template_id === templateId);
     const loaded = toDraft(template?.tasks ?? [], nextKey);
     setDraft(loaded);
     setBaseline(serializeDraft(loaded));
-    setLoadedType(type);
+    setLoadedId(templateId);
     setShowErrors(false);
-  }, [templates, type, loadedType, nextKey]);
+    setSaveError(null);
+  }, [templates, templateId, loadedId, nextKey]);
 
+  const selected = templates?.find((template) => template.template_id === templateId);
   const isDirty = serializeDraft(draft) !== baseline;
   const errors = useMemo(() => validateDraft(draft), [draft]);
-  const hasErrors = Object.keys(errors).length > 0 || draft.length > MAX_TEMPLATE_TASKS;
-  const unfinishedCount = tasks.filter((task) => !isTaskFinished(task)).length;
-  const isBusy = saveTemplate.isLoading || applyProcedure.isLoading;
+  const totalTasks = countDraftTasks(draft);
+  const hasErrors = Object.keys(errors).length > 0 || totalTasks > MAX_TEMPLATE_TASKS;
+  const isFull = totalTasks >= MAX_TEMPLATE_TASKS;
 
   const updateTask = (key: string, patch: Partial<DraftTask>) =>
     setDraft((current) => current.map((task) => (task.key === key ? { ...task, ...patch } : task)));
-  const moveTask = (key: string, direction: -1 | 1) =>
-    setDraft((current) => {
-      const index = current.findIndex((task) => task.key === key);
-      const target = index + direction;
-      if (index < 0 || target < 0 || target >= current.length) {
-        return current;
-      }
-      const next = [...current];
-      [next[index], next[target]] = [next[target], next[index]];
-      return next;
-    });
   const removeTask = (key: string) =>
     setDraft((current) =>
       current
@@ -125,64 +146,87 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
     );
   const addTask = () =>
     setDraft((current) => [...current, createBlankDraft(nextKey(), i18n.EDITOR_NEW_TASK)]);
+  const addSubtask = (taskKey: string) =>
+    setDraft((current) =>
+      current.map((task) =>
+        task.key === taskKey
+          ? {
+              ...task,
+              subtasks: [...task.subtasks, createBlankSubtask(nextKey(), i18n.EDITOR_NEW_SUBTASK)],
+            }
+          : task
+      )
+    );
+  const updateSubtask = (taskKey: string, subtaskKey: string, patch: Partial<DraftSubtask>) =>
+    setDraft((current) =>
+      current.map((task) =>
+        task.key === taskKey
+          ? {
+              ...task,
+              subtasks: task.subtasks.map((subtask) =>
+                subtask.key === subtaskKey ? { ...subtask, ...patch } : subtask
+              ),
+            }
+          : task
+      )
+    );
+  const removeSubtask = (taskKey: string, subtaskKey: string) =>
+    setDraft((current) =>
+      current.map((task) =>
+        task.key === taskKey
+          ? { ...task, subtasks: task.subtasks.filter((subtask) => subtask.key !== subtaskKey) }
+          : task
+      )
+    );
+
+  const handleDragEnd = ({ source, destination }: DropResult) => {
+    if (!destination || destination.index === source.index) {
+      return;
+    }
+    const next = [...draft];
+    const [moved] = next.splice(source.index, 1);
+    next.splice(destination.index, 0, moved);
+    setDraft(next);
+    setAnnouncement(
+      i18n.MOVED_ANNOUNCEMENT(
+        moved.title.trim() || i18n.EDITOR_NEW_TASK,
+        destination.index + 1,
+        next.length
+      )
+    );
+  };
 
   const requestClose = () => (isDirty ? setPending('discard-close') : onClose());
-  const requestTypeChange = (next: string) => {
-    if (next === type) {
+  const requestListChange = (next: string) => {
+    if (next === templateId) {
       return;
     }
     if (isDirty) {
-      setPendingType(next);
+      setPendingId(next);
       setPending('discard-type');
       return;
     }
-    setType(next);
-  };
-
-  const save = async (): Promise<boolean> => {
-    try {
-      await saveTemplate.mutateAsync({ type, tasks: toTemplateTasks(draft) });
-      setBaseline(serializeDraft(draft));
-      return true;
-    } catch {
-      return false;
-    }
+    setTemplateId(next);
   };
 
   const handleSave = async () => {
     setShowErrors(true);
-    if (hasErrors) {
-      return;
-    }
-    if (await save()) {
-      onClose();
-    }
-  };
-
-  const applySaved = async () => {
-    setPending(null);
-    if (!(await save())) {
+    setSaveError(null);
+    if (hasErrors || !templateId) {
       return;
     }
     try {
-      await applyProcedure.mutateAsync({ type, replace: true });
-      showSuccess(i18n.EDITOR_SAVED_APPLIED(type));
+      await saveTemplate.mutateAsync({ templateId, tasks: toTemplateTasks(draft) });
+      showSuccess(i18n.EDITOR_SAVED(selected?.type ?? ''));
+      setBaseline(serializeDraft(draft));
       onClose();
-    } catch {
-      // useApplyProcedure already shows the error.
+    } catch (error) {
+      if (getHttpErrorStatus(error) === 403) {
+        setIsForbidden(true);
+        return;
+      }
+      setSaveError(getHttpErrorMessage(error));
     }
-  };
-
-  const handleSaveAndApply = () => {
-    setShowErrors(true);
-    if (hasErrors) {
-      return;
-    }
-    if (unfinishedCount > 0) {
-      setPending('apply');
-      return;
-    }
-    void applySaved();
   };
 
   const renderBody = () => {
@@ -200,41 +244,108 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
     }
     return (
       <>
+        {readOnly ? (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              size="s"
+              color="primary"
+              title={i18n.EDITOR_READ_ONLY_TITLE}
+              text={<p>{i18n.EDITOR_READ_ONLY_BODY}</p>}
+              data-test-subj="investigationTemplateReadOnly"
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {draft.length === 0 ? (
           <EuiText size="s" color="subdued" data-test-subj="investigationTemplateEmpty">
             <p>{i18n.EDITOR_NO_TASKS}</p>
           </EuiText>
-        ) : null}
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-          {draft.map((task, index) => (
-            <EuiFlexItem grow={false} key={task.key}>
-              <TemplateTaskRow
-                draft={task}
-                index={index}
-                total={draft.length}
-                afterOptions={draft}
-                errors={showErrors ? errors[task.key] : undefined}
-                onChange={updateTask}
-                onMove={moveTask}
-                onRemove={removeTask}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiButtonEmpty
-          size="s"
-          iconType={ICONS.add}
-          isDisabled={draft.length >= MAX_TEMPLATE_TASKS}
-          onClick={addTask}
-          data-test-subj="investigationTemplateAddTask"
-        >
-          {i18n.EDITOR_ADD_TASK}
-        </EuiButtonEmpty>
-        {draft.length > MAX_TEMPLATE_TASKS ? (
-          <EuiText size="xs" color="danger">
-            {i18n.EDITOR_TOO_MANY}
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <p>{i18n.EDITOR_DRAG_HELP}</p>
           </EuiText>
+        )}
+        <EuiSpacer size="s" />
+        <EuiDragDropContext onDragEnd={handleDragEnd}>
+          <EuiDroppable droppableId="template-tasks" spacing="m">
+            {draft.map((task, index) => (
+              <EuiDraggable
+                key={task.key}
+                draggableId={task.key}
+                index={index}
+                spacing="s"
+                customDragHandle
+                usePortal
+                isDragDisabled={readOnly}
+              >
+                {(provided) => (
+                  <div>
+                    <TemplateTaskRow
+                      draft={task}
+                      index={index}
+                      afterOptions={draft}
+                      workflows={workflowsQuery.data?.results}
+                      workflowsError={workflowsQuery.isError}
+                      errors={showErrors ? errors[task.key] : undefined}
+                      readOnly={readOnly}
+                      canAddSubtask={!isFull && task.subtasks.length < MAX_SUBTASKS_PER_TASK}
+                      dragHandle={
+                        readOnly ? null : (
+                          <div
+                            {...provided.dragHandleProps}
+                            aria-label={i18n.DRAG_TO_REORDER}
+                            data-test-subj={`investigationTemplateDrag-${index}`}
+                            css={css`
+                              display: flex;
+                              align-items: center;
+                              cursor: grab;
+                            `}
+                          >
+                            <EuiIcon type={ICONS.dragHandle} color="subdued" aria-hidden="true" />
+                          </div>
+                        )
+                      }
+                      onChange={updateTask}
+                      onRemove={removeTask}
+                      onAddSubtask={addSubtask}
+                      onChangeSubtask={updateSubtask}
+                      onRemoveSubtask={removeSubtask}
+                    />
+                  </div>
+                )}
+              </EuiDraggable>
+            ))}
+          </EuiDroppable>
+        </EuiDragDropContext>
+        <EuiSpacer size="s" />
+        {readOnly || isFull ? null : (
+          <EuiButtonEmpty
+            size="s"
+            iconType={ICONS.add}
+            onClick={addTask}
+            data-test-subj="investigationTemplateAddTask"
+          >
+            {i18n.EDITOR_ADD_TASK}
+          </EuiButtonEmpty>
+        )}
+        {isFull ? (
+          <EuiText size="xs" color="subdued" data-test-subj="investigationTemplateMaxTasks">
+            {i18n.MAX_TASKS_REACHED(MAX_TEMPLATE_TASKS)}
+          </EuiText>
+        ) : null}
+        {saveError ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              title={i18n.EDITOR_SAVE_ERROR}
+              text={<p>{saveError}</p>}
+              data-test-subj="investigationTemplateSaveError"
+            />
+          </>
         ) : null}
         {showErrors && hasErrors ? (
           <>
@@ -271,15 +382,37 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
               <EuiFormRow label={i18n.EDITOR_TYPE_LABEL} display="rowCompressed">
                 <EuiSelect
                   compressed
-                  value={type}
-                  options={typeOptions.map((name) => ({ value: name, text: name }))}
-                  onChange={(event) => requestTypeChange(event.target.value)}
+                  value={templateId ?? ''}
+                  options={(templates ?? []).map((template) => ({
+                    value: template.template_id,
+                    text: template.saved
+                      ? template.type
+                      : i18n.EDITOR_TYPE_DEFAULT_OPTION(template.type),
+                  }))}
+                  isLoading={templatesQuery.isLoading}
+                  onChange={(event) => requestListChange(event.target.value)}
                   data-test-subj="investigationTemplateType"
                 />
               </EuiFormRow>
             </EuiFlexItem>
+            {selected ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color={selected.saved ? 'success' : 'hollow'}
+                  data-test-subj="investigationTemplateSavedBadge"
+                >
+                  {selected.saved ? i18n.EDITOR_SAVED_BADGE : i18n.EDITOR_DEFAULT_BADGE}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
             <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
+              <EuiText
+                size="xs"
+                color="subdued"
+                css={css`
+                  max-width: ${euiTheme.breakpoint.s}px;
+                `}
+              >
                 {i18n.EDITOR_HINT}
               </EuiText>
             </EuiFlexItem>
@@ -290,38 +423,31 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={requestClose} data-test-subj="investigationTemplateCancel">
-                {i18n.EDITOR_CANCEL}
+                {readOnly ? i18n.EDITOR_CLOSE : i18n.EDITOR_CANCEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={saveTemplate.isLoading && pending !== 'apply'}
-                    isDisabled={isBusy || !templates}
-                    onClick={() => void handleSave()}
-                    data-test-subj="investigationTemplateSave"
-                  >
-                    {i18n.EDITOR_SAVE}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    isLoading={applyProcedure.isLoading}
-                    isDisabled={isBusy || !templates}
-                    onClick={handleSaveAndApply}
-                    data-test-subj="investigationTemplateSaveApply"
-                  >
-                    {i18n.EDITOR_SAVE_APPLY}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {readOnly ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  fill
+                  isLoading={saveTemplate.isLoading}
+                  isDisabled={!templates || templateId === null}
+                  onClick={() => void handleSave()}
+                  data-test-subj="investigationTemplateSave"
+                >
+                  {i18n.EDITOR_SAVE}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
+        <EuiScreenReaderOnly>
+          <div role="status" aria-live="polite" data-test-subj="investigationTemplateAnnouncement">
+            {announcement}
+          </div>
+        </EuiScreenReaderOnly>
       </EuiFlyout>
-      {pending === 'discard-close' || pending === 'discard-type' ? (
+      {pending ? (
         <ConfirmModal
           title={i18n.EDITOR_DISCARD_TITLE}
           body={<p>{i18n.EDITOR_DISCARD_BODY}</p>}
@@ -329,9 +455,9 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
           cancelLabel={i18n.EDITOR_KEEP_EDITING}
           destructive
           onConfirm={() => {
-            if (pending === 'discard-type' && pendingType) {
-              setType(pendingType);
-              setPendingType(null);
+            if (pending === 'discard-type' && pendingId) {
+              setTemplateId(pendingId);
+              setPendingId(null);
               setPending(null);
               return;
             }
@@ -340,20 +466,9 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, tasks, o
           }}
           onCancel={() => {
             setPending(null);
-            setPendingType(null);
+            setPendingId(null);
           }}
           data-test-subj="investigationTemplateDiscardModal"
-        />
-      ) : null}
-      {pending === 'apply' ? (
-        <ConfirmModal
-          title={i18n.EDITOR_APPLY_TITLE}
-          body={<p>{i18n.EDITOR_APPLY_BODY(type, unfinishedCount)}</p>}
-          confirmLabel={i18n.EDITOR_APPLY_CONFIRM}
-          destructive
-          onConfirm={() => void applySaved()}
-          onCancel={() => setPending(null)}
-          data-test-subj="investigationTemplateApplyModal"
         />
       ) : null}
     </>
