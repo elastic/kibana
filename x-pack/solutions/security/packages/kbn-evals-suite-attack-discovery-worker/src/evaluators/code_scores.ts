@@ -416,8 +416,8 @@ export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
 
 /**
  * For rows the review cannot see (`blindReason`): the right answer is to abstain. A definite
- * verdict means the model claimed evidence the workflow never gave it. Reported only (threshold 0
- * in `CODE_PASS_THRESHOLDS`), because the gap is the workflow's, not the model's.
+ * verdict means the model claimed evidence the workflow never gave it. Reported only
+ * (`QUALITY_CODE_EVALUATORS`), because the gap is the workflow's, not the model's.
  */
 export const scoreBlindReviewAbstained: CodeScorer = (expected, artifacts) => {
   if (!expected.blindReason) return notApplicable("the review can see this row's evidence");
@@ -521,10 +521,9 @@ export const scoreOutcomeReported: CodeScorer = (_expected, artifacts) => {
 const MAX_UNKNOWN_IDS_REPORTED = 20;
 
 /**
- * Fraction of the distinct alert ids the discoveries cite that were seeded. A cited id outside
- * the seeded set is one the model or the batch merge invented or corrupted. `chainRecall` reports
- * whether every seeded alert of the gold recall-target group is cited (absent when the scenario
- * names no such group).
+ * A cited id outside the seeded set is one the model or the batch merge invented or corrupted.
+ * `chainRecall` reports whether every seeded alert of the gold recall-target group is cited
+ * (absent when the scenario names no such group).
  */
 export const scoreAlertIdSurvival: CodeScorer = (_expected, artifacts) => {
   const cited = new Set(artifacts.insights.flatMap(({ alertIds }) => alertIds));

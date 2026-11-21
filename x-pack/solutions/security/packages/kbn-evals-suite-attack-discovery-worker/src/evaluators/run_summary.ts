@@ -299,10 +299,6 @@ export const logRunSummary = ({
   return rows;
 };
 
-/**
- * Lists the quality misses the gate did not count, after the per-evaluator summary, so a run that
- * passes still states what the model got wrong.
- */
 export const logQualityMisses = ({
   failures,
   datasetName,

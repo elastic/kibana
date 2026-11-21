@@ -49,10 +49,6 @@ const collectStepNames = (steps: unknown, names: string[]): void => {
   });
 };
 
-/**
- * Step names declared in a workflow definition, at any depth: top-level steps plus the steps
- * nested in foreach, parallel, if/else and switch cases. Throws when the YAML does not parse.
- */
 export const parseStepNames = (yaml: string): string[] => {
   const names: string[] = [];
   collectStepNames(asRecord(parse(yaml))?.steps, names);

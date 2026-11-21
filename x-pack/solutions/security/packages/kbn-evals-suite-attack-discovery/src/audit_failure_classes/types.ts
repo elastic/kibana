@@ -14,11 +14,7 @@ import type { AnonymizedAlert } from '../types';
  */
 export type AuditInputVariant = 'baseline' | 'enriched' | 'enriched_context';
 
-/**
- * Per-variant replacement of parts of the gold: the recall target (`requiredGroup` /
- * `requiredAnyOf`) and, when set, the forbidden pairs (`forbiddenCoCitation`; `[]` means no pair
- * is forbidden in that variant).
- */
+/** Per-variant override of parts of the gold; see `variantOverrides` for the property contract. */
 export type AuditGoldVariantOverride = Partial<
   Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf' | 'forbiddenCoCitation'>
 >;

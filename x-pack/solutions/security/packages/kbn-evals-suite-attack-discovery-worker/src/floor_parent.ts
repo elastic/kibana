@@ -64,10 +64,6 @@ export const rewriteFloorParentYaml = ({
   return String(document);
 };
 
-/**
- * The `workflow-id` the floor's single `workflow.execute` step dispatches, or undefined when the
- * YAML does not parse or has no such single step.
- */
 export const floorDispatchTarget = (yaml: string): string | undefined => {
   const document = parseDocument(yaml);
   if (document.errors.length > 0) return undefined;
@@ -95,9 +91,7 @@ const hasRenderedInputs = (yaml: string): boolean => {
 
 /**
  * Whether the floor is as the registry renders it: it dispatches the runner and still has the
- * rendered inputs. An interrupted floor-parent run leaves its edit behind, including a rewrite that
- * keeps the runner as target but swaps in literal inputs, and reading that as the "original" would
- * make the next run restore the leftover.
+ * rendered inputs.
  */
 export const isFloorClean = (yaml: string): boolean =>
   floorDispatchTarget(yaml) === RUNNER_WORKFLOW_ID && hasRenderedInputs(yaml);

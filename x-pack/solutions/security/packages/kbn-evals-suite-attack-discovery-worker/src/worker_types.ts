@@ -20,10 +20,6 @@ export interface WorkerInput extends Record<string, unknown> {
   spaceId: string;
 }
 
-/**
- * Per-scenario answer key for the review stage. The generation-stage gold (alert groups,
- * forbidden joins) lives with the scenario in `@kbn/evals-suite-attack-discovery`.
- */
 export interface WorkerExpected extends Record<string, unknown> {
   goldVerdict: GoldVerdict;
   /** Other verdicts that are also correct, for rows whose evidence does not separate them. */
@@ -76,10 +72,6 @@ export interface StepSnapshot {
   output?: unknown;
 }
 
-/**
- * What the review's FP/TP analysis step actually ran on, read from the per-step usage of the
- * analysis child execution (`stepUsage` entries for its `analyze` step).
- */
 export interface ReviewAnalysisUsage {
   childExecutionId?: string;
   /**
@@ -98,8 +90,8 @@ export interface ReviewAnalysisUsage {
 }
 
 /**
- * What generation actually ran on, read from the `api_config` stored on each persisted
- * discovery. Generation token usage is not reported by the runner, so none is carried.
+ * What generation ran on, read from the `api_config` stored on each persisted discovery.
+ * Generation token usage is not reported by the runner, so none is carried.
  */
 export interface GenerationUsage {
   discoveryCount: number;

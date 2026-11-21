@@ -197,11 +197,6 @@ const isFloorWorkflowClean = async (
 ): Promise<boolean> =>
   isFloorClean((await readFloorWorkflow({ fetch, spaceId, floorWorkflowId: workflowId })).yaml);
 
-/**
- * Writes the floor worker's settings with the revision read just before, retrying once with a fresh
- * one on a 409 so a concurrent write does not leave the worker half put back. Other failures
- * rethrow.
- */
 const patchFloorSettingsWithRetry = async (
   fetch: HttpHandler,
   spaceId: string,
@@ -267,9 +262,8 @@ const reRenderFloor = async ({
 };
 
 /**
- * Throws unless the floor dispatches the runner. A leftover from an interrupted floor-parent run is
- * re-rendered (see `reRenderFloor`) and checked again. The worker must be disabled, so nothing can
- * dispatch the leftover meanwhile.
+ * Throws unless the floor dispatches the runner. The worker must be disabled, so nothing can
+ * dispatch a leftover meanwhile (repair: `reRenderFloor`).
  */
 const ensureFloorClean = async ({
   fetch,
@@ -476,13 +470,7 @@ export const settleEnableTimeRun = async ({
  * so a run starts the way production starts it: the worker dispatches the runner as its
  * `run_as` identity. The enable-time scheduled run is cancelled before this returns (see
  * `settleEnableTimeRun`); the long schedule interval keeps any later tick out of the rows.
- *
- * TODO(Workflows/AlertZero owners): the seeded-false-positive row starts the review through the
- * floor worker's rewritten YAML (see `runViaFloorParent`) because the review inherits its
- * execution identity and refuses a direct `/run` with 403. What this suite needs is a supported
- * run-as service-account start API for such workflows — the same `alertzero_attack_discovery`
- * identity the floor runs as. When that lands, the floor-parent workaround and its restore
- * machinery can be deleted.
+ * (Pending upstream API: see the TODO on `runViaFloorParent`.)
  */
 export const enableFloorWorker = async ({
   fetch,
@@ -513,11 +501,9 @@ export const enableFloorWorker = async ({
   /** Set once the repair has disabled an enabled worker, so a failed `restore` can say so. */
   let disabledForRepair = false;
   /**
-   * Re-renders a floor that an interrupted floor-parent run left rewritten, only while the worker
-   * is disabled (an enabled one is disabled first), since on a live worker the write can fire a
-   * tick that dispatches the leftover. Returns whether the floor was repaired; the worker is then
-   * left disabled and its settings revision has moved, so the caller re-reads it and re-enables it
-   * if needed.
+   * Repairs a leftover rewrite via `reRenderFloor` (its contract covers the disabled-only
+   * precondition). Returns whether the floor was repaired; the worker is then left disabled and
+   * its settings revision has moved, so the caller re-reads it and re-enables it if needed.
    */
   const repairFloorWhileDisabled = async ({
     workflowId,

@@ -143,10 +143,6 @@ const readNarrative = (
     : raw;
 };
 
-/**
- * Maps persisted discovery documents to the shape the audit evaluators read, with the seeded
- * alert ids translated back to the scenario's own ids and the narrative de-anonymized.
- */
 export const toInsights = (
   docs: readonly Record<string, unknown>[],
   goldIdBySeededId: ReadonlyMap<string, string>
@@ -179,8 +175,7 @@ const distinct = (values: readonly (string | undefined)[]): string[] => [
 
 /**
  * What generation ran on, from the `api_config` each persisted discovery carries (the runner
- * stores the connector the generation call resolved to). The runner reports no generation
- * token usage, so none is read.
+ * stores the connector the generation call resolved to).
  */
 export const generationUsageOf = (docs: readonly Record<string, unknown>[]): GenerationUsage => {
   const connectors = docs.map((doc) =>
@@ -265,8 +260,7 @@ const snapshot = (step: WorkflowStepExecutionDto): StepSnapshot => ({
 });
 
 /**
- * The Investigation id the review derives from the attack id:
- * `<a[0:8]>-<a[8:12]>-8<a[12:15]>-8<a[15:18]>-<a[18:30]>`.
+ * The Investigation id the review derives from the attack id.
  */
 export const investigationIdFor = (attackDiscoveryId: string): string | undefined => {
   const hex = attackDiscoveryId.replace(/-/g, '');
@@ -755,10 +749,6 @@ export const extractStepTimings = (run: WorkflowExecutionDto): StepTiming[] =>
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     }));
 
-/**
- * Runner wall time: the engine's `finishedAt - startedAt` when both are readable, otherwise the
- * time the client measured around the run (`clientWallTimeMs`), with the source recorded.
- */
 export const wallTimeOf = (
   run: WorkflowExecutionDto,
   clientWallTimeMs?: number
@@ -773,11 +763,6 @@ export const wallTimeOf = (
     : {};
 };
 
-/**
- * Collects what one runner execution produced: the persisted discoveries, the fingerprint
- * match result, every review it dispatched (polled until it ends or parks at the analyst gate)
- * and the outcome events it reported.
- */
 export const collectWorkerArtifacts = async ({
   client,
   esClient,

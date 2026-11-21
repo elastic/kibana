@@ -139,11 +139,6 @@ export class AttackDiscoveryWorkerClient {
     return { execution };
   }
 
-  /**
-   * Finds the execution of `workflowId` that `parentExecutionId` started, which appears only once
-   * the parent's `workflow.execute` step has begun. Undefined when the parent ended without
-   * starting one.
-   */
   private async findChildExecution({
     spaceId,
     parentExecutionId,
@@ -259,10 +254,6 @@ export class AttackDiscoveryWorkerClient {
     return polled;
   }
 
-  /**
-   * Runs the runner through the floor worker within one `RUNNER_TIMEOUT_MS` deadline (see
-   * `runFloorToChild`).
-   */
   async run({
     spaceId,
     floorWorkflowId,
@@ -284,7 +275,9 @@ export class AttackDiscoveryWorkerClient {
    * Runs `targetWorkflowId` as a child of the floor worker and polls it until `isDone` accepts it
    * or it ends. A workflow that inherits its execution identity (the review) is refused with 403
    * when started directly, so the floor is the parent: its stored YAML is rewritten to dispatch the
-   * target with literal `inputs`, the floor is run, and the YAML is put back.
+   * target with literal `inputs`, the floor is run, and the YAML is put back. A workflow that
+   * inherits its execution identity (the review) is refused with 403 when started directly (see
+   * the TODO below).
    *
    * TODO(Workflows/AlertZero owners): this floor-parent rewrite exists because the review workflow
    * refuses a direct `/run` with 403 (it inherits its execution identity). The supported answer is
@@ -484,7 +477,7 @@ export class AttackDiscoveryWorkerClient {
 
   /**
    * Waits for each cancelled execution to end and returns a failure for any that has not by the
-   * deadline (re-tracked for one retry like a failed cancel). Settled ones are cleared.
+   * deadline. Settled ones are cleared.
    */
   private async settleCancelled(
     cancelled: Array<{ spaceId: string; executionId: string }>
@@ -508,11 +501,7 @@ export class AttackDiscoveryWorkerClient {
     });
   }
 
-  /**
-   * Cancels those of the given executions that have not ended (the route may refuse an ended one),
-   * then waits a bounded time for them to end. Failures, including an execution that has not ended
-   * by the deadline, follow `cancelPending`'s contract.
-   */
+  /** Cancels those of the given executions that have not ended; contract: `cancelPending`. */
   private async cancelExecutions(spaceId: string, executionIds: string[]): Promise<void> {
     for (const executionId of executionIds) this.forget(executionId);
     const live = (
@@ -532,10 +521,6 @@ export class AttackDiscoveryWorkerClient {
     throwFailures([...failures, ...(await this.settleCancelled(cancelled))]);
   }
 
-  /**
-   * Waits a bounded time for a cancelled execution to end (a 404 counts as ended) and returns
-   * whether it did.
-   */
   private async waitUntilSettled(spaceId: string, executionId: string): Promise<boolean> {
     const deadline = Date.now() + CANCEL_SETTLE_TIMEOUT_MS;
     for (;;) {

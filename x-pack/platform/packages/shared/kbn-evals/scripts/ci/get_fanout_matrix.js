@@ -168,9 +168,8 @@ function buildFanoutMatrix({
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
-  // `requiredModelGroups` is always unioned into the request (see assertRequestedConnectors),
-  // whatever the caller asked for: a suite that must always cover its AZ tier models keeps that coverage even when an
-  // on-demand run names one specific model via EVAL_MODEL_GROUPS.
+  // `requiredModelGroups` is always unioned into the request; see `assertRequestedConnectors`
+  // for the required-group vs operator-request rule.
   const requiredModelGroups = Array.isArray(suiteInfo.requiredModelGroups)
     ? suiteInfo.requiredModelGroups
     : [];

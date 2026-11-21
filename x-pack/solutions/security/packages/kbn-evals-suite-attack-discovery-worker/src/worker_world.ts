@@ -17,16 +17,7 @@ import {
  * Without them the review has nothing but the alerts, and its rules leave one reachable verdict:
  * `inconclusive` (a `false_positive` needs hits in both sources, a `true_positive` needs a
  * supporting parent or destination in the raw events). The documents here are authored to agree
- * with each scenario's gold verdict, the way an analyst would read them:
- *
- * - positive-chain-with-noise: an ordinary workstation, `powershell.exe` started by `explorer.exe`
- *   and an unknown public IP as the destination (supports);
- * - benign-batch: thin host records, management and service parents, one internal management
- *   destination (contradicts);
- * - threshold-meta-alerts: thin records, a task scheduler parent, the internal backup server as
- *   the destination (contradicts);
- * - bait-false-positive: thin records, the alerts' encoded PowerShell and scheduled task under the
- *   management agent, the internal management server as the only destination (contradicts).
+ * with each scenario's gold verdict, the way an analyst would read them.
  *
  * The cloud scenarios have no host, so the raw-event source can never hold hits for them and no
  * documents are seeded: their review stays `inconclusive` by construction. That is a gap in the

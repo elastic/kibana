@@ -358,10 +358,7 @@ export interface SeededScenario {
   /** Seeded `_id` to the scenario's own alert id, so evaluators compare against gold ids. */
   goldIdBySeededId: ReadonlyMap<string, string>;
   alertCount: number;
-  /**
-   * The entity store records and raw endpoint events written next to the alerts (see
-   * `worker_world.ts`), by index and `_id`. Removed with the seed.
-   */
+  /** World docs (see `worker_world.ts`), by index and `_id`. Removed with the seed. */
   worldDocs: ReadonlyArray<Pick<WorldDoc, 'index' | 'id'>>;
   /** `_id` of the authored discovery seeded next to the alerts (seeded-false-positive only). */
   seededDiscoveryId?: string;
@@ -563,12 +560,7 @@ const deleteMatching = async ({
   }
 };
 
-/**
- * When the seed bulk itself rejected (a socket hang up or a client timeout), Elasticsearch may
- * still be running it, so a missing document does not yet mean nothing will land. The delete and
- * the read-back then repeat for `UNSETTLED_REMOVE_ROUNDS` rounds, `UNSETTLED_REMOVE_PAUSE_MS` apart:
- * 8 rounds with 7 pauses, 3.5s in all.
- */
+/** Unsettled-bulk rollback bounds: see `removeSeededAlertsById` for the rounds contract. */
 const UNSETTLED_REMOVE_ROUNDS = 8;
 const UNSETTLED_REMOVE_PAUSE_MS = 500;
 

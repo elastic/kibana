@@ -286,10 +286,7 @@ const adaptAuditEvaluator = (
   );
 
 /**
- * The generation-quality checks from the audit suite, run over the persisted discoveries. The
- * `ConditionalRemediationJudge` (an LLM judge, so never in the code-score gate) confirms the
- * regex `ConditionalRemediation` screen's flags on the same discoveries; the regex evaluator
- * stays as the deterministic lower bound.
+ * The generation-quality checks from the audit suite, run over the persisted discoveries.
  */
 export const createAuditEvaluators = ({
   routing,

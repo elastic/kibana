@@ -11,12 +11,6 @@
  * License 2.0.
  */
 
-/**
- * Public surface of the Attack Discovery eval suite. The worker suite
- * (`@kbn/evals-suite-attack-discovery-worker`) imports the audit failure classes and evaluators
- * from here instead of carrying copies: one definition of every check, fixed in one place.
- */
-
 export {
   AUDIT_INPUT_VARIANTS,
   AUDIT_SCENARIOS,

@@ -197,11 +197,6 @@ export const buildSeededFalsePositiveDiscovery = ({
   return { id, doc };
 };
 
-/**
- * Negative control: 18 routine SCCM alerts plus an authored Attack Discovery claiming an attack
- * over them. Generation must still report nothing; the review, dispatched directly at the seeded
- * discovery, must clear it as a false positive.
- */
 export const seededFalsePositiveScenario: AuditScenario = {
   id: SCENARIO_ID,
   description:

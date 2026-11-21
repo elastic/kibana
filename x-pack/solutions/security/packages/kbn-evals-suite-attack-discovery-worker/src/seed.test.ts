@@ -706,10 +706,6 @@ describe('seedScenario world documents', () => {
       expect((error as Error).message).toMatch(/socket hang up/);
     });
 
-    /**
-     * Counts of the world rollback, by round: the nth `ids` count of an index answers
-     * `countsByRound[n]` (the last entry repeats). Every other count answers 0.
-     */
     const worldCountsByRound = (countsByRound: readonly number[]) => {
       const reads = new Map<string, number>();
       return jest.fn(async ({ index, query }: { index: string; query?: { ids?: unknown } }) => {
@@ -775,10 +771,6 @@ describe('seedScenario world documents', () => {
     describe('when one world index fails while another is still rolling back', () => {
       const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
-      /**
-       * The first world index to be deleted from fails at once. Every other world index holds its
-       * first read-back on a gate the test opens, then answers `remainingAfterGate`, and 0 after.
-       */
       const failingFirstIndex = (remainingAfterGate: number) => {
         let failingIndex: string | undefined;
         let openGate: () => void = () => undefined;

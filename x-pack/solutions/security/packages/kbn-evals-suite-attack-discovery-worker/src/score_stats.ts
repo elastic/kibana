@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/**
- * Pure score statistics. A mean without a confidence interval invites
- * over-reading: at n=3 examples x 3 reps, one example flipping moves a dataset
- * mean by 0.33. Every reported number here carries its own resolution limit.
- */
-
 export interface ScoreStats {
   n: number;
   mean: number;
@@ -94,8 +88,7 @@ export const areDistinguishable = (
 
 /**
  * Paired per-example delta: for each example scored in both arms, the score
- * difference removes example difficulty as a variance source. Typically halves
- * the n needed versus comparing dataset means.
+ * difference removes example difficulty as a variance source.
  */
 export const pairedDeltas = (
   aByExample: Map<string, number | null>,
