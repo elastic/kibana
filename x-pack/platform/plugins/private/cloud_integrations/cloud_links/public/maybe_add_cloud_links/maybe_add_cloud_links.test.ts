@@ -236,4 +236,30 @@ describe('maybeAddCloudLinks', () => {
     expect(security.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
     expect(chrome.setHelpMenuLinks).not.toHaveBeenCalledTimes(1);
   });
+
+  it('when running on ECE, it does not add the profile and organization links', async () => {
+    const security = securityMock.createStart();
+    security.authc.getCurrentUser.mockResolvedValue(
+      securityMock.createMockAuthenticatedUser({ elastic_cloud_user: true })
+    );
+    const core = coreMock.createStart();
+    const cloud = {
+      ...cloudMock.createStart(),
+      isCloudEnabled: true,
+      isEce: true,
+      getPrivilegedUrls: jest.fn().mockResolvedValue({ billingUrl: 'billing-url' }),
+    };
+    maybeAddCloudLinks({
+      security,
+      core,
+      share: sharePluginMock.createStartContract(),
+      cloud,
+      isServerless: false,
+    });
+    await new Promise((resolve) => process.nextTick(resolve));
+    const links = security.navControlService.addUserMenuLinks.mock.calls[0][0];
+    const testSubjects = links.map(({ dataTestSubj }) => dataTestSubj);
+    expect(testSubjects).not.toContain('userMenuLink__profile');
+    expect(testSubjects).not.toContain('userMenuLink__organization');
+  });
 });

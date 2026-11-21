@@ -25,11 +25,12 @@ export const createUserMenuLinks = async ({
   security: SecurityPluginStart;
   isServerless: boolean;
 }): Promise<UserMenuLink[]> => {
-  const { profileUrl, organizationUrl } = cloud;
+  const { profileUrl, organizationUrl, isEce } = cloud;
 
   const userMenuLinks = [] as UserMenuLink[];
 
-  if (profileUrl) {
+  // ECE has no user profile or organization pages: these links would 404 on the ECE admin console.
+  if (profileUrl && !isEce) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.profileLinkText', {
         defaultMessage: 'Profile',
@@ -57,7 +58,7 @@ export const createUserMenuLinks = async ({
     });
   }
 
-  if (organizationUrl) {
+  if (organizationUrl && !isEce) {
     userMenuLinks.push({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.organizationLinkText', {
         defaultMessage: 'Organization',
