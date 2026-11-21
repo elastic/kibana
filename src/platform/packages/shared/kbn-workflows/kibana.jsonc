@@ -13,6 +13,7 @@
       "!managed/definitions/aesop_prototype/aesop_ab_compare.yaml",
       "!managed/definitions/aesop_prototype/aesop_drift_monitor.yaml",
       "!managed/definitions/aesop_prototype/aesop_explorer.yaml",
+      "!managed/definitions/aesop_prototype/aesop_refine.yaml",
       "!managed/definitions/alertzero/detection_rule_coverage.yaml",
       "!managed/definitions/alertzero/detection_rule_tuning.yaml",
       "!managed/definitions/alertzero/floor_alert_triage.yaml",
