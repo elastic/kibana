@@ -10,16 +10,51 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { RuleCreationClient } from '../src/rule_creation_client';
-import { assertToolSpansReachable } from '../src/evaluators/tool_routing';
+import { armTraceEvaluators } from '../src/evaluators/tool_routing';
 import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
 import { createCanaryEvaluator } from '../src/evaluators/canary_evaluator';
-import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
+import {
+  assertDraftRanOnModel,
+  assertWorkflowInstalled,
+  bindModelUnderTest,
+  ensureJudgeConnectorAccessible,
+} from '../src/workflow_fixture';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 import { canaryDataset } from '../datasets/canary';
 
+// Winnable gaps tried in order; the first the quality gate does not decline carries the probe.
+const REACHABILITY_PROBE_INPUTS = [
+  {
+    technique: 'T1078.001',
+    gap_description:
+      'No rule covering repeated failed sudo authentication from a single Linux host.',
+    evidence:
+      'Hunt found 40+ sudo auth failures for one account on linux-web-01 within 10 minutes.',
+    confidence: 0.9,
+  },
+  {
+    technique: 'T1548.002',
+    gap_description:
+      'No rule for UAC bypass via Windows Firewall MMC snap-in hijack. ' +
+      'Attackers use this to elevate privileges without a UAC prompt.',
+    evidence:
+      'Red team exercise reproduced the technique: mmc.exe spawning unexpected child processes ' +
+      'when launched with WF.msc argument on Windows hosts.',
+    confidence: 0.9,
+  },
+];
+
 evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.complete }, () => {
+  let restoreModelBinding: (() => Promise<void>) | undefined;
+
+  evaluate.afterAll(async ({ log }: { log: ToolingLog }) => {
+    await restoreModelBinding?.().catch((error: Error) =>
+      log.warning(`Could not restore inference feature settings: ${error.message}`)
+    );
+  });
+
   evaluate.beforeAll(
     async ({
       fetch,
@@ -36,42 +71,45 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
     }) => {
       await ensureJudgeConnectorAccessible({ fetch, connector, log });
       await assertWorkflowInstalled({ fetch, log });
+      restoreModelBinding = await bindModelUnderTest({ fetch, connector, log });
 
       // Trace reachability assertion. A run whose executions carry no traceId — or whose
       // agent tool spans never reach the tracing cluster — silently degrades every
       // trace-based evaluator (Tool Routing, Trajectory: *) to N/A, and N/A is not a failure, so the suite
       // would still report a pass. Probe once here and fail setup loudly instead.
       //
-      // The probe input must be WINNABLE: the managed workflow's quality gate refuses
-      // catch-all gaps and confidence < 0.3 (see rule_creation.yaml), so a deliberately
-      // vague probe would be correctly declined, produce no agent turn, and prove nothing
-      // about tracing. Verified 2026-08-31: the earlier low-confidence probe passed on an
-      // execution that produced no rule at all.
-      const probe = await ruleCreationClient.run({
-        input: {
-          technique: 'T1078.001',
-          gap_description:
-            'No rule covering repeated failed sudo authentication from a single Linux host.',
-          evidence:
-            'Hunt found 40+ sudo auth failures for one account on linux-web-01 within 10 minutes.',
-          confidence: 0.9,
+      // The probe input must be WINNABLE: a vague probe can be correctly declined, produce no
+      // tool call, and prove nothing about tracing. Verified 2026-08-31: an earlier
+      // low-confidence probe passed on an execution that produced no rule at all.
+      //
+      // A probe the quality gate declines proves nothing about tracing, so armTraceEvaluators
+      // re-probes with the next winnable gap and throws if every one is declined — it never
+      // reports the evaluators armed on a skipped probe.
+      const probe = await armTraceEvaluators({
+        inputs: REACHABILITY_PROBE_INPUTS,
+        traceEsClient,
+        log,
+        runProbe: async (input) => {
+          const run = await ruleCreationClient.run({ input });
+          // Every score below is attributed to `connector`; prove the draft ran on it.
+          assertDraftRanOnModel({ connectorId: run.connectorId, expected: connector.id });
+          if (!run.traceId) {
+            throw new Error(
+              'Workflow execution carried no traceId — trace-based evaluators (Tool Routing, Trajectory: *) would ' +
+                'silently score N/A and the suite would report a false pass. This stack is not ' +
+                'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
+            );
+          }
+          if (!run.rule && !run.skipped) {
+            throw new Error(
+              'TraceId probe produced neither a rule nor an explicit skip on a winnable gap. The ' +
+                'draft agent step is failing, so no tool spans exist to trace and every trace-based ' +
+                'evaluator would score N/A on a broken run.'
+            );
+          }
+          return run;
         },
       });
-      if (!probe.traceId) {
-        throw new Error(
-          'Workflow execution carried no traceId — trace-based evaluators (Tool Routing, Trajectory: *) would ' +
-            'silently score N/A and the suite would report a false pass. This stack is not ' +
-            'persisting OTEL trace ids (see #284701); fix the stack, not the suite.'
-        );
-      }
-      if (!probe.rule && !probe.skipped) {
-        throw new Error(
-          'TraceId probe produced neither a rule nor an explicit skip on a winnable gap. The ' +
-            'draft agent step is failing, so no tool spans exist to trace and every trace-based ' +
-            'evaluator would score N/A on a broken run.'
-        );
-      }
-      await assertToolSpansReachable({ traceEsClient, probe, log });
       log.info(`trace reachability verified (${probe.traceId}) — trace-based evaluators armed`);
     }
   );
