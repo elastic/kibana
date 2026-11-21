@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
@@ -16,6 +16,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 interface DragHandleProps {
   isEditable: boolean;
   controlTitle?: string;
+  dragHandleRef?: React.Ref<HTMLDivElement>;
   highContrast?: boolean; // If true, set the icon color to higher contrast instead of subdued
   [key: string]: any; // Allows passing additional props (like drag info)
 }
@@ -32,9 +33,9 @@ const dragHandleStyles = {
         color: euiTheme.colors.textDisabled,
       },
       '&:hover > .euiIcon:first-of-type': {
-        color: euiTheme.colors.textParagraph,
+        color: euiTheme.colors.vis.euiColorVis0,
       },
-      '.euiFormLabel': {
+      '.euiFormLabel:not([role="button"])': {
         pointerEvents: 'none', // Prevent label from blocking drag events
       },
     }),
@@ -42,6 +43,9 @@ const dragHandleStyles = {
     css({
       '.euiIcon': {
         color: euiTheme.colors.textParagraph,
+      },
+      '&:hover > .euiIcon:first-of-type': {
+        color: euiTheme.colors.primary,
       },
     }),
 };
@@ -51,15 +55,34 @@ export const DragHandle = ({
   controlTitle = '',
   children,
   highContrast,
+  dragHandleRef,
   ...rest
 }: DragHandleProps) => {
   const styles = useMemoCss(dragHandleStyles);
+
+  // hide hover actions on drop; otherwise, they get stuck
+  const onPointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const handle = event.currentTarget;
+    const release = () => {
+      window.removeEventListener('pointerup', release, true);
+      window.removeEventListener('pointercancel', release, true);
+      if (document.activeElement === handle) handle.blur();
+    };
+    window.addEventListener('pointerup', release, true);
+    window.addEventListener('pointercancel', release, true);
+  }, []);
 
   if (!isEditable) return children;
 
   return (
     <div
       {...rest}
+      ref={dragHandleRef}
+      onPointerDown={onPointerDown}
+      // keyboard users need to focus the handle to start a move with Space/Enter + arrow keys;
+      // a div is used (rather than a <button>) because the handle may wrap an interactive label
+      role="button"
+      tabIndex={0}
       aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
         defaultMessage: 'Move control {controlTitle}',
         values: { controlTitle },

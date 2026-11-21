@@ -79,7 +79,7 @@ const DashboardToolBarComponent = ({
       css({
         // Keep TopNav's levels.mask from competing with the shared Security KQL header.
         isolation: 'isolate',
-        '.controlGroup[data-test-subj="controls-group-wrapper"]': {
+        '[data-test-subj="controls-group-wrapper"] .controlGroup': {
           backgroundColor: euiTheme.colors.backgroundBaseRecessed,
           paddingTop: euiTheme.size.s,
         },

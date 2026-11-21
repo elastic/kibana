@@ -119,6 +119,30 @@ describe('GridLayout', () => {
     expect(onLayoutChange).toHaveBeenCalledTimes(1);
   });
 
+  describe('mobile view class', () => {
+    const originalInnerWidth = window.innerWidth;
+
+    afterEach(() => {
+      window.innerWidth = originalInnerWidth;
+    });
+
+    it('keeps `kbnGrid--mobileView` when React re-renders the className', () => {
+      window.innerWidth = 300;
+      const { rerender } = renderGridLayout({ accessMode: 'VIEW' });
+      const gridLayout = screen.getByTestId('kbnGridLayout');
+      expect(gridLayout).toHaveClass('kbnGrid--static', 'kbnGrid--mobileView');
+
+      rerender({ accessMode: 'VIEW', className: 'customClass' });
+      expect(gridLayout).toHaveClass('customClass', 'kbnGrid--static', 'kbnGrid--mobileView');
+    });
+
+    it('does not add `kbnGrid--mobileView` on wide viewports', () => {
+      window.innerWidth = 2000;
+      renderGridLayout({ accessMode: 'VIEW' });
+      expect(screen.getByTestId('kbnGridLayout')).not.toHaveClass('kbnGrid--mobileView');
+    });
+  });
+
   describe('dragging sections', () => {
     beforeAll(() => {
       // scroll into view is not mocked by RTL so we need to add this to prevent these tests from throwing

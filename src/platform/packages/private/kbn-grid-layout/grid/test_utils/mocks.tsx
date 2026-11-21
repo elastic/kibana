@@ -18,10 +18,10 @@ import {
   DASHBOARD_GRID_ROW_HEIGHT,
 } from '@kbn/dashboard-constants';
 
+import type { GridAccessMode } from '../../common/types';
 import type { ActivePanelEvent } from '../grid_panel';
 import type { ActiveSectionEvent } from '../grid_section';
 import type {
-  GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
   OrderedLayout,

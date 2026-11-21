@@ -21,12 +21,12 @@ import {
   startKeyboardInteraction,
   startMouseInteraction,
   startTouchInteraction,
-} from '../sensors';
+} from '../../../common/sensors';
 import {
   hasRowInteractionStartedWithKeyboard,
   isLayoutInteractive,
 } from '../state_manager_selectors';
-import type { PointerPosition, UserInteractionEvent } from '../types';
+import type { PointerPosition, UserInteractionEvent } from '../../../common/types';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { getNextKeyboardPosition } from './utils';
 
