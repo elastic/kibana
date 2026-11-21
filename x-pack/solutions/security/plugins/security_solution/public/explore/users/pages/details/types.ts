@@ -9,7 +9,7 @@ import type { ActionCreator } from 'typescript-fsa';
 
 import type { Filter, Query } from '@kbn/es-query';
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
 

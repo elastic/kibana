@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
-import type { RiskScoreLeftPanelSubTab } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { RiskScoreLeftPanelSubTab } from '../../../../shared/components/left_panel_header';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { RiskInputsTab } from '../../../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
 import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../test_ids';
 
 export const NOTES_DETAILS_TEST_ID = `${PREFIX}NotesTabContent` as const;

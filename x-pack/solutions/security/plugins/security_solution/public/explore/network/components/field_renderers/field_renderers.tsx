@@ -10,7 +10,7 @@ import { getOr } from 'lodash/fp';
 import React, { Fragment, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
-import { ecsSliceToFlattenedDocument } from '../../../../flyout/document_details/shared/utils';
+import { ecsSliceToFlattenedDocument } from '../../../../flyout_v2/shared/utils/document_utils';
 import type { PageScope } from '../../../../data_view_manager/constants';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {

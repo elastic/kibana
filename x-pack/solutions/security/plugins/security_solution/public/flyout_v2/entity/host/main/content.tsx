@@ -24,11 +24,11 @@ import type { RiskScoreState } from '../../../../entity_analytics/api/hooks/use_
 import type { EntityRiskScoresState } from '../../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID } from './constants';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, HostItem } from '../../../../../common/search_strategy';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../../shared/components/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';

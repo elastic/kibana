@@ -8,11 +8,7 @@
 import React, { useMemo } from 'react';
 import { BasicTable } from '../../../../../common/components/ml/tables/basic_table';
 import { getEntityTableColumns } from './columns';
-import type {
-  BasicEntityData,
-  EntityTableLinkRenderer,
-  EntityTableRows,
-} from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { BasicEntityData, EntityTableLinkRenderer, EntityTableRows } from './types';
 
 interface EntityTableProps<T extends BasicEntityData> {
   contextID: string;

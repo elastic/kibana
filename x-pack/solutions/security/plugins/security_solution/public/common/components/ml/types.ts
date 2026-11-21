@@ -6,7 +6,7 @@
  */
 
 import type { MlInfluencer } from '@kbn/ml-anomaly-utils';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { FlowTarget } from '../../../../common/search_strategy';
 
 import type { HostsType } from '../../../explore/hosts/store/model';

@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { useEntityFromStore } from '../../../shared/hooks/use_entity_from_store';
 import { useEntitiesOverview } from './use_entities_overview';
 
 jest.mock('@kbn/entity-store/public', () => {
@@ -21,7 +21,7 @@ jest.mock('@kbn/entity-store/public', () => {
   };
 });
 
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store');
+jest.mock('../../../shared/hooks/use_entity_from_store');
 
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 const mockUseEntityFromStore = useEntityFromStore as jest.Mock;

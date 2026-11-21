@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { usePrevalence } from './use_prevalence';
-import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockSearchHit } from '../../../../shared/mocks/mock_search_hit';
 import { useHighlightedFields } from '../../../main/hooks/use_highlighted_fields';
 import {
   FIELD_NAMES_AGG_KEY,

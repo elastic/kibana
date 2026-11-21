@@ -9,7 +9,7 @@ import { isValidElement, type ReactNode } from 'react';
 import { renderHook } from '@testing-library/react';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityType } from '../../../common/entity_analytics/types';
-import { RiskScoreLeftPanelSubTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { RiskScoreLeftPanelSubTab } from '../shared/components/left_panel_header';
 import { useEntityFlyoutApi, type EntityFlyoutApi } from './use_entity_flyout_api';
 import { useKibana } from '../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';

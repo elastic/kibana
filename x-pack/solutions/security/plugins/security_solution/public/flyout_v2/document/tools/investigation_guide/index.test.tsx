@@ -10,7 +10,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { InvestigationGuide } from '.';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');

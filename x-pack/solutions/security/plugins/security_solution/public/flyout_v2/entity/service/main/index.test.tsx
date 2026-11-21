@@ -9,7 +9,7 @@ import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../shared/components/test_ids';
@@ -87,7 +87,7 @@ const mockContentProps = jest.fn();
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
-    '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
+    '../../../shared/components/left_panel_header'
   );
   const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => {
     mockContentProps(props);
@@ -149,10 +149,8 @@ jest.mock('./hooks/use_observed_service', () => ({
 }));
 
 const mockedUseEntityFromStore = jest.fn();
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-  const actual = jest.requireActual(
-    '../../../../flyout/entity_details/shared/hooks/use_entity_from_store'
-  );
+jest.mock('../../../shared/hooks/use_entity_from_store', () => {
+  const actual = jest.requireActual('../../../shared/hooks/use_entity_from_store');
   return {
     ...actual,
     useEntityFromStore: (...args: unknown[]) => mockedUseEntityFromStore(...args),

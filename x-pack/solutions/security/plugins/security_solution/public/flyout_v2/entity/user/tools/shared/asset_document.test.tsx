@@ -10,12 +10,12 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import { AssetDocumentTab } from './asset_document';
 import { FLYOUT_BODY_TEST_ID } from './test_ids';
-import { DocumentDetailsContext } from '../../../../../flyout/document_details/shared/context';
-import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
+import { DocumentDetailsContext } from '../../../../shared/context/document_details_context';
+import { mockContextValue } from '../../../../shared/mocks/mock_context';
 import userEvent from '@testing-library/user-event';
 import { TABLE_TAB_CONTENT_TEST_ID } from '../../../../document/main/tabs/test_ids';
 import { JSON_TAB_CONTENT_TEST_ID } from '../../../../shared/components/json_tab';
-import { PREFIX } from '../../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../../shared/test_ids';
 
 jest.mock('@kbn/unified-doc-viewer-plugin/public');
 // Aliased with a `mock` prefix so the hoisted `jest.mock` factory below may reference it.

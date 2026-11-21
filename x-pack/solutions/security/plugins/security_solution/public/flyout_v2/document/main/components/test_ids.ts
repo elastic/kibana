@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 export const FLYOUT_MISSING_ALERTS_PRIVILEGE_TEST_ID = `${PREFIX}MissingAlertsPrivilege` as const;
 

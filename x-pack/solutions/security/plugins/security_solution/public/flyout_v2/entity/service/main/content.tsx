@@ -20,9 +20,9 @@ import type { EntityViewMode } from '../../../../../common/entity_analytics/enti
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
-import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { IdentityFields } from '../../../shared/utils/document_utils';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
 import { VisualizationsSection } from '../../shared/components/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';

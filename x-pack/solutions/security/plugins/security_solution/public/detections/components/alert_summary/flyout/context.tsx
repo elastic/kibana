@@ -12,10 +12,10 @@ import type { SearchHit } from '../../../../../common/search_strategy';
 import { useCreateEaseAlertsDataView } from '../../../hooks/alert_summary/use_create_data_view';
 import { useDocumentDetails } from './hooks/use_document_details';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
-import type { GetFieldsData } from '../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import type { GetFieldsData } from '../../../../flyout_v2/shared/hooks/use_get_fields_data';
 import { FlyoutLoading } from '../../../../flyout_v2/shared/components/flyout_loading';
 import { FlyoutError } from '../../../../flyout_v2/shared/components/flyout_error';
-import { useBasicDataFromDetailsData } from '../../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
+import { useBasicDataFromDetailsData } from '../../../../flyout_v2/shared/hooks/use_basic_data_from_details_data';
 
 export interface EaseDetailsContext {
   /**

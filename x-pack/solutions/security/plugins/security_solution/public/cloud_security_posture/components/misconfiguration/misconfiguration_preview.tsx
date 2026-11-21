@@ -19,11 +19,11 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   CspInsightLeftPanelSubTab,
   EntityDetailsLeftPanelTab,
-} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+} from '../../../flyout_v2/shared/components/left_panel_header';
 
 interface MisconfigurationPreviewDistributionBarProps {
   key: string;

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { DocumentDetailsContext } from '../../../../flyout/document_details/shared/context';
+import { DocumentDetailsContext } from '../../../shared/context/document_details_context';
 import { TestProviders } from '../../../../common/mock';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
 import {
@@ -16,7 +16,7 @@ import {
   HIGHLIGHTED_FIELDS_MODAL_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockContextValue } from '../../../shared/mocks/mock_context';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';

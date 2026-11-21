@@ -21,7 +21,7 @@ import {
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../../common/utils/execution_context';
 import { useUiSetting } from '../../../../../common/lib/kibana';
-import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import {
   combineEntityGroupFilters,
   getEntityGroupRecords,

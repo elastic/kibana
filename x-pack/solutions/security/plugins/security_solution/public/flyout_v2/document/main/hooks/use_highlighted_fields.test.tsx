@@ -12,7 +12,7 @@ import type { TimelineEventsDetailsItem } from '@kbn/securitysolution-timeline-s
 import {
   mockDataFormattedForFieldBrowser,
   mockDataFormattedForFieldBrowserWithOverridenField,
-} from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
+} from '../../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from './use_highlighted_fields';
 import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS } from '../../../../../common/endpoint/service/response_actions/constants';

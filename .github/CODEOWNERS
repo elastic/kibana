@@ -3140,7 +3140,6 @@ x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @e
 /x-pack/solutions/security/plugins/security_solution/public/detections/pages @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/detections/utils @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/document_details @elastic/security-investigations
-/x-pack/solutions/security/plugins/security_solution/public/flyout/attack_details @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/shared @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout/rule_details @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2 @elastic/security-investigations
@@ -3673,9 +3672,13 @@ x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_reso
 x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolved_latest_entities_index_name.test.ts @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/entities @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/hooks/use_entity_from_store.ts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/hooks/use_entity_from_store.test.ts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/utils/entity_store_risk_utils.ts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/utils/entity_store_risk_utils.test.ts @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/shared/components/left_panel_header.tsx @elastic/security-entity-analytics
 
 x-pack/solutions/security/packages/navigation/src/navigation_tree/entity_analytics_navigation_tree.ts @elastic/security-entity-analytics
 
@@ -3704,7 +3707,6 @@ x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_su
 /x-pack/solutions/security/packages/test-api-clients/scout/entity_analytics.gen.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Store / Maintainers / Entity Details
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/security-entity-analytics

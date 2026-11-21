@@ -12,7 +12,7 @@ import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@e
 import styled from '@emotion/styled';
 import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';

@@ -10,7 +10,7 @@ import { EuiInMemoryTable, EuiText } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../shared/hooks/use_entity_from_store';
 import {
   ENTITY_PANEL_TABLE_CONTENT_TEST_ID,
   ENTITY_PANEL_TABLE_SEARCH_INPUT_TEST_ID,

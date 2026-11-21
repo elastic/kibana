@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 export const ENTITIES_TOOL_TEST_ID = `${PREFIX}EntitiesTool` as const;

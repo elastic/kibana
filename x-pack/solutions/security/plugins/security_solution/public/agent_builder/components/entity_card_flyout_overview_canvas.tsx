@@ -31,13 +31,13 @@ import { EntityType } from '../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
   getRiskFromEntityRecord,
-} from '../../flyout/entity_details/shared/entity_store_risk_utils';
-import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+} from '../../flyout_v2/shared/utils/entity_store_risk_utils';
+import { useEntityFromStore } from '../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
-} from '../../flyout/document_details/shared/utils';
+} from '../../flyout_v2/shared/utils/document_utils';
 import { HOST_PANEL_RISK_SCORE_QUERY_ID } from '../../flyout_v2/entity/host/main/constants';
 import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
@@ -53,7 +53,7 @@ import {
   ServicePanelKey,
   UserPanelKey,
 } from '../../flyout_v2/entity/shared/constants';
-import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../flyout_v2/shared/components/left_panel_header';
 import { EntityEventTypes } from '../../common/lib/telemetry';
 import { Content as UserPanelContent } from '../../flyout_v2/entity/user/main/content';
 import { Header as UserPanelHeader } from '../../flyout_v2/entity/user/main/header';

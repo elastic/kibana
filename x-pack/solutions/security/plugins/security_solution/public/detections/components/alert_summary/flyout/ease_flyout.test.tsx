@@ -11,11 +11,11 @@ import { EaseFlyout } from './ease_flyout';
 import { FLYOUT_BODY_TEST_ID, FLYOUT_TEST_ID } from './test_ids';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../../../common/mock';
-import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
+import { mockDataFormattedForFieldBrowser } from '../../../../flyout_v2/shared/mocks/mock_data_formatted_for_field_browser';
 import { useEaseDetailsContext } from './context';
 import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
-import { mockDataAsNestedObject } from '../../../../flyout/document_details/shared/mocks/mock_data_as_nested_object';
-import { mockSearchHit } from '../../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../../../flyout_v2/shared/mocks/mock_data_as_nested_object';
+import { mockSearchHit } from '../../../../flyout_v2/shared/mocks/mock_search_hit';
 
 jest.mock('@kbn/inference-connectors', () => ({
   ...jest.requireActual('@kbn/inference-connectors'),

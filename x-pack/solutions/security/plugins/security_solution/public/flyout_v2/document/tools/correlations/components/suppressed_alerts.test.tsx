@@ -18,8 +18,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../../shared/components/test_ids';
-import { DocumentDetailsContext } from '../../../../../flyout/document_details/shared/context';
-import { mockContextValue } from '../../../../../flyout/document_details/shared/mocks/mock_context';
+import { DocumentDetailsContext } from '../../../../shared/context/document_details_context';
+import { mockContextValue } from '../../../../shared/mocks/mock_context';
 import { isSuppressionRuleInGA } from '../../../../../../common/detection_engine/utils';
 
 jest.mock('../../../../../../common/detection_engine/utils', () => ({

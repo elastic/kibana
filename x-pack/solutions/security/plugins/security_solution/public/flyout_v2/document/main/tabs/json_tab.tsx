@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { JsonTab as SharedJsonTab } from '../../../shared/components/json_tab';
-import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { PREFIX } from '../../../shared/test_ids';
 
 export interface JsonTabProps {
   /**

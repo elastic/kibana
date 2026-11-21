@@ -8,12 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
+import { useEventDetails } from '../../../shared/hooks/use_event_details';
 import { EventRenderer } from './event_renderer';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
 
-jest.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
+jest.mock('../../../shared/hooks/use_event_details');
 
 const mockUseEventDetails = useEventDetails as jest.Mock;
 

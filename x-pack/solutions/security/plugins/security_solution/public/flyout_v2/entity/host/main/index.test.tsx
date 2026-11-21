@@ -15,7 +15,7 @@ import { RiskSeverity } from '../../../../../common/search_strategy';
 import { Host } from '.';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import type { EntityDetailsPath } from '../../../shared/components/left_panel_header';
 
 const mockProps = {
   hostName: 'test',
@@ -46,7 +46,7 @@ const mockContentProps = jest.fn();
 jest.mock('./content', () => {
   const actual = jest.requireActual('./content');
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
-    '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
+    '../../../shared/components/left_panel_header'
   );
   const Content = (props: {
     openDetailsPanel: (path: EntityDetailsPath) => void;
@@ -96,10 +96,8 @@ jest.mock('./hooks/use_observed_host', () => ({
 }));
 
 const mockedUseEntityFromStore = jest.fn();
-jest.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-  const actual = jest.requireActual(
-    '../../../../flyout/entity_details/shared/hooks/use_entity_from_store'
-  );
+jest.mock('../../../shared/hooks/use_entity_from_store', () => {
+  const actual = jest.requireActual('../../../shared/hooks/use_entity_from_store');
   return {
     ...actual,
     useEntityFromStore: (...args: unknown[]) => mockedUseEntityFromStore(...args),

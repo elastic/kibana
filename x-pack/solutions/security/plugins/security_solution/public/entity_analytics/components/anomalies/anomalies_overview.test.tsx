@@ -13,7 +13,7 @@ import type {
   AnomalyOverviewHit,
   GetAnomalyOverviewResponse,
 } from '../../../../common/api/entity_analytics';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../../../flyout_v2/shared/components/left_panel_header';
 import {
   ENTITY_ANOMALY_RECENT_TABLE_EMPTY_MESSAGE,
   ENTITY_ANOMALY_STATE_ERROR_BODY,

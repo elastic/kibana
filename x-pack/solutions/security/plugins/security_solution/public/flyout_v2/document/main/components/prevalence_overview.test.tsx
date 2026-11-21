@@ -25,7 +25,7 @@ import {
 } from '../../../shared/components/test_ids';
 import { usePrevalence } from '../../tools/prevalence/hooks/use_prevalence';
 import { useKibana } from '../../../../common/lib/kibana';
-import { mockSearchHit } from '../../../../flyout/document_details/shared/mocks/mock_search_hit';
+import { mockSearchHit } from '../../../shared/mocks/mock_search_hit';
 
 jest.mock('../../tools/prevalence/hooks/use_prevalence');
 jest.mock('../../../../common/lib/kibana');

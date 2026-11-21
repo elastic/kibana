@@ -10,13 +10,13 @@ import { useTimelineEventsDetails } from '../../../../../timelines/containers/de
 import { useDocumentDetails } from './use_document_details';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { mockDataFormattedForFieldBrowser } from '../../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
-import { mockDataAsNestedObject } from '../../../../../flyout/document_details/shared/mocks/mock_data_as_nested_object';
-import { useGetFieldsData } from '../../../../../flyout/document_details/shared/hooks/use_get_fields_data';
+import { mockDataFormattedForFieldBrowser } from '../../../../../flyout_v2/shared/mocks/mock_data_formatted_for_field_browser';
+import { mockSearchHit } from '../../../../../flyout_v2/shared/mocks/mock_search_hit';
+import { mockDataAsNestedObject } from '../../../../../flyout_v2/shared/mocks/mock_data_as_nested_object';
+import { useGetFieldsData } from '../../../../../flyout_v2/shared/hooks/use_get_fields_data';
 
 jest.mock('../../../../../timelines/containers/details');
-jest.mock('../../../../../flyout/document_details/shared/hooks/use_get_fields_data');
+jest.mock('../../../../../flyout_v2/shared/hooks/use_get_fields_data');
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const documentId = 'documentId';

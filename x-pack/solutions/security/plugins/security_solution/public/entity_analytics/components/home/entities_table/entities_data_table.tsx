@@ -41,7 +41,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import type { EntityStoreRecord } from '../../../../flyout_v2/shared/hooks/use_entity_from_store';
 import type { inputsModel } from '../../../../common/store';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { InspectButton } from '../../../../common/components/inspect';

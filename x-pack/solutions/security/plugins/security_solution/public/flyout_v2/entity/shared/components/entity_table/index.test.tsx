@@ -9,10 +9,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { EntityTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import type {
-  BasicEntityData,
-  EntityTableRow,
-} from '../../../../../flyout/entity_details/shared/components/entity_table/types';
+import type { BasicEntityData, EntityTableRow } from './types';
 
 const renderedFieldValue = 'testValue1';
 

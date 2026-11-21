@@ -11,7 +11,7 @@ import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import type { EntityTableLinkRenderer } from '../../../flyout/entity_details/shared/components/entity_table/types';
+import type { EntityTableLinkRenderer } from '../../../flyout_v2/entity/shared/components/entity_table/types';
 import { OpenFlyoutLink } from '../../../flyout_v2/shared/components/open_flyout_link';
 import { FLYOUT_LINK_TEST_ID } from '../../../flyout/shared/components/test_ids';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_header_title';
