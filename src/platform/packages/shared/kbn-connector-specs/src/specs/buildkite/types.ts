@@ -64,9 +64,9 @@ export const CreateBuildInputSchema = lazySchema(() =>
     branch: z.string().min(1).max(200).describe('The git branch to build, e.g. "main".'),
     message: z
       .string()
+      .min(1)
       .max(2000)
-      .optional()
-      .describe('Optional build message shown in the Buildkite UI, e.g. the commit message.'),
+      .describe('The build message shown in the Buildkite UI, e.g. the commit message.'),
     ignoreBranchFilters: z
       .boolean()
       .optional()

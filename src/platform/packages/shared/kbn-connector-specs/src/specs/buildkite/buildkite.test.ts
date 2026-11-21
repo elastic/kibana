@@ -76,6 +76,7 @@ describe('Buildkite', () => {
         pipelineSlug: 'my-pipeline',
         commit: 'HEAD',
         branch: 'main',
+        message: 'Triggered from a workflow',
       });
       await Buildkite.actions.createBuild.handler(mockContext, input);
 
@@ -93,6 +94,7 @@ describe('Buildkite', () => {
         pipelineSlug: 'my-pipeline',
         commit: 'HEAD',
         branch: 'main',
+        message: 'Triggered from a workflow',
       });
       const contextWithoutOrg = { ...mockContext, config: {} } as unknown as ActionContext;
 
