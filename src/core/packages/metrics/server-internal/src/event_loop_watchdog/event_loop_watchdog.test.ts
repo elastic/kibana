@@ -43,13 +43,13 @@ describe('EventLoopWatchdog', () => {
         createWorker.mock.calls[call][0] as ManagedWorkerOptions<WatchdogWorkerData>
       ).workerData!.shared
     );
-  const create = () =>
+  const create = ({ diagnosticDir }: { diagnosticDir?: string } = profiling) =>
     new EventLoopWatchdog({
       logger,
       thresholdsMs: { starting: 300, running: 200 },
       statsIntervalMs: 600_000,
       logging,
-      profiling,
+      profiling: { ...profiling, diagnosticDir },
       workerEntry: '/entry.js',
     });
 
@@ -194,7 +194,7 @@ describe('EventLoopWatchdog', () => {
   });
 
   describe('profiling log line', () => {
-    const ON = 'Event loop watchdog profiling on for this node';
+    const ON = 'Event loop watchdog profiling on for this node. Profile directory: /diag';
     const OFF = 'Event loop watchdog profiling off for this node';
     const profilingLines = () =>
       logger.info.mock.calls
@@ -208,6 +208,23 @@ describe('EventLoopWatchdog', () => {
       watchdog.setProfiling(true);
       watchdog.setProfiling(false);
       expect(profilingLines()).toEqual([ON, OFF]);
+    });
+
+    it('logs the full directory when profiling turns on', () => {
+      const long = `/${'d'.repeat(200)}`;
+      const watchdog = create({ diagnosticDir: long });
+      watchdog.start();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual([
+        `Event loop watchdog profiling on for this node. Profile directory: ${long}`,
+      ]);
+    });
+
+    it('omits the directory from the log when no directory is set', () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      expect(profilingLines()).toEqual(['Event loop watchdog profiling on for this node']);
     });
 
     it('logs nothing while the worker is stopped, and on once it starts', () => {

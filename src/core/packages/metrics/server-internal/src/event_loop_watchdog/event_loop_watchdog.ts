@@ -156,7 +156,12 @@ export class EventLoopWatchdog {
     const on = this.shared !== undefined && this.profilingEnabled;
     if (on !== this.profilingLoggedOn) {
       this.profilingLoggedOn = on;
-      this.params.logger.info(`Event loop watchdog profiling ${on ? 'on' : 'off'} for this node`);
+      const { diagnosticDir } = this.params.profiling;
+      // The full directory: capture lines show only its end.
+      const dir = on && diagnosticDir ? `. Profile directory: ${diagnosticDir}` : '';
+      this.params.logger.info(
+        `Event loop watchdog profiling ${on ? 'on' : 'off'} for this node${dir}`
+      );
     }
   }
 

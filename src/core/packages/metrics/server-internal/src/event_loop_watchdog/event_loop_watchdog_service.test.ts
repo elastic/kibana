@@ -22,7 +22,6 @@ import {
 } from './event_loop_watchdog_service';
 import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './constants';
 import { resolveDiagnosticDir } from './resolve_diagnostic_dir';
-import { MAX_LOGGED_DIR_LENGTH, capDir } from './sanitize';
 
 jest.mock('./event_loop_watchdog');
 jest.mock('./resolve_diagnostic_dir');
@@ -493,7 +492,7 @@ describe('EventLoopWatchdogService', () => {
       ]);
     });
 
-    it('shows only the end of a long directory in the warning', async () => {
+    it('shows the full directory in the warning', async () => {
       const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 2)}z`;
       resolveDiagnosticDirMock.mockReturnValue(long);
       access.mockRejectedValue(fsError('EACCES', `EACCES: permission denied, access '${long}'`));
@@ -502,13 +501,9 @@ describe('EventLoopWatchdogService', () => {
       await settle();
       expect(warnings()).toEqual([
         [
-          `Event loop watchdog profiling is on, but the profile directory ${capDir(
-            long
-          )} can't be written (EACCES). Profile file writes will fail.`,
+          `Event loop watchdog profiling is on, but the profile directory ${long} can't be written (EACCES). Profile file writes will fail.`,
         ],
       ]);
-      expect(capDir(long).endsWith('az')).toBe(true);
-      expect(capDir(long)).toHaveLength(MAX_LOGGED_DIR_LENGTH);
     });
 
     it('warns again each time profiling turns back on', async () => {
