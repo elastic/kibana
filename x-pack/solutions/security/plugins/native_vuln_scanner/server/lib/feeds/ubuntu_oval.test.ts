@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { dpkgKey } from '../version_compare';
 import type { FeedParseResult } from './types';
-import { parseUbuntuOval } from './ubuntu_oval';
+import { parseUbuntuOval, UBUNTU_SOLUTION_MAX_CHARS } from './ubuntu_oval';
 
 // Definitions trimmed from com.ubuntu.noble.cve.oval.xml, with every test/object/state/variable
 // they reference.
@@ -100,6 +100,73 @@ describe('parseUbuntuOval', () => {
   it('does not depend on chunk boundaries', async () => {
     const small = await parseUbuntuOval(chunked(fixture, 97), { release: 'noble' });
     expect(small.records).toEqual(result.records);
+    expect(small.knowledge).toEqual(result.knowledge);
+    expect(small.attribution).toBe(result.attribution);
+  });
+
+  describe('knowledge', () => {
+    it('keeps the vendor description and reads the feed copyright once', () => {
+      expect(result.attribution).toBe('Copyright (C) 2026 Canonical Ltd.');
+      const entry = result.knowledge.get('cve:ubuntu:noble:CVE-2018-14628');
+      expect(entry).toMatchObject({
+        kind: 'cve',
+        id: 'CVE-2018-14628',
+        url: 'https://ubuntu.com/security/CVE-2018-14628',
+        severity: 'low',
+      });
+      expect(entry?.description).toMatch(/^An information leak vulnerability/);
+      expect(entry?.description).not.toContain('Update Instructions');
+    });
+
+    it('splits the Update Instructions into the solution and marks the text as cut', () => {
+      const entry = result.knowledge.get('cve:ubuntu:noble:CVE-2018-14628');
+      expect(entry?.solution).toMatch(/^Run `sudo pro fix CVE-2018-14628`/);
+      expect(entry?.solution).toContain('samba - 2:4.19.4+dfsg-3ubuntu1');
+      expect(entry?.truncated).toBe(true);
+    });
+
+    it('bounds a long package-version list, keeps the command and the first packages, and marks it cut', async () => {
+      const filler = 'pkg-a - 1.0 '.repeat(2000);
+      const long = Buffer.from(
+        fixture
+          .toString('utf8')
+          .replace(
+            'to the following package versions:',
+            `to the following package versions: ${filler}`
+          )
+      );
+      const { knowledge } = await parseUbuntuOval(chunked(long, 4096), { release: 'noble' });
+      const entry = knowledge.get('cve:ubuntu:noble:CVE-2018-14628');
+      expect(entry?.solution).toHaveLength(UBUNTU_SOLUTION_MAX_CHARS);
+      expect(entry?.solution).toMatch(/^Run `sudo pro fix CVE-2018-14628`/);
+      expect(entry?.solution).toContain('pkg-a - 1.0');
+      expect(entry?.truncated).toBe(true);
+      expect(entry?.description).toMatch(/^An information leak vulnerability/);
+    });
+
+    it('leaves text without instructions whole', () => {
+      const entry = result.knowledge.get('cve:ubuntu:noble:CVE-2024-38828');
+      expect(entry?.solution).toBeUndefined();
+      expect(entry?.truncated).toBeUndefined();
+    });
+
+    it('turns a "Rejected reason:" description into a rejected entry holding the reason', () => {
+      const entry = result.knowledge.get('cve:ubuntu:noble:CVE-2024-6484');
+      expect(entry?.kind).toBe('rejected');
+      // The "Rejected reason:" prefix is stripped, so the text is an excerpt.
+      expect(entry?.truncated).toBe(true);
+      expect(entry?.description).toMatch(/^This was not a security issue in Bootstrap/);
+    });
+
+    it('writes no entry for an empty description', () => {
+      expect(
+        [...result.knowledge.values()].every((e) => Boolean(e.description || e.solution))
+      ).toBe(true);
+    });
+
+    it('never puts vendor text on the advisory records', () => {
+      expect(JSON.stringify(result.records)).not.toContain('information leak vulnerability');
+    });
   });
 });
 

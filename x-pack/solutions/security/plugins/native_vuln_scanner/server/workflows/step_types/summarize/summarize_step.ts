@@ -99,6 +99,7 @@ export const buildSummarizeStepDefinition = ({
         failures,
         ...(match?.kev ? { kev: match.kev } : {}),
         ...(match?.distinct_cves !== undefined ? { distinct_cves: match.distinct_cves } : {}),
+        ...(match?.knowledge ? { knowledge: match.knowledge } : {}),
       };
       // Start-up creates the index too, but a write before it exists would auto-create it unmapped.
       await ensureSummaryIndex(es);

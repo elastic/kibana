@@ -89,6 +89,19 @@ describe('native_vuln.summarize handler', () => {
     expect(doc?.kev).toEqual({ status: 'ok', listed: 2 });
   });
 
+  it('records the knowledge counters when the match step reports them', async () => {
+    const { doc } = await run({
+      fetch: fetched,
+      match: matched({ knowledge: { written: 661, unchanged: 0, failed: 2 } }),
+    });
+    expect(doc?.knowledge).toEqual({ written: 661, unchanged: 0, failed: 2 });
+  });
+
+  it('leaves knowledge out of the summary when the match step did not report it', async () => {
+    const { doc } = await run({ fetch: fetched, match: matched() });
+    expect(doc).not.toHaveProperty('knowledge');
+  });
+
   it('leaves kev out of the summary when the match step did not report it', async () => {
     const { doc } = await run({ fetch: fetched, match: matched() });
     expect(doc).not.toHaveProperty('kev');

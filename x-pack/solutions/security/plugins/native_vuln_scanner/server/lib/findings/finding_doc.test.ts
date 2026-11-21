@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { KnowledgeEntry } from '../feeds/types';
 import type { Finding } from '../matcher';
 import { FINDINGS_DATASET } from './constants';
-import { findingId, toFindingDoc, toSeverity } from './finding_doc';
+import { FINDING_DESCRIPTION_MAX, findingId, toFindingDoc, toSeverity } from './finding_doc';
 import { findingsMappings } from './mappings';
 import type { HostMeta } from './finding_doc';
 
@@ -196,7 +197,45 @@ describe('toFindingDoc', () => {
         source_package: 'glibc',
       },
     });
-    expect(doc.vulnerability.description).toContain('is earlier than 0:2.34-83.el9_3.7');
+    // No vendor text parsed: the advisory title stands in, and the reason stays in `why` only.
+    expect(doc.vulnerability.description).toBe('RHSA-2026:1234: glibc security update (Important)');
+    expect(doc.native_vuln_scanner.why).toContain('is earlier than 0:2.34-83.el9_3.7');
+    expect(doc.native_vuln_scanner.knowledge_id).toBe('cve:redhat:9:CVE-2026-23868');
+  });
+
+  describe('vendor description', () => {
+    const entry = (overrides: Partial<KnowledgeEntry>): KnowledgeEntry => ({
+      kind: 'cve',
+      id: 'CVE-2026-23868',
+      ...overrides,
+    });
+    const describeWith = (knowledge: Map<string, KnowledgeEntry>) =>
+      toFindingDoc(finding(), HOST, { ...CTX, knowledge }).vulnerability.description;
+
+    it('uses the CVE description, cut to 2 KB, and keeps the source link', () => {
+      const long = 'a'.repeat(FINDING_DESCRIPTION_MAX + 500);
+      const knowledge = new Map([['cve:redhat:9:CVE-2026-23868', entry({ description: long })]]);
+      const doc = toFindingDoc(finding(), HOST, { ...CTX, knowledge });
+      expect(doc.vulnerability.description).toHaveLength(FINDING_DESCRIPTION_MAX);
+      expect(doc.vulnerability.reference).toContain(finding().cve.url);
+    });
+
+    it('does not end on half a surrogate pair', () => {
+      const text = `${'a'.repeat(FINDING_DESCRIPTION_MAX - 1)}😀`;
+      const knowledge = new Map([['cve:redhat:9:CVE-2026-23868', entry({ description: text })]]);
+      const description = describeWith(knowledge);
+      expect(description).toBe('a'.repeat(FINDING_DESCRIPTION_MAX - 1));
+    });
+
+    it('falls back to the advisory summary when the CVE has no text', () => {
+      const knowledge = new Map<string, KnowledgeEntry>([
+        [
+          'adv:redhat:9:RHSA-2026:1234',
+          { kind: 'advisory', id: 'RHSA-2026:1234', summary: 'An update for glibc.' },
+        ],
+      ]);
+      expect(describeWith(knowledge)).toBe('An update for glibc.');
+    });
   });
 
   it('adds a kev block only for a CVE in the KEV catalog', () => {

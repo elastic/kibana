@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerKnowledgeRoute } from './knowledge';
 import { registerOnboardingPlanRoute } from './onboarding_plan';
 import { registerOnboardingRuntimePinRoute } from './onboarding_runtime_pin';
 import { registerOnboardingScheduleRoute } from './onboarding_schedule';
@@ -20,4 +21,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerOnboardingRuntimePinRoute(dependencies);
   registerOnboardingScheduleRoute(dependencies);
   registerScanRoute(dependencies);
+  registerKnowledgeRoute(dependencies);
 };

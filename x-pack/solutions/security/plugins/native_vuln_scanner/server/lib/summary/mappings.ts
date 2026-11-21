@@ -23,6 +23,13 @@ export const summaryMappings: MappingTypeMapping = {
     findings_fixed: { type: 'integer' },
     kev: { properties: { status: keyword, listed: { type: 'integer' } } },
     distinct_cves: { type: 'integer' },
+    knowledge: {
+      properties: {
+        written: { type: 'integer' },
+        unchanged: { type: 'integer' },
+        failed: { type: 'integer' },
+      },
+    },
     feeds: {
       properties: {
         release: keyword,

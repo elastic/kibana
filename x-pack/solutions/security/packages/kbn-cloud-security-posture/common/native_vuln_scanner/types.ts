@@ -48,6 +48,8 @@ export interface SummaryDoc {
   kev?: { status: 'ok' | 'stale' | 'unavailable' | 'not_attempted'; listed: number };
   /** Distinct CVE ids among this run's matched findings (unfixed included). */
   distinct_cves?: number;
+  /** Vendor-text docs this run wrote to the knowledge index. */
+  knowledge?: { written: number; unchanged: number; failed: number };
 }
 
 export type PackState = 'missing' | 'ok' | 'differs';
@@ -173,4 +175,32 @@ export interface OnboardingStatus {
 /** The status route answers this instead of the body when the licence is below Enterprise. */
 export interface InsufficientLicenseStatus {
   license: 'insufficient';
+}
+
+/** The vendor text of one CVE or advisory, as the knowledge route returns it. */
+export interface VulnerabilityKnowledgeDoc {
+  kind: 'cve' | 'advisory' | 'rejected';
+  vulnerability?: { id: string; description?: string };
+  impact?: string;
+  solution?: string;
+  workaround?: string;
+  advisory?: {
+    id: string;
+    title?: string;
+    summary?: string;
+    url?: string;
+    severity?: string;
+  };
+  attribution: string;
+  license: string;
+  license_url: string;
+  source_url: string;
+  /** True when the text was cut or split, so it is an excerpt of the vendor's page. */
+  modified: boolean;
+}
+
+export interface VulnerabilityKnowledgeResponse {
+  /** Null when the feed has no per-CVE text (advisory-fixed RHEL CVEs); advisories may still exist. */
+  knowledge: VulnerabilityKnowledgeDoc | null;
+  advisories: VulnerabilityKnowledgeDoc[];
 }

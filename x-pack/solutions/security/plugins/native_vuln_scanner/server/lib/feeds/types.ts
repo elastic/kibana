@@ -89,6 +89,34 @@ export interface AdvisoryRecord {
   feed: { snapshot_time?: string };
 }
 
+/**
+ * Vendor prose for one CVE or advisory, kept apart from `AdvisoryRecord` so the matcher's
+ * per-row memory does not grow. Keyed in `FeedParseResult.knowledge` by the KB doc id.
+ */
+export interface KnowledgeEntry {
+  /** `rejected` is a CVE the vendor withdrew; its description holds the reason. */
+  kind: 'cve' | 'advisory' | 'rejected';
+  /** CVE id or advisory id. */
+  id: string;
+  title?: string;
+  description?: string;
+  impact?: string;
+  solution?: string;
+  workaround?: string;
+  /** Advisory-level summary (advisory entries only). */
+  summary?: string;
+  /** The vendor's own page for this CVE or advisory. */
+  url?: string;
+  severity?: string;
+  /** CVE ids an advisory covers. */
+  cves?: string[];
+  references?: string[];
+  published?: string;
+  modified?: string;
+  /** The text was cut or split while parsing (as opposed to the KB caps applied later). */
+  truncated?: true;
+}
+
 export interface FeedParseResult {
   os: { family: 'ubuntu' | 'rhel'; version: string };
   snapshotTime?: string;
@@ -96,4 +124,8 @@ export interface FeedParseResult {
   records: AdvisoryRecord[];
   /** Why definitions or criteria were dropped, with counts (e.g. `other_pocket`, `criteria_negated`). */
   skipped: Record<string, number>;
+  /** Vendor prose by KB doc id (`cve:<source>:<release>:<CVE>`, `adv:<source>:<release>:<advisory>`). */
+  knowledge: Map<string, KnowledgeEntry>;
+  /** The feed's own copyright line, shown as the licence attribution. */
+  attribution?: string;
 }

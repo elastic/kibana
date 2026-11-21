@@ -8,7 +8,16 @@
 import { rpmKey, UnencodableVersionError } from '../version_compare';
 import { countInto } from './oval';
 import { readJsonDocuments } from './json';
-import type { AdvisoryCve, AdvisoryRecord, CvssScore, FeedParseResult } from './types';
+import type {
+  AdvisoryCve,
+  AdvisoryRecord,
+  CvssScore,
+  FeedParseResult,
+  KnowledgeEntry,
+} from './types';
+import { MAX_KEPT_TEXT_CHARS } from './oval';
+import { advisoryKnowledgeId, cveKnowledgeId } from '../knowledge/constants';
+import { truncateText } from '../truncate';
 
 /*
  * Red Hat CSAF (VEX), the only advisory format published for RHEL 10+ (OVAL v2 is
@@ -130,6 +139,73 @@ const severityWord = (raw: unknown): string | undefined => {
 
 const cveUrl = (id: string): string => `https://access.redhat.com/security/cve/${id}`;
 
+const noteText = (notes: unknown, categories: string[]): string | undefined => {
+  for (const category of categories) {
+    for (const note of asArray(notes)) {
+      const n = asObject(note);
+      const text = asString(n?.text);
+      if (text && asString(n?.category) === category) return text;
+    }
+  }
+  return undefined;
+};
+
+/** One CSAF text, cut like the OVAL feeds so a hostile feed cannot grow the parse. */
+const clip = (text: string | undefined): { text?: string; truncated: boolean } => {
+  if (!text) return { truncated: false };
+  const cut = truncateText(text, MAX_KEPT_TEXT_CHARS);
+  return { text: cut, truncated: cut.length < text.length };
+};
+
+/**
+ * Only the vendor's own words are kept: the CVE `description` note, the `summary` and
+ * `threats[impact]` details as impact, and the vendor_fix / workaround / none_available
+ * remediation details. `legal_disclaimer` and `distribution` are never read.
+ */
+const cveText = (vuln: CsafObject | undefined, cveId: string): KnowledgeEntry | undefined => {
+  const description = clip(noteText(vuln?.notes, ['description']));
+  const summary = noteText(vuln?.notes, ['summary']);
+  const threat = asArray(vuln?.threats)
+    .map((t) => asObject(t))
+    .find((t) => asString(t?.category) === 'impact');
+  const impactParts = [summary, asString(threat?.details)].filter(Boolean);
+  const impact = clip(impactParts.join('\n\n'));
+  const remediation = (category: string) =>
+    clip(
+      asArray(vuln?.remediations)
+        .map((r) => asObject(r))
+        .find((r) => asString(r?.category) === category && asString(r?.details))?.details as
+        | string
+        | undefined
+    );
+  const fix = remediation('vendor_fix');
+  const workaround = remediation('workaround');
+  const none = remediation('none_available');
+  const solution = fix.text ?? none.text;
+  if (!description.text && !impact.text && !solution && !workaround.text) return undefined;
+  return {
+    kind: 'cve',
+    id: cveId,
+    description: description.text,
+    impact: impact.text,
+    solution,
+    workaround: workaround.text,
+    url: cveUrl(cveId),
+    // Composing the impact from two notes is a rewrite of the vendor's text, not a copy.
+    ...(description.truncated ||
+    impact.truncated ||
+    impactParts.length > 1 ||
+    fix.truncated ||
+    none.truncated ||
+    workaround.truncated
+      ? { truncated: true as const }
+      : {}),
+  };
+};
+
+const advisorySummary = (document: CsafObject | undefined): string | undefined =>
+  clip(noteText(document?.notes, ['summary', 'topic'])).text;
+
 /** Parses one CSAF advisory document; undefined when it does not touch the major. */
 const parseAdvisory = (
   doc: unknown,
@@ -150,7 +226,7 @@ const parseAdvisory = (
   const selfUrl = asArray(document?.references)
     .map((r) => asObject(r))
     .find((r) => asString(r?.category) === 'self' && asString(r?.url)?.includes('/errata/'));
-  const vulns: Array<{ cve: AdvisoryCve; fixed: FixedEntry[] }> = [];
+  const vulns: Array<{ cve: AdvisoryCve; fixed: FixedEntry[]; text?: KnowledgeEntry }> = [];
   for (const v of asArray(root?.vulnerabilities)) {
     const cveId = asString(asObject(v)?.cve);
     if (!cveId) {
@@ -178,10 +254,11 @@ const parseAdvisory = (
       cve.cvss = cvss;
       cve.severity = severityWord(cvssV3?.baseSeverity);
     }
-    vulns.push({ cve, fixed: [...fixed.values()] });
+    vulns.push({ cve, fixed: [...fixed.values()], text: cveText(asObject(v), cveId) });
   }
   if (vulns.length === 0) return undefined;
   return {
+    summary: advisorySummary(document),
     advisoryId,
     title: asString(document?.title) ?? '',
     url: asString(selfUrl?.url),
@@ -193,6 +270,7 @@ const parseAdvisory = (
 };
 
 interface PendingCsaf {
+  summary?: string;
   advisoryId: string;
   title: string;
   url?: string;
@@ -200,7 +278,7 @@ interface PendingCsaf {
   published?: string;
   modified?: string;
   /** Vulnerabilities with at least one fixed package of the wanted major. */
-  vulns: Array<{ cve: AdvisoryCve; fixed: FixedEntry[] }>;
+  vulns: Array<{ cve: AdvisoryCve; fixed: FixedEntry[]; text?: KnowledgeEntry }>;
 }
 
 export interface ParseRhelCsafOptions {
@@ -221,6 +299,7 @@ export const parseRhelCsaf = async (
   const pending: PendingCsaf[] = [];
   let definitions = 0;
   let snapshotTime: string | undefined;
+  const knowledge = new Map<string, KnowledgeEntry>();
 
   await readJsonDocuments(input, {
     onDocument: (doc) => {
@@ -245,7 +324,23 @@ export const parseRhelCsaf = async (
   const os = { family: 'rhel' as const, version: major };
   const records: AdvisoryRecord[] = [];
   for (const advisory of pending) {
-    for (const { cve, fixed } of advisory.vulns) {
+    knowledge.set(advisoryKnowledgeId('redhat', major, advisory.advisoryId), {
+      kind: 'advisory',
+      id: advisory.advisoryId,
+      title: advisory.title,
+      summary: advisory.summary,
+      url: advisory.url,
+      severity: advisory.severity,
+      cves: advisory.vulns.map(({ cve }) => cve.id),
+      published: advisory.published,
+      modified: advisory.modified,
+    });
+    for (const { cve, fixed, text } of advisory.vulns) {
+      if (text) {
+        const key = cveKnowledgeId('redhat', major, cve.id);
+        // The same CVE appears in several advisories; the first one's text stands.
+        if (!knowledge.has(key)) knowledge.set(key, { ...text, published: cve.published });
+      }
       for (const entry of fixed) {
         // Source rpms are never installed; noarch fixes carry no arch signal.
         if (entry.arch === 'src' || entry.arch === 'noarch') continue;
@@ -279,5 +374,13 @@ export const parseRhelCsaf = async (
     }
   }
 
-  return { os, snapshotTime, definitions, records, skipped };
+  return {
+    os,
+    snapshotTime,
+    definitions,
+    records,
+    skipped,
+    knowledge,
+    attribution: 'Red Hat, Inc.',
+  };
 };

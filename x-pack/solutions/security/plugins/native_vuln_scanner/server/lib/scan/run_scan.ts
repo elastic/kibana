@@ -15,6 +15,15 @@ import { findInventoryScheduleIds, normalizeInventories, readAgentInventories } 
 import type { Finding, MatchStats } from '../matcher';
 import { buildAdvisoryIndex, matchHost } from '../matcher';
 import { ensureFindingsIndex, writeFindings } from '../findings';
+import type { AdvisorySource, FeedParseResult } from '../feeds/types';
+import {
+  advisoryKnowledgeId,
+  cveKnowledgeId,
+  ensureKnowledgeIndex,
+  writeKnowledge,
+} from '../knowledge';
+import type { KnowledgeWriteResult } from '../knowledge';
+import { truncateText } from '../truncate';
 
 export interface ScanDeps {
   es: ElasticsearchClient;
@@ -25,6 +34,8 @@ export interface ScanDeps {
   loadKev?: (signal: AbortSignal) => Promise<LoadKevResult>;
   /** From kibana.yml: whether this run's feeds and findings include vendor-unfixed CVEs. */
   includeUnfixed?: boolean;
+  /** Called after each release's knowledge write; `stored` is true when nothing failed. */
+  onKnowledgeStored?: (os: FeedOs, stored: boolean) => void;
   now?: () => Date;
 }
 
@@ -50,6 +61,8 @@ export interface ScanSummary {
   distinctCves: number;
   /** Feed provenance the run actually used, keyed like `releases`. */
   feedInfo: Record<string, { sourceUrl?: string; snapshotTime?: string; ageSeconds?: number }>;
+  /** Vendor-text docs written to the knowledge index; a failure there never fails the scan. */
+  knowledge: KnowledgeWriteResult;
 }
 
 export class ScanFailedError extends Error {
@@ -70,12 +83,8 @@ export class ScanFailedError extends Error {
 export const MAX_STATE_MESSAGE_LENGTH = 2048;
 
 /** Cuts text to the summary bound without splitting a surrogate pair. */
-export const truncate = (text: string, max: number = MAX_STATE_MESSAGE_LENGTH): string => {
-  if (text.length <= max) return text;
-  const lastCode = text.charCodeAt(max - 1);
-  const isHighSurrogate = lastCode >= 0xd800 && lastCode <= 0xdbff;
-  return text.slice(0, isHighSurrogate ? max - 1 : max);
-};
+export const truncate = (text: string, max: number = MAX_STATE_MESSAGE_LENGTH): string =>
+  truncateText(text, max);
 
 export const releaseKey = ({ family, version }: FeedOs): string => `${family}:${version}`;
 
@@ -164,6 +173,58 @@ const loadKevEntries = async (
   return { status: 'unavailable' };
 };
 
+const sourceOf = ({ advisories, scheme }: Finding): AdvisorySource =>
+  advisories[0]?.source ?? (scheme === 'dpkg' ? 'ubuntu' : 'redhat');
+
+const knowledgeIdsOf = (findings: readonly Finding[], release: string): Set<string> => {
+  const ids = new Set<string>();
+  for (const finding of findings) {
+    const source = sourceOf(finding);
+    ids.add(cveKnowledgeId(source, release, finding.cve.id));
+    for (const { id } of finding.advisories) ids.add(advisoryKnowledgeId(source, release, id));
+  }
+  return ids;
+};
+
+/**
+ * Writes the vendor text of the CVEs and advisories this release's findings use. The text is
+ * optional enrichment, so any failure is logged and counted, never thrown.
+ */
+const storeKnowledge = async (
+  es: ElasticsearchClient,
+  logger: Logger,
+  feed: FeedParseResult,
+  findings: readonly Finding[],
+  { now, signal }: { now: string; signal: AbortSignal }
+): Promise<KnowledgeWriteResult> => {
+  const ids = knowledgeIdsOf(findings, feed.os.version);
+  try {
+    await ensureKnowledgeIndex(es);
+    return await writeKnowledge(es, {
+      ids,
+      knowledge: feed.knowledge,
+      source: feed.os.family === 'ubuntu' ? 'ubuntu' : 'redhat',
+      os: feed.os,
+      attribution: feed.attribution,
+      snapshotTime: feed.snapshotTime,
+      now,
+      signal,
+    });
+  } catch (error) {
+    logger.warn(
+      `Could not write vendor advisory text to the knowledge index: ${
+        error instanceof Error ? error.message : String(error)
+      }. Findings are unaffected.`
+    );
+    // Only ids the feed has text for could have been written; the rest were never going to be.
+    return {
+      written: 0,
+      unchanged: 0,
+      failed: [...ids].filter((id) => feed.knowledge.has(id)).length,
+    };
+  }
+};
+
 /**
  * Reads the latest inventory, then matches and writes one OS release at a time (a parsed feed
  * takes a few hundred MB of heap). A failed release does not stop the others; the run throws at
@@ -177,6 +238,7 @@ export const runScan = async (
     loadFeed: load = loadFeed,
     loadKev: loadKevCatalog = (abort) => loadKev(abort, { logger }),
     includeUnfixed,
+    onKnowledgeStored,
     now = () => new Date(),
   }: ScanDeps,
   { signal, runId }: { signal: AbortSignal; runId: string }
@@ -195,6 +257,7 @@ export const runScan = async (
     kev: { status: 'not_attempted', listed: 0 },
     distinctCves: 0,
     feedInfo: {},
+    knowledge: { written: 0, unchanged: 0, failed: 0 },
   };
 
   const inventory = await readInventory({ es, packRepository, logger }, signal);
@@ -256,6 +319,12 @@ export const runScan = async (
           findings.push(...matchHost(hostInventory, index, summary.matchStats));
         }
       }
+      // The feed text is only needed for what the findings use; dropping the rest frees it for the
+      // (slow) Elasticsearch writes below.
+      const usedKnowledge = knowledgeIdsOf(findings, os.version);
+      for (const id of [...result.feed.knowledge.keys()]) {
+        if (!usedKnowledge.has(id)) result.feed.knowledge.delete(id);
+      }
       const written = await writeFindings(es, {
         hosts: releaseHosts.map(({ meta }) => meta),
         findings,
@@ -265,9 +334,22 @@ export const runScan = async (
         kev: kev?.entries,
         // Only an outage keeps the stamps already stored; an ok or stale catalog is the truth.
         keepKev: kev?.status === 'unavailable',
+        knowledge: result.feed.knowledge,
         signal,
       });
       for (const { cve } of findings) cves.add(cve.id);
+      // An unchanged feed (304) has the same text already stored, unless the last write for it
+      // failed; the loader reports that as `changed`.
+      if (result.changed !== false) {
+        const stored = await storeKnowledge(es, logger, result.feed, findings, {
+          now: now().toISOString(),
+          signal,
+        });
+        summary.knowledge.written += stored.written;
+        summary.knowledge.unchanged += stored.unchanged;
+        summary.knowledge.failed += stored.failed;
+        onKnowledgeStored?.(os, stored.failed === 0);
+      }
       summary.distinctCves = cves.size;
       summary.releases[key] = 'matched';
       summary.findings += written.written;

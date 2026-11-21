@@ -6,6 +6,8 @@
  */
 
 import { dpkgKey, UnencodableVersionError } from '../version_compare';
+import { cveKnowledgeId } from '../knowledge/constants';
+import { flatCopy, truncateText } from '../truncate';
 import type { Atom, Conjunction, XmlNode } from './oval';
 import {
   child,
@@ -22,7 +24,7 @@ import {
   UnsupportedCriteriaError,
   type OvalInput,
 } from './oval';
-import type { AdvisoryCve, AdvisoryRecord, FeedParseResult } from './types';
+import type { AdvisoryCve, AdvisoryRecord, FeedParseResult, KnowledgeEntry } from './types';
 
 /*
  * Canonical's OVAL has one definition per CVE. Each fixed source package is a criterion whose
@@ -54,6 +56,51 @@ interface PendingDefinition {
   leaves: Array<{ leaf: UbuntuLeaf; conditions: UbuntuCondition[][] }>;
 }
 
+/**
+ * Longest `pro fix` solution kept per CVE, in UTF-16 units. The text is a package-version list
+ * (up to 16 KB, 60% of all Ubuntu prose) that the finding's own fixed version already carries.
+ * Keeping it whole made the noble knowledge map retain ~115 MB; this bound keeps the command and
+ * the first packages and lands the map near 60 MB. A cut sets `truncated`.
+ */
+export const UBUNTU_SOLUTION_MAX_CHARS = 1024;
+
+const UPDATE_INSTRUCTIONS = /\s*Update Instructions:\s*/;
+const REJECTED_PREFIX = /^Rejected reason:\s*/;
+
+/**
+ * Canonical packs the CVE description and the `pro fix` instructions into one `<description>`;
+ * the instructions become the solution. A "Rejected reason:" description is the vendor
+ * withdrawing the CVE.
+ */
+const splitUbuntuDescription = (
+  node: XmlNode | undefined
+):
+  | {
+      rejected: boolean;
+      truncated: boolean;
+      fields: Pick<KnowledgeEntry, 'description' | 'solution'>;
+    }
+  | undefined => {
+  if (!node?.text) return undefined;
+  const [before, ...rest] = node.text.split(UPDATE_INSTRUCTIONS);
+  const fullSolution = rest.join(' ').trim();
+  const solution = truncateText(fullSolution, UBUNTU_SOLUTION_MAX_CHARS);
+  const rejected = REJECTED_PREFIX.test(before);
+  const description = (rejected ? before.replace(REJECTED_PREFIX, '') : before).trim();
+  return {
+    rejected,
+    // Splitting drops the heading, the solution may be cut and the rejected prefix is stripped,
+    // so the text is an excerpt of the vendor's.
+    truncated: node.truncated === true || fullSolution.length > 0 || rejected,
+    // Both are slices of the one XML text; copying lets that parent (description + the full
+    // solution) be collected instead of being pinned by every entry.
+    fields: {
+      description: description ? flatCopy(description) : undefined,
+      solution: solution ? flatCopy(solution) : undefined,
+    },
+  };
+};
+
 const FIXED_PACKAGE = /^(\S+) source package in ([^,]+), is affected and has been fixed\b/;
 const MIGHT_BE_AFFECTED = /^(\S+) source package in ([^,]+), might be affected\b/;
 const KERNEL_RUNNING = /^Is kernel '([^']+)' running\?$/;
@@ -74,6 +121,17 @@ export const parseUbuntuOval = async (
   const pending: PendingDefinition[] = [];
   let definitions = 0;
   let snapshotTime: string | undefined;
+  let attribution: string | undefined;
+  const knowledge = new Map<string, KnowledgeEntry>();
+  // The same reference URLs recur across thousands of CVEs; one string per URL.
+  const urls = new Map<string, string>();
+  const intern = (url: string): string => {
+    const known = urls.get(url);
+    if (known !== undefined) return known;
+    const copy = flatCopy(url);
+    urls.set(copy, copy);
+    return copy;
+  };
 
   const wantedTests = new Set<string>();
   const tests = new Map<string, { objectRef?: string; stateRef?: string }>();
@@ -197,9 +255,10 @@ export const parseUbuntuOval = async (
         refsOverflowed = true;
         break;
       }
-      refs.push({ id: refAttrs.ref_id ?? '', url: refAttrs.ref_url.slice(0, 1024) });
+      refs.push({ id: refAttrs.ref_id ?? '', url: intern(refAttrs.ref_url.slice(0, 1024)) });
     }
     if (refsOverflowed) countInto(skipped, 'reference_overflow');
+    attribution ??= descendant(metadata, 'rights')?.text || undefined;
     const advisory = child(metadata, 'advisory');
     const severity = advisory && child(advisory, 'severity')?.text;
     const publicDate = advisory && child(advisory, 'public_date')?.text;
@@ -219,6 +278,20 @@ export const parseUbuntuOval = async (
       },
       leaves: grouped,
     });
+    const text = splitUbuntuDescription(child(metadata, 'description'));
+    if (text) {
+      knowledge.set(cveKnowledgeId('ubuntu', release, cveNode.text), {
+        kind: text.rejected ? 'rejected' : 'cve',
+        id: cveNode.text,
+        title: child(metadata, 'title')?.text || undefined,
+        ...text.fields,
+        url: attrs.href,
+        severity: attrs.priority,
+        references: refs.length > 0 ? refs.map((r) => r.url) : undefined,
+        published: ovalPublicToIso(attrs.public),
+        ...(text.truncated ? { truncated: true as const } : {}),
+      });
+    }
     for (const { leaf, conditions } of grouped) {
       wantedTests.add(leaf.testRef);
       for (const alternative of conditions) for (const c of alternative) wantedTests.add(c.testRef);
@@ -268,6 +341,7 @@ export const parseUbuntuOval = async (
   };
 
   await readOval(input, {
+    keepText: new Set(['description', 'rights']),
     onTimestamp: (ts) => {
       snapshotTime = ovalTimestampToIso(ts);
     },
@@ -423,5 +497,5 @@ export const parseUbuntuOval = async (
     }
   }
 
-  return { os, snapshotTime, definitions, records, skipped };
+  return { os, snapshotTime, definitions, records, skipped, knowledge, attribution };
 };

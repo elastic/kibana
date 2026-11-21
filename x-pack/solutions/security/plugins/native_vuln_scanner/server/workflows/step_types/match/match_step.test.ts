@@ -6,7 +6,7 @@
  */
 
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import { clearFeedCache, setCachedFeed } from '../../../lib/feeds/feed_cache';
+import { clearFeedCache, getCachedFeed, setCachedFeed } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs } from '../../../lib/feeds/fetch';
 import { ScanFailedError, runScan } from '../../../lib/scan';
@@ -43,6 +43,7 @@ const summary = (overrides: Partial<ScanSummary> = {}): ScanSummary => ({
   packMissing: false,
   kev: { status: 'ok', listed: 0 },
   distinctCves: 0,
+  knowledge: { written: 0, unchanged: 0, failed: 0 },
   feedInfo: {},
   ...overrides,
 });
@@ -79,6 +80,7 @@ describe('native_vuln.match handler', () => {
         releases: { 'ubuntu:noble': 'matched' },
         failures: {},
         kev: { status: 'ok', listed: 0 },
+        knowledge: { written: 0, unchanged: 0, failed: 0 },
         feed_provenance: {},
         distinct_cves: 0,
       },
@@ -167,8 +169,58 @@ describe('native_vuln.match handler', () => {
 
       const result = await load({ feeds: [{ release: 'ubuntu:noble', status: 'downloaded' }] });
 
-      expect(result).toEqual({ status: 'ok', feed: parsed, etag: '"e"', lastModified: 'lm' });
+      expect(result).toEqual({
+        status: 'ok',
+        feed: parsed,
+        changed: true,
+        etag: '"e"',
+        lastModified: 'lm',
+      });
       expect(loadFeedMock).not.toHaveBeenCalled();
+    });
+
+    describe('knowledge write after a 304', () => {
+      const parsed = { records: [] } as never;
+      const cacheFeed = (knowledgeStored?: boolean) => {
+        parseMock.mockResolvedValue(parsed);
+        setCachedFeed('ubuntu:noble', {
+          etag: '"e"',
+          body: new Uint8Array(2),
+          includeUnfixed: false,
+          knowledgeStored,
+        });
+      };
+      const loaded = (status: 'not_modified' | 'downloaded') =>
+        load({ feeds: [{ release: 'ubuntu:noble', status, hosts: 1 }] });
+
+      it.each([undefined, false])(
+        'asks for the write again when the last write for these bytes was %s',
+        async (stored) => {
+          cacheFeed(stored);
+          expect(await loaded('not_modified')).toMatchObject({ changed: true });
+        }
+      );
+
+      it('skips the write when the last write for these bytes was clean', async () => {
+        cacheFeed(true);
+        expect(await loaded('not_modified')).toMatchObject({ changed: false });
+      });
+
+      it('always writes when the bytes were just downloaded', async () => {
+        cacheFeed(true);
+        expect(await loaded('downloaded')).toMatchObject({ changed: true });
+      });
+
+      it('records the outcome of each write on the cached entry', async () => {
+        runScanMock.mockResolvedValue(summary());
+        cacheFeed(false);
+        const { scanDeps } = await run({ feeds: [] });
+
+        scanDeps!.onKnowledgeStored!(noble, true);
+        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStored).toBe(true);
+        scanDeps!.onKnowledgeStored!(noble, false);
+        expect(getCachedFeed('ubuntu:noble', false)?.knowledgeStored).toBe(false);
+      });
     });
 
     it('downloads the feed itself when this node has none cached', async () => {

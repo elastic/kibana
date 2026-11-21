@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { BulkOperationContainer, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KevEntries } from '../enrichment/kev';
+import type { KnowledgeEntry } from '../feeds/types';
 import type { Finding } from '../matcher';
 import { FINDINGS_INDEX } from './constants';
 import type { FindingDoc, HostMeta } from './finding_doc';
@@ -74,6 +75,8 @@ export interface WriteFindingsParams {
   unfixedScanned: boolean;
   /** CISA KEV catalog; findings of listed CVEs get a `vulnerability.kev` block. */
   kev?: KevEntries;
+  /** Vendor prose by knowledge id; each finding's description is cut from it. */
+  knowledge?: ReadonlyMap<string, KnowledgeEntry>;
   /**
    * True when this run had no KEV catalog at all: a finding without a `kev` block keeps the one
    * it already has. False when the catalog (even a stale copy) is the truth for this run.
@@ -135,14 +138,29 @@ const countFailures = (response: BulkResponse, failures: Record<string, number>)
  */
 export const writeFindings = async (
   es: ElasticsearchClient,
-  { hosts, findings, now, runId, unfixedScanned, kev, keepKev = false, signal }: WriteFindingsParams
+  {
+    hosts,
+    findings,
+    now,
+    runId,
+    unfixedScanned,
+    kev,
+    knowledge,
+    keepKev = false,
+    signal,
+  }: WriteFindingsParams
 ): Promise<WriteFindingsResult> => {
   const metaById = new Map(hosts.map((host) => [host.id, host]));
   const docs = new Map<string, FindingDoc>();
   for (const finding of findings) {
     const host = metaById.get(finding.hostId);
     if (!host) throw new Error(`Finding for host ${finding.hostId} has no host metadata`);
-    const doc = toFindingDoc(finding, host, { now, runId, kev: kev?.get(finding.cve.id) });
+    const doc = toFindingDoc(finding, host, {
+      now,
+      runId,
+      kev: kev?.get(finding.cve.id),
+      knowledge,
+    });
     docs.set(doc.event.id, doc);
   }
 

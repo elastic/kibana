@@ -29,6 +29,29 @@ describe('parseRhelOval', () => {
     expect(result.definitions).toBe(5);
   });
 
+  describe('knowledge', () => {
+    it('reads the feed copyright', () => {
+      expect(result.attribution).toBe('Copyright 2026 Red Hat, Inc.');
+    });
+
+    it('keeps a patch definition text as the advisory summary, not as a CVE description', () => {
+      const entry = result.knowledge.get('adv:redhat:9:RHSA-2026:19367');
+      expect(entry).toMatchObject({
+        kind: 'advisory',
+        id: 'RHSA-2026:19367',
+        summary: 'Please update',
+        cves: ['CVE-2026-23868'],
+        url: 'https://access.redhat.com/errata/RHSA-2026:19367',
+      });
+      expect(entry?.description).toBeUndefined();
+      expect(result.knowledge.has('cve:redhat:9:CVE-2026-23868')).toBe(false);
+    });
+
+    it('never puts vendor text on the advisory records', () => {
+      expect(JSON.stringify(result.records)).not.toContain('Please update');
+    });
+  });
+
   it('emits one record per binary with advisory, CVE and arch details', () => {
     const giflib = byAdvisory('RHSA-2026:19367');
     expect(giflib.map((r) => r.package.name)).toEqual(['giflib', 'giflib-devel']);
@@ -380,5 +403,22 @@ describe('parseRhelOval with includeUnfixed', () => {
       severity: 'Moderate',
     });
     expect(tar.cves.map((c) => c.id)).toEqual(['CVE-2005-2541']);
+  });
+
+  it('splits the unpatched text into description, impact and workaround', async () => {
+    const result = await parseRhelOval([unpatched], { major: '9', includeUnfixed: true });
+
+    const tar = result.knowledge.get('cve:redhat:9:CVE-2005-2541');
+    expect(tar?.kind).toBe('cve');
+    expect(tar?.description).toMatch(/^A flaw was found in tar utility/);
+    expect(tar?.description).not.toContain('DOCUMENTATION');
+    expect(tar?.impact).toMatch(/^Currently, there are no plans to change tar behaviour/);
+    expect(tar?.workaround).toMatch(/^To mitigate the risks associated with this vulnerability/);
+    expect(tar?.truncated).toBe(true);
+
+    const nginx = result.knowledge.get('cve:redhat:9:CVE-2016-1247');
+    expect(nginx?.description).toMatch(/^A vulnerability was discovered in nginx/);
+    expect(nginx?.impact).toMatch(/^Red Hat Product Security has rated this issue as having Low/);
+    expect(nginx?.workaround).toBeUndefined();
   });
 });

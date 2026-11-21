@@ -15,6 +15,7 @@ import type {
 import type { NativeVulnScannerConfig } from './config';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
+import { ensureKnowledgeIndex } from './lib/knowledge';
 import { ensureSummaryIndex } from './lib/summary';
 import { installWorkflows } from './managed_workflows/install';
 import { registerOwner } from './managed_workflows/register_owner';
@@ -108,6 +109,9 @@ export class NativeVulnScannerPlugin
     await Promise.all([
       ensureFindingsIndex(es).catch((error: Error) => {
         this.logger.error(`Failed to set up the vulnerability findings index: ${error.message}`);
+      }),
+      ensureKnowledgeIndex(es).catch((error: Error) => {
+        this.logger.error(`Failed to set up the vulnerability knowledge index: ${error.message}`);
       }),
       ensureSummaryIndex(es).catch((error: Error) => {
         this.logger.error(

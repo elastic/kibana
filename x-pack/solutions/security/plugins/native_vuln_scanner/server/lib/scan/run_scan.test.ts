@@ -12,9 +12,10 @@ import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-m
 import { parseRhelOval } from '../feeds/rhel_oval';
 import type { KevEntries, LoadKevResult } from '../enrichment/kev';
 import type { FeedOs, LoadFeedResult } from '../feeds/fetch';
+import type { KnowledgeEntry } from '../feeds/types';
 import type { AgentInventoryRows } from '../inventory';
 import { findInventoryScheduleIds, readAgentInventories } from '../inventory';
-import { ensureFindingsIndex, writeFindings } from '../findings';
+import { ensureFindingsIndex, toFindingDoc, writeFindings } from '../findings';
 import type { ScanDeps } from './run_scan';
 import { ScanFailedError, runScan, truncate } from './run_scan';
 
@@ -167,6 +168,224 @@ describe('runScan', () => {
     expect(info?.snapshotTime).toBe('2026-11-12T19:21:30Z');
     // now() is 2026-11-13T00:00:00Z; the snapshot is from 2026-11-12T19:21:30Z.
     expect(info?.ageSeconds).toBe(16710);
+  });
+
+  describe('knowledge index', () => {
+    const KB = 'security_solution-native_knowledge.vulnerability_latest-1';
+    const indexedIds = (deps: ScanDeps): string[] =>
+      (deps.es.bulk as jest.Mock).mock.calls.flatMap(([{ operations }]) =>
+        (operations as Array<{ index?: { _id: string } }>).flatMap(({ index }) =>
+          index ? [index._id] : []
+        )
+      );
+    const mockKb = (deps: ScanDeps) => {
+      (deps.es.mget as jest.Mock).mockImplementation(async ({ ids }: { ids: string[] }) => ({
+        docs: ids.map((_id) => ({ _id, found: false })),
+      }));
+      (deps.es.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [], took: 1 });
+    };
+
+    it('creates the lookup index and writes the text of the advisories the findings use', async () => {
+      const { deps } = setup([rhelAgent('a1', '9')]);
+      mockKb(deps);
+
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+      expect(deps.es.indices.create).toHaveBeenCalledWith(
+        expect.objectContaining({ index: KB, settings: { index: { mode: 'lookup' } } })
+      );
+      const advisoryIds = writeMock.mock.calls[0][1].findings.flatMap((f) =>
+        f.advisories.map(({ id }) => `adv:redhat:9:${id}`)
+      );
+      expect(indexedIds(deps)).toEqual(expect.arrayContaining(advisoryIds));
+      expect(summary.knowledge).toEqual({
+        written: indexedIds(deps).length,
+        unchanged: 0,
+        failed: 0,
+      });
+      expect(summary.knowledge.written).toBeGreaterThan(0);
+    });
+
+    it('keeps one doc per release for a CVE both releases carry, and points each finding at its own', async () => {
+      // The 9 feed re-keyed per release, each carrying its own text for the same CVE.
+      const SHARED_CVE = 'CVE-2026-23868';
+      const feedFor = async (version: '9' | '10'): Promise<LoadFeedResult> => {
+        const { feed } = (await rhel9Feed()) as Extract<LoadFeedResult, { status: 'ok' }>;
+        const knowledge = new Map<string, KnowledgeEntry>();
+        for (const [id, entry] of feed.knowledge) {
+          knowledge.set(id.replace(':redhat:9:', `:redhat:${version}:`), entry);
+        }
+        knowledge.set(`cve:redhat:${version}:${SHARED_CVE}`, {
+          kind: 'cve',
+          id: SHARED_CVE,
+          description: `Release ${version} text`,
+        });
+        return {
+          status: 'ok',
+          feed: {
+            ...feed,
+            os: { ...feed.os, version },
+            records: feed.records.map((record) => ({
+              ...record,
+              os: { ...record.os, version },
+            })),
+            knowledge,
+          },
+        };
+      };
+      const load = async (os: FeedOs) => feedFor(os.version === '10' ? '10' : '9');
+      const agents = [rhelAgent('a1', '9'), rhelAgent('a10', '10')];
+
+      // A tiny in-memory knowledge index, so the second run sees what the first one stored.
+      const store = new Map<string, { content_hash?: string; last_seen_in_feed?: string }>();
+      const run = async () => {
+        const { deps } = setup(agents, load);
+        (deps.es.mget as jest.Mock).mockImplementation(async ({ ids }: { ids: string[] }) => ({
+          docs: ids.map((_id) =>
+            store.has(_id) ? { _id, found: true, _source: store.get(_id) } : { _id, found: false }
+          ),
+        }));
+        (deps.es.bulk as jest.Mock).mockImplementation(
+          async ({ operations }: { operations: Array<Record<string, unknown>> }) => {
+            for (let i = 0; i < operations.length; i += 2) {
+              const { index } = operations[i] as { index?: { _id: string } };
+              if (index) store.set(index._id, operations[i + 1] as { content_hash?: string });
+            }
+            return { errors: false, items: [], took: 1 };
+          }
+        );
+        const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r' });
+        return { summary, calls: writeMock.mock.calls.map(([, params]) => params) };
+      };
+
+      const first = await run();
+      const docIds = [...store.keys()];
+      const sharedCve = SHARED_CVE;
+      expect(docIds).toEqual(
+        expect.arrayContaining([`cve:redhat:9:${sharedCve}`, `cve:redhat:10:${sharedCve}`])
+      );
+      expect(first.summary.knowledge.written).toBe(docIds.length);
+      expect(
+        (store.get(`cve:redhat:9:${sharedCve}`) as { content_hash: string }).content_hash
+      ).not.toBe(
+        (store.get(`cve:redhat:10:${sharedCve}`) as { content_hash: string }).content_hash
+      );
+
+      // Each finding's knowledge_id is the doc of its own release.
+      let sharedSeen = 0;
+      for (const { hosts, findings, knowledge } of first.calls) {
+        const [host] = hosts;
+        const release = host.os.version;
+        for (const finding of findings) {
+          const doc = toFindingDoc(finding, host, {
+            now: '2026-11-13T00:00:00.000Z',
+            runId: 'r',
+            knowledge,
+          });
+          expect(doc.native_vuln_scanner.knowledge_id).toBe(
+            `cve:redhat:${release}:${finding.cve.id}`
+          );
+          if (finding.cve.id === sharedCve) {
+            sharedSeen += 1;
+            expect(store.has(doc.native_vuln_scanner.knowledge_id)).toBe(true);
+          }
+        }
+      }
+
+      expect(sharedSeen).toBe(2);
+
+      writeMock.mockClear();
+      const second = await run();
+      expect([...store.keys()]).toEqual(docIds);
+      expect(second.summary.knowledge).toEqual({
+        written: 0,
+        unchanged: docIds.length,
+        failed: 0,
+      });
+    });
+
+    it('skips the knowledge write when the feed was unchanged (304)', async () => {
+      const { deps } = setup([rhelAgent('a1', '9')], async () => ({
+        ...(await rhel9Feed()),
+        changed: false,
+      }));
+      mockKb(deps);
+
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+      expect(summary.findings).toBeGreaterThan(0);
+      expect(deps.es.mget).not.toHaveBeenCalled();
+      expect(deps.es.bulk).not.toHaveBeenCalled();
+      expect(summary.knowledge).toEqual({ written: 0, unchanged: 0, failed: 0 });
+    });
+
+    it('reports each release write to onKnowledgeStored, clean or not', async () => {
+      const onKnowledgeStored = jest.fn();
+      const clean = setup([rhelAgent('a1', '9')]);
+      clean.deps.onKnowledgeStored = onKnowledgeStored;
+      mockKb(clean.deps);
+      await runScan(clean.deps, { signal: new AbortController().signal, runId: 'r1' });
+      expect(onKnowledgeStored).toHaveBeenLastCalledWith({ family: 'rhel', version: '9' }, true);
+
+      const failing = setup([rhelAgent('a1', '9')]);
+      failing.deps.onKnowledgeStored = onKnowledgeStored;
+      (failing.deps.es.mget as jest.Mock).mockImplementation(
+        async ({ ids }: { ids: string[] }) => ({
+          docs: ids.map((_id) => ({ _id, found: false })),
+        })
+      );
+      (failing.deps.es.bulk as jest.Mock).mockResolvedValue({
+        errors: true,
+        items: [{ index: { error: { type: 'x' } } }],
+        took: 1,
+      });
+      await runScan(failing.deps, { signal: new AbortController().signal, runId: 'r2' });
+      expect(onKnowledgeStored).toHaveBeenLastCalledWith({ family: 'rhel', version: '9' }, false);
+    });
+
+    it('does not call onKnowledgeStored for a 304 whose text is already stored', async () => {
+      const onKnowledgeStored = jest.fn();
+      const { deps } = setup([rhelAgent('a1', '9')], async () => ({
+        ...(await rhel9Feed()),
+        changed: false,
+      }));
+      deps.onKnowledgeStored = onKnowledgeStored;
+      await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      expect(onKnowledgeStored).not.toHaveBeenCalled();
+    });
+
+    it('counts a thrown write as failed only for ids the feed has text for', async () => {
+      const { deps } = setup([rhelAgent('a1', '9')]);
+      (deps.es.indices.create as jest.Mock).mockRejectedValue(new Error('security_exception'));
+
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+      const { feed } = (await rhel9Feed()) as Extract<LoadFeedResult, { status: 'ok' }>;
+      const { findings } = writeMock.mock.calls[0][1];
+      const wanted = new Set<string>();
+      for (const finding of findings) {
+        wanted.add(`cve:redhat:9:${finding.cve.id}`);
+        for (const { id } of finding.advisories) wanted.add(`adv:redhat:9:${id}`);
+      }
+      const withText = [...wanted].filter((id) => feed.knowledge.has(id)).length;
+      expect(wanted.size).toBeGreaterThan(withText);
+      expect(summary.knowledge.failed).toBe(withText);
+    });
+
+    it('keeps the findings and the release status when the knowledge write fails', async () => {
+      const { deps } = setup([rhelAgent('a1', '9')]);
+      (deps.es.indices.create as jest.Mock).mockRejectedValue(new Error('security_exception'));
+
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+
+      expect(summary.releases).toEqual({ 'rhel:9': 'matched' });
+      expect(summary.findings).toBeGreaterThan(0);
+      expect(summary.knowledge.written).toBe(0);
+      expect(summary.knowledge.failed).toBeGreaterThan(0);
+      expect(deps.logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Findings are unaffected')
+      );
+    });
   });
 
   it('hands the KEV catalog to the writer and counts the findings it lists', async () => {

@@ -9,6 +9,7 @@ import type { Atom, CriteriaLeafInput, OvalSection, XmlNode } from './oval';
 import {
   expandCriteria,
   groupByLeaf,
+  MAX_KEPT_TEXT_CHARS,
   ovalPublicToIso,
   ovalTimestampToIso,
   parseCvss,
@@ -171,6 +172,41 @@ describe('readOval', () => {
       ['description', ''],
     ]);
     expect(items[1][1].children[0]).toMatchObject({ name: 'object', attrs: { object_ref: 'o1' } });
+  });
+
+  describe('keepText', () => {
+    const prose = (text: string) =>
+      `<oval_definitions xmlns="http://oval.mitre.org/XMLSchema/oval-definitions-5"><definitions><definition id="d1"><metadata><description>${text}</description><rights>(c) Vendor</rights></metadata></definition></definitions></oval_definitions>`;
+    const read = async (xml: string, keepText: ReadonlySet<string>) => {
+      const nodes: XmlNode[] = [];
+      await readOval([xml], { keepText, onItem: (_section, item) => nodes.push(...item.children) });
+      return nodes[0].children;
+    };
+
+    it('keeps only the tags it is asked to keep', async () => {
+      const [description, rights] = await read(prose('some prose'), new Set(['description']));
+      expect(description).toMatchObject({ name: 'description', text: 'some prose' });
+      expect(description.truncated).toBeUndefined();
+      expect(rights.text).toBe('');
+    });
+
+    it('cuts at MAX_KEPT_TEXT_CHARS and flags the node', async () => {
+      const [description] = await read(
+        prose('a'.repeat(MAX_KEPT_TEXT_CHARS + 10)),
+        new Set(['description'])
+      );
+      expect(description.text).toHaveLength(MAX_KEPT_TEXT_CHARS);
+      expect(description.truncated).toBe(true);
+    });
+
+    it('never ends on half a surrogate pair', async () => {
+      const [description] = await read(
+        prose(`${'a'.repeat(MAX_KEPT_TEXT_CHARS - 1)}😀`),
+        new Set(['description'])
+      );
+      expect(description.text).toBe('a'.repeat(MAX_KEPT_TEXT_CHARS - 1));
+      expect(description.truncated).toBe(true);
+    });
   });
 
   it('rejects malformed XML', async () => {

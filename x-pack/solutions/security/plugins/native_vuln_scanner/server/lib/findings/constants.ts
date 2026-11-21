@@ -6,6 +6,7 @@
  */
 
 import { CDR_LATEST_NATIVE_SCANNER_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { NATIVE_VULN_SCANNER_VENDOR } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
 
 /**
  * Read alias, shared with the CNVM dashboard and detection-rule builders so they cannot drift.
@@ -25,6 +26,6 @@ export const FINDINGS_INDEX_TEMPLATE = FINDINGS_ALIAS;
 
 export const FINDINGS_DATASET = 'native_vuln_scanner.vulnerability';
 
-export const FINDINGS_VENDOR = 'Elastic native scanner';
+export const FINDINGS_VENDOR = NATIVE_VULN_SCANNER_VENDOR;
 
 export type FindingState = 'new' | 'active' | 'fixed' | 'reopened' | 'unfixed';

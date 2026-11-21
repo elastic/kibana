@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { advisoryKnowledgeId, cveKnowledgeId } from '../knowledge/constants';
 import { rpmKey, UnencodableVersionError } from '../version_compare';
 import type { Atom, Conjunction, XmlNode } from './oval';
 import {
   child,
   children,
   countInto,
+  descendant,
   expandCriteria,
   groupByLeaf,
   ovalPublicToIso,
@@ -26,6 +28,7 @@ import type {
   AdvisoryRecord,
   ArchConstraint,
   FeedParseResult,
+  KnowledgeEntry,
 } from './types';
 
 /*
@@ -197,6 +200,30 @@ const mergeByArch = (
   return [...merged.values()].map(({ leaf, arch, conditions }) => ({ leaf, arch, conditions }));
 };
 
+const SECTION_HEADING = /(?:^|\s)(DOCUMENTATION|STATEMENT|MITIGATION):\s*/g;
+
+/** Unfixed RHEL definitions carry "DOCUMENTATION: … STATEMENT: … MITIGATION: …" in one text. */
+const splitRedHatSections = (
+  text: string
+): { split: boolean; fields: Pick<KnowledgeEntry, 'description' | 'impact' | 'workaround'> } => {
+  const headings = [...text.matchAll(SECTION_HEADING)];
+  if (headings.length === 0) return { split: false, fields: { description: text } };
+  const sections: Record<string, string> = {};
+  headings.forEach((heading, i) => {
+    const start = (heading.index ?? 0) + heading[0].length;
+    const end = headings[i + 1]?.index ?? text.length;
+    sections[heading[1]] ??= text.slice(start, end).trim();
+  });
+  return {
+    split: true,
+    fields: {
+      description: sections.DOCUMENTATION || undefined,
+      impact: sections.STATEMENT || undefined,
+      workaround: sections.MITIGATION || undefined,
+    },
+  };
+};
+
 export const parseRhelOval = async (
   input: OvalInput,
   { major, includeUnfixed }: ParseRhelOvalOptions
@@ -205,6 +232,8 @@ export const parseRhelOval = async (
   const pending: PendingDefinition[] = [];
   let definitions = 0;
   let snapshotTime: string | undefined;
+  let attribution: string | undefined;
+  const knowledge = new Map<string, KnowledgeEntry>();
   const wantedTests = new Set<string>();
   const testStates = new Map<string, string>();
   const wantedStates = new Set<string>();
@@ -277,6 +306,42 @@ export const parseRhelOval = async (
     );
     if (leaves.length === 0) return;
     for (const { leaf } of leaves) if (leaf.testRef) wantedTests.add(leaf.testRef);
+    attribution ??= descendant(metadata, 'rights')?.text || undefined;
+    const descriptionNode = child(metadata, 'description');
+    const text = descriptionNode?.text;
+    if (text) {
+      const entry = {
+        title: child(metadata, 'title')?.text || undefined,
+        url: advisoryRef.attrs.ref_url,
+        severity: (advisory && child(advisory, 'severity')?.text) || undefined,
+        references: refs.length > 0 ? refs.map((r) => r.url) : undefined,
+        published: dateToIso(advisory && child(advisory, 'issued')?.attrs.date),
+        modified: dateToIso(advisory && child(advisory, 'updated')?.attrs.date),
+        ...(descriptionNode.truncated ? { truncated: true as const } : {}),
+      };
+      if (unfixed) {
+        const [{ id: cveId, published }] = cves;
+        const sections = splitRedHatSections(text);
+        knowledge.set(cveKnowledgeId('redhat', major, cveId), {
+          ...entry,
+          kind: 'cve',
+          id: cveId,
+          ...sections.fields,
+          published: published ?? entry.published,
+          // Splitting drops the section headings, so the stored text is an excerpt of the vendor's.
+          ...(sections.split ? { truncated: true as const } : {}),
+        });
+      } else {
+        // A patch definition's text is the RHSA description, not a per-CVE one.
+        knowledge.set(advisoryKnowledgeId('redhat', major, advisoryRef.attrs.ref_id), {
+          ...entry,
+          kind: 'advisory',
+          id: advisoryRef.attrs.ref_id,
+          summary: text,
+          cves: cves.map((cve) => cve.id),
+        });
+      }
+    }
     pending.push({
       id: node.attrs.id,
       title: child(metadata, 'title')?.text ?? '',
@@ -293,6 +358,7 @@ export const parseRhelOval = async (
   };
 
   await readOval(input, {
+    keepText: new Set(['description', 'rights']),
     onTimestamp: (ts) => {
       snapshotTime = ovalTimestampToIso(ts);
     },
@@ -368,5 +434,5 @@ export const parseRhelOval = async (
     }
   }
 
-  return { os, snapshotTime, definitions, records, skipped };
+  return { os, snapshotTime, definitions, records, skipped, knowledge, attribution };
 };

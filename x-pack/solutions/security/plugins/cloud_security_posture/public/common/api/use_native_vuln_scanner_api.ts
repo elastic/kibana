@@ -12,6 +12,7 @@ import {
   ONBOARDING_PLAN_PATH,
   ONBOARDING_RUNTIME_PIN_PATH,
   ONBOARDING_SCHEDULE_PATH,
+  KNOWLEDGE_PATH,
   ONBOARDING_STATUS_PATH,
   SCAN_PATH,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/constants';
@@ -20,6 +21,7 @@ import type {
   OnboardingPlan,
   OnboardingStatus,
   RuntimePinResult,
+  VulnerabilityKnowledgeResponse,
 } from '@kbn/cloud-security-posture-common/native_vuln_scanner/types';
 import type { InventoryPackBody } from '@kbn/cloud-security-posture-common/native_vuln_scanner/pack_body';
 import { useKibana } from '../hooks/use_kibana';
@@ -156,5 +158,35 @@ export const useNativeVulnScannerAvailability = () => {
       }
     },
     { retry: false, refetchOnWindowFocus: false, staleTime: Infinity }
+  );
+};
+
+export const NATIVE_VULN_SCANNER_KNOWLEDGE_QUERY_KEY = 'csp_native_vuln_scanner_knowledge';
+
+/**
+ * The vendor text of a native-scanner finding. A 404 (no text for the CVE) or 403 (the caller
+ * cannot read the knowledge index) is an expected answer, so it never retries and the flyout
+ * just hides the vendor sections.
+ */
+export const useVulnerabilityKnowledge = ({
+  knowledgeId,
+  advisoryIds,
+}: {
+  knowledgeId: string | undefined;
+  advisoryIds: string[];
+}) => {
+  const { http } = useKibana().services;
+
+  return useQuery(
+    [NATIVE_VULN_SCANNER_KNOWLEDGE_QUERY_KEY, knowledgeId, advisoryIds],
+    () =>
+      http.get<VulnerabilityKnowledgeResponse>(
+        KNOWLEDGE_PATH.replace('{knowledge_id}', encodeURIComponent(knowledgeId ?? '')),
+        {
+          version: NATIVE_VULN_SCANNER_API_VERSION,
+          query: { advisory_ids: advisoryIds },
+        }
+      ),
+    { enabled: !!knowledgeId, retry: false, refetchOnWindowFocus: false }
   );
 };

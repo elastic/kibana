@@ -11,7 +11,7 @@ import type {
   MatchInput,
   MatchOutput,
 } from '../../../../common/workflows/step_types/match/match_common';
-import { getCachedFeed } from '../../../lib/feeds/feed_cache';
+import { getCachedFeed, markKnowledgeStored } from '../../../lib/feeds/feed_cache';
 import { loadFeed, parseFeedBody } from '../../../lib/feeds/fetch';
 import type { FeedOs, LoadFeedResult } from '../../../lib/feeds/fetch';
 import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
@@ -39,6 +39,7 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
   ),
   distinct_cves: summary.distinctCves,
   kev: summary.kev,
+  knowledge: summary.knowledge,
 });
 
 /**
@@ -60,7 +61,13 @@ const buildFeedLoader =
     const cached = getCachedFeed(release, includeUnfixed);
     if (!cached) return loadFeed(os, { signal, includeUnfixed });
     const feed = await parseFeedBody(os, cached.body, { signal, includeUnfixed });
-    return { status: 'ok', feed, etag: cached.etag, lastModified: cached.lastModified };
+    return {
+      status: 'ok',
+      feed,
+      etag: cached.etag,
+      lastModified: cached.lastModified,
+      changed: reported?.status !== 'not_modified' || cached.knowledgeStored !== true,
+    };
   };
 
 export const buildMatchStepDefinition = ({
@@ -85,6 +92,7 @@ export const buildMatchStepDefinition = ({
             logger,
             loadFeed: buildFeedLoader(feeds, includeUnfixed),
             includeUnfixed,
+            onKnowledgeStored: (os, stored) => markKnowledgeStored(releaseKey(os), stored),
             now,
           },
           { signal, runId }

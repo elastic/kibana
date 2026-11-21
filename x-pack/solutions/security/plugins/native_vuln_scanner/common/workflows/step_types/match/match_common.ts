@@ -56,6 +56,10 @@ export const matchOutputSchema = lazySchema(() =>
         listed: z.number(),
       })
       .optional(),
+    /** Vendor-text docs written to the knowledge index; failures there never fail the scan. */
+    knowledge: z
+      .object({ written: z.number(), unchanged: z.number(), failed: z.number() })
+      .optional(),
   })
 );
 

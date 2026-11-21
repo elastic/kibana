@@ -8,7 +8,9 @@
 import { createHash } from 'crypto';
 import { EcsVersion } from '@elastic/ecs';
 import type { KevEntry } from '../enrichment/kev';
-import type { AdvisorySource, CvssScore } from '../feeds/types';
+import type { AdvisorySource, CvssScore, KnowledgeEntry } from '../feeds/types';
+import { advisoryKnowledgeId, cveKnowledgeId } from '../knowledge/constants';
+import { truncateText } from '../truncate';
 import type { Finding } from '../matcher';
 import type { FindingState } from './constants';
 import { FINDINGS_DATASET, FINDINGS_VENDOR } from './constants';
@@ -92,6 +94,8 @@ export interface FindingDoc {
     state: FindingState;
     run_id: string;
     why: string;
+    /** Doc id of the vendor text for this CVE in the knowledge index (a lookup join key). */
+    knowledge_id: string;
     first_seen: string;
     last_seen: string;
     fixed_at?: string;
@@ -186,7 +190,26 @@ export interface FindingDocContext {
   runId: string;
   /** The KEV catalog entry for `finding.cve.id`, when the CVE is listed. */
   kev?: KevEntry;
+  /** The feed's vendor prose by knowledge id; the finding's description is cut from it. */
+  knowledge?: ReadonlyMap<string, KnowledgeEntry>;
 }
+
+/** Bound on the description kept on each finding, in UTF-16 units; the full text is in the knowledge index. */
+export const FINDING_DESCRIPTION_MAX = 2048;
+
+const findingDescription = (
+  { cve, advisories }: Finding,
+  source: AdvisorySource,
+  release: string,
+  knowledge: FindingDocContext['knowledge']
+): string => {
+  const text =
+    knowledge?.get(cveKnowledgeId(source, release, cve.id))?.description ??
+    advisories
+      .map(({ id }) => knowledge?.get(advisoryKnowledgeId(source, release, id))?.summary)
+      .find((summary) => summary);
+  return truncateText(text || advisories[0]?.title || cve.id, FINDING_DESCRIPTION_MAX);
+};
 
 /**
  * Builds the ECS document for a first sighting; the writer's upsert script keeps `first_seen`
@@ -195,7 +218,7 @@ export interface FindingDocContext {
 export const toFindingDoc = (
   finding: Finding,
   host: HostMeta,
-  { now, runId, kev }: FindingDocContext
+  { now, runId, kev, knowledge }: FindingDocContext
 ): FindingDoc => {
   if (host.id !== finding.hostId) {
     throw new Error(`Host metadata ${host.id} does not belong to finding host ${finding.hostId}`);
@@ -242,9 +265,7 @@ export const toFindingDoc = (
           }
         : {}),
       ...(cve.cwe ? { cwe: [cve.cwe] } : {}),
-      // The CNVM flyout shows `description` but nothing from `native_vuln_scanner`, so the
-      // detection reason goes here until the flyout learns about it.
-      description: `Detected because ${finding.why}.`,
+      description: findingDescription(finding, source, host.os.version, knowledge),
       ...(cve.published ? { published_date: cve.published } : {}),
       enumeration: 'CVE',
       scanner: { vendor: FINDINGS_VENDOR },
@@ -272,6 +293,7 @@ export const toFindingDoc = (
       state: finding.unfixed ? 'unfixed' : 'new',
       run_id: runId,
       why: finding.why,
+      knowledge_id: cveKnowledgeId(source, host.os.version, cve.id),
       first_seen: now,
       last_seen: now,
       ...(finding.feedSnapshotTime ? { feed_snapshot_time: finding.feedSnapshotTime } : {}),

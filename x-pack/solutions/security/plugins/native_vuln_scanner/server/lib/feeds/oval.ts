@@ -17,6 +17,8 @@ export interface XmlNode {
   attrs: Record<string, string>;
   children: XmlNode[];
   text: string;
+  /** Set when `text` was cut at `MAX_KEPT_TEXT_CHARS`. */
+  truncated?: true;
 }
 
 export type OvalSection = 'definitions' | 'tests' | 'objects' | 'states' | 'variables';
@@ -27,7 +29,15 @@ export interface OvalHandlers {
   /** Called once per direct child of a section, after its closing tag. */
   onItem: (section: OvalSection, node: XmlNode) => void;
   onTimestamp?: (timestamp: string) => void;
+  /**
+   * Prose tags whose text is kept (cut at `MAX_KEPT_TEXT_CHARS`). Every other `description` and
+   * `rights` is dropped while streaming to keep per-definition memory small.
+   */
+  keepText?: ReadonlySet<string>;
 }
+
+/** Longest text kept for a `keepText` tag; the rest is dropped while streaming. */
+export const MAX_KEPT_TEXT_CHARS = 16 * 1024;
 
 const SECTIONS: ReadonlySet<string> = new Set([
   'definitions',
@@ -54,6 +64,8 @@ export const readOval = async (input: OvalInput, handlers: OvalHandlers): Promis
   const stack: string[] = [];
   let section: OvalSection | undefined;
   let nodes: XmlNode[] = [];
+  const keepText = handlers.keepText;
+  const skipped = (name: string): boolean => SKIPPED_TEXT.has(name) && !keepText?.has(name);
   let skipText = 0;
   let timestamp: string | undefined;
 
@@ -69,7 +81,7 @@ export const readOval = async (input: OvalInput, handlers: OvalHandlers): Promis
       return;
     }
     if (section === undefined || stack.length < 3) return;
-    if (SKIPPED_TEXT.has(name)) skipText++;
+    if (skipped(name)) skipText++;
     const node: XmlNode = {
       name,
       attrs: tag.attributes as Record<string, string>,
@@ -85,7 +97,22 @@ export const readOval = async (input: OvalInput, handlers: OvalHandlers): Promis
       timestamp += text;
       return;
     }
-    if (nodes.length > 0 && skipText === 0) nodes[nodes.length - 1].text += text;
+    if (nodes.length === 0 || skipText > 0) return;
+    const node = nodes[nodes.length - 1];
+    if (!keepText?.has(node.name)) {
+      node.text += text;
+      return;
+    }
+    const room = MAX_KEPT_TEXT_CHARS - node.text.length;
+    if (text.length <= room) {
+      node.text += text;
+      return;
+    }
+    node.truncated = true;
+    if (room <= 0) return;
+    // Never end on half a surrogate pair.
+    const last = text.charCodeAt(room - 1);
+    node.text += text.slice(0, last >= 0xd800 && last <= 0xdbff ? room - 1 : room);
   };
   parser.on('text', onText);
   parser.on('cdata', onText);
@@ -103,7 +130,7 @@ export const readOval = async (input: OvalInput, handlers: OvalHandlers): Promis
       return;
     }
     if (section === undefined || nodes.length === 0) return;
-    if (SKIPPED_TEXT.has(name)) skipText--;
+    if (skipped(name)) skipText--;
     const node = nodes.pop() as XmlNode;
     node.text = node.text.trim();
     if (nodes.length === 0) handlers.onItem(section, node);

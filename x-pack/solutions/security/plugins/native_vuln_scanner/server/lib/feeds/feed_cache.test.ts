@@ -9,6 +9,7 @@ import {
   MAX_CACHED_FEEDS,
   clearFeedCache,
   getCachedFeed,
+  markKnowledgeStored,
   retainCachedFeeds,
   setCachedFeed,
 } from './feed_cache';
@@ -34,6 +35,19 @@ describe('feed cache', () => {
     for (let i = 0; i <= MAX_CACHED_FEEDS; i++) setCachedFeed(`rhel:${i}`, feed(`"${i}"`));
     expect(getCachedFeed('rhel:0', false)).toBeUndefined();
     expect(getCachedFeed(`rhel:${MAX_CACHED_FEEDS}`, false)).toBeDefined();
+  });
+
+  it('tracks whether the knowledge write for the cached bytes was clean', () => {
+    setCachedFeed('rhel:9', feed('"b"'));
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
+    markKnowledgeStored('rhel:9', true);
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(true);
+    markKnowledgeStored('rhel:9', false);
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(false);
+    // New bytes (new etag) start unstored again.
+    setCachedFeed('rhel:9', feed('"c"'));
+    expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
+    expect(() => markKnowledgeStored('rhel:10', true)).not.toThrow();
   });
 
   it('retains only the releases it is told to keep', () => {
