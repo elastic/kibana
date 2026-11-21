@@ -32,6 +32,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
 import type { ShownAttachmentVersion } from './dashboard_integration/dashboard_app_integration';
+import type { CanvasDashboardRegistry } from './canvas_dashboard_registry';
 
 export interface IdGenerator {
   readonly current: string;
@@ -69,6 +70,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   canWriteDashboards,
   draftAttachmentId,
   toasts,
+  canvasDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
@@ -79,6 +81,7 @@ export const registerDashboardAttachmentUiDefinition = ({
   canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
   toasts: NotificationsStart['toasts'];
+  canvasDashboards: CanvasDashboardRegistry;
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
@@ -154,6 +157,7 @@ export const registerDashboardAttachmentUiDefinition = ({
           data={data}
           checkSavedDashboardExist={checkSavedDashboardExist}
           canWriteDashboards={canWriteDashboards}
+          registerCanvasDashboard={canvasDashboards.register}
         />
       </React.Suspense>
     ),
@@ -209,3 +213,10 @@ export const registerDashboardAttachmentUiDefinition = ({
     shownAttachmentVersion$.complete();
   };
 };
+
+export { registerDashboardPanelAttachmentUiDefinition } from './dashboard_panel_ui_definition';
+export {
+  createCanvasDashboardRegistry,
+  type CanvasDashboard,
+  type CanvasDashboardRegistry,
+} from './canvas_dashboard_registry';

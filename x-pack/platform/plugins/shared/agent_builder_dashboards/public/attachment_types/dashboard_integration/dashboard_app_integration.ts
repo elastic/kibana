@@ -22,23 +22,26 @@ import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
-import { dashboardStateToAttachmentData } from '@kbn/agent-builder-dashboards-common';
+import {
+  dashboardStateToAttachmentData,
+  type DashboardAttachmentData,
+} from '@kbn/agent-builder-dashboards-common';
 import {
   CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createChatAdapter } from './chat_adapter';
 import {
-  findDashboardAttachment,
+  getPanelIds,
   isAttachmentShownInDashboard,
   isOpenDashboardUpdate,
   reconcileStaging,
+  resolveDashboardAttachmentLink,
   type AreDashboardStatesEqual,
 } from './reconcile';
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
   applyAttachment,
-  canApplyAgentChangesInPlace,
   type ApplyAttachmentOutcome,
 } from './show_attachment';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
@@ -107,26 +110,47 @@ export const registerDashboardAppIntegration = ({
   // agent updates carry no version until the conversation that has them is published
   let attachments: Array<DashboardAttachment & { version?: number }> | undefined;
   let conversationId: string | undefined;
+  // the dashboard attachments and panels a pointer may have been staged for, so pointers can be
+  // unstaged when their panel is removed or the user leaves the dashboard
+  const pointedDashboardAttachmentIds = new Set<string>();
+  let knownPanelIds = new Set<string>();
   // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
   // the user can't edit open in a new dashboard, which the origin then follows on save. One per
   // conversation started here, so switching back to an earlier conversation still finds its own.
   const unlinkedStagedAttachmentIds = new Set<string>();
 
-  // a dashboard that can't be linked, e.g. a managed one, is staged as a new attachment every time
-  const isLinkable = () => canWriteDashboards && canApplyAgentChangesInPlace(api);
+  const unstageRemovedPanelPointers = (dashboardData: DashboardAttachmentData) => {
+    const panelIds = new Set(getPanelIds(dashboardData));
+    chat.unstagePanelPointers({
+      dashboardAttachmentIds: pointedDashboardAttachmentIds,
+      panelIds: [...knownPanelIds].filter((panelId) => !panelIds.has(panelId)),
+    });
+    knownPanelIds = panelIds;
+  };
 
   const stageOpenDashboard = async () => {
-    const linkable = isLinkable();
-    const dashboardId = linkable ? api.savedObjectId$.getValue() : undefined;
-    const dashboardAttachment = linkable
-      ? findDashboardAttachment({ attachments: attachments ?? [], dashboardId })
-      : undefined;
+    const { attributes: dashboardState } = api.getSerializedState();
+    const dashboardData = dashboardStateToAttachmentData(dashboardState);
+    const {
+      linkable,
+      origin,
+      attachment: dashboardAttachment,
+    } = resolveDashboardAttachmentLink({
+      api,
+      canWriteDashboards,
+      attachments: attachments ?? [],
+    });
     const attachmentId = reconcileStaging({
       dashboardAttachmentId: dashboardAttachment?.id,
       isNewConversation: !conversationId,
       draftAttachmentId: draftAttachmentId.current,
     });
-    const { attributes: dashboardState } = api.getSerializedState();
+    for (const id of [dashboardAttachment?.id, attachmentId]) {
+      if (id) {
+        pointedDashboardAttachmentIds.add(id);
+      }
+    }
+    unstageRemovedPanelPointers(dashboardData);
     const isShown = dashboardAttachment
       ? await isAttachmentShownInDashboard({
           areEqual,
@@ -150,11 +174,7 @@ export const registerDashboardAppIntegration = ({
     if (!linkable) {
       unlinkedStagedAttachmentIds.add(attachmentId);
     }
-    chat.stage({
-      id: attachmentId,
-      origin: dashboardId,
-      data: dashboardStateToAttachmentData(dashboardState),
-    });
+    chat.stage({ id: attachmentId, origin, data: dashboardData });
   };
 
   // never throws, since a throw would end the integration
@@ -279,6 +299,12 @@ export const registerDashboardAppIntegration = ({
     originSyncSubscription.unsubscribe();
     setShownAttachmentVersion(undefined);
     otherDashboardUpdateNotifier.removeAll();
+    // the pointers of a dashboard the user left are no longer context for their next message;
+    // pointers already sent stay in the conversation
+    chat.unstagePanelPointers({
+      dashboardAttachmentIds: [...pointedDashboardAttachmentIds, draftAttachmentId.current],
+      panelIds: knownPanelIds,
+    });
   };
 };
 

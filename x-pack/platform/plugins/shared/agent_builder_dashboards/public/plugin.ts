@@ -17,7 +17,14 @@ import type {
   AgentBuilderDashboardsPluginPublicSetupDependencies,
   AgentBuilderDashboardsPluginPublicStartDependencies,
 } from './types';
-import { createIdGenerator, registerDashboardAttachmentUiDefinition } from './attachment_types';
+import {
+  createCanvasDashboardRegistry,
+  createIdGenerator,
+  registerDashboardAttachmentUiDefinition,
+  registerDashboardPanelAttachmentUiDefinition,
+} from './attachment_types';
+import { registerAgentBuilderDashboardsAnalyticsEvents } from './telemetry';
+import { createDashboardAddToChatProvider } from './add_to_chat/add_to_chat_provider';
 
 export class AgentBuilderDashboardsPlugin
   implements
@@ -33,12 +40,13 @@ export class AgentBuilderDashboardsPlugin
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
-    _core: CoreSetup<
+    core: CoreSetup<
       AgentBuilderDashboardsPluginPublicStartDependencies,
       AgentBuilderDashboardsPluginPublicStart
     >,
     _plugins: AgentBuilderDashboardsPluginPublicSetupDependencies
   ): AgentBuilderDashboardsPluginPublicSetup {
+    registerAgentBuilderDashboardsAnalyticsEvents(core.analytics);
     return {};
   }
 
@@ -47,6 +55,7 @@ export class AgentBuilderDashboardsPlugin
     plugins: AgentBuilderDashboardsPluginPublicStartDependencies
   ): AgentBuilderDashboardsPluginPublicStart {
     const draftAttachmentId = createIdGenerator();
+    const canvasDashboards = createCanvasDashboardRegistry();
     const canWriteDashboards =
       core.application.capabilities.dashboard_v2?.showWriteControls === true;
 
@@ -60,7 +69,9 @@ export class AgentBuilderDashboardsPlugin
       dashboardPlugin: plugins.dashboard,
       draftAttachmentId,
       toasts: core.notifications.toasts,
+      canvasDashboards,
     });
+    registerDashboardPanelAttachmentUiDefinition(plugins.agentBuilder);
 
     if (core.application.capabilities.agentBuilder?.show === true) {
       plugins.uiActions.registerActionAsync(OPEN_DASHBOARD_CHAT_ACTION_ID, async () => {
@@ -69,6 +80,17 @@ export class AgentBuilderDashboardsPlugin
         );
         return createOpenDashboardChatAction(plugins.agentBuilder.openChat);
       });
+
+      plugins.agentBuilderVisualizations.addToChat.registerProvider(
+        createDashboardAddToChatProvider({
+          agentBuilder: plugins.agentBuilder,
+          analytics: core.analytics,
+          dashboardAppApi$: plugins.dashboard.dashboardAppClientApi$,
+          canvasDashboards,
+          canWriteDashboards,
+          draftAttachmentId,
+        })
+      );
 
       plugins.uiActions.registerActionAsync(ENHANCE_DASHBOARD_ACTION_ID, async () => {
         const { createEnhanceDashboardAction } = await import('./enhance/enhance_dashboard_action');

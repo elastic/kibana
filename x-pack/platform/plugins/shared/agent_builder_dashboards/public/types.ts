@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { AgentBuilderVisualizationsPluginPublicStart } from '@kbn/agent-builder-visualizations-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -23,6 +24,7 @@ export interface AgentBuilderDashboardsPluginPublicSetupDependencies {}
 
 export interface AgentBuilderDashboardsPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  agentBuilderVisualizations: AgentBuilderVisualizationsPluginPublicStart;
   data: DataPublicPluginStart;
   dashboard: DashboardStart;
   share: SharePluginStart;

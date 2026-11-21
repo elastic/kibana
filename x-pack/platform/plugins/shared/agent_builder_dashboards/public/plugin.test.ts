@@ -10,11 +10,17 @@ import {
   OPEN_DASHBOARD_CHAT_ACTION_ID,
   ENHANCE_DASHBOARD_ACTION_ID,
 } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID } from './add_to_chat/add_to_chat_provider';
 import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 jest.mock('./attachment_types', () => ({
   registerDashboardAttachmentUiDefinition: jest.fn(() => jest.fn()),
+  registerDashboardPanelAttachmentUiDefinition: jest.fn(),
+  createCanvasDashboardRegistry: jest.fn(() => ({
+    register: jest.fn(),
+    get: jest.fn(),
+  })),
   createIdGenerator: () => ({
     current: 'draft-id',
     next: jest.fn(),
@@ -23,6 +29,8 @@ jest.mock('./attachment_types', () => ({
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = jest.fn();
+  const attachAction = jest.fn();
+  const registerAddToChatProvider = jest.fn();
   const openChat = jest.fn();
 
   const createCoreStart = (showAgentBuilder: boolean) =>
@@ -43,6 +51,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
         openChat,
         getAgentBuilderAccess: jest.fn(),
       },
+      agentBuilderVisualizations: {
+        addToChat: { registerProvider: registerAddToChatProvider },
+      },
       dashboard: {},
       share: {
         url: {
@@ -53,15 +64,18 @@ describe('AgentBuilderDashboardsPlugin', () => {
       },
       uiActions: {
         registerActionAsync,
+        attachAction,
       },
     } as unknown as AgentBuilderDashboardsPluginPublicStartDependencies);
 
   beforeEach(() => {
     registerActionAsync.mockClear();
+    attachAction.mockClear();
+    registerAddToChatProvider.mockClear();
     openChat.mockClear();
   });
 
-  it('registers the lazy chat and enhance actions when Agent Builder is available', async () => {
+  it('registers the lazy chat and enhance actions and the Add to chat provider when Agent Builder is available', async () => {
     const plugin = new AgentBuilderDashboardsPlugin({} as PluginInitializerContext);
 
     plugin.start(createCoreStart(true), createStartDependencies());
@@ -73,6 +87,9 @@ describe('AgentBuilderDashboardsPlugin', () => {
     expect(registerActionAsync).toHaveBeenCalledWith(
       ENHANCE_DASHBOARD_ACTION_ID,
       expect.any(Function)
+    );
+    expect(registerAddToChatProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ id: DASHBOARD_PANEL_ADD_TO_CHAT_PROVIDER_ID })
     );
 
     const openChatAction = await registerActionAsync.mock.calls[0][1]();
@@ -90,5 +107,7 @@ describe('AgentBuilderDashboardsPlugin', () => {
     plugin.start(createCoreStart(false), createStartDependencies());
 
     expect(registerActionAsync).not.toHaveBeenCalled();
+    expect(attachAction).not.toHaveBeenCalled();
+    expect(registerAddToChatProvider).not.toHaveBeenCalled();
   });
 });

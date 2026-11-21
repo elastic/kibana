@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
+export { DASHBOARD_ATTACHMENT_TYPE, DASHBOARD_PANEL_ATTACHMENT_TYPE } from './constants';
 
 export {
   panelGridSchema,
@@ -33,3 +33,18 @@ export {
 export { DEFAULT_TIME_RANGE, EMPTY_DASHBOARD_STATE } from './dashboard_state_helpers';
 
 export { isDashboardAttachment } from './is_dashboard_attachment';
+
+export {
+  DASHBOARD_PANEL_LABEL_MAX_LENGTH,
+  dashboardPanelAttachmentDataSchema,
+  getDashboardPanelAttachmentId,
+  isDashboardPanelAttachment,
+} from './dashboard_panel_attachment';
+
+export type {
+  DashboardPanelAttachmentData,
+  DashboardPanelAttachment,
+  PendingDashboardPanelAttachment,
+} from './dashboard_panel_attachment';
+
+export { getPanelLabel, findPanelById } from './panel_label';

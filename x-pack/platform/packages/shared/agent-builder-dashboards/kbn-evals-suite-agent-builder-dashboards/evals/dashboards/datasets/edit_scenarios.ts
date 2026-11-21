@@ -17,7 +17,8 @@ const editScenario = (gold: Parameters<typeof layoutEditExample>[0]): DashboardD
 /**
  * Edits of the seeded sectioned logs dashboard beyond moving ES|QL panels:
  * the non-ES|QL panel kinds, controls, data the cluster does not have,
- * visualizations from earlier in the conversation, and section renames.
+ * visualizations from earlier in the conversation, section renames, and
+ * panel pointers that scope only the message they come with.
  * Each example combines several asks, so one run covers more than one gap.
  */
 export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
@@ -146,5 +147,16 @@ export const DASHBOARD_EDIT_SCENARIO_EXAMPLES: DashboardDatasetExample[] = [
     },
     panelEdits: [{ panel: 'errors-4xx', color: 'red' }],
     structure: { sectionCount: 3 },
+  }),
+  editScenario({
+    question: 'make these red',
+    panelPointers: ['errors-4xx', 'errors-5xx'],
+    followUp: 'which operating system sends the most requests?',
+    layoutEdit: { changes: [] },
+    panelEdits: [
+      { panel: 'errors-4xx', color: 'red' },
+      { panel: 'errors-5xx', color: 'red' },
+    ],
+    followUpKeepsDashboard: true,
   }),
 ];

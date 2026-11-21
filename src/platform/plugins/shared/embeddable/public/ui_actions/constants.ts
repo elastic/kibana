@@ -15,6 +15,12 @@ export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 
 export const APPROXIMATION_APPLIED_BADGE = 'APPROXIMATION_APPLIED_BADGE';
 
+/**
+ * Panel action that sends a panel to the AI chat. The plugin that owns the chat integration registers
+ * it; the id lives here so any panel can promote or run it without depending on that plugin.
+ */
+export const ADD_TO_CHAT_ACTION_ID = 'addToChat';
+
 export const EXPORT_ACTION_GROUP = {
   id: 'export_actions',
   order: 9,

@@ -20,6 +20,7 @@ import {
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
+  getDashboardPanelAttachmentId,
   isDashboardAttachment,
 } from '@kbn/agent-builder-dashboards-common';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
@@ -48,6 +49,11 @@ export interface ChatAdapter {
   stage: (attachment: Omit<DashboardAttachment, 'type'>) => void;
   /** Removes the attachment from the chat input when it is the one staged. */
   unstage: (attachmentId: string) => void;
+  /** Removes the pointers to these panels of these dashboard attachments from the chat input. Sent pointers stay. */
+  unstagePanelPointers: (pointers: {
+    dashboardAttachmentIds: Iterable<string>;
+    panelIds: Iterable<string>;
+  }) => void;
   /** Persists the attachment's origin, keeping the rendered conversation in sync. */
   updateOrigin: (
     attachmentId: string,
@@ -102,7 +108,10 @@ export const createChatAdapter = ({
     }),
     map((change) =>
       change
-        ? { conversationId: change.id, attachments: toDashboardAttachments(change.conversation) }
+        ? {
+            conversationId: change.id,
+            attachments: toDashboardAttachments(change.conversation),
+          }
         : null
     )
   );
@@ -131,6 +140,16 @@ export const createChatAdapter = ({
       }
       agentBuilder.removeAttachment(attachmentId);
       stagedAttachmentId = undefined;
+    },
+    unstagePanelPointers: ({ dashboardAttachmentIds, panelIds }) => {
+      const panelIdList = [...panelIds];
+      for (const dashboardAttachmentId of new Set(dashboardAttachmentIds)) {
+        for (const panelId of panelIdList) {
+          agentBuilder.removeAttachment(
+            getDashboardPanelAttachmentId({ dashboardAttachmentId, panelId })
+          );
+        }
+      }
     },
     updateOrigin: (attachmentId, origin) => getUpdateOrigin(attachmentId)?.(origin),
   };
