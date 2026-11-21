@@ -3289,10 +3289,11 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.* @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/worker_settings/continuous_threat_hunt.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/hunt_coordinator_result_attachment_schema.ts @elastic/security-investigations
-/x-pack/solutions/security/plugins/alertzero/common/step_types/package_report.* @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/workers/continuous_threat_hunt @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/common/sse_view/is_executable_hunt_query.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/common/telemetry/workers/continuous_threat_hunt.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/hooks/hunt @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/hunt_index_coverage_callout.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/public/pages/watches/components/threat_intel_supply_section.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/agent_builder/attachments/hunt_coordinator_result.* @elastic/security-investigations
 /x-pack/solutions/security/plugins/alertzero/server/managed_workflows/hunt @elastic/security-investigations

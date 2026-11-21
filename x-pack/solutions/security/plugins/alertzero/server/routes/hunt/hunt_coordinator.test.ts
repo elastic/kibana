@@ -24,7 +24,7 @@ import type {
 } from '@kbn/alertzero-common';
 import { SECURITY_SOLUTION_DEFAULT_INDEX_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../register_routes';
-import type { HuntCoordinatorResultAttachment } from '../../../common/hunt_coordinator_result_attachment_schema';
+import type { HuntCoordinatorResultAttachment } from '../../../common/workers/continuous_threat_hunt/hunt_coordinator_result_attachment_schema';
 import { buildSseAttachmentId } from '../../services/watches/hunt/common/sse_mapper';
 import { InvalidHuntWindowError } from '../../services/watches/hunt/common/assert_hunt_window';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';

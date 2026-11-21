@@ -23,7 +23,7 @@ import {
 import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
-} from '../../../../../common/step_types/package_report';
+} from '../../../../../common/workers/continuous_threat_hunt/package_report';
 import type { CurrentRunHost, CurrentRunState, ProcessSelector, Subject } from './types';
 
 // Fake ids: these exercise the generic fan-out, which governs any fillable action the

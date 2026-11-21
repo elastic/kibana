@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
+import { packageReportStepCommonDefinition } from '../../../common/workers/continuous_threat_hunt/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
 import {

@@ -8,7 +8,7 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { ALERTZERO_ATTACHMENT_TYPES } from '../../../common/constants';
-import { huntCoordinatorResultAttachmentSchema } from '../../../common/hunt_coordinator_result_attachment_schema';
+import { huntCoordinatorResultAttachmentSchema } from '../../../common/workers/continuous_threat_hunt/hunt_coordinator_result_attachment_schema';
 
 export const HUNT_COORDINATOR_RESULT_ATTACHMENT_ID =
   ALERTZERO_ATTACHMENT_TYPES.huntCoordinatorResult;
