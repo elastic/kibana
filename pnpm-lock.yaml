@@ -6153,8 +6153,8 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(react-refresh@0.18.0)(type-fest@4.41.0)(webpack-hot-middleware@2.26.1)(webpack@5.96.1)
       '@redocly/cli':
-        specifier: 2.64.1
-        version: 2.64.1
+        specifier: 2.72.1
+        version: 2.72.1
       '@rsdoctor/rspack-plugin':
         specifier: 1.6.1
         version: 1.6.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1)(@rspack/core@2.1.8(@swc/helpers@0.5.19))(supports-color@10.2.2)(webpack@5.96.1)
@@ -6558,8 +6558,8 @@ importers:
         specifier: 1.8.1
         version: 1.8.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       bump-cli:
-        specifier: 2.11.0
-        version: 2.11.0(supports-color@10.2.2)
+        specifier: 2.12.0
+        version: 2.12.0(supports-color@10.2.2)
       cache-manager:
         specifier: 7.0.0
         version: 7.0.0
@@ -13623,8 +13623,8 @@ packages:
       yauzl:
         optional: true
 
-  '@redocly/cli@2.64.1':
-    resolution: {integrity: sha512-SkCnNexidfvHmkOCqRZ29oaHh1nVbpnQEF5Qweu8M2cUfVEh1/jSAvd5+LX+D/uNbPnhL6v03AamXHeeB2AwsQ==}
+  '@redocly/cli@2.72.1':
+    resolution: {integrity: sha512-eARHR2ZsqIlrnV4mcKA+CK3ptV0u2d74xOhNQMlrmixMEbV4RfrnAdwNyIcGhO+3A6B3YzzG6nj5kZRKKCiGLw==}
     engines: {node: '>=22.12.0 || >=20.19.0 <21.0.0', npm: '>=10'}
     hasBin: true
 
@@ -16209,8 +16209,8 @@ packages:
   builtin-status-codes@3.0.0:
     resolution: {integrity: sha512-HpGFw18DgFWlncDfjTa2rcQ4W88O1mC8e8yZ2AvQY5KDaktSTwo+KRf6nHK6FRI5FyRyb/5T6+TSxfP7QyGsmQ==}
 
-  bump-cli@2.11.0:
-    resolution: {integrity: sha512-EMJembvmPobVt39y7s1mqqJeRZ08hN/UECJlxZS5FZeoSgbXWo1Qhd+UK1lDWCgDNViyVFV190Lo/IbnOJwi/w==}
+  bump-cli@2.12.0:
+    resolution: {integrity: sha512-AbzZeUn0GRgHnmjSmjf9XZX96fiNwz3hbjpVY80bvAJKEasJUt+fDtaO8v+WszZfvccsoJcpkQWZ9cuG9mlRYA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
 
@@ -29454,7 +29454,7 @@ snapshots:
       proxy-agent: 8.0.3(supports-color@10.2.2)
       yauzl: 3.4.0
 
-  '@redocly/cli@2.64.1': {}
+  '@redocly/cli@2.72.1': {}
 
   '@redux-saga/core@1.3.0':
     dependencies:
@@ -32434,7 +32434,7 @@ snapshots:
 
   builtin-status-codes@3.0.0: {}
 
-  bump-cli@2.11.0(supports-color@10.2.2):
+  bump-cli@2.12.0(supports-color@10.2.2):
     dependencies:
       '@apidevtools/json-schema-ref-parser': 11.9.3
       '@asyncapi/specs': 6.11.1
