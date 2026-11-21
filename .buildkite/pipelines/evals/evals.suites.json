@@ -393,6 +393,8 @@
       "name": "Security Alerts RAG Regression",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
+      "stepTimeoutInMinutes": 150,
+      "defaultJudge": "eis-zai-glm-5-2",
       "tags": [
         "security",
         "alerts-rag"
@@ -455,6 +457,7 @@
       "name": "Security Alert Triage",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/playwright.config.ts",
+      "defaultJudge": "eis-zai-glm-5-2",
       "tags": [
         "security",
         "alert-triage"

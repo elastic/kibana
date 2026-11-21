@@ -9,6 +9,10 @@ import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
 const config = createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
+  // Three repetitions per example so per-example variance is visible in the aggregated
+  // scores; the suite-level step budget covers the added runs (see
+  // stepTimeoutInMinutes in .buildkite/pipelines/evals/evals.suites.json).
+  repetitions: 3,
   // Each test batches all examples for one category through
   // /api/agent_builder/converse over the restored alerts snapshot
   // (~285 documents), plus N evaluator (LLM-as-judge) calls. 10 minutes was
