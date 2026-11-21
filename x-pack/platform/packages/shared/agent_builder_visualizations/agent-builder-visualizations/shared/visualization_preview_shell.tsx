@@ -22,9 +22,7 @@ import {
 } from './styles';
 import { FallbackVisualizationActions } from './visualization_actions';
 
-export interface VisualizationPreviewShellProps {
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  searchBarProps: StatefulSearchBarProps<Query>;
+interface VisualizationPreviewShellBaseProps {
   actionButtons: ActionButton[];
   registerActionButtons?: InlineRenderCallbacks['registerActionButtons'];
   height?: number;
@@ -32,17 +30,35 @@ export interface VisualizationPreviewShellProps {
   children: React.ReactNode;
 }
 
-/** Shared time-picker chrome and action-button registration for inline visualizations. */
+interface VisualizationPreviewShellWithTimePicker extends VisualizationPreviewShellBaseProps {
+  showTimePicker?: true;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  searchBarProps: StatefulSearchBarProps<Query>;
+}
+
+interface VisualizationPreviewShellWithoutTimePicker extends VisualizationPreviewShellBaseProps {
+  showTimePicker: false;
+}
+
+export type VisualizationPreviewShellProps =
+  | VisualizationPreviewShellWithTimePicker
+  | VisualizationPreviewShellWithoutTimePicker;
+
+/** Shared preview frame and action-button registration for inline visualizations. */
 export function VisualizationPreviewShell({
-  unifiedSearch,
-  searchBarProps,
   actionButtons,
   registerActionButtons,
   height = DEFAULT_VISUALIZATION_HEIGHT,
   dataTestSubj,
+  showTimePicker = true,
   children,
+  ...timePickerProps
 }: VisualizationPreviewShellProps) {
-  const SearchBar = unifiedSearch.ui.SearchBar;
+  const unifiedSearch =
+    'unifiedSearch' in timePickerProps ? timePickerProps.unifiedSearch : undefined;
+  const searchBarProps =
+    'searchBarProps' in timePickerProps ? timePickerProps.searchBarProps : undefined;
+  const SearchBar = showTimePicker ? unifiedSearch?.ui.SearchBar : undefined;
   const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
   const registerLocalActionButtons = useCallback((buttons: ActionButton[]) => {
     setLocalActionButtons(buttons);
@@ -60,9 +76,11 @@ export function VisualizationPreviewShell({
       {shouldRenderLocalActionButtons && (
         <FallbackVisualizationActions buttons={localActionButtons} />
       )}
-      <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
-        <SearchBar {...searchBarProps} />
-      </div>
+      {SearchBar && searchBarProps ? (
+        <div css={visualizationHeaderStyles} className={visualizationTimePickerContainerClassName}>
+          <SearchBar {...searchBarProps} />
+        </div>
+      ) : null}
       <div css={[visualizationEmbeddableStyles(height), css({ width: '100%' })]}>{children}</div>
     </div>
   );

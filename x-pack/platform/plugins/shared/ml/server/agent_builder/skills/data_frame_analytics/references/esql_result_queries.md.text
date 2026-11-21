@@ -1,0 +1,102 @@
+# ES|QL result queries
+
+Checked on Elasticsearch 9.7 against an index mapped like a data frame analytics destination. Selecting `ml.feature_importance`, `ml.feature_influence`, or `ml.top_classes` fails with `verification_exception`: `Unknown column`. Expanding those nested fields fails the same way. Do not use them as columns.
+
+Scalar columns do resolve: `ml.outlier_score`, `ml.is_training`, `ml.FlightDelay_prediction`, `ml.prediction_probability`.
+
+Replace angle-bracket tokens in the query text. Pass only the `?` parameters in `params`. `<results_field>` is `ml` unless the job set another name. `<prediction_field>` is `{dependent_variable}_prediction` unless `prediction_field_name` is set.
+
+## Outlier rows
+
+```
+FROM <dest_index>
+| WHERE <results_field>.outlier_score >= ?min_score
+| SORT <results_field>.outlier_score DESC
+| KEEP <entity_field>, <results_field>.outlier_score
+| LIMIT 50
+```
+
+`params`: `min_score` 0.75.
+
+## Per-row nested JSON
+
+Use this for `feature_influence`, `feature_importance`, and `top_classes`. Read them from `_source.<results_field>`, not as columns.
+
+```
+FROM <dest_index> METADATA _source
+| WHERE <results_field>.outlier_score >= ?min_score
+| SORT <results_field>.outlier_score DESC
+| KEEP <entity_field>, <results_field>.outlier_score, _source
+| LIMIT 20
+```
+
+For classification or regression, filter with `<results_field>.is_training == false` instead of the outlier score, and keep the prediction column plus `_source`.
+
+## Confusion matrix, entire dataset
+
+Count the cells first with `platform.core.execute_esql`. Do not filter `is_training`. Do not invent counts.
+
+```
+FROM <dest_index>
+| STATS count = COUNT(*) BY actual = <dependent_variable>, predicted = <results_field>.<prediction_field>
+```
+
+Then call `platform.core.create_visualization` with those counts written into the `query` below. Omit `time_range`. Pass `target.type` `custom_content` and `target.has_data` false, so the chart draws the labels and counts you computed instead of a generic heatmap. Render `<render_attachment id="{attachment_id}" version="{version}" />`.
+
+Use the class meaning from the business question. When the stored value is a code, write the meaning and the code, as in Benign (2). The positive class is the outcome the question is trying to detect. If that was not named, use `true`, `yes`, or `1` when that value is one of the classes.
+
+Accuracy and recall in the chart come from these same entire-dataset counts, rounded to one decimal. Accuracy is the correct cells divided by every cell. Recall for a class is that class's correct cell divided by every row whose actual class is that class. Quote test-split accuracy from `ml.dfa_evaluate` in the reply as well.
+
+Two classes. Fill every number and name from this job. `<positive>` is the class being detected. `<other>` is the remaining class.
+
+```
+Confusion matrix for the <job_id> classification model (<training_percent>% training). Actual vs Predicted classes: <other> and <positive>. True <other>: <true_other_count>, False <positive> (false positive): <false_positive_count>, False <other> (false negative): <false_negative_count>, True <positive>: <true_positive_count>. Show overall accuracy of <accuracy>%, <positive> recall of <positive_recall>%, <other> recall of <other_recall>%. Use a grid layout with color-coded cells — green for correct predictions (true positives/negatives), red for incorrect ones. Display counts prominently in each cell with label annotations.
+```
+
+```json
+{
+  "query": "<the filled sentence>",
+  "index": "<dest_index>",
+  "target": { "type": "custom_content", "has_data": false }
+}
+```
+
+More than two classes. Do not say false positive or false negative. On the diagonal write `True <class>: <count>`. Off the diagonal write `Actual <actual>, predicted <predicted>: <count>`. Then: `Show overall accuracy of <accuracy>%,` and `<class> recall of <recall>%` for every class. End with the same grid sentence: green for correct predictions, red for incorrect ones, counts prominent, label annotations. Use the same `custom_content` target.
+
+## Classification confusion, test split
+
+```
+FROM <dest_index>
+| WHERE <results_field>.is_training == false
+| STATS rows = COUNT(*) BY actual = <dependent_variable>, predicted = <results_field>.<prediction_field>
+| SORT rows DESC
+| LIMIT 100
+```
+
+## Low-confidence predictions
+
+```
+FROM <dest_index>
+| WHERE <results_field>.is_training == false AND <results_field>.prediction_probability < ?max_probability
+| SORT <results_field>.prediction_probability ASC
+| KEEP <entity_field>, <dependent_variable>, <results_field>.<prediction_field>, <results_field>.prediction_probability
+| LIMIT 50
+```
+
+`params`: `max_probability` 0.6.
+
+## Regression residuals, test split
+
+```
+FROM <dest_index>
+| WHERE <results_field>.is_training == false
+| EVAL residual = <results_field>.<prediction_field> - <dependent_variable>
+| EVAL abs_residual = ABS(residual)
+| SORT abs_residual DESC
+| KEEP <entity_field>, <dependent_variable>, <results_field>.<prediction_field>, residual
+| LIMIT 50
+```
+
+Use `ml.dfa_evaluate` for R-squared, MSE, MSLE, and Huber. Do not recompute those from this row sample.
+
+Total feature importance is not an ES|QL aggregate. Call `ml.dfa_get_job` with `include_model_metadata: true` and copy `chart_attachment.render`. Do not build another feature importance chart from the numbers or from a row sample.

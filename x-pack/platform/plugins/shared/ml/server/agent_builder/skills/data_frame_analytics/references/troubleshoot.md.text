@@ -1,0 +1,24 @@
+# Troubleshoot
+
+Read `ml.dfa_get_job` first. Use `state`, `progress`, `data_counts`, and `memory_usage.status`.
+
+| Symptom | What to do |
+| --- | --- |
+| `skipped_docs_count` is high | Outlier detection skips missing values, multi-value arrays, and non-numeric fields. Regression and classification tolerate missing values and skip multi-value arrays and unsupported types. Drop those fields or fix the source rows. Explain lists the fields that were actually used. |
+| Phase stuck in `reindexing` or `loading_data` | Source index is large or the user who created the job cannot read it. The `security_exception` from explain or create names the index. |
+| `memory_usage.status` is `hard_limit` | Stop the job if it is running. `ml.dfa_manage_job` `update` with a higher `model_memory_limit`, then start. Do not update while state is `starting`, `started`, or `stopping`. |
+| Inference phase fails, model too large for the JVM | Fewer fields, a lower `training_percent`, or a higher memory limit. Then a new job. This skill does not change JVM flags. |
+| Training metrics look good and test metrics do not | The model memorized the training split. Lower `training_percent` was not the bug if test error is the problem; remove leaked fields and compare a new job. |
+| Test metrics are perfect | A field restates the label, such as a row number or a copy of the class. Exclude it and create a new job. |
+| Outlier evaluation has no true outliers at 0.25, 0.5, and 0.75, and the user knows the unusual share | Create a new job with `outlier_fraction` set to that share. Leave neighbor count and method at the defaults. |
+| One class is almost never predicted | Imbalanced classes with `maximize_accuracy`. Keep the default `maximize_minimum_recall`, or collect more rows of the rare class. |
+| User asks to rerun an outlier job | Create a new job. Starting a completed outlier job does not recompute scores. |
+| User asks to score rows that arrived after the job finished | Data frame analytics does not watch the index. Create a new job, or deploy the trained model. This skill does not create the pipeline. |
+| Stop returns an error or state stays `started` | Call stop again with `force: true`. Do not set force on the first stop. |
+| Explain or create returns `security_exception` | Repeat the index and the action from the error. The current user needs read on the source and write on the destination. |
+
+Supervised phases, in order: `reindexing`, `loading_data`, `feature_selection`, `coarse_parameter_search`, `fine_tuning_parameters`, `final_training`, `writing_results`, `inference`.
+
+Outlier phases: `reindexing`, `loading_data`, `computing_outliers`, `writing_results`.
+
+A job that reaches `stopped` with every phase at 100 is finished. A job stopped earlier can be started again and continues. `failed` needs the message from the stats error, then a config change, not a blind restart.
