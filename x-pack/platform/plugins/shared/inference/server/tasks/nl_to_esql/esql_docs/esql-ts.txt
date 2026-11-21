@@ -1,6 +1,6 @@
 # TS
 
-The `TS` source command targets time series indices, enables time series semantics, and adds support for time series aggregation functions inside the `STATS` command.
+The `TS` source command targets time series indices, enables time series semantics, and allows time series aggregation functions inside the `STATS` command.
 
 ## Syntax
 
@@ -8,13 +8,13 @@ The `TS` source command targets time series indices, enables time series semanti
 
 ### Parameters
 
-#### index_pattern
+#### `index_pattern`
 
-A list of indices, data streams or aliases with the `time_series` index mode. Supports wildcards and date math. Wildcards only match time series indices and silently skip everything else.
+A list of indices, data streams, or aliases with the `time_series` index mode. Supports wildcards and date math. Wildcards only match time series indices and silently skip everything else.
 
 `index_pattern` can't reference views or subqueries, even if they're backed by time series indices. If you name a view explicitly, the query fails. To query a view, use `FROM` instead.
 
-#### fields
+#### `fields`
 
 Optional.
 
@@ -22,7 +22,7 @@ A comma-separated list of metadata fields to retrieve.
 
 ## Examples
 
-Calculate the total rate of search requests per host and hour.
+Calculate the total rate of search requests per host and hour:
 
 ```esql
 TS metrics
@@ -30,32 +30,32 @@ TS metrics
   | STATS SUM(RATE(search_requests)) BY TBUCKET(1 hour), host
 ```
 
-Aggregate raw counter values with `FROM`.
+Compare an invalid raw counter aggregation with a rate-based time series aggregation:
 
 ```esql
 FROM metrics | STATS SUM(request_count) BY host
 ```
 
-Calculate per-bucket counter deltas with `TS`, `RATE()`, and `SUM()`.
+Calculate request rates per time series and sum them by host using time series semantics:
 
 ```esql
 TS metrics | STATS SUM(RATE(request_count)) BY host
 ```
 
-Calculate the average CPU usage per cluster from raw metric rows.
+Compare an uneven raw average with a per-time-series time bucket average:
 
 ```esql
 FROM metrics | STATS AVG(cpu_usage) BY cluster
 ```
 
-Calculate per-series CPU averages per minute, then aggregate them by cluster.
+Calculate per-time-series CPU usage averages and aggregate them by cluster and one-minute bucket:
 
 ```esql
 TS metrics
 | STATS AVG(AVG_OVER_TIME(cpu_usage)) BY cluster, TBUCKET(1 minute)
 ```
 
-Calculate garbage collection event count, average duration, and 99th-percentile duration for histogram metrics.
+Aggregate histogram metrics by garbage collection action and five-minute bucket:
 
 ```esql
 TS metrics-*
@@ -66,7 +66,7 @@ TS metrics-*
   BY jvm.gc.action, TBUCKET(5 minutes)
 ```
 
-Return the average of the last memory usage values per time series using implicit `LAST_OVER_TIME()`.
+Calculate the average of the last memory usage values per time series using implicit `LAST_OVER_TIME()`:
 
 ```esql
 TS metrics | STATS AVG(memory_usage)
@@ -74,13 +74,13 @@ TS metrics | STATS AVG(memory_usage)
 TS metrics | STATS AVG(LAST_OVER_TIME(memory_usage))
 ```
 
-Calculate average memory usage across per-time-series averages.
+Calculate the average memory usage across per-time-series averages:
 
 ```esql
 TS metrics | STATS AVG(AVG_OVER_TIME(memory_usage))
 ```
 
-Use a time series aggregation function directly in `STATS`.
+Use a time series aggregation function directly in `STATS`:
 
 ```esql
 TS metrics
@@ -88,13 +88,13 @@ TS metrics
 | STATS RATE(search_requests) BY TBUCKET(1 hour)
 ```
 
-Sum counter rates across host groups.
+Sum counter rates across host groups:
 
 ```esql
 TS metrics | STATS SUM(RATE(search_requests)) BY host
 ```
 
-Compute per-time-series memory averages, then group results by host and hourly bucket.
+Compute per-time-series memory usage averages and sum them by host and hourly bucket:
 
 ```esql
 TS metrics
@@ -102,7 +102,7 @@ TS metrics
 | STATS SUM(AVG_OVER_TIME(memory_usage)) BY host, TBUCKET(1 hour)
 ```
 
-Derive secondary aggregations after the first `STATS` by computing per-minute network rates, cluster percentiles, peak rates, and headroom.
+Process tabular results after the first `STATS` command:
 
 ```esql
 TS k8s
@@ -113,7 +113,7 @@ TS k8s
 | SORT headroom DESC
 ```
 
-Group bare time series aggregation results by all dimensions implicitly.
+Group bare time series aggregation results by all dimensions implicitly:
 
 ```esql
 TS k8s
@@ -121,7 +121,7 @@ TS k8s
 | SORT avg DESC
 ```
 
-Exclude the `pod` dimension from time series grouping with `WITHOUT`.
+Exclude the `pod` dimension from time series grouping with `WITHOUT`:
 
 ```esql
 TS k8s
@@ -129,7 +129,7 @@ TS k8s
 | SORT total_cost
 ```
 
-Combine `WITHOUT` with `TBUCKET` to aggregate surviving dimensions by hourly bucket.
+Combine `WITHOUT` and `TBUCKET` to aggregate by surviving dimensions and hourly bucket:
 
 ```esql
 TS k8s
@@ -137,7 +137,31 @@ TS k8s
 | SORT total_cost
 ```
 
-Show an invalid nested time series function query.
+Return exemplars relevant to a metrics aggregation:
+
+```esql
+SET exemplars=true;
+TS metrics-cpu
+| WHERE attributes.state == "idle"
+| STATS AVG(cpu_time) BY attributes.cpu
+```
+
+Configure exemplar limit and include the `_timeseries` column:
+
+```esql
+SET exemplars={"limit": 100, "include_timeseries": true};
+TS metrics-cpu | STATS AVG(cpu_time) BY attributes.cpu
+```
+
+Query exemplar data streams directly for stable exemplar results:
+
+```esql
+FROM exemplars-cpu
+| WHERE metric_name == "cpu_time" AND attributes.state == "idle"
+| SORT @timestamp DESC
+```
+
+Show an invalid nested time series function query:
 
 ```esql
 TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
@@ -145,8 +169,16 @@ TS metrics | STATS AVG_OVER_TIME(RATE(memory_usage))
 
 ## Limitations
 
-- `COUNT(*)` under `TS`: After the first `STATS` under `TS`, rows are grouped per time series rather than counted as raw metric documents, so `COUNT(*)` does not have the same meaning it does under `FROM`. To count samples for a specific metric, use `COUNT(<field>)` or `COUNT_OVER_TIME()` against a named field.
-- Commands that reorder rows, such as `SORT` or `FORK`, cannot appear between `TS` and the first `STATS`. Time series aggregations rely on the natural `@timestamp` ordering produced by `TS`. After the first `STATS`, results are tabular and these commands are available again.
+- `COUNT(*)` under `TS` does not count raw metric documents after the first `STATS`; rows are grouped per time series. To count samples for a specific metric, use `COUNT(<field>)` or `COUNT_OVER_TIME()` against a named field.
+- Commands that change row order, such as `SORT` or `FORK`, cannot appear between `TS` and the first `STATS`. After the first `STATS`, results are tabular and these commands are available again.
 - Time series aggregation functions enforce the field's `metric_type` mapping. For example, `RATE()` requires a counter and rejects gauge fields.
-- A time series aggregation function cannot be combined with an inner time series function.
-- `WITHOUT` can only be used inside the first `STATS` command under a `TS` source. Using it in a `FROM | STATS ... BY WITHOUT(...)` query leads to an error.
+- `index_pattern` can't reference views or subqueries, even when backed by time series indices. Use `FROM` to query a view.
+- `WITHOUT` can only be used inside the first `STATS` command under `TS`.
+- When combining a bare time series function with other groupings, only grouping functions such as `TBUCKET` or `WITHOUT` are allowed in the `BY` clause.
+- Using a time series aggregation function in combination with an inner time series function causes an error.
+- For exemplars, a query can contain at most one `TS ... | STATS` or `PROMQL` command.
+- Exemplar queries that use views are rejected.
+- Commands after an exemplar metrics query can't filter or transform the returned exemplars. To process exemplars, query the exemplar data streams with `FROM`.
+- Exemplar data streams are found by metrics data stream names, not by alias. Filtered alias filters over metrics don't apply to their exemplars.
+- Reading exemplars requires the `read` privilege on the exemplar data streams.
+- Exemplar cross-cluster search requires remote clusters to run version 9.3 or later.

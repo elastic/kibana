@@ -1,6 +1,8 @@
 # FUSE
 
-The `FUSE` processing command merges rows from multiple result sets and assigns new relevance scores. It supports hybrid search with `FORK` by merging rows with matching key column values and rescoring them with the configured fusion method, group column, and score column.
+The `FUSE` processing command merges rows from multiple ranked result sets and assigns new relevance scores. It enables hybrid search by combining and scoring results from multiple queries, together with the `FORK` command.
+
+`FUSE` works by merging rows with matching `<key_columns>` values, then assigning new relevance scores using the specified `<fuse_method>` algorithm and the values from the `<group_column>` and `<score_column>`.
 
 `FUSE` can also normalize scores, making it simple to apply a minimum score cutoff and filter out low-quality results.
 
@@ -18,55 +20,39 @@ Specify custom parameters:
 
 #### `fuse_method`
 
-Optional. Defaults to `RRF`. Can be one of `RRF`, for Reciprocal Rank Fusion, or `LINEAR`, for linear combination of scores.
-
-Designates which method to use to assign new relevance scores.
+Optional. Defaults to `RRF`. Can be one of `RRF` for Reciprocal Rank Fusion or `LINEAR` for linear combination of scores. Designates which method to use to assign new relevance scores.
 
 #### `score_column`
 
-Optional. Defaults to `_score`.
-
-Designates which column to use to retrieve the relevance scores of the input row and where to output the new relevance scores of the merged rows.
+Optional. Defaults to `_score`. Designates which column to use to retrieve the relevance scores of the input row and where to output the new relevance scores of the merged rows.
 
 #### `group_column`
 
-Optional. Defaults to `_fork`.
-
-Designates which column represents the result set.
+Optional. Defaults to `_fork`. Designates which column represents the result set.
 
 #### `key_columns`
 
-Optional. Defaults to `_id, _index`.
-
-Rows with matching `key_columns` values are merged. Each remaining column value of the merged row is the first non-null value across the fork branches, or null in the absence of a value.
+Optional. Defaults to `_id, _index`. Rows with matching `key_columns` values are merged. Each remaining column value of the merged row is the first non-null value across the fork branches, or null in the absence of a value.
 
 #### `options`
 
-Optional.
-
-Options for the `fuse_method`.
+Optional. Options for the `fuse_method`.
 
 #### `rank_constant`
 
-Optional. Defaults to `60`.
-
-When `fuse_method` is `RRF`, represents the `rank_constant` used in the RRF formula.
+Optional. Defaults to `60`. Represents the `rank_constant` used in the RRF formula. Applies when `fuse_method` is `RRF`.
 
 #### `normalizer`
 
-Optional. Defaults to `none`. Can be one of `none` or `minmax`.
-
-When `fuse_method` is `LINEAR`, specifies which score normalization method to apply.
+Optional. Defaults to `none`. Can be one of `none` or `minmax`. Specifies which score normalization method to apply. Applies when `fuse_method` is `LINEAR`.
 
 #### `weights`
 
-Optional. Defaults to `{}`.
-
-Allows you to set different weights for RRF scores or linear scores based on `group_column` values.
+Optional. Defaults to `{}`. Allows you to set different weights for RRF scores or linear scores based on `group_column` values.
 
 ## Examples
 
-Runs lexical and semantic searches for “Shakespeare” in parallel, merges matching book results with default RRF scoring, and sorts them by the fused score:
+Run a lexical query and a semantic query in parallel with `FORK`, then merge the ranked result sets with default `RRF` fusion:
 
 ```esql
 FROM books METADATA _id, _index, _score 
@@ -76,7 +62,7 @@ FROM books METADATA _id, _index, _score
 | SORT _score DESC
 ```
 
-Uses linear score combination to merge lexical and semantic search results for “Shakespeare” and rank the merged books by score:
+Run a lexical query and a semantic query in parallel, then merge the ranked result sets with linear score combination:
 
 ```esql
 FROM books METADATA _id, _index, _score
@@ -86,7 +72,7 @@ FROM books METADATA _id, _index, _score
 | SORT _score DESC
 ```
 
-Normalizes lexical and semantic scores with min-max normalization before combining them linearly and sorting the merged results:
+Normalize lexical and semantic scores to values between 0 and 1 before combining them with linear fusion:
 
 ```esql
 FROM books METADATA _id, _index, _score
@@ -96,7 +82,7 @@ FROM books METADATA _id, _index, _score
 | SORT _score DESC
 ```
 
-Applies custom weights to favor one search branch over another when linearly combining normalized lexical and semantic scores:
+Apply custom weights to `_fork` branches to control the relative importance of lexical and semantic query results:
 
 ```esql
 FROM books METADATA _id, _index, _score
@@ -106,7 +92,7 @@ FROM books METADATA _id, _index, _score
 | SORT _score DESC
 ```
 
-Normalizes scores for a single result set, filters out results below a minimum fused score, and returns the remaining books sorted by relevance:
+Normalize scores and apply a minimum score cutoff to filter out low-quality results:
 
 ```esql
 FROM books METADATA _id, _index, _score
@@ -119,7 +105,7 @@ FROM books METADATA _id, _index, _score
 | SORT _score DESC
 ```
 
-Normalizes and filters scores inside each search branch, then merges the remaining lexical and semantic results with RRF scoring:
+Normalize and filter scores in each `FORK` branch before merging the remaining results with `RRF`:
 
 ```esql
 FROM books METADATA _id, _index, _score
@@ -146,11 +132,11 @@ FROM books METADATA _id, _index, _score
 
 A `LIMIT` is required before `FUSE`, because `FUSE` can only work with a finite set of rows.
 
-When using `FUSE` after `FORK`, a `LIMIT` must be added to each `FORK` branch in Elastic Cloud Serverless and Elastic Stack 9.4 and later. In Elastic Stack 9.1 to 9.3, an implicit `LIMIT 1000` is added to each `FORK` branch, but adding an explicit `LIMIT` before `FUSE` is still recommended.
+When using `FUSE` after `FORK`, a `LIMIT` must be added to each `FORK` branch. In Elastic Stack 9.1 to 9.3, an implicit `LIMIT 1000` is added to each `FORK` branch, but adding an explicit `LIMIT` before `FUSE` is still recommended.
 
 Columns of type `aggregate_metric_double`, `histogram`, and `date_range` are not yet supported and must be dropped using `DROP` before `FUSE`.
 
-These limitations can be present when `FUSE` is not combined with `FORK`, or when `FUSE` doesn't use the default metadata columns `_id`, `_index`, `_score`, and `_fork`:
+When `FUSE` is not combined with `FORK`, or when `FUSE` doesn't use the default metadata columns `_id`, `_index`, `_score`, and `_fork`, these limitations apply:
 
 1. `FUSE` assumes that `key_columns` are single valued. When `key_columns` are multivalued, `FUSE` can produce unreliable relevance scores.
 2. `FUSE` automatically assigns a score value of `NULL` if the `<score_column>` or `<group_column>` are multivalued.

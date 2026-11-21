@@ -1,8 +1,8 @@
 # FORK
 
-The `FORK` processing command creates multiple execution branches that operate on the same input data and combines the results into a single output table.
+The `FORK` processing command creates multiple execution branches that operate on the same input data, then combines the branch results into a single output table. It adds a `_fork` discriminator column to identify the branch each row came from.
 
-`FORK` adds a discriminator column (`_fork`) to identify which branch each row came from. Branches can output different columns. Columns with the same name must have the same data type across all branches; missing columns are filled with `null` values. Row order is preserved within each branch, but rows from different branches may be interleaved. Use `SORT _fork` to group results by branch.
+`FORK` merges branch outputs into one table. The `_fork` column uses values like `fork1`, `fork2`, and `fork3`, matching the order of the branches. Branches can output different columns, but columns with the same name must have the same data type across all branches. Missing columns are filled with `null` values. Row order is preserved within each branch, but rows from different branches may be interleaved. Use `SORT _fork` to group results by branch.
 
 Together with the `FUSE` command, `FORK` enables hybrid search to combine and score results from multiple queries.
 
@@ -14,11 +14,11 @@ Together with the `FUSE` command, `FORK` enables hybrid search to combine and sc
 
 #### <processing_commands>
 
-A group of processing commands that defines one execution branch. Each branch operates on the same input data. The `_fork` column takes values like `fork1`, `fork2`, and `fork3`, corresponding to the order in which branches are defined.
+A sequence of processing commands that defines an execution branch. Each branch runs on the same input data and contributes rows to the combined output table.
 
 ## Examples
 
-Run two branches and identify each row by branch:
+Run two branches that each select a different employee, then show which branch produced each row.
 
 ```esql
 FROM employees
@@ -28,8 +28,11 @@ FROM employees
 | SORT emp_no
 ```
 
+emp_no:integer | _fork:keyword
+10001 | fork1
+10002 | fork2
 
-Return the total row count alongside the top five scored results:
+Return the total row count alongside the top five scored rows for books matching the author search.
 
 ```esql
 FROM books METADATA _score
@@ -40,16 +43,24 @@ FROM books METADATA _score
 | SORT _fork, score DESC, author
 ```
 
+author:text | score:double | _fork:keyword | total:long
+Colleen Faulkner | 2.18 | fork1 | null
+William Faulkner | 2.18 | fork1 | null
+Danny Faulkner | 2.02 | fork1 | null
+Paul Faulkner | 2.02 | fork1 | null
+William Faulkner | 2.02 | fork1 | null
+null | null | fork2 | 18
+
 ## Limitations
 
-- In Elastic Cloud Serverless and Elastic Stack 9.4 and later, `FORK` branches do not have an implicit `LIMIT 1000`.
-- In Elastic Stack 9.1 to 9.3, an implicit `LIMIT 1000` is added to each `FORK` branch.
-- In Elastic Cloud Serverless and Elastic Stack 9.6 and later, `FORK` supports at most 8 execution branches by default. The limit is the `esql.query.max_branch_count_per_merge` cluster setting.
+- `FORK` supports at most 8 execution branches by default. In Elastic Stack 9.6 and later and Elastic Cloud Serverless, the limit is controlled by the `esql.query.max_branch_count_per_merge` cluster setting.
 - In Elastic Stack 9.1 to 9.5, `FORK` supports at most 8 execution branches.
+- In Elastic Stack 9.1 to 9.3, an implicit `LIMIT 1000` is added to each `FORK` branch.
+- In Elastic Stack 9.4 and later and Elastic Cloud Serverless, `FORK` branches do not have an implicit `LIMIT 1000`.
 - In Elastic Stack 9.1 to 9.5, using more than one `FORK` command in a query is not supported.
-- In Elastic Cloud Serverless and Elastic Stack 9.6 and later, multiple user-written `FORK` commands can't occur along the same uninterrupted pipeline. A query can contain multiple `FORK` commands when a view or multi-source `FROM` combines branches between them, or when separate source branches contain their own `FORK` commands.
+- In Elastic Stack 9.6 and later and Elastic Cloud Serverless, multiple user-written `FORK` commands can't occur along the same uninterrupted pipeline. A query can contain multiple `FORK` commands when a view or multi-source `FROM` combines branches between them, or when separate source branches contain their own `FORK` commands.
 
-Consecutive `FORK` commands are not supported:
+Attempting to run consecutive `FORK` commands in the same uninterrupted pipeline is not supported.
 
 ```esql
 FROM employees
@@ -57,7 +68,7 @@ FROM employees
 | FORK (WHERE salary > 50000) (WHERE salary <= 50000)
 ```
 
-The following query is supported because the multi-source `FROM` combines its branches before the final `FORK`:
+The following query is supported because the multi-source `FROM` combines its branches before the final `FORK`.
 
 ```esql
 FROM (FROM employees | WHERE emp_no >= 10091 AND emp_no < 10093 | FORK (WHERE emp_no == 10091) (WHERE emp_no == 10092)),
@@ -68,3 +79,4 @@ FROM (FROM employees | WHERE emp_no >= 10091 AND emp_no < 10093 | FORK (WHERE em
 ```
 
 - In versions older than 9.3.0, using remote cluster references and `FORK` is not supported.
+- In Elastic Stack planned versions and Elastic Cloud Serverless, a full-text search after `FORK` is a runtime search when a branch contains a command that changes the rows, such as `LIMIT` or `STATS`. It then doesn't contribute to `_score`, and a mapped `text` field in the output needs an analyzer declared with `TO_TEXT` to be searched.

@@ -1,6 +1,6 @@
 # FROM
 
-The `FROM` source command returns a table with data from an index, data stream, alias, view, or subquery.
+The `FROM` source command returns a table with data from an index, data stream, alias, view, or subquery. Each row in the resulting table represents a document, and each column corresponds to a field.
 
 ## Syntax
 
@@ -12,34 +12,38 @@ The `FROM` source command returns a table with data from an index, data stream, 
 
 ### Parameters
 
-#### `index_pattern`
+#### index_pattern
 
 A list of indices, data streams, aliases, or views. Supports wildcards and date math.
 
-#### `fields`
+#### fields
 
-Optional.
-
-A comma-separated list of metadata fields to retrieve.
+Optional. A comma-separated list of metadata fields to retrieve.
 
 ## Examples
 
-Query an index:
+Query the `employees` index:
 
 ```esql
 FROM employees
 ```
 
-Use date math to refer to today’s index:
+Use date math to query today’s index:
 
 ```esql
 FROM <logs-{now/d}>
 ```
 
-Query multiple data streams, indices, aliases, or views with comma-separated lists and wildcards:
+Query multiple indices with a comma-separated list and wildcard:
 
 ```esql
 FROM employees-00001,other-employees-*
+```
+
+Query an external dataset through Data Federation:
+
+```esql
+FROM my_s3_dataset
 ```
 
 Query data streams and indices on remote clusters:
@@ -54,13 +58,13 @@ Include the `_id` metadata field:
 FROM employees METADATA _id
 ```
 
-Escape index names that contain special characters with double quotes or triple double quotes:
+Escape index names that contain special characters:
 
 ```esql
 FROM "this=that", """this[that"""
 ```
 
-Combine an index pattern with a `FROM` subquery:
+Combine an index pattern with a filtered subquery:
 
 ```esql
 FROM
@@ -72,7 +76,7 @@ FROM
 
 For time series data, use the `TS` source command instead of `FROM`. `TS` enables time series aggregation functions and is optimized for processing time series indices.
 
-A query without an explicit `LIMIT` uses an implicit limit of 1000. This applies to `FROM` too. A `FROM` command without `LIMIT`:
+By default, a query without an explicit `LIMIT` uses an implicit limit of 1000. This applies to `FROM` too. A `FROM` command without `LIMIT`:
 
 ```esql
 FROM employees

@@ -20,17 +20,13 @@ Optional. An expression that outputs the values to group by.
 
 ## Examples
 
-### Limit
-
-Return the first five employees after sorting by employee number.
+Return the first 5 employees after sorting by employee number.
 
 ```esql
 FROM employees
 | SORT emp_no ASC
 | LIMIT 5
 ```
-
-### With groups
 
 Return the highest-paid employee for each gender.
 
@@ -41,9 +37,7 @@ FROM employees
 | KEEP first_name, last_name, salary, gender
 ```
 
-### Group by multiple values
-
-Return the highest-paid employee for each languages and gender combination.
+Group by language and gender, then return the highest-paid employee per group.
 
 ```esql
 FROM employees
@@ -53,28 +47,7 @@ FROM employees
 
 ## Limitations
 
-Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This is a configurable upper limit.
-
-To reduce the impact of this limit:
-
-- Reduce the result set size by modifying the query to only return relevant data. Use `WHERE` to select a smaller subset of the data.
-- Shift post-query processing into the query itself. Use `STATS` to aggregate data in the query.
-
-The upper limit applies only to the number of rows output by the query, not to the number of documents processed. The query still runs on the full data set.
-
-Filter rows where `field0` matches `"value"` and request up to 20,000 results, subject to the configured maximum result limit.
-
-```esql
-FROM index | WHERE field0 == "value" | LIMIT 20000
-```
-
-Calculate the average of `field1` grouped by `field2` and request up to 20,000 grouped results, subject to the configured maximum result limit.
-
-```esql
-FROM index | STATS AVG(field1) BY field2 | LIMIT 20000
-```
-
-Both queries return at most 10,000 rows, even if more rows are available.
+Queries do not return more than 10,000 rows, regardless of the `LIMIT` command’s value. This configurable upper limit applies only to the number of rows output by the query, not to the number of documents processed.
 
 The default and maximum limits can be changed using these dynamic cluster settings:
 
