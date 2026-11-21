@@ -61,7 +61,8 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
     () =>
       agentPoliciesRequest.data
         ? agentPoliciesRequest.data.items
-            .filter((policy) => policy && !policy.is_managed)
+            // agentless policies are managed by Elastic: agents can't be assigned to them
+            .filter((policy) => policy && !policy.is_managed && !policy.supports_agentless)
             .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
         : [],
     [agentPoliciesRequest.data]

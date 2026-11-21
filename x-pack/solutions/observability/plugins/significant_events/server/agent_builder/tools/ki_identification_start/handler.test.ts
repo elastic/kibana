@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { startKiIdentificationToolHandler } from './handler';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
@@ -28,6 +29,7 @@ describe('startKiIdentificationToolHandler', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry,
+      logger: loggerMock.create(),
       getSourcesClient: jest.fn().mockResolvedValue({
         get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
       }),
@@ -57,7 +59,7 @@ describe('startKiIdentificationToolHandler', () => {
     });
 
     expect(result).toEqual({
-      kibanaPath: '/app/significant_events/knowledge_indicators?source=logs.nginx',
+      kibanaPath: '/app/nightshift/sources',
     });
 
     expect(managementApi.getWorkflow).toHaveBeenCalledWith('system-streams-ki-onboarding', '*');

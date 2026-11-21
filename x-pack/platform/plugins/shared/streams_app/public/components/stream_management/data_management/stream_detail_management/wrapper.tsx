@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiCallOut, EuiSpacer, EuiTourStep } from '@elastic/eui';
+import { EuiBetaBadge, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import type {
@@ -30,6 +30,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
+  useNavigateToStreamsHome,
+  useStreamsHomeLink,
+} from '../../../../hooks/use_streams_home_link';
+import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
 } from '../../../../hooks/use_streams_doc_counts_fetch';
@@ -45,7 +49,6 @@ import {
 } from '../../../stream_badges';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../../../streams_app_page_template';
-import { TAB_TO_TOUR_STEP_ID, useStreamsTour } from '../../../streams_tour';
 
 export interface ManagementTab {
   content: JSX.Element;
@@ -72,11 +75,10 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const streamsHomeLink = useStreamsHomeLink();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
   const { definition } = useStreamDetail();
   const {
-    core: {
-      application: { navigateToApp },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -84,7 +86,6 @@ export function Wrapper({
     },
     services,
   } = useKibana();
-  const { getStepPropsByStepId } = useStreamsTour();
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -279,8 +280,8 @@ export function Wrapper({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToApp('/streams');
-  }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
+    navigateToStreamsHome();
+  }, [definition, abortController.signal, navigateToStreamsHome, streamsRepositoryClient]);
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -349,37 +350,11 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={{ href: streamsHomeLink, label: backToStreamsLabel }}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
       />
-      {Object.keys(tabs).map((tabName) => {
-        const tourStepId = TAB_TO_TOUR_STEP_ID[tabName];
-        const stepProps = tourStepId ? getStepPropsByStepId(tourStepId) : undefined;
-
-        if (!stepProps) {
-          return null;
-        }
-
-        return (
-          <EuiTourStep
-            key={tabName}
-            step={stepProps.step}
-            stepsTotal={stepProps.stepsTotal}
-            title={stepProps.title}
-            subtitle={stepProps.subtitle}
-            content={stepProps.content}
-            anchorPosition={stepProps.anchorPosition}
-            offset={stepProps.offset}
-            maxWidth={stepProps.maxWidth}
-            isStepOpen={stepProps.isStepOpen}
-            footerAction={stepProps.footerAction}
-            onFinish={stepProps.onFinish}
-            anchor={`[data-test-subj="${getTabTestSubj(tabName, tabs[tabName])}"]`}
-          />
-        );
-      })}
       <StreamsAppPageTemplate.Body
         noPadding={tab === 'partitioning' || tab === 'processing'}
         paddingSize="m"

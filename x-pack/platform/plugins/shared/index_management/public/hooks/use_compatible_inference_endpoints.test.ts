@@ -8,6 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useCompatibleInferenceEndpoints } from './use_compatible_inference_endpoints';
 
 describe('useCompatibleInferenceEndpoints', () => {
@@ -296,7 +297,9 @@ describe('useCompatibleInferenceEndpoints', () => {
       expect(result.current?.compatibleEndpoints?.endpointDefinitions).toContainEqual(
         expect.objectContaining({
           inference_id: 'custom-endpoint',
-          description: 'OpenAI - text-embedding-3-large',
+          description: `${
+            SERVICE_PROVIDERS[ServiceProviderKeys.openai].name
+          } - text-embedding-3-large`,
         })
       );
     });

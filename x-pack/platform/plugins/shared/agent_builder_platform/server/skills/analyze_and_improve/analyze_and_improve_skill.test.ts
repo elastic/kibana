@@ -28,10 +28,6 @@ describe('analyzeAndImproveSkill', () => {
     expect(isAllowedBuiltinSkill(analyzeAndImproveSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(analyzeAndImproveSkill.experimental).toBe(true);
-  });
-
   it('is not excluded from Elastic capabilities, so the default agent picks it up', () => {
     expect(analyzeAndImproveSkill.excludeFromElasticCapabilities).toBeFalsy();
   });
@@ -68,6 +64,7 @@ describe('analyzeAndImproveSkill', () => {
   });
 
   it('is hidden in spaces where the Context Engine is off, like the other setup skills', () => {
+    expect(analyzeAndImproveSkill.experimental).toBeFalsy();
     expect(analyzeAndImproveSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
@@ -214,7 +211,7 @@ describe('analyzeAndImproveSkill', () => {
       expect(catalog).toMatch(
         /\*\*A keyword key with many rows per value in one index\*\*[^*]*→ Cumulative/
       );
-      expect(catalog).toMatch(/a second index, it is a custom workflow built through a subagent/);
+      expect(catalog).toMatch(/a second index, it needs a workflow/);
       expect(catalog).toMatch(
         /\*\*Several sources the agent must route between or join\*\*[^*]*→ Index\/Table Metadata over all of them, in one install/
       );

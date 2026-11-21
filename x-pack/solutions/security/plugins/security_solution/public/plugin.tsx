@@ -108,8 +108,10 @@ import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachm
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerEndpointWorkflowSteps } from './workflows/step_types/endpoint/register_workflow_steps';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
+import { flyoutV2DocViewerStateSchema } from './flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -171,6 +173,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
+      registerEndpointWorkflowSteps(workflowsExtensions, {
+        experimentalFeatures: this.experimentalFeatures,
+      });
       registerSecurityWorkflowTriggers(workflowsExtensions);
       if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);
@@ -344,6 +349,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.logger.error('Failed to register entity attachment type', e);
       });
 
+    // Always register the attack attachment renderer so that attachments created
+    // while the feature flag was enabled continue to display correctly after the
+    // flag is disabled. The flag gates server-side writes; client-side rendering
+    // must be unconditional to avoid "Attachment type is not registered" errors.
+    // Lazily imported to keep the attack attachment module out of the page-load bundle.
+    import('./cases/attachments/attack')
+      .then(({ getAttackAttachment }) => {
+        cases.attachmentFramework.registerAttachment(getAttackAttachment());
+      })
+      .catch((e) => {
+        this.logger.error('Failed to register attack attachment type', e);
+      });
+
     this.registerDiscoverSharedFeatures(core, plugins);
 
     return this.contract.getSetupContract();
@@ -398,9 +416,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         application: core.application,
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
-        experimentalFeatures: this.experimentalFeatures,
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
       });
       registerEntityGraphAttachment({
         attachments: plugins.agentBuilder.attachments,
@@ -409,8 +425,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         agentBuilder: plugins.agentBuilder,
         chrome: core.chrome,
         searchSession: plugins.data.search.session,
-        experimentalFeatures: this.experimentalFeatures,
-        uiSettings: core.uiSettings,
       });
       if (this.experimentalFeatures.riskScoreHistoryEnabled) {
         registerEntityRiskScoreHistoryAttachment({
@@ -418,9 +432,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           application: core.application,
           agentBuilder: plugins.agentBuilder,
           chrome: core.chrome,
-          experimentalFeatures: this.experimentalFeatures,
           searchSession: plugins.data.search.session,
-          uiSettings: core.uiSettings,
         });
       }
       registerExceptionAttachment({ attachments: plugins.agentBuilder.attachments });
@@ -433,8 +445,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         resolveSecurityCanvasContext: () =>
           this.getSecurityCanvasContext(core, plugins as StartPluginsDependencies),
         searchSession: plugins.data.search.session,
-        uiSettings: core.uiSettings,
         rendering: core.rendering,
+        spaces: plugins.spaces,
         registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
@@ -616,7 +628,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAlertUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -631,6 +653,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -697,7 +721,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const iocFlyoutOverviewTabFeature: SecuritySolutionIOCFlyoutOverviewTabFeature = {
       id: 'security-solution-ioc-flyout-overview-tab',
-      render: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -711,6 +744,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -777,7 +812,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAttackUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -792,6 +837,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -946,9 +993,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         this.storage,
         this.experimentalFeatures
       );
-    }
-    if (startPlugins.timelines) {
-      startPlugins.timelines.setTimelineEmbeddedStore(this._store);
     }
     return this._store;
   }

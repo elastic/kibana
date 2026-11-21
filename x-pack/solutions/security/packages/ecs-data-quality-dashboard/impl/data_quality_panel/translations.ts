@@ -69,14 +69,6 @@ export const DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP = i18n.translate(
   }
 );
 
-/** The subtitle displayed on the Data Quality dashboard */
-export const DATA_QUALITY_SUBTITLE: string = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.securitySolutionPackages.ecsDataQualityDashboardSubtitle',
-  {
-    defaultMessage: 'Check index mappings and values for compatibility with the',
-  }
-);
-
 export const DATA_QUALITY_SUGGESTED_USER_PROMPT = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.dataQualitySuggestedUserPromptV2',
   {

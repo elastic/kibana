@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Schema, SwitchCases } from 'joi';
+import type { SwitchCases } from 'joi';
 import typeDetect from 'type-detect';
 
 import { internals } from '../internals';
@@ -42,65 +42,63 @@ export class DiscriminatedUnionType<
 
   constructor(discriminator: Discriminator, types: RTS, options?: UnionTypeOptions<T>) {
     const discriminators = new Set<string>();
+    let fallbackType: ObjectType<any> | undefined;
+    const cases: Array<{ is: string; type: ObjectType<any> }> = [];
 
-    let otherwise: Schema | undefined;
-    const switchCases = types.reduce<SwitchCases[]>((acc, type, index) => {
+    types.forEach((type, index) => {
       const discriminatorSchema = type.getPropSchemas()[discriminator];
       const discriminatorValue = discriminatorSchema.expectedValue;
 
       if (discriminatorValue == null) {
-        if (otherwise) {
+        if (fallbackType) {
           throw new Error(`Only one fallback schema is allowed`);
         }
 
-        otherwise = type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
-        return acc;
-      } else {
-        if (typeof discriminatorValue !== 'string') {
-          throw new Error(
-            `Discriminator for schema at index ${index} must be a string type, got ${typeof discriminatorValue}`
-          );
-        }
-
-        if (discriminators.has(discriminatorValue)) {
-          throw new Error(
-            `Discriminator for schema at index ${index} must be a unique, ${discriminatorValue} is already used`
-          );
-        }
-
-        discriminators.add(discriminatorValue);
+        fallbackType = type;
+        return;
       }
 
-      acc.push({
-        is: discriminatorValue,
-        then: type.getSchema(),
-      });
+      if (typeof discriminatorValue !== 'string') {
+        throw new Error(
+          `Discriminator for schema at index ${index} must be a string type, got ${typeof discriminatorValue}`
+        );
+      }
 
-      return acc;
-    }, []);
+      if (discriminators.has(discriminatorValue)) {
+        throw new Error(
+          `Discriminator for schema at index ${index} must be a unique, ${discriminatorValue} is already used`
+        );
+      }
 
-    // This is a workaround to add the discriminator to the first case because our parser
-    // strips it off the alternatives.match container.
-    // https://github.com/kenspirit/joi-to-json/pull/58
-    if (switchCases.length > 0) {
-      switchCases[0].then = (switchCases[0]!.then! as Schema).meta({
-        [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator,
-      });
-    }
+      discriminators.add(discriminatorValue);
+      cases.push({ is: discriminatorValue, type });
+    });
 
-    const schema = internals
-      .alternatives()
-      .match('any')
-      .meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator })
-      .conditional(
-        internals.ref(`.${discriminator}`), // self reference object property
-        {
-          switch: switchCases,
-          otherwise,
-        }
-      );
+    super(() => {
+      const switchCases: SwitchCases[] = cases.map(({ is, type }, idx) => ({
+        is,
+        then:
+          idx === 0
+            ? type.getSchema().meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator })
+            : type.getSchema(),
+      }));
 
-    super(schema, options);
+      const otherwise = fallbackType
+        ?.getSchema()
+        .meta({ [META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE]: true });
+
+      return internals
+        .alternatives()
+        .match('any')
+        .meta({ [META_FIELD_X_OAS_DISCRIMINATOR]: discriminator })
+        .conditional(
+          internals.ref(`.${discriminator}`), // self reference object property
+          {
+            switch: switchCases,
+            otherwise,
+          }
+        );
+    }, options);
 
     this.discriminator = discriminator;
     this.discriminatedValues = Array.from(discriminators);

@@ -65,6 +65,8 @@ responses:
               statusCode: 400
               error: "Bad Request"
               message: "Duplicate ACL entry for user \"u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0\""
+              attributes:
+                code: "badRequest"
   404:
     description: "Not Found — no conversation with this ID is readable by the caller, or the caller is not its owner. Matches the existing `conversationNotFound` shape, so members cannot distinguish a conversation they may not re-share from one that does not exist."
     content:
@@ -76,6 +78,7 @@ responses:
               error: "Not Found"
               message: "Conversation my-conversation-id not found"
               attributes:
+                code: "conversationNotFound"
                 trace_id: "8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e"
 x-codeSamples:
   - lang: curl

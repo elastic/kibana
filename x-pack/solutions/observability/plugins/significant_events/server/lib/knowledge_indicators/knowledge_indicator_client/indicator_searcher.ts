@@ -25,6 +25,7 @@ import {
   inSpace,
   IS_NOT_DELETED,
   IS_NOT_EXCLUDED,
+  IS_NOT_EXPIRED,
 } from '../esql_helpers';
 import {
   DESCRIPTION,
@@ -38,6 +39,7 @@ import {
   QUERY_RULE_BACKED,
   QUERY_RULE_ID,
   QUERY_TYPE,
+  REVISION_ID,
   SEARCH_EMBEDDING,
   SOURCE_ID,
   TAGS,
@@ -57,15 +59,31 @@ import type { SearchMode } from '../../../../common/queries';
 
 import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
+import {
+  readSearchEmbeddingModel,
+  type SearchEmbeddingModel,
+  type SearchEmbeddingModelResolver,
+} from './search_embedding_model';
 
 const SEARCH_SIZE_LIMIT = 10_000;
+const CROSS_SOURCE_RANK_LIMIT = 300;
+// ES|QL rejects statements over 1,000,000 characters (`EsqlParser.MAX_LENGTH`).
+const RANK_PREFILTER_CHAR_BUDGET = 900_000;
+const RANK_PREFILTER_LITERAL_OVERHEAD = '"", '.length;
 const QUERY_FEATURE_ID = 'query.features.id';
+// `FUSE` preserves this label only when the semantic branch contributes the row.
+const RANK_LABEL_COLUMN = 'label';
+const SEMANTIC_LABEL = 'semantic';
+// Semantic rank one ties keyword rank one and beats every other keyword-only row, so it is always
+// within the top two of an equal-weight RRF page; a page of one can cut it and fool the tie gate.
+const MIN_TIE_GATE_PAGE = 2;
 
 type RankedIndicatorRow = Record<string, unknown> & {
   id?: string;
   'source.id'?: string;
   type?: KnowledgeIndicatorType;
   '@timestamp'?: string;
+  [RANK_LABEL_COLUMN]?: string | null;
 };
 
 interface KeywordClause {
@@ -76,6 +94,11 @@ interface KeywordClause {
 interface KeywordExpressions {
   readonly condition: LatestSourceWhereCondition;
   readonly score: LatestSourceWhereCondition;
+}
+
+interface SemanticCondition {
+  readonly condition: LatestSourceWhereCondition;
+  readonly params: Readonly<Record<string, string>>;
 }
 
 const combineKeywordClauses = (clauses: KeywordClause[]): KeywordExpressions => {
@@ -112,7 +135,9 @@ export class IndicatorSearcher {
       'semantic_min_score' | 'rrf_rank_constant'
     >,
     private readonly revisionReader: RevisionReader,
-    private readonly space: string
+    private readonly space: string,
+    private readonly resolveEmbeddingModel: SearchEmbeddingModelResolver = () =>
+      readSearchEmbeddingModel(esClient, logger)
   ) {}
 
   async findIndicators(
@@ -161,6 +186,95 @@ export class IndicatorSearcher {
     return {
       hits: hits.flatMap((h) => (h.type === 'feature' ? [h.feature] : [])),
     };
+  }
+
+  async findFeaturesAcrossSources(
+    sourceIds: string[],
+    query: string,
+    options: { featureType: string; searchMode?: SearchMode; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    return searchWithKeywordFallback(
+      this.logger,
+      { searchMode: options.searchMode, label: 'KnowledgeIndicator', sourceIds },
+      (mode) => this.executeFindFeaturesAcrossSources(mode, sourceIds, query, options)
+    );
+  }
+
+  private async executeFindFeaturesAcrossSources(
+    mode: SearchMode,
+    sourceIds: string[],
+    queryText: string,
+    { featureType, limit }: { featureType: string; limit?: number }
+  ): Promise<{ hits: Feature[] }> {
+    // Latest-per-group cannot be folded into the rank query: `KNN()`/`MATCH` after `INLINE STATS`
+    // is not pushed to Lucene, and dense `KNN()` fails outright on `semantic_text` there.
+    const latest = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType])
+      )
+    );
+    const latestByKey = new Map(
+      latest
+        .filter(isStoredFeatureKnowledgeIndicator)
+        .map((doc) => [`${doc['source.id']}:${doc.id}`, doc])
+    );
+    if (latestByKey.size === 0) {
+      return { hits: [] };
+    }
+
+    const rankWhere = andWhere(
+      combineWhere(
+        inPredicate(SOURCE_ID, sourceIds),
+        inPredicate(TYPE, [KI_TYPE_FEATURE]),
+        inPredicate(REVISION_ID, this.prefilterRevisionIds(latest, 'Cross-source feature search'))
+      ),
+      inSpace(this.space)
+    );
+    const model: SearchEmbeddingModel =
+      mode === 'keyword' ? { kind: 'unknown' } : await this.resolveEmbeddingModel();
+    const rankedRows = await this.rankWithTieFallback(
+      mode,
+      CROSS_SOURCE_RANK_LIMIT,
+      (semanticMinScore) =>
+        this.buildRankQuery(
+          mode,
+          rankWhere,
+          queryText,
+          [KI_TYPE_FEATURE],
+          CROSS_SOURCE_RANK_LIMIT,
+          semanticMinScore,
+          model
+        )
+    );
+
+    const seen = new Set<string>();
+    const hits: Feature[] = [];
+    for (const row of rankedRows) {
+      const id = row[ID];
+      const sourceId = row[SOURCE_ID];
+      if (typeof id !== 'string' || typeof sourceId !== 'string') {
+        continue;
+      }
+      const key = `${sourceId}:${id}`;
+      const doc = latestByKey.get(key);
+      if (!doc || seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      hits.push(fromStoredFeature(doc));
+    }
+    this.logger.debug(
+      `Cross-source feature search: ${hits.length} distinct groups in ${rankedRows.length} ranked rows`
+    );
+    return { hits: limit === undefined ? hits : hits.slice(0, limit) };
   }
 
   async findQueries(
@@ -253,28 +367,38 @@ export class IndicatorSearcher {
     const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
     const docById = new Map(docs.map((d) => [`${d['source.id']}:${d.type}:${d.id}`, d]));
 
-    // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
-    // constrained by the (source.id, type, id) tuples from phase 1.
     if (docById.size === 0) {
       return { hits: [] };
     }
 
-    const ids = Array.from(new Set(docs.map((d) => d.id)));
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
     // `buildRankQuery` issues its own FROM and bypasses `RevisionReader`, so the space
-    // filter has to be re-applied here.
+    // filter has to be re-applied here. The latest-revision restriction is a WHERE predicate, not
+    // a request `filter`: only WHERE conjuncts become `KNN` prefilters, and `_id` is not pushable.
     const phase2Where = andWhere(
       combineWhere(
-        inPredicate(ID, ids),
         inPredicate(SOURCE_ID, sourceIds),
-        inPredicate(TYPE, options.types ?? [])
+        inPredicate(TYPE, options.types ?? []),
+        inPredicate(
+          REVISION_ID,
+          this.prefilterRevisionIds(docs, `KnowledgeIndicator ${mode} search`)
+        )
       ),
       inSpace(this.space)
     );
 
-    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
-    const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query })
+    const model: SearchEmbeddingModel =
+      mode === 'keyword' ? { kind: 'unknown' } : await this.resolveEmbeddingModel();
+    const rankedRows = await this.rankWithTieFallback(mode, limit, (semanticMinScore) =>
+      this.buildRankQuery(
+        mode,
+        phase2Where,
+        queryText,
+        options.types ?? [],
+        limit,
+        semanticMinScore,
+        model
+      )
     );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
@@ -315,26 +439,120 @@ export class IndicatorSearcher {
     return { hits };
   }
 
+  /**
+   * Documents predating `revision_id` and ids past the statement budget are dropped with a warning;
+   * an empty result lifts the restriction and leaves stale rows to the post-ranking timestamp check.
+   */
+  private prefilterRevisionIds(
+    docs: ReadonlyArray<{ revision_id?: string }>,
+    label: string
+  ): string[] {
+    const revisionIds: string[] = [];
+    let legacy = 0;
+    let chars = 0;
+    for (const { revision_id: revisionId } of docs) {
+      if (!revisionId) {
+        legacy += 1;
+        continue;
+      }
+      chars += revisionId.length + RANK_PREFILTER_LITERAL_OVERHEAD;
+      if (chars > RANK_PREFILTER_CHAR_BUDGET) {
+        break;
+      }
+      revisionIds.push(revisionId);
+    }
+    const dropped = docs.length - legacy - revisionIds.length;
+    if (legacy > 0) {
+      this.logger.warn(
+        `${label}: ${legacy} current revision(s) have no revision_id and are not searchable; backfill the field`
+      );
+    }
+    if (dropped > 0) {
+      this.logger.warn(
+        `${label}: prefilter exceeds the ES|QL statement budget; ${dropped} of ${docs.length} current revisions dropped from ranking`
+      );
+    }
+    return revisionIds;
+  }
+
+  /**
+   * Retries when minmax collapses an all-tied semantic branch to zero. The hybrid query over-fetches
+   * to `MIN_TIE_GATE_PAGE` rows for the gate; the page is trimmed to `limit` here.
+   * Replace the retry once https://github.com/elastic/elasticsearch/issues/135543 is resolved.
+   */
+  private async rankWithTieFallback(
+    mode: SearchMode,
+    limit: number,
+    build: (semanticMinScore: number) => ComposerQuery
+  ): Promise<RankedIndicatorRow[]> {
+    const rankedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query: build(this.config.semantic_min_score) })
+    );
+    if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
+      return rankedRows.slice(0, limit);
+    }
+    this.logger.debug(
+      `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
+    );
+    const retriedRows = esqlToObjects<RankedIndicatorRow>(
+      await queryEsql({ esClient: this.esClient, query: build(0) })
+    );
+    return retriedRows.slice(0, limit);
+  }
+
+  /**
+   * ES|QL shard searches carry no size, so `MATCH` on dense `semantic_text` compiles to a knn with
+   * `k = 10` per shard regardless of `LIMIT`; `KNN()` takes `k` from `LIMIT` (`PushLimitToKnn`).
+   * Sparse has no such cap, and `TEXT_EMBEDDING` cannot target a sparse endpoint.
+   */
+  private semanticCondition(queryText: string, model: SearchEmbeddingModel): SemanticCondition {
+    const field = esql.col(SEARCH_EMBEDDING);
+    return model.kind === 'dense'
+      ? {
+          condition: esql.exp`KNN(${field}, TEXT_EMBEDDING(?q, ?inference_id))`,
+          params: { q: queryText, inference_id: model.inferenceId },
+        }
+      : { condition: esql.exp`MATCH(${field}, ?q)`, params: { q: queryText } };
+  }
+
+  // `esql.exp` fragments cannot register params; `?name` holes are bound on the whole query.
+  private bindSemanticParams(query: ComposerQuery, { params }: SemanticCondition): ComposerQuery {
+    for (const [name, value] of Object.entries(params)) {
+      query.setParam(name, value);
+    }
+    return query;
+  }
+
   private buildRankQuery(
     mode: SearchMode,
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
-    limit: number
+    limit: number,
+    semanticMinScore: number,
+    model: SearchEmbeddingModel
   ): ComposerQuery {
+    const semantic = this.semanticCondition(queryText, model);
+    const label = esql.col(RANK_LABEL_COLUMN);
+    const semanticLabel = esql.str(SEMANTIC_LABEL);
+
     if (mode === 'semantic') {
-      return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
+      return this.bindSemanticParams(
+        esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
         | WHERE ${where}
         | FORK (
-            WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
+            WHERE ${semantic.condition}
             | SORT _score DESC
             | LIMIT ${limit}
           )
+        | EVAL ${label} = ${semanticLabel}
         | FUSE LINEAR WITH {"normalizer":"minmax"}
-        | WHERE _score >= ${this.config.semantic_min_score}
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | WHERE _score >= ${semanticMinScore}
+        | KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}
         | SORT _score DESC
-        | LIMIT ${limit}`;
+        | LIMIT ${limit}`,
+        semantic
+      );
     }
 
     const keyword = this.buildKeywordExpressions(queryText, types);
@@ -350,17 +568,18 @@ export class IndicatorSearcher {
     }
 
     // Threshold the semantic branch in-place (FUSE LINEAR + fake group) before RRF-fusing with keyword; final KEEP drops the FUSE keys _id/_index.
-    return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
+    return this.bindSemanticParams(
+      esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
       | WHERE ${where}
       | FORK
           (
-            WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
+            WHERE ${semantic.condition}
             | SORT _score DESC
             | LIMIT ${limit}
-            | EVAL label = "semantic"
-            | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
-            | WHERE _score >= ${this.config.semantic_min_score}
-            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | EVAL ${label} = ${semanticLabel}
+            | FUSE LINEAR GROUP BY ${label} WITH {"normalizer":"minmax"}
+            | WHERE _score >= ${semanticMinScore}
+            | KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
           )
@@ -374,8 +593,10 @@ export class IndicatorSearcher {
           )
       | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
       | SORT _score DESC
-      | KEEP ${rankGroupKeyColumns()}, _score
-      | LIMIT ${limit}`;
+      | KEEP ${rankGroupKeyColumns()}, _score, ${label}
+      | LIMIT ${Math.max(limit, MIN_TIE_GATE_PAGE)}`,
+      semantic
+    );
   }
 
   private buildKeywordExpressions(
@@ -395,6 +616,7 @@ export class IndicatorSearcher {
     const includeQueries = types.length === 0 || types.includes(KI_TYPE_QUERY);
 
     if (includeFeatures) {
+      clauses.push(likeClause(FEATURE_SLUG, 3));
       // Join the multivalue so substring LIKE works; LIKE is null per-element, and MV_CONTAINS matched whole tags only.
       clauses.push(likeClause(FEATURE_TYPE, 1), likeClause(FEATURE_SUBTYPE, 1), {
         condition: esql.exp`MV_CONCAT(TO_LOWER(${esql.col(TAGS)}), " ") LIKE ${lowerWildcard}`,

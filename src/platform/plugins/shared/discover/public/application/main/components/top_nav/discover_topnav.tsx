@@ -82,15 +82,14 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const customizationContext = useDiscoverCustomizationContext();
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
-  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const [initialCopyOnSave, setInitialCopyOnSave] = useState(false);
-
-  const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
+  const saveSessionModal = useInternalStateSelector((state) => state.saveSessionModal);
 
   const query = useAppStateSelector((state) => state.query);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
+  const { timeRangeAbsolute, replayCacheLastFetched } = useCurrentTabSelector(
+    (tab) => tab.dataRequestParams
+  );
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
   const timeRangeRelative = useCurrentTabSelector((state) => state.globalState.timeRange);
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
@@ -216,21 +215,16 @@ export const DiscoverTopNav = ({
   );
 
   const onOpenSaveModal = useCallback(() => {
-    setInitialCopyOnSave(false);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({}));
+  }, [dispatch]);
 
   const onOpenSaveAsModal = useCallback(() => {
-    setInitialCopyOnSave(true);
-    onSaveCbRef.current = undefined;
-    setIsSaveModalVisible(true);
-  }, []);
+    dispatch(internalStateActions.openSaveSessionModal({ initialCopyOnSave: true }));
+  }, [dispatch]);
 
   const onCloseSaveModal = useCallback(() => {
-    setIsSaveModalVisible(false);
-    onSaveCbRef.current = undefined;
-  }, []);
+    dispatch(internalStateActions.closeSaveSessionModal());
+  }, [dispatch]);
   const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
   const onChangeDataView = useCallback(
     (dataViewOrDataViewId: string | DataView) => {
@@ -365,36 +359,14 @@ export const DiscoverTopNav = ({
           disabledReason: emptyEsqlQueryDisabledTooltip,
         }
       : showDatePicker;
-  const esqlEditorInitialState = useMemo(
-    () =>
-      isUninitializedEsqlTab
-        ? {
-            ...esqlEditorUiState,
-            isHistoryOpen: esqlEditorUiState?.isHistoryOpen ?? true,
-          }
-        : esqlEditorUiState,
-    [esqlEditorUiState, isUninitializedEsqlTab]
-  );
   const onQuerySubmit = useCallback(
     (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
       if (isEmptyEsqlQuery(payload.query)) {
         return;
       }
-      if (isUninitializedEsqlTab) {
-        onEsqlEditorInitialStateChange({
-          ...esqlEditorUiState,
-          isHistoryOpen: false,
-        });
-      }
       dispatch(onQuerySubmitAction({ payload, isUpdate }));
     },
-    [
-      dispatch,
-      esqlEditorUiState,
-      isUninitializedEsqlTab,
-      onEsqlEditorInitialStateChange,
-      onQuerySubmitAction,
-    ]
+    [dispatch, onQuerySubmitAction]
   );
 
   const textBasedLanguageModeErrors = useMemo(
@@ -424,6 +396,7 @@ export const DiscoverTopNav = ({
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }
+        cachedResultsLoadedAt={replayCacheLastFetched}
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={onQuerySubmit}
@@ -467,7 +440,7 @@ export const DiscoverTopNav = ({
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         draft={searchDraftUiState}
         onDraftChange={onSearchDraftChange}
-        esqlEditorInitialState={esqlEditorInitialState}
+        esqlEditorInitialState={esqlEditorUiState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
         visorInitialState={visorUiState}
         onVisorInitialStateChange={onVisorInitialStateChange}
@@ -512,11 +485,11 @@ export const DiscoverTopNav = ({
             : undefined
         }
       />
-      {isSaveModalVisible && (
+      {saveSessionModal.isOpen && (
         <DiscoverSessionSaveModalContainer
-          initialCopyOnSave={initialCopyOnSave}
+          initialCopyOnSave={saveSessionModal.initialCopyOnSave}
+          initialTitle={saveSessionModal.initialTitle}
           onClose={onCloseSaveModal}
-          onSaveCb={onSaveCbRef.current}
           services={services}
         />
       )}

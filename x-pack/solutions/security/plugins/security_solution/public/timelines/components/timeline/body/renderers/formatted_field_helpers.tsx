@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elasti
 import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -24,10 +23,8 @@ import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
-import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
 import {
@@ -67,11 +64,9 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   value,
   origin = FLYOUT_ORIGIN.TABLE_FIELD_LINK,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const { services } = useKibana();
   const { application } = services;
   const eventContext = useContext(StatefulEventContext);
-  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openRuleFlyout } = useFlyoutApi();
 
   const ruleName = `${value}`;
@@ -96,30 +91,18 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
-      if (enableNewFlyout && ruleId) {
+      if (ruleId) {
         openRuleFlyout({ ruleId, origin, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
-        return;
       }
-
-      openFlyout({
-        right: {
-          id: RulePanelKey,
-          params: {
-            ruleId,
-          },
-        },
-      });
     },
     [
       navigateToApp,
       ruleId,
       search,
       openInNewTab,
-      openFlyout,
       eventContext,
       origin,
       isInTimelineContext,
-      enableNewFlyout,
       openRuleFlyout,
       ruleName,
     ]

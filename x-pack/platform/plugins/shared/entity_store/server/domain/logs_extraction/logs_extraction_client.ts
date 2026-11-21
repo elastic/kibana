@@ -897,6 +897,12 @@ export class LogsExtractionClient {
             // before the interruption instead.
             samplingRate = resumeSamplingRate ?? undefined;
           } else if (samplingEligible) {
+            // `maxLogsPerWindow` here is runMainPath's *remaining* budget for this sub-window
+            // (already reduced by logs consumed in earlier sub-windows), while `scannedLogs`
+            // below separately re-adds that same prior consumption via `processedLogsBefore`.
+            // Add it back to `maxLogsPerWindow` first so the two don't double-subtract it.
+            const fullConfiguredCap =
+              maxLogsPerWindow > 0 ? maxLogsPerWindow + processedLogsBefore : 0;
             const rate = resolveSamplingRate(
               {
                 scannedLogs: processedLogsBefore + totalLogs,
@@ -904,6 +910,7 @@ export class LogsExtractionClient {
                 sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
                 sliceEndISO: logsPageCursorEnd.timestampCursor,
                 windowEndISO,
+                maxLogsPerWindow: fullConfiguredCap,
               },
               samplingRateOverride
             );

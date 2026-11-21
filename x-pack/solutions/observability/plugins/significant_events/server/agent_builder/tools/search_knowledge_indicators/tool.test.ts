@@ -18,6 +18,7 @@ import {
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import {
   createMockToolContext,
+  createMockToolFailureTelemetry,
   createSignificantEventsServer,
   invokeHandler,
   mockSourcesClient,
@@ -33,6 +34,7 @@ describe('ki_search tool', () => {
   const server = createSignificantEventsServer({ featurePrivilege: 'read' });
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
+  const telemetry = createMockToolFailureTelemetry();
 
   it('uses the expected tool id', () => {
     const getScopedClients = jest.fn() as unknown as jest.MockedFunction<GetScopedClients>;
@@ -40,6 +42,7 @@ describe('ki_search tool', () => {
       getScopedClients,
       server,
       logger,
+      telemetry,
     });
 
     expect(tool.id).toBe(SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_SEARCH_TOOL_ID);
@@ -52,6 +55,7 @@ describe('ki_search tool', () => {
       getScopedClients,
       server,
       logger,
+      telemetry,
     });
     if (!('schema' in tool)) {
       throw new Error('Expected a schema-backed tool registration');
@@ -90,6 +94,7 @@ describe('ki_search tool', () => {
       getScopedClients,
       server,
       logger,
+      telemetry,
     });
 
     const res = await tool.availability!.handler({ request, uiSettings, spaceId: 'default' });
@@ -107,6 +112,7 @@ describe('ki_search tool', () => {
       getScopedClients,
       server,
       logger,
+      telemetry,
     });
 
     const res = await tool.availability!.handler({ request, uiSettings, spaceId: 'default' });
@@ -121,12 +127,14 @@ describe('ki_search tool', () => {
         licensing: {},
         sourcesClient: mockSourcesClient([]),
         getKnowledgeIndicatorClient,
+        getTopologySnapshotClient: jest.fn().mockResolvedValue({ neighborhood: jest.fn() }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege }),
       logger,
+      telemetry,
     });
 
     const result = await invokeHandler(tool as never, {}, createMockToolContext());
@@ -154,12 +162,14 @@ describe('ki_search tool', () => {
         licensing: {},
         sourcesClient,
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getQueryLinks, getFeatures }),
+        getTopologySnapshotClient: jest.fn().mockResolvedValue({ neighborhood: jest.fn() }),
       } as unknown as RouteHandlerScopedClients;
     }) as unknown as jest.MockedFunction<GetScopedClients>;
     const tool = createSearchKnowledgeIndicatorsTool({
       getScopedClients,
       server: createSignificantEventsServer({ featurePrivilege: 'read' }),
       logger,
+      telemetry,
     });
 
     const result = await invokeHandler(tool as never, input, createMockToolContext());
@@ -188,5 +198,59 @@ describe('ki_search tool', () => {
 
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('reports an unknown source as a refused call, not as an error', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+    const refusalLogger = loggingSystemMock.createLogger();
+    const refusalTelemetry = createMockToolFailureTelemetry();
+    const getKnowledgeIndicatorClient = jest.fn();
+    const getScopedClients = jest.fn(async () => {
+      return {
+        licensing: {},
+        sourcesClient: mockSourcesClient(['logs.open']),
+        getKnowledgeIndicatorClient,
+        getTopologySnapshotClient: jest.fn().mockResolvedValue({ neighborhood: jest.fn() }),
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createSearchKnowledgeIndicatorsTool({
+      getScopedClients,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+      logger: refusalLogger,
+      telemetry: refusalTelemetry,
+    });
+
+    const result = await invokeHandler(
+      tool as never,
+      { slugs: ['5e0bf42a-rule-uuid', 'logs.gone'] },
+      createMockToolContext()
+    );
+
+    expect(result).toMatchObject({
+      results: [
+        {
+          type: 'error',
+          data: {
+            message: expect.stringContaining(
+              'Source not found in this space: 5e0bf42a-rule-uuid, logs.gone'
+            ),
+          },
+        },
+      ],
+    });
+    expect(refusalLogger.error).not.toHaveBeenCalled();
+    expect(refusalLogger.debug).toHaveBeenCalledWith(
+      'platform.sig_events.ki_search refused the call: unknown_source'
+    );
+    expect(refusalTelemetry.trackAgentToolFailed).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tool_id: 'platform.sig_events.ki_search',
+        error_code: 'unknown_source',
+        input_rejected: true,
+        status_code: 404,
+        unresolved_count: 2,
+      }),
+      expect.anything()
+    );
   });
 });

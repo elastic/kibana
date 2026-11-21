@@ -8,10 +8,11 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, type WorkflowStepExecutionDto } from '@kbn/workflows';
 import { PROPOSAL_APPROVE_URL, PROPOSAL_DISMISS_URL } from '@kbn/proposals-common';
 import { CoverageChain } from './coverage_chain';
-import { RuleCreationClient } from './rule_creation_client';
+import { DRAFT_STEP_ID } from './constants';
+import { RuleCreationClient, extractDraftFromSteps } from './rule_creation_client';
 
 jest.mock('./coverage_chain');
 const esClient = {} as EsClient;
@@ -242,5 +243,73 @@ describe('RuleCreationClient proposal gate', () => {
           c.url === `/api/agent_builder/conversations/${result.investigationId}`
       )
     ).toBe(true);
+  });
+});
+
+const draftSteps = (structuredOutput: Record<string, unknown>) =>
+  [
+    { stepId: DRAFT_STEP_ID, output: null },
+    { stepId: DRAFT_STEP_ID, output: { structured_output: structuredOutput } },
+  ] as unknown as WorkflowStepExecutionDto[];
+
+const emptyRule = {
+  name: '',
+  description: '',
+  query: '',
+  language: 'esql',
+  type: 'esql',
+  severity: 'low',
+  risk_score: 0,
+  interval: '',
+  from: '',
+  threat: [],
+  tags: [],
+};
+
+describe('extractDraftFromSteps', () => {
+  it('returns the drafted rule when the agent built one', () => {
+    const rule = { ...emptyRule, name: 'Sudo brute force', query: 'FROM logs-* | LIMIT 1' };
+
+    expect(extractDraftFromSteps(draftSteps({ rule, attachment_id: 'a-1', reason: '' }))).toEqual({
+      rule,
+      skipped: false,
+      skipReason: undefined,
+    });
+  });
+
+  it('treats an empty name and query as a quality-gate refusal', () => {
+    expect(
+      extractDraftFromSteps(
+        draftSteps({
+          rule: emptyRule,
+          attachment_id: '',
+          reason: 'The data source does not exist.',
+        })
+      )
+    ).toEqual({ rule: undefined, skipped: true, skipReason: 'The data source does not exist.' });
+  });
+
+  it('does not report a refusal without a reason as skipped', () => {
+    expect(
+      extractDraftFromSteps(draftSteps({ rule: emptyRule, attachment_id: '', reason: '' }))
+    ).toEqual({ rule: undefined, skipped: false, skipReason: undefined });
+  });
+
+  it('keeps a partial draft that has a query, so evaluators can score it', () => {
+    const rule = { ...emptyRule, query: 'FROM logs-* | LIMIT 1' };
+
+    expect(extractDraftFromSteps(draftSteps({ rule, attachment_id: '' }))).toEqual({
+      rule,
+      skipped: false,
+      skipReason: undefined,
+    });
+  });
+
+  it('returns neither a rule nor a skip when draft_creation produced no output', () => {
+    expect(
+      extractDraftFromSteps([
+        { stepId: DRAFT_STEP_ID, output: null },
+      ] as unknown as WorkflowStepExecutionDto[])
+    ).toEqual({ rule: undefined, skipped: false, skipReason: undefined });
   });
 });

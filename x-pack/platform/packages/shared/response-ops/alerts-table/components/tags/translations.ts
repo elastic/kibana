@@ -8,72 +8,90 @@
 import { i18n } from '@kbn/i18n';
 
 export const EDITED_ALERTS = (totalAlerts: number) =>
-  i18n.translate('platform.responseOps.alertsTable.editedAlerts', {
+  i18n.translate('xpack.responseOpsAlertsTable.responseOps.alertsTable.editedAlerts', {
     values: { totalAlerts },
     defaultMessage: 'Edited {totalAlerts, plural, =1 {alert} other {{totalAlerts} alerts}}',
   });
 
 export const SELECTED_ALERTS = (totalAlerts: number) =>
-  i18n.translate('platform.responseOps.alertsTable.tags.headerSubtitle', {
+  i18n.translate('xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.headerSubtitle', {
     values: { totalAlerts },
     defaultMessage: 'Selected alerts: {totalAlerts}',
   });
 
 export const SAVE_SELECTION = i18n.translate(
-  'platform.responseOps.alertsTable.tags.saveSelection',
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.saveSelection',
   {
     defaultMessage: 'Save selection',
   }
 );
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
-  'platform.responseOps.alertsTable.tags.searchPlaceholder',
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.searchPlaceholder',
   {
     defaultMessage: 'Search',
   }
 );
 
-export const CANCEL = i18n.translate('platform.responseOps.alertsTable.tags.cancel', {
-  defaultMessage: 'Cancel',
-});
+export const CANCEL = i18n.translate(
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
 
 export const ADD_TAG_CUSTOM_OPTION_LABEL = (searchValue: string) =>
-  i18n.translate('platform.responseOps.alertsTable.configure.addTagCustomOptionLabel', {
-    defaultMessage: 'Add {searchValue} as a tag',
-    values: { searchValue },
-  });
+  i18n.translate(
+    'xpack.responseOpsAlertsTable.responseOps.alertsTable.configure.addTagCustomOptionLabel',
+    {
+      defaultMessage: 'Add {searchValue} as a tag',
+      values: { searchValue },
+    }
+  );
 
-export const EDIT_TAGS = i18n.translate('platform.responseOps.alertsTable.tags.edit', {
-  defaultMessage: 'Edit tags',
-});
+export const EDIT_TAGS = i18n.translate(
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.edit',
+  {
+    defaultMessage: 'Edit tags',
+  }
+);
 
 export const TOTAL_TAGS = (totalTags: number) =>
-  i18n.translate('platform.responseOps.alertsTable.tags.totalTags', {
+  i18n.translate('xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.totalTags', {
     defaultMessage: 'Total tags: {totalTags}',
     values: { totalTags },
   });
 
-export const SELECT_ALL = i18n.translate('platform.responseOps.alertsTable.tags.selectAll', {
-  defaultMessage: 'Select all',
-});
+export const SELECT_ALL = i18n.translate(
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.selectAll',
+  {
+    defaultMessage: 'Select all',
+  }
+);
 
-export const SELECT_NONE = i18n.translate('platform.responseOps.alertsTable.tags.selectNone', {
-  defaultMessage: 'Select none',
-});
+export const SELECT_NONE = i18n.translate(
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.selectNone',
+  {
+    defaultMessage: 'Select none',
+  }
+);
 
 export const SELECTED_TAGS = (selectedTags: number) =>
-  i18n.translate('platform.responseOps.alertsTable.tags.selectedTags', {
+  i18n.translate('xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.selectedTags', {
     defaultMessage: 'Selected: {selectedTags}',
     values: { selectedTags },
   });
 
 export const NO_TAGS_AVAILABLE = i18n.translate(
-  'platform.responseOps.alertsTable.tags.noTagsAvailable',
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.noTagsAvailable',
   {
     defaultMessage: 'No tags available. To add a tag, enter it in the query bar',
   }
 );
 
-export const NO_SEARCH_MATCH = i18n.translate('platform.responseOps.alertsTable.tags.noTagsMatch', {
-  defaultMessage: 'No tags match your search',
-});
+export const NO_SEARCH_MATCH = i18n.translate(
+  'xpack.responseOpsAlertsTable.responseOps.alertsTable.tags.noTagsMatch',
+  {
+    defaultMessage: 'No tags match your search',
+  }
+);

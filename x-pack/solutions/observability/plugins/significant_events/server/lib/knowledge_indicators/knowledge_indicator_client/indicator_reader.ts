@@ -33,9 +33,11 @@ import {
 } from '../fields';
 import { fromStoredFeature, fromStoredQuery } from './serializers';
 import { StatusError } from '../../errors/status_error';
-import type { RevisionReader } from './revision_reader';
+import type { LatestRevisionCursor, RevisionReader } from './revision_reader';
 import type { LatestSourceWhereCondition } from '../../significant_events/latest_source_query';
 import type { RuleUnbackedFilter } from './types';
+
+export type TopologyFeaturePageCursor = LatestRevisionCursor;
 
 function ruleUnbackedPostGroupingWhere(
   filter: RuleUnbackedFilter | undefined
@@ -62,6 +64,76 @@ export class IndicatorReader {
 
   countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
     return this.revisionReader.countLatestRevisions(inPredicate(TYPE, [type]), IS_NOT_DELETED);
+  }
+
+  /** Distinct live entity slugs, matching the entities `getFeatures` returns but without its limit. */
+  countEntities(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      IS_NOT_EXPIRED,
+      inPredicate(FEATURE_TYPE, ['entity'])
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere, FEATURE_SLUG);
+  }
+
+  countFeatures(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED);
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
+      ruleUnbackedPostGroupingWhere('only')
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
+  countRuleBackedQueries(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
+      esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
   }
 
   async getFeatures(
@@ -124,6 +196,47 @@ export class IndicatorReader {
     return { hits };
   }
 
+  async getTopologyFeaturesPage({
+    sourceIds,
+    featureTypes,
+    asOf,
+    after,
+    size,
+  }: {
+    sourceIds: string[];
+    featureTypes: string[];
+    asOf: string;
+    after?: TopologyFeaturePageCursor;
+    size: number;
+  }): Promise<{ hits: Feature[]; nextCursor?: TopologyFeaturePageCursor }> {
+    if (sourceIds.length === 0) {
+      return { hits: [] };
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      esql.exp`expires_at IS NULL OR expires_at >= TO_DATETIME(${esql.str(asOf)})`,
+      inPredicate(FEATURE_TYPE, featureTypes)
+    );
+    const { hits, nextCursor } = await this.revisionReader.fetchLatestRevisionsPage({
+      where,
+      postGroupingWhere,
+      asOf,
+      after,
+      size,
+    });
+
+    return {
+      hits: hits.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature),
+      ...(nextCursor ? { nextCursor } : {}),
+    };
+  }
+
   async getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
@@ -138,6 +251,37 @@ export class IndicatorReader {
     return { hits };
   }
 
+  async getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    const bySlug = new Map<string, string[]>();
+    if (sourceIds.length === 0 || slugs.length === 0) {
+      return bySlug;
+    }
+    // Tombstones carry no `feature.*` fields: filtering on them before the latest-per-group pick
+    // would resurface deleted features through their previous revision.
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType]),
+        inPredicate(FEATURE_SLUG, slugs)
+      )
+    );
+    for (const doc of docs) {
+      if (!isStoredFeatureKnowledgeIndicator(doc)) continue;
+      const slug = doc.feature.slug;
+      const sources = bySlug.get(slug) ?? [];
+      if (!sources.includes(doc['source.id'])) sources.push(doc['source.id']);
+      bySlug.set(slug, sources);
+    }
+    return bySlug;
+  }
+
   async getFeature(sourceId: string, id: string): Promise<Feature> {
     const { hits } = await this.getFeatures(sourceId, { id: [id] });
     if (hits.length === 0) {
@@ -147,38 +291,25 @@ export class IndicatorReader {
   }
 
   /**
-   * Pure ES|QL probe: returns the timestamp of the most recent **active**
-   * feature revision for a source (neither tombstoned nor excluded), optionally
-   * scoped to a set of feature types.
-   *
-   * Only active revisions are counted on purpose, so a `null` result reliably
-   * signals an empty active set for the requested types. `shouldIdentifyFeatures`
-   * relies on this in two ways: a `null` inferred result forces re-identification
-   * (empty or user-wiped set), while the computed-type timestamp drives the
-   * recency throttle.
+   * Returns the newest timestamp among active latest feature revisions for a
+   * source, optionally scoped to a set of feature types. A latest revision
+   * must be live, included, and unexpired to count.
    */
   async getLatestRevisionTimestamp(
     sourceId: string,
     options: { types?: string[] } = {}
   ): Promise<{ '@timestamp': string } | null> {
-    const featureTypesFilter = options.types?.length
-      ? inPredicate(FEATURE_TYPE, options.types)
-      : undefined;
+    const featureTypesFilter = inPredicate(FEATURE_TYPE, options.types ?? []);
     const where = combineWhere(
       inPredicate(TYPE, [KI_TYPE_FEATURE]),
       inPredicate(SOURCE_ID, [sourceId])
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(
+    const timestamp = await this.revisionReader.fetchLatestRevisionTimestamp(
       where,
       combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED, featureTypesFilter)
     );
-    if (docs.length === 0) return null;
-
-    const latest = docs.reduce((best, current) =>
-      current['@timestamp'] > best['@timestamp'] ? current : best
-    );
-    return { '@timestamp': latest['@timestamp'] };
+    return timestamp === null ? null : { '@timestamp': timestamp };
   }
 
   async getQueryLinks(

@@ -41,7 +41,7 @@ import {
 } from './schema_sections';
 
 // Regex to extract JSON from markdown code blocks
-const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
+const INLINE_JSON_REGEX = /```(?:json)?([\s\S]*?)```/gm;
 
 /**
  * Range bound to `?_tstart`/`?_tend` when a provided query runs to collect its

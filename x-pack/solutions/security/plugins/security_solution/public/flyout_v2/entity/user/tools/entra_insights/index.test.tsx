@@ -34,7 +34,7 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
   ),
 }));
 
-jest.mock('../../../../../flyout/entity_details/user_details_left/tabs/asset_document', () => ({
+jest.mock('../shared/asset_document', () => ({
   AssetDocumentTab: () => <div data-test-subj="mockAssetDocumentTab" />,
 }));
 

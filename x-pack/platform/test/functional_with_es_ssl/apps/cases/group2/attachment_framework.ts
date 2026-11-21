@@ -216,7 +216,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     /**
-     * The UI of the cases fixture plugin is in x-pack/platform/test/functional_with_es_ssl/plugins/cases/public/application.tsx
+     * The UI of the cases fixture plugin is in x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases/public/application.tsx
      */
     describe('Attachment hooks', () => {
       const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];
@@ -354,7 +354,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
 
             await cases.casesTable.getCaseById(currentCaseId);
-            await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
+            await cases.common.selectCaseInModal(currentCaseId);
 
             await cases.common.expectToasterToContain('updated');
             await toasts.dismissAllWithChecks();
@@ -449,7 +449,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await dashboardPanelActions.clickPanelAction(ADD_TO_EXISTING_CASE_DATA_TEST_SUBJ);
 
-        await testSubjects.click(`cases-table-row-select-${theCase.id}`);
+        await cases.common.selectCaseInModal(theCase.id);
 
         await cases.common.expectToasterToContain(`Case ${theCaseTitle} updated`);
         await testSubjects.click('toaster-content-case-view-link');

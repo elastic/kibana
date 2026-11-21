@@ -8,9 +8,12 @@
 import { processVertexStreamMock, processVertexResponseMock } from './gemini_adapter.test.mocks';
 import { PassThrough } from 'stream';
 import { noop, tap, lastValueFrom, toArray, of } from 'rxjs';
+import { pick } from 'lodash';
+import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
+import type { ToolSchema } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, InferenceConnectorType } from '@kbn/inference-common';
 import { geminiAdapter } from './gemini_adapter';
 
@@ -221,7 +224,6 @@ describe('geminiAdapter', () => {
                   bar: {
                     description: 'bar',
                     enum: ['a', 'b'],
-                    format: 'enum',
                     type: 'string',
                   },
                 },
@@ -232,6 +234,74 @@ describe('geminiAdapter', () => {
           ],
         },
       ]);
+    });
+
+    it('preserves tool schema shapes emitted by zod', () => {
+      const schema = pick(
+        z.toJSONSchema(
+          z.object({
+            count: z.number().int(),
+            note: z.string().nullable(),
+            value: z.union([z.string(), z.number()]),
+            data: z.record(z.string(), z.string()),
+            operations: z.array(
+              z.discriminatedUnion('type', [
+                z.object({ type: z.literal('add'), name: z.string() }),
+                z.object({ type: z.literal('remove') }),
+              ])
+            ),
+          }),
+          { io: 'input' }
+        ),
+        ['type', 'properties', 'required']
+      ) as ToolSchema;
+
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: { myFunction: { description: 'myFunction', schema } },
+        })
+        .subscribe(noop);
+
+      const { tools } = getCallParams();
+      expect(tools[0].functionDeclarations[0].parameters).toEqual({
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+            minimum: Number.MIN_SAFE_INTEGER,
+            maximum: Number.MAX_SAFE_INTEGER,
+          },
+          note: { type: 'string', nullable: true },
+          value: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+          data: { type: 'object', additionalProperties: { type: 'string' } },
+          operations: {
+            type: 'array',
+            items: {
+              anyOf: [
+                {
+                  type: 'object',
+                  properties: {
+                    type: { type: 'string', enum: ['add'] },
+                    name: { type: 'string' },
+                  },
+                  required: ['type', 'name'],
+                },
+                {
+                  type: 'object',
+                  properties: {
+                    type: { type: 'string', enum: ['remove'] },
+                  },
+                  required: ['type'],
+                },
+              ],
+            },
+          },
+        },
+        required: ['count', 'note', 'value', 'data', 'operations'],
+      });
     });
 
     it('correctly format messages', () => {

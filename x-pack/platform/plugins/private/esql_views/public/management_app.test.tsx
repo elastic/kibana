@@ -34,8 +34,7 @@ import type {
 type EsqlEditorProps = Omit<ESQLEditorProps, 'ref'>;
 
 const mockRunPreview = jest.fn().mockResolvedValue(undefined);
-const mockResetPreview = jest.fn();
-const mockResetPreviewIfQueryChanged = jest.fn();
+const mockClearPreviewErrorIfQueryChanged = jest.fn();
 const mockUseEsqlViewPreview = jest.fn<UseEsqlViewPreviewResult, [EsqlViewPreviewDependencies]>();
 const mockEsqlDataGrid = jest.fn();
 
@@ -162,8 +161,7 @@ describe('ManagementApp', () => {
     jest.clearAllMocks();
     mockRunPreview.mockResolvedValue(undefined);
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: false,
       isLoading: false,
@@ -277,6 +275,62 @@ describe('ManagementApp', () => {
     expect(screen.getByTestId('esqlViewsDeleteButton')).toBeInTheDocument();
   });
 
+  it('identifies reserved views and disables their management controls', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client, { discoverLocator: createDiscoverLocator() });
+
+    await screen.findByText('reserved-view');
+    const reservedRow = getRow('reserved-view');
+    expect(within(reservedRow).getByTestId('esqlViewsReservedBadge')).toHaveTextContent('Reserved');
+    expect(within(reservedRow).getByRole('checkbox')).toBeDisabled();
+    const reservedActionsButton = within(reservedRow).getByTestId('esqlViewsActionsButton');
+    expect(reservedActionsButton).toHaveAttribute('aria-disabled', 'true');
+    expect(reservedActionsButton).toHaveAccessibleName(
+      'Reserved views cannot be edited or deleted.'
+    );
+    fireEvent.click(reservedActionsButton);
+    expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();
+    expect(within(reservedRow).getByTestId('esqlViewsOpenInDiscoverAction')).not.toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+
+    const userRow = getRow('user-view');
+    expect(within(userRow).getByRole('checkbox')).toBeEnabled();
+    expect(within(userRow).getByTestId('esqlViewsActionsButton')).toBeEnabled();
+  });
+
+  it('shows reserved views by default and allows hiding them', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue({
+      views: [
+        { name: 'user-view', query: 'FROM logs-*' },
+        { name: 'reserved-view', query: 'FROM metrics-*', reserved: true },
+      ],
+    });
+
+    renderApp(client);
+
+    await screen.findByText('reserved-view');
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+
+    await waitFor(() => expect(screen.queryByText('reserved-view')).not.toBeInTheDocument());
+    expect(screen.getByText('user-view')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('esqlViewsReservedFilter'));
+    expect(await screen.findByText('reserved-view')).toBeInTheDocument();
+  });
+
   it('renders the form fields while the ES|QL editor loads', async () => {
     const client = createClient();
     let resolveEditor: ((module: { default: ComponentType<EsqlEditorProps> }) => void) | undefined;
@@ -364,7 +418,7 @@ describe('ManagementApp', () => {
 
     fireEvent.click(screen.getByTestId('mockSelectHistoryQuery'));
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(historyQuery);
-    expect(mockResetPreviewIfQueryChanged).toHaveBeenCalledWith(historyQuery);
+    expect(mockClearPreviewErrorIfQueryChanged).toHaveBeenCalledWith(historyQuery);
     expect(mockRunPreview).toHaveBeenLastCalledWith(
       { esql: historyQuery },
       expect.any(AbortController)
@@ -421,7 +475,7 @@ describe('ManagementApp', () => {
     expect(mockRunPreview).not.toHaveBeenCalled();
   });
 
-  it('matches the prototype preview accordion and configures the shared result grid', async () => {
+  it('keeps existing results visible while loading and configures the shared result grid', async () => {
     const client = createClient();
     const editorProps = jest.fn();
     const Editor = (props: EsqlEditorProps) => {
@@ -441,11 +495,10 @@ describe('ManagementApp', () => {
       rows: [['first'], ['second']],
     };
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: undefined,
       hasRun: true,
-      isLoading: false,
+      isLoading: true,
       result: previewResult,
       runPreview: mockRunPreview,
     });
@@ -461,6 +514,7 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByText('ES|QL query results'));
 
     expect(await screen.findByTestId('mockEsqlDataGrid')).toHaveTextContent('2 preview rows');
+    expect(screen.queryByTestId('esqlViewPreviewLoading')).not.toBeInTheDocument();
     expect(mockEsqlDataGrid).toHaveBeenCalledWith(
       expect.objectContaining({
         columns: previewResult.columns,
@@ -492,6 +546,35 @@ describe('ManagementApp', () => {
     expect(
       screen.getByText('Run the query above to preview its results here.')
     ).toBeInTheDocument();
+  });
+
+  it('surfaces preview errors only through the ES|QL editor', async () => {
+    const client = createClient();
+    const editorProps = jest.fn();
+    const previewError = new Error('Preview request failed');
+    const Editor = (props: EsqlEditorProps) => {
+      editorProps(props);
+      return <MockEsqlEditor {...props} />;
+    };
+    client.getViews.mockResolvedValue({ views: [] });
+    mockUseEsqlViewPreview.mockReturnValue({
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
+      error: previewError,
+      hasRun: true,
+      isLoading: false,
+      result: undefined,
+      runPreview: mockRunPreview,
+    });
+
+    renderApp(client, { EsqlEditor: Editor });
+
+    await screen.findByText('No ES|QL views found');
+    fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+    fireEvent.click(screen.getByText('ES|QL query results'));
+
+    expect(editorProps.mock.lastCall?.[0].errors).toEqual([previewError]);
+    expect(screen.getByText(previewError.message)).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewPreviewError')).not.toBeInTheDocument();
   });
 
   it('validates fields while creating a view and refetches after saving', async () => {
@@ -532,7 +615,7 @@ describe('ManagementApp', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('Write a new query, or select a recently or starred query.')
+      screen.getByText('Write a new query, or select a recent or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
@@ -749,8 +832,7 @@ describe('ManagementApp', () => {
     });
     client.createView.mockResolvedValue({ acknowledged: true });
     mockUseEsqlViewPreview.mockReturnValue({
-      resetPreview: mockResetPreview,
-      resetPreviewIfQueryChanged: mockResetPreviewIfQueryChanged,
+      clearPreviewErrorIfQueryChanged: mockClearPreviewErrorIfQueryChanged,
       error: new Error('Preview request failed'),
       hasRun: true,
       isLoading: false,
@@ -1141,12 +1223,17 @@ describe('ManagementApp', () => {
 
       fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
 
+      const actionsButton = within(otherRow).getByTestId('esqlViewsActionsButton');
       await waitFor(() => {
-        expect(within(otherRow).getByTestId('esqlViewsActionsButton')).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        expect(actionsButton).toHaveAttribute('aria-disabled', 'true');
       });
+      expect(actionsButton).toHaveAccessibleName(
+        'Individual item actions are disabled when rows are being selected.'
+      );
+      fireEvent.mouseOver(actionsButton.parentElement as HTMLElement);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Individual item actions are disabled when rows are being selected.'
+      );
       expect(within(otherRow).getByTestId('esqlViewsOpenInDiscoverAction')).toHaveAttribute(
         'aria-disabled',
         'true'

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { ENRICHMENT_DESTINATION_PATH, DEFAULT_INDICATOR_SOURCE_PATH } from '../constants';
 
 export const MATCHED_ATOMIC = 'matched.atomic';
@@ -49,5 +50,20 @@ export const DEFAULT_EVENT_ENRICHMENT_FROM = 'now-30d';
 export const DEFAULT_EVENT_ENRICHMENT_TO = 'now';
 
 export const OTHER_TI_DATASET_KEY = '_others_ti_';
+
+/**
+ * Matches raw indicator copies that an integration's latest transform also stores in a latest
+ * index. Integrations mark them with one of two labels. Use it in `must_not` so indicators
+ * without either label are still returned.
+ */
+export const IOC_TRANSFORM_SOURCE_QUERY: estypes.QueryDslQueryContainer = {
+  bool: {
+    should: [
+      { term: { 'labels.is_ioc_transform_source': 'true' } },
+      { term: { 'labels.is_transform_source': 'true' } },
+    ],
+    minimum_should_match: 1,
+  },
+};
 
 export const THREAT_PIT_KEEP_ALIVE = '5m';

@@ -13,7 +13,7 @@ import type { MitreEntityStatus } from './types';
 // -------------------------------------------------------------------------
 
 /** Framework applied when a caller does not specify one. */
-export const DEFAULT_MITRE_FRAMEWORK: MitreFramework = 'enterprise';
+export const DEFAULT_MITRE_FRAMEWORK = 'enterprise' satisfies MitreFramework;
 
 /** Entity status applied when a caller does not specify one; excludes revoked and deprecated entities. */
 export const DEFAULT_MITRE_ENTITY_STATUS: MitreEntityStatus = 'active';

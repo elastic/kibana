@@ -114,47 +114,13 @@ export const LIQUID_EXPRESSION_REGEX_GLOBAL = /(\{\{[^}]*\}\}|\{\%[^%]*\%\})/g;
 export const LIQUID_OUTPUT_REGEX_GLOBAL = /\{\{\s*([^}]*?)\s*\}\}/g;
 export const LIQUID_TAG_REGEX_GLOBAL = /\{\%\s*([^%]*?)\s*\%\}/g;
 
-export const DYNAMIC_VALUE_REGEX = /^\$\{\{\s*\S[\s\S]*\}\}$/;
-
-/**
- * Checks if a value matches the dynamic/templated value pattern ($<something>)
- * Examples: ${{env.USER}}, ${{ref:myVar}}, ${{someVariable}}
- * Pattern: starts with ${{ and ends with }}, and any non-empty string in between
- */
-export function isDynamicValue(value: unknown): boolean {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  return DYNAMIC_VALUE_REGEX.test(value);
-}
-
-export const VARIABLE_VALUE_REGEX = /^\{\{\s*\S[\s\S]*\}\}$/;
-
-/**
- * Checks if a value matches the variable pattern ({{ variable }})
- * Examples: {{ variable }}, {{ variable | filter }}
- * Pattern: starts with {{ and ends with }}, and any non-empty string in between
- */
-export function isVariableValue(value: unknown): boolean {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  return VARIABLE_VALUE_REGEX.test(value);
-}
-
-// Regex to match Liquid tags: {% ... %} or {%- ... -%} (with optional dashes)
-// Matches both single-line and multi-line Liquid tag blocks
-export const LIQUID_TAG_VALUE_REGEX = /\{\%-?\s*[^%]*?\s*-?\%\}/s;
-
-/**
- * Checks if a value contains Liquid tag patterns ({% ... %} or {%- ... -%})
- * Examples: {% if condition %}, {%- if condition -%}, multi-line blocks with Liquid tags
- * Pattern: matches {% or {%- followed by content and %} or -%}
- * The 's' flag allows . to match newlines for multi-line support
- */
-export function isLiquidTagValue(value: unknown): boolean {
-  if (typeof value !== 'string') {
-    return false;
-  }
-  return LIQUID_TAG_VALUE_REGEX.test(value);
-}
+// Whole-value template patterns live in @kbn/workflows, so the managed workflow tests there
+// check against the same patterns the editor uses.
+export {
+  DYNAMIC_VALUE_REGEX,
+  isDynamicValue,
+  VARIABLE_VALUE_REGEX,
+  isVariableValue,
+  LIQUID_TAG_VALUE_REGEX,
+  isLiquidTagValue,
+} from '@kbn/workflows';

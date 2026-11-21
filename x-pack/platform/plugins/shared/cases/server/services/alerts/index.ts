@@ -23,14 +23,19 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { MgetResponse, MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID,
+  isAttackDiscoveryIndex,
+  toReadableAttackIndexPattern,
+} from '@kbn/elastic-assistant-common';
 import { CaseStatuses } from '../../../common/types/domain';
 import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { createCaseError } from '../../common/error';
-import type { AlertInfo } from '../../common/types';
+import type { AlertIndexClaim, AlertInfo } from '../../common/types';
 import type {
   RemoveCaseIdFromAlertsRequest,
   UpdateAlertCasesRequest,
@@ -483,15 +488,22 @@ export class AlertService {
   }
 
   /**
-   * Authorizes attack attachments, which reference an attack discovery AAD alert.
-   *
-   * `ensureAlertsAuthorized` alone is not enough: it authorizes the (rule type, consumer) pair of
-   * every document that carries those fields, and silently accepts a document that is missing, is
-   * not an alert, or belongs to another space. The status sync later writes to the reference by id
-   * alone, so all three are rejected here, before the attachment is persisted.
-   *
-   * Scheduled and ad-hoc discoveries are both accepted, but only scheduled ones reach alerting
-   * RBAC — see `ensureScheduledAttacksAuthorized`.
+   * Rejects indices outside the two attack discovery families, so a document elsewhere that merely
+   * carries an attack discovery rule type and space id cannot pass the checks that follow.
+   */
+  private rejectNonAttackIndices(attacks: AlertInfo[]): void {
+    const foreignAttack = attacks.find((attack) => !isAttackDiscoveryIndex(attack.index));
+
+    if (foreignAttack != null) {
+      throw Boom.badRequest(
+        `Cannot attach an attack from an index that is not an attack discovery index: ${foreignAttack.index}`
+      );
+    }
+  }
+
+  /**
+   * Authorizes attack attachments, rejecting references that are missing, not attack discoveries,
+   * or in another space, all of which `ensureAlertsAuthorized` silently accepts.
    */
   public async ensureAttacksAuthorized({
     attacks,
@@ -508,21 +520,23 @@ export class AlertService {
       }
 
       this.rejectNonLocalIndices(nonEmptyAttacks, 'an attack');
+      this.rejectNonAttackIndices(nonEmptyAttacks);
 
-      const { docs } = await this.scopedClusterClient.mget<AttackAuthorizationFields>({
-        docs: nonEmptyAttacks.map((attack) => ({ _id: attack.id, _index: attack.index })),
-        _source_includes: [ALERT_RULE_TYPE_ID, SPACE_IDS],
-      });
+      const sourcesById = await this.fetchAttackAuthorizationSources(nonEmptyAttacks);
 
-      const missingIds = docs.filter((doc) => !('found' in doc && doc.found)).map((doc) => doc._id);
+      const missingIds = nonEmptyAttacks
+        .filter((attack) => !sourcesById.has(attack.id))
+        .map((attack) => attack.id);
 
       if (missingIds.length > 0) {
         throw Boom.badRequest(`Referenced attack(s) not found: ${missingIds.join(', ')}`);
       }
 
-      const invalidIds = docs
-        .filter((doc) => !AlertService.isAttackInSpace(doc, spaceId))
-        .map((doc) => doc._id);
+      const invalidIds = nonEmptyAttacks
+        .filter(
+          (attack) => !AlertService.isAttackInSpace(sourcesById.get(attack.id)?.fields, spaceId)
+        )
+        .map((attack) => attack.id);
 
       if (invalidIds.length > 0) {
         throw Boom.badRequest(
@@ -532,7 +546,7 @@ export class AlertService {
         );
       }
 
-      await this.ensureScheduledAttacksAuthorized(nonEmptyAttacks, docs);
+      await this.ensureScheduledAttacksAuthorized(nonEmptyAttacks, sourcesById);
     } catch (error) {
       throw createCaseError({
         message: `Failed to authorize attacks: ${error}`,
@@ -543,29 +557,234 @@ export class AlertService {
   }
 
   /**
+   * Whether Elasticsearch refused a read because the caller holds no privilege on what it searched.
+   *
+   * A caller with read somewhere else gets an empty result for an index or pattern it cannot see,
+   * because it resolves to no authorized index. A caller with no index privileges at all is
+   * refused the search action outright, before resolution, so the same absence arrives as an
+   * error instead. Both mean the document is not readable, so they must be treated alike.
+   */
+  private static isUnauthorizedRead(error: unknown): boolean {
+    const candidate = error as {
+      statusCode?: number;
+      body?: { error?: { type?: string } };
+    };
+
+    return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
+  }
+
+  /**
+   * Whether Elasticsearch rejected a searched index, or an `_index` value filtered on, as invalid
+   * or missing.
+   *
+   * Attachment and selection indices are free text, so such a rejection means the referenced
+   * documents cannot be found there, not that the search itself failed. Shard-level rejections,
+   * such as an invalid `_index` filter value, arrive as root causes of a search phase failure.
+   */
+  private static isRejectedIndexName(error: unknown): boolean {
+    const candidate = error as {
+      body?: { error?: { type?: string; root_cause?: Array<{ type?: string }> } };
+    };
+    const { type, root_cause: rootCauses = [] } = candidate?.body?.error ?? {};
+
+    return [type, ...rootCauses.map((rootCause) => rootCause.type)].some(
+      (errorType) =>
+        errorType === 'invalid_index_name_exception' || errorType === 'index_not_found_exception'
+    );
+  }
+
+  /**
+   * Reads each referenced attack's authorization fields as the caller, keyed by `_id`.
+   *
+   * Searches an index pattern rather than `mget`-ing the attachment's index: privileges are granted
+   * on the alias family, not the concrete backing index `metadata.index` holds, and single-document
+   * operations against the alias fail once it spans more than one index, i.e. after the first
+   * rollover. Callers must call `rejectNonAttackIndices` first.
+   */
+  private async fetchAttackAuthorizationSources(
+    attacks: AlertInfo[]
+  ): Promise<Map<string, AttackAuthorizationSource>> {
+    const idsByPattern = new Map<string, string[]>();
+
+    for (const attack of attacks) {
+      const pattern = toReadableAttackIndexPattern(attack.index);
+      const ids = idsByPattern.get(pattern);
+      if (ids) {
+        ids.push(attack.id);
+      } else {
+        idsByPattern.set(pattern, [attack.id]);
+      }
+    }
+
+    const sourcesById = new Map<string, AttackAuthorizationSource>();
+
+    await pMap(
+      Array.from(idsByPattern.entries()),
+      async ([index, ids]) => {
+        let hits;
+
+        try {
+          ({ hits } = await this.scopedClusterClient.search<AttackAuthorizationFields>({
+            index,
+            size: ids.length,
+            query: { ids: { values: ids } },
+            _source: [ALERT_RULE_TYPE_ID, SPACE_IDS],
+            // A pattern that currently resolves to nothing is a missing attack, not a failure.
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          }));
+        } catch (error) {
+          if (!AlertService.isUnauthorizedRead(error)) {
+            throw error;
+          }
+
+          // Leaving the ids unresolved reports them as not found, the same as an empty result.
+          this.logger.debug(
+            `Caller cannot read ${index}, treating its referenced attacks as not found: ${ids.join(
+              ', '
+            )}`
+          );
+
+          return;
+        }
+
+        for (const hit of hits.hits) {
+          if (hit._id != null) {
+            sourcesById.set(hit._id, { index: hit._index, fields: hit._source });
+          }
+        }
+      },
+      { concurrency: MAX_CONCURRENT_SEARCHES }
+    );
+
+    return sourcesById;
+  }
+
+  /**
+   * Returns the claims whose alert lives in the claimed index and is reachable through the index
+   * its attachment stores, searching that stored index as the caller.
+   *
+   * Some attach paths store the alerts alias rather than the backing index, and single-document
+   * operations against an alias fail once it spans more than one index. Each claimed pair is
+   * checked exactly, because ids are unique only within an index, so an alias can expose the same
+   * id in several backing indices. Claims the caller cannot read, whose alert no longer exists, or
+   * whose stored index is remote or rejected by Elasticsearch are left out of the result.
+   */
+  public async confirmAlertIndices({
+    claims,
+  }: {
+    claims: AlertIndexClaim[];
+  }): Promise<AlertIndexClaim[]> {
+    try {
+      const idsByIndexByAttachedIndex = new Map<string, Map<string, Set<string>>>();
+
+      for (const { id, index, attachedIndex } of claims) {
+        // Hits report local concrete indices, whose names never contain ':', so such a claim can
+        // never be confirmed, and a value like ':' would fail the `_index` filter outright.
+        const isConfirmable =
+          !isEmpty(id) &&
+          !isEmpty(index) &&
+          !index.includes(':') &&
+          !isEmpty(attachedIndex) &&
+          !isNonLocalIndexName(attachedIndex);
+
+        if (isConfirmable) {
+          const idsByIndex =
+            idsByIndexByAttachedIndex.get(attachedIndex) ?? new Map<string, Set<string>>();
+          const ids = idsByIndex.get(index) ?? new Set<string>();
+          ids.add(id);
+          idsByIndex.set(index, ids);
+          idsByIndexByAttachedIndex.set(attachedIndex, idsByIndex);
+        }
+      }
+
+      const confirmed = await pMap(
+        Array.from(idsByIndexByAttachedIndex.entries()),
+        async ([attachedIndex, idsByIndex]): Promise<AlertIndexClaim[]> => {
+          const claimedPairs = Array.from(idsByIndex.entries(), ([index, ids]) => ({
+            index,
+            ids: Array.from(ids),
+          }));
+          let hits;
+
+          try {
+            ({ hits } = await this.scopedClusterClient.search({
+              index: attachedIndex,
+              // A concrete index holds one document per id at most, so each claimed pair is one hit
+              // at most. A claim naming an alias or pattern can match more, but is never confirmed.
+              size: claimedPairs.reduce((count, { ids }) => count + ids.length, 0),
+              query: {
+                bool: {
+                  should: claimedPairs.map(({ index, ids }) => ({
+                    bool: { filter: [{ term: { _index: index } }, { ids: { values: ids } }] },
+                  })),
+                  minimum_should_match: 1,
+                },
+              },
+              _source: false,
+              track_total_hits: false,
+              // A stored index that no longer resolves to anything holds no alerts.
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }));
+          } catch (error) {
+            const isUnauthorized = AlertService.isUnauthorizedRead(error);
+            if (!isUnauthorized && !AlertService.isRejectedIndexName(error)) {
+              throw error;
+            }
+
+            const reason = isUnauthorized
+              ? 'the caller cannot read it'
+              : 'Elasticsearch rejected an index name';
+            const claimed = claimedPairs.flatMap(({ index, ids }) =>
+              ids.map((id) => `${id} in ${index}`)
+            );
+            this.logger.debug(
+              `Leaving the alerts claimed through ${attachedIndex} unconfirmed because ${reason}: ${claimed.join(
+                ', '
+              )}`
+            );
+
+            return [];
+          }
+
+          // An `_index` filter also matches aliases and patterns, so only exact pairs are confirmed.
+          return hits.hits.flatMap(({ _id: id, _index: index }) =>
+            id != null && idsByIndex.get(index)?.has(id) ? [{ id, index, attachedIndex }] : []
+          );
+        },
+        { concurrency: MAX_CONCURRENT_SEARCHES }
+      );
+
+      return confirmed.flat();
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to confirm alert indices: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  /**
    * Runs alerting RBAC over the scheduled attacks of an already space-checked batch.
    *
-   * Ad-hoc discoveries are deliberately left out. `ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID` is a
-   * sentinel the alerting framework never registers and no feature privilege grants, so
-   * `ensureAllAlertsAuthorizedRead` would reject every ad-hoc attack for any caller that is not a
-   * superuser. They carry no privacy of their own — the generating user is recorded on the
-   * document so it can be filtered on, not hidden — so the caller-scoped `mget` that produced
-   * `docs` is the authorization: it is the same Elasticsearch index privilege gate the attack
-   * discovery APIs read ad-hoc discoveries with, and the one the status sync writes through.
+   * Ad-hoc attacks are skipped because their rule type is never registered, so RBAC would reject
+   * them for every non-superuser; the caller-scoped search is their authorization instead.
+   * Attacks are paired with their sources by `_id`, and RBAC is given the resolved `_index`, never
+   * the caller-supplied one, so it checks the same document whose rule type was read.
    */
   private async ensureScheduledAttacksAuthorized(
     attacks: AlertInfo[],
-    docs: Array<MgetResponseItem<AttackAuthorizationFields>>
+    sourcesById: Map<string, AttackAuthorizationSource>
   ): Promise<void> {
-    const scheduledKeys = new Set(
-      docs
-        .filter((doc) => AlertService.isScheduledAttack(doc))
-        .map((doc) => `${doc._index}:${doc._id}`)
-    );
+    const scheduledAttacks = attacks.flatMap((attack) => {
+      const source = sourcesById.get(attack.id);
 
-    const scheduledAttacks = attacks.filter((attack) =>
-      scheduledKeys.has(`${attack.index}:${attack.id}`)
-    );
+      return AlertService.isScheduledAttack(source?.fields)
+        ? [{ ...attack, index: source?.index ?? attack.index }]
+        : [];
+    });
 
     if (scheduledAttacks.length <= 0) {
       return;
@@ -574,31 +793,37 @@ export class AlertService {
     await this.alertsClient.ensureAllAlertsAuthorizedRead({ alerts: scheduledAttacks });
   }
 
-  private static isAttackInSpace(
-    doc: MgetResponseItem<AttackAuthorizationFields>,
-    spaceId: string
-  ): boolean {
-    if (!('found' in doc) || !doc.found) {
-      return false;
-    }
-
-    const source = doc._source;
-    const ruleTypeId = source?.[ALERT_RULE_TYPE_ID];
-
+  /**
+   * The rule types that write attack discovery alerts. The data generator is only registered in
+   * dev mode or on Elastic-staff cloud deployments, so accepting it does not widen production.
+   */
+  private static isAttackDiscoveryRuleType(ruleTypeId: string | undefined): boolean {
     return (
-      (ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
-        ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID) &&
-      Array.isArray(source?.[SPACE_IDS]) &&
-      source[SPACE_IDS].includes(spaceId)
+      ruleTypeId === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID ||
+      ruleTypeId === ATTACK_DISCOVERY_DATA_GENERATOR_RULE_TYPE_ID
     );
   }
 
-  private static isScheduledAttack(doc: MgetResponseItem<AttackAuthorizationFields>): boolean {
-    if (!('found' in doc) || !doc.found) {
+  private static isAttackInSpace(
+    source: AttackAuthorizationFields | undefined,
+    spaceId: string
+  ): boolean {
+    if (source == null) {
       return false;
     }
 
-    return doc._source?.[ALERT_RULE_TYPE_ID] === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
+    const spaceIds = source[SPACE_IDS];
+
+    return (
+      AlertService.isAttackDiscoveryRuleType(source[ALERT_RULE_TYPE_ID]) &&
+      Array.isArray(spaceIds) &&
+      spaceIds.includes(spaceId)
+    );
+  }
+
+  private static isScheduledAttack(source: AttackAuthorizationFields | undefined): boolean {
+    return source?.[ALERT_RULE_TYPE_ID] === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID;
   }
 
   /**
@@ -728,6 +953,12 @@ export interface Alert {
 interface AttackAuthorizationFields {
   [ALERT_RULE_TYPE_ID]?: string;
   [SPACE_IDS]?: string[];
+}
+
+/** A referenced attack as resolved; `index` is the hit's `_index`, not the attachment's. */
+interface AttackAuthorizationSource {
+  index: string;
+  fields: AttackAuthorizationFields | undefined;
 }
 
 interface AlertIdIndex {

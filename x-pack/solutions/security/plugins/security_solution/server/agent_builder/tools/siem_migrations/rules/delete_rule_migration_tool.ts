@@ -18,7 +18,7 @@ import { createSiemMigrationAvailability } from '../common/availability';
 import { hasRuleMigrationPrivileges } from '../common/privileges';
 import { createToolErrorResult, createMissingPrivilegeError } from '../common/tool_results';
 import { SIEM_MIGRATION_DELETE_RULE_MIGRATION_TOOL_ID } from './tool_ids';
-import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_ids';
+import { RULE_MIGRATION_SKILLS } from '../../../skills/siem_migration/rules/skill_catalog';
 import { MigrationId } from '../common/schemas';
 
 const schema = lazySchema(() =>
@@ -54,7 +54,7 @@ export const deleteRuleMigrationTool = (
 Returns { ok: true, migration_id } (the DELETE endpoint returns no body today;
 additional fields are spread if the endpoint later returns them).
 
-See the ${RULE_MIGRATION_SKILLS.DELETE} skill for the full workflow.`,
+See the ${RULE_MIGRATION_SKILLS.DELETE.id} skill for the full workflow.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async ({ migration_id: migrationId }, { request }) => {

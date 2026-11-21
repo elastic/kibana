@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BrowserFields } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getCategory } from '@kbn/response-ops-alerts-fields-browser/helpers';
 

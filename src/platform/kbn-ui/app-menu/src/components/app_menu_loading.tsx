@@ -27,7 +27,7 @@ const DEFAULT_BUTTON_COUNT = 1;
 
 export interface AppMenuLoadingProps {
   /**
-   * App menu button placeholders on the left (overflow / secondary actions).
+   * App menu button placeholders (secondary actions before the primary, overflow after it).
    * Defaults to 1. Clamped to {@link APP_MENU_ITEM_LIMIT}.
    */
   buttonCount?: number;
@@ -78,8 +78,9 @@ export const AppMenuLoading = ({
     />
   ) : null;
 
-  const expandedButtons = Array.from({ length: resolvedButtonCount }, (_unused, idx) => (
-    <IconSkeleton key={idx} announce={idx === 0} />
+  const inlineButtonCount = Math.max(resolvedButtonCount - 1, 0);
+  const expandedButtons = Array.from({ length: inlineButtonCount }, (_unused, idx) => (
+    <IconSkeleton key={idx} announce={false} />
   ));
 
   const content: Record<AppMenuLayout, React.ReactNode> = {
@@ -88,14 +89,15 @@ export const AppMenuLoading = ({
     collapsed: <IconSkeleton announce />,
     minimal: (
       <>
-        {overflowSkeleton}
         {primarySkeleton}
+        {overflowSkeleton}
       </>
     ),
     expanded: (
       <>
         {expandedButtons}
         {primarySkeleton}
+        {overflowSkeleton}
       </>
     ),
   };

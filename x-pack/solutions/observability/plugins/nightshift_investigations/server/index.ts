@@ -19,10 +19,11 @@ export type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from './types';
-export type { DeleteAllInvestigationsResult } from './storage';
+export type { DetectionSnapshotKnowledgeCounts } from './telemetry/detection_snapshot_event';
 
 export {
   alertSnapshotSchema,
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
   type AlertSnapshot,
 } from '../common';

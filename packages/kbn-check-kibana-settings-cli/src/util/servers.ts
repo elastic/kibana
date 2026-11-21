@@ -13,6 +13,7 @@ import { resolve } from 'path';
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { setTimeout as timer } from 'timers/promises';
+import { withTimeout } from '@kbn/std';
 import type { Root } from '@kbn/core-root-server-internal';
 
 export async function setupKibana(): Promise<Root> {
@@ -65,9 +66,8 @@ async function runWithTimeout(
   message: string,
   millis: number = 5_000
 ): Promise<void> {
-  const timeout = async () => {
-    await timer(millis);
+  const outcome = await withTimeout({ promise: task(), timeoutMs: millis });
+  if (outcome.timedout) {
     throw new Error(message);
-  };
-  await Promise.race([task(), timeout()]);
+  }
 }

@@ -85,9 +85,10 @@ const resolveFeatureConnectorId = async ({
  * do not carry an explicit `connector_id`.
  *
  * Resolution order:
- * 1. `featureId`, when it names a registered `chat_completion` feature in Model
- *    Management > Feature settings. Lets a step pick a tier without naming an
- *    endpoint.
+ * 1. `featureId`, a single id or an ordered list. The first registered
+ *    `chat_completion` feature in Model Management > Feature settings that
+ *    resolves a configured model wins. An empty row is skipped, so a later id
+ *    stays in charge. Lets a step pick a tier without naming an endpoint.
  * 2. `genAiSettings:defaultAIConnector` (request-scoped uiSettings). The
  *    `NO_DEFAULT_CONNECTOR` sentinel and empty values are treated as unset.
  * 3. `inference.getDefaultConnector(request)` fallback.
@@ -102,16 +103,18 @@ export const resolveDefaultConnectorId = async ({
   searchInferenceEndpoints,
   uiSettingsClient,
 }: {
-  featureId?: string;
+  featureId?: string | readonly string[];
   inference?: InferenceServerStart;
   logger: Logger;
   request: KibanaRequest;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   uiSettingsClient: IUiSettingsClient;
 }): Promise<string> => {
-  if (featureId) {
+  const featureIds = Array.isArray(featureId) ? featureId : featureId ? [featureId] : [];
+
+  for (const id of featureIds) {
     const featureConnectorId = await resolveFeatureConnectorId({
-      featureId,
+      featureId: id,
       logger,
       request,
       searchInferenceEndpoints,

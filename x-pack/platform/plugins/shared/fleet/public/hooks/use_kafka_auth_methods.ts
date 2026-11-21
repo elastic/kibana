@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { ENABLE_KAFKA_OAUTH2_AUTH_FLAG } from '../../common/constants';
+import {
+  ENABLE_KAFKA_KERBEROS_AUTH_FLAG,
+  ENABLE_KAFKA_OAUTH2_AUTH_FLAG,
+} from '../../common/constants';
 
 import { useStartServices } from '.';
 
 /**
  * Returns which optional Kafka output authentication methods are enabled through feature flags,
- * e.g. `fleet.enableKafkaOAuth2Auth`. Fallback is false.
+ * e.g. `fleet.enableKafkaOAuth2Auth` and `fleet.enableKafkaKerberosAuth`. Fallback is false.
  */
 export const useKafkaAuthMethods = (): {
   isOAuth2Enabled: boolean;
+  isKerberosEnabled: boolean;
 } => {
   const { featureFlags } = useStartServices();
 
   return {
     isOAuth2Enabled: featureFlags.useBooleanValue(ENABLE_KAFKA_OAUTH2_AUTH_FLAG, false),
+    isKerberosEnabled: featureFlags.useBooleanValue(ENABLE_KAFKA_KERBEROS_AUTH_FLAG, false),
   };
 };

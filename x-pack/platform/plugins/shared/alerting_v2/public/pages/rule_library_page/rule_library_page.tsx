@@ -48,7 +48,7 @@ export const RuleLibraryPage = () => {
         appId={ALERTING_V2_RULE_LIBRARY_APP_ID}
         description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
       />
-      <RuleLibraryList />
+      <RuleLibraryList onCreateFromTemplate={openCreateFromTemplateFlyout} />
       {flyout}
     </div>
   );

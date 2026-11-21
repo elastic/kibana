@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
@@ -34,19 +34,21 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // `steps.draft_creation.output.structured_output.rule.query`). Parsing structured_output
 // as the rule itself strips the wrapper and yields an empty object — every evaluator
 // then sees a rule with no fields (the false-zero failure this fixed).
-const stepOutputSchema = z
-  .object({
-    structured_output: z
-      .object({
-        rule: draftRuleSchema,
-        // The workflow has no `skipped` flag: when the agent produces no rule it returns
-        // empty strings for name/description/query and says why under `reason`.
-        reason: z.string(),
-      })
-      .partial(),
-    metadata: z.object({ usage: z.object({ connectorId: z.string() }).partial() }).partial(),
-  })
-  .partial();
+const stepOutputSchema = lazySchema(() =>
+  z
+    .object({
+      structured_output: z
+        .object({
+          rule: draftRuleSchema,
+          // The workflow has no `skipped` flag: when the agent produces no rule it returns
+          // empty strings for name/description/query and says why under `reason`.
+          reason: z.string(),
+        })
+        .partial(),
+      metadata: z.object({ usage: z.object({ connectorId: z.string() }).partial() }).partial(),
+    })
+    .partial()
+);
 
 export interface DraftOutcome {
   rule: DraftRule | undefined;

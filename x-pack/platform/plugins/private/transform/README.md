@@ -114,60 +114,20 @@ info, refer to [Set up transforms](https://www.elastic.co/guide/en/elasticsearch
 node scripts/jest --config=x-pack/platform/plugins/private/transform/jest.config.js
 ```
 
-### Functional tests
+### Scout tests
 
-Before running the test server, make sure to quit all other instances of
-Elasticsearch.
+UI and API tests use [Scout](../../../../../src/platform/packages/shared/kbn-scout/README.md) and run on stateful and serverless.
 
-Run the following commands from the `x-pack` directory and use separate terminals
-for test server and test runner. The test server command starts an Elasticsearch
-and Kibana instance that the tests will be run against.
+| Suite | Playwright config                    |
+| ----- | ------------------------------------ |
+| UI    | `test/scout/ui/playwright.config.ts`  |
+| API   | `test/scout/api/playwright.config.ts` |
 
-Functional tests are broken up into independent groups with their own configuration.
-Test server and runner need to be pointed to the configuration to run. The basic
-commands are
+Start the servers in one terminal and run the tests in another, from the repository root:
 
-    node scripts/functional_tests_server.js --config PATH_TO_CONFIG
-    node scripts/functional_test_runner.js --config PATH_TO_CONFIG
+```
+node scripts/scout.js start-server --arch stateful --domain classic
+node scripts/playwright test --config x-pack/platform/plugins/private/transform/test/scout/ui/playwright.config.ts --project local --grep @local-stateful-classic
+```
 
-With PATH_TO_CONFIG and other options as follows.
-
-1.  Functional UI tests with `Trial` license:
-
-    | Group                                       | PATH_TO_CONFIG                                                                                 |
-    | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-    | creation - index pattern                    | `src/platform/test/functional/apps/transform/creation/index_pattern/config.ts`                 |
-    | creation - runtime mappings, saved searches | `src/platform/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts` |
-    | edit, clone                                 | `src/platform/test/functional/apps/transform/edit_clone/config.ts`                             |
-    | feature controls                            | `src/platform/test/functional/apps/transform/feature_controls/config.ts`                       |
-    | permissions                                 | `src/platform/test/functional/apps/transform/permissions/config.ts`                            |
-    | actions                                     | `src/platform/test/functional/apps/transform/actions/config.ts`                                |
-
-1.  Functional UI tests with `Basic` license:
-
-    | Group                                       | PATH_TO_CONFIG                                                                          |
-    | ------------------------------------------- | --------------------------------------------------------------------------------------- |
-    | creation - index pattern                    | `test/functional_basic/apps/transform/creation/index_pattern/config.ts`                 |
-    | creation - runtime mappings, saved searches | `test/functional_basic/apps/transform/creation/runtime_mappings_saved_search/config.ts` |
-    | edit, clone                                 | `test/functional_basic/apps/transform/edit_clone/config.ts`                             |
-    | feature controls                            | `test/functional_basic/apps/transform/feature_controls/config.ts`                       |
-    | permissions                                 | `test/functional_basic/apps/transform/permissions/config.ts`                            |
-    | actions                                     | `test/functional_basic/apps/transform/actions/config.ts`                                |
-
-1.  API integration tests with `Trial` license:
-
-    - PATH_TO_CONFIG: `src/platform/test/api_integration/apis/transform/config.ts`
-
-1.  API integration tests with `Basic` license:
-
-    - PATH_TO_CONFIG: `test/api_integration_basic/config.ts`
-    - Add `--include-tag transform` to the test runner command
-
-1.  Accessibility tests:
-
-    We maintain a suite of accessibility tests (you may see them referred to elsewhere as `a11y` tests). These tests render each of our pages and ensure that the inputs and other elements contain the attributes necessary to ensure all users are able to make use of Transforms (for example, users relying on screen readers).
-
-         node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts
-         node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=transform
-
-    Transform accessibility tests are located in `x-pack/platform/test/accessibility/apps/group2`.
+For serverless, start the server with `--arch serverless --domain search` (or `observability_complete`, `security_complete`) and use the matching `@local-serverless-<domain>` tag. Accessibility checks run as steps inside the UI specs.

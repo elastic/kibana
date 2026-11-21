@@ -356,6 +356,47 @@ describe('validateExtendedFields', () => {
     });
   });
 
+  describe('touchedKeys', () => {
+    const fields: FieldSchemaType[] = [
+      makeInputTextField({ name: 'trigger', label: 'Trigger', type: 'keyword' }),
+      makeInputTextField({
+        name: 'code',
+        label: 'Code',
+        type: 'keyword',
+        display: { show_when: { field: 'trigger', operator: 'eq', value: 'yes' } },
+        validation: { pattern: { regex: '^[A-Z]+$' } },
+      }),
+    ];
+
+    it('evaluates show_when against untouched stored values and validates the touched field', () => {
+      const errors = validateExtendedFields(
+        { trigger_as_keyword: 'yes', code_as_keyword: 'lower' },
+        fields,
+        { partial: true, touchedKeys: new Set(['code_as_keyword']) }
+      );
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toContain('Code');
+    });
+
+    it('still skips a touched field hidden by a stored controlling value', () => {
+      const errors = validateExtendedFields(
+        { trigger_as_keyword: 'no', code_as_keyword: 'lower' },
+        fields,
+        { partial: true, touchedKeys: new Set(['code_as_keyword']) }
+      );
+      expect(errors).toEqual([]);
+    });
+
+    it('ignores unknown and invalid untouched keys', () => {
+      const errors = validateExtendedFields(
+        { trigger_as_keyword: 'yes', code_as_keyword: 'lower', stale_as_keyword: 'x' },
+        fields,
+        { partial: true, touchedKeys: new Set(['trigger_as_keyword']) }
+      );
+      expect(errors).toEqual([]);
+    });
+  });
+
   describe('hintFields — global key suggestions in template pass', () => {
     it('suggests a global storage key when the user sends the field name without the suffix', () => {
       // Template-only field set (no global keys). The request sends "priority" which is close to
@@ -703,6 +744,21 @@ describe('validateExtendedFields', () => {
       const fields: FieldSchemaType[] = [makeCheckboxGroupField()];
       const errors = validateExtendedFields({ systems_as_keyword: '[]' }, fields);
       expect(errors).toEqual([]);
+    });
+
+    it.each([
+      ['a comma-separated string', 'api,database'],
+      ['a plain string', 'api'],
+      ['a JSON string literal', '"api"'],
+      ['a JSON object', '{"api":true}'],
+      ['a JSON number', '1'],
+      ['an array with non-string items', '["api",1]'],
+    ])('reports error when the value is %s instead of an array of strings', (_name, value) => {
+      const fields: FieldSchemaType[] = [makeCheckboxGroupField()];
+      const errors = validateExtendedFields({ systems_as_keyword: value }, fields);
+      expect(errors).toEqual([
+        'Field "Systems" must be a JSON array of strings, e.g. ["option1","option2"]',
+      ]);
     });
   });
 

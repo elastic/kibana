@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  RuleChangeHistorySnapshot,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { ROUTING_TAGS_SIGNAL_RULE_MESSAGE, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  putRuleDataSchema,
+  ROUTING_TAGS_SIGNAL_RULE_MESSAGE,
+  ruleResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -24,6 +32,8 @@ import {
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
+  ruleSnapshotFieldsSchema,
+  toRestoreRuleData,
 } from './utils';
 
 const serverFields = {
@@ -797,14 +807,14 @@ describe('utils', () => {
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
-    it('returns metadata.template in a response that satisfies the schema', () => {
+    it('omits metadata.template from the response even when it is stored', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', template: { id: 'template-1' } },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.template).toEqual({ id: 'template-1' });
+      expect(result.metadata).not.toHaveProperty('template');
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
@@ -1411,5 +1421,79 @@ describe('isTaskMidRun', () => {
     expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
     expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
     expect(isTaskMidRun(undefined)).toBe(false);
+  });
+});
+
+describe('toRestoreRuleData', () => {
+  const ruleConfiguration = {
+    ...baseCreateData,
+    enabled: false,
+    metadata: { name: 'restored-rule', description: 'from a snapshot' },
+    grouping: { fields: ['host.name'] },
+    artifacts: [{ id: 'runbook-1', type: 'runbook', data: { content: 'steps' } }],
+  } satisfies CreateRuleData;
+
+  const snapshot: RuleChangeHistorySnapshot = {
+    ...ruleConfiguration,
+    id: 'rule-1',
+    version: 3,
+    created_by: { profile_uid: 'user-1' },
+    created_at: '2025-01-01T00:00:00.000Z',
+    updated_by: { profile_uid: 'user-2' },
+    updated_at: '2025-02-01T00:00:00.000Z',
+  };
+
+  it('returns the configuration fields of the snapshot', () => {
+    expect(toRestoreRuleData(snapshot)).toStrictEqual(ruleConfiguration);
+  });
+
+  it('drops server-managed fields such as created_at', () => {
+    const result = toRestoreRuleData(snapshot);
+
+    expect(result).not.toHaveProperty('created_at');
+    expect(result).not.toHaveProperty('updated_by');
+    expect(result).not.toHaveProperty('version');
+  });
+
+  it('returns data that the PUT rule schema accepts', () => {
+    expect(putRuleDataSchema.safeParse(toRestoreRuleData(snapshot)).success).toBe(true);
+  });
+
+  it('omits optional configuration fields that the snapshot does not have', () => {
+    const { grouping: _grouping, artifacts: _artifacts, ...minimalSnapshot } = snapshot;
+
+    const result = toRestoreRuleData(minimalSnapshot);
+
+    expect(result).not.toHaveProperty('grouping');
+    expect(result).not.toHaveProperty('artifacts');
+  });
+});
+
+describe('ruleSnapshotFieldsSchema', () => {
+  it('accepts a snapshot with only rule response fields, whatever their values', () => {
+    const result = ruleSnapshotFieldsSchema.safeParse({
+      id: 'rule-1',
+      kind: 'alert',
+      enabled: true,
+      created_by: 'legacy-profile-uid',
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a snapshot with top-level fields the rule response schema does not know', () => {
+    const result = ruleSnapshotFieldsSchema.safeParse({
+      id: 'rule-1',
+      future_field: true,
+      other_field: 'x',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({
+        code: 'unrecognized_keys',
+        keys: ['future_field', 'other_field'],
+      }),
+    ]);
   });
 });

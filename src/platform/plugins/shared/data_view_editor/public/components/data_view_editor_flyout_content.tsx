@@ -413,6 +413,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             allowHidden={allowHidden}
             title={title}
             matchedIndices$={dataViewEditorService.matchedIndices$}
+            matchedIndicesError$={dataViewEditorService.matchedIndicesError$}
           />
         )}
       </FlyoutPanels.Item>

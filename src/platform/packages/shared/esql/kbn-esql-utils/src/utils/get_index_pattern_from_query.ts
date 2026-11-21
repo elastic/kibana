@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { BasicPrettyPrinter, Parser, isSource, isSubQuery, synth } from '@elastic/esql';
+import { BasicPrettyPrinter, isSource, isSubQuery, synth } from '@elastic/esql';
 import { esqlCommandRegistry, getIndexFromPromQLParams } from '@kbn/esql-language';
 import type { ESQLSource, ESQLCommand, ESQLAstPromqlCommand } from '@elastic/esql/types';
+import { parseEsqlCached } from './parse_esql_cached';
 
 const INDEX_SOURCE_COMMANDS = new Set(['FROM', 'TS']);
 const ALL_SOURCE_COMMANDS = new Set(
@@ -74,7 +75,7 @@ export function getIndexPatternsFromESQLQuery(esql?: string): ESQLIndexPatterns 
     return { indexPattern: '', indexPatternWithoutRemoteClusterPrefix: '' };
   }
 
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   const indexSources = getIndexSources(root.commands);
   const promqlSources = getPromQLSources(root.commands);
 
@@ -116,7 +117,7 @@ export function getSourceCommandFromESQLQuery(
     return '';
   }
 
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   const sourceCommand = root.commands.find(({ name }) =>
     supportedSourceCommands.has(name.toUpperCase())
   );
@@ -154,7 +155,7 @@ export function getSourceCommandQueryFromESQLQuery(esql: string | undefined): st
     return '';
   }
 
-  const { root } = Parser.parse(esql);
+  const { root } = parseEsqlCached(esql);
   const sourceCommand = root.commands.find(({ name }) =>
     INDEX_SOURCE_COMMANDS.has(name.toUpperCase())
   );

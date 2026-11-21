@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { isServerless } from '@kbn/profiling-data-access-plugin/server';
 import { sumBy, values } from 'lodash';
 import type { RouteRegisterParameters } from '..';
 import { getRoutePaths, MAX_KUERY_LENGTH } from '../../../common';
@@ -24,7 +25,13 @@ import { PROFILING_API_PRIVILEGE } from '../../feature';
 export function registerStorageExplorerRoute({
   router,
   services: { createProfilingEsClient },
+  dependencies,
 }: RouteRegisterParameters) {
+  // Storage explorer only covers Universal Profiling, which is not supported on serverless.
+  if (isServerless(dependencies.buildFlavor)) {
+    return;
+  }
+
   const paths = getRoutePaths();
   router.get(
     {

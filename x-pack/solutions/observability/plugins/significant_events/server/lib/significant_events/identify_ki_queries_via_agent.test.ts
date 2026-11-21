@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
+import * as kbnStd from '@kbn/std';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -94,9 +95,11 @@ describe('executeKIQueryGenerationAgent', () => {
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;
     const requestSignal = new AbortController().signal;
-    const timeoutSignal = new AbortController().signal;
+    const deadline = Object.assign(new AbortController().signal, { dispose: jest.fn() });
     const executionSignal = new AbortController().signal;
-    const timeoutSpy = jest.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal);
+    const timeoutSpy = jest
+      .spyOn(kbnStd, 'timeoutSignal')
+      .mockReturnValue(deadline as unknown as ReturnType<typeof kbnStd.timeoutSignal>);
     const anySpy = jest.spyOn(AbortSignal, 'any').mockReturnValue(executionSignal);
 
     await expect(
@@ -106,7 +109,16 @@ describe('executeKIQueryGenerationAgent', () => {
         connectorId: 'connector-1',
         interactionId: 'run-1',
         source,
-        existingQueries: [],
+        existingQueries: [
+          {
+            id: 'existing-1',
+            title: 'Existing query',
+            type: 'match',
+            description: 'Existing',
+            esql: 'FROM logs.test | WHERE message:"existing"',
+          },
+        ],
+        maxExistingQueriesForContext: 0,
         signal: requestSignal,
         logger: loggerMock.create(),
       })
@@ -117,6 +129,7 @@ describe('executeKIQueryGenerationAgent', () => {
           title: 'Validated query',
           description: 'Detects validated failures',
           esql: { query: 'FROM logs.test | WHERE message:"failure"' },
+          category: 'error',
           severity_score: 60,
           evidence: undefined,
           replaces: undefined,
@@ -132,11 +145,14 @@ describe('executeKIQueryGenerationAgent', () => {
     });
 
     expect(timeoutSpy).toHaveBeenCalledWith(300_000);
-    expect(anySpy).toHaveBeenCalledWith([requestSignal, timeoutSignal]);
+    expect(anySpy).toHaveBeenCalledWith([requestSignal, deadline]);
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         abortSignal: executionSignal,
         params: expect.objectContaining({
+          nextInput: {
+            message: '`slug`: logs.test\n\n`target_description`: Test logs',
+          },
           telemetryMetadata: {
             pluginId: 'nightshift_ki_query_generation',
             aggregateBy: 'nightshift',
@@ -178,16 +194,47 @@ describe('executeKIQueryGenerationAgent', () => {
       execution: { executeAgent },
     } as unknown as AgentBuilderPluginStart;
 
-    await expect(
-      executeKIQueryGenerationAgent({
-        agentBuilder,
-        request: {} as KibanaRequest,
-        connectorId: 'connector-1',
-        interactionId: 'run-1',
-        source,
-        existingQueries: [],
-        logger: loggerMock.create(),
-      })
-    ).rejects.toThrow('KI query generation agent finalized for unexpected source "logs.other"');
+    const run = executeKIQueryGenerationAgent({
+      agentBuilder,
+      request: {} as KibanaRequest,
+      connectorId: 'connector-1',
+      interactionId: 'run-1',
+      source,
+      existingQueries: [],
+      maxExistingQueriesForContext: 50,
+      logger: loggerMock.create(),
+    });
+
+    await expect(run).rejects.toThrow(
+      'KI query generation agent finalized for unexpected source "logs.other"'
+    );
+    await expect(run).rejects.toMatchObject({ reason: 'unexpected_source' });
+  });
+
+  it('names a run that ended without finalizing', async () => {
+    const agentBuilder = {
+      conversations: {
+        getScopedClient: jest.fn().mockResolvedValue({
+          create: jest.fn().mockResolvedValue({ id: 'conversation-1' }),
+        }),
+      },
+      execution: { executeAgent: jest.fn().mockResolvedValue({ events$: EMPTY }) },
+    } as unknown as AgentBuilderPluginStart;
+
+    const run = executeKIQueryGenerationAgent({
+      agentBuilder,
+      request: {} as KibanaRequest,
+      connectorId: 'connector-1',
+      interactionId: 'run-1',
+      source,
+      existingQueries: [],
+      maxExistingQueriesForContext: 50,
+      logger: loggerMock.create(),
+    });
+
+    await expect(run).rejects.toThrow(
+      'KI query generation agent did not finalize validate_queries'
+    );
+    await expect(run).rejects.toMatchObject({ reason: 'agent_did_not_finalize' });
   });
 });

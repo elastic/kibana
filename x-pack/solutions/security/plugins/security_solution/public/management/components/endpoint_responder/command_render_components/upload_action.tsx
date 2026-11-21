@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../../../common/endpoint/types';
-import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
 import type { UploadActionUIRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import { useSendUploadEndpointRequest } from '../../../hooks/response_actions/use_send_upload_endpoint_request';
@@ -52,7 +51,7 @@ export const UploadActionResult = memo<
     return reqBody;
   }, [command.args.args, command.commandDefinition?.meta]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     UploadActionUIRequestBody,
     ResponseActionUploadOutputContent,
     ResponseActionUploadParameters
@@ -65,16 +64,6 @@ export const UploadActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'upload',
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent>
-        <EndpointUploadActionResult action={actionDetails} />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 UploadActionResult.displayName = 'UploadActionResult';

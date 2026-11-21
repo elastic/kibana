@@ -8,5 +8,4 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { EsqlViewsPlugin } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new EsqlViewsPlugin(initializerContext);
+export const plugin = (_initializerContext: PluginInitializerContext) => new EsqlViewsPlugin();

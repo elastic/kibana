@@ -36,6 +36,7 @@ const createWorker = (overrides: Partial<Worker> = {}): Worker => ({
   state: 'paused',
   settingsRevision: 1,
   workflowId: null,
+  workflowOutdated: false,
   blockingReasons: [],
   settings: {
     workerId: TRIAGE,
@@ -73,7 +74,7 @@ describe('notifyWorkerUpdateError', () => {
     const error = httpError(500);
     notifyWorkerUpdateError(toasts, error);
 
-    expect(toasts.addError).toHaveBeenCalledWith(error, { title: 'Unable to update the worker' });
+    expect(toasts.addError).toHaveBeenCalledWith(error, { title: "Couldn't update the Worker" });
     expect(toasts.addWarning).not.toHaveBeenCalled();
     expect(toasts.addDanger).not.toHaveBeenCalled();
   });
@@ -85,9 +86,21 @@ describe('notifyWorkerUpdateError', () => {
     notifyWorkerUpdateError(toasts, error);
 
     expect(toasts.addError).toHaveBeenCalledWith(error, {
-      title: 'Unable to update the worker',
+      title: "Couldn't update the Worker",
       toastMessage: 'Alert Triage cannot be turned on because no AI model is available.',
     });
+  });
+
+  it.each([
+    [409, 'conflict'],
+    [403, 'forbidden'],
+    [500, 'server'],
+  ] as const)('reports a %d toast once, as %s', (status, errorClass) => {
+    const reportShown = jest.fn();
+
+    notifyWorkerUpdateError(toasts, httpError(status), reportShown);
+
+    expect(reportShown.mock.calls).toEqual([[errorClass]]);
   });
 });
 
@@ -236,6 +249,23 @@ describe('useUpdateWorker', () => {
       workers: [persistedTriage, attackDiscovery],
     });
     expect(services.notifications.toasts.addError).toHaveBeenCalledTimes(1);
+  });
+
+  it('refreshes the Hunt worker index coverage once the update settles', async () => {
+    const patch = jest.fn().mockResolvedValue({ worker: createWorker({ settingsRevision: 5 }) });
+    const { queryClient, result } = renderUpdateWorker(scheduledWorker, patch);
+    const invalidate = jest.spyOn(queryClient, 'invalidateQueries');
+
+    await act(async () => {
+      await result.current.mutateAsync({
+        workerId: TRIAGE,
+        patch: { settings: { scheduleInterval: '15m' }, settingsRevision: 4 },
+      });
+    });
+
+    expect(invalidate).toHaveBeenCalledWith({
+      queryKey: queryKeys.huntWorkerIndexCoverage.all,
+    });
   });
 
   it('sends a null revision for a Worker that is not installed yet', async () => {

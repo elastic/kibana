@@ -6,7 +6,11 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
-import type { CompactionSummary, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  AttachmentTimelineEvent,
+  CompactionSummary,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { applyStepUpdates, type RunStepUpdate } from './step_state';
 import {
@@ -48,6 +52,7 @@ export const StateAnnotation = Annotation.Root({
     reducer: lastValue<ResearchOutcome | undefined>(),
     default: () => undefined,
   }),
+  continueAfterAnswer: Annotation<boolean>({ reducer: lastValue<boolean>(), default: () => false }),
   answerOutcome: Annotation<AnswerOutcome | undefined>({
     reducer: lastValue<AnswerOutcome | undefined>(),
     default: () => undefined,
@@ -63,6 +68,11 @@ export const StateAnnotation = Annotation.Root({
     default: () => ({}),
   }),
   retryNotices: Annotation<RetryNotice[]>({
+    reducer: (current, next) => [...current, ...next],
+    default: () => [],
+  }),
+  /** Attachment events materialized during the run, rendered at their anchors; never persisted from here. */
+  attachmentEvents: Annotation<AttachmentTimelineEvent[]>({
     reducer: (current, next) => [...current, ...next],
     default: () => [],
   }),
@@ -112,4 +122,5 @@ export const toCurrentRun = (state: StateType): CurrentRun => ({
   pendingToolCallIds: state.pendingToolCallIds,
   retryNotices: state.retryNotices,
   compactionSummary: state.compactionSummary,
+  attachmentEvents: state.attachmentEvents,
 });

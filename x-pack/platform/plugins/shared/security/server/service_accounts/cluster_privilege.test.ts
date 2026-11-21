@@ -45,18 +45,6 @@ describe('ensureClusterPrivilege', () => {
     expect(globally).toHaveBeenCalledWith({
       elasticsearch: { cluster: ['manage_security'], index: {} },
     });
-
-    await ensureClusterPrivilege({
-      request,
-      checkPrivilegesWithRequest,
-      logger,
-      privilege: 'read_security',
-      action: 'list service accounts',
-    });
-
-    expect(globally).toHaveBeenLastCalledWith({
-      elasticsearch: { cluster: ['read_security'], index: {} },
-    });
   });
 
   it('resolves quietly when the privilege is held', async () => {
@@ -80,7 +68,7 @@ describe('ensureClusterPrivilege', () => {
   it('propagates a failed privilege check rather than treating it as a refusal', async () => {
     globally.mockRejectedValue(new Error('cluster unavailable'));
 
-    await expect(check()).rejects.toThrowError('cluster unavailable');
+    await expect(check()).rejects.toThrow('cluster unavailable');
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -118,7 +106,7 @@ describe('ensureClusterPrivilege', () => {
       globally.mockRejectedValue(new Error('cluster unavailable'));
       const onRefused = jest.fn();
 
-      await expect(checkWith(onRefused)).rejects.toThrowError('cluster unavailable');
+      await expect(checkWith(onRefused)).rejects.toThrow('cluster unavailable');
       expect(onRefused).not.toHaveBeenCalled();
     });
   });

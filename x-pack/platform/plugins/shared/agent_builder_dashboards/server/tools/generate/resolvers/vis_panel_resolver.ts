@@ -17,7 +17,6 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import {
-  createPanelFailureResult,
   getErrorMessage,
   type PanelContentAttempt,
   type VisPanelResolutionRequest,
@@ -48,9 +47,8 @@ const getExistingVegaSpec = (existingPanel: AttachmentPanel | undefined): string
  * (`buildVegaConfig`), and returns it to dashboard authoring through the type-agnostic
  * {@link PanelContentAttempt} contract.
  *
- * It trusts the request's `renderer` (Lens when omitted). On edits,
- * `edit_panels` sets it from the existing panel and rejects panels neither
- * renderer can edit, so the existing panel always matches the renderer.
+ * It trusts the request's `type`: on edits, upsert has checked that the
+ * existing panel is of that kind.
  */
 export const createVisPanelResolver = ({
   logger,
@@ -59,19 +57,17 @@ export const createVisPanelResolver = ({
   esClient,
 }: VisPanelResolverDeps) => {
   return async ({
-    operationType,
-    identifier,
     nlQuery,
     index,
     chartType,
     esql,
-    renderer = 'lens',
+    type,
     preserveESQL,
     applyChartRules,
     existingPanel,
   }: VisPanelResolutionRequest): Promise<PanelContentAttempt> => {
     try {
-      if (renderer === 'vega') {
+      if (type === 'vega') {
         if (applyChartRules) {
           throw new Error('Presentation enhancement is only supported for ES|QL Lens panels.');
         }
@@ -128,7 +124,7 @@ export const createVisPanelResolver = ({
         ...(result.authoringNote ? { authoringNote: result.authoringNote } : {}),
       };
     } catch (error) {
-      return createPanelFailureResult(operationType, identifier, getErrorMessage(error));
+      return { type: 'failure', error: getErrorMessage(error) };
     }
   };
 };

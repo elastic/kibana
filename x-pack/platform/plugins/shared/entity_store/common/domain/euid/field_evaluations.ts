@@ -258,9 +258,9 @@ export function applyFieldEvaluations(
  * {@link getIdentityFieldEvaluations}.
  */
 export function getFieldEvaluations(
-  entityDefinition: Pick<EntityDefinitionWithoutId, 'fieldEvaluations' | 'identityField'>
+  entityDefinition: Pick<EntityDefinitionWithoutId, 'extraction'>
 ): FieldEvaluation[] {
-  return entityDefinition.fieldEvaluations ?? [];
+  return entityDefinition.extraction?.fieldEvaluations ?? [];
 }
 
 /**

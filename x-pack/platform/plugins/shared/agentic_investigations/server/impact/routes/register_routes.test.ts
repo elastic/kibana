@@ -8,7 +8,13 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
-import { IMPACT_INTERNAL_URL } from '../../../common/impact/constants';
+import {
+  IMPACT_ESCALATION_SUMMARY_URL,
+  IMPACT_INTERNAL_URL,
+  IMPACT_PROPOSAL_SUMMARY_URL,
+} from '../../../common/impact/constants';
+import { ESCALATIONS_API_PRIVILEGE_READ } from '../../escalations/constants';
+import type { ImpactPillsService } from '../services/impact_pills_service';
 import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import {
   ImpactConflictError,
@@ -64,7 +70,11 @@ const registerAndCollect = (
       delete: jest.fn(),
     } as never),
   getConversationClient: ImpactRouteDependencies['getConversationClient'] = async () =>
-    ownerConversation as never
+    ownerConversation as never,
+  {
+    pills = {},
+    escalationsEnabled = false,
+  }: { pills?: Partial<ImpactPillsService>; escalationsEnabled?: boolean } = {}
 ) => {
   const router = httpServiceMock.createRouter();
   const posts: RegisteredRoute[] = [];
@@ -88,6 +98,8 @@ const registerAndCollect = (
         attach,
         getByConversationId: service.getByConversationId ?? impactReadsAfterAttach(attach),
       } as unknown as ImpactService),
+    getImpactPillsService: () => pills as ImpactPillsService,
+    escalationsEnabled,
     getSpaceId: () => 'default',
     resolveUser: async () => ANALYST,
     getAttachmentClient,
@@ -106,7 +118,7 @@ describe('investigation impact routes', () => {
     const { posts, gets } = registerAndCollect({});
 
     expect(posts).toHaveLength(1);
-    expect(gets).toHaveLength(1);
+    expect(gets.filter(({ config }) => config.path === IMPACT_INTERNAL_URL)).toHaveLength(1);
     expect(posts[0].config.path).toBe(IMPACT_INTERNAL_URL);
     expect(posts[0].config.security?.authz?.requiredPrivileges).toEqual([
       INVESTIGATIONS_API_PRIVILEGE_MANAGE,
@@ -115,6 +127,61 @@ describe('investigation impact routes', () => {
     expect(gets[0].config.security?.authz?.requiredPrivileges).toEqual([
       INVESTIGATIONS_API_PRIVILEGE_MANAGE,
     ]);
+  });
+
+  describe('impact pills', () => {
+    const findGet = (gets: RegisteredRoute[], path: string) =>
+      gets.find(({ config }) => config.path === path);
+
+    it('registers the escalation pills route only when escalations are enabled', () => {
+      expect(findGet(registerAndCollect({}).gets, IMPACT_ESCALATION_SUMMARY_URL)).toBeUndefined();
+
+      const route = findGet(
+        registerAndCollect({}, undefined, undefined, { escalationsEnabled: true }).gets,
+        IMPACT_ESCALATION_SUMMARY_URL
+      );
+
+      expect(route?.config.security?.authz?.requiredPrivileges).toEqual([
+        ESCALATIONS_API_PRIVILEGE_READ,
+      ]);
+    });
+
+    it('returns the proposal pills the service builds for the query', async () => {
+      const page = { pills: [{ entityId: 'host-1', count: 2 }], total: 1, remaining: 0 };
+      const forProposals = jest.fn().mockResolvedValue(page);
+      const { gets } = registerAndCollect({}, undefined, undefined, { pills: { forProposals } });
+      const response = httpServerMock.createResponseFactory();
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          origin: 'alertzero',
+          categories: ['respond'],
+          decidedWithinHours: 72,
+          from: 0,
+          size: 10,
+        },
+      });
+
+      await findGet(gets, IMPACT_PROPOSAL_SUMMARY_URL)?.handler({}, request, response);
+
+      expect(forProposals).toHaveBeenCalledWith(request, request.query);
+      expect(response.ok).toHaveBeenCalledWith({ body: page });
+    });
+
+    it('returns the escalation pills the service builds', async () => {
+      const page = { pills: [{ entityId: 'user-1', count: 1 }], total: 1, remaining: 0 };
+      const forEscalations = jest.fn().mockResolvedValue(page);
+      const { gets } = registerAndCollect({}, undefined, undefined, {
+        pills: { forEscalations },
+        escalationsEnabled: true,
+      });
+      const response = httpServerMock.createResponseFactory();
+      const request = httpServerMock.createKibanaRequest({ query: { from: 0, size: 10 } });
+
+      await findGet(gets, IMPACT_ESCALATION_SUMMARY_URL)?.handler({}, request, response);
+
+      expect(forEscalations).toHaveBeenCalledWith(request, request.query);
+      expect(response.ok).toHaveBeenCalledWith({ body: page });
+    });
   });
 
   it('attaches through the service with the space and the resolved user, never a body actor', async () => {

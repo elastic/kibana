@@ -108,13 +108,9 @@ export const TrialUsageBadge = ({ cloud }: TrialUsageBadgeProps) => {
       >
         <EuiTitle size="xxs">
           <h4>
-            {cloud.isServerlessEnabled
-              ? i18n.translate('xpack.sharedComponents.trialUsageBadge.serverlessTitle', {
-                  defaultMessage: 'Elastic Cloud Serverless',
-                })
-              : i18n.translate('xpack.sharedComponents.trialUsageBadge.cloudHostedTitle', {
-                  defaultMessage: 'Elastic Cloud Hosted',
-                })}
+            {i18n.translate('xpack.sharedComponents.trialUsageBadge.cloudHostedTitle', {
+              defaultMessage: 'Elastic Cloud Hosted',
+            })}
           </h4>
         </EuiTitle>
       </EuiPopoverTitle>

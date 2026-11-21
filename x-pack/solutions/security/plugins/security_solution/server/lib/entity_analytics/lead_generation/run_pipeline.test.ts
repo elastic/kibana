@@ -62,6 +62,7 @@ describe('runLeadGenerationPipeline', () => {
   const pipelineParams = {
     listEntities: mockListEntities,
     esClient,
+    internalEsClient: esClient,
     logger,
     spaceId: 'default' as const,
     riskScoreDataClient,

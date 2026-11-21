@@ -1,0 +1,17 @@
+(Context: earlier in this conversation the user asked whether elastic/kibana#912202 needs a test plan. You ran `context` and the `comment-no` dry run, and you showed this decision and stopped:
+
+**Issue:** [elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202) — [Detection Engine] Show the space count on shared exception list cards
+**Decision:** No — N4: one badge with two acceptance criteria, a small part of shared exception lists
+**Hierarchy:** [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200) › **[elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202)**
+**Suggested level for a test plan:** [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200) — one functionality: exception lists shared across spaces
+**Proposed label changes:**
+- add `Needs Test Plan` to [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200)
+**Proposed comment:** on [elastic/kibana#912202](https://github.com/elastic/kibana/issues/912202)
+> **Test plan triage:** no test plan needed (N4: one badge with two acceptance criteria, a small part of shared exception lists). Suggested level for a test plan: [elastic/kibana#912200](https://github.com/elastic/kibana/issues/912200).
+>
+> _Decided on 2026-11-13 with the `test-plan-triage` skill._
+
+Reply "yes" to apply the changes above, or tell me which ones to apply.)
+
+The user's new message is:
+makes sense. let me run it by Priya first, she owns that epic

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { AddToCaseModal } from './add_to_case_modal';
 export {
   ObservabilityAlertingPage,
   OBSERVABILITY_ALERTING_SURFACES,
@@ -20,6 +21,7 @@ export {
   ObservabilityClassicRulesPage,
   OBS_V1_LIST_URL_RE,
   OBS_V1_LOGS_URL_RE,
+  OBS_V1_SETTINGS_URL_RE,
   OBS_V1_CREATE_URL_RE,
   OBS_V1_EDIT_URL_RE,
   OBS_V1_DETAILS_URL_RE,

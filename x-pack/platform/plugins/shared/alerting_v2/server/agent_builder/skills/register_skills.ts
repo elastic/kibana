@@ -8,22 +8,30 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability';
 import {
-  ACTION_POLICY_MANAGEMENT_SKILL_ID,
-  RULE_MANAGEMENT_SKILL_ID,
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  RULE_AUTHORING_SKILL_ID,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
+import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
+import type { AttachRuleToolDeps } from '../tools/attach_rule';
+import type { LinkRuleAndActionPolicyToolDeps } from '../tools/link_rule_and_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
 import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
-import { createActionPolicyManagementSkill } from './action_policy_management_skill';
-import { createRuleManagementSkill } from './rule_management_skill';
+import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
+import { createRuleAuthoringSkill } from './rule_authoring_skill';
+import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps &
-  ManageActionPolicyToolDeps & {
+  AttachRuleToolDeps &
+  ManageActionPolicyToolDeps &
+  AttachActionPolicyToolDeps &
+  LinkRuleAndActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
 
 /**
- * Registers Alerting v2 Agent Builder skills. Unexpected register failures are
+ * Registers universal alerting Agent Builder skills. Unexpected register failures are
  * logged and skipped so one skill cannot block the other.
  */
 export const registerSkills = (
@@ -33,12 +41,16 @@ export const registerSkills = (
   const { logger } = deps;
   const skills = [
     {
-      id: RULE_MANAGEMENT_SKILL_ID,
-      create: () => createRuleManagementSkill(deps),
+      id: RULE_AUTHORING_SKILL_ID,
+      create: () => createRuleAuthoringSkill(deps),
     },
     {
-      id: ACTION_POLICY_MANAGEMENT_SKILL_ID,
-      create: () => createActionPolicyManagementSkill(deps),
+      id: ACTION_POLICY_AUTHORING_SKILL_ID,
+      create: () => createActionPolicyAuthoringSkill(deps),
+    },
+    {
+      id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+      create: () => createUniversalAlertingFailureDiagnosisSkill(deps),
     },
   ] as const;
 

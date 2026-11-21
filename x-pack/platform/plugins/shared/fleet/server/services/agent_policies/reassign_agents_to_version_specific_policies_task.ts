@@ -18,6 +18,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { appContextService } from '..';
 import * as AgentService from '../agents';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
+import { NOT_OPAMP_AGENT_KUERY } from '../../../common/constants';
 import { throwIfAborted } from '../../tasks/utils';
 import {
   splitVersionSuffixFromPolicyId,
@@ -96,11 +97,11 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
 
   const { baseId: agentPolicyId, version } = splitVersionSuffixFromPolicyId(versionedAgentPolicyId);
   // agents enrolled to parent policy or agents using child policy but upgraded to new version
-  const kueryToReassignAgents = `(policy_id:("${escapeQuotes(agentPolicyId)}" or "${escapeQuotes(
+  const kueryToReassignAgents = `((policy_id:("${escapeQuotes(agentPolicyId)}" or "${escapeQuotes(
     getSentinelVersionPolicyId(agentPolicyId)
   )}") AND agent.version:${version}.*) OR (${buildAgentVersionVariantsKueryFragment(
     agentPolicyId
-  )} AND agent.version:${version}.* AND upgraded_at:*)`;
+  )} AND agent.version:${version}.* AND upgraded_at:*)) AND ${NOT_OPAMP_AGENT_KUERY}`;
 
   try {
     const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {

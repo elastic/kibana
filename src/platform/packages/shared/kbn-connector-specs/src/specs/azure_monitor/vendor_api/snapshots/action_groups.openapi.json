@@ -1,0 +1,514 @@
+{
+  "components": {
+    "schemas": {
+      "ActionGroup": {
+        "properties": {
+          "armRoleReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/ArmRoleReceiver"
+            },
+            "type": "array"
+          },
+          "automationRunbookReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationRunbookReceiver"
+            },
+            "type": "array"
+          },
+          "azureAppPushReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/AzureAppPushReceiver"
+            },
+            "type": "array"
+          },
+          "azureFunctionReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/AzureFunctionReceiver"
+            },
+            "type": "array"
+          },
+          "emailReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/EmailReceiver"
+            },
+            "type": "array"
+          },
+          "enabled": {
+            "default": true,
+            "type": "boolean"
+          },
+          "eventHubReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/EventHubReceiver"
+            },
+            "type": "array"
+          },
+          "groupShortName": {
+            "maxLength": 12,
+            "type": "string"
+          },
+          "itsmReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/ItsmReceiver"
+            },
+            "type": "array"
+          },
+          "logicAppReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/LogicAppReceiver"
+            },
+            "type": "array"
+          },
+          "smsReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/SmsReceiver"
+            },
+            "type": "array"
+          },
+          "voiceReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/VoiceReceiver"
+            },
+            "type": "array"
+          },
+          "webhookReceivers": {
+            "items": {
+              "$ref": "#/components/schemas/WebhookReceiver"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "groupShortName",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "ActionGroupList": {
+        "properties": {
+          "nextLink": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/ActionGroupResource"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ActionGroupResource": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AzureResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/ActionGroup"
+          }
+        },
+        "type": "object"
+      },
+      "ArmRoleReceiver": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "roleId": {
+            "type": "string"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "roleId"
+        ],
+        "type": "object"
+      },
+      "AutomationRunbookReceiver": {
+        "properties": {
+          "automationAccountId": {
+            "type": "string"
+          },
+          "isGlobalRunbook": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "runbookName": {
+            "type": "string"
+          },
+          "serviceUri": {
+            "type": "string"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          },
+          "webhookResourceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "automationAccountId",
+          "runbookName",
+          "webhookResourceId",
+          "isGlobalRunbook"
+        ],
+        "type": "object"
+      },
+      "AzureAppPushReceiver": {
+        "properties": {
+          "emailAddress": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "emailAddress"
+        ],
+        "type": "object"
+      },
+      "AzureFunctionReceiver": {
+        "properties": {
+          "functionAppResourceId": {
+            "type": "string"
+          },
+          "functionName": {
+            "type": "string"
+          },
+          "httpTriggerUrl": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "functionAppResourceId",
+          "functionName",
+          "httpTriggerUrl"
+        ],
+        "type": "object"
+      },
+      "AzureResource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "type": "object"
+      },
+      "EmailReceiver": {
+        "properties": {
+          "emailAddress": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReceiverStatus",
+            "readOnly": true
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "emailAddress"
+        ],
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "EventHubReceiver": {
+        "properties": {
+          "eventHubName": {
+            "type": "string"
+          },
+          "eventHubNameSpace": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "subscriptionId": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "eventHubNameSpace",
+          "eventHubName",
+          "subscriptionId"
+        ],
+        "type": "object"
+      },
+      "ItsmReceiver": {
+        "properties": {
+          "connectionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "ticketConfiguration": {
+            "type": "string"
+          },
+          "workspaceId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "workspaceId",
+          "connectionId",
+          "ticketConfiguration",
+          "region"
+        ],
+        "type": "object"
+      },
+      "LogicAppReceiver": {
+        "properties": {
+          "callbackUrl": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "resourceId": {
+            "type": "string"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "resourceId",
+          "callbackUrl"
+        ],
+        "type": "object"
+      },
+      "ReceiverStatus": {
+        "enum": [
+          "NotSpecified",
+          "Enabled",
+          "Disabled"
+        ],
+        "type": "string"
+      },
+      "SmsReceiver": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReceiverStatus",
+            "readOnly": true
+          }
+        },
+        "required": [
+          "name",
+          "countryCode",
+          "phoneNumber"
+        ],
+        "type": "object"
+      },
+      "VoiceReceiver": {
+        "properties": {
+          "countryCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "countryCode",
+          "phoneNumber"
+        ],
+        "type": "object"
+      },
+      "WebhookReceiver": {
+        "properties": {
+          "identifierUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "objectId": {
+            "type": "string"
+          },
+          "serviceUri": {
+            "type": "string"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "useAadAuth": {
+            "default": false,
+            "type": "boolean"
+          },
+          "useCommonAlertSchema": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "serviceUri"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "azure_auth": {
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://login.microsoftonline.com/common/oauth2/authorize",
+            "scopes": {
+              "user_impersonation": "impersonate your user account"
+            }
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Action Groups API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/subscriptions/{subscriptionId}/providers/Microsoft.Insights/actionGroups": {
+      "get": {
+        "operationId": "ActionGroups_ListBySubscriptionId",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subscriptionId",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionGroupList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": null
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "azure_auth": [
+        "user_impersonation"
+      ]
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

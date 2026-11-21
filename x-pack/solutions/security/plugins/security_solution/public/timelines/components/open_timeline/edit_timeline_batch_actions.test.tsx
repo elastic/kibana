@@ -124,3 +124,43 @@ describe('useEditTimelineBatchActions — "View Super Timeline" action', () => {
     });
   });
 });
+
+describe('useEditTimelineBatchActions — "Remove from case" action', () => {
+  const renderWithRemove = (
+    selectedItems: OpenTimelineResult[],
+    onRemoveSelectedFromCase?: () => void
+  ) => {
+    const closePopover = jest.fn();
+    const { result } = renderHook(() =>
+      useEditTimelineBatchActions({
+        onRemoveSelectedFromCase,
+        selectedItems,
+        tableRef,
+        timelineType: TimelineTypeEnum.default,
+      })
+    );
+    render(result.current.getBatchItemsPopoverContent(closePopover));
+    return { closePopover };
+  };
+
+  it('does not render the item without onRemoveSelectedFromCase', () => {
+    renderWithRemove([makeItem('a')]);
+    expect(screen.queryByTestId('remove-timelines-from-case-action')).not.toBeInTheDocument();
+  });
+
+  it('closes the popover and removes the selected timelines', async () => {
+    const user = userEvent.setup();
+    const onRemoveSelectedFromCase = jest.fn();
+    const { closePopover } = renderWithRemove([makeItem('a')], onRemoveSelectedFromCase);
+
+    await user.click(screen.getByTestId('remove-timelines-from-case-action'));
+
+    expect(closePopover).toHaveBeenCalled();
+    expect(onRemoveSelectedFromCase).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the item when nothing is selected', () => {
+    renderWithRemove([], jest.fn());
+    expect(screen.getByTestId('remove-timelines-from-case-action')).toBeDisabled();
+  });
+});

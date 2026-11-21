@@ -66,6 +66,11 @@ export const ensureJudgeConnectorAccessible = async ({
  * truth — this pins the contract the suite depends on so renaming a step in the yaml fails setup
  * here instead of surfacing as opaque timeouts in every downstream lookup.
  */
+/**
+ * Prompt clauses the scored evaluators depend on. Kept as loose patterns: this asserts the
+ * behaviour contract is present, not the exact wording (the wording itself is pinned by
+ * workflow_contract.test.ts against the checked-in definition).
+ */
 export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID] as const;
 
 /**

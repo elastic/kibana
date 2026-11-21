@@ -20,19 +20,23 @@ import { appContextService } from '../app_context';
 import { checkFleetServerVersionsForSecretsStorage } from '../fleet_server';
 import { isFleetServerVersionRequirementMet } from '../fleet_server/version_requirements';
 
+import { isOutputSecretStorageEnabled } from '../secrets';
+
 import {
+  checkKafkaKerberosAllowed,
   checkKafkaOAuth2Allowed,
   checkOtlpOutputAllowed,
   findAgentlessPolicies,
   isOtlpOutputSupported,
 } from './helpers';
-import { isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
+import { isKafkaKerberosAuthEnabled, isKafkaOAuth2AuthEnabled } from './kafka_auth_feature_flags';
 
 jest.mock('../agent_policy');
 jest.mock('../app_context');
 jest.mock('../fleet_server');
 jest.mock('../fleet_server/version_requirements');
 jest.mock('./kafka_auth_feature_flags');
+jest.mock('../secrets');
 
 const mockedIsFleetServerVersionRequirementMet =
   isFleetServerVersionRequirementMet as jest.MockedFunction<
@@ -41,6 +45,12 @@ const mockedIsFleetServerVersionRequirementMet =
 
 const mockedIsKafkaOAuth2AuthEnabled = isKafkaOAuth2AuthEnabled as jest.MockedFunction<
   typeof isKafkaOAuth2AuthEnabled
+>;
+const mockedIsKafkaKerberosAuthEnabled = isKafkaKerberosAuthEnabled as jest.MockedFunction<
+  typeof isKafkaKerberosAuthEnabled
+>;
+const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
+  typeof isOutputSecretStorageEnabled
 >;
 const mockedCheckFleetServerVersions = checkFleetServerVersionsForSecretsStorage as jest.Mock;
 
@@ -102,6 +112,75 @@ describe('checkKafkaOAuth2Allowed', () => {
     expect(mockedCheckFleetServerVersions).not.toHaveBeenCalled();
   });
 });
+describe('checkKafkaKerberosAllowed', () => {
+  const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+  const soClientMock = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedIsKafkaKerberosAuthEnabled.mockResolvedValue(true);
+    mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+  });
+
+  it('returns { result: false } when the feature flag is off, without checking the secrets storage', async () => {
+    mockedIsKafkaKerberosAuthEnabled.mockResolvedValue(false);
+
+    const result = await checkKafkaKerberosAllowed(esClientMock, soClientMock);
+
+    expect(result).toEqual({
+      result: false,
+      error: 'Kerberos authentication of Kafka outputs is not enabled',
+    });
+    expect(mockedIsOutputSecretStorageEnabled).not.toHaveBeenCalled();
+  });
+
+  describe('password authentication', () => {
+    const output = { kerberos: { auth_type: 'password' } };
+
+    it('returns { result: false, error } when the output secrets storage is not available', async () => {
+      mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+      const result = await checkKafkaKerberosAllowed(esClientMock, soClientMock, output);
+
+      expect(result.result).toBe(false);
+      expect(result.error).toContain('requires output secrets storage');
+    });
+
+    it('returns { result: true } when the secrets storage is available', async () => {
+      expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).toEqual({
+        result: true,
+      });
+    });
+  });
+
+  describe('keytab authentication', () => {
+    const output = { kerberos: { auth_type: 'keytab' } };
+
+    it('does not need the output secrets storage, as it has no secret', async () => {
+      mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+      expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).toEqual({
+        result: true,
+      });
+      expect(mockedIsOutputSecretStorageEnabled).not.toHaveBeenCalled();
+    });
+
+    it('is not allowed when the feature flag is off', async () => {
+      mockedIsKafkaKerberosAuthEnabled.mockResolvedValue(false);
+
+      expect((await checkKafkaKerberosAllowed(esClientMock, soClientMock, output)).result).toBe(
+        false
+      );
+    });
+  });
+
+  it('only checks the feature flag when there are no settings to look at', async () => {
+    mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+
+    expect(await checkKafkaKerberosAllowed(esClientMock, soClientMock)).toEqual({ result: true });
+  });
+});
+
 const mockOtlpFlag = (value: boolean) => {
   const getBooleanValue$ = jest.fn().mockReturnValue(of(value));
   (appContextService.getFeatureFlags as jest.Mock).mockReturnValue({ getBooleanValue$ });

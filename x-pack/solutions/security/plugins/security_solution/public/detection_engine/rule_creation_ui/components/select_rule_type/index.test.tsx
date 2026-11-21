@@ -227,6 +227,44 @@ describe('SelectRuleType', () => {
     });
   });
 
+  describe('selection switch', () => {
+    it('renders the selected card switch as disabled in update mode', () => {
+      const field = useFormFieldMock<unknown>({ value: 'query' });
+      const wrapper = mount(
+        <TestProviders>
+          <SelectRuleType
+            describedByIds={[]}
+            field={field}
+            isUpdateView={true}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        </TestProviders>
+      );
+      const switchButton = wrapper.find('[data-test-subj="customRuleType"] button[role="switch"]');
+      expect(switchButton.prop('disabled')).toEqual(true);
+      expect(switchButton.prop('aria-checked')).toEqual(true);
+      expect(switchButton.text()).toEqual('Selected');
+    });
+
+    it('renders the selected card switch as enabled when not in update mode', () => {
+      const field = useFormFieldMock<unknown>({ value: 'query' });
+      const wrapper = mount(
+        <TestProviders>
+          <SelectRuleType
+            describedByIds={[]}
+            field={field}
+            isUpdateView={false}
+            hasValidLicense={true}
+            isMlAdmin={true}
+          />
+        </TestProviders>
+      );
+      const switchButton = wrapper.find('[data-test-subj="customRuleType"] button[role="switch"]');
+      expect(switchButton.prop('disabled')).toEqual(false);
+    });
+  });
+
   describe('permissions', () => {
     it('renders machine learning as disabled if "hasValidLicense" is false and it is not selected', () => {
       const field = useFormFieldMock<unknown>({ value: 'query' });

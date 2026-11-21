@@ -14,6 +14,7 @@ import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
+  type DataGridRenderMode,
   type UnifiedDataTableProps,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
@@ -54,6 +55,7 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   wrapToolbar?: boolean;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
+  renderMode: DataGridRenderMode;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -67,8 +69,10 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     wrapToolbar = true,
     searchContext,
     flyoutMenuTrailingActions,
+    renderMode,
     ...gridProps
   } = props;
+  const isInteractive = renderMode === 'interactive';
   const { euiTheme } = useEuiTheme();
   const {
     leftSide: toolbarSlotLeftSide,
@@ -80,7 +84,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const isEsqlResult = props.dataSource?.kind === 'esql';
   // UnifiedDataTable does not render the grid toolbar when there are no rows.
   const showToolbarSlotOutsideGrid =
-    !hasRows && Boolean(toolbarSlotLeftSide || saveToDashboardButton);
+    isInteractive && !hasRows && Boolean(toolbarSlotLeftSide || saveToDashboardButton);
 
   useEffect(() => {
     onVisibleColumnsChange?.(props.columns);
@@ -194,7 +198,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hideFilteringOnComputedColumns={true}
       maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
       renderDocumentView={enableDocumentViewer ? renderDocumentView : undefined}
-      renderCustomToolbar={renderCustomToolbarWithElements}
+      renderMode={renderMode}
+      renderCustomToolbar={isInteractive ? renderCustomToolbarWithElements : undefined}
       externalCustomRenderers={cellRenderers}
       enableComparisonMode
       showColumnTokens
@@ -206,7 +211,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <SavedSearchEmbeddableBase
-      totalHitCount={undefined} // it will be rendered inside the custom grid toolbar instead
+      // interactive: rendered inside the custom grid toolbar instead; non-interactive modes have no toolbar, so render it here
+      totalHitCount={isInteractive ? undefined : props.totalHitCount}
+      isEsqlMode={isEsqlResult}
       isLoading={props.loadingState === DiscoverGridLoadingState.loading}
       interceptedWarnings={interceptedWarnings}
       inlineEditing={inlineEditing}

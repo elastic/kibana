@@ -15,10 +15,22 @@ export {
   type GraphEdge,
   type HandleSide,
   type LayoutDirection,
+  type LayoutStructure,
   type NodeRef,
+  type StructureBranch,
+  type StructureContainer,
+  type StructureFork,
+  type StructureItem,
+  type StructureLane,
+  type StructureSequence,
+  type StructureStep,
 } from './types';
 export { computeTopologyFingerprint } from './compute_topology_fingerprint';
-export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
+export {
+  transformWorkflowToGraph,
+  type GetTriggerLabel,
+  type TransformResult,
+} from './transform_workflow_to_graph';
 export {
   visitStepChildSlots,
   walkStepTree,

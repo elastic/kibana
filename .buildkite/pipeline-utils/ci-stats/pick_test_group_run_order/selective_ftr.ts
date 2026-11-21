@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages/index.ts';
+import {
+  allChangedFilesInScope,
+  getAffectedPackages,
+  touchedCriticalFiles,
+} from '../../affected-packages/index.ts';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -52,6 +56,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   '@kbn/eslint-plugin-imports',
   '@kbn/eslint-plugin-telemetry',
   '@kbn/eslint-plugin-kbn-ui',
+  '@kbn/eslint-plugin-kbn-monaco',
   '@kbn/check-kibana-settings-cli',
 ]);
 
@@ -67,7 +72,6 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'scripts/functional_test_runner.js',
   'package.json',
   'pnpm-lock.yaml',
-  '.node-version',
   '.nvmrc',
   'config/**/*.yml',
   'config/node.options',
@@ -112,6 +116,25 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   '**/test/scout{_*,}/**',
 ];
 
+/**
+ * Modules directly owning changed files, ignoring FTR-irrelevant paths so e.g. a plugin's
+ * `test/scout/**` changes don't count as changes to that plugin. Returns null on failure.
+ */
+export async function getFtrRelevantModules(
+  changedFiles: readonly string[]
+): Promise<Set<string> | null> {
+  return getAffectedPackages(undefined, {
+    changedFiles: [...changedFiles],
+    strategy: 'git',
+    includeDownstream: false,
+    ignorePatterns: FTR_IRRELEVANT_PATHS,
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages for FTR skip check', error);
+    return null;
+  });
+}
+
 /** True when this PR should omit FTR configs. */
 export function shouldSkipFtrTests(
   affectedModules: ReadonlySet<string>,
@@ -139,4 +162,14 @@ export function shouldSkipFtrTests(
   }
 
   return false;
+}
+
+/** Directly affected modules when the diff cannot affect FTR; null when FTR must run. */
+export async function getFtrSkipModules(changedFiles: string[]): Promise<string[] | null> {
+  const directlyAffected = await getFtrRelevantModules(changedFiles);
+
+  if (directlyAffected === null || !shouldSkipFtrTests(directlyAffected, changedFiles)) {
+    return null;
+  }
+  return [...directlyAffected];
 }

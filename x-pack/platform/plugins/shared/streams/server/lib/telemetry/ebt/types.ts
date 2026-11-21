@@ -30,15 +30,8 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_type: StreamType;
 }
 
-interface StreamsAgentToolEventCreateProps {
-  success: boolean;
-  stream_names: string[];
-  error_message?: string;
-}
-
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
   type StreamsProcessingPipelineSuggestedProps,
-  type StreamsAgentToolEventCreateProps,
 };

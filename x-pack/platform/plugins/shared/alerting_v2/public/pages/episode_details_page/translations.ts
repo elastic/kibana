@@ -25,7 +25,7 @@ export const OVERVIEW_TAB_TITLE = i18n.translate(
 export const METADATA_TAB_TITLE = i18n.translate(
   'xpack.alertingV2.episodeDetails.mainTabMetadata',
   {
-    defaultMessage: 'Metadata',
+    defaultMessage: 'Data container',
   }
 );
 
@@ -106,41 +106,6 @@ export const EPISODES_LIST_BACK_LABEL = i18n.translate(
 );
 
 /** --- App header badges --- */
-export const STATUS_BADGE_INACTIVE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.statusBadgeInactive',
-  {
-    defaultMessage: 'Inactive',
-  }
-);
-
-export const STATUS_BADGE_PENDING = i18n.translate(
-  'xpack.alertingV2.episodeDetails.statusBadgePending',
-  {
-    defaultMessage: 'Pending',
-  }
-);
-
-export const STATUS_BADGE_ACTIVE = i18n.translate(
-  'xpack.alertingV2.episodeDetails.statusBadgeActive',
-  {
-    defaultMessage: 'Active',
-  }
-);
-
-export const STATUS_BADGE_RECOVERING = i18n.translate(
-  'xpack.alertingV2.episodeDetails.statusBadgeRecovering',
-  {
-    defaultMessage: 'Recovering',
-  }
-);
-
-export const STATUS_BADGE_UNKNOWN = i18n.translate(
-  'xpack.alertingV2.episodeDetails.statusBadgeUnknown',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-
 export const ACKNOWLEDGED_BADGE_LABEL = i18n.translate(
   'xpack.alertingV2.episodeDetails.acknowledgedBadgeLabel',
   {

@@ -26,13 +26,16 @@ import {
   envFromDatasetsProfile,
   envFromExportProfile,
   loadVaultConfig,
+  readSuiteSecretFromDevVault,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
+  resolveDefaultJudgeConnectorId,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
 import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
+import { validateSuiteVaultConfig } from '../../scripts/vault/manage_secrets';
 import { parseSpaceIds } from '../utils/space_ids';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
 import {
@@ -70,6 +73,42 @@ export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) 
   );
 };
 
+/** Interactive profile choice (local / golden cluster / custom), used when `--profile` is omitted. */
+export const promptForProfile = async (repoRoot: string, log: ToolingLog): Promise<string> => {
+  type InfraChoice = 'local' | 'golden-cluster' | 'custom';
+  const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
+    type: 'list',
+    name: 'choice',
+    message: 'How do you want to run evals and export results and traces?',
+    choices: [
+      { name: 'Local (localhost ES/Kibana)', value: 'local' },
+      {
+        name: 'Golden cluster (uses Vault -- no config file needed)',
+        value: 'golden-cluster',
+      },
+      { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
+    ],
+  });
+
+  if (choice === 'local') {
+    await ensureLocalConfig(repoRoot, log);
+    return 'local';
+  }
+  if (choice === 'golden-cluster') {
+    await ensureVaultAuth(log);
+    return 'dev-vault';
+  }
+  const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
+    type: 'input',
+    name: 'customProfile',
+    message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
+    default: '',
+  });
+  const resolvedProfile = customProfile.trim() || 'default';
+  await runConfigInit(repoRoot, log, { profile: resolvedProfile });
+  return resolvedProfile;
+};
+
 export const ensureEvalInit = async (
   repoRoot: string,
   log: ToolingLog,
@@ -84,39 +123,7 @@ export const ensureEvalInit = async (
           '--profile is required in non-interactive mode (e.g. --profile dev-vault, --profile local).'
         );
       }
-
-      type InfraChoice = 'local' | 'golden-cluster' | 'custom';
-      const { choice } = await inquirer.prompt<{ choice: InfraChoice }>({
-        type: 'list',
-        name: 'choice',
-        message: 'How do you want to run evals and export results and traces?',
-        choices: [
-          { name: 'Local (localhost ES/Kibana)', value: 'local' },
-          {
-            name: 'Golden cluster (uses Vault -- no config file needed)',
-            value: 'golden-cluster',
-          },
-          { name: 'Custom (create a config file with your own URLs)', value: 'custom' },
-        ],
-      });
-
-      if (choice === 'local') {
-        await ensureLocalConfig(repoRoot, log);
-        profile = 'local';
-      } else if (choice === 'golden-cluster') {
-        await ensureVaultAuth(log);
-        profile = 'dev-vault';
-      } else {
-        const { customProfile } = await inquirer.prompt<{ customProfile: string }>({
-          type: 'input',
-          name: 'customProfile',
-          message: 'Config profile name (creates config.<name>.json, or empty for config.json):',
-          default: '',
-        });
-        const resolvedProfile = customProfile.trim() || 'default';
-        await runConfigInit(repoRoot, log, { profile: resolvedProfile });
-        profile = resolvedProfile;
-      }
+      profile = await promptForProfile(repoRoot, log);
     } else if (isDevVaultProfile(profile)) {
       await ensureVaultAuth(log);
     } else if (profile === 'local') {
@@ -238,9 +245,28 @@ export interface ResolveProfileEnvOverridesOptions {
 /**
  * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
  * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ * With `dev-vault`, a suite that declares a `vaultSecret` reads that secret instead of the general
+ * config; file profiles keep passing the profile JSON, which holds any suite blocks itself. In CI,
+ * `run_suite.sh` has already run the hook and forwards its input, so the CLI doesn't reread Vault.
  */
-const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
-  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+export const loadScoutHookConfig = (
+  repoRoot: string,
+  datasetsProfile: string | undefined,
+  suite: Pick<EvalSuiteDefinition, 'vaultSecret'> | undefined
+): object => {
+  const ciHookConfig = process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64;
+  if (!datasetsProfile && ciHookConfig) {
+    try {
+      return validateSuiteVaultConfig(JSON.parse(Buffer.from(ciHookConfig, 'base64').toString()));
+    } catch {
+      throw new Error('CI scout-hook config must encode a JSON object');
+    }
+  }
+  if (suite?.vaultSecret && isDevVaultProfile(datasetsProfile)) {
+    return readSuiteSecretFromDevVault(suite.vaultSecret) ?? {};
+  }
+  return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
@@ -278,29 +304,45 @@ export const resolveProfileEnvOverrides = async ({
   }
 
   const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
+    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile, suite))
     : {};
 
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
 };
 
+/**
+ * Judge connector: `--judge` flag, then `EVAL_CONNECTOR_ID`, then the profile's
+ * `evaluationConnectorId` (pre-selected in the picker on a TTY; used as-is otherwise).
+ */
 export const resolveEvaluationConnectorId = async (
   repoRoot: string,
   log: ToolingLog,
-  flagsReader: FlagsReader
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition,
+  profile?: string
 ): Promise<string> => {
   const evaluationConnectorId =
-    flagsReader.string('evaluation-connector-id') ?? process.env.EVAL_CONNECTOR_ID;
+    flagsReader.string('evaluation-connector-id') ??
+    (process.env.EVAL_CONNECTOR_ID || undefined) ??
+    suite?.defaultJudge;
 
   if (evaluationConnectorId) {
     return evaluationConnectorId;
   }
 
+  const defaultConnectorId = resolveDefaultJudgeConnectorId(repoRoot, profile);
+
   if (isTTY()) {
-    return promptForConnector(repoRoot, log);
+    return promptForConnector(repoRoot, log, undefined, defaultConnectorId);
   }
 
-  throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  if (!defaultConnectorId) {
+    throw createFlagError('EVAL_CONNECTOR_ID is required. Set --evaluation-connector-id or env.');
+  }
+
+  // Not validated here: the Playwright config resolves the id once connectors are loaded.
+  log.info(`Using default judge: ${defaultConnectorId}`);
+  return defaultConnectorId;
 };
 
 const isEisConnectorId = (id: string): boolean => id.startsWith('eis-');
@@ -330,7 +372,13 @@ export const resolveEvalRunContext = async ({
   profile,
   suite,
 }: ResolveEvalRunContextOptions): Promise<EvalRunContext> => {
-  const evaluationConnectorId = await resolveEvaluationConnectorId(repoRoot, log, flagsReader);
+  const evaluationConnectorId = await resolveEvaluationConnectorId(
+    repoRoot,
+    log,
+    flagsReader,
+    suite,
+    profile
+  );
 
   let projects: string[] = [];
   const projectFlag = flagsReader.string('project');

@@ -8,8 +8,8 @@
 import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import { scoutEvalsArgs, parseConnectorsFromEnv } from '../prompts';
-import { envFromDatasetsProfile, loadVaultConfig } from '../profiles';
-import { ensureSuite } from '../run_helpers';
+import { envFromDatasetsProfile } from '../profiles';
+import { ensureSuite, loadScoutHookConfig } from '../run_helpers';
 import { runScoutHook } from '../scout_hook';
 import { resolveScoutTarget } from '../scout_target';
 
@@ -42,7 +42,7 @@ export const scoutCmd: Command<void> = {
     const suite = suiteId ? ensureSuite(suiteId, repoRoot, log) : undefined;
     const profile = flagsReader.string('profile');
     const suiteScoutEnv = suite?.scoutHook
-      ? runScoutHook(repoRoot, suite.scoutHook, loadVaultConfig(repoRoot, profile) ?? {})
+      ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, profile, suite))
       : {};
 
     const scoutTarget = resolveScoutTarget(suite, {

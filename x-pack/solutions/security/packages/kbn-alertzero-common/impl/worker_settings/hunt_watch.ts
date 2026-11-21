@@ -12,7 +12,7 @@ import type { WorkerSettingsDeclaration } from './types';
  * Hunt Watch Continuous Threat Hunt: fixed Manual autonomy and a locked 4h schedule
  * (scheduled + manual triggers). Its tier2When, candidateLimit, and fanOutMax dials are
  * fixed implementation constants, not user-configurable; see `HUNT_WORKER_DEFAULTS` in
- * `worker_template_values.ts`.
+ * `hunt_worker_template.ts`.
  */
 export const CONTINUOUS_THREAT_HUNT_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,

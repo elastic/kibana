@@ -20,11 +20,13 @@ import {
   getRetrieveAnonymizedDocsOrGenerateEdge,
 } from '../../../lib/langchain/output_chunking';
 import { NodeType } from '../../../lib/langchain/constants';
+import { withGraphNodeSpan } from '../../../lib/langchain/tracing/with_graph_node_span';
 import { getCombinedAttackDiscoveryPrompt } from './prompts/get_combined_attack_discovery_prompt';
 import { responseIsHallucinated } from './helpers/response_is_hallucinated';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';
 import { getAttackDiscoveriesGenerationSchema } from './schemas';
 import type { CombinedPrompts } from './prompts';
+import type { AttackDiscoveryTemplateCompletion } from '../template_completion';
 import { getDefaultGraphAnnotation } from './state';
 
 export { getAnonymizedAlerts } from './nodes/retriever';
@@ -42,6 +44,11 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   replacements?: Replacements;
   size: number;
   start?: string;
+  /**
+   * Set when the selected connector requires an EIS prompt template.
+   * Generate and refine then send `{ template }` and skip the messages chain.
+   */
+  completeWithTemplate?: AttackDiscoveryTemplateCompletion;
 }
 
 export type DefaultAttackDiscoveryGraph = ReturnType<typeof getDefaultAttackDiscoveryGraph>;
@@ -66,6 +73,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   replacements,
   size,
   start,
+  completeWithTemplate,
 }: GetDefaultAttackDiscoveryGraphParams) => {
   try {
     const graphState = getDefaultGraphAnnotation({ end, filter, prompts, start });
@@ -89,6 +97,7 @@ export const getDefaultAttackDiscoveryGraph = ({
       getCombinedPromptFn: getCombinedAttackDiscoveryPrompt,
       generationSchema,
       responseIsHallucinated,
+      completeWithTemplate,
     });
 
     const refineNode = getRefineNode({
@@ -96,6 +105,7 @@ export const getDefaultAttackDiscoveryGraph = ({
       logger,
       generationSchema,
       responseIsHallucinated,
+      completeWithTemplate,
     });
 
     // get edges:
@@ -109,9 +119,12 @@ export const getDefaultAttackDiscoveryGraph = ({
 
     // create the graph:
     const graph = new StateGraph(graphState)
-      .addNode(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedAlertsNode)
-      .addNode(NodeType.GENERATE_NODE, generateNode)
-      .addNode(NodeType.REFINE_NODE, refineNode)
+      .addNode(
+        NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,
+        withGraphNodeSpan(NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE, retrieveAnonymizedAlertsNode)
+      )
+      .addNode(NodeType.GENERATE_NODE, withGraphNodeSpan(NodeType.GENERATE_NODE, generateNode))
+      .addNode(NodeType.REFINE_NODE, withGraphNodeSpan(NodeType.REFINE_NODE, refineNode))
       .addConditionalEdges(START, retrieveAnonymizedAlertsOrGenerateEdge, {
         generate: NodeType.GENERATE_NODE,
         retrieve_anonymized_docs: NodeType.RETRIEVE_ANONYMIZED_DOCS_NODE,

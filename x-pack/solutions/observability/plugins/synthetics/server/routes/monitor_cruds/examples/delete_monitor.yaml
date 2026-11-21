@@ -14,3 +14,13 @@ responses:
                 deleted: true
   404:
     description: The monitor does not exist.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X DELETE "${KIBANA_URL}/api/synthetics/monitors/monitor-id" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true"
+  - lang: Console
+    source: |
+      DELETE kbn://api/synthetics/monitors/monitor-id

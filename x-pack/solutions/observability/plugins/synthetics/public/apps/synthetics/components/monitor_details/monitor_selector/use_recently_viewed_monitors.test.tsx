@@ -15,7 +15,7 @@ import { fetchMonitorManagementList } from '../../../state';
 
 import * as useMonitorQueryModule from '../hooks/use_monitor_query_id';
 import { useRecentlyViewedMonitors } from './use_recently_viewed_monitors';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
 jest.mock('../../../state', () => ({
@@ -40,9 +40,9 @@ describe('useRecentlyViewedMonitors', () => {
   it('returns expected result', () => {
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
+        <HookWrapper url="/monitor/1" path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
 
@@ -89,9 +89,9 @@ describe('useRecentlyViewedMonitors', () => {
 
     const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
-        <WrappedHelper url="/monitor/1" path={MONITOR_ROUTE}>
+        <HookWrapper url="/monitor/1" path={MONITOR_ROUTE}>
           {React.createElement(React.Fragment, null, children)}
-        </WrappedHelper>
+        </HookWrapper>
       );
     };
     const { result, rerender } = renderHook(() => useRecentlyViewedMonitors(), {

@@ -428,7 +428,7 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
 
   // ECF-only services (OTel format) alias an ECS policy template and have no agent-based route.
   // These tests register their own manifests, which win over the `elb` mock from beforeEach.
-  test('ecf-only services: switching to agent-based warns first, then removes them on Save', async ({
+  test('ecf-only services: switching to agent-based warns first, then removes them on confirm', async ({
     browserAuth,
     page,
   }) => {
@@ -440,21 +440,19 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
     await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
 
-    await page.testSubj.locator('deploymentMethodCard-editButton').click();
-    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
+    await page.testSubj.locator('deploymentMethodCard-agent_based').click();
     await expect(
-      page.testSubj.locator('editDeploymentMethodModal-removedServicesCallout')
+      page.testSubj.locator('confirmDeploymentMethodModal-removedServicesCallout')
     ).toContainText('AWS CloudTrail');
 
     // Cancel changes nothing.
-    await page.testSubj.locator('editDeploymentMethodModal-cancelButton').click();
+    await page.testSubj.locator('confirmModalCancelButton').click();
     await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
     expect(await readSelectedServiceIds(page)).toStrictEqual(['cloudtrail_otel', 'ec2_otel']);
 
-    // Save drops the ECF-only service from the selection, so its ECF section goes with it.
-    await page.testSubj.locator('deploymentMethodCard-editButton').click();
-    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
-    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+    // Confirm drops the ECF-only service from the selection, so its ECF section goes with it.
+    await page.testSubj.locator('deploymentMethodCard-agent_based').click();
+    await page.testSubj.locator('confirmModalConfirmButton').click();
 
     await expect(page.testSubj.locator('ecfDeploymentSection')).toBeHidden();
     await expect.poll(() => readSelectedServiceIds(page)).toStrictEqual(['ec2_otel']);
@@ -483,16 +481,11 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
     await expect(page.testSubj.locator('ecfDeploymentSection')).toBeVisible();
 
-    await page.testSubj.locator('deploymentMethodCard-editButton').click();
-    await page.testSubj.locator('editDeploymentMethodModal-select').selectOption('agent_based');
-    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+    await page.testSubj.locator('deploymentMethodCard-agent_based').click();
+    await page.testSubj.locator('confirmModalConfirmButton').click();
     await expect(page.testSubj.locator('ecfDeploymentSection')).toBeHidden();
 
-    await page.testSubj.locator('deploymentMethodCard-editButton').click();
-    await page.testSubj
-      .locator('editDeploymentMethodModal-select')
-      .selectOption('managed_integration');
-    await page.testSubj.locator('editDeploymentMethodModal-saveButton').click();
+    await page.testSubj.locator('deploymentMethodCard-managed_integration').click();
 
     // Back on managed, only EC2 is selected, so there is nothing to deploy through ECF.
     await expect(page.testSubj.locator('managedIntegrationsSection')).toBeVisible();
@@ -510,6 +503,11 @@ test.describe('Onboarding Authenticate and Deploy step', { tag: tags.stateful.cl
     });
 
     await expect(page.testSubj.locator('deploymentMethodCard')).toBeVisible();
-    await expect(page.testSubj.locator('deploymentMethodCard-editButton')).toBeHidden();
+    await expect(
+      page.testSubj.locator('deploymentMethodCard-managed_integration').locator('input')
+    ).toBeDisabled();
+    await expect(
+      page.testSubj.locator('deploymentMethodCard-agent_based').locator('input')
+    ).toBeDisabled();
   });
 });

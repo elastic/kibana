@@ -63,7 +63,7 @@ export const buildKqlFilter = ({
   return parts.join(' AND ');
 };
 
-/** Formats a per-framework/version entity count for the population log line, e.g. "enterprise@19.1: 873". */
+/** Formats per-framework/version entity counts for the population log line, e.g. "enterprise@19.2: 873, atlas@2026.8: 213". */
 export const summarizeEntityCounts = (entities: MitreEntity[]): string => {
   const versionSummary = entities.reduce<Record<string, number>>((acc, entity) => {
     const key = `${entity.framework}@${entity.framework_version}`;

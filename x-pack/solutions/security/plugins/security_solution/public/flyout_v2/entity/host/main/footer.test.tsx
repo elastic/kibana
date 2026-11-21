@@ -31,7 +31,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 // Render additionalItems inline so tests can assert on them without opening the popover.
-jest.mock('../../../../flyout/entity_details/shared/components/take_action', () => ({
+jest.mock('../../shared/components/take_action', () => ({
   TakeAction: ({
     additionalItems,
   }: {

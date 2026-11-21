@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const getAlertSeriesNotFoundMessage = (groupHash: string): string =>
-  `Alert series with group_hash [${groupHash}] not found`;
+export const getAlertSeriesNotFoundMessage = (seriesId: string): string =>
+  `Alert series with series_id [${seriesId}] not found`;
+
+export const getInvalidSeriesIdMessage = (seriesId: string): string =>
+  `[${seriesId}] is not a valid series_id`;
 
 export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
   `Alert with alert_id [${episodeId}] not found`;
@@ -36,3 +39,14 @@ export const getAssigneeUnchangedMessage = (
 
 export const getTagsUnchangedMessage = (episodeId: string): string =>
   `[${episodeId}] already has these tags.`;
+
+export const getSeriesAlreadySnoozedMessage = (
+  groupHash: string,
+  snoozedUntil: string | null
+): string =>
+  snoozedUntil == null
+    ? `[${groupHash}] is already snoozed indefinitely.`
+    : `[${groupHash}] is already snoozed until [${snoozedUntil}].`;
+
+export const getSeriesNotSnoozedMessage = (groupHash: string): string =>
+  `[${groupHash}] is not snoozed.`;

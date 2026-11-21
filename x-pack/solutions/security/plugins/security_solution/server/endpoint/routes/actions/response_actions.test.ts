@@ -1526,7 +1526,7 @@ describe('Response actions', () => {
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
-      // eslint-disable-next-line require-atomic-updates
+      // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
       httpHandlerContextMock.core = Promise.resolve(
         set(
           await httpHandlerContextMock.core,
@@ -1632,7 +1632,7 @@ describe('Response actions', () => {
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
-      // eslint-disable-next-line require-atomic-updates
+      // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
       httpHandlerContextMock.core = Promise.resolve(
         set(
           await httpHandlerContextMock.core,
@@ -1713,7 +1713,7 @@ describe('Response actions', () => {
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context
-      // eslint-disable-next-line require-atomic-updates
+      // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
       httpHandlerContextMock.core = Promise.resolve(
         set(
           await httpHandlerContextMock.core,

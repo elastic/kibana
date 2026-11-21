@@ -25,6 +25,7 @@ const info = (
   lastCheckin,
   memoryMib,
   complete,
+  policyRevision: null,
 });
 
 const plan = (

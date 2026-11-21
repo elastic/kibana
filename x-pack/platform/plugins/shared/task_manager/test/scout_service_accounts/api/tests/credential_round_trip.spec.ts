@@ -11,8 +11,16 @@ import { expect } from '@kbn/scout/api';
 
 const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
+const TASK_TYPE = 'taskManagerServiceAccountsTest:runAs';
 const ENCRYPTED_CREDENTIAL_BYTES = 32;
-const RUN_AS = {
+interface RunAs {
+  workloadType: string;
+  workloadId: string;
+  spaceId: string;
+  expectedServiceAccountId: string | null;
+}
+
+const RUN_AS: RunAs = {
   workloadType: 'task_manager_test',
   workloadId: 'credential-round-trip',
   spaceId: 'default',
@@ -29,6 +37,7 @@ interface StoredTask {
   credential?: Record<string, unknown>;
   encryptedCredential?: string;
   apiKey?: string;
+  userScope?: Record<string, unknown>;
 }
 
 apiTest.describe(
@@ -54,11 +63,12 @@ apiTest.describe(
     const updateTask = async (
       apiClient: ApiClientFixture,
       id: string,
-      api: 'bulkUpdateState' | 'bulkUpdateSchedules'
+      api: 'bulkUpdateState' | 'bulkUpdateSchedules',
+      options: { regenerateApiKey?: boolean } = {}
     ) => {
       const response = await apiClient.post(`${taskPath(id)}/_update`, {
         headers,
-        body: { api },
+        body: { api, ...options },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -77,6 +87,14 @@ apiTest.describe(
         throw new Error(`Task document "${id}" has no source`);
       }
       return _source.task;
+    };
+
+    const readTaskApiKeyIds = async (esClient: EsClient) => {
+      const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+        size: 1000,
+        query: { prefix: { name: `TaskManager: ${TASK_TYPE}` } },
+      });
+      return apiKeys.map(({ id }) => id).sort();
     };
 
     const expectEncryptedCredential = async (
@@ -162,6 +180,28 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'does not let bulkSchedule replace the service account of a task',
+      async ({ apiClient, esClient }) => {
+        const id = await scheduleTask(apiClient, {
+          runAs: { ...RUN_AS, expectedServiceAccountId: 'kibana/account-a' },
+        });
+        const stored = await readStoredTask(esClient, id);
+        const before = await decryptTask(apiClient, id);
+        expect(before).toHaveStatusCode(200);
+
+        const response = await bulkScheduleTasks(apiClient, [
+          { id, runAs: { ...RUN_AS, expectedServiceAccountId: 'kibana/account-b' } },
+        ]);
+        expect(response).toHaveStatusCode(409);
+
+        expect(await readStoredTask(esClient, id)).toStrictEqual(stored);
+        const after = await decryptTask(apiClient, id);
+        expect(after).toHaveStatusCode(200);
+        expect(after.body).toStrictEqual(before.body);
+      }
+    );
+
     for (const api of ['bulkUpdateState', 'bulkUpdateSchedules'] as const) {
       apiTest(`keeps the credential decryptable after ${api}`, async ({ apiClient, esClient }) => {
         const id = await scheduleTask(apiClient, { runAs: RUN_AS });
@@ -180,6 +220,28 @@ apiTest.describe(
         expect(after.body).toStrictEqual(before.body);
       });
     }
+
+    apiTest(
+      'mints no API key when bulkUpdateSchedules regenerates API keys with a request',
+      async ({ apiClient, esClient }) => {
+        const id = await scheduleTask(apiClient, { runAs: RUN_AS });
+        const { encryptedCredential } = await readStoredTask(esClient, id);
+        const before = await decryptTask(apiClient, id);
+        expect(before).toHaveStatusCode(200);
+        const apiKeyIds = await readTaskApiKeyIds(esClient);
+
+        await updateTask(apiClient, id, 'bulkUpdateSchedules', { regenerateApiKey: true });
+
+        expect(await readTaskApiKeyIds(esClient)).toStrictEqual(apiKeyIds);
+        const updated = await readStoredTask(esClient, id);
+        expect(updated).toMatchObject({ credential: STORED_CREDENTIAL, encryptedCredential });
+        expect(updated.apiKey).toBeUndefined();
+        expect(updated.userScope).toBeUndefined();
+        const after = await decryptTask(apiClient, id);
+        expect(after).toHaveStatusCode(200);
+        expect(after.body).toStrictEqual(before.body);
+      }
+    );
 
     apiTest(
       'fails to decrypt once the credential is changed outside Task Manager',

@@ -81,8 +81,12 @@ toc:
           - file: connectors-kibana/amazon-s3-action-type.md
           - file: connectors-kibana/ansible-controller-action-type.md
           - file: connectors-kibana/argocd-action-type.md
+          - file: connectors-kibana/aws-action-type.md
           - file: connectors-kibana/aws-cloudwatch-action-type.md
           - file: connectors-kibana/aws-eks-action-type.md
+          - file: connectors-kibana/aws-lambda-action-type.md
+          - file: connectors-kibana/aws-rds-action-type.md
+          - file: connectors-kibana/aws-ssm-action-type.md
           - file: connectors-kibana/aws-x-ray-action-type.md
           - file: connectors-kibana/azure-aks-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
@@ -161,6 +165,7 @@ toc:
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
+      - file: connectors-kibana/quick-connect-oauth.md
   - file: kibana-plugins.md
   - file: commands.md
     children:

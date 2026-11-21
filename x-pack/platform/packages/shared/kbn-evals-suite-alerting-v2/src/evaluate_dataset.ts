@@ -30,6 +30,8 @@ import {
   createExpectedToolCalledEvaluator,
 } from './evaluators/expected_tool_called';
 import {
+  collectAttachmentDataCheckNames,
+  createAttachmentDataCheckEvaluator,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
 } from './evaluators/expected_attachment';
@@ -198,6 +200,7 @@ export const createEvaluateDataset = ({
         createExpectedAnyOfToolIdsEvaluator(),
         createExpectedRenderAttachmentEvaluator(),
         createExpectedAttachmentDataEvaluator(),
+        ...collectAttachmentDataCheckNames(examples).map(createAttachmentDataCheckEvaluator),
         createCriteriaEvaluator(evaluators),
       ].map((evaluator) => withLowScoreLogging(evaluator, log, { testTitle }))
     );

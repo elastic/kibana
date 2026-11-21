@@ -166,6 +166,112 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('pending restart', () => {
+      function restart(agentId: string, body?: object) {
+        return supertest
+          .post(`/api/fleet/agents/${agentId}/restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send(body);
+      }
+
+      async function writeActionResult(actionId: string, agentId: string) {
+        await es.index(
+          {
+            index: AGENT_ACTIONS_RESULTS_INDEX,
+            refresh: true,
+            op_type: 'create',
+            document: {
+              action_id: actionId,
+              agent_id: agentId,
+              '@timestamp': new Date().toISOString(),
+            },
+          },
+          ES_INDEX_OPTIONS
+        );
+      }
+
+      it('returns 409 when the agent already has a pending restart', async () => {
+        await createAgent('pending-single', SUPPORTED_VERSION);
+        await restart('pending-single').expect(200);
+
+        const before = await countRestartActionsInIndex();
+        const { body } = await restart('pending-single').expect(409);
+        expect(body.message).to.match(/already has a pending restart action/);
+
+        const after = await countRestartActionsInIndex();
+        expect(after.value).to.eql(before.value);
+      });
+
+      it('creates a new RESTART action with force when a restart is pending', async () => {
+        await createAgent('pending-force', SUPPORTED_VERSION);
+        const { body: first } = await restart('pending-force').expect(200);
+
+        const { body: second } = await restart('pending-force', { force: true }).expect(200);
+        expect(second.actionId).not.to.eql(first.actionId);
+      });
+
+      it('allows a new restart once the previous one has a result', async () => {
+        await createAgent('pending-acked', SUPPORTED_VERSION);
+        const { body } = await restart('pending-acked').expect(200);
+        await writeActionResult(body.actionId, 'pending-acked');
+
+        await restart('pending-acked').expect(200);
+      });
+
+      it('returns pending_restart on the agent when withPendingRestart is set', async () => {
+        await createAgent('pending-get', SUPPORTED_VERSION);
+        const { body } = await restart('pending-get').expect(200);
+
+        const { body: agentBody } = await supertest
+          .get(`/api/fleet/agents/pending-get?withPendingRestart=true`)
+          .expect(200);
+        expect(agentBody.item.pending_restart.action_id).to.eql(body.actionId);
+
+        const { body: listBody } = await supertest
+          .get(`/api/fleet/agents?withPendingRestart=true&kuery=agent.id:pending-get`)
+          .expect(200);
+        expect(listBody.items[0].pending_restart.action_id).to.eql(body.actionId);
+
+        const { body: withoutFlagBody } = await supertest
+          .get(`/api/fleet/agents/pending-get`)
+          .expect(200);
+        expect(withoutFlagBody.item.pending_restart).to.be(undefined);
+      });
+
+      it('bulk restart writes an error result for agents with a pending restart', async () => {
+        await createAgent('bulk-pending', SUPPORTED_VERSION);
+        await createAgent('bulk-free', SUPPORTED_VERSION);
+        await restart('bulk-pending').expect(200);
+
+        const { body } = await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['bulk-pending', 'bulk-free'] })
+          .expect(200);
+
+        const action = await getLatestAction();
+        expect(action.agents).to.eql(['bulk-free']);
+
+        const errorResults = await getActionResultsForAction(body.actionId);
+        const pendingError = errorResults.find((r: any) => r.agent_id === 'bulk-pending');
+        expect(pendingError.error).to.match(/already has a pending restart action/);
+      });
+
+      it('bulk restart with force includes agents with a pending restart', async () => {
+        await createAgent('bulk-pending-force', SUPPORTED_VERSION);
+        await restart('bulk-pending-force').expect(200);
+
+        await supertest
+          .post(`/api/fleet/agents/bulk_restart`)
+          .set('kbn-xsrf', 'xxx')
+          .send({ agents: ['bulk-pending-force'], force: true })
+          .expect(200);
+
+        const action = await getLatestAction();
+        expect(action.agents).to.eql(['bulk-pending-force']);
+      });
+    });
+
     describe('bulk restart — mixed supported/unsupported agents', () => {
       it('creates action only for supported agents and writes error results for unsupported', async () => {
         await createAgent('bulk-supported-1', SUPPORTED_VERSION);

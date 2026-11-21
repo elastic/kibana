@@ -81,7 +81,7 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await switcher.waitFor({ state: 'hidden' });
     // The trigger label renders the committed data view, so it is the only signal that the
     // switch's async `dataViews.get()` has resolved; the popover hides on the click itself.
-    await expect(dataViewSwitch.getByTestId('fullText')).toHaveText(name, { timeout: 30_000 });
+    await expect(dataViewSwitch.getByTestId('fullText')).toHaveText(name);
     if (waitForFieldList) {
       await this.waitUntilFieldListHasCountOfFields();
     }
@@ -641,9 +641,7 @@ export abstract class DiscoverLayout extends DiscoverSave {
     await this.page.testSubj.fill('unifiedHistogramBreakdownSelectorSelectorSearch', field);
     // The list is virtualised; clicking while EUI is still filtering misses the option
     // and leaves the popover open.
-    await selectable.and(this.page.locator('[data-is-searching="false"]')).waitFor({
-      state: 'attached',
-    });
+    await expect(selectable).toHaveAttribute('data-search-term', field);
     await selectable.locator(`.euiSelectableListItem[value="${value}"]`).click();
     await selectable.waitFor({ state: 'hidden' });
   }

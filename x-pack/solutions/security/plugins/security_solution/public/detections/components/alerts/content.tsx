@@ -10,12 +10,13 @@ import styled from '@emotion/styled';
 import { isEqual } from 'lodash';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { isTab } from '../../../common/utils/accessibility';
 import { SecurityAppHeader } from '../../../common/components/app_header';
+import { useKibana } from '../../../common/lib/kibana';
 import { PAGE_TITLE } from '../../pages/alerts/translations';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { KPIsSection } from './kpis/kpis_section';
@@ -70,6 +71,9 @@ export interface AlertsPageContentProps {
  */
 export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => {
   const containerElement = useRef<HTMLDivElement | null>(null);
+  const {
+    services: { docLinks },
+  } = useKibana();
 
   const { globalFullScreen } = useGlobalFullScreen();
   // The sticky AppHeader and KQL input stack above EuiDataGrid's own full screen mode.
@@ -137,7 +141,12 @@ export const AlertsPageContent = memo(({ dataView }: AlertsPageContentProps) => 
       >
         {/* Must stay a direct child of the page wrapper: CSS sticky is confined to its parent's height. */}
         {!hasFullScreenContent && (
-          <SecurityAppHeader title={PAGE_TITLE} menu={headerMenu} spacing="largeBleed" />
+          <SecurityAppHeader
+            title={PAGE_TITLE}
+            menu={headerMenu}
+            spacing="largeBleed"
+            docLink={docLinks.links.siem.alertsPage}
+          />
         )}
         <Display show={!hasFullScreenContent}>
           <EuiSpacer size="m" />

@@ -33,6 +33,7 @@ const setupRoute = (update: jest.Mock) => {
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkersService: () => ({ update }),
+    isCpsEnabled: () => false,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (
@@ -87,35 +88,6 @@ describe('registerUpdateWorkerRoute', () => {
     expect(response.customError).not.toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 501 })
     );
-  });
-
-  it('maps a blocked Alert Triage enable to 400 with a message for the reason', async () => {
-    const update = jest
-      .fn()
-      .mockResolvedValue({ outcome: 'blocked', reason: 'alertAnalysisRuntimeDisabled' });
-    const { handler } = setupRoute(update);
-    const response = httpServerMock.createResponseFactory();
-
-    await handler(
-      createRouteContextMock(),
-      httpServerMock.createKibanaRequest({
-        params: { workerId: TRIAGE },
-        body: { enabled: true },
-        kibanaRequestState: {
-          requestId: '123',
-          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
-          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
-          authzResult: managedUpdateAuthzResult,
-        },
-      }),
-      response
-    );
-
-    expect(response.badRequest).toHaveBeenCalledWith({
-      body: {
-        message: expect.stringContaining('alert analysis to be turned on for this space'),
-      },
-    });
   });
 
   it('maps a template-free reports index block to 400 naming the index', async () => {
@@ -243,5 +215,37 @@ describe('registerUpdateWorkerRoute', () => {
     expect(update).toHaveBeenCalled();
     expect(response.forbidden).not.toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('hands the service a universe callback that returns the filtered patterns', async () => {
+    const update = jest.fn().mockResolvedValue({
+      outcome: 'updated',
+      response: { worker: { id: TRIAGE } },
+    });
+    const { handler } = setupRoute(update);
+    const base = createRouteContextMock() as { core: Promise<object> };
+    const context = {
+      ...base,
+      core: base.core.then((core) => ({
+        ...core,
+        uiSettings: {
+          client: {
+            get: jest.fn().mockResolvedValue(['logs-*', '.alerts-security.alerts-default']),
+          },
+        },
+      })),
+    };
+
+    await handler(
+      context,
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+      }),
+      httpServerMock.createResponseFactory()
+    );
+
+    const getHuntUniverse = update.mock.calls[0].at(-1) as () => Promise<string[]>;
+    await expect(getHuntUniverse()).resolves.toEqual(['logs-*']);
   });
 });

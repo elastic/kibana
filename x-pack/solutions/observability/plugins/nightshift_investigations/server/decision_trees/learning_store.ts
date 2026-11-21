@@ -28,7 +28,13 @@ interface DecisionTreeLearningSource extends LearningRecord {
   type: 'decision_tree_learning';
   title: string;
   tags: string[];
-  attributes?: { space_id?: string; tree_id?: string };
+  attributes?: {
+    space_id?: string;
+    tree_id?: string;
+    conversation_id?: string;
+    round_id?: string;
+    workflow_execution_id?: string;
+  };
 }
 
 /**
@@ -74,6 +80,13 @@ const titleFor = (record: {
 };
 
 export interface LearningStore {
+  /** Reads the existing learning slot if present. */
+  get?: (input: {
+    kind: LearningKind;
+    treeId: string;
+    category?: SystemLearningCategory | ToolLearningCategory;
+    connectorName?: string;
+  }) => Promise<LearningRecord | undefined>;
   /** Replaces the slot for this tree/kind/category/connector and returns the stored record. */
   record: (input: {
     kind: LearningKind;
@@ -81,6 +94,9 @@ export interface LearningStore {
     content: string;
     category?: SystemLearningCategory | ToolLearningCategory;
     connectorName?: string;
+    conversationId?: string;
+    roundId?: string;
+    workflowExecutionId?: string;
   }) => Promise<LearningRecord>;
   /** Active learnings in this space, for the turn prompt's retention section. */
   list: () => Promise<LearningRecord[]>;
@@ -93,6 +109,18 @@ const toRecord = (source: DecisionTreeLearningSource): LearningRecord => ({
   ...(source.tree_id ? { tree_id: source.tree_id } : {}),
   ...(source.category ? { category: source.category } : {}),
   ...(source.connector_name ? { connector_name: source.connector_name } : {}),
+  ...(source.attributes?.conversation_id ?? source.conversation_id
+    ? { conversation_id: source.attributes?.conversation_id ?? source.conversation_id }
+    : {}),
+  ...(source.attributes?.round_id ?? source.round_id
+    ? { round_id: source.attributes?.round_id ?? source.round_id }
+    : {}),
+  ...(source.attributes?.workflow_execution_id ?? source.workflow_execution_id
+    ? {
+        workflow_execution_id:
+          source.attributes?.workflow_execution_id ?? source.workflow_execution_id,
+      }
+    : {}),
 });
 
 export const createLearningStore = ({
@@ -107,7 +135,32 @@ export const createLearningStore = ({
   signal?: AbortSignal;
 }): LearningStore => {
   return {
-    record: async ({ kind, treeId, content, category, connectorName }) => {
+    get: async ({ kind, treeId, category, connectorName }) => {
+      if (typeof esClient.get !== 'function') {
+        return undefined;
+      }
+      const id = learningDocId(spaceId, { kind, treeId, category, connectorName });
+      try {
+        const res = await esClient.get<DecisionTreeLearningSource>(
+          { index: DECISION_TREE_AI_INDEX_DEST, id },
+          { signal }
+        );
+        return res._source ? toRecord(res._source) : undefined;
+      } catch {
+        return undefined;
+      }
+    },
+
+    record: async ({
+      kind,
+      treeId,
+      content,
+      category,
+      connectorName,
+      conversationId,
+      roundId,
+      workflowExecutionId,
+    }) => {
       const label =
         kind === 'system' ? 'System learning' : kind === 'tool' ? 'Tool learning' : 'Remediation';
       const validated = validateShortText(content, label);
@@ -129,6 +182,9 @@ export const createLearningStore = ({
         keywords,
         ...(category ? { category } : {}),
         ...(connectorName ? { connector_name: connectorName } : {}),
+        ...(conversationId ? { conversation_id: conversationId } : {}),
+        ...(roundId ? { round_id: roundId } : {}),
+        ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
       };
 
       const document: DecisionTreeLearningSource = {
@@ -136,7 +192,13 @@ export const createLearningStore = ({
         type: 'decision_tree_learning',
         title: titleFor({ kind, category, connectorName }),
         tags: ['nightshift', DECISION_TREE_TAG, 'learning'],
-        attributes: { space_id: spaceId, tree_id: treeId },
+        attributes: {
+          space_id: spaceId,
+          tree_id: treeId,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(roundId ? { round_id: roundId } : {}),
+          ...(workflowExecutionId ? { workflow_execution_id: workflowExecutionId } : {}),
+        },
         ...record,
       };
 
