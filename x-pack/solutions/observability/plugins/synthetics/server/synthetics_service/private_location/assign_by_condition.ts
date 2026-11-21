@@ -145,17 +145,22 @@ export const countMonitorsByAssignedAgent = (
 
 /**
  * Assigned agent for one monitor at one location. Prefers the current
- * `${configId}-${locationId}` package policy; falls back to a legacy
- * space-suffixed id when the new format is absent.
+ * `${configId}-${locationId}` package policy, then the `${monitorId}-${locationId}` one that
+ * monitors with a custom heartbeat id (project monitors) got before policy ids were built from
+ * `configId`; falls back to a legacy space-suffixed id when neither exists.
  */
 export const assignedAgentIdForMonitorLocation = (
   packagePolicies: ReadonlyArray<{ id: string; condition?: string | null }>,
   monitorId: string,
   locationId: string,
-  spaceId: string
+  spaceId: string,
+  configId: string = monitorId
 ): string | undefined => {
-  const newId = `${monitorId}-${locationId}`;
-  const exact = packagePolicies.find((policy) => policy.id === newId);
+  const newId = `${configId}-${locationId}`;
+  const heartbeatId = `${monitorId}-${locationId}`;
+  const exact =
+    packagePolicies.find((policy) => policy.id === newId) ??
+    packagePolicies.find((policy) => policy.id === heartbeatId);
   if (exact) {
     return agentIdFromCondition(exact.condition);
   }

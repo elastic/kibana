@@ -153,6 +153,44 @@ describe('SyntheticsPrivateLocation', () => {
       const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
       expect(result).toEqual('monitor-123-location-456');
     });
+
+    it.each([
+      [
+        'fields.config_id',
+        { id: ' journey with spaces é-project-default ', fields: { config_id: 'so-uuid' } },
+        'so-uuid-location-456',
+      ],
+      ['config_id', { id: 'journey', config_id: 'so-uuid' }, 'so-uuid-location-456'],
+      [
+        'the heartbeat id when the saved-object id is unknown',
+        { id: 'journey' },
+        'journey-location-456',
+      ],
+    ])('builds the policy ID from %s', (_label, config, expected) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+      expect(syntheticsPrivateLocation.getPolicyId(config, 'location-456')).toEqual(expected);
+    });
+  });
+
+  describe('getPolicyIdCandidates', () => {
+    it('lists the new, the heartbeat-based and the space-suffixed IDs of a project monitor', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'journey-project-default', config_id: 'so-uuid' };
+
+      expect(
+        syntheticsPrivateLocation.getPolicyIdCandidates(
+          config,
+          'loc-1',
+          new Set(['default', 'space-a'])
+        )
+      ).toEqual([
+        'so-uuid-loc-1',
+        'journey-project-default-loc-1',
+        'journey-project-default-loc-1-default',
+        'journey-project-default-loc-1-space-a',
+      ]);
+    });
   });
 
   describe('getLegacyPolicyId', () => {
@@ -317,6 +355,64 @@ describe('SyntheticsPrivateLocation', () => {
       expect(result.hasNewFormatPolicyId).toBe(false);
       expect(result.hasAnyLegacyPolicyId).toBe(false);
       expect(result.legacyPolicyIds).toEqual([]);
+    });
+
+    describe('project monitors with a heartbeat id different from the saved-object id', () => {
+      const config = { id: 'journey-project-default', config_id: 'so-uuid' };
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const cases: Array<[string, string[], string, boolean, string[]]> = [
+        ['nothing exists', [], 'so-uuid-loc-1', false, []],
+        [
+          'a heartbeat-based policy exists',
+          ['journey-project-default-loc-1'],
+          'journey-project-default-loc-1',
+          true,
+          [],
+        ],
+        [
+          'a policy exists under both ids',
+          ['journey-project-default-loc-1', 'so-uuid-loc-1'],
+          'so-uuid-loc-1',
+          true,
+          [],
+        ],
+        [
+          'a space-suffixed policy exists',
+          ['journey-project-default-loc-1-space-a'],
+          'so-uuid-loc-1',
+          false,
+          ['journey-project-default-loc-1-space-a'],
+        ],
+        [
+          'a heartbeat-based and a space-suffixed policy exist',
+          ['journey-project-default-loc-1', 'journey-project-default-loc-1-space-a'],
+          'journey-project-default-loc-1',
+          true,
+          ['journey-project-default-loc-1-space-a'],
+        ],
+      ];
+
+      it.each(cases)(
+        'when %s',
+        (_label, existingIds, policyId, hasNewFormatPolicyId, legacyPolicyIds) => {
+          const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+
+          expect(
+            syntheticsPrivateLocation.getPolicyIdFormatInfo(
+              config,
+              'loc-1',
+              existingIds.map((id) => ({ id })),
+              allSpaces
+            )
+          ).toEqual({
+            policyId,
+            hasNewFormatPolicyId,
+            hasAnyLegacyPolicyId: legacyPolicyIds.length > 0,
+            legacyPolicyIds,
+          });
+        }
+      );
     });
   });
 
@@ -1672,6 +1768,187 @@ describe('SyntheticsPrivateLocation', () => {
       );
 
       expect(failedUpdates).toHaveLength(1);
+    });
+  });
+
+  describe('package policy ids of project monitors', () => {
+    const location = {
+      id: 'loc-a',
+      label: 'Location A',
+      agentPolicyId: 'agent-policy-a',
+      isServiceManaged: false,
+    } as unknown as PrivateLocationAttributes;
+    const customHeartbeatId = 'my journey-my-project-default';
+    const configId = 'f9c1d0aa-1c3e-4d2b-9b1e-6a5f0b1d2c3e';
+    const newPolicyId = `${configId}-loc-a`;
+    const heartbeatPolicyId = `${customHeartbeatId}-loc-a`;
+    const spaceSuffixedPolicyId = `${customHeartbeatId}-loc-a-space-a`;
+
+    // Shaped like the formatted configs create and edit receive.
+    const projectConfig = {
+      ...testConfig,
+      id: customHeartbeatId,
+      fields: { config_id: configId },
+      locations: [location],
+    } as unknown as HeartbeatConfig;
+    // Shaped like the monitor attributes delete receives.
+    const projectMonitorToDelete = {
+      ...testConfig,
+      id: customHeartbeatId,
+      config_id: configId,
+      locations: [location],
+    } as unknown as HeartbeatConfig;
+
+    const setup = (existingPolicies: Array<{ id: string }> = []) => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+        ...serverMock,
+        fleet: {
+          ...serverMock.fleet,
+          packagePolicyService: {
+            ...serverMock.fleet.packagePolicyService,
+            buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+          },
+        },
+        pluginsStart: {
+          licensing: { getLicense: jest.fn().mockRejectedValue(new Error('es unavailable')) },
+        },
+      } as unknown as SyntheticsServerSetup);
+      jest
+        .spyOn(getSecretConnectionModule, 'getSecretConnectionDelivery')
+        .mockResolvedValue({ secretConnections: [], secretStorageEnabled: true });
+      const getExistingPolicies = jest
+        .spyOn(syntheticsPrivateLocation, 'getExistingPolicies')
+        .mockResolvedValue({
+          policies: existingPolicies,
+          allSpaces: new Set(['default', 'space-a']),
+        } as never);
+      const bulkCreate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+        .mockResolvedValue({ created: [], failed: [] });
+      const bulkUpdate = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdate')
+        .mockResolvedValue([]);
+      const bulkDelete = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkDelete')
+        .mockResolvedValue(undefined);
+      return { syntheticsPrivateLocation, getExistingPolicies, bulkCreate, bulkUpdate, bulkDelete };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('creates the policy under the saved-object id, not under the custom heartbeat id', async () => {
+      const { syntheticsPrivateLocation, bulkCreate } = setup();
+
+      await syntheticsPrivateLocation.createPackagePolicies(
+        [{ config: projectConfig, globalParams: {} }],
+        [location],
+        'default',
+        []
+      );
+
+      expect(bulkCreate.mock.calls[0][0].newPolicies.map(({ id }) => id)).toEqual([newPolicyId]);
+    });
+
+    it('updates a policy created under the heartbeat id in place, without a duplicate', async () => {
+      const { syntheticsPrivateLocation, bulkCreate, bulkUpdate, bulkDelete } = setup([
+        { id: heartbeatPolicyId },
+      ]);
+
+      const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+        [{ config: projectConfig, globalParams: {} }],
+        [location],
+        'default',
+        []
+      );
+
+      expect(bulkUpdate.mock.calls[0][0].policiesToUpdate.map(({ id }) => id)).toEqual([
+        heartbeatPolicyId,
+      ]);
+      expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
+      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([]);
+      expect(failedUpdates).toEqual([]);
+    });
+
+    it('hands a failed in-place update back with its monitor so the caller can revert it', async () => {
+      const { syntheticsPrivateLocation, bulkUpdate } = setup([{ id: heartbeatPolicyId }]);
+      bulkUpdate.mockResolvedValue([
+        {
+          packagePolicy: { id: heartbeatPolicyId } as never,
+          error: new Error('update failed'),
+        },
+      ]);
+
+      const { failedUpdates } = await syntheticsPrivateLocation.editMonitors(
+        [{ config: projectConfig, globalParams: {} }],
+        [location],
+        'default',
+        []
+      );
+
+      expect(failedUpdates).toHaveLength(1);
+      expect(failedUpdates[0].config).toBe(projectConfig);
+    });
+
+    it('removes the policy under the heartbeat id when the monitor leaves the location', async () => {
+      const { syntheticsPrivateLocation, bulkCreate, bulkDelete } = setup([
+        { id: heartbeatPolicyId },
+      ]);
+
+      await syntheticsPrivateLocation.editMonitors(
+        [{ config: { ...projectConfig, locations: [] }, globalParams: {} }],
+        [location],
+        'default',
+        []
+      );
+
+      expect(bulkCreate.mock.calls[0][0].newPolicies).toEqual([]);
+      expect(bulkDelete.mock.calls[0][0].policyIdsToDelete).toEqual([heartbeatPolicyId]);
+    });
+
+    describe('deleteMonitors', () => {
+      const setupDelete = (existingPolicyIds: string[]) => {
+        const deleteMock = jest.fn().mockResolvedValue(undefined);
+        const getByIDsMock = jest.fn().mockResolvedValue(existingPolicyIds.map((id) => ({ id })));
+        const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+          ...serverMock,
+          fleet: {
+            ...serverMock.fleet,
+            packagePolicyService: {
+              ...serverMock.fleet.packagePolicyService,
+              getByIDs: getByIDsMock,
+              delete: deleteMock,
+            },
+          },
+        });
+        return { syntheticsPrivateLocation, deleteMock, getByIDsMock };
+      };
+
+      it('looks the policy up under the new, heartbeat-based and space-suffixed ids', async () => {
+        const { syntheticsPrivateLocation, getByIDsMock } = setupDelete([]);
+
+        await syntheticsPrivateLocation.deleteMonitors([projectMonitorToDelete], 'space-a');
+
+        expect(getByIDsMock.mock.calls[0][1]).toEqual(
+          expect.arrayContaining([newPolicyId, heartbeatPolicyId, spaceSuffixedPolicyId])
+        );
+      });
+
+      it('deletes every policy of the monitor when it exists under several ids', async () => {
+        const { syntheticsPrivateLocation, deleteMock } = setupDelete([
+          newPolicyId,
+          heartbeatPolicyId,
+          spaceSuffixedPolicyId,
+        ]);
+
+        await syntheticsPrivateLocation.deleteMonitors([projectMonitorToDelete], 'space-a');
+
+        expect(deleteMock.mock.calls[0][2]).toHaveLength(3);
+        expect(deleteMock.mock.calls[0][2]).toEqual(
+          expect.arrayContaining([newPolicyId, heartbeatPolicyId, spaceSuffixedPolicyId])
+        );
+      });
     });
   });
 

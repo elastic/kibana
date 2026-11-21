@@ -262,11 +262,11 @@ apiTest.describe(
           const { total, monitors: created } = await listByProjectId(apiClient, project);
           expect(total).toBe(monitors.length);
 
-          const customHeartbeatId = created[0].custom_heartbeat_id as string;
+          const configId = created[0].config_id as string;
           const policy = await getPackagePolicyForMonitor(
             apiClient,
             adminHeaders,
-            customHeartbeatId,
+            configId,
             privateLocation.id
           );
           expect(policy?.policy_id).toBe(privateLocation.id);
@@ -281,7 +281,7 @@ apiTest.describe(
           const policyAfter = await getPackagePolicyForMonitor(
             apiClient,
             adminHeaders,
-            customHeartbeatId,
+            configId,
             privateLocation.id
           );
           expect(policyAfter).toBeUndefined();
