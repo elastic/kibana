@@ -116,9 +116,16 @@ describe('frustrationPanelConfigs', () => {
     });
   });
 
-  it('labels the count of the other metrics', () => {
-    expect(configsById()['frustration-rage-clicks'].config).toMatchObject({
-      metrics: [{ type: 'primary', column: 'signals', label: 'Signals' }],
+  it('leaves the count metrics without a label, as the panel title names them', () => {
+    [
+      'frustration-signals',
+      'frustration-rage-clicks',
+      'frustration-dead-clicks',
+      'frustration-error-clicks',
+    ].forEach((id) => {
+      expect(configsById()[id].config).toMatchObject({
+        metrics: [{ type: 'primary', column: 'signals', label: '' }],
+      });
     });
   });
 

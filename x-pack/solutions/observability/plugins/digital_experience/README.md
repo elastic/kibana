@@ -241,7 +241,32 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   its per-type counts, its sessions (**Pages** shows a lower bound: the largest session count of the
   URLs that fold into the path) and **Open sessions**, which opens the Sessions list filtered to
   that element or page (`withFrustration`, `frustrationTarget` / `frustrationPage`). The page filter
-  narrows it, as the signals carry a page URL. See [Frustration signals](#frustration-signals).
+  narrows it, as the signals carry a page URL. A **View dashboard** link in its header opens the
+  Frustration page below. See [Frustration signals](#frustration-signals).
+
+### Frustration (`/{serviceName}/frustration?source=otel`)
+
+A page of EDOT Browser applications only (Classic RUM shows an empty prompt), opened from the
+Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcrumb is Applications >
+{application} > Frustration. The time range and environment are the app's and are kept in the URL.
+
+- **Dashboard:** the portable dashboard (`DashboardRenderer`, view mode) with ten Lens panels built
+  as code from ES|QL (`LensConfigBuilder`, `public/pages/frustration/utils/frustration_panels.ts`),
+  so each has the panel menu's inspect, maximize and **Explore in Discover / Lens**. Metrics:
+  frustration signals, frustrated sessions (share of all sessions, with their count), rage, dead and
+  error clicks. Charts: signals over time, and by app version, browser and device, stacked by type.
+  Table: error clicks by exception, with signals and sessions.
+- **Queries:** every panel filters on the application and, unless all environments are picked, the
+  environment, in the ES|QL `WHERE` (escaped); the time range goes through the dashboard. The field
+  names are shared with the summary query (`common/otel_source_fields.ts`) and the event names come
+  from `common/otel_data.ts`.
+- **Native panel:** below the grid, the Overview's **Elements** / **Pages** panel from `/usage`, with
+  **Open sessions**, as Lens tables can't link into the Sessions list with those filters.
+- **Plugins:** `dashboard`, `lens` and `dataViews` are optional. Without them the Overview hides the
+  link and the page shows an empty prompt in place of the dashboard.
+- **Limits:** the Overview's filters (browser, OS, device, country, version, page) and KQL query
+  aren't carried over yet: the dashboard and the panel below it cover the application and
+  environment only.
 
 ### Sessions (`/{serviceName}/sessions?source=otel`)
 
@@ -592,5 +617,6 @@ logged and answer 500 without Elasticsearch details:
 - `server/services/sessions/`: the session summaries: the task, its ES|QL queries, the index, status,
   and enabling, with their routes and readers in `server/routes/sessions/`.
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
-  `session_detail/`) with its own components, hooks and utils; what several pages share is in
-  `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  `session_detail/`, `frustration/`) with its own components, hooks and utils; what several pages
+  share is in `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the
+  app shell.

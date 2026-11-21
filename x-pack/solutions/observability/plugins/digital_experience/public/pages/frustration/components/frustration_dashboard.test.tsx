@@ -77,7 +77,7 @@ beforeEach(() => {
 });
 
 describe('FrustrationDashboard', () => {
-  it('starts in view mode with the panels of the service and environment, in the time range', async () => {
+  it('starts with the panels of the service and environment, in the time range', async () => {
     renderDashboard();
 
     expect(buildFrustrationPanels).toHaveBeenCalledWith(
@@ -90,7 +90,6 @@ describe('FrustrationDashboard', () => {
     );
     const { getInitialInput } = await lastProps().getCreationOptions!();
     expect(getInitialInput?.()).toEqual({
-      viewMode: 'view',
       panels,
       time_range: { from: 'now-24h', to: 'now' },
     });

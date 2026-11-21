@@ -97,7 +97,7 @@ const countMetricPanel = (
     title,
     ...layerSettings,
     data_source: { type: 'esql', query: esql },
-    metrics: [{ type: 'primary', column: 'signals', label: SIGNALS_LABEL }],
+    metrics: [{ type: 'primary', column: 'signals', label: '' }],
   },
 });
 

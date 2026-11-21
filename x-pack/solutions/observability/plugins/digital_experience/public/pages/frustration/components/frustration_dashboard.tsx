@@ -116,7 +116,6 @@ export function FrustrationDashboard({
   const getCreationOptions = useCallback(
     async (): Promise<DashboardCreationOptions> => ({
       getInitialInput: () => ({
-        viewMode: 'view',
         panels,
         time_range: { from: rangeFrom, to: rangeTo },
       }),
