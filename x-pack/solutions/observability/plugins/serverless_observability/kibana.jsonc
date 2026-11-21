@@ -27,6 +27,23 @@
       "profiling",
       "entityInventoryApp"
     ],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "agentBuilder",
+      "apm",
+      "contextEngine",
+      "dashboard",
+      "devTools",
+      "digitalExperience",
+      "fleet",
+      "infra",
+      "ml",
+      "observabilityAlerting",
+      "observabilityOnboarding",
+      "slo",
+      "streamsApp",
+      "synthetics"
+    ],
     "requiredBundles": ["significantEvents"]
   }
 }

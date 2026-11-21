@@ -43,6 +43,20 @@
       "share",
       "fleet"
     ],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "agentBuilder",
+      "contextEngine",
+      "dashboard",
+      "devTools",
+      "management",
+      "monitoring",
+      "searchGettingStarted",
+      "searchHomepage",
+      "searchQueryRules",
+      "searchSynonyms",
+      "workflowsManagement"
+    ],
     "requiredBundles": ["kibanaReact"]
   }
 }

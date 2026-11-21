@@ -38,6 +38,15 @@
       "searchInferenceEndpoints",
       "workflowsManagement",
     ],
+    // Solution-nav targets. Also an allowlist for dynamic contract resolution.
+    "runtimePluginDependencies": [
+      "contextEngine",
+      "ml",
+      "searchGettingStarted",
+      "searchHomepage",
+      "searchQueryRules",
+      "searchSynonyms",
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

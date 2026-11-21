@@ -36,6 +36,7 @@ module.exports = eslintCompatPlugin({
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
     no_redundant_link_navigation: require('./rules/no_redundant_link_navigation'),
     no_viz_naming: require('./rules/no_viz_naming'),
+    valid_nav_tree_owner_plugin_id: require('./rules/valid_nav_tree_owner_plugin_id'),
     scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
     scout_prefer_both_arch_tags: require('./rules/scout_prefer_both_arch_tags'),
     scout_max_one_describe: require('./rules/scout_max_one_describe'),
