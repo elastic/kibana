@@ -17,5 +17,7 @@ export default createPlaywrightEvalsConfig({
   // call in evals/hunt_watch.spec.ts) for the same reason, so a second Playwright worker
   // buys nothing and risks interleaving the approval spec with the quality spec.
   workers: 1,
-  timeout: 30 * 60_000,
+  // The hard cohort runs its 6 rows sequentially and each `huntWatchClient.run` may wait up to
+  // 2m for the Worker slot plus 10m for the run, so 30m timed the cohort out before its judges.
+  timeout: 90 * 60_000,
 });
