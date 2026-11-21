@@ -38,6 +38,21 @@ jest.mock('../agent_policies/use_agent_policies', () => ({
       agentPoliciesById: {
         'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
         'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
+        'shared-a': { id: 'shared-a', agents: 2 },
+        'shared-b': { id: 'shared-b', agents: 5 },
+        'shared-empty': { id: 'shared-empty', agents: 0 },
+      },
+      groupsByPackagePolicyId: {
+        integration: {
+          id: 'integration',
+          name: 'Shared hosts',
+          policyIds: ['shared-a', 'shared-b', 'shared-empty'],
+        },
+      },
+      groupIdByPolicyId: {
+        'shared-a': 'integration',
+        'shared-b': 'integration',
+        'shared-empty': 'integration',
       },
     },
   }),
@@ -157,6 +172,41 @@ describe('ActiveStateSwitch', () => {
 
     expect(mockMutateAsync).not.toHaveBeenCalled();
     expect(screen.getByTestId('confirmModalTitleText')).toBeInTheDocument();
+  });
+
+  describe('shared integrations', () => {
+    it('counts every agent policy and agent of the shared integration for a disabled partial pack', () => {
+      renderSwitch(
+        basePack({ enabled: false, policy_ids: ['shared-a'], effective_policy_ids: [] })
+      );
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(
+        screen.getByText(/This action will update 3 agent policies affecting 7 agents/)
+      ).toBeInTheDocument();
+    });
+
+    it('shows the confirmation when only an unsaved member of the integration has agents', () => {
+      renderSwitch(basePack({ enabled: false, policy_ids: ['shared-empty'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(mockMutateAsync).not.toHaveBeenCalled();
+      expect(
+        screen.getByText(/This action will update 3 agent policies affecting 7 agents/)
+      ).toBeInTheDocument();
+    });
+
+    it('keeps counts unchanged for an unshared pack', () => {
+      renderSwitch(basePack({ enabled: false, policy_ids: ['policy-with-agents'] }));
+
+      fireEvent.click(screen.getByRole('switch'));
+
+      expect(
+        screen.getByText(/This action will update 1 agent policy affecting 3 agents/)
+      ).toBeInTheDocument();
+    });
   });
 
   it('disables the toggle regardless of policy count when the user lacks writePacks permission', () => {

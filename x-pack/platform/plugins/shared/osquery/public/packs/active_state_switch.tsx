@@ -18,6 +18,7 @@ import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useUpdatePack } from './use_update_pack';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 const euiLoadingSpinnerCss = ({ euiTheme }: UseEuiTheme) => ({
   marginRight: euiTheme.size.s,
@@ -43,13 +44,31 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
 
   const { data } = useAgentPolicies();
 
+  // Fleet delivers a pack to every agent policy of a shared integration, so
+  // expand the saved targets by their group. `effective_policy_ids` alone is
+  // not enough: a disabled pack has no wire block and reports `[]`.
+  const deliveredPolicyIds = useMemo(() => {
+    const ids = new Set([...item.policy_ids, ...(item.effective_policy_ids ?? [])]);
+    for (const policyId of item.policy_ids) {
+      const groupId = data?.groupIdByPolicyId?.[policyId];
+      data?.groupsByPackagePolicyId?.[groupId ?? '']?.policyIds.forEach((id) => ids.add(id));
+    }
+
+    return [...ids];
+  }, [
+    data?.groupIdByPolicyId,
+    data?.groupsByPackagePolicyId,
+    item.effective_policy_ids,
+    item.policy_ids,
+  ]);
+
   const agentCount = useMemo(
     () =>
-      item.policy_ids.reduce(
+      deliveredPolicyIds.reduce(
         (acc, policyId) => acc + (data?.agentPoliciesById[policyId]?.agents || 0),
         0
       ),
-    [data?.agentPoliciesById, item.policy_ids]
+    [data?.agentPoliciesById, deliveredPolicyIds]
   );
 
   const { isLoading, mutateAsync } = useUpdatePack({
@@ -72,6 +91,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
                 },
               })
         );
+        addSharedIntegrationWarningToasts(response?.warnings, toasts, queryClient);
       },
     },
   });
@@ -122,7 +142,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
           onConfirm={handleToggleActive}
           onCancel={hideConfirmationModal}
           agentCount={agentCount}
-          agentPolicyCount={item.policy_ids.length}
+          agentPolicyCount={deliveredPolicyIds.length}
         />
       )}
     </>

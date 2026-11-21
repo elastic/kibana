@@ -10,8 +10,11 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useController, useWatch } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  EuiBadge,
+  EuiToolTip,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
@@ -19,15 +22,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiPanel,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiText,
   EuiSearchBar,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiSearchBarOnChangeArgs, Query } from '@elastic/eui';
+import type { EuiSearchBarOnChangeArgs, Query, UseEuiTheme } from '@elastic/eui';
 import { PLUGIN_ID as FLEET_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useAgentPolicies } from '../../agent_policies';
@@ -41,13 +48,17 @@ interface PolicyRow {
   // Synthesized from a saved policy_id that Fleet did not return, so there is
   // no Fleet page to link to.
   isOrphan: boolean;
+  members?: PolicyRow[];
+  // Set on a shared-integration row, whose `name` is its first member's name.
+  integrationName?: string;
+  searchTerms?: string;
 }
 
 const EMPTY_POLICY_ROWS: PolicyRow[] = [];
 
 // Shared by the table and by the bulk actions, so the rows a user sees and the
 // rows Select all acts on are always the same set.
-const EXECUTE_QUERY_OPTIONS = { defaultFields: ['name', 'description'] };
+const EXECUTE_QUERY_OPTIONS = { defaultFields: ['name', 'description', 'searchTerms'] };
 
 const shardAssignedTooltip = i18n.translate('xpack.osquery.pack.policyList.shardAssignedTooltip', {
   defaultMessage:
@@ -57,6 +68,7 @@ const shardAssignedTooltip = i18n.translate('xpack.osquery.pack.policyList.shard
 interface CheckboxCellProps {
   policyId: string;
   policyName: string;
+  accessibleName?: string;
   checked: boolean;
   disabled: boolean;
   isShardAssigned: boolean;
@@ -64,7 +76,7 @@ interface CheckboxCellProps {
 }
 
 const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
-  ({ policyId, policyName, checked, disabled, isShardAssigned, onToggle }) => {
+  ({ policyId, policyName, accessibleName, checked, disabled, isShardAssigned, onToggle }) => {
     const handleChange = useCallback(() => onToggle(policyId), [onToggle, policyId]);
 
     const tipAnchorProps = useMemo(
@@ -78,10 +90,13 @@ const CheckboxCell: React.FC<CheckboxCellProps> = React.memo(
         checked={checked}
         onChange={handleChange}
         disabled={disabled}
-        aria-label={i18n.translate('xpack.osquery.pack.policyList.checkboxAriaLabel', {
-          defaultMessage: 'Select policy {name}',
-          values: { name: policyName },
-        })}
+        aria-label={
+          accessibleName ??
+          i18n.translate('xpack.osquery.pack.policyList.checkboxAriaLabel', {
+            defaultMessage: 'Select policy {name}',
+            values: { name: policyName },
+          })
+        }
       />
     );
 
@@ -195,12 +210,90 @@ const AgentCountCell: React.FC<AgentCountCellProps> = React.memo(({ count }) => 
 
 AgentCountCell.displayName = 'AgentCountCell';
 
+const popoverListCss = ({ euiTheme }: UseEuiTheme) => ({
+  width: euiTheme.base * 26,
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+});
+
+const sharedPoliciesPanelProps = { 'data-test-subj': 'policyAssignmentSharedPoliciesPopover' };
+
+interface SharedPoliciesPopoverProps {
+  integrationName: string;
+  members: PolicyRow[];
+  renderMember: (member: PolicyRow) => React.ReactNode;
+}
+
+// Same shape as Fleet's MultipleAgentPoliciesSummaryLine: the row names one
+// agent policy and a "+N" badge opens the full list of the integration's
+// agent policies.
+const SharedPoliciesPopover: React.FC<SharedPoliciesPopoverProps> = ({
+  integrationName,
+  members,
+  renderMember,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = useCallback(() => setIsOpen((open) => !open), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const titleId = useGeneratedHtmlId({ prefix: 'sharedIntegrationPolicies' });
+
+  return (
+    <EuiPopover
+      aria-labelledby={titleId}
+      isOpen={isOpen}
+      closePopover={close}
+      anchorPosition="downCenter"
+      panelProps={sharedPoliciesPanelProps}
+      button={
+        <EuiBadge
+          color="hollow"
+          onClick={toggle}
+          onClickAriaLabel={i18n.translate(
+            'xpack.osquery.pack.form.sharedIntegration.moreBadgeAriaLabel',
+            {
+              defaultMessage: 'Show the {count} agent policies of shared integration {name}',
+              values: { count: members.length, name: integrationName },
+            }
+          )}
+          data-test-subj="policyAssignmentSharedPoliciesBadge"
+        >
+          <FormattedMessage
+            id="xpack.osquery.pack.form.sharedIntegration.moreBadge"
+            defaultMessage="+{count}"
+            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+            values={{ count: members.length - 1 }}
+          />
+        </EuiBadge>
+      }
+    >
+      <EuiPopoverTitle id={titleId}>
+        <FormattedMessage
+          id="xpack.osquery.pack.form.sharedIntegration.popoverTitle"
+          defaultMessage="Shared integration {name} is used by"
+          // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
+          values={{ name: integrationName }}
+        />
+      </EuiPopoverTitle>
+      <ul css={popoverListCss}>
+        {members.map((member) => (
+          <li key={member.id}>
+            {renderMember(member)}
+            <EuiSpacer size="xs" />
+          </li>
+        ))}
+      </ul>
+    </EuiPopover>
+  );
+};
+
 interface PolicyAssignmentFormValues {
   policy_ids: string[];
   shards: Record<string, number>;
 }
 
 interface PolicyAssignmentListProps {
+  receivingPolicyIds?: string[];
   isReadOnly?: boolean;
 }
 
@@ -210,12 +303,17 @@ const tableCaption = i18n.translate('xpack.osquery.pack.policyList.tableCaption'
 
 const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   isReadOnly = false,
+  receivingPolicyIds,
 }) => {
   const { getUrlForApp, capabilities } = useKibana().services.application;
   // The policy list is fetched with Osquery privileges only, so a user can see
   // rows here without being allowed to open the Fleet policy details page.
   const canReadFleetPolicies = !!capabilities.fleetv2?.agent_policies_read;
-  const { data: { agentPoliciesById } = {}, isFetching, isError } = useAgentPolicies();
+  const {
+    data: { agentPoliciesById, groupsByPackagePolicyId, groupIdByPolicyId } = {},
+    isFetching,
+    isError,
+  } = useAgentPolicies();
 
   const {
     field: { onChange, value: selectedIds },
@@ -273,12 +371,72 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
     [orphanIdsKey]
   );
 
-  const allPolicies = useMemo<PolicyRow[]>(
-    () => [...knownPolicies, ...orphanPolicies],
-    [knownPolicies, orphanPolicies]
+  const allPolicies = useMemo<PolicyRow[]>(() => {
+    const rows = knownPolicies.filter((policy) => !groupIdByPolicyId?.[policy.id]);
+    for (const group of Object.values(groupsByPackagePolicyId ?? {})) {
+      const members = knownPolicies
+        .filter((policy) => group.policyIds.includes(policy.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (members.length === 0) continue;
+
+      // Named after its first agent policy (like Fleet's shared-integration
+      // summary), so the row sorts and reads like any other policy row.
+      rows.push({
+        id: group.id,
+        name: members[0].name,
+        description: members[0].description,
+        agents: members.reduce((sum, { agents }) => sum + agents, 0),
+        isOrphan: false,
+        members,
+        integrationName: group.name,
+        searchTerms: [
+          group.name,
+          ...members.map(({ name, description }) => `${name} ${description}`),
+        ].join(' '),
+      });
+    }
+
+    return [...rows, ...orphanPolicies];
+  }, [knownPolicies, orphanPolicies, groupsByPackagePolicyId, groupIdByPolicyId]);
+
+  const selectedSet = useMemo(() => {
+    const selected = new Set(selectedIds ?? []);
+    for (const { policyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
+      if (policyIds.some((id) => selected.has(id))) {
+        policyIds.forEach((id) => selected.add(id));
+      }
+    }
+
+    return selected;
+  }, [selectedIds, groupsByPackagePolicyId]);
+
+  // Shard-keyed policies are explicit targets too: the form keeps them out of
+  // `policy_ids` (they live in `shards`), so they must not be reported as
+  // included only through the shared integration.
+  const implicitPolicyIds = useMemo(() => {
+    const explicit = new Set(selectedIds ?? []);
+
+    return new Set([...selectedSet].filter((id) => !explicit.has(id) && !shardKeySet.has(id)));
+  }, [selectedIds, selectedSet, shardKeySet]);
+
+  const implicitPolicyNames = useMemo(
+    () =>
+      i18n.formatList(
+        'conjunction',
+        knownPolicies.filter(({ id }) => implicitPolicyIds.has(id)).map(({ name }) => name)
+      ),
+    [knownPolicies, implicitPolicyIds]
   );
 
-  const selectedSet = useMemo(() => new Set(selectedIds ?? []), [selectedIds]);
+  const isRowSelected = useCallback(
+    (row: PolicyRow) => (row.members ?? [row]).some(({ id }) => selectedSet.has(id)),
+    [selectedSet]
+  );
+  const isRowShardAssigned = useCallback(
+    (row: PolicyRow) =>
+      !isRowSelected(row) && (row.members ?? [row]).some(({ id }) => shardKeySet.has(id)),
+    [isRowSelected, shardKeySet]
+  );
 
   // `EuiInMemoryTable` owns the search box, so mirror its query here to keep the
   // bulk actions scoped to the rows actually on screen.
@@ -296,8 +454,10 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   // the "N of M selected" denominator unless they are already selected.
   const visibleAssignable = useMemo(
     () =>
-      visiblePolicies.filter((policy) => !shardKeySet.has(policy.id) || selectedSet.has(policy.id)),
-    [visiblePolicies, shardKeySet, selectedSet]
+      visiblePolicies
+        .filter((policy) => !isRowShardAssigned(policy))
+        .flatMap((policy) => policy.members ?? [policy]),
+    [visiblePolicies, isRowShardAssigned]
   );
 
   const visibleSelectedCount = useMemo(
@@ -308,29 +468,29 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   const totalAgents = useMemo(
     () =>
       reduce(
-        selectedIds ?? [],
+        Array.from(selectedSet),
         (acc, policyId) => acc + (agentPoliciesById?.[policyId]?.agents ?? 0),
         0
       ),
-    [selectedIds, agentPoliciesById]
+    [selectedSet, agentPoliciesById]
   );
 
   const togglePolicy = useCallback(
     (policyId: string) => {
+      const row = allPolicies.find(({ id }) => id === policyId);
+      if (!row || isRowShardAssigned(row)) return;
+
       const next = new Set(selectedIds ?? []);
-      if (next.has(policyId)) {
-        next.delete(policyId);
-      } else if (shardKeySet.has(policyId)) {
-        // Refuse to newly add a shard key into policy_ids. Removals above are
-        // always allowed so a wrongly-present overlap can still be cleared.
-        return;
+      const members = row.members ?? [row];
+      if (isRowSelected(row)) {
+        members.forEach(({ id }) => next.delete(id));
       } else {
-        next.add(policyId);
+        members.forEach(({ id }) => next.add(id));
       }
 
       onChange(Array.from(next));
     },
-    [selectedIds, onChange, shardKeySet]
+    [selectedIds, onChange, allPolicies, isRowSelected, isRowShardAssigned]
   );
 
   // Both bulk actions operate on the rows currently matching the search, so a
@@ -339,14 +499,17 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   // unfiltered behaviour (including orphan ids, which are never invented here).
   const handleSelectAll = useCallback(() => {
     const idsToAdd = visiblePolicies
-      .filter((policy) => !policy.isOrphan && !shardKeySet.has(policy.id))
+      .filter((policy) => !policy.isOrphan && !isRowShardAssigned(policy))
+      .flatMap((policy) => policy.members ?? [policy])
       .map((policy) => policy.id);
 
     onChange(Array.from(new Set([...(selectedIds ?? []), ...idsToAdd])));
-  }, [visiblePolicies, shardKeySet, selectedIds, onChange]);
+  }, [visiblePolicies, isRowShardAssigned, selectedIds, onChange]);
 
   const handleUnselectAll = useCallback(() => {
-    const visibleIds = new Set(visiblePolicies.map((policy) => policy.id));
+    const visibleIds = new Set(
+      visiblePolicies.flatMap((policy) => policy.members ?? [policy]).map((policy) => policy.id)
+    );
 
     onChange((selectedIds ?? []).filter((id) => !visibleIds.has(id)));
   }, [visiblePolicies, selectedIds, onChange]);
@@ -365,19 +528,119 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
   // assignment, so editing it would save against data the user cannot see.
   const isAssignmentDisabled = isReadOnly || isInitialLoad || isLoadError;
 
+  const renderPolicyLink = useCallback(
+    (item: PolicyRow) =>
+      item.isOrphan ? (
+        <UnavailablePolicyCell policyId={item.id} policyName={item.name} />
+      ) : canReadFleetPolicies ? (
+        <EuiLink
+          href={getUrlForApp(FLEET_PLUGIN_ID, {
+            path: pagePathGetters.policy_details({ policyId: item.id })[1],
+          })}
+          target="_blank"
+          data-test-subj={`viewPolicy-${item.id}`}
+        >
+          <FormattedMessage
+            id="xpack.osquery.pack.policyList.viewPolicyLink"
+            defaultMessage="View policy"
+          />
+        </EuiLink>
+      ) : null,
+    [canReadFleetPolicies, getUrlForApp]
+  );
+
+  const renderPolicyName = useCallback(
+    (policy: PolicyRow) => (
+      <>
+        {policy.name}
+        {receivingPolicyIds?.includes(policy.id) && (
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="xpack.osquery.pack.form.sharedIntegration.receivesPackLabel"
+              defaultMessage="Receives this pack via shared integration"
+            />
+          </EuiText>
+        )}
+      </>
+    ),
+    [receivingPolicyIds]
+  );
+
+  // One marker per member. "Included" covers members pulled in by the current
+  // selection; "Receives this pack" (from the server) is kept only for a group
+  // that gets the pack while none of its members is selected, i.e. Fleet drift.
+  // Like Fleet's shared-integration popover, the policy name itself links to
+  // the agent policy.
+  const renderGroupMember = useCallback(
+    (member: PolicyRow) => (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <EuiFlexItem grow={false} className="eui-textTruncate">
+          {canReadFleetPolicies ? (
+            <EuiLink
+              href={getUrlForApp(FLEET_PLUGIN_ID, {
+                path: pagePathGetters.policy_details({ policyId: member.id })[1],
+              })}
+              target="_blank"
+              data-test-subj={`viewPolicy-${member.id}`}
+            >
+              {member.name}
+            </EuiLink>
+          ) : (
+            member.name
+          )}
+        </EuiFlexItem>
+        {implicitPolicyIds.has(member.id) ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">
+              <FormattedMessage
+                id="xpack.osquery.pack.form.sharedIntegration.includedLabel"
+                defaultMessage="Included via shared integration"
+              />
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : (
+          !selectedSet.has(member.id) &&
+          receivingPolicyIds?.includes(member.id) && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.osquery.pack.form.sharedIntegration.receivesPackLabel"
+                  defaultMessage="Receives this pack via shared integration"
+                />
+              </EuiBadge>
+            </EuiFlexItem>
+          )
+        )}
+        <EuiFlexItem />
+        <EuiFlexItem grow={false} className="eui-textNoWrap">
+          <AgentCountCell count={member.agents} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [implicitPolicyIds, selectedSet, receivingPolicyIds, canReadFleetPolicies, getUrlForApp]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<PolicyRow>>>(
     () => [
       {
         name: '',
         width: '64px',
         render: (item: PolicyRow) => {
-          const isShardAssigned = shardKeySet.has(item.id) && !selectedSet.has(item.id);
+          const isShardAssigned = isRowShardAssigned(item);
 
           return (
             <CheckboxCell
               policyId={item.id}
               policyName={item.name}
-              checked={selectedSet.has(item.id)}
+              accessibleName={
+                item.members
+                  ? i18n.translate('xpack.osquery.pack.form.sharedIntegration.checkboxAriaLabel', {
+                      defaultMessage: 'Select shared integration {name}, {count} agent policies',
+                      values: { name: item.integrationName, count: item.members.length },
+                    })
+                  : undefined
+              }
+              checked={isRowSelected(item)}
               disabled={isAssignmentDisabled || isShardAssigned}
               isShardAssigned={isShardAssigned}
               onToggle={togglePolicy}
@@ -391,6 +654,59 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
           defaultMessage: 'Policy name',
         }),
         sortable: true,
+        render: (name: string, item: PolicyRow) => {
+          if (!item.members) return renderPolicyName(item);
+
+          const integrationName = item.integrationName ?? '';
+
+          return (
+            <EuiFlexGroup
+              role="group"
+              aria-label={i18n.translate('xpack.osquery.pack.form.sharedIntegration.badge', {
+                defaultMessage: 'Shared integration: {name}',
+                values: { name: integrationName },
+              })}
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+              wrap={false}
+            >
+              <EuiFlexItem grow={false} className="eui-textTruncate">
+                {name}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SharedPoliciesPopover
+                  integrationName={integrationName}
+                  members={item.members}
+                  renderMember={renderGroupMember}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('xpack.osquery.pack.form.sharedIntegration.tooltip', {
+                    defaultMessage:
+                      'These agent policies share the Osquery Manager integration {name}. Packs are delivered per integration, so they are selected together.',
+                    values: { name: integrationName },
+                  })}
+                >
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    className="eui-textNoWrap"
+                    tabIndex={0}
+                    data-test-subj="policyAssignmentSharedLabel"
+                  >
+                    <FormattedMessage
+                      id="xpack.osquery.pack.form.sharedIntegration.sharedLabel"
+                      defaultMessage="Shared"
+                    />{' '}
+                    <EuiIcon type="info" aria-hidden={true} />
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'description',
@@ -414,33 +730,19 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
         width: '140px',
         align: 'right' as const,
         // Orphan rows have no Fleet page behind them, so linking would send the
-        // user to a not-found screen.
-        render: (item: PolicyRow) =>
-          item.isOrphan ? (
-            <UnavailablePolicyCell policyId={item.id} policyName={item.name} />
-          ) : canReadFleetPolicies ? (
-            <EuiLink
-              href={getUrlForApp(FLEET_PLUGIN_ID, {
-                path: pagePathGetters.policy_details({ policyId: item.id })[1],
-              })}
-              target="_blank"
-              data-test-subj={`viewPolicy-${item.id}`}
-            >
-              <FormattedMessage
-                id="xpack.osquery.pack.policyList.viewPolicyLink"
-                defaultMessage="View policy"
-              />
-            </EuiLink>
-          ) : null,
+        // user to a not-found screen. A shared row links its first agent policy,
+        // like Fleet's summary line; the popover links every member.
+        render: (item: PolicyRow) => renderPolicyLink(item.members?.[0] ?? item),
       },
     ],
     [
-      selectedSet,
       togglePolicy,
       isAssignmentDisabled,
-      getUrlForApp,
-      shardKeySet,
-      canReadFleetPolicies,
+      isRowSelected,
+      isRowShardAssigned,
+      renderPolicyLink,
+      renderPolicyName,
+      renderGroupMember,
     ]
   );
 
@@ -569,6 +871,30 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
       fullWidth
     >
       <EuiPanel hasBorder paddingSize="s">
+        {implicitPolicyIds.size > 0 && (
+          <>
+            <KbnInfoCallout
+              announceOnMount
+              size="s"
+              data-test-subj="policyAssignmentSharedIntegrationCallout"
+              title={i18n.translate(
+                'xpack.osquery.pack.form.sharedIntegration.partialSelectionTitle',
+                {
+                  defaultMessage: 'Shared integration includes additional agent policies',
+                }
+              )}
+              text={i18n.translate(
+                'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
+                {
+                  defaultMessage:
+                    'These agent policies already receive this pack via a shared integration. Saving adds them to this pack’s agent policies: {policyNames}.',
+                  values: { policyNames: implicitPolicyNames },
+                }
+              )}
+            />
+            <EuiSpacer size="s" />
+          </>
+        )}
         {isLoadError && !hasNoPolicyRows && (
           <>
             <EuiCallOut

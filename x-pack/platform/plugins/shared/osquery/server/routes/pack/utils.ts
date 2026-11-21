@@ -26,10 +26,12 @@ import {
 import moment from 'moment-timezone';
 import { satisfies } from 'semver';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
+import type { SharedIntegrationWarning } from '../../../common/api/packs/shared_integration_warning';
 import type { Shard } from '../../../common/utils/converters';
 import { isAllPlatforms } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
@@ -1026,6 +1028,94 @@ export const groupAgentPolicyIdsByPackagePolicy = (
   }
 
   return writeTargetsByPackagePolicyId;
+};
+
+/** Reports additional owners of the supported integrations that will receive a policy pack. */
+export const resolveSharedIntegrationOverdelivery = (
+  policyIds: string[],
+  packagePolicies: PackagePolicy[],
+  shards?: Shard
+): SharedIntegrationWarning[] => {
+  if (shards?.['*']) return [];
+
+  const selectedPolicyIds = new Set(policyIds);
+  const warnings: SharedIntegrationWarning[] = [];
+  const writeTargets = groupAgentPolicyIdsByPackagePolicy(policyIds, packagePolicies);
+  for (const { packagePolicy } of writeTargets.values()) {
+    if (!satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')) continue;
+
+    const additionalPolicyIds = [...new Set(packagePolicy.policy_ids)]
+      .filter((id) => !selectedPolicyIds.has(id))
+      .sort();
+    if (additionalPolicyIds.length === 0) continue;
+
+    warnings.push({
+      code: 'shared_integration_overdelivery',
+      package_policy_id: packagePolicy.id,
+      package_policy_name: packagePolicy.name,
+      additional_policy_ids: additionalPolicyIds,
+    });
+  }
+
+  return warnings;
+};
+
+/** Computes live pack owners in one wire scan, filtering them through the caller's space-scoped client. */
+export const computeEffectivePolicyIds = async (
+  packNames: string[],
+  spaceId: string,
+  packagePolicies: PackagePolicy[],
+  {
+    soClient,
+    agentPolicyService,
+  }: {
+    soClient: SavedObjectsClientContract;
+    agentPolicyService: Pick<AgentPolicyServiceInterface, 'getByIds'>;
+  }
+): Promise<Map<string, string[]>> => {
+  // A legacy bare (unprefixed) wire key belongs to the default space — the same
+  // rule `reconcileScheduleIdsToWire` applies — so only match it there. Matching
+  // it in every space would credit another space's same-named pack with its owners.
+  const matchesBareKey = spaceId === DEFAULT_SPACE_ID;
+  const policyIdsByPackKey = new Map<string, Set<string>>();
+  for (const packName of packNames) {
+    policyIdsByPackKey.set(makePackKey(packName, spaceId), new Set());
+    if (matchesBareKey) policyIdsByPackKey.set(packName, new Set());
+  }
+
+  for (const packagePolicy of packagePolicies) {
+    // Fleet leaves disabled integrations and inputs out of the agent policy, so their
+    // pack blocks are never delivered.
+    const input = packagePolicy.inputs[0];
+    if (packagePolicy.enabled === false || input?.enabled === false) continue;
+    const packs = input?.config?.osquery?.value?.packs ?? {};
+    for (const packKey of Object.keys(packs)) {
+      const owners = policyIdsByPackKey.get(packKey);
+      if (!owners) continue;
+      for (const policyId of packagePolicy.policy_ids) owners.add(policyId);
+    }
+  }
+
+  const candidatePolicyIds = new Set<string>();
+  for (const owners of policyIdsByPackKey.values()) {
+    for (const policyId of owners) candidatePolicyIds.add(policyId);
+  }
+
+  const agentPolicies = candidatePolicyIds.size
+    ? await agentPolicyService.getByIds(soClient, [...candidatePolicyIds], { ignoreMissing: true })
+    : [];
+  const visiblePolicyIds = new Set(agentPolicies.map(({ id }) => id));
+
+  return new Map(
+    packNames.map((packName) => {
+      const owners = new Set([
+        ...(policyIdsByPackKey.get(makePackKey(packName, spaceId)) ?? []),
+        ...((matchesBareKey && policyIdsByPackKey.get(packName)) || []),
+      ]);
+
+      return [packName, [...owners].filter((id) => visiblePolicyIds.has(id)).sort()];
+    })
+  );
 };
 
 /**

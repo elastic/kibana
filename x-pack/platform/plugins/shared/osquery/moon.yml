@@ -99,6 +99,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/app-menu'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

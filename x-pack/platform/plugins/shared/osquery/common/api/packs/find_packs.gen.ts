@@ -98,6 +98,15 @@ export const FindPacksResponse = lazySchema(() =>
           updated_at: isoDateTime().optional(),
           updated_by: z.string().nullable().optional(),
           updated_by_profile_uid: z.string().optional(),
+          /**
+           * Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.
+           */
+          effective_policy_ids: z
+            .array(z.string())
+            .optional()
+            .describe(
+              'Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.'
+            ),
           policy_ids: PolicyIdsOrUndefined.optional(),
           /**
            * Whether the pack is read-only (true for prebuilt packs).
@@ -147,6 +156,15 @@ export const FindPackResponse = lazySchema(() =>
         updated_at: isoDateTime().optional(),
         updated_by: z.string().nullable().optional(),
         updated_by_profile_uid: z.string().optional(),
+        /**
+         * Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.
+         */
+        effective_policy_ids: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Live agent-policy owners of integrations carrying this pack. Absent when Fleet state is unavailable.'
+          ),
         policy_ids: PolicyIdsOrUndefined.optional(),
         shards: Shards.optional(),
         /**

@@ -104,6 +104,26 @@ interface PackFormProps {
   onDirtyStateChange?: (isDirty: boolean) => void;
 }
 
+/**
+ * The agent policies a save writes the pack to: the selected ones, the ones with a
+ * shard, and every other agent policy of a shared integration that a selected one uses.
+ * Submission and the deploy confirmation must use the same set.
+ */
+export const getDeliveredPolicyIds = (
+  selectedPolicyIds: readonly string[],
+  shards: Record<string, number> | undefined,
+  groupsByPackagePolicyId: Record<string, { policyIds: string[] }> | undefined
+): string[] => {
+  const policies = new Set([...selectedPolicyIds, ...Object.keys(shards ?? {}).filter(Boolean)]);
+  for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
+    if (groupPolicyIds.some((id) => selectedPolicyIds.includes(id))) {
+      groupPolicyIds.forEach((id) => policies.add(id));
+    }
+  }
+
+  return [...policies];
+};
+
 const PackFormComponent: React.FC<PackFormProps> = ({
   defaultValue,
   editMode = false,
@@ -124,7 +144,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     notifications: { toasts },
   } = useKibana().services;
 
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
 
   // Cancel returns to the Packs list. The read-only Pack details page was
   // removed, so edit mode no longer navigates back to `packs/:packId`.
@@ -206,6 +226,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       platform: payload.platform ?? '',
     };
   };
+
+  const receivingPolicyIds = useMemo(
+    () => defaultValue?.effective_policy_ids?.filter((id) => !defaultValue.policy_ids.includes(id)),
+    [defaultValue?.effective_policy_ids, defaultValue?.policy_ids]
+  );
 
   const defaultPackType = defaultValue?.shards?.['*'] ? 'global' : 'policy';
 
@@ -372,16 +397,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         platform: platformValue,
         ...restPayload
       }: PackFormData) => {
-        const mappedShards = !isEmpty(shards)
-          ? (filter(
-              map(shards, (shard, key) => {
-                if (!isEmpty(key)) {
-                  return key;
-                }
-              })
-            ) as string[])
-          : [];
-        const policies = [...payloadAgentPolicyIds, ...mappedShards];
+        const policies = getDeliveredPolicyIds(
+          payloadAgentPolicyIds,
+          shards,
+          groupsByPackagePolicyId
+        );
 
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
@@ -414,7 +434,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
         return {
           ...restPayload,
-          policy_ids: policies ?? [],
+          policy_ids: [...policies],
           // On edit, round-trip each query's id so the server preserves schedule_id.
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
@@ -447,6 +467,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       dirtyFields.schedule,
       editMode,
       getShards,
+      groupsByPackagePolicyId,
       isRruleSchedulingEnabled,
       originalStartDate,
       packHasExplicitSchedule,
@@ -458,10 +479,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const handleSubmitForm = useMemo(() => handleSubmit(onSubmit), [handleSubmit, onSubmit]);
 
+  const deliveredPolicyIds = useMemo(
+    () => getDeliveredPolicyIds(policyIds ?? [], shards, groupsByPackagePolicyId),
+    [policyIds, shards, groupsByPackagePolicyId]
+  );
+
   const agentCount = useMemo(
     () =>
       reduce(
-        policyIds,
+        deliveredPolicyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
 
@@ -469,7 +495,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         },
         0
       ),
-    [policyIds, agentPoliciesById]
+    [deliveredPolicyIds, agentPoliciesById]
   );
 
   const handleSaveClick = useCallback(async () => {
@@ -673,7 +699,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
                     {/* Scheduled agent policies / shards / Type stay editable for prebuilt
                         packs (a writePacks user may re-target them) — only a fully read-only
                         user is blocked. Matches the prebuiltPackModeDescription callout. */}
-                    <PolicyAssignmentList isReadOnly={isReadOnly} />
+                    <PolicyAssignmentList
+                      isReadOnly={isReadOnly}
+                      receivingPolicyIds={receivingPolicyIds}
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
@@ -700,6 +729,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
     ],
     [
       availableOptions,
+      receivingPolicyIds,
       changePackType,
       defaultValue?.saved_object_id,
       euiFieldProps,
@@ -774,7 +804,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           onCancel={handleHideConfirmationModal}
           onConfirm={handleConfirmConfirmationClick}
           agentCount={agentCount}
-          agentPolicyCount={policyIds.length}
+          agentPolicyCount={deliveredPolicyIds.length}
         />
       )}
     </>

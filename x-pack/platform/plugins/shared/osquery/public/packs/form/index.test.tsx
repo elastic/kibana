@@ -167,6 +167,234 @@ describe('PackForm', () => {
     expect(mockUseRouterNavigate).toHaveBeenCalledWith('packs');
   });
 
+  it.each([
+    { label: 'expands a partial shared selection', shared: true, expected: ['A', 'B'] },
+    { label: 'preserves unshared selections', shared: false, expected: ['A'] },
+  ])('$label on submit', async ({ shared, expected }) => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: shared
+          ? { integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] } }
+          : {},
+        groupIdByPolicyId: shared ? { A: 'integration', B: 'integration' } : {},
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'partial-pack',
+          id: 'partial-pack',
+          name: 'partial-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(expected);
+  });
+
+  it('asks for deploy confirmation when only an added shared-integration member has agents', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 5 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, findByText } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'partial-pack',
+          id: 'partial-pack',
+          name: 'partial-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A'],
+        }}
+      />
+    );
+
+    fireEvent.click(getByTestId('update-pack-button'));
+    expect(
+      await findByText('This action will update 2 agent policies affecting 5 agents')
+    ).toBeInTheDocument();
+    expect(mockUpdateAsync).not.toHaveBeenCalled();
+  });
+
+  it('sets 25% for a shared integration and submits member shards', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, getByText, getByRole } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'sharded-pack',
+          id: 'sharded-pack',
+          name: 'sharded-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A', 'B'],
+          shards: { A: 10, B: 50 },
+        }}
+      />
+    );
+
+    const row = getByTestId('packShardsForm-0');
+    expect(within(row).getByRole('combobox')).toHaveValue('Alpha, Beta');
+    expect(getByText('One value applies to the whole integration')).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: /Shared hosts/ })).toBeDisabled();
+    const percentage = within(row).getByRole('spinbutton');
+    expect(percentage).toHaveValue(50);
+    fireEvent.change(percentage, { target: { value: '25' } });
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 25, B: 25 });
+    expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A', 'B']);
+  });
+
+  it('keeps a shared integration at 100% when an untouched pack is saved with one member sharded', async () => {
+    mockUseAgentPolicies.mockReturnValue({
+      data: {
+        agentPoliciesById: {
+          A: { id: 'A', name: 'Alpha', agents: 0 },
+          B: { id: 'B', name: 'Beta', agents: 0 },
+        },
+        groupsByPackagePolicyId: {
+          integration: { id: 'integration', name: 'Shared hosts', policyIds: ['A', 'B'] },
+        },
+        groupIdByPolicyId: { A: 'integration', B: 'integration' },
+      },
+      isFetching: false,
+      isError: false,
+    });
+    const { getByTestId, queryByText } = renderWithContext(
+      <PackForm
+        editMode
+        defaultValue={{
+          saved_object_id: 'legacy-shard-pack',
+          id: 'legacy-shard-pack',
+          name: 'legacy-shard-pack',
+          description: '',
+          created_at: '2024-01-01',
+          created_by: 'test-user',
+          updated_at: '2024-01-01',
+          updated_by: 'test-user',
+          references: [],
+          enabled: true,
+          queries: {},
+          policy_ids: ['A', 'B'],
+          effective_policy_ids: ['A', 'B'],
+          shards: { A: 10 },
+        }}
+      />
+    );
+
+    expect(within(getByTestId('packShardsForm-0')).getByRole('spinbutton')).toHaveValue(100);
+    expect(queryByText('Included via shared integration')).not.toBeInTheDocument();
+    expect(
+      queryByText('Shared integration includes additional agent policies')
+    ).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('update-pack-button'));
+    await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+    expect(mockUpdateAsync.mock.calls[0][0].shards).toEqual({ A: 100, B: 100 });
+  });
+
+  it.each([false, true])(
+    'marks effective drift owners without adopting them (read-only: %s)',
+    async (isReadOnly) => {
+      mockUseAgentPolicies.mockReturnValue({
+        data: {
+          agentPoliciesById: {
+            A: { id: 'A', name: 'Alpha', agents: 0 },
+            E: { id: 'E', name: 'Drift owner', agents: 0 },
+          },
+          groupsByPackagePolicyId: {},
+          groupIdByPolicyId: {},
+        },
+        isFetching: false,
+        isError: false,
+      });
+      const { getByText, getByTestId, getByRole } = renderWithContext(
+        <PackForm
+          editMode
+          isReadOnly={isReadOnly}
+          defaultValue={{
+            saved_object_id: 'drift-pack',
+            id: 'drift-pack',
+            name: 'drift-pack',
+            description: '',
+            created_at: '2024-01-01',
+            created_by: 'test-user',
+            updated_at: '2024-01-01',
+            updated_by: 'test-user',
+            references: [],
+            enabled: true,
+            queries: {},
+            policy_ids: ['A'],
+            effective_policy_ids: ['A', 'E'],
+          }}
+        />
+      );
+
+      expect(getByText('Receives this pack via shared integration')).toBeInTheDocument();
+      expect(getByRole('checkbox', { name: /Drift owner/ })).not.toBeChecked();
+      if (!isReadOnly) {
+        fireEvent.click(getByTestId('update-pack-button'));
+        await waitFor(() => expect(mockUpdateAsync).toHaveBeenCalled());
+        expect(mockUpdateAsync.mock.calls[0][0].policy_ids).toEqual(['A']);
+      }
+    }
+  );
+
   describe('read-only mode', () => {
     const readOnlyDefaultValue = {
       id: 'ro-pack',

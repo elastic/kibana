@@ -51,6 +51,7 @@ paths:
                     total: 1
                     data:
                       - saved_object_id: '1c266590-381f-428c-878f-c80c1334f856'
+                        effective_policy_ids: ['my_policy_id']
                         name: 'my_pack'
                         description: 'My pack'
                         enabled: true
@@ -168,6 +169,7 @@ paths:
                       created_by: 'elastic'
                       updated_at: '2025-02-26T13:37:30.452Z'
                       updated_by: 'elastic'
+                      effective_policy_ids: ['my_policy_id']
                       policy_ids:
                         - 'my_policy_id'
                       shards: {}

@@ -9,8 +9,9 @@ import React, { useEffect, useMemo } from 'react';
 import type { InternalFieldErrors } from 'react-hook-form';
 import { useFieldArray, useForm, useFormContext } from 'react-hook-form';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, last, reject } from 'lodash';
 import { convertShardsToArray, convertShardsToObject } from '../../../../common/utils/converters';
@@ -38,12 +39,18 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     setValue: setValueRoot,
     formState: { errors: errorsRoot },
   } = useFormContext();
-  const { data: { agentPoliciesById } = {} } = useAgentPolicies();
+  const { data: { agentPoliciesById, groupsByPackagePolicyId } = {} } = useAgentPolicies();
 
   const rootShards = watchRoot('shards');
+  const rootPolicyIds: string[] | undefined = watchRoot('policy_ids');
 
   const initialShardsArray = useMemo(() => {
-    const initialConvertedShards = convertShardsToArray(rootShards, agentPoliciesById);
+    const initialConvertedShards = convertShardsToArray(
+      rootShards,
+      agentPoliciesById,
+      groupsByPackagePolicyId,
+      rootPolicyIds
+    );
     if (!isEmpty(initialConvertedShards)) {
       if (initialConvertedShards[initialConvertedShards.length - 1].policy.key) {
         return [...initialConvertedShards, defaultShardData];
@@ -53,9 +60,9 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
     }
 
     return [defaultShardData];
-  }, [agentPoliciesById, rootShards]);
+  }, [agentPoliciesById, rootShards, groupsByPackagePolicyId, rootPolicyIds]);
 
-  const { control, watch, getFieldState, formState, resetField, setValue } = useForm<{
+  const { control, watch, getFieldState, formState, resetField, setValue, reset } = useForm<{
     shardsArray: ShardsArray;
   }>({
     mode: 'all',
@@ -72,6 +79,28 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
   const formValue = watch();
 
   const shardsArrayState = getFieldState('shardsArray', formState);
+
+  useEffect(() => {
+    if (!shardsArrayState.isDirty) {
+      reset({ shardsArray: initialShardsArray });
+      const normalizedShards = convertShardsToObject(initialShardsArray, groupsByPackagePolicyId);
+      // Collapsing per-policy shards of a shared integration to one row is a
+      // display normalization, not a user edit: the server already writes the
+      // max shard per integration (resolveSharedPackagePolicyShard, where a
+      // targeted member without a shard counts as 100), so keep the form
+      // pristine instead of flagging unsaved changes on open.
+      if (!deepEqual(normalizedShards, rootShards)) {
+        setValueRoot('shards', normalizedShards, { shouldDirty: false });
+      }
+    }
+  }, [
+    initialShardsArray,
+    groupsByPackagePolicyId,
+    rootShards,
+    shardsArrayState.isDirty,
+    reset,
+    setValueRoot,
+  ]);
 
   useEffect(() => {
     registerRoot('shards', {
@@ -111,14 +140,40 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
   }, [formValue, append, watch]);
 
   useEffect(() => {
-    const parsedShards = convertShardsToObject(formValue.shardsArray);
+    const parsedShards = convertShardsToObject(formValue.shardsArray, groupsByPackagePolicyId);
     if (shardsArrayState.isDirty && !deepEqual(parsedShards, rootShards)) {
       setValueRoot('shards', parsedShards, {
         shouldTouch: true,
         shouldDirty: true,
       });
     }
-  }, [setValueRoot, formValue, shardsArrayState.isDirty, rootShards, resetField, setValue]);
+  }, [
+    setValueRoot,
+    formValue,
+    shardsArrayState.isDirty,
+    rootShards,
+    resetField,
+    setValue,
+    groupsByPackagePolicyId,
+  ]);
+
+  const groupedOptions = useMemo(() => {
+    const memberIds = new Set(
+      Object.values(groupsByPackagePolicyId ?? {}).flatMap(({ policyIds }) => policyIds)
+    );
+    const availableIds = new Set(options.map(({ key }) => key));
+
+    return [
+      ...options.filter(({ key }) => key == null || !memberIds.has(key)),
+      ...Object.entries(groupsByPackagePolicyId ?? {})
+        .filter(([, { policyIds }]) => policyIds.every((id) => availableIds.has(id)))
+        .map(([key, { policyIds }]) => ({
+          key,
+          value: key,
+          label: policyIds.map((id) => agentPoliciesById?.[id]?.name ?? id).join(', '),
+        })),
+    ];
+  }, [options, groupsByPackagePolicyId, agentPoliciesById]);
 
   return (
     <>
@@ -131,9 +186,17 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
             onDelete={remove}
             isLastItem={index === array.length - 1}
             control={control}
-            options={options}
+            options={groupedOptions}
             isDisabled={isDisabled}
           />
+          {groupsByPackagePolicyId?.[formValue.shardsArray?.[index]?.policy?.key] && (
+            <EuiText size="xs">
+              <FormattedMessage
+                id="xpack.osquery.pack.form.sharedIntegration.shardValueDescription"
+                defaultMessage="One value applies to the whole integration"
+              />
+            </EuiText>
+          )}
           <EuiSpacer size="xs" />
         </EuiFlexItem>
       ))}

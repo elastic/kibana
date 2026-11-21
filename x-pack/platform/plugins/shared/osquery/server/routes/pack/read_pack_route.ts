@@ -23,6 +23,7 @@ import {
   buildExecutionDefaultsResponseSlice,
   stripPerQueryRruleFields,
 } from './utils';
+import { getEffectivePolicyIdsForPacks } from './effective_policy_ids';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
@@ -88,6 +89,13 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
           .length;
 
+        const effectivePolicyIds = await getEffectivePolicyIdsForPacks({
+          osqueryContext,
+          request,
+          soClient: spaceScopedClient,
+          packNames: [attributes.name],
+        });
+
         const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
         const data: ReadPackResponseData = {
@@ -117,6 +125,9 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           ),
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
+          ...(effectivePolicyIds && {
+            effective_policy_ids: effectivePolicyIds.get(attributes.name),
+          }),
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
           // Discriminated read response — see buildScheduleResponseSlice.
           ...buildScheduleResponseSlice(attributes, isRruleFeatureEnabled),

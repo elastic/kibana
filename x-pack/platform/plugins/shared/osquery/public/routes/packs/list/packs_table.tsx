@@ -279,7 +279,32 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
         }),
         truncateText: true,
         width: '10%',
-        render: (policyIds: string[]) => <>{policyIds?.length ?? 0}</>,
+        render: (policyIds: string[], item: PackSavedObject) => {
+          // A disabled pack is normally not compiled into any integration, so the server
+          // reports no effective targets for it. Show its saved targets instead of a
+          // misleading 0, but keep live targets if Fleet still delivers it (failed detach).
+          const effectiveIds =
+            item.enabled || item.effective_policy_ids?.length
+              ? item.effective_policy_ids ?? policyIds
+              : policyIds;
+          const effectiveCount = effectiveIds?.length ?? 0;
+
+          return effectiveCount > (policyIds?.length ?? 0) ? (
+            <EuiToolTip
+              content={i18n.translate(
+                'xpack.osquery.pack.form.sharedIntegration.effectivePoliciesTooltip',
+                {
+                  defaultMessage:
+                    'Includes agent policies receiving this pack via shared integrations.',
+                }
+              )}
+            >
+              <span tabIndex={0}>{effectiveCount}</span>
+            </EuiToolTip>
+          ) : (
+            <>{effectiveCount}</>
+          );
+        },
       });
     }
 

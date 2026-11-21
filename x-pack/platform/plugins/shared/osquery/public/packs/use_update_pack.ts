@@ -17,11 +17,13 @@ import { pagePathGetters } from '../common/page_paths';
 import { PACKS_ID } from './constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import type { PackSavedObject, ClearableExecutionDefaults } from './types';
+import type { SharedIntegrationWarning } from '../../common/api/packs/shared_integration_warning';
+import { addSharedIntegrationWarningToasts } from './shared_integration_warning_toast';
 
 interface UseUpdatePackProps {
   withRedirect?: boolean;
   options?: UseMutationOptions<
-    { data: PackSavedObject },
+    { data: PackSavedObject; warnings?: SharedIntegrationWarning[] },
     { body: { message: string; error: string } },
     Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
       ClearableExecutionDefaults & { id: string }
@@ -38,7 +40,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
   const setErrorToast = useErrorToast();
 
   return useMutation<
-    { data: PackSavedObject },
+    { data: PackSavedObject; warnings?: SharedIntegrationWarning[] },
     { body: { message: string; error: string } },
     Omit<Partial<PackSavedObject>, 'min_osquery_version' | 'result_type' | 'platform'> &
       ClearableExecutionDefaults & { id: string }
@@ -69,6 +71,7 @@ export const useUpdatePack = ({ withRedirect, options }: UseUpdatePackProps) => 
             },
           })
         );
+        addSharedIntegrationWarningToasts(response?.warnings, toasts, queryClient);
       },
       ...options,
     }
