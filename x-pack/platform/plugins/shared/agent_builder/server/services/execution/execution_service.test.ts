@@ -32,6 +32,7 @@ import {
   createConversationBusyError,
   createConversationWriteConflictError,
   createRequestAbortedError,
+  createAgentNotFoundError,
   isBadRequestError,
   isConversationBusyError,
   isConversationPausedError,
@@ -1062,6 +1063,56 @@ describe('AgentExecutionService', () => {
       // Reported on the result whether or not the event was emitted, so a caller that never
       // reads the stream still learns the conversation.
       expect(conversationId).toBe(existing.id);
+    });
+
+    it('rejects a new conversation for an agent the caller cannot use, before storing anything', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      conversationClient.exists.mockResolvedValue(false);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'missing-agent' }));
+
+      await expect(
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request,
+          params: {
+            agentId: 'missing-agent',
+            conversationId: 'new-conversation',
+            autoCreateConversationWithId: true,
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: false,
+        })
+      ).rejects.toThrow('Agent missing-agent not found');
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('missing-agent', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('does not re-check the agent when continuing an existing conversation', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const existing = createEmptyConversation({ id: 'conversation-1', agent_id: 'agent-1' });
+      conversationClient.exists.mockResolvedValue(true);
+      conversationClient.get.mockResolvedValue(existing);
+      mockHandleAgentExecution.mockResolvedValue(of());
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          conversationId: existing.id,
+          autoCreateConversationWithId: true,
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: false,
+      });
+
+      // `resolveExecutionIdentity` now reads the agent with use access on every run, continuing
+      // conversations included; this guard only adds the read on the `trigger_mode: 'never'`
+      // path, which never reaches it.
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(agentRegistry.get).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -2514,6 +2565,19 @@ describe('AgentExecutionService', () => {
 
       expect(events.map(({ type }) => type)).toEqual([ChatEventType.conversationUpdated]);
       expect(findConversationEvent(events).data.conversation_id).toBe('conversation-1');
+    });
+
+    it('does not create a conversation for an agent the caller cannot use', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+
+      await expect(append({ conversationId: undefined })).rejects.toThrow(
+        'Agent agent-1 not found'
+      );
+
+      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
     it('creates the conversation when the request names none', async () => {

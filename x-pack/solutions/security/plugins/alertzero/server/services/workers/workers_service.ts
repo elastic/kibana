@@ -21,6 +21,7 @@ import {
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowSchema } from '@kbn/workflows';
+import { isBadRequestError } from '@kbn/agent-builder-common';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
@@ -96,7 +97,10 @@ export type HuntSupplyEnableBlockedReason =
   | 'huntSupplyNotInstalled';
 
 /** Why a Worker enable was refused before anything was written. */
-export type WorkerEnableBlockedReason = SpaceEnableBlockedReason | HuntSupplyEnableBlockedReason;
+export type WorkerEnableBlockedReason =
+  | SpaceEnableBlockedReason
+  | HuntSupplyEnableBlockedReason
+  | 'sharedAgentIdTaken';
 
 const readServiceAccountId = (
   values: Record<string, unknown> | null | undefined
@@ -136,8 +140,10 @@ export class WorkersService {
       | undefined,
     private readonly logger: Logger,
     private readonly agentOpts: {
-      /** Lazy ensure of the shared thin agent for the caller's space. */
+      /** Lazy, best-effort ensure of the shared thin agent for the caller's space. */
       ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      /** Ensure of the shared thin agent that throws when the agent cannot be stored. */
+      requireAgentForSpace?: (spaceId: string) => Promise<void>;
       agentBuilder?: AgentBuilderPluginStart;
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
@@ -181,6 +187,10 @@ export class WorkersService {
 
   private async ensureAgent(spaceId: string): Promise<void> {
     await this.agentOpts.ensureAgentForSpace?.(spaceId);
+  }
+
+  private async requireAgent(spaceId: string): Promise<void> {
+    await this.agentOpts.requireAgentForSpace?.(spaceId);
   }
 
   private async buildAgentLookup(request: KibanaRequest) {
@@ -390,7 +400,47 @@ export class WorkersService {
       pendingSettingsValues = applied.values;
     }
 
-    // Hunt supply: hard-gate + ensure TI after request validation and before enabling
+    const huntSupply = isHuntWorker && patch.enabled === true ? this.threatIntelSupply : undefined;
+
+    // Read-only, so a Hunt enable that cannot succeed is refused before the agent is stored.
+    if (huntSupply) {
+      try {
+        await huntSupply.assertHardGate(request);
+      } catch (err) {
+        if (err instanceof ThreatIntelSupplyHardGateError) {
+          return {
+            outcome: 'blocked',
+            reason: err.reasonCodes.includes('reports_index_unmanaged')
+              ? 'huntSupplyReportsIndexUnmanaged'
+              : 'huntSupplyPrerequisitesUnmet',
+          };
+        }
+        throw err;
+      }
+    }
+
+    // A worker that is on runs as the shared agent, which any earlier list only ensured
+    // best-effort, and a worker enabled without it fails every run: a failed ensure refuses
+    // the save as transient so the caller can retry. Run it before the Hunt supply ensure so
+    // an agent-store failure never tears down a supply a still-enabled Hunt worker depends on.
+    if (nextEnabled) {
+      try {
+        await this.requireAgent(spaceId);
+      } catch (err) {
+        // Another agent already holds the id: retrying cannot help until it is freed.
+        if (isBadRequestError(err)) {
+          return { outcome: 'blocked', reason: 'sharedAgentIdTaken' };
+        }
+        this.logger.warn(
+          `Failed to ensure the shared agent in space "${spaceId}" before a worker update: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        return { outcome: 'unavailable' };
+      }
+    }
+
+    // Hunt supply: ensure TI after request validation and before enabling
     // CTH so a failed ensure never leaves Hunt on without reports. If Hunt never ends up
     // enabled after this ensure, roll supply back (Restore only shows when Hunt is on).
     let huntSupplyEnsured = false;
@@ -410,20 +460,11 @@ export class WorkersService {
       }
     };
 
-    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+    if (huntSupply) {
       try {
-        await this.threatIntelSupply.assertHardGate(request);
-        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+        await huntSupply.ensureSupplyForSpace(spaceId, request);
         huntSupplyEnsured = true;
       } catch (err) {
-        if (err instanceof ThreatIntelSupplyHardGateError) {
-          return {
-            outcome: 'blocked',
-            reason: err.reasonCodes.includes('reports_index_unmanaged')
-              ? 'huntSupplyReportsIndexUnmanaged'
-              : 'huntSupplyPrerequisitesUnmet',
-          };
-        }
         if (err instanceof ThreatIntelSupplyNotInstalledError) {
           return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
         }

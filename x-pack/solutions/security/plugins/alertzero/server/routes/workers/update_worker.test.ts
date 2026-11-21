@@ -145,6 +145,36 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
+  it('maps a taken shared agent id to 400 naming the agent to free', async () => {
+    const update = jest
+      .fn()
+      .mockResolvedValue({ outcome: 'blocked', reason: 'sharedAgentIdTaken' });
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { enabled: true },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message:
+          'Alert Triage cannot be turned on because another agent in this space uses the id "alertzero-thin-agent". Delete or rename that agent in Agent Builder, then try again.',
+      },
+    });
+  });
+
   it('returns 403 when enabling a worker without managed-update privileges', async () => {
     const update = jest.fn();
     const { handler } = setupRoute(update);
