@@ -13,7 +13,7 @@ import type { Dependency } from '../../../../../common/burn_rate_rule/types';
 import type { SLODefinitionRepository } from '../../../../services';
 import type { BurnRateRuleParams } from '../types';
 import type { SLODefinition } from '../../../../domain/models';
-import { evaluate } from './evaluate';
+import { findBreachingInstances } from './evaluate';
 
 export interface ActiveRule {
   rule: Rule<BurnRateRuleParams>;
@@ -44,12 +44,12 @@ export async function evaluateDependencies(
           dependency.actionGroupsToSuppressOn.includes(winDef.actionGroup)
         ),
       };
-      const results = await evaluate(
+      const results = await findBreachingInstances(
         esClient,
         slo,
         paramsWithSuppressOnWindows,
         startedAt,
-        projectRouting
+        { projectRouting }
       );
       const instanceIdsToSuppress = results
         .filter((res) => res.shouldAlert)
