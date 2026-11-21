@@ -35,15 +35,29 @@ const statusOf = ({
 };
 
 const feedsOf = ({ fetch, match, match_error: matchError }: SummarizeInput): SummaryFeed[] => {
-  const etags = new Map((fetch?.feeds ?? []).map(({ release, etag }) => [release, etag]));
+  const fetched = new Map(
+    (fetch?.feeds ?? []).map((feed) => [
+      feed.release,
+      {
+        etag: feed.etag,
+        ...(feed.downloaded_bytes !== undefined ? { downloaded_bytes: feed.downloaded_bytes } : {}),
+        ...(feed.download_ms !== undefined ? { download_ms: feed.download_ms } : {}),
+      },
+    ])
+  );
   if (match) {
     return Object.entries(match.releases).map(([release, status]) => {
       const provenance = match.feed_provenance?.[release];
+      const cost = fetched.get(release);
       return {
         release,
         status,
-        etag: etags.get(release),
+        etag: cost?.etag,
         error: match.failures[release],
+        ...(cost?.downloaded_bytes !== undefined
+          ? { downloaded_bytes: cost.downloaded_bytes }
+          : {}),
+        ...(cost?.download_ms !== undefined ? { download_ms: cost.download_ms } : {}),
         ...(provenance?.source_url ? { source_url: provenance.source_url } : {}),
         ...(provenance?.snapshot_time ? { snapshot_time: provenance.snapshot_time } : {}),
         ...(provenance?.age_seconds !== undefined ? { age_seconds: provenance.age_seconds } : {}),
@@ -51,16 +65,20 @@ const feedsOf = ({ fetch, match, match_error: matchError }: SummarizeInput): Sum
     });
   }
   // The match step did not report, so only the fetch outcome is known.
-  return (fetch?.feeds ?? []).map(({ release, status, etag, error }) => ({
-    release,
-    status: status === 'unavailable' ? 'unavailable' : 'failed',
-    etag,
-    error:
-      error ??
-      (status === 'unavailable'
-        ? undefined
-        : `Not matched: ${matchError ?? 'the match step did not run'}`),
-  }));
+  return (fetch?.feeds ?? []).map(
+    ({ release, status, etag, error, downloaded_bytes, download_ms }) => ({
+      release,
+      status: status === 'unavailable' ? 'unavailable' : 'failed',
+      etag,
+      ...(downloaded_bytes !== undefined ? { downloaded_bytes } : {}),
+      ...(download_ms !== undefined ? { download_ms } : {}),
+      error:
+        error ??
+        (status === 'unavailable'
+          ? undefined
+          : `Not matched: ${matchError ?? 'the match step did not run'}`),
+    })
+  );
 };
 
 export const buildSummarizeStepDefinition = ({
@@ -92,6 +110,18 @@ export const buildSummarizeStepDefinition = ({
         started_at: toIso(execution.startedAt, finished),
         finished_at: finished.toISOString(),
         status,
+        ...(match?.scope === 'refresh' ? { scope: match.scope } : {}),
+        ...(match
+          ? {
+              releases: {
+                matched: Object.values(match.releases).filter((s) => s === 'matched').length,
+                skipped: Object.values(match.releases).filter((s) => s === 'skipped').length,
+                failed: Object.values(match.releases).filter((s) => s === 'failed').length,
+                unavailable: Object.values(match.releases).filter((s) => s === 'unavailable')
+                  .length,
+              },
+            }
+          : {}),
         hosts_scanned: match?.hosts ?? fetch?.hosts ?? 0,
         findings_open: match?.findings ?? 0,
         findings_fixed: match?.fixed ?? 0,

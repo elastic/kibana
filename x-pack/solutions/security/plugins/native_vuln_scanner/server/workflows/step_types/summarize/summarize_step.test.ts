@@ -38,6 +38,7 @@ const matched = (overrides: Partial<MatchOutput> = {}): MatchOutput => ({
   aborted: false,
   pack_missing: false,
   releases: { 'ubuntu:noble': 'matched', 'rhel:9': 'matched' },
+  skipped_releases: 0,
   failures: {},
   feed_provenance: {},
   ...overrides,
@@ -69,6 +70,7 @@ describe('native_vuln.summarize handler', () => {
       started_at: '2026-11-13T00:00:00.000Z',
       finished_at: '2026-11-13T01:00:00.000Z',
       status: 'success',
+      releases: { matched: 2, skipped: 0, failed: 0, unavailable: 0 },
       hosts_scanned: 3,
       findings_open: 5,
       findings_fixed: 1,
@@ -237,5 +239,67 @@ describe('native_vuln.summarize handler', () => {
 
     expect(result.error).toBeUndefined();
     expect(writeMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('native_vuln.summarize refresh scope', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    ensureMock.mockResolvedValue(undefined);
+    writeMock.mockResolvedValue(undefined);
+  });
+
+  it('records the refresh scope, the skipped counters and the per-feed download cost', async () => {
+    const { doc } = await run({
+      fetch: {
+        ...fetched,
+        feeds: [
+          {
+            release: 'ubuntu:noble',
+            status: 'downloaded',
+            hosts: 2,
+            etag: '"u"',
+            downloaded_bytes: 4096,
+            download_ms: 1200,
+          },
+          {
+            release: 'rhel:9',
+            status: 'not_modified',
+            hosts: 1,
+            etag: '"r"',
+            downloaded_bytes: 0,
+            download_ms: 45,
+          },
+        ],
+      },
+      match: matched({
+        scope: 'refresh',
+        releases: { 'ubuntu:noble': 'skipped', 'rhel:9': 'matched' },
+      }),
+    });
+    expect(doc).toMatchObject({
+      scope: 'refresh',
+      releases: { matched: 1, skipped: 1, failed: 0, unavailable: 0 },
+      feeds: [
+        expect.objectContaining({
+          release: 'ubuntu:noble',
+          status: 'skipped',
+          downloaded_bytes: 4096,
+          download_ms: 1200,
+        }),
+        expect.objectContaining({
+          release: 'rhel:9',
+          status: 'matched',
+          downloaded_bytes: 0,
+          download_ms: 45,
+        }),
+      ],
+    });
+  });
+
+  it('omits the scope field and records zero skipped for a full scan', async () => {
+    const { doc } = await run({ fetch: fetched, match: matched() });
+    expect(doc).not.toHaveProperty('scope');
+    expect(doc?.releases).toEqual({ matched: 2, skipped: 0, failed: 0, unavailable: 0 });
   });
 });

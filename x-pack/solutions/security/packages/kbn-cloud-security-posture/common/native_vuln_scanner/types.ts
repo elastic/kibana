@@ -13,7 +13,7 @@
 
 export type SummaryRunStatus = 'success' | 'partial' | 'failed' | 'aborted' | 'no_pack';
 
-export type SummaryFeedStatus = 'matched' | 'unavailable' | 'failed';
+export type SummaryFeedStatus = 'matched' | 'unavailable' | 'failed' | 'skipped';
 
 export interface SummaryFeed {
   /** `family:version`, e.g. `ubuntu:noble`. */
@@ -29,6 +29,10 @@ export interface SummaryFeed {
   snapshot_time?: string;
   /** Whole seconds from the run's start to `snapshot_time`; only with a `snapshot_time`. */
   age_seconds?: number;
+  /** Body bytes the vendor transferred for this feed (0 on a 304); CSAF costs are visible hourly. */
+  downloaded_bytes?: number;
+  /** Whole milliseconds the feed download took (headers plus body). */
+  download_ms?: number;
 }
 
 export interface SummaryDoc {
@@ -38,6 +42,15 @@ export interface SummaryDoc {
   started_at: string;
   finished_at: string;
   status: SummaryRunStatus;
+  /** `refresh` runs match only changed releases; full scans omit the field. */
+  scope?: 'refresh';
+  /** Outcome counts over `feeds`, so a refresh's skipping is visible at a glance. */
+  releases?: {
+    matched: number;
+    skipped: number;
+    failed: number;
+    unavailable: number;
+  };
   hosts_scanned: number;
   findings_open: number;
   findings_fixed: number;
