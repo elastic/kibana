@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import { TabPlaceholder } from './tab_placeholder';
+import { ActivityPanel } from '../activity/activity_panel';
 import type { TabProps } from './tab_props';
-import * as i18n from './translations';
 
-/** Placeholder: a later change replaces this file with the real tab. */
-export const ActivityTab: React.FC<TabProps> = () => (
-  <TabPlaceholder tabName={i18n.ACTIVITY} testSubj="investigationActivityTab" />
-);
+export const ActivityTab: React.FC<TabProps> = (props) => <ActivityPanel {...props} />;
 ActivityTab.displayName = 'ActivityTab';

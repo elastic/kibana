@@ -205,6 +205,18 @@ const ITEM_SORT_FIELDS: Record<string, string> = {
   status: 'status',
 };
 
+const pluralNoun = (noun: string): string =>
+  /[^aeiou]y$/.test(noun) ? `${noun.slice(0, -1)}ies` : /(s|sh|ch|x)$/.test(noun) ? `${noun}es` : `${noun}s`;
+
+const isLayoutOnly = (patch: ItemPatch): boolean => {
+  const keys = Object.keys(patch).filter((k) => patch[k as keyof ItemPatch] !== undefined);
+  return (
+    keys.length === 1 &&
+    keys[0] === 'entity' &&
+    Object.keys(patch.entity ?? {}).every((k) => k === 'position')
+  );
+};
+
 const describeItem = (item: { kind: ItemKind; ref: string; title: string }): string =>
   `${item.ref}: ${clip(item.title, 120)}`;
 
@@ -366,7 +378,15 @@ export class InvestigationsService {
     if (req.target_id) filter.push(term('target.id', req.target_id));
     if (req.action?.length) filter.push(terms('action', req.action));
     const must: QueryDslQueryContainer[] = req.search
-      ? [{ multi_match: { query: req.search, fields: ['message^2', 'details', 'actor.name', 'target.title'] } }]
+      ? [
+          {
+            multi_match: {
+              query: req.search,
+              fields: ['message^2', 'details', 'actor.name', 'target.title'],
+              operator: 'and',
+            },
+          },
+        ]
       : [];
     const res = await this.es.search<ActivityEntry>({
       index: INVESTIGATION_ACTIVITY_INDEX,
@@ -1877,7 +1897,7 @@ export class InvestigationsService {
       action: 'items.created',
       message: allEvidence ? `Added ${plural(items.length, 'evidence item')}` : `Added ${plural(items.length, 'item')}`,
       details: Array.from(byKind.entries())
-        .map(([k, n]) => `${n.toLocaleString('en-US')} ${k}`)
+        .map(([k, n]) => (n === 1 ? `1 ${k}` : `${n.toLocaleString('en-US')} ${pluralNoun(k)}`))
         .join(', '),
       links: [{ kind: 'tab', id: allEvidence ? 'evidence' : 'overview', label: allEvidence ? 'Evidence' : 'Overview' }],
     };
@@ -2230,9 +2250,12 @@ export class InvestigationsService {
       }
       throw error;
     }
-    await this.appendActivity(recordId, [this.describeUpdate(before, after, actor, ts)]);
-    await this.afterUpdate(recordId, before, after, actor);
-    await this.refreshCounters(recordId, actor);
+    // Moving a node in the scope graph is layout, not a change to the record: no activity entry.
+    if (!isLayoutOnly(req.patch)) {
+      await this.appendActivity(recordId, [this.describeUpdate(before, after, actor, ts)]);
+      await this.afterUpdate(recordId, before, after, actor);
+      await this.refreshCounters(recordId, actor);
+    }
     const { ref_num: _r, ...rest } = after;
     return { ...rest, version: encodeVersion(res._seq_no, res._primary_term) } as InvestigationItem;
   }
@@ -2284,6 +2307,10 @@ export class InvestigationsService {
           updated.push({ ...rest, version: encodeVersion(op?._seq_no, op?._primary_term) } as InvestigationItem);
         }
       });
+      const layoutOnly = req.items.every((change) => isLayoutOnly(change.patch));
+      if (layoutOnly) {
+        return { items: updated, errors };
+      }
       if (done.length === 1) {
         await this.appendActivity(recordId, [this.describeUpdate(done[0].before, done[0].after, actor, ts)]);
       } else if (done.length > 1) {

@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import { TabPlaceholder } from './tab_placeholder';
+import { ProcedurePanel } from '../procedure/procedure_panel';
 import type { TabProps } from './tab_props';
-import * as i18n from './translations';
 
-/** Placeholder: a later change replaces this file with the real tab. */
-export const ProcedureTab: React.FC<TabProps> = () => (
-  <TabPlaceholder tabName={i18n.PROCEDURE} testSubj="investigationProcedureTab" />
-);
+export const ProcedureTab: React.FC<TabProps> = (props) => <ProcedurePanel {...props} />;
 ProcedureTab.displayName = 'ProcedureTab';
