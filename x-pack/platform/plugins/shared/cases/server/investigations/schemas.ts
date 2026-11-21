@@ -8,13 +8,15 @@
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { INVESTIGATION_LIMITS as L } from '../../common/investigations/constants';
+import { MAX_TITLE_LENGTH as CASE_TITLE_MAX } from '../../common/constants';
 import { PROCEDURE_PHASES, PROPOSAL_CATEGORIES } from '../../common/investigations/types';
 
 /*
  * Request validation for the investigation routes. Every string and array is bounded.
  */
 
-const str = (max: number = L.maxShortTextLength, min = 0) => schema.string({ maxLength: max, minLength: min });
+const str = (max: number = L.maxShortTextLength, min = 0) =>
+  schema.string({ maxLength: max, minLength: min });
 const optStr = (max: number = L.maxShortTextLength) => schema.maybe(schema.nullable(str(max)));
 const id = () => str(L.maxIdLength, 1);
 const ids = (max: number = L.maxIdsPerArray) => schema.arrayOf(id(), { maxSize: max });
@@ -22,7 +24,8 @@ const lits = <T extends string>(values: readonly T[]) =>
   schema.string({
     validate: (v) => (values.includes(v as T) ? undefined : `must be one of: ${values.join(', ')}`),
   }) as unknown as Type<T>;
-const pairs = (max = 200) => schema.arrayOf(schema.arrayOf(str(4096), { maxSize: 3 }), { maxSize: max });
+const pairs = (max = 200) =>
+  schema.arrayOf(schema.arrayOf(str(4096), { maxSize: 3 }), { maxSize: max });
 const isoDate = () =>
   schema.string({
     maxLength: 64,
@@ -33,7 +36,9 @@ const boundedJson = (maxBytes = 256 * 1024) =>
   schema.any({
     validate: (v) => {
       try {
-        return JSON.stringify(v ?? null).length > maxBytes ? `Value is larger than ${maxBytes} bytes` : undefined;
+        return JSON.stringify(v ?? null).length > maxBytes
+          ? `Value is larger than ${maxBytes} bytes`
+          : undefined;
       } catch {
         return 'Value is not serializable';
       }
@@ -54,7 +59,10 @@ export const actorSchema = schema.object({
 const verdictSchema = lits(['true_positive', 'benign', 'inconclusive'] as const);
 const prioritySchema = lits(['low', 'medium', 'high', 'critical'] as const);
 const fieldsSchema = schema.recordOf(
-  schema.string({ maxLength: 128, validate: (k) => (/^[a-z0-9_]+$/i.test(k) ? undefined : `Invalid field key "${k}"`) }),
+  schema.string({
+    maxLength: 128,
+    validate: (k) => (/^[a-z0-9_]+$/i.test(k) ? undefined : `Invalid field key "${k}"`),
+  }),
   schema.nullable(schema.oneOf([str(L.maxShortTextLength), schema.number(), schema.boolean()])),
   {
     validate: (v) =>
@@ -74,7 +82,18 @@ const alertRefSchema = schema.object({
   rule_name: optStr(1024),
 });
 const activityLinkSchema = schema.object({
-  kind: lits(['evidence', 'claim', 'task', 'entity', 'link', 'proposal', 'tab', 'thread', 'verdict', 'record'] as const),
+  kind: lits([
+    'evidence',
+    'claim',
+    'task',
+    'entity',
+    'link',
+    'proposal',
+    'tab',
+    'thread',
+    'verdict',
+    'record',
+  ] as const),
   id: optStr(512),
   label: optStr(512),
 });
@@ -84,16 +103,47 @@ const itemLinkSchema = schema.object({
 });
 
 const evidenceTypeSchema = lits([
-  'alert', 'event', 'entity', 'indicator', 'query', 'saved_search', 'visualization', 'file', 'note', 'finding', 'conversation',
+  'alert',
+  'event',
+  'entity',
+  'indicator',
+  'query',
+  'saved_search',
+  'visualization',
+  'file',
+  'note',
+  'finding',
+  'conversation',
 ] as const);
-const indicatorTypeSchema = lits(['ip', 'domain', 'url', 'file_hash', 'file_path', 'email', 'registry_key', 'other'] as const);
+const indicatorTypeSchema = lits([
+  'ip',
+  'domain',
+  'url',
+  'file_hash',
+  'file_path',
+  'email',
+  'registry_key',
+  'other',
+] as const);
 
 const evidenceFields = {
   type: evidenceTypeSchema,
   why: optStr(L.maxShortTextLength),
   source: schema.object({
     label: str(256, 1),
-    kind: schema.maybe(lits(['alert', 'document', 'saved_search', 'visualization', 'file', 'entity', 'query', 'conversation', 'manual'] as const)),
+    kind: schema.maybe(
+      lits([
+        'alert',
+        'document',
+        'saved_search',
+        'visualization',
+        'file',
+        'entity',
+        'query',
+        'conversation',
+        'manual',
+      ] as const)
+    ),
     index: optStr(512),
     id: optStr(512),
     url: optStr(4096),
@@ -101,7 +151,9 @@ const evidenceFields = {
     file_id: optStr(512),
     conversation_id: optStr(512),
   }),
-  indicator: schema.maybe(schema.nullable(schema.object({ type: indicatorTypeSchema, value: str(2048, 1) }))),
+  indicator: schema.maybe(
+    schema.nullable(schema.object({ type: indicatorTypeSchema, value: str(2048, 1) }))
+  ),
   alert: schema.maybe(
     schema.nullable(
       schema.object({
@@ -158,7 +210,9 @@ const entityFields = {
   evidence_ids: schema.arrayOf(id(), { maxSize: 500, defaultValue: [] }),
   attributes: schema.maybe(pairs()),
   tags: schema.maybe(schema.arrayOf(str(256), { maxSize: 50 })),
-  position: schema.maybe(schema.nullable(schema.object({ x: schema.number(), y: schema.number() }))),
+  position: schema.maybe(
+    schema.nullable(schema.object({ x: schema.number(), y: schema.number() }))
+  ),
 };
 
 const linkFields = {
@@ -172,7 +226,11 @@ const linkFields = {
 };
 
 const taskAutoSchema = schema.oneOf([
-  schema.object({ type: schema.literal('claim'), claim_id: optStr(512), question: optStr(L.maxShortTextLength) }),
+  schema.object({
+    type: schema.literal('claim'),
+    claim_id: optStr(512),
+    question: optStr(L.maxShortTextLength),
+  }),
   schema.object({ type: schema.literal('action'), category: lits(PROPOSAL_CATEGORIES) }),
 ]);
 
@@ -207,7 +265,10 @@ const proposalFields = {
   effect: str(L.maxShortTextLength),
   disruption: lits(['high', 'medium', 'low'] as const),
   confirm_label: str(128),
-  scope: schema.arrayOf(schema.arrayOf(str(1024), { maxSize: 2 }), { maxSize: 50, defaultValue: [] }),
+  scope: schema.arrayOf(schema.arrayOf(str(1024), { maxSize: 2 }), {
+    maxSize: 50,
+    defaultValue: [],
+  }),
   evidence_ids: schema.arrayOf(id(), { maxSize: 200, defaultValue: [] }),
   revision: schema.number({ min: 1, max: 1000, defaultValue: 1 }),
   decision: schema.maybe(schema.nullable(decisionSchema)),
@@ -241,11 +302,36 @@ const envelope = {
 };
 
 export const itemInputSchema = schema.oneOf([
-  schema.object({ ...envelope, kind: schema.literal('evidence'), status: optStr(64), evidence: schema.object(evidenceFields) }),
-  schema.object({ ...envelope, kind: schema.literal('claim'), status: lits(['open', 'supported', 'blocked', 'refuted'] as const), claim: schema.object(claimFields) }),
-  schema.object({ ...envelope, kind: schema.literal('entity'), status: lits(['primary', 'scoped', 'suspected', 'dismissed', 'external'] as const), entity: schema.object(entityFields) }),
-  schema.object({ ...envelope, kind: schema.literal('link'), status: lits(['confirmed', 'suspected', 'dismissed'] as const), link: schema.object(linkFields) }),
-  schema.object({ ...envelope, kind: schema.literal('task'), status: lits(['todo', 'doing', 'done', 'skipped'] as const), task: schema.object(taskFields) }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('evidence'),
+    status: optStr(64),
+    evidence: schema.object(evidenceFields),
+  }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('claim'),
+    status: lits(['open', 'supported', 'blocked', 'refuted'] as const),
+    claim: schema.object(claimFields),
+  }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('entity'),
+    status: lits(['primary', 'scoped', 'suspected', 'dismissed', 'external'] as const),
+    entity: schema.object(entityFields),
+  }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('link'),
+    status: lits(['confirmed', 'suspected', 'dismissed'] as const),
+    link: schema.object(linkFields),
+  }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('task'),
+    status: lits(['todo', 'doing', 'done', 'skipped'] as const),
+    task: schema.object(taskFields),
+  }),
   schema.object({
     ...envelope,
     title: schema.maybe(str(L.maxTitleLength)),
@@ -253,8 +339,18 @@ export const itemInputSchema = schema.oneOf([
     kind: schema.literal('comment'),
     comment: schema.object({ target_id: id(), parent_id: optStr(512) }),
   }),
-  schema.object({ ...envelope, kind: schema.literal('proposal'), status: lits(['pending', 'approved', 'rejected', 'withdrawn'] as const), proposal: schema.object(proposalFields) }),
-  schema.object({ ...envelope, kind: schema.literal('timeline_event'), status: optStr(64), timeline_event: schema.object(timelineFields) }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('proposal'),
+    status: lits(['pending', 'approved', 'rejected', 'withdrawn'] as const),
+    proposal: schema.object(proposalFields),
+  }),
+  schema.object({
+    ...envelope,
+    kind: schema.literal('timeline_event'),
+    status: optStr(64),
+    timeline_event: schema.object(timelineFields),
+  }),
 ]);
 
 /** Partial per-kind objects: every key optional, same bounds. */
@@ -288,7 +384,8 @@ export const recordIdParams = schema.object({ id: id() });
 export const recordItemParams = schema.object({ id: id(), item_id: id() });
 
 export const createRecordBody = schema.object({
-  title: str(L.maxTitleLength, 1),
+  // The record title is the case title, so the Cases bound applies.
+  title: str(CASE_TITLE_MAX, 1),
   description: str(L.maxTextLength, 1),
   investigation_type: str(256, 1),
   priority: schema.maybe(prioritySchema),
@@ -340,7 +437,7 @@ const agentVerdictSchema = schema.object({
 });
 
 export const updateRecordBody = schema.object({
-  title: schema.maybe(str(L.maxTitleLength, 1)),
+  title: schema.maybe(str(CASE_TITLE_MAX, 1)),
   description: schema.maybe(str(L.maxTextLength, 1)),
   summary: optStr(L.maxTextLength),
   priority: schema.maybe(prioritySchema),
@@ -350,10 +447,16 @@ export const updateRecordBody = schema.object({
   fields: schema.maybe(fieldsSchema),
   investigation_type: schema.maybe(str(256, 1)),
   stage: optStr(256),
-  owner: schema.maybe(schema.nullable(schema.oneOf([actorSchema, schema.object({ self: schema.literal(true) })]))),
+  owner: schema.maybe(
+    schema.nullable(schema.oneOf([actorSchema, schema.object({ self: schema.literal(true) })]))
+  ),
   handoff_note: optStr(L.maxShortTextLength),
   agent_verdict: schema.maybe(schema.nullable(agentVerdictSchema)),
-  analyst_verdict: schema.maybe(schema.nullable(schema.object({ verdict: verdictSchema, reason: schema.maybe(str(L.maxShortTextLength)) }))),
+  analyst_verdict: schema.maybe(
+    schema.nullable(
+      schema.object({ verdict: verdictSchema, reason: schema.maybe(str(L.maxShortTextLength)) })
+    )
+  ),
   status: schema.maybe(lits(['open', 'in-progress'] as const)),
   restricted_to: schema.maybe(schema.arrayOf(str(512, 1), { maxSize: L.maxRestrictedTo })),
   ai_enabled: schema.maybe(schema.boolean()),
@@ -386,7 +489,19 @@ export const historyQuery = schema.object({ target_id: schema.maybe(id()) });
 export const createThreadBody = schema.object({ title: str(256, 1), anchor: optStr(256) });
 
 export const findItemsQuery = schema.object({
-  kind: queryArray(lits(['evidence', 'claim', 'entity', 'link', 'task', 'comment', 'proposal', 'timeline_event'] as const), 10),
+  kind: queryArray(
+    lits([
+      'evidence',
+      'claim',
+      'entity',
+      'link',
+      'task',
+      'comment',
+      'proposal',
+      'timeline_event',
+    ] as const),
+    10
+  ),
   type: queryArray(evidenceTypeSchema, 20),
   indicator_type: queryArray(indicatorTypeSchema, 20),
   added_by: queryArray(str(512), 50),
@@ -397,7 +512,18 @@ export const findItemsQuery = schema.object({
   refs: queryArray(str(64), L.maxPerPage),
   search: schema.maybe(str(L.maxSearchLength)),
   created_after: schema.maybe(isoDate()),
-  sort_field: schema.maybe(lits(['created_at', 'updated_at', 'title', 'ref_num', 'kind', 'evidence.type', 'status', 'created_by'] as const)),
+  sort_field: schema.maybe(
+    lits([
+      'created_at',
+      'updated_at',
+      'title',
+      'ref_num',
+      'kind',
+      'evidence.type',
+      'status',
+      'created_by',
+    ] as const)
+  ),
   sort_order: schema.maybe(lits(['asc', 'desc'] as const)),
   page: schema.maybe(schema.number({ min: 1, max: 10000 })),
   per_page: schema.maybe(schema.number({ min: 1, max: L.maxPerPage })),
@@ -457,7 +583,17 @@ export const createActivityBody = schema.object({
   target: schema.maybe(
     schema.nullable(
       schema.object({
-        kind: lits(['evidence', 'claim', 'entity', 'link', 'task', 'comment', 'proposal', 'timeline_event', 'record'] as const),
+        kind: lits([
+          'evidence',
+          'claim',
+          'entity',
+          'link',
+          'task',
+          'comment',
+          'proposal',
+          'timeline_event',
+          'record',
+        ] as const),
         id: id(),
         ref: optStr(64),
         title: optStr(L.maxTitleLength),

@@ -13,6 +13,7 @@ import type {
   RecordFields,
 } from '../../../../common/investigations/types';
 import * as i18n from './translations';
+import { MAX_TITLE_LENGTH } from '../../../../common/constants';
 
 export type TypeField = InvestigationType['fields'][number];
 
@@ -84,8 +85,8 @@ export const validateForm = (
 
   if (title.length === 0) {
     errors.title = i18n.TITLE_REQUIRED;
-  } else if (title.length > INVESTIGATION_LIMITS.maxTitleLength) {
-    errors.title = i18n.TITLE_TOO_LONG(INVESTIGATION_LIMITS.maxTitleLength);
+  } else if (title.length > MAX_TITLE_LENGTH) {
+    errors.title = i18n.TITLE_TOO_LONG(MAX_TITLE_LENGTH);
   }
 
   if (description.length === 0) {
