@@ -1,0 +1,77 @@
+{
+  "Is there an archive tier for the network data stream? We might still have the DNS lookups from last night.": {
+    "reply": "The network data stream rolls to the frozen tier after 7 days and is deleted after 30 days. DNS lookups for rundll32.exe from Nov 12 should still exist in the frozen tier."
+  },
+  "Can the Hunt worker query the frozen tier?": {
+    "reply": "Not yet. It needs a searchable snapshot mount, and mounting needs approval from someone with data access. I can run the DNS query again once it is mounted."
+  },
+  "Start from the two alerts on edge-sec-windows-2019.": {
+    "reply": "Starting from the two alerts on edge-sec-windows-2019. Pulling the process tree and 7 days of host activity."
+  },
+  "What did rundll32.exe load, and is the file signed?": {
+    "reply": "rundll32.exe loaded upd.dll from C:\\Users\\svc-build\\AppData\\Local\\Temp. The file is unsigned and has no reputation hits."
+  },
+  "Did the child cmd.exe touch LSASS?": {
+    "reply": "The child cmd.exe opened a handle to LSASS 12 seconds after launch. I did not capture a dump file."
+  },
+  "Can we confirm what the DLL contacted from DNS history?": {
+    "reply": "DNS history for the host is out of retention, so I cannot confirm what the DLL contacted."
+  },
+  "Can you capture memory of the shell, and what should we do about containment?": {
+    "reply": "I do not have Defend response access, so I cannot take a memory capture. I proposed 8 actions for your approval, response actions first."
+  },
+  "Please hand this over to Priya K. with a short summary of where it stands.": {
+    "reply": "Handing this to Priya K. Two claims are open and two are blocked."
+  },
+  "Group the 40 port scan alerts by source and target.": {
+    "reply": "Grouped the 40 alerts by source and target: one source address, 12 targets."
+  },
+  "Who owns the source address, and is there a change window for it?": {
+    "reply": "The source is vuln-scan-02. Change CHG-48121 covers the window, and the logons match last week."
+  },
+  "What is your verdict, and what is left to check?": {
+    "reply": "I concluded false positive at 94%. I could not check the scanner audit log because it is not ingested. I proposed 2 actions."
+  },
+  "Triage the privileged login to pay-db-01 and check the change calendar.": {
+    "reply": "Alert at 02:14: a privileged login to pay-db-01 outside the change window. Checking the change calendar."
+  },
+  "Is there a change that covers the login?": {
+    "reply": "An emergency change was approved at 01:52. I cannot confirm the login belongs to it without the DBA."
+  },
+  "What verdict do you hold until someone reviews the session content?": {
+    "reply": "I will keep the verdict at inconclusive, 55%, until someone reviews the session content."
+  },
+  "On spray sources: Add the other 24 to the block.": {
+    "reply": "Noted. I will update the claim if this changes anything."
+  },
+  "On service account: Rotation needs IT Operations.": {
+    "reply": "Noted. I will update the claim if this changes anything."
+  },
+  "On token replay: Looks like a separate cluster.": {
+    "reply": "Noted. I will update the claim if this changes anything."
+  },
+  "On support portal: Watch the Support accounts.": {
+    "reply": "Noted. I will update the claim if this changes anything."
+  },
+  "On upload: Need a proxy capture.": {
+    "reply": "Noted. I will update the claim if this changes anything."
+  },
+  "Check the spray sources for me.": {
+    "reply": "Spray sources: Partner list matches 190 of the 214 addresses."
+  },
+  "Check the service account for me.": {
+    "reply": "Service account: svc-backup has not been rotated in 640 days."
+  },
+  "Check the token replay for me.": {
+    "reply": "Token replay: The replay came from a second address."
+  },
+  "Check the support portal for me.": {
+    "reply": "Support portal: Spray started again on day 16."
+  },
+  "Check the upload for me.": {
+    "reply": "Upload: The destination has no reputation hits."
+  },
+  "uipoc seed preflight: say the canned answer": {
+    "reply": "uipoc seed preflight ok"
+  }
+}
