@@ -783,6 +783,7 @@ describe('OtelOverview', () => {
       'digitalExperienceOverviewTopPages',
       'digitalExperienceOverviewBreakdowns',
       'digitalExperienceOverviewTopClicks',
+      'digitalExperienceOverviewFrustration',
     ].forEach((testId) => {
       return expect(screen.getByTestId(testId)).toBeInTheDocument();
     });

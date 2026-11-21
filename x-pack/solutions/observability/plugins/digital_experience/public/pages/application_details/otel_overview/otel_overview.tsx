@@ -43,6 +43,7 @@ import { useApplicationErrors } from '../../errors/hooks/use_application_errors'
 import { AllFiltersFlyout } from './components/all_filters_flyout';
 import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
+import { FrustrationPanel } from './components/frustration_panel';
 import { OverviewFilterPills } from './components/overview_filters';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewToolbar } from './components/overview_toolbar';
@@ -179,7 +180,15 @@ function UsageAndErrorsPanels({
   onSelectFilter: (name: OverviewFilterName, value: string) => void;
 }) {
   const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
-  const { topPages, breakdowns, topClicks, totalClicks } = response ?? EMPTY_USAGE;
+  const {
+    topPages,
+    breakdowns,
+    topClicks,
+    totalClicks,
+    frustration,
+    frustratedElements,
+    frustratedPages,
+  } = response ?? EMPTY_USAGE;
 
   return (
     <>
@@ -242,6 +251,22 @@ function UsageAndErrorsPanels({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {!error && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="m" alignItems="stretch">
+            <EuiFlexItem>
+              <FrustrationPanel
+                frustration={frustration}
+                frustratedElements={frustratedElements}
+                frustratedPages={frustratedPages}
+                isLoading={isLoading}
+                sessionsHref={sessionsHref}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 }

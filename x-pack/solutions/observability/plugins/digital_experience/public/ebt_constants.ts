@@ -89,6 +89,7 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   USAGE_RETRY: 'overviewUsageRetry',
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
   BROWSER_FILTER: 'overviewBrowserFilter',
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
