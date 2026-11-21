@@ -784,6 +784,7 @@ export const mockCasesContract = (): CasesServerStart => ({
   config: {
     enabled: true,
     assigneeIdentity: { enabled: true },
+    investigations: { enabled: false, allowBackdate: false },
     stack: {
       enabled: true,
     },

@@ -44,6 +44,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
     enabled: true,
     assigneeIdentity: { enabled: true },
+    investigations: { enabled: false, allowBackdate: false },
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
