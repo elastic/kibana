@@ -32,7 +32,7 @@ describe('alert_rule_query', () => {
         [
           'FROM .evaluation-online-scores',
           '| WHERE monitor.id == "workflow-1" AND MV_CONTAINS(space_ids, "space-a") AND score.name == "factuality"',
-          '| STATS avg_score = AVG(score.value), n = COUNT(*)',
+          '| STATS avg_score = AVG(score.value), n = COUNT(score.value)',
           '| WHERE n >= 20 AND avg_score < 0.7',
         ].join('\n')
       );

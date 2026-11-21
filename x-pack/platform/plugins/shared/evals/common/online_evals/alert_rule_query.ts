@@ -78,7 +78,9 @@ export const buildOnlineEvalAlertEsql = ({
     )}" AND MV_CONTAINS(space_ids, "${escapeEsqlString(
       spaceId
     )}") AND score.name == "${escapeEsqlString(metric)}"`,
-    '| STATS avg_score = AVG(score.value), n = COUNT(*)',
+    // `COUNT(score.value)` skips null values (failed or unscored evaluations), so the
+    // sample-size gate only counts rows that actually back the average.
+    '| STATS avg_score = AVG(score.value), n = COUNT(score.value)',
     `| WHERE n >= ${Math.max(
       1,
       Math.floor(minSampleSize)
