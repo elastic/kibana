@@ -30,10 +30,13 @@ export const renderSlackMessageStepDefinition = ({
   investigationLocator,
   getInvestigationsClient,
   getIsomerRuntime,
+  waitForFindings,
 }: {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
   getIsomerRuntime: IsomerPluginStart['getRuntime'];
+  /** Resolves once the investigation's findings are recorded, or after a bounded wait. */
+  waitForFindings?: (investigationId: string, signal: AbortSignal) => Promise<void>;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.renderSlackMessage',
@@ -52,6 +55,7 @@ export const renderSlackMessageStepDefinition = ({
         workflow: { spaceId },
       } = context.contextManager.getContext();
       const { investigation_id: investigationId, phase, reason } = inputSchema.parse(context.input);
+      await waitForFindings?.(investigationId, context.abortSignal);
       const investigation = await getInvestigationsClient(
         context.contextManager.getFakeRequest(),
         spaceId

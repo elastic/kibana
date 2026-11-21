@@ -28,6 +28,8 @@ export interface InvestigationNotificationDeps {
   getInvestigationsClient: GetInvestigationsClient;
   getActions: () => ActionsPluginStart | undefined;
   getIsomerRuntime: IsomerPluginStart['getRuntime'];
+  /** Resolves once the investigation's findings are recorded, or after a bounded wait. */
+  waitForFindings?: (investigationId: string, signal: AbortSignal) => Promise<void>;
   getRoutingClient: (
     request: KibanaRequest,
     spaceId: string,
@@ -79,6 +81,7 @@ export const sendInvestigationNotificationsForExecution = async (
     getActions,
     getIsomerRuntime,
     getRoutingClient,
+    waitForFindings,
   }: InvestigationNotificationDeps,
   context: InvestigationNotificationSource,
   {
@@ -94,6 +97,11 @@ export const sendInvestigationNotificationsForExecution = async (
   }
 ): Promise<DeliverInvestigationNotificationsResult> => {
   const { request, spaceId, executionId, kibanaUrl } = context;
+  // A terminal message carries the summary and verdict, which the final findings pass records after
+  // the execution returns. The started message does not depend on them.
+  if (phase !== 'started') {
+    await waitForFindings?.(investigationId, context.abortSignal);
+  }
   const client = getInvestigationsClient(request, spaceId);
   const { investigation, conversationId, workflowId, notificationDestinations } =
     await client.getInvestigationExecutionContext(investigationId, executionId);

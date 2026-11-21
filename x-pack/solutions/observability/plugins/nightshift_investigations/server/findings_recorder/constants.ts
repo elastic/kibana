@@ -11,8 +11,8 @@ export const FINDINGS_RECORDER_AFTER_EXECUTION_HOOK_ID = 'nightshift-findings-re
 /** A live pass starts every n-th agent cycle. */
 export const FINDINGS_RECORDER_EVERY_CYCLES = 4;
 /**
- * The final pass blocks the end of the execution, so it is bounded. It may read workspace files
- * over a few model calls before it answers, so it gets longer than a live pass.
+ * The final pass runs after the execution, off the user's path, but it is still bounded. It may
+ * read workspace files over a few model calls before it answers, so it gets longer than a live pass.
  */
 export const FINDINGS_RECORDER_FINAL_TIMEOUT_MS = 120_000;
 /** A live pass is abandoned after this long, so a hung model call cannot pin the guard. */
@@ -42,3 +42,9 @@ export const RECORDER_FILE_MAX_BYTES = 2_000_000;
 export const RECORDER_REDACTION_MARGIN_BYTES = 1_024;
 export const RECORDER_READ_DEFAULT_BYTES = 16_000;
 export const RECORDER_READ_MAX_BYTES = 32_000;
+
+/**
+ * How long a reader of the findings, such as a notification, waits for the final pass. Past it the
+ * reader goes on with what is recorded, so a slow pass delays a message but never loses it.
+ */
+export const FINDINGS_RECORDER_FINAL_WAIT_MS = FINDINGS_RECORDER_FINAL_TIMEOUT_MS + 15_000;
