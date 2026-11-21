@@ -144,6 +144,19 @@ describe('layoutWaterfall', () => {
     ]);
   });
 
+  it('places frustration on its own markers, apart from errors', () => {
+    const layout = layoutWaterfall(
+      { startTime: START, durationMs: 20_000 },
+      [visit('/', 0, 20_000)],
+      [event('error', 5_000), event('frustration', 15_000, 'browser.frustration.rage_click')]
+    );
+
+    expect(layout.errorMarkers).toHaveLength(1);
+    expect(layout.frustrationMarkers).toEqual([
+      { offsetPercent: 75, event: expect.objectContaining({ kind: 'frustration' }) },
+    ]);
+  });
+
   it('spans events newer than the summary, so nothing falls off the bar', () => {
     const layout = layoutWaterfall(
       { startTime: START, durationMs: 10_000 },

@@ -15,6 +15,7 @@ import {
   buildVisitActivity,
   displayUrl,
   formatElapsed,
+  frustrationLabelOf,
   requestFamilyOf,
   type ActivityFilters,
 } from './visit_activity';
@@ -186,6 +187,23 @@ describe('buildVisitActivity', () => {
     ).toEqual(['/help.js', 'a.help']);
   });
 
+  it('filters frustration by its own kind', () => {
+    const events = [event('click', 100, '#pay'), event('frustration', 200, '#pay')];
+
+    const onlyFrustration = buildVisitActivity(SOFT_VISIT, events, [], {
+      kinds: new Set(['frustration']),
+      search: '',
+    });
+    expect(onlyFrustration.rows.map((row) => row.type === 'event' && row.event.kind)).toEqual([
+      'frustration',
+    ]);
+    const withoutFrustration = buildVisitActivity(SOFT_VISIT, events, [], {
+      kinds: new Set(['click']),
+      search: '',
+    });
+    expect(withoutFrustration.rows).toHaveLength(1);
+  });
+
   it('has an empty but drawable axis without rows', () => {
     const activity = buildVisitActivity(SOFT_VISIT, [], [], ALL);
     expect(activity).toEqual({
@@ -244,6 +262,26 @@ describe('buildVisitActivity keys and milestones', () => {
         ['load', 1_800, 1_500],
       ]
     );
+  });
+});
+
+describe('frustrationLabelOf', () => {
+  const frustration = (name: string, clickCount: number | null = null) => ({
+    ...event('frustration', 0, '#pay'),
+    name,
+    clickCount,
+  });
+
+  it.each([
+    ['browser.frustration.rage_click', 5, 'Rage click (5 clicks)'],
+    ['browser.frustration.rage_click', 1, 'Rage click (1 click)'],
+    ['browser.frustration.rage_click', null, 'Rage click'],
+    ['browser.frustration.dead_click', null, 'Dead click'],
+    ['browser.frustration.dead_click', 3, 'Dead click'],
+    ['browser.frustration.error_click', null, 'Error click'],
+    ['browser.frustration.something_new', null, 'Frustration'],
+  ])('labels %s (%s clicks) as "%s"', (name, clickCount, label) => {
+    expect(frustrationLabelOf(frustration(name, clickCount))).toBe(label);
   });
 });
 

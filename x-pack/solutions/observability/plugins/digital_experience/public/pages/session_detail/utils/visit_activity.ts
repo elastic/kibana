@@ -6,6 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
+  EVENT_RAGE_CLICK,
+} from '../../../../common/otel_data';
 import { formatDurationMs } from '../../../utils/format_duration';
 import type {
   SessionPageLoad,
@@ -15,7 +20,7 @@ import type {
 } from '../../../../common/sessions';
 
 /** What the journey can be filtered to. */
-export const ACTIVITY_KINDS = ['request', 'click', 'error', 'web_vital'] as const;
+export const ACTIVITY_KINDS = ['request', 'click', 'error', 'frustration', 'web_vital'] as const;
 export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
 
 export interface ActivityFilters {
@@ -195,7 +200,40 @@ export const displayUrl = (url: string, pageOrigin: string | null): string => {
 export const urlWithoutQuery = (url: string): string => url.split(/[?#]/)[0];
 
 const kindOfEvent = ({ kind }: SessionTimelineEvent): ActivityKind | null =>
-  kind === 'click' || kind === 'error' || kind === 'web_vital' ? kind : null;
+  kind === 'click' || kind === 'error' || kind === 'frustration' || kind === 'web_vital'
+    ? kind
+    : null;
+
+const DEAD_CLICK_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.deadClickLabel', {
+  defaultMessage: 'Dead click',
+});
+const ERROR_CLICK_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.errorClickLabel', {
+  defaultMessage: 'Error click',
+});
+const FRUSTRATION_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.frustrationLabel', {
+  defaultMessage: 'Frustration',
+});
+
+/** What a frustration event reads as, e.g. `Rage click (5 clicks)`, rather than its raw name. */
+export const frustrationLabelOf = ({ name, clickCount }: SessionTimelineEvent): string => {
+  switch (name) {
+    case EVENT_RAGE_CLICK:
+      return clickCount === null
+        ? i18n.translate('xpack.digitalExperience.sessionDetail.rageClickLabel', {
+            defaultMessage: 'Rage click',
+          })
+        : i18n.translate('xpack.digitalExperience.sessionDetail.rageClickCountLabel', {
+            defaultMessage: 'Rage click ({count, plural, one {# click} other {# clicks}})',
+            values: { count: clickCount },
+          });
+    case EVENT_DEAD_CLICK:
+      return DEAD_CLICK_LABEL;
+    case EVENT_ERROR_CLICK:
+      return ERROR_CLICK_LABEL;
+    default:
+      return FRUSTRATION_LABEL;
+  }
+};
 
 const matchesSearch = (search: string, ...values: Array<string | null>): boolean =>
   search.length === 0 || values.some((value) => value?.toLowerCase().includes(search));

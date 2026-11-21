@@ -188,10 +188,11 @@ function SessionDetail({
       request: requests.length,
       click: 0,
       error: 0,
+      frustration: 0,
       web_vital: 0,
     };
     for (const { kind } of timeline) {
-      if (kind === 'click' || kind === 'error' || kind === 'web_vital') {
+      if (kind === 'click' || kind === 'error' || kind === 'frustration' || kind === 'web_vital') {
         byKind[kind] += 1;
       }
     }

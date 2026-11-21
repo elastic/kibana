@@ -90,14 +90,24 @@ export interface SessionWaterfallLayout {
   totalMs: number;
   segments: WaterfallSegment[];
   errorMarkers: WaterfallMarker[];
+  frustrationMarkers: WaterfallMarker[];
 }
 
 const percentOf = (ms: number, totalMs: number): number =>
   Math.min(100, Math.max(0, (ms / totalMs) * 100));
 
+const markersOf = (
+  timeline: SessionTimelineEvent[],
+  kind: SessionTimelineEvent['kind'],
+  totalMs: number
+): WaterfallMarker[] =>
+  timeline
+    .filter((event) => event.kind === kind)
+    .map((event) => ({ offsetPercent: percentOf(event.offsetMs, totalMs), event }));
+
 /**
  * Places each page visit on a bar spanning the whole session, proportionally to when it started and
- * how long it lasted, with a marker at each error. The bar spans the summary's duration, or longer
+ * how long it lasted, with a marker at each error and each frustration signal. The bar spans the summary's duration, or longer
  * when the raw events, which can be newer than the summary, run past it.
  */
 export const layoutWaterfall = (
@@ -126,9 +136,8 @@ export const layoutWaterfall = (
         widthPercent: Math.min(100 - offsetPercent, percentOf(visit.durationMs, totalMs)),
       };
     }),
-    errorMarkers: timeline
-      .filter(({ kind }) => kind === 'error')
-      .map((event) => ({ offsetPercent: percentOf(event.offsetMs, totalMs), event })),
+    errorMarkers: markersOf(timeline, 'error', totalMs),
+    frustrationMarkers: markersOf(timeline, 'frustration', totalMs),
   };
 };
 

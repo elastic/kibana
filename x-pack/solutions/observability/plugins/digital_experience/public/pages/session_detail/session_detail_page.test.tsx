@@ -68,6 +68,34 @@ const event = (
   spanId: null,
 });
 
+const frustrationEvent = (
+  name: string,
+  offsetMs: number,
+  selector: string,
+  clickCount: number | null = null
+): SessionTimelineEvent => ({
+  ...event('frustration', offsetMs, name, selector),
+  page: '/cart',
+  clickCount,
+});
+
+const withFrustration = (): SessionDetailResponse => {
+  const base = detail();
+  return {
+    ...base,
+    session: {
+      ...base.session,
+      frustration: { rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2 },
+    },
+    timeline: [
+      ...base.timeline,
+      frustrationEvent('browser.frustration.rage_click', 40_000, '#pay', 5),
+      frustrationEvent('browser.frustration.dead_click', 42_000, 'a.help'),
+    ],
+    pageVisits: [base.pageVisits[0], { ...base.pageVisits[1], frustrationCount: 2 }],
+  };
+};
+
 const request = (
   url: string,
   offsetMs: number,
@@ -415,6 +443,66 @@ describe('SessionDetailPage', () => {
     expect(marker).toHaveAccessibleName('0:45 TypeError: cart is undefined');
     // At the error's offset, shifted back by the same share of its width so it stays in the bar.
     expect(marker.parentElement).toHaveStyle({ left: '75%', transform: 'translateX(-75%)' });
+  });
+
+  it('marks frustration on the waterfall, apart from errors', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const waterfall = await screen.findByTestId('digitalExperienceSessionWaterfall');
+    const markers = within(waterfall).getAllByTestId(
+      'digitalExperienceSessionWaterfallFrustration'
+    );
+    expect(markers.map((marker) => marker.getAttribute('aria-label'))).toEqual([
+      'Rage click (5 clicks) on #pay',
+      'Dead click on a.help',
+    ]);
+    expect(markers[0]).toHaveAttribute('tabindex', '0');
+    expect(within(waterfall).getAllByTestId('digitalExperienceSessionWaterfallError')).toHaveLength(
+      1
+    );
+  });
+
+  it('lists frustration on its page, with the number of clicks of a rage click', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const [home, cart] = await screen.findAllByTestId('digitalExperiencePageVisit');
+    expect(within(home).queryByTestId('digitalExperienceSessionEvent-frustration')).toBeNull();
+    const [rage, dead] = within(cart).getAllByTestId('digitalExperienceSessionEvent-frustration');
+    expect(rage).toHaveTextContent('Rage click (5 clicks)');
+    expect(rage).toHaveTextContent('#pay');
+    expect(rage).not.toHaveTextContent('browser.frustration');
+    expect(dead).toHaveTextContent('Dead click');
+    expect(dead).not.toHaveTextContent('clicks');
+    expect(within(cart).getByTestId('digitalExperienceVisitFrustration')).toHaveTextContent(
+      '2 frustration signals'
+    );
+    expect(within(home).queryByTestId('digitalExperienceVisitFrustration')).toBeNull();
+  });
+
+  it('breaks the frustration of the session down by type in its summary', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    const stat = await screen.findByTestId('digitalExperienceSessionStat-frustration');
+    expect(stat).toHaveTextContent('Frustration signals');
+    expect(stat).toHaveTextContent('2');
+    expect(
+      screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration')
+    ).toHaveTextContent('1 rage, 1 dead, 0 error clicks');
+  });
+
+  it('filters the journey to frustration', async () => {
+    mockDetail.mockResolvedValue(withFrustration());
+    renderPage();
+
+    await screen.findAllByTestId('digitalExperiencePageVisit');
+    const chip = screen.getByTestId('digitalExperienceActivityFilter-frustration');
+    expect(chip).toHaveTextContent('Frustration');
+    expect(chip).toHaveTextContent('2');
+    fireEvent.click(chip);
+    expect(screen.queryAllByTestId('digitalExperienceSessionEvent-frustration')).toHaveLength(0);
   });
 
   it('lists what happened on each page', async () => {
