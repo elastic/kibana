@@ -28,7 +28,10 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
+import { REPORT_TEMPLATES } from '../reports/report_templates';
+import type { ReportTemplateId } from '../reports/report_templates';
 import { ReportsTab } from '../reports/reports_tab';
+import { ScorecardReport } from '../reports/scorecard/scorecard_report';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
 
@@ -149,15 +152,25 @@ export function ApplicationPage({
   serviceName,
   source,
   selectedTab,
+  report,
 }: {
   serviceName: string;
   source: ApplicationSource;
   selectedTab: ApplicationTabId;
+  /** The report open on the Reports tab; the template gallery when unset. */
+  report?: ReportTemplateId;
 }) {
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
-  const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
-    useApplicationLinks(serviceName, source);
+  const {
+    overviewHref,
+    overviewPath,
+    errorsHref,
+    networkHref,
+    reportsHref,
+    scorecardReportHref,
+    sessionsHref,
+  } = useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
   // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
   // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
@@ -175,10 +188,16 @@ export function ApplicationPage({
     sessions: sessionsHref(),
   };
 
-  useRouteBreadcrumb([
-    { text: serviceName, href: overviewHref },
-    { text: APPLICATION_TAB_LABELS[selectedTab] },
-  ]);
+  const reportTitle = REPORT_TEMPLATES.find(({ id }) => id === report)?.title;
+  useRouteBreadcrumb(
+    reportTitle
+      ? [
+          { text: serviceName, href: overviewHref },
+          { text: APPLICATION_TAB_LABELS[selectedTab], href: reportsHref },
+          { text: reportTitle },
+        ]
+      : [{ text: serviceName, href: overviewHref }, { text: APPLICATION_TAB_LABELS[selectedTab] }]
+  );
 
   const renderOverview = () =>
     source === APPLICATION_SOURCE.otel ? (
@@ -208,7 +227,13 @@ export function ApplicationPage({
       case 'sessions':
         return renderSessions();
       case 'reports':
-        return withPagePadding(<ReportsTab />);
+        return withPagePadding(
+          report === 'scorecard' ? (
+            <ScorecardReport serviceName={serviceName} />
+          ) : (
+            <ReportsTab hrefs={{ scorecard: scorecardReportHref }} />
+          )
+        );
       default:
         return renderOverview();
     }

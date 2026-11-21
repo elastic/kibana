@@ -116,6 +116,10 @@ export const ERRORS_EBT_ELEMENTS = {
   CLEAR_KUERY: 'errorsClearKuery',
 } as const;
 
+export const REPORTS_EBT_ELEMENTS = {
+  SCORECARD_RETRY: 'reportsScorecardRetry',
+} as const;
+
 export const NETWORK_EBT_ELEMENTS = {
   RETRY: 'networkRetry',
   RENDER_BLOCKING_FILTER: 'networkRenderBlockingFilter',

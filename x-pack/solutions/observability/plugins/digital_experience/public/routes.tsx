@@ -13,18 +13,21 @@ import { applicationSourceRt, DEFAULT_APPLICATION_SOURCE } from './utils/applica
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import type { ApplicationTabId } from '../common/types/applications';
+import type { ReportTemplateId } from './pages/reports/report_templates';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
 import { overviewQueryProps } from './utils/overview_filters_query';
 import { sessionsListQueryRt } from './utils/sessions_list_query';
 
-function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
+function ApplicationRoute({ tab, report }: { tab: ApplicationTabId; report?: ReportTemplateId }) {
   const {
     path: { serviceName },
     query: { source },
   } = useDigitalExperienceParams('/{serviceName}');
-  return <ApplicationPage serviceName={serviceName} source={source} selectedTab={tab} />;
+  return (
+    <ApplicationPage serviceName={serviceName} source={source} selectedTab={tab} report={report} />
+  );
 }
 
 function SessionDetailRoute() {
@@ -75,6 +78,9 @@ const digitalExperienceRoutes = {
           },
           '/{serviceName}/network': {
             element: <ApplicationRoute tab="network" />,
+          },
+          '/{serviceName}/reports/scorecard': {
+            element: <ApplicationRoute tab="reports" report="scorecard" />,
           },
           '/{serviceName}/reports': {
             element: <ApplicationRoute tab="reports" />,
