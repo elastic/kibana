@@ -86,14 +86,18 @@ export const okOrIndexMissing = <T>(result: ApiResult<T>, label: string, whenInd
 
 /**
  * Bounded polling. Resolves with the first non-undefined value `read` returns; a timeout throws,
- * so a flow that never gets there is a failure, never a skip.
+ * so a flow that never gets there is a failure, never a skip. Callers that budget their own
+ * request signals pass the same `deadline`, so the check here and their signal expire together.
  */
 export const pollUntil = async <T>(
   label: string,
   read: () => Promise<T | undefined>,
-  { timeoutMs, intervalMs = POLL_INTERVAL_MS }: { timeoutMs: number; intervalMs?: number }
+  {
+    timeoutMs,
+    intervalMs = POLL_INTERVAL_MS,
+    deadline = Date.now() + timeoutMs,
+  }: { timeoutMs: number; intervalMs?: number; deadline?: number }
 ): Promise<T> => {
-  const deadline = Date.now() + timeoutMs;
   let lastError: unknown;
   for (;;) {
     // The deadline is checked before, not after, `read`: a caller that sleeps past it and

@@ -407,7 +407,9 @@ export const captureWorkerBaseline = async (
         deadline2.dispose();
       }
     },
-    { timeoutMs: BASELINE_TIMEOUT_MS }
+    // Same deadline as the per-read signal above: a tick between two separately computed
+    // deadlines could start one more read with a ~1 ms signal and abort it artificially.
+    { timeoutMs: BASELINE_TIMEOUT_MS, deadline }
   );
 };
 
