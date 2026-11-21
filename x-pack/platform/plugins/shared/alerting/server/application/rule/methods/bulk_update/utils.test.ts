@@ -6,10 +6,17 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RawRule } from '../../../../types';
-import { loadPending, loadRulesByIds, prepareUpdate, updateTaskSchedules } from './utils';
+import {
+  loadPending,
+  loadRulesByIds,
+  loadRulesByIdsRealtime,
+  prepareUpdate,
+  updateTaskSchedules,
+} from './utils';
 import type { PreparedUpdate } from './types';
 
 const so = (id: string): SavedObject<RawRule> =>
@@ -64,6 +71,57 @@ describe('bulkUpdate utils', () => {
     });
   });
 
+  describe('loadRulesByIdsRealtime', () => {
+    it('returns empty without reading', async () => {
+      const getDecryptedAsInternalUser = jest.fn();
+      const context = {
+        encryptedSavedObjectsClient: { getDecryptedAsInternalUser },
+      } as unknown as RulesClientContext;
+
+      await expect(loadRulesByIdsRealtime(context, [])).resolves.toEqual([]);
+      expect(getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    it('reads each id realtime in the context namespace', async () => {
+      const getDecryptedAsInternalUser = jest
+        .fn()
+        .mockImplementation(async (_type: string, id: string) => so(id));
+      const context = {
+        namespace: 'space-1',
+        encryptedSavedObjectsClient: { getDecryptedAsInternalUser },
+      } as unknown as RulesClientContext;
+
+      const loaded = await loadRulesByIdsRealtime(context, ['id-1', 'id-2']);
+
+      expect(loaded.map((item) => item.id)).toEqual(['id-1', 'id-2']);
+      expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'id-1', {
+        namespace: 'space-1',
+      });
+      expect(getDecryptedAsInternalUser).toHaveBeenCalledWith(RULE_SAVED_OBJECT_TYPE, 'id-2', {
+        namespace: 'space-1',
+      });
+    });
+
+    it('omits ids that are gone and rethrows other errors', async () => {
+      const context = (getDecryptedAsInternalUser: jest.Mock): RulesClientContext =>
+        ({
+          encryptedSavedObjectsClient: { getDecryptedAsInternalUser },
+        } as unknown as RulesClientContext);
+
+      const notFound = jest.fn().mockImplementation(async (_type: string, id: string) => {
+        if (id === 'id-2') {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, id);
+        }
+        return so(id);
+      });
+      const loaded = await loadRulesByIdsRealtime(context(notFound), ['id-1', 'id-2']);
+      expect(loaded.map((item) => item.id)).toEqual(['id-1']);
+
+      const boom = jest.fn().mockRejectedValue(new Error('ES down'));
+      await expect(loadRulesByIdsRealtime(context(boom), ['id-1'])).rejects.toThrow('ES down');
+    });
+  });
+
   describe('loadPending', () => {
     it('records a 404 for ids that the PIT load missed', async () => {
       const context = {
@@ -92,6 +150,30 @@ describe('bulkUpdate utils', () => {
           rule: { id: 'id-2', name: 'two' },
         }),
       ]);
+    });
+
+    it('reads realtime instead of opening a PIT finder when asked', async () => {
+      const createFinder = jest.fn();
+      const getDecryptedAsInternalUser = jest
+        .fn()
+        .mockImplementation(async (_type: string, id: string) => so(id));
+      const context = {
+        encryptedSavedObjectsClient: {
+          createPointInTimeFinderDecryptedAsInternalUser: createFinder,
+          getDecryptedAsInternalUser,
+        },
+      } as unknown as RulesClientContext;
+      const errors: BulkOperationError[] = [];
+      const byId = new Map([['id-1', { id: 'id-1', data: { name: 'one' } }]]);
+
+      const pending = await loadPending(context, byId as never, ['id-1'], errors, {
+        realtime: true,
+      });
+
+      expect(pending.map(({ item }) => item.id)).toEqual(['id-1']);
+      expect(errors).toEqual([]);
+      expect(createFinder).not.toHaveBeenCalled();
+      expect(getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     });
   });
 
