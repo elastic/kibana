@@ -15,6 +15,9 @@ import {
 } from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
+import { createClassicDiscoverExtension } from './discover_extension';
+import { STACK_DISCOVER_LINK_RESOLVERS } from './utils/get_classic_alert_discover_target';
+import type { AlertDiscoverLinkResolvers } from '../utils/discover_href_for_alert';
 import {
   EPISODE_SEVERITY_WARNING_LABEL,
   EPISODE_SEVERITY_MINOR_LABEL,
@@ -56,11 +59,14 @@ export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
   host?: LocatorHost;
+  /** Discover resolvers for the host's rule types, added to the stack resolvers (host wins per rule type). */
+  discoverLinkResolvers?: AlertDiscoverLinkResolvers;
 }
 
 export const createClassicEpisodeSource = ({
   ruleTypeIds,
   host = STACK_MANAGEMENT_RULES_HOST,
+  discoverLinkResolvers,
 }: CreateClassicEpisodeSourceOptions): EpisodeDataSource => ({
   id: CLASSIC_EPISODE_SOURCE_ID,
   label: CLASSIC_SOURCE_LABEL,
@@ -125,7 +131,13 @@ export const createClassicEpisodeSource = ({
   fetchSearchFields: ({ services, abortSignal }) =>
     fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
-  actionExtensions: classicActionExtensions,
+  actionExtensions: [
+    ...classicActionExtensions,
+    createClassicDiscoverExtension({
+      ruleTypeIds,
+      resolvers: { ...STACK_DISCOVER_LINK_RESOLVERS, ...discoverLinkResolvers },
+    }),
+  ],
 
   useWriteAccess: useClassicWriteAccess,
 

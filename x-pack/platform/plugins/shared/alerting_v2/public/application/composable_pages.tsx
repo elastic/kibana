@@ -15,6 +15,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertDiscoverLinkResolvers } from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
 import { RulesApp } from './rules_app';
 import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
@@ -37,6 +38,7 @@ export interface AlertingV2PageProps extends EpisodeDetailsPageProps {
   privilegeCheck?: PrivilegeCheck;
   tabs?: AppHeaderTab[];
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  discoverLinkResolvers?: AlertDiscoverLinkResolvers;
   manageRulesHref?: string;
 }
 
@@ -155,6 +157,7 @@ export const AlertingV2EpisodesPage = ({
   hostApp,
   privilegeCheck,
   createActions,
+  discoverLinkResolvers,
   useAdditionalEpisodeDetailsHeaderMenuItems,
   manageRulesHref,
 }: InternalPageProps) => (
@@ -164,6 +167,7 @@ export const AlertingV2EpisodesPage = ({
     hostApp={hostApp}
     privilegeCheck={privilegeCheck}
     createActions={createActions}
+    discoverLinkResolvers={discoverLinkResolvers}
   >
     <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
       <ManageRulesHrefProvider value={manageRulesHref}>

@@ -33,12 +33,13 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
+import type { AlertDiscoverLinkResolvers } from '@kbn/alerting-v2-episodes-ui/utils/discover_href_for_alert';
 import { LocatorProvider } from './locator_context';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
 import type { AlertingV2HostApp } from '../../common/locators';
 import type { AlertsKibanaServices } from '../alerts_kibana_services';
-import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE, createClassicAlertsDataSource } from '../alert_sources';
 import { UserCapabilities } from '../services/user_capabilities';
 import type { RuleApiResponse } from '../services/rules_api';
 import type { ComposeTarget } from './compose_rule_flyout';
@@ -59,12 +60,24 @@ export interface AlertingV2AlertsProviderProps {
   privilegeCheck?: PrivilegeCheck;
   dataSource?: EpisodeDataSource;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  /** Discover resolvers for the host's rule types, added to the default classic source's resolvers. */
+  discoverLinkResolvers?: AlertDiscoverLinkResolvers;
   children: React.ReactNode;
 }
 
 export interface InternalAlertsProviderProps extends AlertingV2AlertsProviderProps {
   container: Container;
 }
+
+/** The host's own source, or the classic source with the host's Discover resolvers added. */
+const getBaseSource = (
+  dataSource: EpisodeDataSource | undefined,
+  discoverLinkResolvers: AlertDiscoverLinkResolvers | undefined
+): EpisodeDataSource => {
+  if (dataSource) return dataSource;
+  if (discoverLinkResolvers) return createClassicAlertsDataSource(discoverLinkResolvers);
+  return CLASSIC_ALERTS_DATA_SOURCE;
+};
 
 const AlertHostScope = ({
   dataSource,
@@ -139,6 +152,7 @@ export const AlertingV2AlertsProvider = ({
   privilegeCheck,
   dataSource: dataSourceProp,
   createActions,
+  discoverLinkResolvers,
   children,
 }: InternalAlertsProviderProps) => {
   const [queryClient] = useState(() => new QueryClient());
@@ -149,9 +163,9 @@ export const AlertingV2AlertsProvider = ({
   }, [container, hostApp]);
 
   const dataSource: EpisodeDataSource = useMemo(() => {
-    const source = dataSourceProp ?? CLASSIC_ALERTS_DATA_SOURCE;
+    const source = getBaseSource(dataSourceProp, discoverLinkResolvers);
     return createActions ? { ...source, createActions } : source;
-  }, [dataSourceProp, createActions]);
+  }, [dataSourceProp, createActions, discoverLinkResolvers]);
 
   const hrefs = useMemo(
     () => ({

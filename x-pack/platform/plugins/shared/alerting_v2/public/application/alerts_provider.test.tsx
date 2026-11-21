@@ -9,7 +9,12 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { PluginStart } from '@kbn/core-di';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import {
+  isDiscoverExtension,
+  type EpisodeDataSource,
+} from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '@kbn/alerting-v2-episodes-ui/actions';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import {
   useAlertHost,
@@ -17,6 +22,16 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/context/alert_host_context';
 import { AlertingV2AlertsProvider } from './alerts_provider';
 import { CLASSIC_ALERTS_DATA_SOURCE } from '../alert_sources';
+
+const HOST_RULE_TYPE_ID = 'host.rule';
+
+const makeClassicEpisode = (ruleTypeId: string) =>
+  ({
+    'episode.id': 'alert-1',
+    supports_actions: false,
+    source_id: CLASSIC_ALERTS_DATA_SOURCE.id,
+    source_action_context: { alertUuid: 'alert-1', ruleTypeId },
+  } as unknown as AlertEpisode);
 
 jest.mock('@kbn/core-di-browser', () => ({
   ...jest.requireActual('@kbn/core-di-browser'),
@@ -125,6 +140,25 @@ describe('AlertingV2AlertsProvider', () => {
     renderProvider({ dataSource, createActions });
 
     expect(seen.dataSource).toEqual({ id: 'security', createActions });
+  });
+
+  it('adds host Discover resolvers to the default classic source', () => {
+    renderProvider({ discoverLinkResolvers: { [HOST_RULE_TYPE_ID]: jest.fn() } });
+
+    const extension = seen.dataSource?.actionExtensions
+      ?.filter(isDiscoverExtension)
+      .find(({ actionId }) => actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID);
+
+    expect(seen.dataSource?.id).toBe(CLASSIC_ALERTS_DATA_SOURCE.id);
+    expect(extension?.isCompatible(makeClassicEpisode(HOST_RULE_TYPE_ID))).toBe(true);
+  });
+
+  it('keeps a host-supplied source as is when the host also adds Discover resolvers', () => {
+    const dataSource = { id: 'security' } as unknown as EpisodeDataSource;
+
+    renderProvider({ dataSource, discoverLinkResolvers: { [HOST_RULE_TYPE_ID]: jest.fn() } });
+
+    expect(seen.dataSource).toBe(dataSource);
   });
 
   it('reports the write privilege to the alert components', () => {
