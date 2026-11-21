@@ -3259,6 +3259,9 @@ importers:
       '@kbn/rison':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-rison
+      '@kbn/rollout-gates-plugin':
+        specifier: workspace:*
+        version: link:src/platform/plugins/shared/rollout_gates
       '@kbn/rollup':
         specifier: workspace:*
         version: link:x-pack/platform/packages/private/rollup
@@ -8847,6 +8850,8 @@ importers:
   src/platform/plugins/shared/no_data_page: {}
 
   src/platform/plugins/shared/presentation_util: {}
+
+  src/platform/plugins/shared/rollout_gates: {}
 
   src/platform/plugins/shared/saved_objects: {}
 
