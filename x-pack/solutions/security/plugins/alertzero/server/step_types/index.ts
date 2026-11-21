@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+  Logger,
+} from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -20,6 +25,7 @@ import {
   getTriageTagPatternKeysStepDefinition,
 } from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
+import { getRemoteIndexTargetsStepDefinition } from './remote_index_targets';
 import { getResolveProposalsStepDefinition } from './resolve_proposals';
 import {
   getSummarizeInvestigationStepDefinition,
@@ -43,6 +49,7 @@ export const registerStepDefinitions = ({
   getHuntServices,
   getResolveHostEnrollment,
   isContextEngineEnabled,
+  getUiSettingsClient,
   getInternalEsClient,
   getTaskManager,
   getWorkflowsManagement,
@@ -57,6 +64,7 @@ export const registerStepDefinitions = ({
   getHuntServices: () => HuntServices;
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
+  getUiSettingsClient: (request: KibanaRequest) => IUiSettingsClient;
   getInternalEsClient?: () => ElasticsearchClient;
   getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   getWorkflowsManagement: LoadAlertsStepDependencies['getWorkflowsManagement'];
@@ -89,6 +97,9 @@ export const registerStepDefinitions = ({
       getProposals,
       logger,
     })
+  );
+  workflowsExtensions.registerStepDefinition(
+    getRemoteIndexTargetsStepDefinition({ getUiSettingsClient, logger })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
   workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
