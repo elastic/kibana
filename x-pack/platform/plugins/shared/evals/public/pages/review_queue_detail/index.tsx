@@ -28,7 +28,6 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { BlindReviewItem, RevealedReviewItem } from '@kbn/evals-common';
 import { useHistory, useParams } from 'react-router-dom';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
-import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import {
   useNextReviewItem,
   useReviewQueue,
@@ -38,6 +37,7 @@ import {
   type SubmitReviewVerdictVariables,
 } from '../../hooks/use_review_queues_api';
 import { JudgeAgreementPanel } from '../../components/judge_agreement';
+import { ReviewPrivilegeGuard } from '../../components/review_privilege_guard';
 import { REVIEW_QUEUES_PATH } from '../review_queues_list';
 import { VerdictForm } from './verdict_form';
 import * as i18n from './translations';
@@ -157,23 +157,35 @@ const RevealedVerdict: React.FC<{ item: RevealedReviewItem; onNext: () => void }
   );
 };
 
-export const ReviewQueueDetailPage: React.FC = () => {
+const ReviewQueueDetailContent: React.FC = () => {
   const history = useHistory();
   const { queueId } = useParams<{ queueId: string }>();
-  const { canReview } = useEvalsPermissions();
   const queue = useReviewQueue(queueId);
-  // Both routes need the review privilege, so a read-only user must not fire them and get 403s.
-  const next = useNextReviewItem(queueId, { enabled: canReview });
+  const next = useNextReviewItem(queueId);
   const submit = useSubmitReviewVerdict(queueId);
-  const agreement = useReviewQueueAgreement(queueId, { enabled: canReview });
+  const agreement = useReviewQueueAgreement(queueId);
   const [revealed, setRevealed] = useState<RevealedReviewItem | null>(null);
+  const [advancing, setAdvancing] = useState(false);
 
-  const item: BlindReviewItem | null = revealed ?? next.data?.item ?? null;
+  // React Query keeps the previous `data` while refetching and after a failed refetch, so the
+  // item that was just reviewed or skipped stays in `next.data` until the new one arrives. It
+  // must not be offered again: hide it for the whole transition and let an error win over it.
+  const pendingItem = advancing || next.error ? null : next.data?.item ?? null;
+  const item: BlindReviewItem | null = revealed ?? pendingItem;
+
+  const advance = async () => {
+    setAdvancing(true);
+    try {
+      await next.refetch();
+    } finally {
+      setAdvancing(false);
+    }
+  };
 
   const goToNext = async () => {
     setRevealed(null);
     submit.reset();
-    await next.refetch();
+    await advance();
   };
 
   const onSubmit = (verdict: SubmitReviewVerdictVariables['verdict']) => {
@@ -194,7 +206,7 @@ export const ReviewQueueDetailPage: React.FC = () => {
     );
   };
 
-  if (queue.isLoading || (canReview && next.isLoading && !revealed)) {
+  if (queue.isLoading || (next.isLoading && !revealed)) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
@@ -263,7 +275,7 @@ export const ReviewQueueDetailPage: React.FC = () => {
           <EuiSpacer size="m" />
           {revealed ? (
             <RevealedVerdict item={revealed} onNext={goToNext} />
-          ) : canReview ? (
+          ) : (
             <>
               <VerdictForm key={item.id} isSubmitting={submit.isLoading} onSubmit={onSubmit} />
               {submit.error ? (
@@ -282,19 +294,17 @@ export const ReviewQueueDetailPage: React.FC = () => {
                 </>
               ) : null}
             </>
-          ) : (
-            <EuiCallOut announceOnMount size="s" title={i18n.NO_REVIEW_PRIVILEGE} />
           )}
         </>
-      ) : !canReview ? (
-        <EuiCallOut announceOnMount size="s" title={i18n.NO_REVIEW_PRIVILEGE} />
+      ) : advancing ? (
+        <EuiLoadingSpinner size="xl" data-test-subj="evalsReviewAdvancing" />
       ) : next.error ? (
         <EuiEmptyPrompt
           color="danger"
           iconType="warning"
           title={<h3>{i18n.LOAD_ERROR_TITLE}</h3>}
           actions={
-            <EuiButton onClick={() => next.refetch()} data-test-subj="evalsReviewNextRetry">
+            <EuiButton onClick={advance} data-test-subj="evalsReviewNextRetry">
               {i18n.RETRY}
             </EuiButton>
           }
@@ -309,3 +319,9 @@ export const ReviewQueueDetailPage: React.FC = () => {
     </EuiPageSection>
   );
 };
+
+export const ReviewQueueDetailPage: React.FC = () => (
+  <ReviewPrivilegeGuard>
+    <ReviewQueueDetailContent />
+  </ReviewPrivilegeGuard>
+);

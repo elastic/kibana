@@ -53,6 +53,6 @@ export const getProgress = (reviewed: number, total: number) =>
 
 export const getEvaluatorLabel = (name: string, version: string) =>
   i18n.translate('xpack.evals.reviewQueues.list.evaluatorLabel', {
-    defaultMessage: '{name} (v{version})',
+    defaultMessage: '{name} ({version})',
     values: { name, version },
   });

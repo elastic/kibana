@@ -20,11 +20,12 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { ReviewQueueWithCounts } from '@kbn/evals-common';
 import { useHistory } from 'react-router-dom';
 import { useReviewQueues } from '../../hooks/use_review_queues_api';
+import { ReviewPrivilegeGuard } from '../../components/review_privilege_guard';
 import * as i18n from './translations';
 
 export const REVIEW_QUEUES_PATH = '/review' as const;
 
-export const ReviewQueuesListPage: React.FC = () => {
+const ReviewQueuesListContent: React.FC = () => {
   const history = useHistory();
   const { data, isLoading, error, refetch } = useReviewQueues();
   const queues = data?.queues ?? [];
@@ -111,3 +112,9 @@ export const ReviewQueuesListPage: React.FC = () => {
     </EuiPageSection>
   );
 };
+
+export const ReviewQueuesListPage: React.FC = () => (
+  <ReviewPrivilegeGuard>
+    <ReviewQueuesListContent />
+  </ReviewPrivilegeGuard>
+);

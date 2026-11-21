@@ -22,6 +22,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { APP_TITLE } from './translations';
 import { ExperimentsListPage } from './pages/experiments_list';
 import { DatasetsListPage } from './pages/datasets_list';
+import { useEvalsPermissions } from './hooks/use_evals_permissions';
 import { OnlineEvalsListPage } from './pages/online_evals_list';
 import { OnlineEvalDetailPage } from './pages/online_eval_detail';
 import { REVIEW_QUEUES_PATH, ReviewQueuesListPage } from './pages/review_queues_list';
@@ -236,6 +237,7 @@ const getBreadcrumbs = ({
 const EvalsNavigation: React.FC = () => {
   const history = useHistory();
   const { pathname } = useLocation();
+  const { canReview } = useEvalsPermissions();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
   const isEvaluatorsSelected = pathname.startsWith(EVALUATORS_PATH);
@@ -262,9 +264,11 @@ const EvalsNavigation: React.FC = () => {
         <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push(EVALUATORS_PATH)}>
           {evaluatorsTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isReviewSelected} onClick={() => history.push(REVIEW_QUEUES_PATH)}>
-          {reviewTabLabel}
-        </EuiTab>
+        {canReview ? (
+          <EuiTab isSelected={isReviewSelected} onClick={() => history.push(REVIEW_QUEUES_PATH)}>
+            {reviewTabLabel}
+          </EuiTab>
+        ) : null}
         <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
           {tracingTabLabel}
         </EuiTab>

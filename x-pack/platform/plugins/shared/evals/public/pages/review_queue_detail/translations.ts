@@ -30,13 +30,6 @@ export const QUEUE_COMPLETE_BODY = i18n.translate(
   'xpack.evals.reviewQueues.detail.queueCompleteBody',
   { defaultMessage: 'Every item in this queue has been reviewed or skipped.' }
 );
-export const NO_REVIEW_PRIVILEGE = i18n.translate(
-  'xpack.evals.reviewQueues.detail.noReviewPrivilege',
-  {
-    defaultMessage:
-      'You can see this queue, but your role does not allow submitting reviews. Ask an administrator for the evals "All" privilege.',
-  }
-);
 
 export const INPUT_TITLE = i18n.translate('xpack.evals.reviewQueues.detail.inputTitle', {
   defaultMessage: 'Input',
@@ -114,6 +107,6 @@ export const getItemPosition = (position: number, total: number) =>
 
 export const getEvaluatorLabel = (name: string, version: string) =>
   i18n.translate('xpack.evals.reviewQueues.detail.evaluatorLabel', {
-    defaultMessage: 'Evaluator: {name} (v{version})',
+    defaultMessage: 'Evaluator: {name} ({version})',
     values: { name, version },
   });

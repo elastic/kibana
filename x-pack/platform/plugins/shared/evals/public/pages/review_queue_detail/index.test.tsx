@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router, Route } from '@kbn/shared-ux-router';
 import type { BlindReviewItem, RevealedReviewItem } from '@kbn/evals-common';
@@ -133,6 +133,17 @@ describe('ReviewQueueDetailPage', () => {
     expect(screen.queryByText('0.12')).not.toBeInTheDocument();
   });
 
+  it.each(['latest', 'v2.0.0'])('shows the evaluator version %s as stored', (version) => {
+    const queueResult = mockedQueue('queue-1');
+    mockedQueue.mockReturnValue({
+      ...queueResult,
+      data: { ...queueResult.data, evaluator_version: version },
+    } as unknown as ReturnType<typeof useReviewQueue>);
+    renderPage();
+
+    expect(screen.getByText(`Evaluator: correctness (${version})`)).toBeInTheDocument();
+  });
+
   it('keeps submit disabled until a verdict is chosen', () => {
     renderPage();
 
@@ -162,17 +173,16 @@ describe('ReviewQueueDetailPage', () => {
     expect(screen.queryByTestId('evalsReviewVerdictForm')).not.toBeInTheDocument();
   });
 
-  it('does not offer the form without the review privilege', async () => {
-    mockedPermissions.mockReturnValue({ canRead: true, canManage: true, canReview: false });
+  it('mounts nothing that queries without the review privilege', () => {
+    mockedPermissions.mockReturnValue({ canRead: true, canManage: false, canReview: false });
     renderPage();
 
-    await waitFor(() => {
-      expect(screen.getByText(/does not allow submitting reviews/)).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('evalsReviewNoPrivilege')).toBeInTheDocument();
     expect(screen.queryByTestId('evalsReviewSubmit')).not.toBeInTheDocument();
     expect(screen.queryByText('Nothing left to review')).not.toBeInTheDocument();
-    expect(mockedNext).toHaveBeenCalledWith('queue-1', { enabled: false });
-    expect(mockedAgreement).toHaveBeenCalledWith('queue-1', { enabled: false });
+    expect(mockedQueue).not.toHaveBeenCalled();
+    expect(mockedNext).not.toHaveBeenCalled();
+    expect(mockedAgreement).not.toHaveBeenCalled();
   });
 
   it('shows a retry instead of a finished queue when loading the next item fails', () => {
@@ -186,6 +196,19 @@ describe('ReviewQueueDetailPage', () => {
 
     expect(screen.getByTestId('evalsReviewNextRetry')).toBeInTheDocument();
     expect(screen.queryByText('Nothing left to review')).not.toBeInTheDocument();
+  });
+
+  it('prefers the error over the previously cached item', () => {
+    mockedNext.mockReturnValue({
+      isLoading: false,
+      error: new Error('boom'),
+      data: { item: blindItem },
+      refetch: jest.fn(),
+    } as unknown as ReturnType<typeof useNextReviewItem>);
+    renderPage();
+
+    expect(screen.getByTestId('evalsReviewNextRetry')).toBeInTheDocument();
+    expect(screen.queryByTestId('evalsReviewSubmit')).not.toBeInTheDocument();
   });
 
   it('shows the empty state when no pending items remain', () => {
