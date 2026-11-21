@@ -30,6 +30,8 @@ export class RuleDetailsPage {
   readonly alertSeverityCells: Locator;
   readonly alertRiskScoreCells: Locator;
   readonly investigateInTimelineButtons: Locator;
+  /** "Add rule exception" button shown on the exceptions tab while the rule has no exceptions. */
+  readonly addExceptionFromEmptyPromptButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.header = this.page.testSubj.locator('appHeaderTitle');
@@ -51,13 +53,16 @@ export class RuleDetailsPage {
       'formatted-field-kibana.alert.risk_score'
     );
     this.investigateInTimelineButtons = this.page.testSubj.locator('send-alert-to-timeline-button');
+    this.addExceptionFromEmptyPromptButton = this.page.testSubj.locator(
+      'exceptionsEmptyPromptButton'
+    );
   }
 
   async goto(params: {
     kbnUrl: KibanaUrl;
     spaceId: string;
     ruleId: string;
-    tab?: 'alerts';
+    tab?: 'alerts' | 'rule_exceptions';
   }): Promise<void> {
     const { kbnUrl, spaceId, ruleId, tab } = params;
     await this.page.goto(
