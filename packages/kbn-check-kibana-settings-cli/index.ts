@@ -8,3 +8,5 @@
  */
 
 export { runCheckKibanaSettingsCli } from './src/commands/run_check_kibana_settings_cli';
+export { setupKibana, stopKibana } from './src/util';
+export { getKibanaSettings } from './src/commands/tasks';

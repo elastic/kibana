@@ -1,0 +1,10 @@
+{
+  "type": "tooling",
+  "id": "@kbn/dev-procs",
+  "owner": [
+    "@elastic/kibana-operations"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "devOnly": true
+}
