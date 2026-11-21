@@ -61,7 +61,7 @@ export const MEMORIES_CITED_EVALUATOR = 'memories_cited_in_answer';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
 
-interface JudgeDeps {
+export interface JudgeDeps {
   inferenceClient: BoundInferenceClient;
   evaluationConnector: EvalConnector;
   log: ToolingLog;
@@ -82,7 +82,7 @@ const NO_TRAJECTORY_EXPLANATION =
   'No tool-call trajectory was captured for this run, so what the agent accessed cannot be judged.';
 
 /** Model attribution matching the built-in `evaluators` fixture (`toScoreModel(...)`). */
-const getModelFactory = (evaluationConnector: EvalConnector) => () => {
+export const getModelFactory = (evaluationConnector: EvalConnector) => () => {
   const model = buildModelFromConnector(evaluationConnector);
   if (!model.id) return undefined;
   return {
@@ -101,11 +101,13 @@ const getModelFactory = (evaluationConnector: EvalConnector) => () => {
  * LLM evaluators, which get the same span via `executeUntilValid` → `withActiveInferenceSpan`.
  * Without this wrap the judge model call emits no queryable `gen_ai` span.
  */
-const invokeJudge = async <TArgs>(
+export const invokeJudge = async <TArgs>(
   { inferenceClient, log }: Pick<JudgeDeps, 'inferenceClient' | 'log'>,
   name: string,
   prompt: Parameters<BoundInferenceClient['prompt']>[0]['prompt'],
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  // The tool the prompt defines; the investigation judges' prompts all call theirs `score`.
+  toolName: string = 'score'
 ): Promise<TArgs> =>
   withActiveInferenceSpan(
     name,
@@ -113,7 +115,11 @@ const invokeJudge = async <TArgs>(
     () =>
       pRetry(
         async () => {
-          const response = await inferenceClient.prompt({ prompt, input, toolChoice: scoreTool });
+          const response = await inferenceClient.prompt({
+            prompt,
+            input,
+            toolChoice: toolName === 'score' ? scoreTool : ({ function: toolName } as ToolChoice),
+          });
           const toolCall = response.toolCalls[0];
           if (!toolCall) throw new Error(`No tool call returned by the ${name} judge`);
           return toolCall.function.arguments as TArgs;

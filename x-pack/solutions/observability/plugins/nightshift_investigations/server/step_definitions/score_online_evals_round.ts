@@ -40,7 +40,7 @@ const inputSchema = lazySchema(() =>
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
       .describe(
-        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored (a recovery round's own analysis). `pre_recovery`, the report just before an alert recovery, isn't supported yet."
       ),
     evaluator_set: z
       .string()
@@ -103,7 +103,8 @@ const getErrorMessage = (error: unknown) =>
 
 /**
  * The round the judges grade. `first_round` is the investigation's first round, whatever round is
- * being scored; an alert recovery is the ground truth, so it is never graded itself.
+ * being scored, and a recovery round graded that way is the ground truth, never graded itself;
+ * `current` is the round being scored, which for a recovery is graded on its own analysis.
  */
 const getGradedRound = (
   input: ScoreInput,
@@ -120,7 +121,9 @@ const getGradedRound = (
     }
     return rounds[0];
   }
-  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
+  // The round itself is graded. An alert recovery is the ground truth for first-round judges, but
+  // judges of the recovery round's own analysis grade it too.
+  if (input.graded_report === 'current') {
     return round;
   }
   throw new OnlineEvalsStepError(
@@ -141,7 +144,12 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+}): Promise<{
+  agentId: string;
+  round: ConversationRound;
+  gradedRound: ConversationRound;
+  earlierAnswers: string[];
+}> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -166,6 +174,13 @@ const readRound = async ({
     agentId: conversation.agent_id,
     round,
     gradedRound: getGradedRound(input, conversation.rounds, round),
+    // The conversation already holds the earlier rounds, so judges that revisit them get them here.
+    earlierAnswers: conversation.rounds
+      .slice(
+        0,
+        conversation.rounds.findIndex(({ id }) => id === round.id)
+      )
+      .map(({ response }) => response.message),
   };
 };
 
@@ -279,7 +294,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round, gradedRound } = await readRound({
+        const { agentId, round, gradedRound, earlierAnswers } = await readRound({
           input,
           getAgentBuilder,
           request,
@@ -312,8 +327,16 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
               input,
               evidence: buildOnlineEvalsEvidence({
                 round: gradedRound,
+                // Only first-round judges read the recovery as ground truth.
                 alertOutcome:
-                  input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'first_round'
+                    ? round.response.message
+                    : undefined,
+                // A recovery round's own analysis is judged against what the rounds before it said.
+                earlierAnswers:
+                  input.round_kind === 'alert_recovery' && input.graded_report === 'current'
+                    ? earlierAnswers
+                    : undefined,
               }),
               judgeConnectorId,
               evaluate,

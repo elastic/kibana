@@ -23,9 +23,12 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
 export const buildOnlineEvalsEvidence = ({
   round,
   alertOutcome,
+  earlierAnswers,
 }: {
   round: ConversationRound;
   alertOutcome?: string;
+  /** The final answers of the rounds before this one, for judges that grade a later round against them. */
+  earlierAnswers?: string[];
 }): EvaluateEvidence => {
   const boundNotes = new Map<string, string[]>();
   for (const step of round.steps) {
@@ -65,6 +68,7 @@ export const buildOnlineEvalsEvidence = ({
   const closingReasoning = pendingNotes.join('\n');
   const referenceData = {
     ...(alertOutcome === undefined ? {} : { alert_outcome: alertOutcome }),
+    ...(earlierAnswers && earlierAnswers.length > 0 ? { earlier_rounds: earlierAnswers } : {}),
     ...(closingReasoning ? { closing_reasoning: closingReasoning } : {}),
   };
 
