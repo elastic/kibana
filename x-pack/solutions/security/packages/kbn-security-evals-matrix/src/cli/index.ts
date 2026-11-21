@@ -8,6 +8,7 @@
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { matrixCmd } from './commands/matrix';
 import { rejudgeCmd } from './commands/rejudge';
+import { regressionGateCmd } from './commands/regression_gate';
 
 export async function run() {
   await new RunWithCommands(
@@ -16,6 +17,6 @@ export async function run() {
         'node x-pack/solutions/security/packages/kbn-security-evals-matrix/scripts/run_cli.cjs',
       description: 'Security LLM performance matrix generator',
     },
-    [matrixCmd, rejudgeCmd]
+    [matrixCmd, rejudgeCmd, regressionGateCmd]
   ).execute();
 }

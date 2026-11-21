@@ -44,8 +44,12 @@ export interface ExampleScoresFilters {
 
 /** `EvalsClient` plus the experiment listing and per-example score reads the matrix needs. */
 export class MatrixEvalsClient extends EvalsClient {
-  constructor(private readonly matrixKbnClient: KbnClient, private readonly matrixLog: ToolingLog) {
-    super(matrixKbnClient, matrixLog);
+  constructor(
+    private readonly matrixKbnClient: KbnClient,
+    private readonly matrixLog: ToolingLog,
+    options: { spaceIds?: string[] } = {}
+  ) {
+    super(matrixKbnClient, matrixLog, options);
   }
 
   async listExperiments(
