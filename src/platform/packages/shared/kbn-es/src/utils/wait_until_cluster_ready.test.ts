@@ -9,7 +9,10 @@
 
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { gracefulExit } from 'exit-hook';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
+
+jest.mock('exit-hook', () => ({ gracefulExit: jest.fn() }));
 
 jest.mock('@elastic/elasticsearch', () => {
   return {
@@ -83,5 +86,50 @@ describe('waitUntilClusterReady', () => {
     await expect(
       waitUntilClusterReady({ client, log, expectedStatus: 'yellow', readyTimeout: 1000 })
     ).rejects.toThrow('ES cluster failed to come online with the 1 second timeout');
+  });
+
+  test(`a SIGINT while waiting exits through exit-hook, so async shutdown hooks still run`, async () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const listenersBefore = process.listeners('SIGINT');
+    health.mockImplementationOnce(async () => {
+      const added = process.listeners('SIGINT').filter((l) => !listenersBefore.includes(l));
+      expect(added).toHaveLength(1);
+      added[0]('SIGINT'); // what node does when the signal arrives during the wait
+      return { status: 'green' };
+    });
+    const client = new Client({});
+
+    await waitUntilClusterReady({ client, log, expectedStatus: 'green' });
+
+    expect(gracefulExit).toHaveBeenCalledTimes(1);
+    expect(exitSpy).not.toHaveBeenCalled();
+    exitSpy.mockRestore();
+  });
+
+  test(`forces exit on SIGINT only while waiting, and removes that listener afterwards`, async () => {
+    const listenersBefore = process.listenerCount('SIGINT');
+    let listenersWhileWaiting = 0;
+    health.mockImplementationOnce(async () => {
+      listenersWhileWaiting = process.listenerCount('SIGINT');
+      return { status: 'green' };
+    });
+    const client = new Client({});
+
+    await waitUntilClusterReady({ client, log, expectedStatus: 'green' });
+
+    expect(listenersWhileWaiting).toBe(listenersBefore + 1);
+    expect(process.listenerCount('SIGINT')).toBe(listenersBefore);
+  });
+
+  test(`removes the SIGINT listener when the wait times out`, async () => {
+    const listenersBefore = process.listenerCount('SIGINT');
+    health.mockImplementation(() => Promise.reject(new Error('foo')));
+    const client = new Client({});
+
+    await expect(
+      waitUntilClusterReady({ client, log, expectedStatus: 'yellow', readyTimeout: 0 })
+    ).rejects.toThrow('ES cluster failed to come online');
+
+    expect(process.listenerCount('SIGINT')).toBe(listenersBefore);
   });
 });

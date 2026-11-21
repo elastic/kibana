@@ -16,11 +16,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
 import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
-import {
-  preCreateSecurityIndexesViaSamlAuth,
-  runElasticsearch,
-  runKibanaServer,
-} from '../../servers';
+import { preCreateSecurityIndexesViaSamlAuth, runKibanaServer } from '../../servers';
+import { runWithBackingServices } from '../../servers/backing_services';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
@@ -121,53 +118,40 @@ async function runLocalServersAndTests(
   cmd: string,
   cmdArgs: string[],
   env: Record<string, string> = {}
-) {
+): Promise<'ok' | 'interrupted'> {
   const configRootDir = getConfigRootDir(options.configPath, options.testTarget);
   const config = await loadServersConfig(options.testTarget, log, configRootDir);
-  const abortCtrl = new AbortController();
 
-  const onEarlyExit = (msg: string) => {
-    log.error(msg);
-    abortCtrl.abort();
-  };
-
-  let shutdownEs;
-
-  try {
-    shutdownEs = await runElasticsearch({
-      onEarlyExit,
+  // The docker servers (e.g. the Fleet package registry) and Elasticsearch come up before Kibana
+  // boots; everything is stopped when the tests end, on a signal and when any step fails.
+  return runWithBackingServices(
+    {
       config,
       log,
-      esFrom: options.esFrom,
-      logsDir: options.logsDir,
-    });
-
-    await runKibanaServer({
       procs,
-      onEarlyExit,
-      config,
-      installDir: options.installDir,
-      extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
-    });
+      es: { esFrom: options.esFrom, logsDir: options.logsDir },
+      interruptedMessage: 'scout: run interrupted',
+    },
+    async ({ onEarlyExit }) => {
+      await runKibanaServer({
+        procs,
+        onEarlyExit,
+        config,
+        installDir: options.installDir,
+        extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
+      });
 
-    // wait for 5 seconds
-    await silence(log, 5000);
+      // wait for 5 seconds
+      await silence(log, 5000);
 
-    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
-    if (!config.get('prebootOnly')) {
-      await preCreateSecurityIndexesViaSamlAuth(config, log);
-    }
-
-    await runPlaywrightTest(procs, cmd, cmdArgs, env);
-  } finally {
-    try {
-      await procs.stop('kibana');
-    } finally {
-      if (shutdownEs) {
-        await shutdownEs();
+      // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
+      if (!config.get('prebootOnly')) {
+        await preCreateSecurityIndexesViaSamlAuth(config, log);
       }
+
+      await runPlaywrightTest(procs, cmd, cmdArgs, env);
     }
-  }
+  );
 }
 
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
@@ -235,7 +219,18 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, pwEnv);
+      const outcome = await runLocalServersAndTests(
+        procs,
+        log,
+        options,
+        pwBinPath,
+        pwCmdArgs,
+        pwEnv
+      );
+      if (outcome === 'interrupted') {
+        // not a successful run to report
+        return;
+      }
     } else {
       await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }

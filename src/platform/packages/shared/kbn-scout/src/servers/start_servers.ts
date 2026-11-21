@@ -11,16 +11,14 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 import dedent from 'dedent';
-import { once } from 'lodash';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';
+import { runWithBackingServices } from './backing_services';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
 import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
-import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { registerServerShutdown } from './server_shutdown';
 
 export async function startServers(log: ToolingLog, options: StartServerOptions) {
   const runStartTime = Date.now();
@@ -38,54 +36,61 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     const config = await loadServersConfig(options.testTarget, log, configRootDir);
     const pwGrepTag = getPlaywrightGrepTag(options.testTarget);
 
-    const shutdownEs = once(
-      await runElasticsearch({
+    // The docker servers (e.g. the Fleet package registry) and Elasticsearch come up before
+    // Kibana boots, otherwise Fleet setup falls back to retrying against a registry that is not
+    // there yet; everything is stopped on exit, on a signal and when any step fails.
+    await runWithBackingServices(
+      {
         config,
         log,
-        esFrom: options.esFrom,
-        preserveEsData: options.preserveEsData,
-        logsDir: options.logsDir,
-      })
-    );
+        procs,
+        es: {
+          esFrom: options.esFrom,
+          preserveEsData: options.preserveEsData,
+          logsDir: options.logsDir,
+        },
+        interruptedMessage: 'scout: server start interrupted',
+      },
+      async ({ onEarlyExit }) => {
+        await ensureDefaultSpaceNPRE(config, log);
 
-    const removeShutdownHook = registerServerShutdown(procs, shutdownEs);
+        // No `onEarlyExit` for Kibana here: it exiting, however it exits, is how this command
+        // ends (`waitForAllToStop` below), as before. Elasticsearch and the docker servers do
+        // report their exits through it, since Kibana would keep serving against them.
+        await runKibanaServer({
+          procs,
+          config,
+          installDir: options.installDir,
+          extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
+        });
 
-    await ensureDefaultSpaceNPRE(config, log);
+        reportTime(runStartTime, 'ready', {
+          success: true,
+          ...options,
+        });
 
-    await runKibanaServer({
-      procs,
-      config,
-      installDir: options.installDir,
-      extraKbnOpts: getExtraKbnOpts(options.installDir, config.get('serverless')),
-    });
+        // wait for 5 seconds of silence before logging the
+        // success message so that it doesn't get buried
+        await silence(log, 5000);
 
-    reportTime(runStartTime, 'ready', {
-      success: true,
-      ...options,
-    });
+        // Pre-create Elasticsearch Security indexes after server startup. Skipped for
+        // `prebootOnly` config sets: Kibana is deliberately held in the `preboot` stage, so it
+        // serves no SAML endpoints to authenticate against.
+        if (!config.get('prebootOnly')) {
+          await preCreateSecurityIndexesViaSamlAuth(config, log);
+        }
 
-    // wait for 5 seconds of silence before logging the
-    // success message so that it doesn't get buried
-    await silence(log, 5000);
-
-    // Pre-create Elasticsearch Security indexes after server startup. Skipped for `prebootOnly`
-    // config sets: Kibana is deliberately held in the `preboot` stage, so it serves no SAML
-    // endpoints to authenticate against.
-    if (!config.get('prebootOnly')) {
-      await preCreateSecurityIndexesViaSamlAuth(config, log);
-    }
-
-    log.success(
-      '\n\n' +
-        dedent`
+        log.success(
+          '\n\n' +
+            dedent`
           Elasticsearch and Kibana are ready for functional testing.
           Use 'node scripts/playwright test --project local --grep ${pwGrepTag} --config <path_to_Playwright.config.ts>' to run tests'
         ` +
-        '\n\n'
-    );
+            '\n\n'
+        );
 
-    await procs.waitForAllToStop();
-    await shutdownEs();
-    removeShutdownHook();
+        await procs.waitForAllToStop();
+      }
+    );
   });
 }

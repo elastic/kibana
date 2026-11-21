@@ -20,7 +20,6 @@
     "@kbn/dev-proc-runner",
     "@kbn/test-kibana-server",
     "@kbn/jest-serializers",
-    "@kbn/stdio-dev-helpers",
     "@kbn/test-docker-servers",
     "@kbn/swc-register",
     "@kbn/test-saml-auth",

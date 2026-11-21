@@ -7,61 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import execa from 'execa';
-import * as Rx from 'rxjs';
-import { tap } from 'rxjs';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { observeLines } from '@kbn/stdio-dev-helpers';
-
-/**
- * Observe the logs for a container, reflecting the log lines
- * to the ToolingLog and the returned Observable
- */
-export function observeContainerLogs(name: string, containerId: string, log: ToolingLog) {
-  log.debug(`[docker:${name}] streaming logs from container [id=${containerId}]`);
-  const logsProc = execa('docker', ['logs', '--follow', containerId], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  const logLine$ = new Rx.Subject<string>();
-
-  Rx.merge(
-    observeLines(logsProc.stdout!).pipe(tap((line) => log.info(`[docker:${name}] ${line}`))), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
-    observeLines(logsProc.stderr!).pipe(
-      tap((line) => {
-        // Check if this is actually an error or just info/debug written to stderr
-        if (isActualError(line)) {
-          log.error(`[docker:${name}] ${line}`);
-        } else {
-          log.info(`[docker:${name}] ${line}`);
-        }
-      })
-    ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
-  ).subscribe(logLine$);
-
-  return logLine$.asObservable();
-}
-
-/**
- * Check if a log line from stderr is actually an error or just info/debug written to stderr
- */
-export function isActualError(line: string): boolean {
-  try {
-    const parsed = JSON.parse(line);
-    // If it's JSON with a log.level field, check if it's an error/warning level
-    if (parsed['log.level']) {
-      const level = parsed['log.level'].toLowerCase();
-      return level === 'error' || level === 'fatal' || level === 'severe';
-    }
-    // If it has a level field (alternative format)
-    if (parsed.level) {
-      const level = parsed.level.toLowerCase();
-      return level === 'error' || level === 'fatal' || level === 'severe';
-    }
-  } catch (e) {
-    // Not JSON, treat as potential error since it's on stderr
-    return true;
-  }
-  // JSON but no log level field, treat as info
-  return false;
-}
+// Implemented in @kbn/test-docker-servers so test runners without the FTR lifecycle (Scout) can
+// share it. Re-exported here for backwards compatibility.
+export { isActualError, observeContainerLogs } from '@kbn/test-docker-servers';
