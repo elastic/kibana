@@ -6,6 +6,7 @@
  */
 
 import {
+  bulkCreateSignalEventsResponseSchema,
   createSignalEventDataSchema,
   createSignalEventInternalDataSchema,
 } from './create_signal_event_data_schema';
@@ -117,6 +118,31 @@ describe('createSignalEventInternalDataSchema', () => {
     ).toBe(true);
     expect(
       createSignalEventInternalDataSchema.safeParse({ source: 'datadog', status: 'active' }).success
+    ).toBe(false);
+  });
+});
+
+describe('bulkCreateSignalEventsResponseSchema', () => {
+  it('accepts created and failed items', () => {
+    const result = bulkCreateSignalEventsResponseSchema.safeParse({
+      items: [
+        { status: 'created', group_hash: 'abc' },
+        { status: 'failed', error: { code: 'invalid_signal_event', message: 'bad' } },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an item with an unknown status or a missing detail', () => {
+    expect(
+      bulkCreateSignalEventsResponseSchema.safeParse({ items: [{ status: 'duplicate' }] }).success
+    ).toBe(false);
+    expect(
+      bulkCreateSignalEventsResponseSchema.safeParse({ items: [{ status: 'created' }] }).success
+    ).toBe(false);
+    expect(
+      bulkCreateSignalEventsResponseSchema.safeParse({ items: [{ status: 'failed' }] }).success
     ).toBe(false);
   });
 });

@@ -9,9 +9,10 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import { createSignalEventInternalDataSchema } from '@kbn/alerting-v2-schemas';
+import { MAX_BULK_ITEMS, createSignalEventInternalDataSchema } from '@kbn/alerting-v2-schemas';
 import type {
   AlertEventSeverity,
+  BulkCreateSignalEventsResponse,
   CreateAlertEventData,
   CreateAlertEventResponse,
   CreateSignalEventData,
@@ -44,6 +45,13 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+
+/**
+ * The `code` of a bulk item that failed validation. The `code` of an item that
+ * Elasticsearch rejected is the Elasticsearch error type, which is lower case, so this one
+ * is upper case to tell the two apart.
+ */
+const INVALID_SIGNAL_EVENT_ERROR_CODE = 'INVALID_SIGNAL_EVENT';
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -213,12 +221,100 @@ export class AlertEventsClient {
    * the dispatcher.
    */
   public async createSignalEvent(event: CreateSignalEventData): Promise<CreateSignalEventResponse> {
-    // Validate here as well as in the workflow step, so direct callers of the client
-    // cannot store a lifecycle status or a rule id. Any source is accepted, because only the
-    // workflow step, the external surface, reserves the `elastic` prefix.
+    const prepared = this.prepareSignalEvent(event);
+    if (!prepared.valid) {
+      throw Boom.badRequest(prepared.message);
+    }
+
+    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
+    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
+
+    // No `refresh: 'wait_for'` as in Create Alert: that is there so the next episode lookup
+    // sees the write, and a signal has no lookup.
+    const { errors } = await this.storageService.bulkIndexDocs({
+      index: ALERT_EVENTS_DATA_STREAM,
+      docs: [prepared.doc],
+    });
+
+    if (errors.length > 0) {
+      const first = errors[0];
+      throw Boom.badData(`Failed to persist signal event: ${first.message}`, {
+        code: first.code,
+        details: first.details,
+      });
+    }
+
+    return { group_hash: prepared.groupHash };
+  }
+
+  /**
+   * Stores up to `MAX_BULK_ITEMS` signal events in one write. The result has one item for
+   * each input event, in input order. An event that is invalid or that Elasticsearch
+   * rejects comes back as a failed item and does not stop the others from being stored.
+   * An empty batch, a batch over the limit or a failure of the whole write throws.
+   */
+  public async bulkCreateSignalEvents(
+    events: CreateSignalEventData[]
+  ): Promise<BulkCreateSignalEventsResponse> {
+    if (events.length === 0 || events.length > MAX_BULK_ITEMS) {
+      throw Boom.badRequest(
+        `Received ${events.length} signal events, expected between 1 and ${MAX_BULK_ITEMS} per request. Split the operation into multiple requests.`
+      );
+    }
+
+    const prepared = events.map((event) => this.prepareSignalEvent(event));
+    const docs = prepared.flatMap((entry) => (entry.valid ? [entry.doc] : []));
+
+    // Rejected documents come back as the same objects that were sent, so they identify
+    // which input event failed.
+    const rejected = new Map<AlertEventDocument, { code: string; message: string }>();
+
+    if (docs.length > 0) {
+      // The docs may omit `@timestamp`, so the ingest pipeline must be in place first.
+      await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
+
+      // No refresh, as for a single signal: nothing reads the write back during this call.
+      const { errors } = await this.storageService.bulkIndexDocs({
+        index: ALERT_EVENTS_DATA_STREAM,
+        docs,
+      });
+
+      for (const error of errors) {
+        rejected.set(error.document, { code: error.code, message: error.message });
+      }
+    }
+
+    return {
+      items: prepared.map((entry) => {
+        if (!entry.valid) {
+          return {
+            status: 'failed',
+            error: { code: INVALID_SIGNAL_EVENT_ERROR_CODE, message: entry.message },
+          };
+        }
+        const failure = rejected.get(entry.doc);
+        return failure
+          ? { status: 'failed', error: failure }
+          : { status: 'created', group_hash: entry.groupHash };
+      }),
+    };
+  }
+
+  /**
+   * Validates a signal event and builds the document to store. This does not throw, so a
+   * bulk write can report an invalid event as a failed item. Validation happens here as
+   * well as in the workflow step, so direct callers of the client cannot store a lifecycle
+   * status or a rule id. Any source is accepted, because only the workflow step, the
+   * external surface, reserves the `elastic` prefix.
+   */
+  private prepareSignalEvent(
+    event: CreateSignalEventData
+  ):
+    | { valid: true; doc: AlertEventDocument; groupHash: string }
+    | { valid: false; message: string } {
     const validation = createSignalEventInternalDataSchema.safeParse(event);
     if (!validation.success) {
-      throw Boom.badRequest(`Invalid signal event: ${validation.error.message}`);
+      return { valid: false, message: `Invalid signal event: ${validation.error.message}` };
     }
 
     const groupHash = getGroupHash(event, this.spaceId);
@@ -235,25 +331,7 @@ export class AlertEventsClient {
       ...(event.severity != null ? { severity: event.severity } : {}),
     };
 
-    // The doc may omit `@timestamp`, so the ingest pipeline must be in place before writing.
-    await this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY);
-
-    // No `refresh: 'wait_for'` as in Create Alert: that is there so the next episode lookup
-    // sees the write, and a signal has no lookup.
-    const { errors } = await this.storageService.bulkIndexDocs({
-      index: ALERT_EVENTS_DATA_STREAM,
-      docs: [doc],
-    });
-
-    if (errors.length > 0) {
-      const first = errors[0];
-      throw Boom.badData(`Failed to persist signal event: ${first.message}`, {
-        code: first.code,
-        details: first.details,
-      });
-    }
-
-    return { group_hash: groupHash };
+    return { valid: true, doc, groupHash };
   }
 
   /**
