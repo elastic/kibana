@@ -6,12 +6,27 @@
  */
 
 import React from 'react';
-import { TabPlaceholder } from './tab_placeholder';
+import { AgentConversation } from '../conversation/agent_conversation';
+import { TeamConversation } from '../conversation/team_conversation';
+import { useConversationMode } from '../conversation/use_conversation_mode';
 import type { TabProps } from './tab_props';
-import * as i18n from './translations';
 
-/** Placeholder: a later change replaces this file with the real tab. */
-export const ConversationTab: React.FC<TabProps> = () => (
-  <TabPlaceholder tabName={i18n.CONVERSATION} testSubj="investigationConversationTab" />
-);
+/**
+ * The Conversation tab. With an agent it embeds the real Agent Builder conversation, with
+ * threads and claims created from messages; without one it is the team's discussion.
+ */
+export const ConversationTab: React.FC<TabProps> = ({ record, agentAvailable, openItemId }) => {
+  const conversationMode = useConversationMode(record, agentAvailable);
+
+  if (conversationMode.mode === 'team') {
+    return <TeamConversation record={record} explanation={conversationMode.explanation} />;
+  }
+  return (
+    <AgentConversation
+      record={record}
+      mainConversationId={conversationMode.conversationId}
+      requestedConversationId={openItemId}
+    />
+  );
+};
 ConversationTab.displayName = 'ConversationTab';
