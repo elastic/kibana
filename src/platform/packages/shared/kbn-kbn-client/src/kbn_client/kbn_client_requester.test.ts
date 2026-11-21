@@ -7,9 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Agent } from 'undici';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClientRequester, pathWithSpace, redactUrl } from './kbn_client_requester';
 import { KbnClientRequesterError } from './kbn_client_requester_error';
+
+// Wrap undici's Agent so the constructor options (private to the requester) are observable.
+jest.mock('undici', () => {
+  const actual = jest.requireActual('undici');
+  return { ...actual, Agent: jest.fn((opts) => new actual.Agent(opts)) };
+});
+const agentSpy = Agent as unknown as jest.Mock;
 
 describe('KBN Client Requester Functions', () => {
   it('pathWithSpace() adds a space to the path', () => {
@@ -189,5 +197,17 @@ describe('KbnClientRequester.request()', () => {
     expect(init.body).toBe(JSON.stringify({ hello: 'world' }));
     const headers = init.headers as Record<string, string>;
     expect(headers['content-type']).toBe('application/json');
+  });
+
+  it('gives plain-http requests an Agent with 15m headers/body timeouts', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+    agentSpy.mockClear();
+
+    const requester = new KbnClientRequester(log, { url: 'http://localhost:5620' });
+    await requester.request({ method: 'GET', path: '/api/status', retries: 0 });
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit & { dispatcher?: unknown };
+    expect(init.dispatcher).toBe(agentSpy.mock.results[0].value);
+    expect(agentSpy).toHaveBeenCalledWith({ headersTimeout: 900_000, bodyTimeout: 900_000 });
   });
 });
