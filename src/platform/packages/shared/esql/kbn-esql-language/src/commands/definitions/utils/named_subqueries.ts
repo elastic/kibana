@@ -58,6 +58,12 @@ export const findNamedSubqueryForSource = (
   return namedSubqueries.find(({ name }) => name === source.name);
 };
 
+/** Returns whether the LET declaration ends before the source that references it. */
+export const isNamedSubqueryDeclaredBefore = (
+  { command }: NamedSubquery,
+  source: ESQLSource
+): boolean => command.location.max < source.location.min;
+
 /** Returns the named subqueries that the selected binding is allowed to reference. */
 export const getNamedSubqueriesAvailableTo = (
   namedSubqueries: readonly NamedSubquery[],

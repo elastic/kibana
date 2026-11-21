@@ -80,12 +80,52 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           values: { name: out.name },
         }),
       };
+    case 'namedSubqueryNameNotLowercase':
+      return {
+        message: i18n.translate(
+          'esqlLanguage.esql.validation.namedSubqueryNameNotLowercaseErrorMessage',
+          {
+            defaultMessage: 'LET binding name "{name}" must be lowercase',
+            values: { name: out.name },
+          }
+        ),
+      };
+    case 'namedSubqueryDuplicateName':
+      return {
+        message: i18n.translate(
+          'esqlLanguage.esql.validation.namedSubqueryDuplicateNameErrorMessage',
+          {
+            defaultMessage: 'Duplicate LET binding name "{name}"',
+            values: { name: out.name },
+          }
+        ),
+      };
+    case 'namedSubqueryForwardReference':
+      return {
+        message: i18n.translate(
+          'esqlLanguage.esql.validation.namedSubqueryForwardReferenceErrorMessage',
+          {
+            defaultMessage:
+              'Forward reference in LET bindings: "{name}" cannot be referenced before its declaration',
+            values: { name: out.name },
+          }
+        ),
+      };
     case 'subqueryNotSupportedInTs':
       return {
         message: i18n.translate(
           'esqlLanguage.esql.validation.subqueryNotSupportedInTsErrorMessage',
           {
             defaultMessage: 'Subqueries are not supported in TS command',
+          }
+        ),
+      };
+    case 'subqueryNotSupportedInLookupJoin':
+      return {
+        message: i18n.translate(
+          'esqlLanguage.esql.validation.subqueryNotSupportedInLookupJoinErrorMessage',
+          {
+            defaultMessage: 'Subqueries are not supported in LOOKUP JOIN',
           }
         ),
       };
@@ -731,6 +771,9 @@ export const errors = {
 
   subqueryNotSupportedInTs: (source: ESQLSource): ESQLMessage =>
     errors.byId('subqueryNotSupportedInTs', source.location, {}),
+
+  subqueryNotSupportedInLookupJoin: (source: ESQLSource): ESQLMessage =>
+    errors.byId('subqueryNotSupportedInLookupJoin', source.location, {}),
 
   unknownPolicy: (policyName: string, location: ESQLLocation): ESQLMessage =>
     tagSemanticError(errors.byId('unknownPolicy', location, { name: policyName }), 'getPolicies'),
