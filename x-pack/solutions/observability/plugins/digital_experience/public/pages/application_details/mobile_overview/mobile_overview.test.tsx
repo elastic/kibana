@@ -165,12 +165,16 @@ describe('MobileOverview', () => {
     ).toBeInTheDocument();
   });
 
-  it('warns about the unreadable indices next to the no data prompt', async () => {
+  it('asks to check the access, not to instrument the app, when nothing readable matched', async () => {
     fetch.mockResolvedValue({ ...KPIS, hasData: false, isPartial: true });
     renderPage();
 
-    expect(await screen.findByTestId('digitalExperienceMobileEmpty')).toBeInTheDocument();
-    expect(screen.getByTestId('digitalExperienceMobileKpisPartialAccess')).toBeInTheDocument();
+    expect(await screen.findByTestId('digitalExperienceMobileUnreadableData')).toHaveTextContent(
+      'No mobile data for this application in the indices you can read'
+    );
+    expect(screen.queryByTestId('digitalExperienceMobileEmpty')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileAndroidDocsLink')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
   });
 
   it('shows no access warning when the user reads every index', async () => {
@@ -289,5 +293,6 @@ describe('MobileOverview', () => {
     expect(screen.getByTestId('digitalExperienceMobileAndroidDocsLink')).toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceMobileIosDocsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('digitalExperienceMobileKpis')).toBeNull();
+    expect(screen.queryByTestId('digitalExperienceMobileUnreadableData')).toBeNull();
   });
 });

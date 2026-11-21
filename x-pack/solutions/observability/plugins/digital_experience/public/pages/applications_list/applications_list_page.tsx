@@ -35,6 +35,7 @@ import { ColumnSelector } from '../../components/column_selector';
 import { EnvironmentFilter } from '../../components/environment_filter';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { MobileOnboardingPrompt } from '../../components/mobile_onboarding_prompt';
+import { MobileUnreadableDataPrompt } from '../../components/mobile_unreadable_data_prompt';
 import { TimeRangePicker } from '../../components/time_range_picker';
 import {
   APPLICATIONS_LIST_EBT_ELEMENTS,
@@ -198,6 +199,11 @@ const NO_MOBILE_APPLICATIONS_TITLE = i18n.translate(
   { defaultMessage: 'No mobile applications found' }
 );
 
+const NO_READABLE_MOBILE_APPLICATIONS_TITLE = i18n.translate(
+  'xpack.digitalExperience.applications.mobileUnreadableData.title',
+  { defaultMessage: 'No mobile applications in the indices you can read' }
+);
+
 const NO_MOBILE_APPLICATIONS_BODY = i18n.translate(
   'xpack.digitalExperience.applications.mobileEmpty.body',
   {
@@ -272,6 +278,10 @@ export function ApplicationsListPage() {
       ? APPLICATION_TYPE.mobile
       : APPLICATION_TYPE.web);
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
+  // Nothing matched in the indices the user can read, without full access: the prompt says so in
+  // place of the setup docs and the partial access warning.
+  const showsMobileUnreadableDataPrompt =
+    mobileAvailability === 'partial' && !hasMobileApplications && !environment;
 
   const mobileItems = useMemo(
     () =>
@@ -396,6 +406,14 @@ export function ApplicationsListPage() {
     if (environment) {
       return noApplicationsInEnvironmentPrompt;
     }
+    if (showsMobileUnreadableDataPrompt) {
+      return (
+        <MobileUnreadableDataPrompt
+          data-test-subj="digitalExperienceMobileApplicationsUnreadableData"
+          title={NO_READABLE_MOBILE_APPLICATIONS_TITLE}
+        />
+      );
+    }
     return (
       <MobileOnboardingPrompt
         data-test-subj="digitalExperienceMobileApplicationsEmpty"
@@ -453,7 +471,7 @@ export function ApplicationsListPage() {
             <EuiSpacer size="m" />
           </>
         )}
-        {isMobileTab && mobileAvailability !== 'complete' && (
+        {isMobileTab && mobileAvailability !== 'complete' && !showsMobileUnreadableDataPrompt && (
           <>
             <MobileAvailabilityCallOut availability={mobileAvailability} />
             <EuiSpacer size="m" />

@@ -92,7 +92,9 @@ on serverless and stateful.
   by `TARGET_BUCKETS` (50, as the plugin's charts) and rounds the width up to a standard one, so a
   day shows 30-minute buckets and 30 days daily ones, and the width changes with the range. A
   warning shows when the user can't read every OTel index, as the counts may then miss data.
-  Without mobile data it links to the EDOT Android and iOS setup docs.
+  Without mobile data it links to the EDOT Android and iOS setup docs, unless the user can't read
+  every OTel index: then it says nothing matched in the indices they can read and asks them to
+  check their access, on this page and on the list's Mobile tab.
 - **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
   optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
   OS) and environments for the pickers.

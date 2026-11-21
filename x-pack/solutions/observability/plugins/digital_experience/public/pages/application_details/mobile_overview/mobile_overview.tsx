@@ -27,6 +27,7 @@ import {
   MOBILE_APPLICATION_EBT_ELEMENTS,
 } from '../../../ebt_constants';
 import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_prompt';
+import { MobileUnreadableDataPrompt } from '../../../components/mobile_unreadable_data_prompt';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { useApiClient } from '../../../hooks/use_api_client';
 import { useDiscoverHref } from '../../../hooks/use_discover_href';
@@ -184,6 +185,13 @@ const PARTIAL_ACCESS_TITLE = i18n.translate('xpack.digitalExperience.mobile.part
     "You can't read all of the mobile indices, so these values may be missing some data. Ask an administrator for read access to them.",
 });
 
+const UNREADABLE_DATA_TITLE = i18n.translate(
+  'xpack.digitalExperience.mobile.unreadableData.title',
+  {
+    defaultMessage: 'No mobile data for this application in the indices you can read',
+  }
+);
+
 const NO_DATA_TITLE = i18n.translate('xpack.digitalExperience.mobile.empty.title', {
   defaultMessage: 'No mobile data for this application',
 });
@@ -314,7 +322,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!errorPrompt && kpis?.isPartial && (
+      {!errorPrompt && !hasNoData && kpis?.isPartial && (
         <>
           <KbnWarningCallout
             data-test-subj="digitalExperienceMobileKpisPartialAccess"
@@ -326,11 +334,19 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
       )}
       {errorPrompt ??
         (hasNoData ? (
-          <MobileOnboardingPrompt
-            data-test-subj="digitalExperienceMobileEmpty"
-            title={NO_DATA_TITLE}
-            body={NO_DATA_BODY}
-          />
+          // Without full access, the data may be in the indices the user can't read.
+          kpis?.isPartial ? (
+            <MobileUnreadableDataPrompt
+              data-test-subj="digitalExperienceMobileUnreadableData"
+              title={UNREADABLE_DATA_TITLE}
+            />
+          ) : (
+            <MobileOnboardingPrompt
+              data-test-subj="digitalExperienceMobileEmpty"
+              title={NO_DATA_TITLE}
+              body={NO_DATA_BODY}
+            />
+          )
         ) : (
           <>
             <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>

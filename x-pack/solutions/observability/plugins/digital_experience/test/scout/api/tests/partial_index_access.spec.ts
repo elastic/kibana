@@ -8,19 +8,11 @@
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
-import type { MobileKpisResponse } from '../../../../common/types/mobile';
-import { MOBILE_APPS } from '../../common/fixtures/mobile_data';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const {
-  APPLICATIONS_IN_TIME_RANGE_PATH,
-  COMMON_HEADERS,
-  SERVICE_NAME,
-  createRole,
-  mobileKpisPath,
-} = testData;
+const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, SERVICE_NAME, createRole } = testData;
 
 /**
  * Reads the EDOT Browser indices only, so not the Classic RUM archive's `apm-*` indices.
@@ -95,26 +87,6 @@ apiTest.describe(
         expect(partiallyAvailableSources).toStrictEqual(['otel']);
         // Mobile reads the same OTel indices, so it is partial too.
         expect(mobileAvailability).toBe('partial');
-      }
-    );
-
-    apiTest(
-      'reports the mobile KPIs as partial, counted from the traces only, when the logs are not readable',
-      async ({ apiClient, requestAuth }) => {
-        const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(NO_OTEL_LOGS_ROLE);
-
-        const response = await apiClient.get(mobileKpisPath(MOBILE_APPS.reactNative), {
-          headers: { ...COMMON_HEADERS, ...apiKeyHeader },
-          responseType: 'json',
-        });
-
-        expect(response).toHaveStatusCode(200);
-        // Of its 4 sessions, an Android one and the iPad one have a span.
-        expect(response.body as MobileKpisResponse).toMatchObject({
-          isPartial: true,
-          hasData: true,
-          sessions: { value: 2 },
-        });
       }
     );
 

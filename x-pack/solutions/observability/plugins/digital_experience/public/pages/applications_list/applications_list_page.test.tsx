@@ -309,6 +309,27 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.getByTestId('digitalExperienceApplicationTypeTab-mobile')).toBeVisible();
   });
 
+  it('warns that the mobile rows may be incomplete with partial access to the mobile indices', async () => {
+    respondWith([mobileApp()], [], [], null, [], 'partial');
+    mockApplicationType('mobile');
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperiencePartiallyAvailableMobile')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsUnreadableData')).toBeNull();
+  });
+
+  it('asks to check the access, not to instrument the apps, when no readable mobile data matched', async () => {
+    respondWith([webApp()], [], [], null, [], 'partial');
+    mockApplicationType('mobile');
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceMobileApplicationsUnreadableData')
+    ).toHaveTextContent('No mobile applications in the indices you can read');
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsEmpty')).toBeNull();
+    expect(screen.queryByTestId('digitalExperiencePartiallyAvailableMobile')).toBeNull();
+  });
+
   it('keeps the tabs on the web tab, and offers a retry, when every web search failed', async () => {
     respondWith([mobileApp()], [], ['otel', 'classic']);
     renderPage();
