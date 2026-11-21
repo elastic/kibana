@@ -122,6 +122,9 @@ const USAGE_RESPONSE: ApplicationUsageResponse = {
   },
   topClicks: [{ cssSelector: '#add-to-cart', tagName: 'BUTTON', count: 5 }],
   totalClicks: 5,
+  frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
+  frustratedElements: [],
+  frustratedPages: [],
 };
 
 const response = (pageLoads: number): ApplicationOverviewResponse => ({

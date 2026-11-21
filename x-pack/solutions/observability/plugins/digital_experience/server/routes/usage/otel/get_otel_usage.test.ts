@@ -32,6 +32,9 @@ describe('getOtelUsage', () => {
       breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
       topClicks: [],
       totalClicks: 0,
+      frustration: { rageClicks: 0, deadClicks: 0, errorClicks: 0, total: 0, sessions: 0 },
+      frustratedElements: [],
+      frustratedPages: [],
     });
   });
 
