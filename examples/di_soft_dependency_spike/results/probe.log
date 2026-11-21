@@ -1,0 +1,34 @@
+
+--- 1. provider module loaded? no. consumer asks for GreeterToken
+consumer.get(Greeter)                                                  => THROWS No bindings found for service: "Symbol(spike.probe.Greeter)".
+consumer.get(Greeter, {optional})                                      => undefined
+consumer.isBound(Greeter)                                              => false
+absent.getAll(Extension, {optional})                                   => []
+
+--- 2. provider module loaded but provider Setup not activated yet
+consumer.get(Greeter, {optional})                                      => undefined
+
+--- 3. provider Setup activated (what PluginWrapper.setup does)
+consumer.get(Greeter).greet()                                          => "hello from provider"
+consumer.isBound(Greeter)                                              => true
+consumer.isCurrentBound(Greeter)                                       => false
+
+--- 4. registry: consumers publish ExtensionToken; registry owner collects
+registryOwner.getAll(Extension) before consumer Setup                  => ["consumer"]
+registryOwner.getAll(Extension) after 1 consumer Setup                 => ["consumer"]
+registryOwner.getAll(Extension) after 2 consumer Setups                => ["consumer","otherConsumer"]
+registryOwner.isCurrentBound(Extension)                                => false
+
+--- 5. KibanaContainerModule onStart(ExtensionToken) helper in registry owner
+collected by helper                                                    => []
+OnStart hooks in registry owner                                        => 1
+
+--- 6. two plugins publish the same Option A token
+consumer.get(Greeter)                                                  => THROWS Ambiguous bindings found for service: "Symbol(spike.probe.Greeter)".
+consumer.getAll(Greeter)                                               => ["hello from provider","hello from second provider"]
+
+--- 7. one plugin contributes two Option B extensions
+registryOwner.getAll(Extension)                                        => ["consumer","otherConsumer","multi-1","multi-2"]
+
+--- 8. one plugin binds two extensions but marks the token Global only once
+registryOwner.getAll(Extension)                                        => THROWS Ambiguous bindings found for service: "Symbol(spike.probe.Extension)".

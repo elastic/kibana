@@ -1,0 +1,9 @@
+{
+  "id": "spikeRtB",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": { "name": "spike" },
+  "server": true,
+  "ui": false,
+  "runtimePluginDependencies": ["spikeRtA"]
+}
