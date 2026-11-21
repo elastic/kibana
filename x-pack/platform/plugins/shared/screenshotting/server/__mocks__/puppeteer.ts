@@ -35,6 +35,7 @@ const stubBrowser = {
   newPage: jest.fn(() => {
     return stubPage;
   }),
+  process: jest.fn(() => null),
 };
 
 const puppeteer = {
