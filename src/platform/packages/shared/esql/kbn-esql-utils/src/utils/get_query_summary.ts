@@ -12,9 +12,12 @@ import { Parser } from '@elastic/esql';
 import {
   esqlCommandRegistry,
   getNamedSubqueries,
+  getUnmappedFieldsStrategy,
+  type ESQLColumnData,
   type ESQLCommandSummary,
   type ESQLCommandSummaryContext,
   type FieldSummary,
+  type IAdditionalFields,
   type NamedSubquery,
 } from '@kbn/esql-language';
 import { parseEsqlCached } from './parse_esql_cached';
@@ -236,4 +239,41 @@ export function getSummaryPerCommand(
  */
 export function isComputedColumn(fieldName: string, summary: ESQLCommandSummary): boolean {
   return summary.newColumns.has(fieldName) || Boolean(summary.metadataColumns?.has(fieldName));
+}
+
+/**
+ * Returns the columns that the query creates (EVAL, STATS, DISSECT, ...) and that are part of its output.
+ * Each command knows the columns that it leaves (`columnsAfter`), so STATS, KEEP, DROP or RENAME are considered.
+ * The fields of the sources are not asked for, so there are no requests and the index fields are not included,
+ * except the ones that STATS groups by.
+ * @param query The ES|QL query.
+ * @returns The names of the columns.
+ */
+export async function getComputedColumnsInOutput(query: string): Promise<Set<string>> {
+  const { root } = parseEsqlCached(query);
+  const noFields = async () => [];
+  const additionalFields: IAdditionalFields = {
+    fromJoin: noFields,
+    fromEnrich: noFields,
+    fromFrom: noFields,
+    fromPromql: noFields,
+    namedSubqueries: getNamedSubqueries(root.header),
+  };
+
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(root.header);
+  let columns: ESQLColumnData[] = [];
+  for (const command of root.commands) {
+    const columnsAfter = esqlCommandRegistry.getCommandByName(command.name)?.methods.columnsAfter;
+    if (columnsAfter) {
+      columns = await columnsAfter(
+        command,
+        columns,
+        query,
+        additionalFields,
+        unmappedFieldsStrategy
+      );
+    }
+  }
+
+  return new Set(columns.map(({ name }) => name));
 }

@@ -22,6 +22,7 @@ import {
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import {
+  appendEsqlFiltersToESQLQuery,
   convertFiltersToESQLExpression,
   convertQueryToESQLExpression,
   injectWhereClauseAfterSourceCommand,
@@ -114,11 +115,14 @@ async function getDiscoverLocationParams({
         }
       }
 
-      if (expressions.length) {
-        queryToApply = {
-          ...args.query,
-          esql: injectWhereClauseAfterSourceCommand(args.query.esql, expressions.join(' AND ')),
-        };
+      const esqlWithFilters = expressions.length
+        ? injectWhereClauseAfterSourceCommand(args.query.esql, expressions.join(' AND '))
+        : args.query.esql;
+      // The filters on columns that the query creates can't go after the source command, as
+      // the columns don't exist there yet. They are applied at the end of the query.
+      const esql = await appendEsqlFiltersToESQLQuery(esqlWithFilters, filtersToApply);
+      if (esql !== args.query.esql) {
+        queryToApply = { ...args.query, esql };
       }
     }
     filtersToApply = [];

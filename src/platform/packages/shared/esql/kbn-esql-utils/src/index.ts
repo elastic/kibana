@@ -120,7 +120,12 @@ export {
   getFieldParamDefinition,
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
-export { isComputedColumn, getQuerySummary, resolveSourceField } from './utils/get_query_summary';
+export {
+  isComputedColumn,
+  getQuerySummary,
+  getComputedColumnsInOutput,
+  resolveSourceField,
+} from './utils/get_query_summary';
 export {
   createEsqlViewsManagementClient,
   ESQL_VIEW_ALREADY_EXISTS_ERROR_TYPE,
@@ -139,7 +144,11 @@ export {
   type ESQLHighlightTags,
 } from './utils/get_columns_with_highlights';
 export { buildRenameSourceFieldMap } from './utils/build_rename_source_field_map';
-export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
+export {
+  convertFiltersToESQLExpression,
+  convertEsqlFiltersToESQLExpression,
+} from './utils/convert_filters_to_esql';
+export { appendEsqlFiltersToESQLQuery } from './utils/append_to_query/append_esql_filters';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
 export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 

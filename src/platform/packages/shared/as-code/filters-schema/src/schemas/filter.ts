@@ -14,7 +14,7 @@
  * in * as Code APIs.
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   ASCODE_FILTER_OPERATOR,
   ASCODE_GROUPED_CONDITION_TYPE,
@@ -65,30 +65,32 @@ const negatePropertySchema = z.boolean().optional().meta({
 /**
  * Common top-level properties shared by all as code filters
  */
-const commonBasePropertiesSchema = z
-  .object({
-    disabled: z.boolean().optional().meta({
-      description:
-        'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
-    }),
-    negate: negatePropertySchema,
-    controlled_by: z.string().optional().meta({
-      description:
-        'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
-    }),
-    data_view_id: z.string().optional().meta({
-      description: 'Identifier of the data view used as context for this filter.',
-    }),
-    label: z
-      .string()
-      .optional()
-      .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
-    is_multi_index: z.boolean().optional().meta({
-      description:
-        'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
-    }),
-  })
-  .strict();
+const commonBasePropertiesSchema = lazySchema(() =>
+  z
+    .object({
+      disabled: z.boolean().optional().meta({
+        description:
+          'When `true`, the filter is inactive and does not affect query results. Defaults to `false`.',
+      }),
+      negate: negatePropertySchema,
+      controlled_by: z.string().optional().meta({
+        description:
+          'Identifier of the panel that manages this filter. When set, the filter is treated as owned by that panel.',
+      }),
+      data_view_id: z.string().optional().meta({
+        description: 'Identifier of the data view used as context for this filter.',
+      }),
+      label: z
+        .string()
+        .optional()
+        .meta({ description: 'Human-readable label for the filter, used for display purposes.' }),
+      is_multi_index: z.boolean().optional().meta({
+        description:
+          'When `true`, the filter can be applied across multiple indices. Defaults to `false`.',
+      }),
+    })
+    .strict()
+);
 
 // ====================================================================
 // FILTER CONDITION SCHEMAS
@@ -207,17 +209,23 @@ export interface AsCodeGroupFilterRecursive {
 /**
  * Discriminated union schema combining all condition filter types
  */
-export const asCodeConditionFilterSchema = commonBasePropertiesSchema
-  .extend({
-    type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
-    condition: conditionSchema,
-  })
-  .meta({
-    description:
-      'A filter that evaluates a single field condition such as equality, range, or existence.',
-    title: ASCODE_FILTER_TYPE.CONDITION,
-    id: 'kbn-as-code-filters-schema_asCodeConditionFilterSchema',
-  });
+export const asCodeConditionFilterSchema = lazySchema(() =>
+  commonBasePropertiesSchema
+    .extend({
+      type: z.literal(ASCODE_FILTER_TYPE.CONDITION),
+      condition: conditionSchema,
+      kind: z.literal('esql').optional().meta({
+        description:
+          'What the filter is evaluated against. Not set for the filters on the fields of a data view, which are applied as a DSL query. `esql` is for a filter on a column created by an ES|QL query, which cannot be expressed as a DSL query: it is applied as a `WHERE` clause to the ES|QL queries that have the column, and it is ignored by the other queries.',
+      }),
+    })
+    .meta({
+      description:
+        'A filter that evaluates a single field condition such as equality, range, or existence.',
+      title: ASCODE_FILTER_TYPE.CONDITION,
+      id: 'kbn-as-code-filters-schema_asCodeConditionFilterSchema',
+    })
+);
 
 // Inner group shape (recursing shape)
 const groupConditionSchema: z.ZodType<AsCodeGroupFilterRecursive> = z

@@ -15,7 +15,12 @@ import {
   isOfQueryType,
   type EsQueryConfig,
 } from '@kbn/es-query';
-import { fixESQLQueryWithVariables, getEsqlInspectorStats, getNamedParams } from '@kbn/esql-utils';
+import {
+  appendEsqlFiltersToESQLQuery,
+  fixESQLQueryWithVariables,
+  getEsqlInspectorStats,
+  getNamedParams,
+} from '@kbn/esql-utils';
 import type {
   ISearchMethods,
   IDslSearchParams,
@@ -526,7 +531,10 @@ export class SearchMethodsService implements ISearchMethods {
     // this is for backward compatibility, if the query is of fields or functions type
     // and the query is not set with ?? in the query, we should set it
     // https://github.com/elastic/elasticsearch/pull/122459
-    const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
+    const esqlQuery = await appendEsqlFiltersToESQLQuery(
+      fixESQLQueryWithVariables(params.query, esqlVariables),
+      kibanaFilters
+    );
 
     const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
     const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];

@@ -28,8 +28,8 @@ const searchContext = {
 } satisfies ChangePointGridSearchRequest;
 
 describe('getChangePointGridDiscoverLocatorParams', () => {
-  it('puts the current query, filters, time range, and approximation into the Discover query', () => {
-    const params = getChangePointGridDiscoverLocatorParams({ esql, searchContext });
+  it('puts the current query, filters, time range, and approximation into the Discover query', async () => {
+    const params = await getChangePointGridDiscoverLocatorParams({ esql, searchContext });
 
     expect(params.timeRange).toEqual(searchContext.timeRange);
     expect(params.esqlApproximation).toBe(true);
@@ -39,8 +39,8 @@ describe('getChangePointGridDiscoverLocatorParams', () => {
     });
   });
 
-  it('drops filters that cannot be translated and keeps the original query otherwise', () => {
-    const params = getChangePointGridDiscoverLocatorParams({
+  it('drops filters that cannot be translated and keeps the original query otherwise', async () => {
+    const params = await getChangePointGridDiscoverLocatorParams({
       esql,
       searchContext: {
         ...searchContext,
@@ -54,7 +54,26 @@ describe('getChangePointGridDiscoverLocatorParams', () => {
     expect(params.filters).toBeUndefined();
   });
 
-  it('includes ES|QL controls from the parent dashboard', () => {
+  it('applies the filters on columns that the query creates at the end of the query', async () => {
+    const esqlWithColumn = 'FROM logs-* | EVAL size = 1 | STATS c = COUNT(*) BY size';
+    const params = await getChangePointGridDiscoverLocatorParams({
+      esql: esqlWithColumn,
+      searchContext: {
+        ...searchContext,
+        inputQuery: undefined,
+        filters: [
+          {
+            meta: { kind: 'esql', key: 'size', type: 'phrase', params: { query: 1 } },
+            query: { match_phrase: { size: 1 } },
+          },
+        ],
+      },
+    });
+
+    expect(params.query).toEqual({ esql: `${esqlWithColumn}\n| WHERE \`size\` == 1` });
+  });
+
+  it('includes ES|QL controls from the parent dashboard', async () => {
     const state$ = new BehaviorSubject(undefined);
     const control = {
       type: 'esql_control',
@@ -71,7 +90,7 @@ describe('getChangePointGridDiscoverLocatorParams', () => {
       children$: new BehaviorSubject({ 'control-1': control }),
     };
 
-    const params = getChangePointGridDiscoverLocatorParams({
+    const params = await getChangePointGridDiscoverLocatorParams({
       esql: 'FROM logs-* | WHERE service == ?service | CHANGE_POINT count ON @timestamp',
       searchContext: { ...searchContext, inputQuery: undefined, filters: [] },
       parentApi,
