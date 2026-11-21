@@ -1,37 +1,38 @@
 ---
-navigation_title: "Ansible Control Server"
+navigation_title: "Ansible Automation Platform"
 type: reference
-description: "Use the Ansible Control Server connector to launch and monitor Ansible Automation Controller / AWX jobs."
+description: "Use the Ansible Automation Platform connector to launch and monitor Ansible Automation jobs."
 applies_to:
   stack: preview 9.6
   serverless: preview
 ---
 
-# Ansible Control Server connector [ansible-controller-action-type]
+# Ansible Automation Platform connector [ansible-platform-action-type]
 
-The Ansible Control Server connector calls the [Ansible Automation Controller / AWX API](https://docs.ansible.com/automation-controller/latest/html/controllerapi/index.html) to list job templates, launch jobs, and diagnose failures via stdout and job events. It authenticates with a long-lived API bearer token and can verify the server TLS certificate against a pasted PEM CA.
+The Ansible Automation Platform connector calls the [Ansible Automation Gateway](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/configure-con_gw_open_api_specification) to list job templates, launch jobs, and diagnose failures via stdout and job events. It authenticates with a API bearer token and can verify the server TLS certificate against a pasted PEM CA.
 
 You can use this connector in **Agent Builder** and **Workflows**.
 
 ::::{warning}
-This connector can perform any operation the configured token is authorized for, including launching jobs that mutate real infrastructure. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Controller / AWX permissions. Prefer a least-privilege automation user scoped to specific templates and organizations.
+This connector can perform any operation the configured token is authorized for, including launching jobs that mutate real infrastructure. There are no additional restrictions in {{kib}}: access is governed entirely by the token's platform permissions. Prefer a least-privilege automation user scoped to specific templates and organizations.
 ::::
 
-## Create connectors in {{kib}} [define-ansible-controller-ui]
+## Create connectors in {{kib}} [define-ansible-platform-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
-### Connector configuration [ansible-controller-connector-configuration]
+### Connector configuration [ansible-platform-connector-configuration]
 
-Ansible Control Server connectors have the following configuration properties:
+Ansible Platform Server connectors have the following configuration properties:
 
 API server URL
-:   The base URL of the Controller / AWX server, for example `https://controller.example.com`. This host must be permitted by the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting.
+:   Base URL of the AAP platform gateway, e.g. https://aap.example.com. In AAP 2.7, all API traffic must route through the gateway; direct component access
+  (controller.example.com, hub.example.com) is removed.
 
 API base path
-:   API root path prepended to typed actions. Use `/api/v2` for AWX, Tower, and AAP ≤2.4. Use `/api/controller/v2` for AAP 2.5+ platform gateway installs. Default: `/api/v2`.
+:   API root path prepended to typed actions. Use /api/v2 for AAP 2.4–2.6 (direct controller access). Use [/api/controller/v2]for AAP 2.7+ where all requests route through the platform gateway. Default: /api/v2.
 
-### Authentication [ansible-controller-connector-authentication]
+### Authentication [ansible-platform-connector-authentication]
 
 **API token**
 
@@ -44,16 +45,16 @@ Server CA certificate (PEM)
 Verification mode
 :   How to verify the server TLS certificate: `full` (default), `certificate`, or `none` (not recommended).
 
-## Test connectors [ansible-controller-action-configuration]
+## Test connectors [ansible-platform-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test requests the authenticated user (`GET …/me/`) to verify connectivity and authentication.
 
-## Connection actions [ansible-controller-connector-actions]
+## Connection actions [ansible-platform-connector-actions]
 
 The connector has the following actions:
 
 `request`
-:   Make an authenticated request to any Controller / AWX API path. Prefer typed actions when they fit.
+:   Make an authenticated request to any platform gateway API path. Prefer typed actions when they fit.
 
 `listJobTemplates` / `getJobTemplate` / `getJobTemplateLaunchOptions`
 :   Discover templates and launch-time prompts (`ask_*`, survey defaults).
@@ -67,9 +68,9 @@ The connector has the following actions:
 `listInventories` / `listHosts` / `listProjects` / `getMe`
 :   Inventory, host, project, and identity reads. Credential secret fields are scrubbed.
 
-## Get API credentials [ansible-controller-api-credentials]
+## Get API credentials [ansible-platform-api-credentials]
 
-1. In Controller / AWX, create a dedicated automation user with execute permissions on the job templates the connector should use.
+1. In platform, create a dedicated automation user with execute permissions on the job templates the connector should use.
 2. Create a personal access token for that user (User → Tokens), or an OAuth2 application token.
 3. If the server uses a private CA, retrieve the CA certificate as PEM.
 4. Enter the API server URL, API base path, token, and optional CA when configuring the connector in {{kib}}.
