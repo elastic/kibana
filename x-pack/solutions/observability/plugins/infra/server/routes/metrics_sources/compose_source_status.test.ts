@@ -149,6 +149,25 @@ describe('composeSourceStatus', () => {
     expect(message).toContain('default error forged line');
   });
 
+  it('collapses line breaks in the request-controlled metric alias so it cannot forge log lines', async () => {
+    const hasMetricIndices = jest
+      .fn()
+      .mockRejectedValue(new errors.RequestAbortedError('Request aborted'));
+
+    await composeSourceStatus({
+      logger,
+      sourceStatus: { hasMetricIndices },
+      requestContext,
+      request,
+      sourceId: 'default',
+      metricAlias: 'metrics-*\nerror forged line',
+    });
+
+    const [message] = logger.debug.mock.calls[0];
+    expect(message).not.toContain('\n');
+    expect(message).toContain('metrics-* error forged line');
+  });
+
   it('keeps the error log and reports missing remote clusters when the remote cluster does not exist', async () => {
     const error = new NoSuchRemoteClusterError('no such remote cluster');
     const hasMetricIndices = jest.fn().mockRejectedValue(error);

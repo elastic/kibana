@@ -80,14 +80,14 @@ export const composeSourceStatus = async ({
       logger.debug(
         `Metric index status check was aborted for source "${toSingleLine(
           sourceId
-        )}" (pattern: ${metricAlias})`
+        )}" (pattern: ${toSingleLine(metricAlias)})`
       );
     } else if (err instanceof errors.TimeoutError) {
       const reason = err instanceof Error ? err.message : String(err);
       logger.warn(
         `Metric index status check timed out for source "${toSingleLine(
           sourceId
-        )}" (pattern: ${metricAlias}): ${reason}`
+        )}" (pattern: ${toSingleLine(metricAlias)}): ${reason}`
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it
@@ -98,7 +98,7 @@ export const composeSourceStatus = async ({
       logger.error(
         `Metric index status check failed for source "${toSingleLine(
           sourceId
-        )}" (pattern: ${metricAlias}): ${error.message}`,
+        )}" (pattern: ${toSingleLine(metricAlias)}): ${error.message}`,
         { error }
       );
     }
