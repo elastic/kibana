@@ -187,13 +187,13 @@
   "sources": {
     "associations_v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:48:50.030Z",
+      "fetchedAt": "2026-11-12T23:29:03.314Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Associations/Rollouts/120891/v3/associations.json"
     },
     "associations_v4": {
       "apiVersion": "v4",
-      "fetchedAt": "2026-10-07T20:20:46.517Z",
+      "fetchedAt": "2026-11-12T23:29:03.627Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Associations/Rollouts/130902/v4/associations.json"
     },
@@ -217,13 +217,13 @@
     },
     "owners_v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:20:46.516Z",
+      "fetchedAt": "2026-11-12T23:29:04.662Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Crm%20Owners/Rollouts/146888/v3/crmOwners.json"
     },
     "pipelines_v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:20:46.517Z",
+      "fetchedAt": "2026-11-12T23:29:05.103Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/HubSpot/HubSpot-public-api-spec-collection/main/PublicApiSpecs/CRM/Pipelines/Rollouts/145896/v3/pipelines.json"
     }

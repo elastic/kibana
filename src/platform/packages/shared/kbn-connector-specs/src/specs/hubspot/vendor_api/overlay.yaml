@@ -9,3 +9,16 @@ actions:
       of the search body is optional: https://developers.hubspot.com/docs/api-reference/search/guide#search-default-searchable-properties
       sends `{"query": "x"}` alone, and other examples on that page send only filterGroups.
     remove: true
+  - target: $.components.schemas.BatchResponseVoidWithErrors.properties.results.items['$ref']
+    description: >-
+      The 207 response of the batch archive operations (BatchResponseVoidWithErrors) gives
+      `results` the item type `#/components/schemas/Void`, which the spec does not define, so the
+      document does not load. `Void` stands for an empty result item, which the next action
+      describes as an object.
+    remove: true
+  - target: $.components.schemas.BatchResponseVoidWithErrors.properties.results.items
+    description: >-
+      Replaces the undefined `Void` reference that the previous action removes: an empty result
+      item.
+    update:
+      type: object
