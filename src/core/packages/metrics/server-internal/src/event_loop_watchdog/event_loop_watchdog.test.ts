@@ -76,7 +76,7 @@ describe('EventLoopWatchdog', () => {
       entry: '/entry.js',
       unref: true,
       logger,
-      resourceLimits: { maxOldGenerationSizeMb: 32, maxYoungGenerationSizeMb: 16 },
+      resourceLimits: { maxOldGenerationSizeMb: 64, maxYoungGenerationSizeMb: 16 },
       restart: { maxAttempts: Infinity },
       workerData: {
         shared: expect.any(SharedArrayBuffer),

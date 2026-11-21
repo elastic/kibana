@@ -12,7 +12,7 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
-import { opsConfig } from '../ops_config';
+import { opsConfig, PROFILING_DIR_MAX_LENGTH } from '../ops_config';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
@@ -136,7 +136,37 @@ describe('EventLoopWatchdogService', () => {
       });
     });
 
-    it('leaves the diagnostic directory unset when Node has none', async () => {
+    it('uses profiling.dir when set', async () => {
+      await setup({ profiling: { dir: '/configured' } });
+      expect(params().profiling.diagnosticDir).toBe('/configured');
+      expect(resolveDiagnosticDirMock).not.toHaveBeenCalled();
+    });
+
+    it('uses diagnostic directory when profiling.dir is not set', async () => {
+      await setup();
+      expect(params().profiling.diagnosticDir).toBe('/diag');
+      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+    });
+
+    it('warns when the diagnostic dir character length is too long', async () => {
+      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH)}`;
+      resolveDiagnosticDirMock.mockReturnValue(long);
+      await setup();
+      expect(params().profiling.diagnosticDir).toBe(long);
+      expect(loggingSystemMock.collect(logger).warn).toEqual([
+        [
+          `Node's --diagnostic-dir is longer than ${PROFILING_DIR_MAX_LENGTH} characters, the limit for ops.eventLoopWatchdog.profiling.dir. Set that setting to a shorter path.`,
+        ],
+      ]);
+    });
+
+    it('does not warn for a diagnostic directory of PROFILING_DIR_MAX_LENGTH characters', async () => {
+      resolveDiagnosticDirMock.mockReturnValue(`/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`);
+      await setup();
+      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
+    });
+
+    it('leaves the directory unset when neither diagnostic dir nor profiling.dir set', async () => {
       resolveDiagnosticDirMock.mockReturnValue(undefined);
       await setup();
       expect(params().profiling.diagnosticDir).toBeUndefined();

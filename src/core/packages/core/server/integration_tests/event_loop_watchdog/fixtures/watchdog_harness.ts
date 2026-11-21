@@ -87,11 +87,15 @@ const NO_PROFILING: WatchdogProfilingData = {
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(60_000),
 };
-/** Profiles blocks from 1 s, so the scenarios stay short. */
+/**
+ * Starts captures after 1 s with a 1 s cooldown, rather than the 30 s and 1 min defaults, to keep
+ * scenarios short. Files are written only when the test passes a profile directory.
+ */
 const PROFILING: WatchdogProfilingData = {
   startAfterMs: perPhase(1_000),
   maxDurationMs: perPhase(10_000),
   cooldownMs: perPhase(1_000),
+  diagnosticDir: process.env.WATCHDOG_PROFILE_DIR,
 };
 
 const create = (workerEntry?: string, profiling = NO_PROFILING) =>
@@ -233,8 +237,9 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 2);
     await watchdog.stop();
   },
-  // A 10 s capture of code with many distinct stacks, at the worker's 32 MB limit. Containers run
-  // Kibana with --max-old-space-size, which replaces that limit, so this covers other installs.
+  // Generate many distinct call stacks in a 10 s capture to stress the worker's 64 MB heap limit.
+  // The test runs the harness without `NODE_OPTIONS`, so CI's `--max-old-space-size` doesn't
+  // replace it.
   profile_large: async () => {
     const run = await loadDeepCode(2_000, 40);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
@@ -243,8 +248,7 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 3);
     await watchdog.stop();
   },
-  // Three large captures with a 1 s cooldown; checks that repeated captures don't restart the
-  // worker or retain the previous profiles across captures.
+  // Three large captures in one worker, so anything a capture leaves behind breaks a later one.
   profile_repeated: async () => {
     const run = await loadDeepCode(2_000, 40);
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });

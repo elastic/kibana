@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AdmissionLimits, Phase } from './types';
+
 export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 
 /** How often the main thread stamps its heartbeat. */
@@ -33,6 +35,13 @@ export const ONGOING_FAST_REPEATS_UNTIL_MS = 12_000;
 
 /** CPU profiler sampling interval in microseconds: about 99 Hz. */
 export const SAMPLING_INTERVAL_US = 10_101;
+
+export const ROLLING_HOUR_MS = 60 * 60_000;
+
+export const ADMISSION_LIMITS: Readonly<Record<Phase, AdmissionLimits>> = {
+  starting: { perHour: 5, minGrowth: 1, maxFiles: 10 },
+  running: { perHour: 5, minGrowth: 1.25, maxFiles: 100 },
+};
 
 /** Kibana is considered running this long after its overall status first becomes available... */
 export const RUNNING_GRACE_MS = 30_000;
