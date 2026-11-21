@@ -432,3 +432,19 @@ describe('isScanRunning', () => {
     );
   });
 });
+
+describe('readLastScan scope filtering', () => {
+  it('excludes refresh runs from the last-scan read', async () => {
+    const { deps, esInternal } = setup({ policies: [createPolicy({ id: 'p' })] });
+    await collectOnboardingStatus(deps);
+    const summaryCall = esInternal.search.mock.calls.find(
+      ([params]: unknown[]) =>
+        typeof (params as Record<string, unknown>)?.index === 'string' &&
+        (params as Record<string, string>).index.includes('native-vuln-scanner')
+    );
+    expect(summaryCall).toBeDefined();
+    expect((summaryCall as unknown[])[0]).toMatchObject({
+      query: { bool: { must_not: { term: { scope: 'refresh' } } } },
+    });
+  });
+});

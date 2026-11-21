@@ -595,6 +595,28 @@ describe('ConcurrencyManager', () => {
       expect(mockWorkflowExecutionRepository.bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
 
+    it('should drop a different workflow execution sharing the same concurrency key', async () => {
+      // The native vulnerability scanner's scan and hourly refresh workflows share
+      // 'native-vuln-scan'; the count is keyed only by group + space, never by workflow id.
+      const settings: ConcurrencySettings = {
+        key: 'native-vuln-scan',
+        strategy: 'drop',
+        max: 1,
+      };
+      mockWorkflowExecutionRepository.getRunningExecutionsByConcurrencyGroup.mockResolvedValue([
+        'scan-exec',
+      ]);
+
+      const result = await concurrencyManager.checkConcurrency(
+        settings,
+        'native-vuln-scan',
+        'refresh-exec',
+        'default'
+      );
+
+      expect(result).toBe(false); // The refresh is dropped while the scan holds the slot
+    });
+
     it('should create different concurrency groups for different input values', async () => {
       const settings: ConcurrencySettings = {
         key: '{{ inputs.mamba }}',

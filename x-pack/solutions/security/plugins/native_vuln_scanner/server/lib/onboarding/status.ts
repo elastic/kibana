@@ -17,7 +17,10 @@ import type { AgentClient, AgentPolicyServiceInterface } from '@kbn/fleet-plugin
 import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID,
+  NATIVE_VULN_SCANNER_WORKFLOW_IDS,
+} from '@kbn/workflows/managed';
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type {
   OnboardingStatus,
@@ -162,11 +165,17 @@ const findReportingAgentIds = async (
   return reporting;
 };
 
+/**
+ * The latest full scan summary. Refresh runs write to the same index hourly; onboarding must not
+ * read one of those as "the last scan" (its findings reflect only changed releases).
+ */
 const readLastScan = async (es: ElasticsearchClient): Promise<SummaryDoc | null> => {
   const response = await es.search<SummaryDoc>({
     index: SUMMARY_INDEX,
     ignore_unavailable: true,
     size: 1,
+    // A full scan has no scope field; a refresh does.
+    query: { bool: { must_not: { term: { scope: 'refresh' } } } },
     sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
   });
   return response.hits.hits[0]?._source ?? null;
@@ -176,16 +185,23 @@ export const isScanRunning = async ({
   workflows,
   request,
 }: Pick<OnboardingDeps, 'workflows' | 'request'>): Promise<boolean> => {
-  const { total } = await workflows.getWorkflowExecutions(
-    {
-      workflowId: NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID,
-      statuses: [...NonTerminalExecutionStatuses],
-      size: 1,
-      request,
-    },
-    DEFAULT_SPACE_ID
+  // Both the scan and the hourly refresh hold the shared concurrency slot while they run.
+  const totals = await Promise.all(
+    NATIVE_VULN_SCANNER_WORKFLOW_IDS.map((workflowId) =>
+      workflows
+        .getWorkflowExecutions(
+          {
+            workflowId,
+            statuses: [...NonTerminalExecutionStatuses],
+            size: 1,
+            request,
+          },
+          DEFAULT_SPACE_ID
+        )
+        .then(({ total }) => total)
+    )
   );
-  return total > 0;
+  return totals.some((total) => total > 0);
 };
 
 const isRuntimePinned = (policy: AgentPolicy): boolean => {

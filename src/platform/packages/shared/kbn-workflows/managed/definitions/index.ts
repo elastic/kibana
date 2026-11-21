@@ -393,6 +393,7 @@ export const managedWorkflowDefinitions = [
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW,
   // Installs only when `xpack.nativeVulnScanner.enabled`; the registry entry is inert otherwise.
   NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
+  NATIVE_VULN_SCANNER_REFRESH_WORKFLOW,
   // Elastic Defend endpoint workflows. security_solution installs them in start()
   // only while a consumer flag is on; registry membership only makes a definition
   // discoverable by id.

@@ -15,6 +15,7 @@ import type {
 import type { NativeVulnScannerConfig } from './config';
 import { ensureFindingsIndex } from './lib/findings';
 import { OSQUERY_PACK_SO_TYPE } from './lib/inventory';
+import { ensureCheckpointIndex } from './lib/checkpoint';
 import { ensureKnowledgeIndex } from './lib/knowledge';
 import { ensureSummaryIndex } from './lib/summary';
 import { installWorkflows } from './managed_workflows/install';
@@ -116,6 +117,11 @@ export class NativeVulnScannerPlugin
       ensureSummaryIndex(es).catch((error: Error) => {
         this.logger.error(
           `Failed to set up the vulnerability scan summary index: ${error.message}`
+        );
+      }),
+      ensureCheckpointIndex(es).catch((error: Error) => {
+        this.logger.error(
+          `Failed to set up the vulnerability scan checkpoint index: ${error.message}`
         );
       }),
     ]);
