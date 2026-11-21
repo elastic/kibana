@@ -14,6 +14,11 @@ since they last passed: at most once a day for each pipeline and branch while th
 (`failing.postedAt` in the issue's metadata), and right away when the issue is closed and was
 updated in the last 30 days, which reopens it. Each post also adds the break's tests, branch and
 pipeline to the issue's `flaky-test-suite` metadata, so `/skip` skips the suite on that branch too.
+A test is broken once it failed every attempt in its latest 2 builds after passing in the 20
+before. When some of those 20 only passed on a retry, the test was flaky, and it takes 3 builds
+failing every attempt instead: the length the daily flaky report takes for a breakage, after which
+that report leaves the test to this check. A test that already failed every attempt in one of
+those 20 is left to the daily report.
 A build counts once the job's retry reported the test too; on a pipeline whose jobs aren't
 retried, like the Elastic Cloud ones, `FAILING_SUITES_JOB_RETRIES=0` counts it on its one attempt.
 Builds of another repository than `elastic/kibana` get no link to the commits in between.

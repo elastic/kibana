@@ -64,6 +64,7 @@ describe('findConsistentFailure', () => {
       findConsistentFailure([...passes(1, 20), failed(21), failed(22)], {
         consecutiveBuilds: 3,
         cleanRunsBefore: 20,
+        consecutiveBuildsAfterRecoveries: 3,
       })
     ).toBeUndefined();
   });
@@ -105,7 +106,7 @@ describe('findConsistentFailure', () => {
     });
   });
 
-  it('is not fooled by a test that recovered on a retry', () => {
+  it('takes more than two failing builds after a retry recovered for a break', () => {
     const history = passes(1, 19);
 
     expect(
@@ -116,6 +117,41 @@ describe('findConsistentFailure', () => {
     ).toBeUndefined();
     expect(
       findConsistentFailure([...history, passed(20), recoveredInRun(21), failed(22)])
+    ).toBeUndefined();
+  });
+
+  it('finds a flaky test that started failing every attempt, after a longer streak', () => {
+    // recovered on a retry every other build, then failed every attempt
+    const flaky = Array.from({ length: 20 }, (_, index) =>
+      index % 2 ? passed(index + 1) : recoveredInRun(index + 1)
+    );
+
+    expect(findConsistentFailure([...flaky, failed(21), failed(22)])).toBeUndefined();
+    expect(findConsistentFailure([...flaky, failed(21), failed(22), failed(23)])).toEqual({
+      failingBuilds: [failed(21), failed(22), failed(23)],
+      lastPassingBuild: passed(20),
+    });
+    expect(
+      findConsistentFailure([
+        ...passes(1, 19),
+        recoveredOnRetry(20),
+        failed(21),
+        failed(22),
+        failed(23),
+      ])
+    ).toEqual({
+      failingBuilds: [failed(21), failed(22), failed(23)],
+      // it passed on the retry there
+      lastPassingBuild: recoveredOnRetry(20),
+    });
+  });
+
+  it('leaves a test that already failed every attempt now and then to the daily flaky report', () => {
+    const history = [...passes(1, 9), failed(10), ...passes(11, 10)];
+
+    expect(findConsistentFailure([...history, failed(21), failed(22)])).toBeUndefined();
+    expect(
+      findConsistentFailure([...history, ...[21, 22, 23, 24, 25].map((build) => failed(build))])
     ).toBeUndefined();
   });
 
@@ -155,7 +191,7 @@ describe('findConsistentFailure', () => {
   });
 
   it('ignores the history when asked for no clean runs, still naming the last pass', () => {
-    const rule = { consecutiveBuilds: 2, cleanRunsBefore: 0 };
+    const rule = { consecutiveBuilds: 2, cleanRunsBefore: 0, consecutiveBuildsAfterRecoveries: 3 };
 
     expect(
       findConsistentFailure([passed(1), failed(2), passed(3), failed(4), failed(5)], rule)
