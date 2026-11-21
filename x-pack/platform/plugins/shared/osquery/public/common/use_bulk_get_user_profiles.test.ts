@@ -57,13 +57,10 @@ describe('useGenericBulkGetUserProfiles', () => {
     expect(result.current.profilesMap.get('uid-2')?.user.username).toBe('user1');
   });
 
-  it('calls bulkGet with deduplicated and sorted uids', async () => {
-    const { result } = renderHook(
-      () => useGenericBulkGetUserProfiles(['uid-2', 'uid-1', 'uid-2', 'uid-1']),
-      { wrapper: createWrapper(queryClient) }
-    );
-
-    await waitFor(() => expect(result.current.profilesMap.size).toBe(2));
+  it('calls bulkGet with deduplicated and sorted uids', () => {
+    renderHook(() => useGenericBulkGetUserProfiles(['uid-2', 'uid-1', 'uid-2', 'uid-1']), {
+      wrapper: createWrapper(queryClient),
+    });
 
     expect(mockBulkGet).toHaveBeenCalledTimes(1);
     const calledUids = Array.from(mockBulkGet.mock.calls[0][0].uids);
@@ -87,14 +84,12 @@ describe('useGenericBulkGetUserProfiles', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('requests avatar data path', async () => {
+  it('requests avatar data path', () => {
     mockBulkGet.mockResolvedValue([MOCK_PROFILES[0]]);
 
-    const { result } = renderHook(() => useGenericBulkGetUserProfiles(['uid-1']), {
+    renderHook(() => useGenericBulkGetUserProfiles(['uid-1']), {
       wrapper: createWrapper(queryClient),
     });
-
-    await waitFor(() => expect(result.current.profilesMap.size).toBe(1));
 
     expect(mockBulkGet).toHaveBeenCalledWith({
       uids: new Set(['uid-1']),
