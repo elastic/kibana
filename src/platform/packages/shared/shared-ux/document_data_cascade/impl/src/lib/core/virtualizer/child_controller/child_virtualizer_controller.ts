@@ -20,6 +20,15 @@ interface ChildEntry {
    * This is the target restoration anchor index for this child, on any remount of the document.
    */
   persistedAnchor: number | null;
+  /**
+   * Pixel offset within the persisted anchor item.
+   */
+  persistedAnchorOffset?: number;
+  /**
+   * Set when the child connected in place of another connection of its row (e.g. a view it was swapped
+   * out for), so that its persisted anchor is restored although the cascade itself is not restoring.
+   */
+  restoreOnConnect?: boolean;
   measurements?: ChildMeasurements;
   /**
    * This is the current state of the child, including the current scroll anchor item index.
@@ -42,6 +51,7 @@ const createDefaultChildState = (cellId: string, rowIndex: number): ConnectedChi
   totalSize: 0,
   totalItemCount: 0,
   scrollAnchorItemIndex: null,
+  scrollAnchorItemOffset: null,
   isDetached: false,
   hasStabilized: false,
 });
@@ -55,6 +65,7 @@ export const createChildVirtualizerController = ({
   const controlledChildren = new Map<string, ChildEntry>();
   const enqueuedCells = new Map<string, symbol>();
   const activatedCells = new Set<string>();
+  const rowsAwaitingMeasurement = new Set<number>();
   const listeners = new Set<() => void>();
   let restoringCellId = initialRestorationCellId;
   let rootStable = false;
@@ -137,6 +148,16 @@ export const createChildVirtualizerController = ({
     }
   };
 
+  /** The attached connection of another cell for the row, e.g. the view a connecting cell replaces. */
+  const findOtherAttachedChildForRow = (rowIndex: number, cellId: string) =>
+    findChildState(
+      (state, { handle }) =>
+        handle !== undefined &&
+        state.cellId !== cellId &&
+        state.rowIndex === rowIndex &&
+        !state.isDetached
+    );
+
   const scheduleActivation = () => {
     if (!rootStable || staggerRafId !== null) return;
     if (getChildrenPendingActivation().length === 0) return;
@@ -172,11 +193,24 @@ export const createChildVirtualizerController = ({
   };
 
   const finishRestoration: ChildVirtualizerController['finishRestoration'] = (cellId) => {
-    if (!restoringCellId || (cellId !== undefined && cellId !== restoringCellId)) return;
-    controlledChildren.get(restoringCellId)?.handle?.cancelScroll?.();
-    restoringCellId = undefined;
-    getRootVirtualizer()?.cancelScroll();
-    notifyListeners();
+    let finished = false;
+
+    for (const [childCellId, child] of controlledChildren) {
+      if (child.restoreOnConnect && (cellId === undefined || cellId === childCellId)) {
+        child.restoreOnConnect = false;
+        child.handle?.cancelScroll?.();
+        finished = true;
+      }
+    }
+
+    if (restoringCellId && (cellId === undefined || cellId === restoringCellId)) {
+      controlledChildren.get(restoringCellId)?.handle?.cancelScroll?.();
+      restoringCellId = undefined;
+      getRootVirtualizer()?.cancelScroll();
+      finished = true;
+    }
+
+    if (finished) notifyListeners();
   };
 
   const enqueue: ChildVirtualizerController['enqueue'] = (cellId, rowIndex) => {
@@ -207,11 +241,24 @@ export const createChildVirtualizerController = ({
   const connect: ChildVirtualizerController['connect'] = (cellId, rowIndex, cancelScroll) => {
     const child = register(cellId, rowIndex);
     const token = Symbol(cellId);
+    // A connection replacing another one of its row (e.g. an alternate view of the cell's content)
+    // takes its activation over, so that the row's content is never without items across the swap,
+    // and restores its own persisted position (see `getRestoreAnchor`).
+    const replacedChild = findOtherAttachedChildForRow(rowIndex, cellId);
+    if (replacedChild && activatedCells.has(replacedChild.cellId)) {
+      activatedCells.add(cellId);
+    }
+    if (replacedChild && child.persistedAnchor !== null) {
+      child.restoreOnConnect = true;
+    }
+    rowsAwaitingMeasurement.add(rowIndex);
     child.handle = { token, cancelScroll };
     if (child.state) {
       child.state = {
         ...child.state,
         scrollAnchorItemIndex: child.state.scrollAnchorItemIndex ?? child.persistedAnchor,
+        scrollAnchorItemOffset:
+          child.state.scrollAnchorItemOffset ?? child.persistedAnchorOffset ?? null,
       };
     }
     const isCurrentHandle = () => controlledChildren.get(cellId)?.handle?.token === token;
@@ -234,6 +281,7 @@ export const createChildVirtualizerController = ({
 
         if (state.scrollAnchorItemIndex !== null) {
           child.persistedAnchor = state.scrollAnchorItemIndex;
+          child.persistedAnchorOffset = state.scrollAnchorItemOffset ?? undefined;
         }
 
         child.state = { ...state, isDetached: true };
@@ -244,15 +292,21 @@ export const createChildVirtualizerController = ({
         if (!isCurrentHandle()) return;
         const { state } = child;
         if (!state || !state.isDetached) return;
+        rowsAwaitingMeasurement.add(state.rowIndex);
         child.state = { ...state, isDetached: false };
         notifyListeners();
       },
       disconnect() {
         if (!isCurrentHandle()) return;
         child.handle = undefined;
+        child.restoreOnConnect = false;
         const { state } = child;
         if (state?.scrollAnchorItemIndex != null && !state.isDetached) {
           child.persistedAnchor = state.scrollAnchorItemIndex;
+          child.persistedAnchorOffset = state.scrollAnchorItemOffset ?? undefined;
+        }
+        if (!findOtherAttachedChildForRow(rowIndex, cellId)) {
+          rowsAwaitingMeasurement.delete(rowIndex);
         }
         releaseChild(cellId);
         notifyListeners();
@@ -290,10 +344,25 @@ export const createChildVirtualizerController = ({
       return () => listeners.delete(listener);
     },
     getPersistedAnchor: (cellId) => controlledChildren.get(cellId)?.persistedAnchor ?? null,
-    getRestoreAnchor: (cellId) =>
-      rootStable && restoringCellId === cellId
-        ? controlledChildren.get(cellId)?.persistedAnchor ?? null
-        : null,
+    getPersistedAnchorOffset: (cellId) =>
+      controlledChildren.get(cellId)?.persistedAnchorOffset ?? 0,
+    getRetainedAnchors: () => {
+      const retainedAnchors = new Map<string, number>();
+      for (const [cellId, { state, persistedAnchor }] of controlledChildren) {
+        if (!state && persistedAnchor !== null) retainedAnchors.set(cellId, persistedAnchor);
+      }
+      return retainedAnchors;
+    },
+    getRestoreAnchor: (cellId) => {
+      const child = controlledChildren.get(cellId);
+      return rootStable && child && (restoringCellId === cellId || child.restoreOnConnect)
+        ? child.persistedAnchor
+        : null;
+    },
+    getRowsAwaitingMeasurement: () => Array.from(rowsAwaitingMeasurement),
+    markRowMeasured: (rowIndex) => {
+      rowsAwaitingMeasurement.delete(rowIndex);
+    },
     finishRestoration,
     cancelRootScroll: () => getRootVirtualizer()?.cancelScroll(),
     // Only the registered children depend on the root's measurements (see `getScrollMarginForRow`), so a
@@ -305,6 +374,7 @@ export const createChildVirtualizerController = ({
       const child = controlledChildren.get(cellId);
       if (child) {
         child.persistedAnchor = null;
+        child.persistedAnchorOffset = undefined;
         child.measurements = undefined;
         releaseChild(cellId);
       }

@@ -117,6 +117,29 @@ describe('virtualizer', () => {
       }
     );
 
+    it('marks a connected row as measured once the root measures it', () => {
+      const { result } = renderHook(() =>
+        useCascadeVirtualizer({
+          rows: rowsToRender(1),
+          enableStickyGroupHeader: true,
+          getScrollElement: () => document.body,
+        })
+      );
+      const instance = jest.mocked(ReactVirtual.useVirtualizer).mock.results.at(-1)
+        ?.value as VirtualizerInstanceType;
+      const element = document.createElement('div');
+      element.dataset.index = '0';
+      Object.defineProperty(element, 'offsetHeight', { value: 40 });
+      const controller = result.current.childController;
+
+      const handle = controller.connect('cell', 0);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([0]);
+
+      instance.options.measureElement(element, undefined, instance);
+      expect(controller.getRowsAwaitingMeasurement()).toEqual([]);
+      handle.disconnect();
+    });
+
     it('should render correctly', () => {
       const { result } = renderHook(() =>
         useCascadeVirtualizer({
@@ -138,6 +161,20 @@ describe('virtualizer', () => {
   });
 
   describe('useCascadeVirtualizerRangeExtractor', () => {
+    it('keeps the retained rows in the range, also without sticky group headers', () => {
+      const range: Range = { startIndex: 10, endIndex: 20, overscan: 5, count: 100 };
+      const { result } = renderHook(() =>
+        useCascadeVirtualizerRangeExtractor({
+          rows: rowsToRender(100),
+          enableStickyGroupHeader: false,
+          // an index beyond the row count is ignored
+          getRetainedRowIndexes: () => [2, 150],
+        })
+      );
+
+      expect(result.current(range)).toEqual([2, ...defaultRangeExtractor(range)]);
+    });
+
     it('should return the default virtualizer range when the prop `enableStickyGroupHeader` is false', () => {
       const { result } = renderHook(() =>
         useCascadeVirtualizerRangeExtractor({

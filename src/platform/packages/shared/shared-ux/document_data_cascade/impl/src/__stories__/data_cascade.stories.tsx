@@ -24,7 +24,10 @@ import { CascadeMultipleStatsPerRow as CascadeMultipleStatsPerRowScene } from '.
 import { CascadeCustomHeaderWithCustomRowActionsImplementation as CascadeCustomHeaderWithCustomRowActionsImplementationScene } from './scenes/custom_header_with_custom_row_actions';
 import { CascadeCustomHeaderWithHiddenRowActions as CascadeCustomHeaderWithHiddenRowActionsScene } from './scenes/custom_header_with_hidden_row_actions';
 import { CascadeNestedGridImplementation as CascadeNestedGridImplementationScene } from './scenes/nested_groups';
-import { CascadeWithNestedVirtualization as CascadeNestedVirtualizationImplementationScene } from './scenes/nested_virtualization';
+import {
+  CascadeWithNestedVirtualization as CascadeNestedVirtualizationImplementationScene,
+  CascadeWithNestedVirtualizationViews as CascadeNestedVirtualizationViewsImplementationScene,
+} from './scenes/nested_virtualization';
 import mdx from './guide.mdx';
 
 /**
@@ -78,4 +81,9 @@ export const CascadeCustomHeaderWithHiddenRowActions = {
 export const CascadeWithNestedVirtualization = {
   ...CascadeNestedVirtualizationImplementationScene,
   name: 'Cascade with nested virtualization',
+};
+
+export const CascadeWithNestedVirtualizationViews = {
+  ...CascadeNestedVirtualizationViewsImplementationScene,
+  name: 'Cascade with nested virtualization and alternate cell views',
 };

@@ -43,6 +43,7 @@ const createDefaultUISnapshot = <G extends GroupNode, L extends LeafNode>(): Dat
   rowSelection: {},
   scrollAnchorItemIndex: null,
   connectedChildren: {},
+  retainedAnchors: {},
 });
 
 /**
@@ -68,6 +69,7 @@ export const toRestorableState = <G extends GroupNode, L extends LeafNode>(
     scrollRect: snapshot.scrollRect,
     scrollAnchorItemIndex: snapshot.scrollAnchorItemIndex,
     connectedChildren,
+    retainedAnchors: snapshot.retainedAnchors,
   };
 };
 
@@ -180,6 +182,7 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
 
       updateSnapshot({
         connectedChildren: Object.fromEntries(childController.getConnectedChildren()),
+        retainedAnchors: Object.fromEntries(childController.getRetainedAnchors()),
       });
       emitSnapshot();
     });
@@ -201,7 +204,10 @@ export function useExposePublicApi<G extends GroupNode, L extends LeafNode>(
       updateSnapshot({
         scrollOffset,
         ...(opts.childController
-          ? { connectedChildren: Object.fromEntries(opts.childController.getConnectedChildren()) }
+          ? {
+              connectedChildren: Object.fromEntries(opts.childController.getConnectedChildren()),
+              retainedAnchors: Object.fromEntries(opts.childController.getRetainedAnchors()),
+            }
           : {}),
         range,
         isScrolling: instance.isScrolling ?? false,

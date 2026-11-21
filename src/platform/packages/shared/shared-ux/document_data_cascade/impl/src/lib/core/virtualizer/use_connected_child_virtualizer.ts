@@ -112,6 +112,10 @@ export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
         lastAttachedOffset.current = instance.scrollOffset ?? 0;
       }
 
+      // the item right below the sticky header, and how far into it the header's bottom edge sits
+      const anchorOffset = (instance.scrollOffset ?? 0) + (isDetached ? 0 : scrollPaddingStart);
+      const anchorItem = instance.getVirtualItemForOffset(anchorOffset);
+
       connectionRef.current?.reportState({
         scrollOffset: instance.scrollOffset ?? 0,
         range: instance.range
@@ -119,10 +123,8 @@ export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
           : null,
         totalSize: instance.getTotalSize(),
         totalItemCount: rows.length,
-        scrollAnchorItemIndex:
-          instance.getVirtualItemForOffset(
-            (instance.scrollOffset ?? 0) + (isDetached ? 0 : scrollPaddingStart)
-          )?.index ?? null,
+        scrollAnchorItemIndex: anchorItem?.index ?? null,
+        scrollAnchorItemOffset: anchorItem ? anchorOffset - anchorItem.start : null,
         hasStabilized: restoreAnchor === null,
       });
     },
@@ -155,12 +157,19 @@ export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
     onChange: reportState,
   });
 
+  // Connects in a layout effect, so the connection exists before the first frame of this connection
+  // is painted. It is released in a passive cleanup, which React runs after the layout effects of the
+  // same commit: a connection that replaces this one for the same row (e.g. an alternate view of the
+  // cell's content) is thereby registered before this one goes away, and takes over from it.
   useLayoutEffect(() => {
-    const connection = controller.connect(cellId, rowIndexRef.current, instance.cancelScroll);
-    connectionRef.current = connection;
+    connectionRef.current = controller.connect(cellId, rowIndexRef.current, instance.cancelScroll);
+  }, [controller, cellId, instance]);
+
+  useEffect(() => {
+    const connection = connectionRef.current;
     return () => {
-      connection.disconnect();
-      connectionRef.current = null;
+      connection?.disconnect();
+      if (connectionRef.current === connection) connectionRef.current = null;
     };
   }, [controller, cellId, instance]);
 
@@ -202,7 +211,7 @@ export const useConnectedChildVirtualizer = <T extends VirtualizerItem>({
     instance.getTotalSize();
     const item = instance.measurementsCache[restoreAnchor];
     if (!item) return;
-    const offset = item.start - scrollPaddingStart;
+    const offset = item.start - scrollPaddingStart + controller.getPersistedAnchorOffset(cellId);
     if (restoration.current.offset === offset) return;
 
     controller.cancelRootScroll();

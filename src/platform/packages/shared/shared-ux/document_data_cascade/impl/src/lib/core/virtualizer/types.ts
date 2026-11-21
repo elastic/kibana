@@ -46,6 +46,11 @@ export interface CascadeVirtualizerProps<G extends GroupNode>
 export interface VirtualizerRangeExtractorArgs<G extends GroupNode> {
   rows: Array<CascadeTableRow<G>>;
   enableStickyGroupHeader: boolean;
+  /**
+   * Indexes of rows that are kept in the range regardless of the scroll position, e.g. rows whose
+   * size the virtualizer has not measured since their content changed.
+   */
+  getRetainedRowIndexes?: () => ReadonlyArray<number>;
 }
 
 /**
@@ -95,6 +100,11 @@ export interface ConnectedChildState {
   totalSize: number;
   totalItemCount: number;
   scrollAnchorItemIndex: number | null;
+  /**
+   * Distance in pixels from the start of the anchor item to the position the anchor was taken at, so
+   * that a scroll position within the item is restored exactly rather than to the item's start.
+   */
+  scrollAnchorItemOffset: number | null;
   isDetached: boolean;
   hasStabilized: boolean;
 }
@@ -138,6 +148,23 @@ export interface ChildVirtualizerController {
   subscribe(listener: () => void): () => void;
   /** The anchor a cell had when it last disconnected or detached, which marks it as a returning cell. */
   getPersistedAnchor(cellId: string): number | null;
+  /** Pixel offset within the persisted anchor item of a cell, `0` when none was persisted. */
+  getPersistedAnchorOffset(cellId: string): number;
+  /**
+   * Persisted anchors of cells that are not registered at the moment (e.g. a view that was swapped out).
+   * They are part of the restorable state, so that such a cell restores its position when it comes back
+   * after the cascade itself was restored.
+   */
+  getRetainedAnchors(): ReadonlyMap<string, number>;
+  /**
+   * Rows with an attached connection whose content the root virtualizer has not measured since the
+   * connection was made or reattached. Their size in the root is stale until its resize observer has
+   * run, so the root keeps them rendered instead of virtualizing them away based on that size, e.g. when
+   * a child restores a scroll position deep inside its new content right after connecting.
+   */
+  getRowsAwaitingMeasurement(): ReadonlyArray<number>;
+  /** Called by the root virtualizer once it has measured the row, see {@link getRowsAwaitingMeasurement}. */
+  markRowMeasured(rowIndex: number): void;
   getRestoreAnchor(cellId: string): number | null;
   finishRestoration(cellId?: string): void;
   cancelRootScroll(): void;

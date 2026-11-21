@@ -154,6 +154,44 @@ describe('useConnectedChildVirtualizer', () => {
     expect(spy).toHaveBeenCalledWith(2);
   });
 
+  it('reports the item below the sticky header as the anchor, with the offset into it', () => {
+    // the cascade is scrolled 10px into the 15th row of this cell: its row starts at 80, the rows are 30px
+    mockRoot.scrollElement!.scrollTop = 510;
+    renderHook(() =>
+      useConnectedChildVirtualizer({
+        controller,
+        cellId: 'cell-a',
+        rowIndex: 2,
+        rows,
+        estimatedRowHeight: 30,
+      })
+    );
+    act(() => {
+      flushRaf();
+    });
+
+    const state = controller.getConnectedChildren().get('cell-a');
+    expect(state?.scrollAnchorItemIndex).toBe(14);
+    expect(state?.scrollAnchorItemOffset).toBe(10);
+  });
+
+  it('hands its activation over to a connection that replaces it for the same row', () => {
+    const { rerender } = renderHook(
+      ({ cellId }: { cellId: string }) =>
+        useConnectedChildVirtualizer({ controller, cellId, rowIndex: 2, rows }),
+      { initialProps: { cellId: 'cell-a' } }
+    );
+    act(() => {
+      flushRaf();
+    });
+    expect(controller.shouldActivate('cell-a')).toBe(true);
+
+    rerender({ cellId: 'cell-a/comparison' });
+
+    expect(controller.shouldActivate('cell-a/comparison')).toBe(true);
+    expect(controller.getConnectedChildren().has('cell-a')).toBe(false);
+  });
+
   describe('activation gating', () => {
     it('renders no items before root is stable', () => {
       const unstableController = createChildVirtualizerController({

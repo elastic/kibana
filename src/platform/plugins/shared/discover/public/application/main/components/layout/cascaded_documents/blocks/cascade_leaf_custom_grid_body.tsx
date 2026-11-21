@@ -17,6 +17,7 @@ import React, {
   createContext,
   useCallback,
   useEffect,
+  useSyncExternalStore,
 } from 'react';
 import { InPortal, OutPortal, type HtmlPortalNode } from 'react-reverse-portal';
 import { useEuiTheme } from '@elastic/eui';
@@ -49,6 +50,15 @@ export interface CascadeGridBodyContextValue
    */
   toolbarPortalNode: HtmlPortalNode;
   /**
+   * Reverse portal node for the comparison grid's toolbar, output by the comparison grid body the same way.
+   */
+  comparisonToolbarPortalNode: HtmlPortalNode;
+  /**
+   * Whether the documents have been shown by the leaf: a comparison mounted afterwards replaces them (the
+   * user entered the comparison), whereas a comparison mounted first is being restored.
+   */
+  hasRenderedDocumentsRef: React.MutableRefObject<boolean>;
+  /**
    * Reverse portal node for the grid header row, so that relocating it into the cascade sticky header
    * reparents its DOM without remounting the EUI header cells.
    */
@@ -70,6 +80,21 @@ export interface CascadeGridBodyContextValue
 }
 
 export const CascadeGridBodyContext = createContext<CascadeGridBodyContextValue | null>(null);
+
+/**
+ * The views a leaf cell renders through the connected grid body: the documents of the group, or the
+ * comparison of the selected documents.
+ */
+export type CascadeGridBodyView = 'documents' | 'comparison';
+
+export interface CustomCascadeGridBodyProps extends EuiDataGridCustomBodyProps {
+  view?: CascadeGridBodyView;
+}
+
+/**
+ * Row height estimate for the compared fields, which are measured individually.
+ */
+const COMPARISON_ROW_ESTIMATED_HEIGHT = 40;
 
 /**
  * The height EUI renders the rows of a freshly mounted grid at, until it has measured the configured one.
@@ -150,13 +175,14 @@ export const useRowHeightWarmUp = () => {
  * and connect this custom grid body to the cascade row cell.
  */
 export function CustomCascadeGridBody({
+  view = 'documents',
   Cell,
   visibleColumns,
   visibleRowData,
   headerRow,
   footerRow,
   gridWidth,
-}: EuiDataGridCustomBodyProps) {
+}: CustomCascadeGridBodyProps) {
   const context = useContext(CascadeGridBodyContext);
   if (!context) {
     throw new Error('CustomCascadeGridBody must be rendered within CascadeGridBodyContext');
@@ -169,6 +195,8 @@ export function CustomCascadeGridBody({
     cellId,
     rowIndex,
     toolbarPortalNode,
+    comparisonToolbarPortalNode,
+    hasRenderedDocumentsRef,
     headerPortalNode,
     stickyHeaderPortalTarget,
     stickyHeaderExtensionPoint: { stickyEnabled, rowElement, headerElementRef },
@@ -176,10 +204,23 @@ export function CustomCascadeGridBody({
     scrollToRowRef,
   } = context;
 
+  const isDocumentsView = view === 'documents';
+
   const visibleRows = useMemo(
     () => data.slice(visibleRowData.startRow, visibleRowData.endRow),
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
+
+  // the comparison's rows are the compared fields, of which the connected virtualizer only needs the count
+  const comparisonRowCount = visibleRowData.endRow - visibleRowData.startRow;
+  const comparisonRows = useMemo(
+    () => Array.from({ length: comparisonRowCount }, (_, index) => ({ id: String(index) })),
+    [comparisonRowCount]
+  );
+
+  // The comparison connects to the cascade under its own id, so that its position is kept apart from the
+  // documents', which are restored when they replace it again.
+  const connectionId = isDocumentsView ? cellId : `${cellId}/comparison`;
 
   const { euiTheme } = useEuiTheme();
 
@@ -245,10 +286,10 @@ export function CustomCascadeGridBody({
 
   const { virtualizer, handle, isDetached } = useConnectedChildVirtualizer({
     controller: virtualizerController,
-    cellId,
+    cellId: connectionId,
     rowIndex,
-    rows: visibleRows,
-    estimatedRowHeight,
+    rows: isDocumentsView ? visibleRows : comparisonRows,
+    estimatedRowHeight: isDocumentsView ? estimatedRowHeight : COMPARISON_ROW_ESTIMATED_HEIGHT,
     measurementKey: layoutMeasurementKey,
     overscan: 10,
     scrollMarginOffset: scrollGeometry.bodyOffsetWithinRow,
@@ -265,6 +306,42 @@ export function CustomCascadeGridBody({
   }, [isFullScreenMode, isDetached, handle]);
 
   useLayoutEffect(() => {
+    if (isDocumentsView) {
+      hasRenderedDocumentsRef.current = true;
+    }
+  }, [isDocumentsView, hasRenderedDocumentsRef]);
+
+  const isActive = useSyncExternalStore(
+    virtualizerController.subscribe,
+    () => virtualizerController.shouldActivate(connectionId),
+    () => false
+  );
+
+  // The comparison replaces the document grid while the cascade may be scrolled deep into the documents,
+  // where the much shorter comparison has no content, so its first field is brought right below the sticky
+  // header once it is active, which shows the group header, the comparison toolbar and the first fields.
+  // A comparison mounted again while already active (e.g. its row scrolled back into the cascade's range)
+  // stays where it is.
+  const [scrollIntoViewOnMount] = useState(
+    () => !isDocumentsView && hasRenderedDocumentsRef.current
+  );
+  const hasScrolledIntoViewRef = useRef(false);
+  useLayoutEffect(() => {
+    if (!scrollIntoViewOnMount || !isActive || isDetached || hasScrolledIntoViewRef.current) return;
+    hasScrolledIntoViewRef.current = true;
+    virtualizer.scrollToIndex(0, { align: 'start', behavior: 'auto' });
+  }, [scrollIntoViewOnMount, isActive, isDetached, virtualizer]);
+
+  // A comparison does not resume where a previous one was scrolled to, so its anchor is dropped when it
+  // goes away. Effects clean up in declaration order, so this runs after the connected virtualizer has
+  // persisted the anchor on disconnect.
+  useEffect(() => {
+    if (isDocumentsView) return;
+    return () => virtualizerController.clearPersistedAnchor(connectionId);
+  }, [isDocumentsView, virtualizerController, connectionId]);
+
+  useLayoutEffect(() => {
+    if (!isDocumentsView) return;
     // 'auto' leaves rows that are already visible (between the sticky header and the bottom edge)
     // where they are, places rows above the viewport just below the sticky header, and rows below
     // it at the bottom edge, accounting for the inline header's pinned height
@@ -274,12 +351,13 @@ export function CustomCascadeGridBody({
     return () => {
       scrollToRowRef.current = null;
     };
-  }, [scrollToRowRef, virtualizer]);
+  }, [isDocumentsView, scrollToRowRef, virtualizer]);
 
   const items = virtualizer.getVirtualItems();
   const hasRenderedRows = items.length > 0;
 
   useLayoutEffect(() => {
+    if (!isDocumentsView) return;
     // EUI hands over a new `Cell` every time the height it gives the rows changes, the cell carries that height
     // itself, so it is not affected by the minimum height the rows are held at.
     const cell = hasRenderedRows
@@ -291,7 +369,7 @@ export function CustomCascadeGridBody({
     } else if (cell?.offsetHeight) {
       reportRowHeight(cell.offsetHeight);
     }
-  }, [Cell, hasRenderedRows, reportRowHeight]);
+  }, [isDocumentsView, Cell, hasRenderedRows, reportRowHeight]);
 
   const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
   const listOffset = items.length > 0 ? items[0].start - scrollMargin : 0;
@@ -307,7 +385,9 @@ export function CustomCascadeGridBody({
 
   return (
     <div
-      data-test-subj="discoverCascadeCustomDataGridBody"
+      data-test-subj={
+        isDocumentsView ? 'discoverCascadeCustomDataGridBody' : 'discoverCascadeComparisonGridBody'
+      }
       role="rowgroup"
       css={customCascadeGridBodyStyle.wrapper}
     >
@@ -315,7 +395,7 @@ export function CustomCascadeGridBody({
       {stickyHeaderPortalTarget
         ? createPortal(
             <>
-              <OutPortal node={toolbarPortalNode} />
+              <OutPortal node={isDocumentsView ? toolbarPortalNode : comparisonToolbarPortalNode} />
               {headerViewport}
             </>,
             stickyHeaderPortalTarget
@@ -336,7 +416,7 @@ export function CustomCascadeGridBody({
                 role="row"
                 className="euiDataGridRow"
                 css={customCascadeGridBodyStyle.row}
-                style={minRowHeight ? { minHeight: minRowHeight } : undefined}
+                style={isDocumentsView && minRowHeight ? { minHeight: minRowHeight } : undefined}
               >
                 {visibleColumns.map((column, colIndex) => (
                   <Cell
