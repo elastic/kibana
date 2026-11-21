@@ -52,4 +52,31 @@ describe('BarList', () => {
     expect(screen.getByRole('listitem')).not.toHaveTextContent('%');
     expect(screen.getByRole('progressbar')).toHaveAttribute('max', '1');
   });
+
+  it('shows the shares as they are formatted in Kibana unless asked for whole percents', () => {
+    render(<BarList aria-label="Clicks" total={73} items={[{ key: '#buy', value: 22 }]} />, {
+      wrapper: EuiProvider,
+    });
+
+    expect(screen.getByRole('listitem')).toHaveTextContent('22 · 30.137%');
+  });
+
+  it('rounds the shares to whole percents when asked to', () => {
+    render(
+      <BarList
+        aria-label="Clicks"
+        total={73}
+        wholePercent
+        items={[
+          { key: '#buy', value: 22 },
+          { key: '#pay', value: 51 },
+        ]}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    const [buy, pay] = screen.getAllByRole('listitem');
+    expect(buy).toHaveTextContent('22 · 30%');
+    expect(pay).toHaveTextContent('51 · 70%');
+  });
 });

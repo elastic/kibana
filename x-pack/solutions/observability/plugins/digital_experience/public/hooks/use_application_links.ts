@@ -47,6 +47,8 @@ export interface ApplicationLinks {
   errorsHref: string;
   networkHref: string;
   reportsHref: string;
+  /** The frustration dashboard, in the selected time range and environment. */
+  frustrationHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -97,6 +99,12 @@ export const useApplicationLinks = (
       ),
       reportsHref: toHref(
         router.link('/{serviceName}/reports', { path: { serviceName }, query: tabQuery })
+      ),
+      frustrationHref: toHref(
+        router.link('/{serviceName}/frustration', {
+          path: { serviceName },
+          query: { ...listQuery, source },
+        })
       ),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(

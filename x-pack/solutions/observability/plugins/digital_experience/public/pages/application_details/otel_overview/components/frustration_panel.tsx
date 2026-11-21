@@ -28,6 +28,7 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import { useFormatters } from '../../../../hooks/use_formatters';
+import { useFrustrationDashboardAvailable } from '../../../../hooks/use_frustration_dashboard_available';
 import type { SessionsListUrlQuery } from '../../../../utils/sessions_list_query';
 import { frustrationFilterRt } from '../../../../utils/sessions_list_query';
 
@@ -160,6 +161,13 @@ const frustrationQueryOf = (
     : { withFrustration: true };
 };
 
+const DASHBOARD_LINK = i18n.translate(
+  'xpack.digitalExperience.overview.frustration.dashboardLink',
+  {
+    defaultMessage: 'View dashboard',
+  }
+);
+
 const SESSIONS_LINK = i18n.translate('xpack.digitalExperience.overview.frustration.sessionsLink', {
   defaultMessage: 'Open sessions',
 });
@@ -254,6 +262,7 @@ export function FrustrationPanel({
   frustratedPages,
   isLoading,
   sessionsHref,
+  dashboardHref,
 }: {
   frustration: ApplicationUsageResponse['frustration'];
   frustratedElements: ApplicationUsageResponse['frustratedElements'];
@@ -261,8 +270,11 @@ export function FrustrationPanel({
   isLoading: boolean;
   /** The sessions of the application, narrowed by the given filters. */
   sessionsHref: (query: SessionsListUrlQuery) => string;
+  /** The frustration dashboard of the application, linked from the header when it can be shown. */
+  dashboardHref: string;
 }) {
   const [tab, setTab] = useState<FrustrationTab>('elements');
+  const isDashboardAvailable = useFrustrationDashboardAvailable();
   const isEmpty = frustration.total === 0;
 
   const items: BarListItem[] =
@@ -309,6 +321,20 @@ export function FrustrationPanel({
       actions={
         !isEmpty && (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            {isDashboardAvailable && (
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  href={dashboardHref}
+                  data-test-subj="digitalExperienceOverviewFrustrationDashboardLink"
+                  {...getEbtProps({
+                    action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_DASHBOARD,
+                    element: APPLICATION_OVERVIEW_EBT_ELEMENTS.FRUSTRATION_DASHBOARD_LINK,
+                  })}
+                >
+                  {DASHBOARD_LINK}
+                </EuiLink>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <EuiIconTip
                 type="info"
@@ -338,7 +364,7 @@ export function FrustrationPanel({
       showInstrumentationDocs
       data-test-subj="digitalExperienceOverviewFrustration"
     >
-      <BarList items={items} total={frustration.total} aria-label={TITLE} />
+      <BarList items={items} total={frustration.total} wholePercent aria-label={TITLE} />
     </DataPanel>
   );
 }

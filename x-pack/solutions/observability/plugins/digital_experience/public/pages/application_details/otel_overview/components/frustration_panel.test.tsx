@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type { FrustratedElement, FrustratedPage } from '../../../../../common/types/usage';
+import { useFrustrationDashboardAvailable } from '../../../../hooks/use_frustration_dashboard_available';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
 import type { SessionsListUrlQuery } from '../../../../utils/sessions_list_query';
@@ -16,6 +17,7 @@ import { EDOT_BROWSER_DOCS_URL } from '../../../../utils/doc_links';
 import { FrustrationPanel } from './frustration_panel';
 
 jest.mock('../../../../hooks/use_kibana_services');
+jest.mock('../../../../hooks/use_frustration_dashboard_available');
 
 const ELEMENTS: FrustratedElement[] = [
   {
@@ -78,6 +80,7 @@ const renderPanel = ({
       frustratedPages={pages}
       isLoading={isLoading}
       sessionsHref={sessionsHref}
+      dashboardHref="/frustration-dashboard"
     />,
     { wrapper: EuiProvider }
   );
@@ -87,6 +90,7 @@ beforeEach(() => {
   jest.mocked(useKibanaServices).mockReturnValue({
     uiSettings: createUiSettingsMock(),
   } as unknown as ReturnType<typeof useKibanaServices>);
+  jest.mocked(useFrustrationDashboardAvailable).mockReturnValue(true);
 });
 
 describe('FrustrationPanel', () => {
@@ -101,6 +105,45 @@ describe('FrustrationPanel', () => {
     renderPanel({ frustration: { ...FRUSTRATION, total: 1, sessions: 1 } });
 
     expect(screen.getByText('1 signal in 1 session')).toBeInTheDocument();
+  });
+
+  it('links the dashboard from the header', () => {
+    renderPanel();
+
+    expect(screen.getByTestId('digitalExperienceOverviewFrustrationDashboardLink')).toHaveAttribute(
+      'href',
+      '/frustration-dashboard'
+    );
+    expect(screen.getByRole('link', { name: 'View dashboard' })).toBeInTheDocument();
+  });
+
+  it('has no dashboard link without the plugins the dashboard needs', () => {
+    jest.mocked(useFrustrationDashboardAvailable).mockReturnValue(false);
+
+    renderPanel();
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
+  });
+
+  it('has no dashboard link without signals', () => {
+    renderPanel({ frustration: NO_FRUSTRATION, elements: [], pages: [] });
+
+    expect(
+      screen.queryByTestId('digitalExperienceOverviewFrustrationDashboardLink')
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the share of a row as a whole percent', () => {
+    renderPanel({ frustration: { ...FRUSTRATION, total: 73 } });
+
+    const [checkout, promo] = within(
+      screen.getByRole('list', { name: 'Frustration' })
+    ).getAllByRole('listitem');
+    expect(checkout).toHaveTextContent('14 · 19%');
+    expect(checkout).not.toHaveTextContent('19.178%');
+    expect(promo).toHaveTextContent('5 · 7%');
   });
 
   it('names a sessions link with the text it shows', () => {

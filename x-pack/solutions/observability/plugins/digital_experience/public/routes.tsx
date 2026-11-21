@@ -14,6 +14,7 @@ import { DigitalExperienceLayout } from './application/digital_experience_layout
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
 import type { ApplicationTabId } from '../common/types/applications';
 import { ApplicationPage } from './pages/application_details/application_page';
+import { FrustrationPage } from './pages/frustration/frustration_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
 import { overviewQueryProps } from './utils/overview_filters_query';
@@ -32,6 +33,14 @@ function SessionDetailRoute() {
     path: { serviceName, sessionId },
   } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   return <SessionDetailPage serviceName={serviceName} sessionId={sessionId} />;
+}
+
+function FrustrationRoute() {
+  const {
+    path: { serviceName },
+    query: { source },
+  } = useDigitalExperienceParams('/{serviceName}/frustration');
+  return <FrustrationPage serviceName={serviceName} source={source} />;
 }
 
 // The router validates the query: an invalid value is replaced in the URL by the route's default,
@@ -64,6 +73,9 @@ const digitalExperienceRoutes = {
             element: <SessionDetailRoute />,
             // The list's state too, so the Sessions breadcrumb leads back to the same list.
             params: t.type({ path: t.type({ sessionId: t.string }), query: sessionsListQueryRt }),
+          },
+          '/{serviceName}/frustration': {
+            element: <FrustrationRoute />,
           },
           '/{serviceName}/sessions': {
             element: <ApplicationRoute tab="sessions" />,

@@ -55,6 +55,10 @@ export type DigitalExperienceLocatorQueryKey =
 
 type QueryValue = string | number | boolean;
 
+export const DIGITAL_EXPERIENCE_LOCATOR_VIEWS = ['frustration'] as const;
+
+export type DigitalExperienceLocatorView = (typeof DIGITAL_EXPERIENCE_LOCATOR_VIEWS)[number];
+
 /**
  * Where to go in the app: an application's tab, or the list of applications without
  * `serviceName`, with the state of the page as its URL holds it.
@@ -65,10 +69,15 @@ export interface DigitalExperienceLocatorParams
   serviceName?: string;
   /** The tab of the application; the Overview when unset or unknown. */
   tab?: ApplicationTabId;
+  /** A page that is not a tab, and wins over `tab`; not `page`, which is a list's page number. */
+  view?: DigitalExperienceLocatorView;
 }
 
 const isTab = (tab: unknown): tab is ApplicationTabId =>
   APPLICATION_TAB_IDS.some((known) => known === tab);
+
+const isView = (view: unknown): view is DigitalExperienceLocatorView =>
+  DIGITAL_EXPERIENCE_LOCATOR_VIEWS.some((known) => known === view);
 
 const isQueryValue = (value: unknown): value is QueryValue =>
   (typeof value === 'string' && value !== '') ||
@@ -88,11 +97,14 @@ export const pickLocatorQuery = (params: Record<string, unknown>): Record<string
     })
   );
 
-const pathOf = ({ serviceName, tab }: DigitalExperienceLocatorParams): string => {
+const pathOf = ({ serviceName, tab, view }: DigitalExperienceLocatorParams): string => {
   if (!serviceName) {
     return '/';
   }
   const application = `/${encodeURIComponent(serviceName)}`;
+  if (isView(view)) {
+    return `${application}/${view}`;
+  }
   return isTab(tab) && tab !== 'overview' ? `${application}/${tab}` : application;
 };
 

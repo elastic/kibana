@@ -6,7 +6,10 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -27,6 +30,10 @@ export interface DigitalExperienceStartDeps {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /** Undefined on serverless, which disables the ux plugin and so has no Classic RUM data. */
   ux?: UxPluginStart;
+  /** The frustration dashboard needs all three of these; without one the page shows a prompt. */
+  dashboard?: DashboardStart;
+  lens?: LensPublicStart;
+  dataViews?: DataViewsPublicPluginStart;
 }
 
 export type DigitalExperienceServices = CoreStart & DigitalExperienceStartDeps;
