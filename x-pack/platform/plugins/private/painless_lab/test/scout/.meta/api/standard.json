@@ -1,5 +1,5 @@
 {
-  "sha1": "116b63b2ba9c94a191c676f5282614fe83b6fe70",
+  "sha1": "619971ea57c351eb1abbaeedae87cb8b385d9309",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -20,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 16,
-        "column": 12
+        "line": 12,
+        "column": 17
       }
     },
     {
@@ -40,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 39,
-        "column": 12
+        "line": 33,
+        "column": 16
       }
     },
     {
@@ -60,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 61,
-        "column": 12
+        "line": 54,
+        "column": 16
       }
     },
     {
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 80,
+        "line": 72,
         "column": 12
       }
     },
@@ -94,8 +94,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_disabled.spec.ts",
-        "line": 21,
-        "column": 12
+        "line": 19,
+        "column": 13
       }
     },
     {
@@ -112,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 28,
-        "column": 12
+        "line": 27,
+        "column": 7
       }
     },
     {
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 42,
+        "column": 19
       }
     }
   ]
