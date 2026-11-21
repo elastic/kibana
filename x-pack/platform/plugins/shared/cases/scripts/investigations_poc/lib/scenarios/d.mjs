@@ -1,3 +1,6 @@
+import { createHash } from 'node:crypto';
+
+const PLANTED_HASH = 'a3f9c2d17e44b0c8b21d96e5f7a03c4d8e1b52f6a9c07d3e4b8f1a2c6d5e9047';
 // Scenario D: a three-week investigation (INV-1187) with real volumes:
 // 4,012 alert evidence items, 600 indicators, 12 threads, a scope of 38 hosts and 61 identities,
 // three changes of owner and a handoff three days ago.
@@ -235,6 +238,22 @@ export const run = async () => {
   /* 3. Evidence in prototype order: E1..E14, 26 alerts (E15..E40), 600 indicators (E41..E640), the other alerts */
   const e14 = ctx.d.ev.filter((e) => /^E([1-9]|1[0-4])$/.test(e.id));
   const indicators = ctx.d.ev.filter((e) => e.det?.kind === 'indicator');
+  // The prototype's generator loses precision and emits zero-filled values; derive distinct,
+  // deterministic ones instead (IP addresses and the planted hash are kept as they are).
+  indicators.forEach((e, i) => {
+    const value = e.det.value;
+    if (!/0{6}/.test(value) || value === PLANTED_HASH) return;
+    const h = createHash('sha256').update(`uipoc-d-indicator-${i}`).digest('hex');
+    const next =
+      e.det.itype === 'Domain'
+        ? `auth-${h.slice(0, 6)}.example`
+        : e.det.itype === 'URL'
+        ? `https://cdn-${h.slice(0, 5)}.example/p/${h.slice(5, 9)}`
+        : h;
+    e.title = next;
+    e.d = next;
+    e.det.value = next;
+  });
   const lastNewIndex = indicators.filter((e) => e.new).length;
   const newStart = handoffProto + 45 * MIN;
   const newEnd = proto.now - 2 * HOUR;
