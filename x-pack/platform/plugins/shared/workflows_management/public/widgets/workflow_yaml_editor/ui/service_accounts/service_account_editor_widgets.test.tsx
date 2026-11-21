@@ -60,6 +60,17 @@ const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMous
   },
 });
 
+const scrollEvent: monaco.IScrollEvent = {
+  scrollTop: 0,
+  scrollLeft: 0,
+  scrollWidth: 400,
+  scrollHeight: 120,
+  scrollTopChanged: false,
+  scrollLeftChanged: false,
+  scrollWidthChanged: false,
+  scrollHeightChanged: true,
+};
+
 const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false) => {
   const directory = {
     isEnabled: () => enabled,
@@ -292,6 +303,24 @@ describe('ServiceAccountEditorWidgets', () => {
       expect(screen.queryByText('This deployment')).not.toBeInTheDocument();
     }
   );
+
+  it('opens the details card for a hover that the editor scrolls under', async () => {
+    jest.useFakeTimers();
+    const { editor } = setup(true, 'settings:\n  run_as: opaque-id');
+    jest.mocked(editor.hasTextFocus).mockReturnValue(false);
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(screen.queryByTestId('serviceAccountEditorPopup')).not.toBeInTheDocument();
+    act(() => {
+      jest.mocked(editor.onMouseMove).mock.calls[0][0](mouseEvent(new monaco.Position(2, 12)));
+      jest.mocked(editor.onDidScrollChange).mock.calls[0][0](scrollEvent);
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(250);
+    });
+    expect(screen.getByText('This deployment')).toBeInTheDocument();
+  });
 
   it('shows name and role badges, and clicking inserts only the stable ID', async () => {
     const { editor } = setup();

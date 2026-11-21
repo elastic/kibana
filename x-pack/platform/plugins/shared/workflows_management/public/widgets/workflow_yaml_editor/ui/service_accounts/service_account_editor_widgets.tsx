@@ -140,23 +140,25 @@ export const ServiceAccountEditorWidgets = ({
       hoverSuppressed = false;
       editor.updateOptions({ hover: originalHover });
     };
-    const closeDetails = () => {
+    const cancelHover = () => {
       hoverGeneration++;
       clearTimeout(hoverTimer);
+      restoreHover();
+    };
+    const closeDetails = () => {
+      cancelHover();
       if (popupRef.current?.kind === 'details') {
         popupVisible.set(false);
         setPopup(null);
       }
-      restoreHover();
     };
     const close = () => {
       completionGeneration++;
-      hoverGeneration++;
-      clearTimeout(hoverTimer);
+      // Only an open popup supersedes an armed hover; incidental editor events must not cancel it.
+      if (popupRef.current) cancelHover();
       pickerVisible.set(false);
       popupVisible.set(false);
       setPopup(null);
-      restoreHover();
     };
     closeRef.current = close;
     dismissRef.current = () => {
@@ -404,6 +406,7 @@ export const ServiceAccountEditorWidgets = ({
           const position = editor.getPosition();
           if (!model || !position) return;
           close();
+          cancelHover();
           const current = hoverGeneration;
           void accounts.getAccountAtPosition(model, position).then((details) => {
             if (current === hoverGeneration && details) {
