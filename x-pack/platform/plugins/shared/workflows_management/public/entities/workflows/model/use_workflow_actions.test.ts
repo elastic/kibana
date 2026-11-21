@@ -9,6 +9,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowDetailDto, WorkflowListDto, WorkflowYaml } from '@kbn/workflows';
+import type { BulkDeleteWorkflowsResponse } from '@kbn/workflows-ui';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/src/api/workflows_api.mock';
 import { useWorkflowActions } from './use_workflow_actions';
 import {
@@ -29,6 +30,12 @@ const mockParseImportFile = parseImportFile as jest.MockedFunction<typeof parseI
 
 jest.mock('../../../features/import_workflows/lib/parse_import_file');
 jest.mock('../../../hooks/use_telemetry');
+const mockRemoveRecentlyViewed = jest.fn();
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: { workflowsManagement: { recentlyViewed: { remove: mockRemoveRecentlyViewed } } },
+  }),
+}));
 jest.mock('@kbn/workflows-ui', () => ({
   useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
     mutate: jest.fn((...args: unknown[]) => {
@@ -1220,7 +1227,11 @@ describe('useWorkflowActions – import mutations', () => {
   // ---------------------------------------------------------------------------
   describe('deleteWorkflows', () => {
     it('should call api.bulkDeleteWorkflows with the IDs', async () => {
-      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce(undefined);
+      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce({
+        total: 2,
+        deleted: 2,
+        failures: [],
+      });
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 
@@ -1231,6 +1242,24 @@ describe('useWorkflowActions – import mutations', () => {
       await waitFor(() => expect(result.current.deleteWorkflows.isSuccess).toBe(true));
 
       expect(mockWorkflowApi.bulkDeleteWorkflows).toHaveBeenCalledWith(['wf-1', 'wf-2']);
+    });
+
+    it('should remove only the deleted workflows from the recently viewed history', async () => {
+      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'wf-2', error: 'Workflow has a running execution' }],
+      });
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.deleteWorkflows.mutate({ ids: ['wf-1', 'wf-2'] });
+      });
+
+      await waitFor(() => expect(result.current.deleteWorkflows.isSuccess).toBe(true));
+
+      expect(mockRemoveRecentlyViewed.mock.calls).toEqual([['wf-1']]);
     });
 
     it('should optimistically remove workflows from list', async () => {
@@ -1247,9 +1276,9 @@ describe('useWorkflowActions – import mutations', () => {
 
       queryClient.setQueryData(['workflows', 'list'], listData);
 
-      let resolveApi: () => void;
+      let resolveApi: (response: BulkDeleteWorkflowsResponse) => void;
       mockWorkflowApi.bulkDeleteWorkflows.mockReturnValue(
-        new Promise<void>((resolve) => {
+        new Promise<BulkDeleteWorkflowsResponse>((resolve) => {
           resolveApi = resolve;
         })
       );
@@ -1268,7 +1297,7 @@ describe('useWorkflowActions – import mutations', () => {
       });
 
       act(() => {
-        resolveApi!();
+        resolveApi!({ total: 2, deleted: 2, failures: [] });
       });
 
       await waitFor(() => expect(result.current.deleteWorkflows.isSuccess).toBe(true));
@@ -1297,10 +1326,15 @@ describe('useWorkflowActions – import mutations', () => {
       const rolledBack = queryClient.getQueryData<WorkflowListDto>(['workflows', 'list']);
       expect(rolledBack?.results).toHaveLength(1);
       expect(rolledBack?.total).toBe(1);
+      expect(mockRemoveRecentlyViewed).not.toHaveBeenCalled();
     });
 
     it('should report telemetry on success for each deleted workflow', async () => {
-      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce(undefined);
+      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce({
+        total: 2,
+        deleted: 2,
+        failures: [],
+      });
 
       const { result } = renderHook(() => useWorkflowActions(), { wrapper });
 

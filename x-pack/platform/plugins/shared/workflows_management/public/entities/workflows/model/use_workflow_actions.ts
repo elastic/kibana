@@ -18,7 +18,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
+import type { BulkCreateWorkflowsResponse, BulkDeleteWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
@@ -27,6 +27,7 @@ import type {
   WorkflowStepTriggerTab,
   WorkflowTriggerTab,
 } from '../../../features/run_workflow/ui/types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -89,6 +90,7 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
+  const { workflowsManagement } = useKibana().services;
 
   const updateWorkflow = useMutation<
     UpdatedWorkflowResponseDto,
@@ -202,7 +204,12 @@ export function useWorkflowActions() {
     },
   });
 
-  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
+  const deleteWorkflows = useMutation<
+    BulkDeleteWorkflowsResponse,
+    HttpError,
+    { ids: string[] },
+    OptimisticContext
+  >({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => api.bulkDeleteWorkflows(ids),
     // Optimistic update: immediately remove workflows from UI before server responds
@@ -254,7 +261,7 @@ export function useWorkflowActions() {
         });
       });
     },
-    onSuccess: (_, variables) => {
+    onSuccess: ({ failures }, variables) => {
       // Report telemetry for successful deletion
       variables.ids.forEach((workflowId) => {
         telemetry.reportWorkflowDeleted({
@@ -264,6 +271,11 @@ export function useWorkflowActions() {
           error: undefined,
         });
       });
+
+      const failedIds = new Set(failures.map(({ id }) => id));
+      variables.ids
+        .filter((workflowId) => !failedIds.has(workflowId))
+        .forEach((workflowId) => workflowsManagement.recentlyViewed.remove(workflowId));
 
       // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
