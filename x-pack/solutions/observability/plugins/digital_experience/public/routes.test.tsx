@@ -36,7 +36,7 @@ describe('digitalExperienceRouter', () => {
   });
 
   it('heals an unknown source to the Classic one', () => {
-    const location = { ...locationOf('/my-app'), search: '?source=mobile' };
+    const location = { ...locationOf('/my-app'), search: '?source=unknown' };
 
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({
@@ -47,7 +47,7 @@ describe('digitalExperienceRouter', () => {
   });
 
   it('removes an unknown source filter from the list', () => {
-    const location = { ...locationOf('/'), search: '?rangeFrom=now-15m&sourceFilter=mobile' };
+    const location = { ...locationOf('/'), search: '?rangeFrom=now-15m&sourceFilter=unknown' };
 
     expect(() => digitalExperienceRouter.matchRoutes(location)).toThrow(
       expect.objectContaining({

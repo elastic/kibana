@@ -5,12 +5,36 @@
  * 2.0.
  */
 
+import {
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+  SERVICE_ENVIRONMENT,
+} from '@kbn/apm-types';
+
+/**
+ * The environment fields of the OTel indices: `service.environment` aliases the deprecated
+ * `deployment.environment`, which newer SDKs replace with `deployment.environment.name`.
+ */
+export const ENVIRONMENT_FIELDS: readonly string[] = [
+  SERVICE_ENVIRONMENT,
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+];
+
 /** Local indices only: remote clusters are not searched. */
 export const OTEL_LOGS_INDEX = 'logs-*.otel-*';
 export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 
 /** `telemetry.sdk.language` of the browser SDKs; the OTel indices also hold backend services. */
 export const BROWSER_SDK_LANGUAGE = 'webjs';
+
+/** `telemetry.distro.name` of the Elastic distributions, EDOT Android and iOS included. */
+export const ELASTIC_DISTRO_NAME = 'elastic';
+
+/**
+ * `telemetry.sdk.name` of EDOT Android and EDOT iOS before they report the Elastic distribution
+ * and the upstream SDK values. Not the language: EDOT Android's is `java`, as backend Java's.
+ */
+export const MOBILE_SDK_NAME_BY_PLATFORM = { android: 'android', ios: 'iOS' } as const;
+export const MOBILE_SDK_NAMES = Object.values(MOBILE_SDK_NAME_BY_PLATFORM);
 
 /**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
@@ -21,6 +45,11 @@ export const BROWSER_SDK_LANGUAGE = 'webjs';
 export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
+
+/** OTel resource attributes the mobile data carries that `@kbn/apm-types` doesn't name. */
+export const OS_NAME = 'os.name';
+export const TELEMETRY_DISTRO_NAME = 'telemetry.distro.name';
+export const APP_INSTALLATION_ID = 'app.installation.id';
 
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';

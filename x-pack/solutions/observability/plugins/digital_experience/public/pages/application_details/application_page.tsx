@@ -12,9 +12,10 @@ import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { APPLICATION_SOURCE } from '../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
+  type ApplicationType,
   type ApplicationSource,
   type ApplicationTabId,
 } from '../../../common/types/applications';
@@ -30,6 +31,7 @@ import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
+import { MobileOverview } from './mobile_overview/mobile_overview';
 import { OtelOverview } from './otel_overview/otel_overview';
 
 const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
@@ -52,9 +54,8 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
  * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
-const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
-  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
-
+const tabsOf = (source: ApplicationSource, isMobile: boolean): readonly ApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel && !isMobile ? APPLICATION_TAB_IDS : ['overview'];
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -148,20 +149,28 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
 export function ApplicationPage({
   serviceName,
   source,
+  applicationType,
   selectedTab,
 }: {
   serviceName: string;
   source: ApplicationSource;
+  /** Whether the application is a web or a mobile one; web when unset. */
+  applicationType?: ApplicationType;
   selectedTab: ApplicationTabId;
 }) {
+  // Mobile applications are EDOT data: their type, not their source, gives them the mobile page.
+  const isMobile =
+    source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile;
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
     useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
-  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
-  // replaced by the Overview's, so a new EDOT-only tab needs no entry here.
-  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt), and mobile only its
+  // Overview; any other tab's URL is replaced by the Overview's.
+  const isUnsupportedTab = isMobile
+    ? selectedTab !== 'overview'
+    : selectedTab !== 'sessions' && !tabsOf(source, isMobile).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
@@ -180,12 +189,16 @@ export function ApplicationPage({
     { text: APPLICATION_TAB_LABELS[selectedTab] },
   ]);
 
-  const renderOverview = () =>
-    source === APPLICATION_SOURCE.otel ? (
+  const renderOverview = () => {
+    if (isMobile) {
+      return withPagePadding(<MobileOverview serviceName={serviceName} />);
+    }
+    return source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)
     ) : (
       <ClassicRumOverview serviceName={serviceName} />
     );
+  };
 
   const renderSessions = () =>
     withPagePadding(
@@ -220,7 +233,7 @@ export function ApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
-        tabs={tabsOf(source).map((id) => ({
+        tabs={tabsOf(source, isMobile).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,

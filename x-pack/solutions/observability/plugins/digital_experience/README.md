@@ -30,6 +30,77 @@ Serverless Logs Essentials hides the feature (`xpack.features.overrides`), as th
 
 `xpack.digital_experience.enabled` is deprecated and ignored; Kibana logs a warning when it is set.
 
+## Mobile applications
+
+EDOT Android and EDOT iOS applications (and React Native apps, which run on both) are listed with
+the others. They ship with the rest of Digital Experience, behind `digitalExperience.enabled` only,
+on serverless and stateful.
+
+- **Source and type:** `source` is the data model, `otel` or `classic`. Mobile applications
+  are OpenTelemetry only, so they are `otel`; what sets them apart is their `applicationType`,
+  `mobile` (`web` for EDOT Browser and Classic RUM), and their `platforms` (`android`, `ios`).
+- **Identity:** a mobile `telemetry.sdk.name` (`android`, `iOS`), or, once the SDKs send the
+  upstream values (elastic/rum-dev#106), the Elastic distribution
+  (`resource.attributes.telemetry.distro.name: elastic`) on a mobile resource `os.name`: `Android`,
+  `iOS` or `iPadOS`, over `traces-*.otel-*,logs-*.otel-*`. The same rule as the mobile session
+  summaries. Not `os.type`, which can't tell the platforms apart (Android sends `linux`, iOS
+  `darwin`), nor `telemetry.sdk.language`, which is `java` for EDOT Android and backend Java alike.
+  EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
+  iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
+- **Platform:** `android` for `os.name: Android` or `telemetry.sdk.name: android`, `ios` otherwise.
+- **Key:** one application per `service.name`, as obs-execution#645 has it: a React Native app is
+  one row, with the platforms it reported on (`VALUES(platform)`).
+- **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
+  review of the names; nothing reads it yet.
+- **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
+  users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
+  latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
+  ("Not enough data") until a crash is defined and session start reaches the SDKs.
+- **Queries:** built with the `@elastic/esql` composer (`common/mobile/`: the fields and computed
+  columns, the mobile documents, the filters, the KPIs and the Discover query; and
+  `server/lib/mobile/queries.ts`) and run through the plugin's traced Elasticsearch client, one APM
+  span per query, with typed rows (`transform: 'plain'`). Every query sets `unmapped_fields` to
+  `nullify`: a field no index maps, e.g. `exception.type` on a cluster whose apps never threw, reads
+  as `null` (and counts 0) instead of failing the query. Values from the request are named params;
+  the Discover query, which takes no params, has them inlined by `inlineParams()`. Results must be
+  complete (`allow_partial_results: false`), and periods are half-open, so a period and the one
+  before it never share a document.
+- **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
+  iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
+  rewritten at query time; a version that carries its build would need fixing in the SDK or at
+  ingest. The latest release is each application's highest `service.version` in the last 24 hours
+  of the time range, on any platform, whatever its session count, compared as versions so `2.10.0`
+  is after `2.9.0` (`MAX(TO_VERSION(...))` per application in ES|QL, so no row limit drops one).
+- **Applications list:** Web and Mobile tabs (`applicationType` in the URL), each with its count,
+  shown when both have data, when the mobile search failed, or when the URL picks one; otherwise the
+  list shows the only kind there is. The Mobile tab has its own table (the name with a badge per
+  platform, from `@kbn/custom-icons`, latest release, sessions, users, crash-free sessions, error
+  rate, last seen), a Platform filter (`platformFilter`: Android or iOS) and, without mobile data,
+  links to the EDOT Android and iOS docs. A failed or partial mobile search is reported in
+  `mobileAvailability`, apart from the sources. The summary, page loads chart, source filter and
+  column selector are the Web tab's. The environment picker lists both environment fields and
+  "Not defined".
+- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms: a
+  badge per platform, environment, OS (`osName`, the `os.name` values in the time range, e.g.
+  `iPadOS`) and release filters (in the URL, so a reload or a shared link keeps them), a
+  Compare toggle, a KPI row (sessions, users, crash-free sessions, error rate) and empty sections
+  (Health summary, Release health, Stability, Users and engagement, Performance, Views) for the
+  sibling issues to fill. Every KPI uses `MobilePanel`: current value with its change against the
+  previous period of equal length, the Compare overlay and a tooltip with the calculation. One
+  "Open in Discover" link opens the KPIs over time with the same ES|QL and filters
+  (`common/mobile/discover.ts`). Its buckets follow Discover's time range: `BUCKET` divides the range
+  by `TARGET_BUCKETS` (50, as the plugin's charts) and rounds the width up to a standard one, so a
+  day shows 30-minute buckets and 30 days daily ones, and the width changes with the range. A
+  warning shows when the user can't read every OTel index, as the counts may then miss data.
+  Without mobile data it links to the EDOT Android and iOS setup docs, unless the user can't read
+  every OTel index: then it says nothing matched in the indices they can read and asks them to
+  check their access, on this page and on the list's Mobile tab. With a filter set (environment,
+  OS or release), either can be the cause, so it names both, and the list keeps its "Show all
+  environments" action.
+- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
+  optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
+  OS) and environments for the pickers.
+
 ## Pages
 
 ### Applications (`/`)
@@ -546,3 +617,5 @@ logged and answer 500 without Elasticsearch details:
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
+  `components/`.

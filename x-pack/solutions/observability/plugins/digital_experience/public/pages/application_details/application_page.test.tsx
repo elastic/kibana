@@ -62,6 +62,9 @@ jest.mock('../reports/reports_tab', () => {
     },
   };
 });
+jest.mock('./mobile_overview/mobile_overview', () => ({
+  MobileOverview: () => <div data-test-subj="mobileOverview" />,
+}));
 jest.mock('../sessions/sessions_tab', () => {
   return {
     SessionsTab: ({ serviceName }: { serviceName: string }) => {
@@ -82,17 +85,19 @@ const setTimeRange = jest.fn();
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: MockAppHeaderProvider });
 
+const LINKS: ReturnType<typeof useApplicationLinks> = {
+  overviewHref: '/overview-href',
+  overviewPath: '/my-app?source=classic',
+  errorsHref: '/errors-href',
+  networkHref: '/network-href',
+  reportsHref: '/reports-href',
+  sessionsHref: () => '/sessions-href',
+  sessionHref: () => '/session-href',
+};
+
 beforeEach(() => {
   historyReplace.mockClear();
-  jest.mocked(useApplicationLinks).mockReturnValue({
-    overviewHref: '/overview-href',
-    overviewPath: '/my-app?source=classic',
-    errorsHref: '/errors-href',
-    networkHref: '/network-href',
-    reportsHref: '/reports-href',
-    sessionsHref: () => '/sessions-href',
-    sessionHref: () => '/session-href',
-  });
+  jest.mocked(useApplicationLinks).mockReturnValue(LINKS);
   jest
     .mocked(useEnvironment)
     .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
@@ -314,6 +319,31 @@ describe('ApplicationPage', () => {
 
       expect(historyReplace).toHaveBeenCalledWith('/my-app?source=classic');
       expect(screen.queryByTestId(`${tab}Tab`)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['sessions', 'errors', 'network'] as const)(
+    'replaces the %s route of a mobile application with its Overview, its only tab',
+    (tab) => {
+      useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+      jest.mocked(useApplicationLinks).mockReturnValue({
+        ...LINKS,
+        overviewPath: '/my-app?applicationType=mobile&source=otel',
+      });
+
+      render(
+        <ApplicationPage
+          serviceName="my-app"
+          source="otel"
+          applicationType="mobile"
+          selectedTab={tab}
+        />
+      );
+
+      expect(useApplicationLinks).toHaveBeenCalledWith('my-app', 'otel');
+      expect(historyReplace).toHaveBeenCalledWith('/my-app?applicationType=mobile&source=otel');
+      expect(screen.queryByTestId('digitalExperienceSessionsUnavailable')).not.toBeInTheDocument();
       expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
     }
   );

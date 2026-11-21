@@ -74,11 +74,20 @@ export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
   INSTRUMENTATION_DOCS_LINK: 'instrumentationDocsLink',
 } as const;
 
+export const MOBILE_APPLICATION_EBT_ELEMENTS = {
+  RELEASE_FILTER: 'mobileReleaseFilter',
+  OS_FILTER: 'mobileOsFilter',
+  KPIS_DISCOVER_LINK: 'mobileKpisDiscoverLink',
+  RETRY: 'mobileRetry',
+} as const;
+
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
   APPLICATION_LINK: 'applicationLink',
   DOCS_LINK: 'applicationsDocsLink',
   CLASSIC_DATA_HINT: 'classicDataHint',
   SOURCE_FILTER: 'sourceFilter',
+  PLATFORM_FILTER: 'platformFilter',
+  APPLICATION_TYPE_TAB: 'applicationTypeTab',
   COLUMN_SELECTOR: 'columnSelector',
   RETRY: 'applicationsRetry',
   SHOW_ALL_ENVIRONMENTS: 'showAllEnvironments',
