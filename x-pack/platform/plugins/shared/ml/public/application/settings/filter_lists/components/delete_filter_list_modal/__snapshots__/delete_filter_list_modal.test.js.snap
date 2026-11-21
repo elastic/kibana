@@ -12,6 +12,7 @@ exports[`DeleteFilterListModal false canDeleteFilter privilege renders as disabl
       class="emotion-euiButtonDisplayContent"
     >
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="trash"
       />
@@ -33,6 +34,7 @@ exports[`DeleteFilterListModal renders as disabled delete button when no lists s
       class="emotion-euiButtonDisplayContent"
     >
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="trash"
       />
@@ -53,6 +55,7 @@ exports[`DeleteFilterListModal renders as enabled delete button when a list is s
       class="emotion-euiButtonDisplayContent"
     >
       <span
+        aria-hidden="true"
         color="inherit"
         data-euiicon-type="trash"
       />
