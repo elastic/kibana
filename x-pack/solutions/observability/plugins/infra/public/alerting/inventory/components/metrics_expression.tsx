@@ -188,6 +188,8 @@ export const MetricExpression = ({
     [metric?.value, metrics, metricsToRemove]
   );
 
+  const hasMetricErrors = Boolean(errors.metric?.length);
+
   return (
     <EuiPopover
       id="metricPopover"
@@ -201,10 +203,9 @@ export const MetricExpression = ({
             }
           )}
           value={expressionDisplayValue}
-          // @ts-expect-error upgrade typescript v5.1.6
-          isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
+          isActive={popoverOpen || hasMetricErrors}
           onClick={togglePopover}
-          color={errors.metric?.length ? 'danger' : 'success'}
+          color={hasMetricErrors ? 'danger' : 'success'}
         />
       }
       isOpen={popoverOpen}
@@ -239,7 +240,7 @@ export const MetricExpression = ({
         <EuiSpacer size="m" />
         {customMetricTabOpen ? (
           <>
-            <EuiFormRow fullWidth>
+            <EuiFormRow fullWidth isInvalid={hasMetricErrors} error={errors.metric}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiSelect
@@ -280,8 +281,7 @@ export const MetricExpression = ({
                     options={fieldOptions}
                     onChange={onFieldChange}
                     isClearable={false}
-                    // @ts-expect-error upgrade typescript v5.1.6
-                    isInvalid={errors.metric.length > 0}
+                    isInvalid={hasMetricErrors}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -311,7 +311,7 @@ export const MetricExpression = ({
             </EuiFormRow>
           </>
         ) : (
-          <EuiFormRow fullWidth>
+          <EuiFormRow fullWidth isInvalid={hasMetricErrors} error={errors.metric}>
             <EuiFlexGroup direction="column" gutterSize="s">
               {nodeType === 'host' && (
                 <EuiFlexItem>
@@ -337,8 +337,7 @@ export const MetricExpression = ({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   data-test-subj="availableFieldsOptionsComboBox"
-                  // @ts-expect-error upgrade typescript v5.1.6
-                  isInvalid={errors.metric.length > 0}
+                  isInvalid={hasMetricErrors}
                   placeholder={firstFieldOption.text}
                   options={availableFieldsOptions}
                   noSuggestions={!availableFieldsOptions.length}
