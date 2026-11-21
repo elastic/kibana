@@ -7,6 +7,7 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -93,6 +94,11 @@ const createMockPersistedProvider = (
 const createMockToolRegistry = (toolIds: string[] = []): ToolRegistry =>
   ({
     has: jest.fn(async (id: string) => toolIds.includes(id)),
+    // Like the real registry, `get` throws for a tool that is not registered or not available.
+    get: jest.fn(async (id: string) => {
+      if (!toolIds.includes(id)) throw new Error(`Tool ${id} is not available`);
+      return { id };
+    }),
   } as unknown as ToolRegistry);
 
 describe('createSkillRegistry', () => {
@@ -890,6 +896,31 @@ describe('createSkillRegistry', () => {
       expect(await registry.has('agent-builder-traces')).toBe(true);
       expect(await registry.get('agent-builder-traces')).toEqual(tracesSkill);
     });
+  });
+
+  it('offers skills that require workflows only when execute_workflow is usable, checking it once', async () => {
+    const skills = ['workflow-skill-1', 'workflow-skill-2'].map((id) =>
+      createMockInternalSkillDefinition({ id, name: id, requiresWorkflows: true })
+    );
+    const createRegistry = (toolIds: string[]) => {
+      const toolRegistry = createMockToolRegistry(toolIds);
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider(skills),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry,
+        experimentalFeaturesEnabled: false,
+      });
+      return { registry, toolRegistry };
+    };
+    const ids = skills.map(({ id }) => id);
+
+    const usable = createRegistry([platformCoreTools.executeWorkflow]);
+    expect((await usable.registry.bulkGet(ids)).size).toBe(2);
+    expect(usable.toolRegistry.get).toHaveBeenCalledTimes(1);
+
+    const unusable = createRegistry([]);
+    expect((await unusable.registry.bulkGet(ids)).size).toBe(0);
+    expect(await unusable.registry.list()).toEqual([]);
   });
 
   describe('availability filtering', () => {

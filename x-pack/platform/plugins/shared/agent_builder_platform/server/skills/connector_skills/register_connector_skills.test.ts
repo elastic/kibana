@@ -12,7 +12,10 @@ import { CONNECTORS_SKILLS_BASE_PATH } from '@kbn/agent-builder-server/skills';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getAllConnectorSkills, getConnectorSkillRegistryId } from '@kbn/connector-specs';
-import { registerConnectorSkills } from './register_connector_skills';
+import {
+  createConnectorSkillDefinition,
+  registerConnectorSkills,
+} from './register_connector_skills';
 
 const registerSkillsWith = () => {
   const register = jest.fn();
@@ -40,6 +43,7 @@ describe('registerConnectorSkills', () => {
     for (const skill of registerSkillsWith()) {
       expect(skill.basePath).toBe(CONNECTORS_SKILLS_BASE_PATH);
       expect(skill.hidden).toBe(true);
+      expect(skill.requiresWorkflows).toBe(true);
       expect(skill.excludeFromElasticCapabilities).toBe(true);
       expect(await skill.getRegistryTools?.()).toEqual([platformCoreTools.executeWorkflow]);
       const inlineTools = (await skill.getInlineTools?.()) ?? [];
@@ -62,5 +66,35 @@ describe('registerConnectorSkills', () => {
       expect(isAllowedSkillRegistration(skill)).toBe(true);
       await expect(validateSkillDefinition(skill)).resolves.toBeDefined();
     }
+  });
+
+  describe('workflow detection', () => {
+    const deps = { getActionsStart: jest.fn() as unknown as () => Promise<ActionsPluginStart> };
+    const base = { id: 'test', name: 'connector-test', description: 'd' };
+    const resource = (content: string) => ({ name: 'r', relativePath: './resources', content });
+    const run = `Run it with ${platformCoreTools.executeWorkflow}.`;
+
+    it.each([
+      ['the skill content names the executor', { content: run }, true],
+      ['a resource names the executor', { content: 'c', resources: [resource(run)] }, true],
+      [
+        'one of several resources names the executor',
+        { content: 'c', resources: [resource('lookup'), resource(run)] },
+        true,
+      ],
+      [
+        'the text only mentions workflows in prose',
+        { content: 'This skill does not use workflows.', resources: [resource('a workflow')] },
+        false,
+      ],
+      ['the skill has no resources and does not name the executor', { content: 'c' }, false],
+    ])('when %s', async (_case, spec, expected) => {
+      const skill = createConnectorSkillDefinition({ ...base, ...spec }, deps);
+
+      expect(skill.requiresWorkflows).toBe(expected);
+      expect(await skill.getRegistryTools?.()).toEqual(
+        expected ? [platformCoreTools.executeWorkflow] : []
+      );
+    });
   });
 });

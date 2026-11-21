@@ -152,6 +152,13 @@ export interface SkillDefinition<
    */
   hidden?: boolean;
   /**
+   * When true, the skill tells the model to run workflows, so it is only available when the
+   * `execute_workflow` tool is usable by the caller: Workflows is enabled and the caller holds the
+   * workflows execute privilege.
+   * Defaults to false.
+   */
+  requiresWorkflows?: boolean;
+  /**
    * Optional dynamic availability configuration.
    * When provided, the framework evaluates the handler per-request to decide
    * whether the skill should be visible. See {@link AvailabilityConfig}.

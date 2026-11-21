@@ -89,6 +89,10 @@ export interface InternalSkillDefinition {
    */
   hidden?: boolean;
   /**
+   * When true, the skill is only available when the caller can use the `execute_workflow` tool.
+   */
+  requiresWorkflows?: boolean;
+  /**
    * When present, evaluates whether the skill is available for the current
    * request context. Skills that return `{ status: 'unavailable' }` are
    * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
