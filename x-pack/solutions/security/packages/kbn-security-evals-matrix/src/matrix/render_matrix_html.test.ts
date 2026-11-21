@@ -73,6 +73,12 @@ const mockMatrix: Matrix = {
   openSource: [],
 };
 
+const tokenCostTable = (html: string): string => {
+  const [table] = html.match(/<table class="tokencost">[\s\S]*?<\/table>/) ?? [];
+  if (table === undefined) throw new Error('token-cost table was not rendered');
+  return table;
+};
+
 describe('renderMatrixHtml', () => {
   it('renders a self-contained HTML document', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
@@ -92,6 +98,7 @@ describe('renderMatrixHtml', () => {
             modelId: 'test-model',
             modelLabel: 'Test Model',
             openSource: false,
+            priced: false,
             cells: [
               {
                 columnId: 'alert',
@@ -106,17 +113,118 @@ describe('renderMatrixHtml', () => {
       },
     };
     const html = renderMatrixHtml(matrixWithCost, mockConfig);
-    expect(html).toContain('Token cost per (model, column)');
+    expect(html).toContain('Token cost per (model, category)');
     expect(html).toContain('tokencost');
-    // 1500 -> "2k" (toFixed(0) rounds 1.5 up), 4000 -> "4k", total 5500 -> "5k"/"6k"
-    expect(html).toContain('>2k</td>');
-    expect(html).toContain('>4k</td>');
+    // Both columns share the "Agent Builder" group: one category bucket summing 1500 + 4000.
+    expect(html).toContain('<th>Agent Builder</th>');
+    expect(html).not.toContain('<th>Alert Analysis</th><th>Threat Hunting</th><th>Total</th>');
+    expect(html).toContain('>6k<br><span class="model-id">unpriced</span></td>');
     expect(html).toContain('in 1,200 / out 300');
+  });
+
+  it('renders the summed USD estimate for priced models, and "partial" when a cell lacks one', () => {
+    const priced = (
+      cells: NonNullable<Matrix['tokenCost']>['models'][number]['cells']
+    ): Matrix => ({
+      ...mockMatrix,
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            priced: true,
+            cells,
+          },
+        ],
+      },
+    });
+    const full = renderMatrixHtml(
+      priced([
+        { columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 },
+        { columnId: 'threat', totalMean: 4000, estimatedCostUsd: 0.5 },
+      ]),
+      mockConfig
+    );
+    expect(full).toContain('>6k<br>$0.75</td>');
+
+    const partial = renderMatrixHtml(
+      priced([
+        { columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 },
+        { columnId: 'threat', totalMean: 4000 },
+      ]),
+      mockConfig
+    );
+    expect(partial).toContain('>6k<br><span class="model-id">partial</span></td>');
+
+    // A column that reported no token counts creates no cell: the Total must not look complete.
+    const missingColumn = renderMatrixHtml(
+      priced([{ columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 }]),
+      mockConfig
+    );
+    expect(missingColumn).not.toContain('>2k<br>$0.25</td>');
+    expect(missingColumn).toContain('<span class="model-id">partial</span></td></tr>');
   });
 
   it('omits the token-cost table when matrix.tokenCost is absent', () => {
     const html = renderMatrixHtml(mockMatrix, mockConfig);
-    expect(html).not.toContain('Token cost per (model, column)');
+    expect(html).not.toContain('class="tokencost"');
+    expect(html).not.toContain('Token cost per (model, category)');
+  });
+
+  it('measures completeness against the configured token columns, not every matrix column', () => {
+    // config.tokenCost.columns scopes the axis to `alert` (group "Agent Builder"); `threat`
+    // is an ungrouped matrix column the axis never aggregates. A model with counts for
+    // `alert` alone must read complete, and the token table must not bucket `threat`.
+    const config: MatrixConfig = {
+      ...mockConfig,
+      tokenCost: {
+        inputEvaluator: 'Input Tokens',
+        outputEvaluator: 'Output Tokens',
+        columns: ['alert'],
+      },
+    };
+    const matrixWithCost: Matrix = {
+      ...mockMatrix,
+      columns: [
+        { id: 'alert', label: 'Alert Analysis', group: 'Agent Builder' },
+        { id: 'threat', label: 'Threat Hunting' },
+      ],
+      tokenCost: {
+        models: [
+          {
+            modelId: 'test-model',
+            modelLabel: 'Test Model',
+            openSource: false,
+            priced: true,
+            cells: [{ columnId: 'alert', totalMean: 1500, estimatedCostUsd: 0.25 }],
+          },
+        ],
+      },
+    };
+    // Scoped to the token table: the score table also renders these column labels.
+    const table = tokenCostTable(renderMatrixHtml(matrixWithCost, config));
+    expect(table).toContain(
+      '<thead><tr><th>Model</th><th>Agent Builder</th><th>Total</th></tr></thead>'
+    );
+    expect(table).not.toContain('Threat Hunting');
+    expect(table).toContain('>2k<br>$0.25</td>');
+    expect(table).not.toContain('<span class="model-id">partial</span>');
+
+    // With both columns configured, the same single-cell model must read partial.
+    const fullAxisConfig: MatrixConfig = {
+      ...mockConfig,
+      tokenCost: {
+        inputEvaluator: 'Input Tokens',
+        outputEvaluator: 'Output Tokens',
+        columns: ['alert', 'threat'],
+      },
+    };
+    const partial = tokenCostTable(renderMatrixHtml(matrixWithCost, fullAxisConfig));
+    expect(partial).toContain(
+      '<thead><tr><th>Model</th><th>Agent Builder</th><th>Threat Hunting</th><th>Total</th></tr></thead>'
+    );
+    expect(partial).toContain('<span class="model-id">partial</span></td></tr>');
   });
 
   it('HTML-escapes attacker-influenced reasons and evaluator names in status cells', () => {
@@ -841,6 +949,7 @@ describe('round 7 regression: tooltip mins and suite-scoped variants', () => {
             modelId: 'test-model',
             modelLabel: 'Test Model',
             openSource: false,
+            priced: false,
             cells: [
               {
                 columnId: 'alert',

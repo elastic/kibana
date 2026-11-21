@@ -5,17 +5,21 @@
  * 2.0.
  */
 
+import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   PARITY_WORKFLOWS,
   PARITY_CASE_TAG,
   CREATE_CASE_WORKFLOW_ID,
+  WRITE_TODOS_WORKFLOW_ID,
+  TODOS_INDEX,
   type ParityWorkflow,
 } from './parity_workflows';
 import { CHRYSALIS_PARITY_AGENT } from './chrysalis_parity_agent';
 import { seedProfile } from './chrysalis_seed';
 import type { AgentProfile } from '../agent_profile';
+import { listIdsInPit } from '../list_window_ids';
 import { STUB_CONNECTOR_ID } from './stub_connector';
 import { SINK_ORIGIN, startStubSink } from './stub_sink';
 
@@ -54,9 +58,16 @@ export const PERSONA_MATRIX_TOOL_IDS = ['virustotal_lookup', 'on_call_lookup'] a
 
 /**
  * Original-benchmark tool ids, referenced verbatim by the parity prompts and by
- * the dedicated parity agent. Seeded only when SEED_PROFILE=parity or
- * AGENT_PROFILE=chrysalis-parity — minimal-profile runs keep the two tools
+ * the dedicated parity agent. Seeded only for the `security-persona-matrix-parity`
+ * suite id (SEED_PROFILE=parity / AGENT_PROFILE=chrysalis-parity when running
+ * Playwright directly) — minimal-profile runs keep the two tools
  * above only, matching the published matrix environment.
+ *
+ * `write_todos` reconstructs the builtin planning tool the platform removed
+ * (#303186) after the external benchmark's baseline was captured; the parity
+ * agent needs it to see the tool surface that baseline ran against. The default
+ * agent never gets it (the parity seed early-returns before the default-agent
+ * attach), so weekly-matrix runs keep measuring the current platform surface.
  */
 export const PERSONA_MATRIX_PARITY_TOOL_IDS = [
   'vt.hash.lookup',
@@ -64,6 +75,7 @@ export const PERSONA_MATRIX_PARITY_TOOL_IDS = [
   'get.time',
   'create.case',
   'create.channel',
+  'write_todos',
 ] as const;
 
 /**
@@ -138,6 +150,38 @@ const PARITY_TOOLS: ReadonlyArray<Record<string, unknown>> = [
     tags: ['security', 'incident-response', 'slack'],
     configuration: { workflow_id: 'create-channel' },
   },
+  {
+    id: 'write_todos',
+    type: 'workflow',
+    // Verbatim copy of the builtin `write_todos` description; tool-selection keys
+    // on it, do not reword. The input schema is reproduced by the `write-todos`
+    // workflow (see parity_workflows.ts).
+    description:
+      'Manage the plan for this conversation by creating and tracking tasks. Use this tool frequently so the user can see what you are doing and how you are progressing.\n\n' +
+      '## When to use it\n\n' +
+      'Use the todo list in these situations:\n\n' +
+      '1. **Complex or multi-step tasks** — any task that requires 3 or more distinct actions\n' +
+      '2. **Non-trivial work** — tasks that benefit from upfront planning or have multiple components\n' +
+      '3. **Multiple tasks at once** — when the user gives you a list of things to do\n' +
+      '4. **After receiving new instructions** — capture requirements immediately as todos\n' +
+      '5. **When starting a new task** — mark it as `in_progress` before you begin\n' +
+      '6. **After completing a task** — mark it `completed` immediately and add any follow-up items\n\n' +
+      '## When NOT to use it\n\n' +
+      'Skip the todo list when:\n\n' +
+      '1. There is only a single, straightforward task\n' +
+      '2. The task is trivial and can be completed in fewer than 3 steps\n' +
+      '3. The request is purely conversational or informational\n\n' +
+      '## Rules\n\n' +
+      '- Mark a task `completed` **immediately** after you finish it. Do not batch completions.\n' +
+      '- Mark a task `in_progress` when you start working on it. You can mark the previous task as `completed` and start a new one as `in_progress` in the same call.\n' +
+      '- Only **one** task should be `in_progress` at a time.\n' +
+      '- Finish the current `in_progress` task before starting a new one.\n' +
+      '- Cancel tasks that become irrelevant as the work evolves.\n' +
+      '- Use clear, specific, actionable task descriptions.\n' +
+      '- Each call **replaces the entire todo list**. Always pass every todo — both existing and new — in a single call. Never call it with only the items you want to add or change.',
+    tags: ['persona-matrix', 'planning'],
+    configuration: { workflow_id: 'write-todos' },
+  },
 ];
 
 interface SeedToolsOptions {
@@ -164,7 +208,51 @@ const createdWorkflowIds = new Set<string>();
  */
 let parityCaseWindowStart: string | undefined;
 
+/**
+ * Todo documents already in `persona-matrix-todos` when this process created the
+ * `write-todos` workflow. Cleanup deletes only docs NOT in this snapshot, so a
+ * reused Scout stack keeps the docs that predate this run.
+ */
+let preexistingTodoIds: Set<string> | undefined;
+
 const CASES_PAGE_SIZE = 100;
+
+const isIndexNotFound = (error: unknown): boolean =>
+  (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type ===
+  'index_not_found_exception';
+
+/**
+ * Ids of every doc currently in the todos index; an absent index has none.
+ */
+async function listTodoIds(esClient: EsClient): Promise<Set<string>> {
+  try {
+    return new Set(await listIdsInPit(esClient, TODOS_INDEX));
+  } catch (error) {
+    if (isIndexNotFound(error)) return new Set();
+    throw error;
+  }
+}
+
+/**
+ * Deletes only todo documents this run added: every id NOT in the pre-seed
+ * snapshot. Both scans are complete or throw (`listIdsInPit`), so a partial
+ * list never widens the delete. A doc another process writes after the
+ * snapshot is also outside it and is deleted; concurrent runs on one stack are
+ * unsupported anyway (cleanup hard-deletes the shared workflows).
+ */
+async function deleteTodosCreatedThisRun(esClient: EsClient): Promise<void> {
+  const preexisting = preexistingTodoIds;
+  if (!preexisting) return;
+  // Collect every id first, then delete: deleting while paging would shift the pages.
+  const doomed = [...(await listTodoIds(esClient))].filter((id) => !preexisting.has(id));
+  if (doomed.length === 0) return;
+  await esClient.deleteByQuery({
+    index: TODOS_INDEX,
+    ignore_unavailable: true,
+    refresh: true,
+    query: { ids: { values: doomed } },
+  });
+}
 
 /**
  * True only when the connector at STUB_CONNECTOR_ID is known to be an `.http`
@@ -320,8 +408,9 @@ const isAlreadyExists = (error: unknown): boolean => {
 async function createWorkflowIfMissing({
   kbnClient,
   log,
+  esClient,
   workflow,
-}: SeedToolsOptions & { workflow: ParityWorkflow }): Promise<void> {
+}: SeedToolsOptions & { esClient?: EsClient; workflow: ParityWorkflow }): Promise<void> {
   try {
     await kbnClient.request({
       method: 'POST',
@@ -331,6 +420,21 @@ async function createWorkflowIfMissing({
     });
     createdWorkflowIds.add(workflow.id);
     if (workflow.id === CREATE_CASE_WORKFLOW_ID) parityCaseWindowStart = new Date().toISOString();
+    if (workflow.id === WRITE_TODOS_WORKFLOW_ID && esClient) {
+      // Snapshot the ids already in the todos index BEFORE this run can add any,
+      // so cleanup can delete only this run's docs (the workflow indexes with
+      // `id: execution.id`, so ids are stable and cheap to diff). Without a
+      // complete snapshot cleanup cannot tell this run's docs apart, so it is
+      // skipped rather than guessed.
+      preexistingTodoIds = undefined;
+      try {
+        preexistingTodoIds = await listTodoIds(esClient);
+      } catch (error) {
+        log.warning(
+          `[persona-matrix] todos snapshot failed, todo cleanup disabled for this run: ${error}`
+        );
+      }
+    }
     log.info(`[persona-matrix] created workflow '${workflow.id}'`);
   } catch (error) {
     if (isAlreadyExists(error)) {
@@ -484,8 +588,9 @@ async function attachToolsToDefaultAgent({
 export async function seedPersonaMatrixTools({
   kbnClient,
   log,
+  esClient,
   profile = 'default',
-}: SeedToolsOptions & { profile?: AgentProfile }): Promise<void> {
+}: SeedToolsOptions & { esClient?: EsClient; profile?: AgentProfile }): Promise<void> {
   await createStubConnectorIfMissing({ kbnClient, log });
 
   await createToolIfMissing({
@@ -538,7 +643,7 @@ export async function seedPersonaMatrixTools({
   }
 
   for (const workflow of PARITY_WORKFLOWS) {
-    await createWorkflowIfMissing({ kbnClient, log, workflow });
+    await createWorkflowIfMissing({ kbnClient, log, esClient, workflow });
   }
   for (const body of PARITY_TOOLS) {
     await createToolIfMissing({ kbnClient, log, body });
@@ -561,7 +666,8 @@ export async function seedPersonaMatrixTools({
 export async function cleanupPersonaMatrixTools({
   kbnClient,
   log,
-}: SeedToolsOptions): Promise<void> {
+  esClient,
+}: SeedToolsOptions & { esClient?: EsClient }): Promise<void> {
   for (const id of createdToolIds) {
     await kbnClient
       .request({
@@ -616,6 +722,14 @@ export async function cleanupPersonaMatrixTools({
           );
         }
       });
+  }
+
+  if (esClient && createdWorkflowIds.has(WRITE_TODOS_WORKFLOW_ID) && preexistingTodoIds) {
+    try {
+      await deleteTodosCreatedThisRun(esClient);
+    } catch (error) {
+      log.warning(`[persona-matrix] parity todos cleanup failed: ${error}`);
+    }
   }
 
   // create.case runs the seeded create-case workflow, which tags every case it

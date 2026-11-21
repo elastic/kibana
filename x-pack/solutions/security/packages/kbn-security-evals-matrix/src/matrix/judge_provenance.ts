@@ -44,17 +44,50 @@ export function classifyFamily(modelId: string | undefined | null): ModelFamily 
   return 'unknown';
 }
 
-/** Whether a judge id names an EIS-backed connector (`eis-` prefix or vendor-canonical id). */
-export function isEisBacked(judgeId: string | undefined | null): boolean {
+/**
+ * Vendor prefixes of EIS chat connector ids. Score docs record the judge with the `eis-`
+ * prefix stripped (`eis-zai-glm-5-2` is stored as `zai-glm-5-2`), so the vendor is all
+ * that is left to recognize an EIS judge by.
+ */
+const EIS_VENDOR_PREFIXES = [
+  'anthropic',
+  'openai',
+  'google',
+  'gp',
+  'jina',
+  'moonshot',
+  'nvidia',
+  'qwen',
+  'rainbow',
+  'zai',
+] as const;
+
+const EIS_VENDOR_ID = new RegExp(`^(${EIS_VENDOR_PREFIXES.join('|')})-`, 'i');
+
+/**
+ * Whether a judge is EIS-backed. Score docs stamp the judge with the provider of its
+ * connector (`Elastic` for EIS), which is authoritative when present: a self-hosted
+ * endpoint registered under a vendor-looking id (`qwen-local`) carries `OpenAI`/`Other`
+ * and must not pass on its id alone. Docs written before providers were recorded fall
+ * back to the id heuristics (`eis-` prefix or vendor-canonical id).
+ */
+export function isEisBacked(
+  judgeId: string | undefined | null,
+  judgeProvider?: string | null
+): boolean {
   const id = String(judgeId ?? '').trim();
   if (!id) {
     return false;
   }
+  const provider = String(judgeProvider ?? '').trim();
+  if (provider) {
+    return provider.toLowerCase() === 'elastic';
+  }
   if (/^eis[-_]/i.test(id)) {
     return true;
   }
-  // Vendor-canonical ids used by EIS connectors, e.g. `anthropic-claude-4.6-sonnet`.
-  return /^(anthropic|openai|google)-/i.test(id) && !id.includes('/');
+  // Self-hosted and router ids carry a repo path (`Qwen/Qwen3-...`) or a router prefix (`openrouter-...`).
+  return EIS_VENDOR_ID.test(id) && !id.includes('/');
 }
 
 export interface JudgeProvenance {

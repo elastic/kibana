@@ -616,6 +616,31 @@ describe('buildMatrix token axis', () => {
     const matrix = buildMatrix(aggregated, tokenConfig);
     expect(matrix.tokenCost!.models).toEqual([]);
   });
+
+  it('prices cells at the EIS list rate and flags models without a price', () => {
+    const pricedId = 'anthropic-claude-4.5-haiku';
+    const matrix = buildMatrix(
+      [
+        { ...tokenAggregated[0], modelId: pricedId },
+        { ...tokenAggregated[0], modelId: 'z-ai/glm-5.3-flash' },
+      ],
+      parseMatrixConfig({
+        columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'], weight: 1 }],
+        models: [
+          { id: pricedId, label: 'Haiku' },
+          { id: 'z-ai/glm-5.3-flash', label: 'GLM flash', openSource: true },
+        ],
+        tokenCost: {},
+      })
+    );
+    const byId = new Map(matrix.tokenCost!.models.map((model) => [model.modelId, model]));
+
+    // Haiku: 100k in * $1.5/M + 2k out * $7/M, input priced uncached.
+    expect(byId.get(pricedId)?.priced).toBe(true);
+    expect(byId.get(pricedId)?.cells[0].estimatedCostUsd).toBeCloseTo(0.164, 6);
+    expect(byId.get('z-ai/glm-5.3-flash')?.priced).toBe(false);
+    expect(byId.get('z-ai/glm-5.3-flash')?.cells[0].estimatedCostUsd).toBeUndefined();
+  });
 });
 
 describe('buildMatrix saturated-evaluator exclusion', () => {
@@ -1710,6 +1735,231 @@ describe('round 8 regression: per-column self-judged and exclusion scoping', () 
     }
     // hunt never ran and has no rejection of its own: missing, not excluded.
     expect(huntCell.kind).toBe('missing');
+  });
+
+  // A column allowlisting only code-only contract checks must not inherit judge-policy
+  // rejections recorded against a different (judged) evaluator of the same dataset: its
+  // numeric mean rests on code-only checks that stay admitted under every judge policy.
+  it('keeps a code-only column scoreable when an unrelated judged grade was rejected', () => {
+    const codeOnlyCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer present',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                // Every Relevance grade was rejected by judge policy...
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                // Rejected docs never reach the aggregation, so Relevance is absent here...
+                evaluators: [
+                  // ...and the column reads only this code-only contract check.
+                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, codeOnlyCfg);
+    expect(matrix.proprietary[0].cells.answer).toMatchObject({ kind: 'score' });
+  });
+
+  it('still excludes a judged column whose every judged grade was rejected', () => {
+    const judgedCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'rel',
+          label: 'Relevance',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const matrix = buildMatrix(rejected, judgedCfg);
+    const cell = matrix.proprietary[0].cells.rel;
+    expect(cell.kind).toBe('excluded');
+    if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
+  });
+
+  // The allowlist decides whether a column reads judged grades. Aggregation keeps only
+  // admitted scores, so a judged evaluator whose every grade was rejected is absent from
+  // the dataset and must not make the column look code-only.
+  it.each([
+    ['contract checks plus a judged evaluator', ['FinalAnswerPresent', 'Relevance']],
+    ['only a judged evaluator', ['Relevance']],
+  ])(
+    'excludes an allowlisted column (%s) whose every judged grade was rejected',
+    (_name, evaluators) => {
+      const allowlistCfg = parseMatrixConfig({
+        columns: [
+          {
+            id: 'rel',
+            label: 'Relevance',
+            suites: ['suite-a'],
+            examplePrefixes: ['alert'],
+            evaluators,
+            weight: 1,
+          },
+        ],
+        models: [{ id: 'model-x', label: 'Model X' }],
+      });
+      const rejected: AggregatedModelScores[] = [
+        {
+          modelId: 'model-x',
+          suites: [
+            {
+              suiteId: 'suite-a',
+              experimentId: 'run-9',
+              datasets: [
+                {
+                  datasetId: 'prefix:alert',
+                  datasetName: 'alert',
+                  excludedNonEis: 4,
+                  excludedJudgelessOnly: true,
+                  evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
+                },
+              ],
+            },
+          ],
+        },
+      ];
+      const cell = buildMatrix(rejected, allowlistCfg).proprietary[0].cells.rel;
+      expect(cell.kind).toBe('excluded');
+      if (cell.kind === 'excluded') expect(cell.reason).toBe('non-eis-judge');
+    }
+  );
+
+  // The control for the case above: an admitted judged grade the column selects keeps the
+  // cell a real ranked score whose value draws on that grade, while the unrelated
+  // `Relevance` rejection stays recorded on the dataset.
+  it('ranks an allowlisted column on its admitted selected judged grade when only an unrelated grade was rejected', () => {
+    const gradedCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent', 'Groundedness'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const admitted: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-10',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                rejectedEvaluators: ['Relevance'],
+                evaluators: [
+                  { evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 },
+                  { evaluatorName: 'Groundedness', mean: 0.5, count: 4 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    const cell = buildMatrix(admitted, gradedCfg).proprietary[0].cells.answer;
+    expect(cell.kind).toBe('score');
+    if (cell.kind === 'score') {
+      // 1 and 0.5 with equal weights scale to the 0-10 range as 7.5: the value must
+      // depend on the admitted judged grade, not just the code check.
+      expect(cell.value).toBe(7.5);
+    }
+  });
+
+  // Rejections are matched by evaluator, so a rejected grade the column does not select
+  // cannot hide the column's valid score.
+  it.each([
+    ['an unrelated judged evaluator was rejected', ['Relevance'], 'score'],
+    ['a selected judged evaluator was rejected', ['Groundedness'], 'excluded'],
+  ])('resolves an allowlisted column when %s', (_name, rejectedEvaluators, kind) => {
+    const allowlistCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert'],
+          evaluators: ['FinalAnswerPresent', 'Groundedness'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const rejected: AggregatedModelScores[] = [
+      {
+        modelId: 'model-x',
+        suites: [
+          {
+            suiteId: 'suite-a',
+            experimentId: 'run-9',
+            datasets: [
+              {
+                datasetId: 'prefix:alert',
+                datasetName: 'alert',
+                excludedNonEis: 4,
+                excludedJudgelessOnly: true,
+                rejectedEvaluators,
+                evaluators: [{ evaluatorName: 'FinalAnswerPresent', mean: 1, count: 4 }],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+    expect(buildMatrix(rejected, allowlistCfg).proprietary[0].cells.answer.kind).toBe(kind);
   });
 
   it('renders a fully self-judged prefix run as excluded, not missing (R-libra-3)', () => {

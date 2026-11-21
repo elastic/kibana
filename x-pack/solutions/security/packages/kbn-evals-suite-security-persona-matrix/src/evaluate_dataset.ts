@@ -22,6 +22,7 @@ import {
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
+import { createSecurityRelevanceEvaluator } from '@kbn/security-evals-matrix';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
@@ -43,6 +44,7 @@ import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awar
 import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
 import { createUnrequestedSideEffectsEvaluator } from './evaluators/unrequested_side_effects_evaluator';
 import { createWorkflowValidityEvaluator } from './evaluators/workflow_validity_evaluator';
+import { personaMatrixQueryArgs } from './fixtures/chrysalis_parity_attachments';
 import { isStubConnectorVerified } from './fixtures/persona_matrix_tools_seed';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
@@ -52,8 +54,11 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient, WorkflowAttachmentYaml } from './chat_client';
+import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import {
   agentProfile as envAgentProfile,
+  PERSONA_MATRIX_SUITE_IDS,
+  resolveWorkflowYamlExtractionMode,
   withProfileExpectedTools,
   type AgentProfile,
 } from './agent_profile';
@@ -105,6 +110,16 @@ const buildJudgedOutput = <T extends { messageSource?: unknown; steps?: unknown 
       },
     ],
   };
+};
+
+const isSubmissionEmpty = (judged: { messages?: unknown }): boolean => {
+  const messages = Array.isArray(judged.messages) ? judged.messages : [];
+  const latest = messages[messages.length - 1];
+  if (!isRecord(latest) || typeof latest.message !== 'string') return true;
+  const message = latest.message.trim();
+  // The unanswered-prompt marker is a diagnostic recorded for a failed converse, not an
+  // answer; FinalAnswerPresent applies the same rule (~line 518).
+  return message === '' || message.startsWith(UNANSWERED_PROMPT_MARKER);
 };
 
 const logJudgePayloadTrim = (
@@ -500,7 +515,11 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
     const hasMessage =
       taskOutput.messageSource !== 'last_assistant_step' &&
       (taskOutput.messages ?? []).some(
-        (msg) => typeof msg?.message === 'string' && msg.message.trim().length > 0
+        (msg) =>
+          typeof msg?.message === 'string' &&
+          msg.message.trim().length > 0 &&
+          // The unanswered-prompt marker is a diagnostic shown to the judges, not an answer.
+          !msg.message.trimStart().startsWith(UNANSWERED_PROMPT_MARKER)
       );
     if (hasMessage) {
       return { score: 1, explanation: 'Final user-facing message present.' };
@@ -737,8 +756,6 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   },
 });
 
-const SUITE_NAME = 'security-persona-matrix';
-
 /**
  * Reporting identity for a profile. A non-default agent is a different system
  * under test, so its dataset and experiment suite name carry the profile and a
@@ -751,8 +768,18 @@ export const reportingIdentity = (
   profile: AgentProfile
 ): { datasetName: string; suite: string } =>
   profile === 'default'
-    ? { datasetName, suite: SUITE_NAME }
-    : { datasetName: `${datasetName} (${profile})`, suite: `${SUITE_NAME}-${profile}` };
+    ? { datasetName, suite: PERSONA_MATRIX_SUITE_IDS.default }
+    : { datasetName: `${datasetName} (${profile})`, suite: PERSONA_MATRIX_SUITE_IDS[profile] };
+
+/**
+ * Platform Factuality / Sequence Accuracy plus the security-owned `Relevance` (code-derived label,
+ * empty response scores 0). The security entry replaces the platform one under the same evaluator
+ * name so the golden formula and dashboards keep resolving it.
+ */
+export const createPersonaMatrixQuantitativeEvaluators = (): Evaluator[] =>
+  createQuantitativeCorrectnessEvaluators().map((evaluator) =>
+    evaluator.name === 'Relevance' ? createSecurityRelevanceEvaluator() : evaluator
+  );
 
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
@@ -870,13 +897,17 @@ export function createEvaluatePersonaMatrixDataset({
       connectorInvokedEvaluator,
       // Deterministic behaviour checks. Recorded per cell, excluded from cell
       // means via `excludeEvaluators` in the matrix config.
-      createWorkflowValidityEvaluator({ fetch, stubVerified: isStubConnectorVerified }),
+      createWorkflowValidityEvaluator({
+        fetch,
+        stubVerified: isStubConnectorVerified,
+        extractionMode: resolveWorkflowYamlExtractionMode(agentProfile),
+      }),
       createEicarTrapEvaluator(),
       createSimulationAwarenessEvaluator(),
       createUnrequestedSideEffectsEvaluator(),
       createStalledAfterLoadSkillEvaluator(),
       createRubricCapNoToolCallEvaluator(),
-      ...createQuantitativeCorrectnessEvaluators(),
+      ...createPersonaMatrixQuantitativeEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
       ...(rubricJudgeClient
@@ -912,7 +943,38 @@ export function createEvaluatePersonaMatrixDataset({
           const input = example.input as PersonaMatrixExampleInput;
           const question = input?.question;
           if (!question) throw new Error('Missing question in example input');
-          const response = await chatClient.query(question, input?.attachment);
+          let response: Awaited<ReturnType<PersonaMatrixChatClient['query']>>;
+          try {
+            response = await chatClient.query(
+              ...personaMatrixQueryArgs(example.id, agentProfile, question, input?.attachment)
+            );
+          } catch (error) {
+            // Fail soft: one unreachable agent must not abort the whole suite. The
+            // executor has no per-example boundary, so a throw here discards every
+            // (example, rep) pair after it. Record the failure as an errored submission
+            // instead: the unanswered marker and `errors` are kept, and the qualitative
+            // judges report 'unavailable' (not a score of 0).
+            const message = error instanceof Error ? error.message : String(error);
+            log.error(
+              `[persona-matrix] converse failed for example "${example.id ?? question}": ${message}`
+            );
+            return {
+              messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ${message}` }],
+              steps: [],
+              errors: [{ type: 'error' as const, error: { message } }],
+              traceId: null,
+              messageSource: 'response' as const,
+              sampling: { connectorId: '', temperature: null, topP: null, seed: null },
+              trajectoryFingerprint: '',
+              workflowAttachments: [],
+              rawResponse: '',
+              correctnessAnalysis: undefined,
+              groundednessAnalysis: undefined,
+              // No judge ran, so Relevance reports 'unavailable': a transport
+              // failure is not graded as the model's answer.
+              criteriaAnalysis: undefined,
+            };
+          }
 
           const taskOutput = {
             messages: response.messages,
@@ -1011,6 +1073,9 @@ export function createEvaluatePersonaMatrixDataset({
             ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
               ? { judgePayloadTrim }
               : {}),
+            // Whether the submission the judges graded was empty. The stored transcript can keep
+            // narration the judges never saw, so Relevance reads this instead of the messages.
+            judgedAnswerEmpty: isSubmissionEmpty(judgedOutput),
             // Added after the judge payload is built so no judge ever reads it.
             rawResponse: response.rawResponse,
           } as TaskOutput;

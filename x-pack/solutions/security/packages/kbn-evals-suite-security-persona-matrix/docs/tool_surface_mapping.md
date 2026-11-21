@@ -10,7 +10,8 @@ mapping — a raw string diff is meaningless without it.
 |---|---|---|
 | `create.case` | `platform.core.cases.manage` | Cases tooling rebuilt; `security_solution_setup.create_case` alias also seen |
 | `create.channel`, `check.on.call.schedule`, `get.time` | `platform.core.generate_workflow` inputs | Workflow authoring folds these primitives into generated workflow steps |
-| `filestore.read /skills/<name>.md` | `platform.core.load_skill` + `platform.core.search_relevant_skills` | Skill activation moved from raw file reads to a first-class tool |
+| `filestore.read /skills/<name>.md` | `platform.core.load_skill` + `platform.core.search_relevant_skills` | Skill activation moved from raw file reads to a first-class tool. The parity suite's Scout config set (`evals_security_persona_matrix_parity`) drops the `agentBuilder:experimentalFeatures` override so `search_relevant_skills` and `sml_search` are not offered — neither appears in the original benchmark's runs |
+| `write_todos` | `write_todos` (parity-suite seeded workflow tool) | Removed platform-wide in #303186; the parity suite reconstructs the original tool contract (verbatim description, `todos: [{content, status}]` schema) as a workflow tool indexed to `persona-matrix-todos`, so the parity agent sees the original tool surface |
 | `entity.store.search` / `entity.store.get_analytics` | `platform.core.search` (`.entities.v1.latest.*`) or ES|QL via `generate_esql`/`execute_esql` | Entities query surface consolidated |
 | `attack_discovery.analyze` | Attack-discovery skill flow | Moved behind skill instructions |
 
@@ -24,7 +25,6 @@ mapping — a raw string diff is meaningless without it.
 
 | Current tool | Purpose |
 |---|---|
-| `platform.core.write_todos` | Agent framework todo tracking |
 | `platform.core.execute_api` / `discover_apis` / `describe_api` | Generic API discovery layer |
 | `platform.core.sml_search` | Semantic search |
 | `platform.core.run_subagent` | Sub-agent fan-out |

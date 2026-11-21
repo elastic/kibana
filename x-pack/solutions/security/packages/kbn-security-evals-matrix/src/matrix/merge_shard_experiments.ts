@@ -6,7 +6,7 @@
  */
 
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
-import type { AggregatedDatasetScores } from './query_matrix_scores';
+import type { AggregatedDatasetScores, AggregatedEvaluatorScore } from './query_matrix_scores';
 
 /** `sweep-123-s2of4::suite::model` -> `{ base: 'sweep-123', index: 2, count: 4 }`. Undefined when unsharded. */
 const parseShard = (
@@ -106,7 +106,13 @@ export const mergeShardDatasets = (
       datasetName: string;
       evaluators: Map<
         string,
-        { sum: number; count: number; min: number | undefined; max: number | undefined }
+        {
+          sum: number;
+          count: number;
+          min: number | undefined;
+          max: number | undefined;
+          direction: AggregatedEvaluatorScore['direction'];
+        }
       >;
     }
   >();
@@ -129,6 +135,7 @@ export const mergeShardDatasets = (
           count: 0,
           min: undefined,
           max: undefined,
+          direction: evaluator.direction,
         };
         agg.sum += evaluator.mean * evaluator.count;
         agg.count += evaluator.count;
@@ -150,6 +157,7 @@ export const mergeShardDatasets = (
       count: agg.count,
       ...(agg.min === undefined ? {} : { min: agg.min }),
       ...(agg.max === undefined ? {} : { max: agg.max }),
+      ...(agg.direction === undefined ? {} : { direction: agg.direction }),
     })),
   }));
 };

@@ -49,6 +49,20 @@ describe('isEisBacked', () => {
     expect(isEisBacked('anthropic-claude-4.6-sonnet')).toBe(true);
   });
 
+  it.each([['zai-glm-5-2'], ['moonshot-kimi-k2-6'], ['qwen-3-8-2-4t-a95b'], ['gp-llm-v2']])(
+    'accepts the stripped id of an EIS connector from any EIS vendor: %s',
+    (id) => {
+      expect(isEisBacked(id)).toBe(true);
+    }
+  );
+
+  it.each([['openrouter-zai-glm-5-3-flash'], ['z-ai/glm-5.3-flash'], ['qwen3.8-27b']])(
+    'rejects router and self-hosted ids that only resemble an EIS vendor: %s',
+    (id) => {
+      expect(isEisBacked(id)).toBe(false);
+    }
+  );
+
   it.each([
     ['Qwen/Qwen3-Coder-30B-A3B-Instruct'],
     ['LiteLLM Qwen3-Coder-30B-A3B-Instruct-AWQ'],
@@ -57,6 +71,18 @@ describe('isEisBacked', () => {
     ['gghfez/Mistral-Small-3.2-24B-Instruct-hf-AWQ'],
   ])('rejects self-hosted endpoint %s', (id) => {
     expect(isEisBacked(id)).toBe(false);
+  });
+
+  it('trusts the recorded provider over a vendor-looking id', () => {
+    expect(isEisBacked('qwen-local', 'Other')).toBe(false);
+    expect(isEisBacked('openai-gpt-oss', 'OpenAI')).toBe(false);
+    expect(isEisBacked('qwen-local', 'Elastic')).toBe(true);
+    expect(isEisBacked('zai-glm-5-2', 'elastic')).toBe(true);
+  });
+
+  it('falls back to id heuristics when the doc carries no provider', () => {
+    expect(isEisBacked('qwen-3-8-2-4t-a95b', undefined)).toBe(true);
+    expect(isEisBacked('qwen-3-8-2-4t-a95b', '')).toBe(true);
   });
 
   it('rejects empty and whitespace ids', () => {

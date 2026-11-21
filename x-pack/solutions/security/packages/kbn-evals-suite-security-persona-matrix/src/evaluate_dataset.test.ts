@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createSecurityRelevanceEvaluator } from '@kbn/security-evals-matrix';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
 import {
   PERSONA_RUBRIC_EVALUATOR_NAME,
@@ -29,9 +30,11 @@ import {
   createPersonaMatrixFinalAnswerPresentEvaluator,
   createPersonaMatrixMinExpectedStepsEvaluator,
   createPersonaMatrixSkillInvokedEvaluator,
+  createPersonaMatrixQuantitativeEvaluators,
   isRankablePathContract,
   type PersonaMatrixDatasetExample,
 } from './evaluate_dataset';
+import { UNANSWERED_PROMPT_MARKER } from './chat_client';
 import type { PersonaMatrixChatClient } from './chat_client';
 import type { AgentProfile } from './agent_profile';
 import {
@@ -330,6 +333,14 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     const result = await evaluate({
       messages: [{ message: 'Let me check that rule.' }],
       messageSource: 'last_assistant_step',
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 for the unanswered-prompt diagnostic (thrown converse / paused agent)', async () => {
+    const result = await evaluate({
+      messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED` }],
+      messageSource: 'response',
     });
     expect(result.score).toBe(0);
   });
@@ -727,6 +738,105 @@ describe('task output shape', () => {
     const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
 
     expect(output.messageSource).toBe('last_assistant_step');
+    // The judges were handed no answer (the narration is stripped), so Relevance must see the
+    // submission as empty even though the stored transcript still carries the narration.
+    expect(output.judgedAnswerEmpty).toBe(true);
+  });
+
+  it('treats an unanswered-prompt marker response as an empty submission', async () => {
+    // A failed converse records `${UNANSWERED_PROMPT_MARKER} ...` as the message.
+    // isSubmissionEmpty must treat it as empty (same rule FinalAnswerPresent
+    // applies), or a failed run hands the diagnostic text to the judges as an answer.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED` }],
+          messageSource: 'final_turn',
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+    expect(output.judgedAnswerEmpty).toBe(true);
+  });
+
+  it('records a rejected converse as an ungraded, errored submission instead of throwing', async () => {
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockRejectedValue(new Error('ECONNREFUSED')),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as {
+      messages: Array<{ message: string }>;
+      errors: unknown[];
+    };
+    expect(output.messages[0].message).toBe(
+      `${UNANSWERED_PROMPT_MARKER} converse failed: ECONNREFUSED`
+    );
+    expect(output.errors).toHaveLength(1);
+    expect(log.error).toHaveBeenCalled();
+
+    const relevance = await createSecurityRelevanceEvaluator().evaluate({
+      input: {},
+      output,
+      expected: {},
+      metadata: {},
+    } as unknown as Parameters<Evaluator['evaluate']>[0]);
+    expect(relevance).toMatchObject({ score: null, label: 'unavailable' });
   });
 });
 
@@ -1308,12 +1418,79 @@ describe('reporting identity per agent profile', () => {
       'security: security-persona-matrix (chrysalis-parity)'
     );
     expect(experiment.metadata).toMatchObject({
-      suite: 'security-persona-matrix-chrysalis-parity',
+      suite: 'security-persona-matrix-parity',
       agent_profile: 'chrysalis-parity',
     });
     expect(experiment.datasets[0].examples[0].metadata).toMatchObject({
       agentProfile: 'chrysalis-parity',
     });
+  });
+});
+
+describe('parity attachment inlining', () => {
+  const sentFor = async (agentProfile: AgentProfile, exampleId: string) => {
+    const query = jest.fn(async (..._args: unknown[]) => ({
+      messages: [{ message: 'final answer' }],
+      steps: [],
+      errors: [],
+      traceId: 'trace-1',
+    }));
+    const example = PERSONA_MATRIX_EXAMPLES.find(({ id }) => id === exampleId);
+    if (!example) throw new Error(`no example ${exampleId}`);
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: { query } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {},
+        criteria: () => ({ name: 'criteria', kind: 'LLM', evaluate: jest.fn(async () => ({})) }),
+        correctnessAnalysis: () => ({ evaluate: jest.fn(async () => ({ metadata: {} })) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn(async () => ({ metadata: {} })) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(
+          async ({ task }: { task: (example: unknown) => Promise<unknown> }) => {
+            await task(toDatasetExample(example));
+          }
+        ),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      fetch: jest.fn(),
+      log: buildLog(),
+      agentProfile,
+    });
+    await evaluateDataset({ dataset: { name: 'd', description: 'd', examples: [example] } });
+    expect(query).toHaveBeenCalledTimes(1);
+    return { args: query.mock.calls[0], example };
+  };
+
+  it.each(['alert-analysis-a', 'detection-rule-edit-b'])(
+    'sends %s unchanged for the default agent',
+    async (exampleId) => {
+      const { args, example } = await sentFor('default', exampleId);
+      expect(args).toEqual([example.input.question, example.input.attachment]);
+    }
+  );
+
+  it.each([
+    ['alert-analysis-a', 'Chrysalis Sim Passthrough', 'kibana.alert.depth'],
+    ['multi-step-a', 'Chrysalis Sim Passthrough', 'kibana.alert.depth'],
+    ['detection-rule-edit-a', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+    ['detection-rule-edit-b', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+    ['detection-rule-edit-c', 'chrysalis-sim-passthrough', '"query": "kibana.alert.rule.name:*"'],
+  ])('inlines the benchmark attachment into %s for the parity agent', async (id, a, b) => {
+    const { args, example } = await sentFor('chrysalis-parity', id);
+    expect(args).toHaveLength(1);
+    const [input] = args as [string];
+    expect(
+      input.startsWith(`${example.input.question}\n\n--- Attached alert (most recent) ---\n{`)
+    ).toBe(true);
+    expect(input).toContain(a);
+    expect(input).toContain(b);
+    if (example.input.attachment) expect(input).not.toContain(example.input.attachment);
+  });
+
+  it('sends prompts the benchmark attached nothing to unchanged for the parity agent', async () => {
+    const { args, example } = await sentFor('chrysalis-parity', 'alert-analysis-b');
+    expect(args).toEqual([example.input.question, example.input.attachment]);
   });
 });
 
@@ -1482,5 +1659,53 @@ describe('createEvaluatePersonaMatrixDataset PersonaRubric flag', () => {
     const { evaluatorNames, taskResult } = await runWith({ client: undefined });
     expect(evaluatorNames).not.toContain(PERSONA_RUBRIC_EVALUATOR_NAME);
     expect(taskResult).not.toHaveProperty('personaRubricAnalysis');
+  });
+});
+
+describe('createPersonaMatrixQuantitativeEvaluators', () => {
+  const emptyResponseOutput = {
+    messages: [{ message: '' }],
+    correctnessAnalysis: {
+      summary: {
+        factual_accuracy_summary: 'ACCURATE',
+        relevance_summary: 'RELEVANT',
+        sequence_accuracy_summary: 'NOT_APPLICABLE',
+      },
+      analysis: [
+        {
+          claim: 'the response is empty',
+          centrality: 'central',
+          centrality_reason: '',
+          verdict: 'FULLY_SUPPORTED',
+          sequence_match: 'NOT_APPLICABLE',
+          explanation: '',
+        },
+      ],
+    },
+  };
+
+  it('keeps the platform evaluator names, with a single Relevance', () => {
+    expect(createPersonaMatrixQuantitativeEvaluators().map((e) => e.name)).toEqual([
+      'Factuality',
+      'Relevance',
+      'Sequence Accuracy',
+    ]);
+  });
+
+  it('uses the security Relevance: an empty response scores 0 even with a central judge claim', async () => {
+    const relevance = createPersonaMatrixQuantitativeEvaluators().find(
+      (e) => e.name === 'Relevance'
+    )!;
+
+    const result = await relevance.evaluate({
+      input: {},
+      expected: {},
+      output: emptyResponseOutput,
+      metadata: {},
+    } as unknown as Parameters<typeof relevance.evaluate>[0]);
+
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('IRRELEVANT');
+    expect(result.metadata).toMatchObject({ relevanceLabelConsistent: false });
   });
 });

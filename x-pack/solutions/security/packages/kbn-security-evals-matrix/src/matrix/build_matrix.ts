@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { estimateCostUsd, getModelPrice, type ModelPrice } from '@kbn/evals';
 import type {
   MatrixColumnConfig,
   MatrixCompositeConfig,
@@ -13,11 +14,13 @@ import type {
   MatrixTokenCostConfig,
 } from './load_matrix_config';
 import type {
+  AggregatedDatasetScores,
   AggregatedEvaluatorScore,
   AggregatedModelScores,
   AggregatedSuiteScores,
   ExcludedScoreCounts,
 } from './query_matrix_scores';
+import { isQualityEvaluator } from './query_matrix_scores';
 import { detectSaturatedEvaluators, saturatedEvaluatorNames } from './evaluator_saturation';
 import type { EvaluatorSaturation } from './evaluator_saturation';
 
@@ -73,6 +76,11 @@ export interface TokenCostCell {
   outputTokens?: TokenStat;
   /** Sum of the input + output means. */
   totalMean: number;
+  /**
+   * USD per example at EIS list price, every input token priced as uncached (an upper bound).
+   * Absent when the model has no EIS price or either token count is missing.
+   */
+  estimatedCostUsd?: number;
 }
 
 export interface TokenStat {
@@ -86,6 +94,8 @@ export interface TokenCostModel {
   modelId: string;
   modelLabel: string;
   openSource: boolean;
+  /** False when no EIS list price matches the model, so its cells carry no cost estimate. */
+  priced: boolean;
   cells: TokenCostCell[];
 }
 
@@ -200,7 +210,10 @@ const computeColumnMean = (
   for (const evaluator of columnEvaluators(modelScores, column)) {
     if (!includeEvaluator || includeEvaluator(evaluator)) {
       // Without an allowlist, the exclusion list drops raw-magnitude evaluators that would break the 0-10 scale.
+      // Prefix-path telemetry is tagged with its direction and never scores a column, even
+      // when allowlisted: a raw token count would swamp the 0-1 mean.
       const skip =
+        !isQualityEvaluator(evaluator) ||
         (evaluatorSet
           ? !evaluatorSet.has(evaluator.evaluatorName)
           : isExcludedEvaluator(evaluator.evaluatorName, excludeEvaluators)) ||
@@ -225,11 +238,15 @@ const buildCell = (
     excludedSelfJudged = 0,
     excludedNonEis = 0,
     erroredOutEvaluators = [],
+    judgelessOnly = false,
   }: {
     selfJudged?: boolean;
     excludedSelfJudged?: number;
     excludedNonEis?: number;
     erroredOutEvaluators?: string[];
+    /** Every judged grade this column reads was rejected; only judge-less contract
+     * checks remain, which must not publish a ranked numeric cell. */
+    judgelessOnly?: boolean;
   } = {}
 ): MatrixCell => {
   // Checked before the `mean === undefined` branch: a cell-relevant evaluator that errored on
@@ -242,6 +259,19 @@ const buildCell = (
   );
   if (erroredOut.length > 0) {
     return { kind: 'insufficient-evaluators', evaluators: erroredOut };
+  }
+
+  // Checked before the scored branch: judge-less contract checks stay admitted under
+  // every judge policy, so a numeric mean computed only from them must not rank the
+  // model — mark the column excluded instead, same as the all-rejected case above.
+  if (judgelessOnly && mean !== undefined) {
+    if (excludedSelfJudged > 0) {
+      return { kind: 'excluded', reason: 'self-judged', docs: excludedSelfJudged };
+    }
+    if (excludedNonEis > 0) {
+      return { kind: 'excluded', reason: 'non-eis-judge', docs: excludedNonEis };
+    }
+    return { kind: 'missing' };
   }
 
   if (mean === undefined) {
@@ -265,6 +295,34 @@ const CONTRACT_EVALUATORS = new Set([
   'MinExpectedSteps',
   'SkillInvoked',
 ]);
+
+const allowlistReadsJudgedGrades = (allows: ReadonlySet<string> | undefined): boolean =>
+  allows === undefined || [...allows].some((name) => !CONTRACT_EVALUATORS.has(name));
+
+/**
+ * Whether the column's allowlist selects an evaluator whose grades the judge policy rejected
+ * in the datasets it reads. Rejections of an evaluator the column does not select must not
+ * hide its score. A dataset with rejections but no per-evaluator record falls back to the
+ * allowlist heuristic.
+ */
+const allowlistReadsRejectedGrades = (
+  allows: ReadonlySet<string> | undefined,
+  datasets: readonly AggregatedDatasetScores[],
+  readDatasetIds: ReadonlySet<string> | undefined
+): boolean => {
+  if (allows === undefined) return true;
+  const withRejections = datasets.filter(
+    ({ datasetId, excludedSelfJudged, excludedNonEis }) =>
+      (!readDatasetIds || readDatasetIds.has(datasetId)) &&
+      ((excludedSelfJudged ?? 0) > 0 || (excludedNonEis ?? 0) > 0)
+  );
+  if (withRejections.some(({ rejectedEvaluators }) => rejectedEvaluators === undefined)) {
+    return allowlistReadsJudgedGrades(allows);
+  }
+  return withRejections.some(({ rejectedEvaluators = [] }) =>
+    rejectedEvaluators.some((name) => allows.has(name))
+  );
+};
 
 const columnSelfJudged = (
   modelScores: AggregatedModelScores,
@@ -517,6 +575,29 @@ const computeTokenStat = (
   return { mean: weightedSum / totalCount, min, max, count: totalCount };
 };
 
+const resolveModelPrice = (modelConfig: MatrixModelConfig): ModelPrice | undefined =>
+  [modelConfig.id, ...(modelConfig.matchIds ?? [])]
+    .map((id) => getModelPrice(id))
+    .find((price): price is ModelPrice => price !== undefined);
+
+// Base-tier rates: per-trace prompt sizes are not in the aggregate, so long-context surcharges are not applied.
+const estimateCellCost = (
+  price: ModelPrice | undefined,
+  inputTokens: TokenStat | undefined,
+  outputTokens: TokenStat | undefined
+): number | undefined =>
+  price && inputTokens && outputTokens
+    ? estimateCostUsd(
+        {
+          inputTokens: inputTokens.mean,
+          cachedTokens: 0,
+          cacheWriteTokens: 0,
+          outputTokens: outputTokens.mean,
+        },
+        price
+      )
+    : undefined;
+
 const buildTokenCost = (
   config: MatrixConfig,
   tokenConfig: MatrixTokenCostConfig,
@@ -532,16 +613,19 @@ const buildTokenCost = (
   for (const modelConfig of config.models) {
     const modelScores = resolveScores(modelConfig);
     if (modelScores) {
+      const price = resolveModelPrice(modelConfig);
       const cells: TokenCostCell[] = [];
       for (const column of tokenColumns) {
         const inputTokens = computeTokenStat(modelScores, column, tokenConfig.inputEvaluator);
         const outputTokens = computeTokenStat(modelScores, column, tokenConfig.outputEvaluator);
         if (inputTokens || outputTokens) {
+          const estimatedCostUsd = estimateCellCost(price, inputTokens, outputTokens);
           cells.push({
             columnId: column.id,
             inputTokens,
             outputTokens,
             totalMean: (inputTokens?.mean ?? 0) + (outputTokens?.mean ?? 0),
+            ...(estimatedCostUsd === undefined ? {} : { estimatedCostUsd }),
           });
         }
       }
@@ -551,6 +635,7 @@ const buildTokenCost = (
           modelId: modelConfig.id,
           modelLabel: modelConfig.label,
           openSource: modelConfig.openSource,
+          priced: price !== undefined,
           cells,
         });
       }
@@ -655,6 +740,23 @@ const buildMatrixRow = (
                 .reduce((sum, dataset) => sum + (pick(dataset) || 0), 0)),
         0
       );
+    // Decided from the recorded rejected evaluator names, not the aggregated
+    // evaluators: those hold only admitted scores, so a judged evaluator whose every
+    // grade was rejected is absent there. (A suite rejected wholesale pushes
+    // `datasets: []`: its fate is the column's fate, so the counts stay.)
+    const columnAllows = column.evaluators ? new Set(column.evaluators) : undefined;
+    const canScopeToSelection = columnSuitesAll.every((suite) => suite.datasets.length > 0);
+    const readsJudgedGrades = allowlistReadsRejectedGrades(
+      columnAllows,
+      columnSuitesAll.flatMap((suite) => suite.datasets),
+      columnDatasetIds
+    );
+    const scopedExcludedSelfJudged = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0);
+    const scopedExcludedNonEis = columnDatasetIds
+      ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
+      : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0);
     const cellExtras = {
       // Per-column, not suite-wide: only the datasets this column actually reads decide
       // whether the published cell is self-judged (a suite mixing self-judged `alert`
@@ -664,19 +766,40 @@ const buildMatrixRow = (
       // total belongs to the suite as a whole, and applying it via Math.max would
       // publish a genuinely missing sibling prefix (`hunt` never ran) as
       // `excluded:non-eis-judge` just because `alert` was fully rejected.
-      excludedSelfJudged: columnDatasetIds
-        ? perDataset((dataset) => dataset.excludedSelfJudged ?? 0)
-        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedSelfJudged ?? 0), 0),
-      excludedNonEis: columnDatasetIds
-        ? perDataset((dataset) => dataset.excludedNonEis ?? 0)
-        : columnSuitesAll.reduce((total, suite) => total + (suite.excludedNonEis ?? 0), 0),
+      excludedSelfJudged: scopedExcludedSelfJudged,
+      excludedNonEis: scopedExcludedNonEis,
+      // True only when EVERY dataset this column reads has rejected judged grades and no
+      // admitted one.
+      judgelessOnly:
+        columnDatasetIds !== undefined &&
+        columnSuitesAll.some((suite) =>
+          suite.datasets.some(
+            (dataset) =>
+              columnDatasetIds.has(dataset.datasetId) && dataset.excludedJudgelessOnly === true
+          )
+        ) &&
+        columnSuitesAll
+          .flatMap((suite) => suite.datasets)
+          .filter((dataset) => columnDatasetIds.has(dataset.datasetId))
+          .every(
+            (dataset) =>
+              dataset.excludedJudgelessOnly === true || !dataset.evaluators.some(isQualityEvaluator)
+          ),
       erroredOutEvaluators: columnErroredOutEvaluators(modelScores, column),
     };
+    // Only an explicit column allowlist that reads no judged grades suppresses the
+    // judge-policy exclusions: without an allowlist the column would have scored
+    // every judged evaluator, so a fully-rejected run genuinely excludes it.
+    const suppressJudgeExclusions =
+      columnAllows !== undefined && canScopeToSelection && !readsJudgedGrades;
+    const appliedCellExtras = suppressJudgeExclusions
+      ? { ...cellExtras, excludedSelfJudged: 0, excludedNonEis: 0, judgelessOnly: false }
+      : cellExtras;
     cells[column.id] = buildCell(
       computeColumnMean(modelScores, column, excludeEvaluators),
       column,
       config,
-      cellExtras
+      appliedCellExtras
     );
     if (overallExcludeEvaluators !== excludeEvaluators) {
       overallCells[column.id] = buildCell(
@@ -689,7 +812,7 @@ const buildMatrixRow = (
         ),
         column,
         config,
-        cellExtras
+        appliedCellExtras
       );
     }
   }

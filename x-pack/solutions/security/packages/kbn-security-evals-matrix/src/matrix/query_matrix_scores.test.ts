@@ -10,10 +10,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import type { ExperimentStats } from '@kbn/evals';
 import type { MatrixEvalsClient } from './matrix_evals_client';
+import { buildMatrix } from './build_matrix';
 import { describeJudge } from './judge_provenance';
+import { parseMatrixConfig } from './load_matrix_config';
 import {
+  type AggregatedModelScores,
   pickLatestExperimentPerModel,
   experimentStatsToDatasets,
+  isQualityEvaluator,
   queryMatrixScores,
   scoresByPrefixToDatasets,
 } from './query_matrix_scores';
@@ -947,8 +951,48 @@ describe('scoresByPrefixToDatasets', () => {
       ['alert-analysis']
     );
 
-    // Only the maximize evaluator survives.
-    expect(datasets[0].evaluators).toEqual([{ evaluatorName: 'correctness', mean: 1, count: 1 }]);
+    // Only the maximize evaluator is a quality score; telemetry is kept, tagged, with its spread.
+    expect(datasets[0].evaluators.filter(isQualityEvaluator)).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
+    expect(datasets[0].evaluators.filter((e) => !isQualityEvaluator(e))).toEqual([
+      { evaluatorName: 'Latency', mean: 900, count: 1, min: 900, max: 900, direction: 'minimize' },
+      { evaluatorName: 'Tool Calls', mean: 42, count: 1, min: 42, max: 42, direction: 'neutral' },
+    ]);
+  });
+
+  it('aggregates judge-less token telemetry with min/max under requireEisJudge', () => {
+    const doc = (id: string, name: string, s: number, direction: string, judge?: string) =>
+      ({
+        example: { id, index: 0, dataset: { id: 'ds', name: 'DS' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name, score: s, direction, ...(judge ? { model: { id: judge } } : {}) },
+        metadata: {},
+      } as unknown as EvaluationScoreDocument);
+
+    const [dataset] = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'correctness', 1, 'maximize', 'zai-glm-5-2'),
+        doc('alert-analysis-a', 'Input Tokens', 1000, 'minimize'),
+        doc('alert-analysis-b', 'Input Tokens', 3000, 'minimize'),
+      ],
+      ['alert-analysis'],
+      { requireEisJudge: true }
+    );
+
+    expect(dataset.evaluators).toContainEqual({
+      evaluatorName: 'Input Tokens',
+      mean: 2000,
+      count: 2,
+      min: 1000,
+      max: 3000,
+      direction: 'minimize',
+    });
+    // Telemetry has no judge, so it is never miscounted as a non-EIS rejection.
+    expect(dataset.excludedNonEis ?? 0).toBe(0);
+    expect(dataset.evaluators.filter(isQualityEvaluator)).toEqual([
+      { evaluatorName: 'correctness', mean: 1, count: 1 },
+    ]);
   });
 
   it('matches exact example ids and prefix-dash boundaries only', () => {
@@ -1352,6 +1396,143 @@ describe('round 6 regression: admission and accumulation fixes', () => {
     expect(datasets[0].datasetId).toBe('prefix:alert-analysis');
     expect(datasets[0].evaluators).toEqual([]);
     expect(datasets[0].excludedNonEis).toBe(1);
+  });
+
+  it('requireEisJudge keeps judge-less code evaluators in the cell mean', () => {
+    // Regression: FinalAnswerPresent/MinExpectedSteps record no judge model, so they were
+    // dropped as non-EIS and never reached the parity report.
+    const codeDoc = {
+      ...doc('alert-analysis-a', undefined),
+      evaluator: { name: 'FinalAnswerPresent', score: 1, kind: 'code' },
+    } as unknown as EvaluationScoreDocument;
+    const datasets = scoresByPrefixToDatasets([codeDoc], ['alert-analysis'], {
+      requireEisJudge: true,
+    });
+
+    expect(datasets[0].excludedNonEis).toBeFalsy();
+    expect(datasets[0].evaluators).toEqual([
+      expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
+    ]);
+  });
+
+  it('marks a dataset judgeless-only when every judged doc was rejected and only code checks survive', () => {
+    // A parity run judged entirely by a non-EIS judge drops its LLM grades, but its
+    // contract checks would still produce ordinary numeric cells ranked on a different
+    // evaluator set than every other column. The dataset must carry excludedJudgelessOnly
+    // so buildCell renders `excluded:*` instead.
+    const codeDoc = {
+      ...doc('alert-analysis-a', undefined),
+      evaluator: { name: 'FinalAnswerPresent', score: 1, kind: 'code' },
+    } as unknown as EvaluationScoreDocument;
+    const judgedDoc = doc('alert-analysis-b', { id: 'openrouter/some-judge' });
+    const datasets = scoresByPrefixToDatasets([codeDoc, judgedDoc], ['alert-analysis'], {
+      requireEisJudge: true,
+    });
+
+    expect(datasets[0].excludedJudgelessOnly).toBe(true);
+    expect(datasets[0].rejectedEvaluators).toEqual([judgedDoc.evaluator?.name]);
+    // The code checks stay aggregated (the token axis and erroredOut plumbing read them).
+    expect(datasets[0].evaluators).toEqual([
+      expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
+    ]);
+
+    // Control: with an EIS-backed judge admitted alongside the code check, the dataset
+    // must NOT be marked judgeless-only and keeps the admitted judged grade.
+    const admittedDatasets = scoresByPrefixToDatasets(
+      [codeDoc, doc('alert-analysis-b', { id: 'eis-judge-1' })],
+      ['alert-analysis'],
+      { requireEisJudge: true }
+    );
+    expect(admittedDatasets[0].excludedJudgelessOnly).toBeFalsy();
+    expect(admittedDatasets[0].rejectedEvaluators).toBeUndefined();
+    expect(admittedDatasets[0].evaluators).toEqual([
+      expect.objectContaining({ evaluatorName: 'FinalAnswerPresent', mean: 1 }),
+      expect.objectContaining({ evaluatorName: 'correctness', mean: 0.6 }),
+    ]);
+  });
+
+  describe('an EIS judged doc without a score does not count as an admitted judged grade', () => {
+    const evaluatorDoc = (exampleId: string, evaluator: Record<string, unknown>) =>
+      ({
+        ...doc(exampleId, undefined),
+        evaluator,
+      } as unknown as EvaluationScoreDocument);
+    const codeDoc = evaluatorDoc('alert-analysis-a', {
+      name: 'FinalAnswerPresent',
+      score: 1,
+      kind: 'code',
+    });
+    // Selected by the column below, but graded by a non-EIS judge: rejected.
+    const rejectedJudgedDoc = evaluatorDoc('alert-analysis-b', {
+      name: 'Groundedness',
+      score: 0.5,
+      model: { id: 'openrouter/some-judge' },
+    });
+    const allowlistCfg = parseMatrixConfig({
+      columns: [
+        {
+          id: 'answer',
+          label: 'Answer',
+          suites: ['suite-a'],
+          examplePrefixes: ['alert-analysis'],
+          evaluators: ['FinalAnswerPresent', 'Groundedness'],
+          weight: 1,
+        },
+      ],
+      models: [{ id: 'model-x', label: 'Model X' }],
+    });
+    const cellFor = (docs: EvaluationScoreDocument[]) => {
+      const datasets = scoresByPrefixToDatasets(docs, ['alert-analysis'], {
+        requireEisJudge: true,
+      });
+      const scores: AggregatedModelScores[] = [
+        {
+          modelId: 'model-x',
+          suites: [{ suiteId: 'suite-a', experimentId: 'run-1', datasets }],
+        },
+      ];
+      return { datasets, cell: buildMatrix(scores, allowlistCfg).proprietary[0].cells.answer };
+    };
+
+    it('baseline: the rejected selected grade excludes the column', () => {
+      const { datasets, cell } = cellFor([codeDoc, rejectedJudgedDoc]);
+
+      expect(datasets[0].excludedJudgelessOnly).toBe(true);
+      expect(cell.kind).toBe('excluded');
+    });
+
+    it.each(['error', 'unavailable'])(
+      'a scoreless EIS Relevance doc labelled "%s" leaves the column excluded',
+      (label) => {
+        const failedDoc = evaluatorDoc('alert-analysis-c', {
+          name: 'Relevance',
+          label,
+          model: { id: 'eis-judge-1' },
+        });
+        const { datasets, cell } = cellFor([codeDoc, rejectedJudgedDoc, failedDoc]);
+
+        expect(datasets[0].excludedJudgelessOnly).toBe(true);
+        // Failure tracking is unchanged: the evaluator still reports as errored out.
+        expect(datasets[0].erroredOutEvaluators).toEqual(['Relevance']);
+        expect(cell.kind).toBe('excluded');
+      }
+    );
+
+    it('control: an EIS Relevance doc with a real numeric grade still lifts the judgeless-only mark', () => {
+      const gradedDoc = evaluatorDoc('alert-analysis-c', {
+        name: 'Relevance',
+        score: 0.8,
+        model: { id: 'eis-judge-1' },
+      });
+      const { datasets, cell } = cellFor([codeDoc, rejectedJudgedDoc, gradedDoc]);
+
+      expect(datasets[0].excludedJudgelessOnly).toBeFalsy();
+      expect(datasets[0].evaluators).toEqual(
+        expect.arrayContaining([expect.objectContaining({ evaluatorName: 'Relevance', mean: 0.8 })])
+      );
+      expect(datasets[0].erroredOutEvaluators).toBeUndefined();
+      expect(cell.kind).toBe('score');
+    });
   });
 
   it('accumulates exclusion counts across suites for the same model', async () => {

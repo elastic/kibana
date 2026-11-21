@@ -44,6 +44,24 @@ describe('scoring policy', () => {
       expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded).score).toBe(7);
     });
 
+    it('rejects a vendor-looking id whose recorded provider is not Elastic', () => {
+      const d = doc({ model: { id: 'qwen-local', provider: 'Other' } });
+      expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded)).toEqual({
+        score: null,
+        rejected: 'non-eis',
+      });
+    });
+
+    it('keeps a judge whose recorded provider is Elastic', () => {
+      const d = doc({ model: { id: 'qwen-local', provider: 'Elastic' } });
+      expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded).score).toBe(7);
+    });
+
+    it('keeps code evaluators, which have no judge, under requireEisJudge', () => {
+      const d = doc({ name: 'FinalAnswerPresent', score: 1, model: undefined, kind: 'code' });
+      expect(applyScoringPolicy(d, { requireEisJudge: true }, noneExcluded).score).toBe(1);
+    });
+
     it('drops a doc with no judge id under requireEisJudge', () => {
       // Regression: the trace path admitted judge-less docs the aggregation path rejected.
       const d = doc({ model: undefined });
@@ -133,6 +151,45 @@ describe('scoring policy', () => {
       delete (d.evaluator as { metadata?: unknown }).metadata;
 
       expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(7);
+    });
+
+    it('ladders the stored label when the scores route stripped evaluator.metadata', () => {
+      const d = doc({ name: 'Groundedness', score: 7 });
+      delete (d.evaluator as { metadata?: unknown }).metadata;
+      (d.evaluator as { label?: string }).label = 'MINOR_HALLUCINATIONS';
+
+      expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0.5);
+    });
+
+    it('Relevance follows the code-derived label, not the judge raw verdict, on empty answers', () => {
+      // The Relevance evaluator scores an empty agent response IRRELEVANT (label),
+      // whatever the correctness judge's raw relevance_summary says. The matrix must
+      // ladder that label, or an empty-answer doc carrying judge metadata reads full credit.
+      const d = doc({
+        name: 'Relevance',
+        score: 0,
+        label: 'IRRELEVANT',
+        metadata: {
+          correctnessAnalysis: { summary: { relevance_summary: 'RELEVANT' } },
+        },
+      });
+
+      expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0);
+    });
+
+    it('Relevance still ladders the judge verdict when the label is not on the ladder', () => {
+      // `unavailable` (no correctness analysis) is not a ladder verdict; the judge's
+      // metadata verdict must still apply so such docs are not silently zeroed.
+      const d = doc({
+        name: 'Relevance',
+        score: null,
+        label: 'unavailable',
+        metadata: {
+          correctnessAnalysis: { summary: { relevance_summary: 'PARTIALLY_RELEVANT' } },
+        },
+      });
+
+      expect(applyScoringPolicy(d, { useVerdictLadder: true }, noneExcluded).score).toBe(0.5);
     });
 
     it('passes through evaluators that have no verdict vocabulary', () => {

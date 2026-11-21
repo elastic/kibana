@@ -168,6 +168,10 @@ export {
   createToolCallsEvaluator,
   createEstimatedCostEvaluator,
   ESTIMATED_COST_EVALUATOR_NAME,
+  estimateCostUsd,
+  getModelPrice,
+  PRICE_TABLE_VERSION,
+  type ModelPrice,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 

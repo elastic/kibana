@@ -126,7 +126,7 @@ export const createAdAxesRubricEvaluator = ({
       );
     }
 
-    const judge = countingJudgeClient(inferenceClient);
+    const judge = countingJudgeClient(inferenceClient, { log });
     try {
       const response = await executeUntilValid({
         prompt: AdAxesRubricPrompt,

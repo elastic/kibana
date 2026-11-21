@@ -40,7 +40,13 @@ export interface AggregatedEvaluatorScore {
   /** Observed spread across the experiment's examples (used by the token axis). */
   min?: number;
   max?: number;
+  /** Set for telemetry evaluators (`minimize`/`neutral`); absent for quality scores. */
+  direction?: 'minimize' | 'neutral';
 }
+
+/** Whether an aggregated evaluator is a quality score rather than a telemetry magnitude. */
+export const isQualityEvaluator = ({ direction }: AggregatedEvaluatorScore): boolean =>
+  direction === undefined;
 
 export interface AggregatedDatasetScores {
   datasetId: string;
@@ -59,6 +65,15 @@ export interface AggregatedDatasetScores {
   excludedNonEis?: number;
   /** True when an admitted score in THIS dataset was self-judged (prefix columns only). */
   selfJudged?: boolean;
+  /**
+   * True when judged grades exist for this dataset but every one was rejected by the
+   * judge policy, leaving only judge-less (`kind: 'code'`) checks. The dataset keeps
+   * its evaluators (telemetry axes still read them), but buildCell renders the column
+   * `excluded:*` rather than ranking it on a different set of evaluators.
+   */
+  excludedJudgelessOnly?: boolean;
+  /** Evaluators with at least one grade rejected by the judge policy in THIS dataset. */
+  rejectedEvaluators?: string[];
 }
 
 export interface AggregatedSuiteScores {
@@ -119,6 +134,14 @@ export const scoresByPrefixToDatasets = (
   options: ScoreAggregationOptions = {}
 ): AggregatedDatasetScores[] => {
   const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
+  // Telemetry magnitudes (tokens, latency) keyed by prefix, kept apart from quality scores.
+  const telemetryByPrefix = new Map<
+    string,
+    Map<
+      string,
+      { sum: number; count: number; min: number; max: number; direction: 'minimize' | 'neutral' }
+    >
+  >();
   const erroredByPrefix = new Map<string, Map<string, { errored: number; scored: number }>>();
   // Per-prefix judge-policy rejections: a column whose every doc was withheld must
   // surface as `excluded:*` even when sibling prefixes in the suite survived.
@@ -127,16 +150,26 @@ export const scoresByPrefixToDatasets = (
   // prefixes, and `cellExtras.selfJudged` must reflect only the datasets a column
   // actually reads (a suite-wide flag would mislabel an independently judged column).
   const selfJudgedByPrefix = new Map<string, boolean>();
+  // True when a model-graded doc with a numeric score was admitted for the prefix.
+  const judgedAdmittedByPrefix = new Map<string, boolean>();
   const excluded: ExcludedScoreCounts = {
     nonQuality: 0,
     nonEis: 0,
     selfJudged: 0,
     unmappedVerdict: 0,
   };
-  const tallyPrefixExclusion = (prefix: string, kind: 'selfJudged' | 'nonEis'): void => {
+  const rejectedEvaluatorsByPrefix = new Map<string, Set<string>>();
+  const tallyPrefixExclusion = (
+    prefix: string,
+    kind: 'selfJudged' | 'nonEis',
+    evaluatorName: string
+  ): void => {
     const entry = excludedByPrefix.get(prefix) ?? { selfJudged: 0, nonEis: 0 };
     entry[kind] += 1;
     excludedByPrefix.set(prefix, entry);
+    const names = rejectedEvaluatorsByPrefix.get(prefix) ?? new Set<string>();
+    names.add(evaluatorName);
+    rejectedEvaluatorsByPrefix.set(prefix, names);
   };
 
   for (const doc of scores) {
@@ -156,29 +189,43 @@ export const scoresByPrefixToDatasets = (
       const direction = (doc.evaluator as { direction?: string } | undefined)?.direction;
       const judgeId = doc.evaluator?.model?.id;
       const taskModelId = doc.task?.model?.id;
+      // Only maximize-direction evaluators are quality scores. The rest (tokens, latency)
+      // are judge-less telemetry: the judge policy does not apply to them, and they feed
+      // the token axis instead of any quality mean.
+      const telemetryDirection =
+        evaluatorName && (direction === 'minimize' || direction === 'neutral')
+          ? direction
+          : undefined;
+      const rejectedNonQuality = Boolean(evaluatorName && direction && direction !== 'maximize');
       // An admitted provenance of "no judge id at all" is indistinguishable from a
       // non-EIS judge when requireEisJudge is on: without this, a doc whose evaluator
       // omitted its judge model silently contributes to a matrix that claims every
       // score is EIS-graded.
+      // Code evaluators invoke no model, so there is no judge to vet: they stay admitted.
+      const isCodeEvaluator = (doc.evaluator as { kind?: string } | undefined)?.kind === 'code';
       const rejectedEisJudge = Boolean(
-        evaluatorName && options.requireEisJudge && (!judgeId || !isEisBacked(judgeId))
+        evaluatorName &&
+          !rejectedNonQuality &&
+          options.requireEisJudge &&
+          !isCodeEvaluator &&
+          (!judgeId || !isEisBacked(judgeId, doc.evaluator?.model?.provider))
       );
       const rejectedSelfJudged = Boolean(
         evaluatorName &&
+          !rejectedNonQuality &&
           !rejectedEisJudge &&
           options.excludeSelfJudged &&
           judgeId &&
           taskModelId &&
           describeJudge(judgeId, taskModelId).selfJudged
       );
-      // Only maximize-direction evaluators are quality scores.
-      const rejectedNonQuality = Boolean(
-        evaluatorName &&
-          !rejectedEisJudge &&
-          !rejectedSelfJudged &&
-          direction &&
-          direction !== 'maximize'
-      );
+      const telemetryScore =
+        telemetryDirection &&
+        doc.evaluator?.label !== 'error' &&
+        doc.evaluator?.label !== 'unavailable' &&
+        typeof doc.evaluator?.score === 'number'
+          ? doc.evaluator.score
+          : undefined;
       if (evaluatorName) {
         if (rejectedEisJudge) {
           excluded.nonEis += 1;
@@ -210,12 +257,31 @@ export const scoresByPrefixToDatasets = (
       }
 
       for (const prefix of matchingPrefixes) {
+        if (telemetryDirection && telemetryScore !== undefined) {
+          let telemetry = telemetryByPrefix.get(prefix);
+          if (!telemetry) {
+            telemetry = new Map();
+            telemetryByPrefix.set(prefix, telemetry);
+          }
+          const agg = telemetry.get(evaluatorName as string) ?? {
+            sum: 0,
+            count: 0,
+            min: telemetryScore,
+            max: telemetryScore,
+            direction: telemetryDirection,
+          };
+          agg.sum += telemetryScore;
+          agg.count += 1;
+          agg.min = Math.min(agg.min, telemetryScore);
+          agg.max = Math.max(agg.max, telemetryScore);
+          telemetry.set(evaluatorName as string, agg);
+        }
         if (evaluatorName) {
           if (rejectedEisJudge) {
-            tallyPrefixExclusion(prefix, 'nonEis');
+            tallyPrefixExclusion(prefix, 'nonEis', evaluatorName);
           }
           if (rejectedSelfJudged) {
-            tallyPrefixExclusion(prefix, 'selfJudged');
+            tallyPrefixExclusion(prefix, 'selfJudged', evaluatorName);
           }
 
           if (admitted) {
@@ -240,6 +306,10 @@ export const scoresByPrefixToDatasets = (
                 errTrack.set(evaluatorName as string, tally);
               }
 
+              // A scoreless failure (label error/unavailable) is no judged grade.
+              if (!isCodeEvaluator && judgeId) {
+                judgedAdmittedByPrefix.set(prefix, true);
+              }
               if (judgeId && taskModelId && describeJudge(judgeId, taskModelId).selfJudged) {
                 selfJudgedByPrefix.set(prefix, true);
               }
@@ -270,25 +340,49 @@ export const scoresByPrefixToDatasets = (
     ...byPrefix.keys(),
     ...erroredByPrefix.keys(),
     ...excludedByPrefix.keys(),
+    ...telemetryByPrefix.keys(),
   ]);
 
   return [...allPrefixes].map((prefix) => {
     const evaluators = byPrefix.get(prefix) ?? new Map<string, { sum: number; count: number }>();
+    const telemetry = [...(telemetryByPrefix.get(prefix)?.entries() ?? [])].map(
+      ([evaluatorName, { sum, count, min, max, direction: telemetryDirection }]) => ({
+        evaluatorName,
+        mean: sum / count,
+        count,
+        min,
+        max,
+        direction: telemetryDirection,
+      })
+    );
     // An evaluator that recovered on retry still produced a grade.
     const erroredOut = [...(erroredByPrefix.get(prefix)?.entries() ?? [])]
       .filter(([, tally]) => tally.errored > 0 && tally.scored === 0)
       .map(([name]) => name);
     const prefixExclusions = excludedByPrefix.get(prefix);
+    const rejectedEvaluators = [...(rejectedEvaluatorsByPrefix.get(prefix) ?? [])].sort();
+    // Contract checks stay admitted under every judge policy; when every judged grade
+    // was rejected they alone must not rank the column, so mark it for `excluded:*`.
+    const judgedRejected = Boolean(
+      prefixExclusions &&
+        (prefixExclusions.selfJudged > 0 || prefixExclusions.nonEis > 0) &&
+        !judgedAdmittedByPrefix.get(prefix)
+    );
     return {
       datasetId: `prefix:${prefix}`,
       datasetName: prefix,
-      evaluators: [...evaluators.entries()].map(([evaluatorName, agg]) => ({
-        evaluatorName,
-        mean: agg.sum / agg.count,
-        count: agg.count,
-      })),
+      evaluators: [
+        ...[...evaluators.entries()].map(([evaluatorName, agg]) => ({
+          evaluatorName,
+          mean: agg.sum / agg.count,
+          count: agg.count,
+        })),
+        ...telemetry,
+      ],
       ...(erroredOut.length > 0 ? { erroredOutEvaluators: erroredOut } : {}),
       ...(selfJudgedByPrefix.get(prefix) === true ? { selfJudged: true } : {}),
+      ...(judgedRejected ? { excludedJudgelessOnly: true } : {}),
+      ...(rejectedEvaluators.length > 0 ? { rejectedEvaluators } : {}),
       // Exposed per dataset so buildCell can mark THIS column excluded even when
       // sibling prefixes in the suite kept admissible scores.
       ...(prefixExclusions && prefixExclusions.selfJudged > 0
@@ -693,7 +787,7 @@ export const queryMatrixScores = async (
                 prefixDatasets.length === 0 ||
                 prefixDatasets.every(
                   (d) =>
-                    d.evaluators.length === 0 &&
+                    !d.evaluators.some(isQualityEvaluator) &&
                     ((d.excludedSelfJudged ?? 0) > 0 || (d.excludedNonEis ?? 0) > 0)
                 );
               if (datasets.length === before && suiteExcludedCounts) {
@@ -756,7 +850,7 @@ export const queryMatrixScores = async (
               if (forbidSelfJudged && describeJudge(judgeId, modelId).selfJudged) {
                 return false;
               }
-              return !(requireEis && !isEisBacked(judgeId));
+              return !(requireEis && !isEisBacked(judgeId, doc.evaluator?.model?.provider));
             });
             for (const doc of admittedDocs) {
               const judgeId = doc.evaluator?.model?.id;

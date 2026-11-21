@@ -6,6 +6,7 @@
  */
 
 import type { AggregatedModelScores } from './query_matrix_scores';
+import { isQualityEvaluator } from './query_matrix_scores';
 
 /** Ranking power of one evaluator across models; a saturated evaluator scores every model alike. */
 export interface EvaluatorSaturation {
@@ -48,7 +49,7 @@ const collectByEvaluator = (models: readonly AggregatedModelScores[]): Map<strin
     for (const suite of model.suites ?? []) {
       for (const dataset of suite.datasets ?? []) {
         for (const evaluator of dataset.evaluators ?? []) {
-          if (Number.isFinite(evaluator.mean)) {
+          if (Number.isFinite(evaluator.mean) && isQualityEvaluator(evaluator)) {
             const weight = evaluator.count > 0 ? evaluator.count : 1;
             const acc = perModel.get(evaluator.evaluatorName) ?? { weightedSum: 0, weight: 0 };
             acc.weightedSum += evaluator.mean * weight;
