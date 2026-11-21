@@ -94,6 +94,11 @@ const BADGE_TOOLTIP = i18n.translate('xpack.evals.judgeAgreement.badgeTooltip', 
     'Pooled over every review queue of this evaluator on the same major version. A major version bump starts a new tally.',
 });
 
+const TRUNCATED_NOTE = i18n.translate('xpack.evals.judgeAgreement.truncatedNote', {
+  defaultMessage:
+    'Only the most recent review queues were scanned, so older queues are not included in this tally.',
+});
+
 const majorOf = (version: string): string | undefined => /^v?(\d+)(?:\.|$)/.exec(version)?.[1];
 
 /**
@@ -115,7 +120,11 @@ export const EvaluatorAgreementBadge: React.FC<{ evaluatorName: string; version:
     major === undefined ? version : `v${major}.x`
   );
   return (
-    <EuiBadge color="hollow" title={BADGE_TOOLTIP} data-test-subj="evalsEvaluatorAgreementBadge">
+    <EuiBadge
+      color="hollow"
+      title={data.truncated ? `${BADGE_TOOLTIP} ${TRUNCATED_NOTE}` : BADGE_TOOLTIP}
+      data-test-subj="evalsEvaluatorAgreementBadge"
+    >
       {text}
     </EuiBadge>
   );

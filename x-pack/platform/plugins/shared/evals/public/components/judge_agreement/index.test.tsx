@@ -51,6 +51,22 @@ describe('EvaluatorAgreementBadge', () => {
     expect(mockedUseAgreement).toHaveBeenCalledWith('correctness', '2.4.0');
   });
 
+  it('notes in the tooltip when only the newest queues were scanned', () => {
+    renderBadge({ binary: binary(), truncated: true });
+    expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).toHaveAttribute(
+      'title',
+      expect.stringContaining('Only the most recent review queues were scanned')
+    );
+  });
+
+  it('does not mention truncation when every queue was scanned', () => {
+    renderBadge({ binary: binary(), truncated: false });
+    expect(screen.getByTestId('evalsEvaluatorAgreementBadge')).not.toHaveAttribute(
+      'title',
+      expect.stringContaining('Only the most recent')
+    );
+  });
+
   it('renders nothing before a reviewer has labelled an item', () => {
     renderBadge({ binary: null });
     expect(screen.queryByTestId('evalsEvaluatorAgreementBadge')).not.toBeInTheDocument();
