@@ -31,6 +31,7 @@ import { processOpenAIStream } from './process_openai_stream';
 import { processOpenAIResponse } from './process_openai_response';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { getOutputTokenLimit } from '../../utils/get_output_token_limit';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -40,6 +41,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     toolChoice,
     tools,
     temperature = 0,
+    maxTokens,
     functionCalling = 'auto',
     modelName: modelName,
     logger,
@@ -56,6 +58,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         ? !isNativeFunctionCallingSupported(connector)
         : functionCalling === 'simulated';
 
+    const outputTokenLimit = getOutputTokenLimit(maxTokens, { connector, modelName });
+
     let request: OpenAIRequest;
 
     if (useSimulatedFunctionCalling) {
@@ -68,6 +72,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       request = {
         stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
+        ...outputTokenLimit,
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
@@ -79,6 +84,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       request = {
         stream,
         ...getTemperatureIfValid(temperature, { connector, modelName }),
+        ...outputTokenLimit,
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         ...(hasTools

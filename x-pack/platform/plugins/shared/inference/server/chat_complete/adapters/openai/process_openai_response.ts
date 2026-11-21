@@ -13,6 +13,7 @@ import type {
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
 import { createInferenceRequestAbortedError } from '@kbn/inference-common';
+import { createTokenLimitReachedError } from '../../../../common/chat_complete/errors';
 import { tokenCountFromOpenAI, chunkFromCompletionResponse } from './from_openai';
 
 export function processOpenAIResponse(): OperatorFunction<
@@ -22,6 +23,9 @@ export function processOpenAIResponse(): OperatorFunction<
   return (source: Observable<OpenAI.ChatCompletion>) => {
     return source.pipe(
       mergeMap((response): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
+        if (response.choices?.[0]?.finish_reason === 'length') {
+          throw createTokenLimitReachedError();
+        }
         const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
         if (response.choices?.length) {
           events.push(chunkFromCompletionResponse(response));

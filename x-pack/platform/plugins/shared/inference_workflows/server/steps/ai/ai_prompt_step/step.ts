@@ -11,7 +11,9 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import {
   isTemplateRequiredConnector,
+  MAX_OUTPUT_TOKENS,
   MessageRole,
+  normalizeMaxTokens,
   parseTemplateJson,
   validateReasoningEffort,
 } from '@kbn/inference-common';
@@ -66,6 +68,66 @@ const buildMetadata = (
  * Parses a `max-step-size` value (e.g. `"10mb"` or a raw byte count) into bytes, the same way the
  * ai.agent step does. Returns `undefined` for empty or malformed values so the limit is not changed.
  */
+export const MAX_TOKENS_INVALID_MESSAGE = `\`max-tokens\` must be a positive integer up to ${MAX_OUTPUT_TOKENS}. A template must render to that number.`;
+
+export const MAX_TOKENS_EXHAUSTED_WITH_REASONING_MESSAGE =
+  'The model returned an empty response. `max-tokens` includes reasoning tokens, so raise `max-tokens` or set `reasoning-level` to `none`.';
+
+/**
+ * Keeps a present `max-tokens` value only when it is a positive integer.
+ * A rendered template is a string, so numeric strings are accepted. An invalid
+ * present value fails the step instead of silently using the provider default.
+ */
+export const resolveStepMaxTokens = (value: unknown): number | undefined => {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+  const normalized = normalizeMaxTokens(value);
+  if (normalized === undefined) {
+    throw new Error(MAX_TOKENS_INVALID_MESSAGE);
+  }
+  return normalized;
+};
+
+const isEmptyModelContent = (content: unknown): boolean => {
+  if (content == null) {
+    return true;
+  }
+  if (typeof content === 'string') {
+    return content.trim() === '';
+  }
+  if (!Array.isArray(content)) {
+    return false;
+  }
+  return content.every((part) => {
+    if (typeof part === 'string') {
+      return part.trim() === '';
+    }
+    if (part && typeof part === 'object' && 'text' in part) {
+      const text = (part as { text?: unknown }).text;
+      return typeof text !== 'string' || text.trim() === '';
+    }
+    return false;
+  });
+};
+
+/**
+ * Reasoning tokens count against `max-tokens`. An empty answer in that case is the cap
+ * being spent before the visible response, so the step fails instead of succeeding empty.
+ */
+export const assertVisibleAnswerWithinTokenCap = (
+  content: unknown,
+  reasoningLevel: string | undefined,
+  maxTokens: number | undefined
+): void => {
+  if (maxTokens === undefined || reasoningLevel === undefined || reasoningLevel === 'none') {
+    return;
+  }
+  if (isEmptyModelContent(content)) {
+    throw new Error(MAX_TOKENS_EXHAUSTED_WITH_REASONING_MESSAGE);
+  }
+};
+
 export const parseMaxStepSize = (value: string | undefined): number | undefined => {
   const trimmed = value?.trim();
   if (!trimmed) {
@@ -92,6 +154,8 @@ const completePromptWithTemplate = async ({
   schema,
   abortSignal,
   telemetryMetadata,
+  maxTokens,
+  reasoningLevel,
 }: {
   inference: InferenceServerStart | undefined;
   request: KibanaRequest;
@@ -102,6 +166,8 @@ const completePromptWithTemplate = async ({
   schema: unknown;
   abortSignal?: AbortSignal;
   telemetryMetadata?: ConnectorTelemetryMetadata;
+  maxTokens?: number;
+  reasoningLevel?: string;
 }): Promise<{ content: unknown; metadata: Record<string, unknown> } | undefined> => {
   if (!inference?.getClient) {
     if (templateId) {
@@ -144,9 +210,11 @@ const completePromptWithTemplate = async ({
     messages: [{ role: MessageRole.User, content: '' }],
     template: { id: templateId, version: templateVersion, variables: templateVariables },
     abortSignal,
+    ...(maxTokens !== undefined ? { maxTokens } : {}),
     ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
   });
 
+  assertVisibleAnswerWithinTokenCap(response.content, reasoningLevel, maxTokens);
   const promptTokens = response.tokens?.prompt ?? 0;
   const completionTokens = response.tokens?.completion ?? 0;
   const content = schema ? parseTemplateJson(response.content) : response.content;
@@ -222,6 +290,8 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
 
       const reasoningLevel = context.config['reasoning-level'];
       const maxContentLength = parseMaxStepSize(context.config['max-step-size']);
+      // Absent means the connector sends no output-token limit, so the provider default applies.
+      const maxTokens = resolveStepMaxTokens(context.config['max-tokens']);
       // Sent only with a plugin-id, so a step without one makes exactly the same call as before.
       let telemetryMetadata: ConnectorTelemetryMetadata | undefined;
       if (pluginId) {
@@ -252,6 +322,8 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         schema: context.input.schema,
         abortSignal: context.abortSignal,
         telemetryMetadata,
+        maxTokens,
+        reasoningLevel,
       });
       if (templateResult) {
         return { output: templateResult };
@@ -265,6 +337,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
           maxRetries: 0,
           ...(reasoningLevel !== undefined ? { reasoning: { effort: reasoningLevel } } : {}),
           ...(maxContentLength !== undefined ? { maxContentLength } : {}),
+          ...(maxTokens !== undefined ? { maxTokens } : {}),
           ...(telemetryMetadata ? { telemetryMetadata } : {}),
         },
       });
@@ -304,6 +377,11 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         const invocationResult = await runnable.invoke(modelInput, {
           signal: context.abortSignal,
         });
+        assertVisibleAnswerWithinTokenCap(
+          invocationResult.raw?.content,
+          reasoningLevel,
+          maxTokens
+        );
         return {
           // We modify the output to match the expected schema
           // For now, structured output flow does not output response_metadata,
@@ -319,6 +397,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       const invocationResult = await chatModel.invoke(modelInput, {
         signal: context.abortSignal,
       });
+      assertVisibleAnswerWithinTokenCap(invocationResult.content, reasoningLevel, maxTokens);
 
       return {
         output: {

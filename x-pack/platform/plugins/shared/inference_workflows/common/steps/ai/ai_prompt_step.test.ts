@@ -69,6 +69,14 @@ describe('ai_prompt_step common', () => {
       expect(ConfigSchema.safeParse({ 'connector-id': 'my-connector' }).success).toBe(true);
     });
 
+    it('accepts max-tokens and rejects a value that is not a positive integer', () => {
+      expect(ConfigSchema.safeParse({ 'max-tokens': 16000 }).success).toBe(true);
+      expect(ConfigSchema.safeParse({}).success).toBe(true);
+      expect(ConfigSchema.safeParse({ 'max-tokens': 0 }).success).toBe(false);
+      expect(ConfigSchema.safeParse({ 'max-tokens': -1 }).success).toBe(false);
+      expect(ConfigSchema.safeParse({ 'max-tokens': 1.5 }).success).toBe(false);
+    });
+
     it('accepts every telemetry field together with max-step-size', () => {
       expect(
         ConfigSchema.safeParse({

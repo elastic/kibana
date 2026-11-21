@@ -12,6 +12,7 @@ import type {
   ChatCompleteOptions,
   ChatCompleteResponse,
 } from '@kbn/inference-common';
+import { normalizeMaxTokens } from '@kbn/inference-common';
 import { defer, from, lastValueFrom } from 'rxjs';
 import type { ChatCompleteRequestBody } from '../http_apis';
 import { retryWithExponentialBackoff } from '../utils/retry_with_exponential_backoff';
@@ -48,7 +49,9 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       maxRetries,
       metadata,
       retryConfiguration,
+      maxTokens,
     } = options;
+    const normalizedMaxTokens = normalizeMaxTokens(maxTokens);
 
     const body: ChatCompleteRequestBody = {
       connectorId,
@@ -57,6 +60,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       toolChoice,
       tools,
       temperature,
+      ...(normalizedMaxTokens !== undefined ? { maxTokens: normalizedMaxTokens } : {}),
       modelName,
       functionCalling,
       retryConfiguration: undefined,

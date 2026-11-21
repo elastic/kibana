@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { MAX_OUTPUT_TOKENS } from '@kbn/inference-common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 /**
@@ -32,84 +33,95 @@ export const normalizeOptionalConnectorParam = (value: string | undefined): stri
 export const AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE =
   '`aggregate-by` can only be set when `plugin-id` is also set.';
 
-export const ConfigSchema = z
-  .object({
-    'connector-id': z.string().max(255).optional(),
-    'max-step-size': z
-      .string()
-      .max(32)
-      .optional()
-      .describe(
-        'Maximum response size for this workflow step. Also used as the response content length limit of the LLM call.'
-      ),
-    'plugin-id': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The feature id to attribute this step's LLM call to in token usage tracking and connector telemetry. When omitted, no telemetry metadata is sent."
-      ),
-    'aggregate-by': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        "The parent feature id to group this step's token usage under. Only used when `plugin-id` is set."
-      ),
-    'product-solution': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    'product-feature': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
-      ),
-    'reasoning-level': z
-      .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
-      .optional()
-      .describe(
-        '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
-      ),
-    'connector-id-by-feature': z
-      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
-      .optional()
-      .describe(
-        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with connector-id. A list where every id misses is not a conflict. Example: "context_engine_prompt".'
-      ),
-  })
-  .superRefine((cfg, ctx) => {
-    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
-    const connectorByFeature =
-      typeof connectorByFeatureRaw === 'string'
-        ? normalizeOptionalConnectorParam(connectorByFeatureRaw)
-        : undefined;
-    if (
-      normalizeOptionalConnectorParam(cfg['connector-id']) !== undefined &&
-      connectorByFeature !== undefined
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Cannot specify both connector-id and connector-id-by-feature.',
-        path: ['connector-id-by-feature'],
-      });
-    }
-    if (
-      normalizeOptionalConnectorParam(cfg['aggregate-by']) !== undefined &&
-      normalizeOptionalConnectorParam(cfg['plugin-id']) === undefined
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
-        path: ['aggregate-by'],
-      });
-    }
-  });
+export const ConfigSchema = lazySchema(() =>
+  z
+    .object({
+      'connector-id': z.string().max(255).optional(),
+      'max-step-size': z
+        .string()
+        .max(32)
+        .optional()
+        .describe(
+          'Maximum response size for this workflow step. Also used as the response content length limit of the LLM call.'
+        ),
+      'max-tokens': z
+        .number()
+        .int()
+        .positive()
+        .max(MAX_OUTPUT_TOKENS)
+        .optional()
+        .describe(
+          'Maximum number of output tokens the model may generate, including reasoning tokens. When omitted, no limit is sent and the provider default applies. A low limit with reasoning-level other than none can exhaust the budget before the answer is written.'
+        ),
+      'plugin-id': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The feature id to attribute this step's LLM call to in token usage tracking and connector telemetry. When omitted, no telemetry metadata is sent."
+        ),
+      'aggregate-by': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          "The parent feature id to group this step's token usage under. Only used when `plugin-id` is set."
+        ),
+      'product-solution': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product solution to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      'product-feature': z
+        .string()
+        .max(255)
+        .optional()
+        .describe(
+          'The product feature to attribute this step to. Ignored when `plugin-id` is not set.'
+        ),
+      'reasoning-level': z
+        .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
+        .optional()
+        .describe(
+          '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
+        ),
+      'connector-id-by-feature': z
+        .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
+        .optional()
+        .describe(
+          'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with connector-id. A list where every id misses is not a conflict. Example: "context_engine_prompt".'
+        ),
+    })
+    .superRefine((cfg, ctx) => {
+      const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+      const connectorByFeature =
+        typeof connectorByFeatureRaw === 'string'
+          ? normalizeOptionalConnectorParam(connectorByFeatureRaw)
+          : undefined;
+      if (
+        normalizeOptionalConnectorParam(cfg['connector-id']) !== undefined &&
+        connectorByFeature !== undefined
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Cannot specify both connector-id and connector-id-by-feature.',
+          path: ['connector-id-by-feature'],
+        });
+      }
+      if (
+        normalizeOptionalConnectorParam(cfg['aggregate-by']) !== undefined &&
+        normalizeOptionalConnectorParam(cfg['plugin-id']) === undefined
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
+          path: ['aggregate-by'],
+        });
+      }
+    })
+);
 
 // Maybe we can define specific schema for metadata in the future
 // For now it's a record with string keys and any values
@@ -207,6 +219,16 @@ export const AiPromptStepCommonDefinition: CommonStepDefinition<
     prompt: "What is the weather like today?"
 \`\`\`
 The default AI connector configured for the workflow will be used.`,
+      `## Raise the output token limit
+\`\`\`yaml
+- name: ask_ai
+  type: ${AiPromptStepTypeId}
+  connector-id: my-bedrock-connector
+  max-tokens: 16000
+  with:
+    prompt: "Write a detailed summary"
+\`\`\`
+When \`max-tokens\` is omitted, no output-token limit is sent and the provider default applies. The cap includes reasoning tokens, so a low limit with \`reasoning-level\` other than \`none\` can exhaust the budget before the answer is written.`,
       `## AI prompt with dynamic input
 \`\`\`yaml
 - name: analyze_data
