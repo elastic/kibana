@@ -150,6 +150,26 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Wait until the editor's derived workflow state (triggers, definition, graph, step lookup)
+   * has been recomputed from the YAML currently in the editor.
+   *
+   * The editor debounces its `onChange` and the store debounces the computation on top of it,
+   * so after setting a new YAML value the language features — including trigger-aware
+   * autocomplete — still answer from the previous document until this signal flips back.
+   *
+   * The flag is global store state, so every mounted editor renders the same value; polling the
+   * document instead of a locator keeps that from tripping strict mode when the execution
+   * flyout mounts a second editor.
+   */
+  async waitForYamlComputationSettled(): Promise<void> {
+    await this.page.waitForFunction(
+      () => !!document.querySelector('[data-yaml-computation-settled="true"]'),
+      null,
+      { timeout: EDITOR_READY_TIMEOUT }
+    );
+  }
+
+  /**
    * Switch to the graph view by clicking the bottom bar toggle.
    * Waits for the graph canvas to become visible.
    */
@@ -660,10 +680,7 @@ export class WorkflowEditorPage {
     textToInsert: string = ''
   ): Promise<void> {
     await this.setYamlEditorValue(yamlContent);
-
-    // Wait for the workflow definition to be parsed after setting the YAML.
-    // The autocomplete context schema depends on the parsed definition (e.g., triggers).
-    await this.page.waitForTimeout(1000);
+    await this.waitForYamlComputationSettled();
 
     // Use Monaco API to find the text and position cursor right after it
     const uri = await this.getEditorUri(this.yamlEditor);
