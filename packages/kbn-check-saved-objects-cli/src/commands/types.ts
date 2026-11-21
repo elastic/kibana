@@ -9,7 +9,10 @@
 
 import type { ListrTask } from 'listr2';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import type {
+  MigrationAlgorithm,
+  SavedObjectsTypeMappingDefinitions,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { Root } from '@kbn/core-root-server-internal';
 import type {
@@ -23,7 +26,7 @@ export type Task = ListrTask<TaskContext>['task'];
 
 export type FixtureMap = Record<string, TypeVersionFixtures>;
 
-export type MigrationAlgorithm = 'v2' | 'zdt';
+export type { MigrationAlgorithm };
 
 export interface TaskContext {
   gitRev: string;
