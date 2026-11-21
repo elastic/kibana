@@ -107,63 +107,66 @@ describe('WorkflowContextManager', () => {
       .fn()
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
+    workflowExecutionState.getWorkflowExecutionId = jest.fn().mockReturnValue('test-execution-id');
+    workflowExecutionState.getWorkflowExecutionScopeStack = jest.fn().mockReturnValue([]);
+    // Fixtures mocked through `getAllStepExecutions` often omit `id`; synthesize a stable one so
+    // the service mock can resolve their baked-in output by id.
+    const withFixtureId = <T extends { id?: string; globalExecutionIndex?: number }>(
+      exec: T,
+      index: number
+    ): T & { id: string; input?: unknown; output?: unknown } => ({
+      ...exec,
+      id: exec.id ?? `fixture_${exec.globalExecutionIndex ?? index}`,
+    });
+    // Tests mock `getAllStepExecutions`; derive the data.set index from it.
+    workflowExecutionState.getDataSetStepExecutions = jest.fn(() =>
+      workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .filter((exec) => exec.stepType === 'data.set')
+    );
 
-    // Service is sovereign over IO. The mock keeps its own input/output
-    // maps but also falls back to reading IO directly off the state mock
-    // when present — this lets pre-refactor test fixtures (which return a
-    // step with `input`/`output` baked into `getStepExecution`) keep working
-    // without mass churn while production goes through the service.
-    const stepInputs = new Map<string, unknown>();
-    const stepOutputs = new Map<string, unknown>();
+    // Fixtures bake input and output onto the step execution. readBatch and
+    // state.getStepIo both serve that value.
     const readIo = (id: string, field: 'input' | 'output'): unknown => {
-      if (field === 'input' && stepInputs.has(id)) return stepInputs.get(id);
-      if (field === 'output' && stepOutputs.has(id)) return stepOutputs.get(id);
       const exec = workflowExecutionState.getStepExecution(id) as
         | { input?: unknown; output?: unknown }
         | undefined;
-      return exec?.[field];
+      if (exec?.[field] !== undefined) return exec[field];
+      return workflowExecutionState
+        .getAllStepExecutions()
+        .map(withFixtureId)
+        .find((candidate) => candidate.id === id)?.[field];
     };
+    workflowExecutionState.getDataSetStepExecutionCount = jest.fn(
+      () => workflowExecutionState.getDataSetStepExecutions().length
+    );
+    workflowExecutionState.getStepIoVersion = jest.fn(() => 0);
+    workflowExecutionState.getStepIo = jest.fn((id: string, type: 'input' | 'output') => {
+      const value = readIo(id, type);
+      return value === undefined ? undefined : (value as never);
+    });
     const stepIoService = {
-      hasEvictedOutputs: jest.fn().mockReturnValue(false),
-      prepareForRead: jest.fn().mockResolvedValue(undefined),
-      rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
-      releaseReadPins: jest.fn(),
-      releaseTransientlyRehydratedOutputs: jest.fn(),
-      setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
-      setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
-      getStepInput: jest.fn((id: string) => readIo(id, 'input')),
-      getStepOutput: jest.fn((id: string) => readIo(id, 'output')),
-      getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
-      getLatestStepIO: jest.fn((stepId: string) => {
-        const latest = workflowExecutionState.getLatestStepExecution(stepId) as
-          | { id?: string; input?: unknown; output?: unknown; error?: unknown }
-          | undefined;
-        if (!latest) return undefined;
-        // Fall back to reading IO directly off the mocked latest exec when
-        // the test fixture didn't bother attaching an id.
-        return {
-          input: latest.id ? readIo(latest.id, 'input') : latest.input,
-          output: latest.id ? readIo(latest.id, 'output') : latest.output,
-          error: latest.error,
-        };
-      }),
-      getDataSetVariables: jest.fn((): Record<string, unknown> => {
-        // Aggregate from data.set steps the test mocked into state. Falls
-        // back to reading `output` directly off the mocked exec when the
-        // mock didn't bother to attach an id, so old fixtures keep working.
-        const result: Record<string, unknown> = {};
-        const sorted = workflowExecutionState
-          .getAllStepExecutions()
-          .filter((exec) => exec.stepType === 'data.set')
-          .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
-        for (const exec of sorted) {
-          const out = exec.id ? readIo(exec.id, 'output') : (exec as { output?: unknown }).output;
-          if (out != null && typeof out === 'object' && !Array.isArray(out)) {
-            Object.assign(result, out);
+      readBatch: jest.fn(
+        async (args: {
+          type: 'input' | 'output' | 'error';
+          refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+        }) => {
+          const values = new Map<string, unknown>();
+          for (const { executionId } of args.refs) {
+            if (args.type === 'error') {
+              const error = workflowExecutionState.getStepExecution(executionId)?.error;
+              if (error !== undefined) values.set(executionId, error);
+            } else {
+              const value = readIo(executionId, args.type);
+              if (value !== undefined) values.set(executionId, value);
+            }
           }
+          return values;
         }
-        return result;
-      }),
+      ),
+      write: jest.fn(),
+      getOutputSizeStats: jest.fn(() => ({ totalBytes: 0, stepCount: 0 })),
     } as unknown as StepIoService;
 
     const underTest = new WorkflowContextManager({
@@ -848,6 +851,57 @@ describe('WorkflowContextManager', () => {
       });
     });
 
+    it('reads a dynamic parallel branch item from snapshotted input.items', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'fan',
+          nestedScopes: [
+            {
+              nodeId: 'enterParallel_fan',
+              nodeType: 'enter-parallel',
+              scopeId: '1',
+            },
+          ],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'exec-1',
+        workflowDefinition: workflow,
+      } as EsWorkflowExecution);
+      testContainer.workflowExecutionState.getStepExecution = jest
+        .fn()
+        .mockImplementation((stepExecutionId: string) => {
+          if (stepExecutionId === 'fan_generated') {
+            return {
+              id: stepExecutionId,
+              stepId: 'fan',
+              stepType: 'parallel',
+              input: {
+                foreach: '{{ steps.list.output }}',
+                items: ['a', 'b'],
+              },
+              state: { total: 2, static: false },
+            };
+          }
+          return undefined;
+        });
+      (testContainer.templatingEngineMock.evaluateExpression as jest.Mock).mockReturnValue([
+        'x',
+        'y',
+      ]);
+      (testContainer.templatingEngineMock.render as jest.Mock).mockReturnValue(['x', 'y']);
+
+      const context = testContainer.underTest.getContext();
+
+      expect(context.foreach).toEqual({
+        items: ['a', 'b'],
+        item: 'b',
+        index: 1,
+        total: 2,
+      });
+    });
+
     describe('nested foreach with inner expression {{foreach.item}}', () => {
       const outerItems = [
         ['innerA', 'innerB'],
@@ -1028,13 +1082,13 @@ describe('WorkflowContextManager', () => {
         expect(context.steps.outerForeachStep).toEqual(
           expect.objectContaining({
             output: { result: 'outerOutput' },
-            input: { foreach: JSON.stringify(outerItems) },
             item: outerItems[outerCurrentIndex],
             items: outerItems,
             index: outerCurrentIndex,
             total: outerItems.length,
           })
         );
+        expect(context.steps.outerForeachStep).not.toHaveProperty('input');
       });
     });
 
@@ -2083,7 +2137,7 @@ describe('WorkflowContextManager', () => {
     });
   });
 
-  describe('ensureContextReady', () => {
+  describe('prepareContext', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
       version: '1',
@@ -2109,26 +2163,224 @@ describe('WorkflowContextManager', () => {
       testContainer = createTestContainer(workflow);
     });
 
-    // ensureContextReady is a thin pass-through to stepIoService.prepareForRead.
-    // The full coverage of static-analysis branches (targeted vs. fallback,
-    // scope-stack walk, no-op when nothing evicted) lives in
-    // step_io_service.test.ts where prepareForRead is exercised directly.
-    it('delegates to stepIoService.prepareForRead with the current node', async () => {
-      await testContainer.underTest.ensureContextReady();
+    // prepareContext asks resolveRehydrationTargets for the ids, then fetches
+    // outputs with readBatch. This node has no predecessors, so the batch is empty.
+    it('fetches the resolved output refs with readBatch', async () => {
+      await testContainer.underTest.prepareContext();
 
-      expect(testContainer.stepIoService.prepareForRead).toHaveBeenCalledWith(
-        expect.objectContaining({ node: testContainer.underTest.node })
+      // step_a has no predecessors and no scope-stack frames → empty output refs.
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: [],
+      });
+      expect(testContainer.stepIoService.readBatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('serves the same context until the node ends', async () => {
+      await testContainer.underTest.prepareContext();
+
+      const first = testContainer.underTest.getContext();
+      const second = testContainer.underTest.getContext();
+
+      expect(second).toBe(first);
+
+      testContainer.underTest.releaseContext();
+
+      expect(testContainer.underTest.getContext()).not.toBe(first);
+    });
+
+    it('renders a predecessor output that readBatch returned and the LRU did not keep', async () => {
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'step_b');
+      expect(node).toBeDefined();
+
+      const output = 'oversized-token';
+      const stepIoService = {
+        readBatch: jest.fn(
+          async (args: {
+            type: 'input' | 'output' | 'error';
+            refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+          }) => {
+            const values = new Map<string, unknown>();
+            if (args.type === 'output' && args.refs.some((r) => r.executionId === 'exec-step-a')) {
+              values.set('exec-step-a', output);
+            }
+            return values;
+          }
+        ),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: workflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest.fn().mockReturnValue([]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(0),
+        getStepIoVersion: jest.fn().mockReturnValue(0),
+        getLatestStepExecution: jest.fn((stepId: string) =>
+          stepId === 'step_a' ? { id: 'exec-step-a', stepId: 'step_a', scopeStack: [] } : undefined
+        ),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.prepareContext();
+
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: [{ executionId: 'exec-step-a', contextId: 'step_a' }],
+      });
+      expect(underTest.renderValueAccordingToContext('{{ steps.step_a.output }}')).toBe(output);
+    });
+
+    it('keeps narrowed variable rendering on the snapshot after an input write', async () => {
+      const variableWorkflow: WorkflowYaml = {
+        name: 'Test Workflow',
+        version: '1',
+        description: 'Variable snapshot test workflow',
+        enabled: true,
+        triggers: [],
+        steps: [
+          {
+            name: 'send',
+            type: 'console',
+            with: { message: '{{ variables.connector_id }}' },
+          } as ConnectorStep,
+        ],
+      };
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(variableWorkflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'send');
+      expect(node).toBeDefined();
+
+      let ioVersion = 0;
+      const stepIoService = {
+        readBatch: jest.fn(
+          async (args: {
+            type: 'input' | 'output' | 'error';
+            refs: ReadonlyArray<{ executionId: string; contextId: string }>;
+          }) => {
+            const values = new Map<string, unknown>();
+            if (args.type === 'output' && args.refs.some((r) => r.executionId === 'exec-set')) {
+              values.set('exec-set', { connector_id: 'conn-123' });
+            }
+            return values;
+          }
+        ),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: variableWorkflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest
+          .fn()
+          .mockReturnValue([{ id: 'exec-set', stepId: 'set_var', scopeStack: [] }]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
+        getStepIoVersion: jest.fn(() => ioVersion),
+        getStepIo: jest.fn().mockReturnValue(undefined),
+        getLatestStepExecution: jest.fn().mockReturnValue(undefined),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.prepareContext();
+      ioVersion = 1;
+
+      expect(underTest.renderValueAccordingToContext('{{ variables.connector_id }}')).toBe(
+        'conn-123'
       );
     });
 
-    it('passes a predecessorsResolver that returns predecessors from the graph', async () => {
-      await testContainer.underTest.ensureContextReady();
+    it('fetches a step named only by a handler condition', async () => {
+      const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
+      const node = workflowExecutionGraph
+        .getAllNodes()
+        .find((candidate) => candidate.stepId === 'step_a');
+      expect(node).toBeDefined();
 
-      const args = (testContainer.stepIoService.prepareForRead as jest.Mock).mock.calls[0][0];
-      expect(typeof args.predecessorsResolver).toBe('function');
-      // Resolver delegates to graph.getAllPredecessors — for step_a (no
-      // predecessors) the resolver returns [].
-      expect(args.predecessorsResolver(testContainer.underTest.node)).toEqual([]);
+      const stepIoService = {
+        readBatch: jest.fn(async () => new Map()),
+      } as unknown as StepIoService;
+      const workflowExecutionState = {
+        getWorkflowExecution: jest.fn().mockReturnValue({
+          id: 'exec-1',
+          workflowId: 'wf-1',
+          spaceId: 'default',
+          createdAt: '2023-01-01T00:00:00.000Z',
+          startedAt: '2023-01-01T00:00:00.000Z',
+          workflowDefinition: workflow,
+          scopeStack: [],
+        }),
+        getDataSetStepExecutions: jest
+          .fn()
+          .mockReturnValue([{ id: 'exec-set', stepId: 'set_var', scopeStack: [] }]),
+        getDataSetStepExecutionCount: jest.fn().mockReturnValue(1),
+        getStepIoVersion: jest.fn().mockReturnValue(0),
+        getLatestStepExecution: jest.fn((stepId: string) =>
+          stepId === 'producer' ? { id: 'exec-producer', stepId, scopeStack: [] } : undefined
+        ),
+        getStepExecution: jest.fn(),
+        getAllStepExecutions: jest.fn().mockReturnValue([]),
+      } as unknown as WorkflowExecutionState;
+
+      const underTest = new WorkflowContextManager({
+        templateEngine: new WorkflowTemplatingEngine(),
+        node: node as AtomicGraphNode,
+        stackFrames: [],
+        workflowExecutionGraph,
+        workflowExecutionState,
+        stepIoService,
+        esClient: {} as any,
+        dependencies,
+        fakeRequest: {} as KibanaRequest,
+        coreStart: {} as CoreStart,
+      });
+
+      await underTest.prepareContext('{{ steps.producer.output }} == {{ variables.flag }}');
+
+      expect(stepIoService.readBatch).toHaveBeenCalledWith({
+        type: 'output',
+        refs: expect.arrayContaining([
+          { executionId: 'exec-producer', contextId: 'producer' },
+          { executionId: 'exec-set', contextId: 'set_var' },
+        ]),
+      });
     });
   });
 

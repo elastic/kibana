@@ -53,10 +53,15 @@ const configSchema = schema.object({
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   eviction: schema.object({
     /**
-     * Minimum output payload size for a completed step to be eligible for eviction
-     * from in-memory state after it has been flushed to Elasticsearch.
-     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
-     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
+     * Maximum total byte size of the in-memory LRU output cache.
+     * When the cache exceeds this limit, the least-recently-used entries are evicted.
+     * Set to "0b" to keep (almost) nothing resident; outputs are then reloaded from
+     * Elasticsearch on demand.
+     */
+    maxCacheSize: schema.byteSize({ defaultValue: '10mb' }),
+    /**
+     * Deprecated. The LRU cache ignores this. A configured value logs a warning and is removed.
+     * Retention is controlled by maxCacheSize.
      */
     minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
   }),
@@ -96,6 +101,24 @@ export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
             defaultMessage:
               'Remove workflowsExecutionEngine.http from the Kibana config file, CLI flag, or environment variable. If allowedHosts listed specific hosts, set those hosts on xpack.actions.allowedHosts.',
           }),
+        ],
+      },
+    }),
+    unused('eviction.minPayloadSize', {
+      level: 'warning',
+      message: i18n.translate('workflowsExecutionEngine.deprecations.minPayloadSizeUnusedMessage', {
+        defaultMessage:
+          'workflowsExecutionEngine.eviction.minPayloadSize is not used. Output retention is controlled by workflowsExecutionEngine.eviction.maxCacheSize.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate(
+            'workflowsExecutionEngine.deprecations.minPayloadSizeUnused.manualStepOneMessage',
+            {
+              defaultMessage:
+                'Remove workflowsExecutionEngine.eviction.minPayloadSize from the Kibana config file, CLI flag, or environment variable. Set workflowsExecutionEngine.eviction.maxCacheSize to control how much step output stays in memory.',
+            }
+          ),
         ],
       },
     }),

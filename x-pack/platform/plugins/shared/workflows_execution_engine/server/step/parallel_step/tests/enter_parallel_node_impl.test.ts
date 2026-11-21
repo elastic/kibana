@@ -40,11 +40,6 @@ describe('EnterParallelNodeImpl', () => {
   let branchOutcome: (index: number) => ExecutionStatus;
   let branchRunCalls: number[];
 
-  // Step execution ids the impl asked to rehydrate before reading the branch
-  // results. Branch runtimes whose id is absent stand in for a branch whose
-  // output was deferred by a resume-time `load()` and never brought back.
-  let rehydratedIds: string[];
-
   const makeNode = (
     overrides: Partial<EnterParallelNode['configuration']> = {}
   ): EnterParallelNode =>
@@ -67,7 +62,6 @@ describe('EnterParallelNodeImpl', () => {
   beforeEach(() => {
     persistedState = undefined;
     branchRunCalls = [];
-    rehydratedIds = [];
     branchOutcome = () => ExecutionStatus.COMPLETED;
 
     workflowRuntime = {
@@ -87,10 +81,6 @@ describe('EnterParallelNodeImpl', () => {
       setCurrentStepState: jest.fn((s: ParallelStepState) => {
         persistedState = s;
       }),
-      rehydrateStepOutputs: jest.fn(async (ids: readonly string[]) => {
-        rehydratedIds.push(...ids);
-      }),
-      releaseReadOutputPins: jest.fn(),
       contextManager: {
         evaluateExpressionInContext: jest.fn((x) => x),
         renderValueAccordingToContext: jest.fn((x) => x),
@@ -111,12 +101,17 @@ describe('EnterParallelNodeImpl', () => {
         const index = Number(scopeId ?? 0);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           stepExecutionId: `exec_branch_${index}`,
           get stepExecution() {
             return { status: branchOutcome(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }),
@@ -185,6 +180,7 @@ describe('EnterParallelNodeImpl', () => {
     expect(stepRuntime.startStep).toHaveBeenCalledTimes(1);
     expect(stepRuntime.setInput).toHaveBeenCalledWith({
       foreach: JSON.stringify(['a', 'b', 'c']),
+      items: ['a', 'b', 'c'],
     });
     expect(persistedState?.total).toBe(3);
   });
@@ -242,6 +238,11 @@ describe('EnterParallelNodeImpl', () => {
     expect(output.results.map((r) => r.key)).toEqual(['a', 'b', 'c']);
     // Persisted branch state carries the snapshot too.
     expect(persistedState?.branches.map((b) => b.key)).toEqual(['a', 'b', 'c']);
+    // The input list is the init resolution, so a later branch does not re-evaluate.
+    expect(stepRuntime.setInput).toHaveBeenCalledWith({
+      foreach: '{{ steps.list.output }}',
+      items: ['a', 'b', 'c'],
+    });
   });
 
   it('fail-fast: a failed branch fails the step (not complete) but still exposes the aggregate', async () => {
@@ -274,11 +275,16 @@ describe('EnterParallelNodeImpl', () => {
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
       const index = Number(scopeId ?? 0);
       return {
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: {
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
+        },
         get stepExecution() {
           return { status: ExecutionStatus.COMPLETED, state: {} };
         },
         getCurrentStepResult: () => ({ output: { node: nodeId, branch: index }, error: undefined }),
+        getCurrentStepOutput: jest.fn(async () => ({ node: nodeId, branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -354,12 +360,17 @@ describe('EnterParallelNodeImpl', () => {
       timeoutStepCalls.push(timeoutStep);
       return {
         abortController,
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: {
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
+        },
         get stepExecution() {
           // Never settles on its own; only the timeout abort ends it.
           return { status: ExecutionStatus.RUNNING, state: {} };
         },
         getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep,
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -417,21 +428,16 @@ describe('EnterParallelNodeImpl', () => {
   });
 
   // Regression: `finish` reads each branch's terminal output directly rather
-  // than through a template, so `StepIoService.prepareForRead` — which targets
-  // outputs by static template analysis — never pre-warms it. Resume-time
-  // `load()` defers every non-pinned step output, and a parallel step advances
-  // at most `concurrency` branches per tick, so without an explicit rehydrate
-  // every wave but the last aggregated as `output: {}`.
-  it('rehydrates branch outputs before aggregating, so earlier waves are not lost', async () => {
+  // than through a template, so context preparation never pre-warms it. A
+  // parallel step advances at most `concurrency` branches per tick, so the
+  // aggregate must read every branch runtime, including ones from earlier waves.
+  it('reads every branch runtime, so earlier waves are not lost', async () => {
     node = makeNode({
       foreach: JSON.stringify(['a', 'b', 'c']),
       concurrency: { max: 2 },
       mode: 'settled',
     });
 
-    // Stands in for the deferred state: an output reads as `{}` (mirroring the
-    // real `getStepOutput(...) || {}`) until the impl has named its step
-    // execution id to `rehydrateStepOutputs`.
     factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
       const lastFrame = stackFrames[stackFrames.length - 1];
       const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
@@ -439,15 +445,20 @@ describe('EnterParallelNodeImpl', () => {
       const stepExecutionId = `exec_branch_${index}`;
       return {
         abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: {
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
+        },
         stepExecutionId,
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
         },
         getCurrentStepResult: () => ({
-          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          output: { branch: index },
           error: undefined,
         }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -524,15 +535,20 @@ describe('EnterParallelNodeImpl', () => {
       const stepExecutionId = `exec_branch_${index}`;
       return {
         abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+        contextManager: {
+          prepareContext: jest.fn().mockResolvedValue(undefined),
+          releaseContext: jest.fn(),
+        },
         stepExecutionId,
         get stepExecution() {
           return { status: branchOutcome(index), state: {} };
         },
         getCurrentStepResult: () => ({
-          output: rehydratedIds.includes(stepExecutionId) ? { branch: index } : {},
+          output: { branch: index },
           error: undefined,
         }),
+        getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+        getCurrentStepError: jest.fn(async () => undefined),
         timeoutStep: jest.fn(),
       } as unknown as StepExecutionRuntime;
     }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -550,85 +566,6 @@ describe('EnterParallelNodeImpl', () => {
       { branch: 1 },
       { branch: 2 },
     ]);
-  });
-
-  // The pin is not bookkeeping. `StepIoService.rehydrateOutputs` snapshots only
-  // the ids that are evicted when it starts, so an id that is RESIDENT at that
-  // moment is not in the fetch set -- and the persistence/eviction loop can run
-  // during the ES round trip. Without a read-pin held across the await and the
-  // subsequent synchronous reads, such an output is evicted mid-flight, never
-  // fetched, and aggregates as `{}`: the very data loss this fix exists to stop.
-  it('pins resident branch outputs so a concurrent eviction cycle cannot drop them mid-rehydrate', async () => {
-    node = makeNode({
-      foreach: JSON.stringify(['a', 'b', 'c']),
-      concurrency: { max: 2 },
-      mode: 'settled',
-    });
-
-    // Branches 0 and 1 settled in an earlier tick and were deferred by `load()`.
-    // Branch 2 settled in this tick, so its output is still resident -- and is
-    // therefore exactly the one `rehydrateOutputs` will not fetch.
-    const evicted = new Set(['exec_branch_0', 'exec_branch_1']);
-    const resident = new Set(['exec_branch_2']);
-    let pinned = new Set<string>();
-
-    stepRuntime.rehydrateStepOutputs = jest.fn(async (ids: readonly string[]) => {
-      pinned = new Set(ids);
-      const toFetch = ids.filter((id) => evicted.has(id));
-      // The await gap: the eviction cycle fires and takes anything resident and
-      // unpinned. With the pin in place it must take nothing.
-      await Promise.resolve();
-      for (const id of [...resident]) {
-        if (!pinned.has(id)) {
-          resident.delete(id);
-          evicted.add(id);
-        }
-      }
-      for (const id of toFetch) {
-        evicted.delete(id);
-        resident.add(id);
-      }
-    });
-    stepRuntime.releaseReadOutputPins = jest.fn(() => {
-      pinned = new Set();
-    });
-
-    factory.createStepExecutionRuntime = jest.fn(({ stackFrames }) => {
-      const lastFrame = stackFrames[stackFrames.length - 1];
-      const scopeId = lastFrame?.nestedScopes?.[lastFrame.nestedScopes.length - 1]?.scopeId;
-      const index = Number(scopeId ?? 0);
-      const stepExecutionId = `exec_branch_${index}`;
-      return {
-        abortController: new AbortController(),
-        contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
-        stepExecutionId,
-        get stepExecution() {
-          return { status: branchOutcome(index), state: {} };
-        },
-        // Mirrors the real `getStepOutput(...) || {}`: evicted reads as `{}`.
-        getCurrentStepResult: () => ({
-          output: resident.has(stepExecutionId) ? { branch: index } : {},
-          error: undefined,
-        }),
-        timeoutStep: jest.fn(),
-      } as unknown as StepExecutionRuntime;
-    }) as unknown as typeof factory.createStepExecutionRuntime;
-
-    const impl = build();
-    await impl.run();
-    await impl.run();
-
-    expect(stepRuntime.finishStep).toHaveBeenCalledTimes(1);
-    const output = stepRuntime.finishStep.mock.calls[0][0] as {
-      results: Array<{ output?: { branch?: number } }>;
-    };
-    expect(output.results.map((r) => r.output)).toEqual([
-      { branch: 0 },
-      { branch: 1 },
-      { branch: 2 },
-    ]);
-    // Pins must not outlive the read.
-    expect(stepRuntime.releaseReadOutputPins).toHaveBeenCalled();
   });
 
   it('count-waiting:false frees a parked branch\u2019s slot so a queued branch can start', async () => {
@@ -694,6 +631,10 @@ describe('EnterParallelNodeImpl', () => {
     node = makeNode({ foreach: JSON.stringify(items) });
     await expect(build().run()).rejects.toThrow(/exceeds the maximum/);
     expect(stepRuntime.finishStep).not.toHaveBeenCalled();
+    expect(stepRuntime.setInput).toHaveBeenCalledTimes(1);
+    expect(stepRuntime.setInput).toHaveBeenCalledWith({
+      foreach: JSON.stringify(items),
+    });
   });
 
   it('clamps an out-of-range concurrency to the ceiling', async () => {
@@ -759,7 +700,10 @@ describe('EnterParallelNodeImpl', () => {
         () =>
           ({
             abortController: new AbortController(),
-            contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+            contextManager: {
+              prepareContext: jest.fn().mockResolvedValue(undefined),
+              releaseContext: jest.fn(),
+            },
             stepExecutionId: 'exec_branch_0',
             get stepExecution() {
               return {
@@ -768,6 +712,8 @@ describe('EnterParallelNodeImpl', () => {
               };
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            getCurrentStepOutput: jest.fn(async () => ({ branch: 0 })),
+            getCurrentStepError: jest.fn(async () => undefined),
             timeoutStep: jest.fn(),
           } as unknown as StepExecutionRuntime)
       );
@@ -794,7 +740,10 @@ describe('EnterParallelNodeImpl', () => {
         () =>
           ({
             abortController: new AbortController(),
-            contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+            contextManager: {
+              prepareContext: jest.fn().mockResolvedValue(undefined),
+              releaseContext: jest.fn(),
+            },
             stepExecutionId: 'exec_branch_0',
             workflowExecution: { startedAt: new Date(nowMs).toISOString() },
             get stepExecution() {
@@ -804,6 +753,8 @@ describe('EnterParallelNodeImpl', () => {
               };
             },
             getCurrentStepResult: () => ({ output: { branch: 0 }, error: undefined }),
+            getCurrentStepOutput: jest.fn(async () => ({ branch: 0 })),
+            getCurrentStepError: jest.fn(async () => undefined),
             timeoutStep: jest.fn(),
           } as unknown as StepExecutionRuntime)
       );
@@ -866,12 +817,17 @@ describe('EnterParallelNodeImpl', () => {
         timeoutStepCalls.push(timeoutStep);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             // Parks in a durable wait and never settles on its own.
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep,
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -913,11 +869,16 @@ describe('EnterParallelNodeImpl', () => {
         timeoutStepCalls.push(timeoutStep);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep,
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -950,11 +911,16 @@ describe('EnterParallelNodeImpl', () => {
         const index = Number(scopeId ?? 0);
         return {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             return { status: ExecutionStatus.WAITING, state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1046,11 +1012,16 @@ describe('EnterParallelNodeImpl', () => {
       factory.createStepExecutionRuntime = jest.fn(({ nodeId }) => {
         startedNodes.push(nodeId);
         return {
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             return { status: ExecutionStatus.COMPLETED, state: {} };
           },
           getCurrentStepResult: () => ({ output: { node: nodeId }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ node: nodeId })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1094,7 +1065,10 @@ describe('EnterParallelNodeImpl', () => {
       factory.createStepExecutionRuntime = jest.fn(({ nodeId }) => {
         const failed = nodeId === 'bad_step';
         return {
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             return {
               status: failed ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
@@ -1105,6 +1079,8 @@ describe('EnterParallelNodeImpl', () => {
             output: failed ? undefined : { node: nodeId },
             error: failed ? { message: 'boom' } : undefined,
           }),
+          getCurrentStepOutput: jest.fn(async () => (failed ? undefined : { node: nodeId })),
+          getCurrentStepError: jest.fn(async () => (failed ? { message: 'boom' } : undefined)),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
       }) as unknown as typeof factory.createStepExecutionRuntime;
@@ -1131,15 +1107,15 @@ describe('EnterParallelNodeImpl', () => {
     });
   });
 
-  describe('releaseReadPins is called on every branch exit path', () => {
+  describe('prepareContext and releaseContext are called on every branch exit path', () => {
     // Captures every StepExecutionRuntime created by the factory. Note that
     // finish() and computeResumeAt() also call createStepExecutionRuntime for
-    // read-only lookups — those runtimes never have ensureContextReady called.
-    // Only runtimes that went through runBranchNode have both ensureContextReady
-    // and releaseReadPins called. We filter on ensureContextReady call count to
-    // distinguish the two populations.
+    // read-only lookups — those runtimes never have prepareContext called.
+    // Only runtimes that went through runBranchNode have prepareContext
+    // called. We filter on prepareContext call count to distinguish the two
+    // populations.
     interface CapturedRuntime {
-      contextManager: { ensureContextReady: jest.Mock; releaseReadPins: jest.Mock };
+      contextManager: { prepareContext: jest.Mock; releaseContext: jest.Mock };
     }
     let createdRuntimes: CapturedRuntime[];
 
@@ -1150,11 +1126,16 @@ describe('EnterParallelNodeImpl', () => {
         const index = Number(scopeId ?? 0);
         const runtime = {
           abortController: new AbortController(),
-          contextManager: { ensureContextReady: jest.fn(), releaseReadPins: jest.fn() },
+          contextManager: {
+            prepareContext: jest.fn().mockResolvedValue(undefined),
+            releaseContext: jest.fn(),
+          },
           get stepExecution() {
             return { status: branchStatus(index), state: {} };
           },
           getCurrentStepResult: () => ({ output: { branch: index }, error: undefined }),
+          getCurrentStepOutput: jest.fn(async () => ({ branch: index })),
+          getCurrentStepError: jest.fn(async () => undefined),
           timeoutStep: jest.fn(),
         } as unknown as StepExecutionRuntime;
         createdRuntimes.push(runtime as unknown as CapturedRuntime);
@@ -1167,12 +1148,12 @@ describe('EnterParallelNodeImpl', () => {
     });
 
     // Returns the subset of captured runtimes that went through runBranchNode —
-    // identified by ensureContextReady having been called on them. Runtimes
-    // created by finish() or computeResumeAt() never call ensureContextReady.
+    // identified by prepareContext having been called on them. Runtimes
+    // created by finish() or computeResumeAt() never call prepareContext.
     const branchNodeRuntimes = (): CapturedRuntime[] =>
-      createdRuntimes.filter((rt) => rt.contextManager.ensureContextReady.mock.calls.length > 0);
+      createdRuntimes.filter((rt) => rt.contextManager.prepareContext.mock.calls.length > 0);
 
-    it('calls releaseReadPins on each branch runtime when branches complete', async () => {
+    it('prepares the context once per branch runtime when branches complete', async () => {
       makeCapturingFactory(() => ExecutionStatus.COMPLETED);
 
       await build().run();
@@ -1180,11 +1161,12 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when branches fail', async () => {
+    it('prepares the context once per branch runtime when branches fail', async () => {
       makeCapturingFactory(() => ExecutionStatus.FAILED);
 
       await build().run();
@@ -1192,11 +1174,12 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when branches park in a durable wait', async () => {
+    it('prepares the context once per branch runtime when branches park in a durable wait', async () => {
       makeCapturingFactory(() => ExecutionStatus.WAITING);
 
       await build().run();
@@ -1204,11 +1187,12 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
 
-    it('calls releaseReadPins on each branch runtime when the per-branch timeout fires', async () => {
+    it('prepares the context once per branch runtime when the per-branch timeout fires', async () => {
       node = makeNode({ 'branch-timeout': '20ms', mode: 'settled' });
       makeCapturingFactory(() => ExecutionStatus.RUNNING);
       nodesFactory.create = jest.fn(
@@ -1228,7 +1212,8 @@ describe('EnterParallelNodeImpl', () => {
       const runRuntimes = branchNodeRuntimes();
       expect(runRuntimes.length).toBe(3); // one per branch
       for (const rt of runRuntimes) {
-        expect(rt.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.prepareContext).toHaveBeenCalledTimes(1);
+        expect(rt.contextManager.releaseContext).toHaveBeenCalledTimes(1);
       }
     });
   });

@@ -7,6 +7,7 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { JsonValue } from '@kbn/utility-types';
 import {
   type EsWorkflowStepExecution,
   type SerializedError,
@@ -16,7 +17,17 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { buildWorkflowRenderContext } from './build_workflow_context';
-import type { StepIoService } from './step_io_service';
+import {
+  analyzeConditionString,
+  extractReferencedStepIds,
+  nodeMayReferenceVariables,
+} from './extract_referenced_step_ids';
+import {
+  areParallelBranchesCompatible,
+  buildStepIoContextId,
+  getParallelBranchScopes,
+} from './parallel_branch_scope';
+import type { StepIoBatchValue, StepIoRef, StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import type { RuntimeGraphView } from './workflow_runtime_graph';
@@ -30,6 +41,72 @@ import { evaluateCondition } from '../step/evaluate_condition';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
 import { isSerializedError } from '../utils/errors';
+
+/** Builds a read/write ref from a step execution's durable id and persisted scope. */
+const toStepIoRef = (exec: {
+  id: string;
+  stepId: string;
+  scopeStack?: readonly StackFrame[];
+}): StepIoRef => ({
+  executionId: exec.id,
+  contextId: buildStepIoContextId(exec.stepId, exec.scopeStack ?? []),
+});
+
+/**
+ * Resolves the step IO refs whose outputs must be loaded before the upcoming
+ * context build for `node`. Combines:
+ *
+ * 1. Template-referenced steps (static analysis via `extractReferencedStepIds`).
+ *    Falls back to all predecessors only when analysis is ambiguous (`null`).
+ *    A node with no step references needs none, so nothing is fetched for it.
+ * 2. All `data.set` executions — needed by `getVariables`, only when the node or
+ *    `condition` may reference `variables`.
+ * 3. Steps named by `condition`, when a handler evaluates that string on this node.
+ *
+ * Each ref carries `contextId` from the target execution's own `stepId` + `scopeStack`.
+ * Open scope frames are not included: they have no output until they leave the stack.
+ * Predecessor `steps.X.input` is not part of the public context; do not fetch inputs here.
+ */
+export function resolveRehydrationTargets(
+  node: GraphNodeUnion,
+  predecessors: ReadonlyArray<GraphNodeUnion>,
+  state: WorkflowExecutionState,
+  stackFrames?: readonly StackFrame[],
+  condition?: string
+): StepIoRef[] {
+  const byExecutionId = new Map<string, StepIoRef>();
+  const referencedStepIds = extractReferencedStepIds(node);
+  const conditionRefs = condition ? analyzeConditionString(condition) : undefined;
+
+  const addExecution = (exec: StepExecutionMetadata | undefined): void => {
+    if (exec) byExecutionId.set(exec.id, toStepIoRef(exec));
+  };
+
+  const addStepIds = (stepIds: ReadonlySet<string>): void => {
+    for (const stepId of stepIds) {
+      addExecution(state.getLatestStepExecution(stepId, stackFrames));
+    }
+  };
+
+  if (referencedStepIds === null || conditionRefs?.stepIds === null) {
+    for (const pred of predecessors) {
+      addExecution(state.getLatestStepExecution(pred.stepId, stackFrames));
+    }
+  }
+  if (referencedStepIds) addStepIds(referencedStepIds);
+  if (conditionRefs?.stepIds) addStepIds(conditionRefs.stepIds);
+
+  // `getVariables()` reads every `data.set` output, so those must be resident when the
+  // node or the handler condition can read `variables`. Skipping them otherwise avoids
+  // re-fetching (and thrashing the LRU with) a potentially huge set of outputs on every node run.
+  if (nodeMayReferenceVariables(node) || conditionRefs?.mayReferenceVariables) {
+    for (const step of state.getDataSetStepExecutions()) {
+      addExecution(step);
+    }
+  }
+
+  return [...byExecutionId.values()];
+}
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -75,6 +152,19 @@ export class WorkflowContextManager {
    */
   private predecessorsCache: GraphNodeUnion[] | undefined;
 
+  /** Memoised `getVariables()` aggregate, keyed by data.set count and step IO version. */
+  private variablesCache: { version: string; value: Record<string, unknown> } | undefined;
+
+  /** Context built by `prepareContext` and served until `releaseContext`. */
+  private snapshot: StepContext | undefined;
+
+  /**
+   * Output values from the `readBatch` that built `snapshot`. Set only while
+   * `buildContext` runs. Oversized outputs live here and then on the snapshot.
+   * Foreach `input.items` is read from the live map, not from this batch.
+   */
+  private outputBatch: ReadonlyMap<string, StepIoBatchValue> | undefined;
+
   private get predecessors(): ReadonlyArray<GraphNodeUnion> {
     if (!this.predecessorsCache) {
       this.predecessorsCache = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
@@ -85,27 +175,6 @@ export class WorkflowContextManager {
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
-
-  /**
-   * Stable identifier for this node's execution — used as the consumer key
-   * in {@link StepIoService.prepareForRead} and {@link StepIoService.releaseReadPins}.
-   * Built from the same `(node.stepId, stackFrames)` the factory uses for
-   * `StepExecutionRuntime.stepExecutionId`, so they are provably identical.
-   * Lazily computed once and cached — the values are immutable after construction.
-   */
-  private get consumerExecutionId(): string {
-    if (!this._consumerExecutionId) {
-      const executionId = this.workflowExecutionState.getWorkflowExecution().id;
-      this._consumerExecutionId = buildStepExecutionId(
-        executionId,
-        this.node.stepId,
-        this.stackFrames
-      );
-    }
-    return this._consumerExecutionId;
-  }
-
-  private _consumerExecutionId: string | undefined;
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
@@ -121,40 +190,40 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Pre-warms the execution state by rehydrating any evicted step outputs
-   * that will be needed by `getContext()`. Must be called before `getContext()`.
-   *
-   * This exists so that `getContext()` and all its synchronous callers
-   * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
-   * remain synchronous. When nothing has been evicted, this is a no-op with
-   * zero overhead.
-   *
-   * Also read-pins the node's referenced outputs for the duration of this
-   * node's execution so the concurrent eviction loop cannot evict them between
-   * the pre-warm and the synchronous `getContext()` call that follows.
+   * Loads the step IO this context reads and freezes the snapshot.
+   * `condition` is included when a handler evaluates that string here.
+   * Pair with `releaseContext`.
    */
-  public async ensureContextReady(): Promise<void> {
-    await this.stepIoService.prepareForRead({
-      node: this.node,
-      predecessorsResolver: () => this.predecessors,
-      consumerId: this.consumerExecutionId,
-      stackFrames: this.stackFrames,
-    });
+  public async prepareContext(condition?: string): Promise<void> {
+    const neededRefs = resolveRehydrationTargets(
+      this.node,
+      this.predecessors,
+      this.workflowExecutionState,
+      this.stackFrames,
+      condition
+    );
+    this.outputBatch = await this.stepIoService.readBatch({ type: 'output', refs: neededRefs });
+    // The batch changes what variables resolve to without touching the IO version.
+    this.variablesCache = undefined;
+    try {
+      this.snapshot = this.buildContext();
+    } finally {
+      this.outputBatch = undefined;
+    }
   }
 
-  /**
-   * Releases the read-pins set by {@link ensureContextReady} for this node.
-   * Must be called when the node finishes (success or error) so its pinned
-   * outputs become eviction candidates again. Idempotent — safe to call even
-   * if `ensureContextReady` was skipped (eviction-disabled fast path).
-   */
-  public releaseReadPins(): void {
-    this.stepIoService.releaseReadPins(this.consumerExecutionId);
+  /** Drops the snapshot. Fitting outputs remain in the shared LRU. */
+  public releaseContext(): void {
+    this.snapshot = undefined;
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
   // x-pack/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts
   public getContext(): StepContext {
+    return this.snapshot ?? this.buildContext();
+  }
+
+  private buildContext(): StepContext {
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
@@ -325,13 +394,40 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Get variables from all completed data.set steps in the workflow execution.
-   * Variables are retrieved from step outputs, which are persisted in execution state.
-   * This ensures variables survive across wait steps and task resumptions.
-   * Steps are processed in execution order to ensure consistent variable assignment.
+   * Aggregates outputs from all `data.set` step executions in execution order.
+   * Outputs are read via the normal IO read path (LRU cache → state fallback).
+   * The aggregate is memoised per instance and recomputed only when a data.set execution
+   * is added or any step IO is written, so repeated `getContext()` calls within a step
+   * do not re-scan every data.set execution.
    */
   public getVariables(): Record<string, unknown> {
-    return this.stepIoService.getDataSetVariables(this.stackFrames);
+    const { workflowExecutionState: state } = this;
+    const version = `${state.getDataSetStepExecutionCount()}:${state.getStepIoVersion()}`;
+    if (this.variablesCache?.version !== version) {
+      this.variablesCache = { version, value: this.computeVariables() };
+    }
+    return { ...this.variablesCache.value };
+  }
+
+  private computeVariables(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    const readerBranchScopes = getParallelBranchScopes(this.stackFrames);
+    const dataSetSteps = this.workflowExecutionState.getDataSetStepExecutions().filter((step) => {
+      if (readerBranchScopes.length === 0) {
+        return true;
+      }
+      return areParallelBranchesCompatible(
+        readerBranchScopes,
+        getParallelBranchScopes(step.scopeStack ?? [])
+      );
+    });
+    for (const step of dataSetSteps) {
+      const output = this.readIoValue(step.id, 'output', fixtureOutput(step));
+      if (output != null && typeof output === 'object' && !Array.isArray(output)) {
+        Object.assign(result, output);
+      }
+    }
+    return result;
   }
 
   /**
@@ -380,10 +476,17 @@ export class WorkflowContextManager {
       referencedVariableSegments.flatMap((path) => (typeof path[0] === 'string' ? [path[0]] : []))
     );
 
+    // Snapshot variables were loaded with the batch. An input write leaves them in place.
+    const variables = referencedRoots.has('variables')
+      ? this.snapshot
+        ? { ...this.snapshot.variables }
+        : this.getVariables()
+      : {};
+
     const stepContext: StepContext = {
       ...this.buildWorkflowContext(),
       steps: {},
-      variables: referencedRoots.has('variables') ? this.getVariables() : {},
+      variables,
     };
 
     if (referencedRoots.has('steps')) {
@@ -418,12 +521,16 @@ export class WorkflowContextManager {
     }
 
     for (const [stepId, requestedPaths] of pathsByStepId) {
-      const stepData = this.getStepData(stepId);
-      if (stepData) {
-        const mergedStepData = {
-          ...stepData.runStepResult,
-          ...(stepData.stepState ?? {}),
-        };
+      // The snapshot already holds outputs the LRU refused. Reading IO again
+      // would miss them.
+      const stepData = this.snapshot ? undefined : this.getStepData(stepId);
+      const mergedStepData = this.snapshot
+        ? this.snapshot.steps[stepId]
+        : stepData && {
+            ...stepData.runStepResult,
+            ...(stepData.stepState ?? {}),
+          };
+      if (mergedStepData) {
         stepContext.steps[stepId] ??= {};
         const partialStepData = stepContext.steps[stepId];
         for (const requestedPath of requestedPaths) {
@@ -661,7 +768,11 @@ export class WorkflowContextManager {
 
     // Prefer the list snapshotted onto input at enter. Re-evaluate the
     // expression only for older executions that never stored `items`.
-    const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
+    const foreachInput = this.readIoValue(
+      stepExecution.id,
+      'input',
+      fixtureInput(stepExecution)
+    ) as EsWorkflowStepExecution['input'];
     const foreachExpression = this.extractForeachExpression(foreachInput);
     const items =
       this.extractPersistedForeachItems(foreachInput) ??
@@ -744,28 +855,59 @@ export class WorkflowContextManager {
   private getStepData(stepId: string):
     | {
         runStepResult: {
-          input: unknown;
           output: unknown;
           error: SerializedError | undefined;
         };
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const io = this.stepIoService.getLatestStepIO(stepId, this.stackFrames);
-    if (!io) {
-      return;
-    }
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(
       stepId,
       this.stackFrames
     );
+    if (!latestStepExecution) {
+      return;
+    }
     return {
       runStepResult: {
-        input: io.input,
-        output: io.output,
-        error: io.error,
+        output: this.readIoValue(
+          latestStepExecution.id,
+          'output',
+          fixtureOutput(latestStepExecution)
+        ),
+        error: latestStepExecution.error,
       },
-      stepState: latestStepExecution?.state,
+      stepState: latestStepExecution.state,
     };
   }
+
+  /**
+   * Outputs prefer the batch captured for this snapshot, then execution state, then a
+   * value baked onto the execution (unit-test fixtures). Inputs are never batched into
+   * the snapshot; open-loop foreach reads them from the live map / fixture only.
+   */
+  private readIoValue(
+    id: string | undefined,
+    type: 'input' | 'output',
+    fixture: JsonValue | null | undefined
+  ): StepIoBatchValue | undefined {
+    if (type === 'output' && id !== undefined && this.outputBatch?.has(id)) {
+      return this.outputBatch.get(id);
+    }
+    if (id !== undefined && typeof this.workflowExecutionState.getStepIo === 'function') {
+      const fromState = this.workflowExecutionState.getStepIo(id, type);
+      if (fromState !== undefined) {
+        return fromState;
+      }
+    }
+    return fixture;
+  }
+}
+
+function fixtureInput(step: object): JsonValue | null | undefined {
+  return 'input' in step ? (step.input as JsonValue | null | undefined) : undefined;
+}
+
+function fixtureOutput(step: object): JsonValue | null | undefined {
+  return 'output' in step ? (step.output as JsonValue | null | undefined) : undefined;
 }
