@@ -53,6 +53,7 @@ const pciComplianceSchema = z
       .optional()
       .describe(
         'Requirement identifiers to evaluate. Accepts "all", top-level ("1".."12"), or sub-requirements ("8.3.4"). ' +
+          'Legacy pre-v4.0.1 numbering is accepted too and resolved to its v4.0.1 id (e.g. "4.1" -> "4.2.1"). ' +
           'Defaults to ["all"].'
       ),
     timeRange: pciTimeRangeSchema
@@ -128,8 +129,9 @@ const rollupOverallStatus = (rows: EvaluatedRequirement[]): ComplianceStatus => 
  *     and bound into ES|QL via `?_tstart` / `?_tend` named parameters — never interpolated.
  *  2. Index patterns are validated against a strict regex before being placed into the ES|QL
  *     `FROM` clause (which cannot be parameterised today).
- *  3. `requirements` entries are validated against the enum of known requirement IDs plus
- *     the sentinel `"all"`. Unknown IDs are rejected at the schema boundary.
+ *  3. `requirements` entries are validated against the enum of known requirement IDs (the v4.0.1
+ *     catalog plus the sentinel `"all"` and the documented legacy aliases). Unknown IDs are
+ *     rejected at the schema boundary; legacy ids resolve to their v4.0.1 equivalent.
  *
  * Every response includes a `scopeClaim` object citing the DSS version, the indices and
  * time range that were actually evaluated, the requirement IDs that were run, the fields
