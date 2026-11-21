@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { differenceBy } from 'lodash';
+import { differenceBy, uniqBy } from 'lodash';
 import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
 import { createInternalStateAsyncThunk, getMemoizedRequest } from '../utils';
 import type { RuntimeStateManager } from '../runtime_state';
@@ -18,10 +18,17 @@ export const loadDataViewList = createInternalStateAsyncThunk(
   async (_, { extra: { services } }) => services.dataViews.getIdsWithTitle(true)
 );
 
-const initialDataViewListRequests = new WeakMap<RuntimeStateManager, Promise<void>>();
+type DataViewListResult =
+  | ReturnType<typeof loadDataViewList.fulfilled>
+  | ReturnType<typeof loadDataViewList.rejected>;
+
+const initialDataViewListRequests = new WeakMap<RuntimeStateManager, Promise<DataViewListResult>>();
 
 /** Loads the data view list, once per Discover instance. */
-export const loadDataViewListOnce: InternalStateThunkActionCreator<[], Promise<void>> = () =>
+export const loadDataViewListOnce: InternalStateThunkActionCreator<
+  [],
+  Promise<DataViewListResult>
+> = () =>
   function loadDataViewListOnceThunkFn(dispatch, _, { runtimeStateManager }) {
     return getMemoizedRequest(initialDataViewListRequests, runtimeStateManager, () =>
       dispatch(loadDataViewList()).then((action) => {
@@ -29,6 +36,8 @@ export const loadDataViewListOnce: InternalStateThunkActionCreator<[], Promise<v
         if (loadDataViewList.rejected.match(action)) {
           initialDataViewListRequests.delete(runtimeStateManager);
         }
+
+        return action;
       })
     );
   };
@@ -94,7 +103,10 @@ export const replaceAdHocDataViewWithId: InternalStateThunkActionCreator<[string
 
     dispatch(
       setAdHocDataViews(
-        prevAdHocDataViews.map((dataView) => (dataView.id === prevId ? newDataView : dataView))
+        uniqBy(
+          prevAdHocDataViews.map((dataView) => (dataView.id === prevId ? newDataView : dataView)),
+          'id'
+        )
       )
     );
     dispatch(

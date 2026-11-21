@@ -18,7 +18,6 @@ import {
   updateStoredDiscoverSession,
 } from './stored_session';
 import { transformDiscoverSessionIn, transformDiscoverSessionOut } from './transforms';
-import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 export const upsertDiscoverSession = async (
   requestContext: RequestHandlerContext,
@@ -39,7 +38,7 @@ export const upsertDiscoverSession = async (
 
     const created = await createStoredDiscoverSession(
       requestContext,
-      { attributes: assignStoredInlineDataViewIds(attributes), references },
+      { attributes, references },
       id
     );
 
@@ -47,7 +46,7 @@ export const upsertDiscoverSession = async (
   }
 
   const updated = await updateStoredDiscoverSession(requestContext, id, {
-    attributes: assignStoredInlineDataViewIds(attributes, existing.attributes),
+    attributes,
     references,
   });
 

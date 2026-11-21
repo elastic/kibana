@@ -35,9 +35,17 @@ import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 import { APP_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { TABS_LOCAL_STORAGE_KEY } from '../../tabs_storage_manager';
 import type { UISession } from '@kbn/data-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { FilterStateStore } from '@kbn/es-query';
+import { createDataViewDataSource } from '../../../../../../common/data_sources';
+import { generateInlineDataViewId } from '../../../../../../common/session/inline_data_view';
+import {
+  createFilter,
+  foreignFilter,
+} from '../../../../../../common/session/inline_data_view.fixtures';
 
 interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
@@ -213,6 +221,71 @@ describe('tabs actions', () => {
   });
 
   describe('openSearchSessionInNewTab', () => {
+    it('restores a legacy inline view with matching app and pinned filter references', async () => {
+      const { internalState, getCurrentTab, initializeSingleTab, runtimeStateManager, services } =
+        await setup();
+      const filterManager = new FilterManager(services.uiSettings);
+      services.filterManager = filterManager;
+      services.data.query.filterManager = filterManager;
+      const dataViewSpec = {
+        id: 'legacy-inline-id',
+        title: 'logs-*',
+        name: 'Inline logs',
+        timeFieldName: '@timestamp',
+      };
+      const dataViewId = generateInlineDataViewId(dataViewSpec);
+      const appFilter = {
+        ...createFilter(dataViewSpec.id),
+        $state: { store: FilterStateStore.APP_STATE },
+      };
+      const pinnedFilter = {
+        ...createFilter(dataViewSpec.id),
+        query: { match_phrase: { 'host.name': 'test-host' } },
+        $state: { store: FilterStateStore.GLOBAL_STATE },
+      };
+      const searchSession = createSearchSession({
+        searchSessionId: 'search-session-id',
+        dataViewId: dataViewSpec.id,
+        dataViewSpec,
+        query: kuery('service.name: checkout'),
+        filters: [appFilter, pinnedFilter, foreignFilter],
+      });
+
+      await internalState.dispatch(
+        internalStateActions.openSearchSessionInNewTab({ searchSession })
+      );
+
+      const tab = getCurrentTab();
+      expect(tab.initialInternalState).toStrictEqual({
+        searchSessionId: 'search-session-id',
+        serializedSearchSource: { index: { ...dataViewSpec, id: dataViewId } },
+      });
+      expect(tab.appState).toStrictEqual({
+        dataSource: createDataViewDataSource({ dataViewId }),
+        query: kuery('service.name: checkout'),
+        filters: [{ ...appFilter, meta: { ...appFilter.meta, index: dataViewId } }, foreignFilter],
+      });
+      expect(tab.globalState.filters).toStrictEqual([
+        { ...pinnedFilter, meta: { ...pinnedFilter.meta, index: dataViewId } },
+      ]);
+
+      await initializeSingleTab({ tabId: tab.id, skipWaitForDataFetching: true });
+
+      const tabRuntimeState = runtimeStateModule.selectTabRuntimeState(runtimeStateManager, tab.id);
+      expect(runtimeStateModule.getTabDataView(tabRuntimeState)?.id).toBe(dataViewId);
+      expect(getCurrentTab().appState.dataSource).toStrictEqual(
+        createDataViewDataSource({ dataViewId })
+      );
+      expect(services.filterManager.getAppFilters().map(({ meta }) => meta.index)).toStrictEqual([
+        dataViewId,
+        foreignFilter.meta.index,
+      ]);
+      expect(services.filterManager.getGlobalFilters().map(({ meta }) => meta.index)).toStrictEqual(
+        [dataViewId]
+      );
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId: tab.id }));
+    });
+
     it('seeds the new tab with parsed Persistent and Url profile state', async () => {
       const { internalState } = await setup();
       const initialTabs = selectAllTabs(internalState.getState());

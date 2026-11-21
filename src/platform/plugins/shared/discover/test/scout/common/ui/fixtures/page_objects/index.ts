@@ -8,4 +8,5 @@
  */
 
 export { InsightsAndAlerting } from './insights_and_alerting';
+export { LensEditing } from './lens_editing';
 export { DiscoverPage } from './discover_page';

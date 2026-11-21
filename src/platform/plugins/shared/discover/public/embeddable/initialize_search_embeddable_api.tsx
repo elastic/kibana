@@ -44,6 +44,15 @@ import { unregisterFromDataViewsCache, type EsqlSource } from '@kbn/data-source'
 import type { DiscoverServices } from '../build_services';
 import { resolveEsqlSource } from '../application/main/data_fetching/resolve_esql_source';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
+import {
+  getInlineDataViewIdentity,
+  normalizeInlineSearchSource,
+  remapSharedFilterDataViewIds,
+} from '../../common/session/inline_data_view_references';
+import {
+  createInlineDataViewIdCompatibility,
+  type InlineDataViewIdCompatibility,
+} from '../../common/session/inline_data_view_id_compatibility';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
@@ -63,9 +72,18 @@ const initializeSearchSource = async (
     ? omit(serializedSearchSource, 'index')
     : serializedSearchSource;
 
+  // The panel's view is the only one visible, so pinned and Dashboard filters can follow it too.
+  const identity = getInlineDataViewIdentity(searchSourceFields);
+  const idCompatibility = createInlineDataViewIdCompatibility({
+    views: [identity],
+  });
+  const normalizedSearchSource = normalizeInlineSearchSource(searchSourceFields ?? {}, {
+    idCompatibility,
+  });
+
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(searchSourceFields),
+      discoverServices.inlineDataViews.resolveSearchSource(normalizedSearchSource),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {
@@ -91,7 +109,7 @@ const initializeSearchSource = async (
       previousSourceId,
     });
     searchSource.setField('index', esqlDataView);
-    return { searchSource, dataView: esqlDataView, esqlSource };
+    return { searchSource, dataView: esqlDataView, esqlSource, idCompatibility };
   }
 
   if (previousSourceId) {
@@ -99,7 +117,7 @@ const initializeSearchSource = async (
     unregisterFromDataViewsCache(previousSourceId);
   }
 
-  return { searchSource, dataView, esqlSource: undefined };
+  return { searchSource, dataView, esqlSource: undefined, idCompatibility };
 };
 
 const initializedSavedSearch = (
@@ -143,18 +161,22 @@ export const initializeSearchEmbeddableApi = async ({
     PublishesEsql;
   internalApi: {
     setApproximationApplied: (approximationApplied?: boolean) => void;
+    remapParentFilters: (filters: Filter[] | undefined) => Filter[] | undefined;
   };
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
+  /** Captures the current legacy references together with a state snapshot for later restoration. */
+  createStateRestorer: (state: SearchEmbeddableSerializedAttributes) => () => Promise<void>;
   esqlSource$: BehaviorSubject<EsqlSource | undefined>;
 }> => {
   /** We **must** have a search source, so start by initializing it  */
-  const { searchSource, dataView, esqlSource } = await initializeSearchSource(
+  const { searchSource, dataView, esqlSource, idCompatibility } = await initializeSearchSource(
     discoverServices,
     initialState.serializedSearchSource
   );
+  let currentIdCompatibility: InlineDataViewIdCompatibility = idCompatibility;
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataSources$ = new BehaviorSubject<DataView[] | undefined>(
     dataView ? [dataView] : undefined
@@ -266,7 +288,10 @@ export const initializeSearchEmbeddableApi = async ({
     stateManager.columns.next(columns);
   };
 
-  const reinitializeState = async (state: SearchEmbeddableSerializedAttributes) => {
+  const reinitializeState = async (
+    state: SearchEmbeddableSerializedAttributes,
+    restoredIdCompatibility?: InlineDataViewIdCompatibility
+  ) => {
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
@@ -277,11 +302,13 @@ export const initializeSearchEmbeddableApi = async ({
       searchSource: newSearchSource,
       dataView: newDataView,
       esqlSource: newEsqlSource,
+      idCompatibility: newIdCompatibility,
     } = await initializeSearchSource(
       discoverServices,
       state.serializedSearchSource,
       previousSourceId
     );
+    currentIdCompatibility = restoredIdCompatibility ?? newIdCompatibility;
 
     // Ensure all state updates happen synchronously to prevent multiple reloads
     savedSearch$.next({ ...savedSearch$.getValue(), tabTypeState: state.tabTypeState });
@@ -357,6 +384,8 @@ export const initializeSearchEmbeddableApi = async ({
     esqlSource$,
     internalApi: {
       setApproximationApplied,
+      remapParentFilters: (filters) =>
+        filters && remapSharedFilterDataViewIds(filters, currentIdCompatibility),
     },
     api: {
       setDataSources,
@@ -378,5 +407,11 @@ export const initializeSearchEmbeddableApi = async ({
       map(() => undefined)
     ),
     reinitializeState,
+    createStateRestorer: (state) => {
+      // Snapshot specs already have derived IDs, so keep their legacy mapping separately.
+      const snapshotIdCompatibility = currentIdCompatibility;
+
+      return () => reinitializeState(state, snapshotIdCompatibility);
+    },
   };
 };

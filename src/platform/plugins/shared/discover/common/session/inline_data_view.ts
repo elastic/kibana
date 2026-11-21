@@ -7,25 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from '@kbn/as-code-data-views-transforms';
+import type { AsCodeDataViewSpec } from '@kbn/as-code-data-views-schema';
+import { fromStoredDataView, fromStoredScriptedFields } from '@kbn/as-code-data-views-transforms';
+import { Sha256 } from '@kbn/crypto-browser';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { stableStringify } from '@kbn/std';
+import { every, isEmpty, isUndefined, mapValues, omit, omitBy, pick } from 'lodash';
 
-/** Finds a classic inline view, leaving saved Data View references and ES|QL views out. */
+export interface InlineDataViewIdentity {
+  dataView: DataViewSpec;
+  id: string;
+}
+
+/** Returns the classic inline spec identified by value; ES|QL and managed views keep their IDs. */
 export const getInlineDataView = (
   searchSource: SerializedSearchSourceFields | undefined
 ): DataViewSpec | undefined => {
-  const { index, query } = searchSource ?? {};
+  if (isOfAggregateQueryType(searchSource?.query)) {
+    return undefined;
+  }
+
+  const index = searchSource?.index;
   if (
-    isOfAggregateQueryType(query) ||
     !index ||
     typeof index === 'string' ||
     !index.title ||
-    index.type === ESQL_TYPE
+    index.type === ESQL_TYPE ||
+    index.managed
   ) {
     return undefined;
   }
@@ -33,24 +44,58 @@ export const getInlineDataView = (
   return index;
 };
 
-/** Compares public definitions with the same defaults, without changing the spec or including its ID. */
-export const getDataViewSpecKey = (dataView: DataViewSpec): string => {
-  const spec = fromStoredDataView(dataView);
-  const fieldFilters = spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_filters : undefined;
-  const fieldSettings = Object.fromEntries(
-    Object.entries(
-      spec.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? spec.field_settings ?? {} : {}
-    ).filter(([, field]) => Object.values(field).some((value) => value !== undefined))
+/** Whether the spec of a view that is not persisted is identified by value. */
+export const isInlineDataViewSpec = (spec: DataViewSpec): boolean =>
+  getInlineDataView({ index: spec }) !== undefined;
+
+/** Whether a view is an inline view identified by its spec rather than a stored ID. */
+export const isInlineDataView = (dataView: DataView): boolean =>
+  !dataView.isPersisted() && isInlineDataViewSpec(dataView.toMinimalSpec());
+
+/** Returns the spec that identifies a view, keeping the scripted fields its minimal spec omits. */
+export const getInlineDataViewIdentitySpec = (dataView: DataView): DataViewSpec => {
+  const scriptedFields = [...dataView.fields].filter(({ scripted }) => scripted);
+  if (scriptedFields.length === 0) {
+    return dataView.toMinimalSpec();
+  }
+
+  return {
+    ...dataView.toMinimalSpec(),
+    fields: Object.fromEntries(scriptedFields.map((field) => [field.name, field.toSpec()])),
+  };
+};
+
+const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
+  const spec = fromStoredDataView(dataView) as AsCodeDataViewSpec;
+  const fieldSettings = omitBy(spec.field_settings, (settings) => every(settings, isUndefined));
+  // Popularity is usage metadata that minimal specs strip, so it is not part of the identity.
+  const scriptedFields = mapValues(
+    fromStoredScriptedFields(dataView.fields, dataView.fieldFormats, dataView.fieldAttrs),
+    (field) => omit(field, 'popularity')
   );
 
-  // An omitted name means the title; omitted allowHidden means false. Empty field
-  // settings can also come from stored-only properties such as field popularity.
-  return stableStringify({
-    ...spec,
-    name: dataView.name || dataView.title,
-    allow_hidden_indices: dataView.allowHidden ?? false,
-    // Sort exclusions only for comparison, so reordering them keeps the same ID.
-    field_filters: fieldFilters ? [...fieldFilters].sort() : undefined,
-    field_settings: Object.keys(fieldSettings).length > 0 ? fieldSettings : undefined,
-  });
+  return {
+    type: 'data_view_spec' as const,
+    // The Data View service uses the title when the name is missing or empty.
+    name: spec.name || spec.index_pattern,
+    // DataView.toMinimalSpec() includes this default even when the API document omits it.
+    allow_hidden_indices: spec.allow_hidden_indices ?? false,
+    ...pick(spec, ['index_pattern', 'time_field']),
+    ...omitBy(
+      {
+        field_settings: fieldSettings,
+        field_filters: spec.field_filters,
+        scripted_fields: scriptedFields,
+      },
+      isEmpty
+    ),
+  };
+};
+
+/** Generates a stable inline ID from the definition without changing the spec. */
+export const generateInlineDataViewId = (dataView: DataViewSpec): string => {
+  // Changing the ID for an unchanged spec can break saved dashboard filters.
+  const specKey = stableStringify(getCanonicalInlineDataViewSpec(dataView));
+
+  return `discover-inline-${new Sha256().update(specKey).digest('hex')}`;
 };

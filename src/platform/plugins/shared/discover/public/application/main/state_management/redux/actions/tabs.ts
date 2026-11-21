@@ -49,11 +49,18 @@ import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
+import { createInlineDataViewIdCompatibility } from '../../../../../../common/session/inline_data_view_id_compatibility';
+import {
+  getInlineDataViewIdentity,
+  normalizeInlineAppState,
+  normalizeInlineSearchSource,
+  remapDataViewReferences,
+} from '../../../../../../common/session/inline_data_view_references';
 import type { InitialTabState } from '../../../../../plugin_imports/initial_tab_state_service';
 import { fetchData } from './tab_state';
-import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { assignSessionDataViewIds } from '../../utils/assign_session_data_view_ids';
+import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
+import { loadDataViewList, loadDataViewListOnce } from './data_views';
 import { clearOutdatedTabUrlState } from '../../utils/cleanup_url_state';
 import { showSessionWarnings } from '../../../../../session';
 
@@ -390,6 +397,7 @@ export const updateTabs: InternalStateThunkActionCreator<
     );
   };
 
+/** Loads the session and saved views before normalizing and restoring its tabs. */
 export const initializeTabs = createInternalStateAsyncThunk(
   'internalState/initializeTabs',
   async function initializeTabsThunkFn(
@@ -465,51 +473,54 @@ export const initializeTabs = createInternalStateAsyncThunk(
       }
     };
 
-    const [userId, spaceId, persistedDiscoverSession] = await Promise.all([
+    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
+    // Only a navigation spec with an ID needs the saved list to be classified as saved or inline,
+    // so other loads do not wait for the list.
+    const needsDataViewList = Boolean(initialTabState?.dataViewSpec?.id);
+
+    const [userId, spaceId, persistedDiscoverSession, dataViewListResult] = await Promise.all([
       existingUserId === undefined ? getUserId() : existingUserId,
       existingSpaceId === undefined ? getSpaceId() : existingSpaceId,
       loadPersistedDiscoverSession(),
+      needsDataViewList ? dispatch(loadDataViewListOnce()) : undefined,
     ]);
+
+    // Without the list, a navigation spec's ID cannot be classified as saved or inline.
+    if (dataViewListResult && loadDataViewList.rejected.match(dataViewListResult)) {
+      throw dataViewListResult.error;
+    }
 
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
-    const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({
-          tab: byValueEmbeddableTab,
-          profileStateRegistry: services.profileStateRegistry,
-        })
+    const savedDataViewIds = dataViewListResult
+      ? getState().savedDataViews.map(({ id }) => id)
       : undefined;
-
-    const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
+    const { inlineDataViewIds, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,
         spaceId,
         persistedDiscoverSession,
         shouldClearAllTabs,
-        defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
-        // Assign IDs before mapping saved tabs, using the incoming link and same-session local tabs.
-        prepareSession: (session, localTabs, selectedTabId) =>
-          assignSessionDataViewIds(session, localTabs, {
-            tabId: selectedTabId ?? session.tabs[0]?.id,
-            dataViewSpec: initialTabState?.dataViewSpec,
-          }),
+        defaultTab: services.embeddableEditor.getByValueTab(),
+        navigationDataViewSpec: initialTabState?.dataViewSpec,
+        savedDataViewIds,
       });
-
-    // Hand the location state over to the tab initialization before updating the URL below, which
-    // discards it, so initial state such as ad hoc data view specs is passed on
-    services.initialTabStateService.capture(initialTabState);
+    const selectedTab = initialTabsState.allTabs.find(
+      ({ id }) => id === initialTabsState.selectedTabId
+    );
+    await dispatch(
+      applyInlineDataViewLoadState({
+        normalized: inlineDataViewIds,
+        selectedTab,
+        initialTabState,
+      })
+    );
 
     // Clear a stale draft URL unless navigation explicitly supplies initial tab state.
     if (!initialTabState && outdatedSelectedTab) {
-      const selectedTab = initialTabsState.allTabs.find(
-        ({ id }) => id === initialTabsState.selectedTabId
-      );
-
       await clearOutdatedTabUrlState({
         tab: outdatedSelectedTab,
         timeRestore: selectedTab?.attributes.timeRestore ?? false,
@@ -626,9 +637,22 @@ export const openInNewTab: InternalStateThunkActionCreator<
     }
 
     if (dataViewSpec) {
+      // New tabs bypass load-time normalization, including restored background searches.
+      const searchSource = { index: dataViewSpec };
+      const idCompatibility = createInlineDataViewIdCompatibility({
+        views: [getInlineDataViewIdentity(searchSource)],
+      });
+      newDefaultTab.appState = normalizeInlineAppState(initialAppState, {
+        searchSource,
+        idCompatibility,
+      });
+      newDefaultTab.globalState = remapDataViewReferences(
+        initialGlobalState,
+        idCompatibility.shared
+      );
       newDefaultTab.initialInternalState = {
         ...newDefaultTab.initialInternalState,
-        serializedSearchSource: { index: dataViewSpec },
+        serializedSearchSource: normalizeInlineSearchSource(searchSource, { idCompatibility }),
       };
     }
 

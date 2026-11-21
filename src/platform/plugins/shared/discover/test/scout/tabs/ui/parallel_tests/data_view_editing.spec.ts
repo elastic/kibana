@@ -22,6 +22,8 @@ const dataViewCases = [
     secondDataViewName: 'logs',
     newFieldStateInOriginalTab: 'hidden',
     editedFieldStateInOriginalTab: 'hidden',
+    originalTabNameAfterRename: 'logstash*',
+    previousNameCountAfterRename: 1,
   },
   {
     isAdHocDataView: false,
@@ -30,6 +32,8 @@ const dataViewCases = [
     secondDataViewName: 'log',
     newFieldStateInOriginalTab: 'visible',
     editedFieldStateInOriginalTab: 'visible',
+    originalTabNameAfterRename: 'logstash edited name',
+    previousNameCountAfterRename: 0,
   },
 ] as const;
 
@@ -90,6 +94,8 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
     secondDataViewName,
     newFieldStateInOriginalTab,
     editedFieldStateInOriginalTab,
+    originalTabNameAfterRename,
+    previousNameCountAfterRename,
   } of dataViewCases) {
     spaceTest(`can edit ${type} data view name`, async ({ pageObjects }) => {
       const { discover, unifiedTabs } = pageObjects;
@@ -102,20 +108,25 @@ spaceTest.describe('Discover tabs - data view editing', { tag: '@local-stateful-
       });
 
       const previousName = await discover.getSelectedDataViewName();
+      const originalId = await discover.getCurrentDataViewId();
 
-      await unifiedTabs.createNewTab();
+      await unifiedTabs.duplicateTab(0);
       await discover.waitUntilTabIsLoaded();
       expect(await discover.getSelectedDataViewName()).toBe(previousName);
+      expect(await discover.getCurrentDataViewId()).toBe(originalId);
 
       await discover.editCurrentDataViewName(editedName);
-      expect(await discover.getSelectedDataViewName()).toBe(editedName);
+      await expect.poll(() => discover.getSelectedDataViewName()).toBe(editedName);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      expect(await discover.getSelectedDataViewName()).toBe(editedName);
+      await expect.poll(() => discover.getSelectedDataViewName()).toBe(originalTabNameAfterRename);
+      expect(await discover.getCurrentDataViewId()).toBe(originalId);
 
       const availableDataViews = await discover.getAvailableDataViewsFromSearchBar();
-      expect(availableDataViews).not.toContain(previousName);
+      expect(availableDataViews.filter((name) => name === previousName)).toHaveLength(
+        previousNameCountAfterRename
+      );
       expect(availableDataViews).toContain(editedName);
     });
 

@@ -152,15 +152,15 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'shows toast notifications for invalid filter references after data view update',
+      'restores the previous inline data view and editable filters when navigating back',
       async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
-        const { discover, filterBar, toasts } = pageObjects;
+        const { discover, filterBar, unifiedFieldList } = pageObjects;
         let prevId: string;
 
         await spaceTest.step('creates ad hoc data view and adds filters', async () => {
           await apiServices.discover.create(
             {
-              title: 'logstas-filter-toast-test',
+              title: 'logstash-filter-history-test',
               tabs: [
                 {
                   id: 'main',
@@ -175,7 +175,7 @@ spaceTest.describe(
             } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
-          await discover.loadSavedSearch('logstas-filter-toast-test');
+          await discover.loadSavedSearch('logstash-filter-history-test');
 
           await filterBar.addFilter({
             field: 'nestedField.child',
@@ -193,15 +193,37 @@ spaceTest.describe(
           });
           const newId = await discover.getCurrentDataViewId();
           expect(newId).not.toBe(prevId);
+          await unifiedFieldList.searchField('_bytes-runtimefield');
+          await expect(unifiedFieldList.getAvailableField('_bytes-runtimefield')).toBeVisible();
+        });
+
+        await spaceTest.step('navigates back to the original inline data view', async () => {
+          // Editing preserves the original instance, so Back can restore it with its filters.
+          await page.goBack();
+          await expect.poll(() => discover.getCurrentDataViewId()).toBe(prevId);
+          await expect(unifiedFieldList.getAvailableField('_bytes-runtimefield')).toBeHidden();
         });
 
         await spaceTest.step(
-          'navigates back and verifies invalid-filter-ref toast notifications',
+          'keeps both restored filters editable with their original values',
           async () => {
-            await page.goBack();
+            await filterBar.clickEditFilter('nestedField.child', 'nestedValue');
+            await expect
+              .poll(() => filterBar.getFilterEditorSelectedPhrases())
+              .toStrictEqual(['nestedValue']);
+            await expect(page.testSubj.locator('saveFilter')).toBeEnabled();
+            await filterBar.closeFieldEditorModal();
 
-            await toasts.waitForToastWithText(`"${prevId}" is not a configured data view ID`);
-            await toasts.waitForToastWithText('Different index references');
+            await page.testSubj.click('~filter & ~filter-key-extension & ~filter-value-jpg');
+            await page.testSubj.click('editFilter');
+            await expect(
+              page
+                .getByRole('dialog')
+                .filter({ hasText: 'Edit filter' })
+                .getByRole('textbox', { name: 'Enter a value', exact: true })
+            ).toHaveValue('jpg');
+            await expect(page.testSubj.locator('saveFilter')).toBeEnabled();
+            await filterBar.closeFieldEditorModal();
           }
         );
       }
