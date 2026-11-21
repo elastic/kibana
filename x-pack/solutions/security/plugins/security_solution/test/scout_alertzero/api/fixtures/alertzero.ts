@@ -18,7 +18,7 @@ import type {
   Ad2IndexedRawEvent,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { ALERTZERO_INFERENCE_PARENT_FEATURE_ID } from '@kbn/alertzero-common';
-import { ATTACK_SCENARIO_KEY, DRAIN_TIMEOUT_MS } from './constants';
+import { ATTACK_SCENARIO_KEY, BASELINE_TIMEOUT_MS, DRAIN_TIMEOUT_MS } from './constants';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
 
@@ -358,22 +358,32 @@ export interface WorkerBaseline {
   serviceAccountId?: string;
 }
 
+/**
+ * Polls (up to `BASELINE_TIMEOUT_MS`) until the worker's stored settings can be read. An
+ * `unavailable` record carries default settings, and restoring those would overwrite the real
+ * ones, so it is retried rather than captured. A hook calling this needs
+ * `BASELINE_TIMEOUT_MS` per worker on top of its other setup.
+ */
 export const captureWorkerBaseline = async (
   api: AlertZeroApi,
   workerId: string
-): Promise<WorkerBaseline> => {
-  const worker = await getWorker(api, workerId);
-  // An unavailable record carries default settings; restoring those would overwrite the real ones.
-  if (worker.state === 'unavailable') {
-    throw new Error(`Worker ${workerId} settings are unavailable; cannot capture a baseline`);
-  }
-  return {
-    workerId,
-    enabled: worker.enabled,
-    autonomy: worker.settings.autonomy,
-    serviceAccountId: worker.settings.serviceAccountId,
-  };
-};
+): Promise<WorkerBaseline> =>
+  pollUntil(
+    `worker ${workerId} settings to be readable for a baseline`,
+    async () => {
+      const worker = await getWorker(api, workerId);
+      if (worker.state === 'unavailable') {
+        throw new Error(`Worker ${workerId} settings are unavailable`);
+      }
+      return {
+        workerId,
+        enabled: worker.enabled,
+        autonomy: worker.settings.autonomy,
+        serviceAccountId: worker.settings.serviceAccountId,
+      };
+    },
+    { timeoutMs: BASELINE_TIMEOUT_MS }
+  );
 
 /**
  * Puts a worker back the way `captureWorkerBaseline` found it, after `resetWorker` left it

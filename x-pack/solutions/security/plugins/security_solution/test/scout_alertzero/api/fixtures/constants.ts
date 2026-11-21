@@ -90,10 +90,10 @@ export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
 export const ACTION_TIMEOUT_MS = 3 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
-/** Ceiling for a `beforeAll` to read a worker's baseline while the catalog settles. */
+/** Ceiling `captureWorkerBaseline` polls for one worker's stored settings to be readable. */
 export const BASELINE_TIMEOUT_MS = 60_000;
-/** A `beforeAll` that reads a baseline: the poll ceiling plus the rest of its setup. */
-export const BASELINE_HOOK_TIMEOUT_MS = BASELINE_TIMEOUT_MS + 60_000;
+/** What a baseline-reading `beforeAll` needs besides its baseline polls: the gate enable and reads. */
+export const BASELINE_SETUP_BUDGET_MS = 60_000;
 
 /** Ceiling `cancelNewExecutions` polls for in-flight executions to stop. */
 export const DRAIN_TIMEOUT_MS = 60_000;

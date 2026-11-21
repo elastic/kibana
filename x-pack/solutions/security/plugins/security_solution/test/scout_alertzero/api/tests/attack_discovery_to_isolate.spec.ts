@@ -206,6 +206,9 @@ apiTest.describe(
     // them, deletes this suite's account, then puts these back, so a worker another suite or an
     // operator left configured is not handed back disabled and unbound.
     const workerBaselines: WorkerBaseline[] = [];
+    // Workers a spec has started writing to. Teardown resets and restores only these: a worker
+    // whose baseline was read but never written is left exactly as it was found.
+    const touchedWorkers = new Set<string>();
     // Bounds teardown's Investigation scan: nothing updated before the suite started is its own.
     // Backdated by a minute because `updated_at` is stamped by the server's clock, not this one.
     const suiteStartedAt = new Date(Date.now() - 60_000);
@@ -224,6 +227,8 @@ apiTest.describe(
         skippedBeforeSetup,
         'no preconfigured chat-completion AI connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
       );
+      // One baseline poll per worker plus the gate enable and connector read.
+      apiTest.setTimeout(2 * testData.BASELINE_TIMEOUT_MS + testData.BASELINE_SETUP_BUDGET_MS);
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       restoreAlertZero = await withAlertZeroEnabledInSpace({
         apiClient,
@@ -261,9 +266,12 @@ apiTest.describe(
       // scheduling, but the runs the enables started keep going until they finish or are
       // cancelled, and a review still mid-model-call when the account disappears fails against
       // the deleted account and can raise a proposal after the dismissal below has finished.
-      // Only workers with a captured baseline: one whose read failed was never touched and has
-      // nothing to restore.
-      for (const { workerId } of workerBaselines) {
+      // Only workers a spec wrote to: an untouched worker has nothing to undo, and every touched
+      // one has a baseline because setup captures both before any spec runs.
+      const touchedBaselines = workerBaselines.filter(({ workerId }) =>
+        touchedWorkers.has(workerId)
+      );
+      for (const { workerId } of touchedBaselines) {
         await attempt(async () => {
           if (api) await resetWorker(api, workerId);
         });
@@ -331,7 +339,7 @@ apiTest.describe(
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
-      for (const baseline of workerBaselines) {
+      for (const baseline of touchedBaselines) {
         await attempt(async () => {
           if (api) await restoreWorkerBaseline(api, baseline);
         });
@@ -410,6 +418,7 @@ apiTest.describe(
         // worker's managed workflow, so on a space where the worker has never been configured the
         // read below would otherwise race an install that this spec itself has not triggered yet.
         const beforeSave = await getWorker(api, WORKER_ID);
+        touchedWorkers.add(WORKER_ID);
         await updateWorker(api, WORKER_ID, {
           settingsRevision: beforeSave.settingsRevision ?? null,
           // Pinned, not inherited: under `supervised` the handoff would be auto-approved and no
@@ -436,6 +445,7 @@ apiTest.describe(
         // account, or the handoff-to-forensics approval cannot start its workflow and no
         // Isolate proposal can ever exist. Settings first, then enable, mirroring the AD worker.
         const forensicsBeforeSave = await getWorker(api, FORENSICS_WORKER_ID);
+        touchedWorkers.add(FORENSICS_WORKER_ID);
         await updateWorker(api, FORENSICS_WORKER_ID, {
           settingsRevision: forensicsBeforeSave.settingsRevision ?? null,
           // Same reason: `supervised` would auto-approve the Isolate proposal.

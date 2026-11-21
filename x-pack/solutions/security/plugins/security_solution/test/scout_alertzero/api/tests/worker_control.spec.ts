@@ -114,7 +114,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   let workerTouched = false;
 
   apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
-    apiTest.setTimeout(testData.BASELINE_HOOK_TIMEOUT_MS);
+    apiTest.setTimeout(testData.BASELINE_TIMEOUT_MS + testData.BASELINE_SETUP_BUDGET_MS);
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     restoreAlertZero = await withAlertZeroEnabledInSpace({
       apiClient,
@@ -123,13 +123,9 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       spaceId: 'default',
     });
     // Required before any spec may write to the worker: without it teardown could not put the
-    // worker back. Polled because the first catalog read can race the gate enable.
+    // worker back. The capture polls, because the first catalog read can race the gate enable.
     const api = await getAdminApi(apiClient, samlAuth);
-    workerBaseline = await pollUntil(
-      `worker ${WORKER_ID} baseline`,
-      () => captureWorkerBaseline(api, WORKER_ID),
-      { timeoutMs: testData.BASELINE_TIMEOUT_MS }
-    );
+    workerBaseline = await captureWorkerBaseline(api, WORKER_ID);
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
