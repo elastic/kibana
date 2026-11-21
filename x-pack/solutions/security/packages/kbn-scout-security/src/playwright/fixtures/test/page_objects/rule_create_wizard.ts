@@ -6,11 +6,20 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { EsqlEditor } from '@kbn/scout';
 import type { RuleSeverity } from '../../../constants/detection_rules';
 import { APP_LOAD_TIMEOUT_MS, DATA_LOAD_TIMEOUT_MS } from '../../../constants/timeouts';
 import { expect } from '../../../../../ui';
 
 export type MitreFramework = 'enterprise' | 'atlas';
+
+// Query validation and field loading are async; "Continue" stays disabled until they settle,
+// which can take tens of seconds on a cold project.
+const STEP_VALIDATION_TIMEOUT_MS = 60_000;
+// A validation error appears client-side, so a retried click shows it well within this budget.
+const QUERY_ERROR_TIMEOUT_MS = 30_000;
+// One attempt inside a toPass retry loop: short, so a click that raced validation is retried.
+const RETRY_ATTEMPT_TIMEOUT_MS = 5_000;
 
 /**
  * Custom query rule create wizard: Define → About → Schedule → Actions.
@@ -48,6 +57,13 @@ export class RuleCreateWizardPage {
   readonly addMitreFrameworkButton: Locator;
   readonly editAboutTab: Locator;
   readonly editSubmitButton: Locator;
+  readonly esqlRuleTypeButton: Locator;
+  /** Container of the ES|QL query bar on the Define step, including its validation errors. */
+  readonly esqlQueryBar: Locator;
+  readonly investigationFieldsRow: Locator;
+  readonly ruleNameOverrideRow: Locator;
+
+  private readonly esqlEditor: EsqlEditor;
 
   constructor(private readonly page: ScoutPage) {
     this.defineStep = this.page.testSubj.locator('stepDefineRule');
@@ -106,6 +122,106 @@ export class RuleCreateWizardPage {
     this.addMitreFrameworkButton = this.page.testSubj.locator('addMitreFramework');
     this.editAboutTab = this.page.testSubj.locator('edit-rule-about-tab');
     this.editSubmitButton = this.page.testSubj.locator('ruleEditSubmitButton');
+    this.esqlRuleTypeButton = this.page.testSubj.locator('esqlRuleType');
+    this.esqlQueryBar = this.page.testSubj.locator('ruleEsqlQueryBar');
+    this.investigationFieldsRow = this.page.testSubj.locator(
+      'detectionEngineStepAboutRuleInvestigationFields'
+    );
+    this.ruleNameOverrideRow = this.page.testSubj.locator(
+      'detectionEngineStepAboutRuleRuleNameOverrideForEsqlRuleType'
+    );
+    this.esqlEditor = new EsqlEditor(this.page, 'ruleEsqlQueryBar');
+  }
+
+  /** Switches the Define step to the ES|QL rule type and waits for its Monaco editor to mount. */
+  async selectEsqlRuleType(): Promise<void> {
+    await this.esqlRuleTypeButton.click();
+    // The ES|QL editor bundle loads lazily on first switch; on a cold project that can outlast
+    // EsqlEditor.waitReady()'s 30 s budget, so wait for the mount with the app-load budget first.
+    await this.esqlQueryBar
+      .getByTestId('ESQLEditor')
+      .getByTestId('kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  /**
+   * Closes any open toasts. The toast list overlays the bottom-right of the page, where the
+   * wizard's "Continue" buttons sit, and intercepts clicks on them.
+   */
+  private async dismissToasts(): Promise<void> {
+    await this.page.components.toast().closeAll();
+  }
+
+  /**
+   * Clicks Define "Continue" until the About step is open and editable. The click races async
+   * query validation and can be swallowed, so it is retried only while About is not shown yet.
+   */
+  async continueFromDefineStep(): Promise<void> {
+    await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+    await expect(async () => {
+      if (!(await this.aboutRuleName.isVisible())) {
+        await this.dismissToasts();
+        await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      }
+      await expect(this.aboutRuleName).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.aboutRuleName).toBeEditable({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+  }
+
+  /**
+   * Clicks About "Continue" until the Schedule step is open. The click races About-step
+   * validation and can be swallowed, so it is retried only while Schedule is not shown yet.
+   */
+  async continueFromAboutStep(): Promise<void> {
+    await expect(async () => {
+      if (!(await this.scheduleContinue.isVisible())) {
+        await this.dismissToasts();
+        await this.aboutContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      }
+      await expect(this.scheduleContinue).toBeVisible({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.scheduleContinue).toBeEnabled({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+    }).toPass({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+  }
+
+  /**
+   * Clicks Define "Continue" until the ES|QL query bar shows `expectedError`. A pending
+   * validation can swallow the first click, so the click is retried.
+   */
+  async continueFromDefineStepUntilQueryError(expectedError: string): Promise<void> {
+    await expect(this.defineContinue).toBeEnabled({ timeout: STEP_VALIDATION_TIMEOUT_MS });
+    await expect(async () => {
+      await this.dismissToasts();
+      await this.defineContinue.click({ timeout: RETRY_ATTEMPT_TIMEOUT_MS });
+      await expect(this.esqlQueryBar).toContainText(expectedError, {
+        timeout: RETRY_ATTEMPT_TIMEOUT_MS,
+      });
+    }).toPass({ timeout: QUERY_ERROR_TIMEOUT_MS });
+  }
+
+  /** Replaces the query in the ES|QL query bar of the Define step. */
+  async setEsqlQuery(query: string): Promise<void> {
+    await this.esqlEditor.setQuery(query);
+  }
+
+  /**
+   * Picks fields in the investigation fields combo box of the About step (Advanced settings).
+   * Options come from the ES|QL query columns and load asynchronously, so pass a generous timeout.
+   */
+  async setInvestigationFields(fields: readonly string[], timeout?: number): Promise<void> {
+    // The form row carries the test subject; the EuiComboBox itself is its `input`.
+    await this.page.components
+      .comboBox('input', this.investigationFieldsRow)
+      .setSelectedOptions([...fields], { timeout });
+  }
+
+  /**
+   * Picks the rule name override field in the About step (Advanced settings). The options are
+   * the columns of the ES|QL query, not the data view fields.
+   */
+  async setRuleNameOverride(field: string, timeout?: number): Promise<void> {
+    await this.page.components
+      .comboBox('input', this.ruleNameOverrideRow)
+      .setSelectedOptions([field], { timeout });
   }
 
   /** Locator for the MITRE picker section of one framework on the About step. */
@@ -211,16 +327,13 @@ export class RuleCreateWizardPage {
     await this.queryInput.pressSequentially(query);
     await this.page.keyboard.press('Enter');
 
-    await this.defineContinue.click();
-    await this.aboutRuleName.waitFor({ state: 'visible' });
+    await this.continueFromDefineStep();
     await this.aboutRuleName.fill(name);
     await this.aboutRuleDescription.fill(description);
     if (onAboutStep) {
       await onAboutStep();
     }
-    await this.aboutContinue.click();
-
-    await this.scheduleContinue.waitFor({ state: 'visible' });
+    await this.continueFromAboutStep();
     await this.scheduleContinue.click();
 
     await this.createWithoutEnabling.waitFor({ state: 'visible' });
