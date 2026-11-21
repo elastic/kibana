@@ -84,7 +84,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       application: { capabilities },
     },
     config: { enableIndexStats },
-    plugins: { console: consolePlugin, ml },
+    plugins: {
+      console: consolePlugin,
+      ml,
+      data: {
+        search: { search: dataSearch },
+      },
+    },
     services: { extensionsService, notificationService },
     url,
   } = useAppContext();
@@ -96,8 +102,8 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     data: documentsSampleData,
     isLoading: isDocumentsSampleLoading,
     error: documentsSampleError,
-    resendRequest: resendDocumentsSampleRequest,
-  } = useLoadIndexDocumentsSample(index.name);
+    refetch: refetchDocumentsSample,
+  } = useLoadIndexDocumentsSample(dataSearch, index.name);
 
   const tabs = useMemo(() => {
     const sortedTabs: IndexDetailsTab[] = [
@@ -112,7 +118,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
             sampleDocuments={documentsSampleData?.results ?? []}
             isDocumentsLoading={isDocumentsSampleLoading}
             documentsError={documentsSampleError}
-            onRefreshDocuments={resendDocumentsSampleRequest}
+            onRefreshDocuments={refetchDocumentsSample}
           />
         ),
         order: 10,
@@ -136,7 +142,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     documentsSampleData,
     isDocumentsSampleLoading,
     documentsSampleError,
-    resendDocumentsSampleRequest,
+    refetchDocumentsSample,
     enableIndexStats,
     extensionsService.indexDetailsTabs,
     index,
@@ -163,9 +169,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     };
   }, [search]);
 
-  const onIndexRefresh = useCallback(() => {
-    return resendDocumentsSampleRequest();
-  }, [resendDocumentsSampleRequest]);
+  const onIndexRefresh = useCallback(async () => {
+    await refetchDocumentsSample();
+  }, [refetchDocumentsSample]);
 
   const {
     manageIndexItems,

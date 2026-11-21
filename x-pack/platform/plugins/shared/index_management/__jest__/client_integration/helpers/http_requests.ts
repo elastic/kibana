@@ -17,6 +17,14 @@ export interface ResponseError {
   attributes?: Record<string, unknown>;
 }
 
+const toEsqlDocCountResponse = (counts: Record<string, number> = {}) => ({
+  columns: [
+    { name: 'count()', type: 'long' },
+    { name: '_index', type: 'keyword' },
+  ],
+  values: Object.entries(counts).map(([indexName, count]) => [count, indexName]),
+});
+
 // Register helpers to mock HTTP Requests
 const registerHttpRequestMockHelpers = (
   httpSetup: ReturnType<typeof httpServiceMock.createStartContract>,
@@ -243,18 +251,26 @@ const registerHttpRequestMockHelpers = (
 
   const setLoadIndexDocumentsSampleResponse = (
     indexName: string,
-    response?: HttpResponse,
+    response?: { results: unknown[] },
     error?: ResponseError
   ) =>
     mockResponse(
-      'GET',
-      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(indexName)}/sample`,
-      response,
+      'POST',
+      '/internal/search/es',
+      { rawResponse: { hits: { hits: response?.results ?? [] } } },
       error
     );
 
-  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
+  /** `response` maps index names to their document counts. */
+  const setLoadIndexDocCountResponse = (response?: Record<string, number>, error?: ResponseError) =>
+    mockResponse(
+      'POST',
+      '/internal/search/esql',
+      { rawResponse: toEsqlDocCountResponse(response) },
+      error
+    );
+
+  setLoadIndexDocCountResponse({});
 
   return {
     setLoadTemplatesResponse,
