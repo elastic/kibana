@@ -14,7 +14,7 @@ The routes exist only when the plugin is enabled. All are internal: send `x-elas
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. `suggestedFilters` lists the columns the definition offers as dropdown filters, in display order, and is empty when it suggests none. Example response for `k8s.deployment`:
 
 ```json
 {
@@ -36,6 +36,7 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
+      "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
           "indexPattern": "metrics-kubernetes.state_deployment-*",

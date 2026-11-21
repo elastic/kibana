@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import type {
+  AttributeValuesResponse,
   GetTypesResponse,
   InventoryRow,
   InventoryType,
@@ -19,7 +20,6 @@ import type {
   SourceError,
   UnavailableColumn,
 } from '../../common';
-import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
 import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
   applyLimit,
@@ -30,7 +30,6 @@ import {
   mergeRows,
   orderRows,
   planRowLimit,
-  probeSources,
   summarizeResults,
   toEsqlRequestBody,
   toSourceError,
@@ -41,11 +40,13 @@ import {
   ENTITY_ID_COLUMN,
   generateListQueries,
   getDynamicBlock,
-  planSources,
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
-import type { ListRequest } from '../inventory/types';
+import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
+import { partialRowsReason } from '../inventory/reasons';
+import { listAttributeValues } from './list_attribute_values';
+import { probeAndPlanSources, toTypeDefinitionError } from './planning';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -58,10 +59,6 @@ interface ListPlan {
   /** One entry per source whose probe failed; its plans are left out of `plans` and `queries`. */
   probeErrors: SourceError[];
 }
-
-// The `errors[]` reason for a plan whose response has `is_partial: true`.
-const PARTIAL_RESULT_REASON =
-  'partial result: some shards or clusters did not answer, so rows may be missing';
 
 const toUnavailableColumns = (
   { index, indexPattern }: QueryPlan,
@@ -178,7 +175,7 @@ export class InventoryService {
         errors.push({
           indexPattern: plan.indexPattern,
           status: null,
-          reason: PARTIAL_RESULT_REASON,
+          reason: partialRowsReason(),
         });
       }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
@@ -212,6 +209,17 @@ export class InventoryService {
       unavailableColumns,
     };
   };
+
+  /** Lists the values a dropdown can offer for an attribute; see `listAttributeValues`. */
+  listAttributeValues = (request: ListAttributeValuesRequest): Promise<AttributeValuesResponse> =>
+    listAttributeValues(
+      {
+        getDynamicDefinition: this.getDynamicDefinition,
+        esClient: this.esClient,
+        logger: this.logger,
+      },
+      request
+    );
 
   /**
    * Plans the request exactly as `list` does, probes included, and returns the probes and the list
@@ -275,54 +283,29 @@ export class InventoryService {
     signal: AbortSignal | undefined
   ): Promise<ListPlan> => {
     try {
-      const { sources } = getDynamicBlock(definition);
-      const probes = await probeSources(
-        this.esClient,
-        sources.map(({ indexPattern }) => indexPattern),
-        { signal }
-      );
-      const probeErrors: SourceError[] = [];
-      probes.forEach((probe, indexPattern) => {
-        if (probe.failed) {
-          probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
-        }
-      });
-      const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
-
-      const allPlans = planSources(
-        definition,
-        sources.map(({ indexPattern }) => {
-          const probe = probes.get(indexPattern);
-          return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
-        })
-      );
+      const { probes, allPlans } = await probeAndPlanSources(this.esClient, definition, signal);
       const identity = resolveIdentityPlan(definition);
       const columns = buildColumns(definition, allPlans, identity);
       const allQueries = generateListQueries(definition, allPlans, window, planRowLimit(limit));
       const runnable = allPlans.flatMap((plan, position) =>
-        failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
+        probes.failedPatterns.has(plan.indexPattern) ? [] : [{ plan, query: allQueries[position] }]
       );
       return {
-        probes,
+        probes: probes.results,
         plans: runnable.map(({ plan }) => plan),
         identity,
         columns,
         queries: runnable.map(({ query }) => query),
-        probeErrors,
+        probeErrors: probes.errors,
       };
     } catch (error) {
-      if (error.name !== 'InventoryDefinitionError') {
-        throw error;
-      }
-      const definitionError = new InventoryTypeDefinitionError(definition.type, error.message);
-      this.logger.error(definitionError.message);
-      throw definitionError;
+      throw toTypeDefinitionError(this.logger, definition, error);
     }
   };
 
   private buildType = (definition: RegisteredEntityDefinition): InventoryType => {
     const { type, name, description } = definition;
-    const { sources } = getDynamicBlock(definition);
+    const { sources, suggestedFilters = [] } = getDynamicBlock(definition);
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
@@ -335,6 +318,7 @@ export class InventoryService {
       description,
       identityFields: identityPlan.groupingFields,
       columns: toResponseColumns(columns),
+      suggestedFilters,
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
     };
   };
