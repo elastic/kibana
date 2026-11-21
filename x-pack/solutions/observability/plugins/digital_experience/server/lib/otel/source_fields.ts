@@ -7,6 +7,7 @@
 
 import { SERVICE_NAME, SESSION_ID, URL_FULL } from '@kbn/apm-types';
 import {
+  BROWSER_CSS_SELECTOR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
   attributeField,
@@ -21,5 +22,6 @@ import {
 export const SOURCE_SESSION_ID_FIELD = attributeField(SESSION_ID);
 export const SOURCE_SERVICE_NAME_FIELD = resourceAttributeField(SERVICE_NAME);
 export const SOURCE_URL_FIELD = attributeField(URL_FULL);
+export const SOURCE_CSS_SELECTOR_FIELD = attributeField(BROWSER_CSS_SELECTOR);
 export const SOURCE_WEB_VITAL_NAME_FIELD = attributeField(WEB_VITAL_NAME);
 export const SOURCE_WEB_VITAL_VALUE_FIELD = attributeField(WEB_VITAL_VALUE);

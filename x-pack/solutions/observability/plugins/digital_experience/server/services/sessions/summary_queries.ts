@@ -24,9 +24,13 @@ import {
 import {
   BROWSER_SDK_LANGUAGE,
   CLICK_EVENTS,
+  EVENT_DEAD_CLICK,
+  EVENT_ERROR_CLICK,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
+  EVENT_RAGE_CLICK,
   EVENT_WEB_VITAL,
+  FRUSTRATION_EVENTS,
   OTEL_SPAN_NAME,
   PAGE_VIEW_EVENTS,
   SPAN_KIND_CLIENT,
@@ -38,6 +42,7 @@ import {
   type SessionAttribute,
 } from '../../../common/session_attribute_fields';
 import {
+  SOURCE_CSS_SELECTOR_FIELD,
   SOURCE_SERVICE_NAME_FIELD,
   SOURCE_SESSION_ID_FIELD,
   SOURCE_URL_FIELD,
@@ -233,6 +238,10 @@ const SESSION_STATS: Stat[] = [
   ['page_load_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_NAVIGATION_TIMING)}`],
   ['click_count', 'COUNT(*) WHERE is_click'],
   ['js_error_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_EXCEPTION)}`],
+  ['rage_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_RAGE_CLICK)}`],
+  ['dead_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_DEAD_CLICK)}`],
+  ['error_click_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_ERROR_CLICK)}`],
+  ['frustration_count', 'COUNT(*) WHERE is_frustration'],
   [
     'http_request_count',
     `COUNT(*) WHERE is_http_request AND (${HTTP_RESPONSE_STATUS_CODE} IS NOT NULL OR no_response)`,
@@ -242,6 +251,12 @@ const SESSION_STATS: Stat[] = [
     `COUNT(*) WHERE is_http_request AND (COALESCE(${HTTP_RESPONSE_STATUS_CODE} >= 400, false) OR no_response)`,
   ],
   ...ATTRIBUTE_STATS,
+];
+
+// Multi-valued, so merged with VALUES in the last stage rather than with MAX like SESSION_STATS.
+const FRUSTRATION_VALUE_STATS: Stat[] = [
+  ['frustration_targets', `VALUES(${SOURCE_CSS_SELECTOR_FIELD}) WHERE is_frustration`],
+  ['frustration_urls', `VALUES(${SOURCE_URL_FIELD}) WHERE is_frustration`],
 ];
 
 const VITAL_STATS: Stat[] = CORE_WEB_VITALS.flatMap(vitalStatsOf);
@@ -289,12 +304,13 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, ""), span = COALESCE(${OTEL_SPAN_NAME}, "")
 | EVAL is_page_view = event IN (${texts(PAGE_VIEW_EVENTS)}) OR span IN (${texts(PAGE_VIEW_EVENTS)}),
        is_click = event IN (${texts(CLICK_EVENTS)}) OR span IN (${texts(CLICK_EVENTS)}),
+       is_frustration = event IN (${texts(FRUSTRATION_EVENTS)}),
        is_http_request = COALESCE(${KIND} == ${escapeStringValue(
     SPAN_KIND_CLIENT
   )}, false) AND ${HTTP_REQUEST_METHOD} IS NOT NULL,
        no_response = COALESCE(${STATUS_CODE} == ${escapeStringValue(SPAN_STATUS_ERROR)}, false),
        ${SEEN_EVALS.join(',\n       ')}
-| FORK (STATS ${renderStats(SESSION_STATS, '              ')}
+| FORK (STATS ${renderStats([...SESSION_STATS, ...FRUSTRATION_VALUE_STATS], '              ')}
           BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
        (WHERE ${PAGE_VIEW_FILTER}
         | STATS first_view = MIN(@timestamp), last_view = MAX(@timestamp)
@@ -305,6 +321,9 @@ ${browserSessionEvents('rebuild_from', 'changed_to')}
         | STATS ${renderStats(VITAL_STATS, '                ')}
             BY service = ${SOURCE_SERVICE_NAME_FIELD}, session = ${SOURCE_SESSION_ID_FIELD})
 | STATS ${renderStats(MERGED_STATS, '        ')},
+        ${FRUSTRATION_VALUE_STATS.map(([column]) => `${column} = VALUES(${column})`).join(
+          ',\n        '
+        )},
         pages = TOP(first_view, ${SESSIONS_JOURNEY_URL_CANDIDATES}, "asc", page_url) WHERE page_url IS NOT NULL,
         exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL
   BY service, session

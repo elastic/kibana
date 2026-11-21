@@ -20,6 +20,8 @@ import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fiel
 import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
 import {
   createSessionsIndex,
+  hasFrustrationMappings,
+  putFrustrationMappings,
   putSessionsIndexTemplate,
   sessionsIndexMappings,
   sessionsIndexTemplate,
@@ -48,6 +50,12 @@ const fullDocument: SessionDocument = {
   page_load_count: 1,
   click_count: 4,
   js_error_count: 2,
+  rage_click_count: 2,
+  dead_click_count: 1,
+  error_click_count: 0,
+  frustration_count: 3,
+  frustration_targets: ['#buy'],
+  frustration_pages: ['/cart'],
   http_request_count: 5,
   http_failed_request_count: 1,
   bounced: false,
@@ -115,6 +123,21 @@ describe('sessions index', () => {
 
     it('searches anywhere in a value with a wildcard field', () => {
       expect(sessionsIndexMappings.properties.search).toEqual({ type: 'wildcard' });
+    });
+
+    it('maps the frustration counts as numbers, and the frustrated selectors and pages as keywords', () => {
+      const { properties } = sessionsIndexMappings;
+
+      for (const field of [
+        properties.rage_click_count,
+        properties.dead_click_count,
+        properties.error_click_count,
+        properties.frustration_count,
+      ]) {
+        expect(field).toEqual({ type: 'long' });
+      }
+      expect(properties.frustration_targets).toEqual({ type: 'keyword', ignore_above: 1024 });
+      expect(properties.frustration_pages).toEqual({ type: 'keyword', ignore_above: 1024 });
     });
 
     it('bounds the environment, which the browser sets', () => {
@@ -198,6 +221,64 @@ describe('sessions index', () => {
       client.indices.create.mockRejectedValue(error);
 
       await expect(createSessionsIndex(client)).rejects.toBe(error);
+    });
+  });
+
+  describe('frustration mappings', () => {
+    const mappingsOf = (properties: Record<string, object>) => ({
+      [SESSIONS_INDEX]: { mappings: { properties } },
+    });
+
+    it('are current once the index maps the frustration total', async () => {
+      const { signal } = new AbortController();
+      client.indices.getMapping.mockResolvedValue(
+        mappingsOf({ frustration_count: { type: 'long' } })
+      );
+
+      expect(await hasFrustrationMappings(client, signal)).toBe(true);
+      expect(client.indices.getMapping).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
+    });
+
+    it('are missing from an index that predates them', async () => {
+      client.indices.getMapping.mockResolvedValue(mappingsOf({ click_count: { type: 'long' } }));
+
+      expect(await hasFrustrationMappings(client)).toBe(false);
+    });
+
+    it('are missing from an index without any mapping', async () => {
+      client.indices.getMapping.mockResolvedValue({ [SESSIONS_INDEX]: { mappings: {} } });
+
+      expect(await hasFrustrationMappings(client)).toBe(false);
+    });
+
+    it('are put as the fields the summaries gained, which the index template also maps', async () => {
+      const { signal } = new AbortController();
+
+      await putFrustrationMappings(client, signal);
+
+      const {
+        rage_click_count,
+        dead_click_count,
+        error_click_count,
+        frustration_count,
+        frustration_targets,
+        frustration_pages,
+      } = sessionsIndexMappings.properties;
+      // The same mappings as the template's, so an index created later matches.
+      expect(client.indices.putMapping).toHaveBeenCalledWith(
+        {
+          index: SESSIONS_INDEX,
+          properties: {
+            rage_click_count,
+            dead_click_count,
+            error_click_count,
+            frustration_count,
+            frustration_targets,
+            frustration_pages,
+          },
+        },
+        { signal }
+      );
     });
   });
 });

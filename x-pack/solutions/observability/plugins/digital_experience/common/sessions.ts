@@ -60,7 +60,7 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
-/** Most frustrated element selectors and page paths kept per session, for the Overview to filter the sessions list on. */
+/** Frustrated element selectors and page paths kept per session. */
 export const SESSIONS_FRUSTRATION_VALUES = 20;
 
 export const SESSION_SORT_FIELDS = [

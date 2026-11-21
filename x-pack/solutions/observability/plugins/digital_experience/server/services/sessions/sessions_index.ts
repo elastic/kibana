@@ -57,6 +57,18 @@ export interface SessionDocument {
    * nothing sets it yet, so it is absent rather than `false`. Readers expose it as `hasReplay`.
    */
   has_replay?: boolean;
+  /**
+   * EDOT Browser frustration signals. Mapped without a `SESSIONS_VERSION` bump: summaries written
+   * before them have none, which readers take as 0 or empty.
+   */
+  rage_click_count?: number;
+  dead_click_count?: number;
+  error_click_count?: number;
+  frustration_count?: number;
+  /** CSS selectors of the elements that were frustrated, capped at `SESSIONS_FRUSTRATION_VALUES`. */
+  frustration_targets?: string[];
+  /** Paths of the pages where the session was frustrated, capped the same way. */
+  frustration_pages?: string[];
   entry_page: string | null;
   exit_page: string | null;
   journey: string[];
@@ -87,6 +99,19 @@ const MAX_KEYWORD_LENGTH = 1024;
 const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
 const count = { type: 'long' } as const;
 
+/**
+ * Fields the summaries gained without a `SESSIONS_VERSION` bump. The index is `dynamic: false`,
+ * so an index created before them needs these put, which `putFrustrationMappings` does.
+ */
+const frustrationMappings = {
+  rage_click_count: count,
+  dead_click_count: count,
+  error_click_count: count,
+  frustration_count: count,
+  frustration_targets: keyword,
+  frustration_pages: keyword,
+} as const;
+
 export const sessionsIndexMappings = {
   dynamic: false,
   properties: {
@@ -104,6 +129,7 @@ export const sessionsIndexMappings = {
     http_failed_request_count: count,
     bounced: { type: 'boolean' },
     has_replay: { type: 'boolean' },
+    ...frustrationMappings,
     entry_page: keyword,
     exit_page: keyword,
     journey: keyword,
@@ -173,4 +199,26 @@ export const createSessionsIndex = async (
     }
     throw error;
   }
+};
+
+/** Whether the index maps the frustration fields, as one created after them does. */
+export const hasFrustrationMappings = async (
+  client: ElasticsearchClient,
+  signal?: AbortSignal
+): Promise<boolean> => {
+  const response = await client.indices.getMapping({ index: SESSIONS_INDEX }, { signal });
+  return Object.values(response).every(
+    ({ mappings }) => mappings.properties?.frustration_count !== undefined
+  );
+};
+
+/** Adds the frustration fields to the index, which keeps its other fields and documents. */
+export const putFrustrationMappings = async (
+  client: ElasticsearchClient,
+  signal?: AbortSignal
+): Promise<void> => {
+  await client.indices.putMapping(
+    { index: SESSIONS_INDEX, properties: frustrationMappings },
+    { signal }
+  );
 };

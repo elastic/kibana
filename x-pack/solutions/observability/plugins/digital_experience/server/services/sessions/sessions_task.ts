@@ -24,6 +24,8 @@ import { describeError } from '../../lib/helpers/errors';
 import { esqlMaxRows } from './esql_max_rows';
 import {
   createSessionsIndex,
+  hasFrustrationMappings,
+  putFrustrationMappings,
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
@@ -114,6 +116,22 @@ const logErrorChange = (logger: Logger, previous: SessionsTaskState, message: st
 export const newerVersionMessage = (version: number) =>
   `The session summaries are version ${version}, newer than this Kibana builds (version ${SESSIONS_VERSION}), so it left them to the nodes that can.`;
 
+// Not fatal: without the mapping the summaries are still written, only the new fields can't be
+// searched. `index` and `create_index`, which the task's key needs, don't allow mapping updates.
+const mapFrustrationFields = async (
+  internalClient: ElasticsearchClient,
+  signal: AbortSignal,
+  logger: Logger
+): Promise<void> => {
+  try {
+    await putFrustrationMappings(internalClient, signal);
+  } catch (error) {
+    logger.warn(
+      `Mapping the Digital Experience session frustration fields failed: ${describeError(error)}`
+    );
+  }
+};
+
 /**
  * One run: summarizes the sessions with new events, window by window, and runs again right away
  * while it hasn't caught up. Failures are kept in the state rather than thrown, so the next run
@@ -155,11 +173,21 @@ export const runSessionsTask = async ({
     // The template has to be in place before the index is created, or the index gets dynamic
     // mappings and nothing repairs it until the next version. Put it while rebuilding, and
     // whenever the index is missing, which covers a template that was deleted by hand.
+    let templatePut = false;
     if (rebuild || !(await sessionsIndexExists(esClient, signal))) {
       await putSessionsIndexTemplate(internalClient, signal);
+      templatePut = true;
     }
     const created = await createSessionsIndex(esClient, signal);
     rebuild = rebuild || created;
+    // An index of this version that predates the frustration fields stays `dynamic: false`
+    // without them, so they would not be searchable. The template goes too, for a later index.
+    if (!created && !(await hasFrustrationMappings(esClient, signal))) {
+      if (!templatePut) {
+        await putSessionsIndexTemplate(internalClient, signal);
+      }
+      await mapFrustrationFields(internalClient, signal, logger);
+    }
     const result = await summarizeSessions({
       esClient,
       signal,
