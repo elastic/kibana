@@ -172,7 +172,7 @@ describe('FrustrationPanel', () => {
 
     expect(await screen.findByText(/3 or more clicks on the same element/)).toBeInTheDocument();
     expect(screen.getByText(/no page reaction within 1 second/)).toBeInTheDocument();
-    expect(screen.getByText(/followed by a JavaScript error/)).toBeInTheDocument();
+    expect(screen.getByText(/followed by an uncaught JavaScript error/)).toBeInTheDocument();
   });
 
   it('shows the empty state with the docs link without signals', () => {

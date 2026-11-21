@@ -58,7 +58,8 @@ const DEFINITIONS = [
       'Dead click: a click on an interactive element with no page reaction within 1 second.',
   }),
   i18n.translate('xpack.digitalExperience.overview.frustration.errorDefinition', {
-    defaultMessage: 'Error click: a click followed by a JavaScript error or a failed request.',
+    defaultMessage:
+      'Error click: a click followed by an uncaught JavaScript error, within 1 second or after a slow request it started.',
   }),
 ];
 
