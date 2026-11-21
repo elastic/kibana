@@ -95,17 +95,19 @@ export function SessionSummary({
           defaultMessage: 'Frustration signals',
         }
       ),
-      breakdown: i18n.translate(
-        'xpack.digitalExperience.sessionDetail.summary.frustrationBreakdown',
-        {
-          defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
-          values: {
-            rage: formatNumber(session.frustration.rageClicks),
-            dead: formatNumber(session.frustration.deadClicks),
-            error: formatNumber(session.frustration.errorClicks),
-          },
-        }
-      ),
+      breakdown:
+        session.frustration.total === 0
+          ? i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationHint', {
+              defaultMessage: 'Needs EDOT Browser with frustration detection.',
+            })
+          : i18n.translate('xpack.digitalExperience.sessionDetail.summary.frustrationBreakdown', {
+              defaultMessage: '{rage} rage, {dead} dead, {error} error clicks',
+              values: {
+                rage: formatNumber(session.frustration.rageClicks),
+                dead: formatNumber(session.frustration.deadClicks),
+                error: formatNumber(session.frustration.errorClicks),
+              },
+            }),
     },
   ];
 

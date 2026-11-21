@@ -107,8 +107,9 @@ const markersOf = (
 
 /**
  * Places each page visit on a bar spanning the whole session, proportionally to when it started and
- * how long it lasted, with a marker at each error and each frustration signal. The bar spans the summary's duration, or longer
- * when the raw events, which can be newer than the summary, run past it.
+ * how long it lasted, with a marker at each error and each frustration signal. The bar spans the
+ * summary's duration, or longer when the raw events, which can be newer than the summary, run past
+ * it.
  */
 export const layoutWaterfall = (
   session: Pick<SessionSummary, 'startTime' | 'durationMs'>,

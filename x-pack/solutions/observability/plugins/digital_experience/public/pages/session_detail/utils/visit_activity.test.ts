@@ -276,6 +276,7 @@ describe('frustrationLabelOf', () => {
     ['browser.frustration.rage_click', 5, 'Rage click (5 clicks)'],
     ['browser.frustration.rage_click', 1, 'Rage click (1 click)'],
     ['browser.frustration.rage_click', null, 'Rage click'],
+    ['browser.frustration.rage_click', 0, 'Rage click'],
     ['browser.frustration.dead_click', null, 'Dead click'],
     ['browser.frustration.dead_click', 3, 'Dead click'],
     ['browser.frustration.error_click', null, 'Error click'],

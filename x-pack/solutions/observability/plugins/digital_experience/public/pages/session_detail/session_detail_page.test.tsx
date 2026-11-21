@@ -491,6 +491,19 @@ describe('SessionDetailPage', () => {
     expect(
       screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration')
     ).toHaveTextContent('1 rage, 1 dead, 0 error clicks');
+    expect(
+      screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration')
+    ).not.toHaveTextContent('Needs EDOT Browser');
+  });
+
+  it('hints that frustration needs EDOT Browser when the session has none', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceSessionStat-frustration');
+    const hint = screen.getByTestId('digitalExperienceSessionStatBreakdown-frustration');
+    expect(hint).toHaveTextContent('Needs EDOT Browser with frustration detection.');
+    expect(hint).not.toHaveTextContent('rage');
   });
 
   it('filters the journey to frustration', async () => {
@@ -501,8 +514,11 @@ describe('SessionDetailPage', () => {
     const chip = screen.getByTestId('digitalExperienceActivityFilter-frustration');
     expect(chip).toHaveTextContent('Frustration');
     expect(chip).toHaveTextContent('2');
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-frustration')).toHaveLength(2);
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-click').length).toBeGreaterThan(0);
     fireEvent.click(chip);
     expect(screen.queryAllByTestId('digitalExperienceSessionEvent-frustration')).toHaveLength(0);
+    expect(screen.getAllByTestId('digitalExperienceSessionEvent-click').length).toBeGreaterThan(0);
   });
 
   it('lists what happened on each page', async () => {

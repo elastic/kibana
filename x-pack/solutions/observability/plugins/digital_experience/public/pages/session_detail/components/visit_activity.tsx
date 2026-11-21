@@ -543,11 +543,11 @@ function EventRow({
   const isDanger = isError || isFrustration;
   const webVital = webVitalOf(event);
   const offsetMs = Date.parse(event.timestamp) - axis.originMs;
-  const markerColor = isError
-    ? euiTheme.colors.danger
-    : isFrustration
-    ? euiTheme.colors.warning
-    : euiTheme.colors.primary;
+  const markerColors: Partial<Record<typeof event.kind, string>> = {
+    error: euiTheme.colors.danger,
+    frustration: euiTheme.colors.warning,
+  };
+  const markerColor = markerColors[event.kind] ?? euiTheme.colors.primary;
   const kindLabel = isFrustration ? frustrationLabelOf(event) : EVENT_LABELS[event.kind];
   return (
     <Row

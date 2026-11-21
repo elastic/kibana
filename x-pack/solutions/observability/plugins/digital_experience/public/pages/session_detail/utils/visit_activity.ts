@@ -218,7 +218,7 @@ const FRUSTRATION_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.
 export const frustrationLabelOf = ({ name, clickCount }: SessionTimelineEvent): string => {
   switch (name) {
     case EVENT_RAGE_CLICK:
-      return clickCount === null
+      return clickCount === null || clickCount <= 0
         ? i18n.translate('xpack.digitalExperience.sessionDetail.rageClickLabel', {
             defaultMessage: 'Rage click',
           })
