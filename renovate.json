@@ -2305,7 +2305,6 @@
       "matchDepNames": [
         "@grpc/grpc-js",
         "@opentelemetry/api",
-        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
         "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",
