@@ -9,6 +9,6 @@ import { useKibanaServices } from './use_kibana_services';
 
 /** Whether the optional plugins the frustration dashboard is built with are all installed. */
 export const useFrustrationDashboardAvailable = (): boolean => {
-  const { dashboard, lens, dataViews } = useKibanaServices();
-  return Boolean(dashboard && lens && dataViews);
+  const { dashboard, lens } = useKibanaServices();
+  return Boolean(dashboard && lens);
 };

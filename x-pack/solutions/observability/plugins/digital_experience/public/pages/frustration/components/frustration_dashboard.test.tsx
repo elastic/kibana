@@ -6,10 +6,9 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
-import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { buildFrustrationPanels } from '../utils/frustration_panels';
 import { FrustrationDashboard } from './frustration_dashboard';
 
@@ -24,11 +23,9 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
     return null;
   },
 }));
-jest.mock('../../../hooks/use_kibana_services');
 jest.mock('../utils/frustration_panels');
 
-const addDanger = jest.fn();
-const panels = [{ uid: 'rage' }] as unknown as ReturnType<typeof buildFrustrationPanels>;
+const panels = [{ id: 'rage' }] as unknown as ReturnType<typeof buildFrustrationPanels>;
 
 const timeRange = { rangeFrom: 'now-24h', rangeTo: 'now' };
 
@@ -70,9 +67,6 @@ const publishApi = (api = createApi()) => {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest.mocked(useKibanaServices).mockReturnValue({
-    notifications: { toasts: { addDanger } },
-  } as unknown as ReturnType<typeof useKibanaServices>);
   jest.mocked(buildFrustrationPanels).mockReturnValue(panels);
 });
 
@@ -88,7 +82,8 @@ describe('FrustrationDashboard', () => {
         error: expect.any(String),
       }
     );
-    const { getInitialInput } = await lastProps().getCreationOptions!();
+    const { getInitialInput, useControlsIntegration } = await lastProps().getCreationOptions!();
+    expect(useControlsIntegration).toBe(false);
     expect(getInitialInput?.()).toEqual({
       panels,
       time_range: { from: 'now-24h', to: 'now' },
@@ -172,7 +167,7 @@ describe('FrustrationDashboard', () => {
     expect(api.forceRefresh).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a callout and a toast instead of the dashboard when the panels cannot be built', async () => {
+  it('shows a callout instead of the dashboard when the panels cannot be built', () => {
     jest.mocked(buildFrustrationPanels).mockImplementation(() => {
       throw new Error('bad panel');
     });
@@ -182,12 +177,9 @@ describe('FrustrationDashboard', () => {
     expect(screen.getByTestId('digitalExperienceFrustrationDashboardError')).toHaveTextContent(
       'bad panel'
     );
-    expect(mockRendererProps).not.toHaveBeenCalled();
-    await waitFor(() =>
-      expect(addDanger).toHaveBeenCalledWith({
-        title: 'Could not load the frustration dashboard',
-        text: 'bad panel',
-      })
+    expect(screen.getByTestId('digitalExperienceFrustrationDashboardError')).toHaveTextContent(
+      'Could not load the frustration dashboard'
     );
+    expect(mockRendererProps).not.toHaveBeenCalled();
   });
 });

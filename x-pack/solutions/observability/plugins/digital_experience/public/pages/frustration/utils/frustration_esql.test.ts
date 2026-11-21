@@ -6,8 +6,14 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { ENVIRONMENT_ALL_VALUE, ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import {
+  ENVIRONMENT_ALL_VALUE,
+  ENVIRONMENT_NOT_DEFINED_VALUE,
+  SERVICE_ENVIRONMENT,
+  TELEMETRY_SDK_LANGUAGE,
+} from '@kbn/apm-types';
+import {
+  BROWSER_SDK_LANGUAGE,
   EVENT_DEAD_CLICK,
   EVENT_ERROR_CLICK,
   EVENT_RAGE_CLICK,
@@ -28,7 +34,6 @@ import {
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../../common/session_attribute_fields';
 import {
   errorClicksQuery,
-  escapeEsqlString,
   frustratedSessionsQuery,
   frustrationBase,
   signalsByBrowserQuery,
@@ -68,25 +73,6 @@ const withEnvironment = (environment: string): FrustrationQueryParams => ({
   environment,
 });
 
-describe('escapeEsqlString', () => {
-  it('escapes quotes and backslashes', () => {
-    expect(escapeEsqlString('say "hi"')).toBe('say \\"hi\\"');
-    expect(escapeEsqlString('C:\\temp')).toBe('C:\\\\temp');
-  });
-
-  it('escapes a backslash before the quote that follows it', () => {
-    expect(escapeEsqlString('a\\"b')).toBe('a\\\\\\"b');
-  });
-
-  it('escapes line breaks and tabs, which a literal cannot hold', () => {
-    expect(escapeEsqlString('a\nb\r\tc')).toBe('a\\nb\\r\\tc');
-  });
-
-  it('leaves plain values alone', () => {
-    expect(escapeEsqlString('media-portal-web')).toBe('media-portal-web');
-  });
-});
-
 describe('frustration ES|QL', () => {
   describe.each(builders)('%s', (_name, build) => {
     it.each([
@@ -107,9 +93,15 @@ describe('frustration ES|QL', () => {
       expect(query).toContain(`${SOURCE_SERVICE_NAME_FIELD} == "media-portal-web"`);
     });
 
+    it('reads browser SDK events only, as the server usage does', () => {
+      expect(frustrationBase(params)).toContain(
+        `${TELEMETRY_SDK_LANGUAGE} == "${BROWSER_SDK_LANGUAGE}"`
+      );
+    });
+
     it('escapes the service name', () => {
-      const query = frustrationBase({ ...params, serviceName: 'a"b\\c' });
-      expect(query).toContain(`${SOURCE_SERVICE_NAME_FIELD} == "a\\"b\\\\c"`);
+      const query = frustrationBase({ ...params, serviceName: 'a"b\\c\n' });
+      expect(query).toContain(`${SOURCE_SERVICE_NAME_FIELD} == "a\\"b\\\\c\\n"`);
     });
 
     it('names the frustration events from the constants', () => {
@@ -122,10 +114,10 @@ describe('frustration ES|QL', () => {
       SESSION_ATTRIBUTE_FIELDS.environment.forEach((field) => expect(query).not.toContain(field));
     });
 
-    it('requires all environment fields to be unset for no environment', () => {
+    it('matches the "Not defined" value or all environment fields unset for no environment', () => {
       const [first, second] = SESSION_ATTRIBUTE_FIELDS.environment;
       expect(frustrationBase(withEnvironment(ENVIRONMENT_NOT_DEFINED_VALUE))).toContain(
-        `(${first} IS NULL AND ${second} IS NULL)`
+        `(${SERVICE_ENVIRONMENT} == "${ENVIRONMENT_NOT_DEFINED_VALUE}" OR (${first} IS NULL AND ${second} IS NULL))`
       );
     });
 
@@ -171,6 +163,13 @@ describe('frustration ES|QL', () => {
     it('guards the share against no sessions and divides as decimals', () => {
       const query = frustratedSessionsQuery(params);
       expect(query).toContain('CASE(sessions > 0, TO_DOUBLE(frustrated) / sessions, 0.0)');
+    });
+
+    it('counts only sessions with an id, as the session summaries do', () => {
+      const query = frustratedSessionsQuery(params);
+      expect(query).toContain(
+        `AND ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""\n| STATS`
+      );
     });
 
     it('keeps the environment in the denominator', () => {
@@ -253,7 +252,7 @@ describe('frustration ES|QL', () => {
       expect(query).not.toContain(EVENT_RAGE_CLICK);
       expect(query).not.toContain(EVENT_DEAD_CLICK);
       expect(query).toContain(
-        `STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = ${SOURCE_EXCEPTION_TYPE_FIELD}, message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`
+        `STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, "No exception"), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}`
       );
     });
 

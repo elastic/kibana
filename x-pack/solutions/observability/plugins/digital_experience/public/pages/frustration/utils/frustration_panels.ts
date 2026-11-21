@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardPanel } from '@kbn/as-code-dashboard-schema';
 import { i18n } from '@kbn/i18n';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
@@ -97,6 +97,8 @@ const countMetricPanel = (
     title,
     ...layerSettings,
     data_source: { type: 'esql', query: esql },
+    // The API has no option to hide the label and drops an empty one, so with `lens.apiFormat`
+    // on the column name shows.
     metrics: [{ type: 'primary', column: 'signals', label: '' }],
   },
 });
@@ -333,7 +335,7 @@ const withTextBasedLayers = (
 /**
  * Lens drops the time buckets that extend past the dashboard's time range, which hides the
  * latest signals whenever the ES|QL bucket is wider than Lens' own interval. The as-code API has
- * no option for it on ES|QL columns.
+ * no option for it on ES|QL columns, so with `lens.apiFormat` on the dashboard loses it.
  */
 const keepPartialTimeBuckets = (attributes: LensAttributes): LensAttributes =>
   withTextBasedLayers(attributes, (layer) => ({
@@ -349,13 +351,15 @@ const keepPartialTimeBuckets = (attributes: LensAttributes): LensAttributes =>
 export const buildFrustrationPanels = (
   params: FrustrationQueryParams,
   colors?: FrustrationColors
-): DashboardState['panels'] => {
+): DashboardPanel[] => {
   const builder = new LensConfigBuilder();
 
-  return frustrationPanelConfigs(params, colors).map(({ id, title, grid, config }) => ({
-    type: 'lens' as const,
-    grid,
-    uid: id,
-    config: { id, title, attributes: keepPartialTimeBuckets(builder.fromAPIFormat(config)) },
-  }));
+  return frustrationPanelConfigs(params, colors).map(
+    ({ id, title, grid, config }): DashboardPanel => ({
+      type: 'lens',
+      grid,
+      id,
+      config: { title, attributes: keepPartialTimeBuckets(builder.fromAPIFormat(config)) },
+    })
+  );
 };

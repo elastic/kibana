@@ -15,7 +15,7 @@ import type { FrustrationCounts } from '../../../../common/frustration';
 import { emptyFrustration } from '../../../../common/frustration';
 import { TOP_ROWS } from '../../../../common/top_rows';
 import type {
-  ApplicationUsageResponse,
+  ApplicationUsage,
   Breakdowns,
   FrustratedElement,
   FrustratedPage,
@@ -97,7 +97,7 @@ const toFrustratedPages = (frustration?: Frustration): FrustratedPage[] => {
  * What users load and do; missing aggregations (indices that do not exist) map to empty lists and
  * `null` percentiles.
  */
-export const toUsage = (logs?: UsageAggregations): ApplicationUsageResponse => {
+export const toUsage = (logs?: UsageAggregations): ApplicationUsage => {
   const metrics = logs?.inEnvironment;
   return {
     topPages: (metrics?.pageLoads.topPages.buckets ?? []).map(

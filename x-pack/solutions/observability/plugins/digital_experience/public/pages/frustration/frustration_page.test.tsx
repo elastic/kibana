@@ -18,7 +18,6 @@ import { useEnvironment } from '../../hooks/use_environment';
 import { useFrustrationDashboardAvailable } from '../../hooks/use_frustration_dashboard_available';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { EMPTY_USAGE } from '../application_details/otel_overview/utils/usage_request';
-import { useApplicationErrors } from '../errors/hooks/use_application_errors';
 import { FrustrationPage } from './frustration_page';
 
 jest.mock('../../breadcrumbs/use_route_breadcrumb');
@@ -28,7 +27,6 @@ jest.mock('../../hooks/use_application_data');
 jest.mock('../../hooks/use_environment');
 jest.mock('../../hooks/use_time_range');
 jest.mock('../../hooks/use_frustration_dashboard_available');
-jest.mock('../errors/hooks/use_application_errors');
 // Its own test covers the pickers; here the page only has to give it the environments.
 jest.mock('../../components/application_tab_toolbar', () => ({
   ApplicationTabToolbar: ({
@@ -74,13 +72,14 @@ jest.mock('../application_details/otel_overview/components/frustration_panel', (
   ),
 }));
 
-const refresh = jest.fn();
 const usageRefresh = jest.fn();
 const sessionsHref = jest.fn(() => '/sessions-href');
 
 const USAGE: ApplicationUsageResponse = {
+  serviceName: 'my-app',
   ...EMPTY_USAGE,
   frustration: { rageClicks: 3, deadClicks: 2, errorClicks: 1, total: 6, sessions: 4 },
+  environments: ['production', 'staging'],
 };
 
 const mockUsage = (
@@ -128,12 +127,6 @@ beforeEach(() => {
     setTimeRange: jest.fn(),
   });
   mockUsage();
-  jest.mocked(useApplicationErrors).mockReturnValue({
-    response: { serviceName: 'my-app', environments: ['production', 'staging'] },
-    isLoading: false,
-    error: undefined,
-    refresh,
-  } as unknown as ReturnType<typeof useApplicationErrors>);
 });
 
 describe('FrustrationPage', () => {
@@ -166,7 +159,7 @@ describe('FrustrationPage', () => {
     ]);
   });
 
-  it('shows the environment and time range controls with the environments of the application', async () => {
+  it('shows the environment and time range controls with the environments of the usage', async () => {
     await renderOtelPage();
 
     expect(screen.getByTestId('toolbar')).toHaveTextContent('production,staging');
@@ -217,7 +210,7 @@ describe('FrustrationPage', () => {
   });
 
   it('keeps the dashboard and the native panel, with its own empty state, without signals', async () => {
-    mockUsage({ response: EMPTY_USAGE });
+    mockUsage({ response: { ...USAGE, ...EMPTY_USAGE } });
 
     renderPage('otel');
 
@@ -234,13 +227,12 @@ describe('FrustrationPage', () => {
     expect(screen.getByTestId('nativePanel')).toHaveAttribute('data-total', '0');
   });
 
-  it('refreshes the environments, the usage and the dashboard together', async () => {
+  it('refreshes the usage and the dashboard together', async () => {
     renderPage('otel');
     await screen.findByTestId('dashboard');
 
     fireEvent.click(screen.getByTestId('toolbar'));
 
-    expect(refresh).toHaveBeenCalledTimes(1);
     expect(usageRefresh).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('dashboard')).toHaveTextContent('my-app|production|now-24h|1');
   });
@@ -269,7 +261,6 @@ describe('FrustrationPage', () => {
       screen.queryByTestId('digitalExperienceFrustrationDashboardSlot')
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId('toolbar')).not.toBeInTheDocument();
-    expect(useApplicationErrors).not.toHaveBeenCalled();
     expect(useApplicationData).not.toHaveBeenCalled();
   });
 });

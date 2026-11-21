@@ -16,6 +16,8 @@ import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
 
+const panelHeadingTestId = (title: string) => `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
+
 type OverviewFilterName =
   | 'browser'
   | 'os'
@@ -56,6 +58,7 @@ export class DigitalExperiencePage {
   public readonly frustrationDashboardLink: Locator;
   public readonly frustrationPageTitle: Locator;
   public readonly frustrationDashboardSlot: Locator;
+  public readonly frustrationDashboardErrors: Locator;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -128,6 +131,9 @@ export class DigitalExperiencePage {
       name: 'Frustration signals',
     });
     this.frustrationDashboardSlot = page.getByTestId('digitalExperienceFrustrationDashboardSlot');
+    this.frustrationDashboardErrors = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddableError"], [data-test-subj="embeddable-lens-failure"]'
+    );
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -321,16 +327,19 @@ export class DigitalExperiencePage {
 
   /** The heading of a panel of the frustration dashboard, found by its title. */
   frustrationPanelHeading(title: string): Locator {
-    return this.frustrationDashboardSlot.getByTestId(
-      `embeddablePanelHeading-${title.replace(/\s/g, '')}`
-    );
+    return this.frustrationDashboardSlot.getByTestId(panelHeadingTestId(title));
   }
 
   /** A panel of the frustration dashboard, with its heading and content, found by its title. */
   frustrationPanel(title: string): Locator {
     return this.frustrationDashboardSlot
       .getByTestId('embeddablePanel')
-      .filter({ has: this.frustrationPanelHeading(title) });
+      .filter({ has: this.page.getByTestId(panelHeadingTestId(title)) });
+  }
+
+  /** The metric of a metric panel of the frustration dashboard, found by its title. */
+  frustrationMetric(title: string): Locator {
+    return this.frustrationPanel(title).getByTestId('mtrVis');
   }
 
   /** The "Open sessions" link of an element's row in the Frustration panel. */

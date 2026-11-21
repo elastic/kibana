@@ -26,8 +26,8 @@ import {
 } from '../../../lib/otel/overview_filters';
 import {
   applicationDocuments,
+  byEnvironment,
   eventCount,
-  inEnvironmentFilter,
   otelSearchDefaults,
 } from '../../../lib/otel/queries';
 import type { ApplicationSearchParams } from '../../application_tab_route';
@@ -45,7 +45,8 @@ const frustrationAggs = {
  * clicks and frustration signals, over the selected environment and the Overview's filters. The
  * page filter narrows the page loads and the frustration, which carry a page URL, but not the
  * clicks, which carry none yet. The breakdowns read the fields the filters and the Sessions read,
- * so a row is a value the filter takes.
+ * so a row is a value the filter takes. The environments for the picker ignore the selected one and
+ * the filters, not the KQL query.
  */
 export const usageSearch = ({
   environment,
@@ -67,65 +68,64 @@ export const usageSearch = ({
         ],
       },
     },
-    aggs: {
-      inEnvironment: {
-        filter: inEnvironmentFilter(environment, documentFilters(filters)),
-        aggs: {
-          pageLoads: {
-            filter: {
-              bool: {
-                filter: [
-                  ...termQuery(OTEL_EVENT_NAME, EVENT_NAVIGATION_TIMING),
-                  ...pageLoadFilters(filters),
-                ],
-              },
-            },
-            aggs: {
-              topPages: {
-                terms: { field: URL_FULL, size: TOP_ROWS },
-                aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
-              },
-              browsers: { terms: { field: filterFieldOf('browser'), size: TOP_ROWS } },
-              operatingSystems: { terms: { field: filterFieldOf('os'), size: TOP_ROWS } },
-              devices: { terms: { field: filterFieldOf('device'), size: TOP_ROWS } },
+    aggs: byEnvironment(
+      environment,
+      {
+        pageLoads: {
+          filter: {
+            bool: {
+              filter: [
+                ...termQuery(OTEL_EVENT_NAME, EVENT_NAVIGATION_TIMING),
+                ...pageLoadFilters(filters),
+              ],
             },
           },
-          clicks: {
-            ...eventCount(EVENT_USER_ACTION_CLICK),
-            aggs: {
-              selectors: {
-                terms: { field: BROWSER_CSS_SELECTOR, size: TOP_ROWS },
-                aggs: { tagName: { terms: { field: BROWSER_TAG_NAME, size: 1 } } },
-              },
+          aggs: {
+            topPages: {
+              terms: { field: URL_FULL, size: TOP_ROWS },
+              aggs: { loadTime: p75Of(NAVIGATION_TIMING_LOAD_EVENT_END) },
+            },
+            browsers: { terms: { field: filterFieldOf('browser'), size: TOP_ROWS } },
+            operatingSystems: { terms: { field: filterFieldOf('os'), size: TOP_ROWS } },
+            devices: { terms: { field: filterFieldOf('device'), size: TOP_ROWS } },
+          },
+        },
+        clicks: {
+          ...eventCount(EVENT_USER_ACTION_CLICK),
+          aggs: {
+            selectors: {
+              terms: { field: BROWSER_CSS_SELECTOR, size: TOP_ROWS },
+              aggs: { tagName: { terms: { field: BROWSER_TAG_NAME, size: 1 } } },
             },
           },
-          frustration: {
-            filter: {
-              bool: {
-                filter: [
-                  ...termsQuery(OTEL_EVENT_NAME, [...FRUSTRATION_EVENTS]),
-                  ...pageLoadFilters(filters),
-                ],
+        },
+        frustration: {
+          filter: {
+            bool: {
+              filter: [
+                ...termsQuery(OTEL_EVENT_NAME, [...FRUSTRATION_EVENTS]),
+                ...pageLoadFilters(filters),
+              ],
+            },
+          },
+          aggs: {
+            ...frustrationAggs,
+            elements: {
+              terms: { field: BROWSER_CSS_SELECTOR, size: TOP_ROWS },
+              aggs: {
+                ...frustrationAggs,
+                tagName: { terms: { field: BROWSER_TAG_NAME, size: 1 } },
+                topPage: { terms: { field: URL_FULL, size: 1 } },
               },
             },
-            aggs: {
-              ...frustrationAggs,
-              elements: {
-                terms: { field: BROWSER_CSS_SELECTOR, size: TOP_ROWS },
-                aggs: {
-                  ...frustrationAggs,
-                  tagName: { terms: { field: BROWSER_TAG_NAME, size: 1 } },
-                  topPage: { terms: { field: URL_FULL, size: 1 } },
-                },
-              },
-              pages: {
-                terms: { field: URL_FULL, size: TOP_ROWS * PAGE_CANDIDATES_PER_ROW },
-                aggs: frustrationAggs,
-              },
+            pages: {
+              terms: { field: URL_FULL, size: TOP_ROWS * PAGE_CANDIDATES_PER_ROW },
+              aggs: frustrationAggs,
             },
           },
         },
       },
-    },
+      documentFilters(filters)
+    ),
   };
 };

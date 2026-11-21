@@ -6,11 +6,11 @@
  */
 
 import type { OverviewSearchParams } from '../../../../../common/overview_filters';
-import type { ApplicationUsageResponse } from '../../../../../common/types/usage';
+import type { ApplicationUsage, ApplicationUsageResponse } from '../../../../../common/types/usage';
 import type { ApplicationRequest } from '../../../../hooks/use_application_data';
 import { withOverviewFilters } from '../../../../utils/with_overview_filters';
 
-export const EMPTY_USAGE: ApplicationUsageResponse = {
+export const EMPTY_USAGE: ApplicationUsage = {
   topPages: [],
   breakdowns: { pageLoads: 0, browsers: [], operatingSystems: [], devices: [] },
   topClicks: [],

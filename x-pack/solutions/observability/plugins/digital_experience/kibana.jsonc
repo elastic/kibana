@@ -16,8 +16,7 @@
       "taskManager",
       "encryptedSavedObjects",
       "dashboard",
-      "lens",
-      "dataViews"
+      "lens"
     ],
     "requiredBundles": ["kibanaReact", "fieldFormats", "observability", "charts"]
   }

@@ -11,7 +11,6 @@ import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plug
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import type { TimeRange } from '../../../hooks/use_time_range';
 import type { FrustrationColors } from '../utils/frustration_panels';
 import { buildFrustrationPanels } from '../utils/frustration_panels';
@@ -61,9 +60,6 @@ export function FrustrationDashboard({
   refreshCount: number;
 }) {
   const { euiTheme } = useEuiTheme();
-  const {
-    notifications: { toasts },
-  } = useKibanaServices();
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const handledRefreshCount = useRef(refreshCount);
   // The dashboard the published API belongs to: a late cleanup of a replaced one must not clear it.
@@ -78,12 +74,6 @@ export function FrustrationDashboard({
   const panels = 'panels' in result ? result.panels : undefined;
   const buildError = 'error' in result ? result.error : undefined;
   const dashboardKey = `${serviceName}|${environment ?? ''}|${danger}|${warning}|${accent}`;
-
-  useEffect(() => {
-    if (buildError) {
-      toasts.addDanger({ title: LOAD_FAILURE_TITLE, text: buildError.message });
-    }
-  }, [buildError, toasts]);
 
   useEffect(() => {
     dashboard?.setTimeRange({ from: rangeFrom, to: rangeTo });
@@ -115,6 +105,7 @@ export function FrustrationDashboard({
 
   const getCreationOptions = useCallback(
     async (): Promise<DashboardCreationOptions> => ({
+      useControlsIntegration: false,
       getInitialInput: () => ({
         panels,
         time_range: { from: rangeFrom, to: rangeTo },

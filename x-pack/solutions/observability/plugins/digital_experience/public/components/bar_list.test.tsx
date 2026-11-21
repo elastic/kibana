@@ -79,4 +79,23 @@ describe('BarList', () => {
     expect(buy).toHaveTextContent('22 · 30%');
     expect(pay).toHaveTextContent('51 · 70%');
   });
+
+  it('shows a share under half a percent as under one percent, not as zero', () => {
+    render(
+      <BarList
+        aria-label="Clicks"
+        total={1000}
+        wholePercent
+        items={[
+          { key: '#buy', value: 4 },
+          { key: '#pay', value: 0 },
+        ]}
+      />,
+      { wrapper: EuiProvider }
+    );
+
+    const [buy, pay] = screen.getAllByRole('listitem');
+    expect(buy).toHaveTextContent('4 · <1%');
+    expect(pay).toHaveTextContent('0 · 0%');
+  });
 });

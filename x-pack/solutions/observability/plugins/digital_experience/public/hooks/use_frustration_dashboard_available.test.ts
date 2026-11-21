@@ -11,7 +11,7 @@ import { useKibanaServices } from './use_kibana_services';
 
 jest.mock('./use_kibana_services');
 
-const plugins = { dashboard: {}, lens: {}, dataViews: {} };
+const plugins = { dashboard: {}, lens: {} };
 
 const availableWith = (services: Record<string, unknown>) => {
   jest
@@ -21,11 +21,11 @@ const availableWith = (services: Record<string, unknown>) => {
 };
 
 describe('useFrustrationDashboardAvailable', () => {
-  it('is available with the dashboard, lens and data views plugins', () => {
+  it('is available with the dashboard and lens plugins', () => {
     expect(availableWith(plugins)).toBe(true);
   });
 
-  it.each(['dashboard', 'lens', 'dataViews'])('is not available without %s', (missing) => {
+  it.each(['dashboard', 'lens'])('is not available without %s', (missing) => {
     expect(availableWith({ ...plugins, [missing]: undefined })).toBe(false);
   });
 });

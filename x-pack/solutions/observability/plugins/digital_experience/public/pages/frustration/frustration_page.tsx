@@ -26,7 +26,6 @@ import {
   EMPTY_USAGE,
   usageRequestOf,
 } from '../application_details/otel_overview/utils/usage_request';
-import { useApplicationErrors } from '../errors/hooks/use_application_errors';
 
 // Loaded on this page only: the dashboard bundle belongs to an optional plugin.
 const FrustrationDashboard = lazy(async () => {
@@ -80,6 +79,11 @@ const DASHBOARD_UNAVAILABLE_BODY = i18n.translate(
   { defaultMessage: 'The dashboard needs the Dashboard and Lens plugins.' }
 );
 
+const DASHBOARD_LOADING_LABEL = i18n.translate(
+  'xpack.digitalExperience.frustration.dashboardLoading',
+  { defaultMessage: 'Loading the frustration dashboard' }
+);
+
 // The dashboard's queries only narrow by service and environment, so the usage does too.
 const usageRequest = usageRequestOf({});
 
@@ -93,9 +97,8 @@ const dashboardUnavailablePrompt = (
 
 /** The time range and environment of the page, then its dashboard and the native panel below it. */
 function FrustrationBody({ serviceName }: { serviceName: string }) {
-  const { response, isLoading, refresh: refreshEnvironments } = useApplicationErrors(serviceName);
-  const environments = useLastEnvironments(serviceName, response);
   const usage = useApplicationData(serviceName, usageRequest);
+  const environments = useLastEnvironments(serviceName, usage.response);
   const { timeRange } = useTimeRange();
   const { environment } = useEnvironment();
   const isDashboardAvailable = useFrustrationDashboardAvailable();
@@ -103,7 +106,6 @@ function FrustrationBody({ serviceName }: { serviceName: string }) {
   const [refreshCount, setRefreshCount] = useState(0);
 
   const refreshAll = () => {
-    refreshEnvironments();
     usage.refresh();
     setRefreshCount((count) => count + 1);
   };
@@ -114,13 +116,13 @@ function FrustrationBody({ serviceName }: { serviceName: string }) {
     <>
       <ApplicationTabToolbar
         environments={environments}
-        isLoading={isLoading}
+        isLoading={usage.isLoading}
         onRefresh={refreshAll}
       />
       <EuiSpacer size="m" />
       <div data-test-subj="digitalExperienceFrustrationDashboardSlot">
         {isDashboardAvailable ? (
-          <Suspense fallback={<EuiLoadingChart size="l" />}>
+          <Suspense fallback={<EuiLoadingChart size="l" aria-label={DASHBOARD_LOADING_LABEL} />}>
             <FrustrationDashboard
               serviceName={serviceName}
               environment={environment}

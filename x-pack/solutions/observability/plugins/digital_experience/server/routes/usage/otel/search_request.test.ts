@@ -42,13 +42,16 @@ describe('usageSearch', () => {
     });
   });
 
-  it('filters the environment in one aggregation, without picker terms', () => {
+  it('lists every environment for the picker and filters the usage to the selected one', () => {
     const all = usageSearch(PARAMS).aggs;
-    const production = inEnvironment(usageSearch({ ...PARAMS, environment: 'production' }));
+    const { aggs } = usageSearch({ ...PARAMS, environment: 'production' });
 
-    expect(Object.keys(all)).toEqual(['inEnvironment']);
     expect(all.inEnvironment.filter).toEqual({ match_all: {} });
-    expect(JSON.stringify(production.filter)).toContain('production');
+    expect(aggs.environments).toBeDefined();
+    expect(aggs.environmentNames).toBeDefined();
+    expect(aggs.environmentNotDefined).toBeDefined();
+    expect(JSON.stringify(aggs.inEnvironment.filter)).toContain('production');
+    expect(JSON.stringify(aggs.environments)).not.toContain('production');
   });
 
   it('reads the top pages from navigation timings, with their load time', () => {

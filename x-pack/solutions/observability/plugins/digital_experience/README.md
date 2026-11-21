@@ -262,7 +262,7 @@ Overview's Frustration panel with **View dashboard**; it has no tab. Its breadcr
   from `common/otel_data.ts`.
 - **Native panel:** below the grid, the Overview's **Elements** / **Pages** panel from `/usage`, with
   **Open sessions**, as Lens tables can't link into the Sessions list with those filters.
-- **Plugins:** `dashboard`, `lens` and `dataViews` are optional. Without them the Overview hides the
+- **Plugins:** `dashboard` and `lens` are optional. Without them the Overview hides the
   link and the page shows an empty prompt in place of the dashboard.
 - **Limits:** the Overview's filters (browser, OS, device, country, version, page) and KQL query
   aren't carried over yet: the dashboard and the panel below it cover the application and

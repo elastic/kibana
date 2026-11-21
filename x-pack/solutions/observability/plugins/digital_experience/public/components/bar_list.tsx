@@ -8,6 +8,7 @@
 import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useFormatters } from '../hooks/use_formatters';
 
 export interface BarListItem {
@@ -17,9 +18,21 @@ export interface BarListItem {
   value: number;
 }
 
+/** The share rounded to a whole percent, and `<1%` rather than `0%` for a share that isn't zero. */
+const wholePercentOf = (share: number, formatPercent: (share: number) => string): string => {
+  const whole = Math.round(share * 100) / 100;
+  if (whole === 0 && share > 0) {
+    return i18n.translate('xpack.digitalExperience.barList.underOnePercent', {
+      defaultMessage: '<{onePercent}',
+      values: { onePercent: formatPercent(0.01) },
+    });
+  }
+  return formatPercent(whole);
+};
+
 /**
  * The count of a row and its share of the total, e.g. `1,200 · 64%`; with `wholePercent`, the
- * share is a whole number whatever the percent format of Kibana says, e.g. `64%` for `63.8%`.
+ * share is rounded to a whole percent before Kibana's percent format, e.g. `64%` for `63.8%`.
  */
 export function ShareValue({
   value,
@@ -37,9 +50,7 @@ export function ShareValue({
       <strong>{formatNumber(value)}</strong>
       {total > 0 && (
         <EuiText size="xs" color="subdued" component="span">
-          {` · ${
-            wholePercent ? `${formatNumber(Math.round(share * 100))}%` : formatPercent(share)
-          }`}
+          {` · ${wholePercent ? wholePercentOf(share, formatPercent) : formatPercent(share)}`}
         </EuiText>
       )}
     </EuiText>

@@ -54,6 +54,18 @@ test.describe('Digital Experience frustration dashboard', { tag: DIGITAL_EXPERIE
       await expect(digitalExperience.frustrationPanelHeading(title)).toBeVisible();
     }
 
+    const { frustration } = testData.OTEL_SHOP_USAGE;
+    for (const [title, count] of [
+      ['Frustration signals', frustration.total],
+      ['Rage clicks', frustration.rageClicks],
+      ['Dead clicks', frustration.deadClicks],
+      ['Error clicks', frustration.errorClicks],
+    ] as const) {
+      // The count panels have no label, so the value is the metric's only text.
+      await expect(digitalExperience.frustrationMetric(title)).toHaveText(String(count));
+    }
+    await expect(digitalExperience.frustrationDashboardErrors).toHaveCount(0);
+
     const [element] = testData.OTEL_SHOP_USAGE.frustratedElements;
     await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
       element.cssSelector

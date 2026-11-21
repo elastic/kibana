@@ -62,7 +62,7 @@ export interface FrustratedPage extends FrustrationCounts {
  * browsers, operating systems and devices, top clicked elements and frustration signals; every
  * list holds up to `TOP_ROWS` rows.
  */
-export interface ApplicationUsageResponse {
+export interface ApplicationUsage {
   /** By page loads, descending; the URLs of navigation timings only. */
   topPages: TopPage[];
   breakdowns: Breakdowns;
@@ -75,4 +75,11 @@ export interface ApplicationUsageResponse {
   frustratedElements: FrustratedElement[];
   /** By total, descending. */
   frustratedPages: FrustratedPage[];
+}
+
+/** The usage of one application, with its environments. */
+export interface ApplicationUsageResponse extends ApplicationUsage {
+  serviceName: string;
+  /** The environments with browser data, whatever the `environment` filter, for the picker. */
+  environments: string[];
 }

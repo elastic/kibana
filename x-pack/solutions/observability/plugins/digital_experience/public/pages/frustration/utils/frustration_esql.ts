@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { ENVIRONMENT_ALL_VALUE, ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import {
+  ENVIRONMENT_ALL_VALUE,
+  ENVIRONMENT_NOT_DEFINED_VALUE,
+  SERVICE_ENVIRONMENT,
+  TELEMETRY_SDK_LANGUAGE,
+} from '@kbn/apm-types';
+import { escapeStringValue } from '@kbn/esql-utils';
+import { i18n } from '@kbn/i18n';
+import {
+  BROWSER_SDK_LANGUAGE,
   EVENT_DEAD_CLICK,
   EVENT_ERROR_CLICK,
   EVENT_RAGE_CLICK,
@@ -42,19 +50,7 @@ const TIME_BUCKETS = 50;
 
 // OTel attributes that some index doesn't map read as null instead of failing the query.
 const NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields = "NULLIFY";';
-
-/** `value` as the text of an ES|QL string literal: backslashes, quotes and line breaks escaped. */
-export const escapeEsqlString = (value: string): string =>
-  value
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t');
-
-const literal = (value: string): string => `"${escapeEsqlString(value)}"`;
-
-const eventList = FRUSTRATION_EVENTS.map(literal).join(', ');
+const eventList = FRUSTRATION_EVENTS.map(escapeStringValue).join(', ');
 
 // One column per type, so a chart stacks them and each value of a dimension is one row.
 const TYPE_COLUMNS: ReadonlyArray<readonly [string, FrustrationEvent]> = [
@@ -63,32 +59,38 @@ const TYPE_COLUMNS: ReadonlyArray<readonly [string, FrustrationEvent]> = [
   ['error', EVENT_ERROR_CLICK],
 ];
 const SIGNALS_BY_TYPE = `${TYPE_COLUMNS.map(
-  ([column, event]) => `${column} = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == ${literal(event)}`
+  ([column, event]) =>
+    `${column} = COUNT(*) WHERE ${SOURCE_EVENT_NAME_FIELD} == ${escapeStringValue(event)}`
 ).join(', ')}, signals = COUNT(*)`;
 
 const ENVIRONMENT_FIELDS = SESSION_ATTRIBUTE_FIELDS.environment;
 
 /**
- * Nothing for all environments. No environment means every environment field is unset: OTel data
- * doesn't carry APM's "Not defined" value, which the server's `environmentFilter` also matches.
+ * Nothing for all environments. No environment is APM's "Not defined" value or every environment
+ * field unset, as the server's `environmentFilter` reads it.
  */
 const environmentClause = (environment: string): string => {
   if (!environment || environment === ENVIRONMENT_ALL_VALUE) {
     return '';
   }
   if (environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return `\n  AND (${ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ')})`;
+    return `\n  AND (${SERVICE_ENVIRONMENT} == ${escapeStringValue(
+      ENVIRONMENT_NOT_DEFINED_VALUE
+    )} OR (${ENVIRONMENT_FIELDS.map((field) => `${field} IS NULL`).join(' AND ')}))`;
   }
-  return `\n  AND (${ENVIRONMENT_FIELDS.map((field) => `${field} == ${literal(environment)}`).join(
-    ' OR '
-  )})`;
+  return `\n  AND (${ENVIRONMENT_FIELDS.map(
+    (field) => `${field} == ${escapeStringValue(environment)}`
+  ).join(' OR ')})`;
 };
 
-/** The events of the service and environment: all of the application's sessions. */
+/** The browser SDK events of the service and environment, as the server's usage reads them. */
 const applicationEvents = ({ serviceName, environment }: FrustrationQueryParams): string =>
   `${NULLIFY_UNMAPPED_FIELDS}
 FROM ${OTEL_LOGS_INDEX}
-| WHERE ${SOURCE_SERVICE_NAME_FIELD} == ${literal(serviceName)}${environmentClause(environment)}`;
+| WHERE ${TELEMETRY_SDK_LANGUAGE} == ${escapeStringValue(BROWSER_SDK_LANGUAGE)}
+  AND ${SOURCE_SERVICE_NAME_FIELD} == ${escapeStringValue(serviceName)}${environmentClause(
+    environment
+  )}`;
 
 /** The frustration events of the service and environment, which every panel but one counts. */
 export const frustrationBase = (params: FrustrationQueryParams): string =>
@@ -102,9 +104,13 @@ export const signalsQuery = (params: FrustrationQueryParams): string =>
   `${frustrationBase(params)}
 | STATS signals = COUNT(*)`;
 
-/** The share of the application's sessions with a frustration signal, with both counts. */
+/**
+ * The share of the application's sessions with a frustration signal, with both counts; a session
+ * needs a non-empty id, as in the session summaries.
+ */
 export const frustratedSessionsQuery = (params: FrustrationQueryParams): string =>
   `${applicationEvents(params)}
+  AND ${SOURCE_SESSION_ID_FIELD} IS NOT NULL AND ${SOURCE_SESSION_ID_FIELD} != ""
 | STATS frustrated = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) WHERE ${SOURCE_EVENT_NAME_FIELD} IN (${eventList}),
         sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD})
 | EVAL share = CASE(sessions > 0, TO_DOUBLE(frustrated) / sessions, 0.0)`;
@@ -115,7 +121,7 @@ export const signalsOfTypeQuery = (
   event: FrustrationEvent
 ): string =>
   `${applicationEvents(params)}
-  AND ${SOURCE_EVENT_NAME_FIELD} == ${literal(event)}
+  AND ${SOURCE_EVENT_NAME_FIELD} == ${escapeStringValue(event)}
 | STATS signals = COUNT(*)`;
 
 /** The signals of each type per bucket of the dashboard's time range. */
@@ -162,18 +168,28 @@ export const signalsByDeviceQuery = (params: FrustrationQueryParams): string =>
     'device',
     `COALESCE(${[
       ...SESSION_ATTRIBUTE_FIELDS.device,
-      `CASE(mobile == "true", ${literal(DEVICE_MOBILE_LABEL)}, mobile == "false", ${literal(
-        DEVICE_DESKTOP_LABEL
-      )})`,
+      `CASE(mobile == "true", ${escapeStringValue(
+        DEVICE_MOBILE_LABEL
+      )}, mobile == "false", ${escapeStringValue(DEVICE_DESKTOP_LABEL)})`,
     ].join(', ')})`,
     TOP_DEVICES,
     [`mobile = COALESCE(${SOURCE_MOBILE_FIELDS.map((field) => `TO_STRING(${field})`).join(', ')})`]
   );
 
-/** The most frequent error click exceptions, with their signals and sessions. */
+const NO_EXCEPTION_LABEL = i18n.translate(
+  'xpack.digitalExperience.frustrationDashboard.exceptions.noException',
+  { defaultMessage: 'No exception' }
+);
+
+/**
+ * The most frequent error click exceptions, with their signals and sessions. Error clicks without
+ * an exception, e.g. on a slow request, share a labeled row.
+ */
 export const errorClicksQuery = (params: FrustrationQueryParams): string =>
   `${applicationEvents(params)}
-  AND ${SOURCE_EVENT_NAME_FIELD} == ${literal(EVENT_ERROR_CLICK)}
-| STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = ${SOURCE_EXCEPTION_TYPE_FIELD}, message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
+  AND ${SOURCE_EVENT_NAME_FIELD} == ${escapeStringValue(EVENT_ERROR_CLICK)}
+| STATS signals = COUNT(*), sessions = COUNT_DISTINCT(${SOURCE_SESSION_ID_FIELD}) BY type = COALESCE(${SOURCE_EXCEPTION_TYPE_FIELD}, ${escapeStringValue(
+    NO_EXCEPTION_LABEL
+  )}), message = ${SOURCE_EXCEPTION_MESSAGE_FIELD}
 | SORT signals DESC
 | LIMIT ${ERROR_CLICK_ROWS}`;

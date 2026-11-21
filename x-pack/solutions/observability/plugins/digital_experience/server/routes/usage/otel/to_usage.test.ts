@@ -6,7 +6,11 @@
  */
 
 import { TOP_ROWS } from '../../../../common/top_rows';
-import { keyBuckets, termsAggregate } from '../../../lib/helpers/aggregate_fixtures.test_helpers';
+import {
+  keyBuckets,
+  NO_ENVIRONMENTS,
+  termsAggregate,
+} from '../../../lib/helpers/aggregate_fixtures.test_helpers';
 import type { UsageAggregations } from './search_response';
 import { toUsage } from './to_usage';
 
@@ -45,6 +49,7 @@ const logs = (
   frustration: Partial<Aggregations['frustration']> = {}
 ): UsageAggregations => {
   return {
+    ...NO_ENVIRONMENTS,
     inEnvironment: {
       doc_count: 0,
       pageLoads: {

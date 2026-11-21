@@ -230,10 +230,8 @@ describe('buildFrustrationPanels', () => {
   });
 
   const attributesOf = (id: string): LensAttributes => {
-    const panel = buildFrustrationPanels(params, colors).find(
-      (candidate) => 'uid' in candidate && candidate.uid === id
-    );
-    const config: unknown = panel && 'config' in panel ? panel.config : undefined;
+    const panel = buildFrustrationPanels(params, colors).find((candidate) => candidate.id === id);
+    const config: unknown = panel?.config;
     return (config as { attributes: LensAttributes }).attributes;
   };
 
@@ -258,9 +256,11 @@ describe('buildFrustrationPanels', () => {
       expect(panel).toMatchObject({
         type: 'lens',
         grid,
-        uid: id,
-        config: { id, title, attributes: { title } },
+        id,
+        config: { title, attributes: { title } },
       });
+      expect(panel).not.toHaveProperty('uid');
+      expect(panel.config).not.toHaveProperty('id');
     });
   });
 
