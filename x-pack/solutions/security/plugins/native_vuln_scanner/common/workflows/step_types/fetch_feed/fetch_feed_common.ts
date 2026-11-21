@@ -28,6 +28,15 @@ export const fetchedFeedSchema = lazySchema(() =>
     last_modified: z.string().optional(),
     /** Compressed bytes held on the server for the match step. */
     bytes: z.number().optional(),
+    /** Whole milliseconds the download took (headers plus body). */
+    download_ms: z.number().optional(),
+    /** Body bytes the vendor transferred this fetch (0 on a 304). */
+    downloaded_bytes: z.number().optional(),
+    /**
+     * The vendor answered 200 but the body bytes are identical to the caller's cached copy
+     * (RHEL S3 does this): the fetch step keeps treating them as unchanged, like a 304.
+     */
+    unchanged: z.boolean().optional(),
     error: z.string().optional(),
   })
 );

@@ -126,10 +126,12 @@ describe('loadFeed', () => {
       { family: 'rhel', version: '10' },
       { fetchImpl: respond('Not Found', { status: 404 }) }
     );
-    expect(result).toEqual({
-      status: 'unavailable',
-      url: REDHAT_CSAF_ARCHIVE_LATEST_URL,
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'unavailable',
+        url: REDHAT_CSAF_ARCHIVE_LATEST_URL,
+      })
+    );
   });
 
   it('throws on other HTTP errors', async () => {
@@ -275,7 +277,7 @@ describe('downloadFeed', () => {
       signal: expect.any(AbortSignal),
       headers: { 'if-none-match': '"abc"' },
     });
-    expect(result).toEqual({ status: 'not_modified', etag: '"abc"', lastModified: undefined });
+    expect(result).toMatchObject({ status: 'not_modified', etag: '"abc"' });
   });
 
   it('keeps the known etag when a 304 omits it', async () => {
@@ -284,6 +286,28 @@ describe('downloadFeed', () => {
       etag: '"known"',
     });
     expect(result).toMatchObject({ status: 'not_modified', etag: '"known"' });
+  });
+
+  it('reports how long the download took and how many bytes the vendor transferred', async () => {
+    let ticks = 0;
+    const result = await downloadFeed(rhel9, {
+      fetchImpl: respond(rhelBz2),
+      clock: () => ticks++ * 1500,
+    });
+    expect(result).toMatchObject({
+      status: 'ok',
+      durationMs: expect.any(Number),
+      downloadedBytes: rhelBz2.byteLength,
+    });
+    if (result.status === 'ok') expect(result.durationMs).toBeGreaterThanOrEqual(1);
+  });
+
+  it('reports zero transferred bytes on a 304', async () => {
+    const result = await downloadFeed(rhel9, {
+      fetchImpl: respond('', { status: 304 }),
+      etag: '"abc"',
+    });
+    expect(result).toMatchObject({ status: 'not_modified', downloadedBytes: 0 });
   });
 });
 
@@ -655,7 +679,12 @@ describe('RHEL 10+ via CSAF', () => {
     const result = await downloadFeed(rhel10, {
       fetchImpl: respond('Not Found', { status: 404 }),
     });
-    expect(result).toEqual({ status: 'unavailable', url: REDHAT_CSAF_ARCHIVE_LATEST_URL });
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: 'unavailable',
+        url: REDHAT_CSAF_ARCHIVE_LATEST_URL,
+      })
+    );
   });
 
   it('throws on an archive HTTP error', async () => {

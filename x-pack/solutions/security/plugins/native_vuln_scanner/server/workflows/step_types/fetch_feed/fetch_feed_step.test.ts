@@ -11,7 +11,7 @@ import { downloadFeed } from '../../../lib/feeds/fetch';
 import { readInventory } from '../../../lib/scan';
 import type { InventorySnapshot } from '../../../lib/scan';
 import { buildContext, buildDeps } from '../test_helpers';
-import { buildFetchFeedStepDefinition } from './fetch_feed_step';
+import { bodySha256, buildFetchFeedStepDefinition } from './fetch_feed_step';
 
 jest.mock('../../../lib/feeds/fetch', () => ({
   ...jest.requireActual('../../../lib/feeds/fetch'),
@@ -74,6 +74,30 @@ describe('native_vuln.fetch_feed handler', () => {
     });
     expect(downloadMock).toHaveBeenCalledTimes(2);
     expect(getCachedFeed('ubuntu:noble', false)?.etag).toBe('"ubuntu"');
+    expect(JSON.stringify(result.output)).not.toContain('records');
+  });
+
+  it('treats a 200 with identical bytes as unchanged, keeping the cache and the new etag', async () => {
+    const body = new Uint8Array([1, 2, 3]);
+    setCachedFeed('ubuntu:noble', {
+      etag: '"old"',
+      body,
+      includeUnfixed: false,
+      bodySha256: bodySha256(body),
+    });
+    inventoryMock.mockResolvedValue(snapshot([ubuntuHost]));
+    downloadMock.mockResolvedValue({ status: 'ok', body, etag: '"new"' });
+
+    const { result } = await run();
+
+    expect(result.output?.feeds[0]).toMatchObject({
+      release: 'ubuntu:noble',
+      status: 'downloaded',
+      unchanged: true,
+      etag: '"new"',
+    });
+    // The cached body survives untouched and the new etag is retained for the next request.
+    expect(getCachedFeed('ubuntu:noble', false)).toMatchObject({ etag: '"new"', body });
     expect(JSON.stringify(result.output)).not.toContain('records');
   });
 

@@ -10,6 +10,8 @@ export interface CachedFeed {
   etag?: string;
   lastModified?: string;
   body: Uint8Array;
+  /** sha256 of `body`, hex; lets a 200 with identical bytes be detected as unchanged. */
+  bodySha256?: string;
   /** Which variant was fetched; a flag mismatch means the bytes are for the other feed. */
   includeUnfixed: boolean;
   /**

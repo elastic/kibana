@@ -130,11 +130,11 @@ export interface FeedHeaders {
 }
 
 export type DownloadFeedResult =
-  | ({ status: 'ok'; body: Uint8Array } & FeedHeaders)
+  | ({ status: 'ok'; body: Uint8Array } & FeedHeaders & DownloadFeedTiming)
   /** The vendor answered 304 to the `etag` the caller sent. */
-  | ({ status: 'not_modified' } & FeedHeaders)
+  | ({ status: 'not_modified' } & FeedHeaders & DownloadFeedTiming)
   /** The vendor publishes no feed for this release (HTTP 404), e.g. an EOL codename. */
-  | { status: 'unavailable'; url: string };
+  | ({ status: 'unavailable'; url: string } & DownloadFeedTiming);
 
 export type LoadFeedResult =
   | ({
@@ -155,6 +155,15 @@ export interface DownloadFeedOptions {
   includeUnfixed?: boolean;
   /** Receives CSAF degradations that do not fail the download (delta over cap, skipped docs). */
   logger?: { warn: (message: string) => void };
+  /** Server-clock skew folded out of the reported duration; for tests. */
+  clock?: () => number;
+}
+
+export interface DownloadFeedTiming {
+  /** Wall-clock milliseconds the download took (headers plus body), rounded up to whole ms. */
+  durationMs: number;
+  /** Body bytes transferred: the compressed feed, or the summed kept-corpus size for CSAF. */
+  downloadedBytes: number;
 }
 
 export interface LoadFeedOptions {
@@ -224,11 +233,23 @@ const guardBlocks = function* (
 /** Downloads the compressed advisory feed for one OS release without parsing it. */
 export const downloadFeed = async (
   os: FeedOs,
-  { signal, fetchImpl = fetch, etag: knownEtag, includeUnfixed, logger }: DownloadFeedOptions = {}
+  {
+    signal,
+    fetchImpl = fetch,
+    etag: knownEtag,
+    includeUnfixed,
+    logger,
+    clock = () => Date.now(),
+  }: DownloadFeedOptions = {}
 ): Promise<DownloadFeedResult> => {
   if (isCsafRelease(os)) {
-    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger);
+    return downloadCsafCorpus(os.version, knownEtag, signal, fetchImpl, logger, clock);
   }
+  const startedAt = clock();
+  const timing = (): DownloadFeedTiming => ({
+    durationMs: Math.max(1, Math.round(clock() - startedAt)),
+    downloadedBytes: 0,
+  });
   const url = feedUrl(os, { includeUnfixed });
   // Fetch and body read share one deadline and the caller's signal: a body that stalls after
   // the headers must fail the download instead of hanging it.
@@ -243,11 +264,12 @@ export const downloadFeed = async (
         status: 'not_modified',
         etag: response.headers.get('etag') ?? knownEtag,
         lastModified: response.headers.get('last-modified') ?? undefined,
+        ...timing(),
       };
     }
     if (response.status === 404) {
       await response.body?.cancel();
-      return { status: 'unavailable', url };
+      return { status: 'unavailable', url, ...timing() };
     }
     if (!response.ok) {
       await response.body?.cancel();
@@ -256,7 +278,7 @@ export const downloadFeed = async (
     const body = await readCapped(response, url, requestSignal);
     const etag = response.headers.get('etag') ?? undefined;
     const lastModified = response.headers.get('last-modified') ?? undefined;
-    return { status: 'ok', body, etag, lastModified };
+    return { status: 'ok', body, etag, lastModified, ...timing(), downloadedBytes: body.byteLength };
   });
 };
 
@@ -482,14 +504,20 @@ const downloadCsafCorpus = async (
   knownEtag: string | undefined,
   signal: AbortSignal | undefined,
   fetchImpl: typeof fetch,
-  logger: DownloadFeedOptions['logger']
+  logger: DownloadFeedOptions['logger'],
+  clock: () => number = () => Date.now()
 ): Promise<DownloadFeedResult> => {
+  const startedAt = clock();
+  const timing = (downloadedBytes: number): DownloadFeedTiming => ({
+    durationMs: Math.max(1, Math.round(clock() - startedAt)),
+    downloadedBytes,
+  });
   const latestResponse = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
     fetchImpl(REDHAT_CSAF_ARCHIVE_LATEST_URL, { signal: requestSignal })
   );
   if (latestResponse.status === 404) {
     await latestResponse.body?.cancel();
-    return { status: 'unavailable', url: REDHAT_CSAF_ARCHIVE_LATEST_URL };
+    return { status: 'unavailable', url: REDHAT_CSAF_ARCHIVE_LATEST_URL, ...timing(0) };
   }
   await expectOk(latestResponse, `CSAF ${REDHAT_CSAF_ARCHIVE_LATEST_URL}`);
   const nameBody = await withTimeout(signal, CSAF_REQUEST_TIMEOUT_MS, (requestSignal) =>
@@ -600,7 +628,7 @@ const downloadCsafCorpus = async (
   // The etag short-circuit covers both modes: an over-cap scan whose cached etag is the
   // archive-only marker must not re-serve the multi-GB archive body on every run.
   if (knownEtag === etag) {
-    return { status: 'not_modified', etag, lastModified };
+    return { status: 'not_modified', etag, lastModified, ...timing(0) };
   }
   const deltaToFetch = delta.length > MAX_CSAF_DELTA_ADVISORIES ? [] : delta;
   let missing = 0;
@@ -662,5 +690,5 @@ const downloadCsafCorpus = async (
     parts.push(doc);
   });
   parts.push(Buffer.from(']', 'utf8'));
-  return { status: 'ok', body: Buffer.concat(parts), etag, lastModified };
+  return { status: 'ok', body: Buffer.concat(parts), etag, lastModified, ...timing(keptBytes) };
 };

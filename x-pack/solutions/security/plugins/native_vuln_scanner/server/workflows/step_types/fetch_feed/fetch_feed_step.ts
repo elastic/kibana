@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { createHash } from 'crypto';
 import { fetchFeedStepCommonDefinition } from '../../../../common/workflows/step_types/fetch_feed/fetch_feed_common';
 import type { FetchedFeed } from '../../../../common/workflows/step_types/fetch_feed/fetch_feed_common';
 import { LicenseRequiredError, isEnterprise } from '../../../lib/license';
@@ -15,6 +16,10 @@ import { groupByRelease, readInventory, truncate } from '../../../lib/scan';
 import type { StepDeps } from '../deps';
 
 const ABORTED = 'The feed download was aborted';
+
+/** Fingerprint of a feed body: the sha256 of its bytes, hex. */
+export const bodySha256 = (body: Uint8Array): string =>
+  createHash('sha256').update(body).digest('hex');
 
 /**
  * Downloads each needed vendor feed (conditionally, by ETag) and keeps the bytes on the server.
@@ -62,10 +67,21 @@ export const buildFetchFeedStepDefinition = ({
               etag: result.etag,
               last_modified: result.lastModified,
               bytes: known.body.byteLength,
+              download_ms: result.durationMs,
+              downloaded_bytes: result.downloadedBytes,
             });
           } else {
-            const { body, etag, lastModified } = result;
-            setCachedFeed(release, { body, etag, lastModified, includeUnfixed });
+            const { body, etag, lastModified, durationMs, downloadedBytes } = result;
+            // RHEL's S3 answers 200 with identical bytes on every request: compare the body
+            // hash against the cached copy and treat a match like a 304, without clobbering
+            // the cached knowledge ids or the (possibly new) etag.
+            const unchanged = known !== undefined && bodySha256(body) === known.bodySha256;
+            if (!unchanged) {
+              setCachedFeed(release, { body, etag, lastModified, includeUnfixed, bodySha256: bodySha256(body) });
+            } else if (etag && etag !== known.etag) {
+              known.etag = etag;
+              known.lastModified = lastModified ?? known.lastModified;
+            }
             feeds.push({
               release,
               status: 'downloaded',
@@ -73,6 +89,9 @@ export const buildFetchFeedStepDefinition = ({
               etag,
               last_modified: lastModified,
               bytes: body.byteLength,
+              download_ms: durationMs,
+              downloaded_bytes: downloadedBytes,
+              ...(unchanged ? { unchanged: true } : {}),
             });
           }
         } catch (error) {
