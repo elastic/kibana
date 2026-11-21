@@ -3,7 +3,8 @@
 import crypto from 'node:crypto';
 
 export const KBN = process.env.KBN_URL ?? 'http://localhost:5602';
-export const ES = process.env.ES_URL ?? 'http://localhost:9201';
+// UIPOC_ES_URL, not ES_URL: developer shells often export ES_URL for another cluster.
+export const ES = process.env.UIPOC_ES_URL ?? 'http://localhost:9201';
 const DEFAULT_AUTH = process.env.KBN_AUTH ?? 'elastic:changeme';
 
 export const AUTH_HEADER = (user, pass) => {

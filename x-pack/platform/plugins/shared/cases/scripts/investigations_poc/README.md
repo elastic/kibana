@@ -5,12 +5,12 @@ Standalone Node ESM scripts (no dependencies, localhost only). Node: `$HOME/.nvm
 | Env var | Default | Purpose |
 | --- | --- | --- |
 | `KBN_URL` | `http://localhost:5602` | Kibana |
-| `ES_URL` | `http://localhost:9201` | Elasticsearch |
+| `UIPOC_ES_URL` | `http://localhost:9201` | Elasticsearch |
 | `KBN_AUTH` | `elastic:changeme` | `user:pass` for both |
 | `MOCK_PORT` | `18555` | Mock model port (also used in the connector URL) |
 | `DUMP_DIR` | unset | Mock writes each raw request to `req_<n>_<kind>.json` |
 
-Note: these are plain env var names. If your shell already exports `ES_URL` (for example `https://localhost:9200`), it wins over the default, so `unset ES_URL` or pass `ES_URL=http://localhost:9201`.
+Note: the Elasticsearch URL is read from `UIPOC_ES_URL`, not `ES_URL`, because developer shells often export `ES_URL` for a different cluster.
 
 ## Setup (idempotent)
 
