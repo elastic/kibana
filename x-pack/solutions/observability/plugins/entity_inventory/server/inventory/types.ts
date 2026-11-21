@@ -12,6 +12,8 @@ export interface ListRequest {
   type: string;
   window: TimeWindow;
   limit: number;
+  /** Also count the active classic alerts of each entity, in one extra query. */
+  includeAlertCounts?: boolean;
   /** Aborts the probes and list queries, for example when the client disconnects. */
   signal?: AbortSignal;
 }

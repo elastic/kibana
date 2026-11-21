@@ -29,7 +29,7 @@ const createService = (definitions: RegisteredDefinitions) => {
   );
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  const service = new InventoryService({ get, list }, esClient, logger);
+  const service = new InventoryService({ get, list }, esClient, logger, 'default');
   return { service, list, esClient, logger };
 };
 
@@ -935,6 +935,121 @@ describe('InventoryService.plan', () => {
     expect(esClient.esql.query.mock.calls.map(([, options]) => options)).toEqual([
       { signal },
       { signal },
+    ]);
+  });
+});
+
+describe('InventoryService.list with includeAlertCounts', () => {
+  const CART = 'k8s.deployment:scout-cluster/checkout/cart-api';
+  const ORPHAN = 'k8s.deployment:scout-cluster/payments/not-listed';
+  const isAlertQuery = (query: string) => query.includes('kibana.alert.status');
+
+  // Answers probes, the two list plans and the alert count query, which `answerByPattern` cannot
+  // tell apart from the OpenTelemetry plan.
+  const answer = (
+    esClient: ReturnType<typeof createService>['esClient'],
+    alertAnswer: EsqlResponse | { throws: Error }
+  ) => {
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isAlertQuery(query)) {
+        if ('throws' in alertAnswer) {
+          throw alertAnswer.throws;
+        }
+        return alertAnswer;
+      }
+      if (isProbe(query)) {
+        return probeResponse(false);
+      }
+      return patternOf(query) === STATE_PATTERN
+        ? esqlResponse(STATE_COLUMNS, [stateRow('cart-api', '2026-11-01T10:02:00.000Z')])
+        : esqlResponse(OTEL_COLUMNS, []);
+    });
+  };
+
+  const alertResponse = (rows: Array<[number, string]>) => ({
+    columns: [
+      { name: 'alerts', type: 'long' },
+      { name: 'entity.id', type: 'keyword' },
+    ],
+    values: rows,
+    is_partial: false,
+    took: 3,
+    documents_found: 40,
+  });
+
+  it('sends no alert query and returns no alert counts by default', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answer(esClient, alertResponse([[2, CART]]));
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(esClient.esql.query.mock.calls.some(([{ query }]) => isAlertQuery(query))).toBe(false);
+    expect(response).not.toHaveProperty('alertCounts');
+  });
+
+  it('counts the alerts of the listed entities with one query for the space', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answer(
+      esClient,
+      alertResponse([
+        [2, CART],
+        [5, ORPHAN],
+      ])
+    );
+
+    const { alertCounts, errors } = await service.list({
+      type: 'k8s.deployment',
+      window: WINDOW,
+      limit: 10,
+      includeAlertCounts: true,
+    });
+
+    const alertQueries = esClient.esql.query.mock.calls
+      .map(([body]) => body)
+      .filter(({ query }) => isAlertQuery(query));
+    expect(alertQueries).toHaveLength(1);
+    expect(alertQueries[0].params).toEqual([{ spaceId: 'default' }]);
+    // An entity the list did not return is left out.
+    expect(alertCounts?.byEntityId).toEqual({ [CART]: 2 });
+    expect(alertCounts?.query).toMatchObject({ engine: 'FROM', rowCount: 2, took: 3 });
+    expect(errors).toEqual([]);
+  });
+
+  it('reports a failed alert query in errors and still returns the entities', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answer(esClient, esError(503, 'search_phase_execution_exception', 'shards failed'));
+
+    const { rows, alertCounts, errors } = await service.list({
+      type: 'k8s.deployment',
+      window: WINDOW,
+      limit: 10,
+      includeAlertCounts: true,
+    });
+
+    expect(rows).toHaveLength(1);
+    expect(alertCounts?.byEntityId).toEqual({});
+    expect(errors).toEqual([
+      expect.objectContaining({
+        indexPattern: '.alerts-stack.*,.alerts-observability.*',
+        status: 503,
+      }),
+    ]);
+  });
+
+  it('reports a partial alert result in errors and keeps its counts', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answer(esClient, { ...alertResponse([[2, CART]]), is_partial: true });
+
+    const { alertCounts, errors } = await service.list({
+      type: 'k8s.deployment',
+      window: WINDOW,
+      limit: 10,
+      includeAlertCounts: true,
+    });
+
+    expect(alertCounts?.byEntityId).toEqual({ [CART]: 2 });
+    expect(errors).toEqual([
+      expect.objectContaining({ reason: expect.stringContaining('partial result') }),
     ]);
   });
 });

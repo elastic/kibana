@@ -14,6 +14,7 @@
     "@kbn/logging-mocks",
     "@kbn/scout-oblt",
     "@kbn/server-route-repository",
+    "@kbn/spaces-plugin",
     "@kbn/zod"
   ]
 }
