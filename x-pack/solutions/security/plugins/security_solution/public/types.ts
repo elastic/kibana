@@ -78,6 +78,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 import type { EsqlPluginSetup } from '@kbn/esql/public';
+import type { AlertZeroPublicSetup } from '@kbn/alertzero-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -134,7 +135,7 @@ export interface SetupPlugins {
    * Optional. When present, `enabled` is the AlertZero soft-enable switch
    * (`xpack.alertzero.enabled`). Threat-intel supply gates on this.
    */
-  alertzero?: { enabled: boolean };
+  alertzero?: AlertZeroPublicSetup;
 }
 
 /**

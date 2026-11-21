@@ -54,4 +54,18 @@ describe('getNavCategories', () => {
   it('lists the legacy Attack Discovery page when alignment is not provided', () => {
     expect(getAllLinkIds()).toContain(SecurityPageName.attackDiscovery);
   });
+
+  it('lists the leading links first, before Discover', () => {
+    const [firstCategory] = getNavCategories(AIChatExperience.Classic, true, [
+      'alertzero:home',
+      'alertzero:watches',
+    ]);
+
+    expect(firstCategory.linkIds).toEqual([
+      'alertzero:home',
+      'alertzero:watches',
+      SecurityPageName.externalLinkDiscover,
+      SecurityPageName.dashboards,
+    ]);
+  });
 });

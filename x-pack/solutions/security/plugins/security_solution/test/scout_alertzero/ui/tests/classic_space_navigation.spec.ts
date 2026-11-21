@@ -25,8 +25,9 @@ test.describe('AlertZero in a Classic space', { tag: tags.stateful.classic }, ()
   });
 
   test('opens AlertZero from the Security side navigation', async ({ page }) => {
-    const alertZeroNavLink = page.testSubj.locator(
-      'solutionSideNavItemLink-external_link-alertzero'
+    const alertZeroNavLink = page.testSubj.locator('solutionSideNavItemLink-alertzero:home');
+    const escalationsNavLink = page.testSubj.locator(
+      'solutionSideNavItemLink-alertzero:escalations'
     );
 
     await test.step('show AlertZero in the Security side navigation', async () => {
@@ -39,6 +40,16 @@ test.describe('AlertZero in a Classic space', { tag: tags.stateful.classic }, ()
     await test.step('open the AlertZero app from the link', async () => {
       await alertZeroNavLink.click();
       await expect(page.testSubj.locator('alertZeroAppChromeLayout')).toBeVisible();
+    });
+
+    await test.step('keep the Security side navigation on AlertZero pages', async () => {
+      await expect(escalationsNavLink).toBeVisible();
+      await expect(
+        page.testSubj.locator('solutionSideNavItemLink-alertzero:watches')
+      ).toBeVisible();
+      await escalationsNavLink.click();
+      await expect(page).toHaveURL(/\/app\/alertzero\/escalations/);
+      await expect(escalationsNavLink).toBeVisible();
     });
   });
 });

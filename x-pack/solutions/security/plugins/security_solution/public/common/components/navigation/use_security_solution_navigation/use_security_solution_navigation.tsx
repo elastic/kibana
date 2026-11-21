@@ -12,16 +12,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../lib/kibana';
 import { useBreadcrumbsNav } from '../breadcrumbs';
 import { SecuritySideNav } from '../security_side_nav';
-
-const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mainLabel', {
-  defaultMessage: 'Security',
-});
+import { getSecuritySolutionNavProps } from './get_security_solution_nav_props';
 
 export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] | null => {
   const { chrome, notifications, application, spaces } = useKibana().services;
@@ -39,21 +35,10 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
     return null;
   }
 
-  const areAnnouncementsEnabled = notifications?.tours.isEnabled();
-  const canManageSpaces = application?.capabilities.spaces?.manage;
-
-  const SolutionViewSwitchCallout = spaces?.ui?.components?.getSolutionViewSwitchCallout;
-  const solutionNavFooter =
-    areAnnouncementsEnabled && canManageSpaces && SolutionViewSwitchCallout ? (
-      <SolutionViewSwitchCallout currentSolution="security" />
-    ) : undefined;
-
-  return {
-    canBeCollapsed: true,
-    name: translatedNavTitle,
-    icon: 'logoSecurity',
+  return getSecuritySolutionNavProps({
     children: <SecuritySideNav />,
-    closeFlyoutButtonPosition: 'inside',
-    footer: solutionNavFooter,
-  };
+    notifications,
+    capabilities: application?.capabilities,
+    spaces,
+  });
 };

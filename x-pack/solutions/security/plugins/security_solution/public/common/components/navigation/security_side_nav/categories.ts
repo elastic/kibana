@@ -9,15 +9,19 @@ import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solu
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { SecurityPageName } from '../../../../../common';
 
+/**
+ * @param leadingLinkIds Links listed first, before Discover, such as AlertZero's pages.
+ */
 export const getNavCategories = (
   chatExperience: AIChatExperience,
-  enableAlertsAndAttacksAlignment?: boolean
+  enableAlertsAndAttacksAlignment?: boolean,
+  leadingLinkIds: readonly string[] = []
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        SecurityPageName.externalLinkAlertZero,
+        ...leadingLinkIds,
         SecurityPageName.externalLinkDiscover,
         SecurityPageName.dashboards,
       ],

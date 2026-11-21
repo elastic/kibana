@@ -111,6 +111,7 @@ import { registerWorkflowSteps } from './workflows/step_types';
 import { registerEndpointWorkflowSteps } from './workflows/step_types/endpoint/register_workflow_steps';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
+import { createSecurityClassicPageTemplate } from './common/components/navigation/classic_page_template';
 import { flyoutV2DocViewerStateSchema } from './flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
@@ -181,6 +182,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         registerThreatIntelWorkflowSteps(workflowsExtensions);
       }
     }
+
+    plugins.alertzero?.setClassicPageTemplate?.(
+      createSecurityClassicPageTemplate(core.getStartServices)
+    );
 
     // Lazily instantiate subPlugins and initialize services
     const mountDependencies = async (params?: AppMountParameters) => {

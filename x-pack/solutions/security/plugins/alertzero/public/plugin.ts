@@ -46,6 +46,7 @@ import type {
   AlertZeroPublicStart,
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
+  ClassicPageTemplate,
 } from './types';
 
 // Kept as a literal rather than `ALERTZERO_PLUGIN_NAME`: the i18n extractor only reads
@@ -82,6 +83,7 @@ export class AlertZeroPublicPlugin
    */
   private readonly appUpdater$ = new Subject<AppUpdater>();
   private uiEventsRegistered = false;
+  private classicPageTemplate?: ClassicPageTemplate;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -134,11 +136,17 @@ export class AlertZeroPublicPlugin
           availability$: this.availability$,
           spaceSupported$: this.spaceSupported$,
           isServerless: this.isServerless,
+          classicPageTemplate: this.classicPageTemplate,
         });
       },
     });
 
-    return { enabled: true };
+    return {
+      enabled: true,
+      setClassicPageTemplate: (template) => {
+        this.classicPageTemplate = template;
+      },
+    };
   }
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {

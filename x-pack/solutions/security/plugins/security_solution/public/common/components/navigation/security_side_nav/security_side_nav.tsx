@@ -94,19 +94,37 @@ const formatLink = (
   };
 };
 
-const useSolutionSideNavItems = (
-  chatExperience: AIChatExperience
-): SolutionSideNavItem<string>[] | undefined => {
-  const navLinks = useNavLinks();
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
+/**
+ * AlertZero is its own app. Its pages come from its Classic nav deep links, which AlertZero only
+ * lists while its setting, space, license and privileges allow it, ordered by their `order`.
+ */
+const useAlertZeroNavItems = (): SolutionSideNavItem[] => {
   const { application } = useKibana().services;
   const applications = useObservable(application.applications$);
-  // AlertZero's deep links are only in the Classic nav while its setting, space, license and
-  // privileges allow it.
-  const isAlertZeroVisible =
-    applications
-      ?.get(ALERTZERO_APP_ID)
-      ?.deepLinks.some(({ visibleIn }) => visibleIn.includes('classicSideNav')) === true;
+  const deepLinks = applications?.get(ALERTZERO_APP_ID)?.deepLinks;
+
+  return useMemo(
+    () =>
+      (deepLinks ?? [])
+        .filter(({ visibleIn }) => visibleIn.includes('classicSideNav'))
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map(({ id, title }) => ({
+          id: `${ALERTZERO_APP_ID}:${id}`,
+          label: title,
+          href: application.getUrlForApp(ALERTZERO_APP_ID, { deepLinkId: id }),
+          position: SolutionSideNavItemPosition.top,
+        })),
+    [application, deepLinks]
+  );
+};
+
+const useSolutionSideNavItems = (
+  chatExperience: AIChatExperience,
+  alertZeroItems: SolutionSideNavItem[],
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
+): SolutionSideNavItem<string>[] | undefined => {
+  const navLinks = useNavLinks();
+  const { application } = useKibana().services;
 
   const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
     const flatNavLinks = flattenNavigationLinks(navLinks);
@@ -232,16 +250,7 @@ const useSolutionSideNavItems = (
     // External app links — hrefs are built via getUrlForApp so basePath and active
     // space are automatically prepended (handles e.g. /s/my-space/app/discover).
     const externalLinks: SolutionSideNavItem[] = [
-      ...(isAlertZeroVisible
-        ? [
-            {
-              id: SecurityPageName.externalLinkAlertZero,
-              label: i18nStrings.alertZero.title,
-              href: application.getUrlForApp(ALERTZERO_APP_ID),
-              position: SolutionSideNavItemPosition.top,
-            },
-          ]
-        : []),
+      ...alertZeroItems,
       // Agent builder for AI agent chat and not classic AI experience
       ...(chatExperience === AIChatExperience.Agent
         ? [
@@ -281,9 +290,9 @@ const useSolutionSideNavItems = (
 
     return [...externalLinks, ...bodyItems, ...(classicFooterItems ? classicFooterItems : [])];
   }, [
+    alertZeroItems,
     application,
     chatExperience,
-    isAlertZeroVisible,
     navLinks,
     getSecuritySolutionLinkProps,
     classicFooterItems,
@@ -318,27 +327,43 @@ const usePanelBottomOffset = (): string | undefined => {
   return isTimelineBottomBarVisible || isPolicySettingsVisible ? BOTTOM_BAR_HEIGHT : undefined;
 };
 
+export interface SecuritySideNavContentProps {
+  selectedId: string;
+  panelBottomOffset?: string;
+  enableAlertsAndAttacksAlignment: boolean;
+  getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps;
+}
+
 /**
- * Main security navigation component.
+ * Security navigation without the Security app's router and store, so other apps can render it.
  * It takes the links to render from the generic application `links` configs.
  */
-export const SecuritySideNav: React.FC = () => {
+export const SecuritySideNavContent: React.FC<SecuritySideNavContentProps> = ({
+  selectedId,
+  panelBottomOffset,
+  enableAlertsAndAttacksAlignment,
+  getSecuritySolutionLinkProps,
+}) => {
   const {
     settings: { client },
   } = useKibana().services;
 
   const chatExperience = useObservable(client.get$(AI_CHAT_EXPERIENCE_TYPE));
-  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
-    'enableAlertsAndAttacksAlignment'
+  const alertZeroItems = useAlertZeroNavItems();
+  const items = useSolutionSideNavItems(
+    chatExperience,
+    alertZeroItems,
+    getSecuritySolutionLinkProps
   );
-  const items = useSolutionSideNavItems(chatExperience);
-  const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
-  const panelBottomOffset = usePanelBottomOffset();
 
   const categories = useMemo(() => {
-    return getNavCategories(chatExperience, enableAlertsAndAttacksAlignment);
-  }, [enableAlertsAndAttacksAlignment, chatExperience]);
+    return getNavCategories(
+      chatExperience,
+      enableAlertsAndAttacksAlignment,
+      alertZeroItems.map(({ id }) => id)
+    );
+  }, [alertZeroItems, enableAlertsAndAttacksAlignment, chatExperience]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
@@ -352,6 +377,27 @@ export const SecuritySideNav: React.FC = () => {
       panelTopOffset={panelTopOffset}
       panelBottomOffset={panelBottomOffset}
       tracker={track}
+    />
+  );
+};
+
+/**
+ * Main security navigation component, for the Security app's pages.
+ */
+export const SecuritySideNav: React.FC = () => {
+  const enableAlertsAndAttacksAlignment = useIsExperimentalFeatureEnabled(
+    'enableAlertsAndAttacksAlignment'
+  );
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
+  const selectedId = useSelectedId();
+  const panelBottomOffset = usePanelBottomOffset();
+
+  return (
+    <SecuritySideNavContent
+      selectedId={selectedId}
+      panelBottomOffset={panelBottomOffset}
+      enableAlertsAndAttacksAlignment={enableAlertsAndAttacksAlignment}
+      getSecuritySolutionLinkProps={getSecuritySolutionLinkProps}
     />
   );
 };

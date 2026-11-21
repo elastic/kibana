@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ComponentType, ReactNode } from 'react';
 import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -38,12 +39,26 @@ export interface AlertZeroStartDependencies {
   workflowsManagement?: WorkflowsPublicPluginStart;
 }
 
+export interface ClassicPageTemplateProps {
+  /** The navigation entry to select: `alertzero:<deep link id>`. */
+  selectedId: string;
+  children: ReactNode;
+}
+
+/** A Classic page template that renders its solution's navigation around AlertZero's pages. */
+export type ClassicPageTemplate = ComponentType<ClassicPageTemplateProps>;
+
 /**
  * Soft-enable contract. Always returned from `setup()` so optional consumers
  * can gate on `enabled` without reading `xpack.alertzero` config themselves.
  */
 export interface AlertZeroPublicSetup {
   enabled: boolean;
+  /**
+   * Sets the page template AlertZero renders around its pages in Classic chrome, so they show the
+   * Security navigation. Security Solution sets it. Absent when the plugin is disabled.
+   */
+  setClassicPageTemplate?: (template: ClassicPageTemplate) => void;
 }
 export interface AlertZeroPublicStart {
   setServerlessTierAvailable: (available: boolean) => void;

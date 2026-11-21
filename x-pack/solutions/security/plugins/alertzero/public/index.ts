@@ -15,7 +15,12 @@ import type {
   AlertZeroStartDependencies,
 } from './types';
 
-export type { AlertZeroPublicSetup, AlertZeroPublicStart };
+export type {
+  AlertZeroPublicSetup,
+  AlertZeroPublicStart,
+  ClassicPageTemplate,
+  ClassicPageTemplateProps,
+} from './types';
 
 export const plugin: PluginInitializer<
   AlertZeroPublicSetup,
