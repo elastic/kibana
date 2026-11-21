@@ -103,6 +103,15 @@ export async function runKibanaServer(options: RunKibanaServerOptions) {
 
     // We also allow passing in extra Kibana server options, tack those on here so they always take precedence
     ...(options.extraKbnOpts ?? []),
+
+    // VALIDATION ONLY: force the ELU rate limiter on for FTR-launched Kibana
+    ...(uiPrefix === 'ftr'
+      ? [
+          '--server.rateLimiter.enabled=true',
+          '--server.rateLimiter.elu=0.05',
+          '--server.rateLimiter.term=short',
+        ]
+      : []),
   ]);
 
   if (installDir) {
