@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
+import type {
+  BulkResponse,
+  QueryDslQueryContainer,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ReviewItemAlreadyReviewedError } from './review_item_already_reviewed_error';
 import { ReviewItemNotFoundError } from './review_item_not_found_error';
@@ -18,30 +23,60 @@ import {
 } from './review_client';
 import type { ReviewItemStorageProperties } from './reviews_storage';
 
-type Query = Record<string, any>;
+type Query = QueryDslQueryContainer;
+type MockSearchRequest = Pick<SearchRequest, 'query' | 'size' | 'aggs'>;
+interface MockBulkOperation {
+  create: { _id: string; document: ReviewItemStorageProperties };
+}
 
-const matches = (id: string, source: ReviewItemStorageProperties, query: Query): boolean => {
-  if (query.term) {
-    const [[field, value]] = Object.entries(query.term) as Array<[string, string]>;
-    return field === '_id'
-      ? id === value
-      : (source as unknown as Record<string, unknown>)[field] === value;
+const conflictMeta: DiagnosticResult = {
+  statusCode: 409,
+  body: {},
+  headers: {},
+  warnings: [],
+  meta: {
+    context: null,
+    name: 'review-client-test',
+    request: { params: { method: 'PUT', path: '/reviews' }, options: {}, id: 1 },
+    connection: null,
+    attempts: 0,
+    aborted: false,
+  },
+};
+
+const toArray = <T>(value: T | T[] | undefined): T[] =>
+  value === undefined ? [] : Array.isArray(value) ? value : [value];
+
+const matches = (
+  id: string,
+  source: ReviewItemStorageProperties,
+  query: Query | undefined
+): boolean => {
+  const fields: Record<string, unknown> = { ...source };
+  if (query?.term) {
+    const [[field, value]] = Object.entries(query.term);
+    return field === '_id' ? id === value : fields[field] === value;
   }
-  if (query.terms) {
-    const [[field, values]] = Object.entries(query.terms) as Array<[string, string[]]>;
-    const actual = (source as unknown as Record<string, unknown>)[field];
-    return Array.isArray(actual) && actual.some((entry) => values.includes(entry as string));
-  }
-  if (query.exists) {
-    return (source as unknown as Record<string, unknown>)[query.exists.field] !== undefined;
-  }
-  if (query.bool) {
-    const { filter = [], should = [], must_not: mustNot } = query.bool;
-    const mustNotClauses = (Array.isArray(mustNot) ? mustNot : mustNot ? [mustNot] : []) as Query[];
+  if (query?.terms) {
+    const [[field, values]] = Object.entries(query.terms);
+    const actual = fields[field];
     return (
-      (filter as Query[]).every((clause) => matches(id, source, clause)) &&
-      !mustNotClauses.some((clause) => matches(id, source, clause)) &&
-      (should.length === 0 || (should as Query[]).some((clause) => matches(id, source, clause)))
+      Array.isArray(actual) &&
+      Array.isArray(values) &&
+      actual.some((entry) => values.some((candidate) => candidate === entry))
+    );
+  }
+  if (query?.exists) {
+    return fields[query.exists.field] !== undefined;
+  }
+  if (query?.bool) {
+    const filter = toArray(query.bool.filter);
+    const should = toArray(query.bool.should);
+    const mustNot = toArray(query.bool.must_not);
+    return (
+      filter.every((clause) => matches(id, source, clause)) &&
+      !mustNot.some((clause) => matches(id, source, clause)) &&
+      (should.length === 0 || should.some((clause) => matches(id, source, clause)))
     );
   }
   throw new Error(`Unsupported mock query: ${JSON.stringify(query)}`);
@@ -52,11 +87,11 @@ const createMockAdapter = () => {
   const versions = new Map<string, number>();
 
   const storage = {
-    search: jest.fn(async (request: Record<string, any>) => {
+    search: jest.fn(async (request: MockSearchRequest) => {
       const hits = [...rows.entries()]
         .filter(([id, source]) => matches(id, source, request.query))
         .sort(([, a], [, b]) => a.position - b.position)
-        .slice(0, request.size)
+        .slice(0, request.size ?? 10)
         .map(([_id, _source]) => ({
           _id,
           _source,
@@ -82,18 +117,26 @@ const createMockAdapter = () => {
         },
       };
     }),
-    bulk: jest.fn(async ({ operations }: { operations: Array<Record<string, any>> }) => {
-      const items = operations.map((operation) => {
-        const id = operation.create._id as string;
-        if (rows.has(id)) {
-          return { create: { status: 409, error: { reason: 'version conflict' } } };
-        }
-        rows.set(id, operation.create.document);
-        versions.set(id, 1);
-        return { create: { status: 201, result: 'created' } };
-      });
-      return { errors: items.some((entry) => entry.create.status === 409), items };
-    }),
+    bulk: jest.fn(
+      async ({ operations }: { operations: MockBulkOperation[] }): Promise<BulkResponse> => {
+        const items = operations.map((operation): BulkResponse['items'][number] => {
+          const id = operation.create._id;
+          if (rows.has(id)) {
+            return {
+              create: {
+                _index: 'reviews',
+                status: 409,
+                error: { type: 'version_conflict_engine_exception', reason: 'version conflict' },
+              },
+            };
+          }
+          rows.set(id, operation.create.document);
+          versions.set(id, 1);
+          return { create: { _index: 'reviews', status: 201, result: 'created' } };
+        });
+        return { took: 1, errors: items.some((entry) => entry.create?.status === 409), items };
+      }
+    ),
     index: jest.fn(
       async ({
         id,
@@ -101,17 +144,11 @@ const createMockAdapter = () => {
         if_seq_no: ifSeqNo,
       }: {
         id: string;
-        document: any;
+        document: ReviewItemStorageProperties;
         if_seq_no?: number;
       }) => {
         if (ifSeqNo != null && ifSeqNo !== versions.get(id)) {
-          throw new errors.ResponseError({
-            statusCode: 409,
-            body: {},
-            headers: {},
-            warnings: [],
-            meta: {} as any,
-          });
+          throw new errors.ResponseError(conflictMeta);
         }
         rows.set(id, document);
         versions.set(id, (versions.get(id) ?? 0) + 1);
@@ -195,7 +232,7 @@ describe('ReviewClient', () => {
     const id = getReviewItemId('q1', 0);
     const realSearch = storage.search.getMockImplementation()!;
     // Another reviewer's write lands between this reviewer's read and write.
-    storage.search.mockImplementationOnce(async (request: Record<string, any>) => {
+    storage.search.mockImplementationOnce(async (request: MockSearchRequest) => {
       const response = await realSearch(request);
       versions.set(id, (versions.get(id) ?? 0) + 1);
       return response;
@@ -217,8 +254,11 @@ describe('ReviewClient', () => {
     const { client, storage } = setup();
     storage.bulk.mockResolvedValueOnce({
       errors: true,
-      items: [{ create: { status: 500, error: { reason: 'boom' } } }],
-    } as any);
+      took: 1,
+      items: [
+        { create: { _index: 'reviews', status: 500, error: { type: 'boom', reason: 'boom' } } },
+      ],
+    });
 
     await expect(client.createPendingItems('q1', [item(0)])).rejects.toThrow('boom');
   });
