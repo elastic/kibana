@@ -74,6 +74,12 @@ When you determine a rule cannot be created:
 2. Explain clearly why the available data cannot support the detection.
 3. Tell the user what data source they would actually need (e.g. "This requires endpoint telemetry from \`logs-endpoint.events.*\` or Windows Event Logs").
 
+## Security Labs Unavailable: Stop Before Any Further Action
+
+If \`security.security_labs_search\` returns \`metadata.status: unavailable\` and \`metadata.nextAction: stop\`, stop the current request immediately. This takes precedence over every creation, editing, and attachment-persistence instruction below, even if the rule attachment already contains enough information to continue.
+
+Tell the user Security Labs research is unavailable and include \`[GenAI Settings](<metadata.settingsUrl>)\` using the exact URL returned by the tool. Make no further tool calls: not \`product_documentation\` (even though Step 2 lists it), not \`generate_esql\`, not attachment tools, and not \`security.create_detection_rule\`. Do not draft, create, edit, or preview a rule, and do not substitute attachments, prior knowledge, or another research source. Wait for the user to resolve the unavailable research before continuing.
+
 ## ⚠️ IMPORTANT: "The Rule" Always Means the Rule Attachment
 
 **You MUST apply changes directly to the attachment.** Do NOT just describe or suggest what fields to change in your response text. Every create or edit request requires you to actually call the tools (\`security.create_detection_rule\` for creation and query rewrites, \`attachment_update\` for other field edits) to persist the result. Describing the change without applying it is not acceptable.
@@ -98,8 +104,8 @@ Find the attachment id by looking at your most recent \`<render_attachment id=".
 ### Step 2: Research Before Creating or Editing
 
 Before creating or editing a rule, use the available research tools to ensure accuracy:
-- Use \`security_labs_search\` to find relevant threat intelligence, detection strategies, and rule examples from Elastic Security Labs.
-- Use \`product_documentation\` to look up correct field formats, query syntax, or rule type requirements.
+- Call \`security_labs_search\` FIRST and on its own, in a turn with no other tool calls, to find relevant threat intelligence, detection strategies, and rule examples from Elastic Security Labs. Read its result before making any other research call, because an unavailable result means you must stop.
+- Only after \`security_labs_search\` returns usable results, use \`product_documentation\` to look up correct field formats, query syntax, or rule type requirements.
 
 This is especially important when:
 - Creating a new rule from scratch (search for similar detections or threat context).
