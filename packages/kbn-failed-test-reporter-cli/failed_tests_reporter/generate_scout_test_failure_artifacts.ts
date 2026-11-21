@@ -36,14 +36,18 @@ const loadGithubIssues = (dirPath: string): Record<string, ScoutGithubIssueDetai
 export async function generateScoutTestFailureArtifacts({
   log,
   bkMeta,
+  cwd = process.cwd(),
 }: {
   log: ToolingLog;
   bkMeta: BuildkiteMetadata;
+  cwd?: string;
 }) {
   log.info('Searching for Scout test failure reports');
 
   const dirs = await globby(SCOUT_TEST_FAILURE_DIR_PATTERN, {
     onlyDirectories: true,
+    cwd,
+    absolute: true,
   });
 
   if (dirs.length === 0) {
@@ -73,9 +77,7 @@ export async function generateScoutTestFailureArtifacts({
       const { githubIssue, failureCount, infraReason } = githubIssues[failureId] ?? {};
 
       const hash = createHash('sha256').update(name).digest('hex');
-      const filenameBase = `${
-        process.env.BUILDKITE_JOB_ID ? process.env.BUILDKITE_JOB_ID + '_' : ''
-      }${hash}`;
+      const filenameBase = `${bkMeta.jobId ? bkMeta.jobId + '_' : ''}${hash}`;
       const dir = Path.join('target', 'test_failures');
       const failureJSON = JSON.stringify(
         {

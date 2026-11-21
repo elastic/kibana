@@ -8,3 +8,4 @@
  */
 
 export * from './annotate.ts';
+export * from './report_failed_test_issues.ts';

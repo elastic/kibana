@@ -103,6 +103,21 @@ describe('reportFailuresToFile', () => {
     expect(readArtifacts().filter((file) => file.endsWith('.html'))).toHaveLength(2);
   });
 
+  it('keeps artifacts for the same failure in different attempts separate', async () => {
+    await report([makeFailure('same test')]);
+    await reportFailuresToFile(
+      new ToolingLog(),
+      [makeFailure('same test')],
+      { ...bkMeta, jobId: 'job-2', jobUrl: `${bkMeta.url}#job-2` },
+      {}
+    );
+
+    expect(readArtifacts().filter((file) => file.endsWith('.json'))).toEqual([
+      expect.stringMatching(/^job-1_/),
+      expect.stringMatching(/^job-2_/),
+    ]);
+  });
+
   it('writes no artifacts for cascading failures', async () => {
     await report([
       makeFailure('root cause'),

@@ -502,5 +502,4 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2

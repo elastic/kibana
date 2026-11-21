@@ -8,6 +8,7 @@
  */
 
 import Path from 'path';
+import { readFileSync } from 'fs';
 
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
@@ -23,6 +24,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { globby } from 'globby';
 import normalize from 'normalize-path';
 import { getBuildkiteMetadata } from './buildkite_metadata';
+import type { BuildkiteMetadata } from './buildkite_metadata';
 import { reportConsistentFailureIssues } from './consistent_failure_issues';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 import { generateScoutTestFailureArtifacts } from './generate_scout_test_failure_artifacts';
@@ -182,45 +184,61 @@ export function runFailedTestsReporterCli() {
             );
           }
 
-          // Separate JUnit and Scout reports
-          const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
-          const scoutReports = reportPaths.filter((p) => p.endsWith('.ndjson'));
-
-          log.info(
-            'Processing',
-            junitReports.length,
-            'JUnit reports and',
-            scoutReports.length,
-            'Scout reports'
-          );
-
           const existingIssues = new ExistingFailedTestIssues(log);
 
-          const processParams: ProcessReportsParams = {
-            log,
-            existingIssues,
-            buildUrl,
-            githubApi,
-            branch,
-            pipeline,
-            prependTitle,
-            updateGithub,
-            perTestIssues: PER_TEST_ISSUES,
-            // the suite issues come from the repository the per-test issues are in
-            suiteIssueComments: !(reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO),
-            indexInEs,
-            reportUpdate,
-            bkMeta,
-          };
-
-          // Process FTR JUnit reports
-          const junitFailures = await processJUnitReports(junitReports, processParams);
-
-          // Process Scout reports
-          const scoutFailures = await processScoutReports(scoutReports, processParams);
-
-          // Generate Scout test failure artifacts after reports are updated (GH issue info, html reports, etc.)
-          await generateScoutTestFailureArtifacts({ log, bkMeta });
+          // An omitted string flag is parsed as ''.
+          const metadataPath = flags['report-job-metadata'];
+          const origins: Record<string, BuildkiteMetadata> =
+            typeof metadataPath === 'string' && metadataPath
+              ? JSON.parse(readFileSync(metadataPath, 'utf8'))
+              : { [process.cwd()]: bkMeta };
+          const batches = Object.entries(origins).map(([directory, metadata]) => ({
+            directory,
+            metadata,
+            jobUrl: (metadataPath && metadata.jobUrl) || buildUrl,
+            reports: new Array<string>(),
+          }));
+          for (const reportPath of reportPaths) {
+            const batch = metadataPath
+              ? batches.find(({ directory }) => reportPath.startsWith(`${directory}${Path.sep}`))
+              : batches[0];
+            if (!batch) {
+              throw createFlagError(`Missing originating job metadata for ${reportPath}`);
+            }
+            batch.reports.push(reportPath);
+          }
+          const failures: TestFailure[] = [];
+          for (const { directory, metadata, reports, jobUrl } of batches) {
+            const params: ProcessReportsParams = {
+              log,
+              existingIssues,
+              buildUrl: jobUrl,
+              githubApi,
+              branch,
+              pipeline,
+              prependTitle,
+              updateGithub,
+              perTestIssues: PER_TEST_ISSUES,
+              // the suite issues come from the repository the per-test issues are in
+              suiteIssueComments: !(
+                reportFailingSuites && failingSuitesRepo === DEFAULT_GITHUB_REPO
+              ),
+              indexInEs,
+              reportUpdate,
+              bkMeta: metadata,
+            };
+            failures.push(
+              ...(await processJUnitReports(
+                reports.filter((p) => p.endsWith('.xml')),
+                params
+              )),
+              ...(await processScoutReports(
+                reports.filter((p) => p.endsWith('.ndjson')),
+                params
+              ))
+            );
+            await generateScoutTestFailureArtifacts({ log, bkMeta: metadata, cwd: directory });
+          }
 
           if (reportFailingSuites && typeof failingSuitesRepo === 'string') {
             log.info(
@@ -230,7 +248,7 @@ export function runFailedTestsReporterCli() {
             try {
               await checkConsistentFailures({
                 log,
-                failures: [...junitFailures, ...scoutFailures],
+                failures,
                 repo: failingSuitesRepo,
                 replacePerTestIssues: !PER_TEST_ISSUES,
                 jobRetries,
@@ -260,7 +278,12 @@ export function runFailedTestsReporterCli() {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
         boolean: ['github-update', 'report-update', 'report-failing-suites'],
-        string: ['build-url', 'failing-suites-repo', 'failing-suites-job-retries'],
+        string: [
+          'build-url',
+          'report-job-metadata',
+          'failing-suites-repo',
+          'failing-suites-job-retries',
+        ],
         default: {
           'github-update': true,
           'report-update': true,
@@ -275,6 +298,8 @@ export function runFailedTestsReporterCli() {
         --no-report-update       Execute the CLI without writing to the JUnit reports
         --no-index-errors        Execute the CLI without indexing failures into Elasticsearch
         --build-url              URL of the failed build, defaults to process.env.BUILD_URL
+        --report-job-metadata    JSON file mapping absolute report directories to their originating
+                                 Buildkite job metadata
 
         Failing suite issues, filed in addition to the per-test issues above. Off unless
         process.env.REPORT_FAILING_SUITES is 'true'; writes follow --github-update.

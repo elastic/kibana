@@ -33,3 +33,11 @@ if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
     buildkite-agent meta-data set pr_comment:docs_changes:head "* [Documentation Changes](${DOCS_CHANGES_URL})"
   fi
 fi
+
+if [[ "${REPORT_FAILED_TESTS_TO_GITHUB:-}" == "true" ]] && [[ "$(buildkite-agent meta-data keys)" == *_github_test_reporting* ]]; then
+  echo "--- Report failed tests to GitHub"
+  # Best-effort, the build result must not depend on it.
+  KBN_BOOTSTRAP_NO_PREBUILT=true .buildkite/scripts/bootstrap.sh \
+    && node "$(dirname "${0}")/report_failed_test_issues.ts" \
+    || echo "Failed to report failed tests to GitHub"
+fi
