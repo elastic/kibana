@@ -1,5 +1,5 @@
 {
-  "sha1": "930b78353aa9585df69b7e7c16444116cd4c6061",
+  "sha1": "0de3f0d93de96efb0fd2d335ef97d2ad8f08c089",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1707,6 +1707,26 @@
       }
     },
     {
+      "id": "7c26d4e0968650c-844988c944a789d",
+      "title": "Index settings API fetches an index settings with defaults through the proxy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
+        "line": 128,
+        "column": 27
+      }
+    },
+    {
       "id": "7c26d4e0968650c-2dd5e0f4c39b838",
       "title": "Index settings API updates an index settings",
       "expectedStatus": "passed",
@@ -1722,8 +1742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/indices/settings.spec.ts",
-        "line": 36,
-        "column": 72
+        "line": 145,
+        "column": 27
       }
     },
     {
