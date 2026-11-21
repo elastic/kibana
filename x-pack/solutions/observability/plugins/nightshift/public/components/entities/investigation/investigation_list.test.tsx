@@ -185,6 +185,67 @@ describe('InvestigationList', () => {
       expect(toggle('high')).toHaveAttribute('aria-expanded', 'false');
     });
 
+    it.each([{ savedSections: undefined }, { savedSections: [] }, { savedSections: ['high'] }])(
+      'starts Closed collapsed with existing preferences $savedSections and preserves severity preferences',
+      ({ savedSections }) => {
+        if (savedSections) {
+          window.localStorage.setItem(
+            'nightshift.investigations.collapsedSections:default',
+            JSON.stringify(savedSections)
+          );
+        }
+        const sections = [
+          makeSection('critical', { investigations: [investigation], total: 1 }),
+          makeSection('high', { investigations: [investigation], total: 1 }),
+          makeSection('closed', { investigations: [investigation], total: 1 }),
+        ];
+        renderSections(sections);
+        const severityPreferences = window.localStorage.getItem(
+          'nightshift.investigations.collapsedSections:default'
+        );
+
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+        expect(toggle('critical')).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle('high')).toHaveAttribute(
+          'aria-expanded',
+          savedSections?.includes('high') ? 'false' : 'true'
+        );
+
+        fireEvent.click(toggle('closed'));
+        cleanup();
+        renderSections(sections);
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
+        expect(toggle('high')).toHaveAttribute(
+          'aria-expanded',
+          savedSections?.includes('high') ? 'false' : 'true'
+        );
+
+        fireEvent.click(toggle('closed'));
+        cleanup();
+        renderSections(sections);
+        expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+        expect(
+          window.localStorage.getItem('nightshift.investigations.collapsedSections:default')
+        ).toBe(severityPreferences);
+      }
+    );
+
+    it('keeps Closed expansion scoped to its space', () => {
+      const sections = [makeSection('closed', { investigations: [investigation], total: 1 })];
+      renderSections(sections);
+      fireEvent.click(toggle('closed'));
+      cleanup();
+
+      mockBasePath = '/s/other-space';
+      renderSections(sections);
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'false');
+      cleanup();
+
+      mockBasePath = '';
+      renderSections(sections);
+      expect(toggle('closed')).toHaveAttribute('aria-expanded', 'true');
+    });
+
     it('remembers a closed section in its own space', () => {
       renderTwoSections();
       fireEvent.click(toggle('critical'));

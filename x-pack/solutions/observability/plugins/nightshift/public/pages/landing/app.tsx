@@ -442,7 +442,7 @@ export function NightshiftApp({
         responsive={false}
         wrap
       >
-        {/* Hide search only when the space has no open investigations; keep mounted through
+        {/* Hide search only when the space has no investigations; keep mounted through
             filtered-empty clears. The time picker always shows, since a narrow window can be
             what empties the list. */}
         {showInvestigationsSearch && (

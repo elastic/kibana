@@ -35,6 +35,7 @@ export interface FetchInvestigationsParams {
   /** True: only investigations an agent is working on; false: the rest. */
   inProgress: boolean;
   severities?: InvestigationSeverityFilterValue[];
+  status?: 'open' | 'closed';
   query?: string;
   /** Only investigations last modified within this window (ISO 8601). */
   updatedAfter?: string;
@@ -94,6 +95,7 @@ export const getInvestigationsNextPageParam = ({
 export const useFetchInvestigations = ({
   inProgress,
   severities,
+  status = 'open',
   query,
   updatedAfter,
   updatedBefore,
@@ -117,6 +119,7 @@ export const useFetchInvestigations = ({
       'section',
       inProgress,
       severities,
+      status,
       query,
       updatedAfter,
       updatedBefore,
@@ -130,8 +133,7 @@ export const useFetchInvestigations = ({
           sort_field: 'updated_at',
           sort_order: 'desc',
           in_progress: inProgress,
-          // Home sections and tiles are open-only; closed finished work is out of scope here.
-          status: 'open',
+          status,
           ...(inProgress
             ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
