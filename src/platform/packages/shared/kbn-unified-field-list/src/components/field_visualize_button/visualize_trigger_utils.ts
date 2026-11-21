@@ -50,7 +50,8 @@ export function triggerVisualizeActions(
   field: DataViewField,
   contextualFields: string[] = [],
   originatingApp: string,
-  dataView?: DataView
+  dataView?: DataView,
+  options?: { openInNewTab?: boolean }
 ) {
   if (!dataView) return;
   const trigger = getTriggerConstant(field.type);
@@ -59,6 +60,7 @@ export function triggerVisualizeActions(
     fieldName: field.name,
     contextualFields,
     originatingApp,
+    ...(options?.openInNewTab ? { openInNewTab: true } : {}),
   };
   uiActions.executeTriggerActions(trigger, triggerOptions);
 }
