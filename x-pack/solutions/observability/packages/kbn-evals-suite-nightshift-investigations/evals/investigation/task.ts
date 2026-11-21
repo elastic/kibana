@@ -27,6 +27,10 @@ import type {
 export const INVESTIGATION_TIMEOUT_MS = 30 * 60_000;
 /** The execution error of a run that ended without a `verdict`; judges still grade its hypotheses. */
 export const NO_CONCLUSION_ERROR = 'Investigation finished without recording a conclusion';
+/** Starts the execution error of an investigation that outlived its timeout. */
+export const STILL_IN_PROGRESS_ERROR_PREFIX = 'Investigation was still in progress after ';
+/** Starts the execution error of a round the agent failed. */
+export const ROUND_FAILED_ERROR_PREFIX = 'Investigation round failed: ';
 export const UNPERSISTED_CONVERSATION_ERROR =
   'Investigation conversation still had an unfinished round after polling';
 const MAX_PERSISTED_REPORT_BYTES = 512 * 1024;
@@ -135,7 +139,7 @@ const roundInterruptionError = (rounds: ConversationRound[]): string | undefined
   const interruption = rounds.at(-1)?.interruption;
   if (!interruption) return undefined;
   if (interruption.type === 'failed') {
-    return `Investigation round failed: ${interruption.error.message}`;
+    return `${ROUND_FAILED_ERROR_PREFIX}${interruption.error.message}`;
   }
   const source = interruption.aborted_by?.source;
   return `Investigation round was aborted${source ? ` by ${source}` : ''}`;
@@ -284,7 +288,7 @@ export const runInvestigation = async (
       if (Date.now() - started > timeoutMs) {
         const minutes = timeoutMs / 60_000;
         const waited = investigation
-          ? `Investigation was still in progress after ${minutes} minutes`
+          ? `${STILL_IN_PROGRESS_ERROR_PREFIX}${minutes} minutes`
           : `Investigation was not created within ${minutes} minutes`;
         throw new Error(
           lastTransient ? `${waited}. Last read failed: ${errorMessage(lastTransient)}` : waited
