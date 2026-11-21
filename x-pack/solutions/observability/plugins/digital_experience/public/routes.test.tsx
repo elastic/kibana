@@ -98,7 +98,9 @@ describe('digitalExperienceRouter', () => {
   it('removes invalid sessions list params', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
-      search: `?source=otel&withJsErrors=true&withFailedRequests=true&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
+      search: `?source=otel&withJsErrors=true&withFailedRequests=true&frustrationTarget=${'X'.repeat(
+        1025
+      )}&frustrationPage=&duration=forever&sortField=error_count&page=1001&perPage=30&os=&country=${'X'.repeat(
         17
       )}&browser=Chrome`,
     };
@@ -121,7 +123,7 @@ describe('digitalExperienceRouter', () => {
     const location = {
       ...locationOf('/my-app/sessions'),
       search:
-        '?source=otel&withJsErrors=true&withFailedRequests=false&sortField=http_failed_request_count&page=2&perPage=50&browser=Chrome',
+        '?source=otel&withJsErrors=true&withFailedRequests=false&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout&sortField=frustration_count&page=2&perPage=50&browser=Chrome',
     };
 
     expect(digitalExperienceRouter.getParams('/{serviceName}/sessions', location)).toEqual({
@@ -130,7 +132,10 @@ describe('digitalExperienceRouter', () => {
         source: 'otel',
         withJsErrors: true,
         withFailedRequests: false,
-        sortField: 'http_failed_request_count',
+        withFrustration: true,
+        frustrationTarget: '#pay',
+        frustrationPage: '/checkout',
+        sortField: 'frustration_count',
         page: 2,
         perPage: 50,
         browser: 'Chrome',

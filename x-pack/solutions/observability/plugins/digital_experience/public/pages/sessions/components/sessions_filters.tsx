@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiFieldSearch,
   EuiFilterButton,
@@ -77,11 +78,41 @@ const FACETS: ReadonlyArray<{
   },
 ];
 
+/** The element and page a link to the list filters the frustrated sessions by. */
+const FRUSTRATION_BADGES: ReadonlyArray<{
+  param: 'frustrationTarget' | 'frustrationPage';
+  dataTestSubj: string;
+  ebtElement: string;
+  label: (value: string) => string;
+}> = [
+  {
+    param: 'frustrationTarget',
+    dataTestSubj: 'digitalExperienceSessionsFrustrationTarget',
+    ebtElement: SESSIONS_EBT_ELEMENTS.FRUSTRATION_TARGET_FILTER,
+    label: (element) =>
+      i18n.translate('xpack.digitalExperience.sessions.filters.frustrationElementBadge', {
+        defaultMessage: 'Element: {element}',
+        values: { element },
+      }),
+  },
+  {
+    param: 'frustrationPage',
+    dataTestSubj: 'digitalExperienceSessionsFrustrationPage',
+    ebtElement: SESSIONS_EBT_ELEMENTS.FRUSTRATION_PAGE_FILTER,
+    label: (page) =>
+      i18n.translate('xpack.digitalExperience.sessions.filters.frustrationPageBadge', {
+        defaultMessage: 'Page: {page}',
+        values: { page },
+      }),
+  },
+];
+
 export function SessionsFilters({
   state,
   facets,
   sessionsWithJsErrors,
   sessionsWithFailedRequests,
+  sessionsWithFrustration,
   hasActiveFilters,
   isLoading,
   formatters,
@@ -94,6 +125,7 @@ export function SessionsFilters({
   /** Shown on the error filters, so users see how many sessions each keeps. */
   sessionsWithJsErrors: number | undefined;
   sessionsWithFailedRequests: number | undefined;
+  sessionsWithFrustration: number | undefined;
   hasActiveFilters: boolean;
   isLoading: boolean;
   formatters: Formatters;
@@ -159,6 +191,23 @@ export function SessionsFilters({
               defaultMessage: 'Failed requests',
             })}
           </EuiFilterButton>
+          <EuiFilterButton
+            data-test-subj="digitalExperienceSessionsFrustrationFilter"
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+              element: SESSIONS_EBT_ELEMENTS.FRUSTRATION_FILTER,
+            })}
+            withNext
+            hasActiveFilters={state.withFrustration}
+            numFilters={sessionsWithFrustration}
+            onClick={() =>
+              onChange({ withFrustration: state.withFrustration ? undefined : 'true' })
+            }
+          >
+            {i18n.translate('xpack.digitalExperience.sessions.filters.withFrustrationLabel', {
+              defaultMessage: 'Frustrated',
+            })}
+          </EuiFilterButton>
           <SingleSelectFilter
             data-test-subj="digitalExperienceSessionsDurationFilter"
             ebtElement={SESSIONS_EBT_ELEMENTS.DURATION_FILTER}
@@ -188,6 +237,36 @@ export function SessionsFilters({
           ))}
         </EuiFilterGroup>
       </EuiFlexItem>
+      {FRUSTRATION_BADGES.map(({ param, dataTestSubj, ebtElement, label }) => {
+        const value = state[param];
+        if (!value) {
+          return null;
+        }
+        const text = label(value);
+        return (
+          <EuiFlexItem grow={false} key={param}>
+            <EuiBadge
+              data-test-subj={dataTestSubj}
+              color="hollow"
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => onChange({ [param]: undefined })}
+              iconOnClickAriaLabel={i18n.translate(
+                'xpack.digitalExperience.sessions.filters.removeFrustrationBadgeLabel',
+                { defaultMessage: 'Remove {filter}', values: { filter: text } }
+              )}
+              title={text}
+              css={{ maxInlineSize: '28em' }}
+              {...getEbtProps({
+                action: DIGITAL_EXPERIENCE_EBT_ACTIONS.SET_FILTER,
+                element: ebtElement,
+              })}
+            >
+              {text}
+            </EuiBadge>
+          </EuiFlexItem>
+        );
+      })}
       {hasActiveFilters && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

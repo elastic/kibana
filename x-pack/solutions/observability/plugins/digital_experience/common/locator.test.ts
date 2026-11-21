@@ -98,6 +98,9 @@ describe('DigitalExperienceLocatorDefinition', () => {
       source: 'otel',
       withJsErrors: true,
       withFailedRequests: true,
+      withFrustration: true,
+      frustrationTarget: '#pay',
+      frustrationPage: '/checkout',
       page: 2,
       perPage: 50,
       sortField: 'duration',
@@ -105,7 +108,7 @@ describe('DigitalExperienceLocatorDefinition', () => {
     });
 
     expect(path).toBe(
-      '/storefront-web/sessions?page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withJsErrors=true'
+      '/storefront-web/sessions?frustrationPage=%2Fcheckout&frustrationTarget=%23pay&page=2&perPage=50&sortDirection=desc&sortField=duration&source=otel&withFailedRequests=true&withFrustration=true&withJsErrors=true'
     );
   });
 

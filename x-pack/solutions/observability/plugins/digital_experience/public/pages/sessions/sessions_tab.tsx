@@ -281,6 +281,7 @@ function SessionsList({
             facets={response?.facets}
             sessionsWithJsErrors={response?.kpis.sessionsWithJsErrors}
             sessionsWithFailedRequests={response?.kpis.sessionsWithFailedRequests}
+            sessionsWithFrustration={response?.kpis.sessionsWithFrustration}
             hasActiveFilters={hasActiveFilters}
             isLoading={loading}
             formatters={formatters}

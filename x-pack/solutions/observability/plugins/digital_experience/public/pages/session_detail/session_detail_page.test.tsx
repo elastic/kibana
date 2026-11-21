@@ -214,7 +214,7 @@ function SessionRoute() {
   return <SessionDetailPage serviceName="shop" sessionId={sessionId} />;
 }
 
-const renderPage = () => {
+const renderPage = (extraSearch = '') => {
   jest.mocked(useKibanaServices).mockReturnValue({
     notifications: { toasts: { addSuccess: mockAddSuccess } },
     share: {
@@ -234,7 +234,7 @@ const renderPage = () => {
   } as unknown as ReturnType<typeof useKibanaServices>);
   const history = createMemoryHistory({
     initialEntries: [
-      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2`,
+      `/shop/sessions/abcdef123456?${TIME_QUERY}&source=otel&withJsErrors=true&page=2${extraSearch}`,
     ],
   });
   render(
@@ -672,6 +672,38 @@ describe('SessionDetailPage', () => {
     expect(within(rail).getByTestId('digitalExperienceSessionsRailEditFilters')).toHaveAttribute(
       'href',
       SESSIONS_HREF
+    );
+  });
+
+  it('keeps the frustration filters of the list in the rail and its links', async () => {
+    mockDetail.mockResolvedValue(detail());
+    renderPage('&withFrustration=true&frustrationTarget=%23pay&frustrationPage=%2Fcheckout');
+
+    const rail = await screen.findByTestId('digitalExperienceSessionsRail');
+    const paramsOf = (testId: string) =>
+      Object.fromEntries(
+        new URL(within(rail).getByTestId(testId).getAttribute('href') ?? '', 'http://localhost')
+          .searchParams
+      );
+    const frustrationParams = {
+      withFrustration: 'true',
+      frustrationTarget: '#pay',
+      frustrationPage: '/checkout',
+    };
+    await within(rail).findByTestId('digitalExperienceSessionsRailItem-first111');
+    expect(paramsOf('digitalExperienceSessionsRailItem-first111')).toEqual(
+      expect.objectContaining(frustrationParams)
+    );
+    expect(paramsOf('digitalExperienceSessionsRailEditFilters')).toEqual(
+      expect.objectContaining(frustrationParams)
+    );
+    expect(mockList).toHaveBeenCalledWith(
+      'GET /internal/digital_experience/applications/{serviceName}/sessions',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          query: expect.objectContaining(frustrationParams),
+        }),
+      })
     );
   });
 

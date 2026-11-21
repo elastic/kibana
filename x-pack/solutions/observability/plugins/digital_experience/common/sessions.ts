@@ -89,6 +89,8 @@ export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
   country: 16,
   entryPage: 1024,
 } as const;
+/** The longest frustrated element selector or page path the list filters by: the summaries' keyword `ignore_above`. */
+export const SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH = 1024;
 
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
