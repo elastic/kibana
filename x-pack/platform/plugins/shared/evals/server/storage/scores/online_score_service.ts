@@ -228,7 +228,12 @@ export class OnlineScoreService {
           aggs: {
             latest_score: { max: { field: '@timestamp' } },
             evaluators: {
-              terms: { field: 'evaluator.name', size: 1 },
+              terms: {
+                field: 'evaluator.name',
+                size: 1,
+                order: { latest_evaluator_score: 'desc' },
+              },
+              aggs: { latest_evaluator_score: { max: { field: '@timestamp' } } },
             },
           },
         },

@@ -106,8 +106,9 @@ export const buildOnlineEvalAlertRuleParams = (
 });
 
 /**
- * Absolute-or-relative path of the detail page, narrowed to the rule's window and metric, so a
+ * App-relative path of the detail page, narrowed to the rule's window and metric, so a
  * fired alert drills down to the scores (and `trace_id`s) that moved the average.
+ * The caller turns it into an absolute URL via `application.getUrlForApp`.
  */
 export const buildOnlineEvalAlertDrillDownPath = ({
   workflowId,

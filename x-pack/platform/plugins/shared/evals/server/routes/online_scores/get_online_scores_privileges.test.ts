@@ -21,8 +21,9 @@ import { createEvaluatorRegistry } from '../../evaluators/registry';
 import type { RouteDependencies } from '../register_routes';
 import { registerGetOnlineScoresPrivilegesRoute } from './get_online_scores_privileges';
 
-// Mocked-client unit tests: the integration ES runs without security, so an unprivileged
-// user cannot be created there. The real `read: false` shape was probed on a secured ES.
+// Mocked-client unit tests: the integration tests cover the `read: false` shape against a
+// secured ES (they create a no-read role and user there), so these unit tests only pin the
+// route's branch logic on the mocked client.
 describe('GET /internal/evals/online_scores/_privileges', () => {
   const securityWithLicense = (isEnabled: boolean) => ({
     license: { isEnabled: jest.fn().mockReturnValue(isEnabled) },
