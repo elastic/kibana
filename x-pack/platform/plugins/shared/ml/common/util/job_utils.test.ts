@@ -6,6 +6,7 @@
  */
 
 import {
+  basicDatafeedValidation,
   calculateDatafeedFrequencyDefaultSeconds,
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
@@ -25,6 +26,7 @@ import {
   removeNodeInfo,
 } from './job_utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type {
   CombinedJob,
   CombinedJobWithStats,
@@ -606,6 +608,30 @@ describe('ML - job utils', () => {
     });
     test('returns undefined for an empty array', () => {
       expect(resolveMaxTimeInterval([])).toBe(undefined);
+    });
+  });
+
+  describe('basicDatafeedValidation', () => {
+    const getDatafeed = (scrollSize?: number) =>
+      ({ query_delay: '60s', frequency: '150s', scroll_size: scrollSize } as Datafeed);
+
+    test('does not report scroll size when it is not set', () => {
+      const result = basicDatafeedValidation(getDatafeed());
+      expect(result.valid).toBe(true);
+      expect(result.contains('scroll_size_valid')).toBe(false);
+      expect(result.contains('scroll_size_invalid')).toBe(false);
+    });
+
+    test('accepts a positive whole number scroll size', () => {
+      const result = basicDatafeedValidation(getDatafeed(1000));
+      expect(result.valid).toBe(true);
+      expect(result.contains('scroll_size_valid')).toBe(true);
+    });
+
+    test.each([0, -5, 1.5])('rejects a scroll size of %s', (scrollSize) => {
+      const result = basicDatafeedValidation(getDatafeed(scrollSize));
+      expect(result.valid).toBe(false);
+      expect(result.contains('scroll_size_invalid')).toBe(true);
     });
   });
 });
