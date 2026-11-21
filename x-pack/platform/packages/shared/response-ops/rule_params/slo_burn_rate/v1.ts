@@ -14,7 +14,11 @@ const durationSchema = schema.object({
 
 const windowSchema = schema.object({
   id: schema.string(),
-  burnRateThreshold: schema.number(),
+  // The rule only evaluates instances that had bad events in their short windows. A threshold of 0
+  // or less would trigger for instances without bad events, so it is rejected.
+  burnRateThreshold: schema.number({
+    validate: (value) => (value > 0 ? undefined : 'must be greater than 0'),
+  }),
   maxBurnRateThreshold: schema.nullable(schema.number()),
   longWindow: durationSchema,
   shortWindow: durationSchema,
