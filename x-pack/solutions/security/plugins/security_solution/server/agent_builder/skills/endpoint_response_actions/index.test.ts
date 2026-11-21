@@ -53,6 +53,7 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.description).toContain('by hostname or agent ID');
       expect(skill.description).toContain('isolation state');
       expect(skill.description).toContain('response action by ID');
+      expect(skill.description).toContain('closing incident summary');
       expect(skill.content).toContain('Endpoint Response Actions Skill');
     });
 
@@ -128,6 +129,26 @@ describe('createEndpointResponseActionsSkill', () => {
       expect(skill.content).toContain('does not restrict');
       expect(skill.content).toContain('other loaded skills');
       expect(skill.content).not.toContain('Never use `platform.core.search`');
+    });
+
+    it('dispatches multi-host requests sequentially and closes with an incident summary', () => {
+      const skill = createEndpointResponseActionsSkill(mockEndpointAppContextService, {
+        automaticTroubleshootingUniversalSkill: false,
+      });
+      const reference =
+        skill.referencedContent?.find((entry) => entry.name === 'reference')?.content ?? '';
+
+      expect(skill.content).toContain('Multiple hosts or actions');
+      expect(skill.content).toMatch(/one tool call per host per action/);
+      expect(skill.content).toMatch(/Never batch/i);
+      expect(skill.content).toContain('Do not retry or re-issue a declined');
+      expect(skill.content).toContain('Closing incident summary');
+      expect(skill.content).toContain('actions declined or cancelled');
+      expect(skill.content).toContain('outstanding items');
+      expect(skill.content).not.toMatch(/leave out any host or action/i);
+      expect(skill.content).toMatch(/Keep every action the analyst did ask for in the summary/);
+      expect(reference).toContain('one tool call per host per action');
+      expect(reference).toContain('incident summary');
     });
 
     it('exposes detailed reference material via referencedContent', () => {

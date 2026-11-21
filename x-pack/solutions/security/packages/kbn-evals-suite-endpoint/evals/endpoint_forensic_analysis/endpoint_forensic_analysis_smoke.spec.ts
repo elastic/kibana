@@ -17,6 +17,10 @@ const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.execute_esql',
 ] as const;
 
+const EXTRACT_IOCS_TOOL_ID = 'security.endpoint_forensic.extract_iocs';
+const FORENSIC_SKILL_PATH = 'skills/security/endpoint/endpoint-forensic-analysis/SKILL.md';
+const ERA_SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
+
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
@@ -143,6 +147,109 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
       },
     });
   });
+
+  evaluate('ioc extraction produces structured indicators', async ({ evaluateForensicDataset }) => {
+    await evaluateForensicDataset({
+      dataset: {
+        name: 'security: endpoint-forensic-analysis-smoke-ioc-extraction',
+        description:
+          'Smoke: after reconstructing an attack, the agent calls extract_iocs and presents the indicators as a table covering the categories the tool returns.',
+        examples: [
+          {
+            input: {
+              question:
+                'Reconstruct the ransomware attack on SRV-DC01 and extract all indicators of compromise so I can hunt for them.',
+            },
+            output: {
+              criteria: [
+                `Called ${EXTRACT_IOCS_TOOL_ID} with SRV-DC01`,
+                'Presents the indicators as a markdown table (Indicator type, Value, First seen, Source event), not a prose paragraph',
+                'Table includes file hashes (shas), network destinations (ips), file paths, and malicious commands drawn from the SRV-DC01 / WKSTN-RECV01 telemetry',
+                'Table lists affected hosts, including SRV-DC01',
+                'Indicator values are echoed verbatim from telemetry (e.g. 185.220.101.42, update.dll) rather than paraphrased',
+              ],
+              tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, EXTRACT_IOCS_TOOL_ID],
+            },
+            metadata: { golden_id: 'ef-010-ioc-extraction', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate(
+    'hands extracted IoCs to threat hunting for a cross-host sweep',
+    async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-smoke-handoff-threat-hunting',
+          description:
+            'Smoke: when the analyst asks whether other hosts are affected, the forensic skill hands the extracted IoCs to threat-hunting for a fleet-wide sweep instead of running it itself.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Reconstruct the attack on SRV-DC01, extract the IoCs, and tell me whether any other hosts in the environment are affected.',
+              },
+              output: {
+                criteria: [
+                  `Called ${EXTRACT_IOCS_TOOL_ID} before addressing whether other hosts are affected`,
+                  'Hands off to the threat-hunting skill (loads it or states it is handing the sweep to it) and carries the extracted indicators (hashes, C2 IPs, file paths, commands, affected hosts) into the cross-environment search',
+                  'The cross-host search is not limited to SRV-DC01 (no single-host host.name filter)',
+                  'Does not call or claim to run any response action (isolate, scan, running processes) as part of the sweep',
+                ],
+              },
+              metadata: { golden_id: 'ef-011-handoff-threat-hunting', row_type: 'happy' },
+            },
+          ],
+        },
+      });
+    }
+  );
+
+  evaluate(
+    'hands containment requests to endpoint response actions',
+    async ({ evaluateResponseActionsDataset }) => {
+      await evaluateResponseActionsDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-smoke-handoff-response-actions',
+          description:
+            'Smoke: a two-turn conversation. Forensic reconstruction first, then a containment request in the same conversation that is handed to endpoint-response-actions rather than refused or redirected to the Security UI. WKSTN-RECV01 is seeded as telemetry only, so the response-actions tool may report endpoint_not_found; either outcome shows the handoff happened.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Reconstruct the ransomware outbreak: which host was patient zero? Do not take any action yet.',
+                follow_ups: [{ message: 'Isolate that host now to contain it.' }],
+              },
+              output: {
+                criteria: [
+                  `In the first turn, activated the endpoint forensic analysis skill by reading ${FORENSIC_SKILL_PATH} and identified WKSTN-RECV01 as patient zero`,
+                  `Only after the analyst asked for containment, activated the endpoint response actions skill by reading ${ERA_SKILL_PATH} (the forensic skill was read before it)`,
+                  'Called endpoint-response-actions.isolate_host for WKSTN-RECV01 — the output lists the call under pending_confirmations, or the tool reported endpoint_not_found for that host',
+                  'Did not answer only by telling the analyst to use Endpoint response actions in Security',
+                  'Did not claim WKSTN-RECV01 was already isolated (any statement about the outcome must say it is awaiting confirmation or that the host was not found)',
+                ],
+                tool_sequence: [
+                  ...FORENSIC_ESQL_TRAJECTORY,
+                  'endpoint-response-actions.isolate_host',
+                ],
+              },
+              metadata: {
+                golden_id: 'ef-012-handoff-response-actions',
+                row_type: 'happy',
+                forbidden_tools: [
+                  'endpoint-response-actions.unisolate_host',
+                  'endpoint-response-actions.scan_host',
+                  'endpoint-response-actions.get_running_processes',
+                ],
+              },
+            },
+          ],
+        },
+      });
+    }
+  );
 
   evaluate('distractor weather', async ({ evaluateForensicDataset }) => {
     await evaluateForensicDataset({

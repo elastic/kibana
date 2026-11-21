@@ -79,6 +79,30 @@ from chat: say so and point the analyst to the Response Actions UI.
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
    codes and best practices.
 
+4. **Multiple hosts or actions** — when the analyst asks for actions on several
+   hosts and/or several actions (for example "isolate A and B, then scan A"),
+   dispatch one tool call per host per action, one at a time. Never batch them
+   into a single call and never issue the next call before the current one has
+   returned. Each call pauses for its own confirmation card; the analyst can
+   decline one without affecting the others. Do not retry or re-issue a declined
+   action.
+
+5. **Closing incident summary** — after the requested containment is done (every
+   action dispatched, declined, or failed), end with a short incident summary:
+   - hosts handled
+   - actions dispatched, each with its action ID and final status as reported by
+     the tool result (use \`get_response_action_status\` if still pending)
+   - actions declined or cancelled by the analyst
+   - outstanding items: pending actions, \`endpoint_not_found\` /
+     \`ambiguous_hostname\` hosts still needing an agent ID, and anything not
+     available from chat
+
+   Report each action's outcome only as the tool results or the analyst's
+   decisions showed it, and never invent an action or host the analyst did not
+   ask for. Keep every action the analyst did ask for in the summary even when it
+   was declined, cancelled, or could not be dispatched (\`endpoint_not_found\`,
+   \`ambiguous_hostname\`): list it as not done, never as performed.
+
 ## Guardrails
 
 - For status and response action lookups, use the tools above instead of
@@ -124,7 +148,7 @@ export const createEndpointResponseActionsSkill = (
     id: ID,
     name: NAME,
     basePath: BASE_PATH,
-    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, and look up a previously dispatched response action by ID. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
+    description: `List enrolled Elastic Defend endpoints, check a host status by hostname or agent ID and its isolation state, isolate or release (unisolate) a host, list running processes, run a malware scan on a host path, look up a previously dispatched response action by ID, and write the closing incident summary of a containment. Write actions pause for analyst confirmation; execute, kill-process, get-file, upload, runscript, and memory-dump are not available. For root-cause diagnosis of unhealthy hosts or failed actions, use ${troubleshootingSkillName}.`,
     content: getSystemInstructions(troubleshootingSkillName),
     referencedContent: [
       {
