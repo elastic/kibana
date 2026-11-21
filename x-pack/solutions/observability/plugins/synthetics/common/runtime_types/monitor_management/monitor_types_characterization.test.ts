@@ -148,6 +148,7 @@ const browserRequired = [
   ConfigKey.JOURNEY_FILTERS_TAGS,
   ConfigKey.IGNORE_HTTPS_ERRORS,
   ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST,
+  ConfigKey.FILMSTRIPS,
   ConfigKey.THROTTLING_CONFIG,
   ConfigKey.SYNTHETICS_ARGS,
 ];

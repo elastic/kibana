@@ -172,6 +172,7 @@ apiTest.describe(
       form_monitor_type: 'multistep',
       ignore_https_errors: false,
       certificate_error_spki_allowlist: [],
+      filmstrips: false,
       journey_id: journeyId,
       locations: [privateLocationResult()],
       name: 'check if title is present',

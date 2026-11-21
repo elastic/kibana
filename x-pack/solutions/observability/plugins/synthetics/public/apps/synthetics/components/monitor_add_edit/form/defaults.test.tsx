@@ -24,6 +24,7 @@ describe('defaults', () => {
     form_monitor_type: 'multistep',
     ignore_https_errors: false,
     certificate_error_spki_allowlist: [],
+    filmstrips: false,
     journey_id: '',
     locations: [
       {
@@ -88,6 +89,7 @@ describe('defaults', () => {
       form_monitor_type: 'multistep',
       ignore_https_errors: false,
       certificate_error_spki_allowlist: [],
+      filmstrips: false,
       journey_id: '',
       locations: [
         {

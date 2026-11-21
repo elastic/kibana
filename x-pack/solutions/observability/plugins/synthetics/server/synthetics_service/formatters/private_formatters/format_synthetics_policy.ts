@@ -14,6 +14,7 @@ import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_
 import { ConfigKey } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
 import {
+  applyFilmstripsCapability,
   formatMWs,
   handleMultilineStringFormatter,
   replaceStringWithParams,
@@ -133,7 +134,7 @@ export const formatSyntheticsPolicy = (
   secretConnections?: HeartbeatVaultConfig[],
   secretStorageEnabled = true
 ) => {
-  const resolvedConfig = resolveHttpAuthParams(config, params);
+  const resolvedConfig = applyFilmstripsCapability(resolveHttpAuthParams(config, params));
   const configKeys = Object.keys(resolvedConfig) as ConfigKey[];
 
   const formattedPolicy = cloneDeep(newPolicy);
