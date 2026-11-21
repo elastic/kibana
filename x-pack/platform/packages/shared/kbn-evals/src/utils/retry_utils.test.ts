@@ -300,11 +300,9 @@ describe('withRetry', () => {
       }
     );
 
-    it.each(['1.5', '9'.repeat(400)])(
-      'surfaces the error when Retry-After %p cannot be honoured within maxDelayMs',
+    it.each(['1.5', 'Sat, 21 Nov 2026 10:00:60 GMT'])(
+      'surfaces the error when Retry-After %p is malformed and the message hint exceeds maxDelayMs',
       async (retryAfter) => {
-        // "1.5" is malformed, so the 90s message hint applies; 400 nines is valid
-        // delay-seconds that overflows to Infinity. Both exceed the 60s ceiling.
         const error = withBodyHint(retryAfter);
         const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
 
@@ -314,6 +312,21 @@ describe('withRetry', () => {
         expect(fn).toHaveBeenCalledTimes(1);
       }
     );
+
+    it('surfaces the error when Retry-After overflows and the message carries no hint', async () => {
+      // Plain message: only the header can cause this rejection. 400 nines is valid
+      // delay-seconds that overflows to Infinity, above the 60s ceiling.
+      const error = Object.assign(new Error('Too Many Requests'), {
+        statusCode: 429,
+        headers: new Headers({ 'retry-after': '9'.repeat(400) }),
+      });
+      const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
+
+      await expect(
+        withRetry(fn, { minDelayMs: 1, maxDelayMs: 60_000, jitter: false })
+      ).rejects.toBe(error);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
 
     it('keeps a tiny maxDelayMs a hard ceiling under maximum jitter', async () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.999999);
@@ -356,6 +369,9 @@ describe('withRetry', () => {
       ['Saturday, 21-Nov-26 10:00:45 GMT', 45_000],
       ['Sat Nov 21 10:00:45 2026', 45_000],
       ['Sat Nov  1 10:00:45 2026', 0],
+      // a leap second is only valid at 23:59:60 on the last day of June or December
+      ['Thu, 31 Dec 2026 23:59:60 GMT', Date.UTC(2027, 0, 1) - Date.UTC(2026, 10, 21, 10)],
+      ['Tue, 30 Jun 2026 23:59:60 GMT', 0],
       // a two-digit year more than 50 years ahead is the most recent past year with those digits
       ['Saturday, 21-Nov-99 10:00:45 GMT', 0],
     ])('parses valid %p as %p ms', (value, expected) => {
@@ -401,6 +417,12 @@ describe('withRetry', () => {
       'Sat, 30 Feb 2026 10:00:30 GMT',
       'Sat, 21 Nov 2026 24:00:30 GMT',
       'Sat, 21 Nov 2026 10:60:30 GMT',
+      'Sat, 21 Nov 2026 10:00:60 GMT',
+      'Thu, 31 Dec 2026 23:58:60 GMT',
+      'Wed, 30 Dec 2026 23:59:60 GMT',
+      'Tue, 30 Jun 2026 22:59:60 GMT',
+      'Mon, 31 Aug 2026 23:59:60 GMT',
+      'Sat, 21 Nov 2026 10:00:61 GMT',
       'Sat, 21 Foo 2026 10:00:30 GMT',
       'Foo, 21 Nov 2026 10:00:30 GMT',
       '30 seconds',

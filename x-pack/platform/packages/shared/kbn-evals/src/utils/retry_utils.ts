@@ -101,6 +101,10 @@ function toUtcMs(parts: {
 }): number | undefined {
   const { year, month, day, hour, minute, second } = parts;
   if (hour > 23 || minute > 59 || second > 60) return undefined;
+  // Second 60 is a leap second: only valid as 23:59:60 on the last day of June or December.
+  const isLeapSlot =
+    hour === 23 && minute === 59 && ((month === 5 && day === 30) || (month === 11 && day === 31));
+  if (second === 60 && !isLeapSlot) return undefined;
   // `Date.UTC` would map years 0-99 to 1900-1999; set the full year explicitly instead.
   const date = new Date(0);
   date.setUTCFullYear(year, month, day);

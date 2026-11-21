@@ -123,16 +123,23 @@ describe('httpHandlerFromKbnClient retries', () => {
     }
   );
 
-  it.each(['1.5', '9'.repeat(400)])(
-    'surfaces the 429 when Retry-After %p cannot be honoured within 60s',
+  it.each(['1.5', 'Sat, 21 Nov 2026 10:00:60 GMT'])(
+    'surfaces the 429 when Retry-After %p is malformed and the message hint exceeds 60s',
     async (retryAfter) => {
-      // "1.5" is malformed, so the 90s message hint applies; 400 nines overflows to Infinity.
       const { request, result } = setup(retryAfter, 'Too Many Requests, retry after 90 seconds');
 
       await expect(result).rejects.toMatchObject({ status: 429 });
       expect(request).toHaveBeenCalledTimes(1);
     }
   );
+
+  it('surfaces the 429 when Retry-After overflows and the message carries no hint', async () => {
+    // Default message has no hint: only the header can cause this rejection.
+    const { request, result } = setup('9'.repeat(400));
+
+    await expect(result).rejects.toMatchObject({ status: 429 });
+    expect(request).toHaveBeenCalledTimes(1);
+  });
 
   it('surfaces the 429 instead of retrying early when Retry-After exceeds 60s', async () => {
     const { request, result } = setup('90');
