@@ -16030,8 +16030,6 @@
     "xpack.agentBuilder.eventSteps.steps.compaction.completeTokens": "Contexto condensado: {before} → {after} tokens",
     "xpack.agentBuilder.eventSteps.steps.compaction.inProgress": "Compactação de contexto",
     "xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel": "Chamada de ferramenta",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.ran": "executou",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.running": "em execução…",
     "xpack.agentBuilder.eventSteps.steps.toolCall.stopped": "interrompido",
     "xpack.agentBuilder.eventSteps.steps.toolCall.toolBadgeToolLabel": "ferramenta",
     "xpack.agentBuilder.eventSteps.subAgentExecutionFlyout.back": "Voltar",

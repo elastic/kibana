@@ -15965,8 +15965,6 @@
     "xpack.agentBuilder.eventSteps.steps.compaction.completeTokens": "Contexte condensé : {before} → {after} tokens",
     "xpack.agentBuilder.eventSteps.steps.compaction.inProgress": "Compression du contexte",
     "xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel": "Appel d'outil",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.ran": "s'est exécuté",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.running": "en cours d'exécution",
     "xpack.agentBuilder.eventSteps.steps.toolCall.stopped": "arrêté",
     "xpack.agentBuilder.eventSteps.steps.toolCall.toolBadgeToolLabel": "outil",
     "xpack.agentBuilder.eventSteps.subAgentExecutionFlyout.back": "Retour",
