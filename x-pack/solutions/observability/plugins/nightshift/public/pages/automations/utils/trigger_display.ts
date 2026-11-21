@@ -24,30 +24,34 @@ export const slackTriggerLabels: Record<SlackTriggerKind, string> = {
   }),
 };
 
+const alertTriggerLabel = i18n.translate('xpack.nightshift.automations.alertTriggerLabel', {
+  defaultMessage: 'Alert',
+});
+
+const slackTriggerLabel = i18n.translate('xpack.nightshift.automations.slackMessageTriggerLabel', {
+  defaultMessage: 'Slack',
+});
+
 export const TRIGGER_LABEL_ORDER = [
-  triggerTypeLabels.alertTriggered,
-  ...Object.values(slackTriggerLabels),
+  alertTriggerLabel,
+  slackTriggerLabel,
   triggerTypeLabels.scheduled,
 ];
-
-const SLACK_EVENT_KINDS = {
-  message: 'slack_message',
-} as const;
 
 export const getTriggerDisplay = (
   row: Automation['trigger']['rows'][number]
 ): { label: string; icon: string } => {
   if (row.kind === 'slack') {
-    return { label: slackTriggerLabels[SLACK_EVENT_KINDS[row.event]], icon: 'logoSlack' };
+    return { label: slackTriggerLabel, icon: 'logoSlack' };
   }
   if (row.kind === 'schedule') {
     return { label: triggerTypeLabels.scheduled, icon: 'calendar' };
   }
-  return { label: triggerTypeLabels.alertTriggered, icon: 'logoElastic' };
+  return { label: alertTriggerLabel, icon: 'logoElastic' };
 };
 
 export const getTriggerIcon = (label: string): string => {
-  if (label === triggerTypeLabels.alertTriggered) return 'logoElastic';
+  if (label === alertTriggerLabel) return 'logoElastic';
   if (label === triggerTypeLabels.scheduled) return 'calendar';
   return 'logoSlack';
 };

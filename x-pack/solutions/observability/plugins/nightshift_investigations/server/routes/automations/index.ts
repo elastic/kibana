@@ -15,3 +15,4 @@ export { runAutomationRoute } from './run_automation';
 export { getAutomationRunActivityRoute } from './get_automation_run_activity';
 export { getAutomationsRunCountsRoute } from './get_automations_run_counts';
 export { repairAutomationRoute } from './repair_automation';
+export { getAutomationsLastRunsRoute } from './get_automations_last_runs';

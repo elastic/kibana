@@ -184,6 +184,15 @@ describe('useAllRelayAppBindings', () => {
     jest.useRealTimers();
   });
 
+  it('does not request bindings when disabled', async () => {
+    const { wrapper } = createSetup();
+    const { result } = renderHook(() => useAllRelayAppBindings(false), { wrapper });
+
+    await flush();
+    expect(httpGet).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+  });
+
   it('follows the cursor and returns every connected channel sorted by label', async () => {
     httpGet
       .mockResolvedValueOnce({

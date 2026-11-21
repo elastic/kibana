@@ -30,6 +30,7 @@ import {
   useRefreshAutomations,
   useRunAutomation,
   useFetchAutomations,
+  useAutomationsLastRuns,
   type Automation,
 } from '../../data/automations/use_automations';
 import { AutomationsEmptyPrompt, FilteredEmptyPrompt } from './list/automations_empty_prompt';
@@ -86,6 +87,11 @@ export const AutomationsPage = (): React.ReactElement => {
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
+  const {
+    data: lastRuns,
+    isInitialLoading: isLoadingLastRuns,
+    isError: didLastRunsFail,
+  } = useAutomationsLastRuns(automations.length > 0);
   const isCreating = id === 'new';
   const detailAutomation = isCreating
     ? undefined
@@ -168,6 +174,8 @@ export const AutomationsPage = (): React.ReactElement => {
         isRunPending={runAutomation.isLoading}
         editDisabledReason={editDisabledReason}
         runCounts={runCounts}
+        lastRuns={didLastRunsFail ? undefined : lastRuns}
+        isLoadingLastRuns={isLoadingLastRuns}
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}

@@ -21,6 +21,7 @@ import {
   useDeleteAutomation,
   useRunAutomation,
   useFetchAutomations,
+  useAutomationsLastRuns,
   useToggleAutomation,
   useUpdateAutomation,
 } from '../../data/automations/use_automations';
@@ -46,6 +47,7 @@ jest.mock('../../data/automations/use_automations', () => ({
   useDeleteAutomation: jest.fn(),
   useRunAutomation: jest.fn(),
   useFetchAutomations: jest.fn(),
+  useAutomationsLastRuns: jest.fn(),
   useRefreshAutomations: jest.fn(() => jest.fn()),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
@@ -62,7 +64,7 @@ jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
-    bindings: [],
+    bindings: [{ channel: 'C12345', displayName: 'payments-oncall', visibility: 'public' }],
     isLoading: false,
     isError: false,
     isComplete: true,
@@ -78,12 +80,14 @@ const mockUseAutomationsRunCounts = useAutomationsRunCounts as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
+const mockUseAutomationsLastRuns = useAutomationsLastRuns as jest.Mock;
 const mockUseFetchAutomations = useFetchAutomations as jest.Mock;
 const mockUseToggleAutomation = useToggleAutomation as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseInvestigationQuotas = useInvestigationQuotas as jest.Mock;
 
 const uiSettingsValues: Record<string, string> = {
+  dateFormat: 'YYYY-MM-DD HH:mm:ss',
   'dateFormat:tz': 'Browser',
   'dateFormat:dow': 'Sunday',
 };
@@ -113,6 +117,9 @@ describe('AutomationsPage', () => {
           get: jest.fn((key: string) => uiSettingsValues[key]),
         },
       },
+    });
+    mockUseAutomationsLastRuns.mockReturnValue({
+      data: undefined,
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
@@ -601,6 +608,76 @@ describe('AutomationsPage', () => {
       expect(within(reportRow).queryByTestId('automationLimitReached')).not.toBeInTheDocument();
     });
 
+    it('shows trigger labels, Slack destinations, and the latest run outside the default count range', () => {
+      const lastRunAt = '2026-10-01T12:00:00.000Z';
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            buildAutomation({
+              ...automations[0],
+              completions: [
+                { action: 'post_to_slack', targetMode: 'channel', destination: 'C12345' },
+              ],
+            }),
+            automations[1],
+            buildAutomation({
+              id: 'slack',
+              name: 'Investigate Slack messages',
+              trigger: { rows: [{ kind: 'slack', event: 'message' }] },
+              completions: [{ action: 'post_to_slack', targetMode: 'thread' }],
+            }),
+          ],
+        },
+        isInitialLoading: false,
+      });
+      mockUseAutomationsLastRuns.mockReturnValue({
+        data: { triage: lastRunAt },
+      });
+      mockUseAutomationsRunsInRange.mockReturnValue([]);
+      mockUseAutomationsRunCounts.mockReturnValue({});
+
+      renderPage();
+
+      const alertRow = rowOf('Triage incoming alerts');
+      expect(within(alertRow).getByText('Alert')).toBeVisible();
+      expect(within(alertRow).getByText('#payments-oncall')).toBeVisible();
+      expect(alertRow.querySelector('time')).toHaveAttribute('datetime', lastRunAt);
+
+      const scheduleRow = within(rowOf('Daily report'));
+      expect(scheduleRow.getByText('Scheduled')).toBeVisible();
+      const emptyDestination = scheduleRow.getByRole('cell', { name: 'No destination' });
+      expect(within(emptyDestination).getByText('—')).toBeVisible();
+      expect(scheduleRow.getByText('No runs recorded')).toBeVisible();
+
+      const slackRow = within(rowOf('Investigate Slack messages'));
+      expect(slackRow.getByText('Slack')).toBeVisible();
+      expect(slackRow.getByText('Triggering Slack thread')).toBeVisible();
+      expect(slackRow.getByText('No runs recorded')).toBeVisible();
+    });
+
+    it('shows a loading state while keeping the automation row visible', () => {
+      mockUseAutomationsLastRuns.mockReturnValue({ isInitialLoading: true });
+
+      renderPage();
+
+      expect(
+        within(rowOf('Triage incoming alerts')).getByLabelText('Loading last run')
+      ).toBeVisible();
+    });
+
+    it('shows unavailable instead of the cached timestamp after a failed refresh', () => {
+      mockUseAutomationsLastRuns.mockReturnValue({
+        data: { triage: '2026-10-01T12:00:00.000Z' },
+        isError: true,
+      });
+
+      renderPage();
+
+      const row = rowOf('Triage incoming alerts');
+      expect(within(row).getByText('Unavailable')).toBeVisible();
+      expect(row.querySelector('time')).not.toBeInTheDocument();
+    });
+
     it('toggles an automation', () => {
       renderPage();
 
@@ -807,9 +884,9 @@ describe('AutomationsPage', () => {
       renderPage();
 
       fireEvent.click(screen.getByTestId('automationTriggerFilter'));
-      expect(await screen.findByRole('option', { name: /Alert triggered/ })).toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: /Alert/ })).toBeInTheDocument();
       expect(screen.getAllByRole('option').map((option) => option.textContent)).toEqual([
-        'Alert triggered1',
+        'Alert1',
         'Scheduled1',
       ]);
       fireEvent.click(screen.getByRole('option', { name: /Scheduled/ }));

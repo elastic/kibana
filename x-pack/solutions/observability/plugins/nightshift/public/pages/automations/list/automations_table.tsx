@@ -9,17 +9,29 @@ import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useState } from 'react';
 import {
   Comparators,
+  EuiIcon,
   EuiInMemoryTable,
+  EuiLoadingSpinner,
+  EuiScreenReaderOnly,
   EuiSwitch,
+  EuiText,
   EuiToolTip,
   type Criteria,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { formatTimestamp } from '../../../common/format_timestamp';
 import { useToggleAutomation, type Automation } from '../../../data/automations/use_automations';
+import {
+  formatChannelValue,
+  useAllRelayAppBindings,
+} from '../../../data/relay_apps/use_relay_app_bindings';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { RunCounts, RunCountStatus } from '../hooks/use_automation_usage';
 import type { AutomationFacets } from '../utils/filter_automations';
+import { getTriggerDisplay } from '../utils/trigger_display';
 import { AutomationAuthorCell } from './cells/author_cell';
 import { AutomationNameCell } from './cells/name_cell';
 import { AutomationActions } from './cells/row_actions';
@@ -35,6 +47,8 @@ export const AutomationsTable = ({
   canManage,
   editDisabledReason,
   runCounts,
+  lastRuns,
+  isLoadingLastRuns,
   usedToday,
   getFacets,
   isRateLimited,
@@ -56,6 +70,8 @@ export const AutomationsTable = ({
   /** Why the switches are disabled, shown on hover. */
   editDisabledReason?: string;
   runCounts: Map<string, RunCounts>;
+  lastRuns?: Record<string, string>;
+  isLoadingLastRuns: boolean;
   usedToday: Map<string, number>;
   getFacets: (automation: Automation) => AutomationFacets;
   isRateLimited: (automation: Automation) => boolean;
@@ -73,6 +89,18 @@ export const AutomationsTable = ({
   onOrderChange: (ids: string[]) => void;
 }) => {
   const toggleAutomation = useToggleAutomation();
+  const dateFormat = useKibana().services.uiSettings.get<string>('dateFormat');
+  const { bindings } = useAllRelayAppBindings(
+    automations.some(({ completions = [] }) =>
+      completions.some(
+        ({ action, targetMode, destination }) =>
+          action === 'post_to_slack' &&
+          targetMode === 'channel' &&
+          destination &&
+          !destination.startsWith('#')
+      )
+    )
+  );
   const [sort, setSort] = useState<{ field: string; direction: 'asc' | 'desc' }>({
     field: 'name',
     direction: 'asc',
@@ -98,11 +126,73 @@ export const AutomationsTable = ({
     {
       field: 'author',
       name: listLabels.author,
-      width: '160px',
+      width: '120px',
       sortable: getAuthorName,
       render: (_author: string, automation: Automation) => (
         <AutomationAuthorCell name={getAuthorName(automation)} />
       ),
+    },
+    {
+      name: listLabels.trigger,
+      render: ({ trigger }: Automation) => {
+        const triggers = new Map(
+          trigger.rows.map((row) => {
+            const { label, icon } = getTriggerDisplay(row);
+            return [label, icon] as const;
+          })
+        );
+        return Array.from(triggers, ([label, icon]) => (
+          <div key={label}>
+            <EuiIcon type={icon} size="s" aria-hidden /> {label}
+          </div>
+        ));
+      },
+    },
+    {
+      name: listLabels.destinationColumn,
+      render: ({ completions = [], trigger }: Automation) => {
+        const destinations = completions.flatMap(({ action, targetMode, destination }) => {
+          if (action !== 'post_to_slack') return [];
+          if (targetMode === 'channel' && destination) {
+            return formatChannelValue(destination, bindings);
+          }
+          if (targetMode === 'thread' && trigger.rows.some(({ kind }) => kind === 'slack')) {
+            return listLabels.slackThreadDestination;
+          }
+          return [];
+        });
+        if (destinations.length > 0) {
+          return i18n.formatList('unit', [...new Set(destinations)]);
+        }
+
+        return (
+          <EuiText size="s" color="subdued">
+            <span aria-hidden>—</span>
+            <EuiScreenReaderOnly>
+              <span>{listLabels.noDestination}</span>
+            </EuiScreenReaderOnly>
+          </EuiText>
+        );
+      },
+    },
+    {
+      field: 'lastRunAt',
+      name: listLabels.lastRunColumn,
+      nameTooltip: { content: listLabels.lastRunTooltip },
+      sortable: ({ id }) => lastRuns?.[id] ?? '',
+      render: (_value: undefined, { id }: Automation) => {
+        if (isLoadingLastRuns) return <EuiLoadingSpinner aria-label={listLabels.loadingLastRun} />;
+        if (!lastRuns) return listLabels.lastRunUnavailable;
+        const lastRunAt = lastRuns[id];
+        if (!lastRunAt) return listLabels.noRunsRecorded;
+        return (
+          <EuiToolTip content={formatTimestamp(lastRunAt, dateFormat)}>
+            <time dateTime={lastRunAt} tabIndex={0}>
+              <FormattedRelative value={lastRunAt} />
+            </time>
+          </EuiToolTip>
+        );
+      },
     },
     ...runCountColumns.map(({ status, name, tooltip, width, getViewLabel }) => ({
       field: `runs-${status}`,
@@ -127,7 +217,7 @@ export const AutomationsTable = ({
       field: 'usage',
       name: listLabels.usage,
       nameTooltip: { content: listLabels.usageTooltip },
-      width: '150px',
+      width: '128px',
       align: 'right' as const,
       sortable: (automation) => usedToday.get(automation.id) ?? 0,
       render: (_usage: unknown, automation: Automation) => (
