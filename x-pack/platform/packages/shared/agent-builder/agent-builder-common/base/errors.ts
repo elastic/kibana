@@ -412,7 +412,7 @@ export const isConversationNotSteerableError = (
   return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationNotSteerable;
 };
 
-/** A public conversation cannot be steered: membership there is not a grant by the owner. */
+/** A shared conversation cannot be steered: a collaborator's message would run as the owner. */
 export const createConversationNotSteerableError = ({
   conversationId,
   meta = {},

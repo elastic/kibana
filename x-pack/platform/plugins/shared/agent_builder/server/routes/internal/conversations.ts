@@ -359,8 +359,9 @@ export function registerInternalConversationRoutes({
       const { message, event_id: eventId } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      // A steer is admitted for whoever could start the run: a member the agent refuses, or one
-      // without the invoke privilege on a bound agent, is turned away as converse turns them away.
+      // A steer needs what starting the run needs: a caller the agent refuses, or one without the
+      // invoke privilege on a bound agent, is turned away as converse turns them away. The client
+      // then refuses any shared conversation, so only its owner's own run is ever steered.
       const { agent_id: agentId } = await client.get(conversationId);
       await executionService.assertCanRunAgent({ request, agentId });
       const { event, alreadyStored } = await client.appendSteer(

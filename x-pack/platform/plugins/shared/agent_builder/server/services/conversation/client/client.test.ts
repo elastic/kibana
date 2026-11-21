@@ -6733,6 +6733,43 @@ describe('ConversationClient', () => {
         expect(mockEsClient.index).not.toHaveBeenCalled();
       });
 
+      it('refuses a privately shared conversation before looking at the run', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', {
+            accessMode: ConversationAccessControlMode.Private,
+            entries: [
+              {
+                type: 'user',
+                id: 'user-2',
+                role: ConversationAccessControlRole.Member,
+                added_at: '2026-10-26T10:00:00.000Z',
+              },
+            ],
+          })
+        );
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationNotSteerableError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('accepts a steer in a private conversation shared with nobody', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', {
+            accessMode: ConversationAccessControlMode.Private,
+            entries: [],
+          })
+        );
+        liveHolder();
+
+        const result = await appendSteer();
+
+        expect(result.alreadyStored).toBe(false);
+        expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+      });
+
       it('refuses while the conversation waits on a prompt and no run holds it', async () => {
         mockGetDocumentResponse(
           documentWithHolder(undefined, { events: pausedRoundTimeline('round-1', ['tc1']) })
