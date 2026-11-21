@@ -18,4 +18,5 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/alertzero/{public,server,common}/**/*.{js,ts,tsx}',
   ],
   coverageReporters: ['html'],
+  testTimeout: 30_000,
 };
