@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,15 +20,27 @@ jest.mock('../hooks/use_nl_to_esql_check', () => ({
 
 describe('useNlGeneration', () => {
   const coreStart = coreMock.createStart();
+  const esqlService = { hasInferenceConnector: jest.fn() };
 
   const createWrapper =
     () =>
     ({ children }: { children: React.ReactNode }) =>
-      <KibanaContextProvider services={{ core: coreStart }}>{children}</KibanaContextProvider>;
+      (
+        <KibanaContextProvider services={{ core: coreStart, esql: esqlService }}>
+          {children}
+        </KibanaContextProvider>
+      );
 
   const defaultParams = {
     query: 'FROM test_index',
     onUpdateAndSubmitQuery: jest.fn(),
+  };
+
+  const useControlledNlGeneration = (
+    params: Omit<Parameters<typeof useNlGeneration>[0], 'nlValue' | 'setNlValue'>
+  ) => {
+    const [nlValue, setNlValue] = useState('');
+    return { ...useNlGeneration({ ...params, nlValue, setNlValue }), nlValue, setNlValue };
   };
 
   beforeEach(() => {
@@ -37,7 +49,7 @@ describe('useNlGeneration', () => {
   });
 
   it('onNlSubmit does nothing when nlValue is empty', async () => {
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -52,9 +64,12 @@ describe('useNlGeneration', () => {
     const onNlResult = jest.fn();
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
-    const { result } = renderHook(() => useNlGeneration({ ...defaultParams, onNlResult }), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useControlledNlGeneration({ ...defaultParams, onNlResult }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     act(() => result.current.setNlValue('show me logs'));
     await act(async () => {
@@ -76,7 +91,7 @@ describe('useNlGeneration', () => {
   it('onNlSubmit falls back to onUpdateAndSubmitQuery when onNlResult is not provided', async () => {
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -89,12 +104,66 @@ describe('useNlGeneration', () => {
     expect(result.current.nlValue).toBe('');
   });
 
+  it('onNlSubmit applies the result without review when skipReview is set', async () => {
+    const onNlResult = jest.fn();
+    (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
+
+    const { result } = renderHook(
+      () => useControlledNlGeneration({ ...defaultParams, onNlResult }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    act(() => result.current.setNlValue('show me logs'));
+    await act(async () => {
+      await result.current.onNlSubmit({ skipReview: true });
+    });
+
+    expect(onNlResult).not.toHaveBeenCalled();
+    expect(defaultParams.onUpdateAndSubmitQuery).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    expect(result.current.nlValue).toBe('');
+  });
+
+  it('onNlSubmit reviews the result despite skipReview when the query changed meanwhile', async () => {
+    const onNlResult = jest.fn();
+    let resolveRequest: (value: { content: string }) => void = () => {};
+    (coreStart.http.post as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+
+    const { result, rerender } = renderHook(
+      ({ query }: { query: string }) =>
+        useControlledNlGeneration({ ...defaultParams, query, onNlResult }),
+      { wrapper: createWrapper(), initialProps: { query: 'FROM test_index' } }
+    );
+
+    act(() => result.current.setNlValue('show me logs'));
+    act(() => {
+      result.current.onNlSubmit({ skipReview: true });
+    });
+    rerender({ query: 'FROM test_index | LIMIT 5' });
+    await act(async () => {
+      resolveRequest({ content: 'FROM logs | LIMIT 10' });
+    });
+
+    expect(onNlResult).toHaveBeenCalledWith(
+      'FROM logs | LIMIT 10',
+      expect.objectContaining({ onAccept: expect.any(Function) })
+    );
+    expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+    expect(result.current.nlValue).toBe('show me logs');
+  });
+
   it('onNlSubmit shows the server error message on failure', async () => {
     (coreStart.http.post as jest.Mock).mockRejectedValue({
       body: { message: 'Connector unavailable', statusCode: 503 },
     });
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -112,7 +181,7 @@ describe('useNlGeneration', () => {
   it('onNlSubmit shows the fallback message when the error has no body message', async () => {
     (coreStart.http.post as jest.Mock).mockRejectedValue(new Error('network error'));
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -130,7 +199,7 @@ describe('useNlGeneration', () => {
   it('onStopGeneration aborts the request, clears loading state and nlValue', async () => {
     (coreStart.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -156,7 +225,7 @@ describe('useNlGeneration', () => {
         })
     );
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -186,7 +255,7 @@ describe('useNlGeneration', () => {
       )
       .mockImplementationOnce(() => new Promise(() => {}));
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -213,7 +282,7 @@ describe('useNlGeneration', () => {
   it('onNlSubmit is a no-op when already loading', async () => {
     (coreStart.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
 
-    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+    const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
       wrapper: createWrapper(),
     });
 
@@ -240,46 +309,25 @@ describe('useNlGeneration', () => {
       (useNlToEsqlCheck as jest.Mock).mockReturnValue(false);
     });
 
-    it('hasConnector is true when the connectors endpoint returns a non-empty array', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+    it.each([true, false])('hasConnector is %s when the esql service says so', async (expected) => {
+      esqlService.hasInferenceConnector.mockResolvedValue(expected);
 
-      const { result } = renderHook(() => useNlGeneration(defaultParams), {
+      const { result } = renderHook(() => useControlledNlGeneration(defaultParams), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => expect(result.current.hasConnector).toBe(true));
+      await waitFor(() => expect(result.current.hasConnector).toBe(expected));
     });
 
-    it('hasConnector is false when the connectors endpoint returns an empty array', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [] });
-
-      const { result } = renderHook(() => useNlGeneration(defaultParams), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => expect(result.current.hasConnector).toBe(false));
-    });
-
-    it('hasConnector is false when the connectors endpoint throws', async () => {
-      (coreStart.http.get as jest.Mock).mockRejectedValue(new Error('network error'));
-
-      const { result } = renderHook(() => useNlGeneration(defaultParams), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => expect(result.current.hasConnector).toBe(false));
-    });
-
-    it('reuses the connector result for the next editor', async () => {
-      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+    it('starts the next editor with the last known connector result', async () => {
+      esqlService.hasInferenceConnector.mockResolvedValue(true);
       const wrapper = createWrapper();
-      const first = renderHook(() => useNlGeneration(defaultParams), { wrapper });
+      const first = renderHook(() => useControlledNlGeneration(defaultParams), { wrapper });
 
       await waitFor(() => expect(first.result.current.hasConnector).toBe(true));
 
-      const second = renderHook(() => useNlGeneration(defaultParams), { wrapper });
+      const second = renderHook(() => useControlledNlGeneration(defaultParams), { wrapper });
       expect(second.result.current.hasConnector).toBe(true);
-      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
     });
   });
 });

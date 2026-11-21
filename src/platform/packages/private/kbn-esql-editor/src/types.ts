@@ -126,6 +126,8 @@ interface ESQLVariableService {
 export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
+  hasEnterpriseLicense: () => Promise<boolean>;
+  hasInferenceConnector: () => Promise<boolean>;
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;

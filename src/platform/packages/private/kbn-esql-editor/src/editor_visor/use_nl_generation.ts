@@ -16,33 +16,26 @@ import { nlErrorMessage } from './visor_i18n';
 import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
-const INFERENCE_CONNECTORS_ROUTE = '/internal/inference/connectors';
-
+// The esql service caches the lookup itself; this mirror lets the next visor start with the
+// last known result synchronously instead of flashing the AI button in after the promise resolves
 let hasInferenceConnector: boolean | undefined;
-let inferenceConnectorRequest: Promise<boolean> | undefined;
 
-const loadHasInferenceConnector = (http: ESQLEditorDeps['core']['http']): Promise<boolean> => {
-  inferenceConnectorRequest ??= http
-    .get<{ connectors: unknown[] }>(INFERENCE_CONNECTORS_ROUTE)
-    .then((res) => {
-      hasInferenceConnector = res.connectors.length > 0;
-      return hasInferenceConnector;
-    })
-    .catch(() => {
-      hasInferenceConnector = false;
-      return false;
-    });
-  return inferenceConnectorRequest;
-};
-
-/** Drops the cached connector lookup so tests can change the result. */
+/** Drops the last known connector result so tests can change it. */
 export const clearInferenceConnectorCache = (): void => {
   hasInferenceConnector = undefined;
-  inferenceConnectorRequest = undefined;
 };
+
+export interface NlSubmitOptions {
+  // Applies the result directly even when the host reviews generated queries, for a prompt that
+  // arrived with the editor and so has no query of the user's to protect yet. The review still
+  // applies if the query is edited while the request runs
+  skipReview?: boolean;
+}
 
 interface UseNlGenerationParams {
   query: string;
+  nlValue: string;
+  setNlValue: (value: string) => void;
   onNlResult?: VisorNlResultHandler;
   onNlReject?: () => void;
   onUpdateAndSubmitQuery: (query: string) => void;
@@ -51,23 +44,28 @@ interface UseNlGenerationParams {
 
 export const useNlGeneration = ({
   query,
+  nlValue,
+  setNlValue,
   onNlResult,
   onNlReject,
   onUpdateAndSubmitQuery,
   telemetryService,
 }: UseNlGenerationParams) => {
-  const { core } = useKibana<ESQLEditorDeps>().services;
+  const { core, esql } = useKibana<ESQLEditorDeps>().services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
 
-  const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // What the editor shows now, to compare with the query a request was sent with once it settles
+  const latestQueryRef = useRef(query);
+  latestQueryRef.current = query;
 
   useEffect(() => {
-    if (!isNlToEsqlEnabled) return;
+    if (!isNlToEsqlEnabled || !esql) return;
     let cancelled = false;
-    loadHasInferenceConnector(core.http).then((available) => {
+    esql.hasInferenceConnector().then((available) => {
+      hasInferenceConnector = available;
       if (!cancelled) {
         setHasConnector(available);
       }
@@ -75,7 +73,7 @@ export const useNlGeneration = ({
     return () => {
       cancelled = true;
     };
-  }, [isNlToEsqlEnabled, core.http]);
+  }, [isNlToEsqlEnabled, esql]);
 
   const trackNlResult = useCallback(
     (
@@ -102,68 +100,75 @@ export const useNlGeneration = ({
     abortControllerRef.current = null;
     setIsNlLoading(false);
     setNlValue('');
-  }, []);
+  }, [setNlValue]);
 
-  const onNlSubmit = useCallback(async () => {
-    const trimmed = nlValue.trim();
-    if (!trimmed || isNlLoading) return;
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-    setIsNlLoading(true);
-    const startTime = Date.now();
-    let appliedContent = false;
-    try {
-      const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-        body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
-        signal: abortController.signal,
-      });
-      if (abortController.signal.aborted) return;
-      if (result.content) {
-        trackNlResult(
-          trimmed.length,
-          query.length,
-          startTime,
-          true,
-          undefined,
-          result.content.length
+  const onNlSubmit = useCallback(
+    async ({ skipReview = false }: NlSubmitOptions = {}) => {
+      const trimmed = nlValue.trim();
+      if (!trimmed || isNlLoading) return;
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+      setIsNlLoading(true);
+      const startTime = Date.now();
+      let appliedContent = false;
+      try {
+        const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
+          body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
+          signal: abortController.signal,
+        });
+        if (abortController.signal.aborted) return;
+        if (result.content) {
+          trackNlResult(
+            trimmed.length,
+            query.length,
+            startTime,
+            true,
+            undefined,
+            result.content.length
+          );
+          // Edits made to the query while the request ran would be lost by applying the result
+          // directly, so in that case it goes through the review after all
+          const applyDirectly = skipReview && latestQueryRef.current === query;
+          if (onNlResult && !applyDirectly) {
+            // The prompt stays until the generated query is kept
+            onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
+          } else {
+            appliedContent = true;
+            onUpdateAndSubmitQuery(result.content);
+          }
+        }
+      } catch (error) {
+        if (abortController.signal.aborted) return;
+        reportEsqlError(error, { errorType: 'NlToEsql' });
+        const errorCode = String(
+          (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
         );
-        if (onNlResult) {
-          // The prompt stays until the generated query is kept
-          onNlResult(result.content, { onAccept: () => setNlValue(''), onReject: onNlReject });
-        } else {
-          appliedContent = true;
-          onUpdateAndSubmitQuery(result.content);
+        trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
+        const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
+        core.notifications.toasts.addDanger({ title: message });
+      } finally {
+        if (abortControllerRef.current === abortController) {
+          abortControllerRef.current = null;
+          if (appliedContent) {
+            setNlValue('');
+          }
+          setIsNlLoading(false);
         }
       }
-    } catch (error) {
-      if (abortController.signal.aborted) return;
-      reportEsqlError(error, { errorType: 'NlToEsql' });
-      const errorCode = String(
-        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
-      );
-      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
-      const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
-      core.notifications.toasts.addDanger({ title: message });
-    } finally {
-      if (abortControllerRef.current === abortController) {
-        abortControllerRef.current = null;
-        if (appliedContent) {
-          setNlValue('');
-        }
-        setIsNlLoading(false);
-      }
-    }
-  }, [
-    nlValue,
-    isNlLoading,
-    query,
-    core.http,
-    core.notifications.toasts,
-    onNlResult,
-    onNlReject,
-    onUpdateAndSubmitQuery,
-    trackNlResult,
-  ]);
+    },
+    [
+      nlValue,
+      setNlValue,
+      isNlLoading,
+      query,
+      core.http,
+      core.notifications.toasts,
+      onNlResult,
+      onNlReject,
+      onUpdateAndSubmitQuery,
+      trackNlResult,
+    ]
+  );
 
-  return { nlValue, setNlValue, isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
+  return { isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
 };

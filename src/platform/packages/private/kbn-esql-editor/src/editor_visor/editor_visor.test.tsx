@@ -18,6 +18,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { QuerySource } from '@kbn/esql-types';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 import { VisorMode } from './visor_mode';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
@@ -46,6 +47,8 @@ describe('Quick search visor', () => {
     kql: kqlMock,
     esql: {
       getLicense: jest.fn().mockResolvedValue(null),
+      hasEnterpriseLicense: jest.fn().mockResolvedValue(false),
+      hasInferenceConnector: jest.fn().mockResolvedValue(false),
     },
   };
 
@@ -68,9 +71,6 @@ describe('Quick search visor', () => {
           { name: 'test_index', hidden: false, type: 'index' },
           { name: 'logs', hidden: false, type: 'index' },
         ]);
-      }
-      if (url.includes('/internal/inference/connectors')) {
-        return Promise.resolve({ connectors: [{ connectorId: 'test-connector' }] });
       }
       return Promise.resolve([]);
     });
@@ -194,7 +194,8 @@ describe('Quick search visor', () => {
     act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
 
     expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      'FROM test_index | WHERE KQL("""hostname:web-01""")'
+      'FROM test_index | WHERE KQL("""hostname:web-01""")',
+      QuerySource.QUICK_SEARCH_KQL
     );
   });
 
@@ -270,7 +271,8 @@ describe('Quick search visor', () => {
     act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
 
     expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
-      expect.stringMatching(/^TS ts_index \| WHERE KQL/)
+      expect.stringMatching(/^TS ts_index \| WHERE KQL/),
+      QuerySource.QUICK_SEARCH_KQL
     );
   });
 
@@ -325,6 +327,8 @@ describe('Quick search visor', () => {
           hasAtLeast: jest.fn().mockReturnValue(true),
           getFeature: jest.fn().mockReturnValue({ isAvailable: false }),
         }),
+        hasEnterpriseLicense: jest.fn().mockResolvedValue(true),
+        hasInferenceConnector: jest.fn().mockResolvedValue(true),
       },
     };
 
@@ -346,6 +350,108 @@ describe('Quick search visor', () => {
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
       expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-label', 'Filter your data');
+    });
+
+    it('should focus the natural language input on mount when autoFocus is set', async () => {
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, autoFocus: true }));
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus());
+    });
+
+    it('should restore the natural language prompt with the caret at the end', async () => {
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({
+          ...props,
+          autoFocus: true,
+          initialState: { nlValue: 'show me logs' },
+        })
+      );
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus());
+      const nlInput = getByTestId('esqlVisorNLQueryInput') as HTMLTextAreaElement;
+      expect(nlInput).toHaveValue('show me logs');
+      expect(nlInput.selectionStart).toBe('show me logs'.length);
+    });
+
+    it('sends the restored prompt once on mount and applies the result without review when autoSubmit is set', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const onUpdateAndSubmitQuery = jest.fn();
+      const onAutoSubmit = jest.fn();
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({
+          ...props,
+          autoSubmit: true,
+          onAutoSubmit,
+          initialState: { nlValue: 'show me logs' },
+          onNlResult,
+          onUpdateAndSubmitQuery,
+        })
+      );
+
+      await waitFor(() =>
+        expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
+          'FROM logs | LIMIT 10',
+          QuerySource.QUICK_SEARCH_NL
+        )
+      );
+      expect(corePluginMock.http.post).toHaveBeenCalledWith(
+        '/internal/esql/nl_to_esql',
+        expect.objectContaining({
+          body: JSON.stringify({ nlInstruction: 'show me logs', currentQuery: 'FROM test_index' }),
+        })
+      );
+      expect(onNlResult).not.toHaveBeenCalled();
+      expect(onAutoSubmit).toHaveBeenCalledTimes(1);
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('');
+
+      // The next prompt waits for the user to send it
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'only the errors');
+      });
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('only the errors');
+      expect(corePluginMock.http.post).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the focus on Stop while the restored prompt generates, then returns it to the prompt', async () => {
+      let resolveRequest: (value: { content: string }) => void = () => {};
+      (corePluginMock.http.post as jest.Mock).mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveRequest = resolve;
+          })
+      );
+      const { getByTestId } = renderWithI18n(
+        renderWithEnterprise({
+          ...props,
+          autoFocus: true,
+          autoSubmit: true,
+          initialState: { nlValue: 'show me logs' },
+          onNlResult: jest.fn(),
+        })
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toHaveFocus());
+      expect(getByTestId('esqlVisorNLQueryInput')).toBeDisabled();
+
+      await act(async () => {
+        resolveRequest({ content: 'FROM logs | LIMIT 10' });
+      });
+
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
+    });
+
+    it('does not move the focus to Stop for a prompt the user sends', async () => {
+      (corePluginMock.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, autoFocus: true }));
+
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus());
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+
+      await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
+      expect(getByTestId('esqlVisorStopGeneration')).not.toHaveFocus();
     });
 
     it('should switch to filter mode and back to natural language', async () => {

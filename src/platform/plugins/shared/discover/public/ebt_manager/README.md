@@ -154,6 +154,7 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 | `click`     | `documents_view_click`         | The user switched to the documents view.                   |
 | `click`     | `esql:try_btn_clicked`         | The user switched from data view mode to ES\|QL mode.      |
 | `click`     | `esql:back_to_classic_clicked` | The user switched from ES\|QL mode back to data view mode. |
+| `click`     | `esql:ask_ai_prompt_submitted` | The user sent an "Ask AI" prompt to a new ES\|QL tab.      |
 | `click`     | `esql_filter_added`            | A filter was added while in ES\|QL mode.                   |
 | `click`     | `filter_added`                 | A filter was added while in data view mode.                |
 | `loaded`    | `field_statistics_loaded`      | The field statistics table loaded.                         |

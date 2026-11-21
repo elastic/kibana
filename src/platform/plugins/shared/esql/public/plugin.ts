@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { ESQLSourceResult, EsqlView } from '@kbn/esql-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -33,6 +34,7 @@ import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
 import { EnricherService } from './enricher_service';
+import { createNlToEsqlAvailability, type NlToEsqlAvailability } from './nl_to_esql_availability';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -63,9 +65,10 @@ export interface EsqlPluginSetup {
   registerViewEnricher(enricher: (views: EsqlView[]) => Promise<EsqlView[]>): void;
 }
 
-export interface EsqlPluginStart {
+export interface EsqlPluginStart extends NlToEsqlAvailability {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
+  getLicense: () => Promise<ILicense | undefined>;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
   /**
@@ -162,10 +165,13 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
 
     let telemetryServicePromise: Promise<ESQLEditorTelemetryService> | undefined;
 
+    const getLicense = async () => await licensing?.getLicense();
+
     const start = {
       isServerless,
       variablesService,
-      getLicense: async () => await licensing?.getLicense(),
+      getLicense,
+      ...createNlToEsqlAvailability(getLicense, core.http),
       enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
       enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
       getTelemetryService: () => {

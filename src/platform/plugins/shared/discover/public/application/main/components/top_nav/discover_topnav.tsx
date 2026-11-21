@@ -25,6 +25,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   useDiscoverCustomization,
@@ -47,6 +48,7 @@ import {
   useInternalStateGetState,
   useInternalStateSelector,
 } from '../../state_management/redux';
+import { useAskAi } from './use_ask_ai';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -323,12 +325,17 @@ export const DiscoverTopNav = ({
 
   const visorUiState = useCurrentTabSelector((state) => state.uiState.visor);
   const setVisorUiState = useCurrentTabAction(internalStateActions.setVisorUiState);
-  const onVisorInitialStateChange = useCallback(
-    (newVisorUiState: Partial<QuickSearchVisorRestorableState>) => {
-      dispatch(setVisorUiState({ visorUiState: newVisorUiState }));
-    },
+  // The visor reports every keystroke of its natural language prompt. Unlike the search draft above,
+  // this state is passed back into the memoized search bar as a prop, so each dispatch re-renders it;
+  // debounce to keep typing cheap
+  const onVisorInitialStateChange = useMemo(
+    () =>
+      debounce((newVisorUiState: Partial<QuickSearchVisorRestorableState>) => {
+        dispatch(setVisorUiState({ visorUiState: newVisorUiState }));
+      }, 300),
     [dispatch, setVisorUiState]
   );
+  useEffect(() => () => onVisorInitialStateChange.flush(), [onVisorInitialStateChange]);
   const mainDataState = useDataState(dataStateContainer.data$.main$);
   const isUninitializedEsqlTab =
     isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED;
@@ -380,6 +387,21 @@ export const DiscoverTopNav = ({
     persistedDiscoverSession,
   });
 
+  // The visor focuses on every mount until the tab runs its first query, which clears skipInitialFetch.
+  const autoFocusVisor = useCurrentTabSelector((tab) =>
+    Boolean(tab.autoFocusVisor && tab.skipInitialFetch)
+  );
+
+  // The prompt the tab was opened with is sent once: the flag is cleared when the visor sends it,
+  // so a stopped or failed generation is not sent again when the visor mounts again
+  const autoSubmitVisor = useCurrentTabSelector((tab) => Boolean(tab.autoSubmitVisor));
+  const setAutoSubmitVisor = useCurrentTabAction(internalStateActions.setAutoSubmitVisor);
+  const onAutoSubmitVisor = useCallback(() => {
+    dispatch(setAutoSubmitVisor({ autoSubmitVisor: false }));
+  }, [dispatch, setAutoSubmitVisor]);
+
+  const askAi = useAskAi();
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
@@ -427,6 +449,7 @@ export const DiscoverTopNav = ({
         dataViewPickerComponentProps={
           shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
         }
+        askAi={askAi}
         displayStyle="detached"
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         textBasedLanguageModeWarning={esqlModeWarning}
@@ -444,6 +467,9 @@ export const DiscoverTopNav = ({
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
         visorInitialState={visorUiState}
         onVisorInitialStateChange={onVisorInitialStateChange}
+        autoFocusVisor={autoFocusVisor}
+        autoSubmitVisor={autoSubmitVisor}
+        onAutoSubmitVisor={onAutoSubmitVisor}
         esqlVariablesConfig={
           isEsqlMode
             ? {

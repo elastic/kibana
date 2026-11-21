@@ -78,6 +78,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;
+  askAi?: QueryBarTopRowProps['askAi'];
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
@@ -201,6 +202,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
   visorInitialState?: QueryBarTopRowProps['visorInitialState'];
   onVisorInitialStateChange?: QueryBarTopRowProps['onVisorInitialStateChange'];
+  autoFocusVisor?: QueryBarTopRowProps['autoFocusVisor'];
+  autoSubmitVisor?: QueryBarTopRowProps['autoSubmitVisor'];
+  onAutoSubmitVisor?: QueryBarTopRowProps['onAutoSubmitVisor'];
 
   hasDirtyState?: boolean;
   useBackgroundSearchButton?: boolean;
@@ -543,7 +547,11 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH_KQL;
+    let source:
+      | QuerySource.SEARCH_BUTTON
+      | QuerySource.TIME_FILTER
+      | QuerySource.QUICK_SEARCH_KQL
+      | QuerySource.QUICK_SEARCH_NL;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
@@ -553,6 +561,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
         break;
       case QuerySubmitTrigger.QUICK_SEARCH:
         source = QuerySource.QUICK_SEARCH_KQL;
+        break;
+      case QuerySubmitTrigger.QUICK_SEARCH_NL:
+        source = QuerySource.QUICK_SEARCH_NL;
         break;
       default:
         return;
@@ -852,6 +863,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           dataViewPickerOverride={this.props.dataViewPickerOverride}
+          askAi={this.props.askAi}
           showSubmitButton={this.props.showSubmitButton}
           submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
@@ -884,6 +896,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           visorInitialState={this.props.visorInitialState}
           onVisorInitialStateChange={this.props.onVisorInitialStateChange}
+          autoFocusVisor={this.props.autoFocusVisor}
+          autoSubmitVisor={this.props.autoSubmitVisor}
+          onAutoSubmitVisor={this.props.onAutoSubmitVisor}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}

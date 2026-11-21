@@ -229,6 +229,12 @@ export interface TabState extends TabItem {
   // Indicates the tab was created via "+" and should not auto-fetch on init.
   skipInitialFetch?: boolean;
 
+  // Indicates the tab was opened to ask in natural language and should focus the ES|QL visor.
+  autoFocusVisor?: boolean;
+
+  // Indicates the natural language prompt the tab was opened with has not been sent yet.
+  autoSubmitVisor?: boolean;
+
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;

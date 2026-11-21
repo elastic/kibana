@@ -11,42 +11,26 @@ import { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 
+// The esql service caches the lookup itself; this mirror lets the next editor start with the
+// last known result synchronously instead of flashing the feature in after the promise resolves
 let enterpriseLicense: boolean | undefined;
-let enterpriseLicenseRequest: Promise<boolean> | undefined;
 
-const loadEnterpriseLicense = (
-  getLicense: NonNullable<ESQLEditorDeps['esql']>['getLicense']
-): Promise<boolean> => {
-  enterpriseLicenseRequest ??= getLicense()
-    .then((license) => {
-      enterpriseLicense = Boolean(
-        license && license.status === 'active' && license.hasAtLeast('enterprise')
-      );
-      return enterpriseLicense;
-    })
-    .catch(() => {
-      enterpriseLicense = false;
-      return false;
-    });
-  return enterpriseLicenseRequest;
-};
-
-/** Drops the cached license so tests can change the result. */
+/** Drops the last known license result so tests can change it. */
 export const clearNlToEsqlLicenseCache = (): void => {
   enterpriseLicense = undefined;
-  enterpriseLicenseRequest = undefined;
 };
 
 export const useNlToEsqlCheck = (): boolean => {
-  const getLicense = useKibana<ESQLEditorDeps>().services.esql?.getLicense;
+  const hasEnterpriseLicense = useKibana<ESQLEditorDeps>().services.esql?.hasEnterpriseLicense;
   const [hasValidLicense, setHasValidLicense] = useState(enterpriseLicense ?? false);
 
   useEffect(() => {
-    if (!getLicense) {
+    if (!hasEnterpriseLicense) {
       return;
     }
     let cancelled = false;
-    loadEnterpriseLicense(getLicense).then((isEnterprise) => {
+    hasEnterpriseLicense().then((isEnterprise) => {
+      enterpriseLicense = isEnterprise;
       if (!cancelled) {
         setHasValidLicense(isEnterprise);
       }
@@ -54,7 +38,7 @@ export const useNlToEsqlCheck = (): boolean => {
     return () => {
       cancelled = true;
     };
-  }, [getLicense]);
+  }, [hasEnterpriseLicense]);
 
   return hasValidLicense;
 };
