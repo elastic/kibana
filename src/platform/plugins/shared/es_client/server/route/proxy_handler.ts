@@ -174,6 +174,8 @@ export const createProxyHandler =
         return response.custom({
           statusCode: error.statusCode ?? 500,
           body: error.body,
+          // Kibana's error format requires a `message`, which Elasticsearch error bodies lack.
+          bypassErrorFormat: true,
           // The transport may have read and parsed the error body, so its original framing no longer applies.
           headers: getResponseHeaders(error.headers ?? {}, proxyBasePath, {
             isOriginalBody: false,

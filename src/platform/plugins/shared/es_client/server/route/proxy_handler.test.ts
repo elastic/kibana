@@ -298,6 +298,22 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(response.options.headers).toEqual({ 'content-type': 'application/json' });
   });
 
+  it('SHOULD return the parsed Elasticsearch error body unchanged WHEN the transport throws a response error', async () => {
+    const { run, transportRequest } = setup();
+    const errorBody = { error: { type: 'security_exception' }, status: 401 };
+    transportRequest.mockRejectedValue(
+      new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({ statusCode: 401, body: errorBody })
+      )
+    );
+
+    const response = await run();
+
+    expect(response.status).toBe(401);
+    expect(response.payload).toEqual(errorBody);
+    expect(response.options.bypassErrorFormat).toBe(true);
+  });
+
   it('SHOULD leave compression enabled for other content types', async () => {
     const { run } = setup();
 
