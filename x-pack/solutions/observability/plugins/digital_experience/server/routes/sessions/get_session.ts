@@ -45,7 +45,10 @@ import {
   type SessionTimelineEvent,
   type SessionTimelineEventKind,
 } from '../../../common/sessions';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import { totalHitsOf } from '../../lib/helpers/values';
 import {
   attributeNumber,

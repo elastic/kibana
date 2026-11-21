@@ -10,7 +10,10 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { SESSIONS_INDEX_PATTERN } from '../../../common/sessions';
 import { TELEMETRY_SDK_LANGUAGE } from '@kbn/apm-types';
 import { BROWSER_SDK_LANGUAGE } from '../../../common/otel_data';
-import { SOURCE_SERVICE_NAME_FIELD, SOURCE_SESSION_ID_FIELD } from '../../lib/otel/source_fields';
+import {
+  SOURCE_SERVICE_NAME_FIELD,
+  SOURCE_SESSION_ID_FIELD,
+} from '../../../common/otel_source_fields';
 import {
   SESSION_TIMELINE_SIZE,
   buildPageVisits,
