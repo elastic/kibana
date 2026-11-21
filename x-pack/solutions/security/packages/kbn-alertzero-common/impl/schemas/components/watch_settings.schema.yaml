@@ -43,10 +43,10 @@ components:
       type: object
       additionalProperties: true
       description: >-
-        Worker-specific settings owned by the Worker's Watch team. The wire schema is open so the
-        shared read/update path stays generic; each Worker declares a closed schema for its own
-        extras (see the Watch-owned `*_watch_settings.schema.yaml` files) and the server validates
-        against that declaration, rejecting unknown or missing fields by name.
+        Worker-specific settings owned by the Worker's team. The wire schema is open so the shared
+        read/update path stays generic; each Worker declares a closed schema for its own extras
+        (see the `<worker>_settings.schema.yaml` files) and the server validates against that
+        declaration, rejecting unknown or missing fields by name.
 
     WorkerSettings:
       type: object

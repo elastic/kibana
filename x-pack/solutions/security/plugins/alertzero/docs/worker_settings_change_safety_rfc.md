@@ -66,10 +66,10 @@ Where each piece lives:
 
 | What | Where | Owner |
 |---|---|---|
-| Per-Worker settings schema: fields, bounds, allowed autonomy levels | `kbn-alertzero-common/impl/schemas/components/*_watch_settings.schema.yaml`, generated into `*.gen.ts` | Watch team |
-| Declaration: allowed levels, schedule default, extras defaults | `kbn-alertzero-common/impl/worker_settings/<watch>.ts` | Watch team |
+| Per-Worker settings schema: fields, bounds, allowed autonomy levels | `kbn-alertzero-common/impl/schemas/components/<worker>_settings.schema.yaml`, generated into `*.gen.ts` | Worker's team |
+| Declaration: allowed levels, schedule default, extras defaults | `kbn-alertzero-common/impl/worker_settings/<worker>.ts` | Worker's team |
 | Reading stored settings | `plugins/alertzero/server/managed_workflows/workers/worker_settings.ts` | CWL |
-| Per-Worker allowed levels and defaults, and the upgrade applied on read and render | `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts` | Watch team (values), CWL (upgrade) |
+| Per-Worker allowed levels and defaults, and the upgrade applied on read and render | `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts` | Worker's team (values), CWL (upgrade) |
 | Workflow YAML and render helpers | `kbn-workflows/managed/definitions/alertzero/` | Watch team (YAML), CWL (helpers) |
 | The guard added by this PR | `plugins/alertzero/server/managed_workflows/workers/fixtures/`, `test_helpers/`, `worker_settings_compat.test.ts` | CWL |
 

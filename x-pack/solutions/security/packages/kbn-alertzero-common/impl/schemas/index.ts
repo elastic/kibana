@@ -38,16 +38,19 @@ export {
   AnalysisWindowDays,
   FpCountThreshold,
   FpRateThresholdPct,
+  RuleTuningWorkerExtras,
+} from './components/rule_tuning_settings.gen';
+
+export {
   LookbackDays,
   MaxGapsPerRun,
   RuleCoverageWorkerExtras,
-  RuleTuningWorkerExtras,
-} from './components/detection_watch_settings.gen';
+} from './components/rule_coverage_settings.gen';
 
 export {
   AutoCloseConfidenceScoreMinThreshold,
   AlertTriageWorkerExtras,
-} from './components/floor_watch_settings.gen';
+} from './components/alert_triage_settings.gen';
 
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
