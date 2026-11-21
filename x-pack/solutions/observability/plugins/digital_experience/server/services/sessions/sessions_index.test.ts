@@ -20,8 +20,6 @@ import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fiel
 import { ENVIRONMENT_FIELDS } from '../../lib/otel/queries';
 import {
   createSessionsIndex,
-  hasFrustrationMappings,
-  putFrustrationMappings,
   putSessionsIndexTemplate,
   sessionsIndexMappings,
   sessionsIndexTemplate,
@@ -221,64 +219,6 @@ describe('sessions index', () => {
       client.indices.create.mockRejectedValue(error);
 
       await expect(createSessionsIndex(client)).rejects.toBe(error);
-    });
-  });
-
-  describe('frustration mappings', () => {
-    const mappingsOf = (properties: Record<string, object>) => ({
-      [SESSIONS_INDEX]: { mappings: { properties } },
-    });
-
-    it('are current once the index maps the frustration total', async () => {
-      const { signal } = new AbortController();
-      client.indices.getMapping.mockResolvedValue(
-        mappingsOf({ frustration_count: { type: 'long' } })
-      );
-
-      expect(await hasFrustrationMappings(client, signal)).toBe(true);
-      expect(client.indices.getMapping).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
-    });
-
-    it('are missing from an index that predates them', async () => {
-      client.indices.getMapping.mockResolvedValue(mappingsOf({ click_count: { type: 'long' } }));
-
-      expect(await hasFrustrationMappings(client)).toBe(false);
-    });
-
-    it('are missing from an index without any mapping', async () => {
-      client.indices.getMapping.mockResolvedValue({ [SESSIONS_INDEX]: { mappings: {} } });
-
-      expect(await hasFrustrationMappings(client)).toBe(false);
-    });
-
-    it('are put as the fields the summaries gained, which the index template also maps', async () => {
-      const { signal } = new AbortController();
-
-      await putFrustrationMappings(client, signal);
-
-      const {
-        rage_click_count,
-        dead_click_count,
-        error_click_count,
-        frustration_count,
-        frustration_targets,
-        frustration_pages,
-      } = sessionsIndexMappings.properties;
-      // The same mappings as the template's, so an index created later matches.
-      expect(client.indices.putMapping).toHaveBeenCalledWith(
-        {
-          index: SESSIONS_INDEX,
-          properties: {
-            rage_click_count,
-            dead_click_count,
-            error_click_count,
-            frustration_count,
-            frustration_targets,
-            frustration_pages,
-          },
-        },
-        { signal }
-      );
     });
   });
 });

@@ -59,7 +59,8 @@ export interface SessionDocument {
   has_replay?: boolean;
   /**
    * EDOT Browser frustration signals. Mapped without a `SESSIONS_VERSION` bump: summaries written
-   * before them have none, which readers take as 0 or empty.
+   * before them have none, which readers take as 0. An index created before them doesn't map them:
+   * delete it to have the task rebuild it (only pre-release setups have one).
    */
   rage_click_count?: number;
   dead_click_count?: number;
@@ -99,10 +100,6 @@ const MAX_KEYWORD_LENGTH = 1024;
 const keyword = { type: 'keyword', ignore_above: MAX_KEYWORD_LENGTH } as const;
 const count = { type: 'long' } as const;
 
-/**
- * Fields the summaries gained without a `SESSIONS_VERSION` bump. The index is `dynamic: false`,
- * so an index created before them needs these put, which `putFrustrationMappings` does.
- */
 const frustrationMappings = {
   rage_click_count: count,
   dead_click_count: count,
@@ -199,26 +196,4 @@ export const createSessionsIndex = async (
     }
     throw error;
   }
-};
-
-/** Whether the index maps the frustration fields, as one created after them does. */
-export const hasFrustrationMappings = async (
-  client: ElasticsearchClient,
-  signal?: AbortSignal
-): Promise<boolean> => {
-  const response = await client.indices.getMapping({ index: SESSIONS_INDEX }, { signal });
-  return Object.values(response).every(
-    ({ mappings }) => mappings.properties?.frustration_count !== undefined
-  );
-};
-
-/** Adds the frustration fields to the index, which keeps its other fields and documents. */
-export const putFrustrationMappings = async (
-  client: ElasticsearchClient,
-  signal?: AbortSignal
-): Promise<void> => {
-  await client.indices.putMapping(
-    { index: SESSIONS_INDEX, properties: frustrationMappings },
-    { signal }
-  );
 };

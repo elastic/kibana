@@ -18,8 +18,6 @@ import { SESSIONS_TASK_ID, SESSIONS_TASK_TYPE, SESSIONS_VERSION } from '../../..
 import { ESQL_DEFAULT_MAX_ROWS } from './esql_max_rows';
 import {
   createSessionsIndex,
-  hasFrustrationMappings,
-  putFrustrationMappings,
   putSessionsIndexTemplate,
   sessionsIndexExists,
 } from './sessions_index';
@@ -98,7 +96,6 @@ describe('runSessionsTask', () => {
     logger = loggingSystemMock.createLogger();
     jest.mocked(createSessionsIndex).mockResolvedValue(false);
     jest.mocked(sessionsIndexExists).mockResolvedValue(true);
-    jest.mocked(hasFrustrationMappings).mockResolvedValue(true);
     jest.mocked(summarizeSessions).mockResolvedValue(summarized);
   });
 
@@ -230,67 +227,6 @@ describe('runSessionsTask', () => {
       expect(state.caughtUp).toBe(false);
       // The template goes back first, or the new index would get dynamic mappings.
       expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
-    });
-
-    describe('an index that predates the frustration mappings', () => {
-      beforeEach(() => {
-        jest.mocked(hasFrustrationMappings).mockResolvedValue(false);
-      });
-
-      it('maps them once, and puts the template so that a later index has them', async () => {
-        const result = await run(caughtUpState);
-
-        expect(hasFrustrationMappings).toHaveBeenCalledWith(esClient, signal);
-        expect(putSessionsIndexTemplate).toHaveBeenCalledTimes(1);
-        expect(putSessionsIndexTemplate).toHaveBeenCalledWith(internalClient, signal);
-        expect(putFrustrationMappings).toHaveBeenCalledTimes(1);
-        expect(putFrustrationMappings).toHaveBeenCalledWith(internalClient, signal);
-        expect(summarizeSessions).toHaveBeenCalledWith(
-          expect.objectContaining({ checkpoint: caughtUpState.checkpoint })
-        );
-        expect(result.state.lastError).toBeNull();
-      });
-
-      it('puts the template once when it is also put for another reason', async () => {
-        jest.mocked(sessionsIndexExists).mockResolvedValue(false);
-
-        await run(caughtUpState);
-
-        expect(putSessionsIndexTemplate).toHaveBeenCalledTimes(1);
-        expect(putFrustrationMappings).toHaveBeenCalledTimes(1);
-      });
-
-      it('summarizes on when they cannot be mapped, which leaves the new fields unsearchable', async () => {
-        jest.mocked(putFrustrationMappings).mockRejectedValue(esError(403));
-
-        const { state } = await run(caughtUpState);
-
-        expect(summarizeSessions).toHaveBeenCalled();
-        expect(state.lastError).toBeNull();
-        expect(logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(
-            'Mapping the Digital Experience session frustration fields failed'
-          )
-        );
-      });
-
-      it('leaves a new index to the template it was created from', async () => {
-        jest.mocked(sessionsIndexExists).mockResolvedValue(false);
-        jest.mocked(createSessionsIndex).mockResolvedValue(true);
-
-        await run(caughtUpState);
-
-        expect(hasFrustrationMappings).not.toHaveBeenCalled();
-        expect(putFrustrationMappings).not.toHaveBeenCalled();
-      });
-    });
-
-    it('maps nothing when the index has the frustration mappings', async () => {
-      await run(caughtUpState);
-
-      expect(hasFrustrationMappings).toHaveBeenCalledWith(esClient, signal);
-      expect(putFrustrationMappings).not.toHaveBeenCalled();
-      expect(putSessionsIndexTemplate).not.toHaveBeenCalled();
     });
 
     it('stays caught up when one run falls behind, and runs again right away', async () => {
