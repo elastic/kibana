@@ -149,8 +149,8 @@ export const sampleRules: ReferenceRule[] = [
   process.args : "Set-MpPreference" and process.args : "-Disable*"`,
     threat: [
       {
-        technique: 'T1562.001',
-        tactic: 'TA0005',
+        technique: 'T1685',
+        tactic: 'TA0112',
         subtechnique: 'Disable or Modify Tools',
       },
     ],
@@ -254,8 +254,8 @@ export const sampleRules: ReferenceRule[] = [
   )`,
     threat: [
       {
-        technique: 'T1070.001',
-        tactic: 'TA0005',
+        technique: 'T1685.005',
+        tactic: 'TA0112',
         subtechnique: 'Clear Windows Event Logs',
       },
     ],
