@@ -276,23 +276,23 @@ describe('Dropbox', () => {
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_shared_link',
         arguments: {
-          path: '/Documents/report.pdf',
-          visibility: 'team_only',
+          path_or_file_id: '/Documents/report.pdf',
+          audience: 'team',
         },
       });
     });
 
-    it('passes custom visibility', async () => {
+    it('maps public visibility onto the public link audience', async () => {
       await Dropbox.actions.createSharedLink.handler(mockContext, {
         path: '/Confidential/budget.xlsx',
-        visibility: 'team_only',
+        visibility: 'public',
       });
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'create_shared_link',
         arguments: {
-          path: '/Confidential/budget.xlsx',
-          visibility: 'team_only',
+          path_or_file_id: '/Confidential/budget.xlsx',
+          audience: 'public',
         },
       });
     });
