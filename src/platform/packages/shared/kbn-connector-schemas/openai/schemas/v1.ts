@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { z, lazySchema } from '@kbn/zod/v4';
-import { DEFAULT_MODEL, OpenAiProviderType } from '../constants';
+import { DEFAULT_MODEL, EXTRA_BODY_PROTECTED_KEYS, OpenAiProviderType } from '../constants';
 
 export const TelemetryMetadataSchema = lazySchema(() =>
   z
@@ -16,6 +16,20 @@ export const TelemetryMetadataSchema = lazySchema(() =>
       aggregateBy: z.string().optional(),
     })
     .strict()
+);
+
+export const ExtraBodySchema = lazySchema(() =>
+  z.record(z.string(), z.unknown()).superRefine((extraBody, ctx) => {
+    const protectedKeys = Object.keys(extraBody).filter((key) =>
+      (EXTRA_BODY_PROTECTED_KEYS as readonly string[]).includes(key)
+    );
+    if (protectedKeys.length > 0) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `extraBody must not set ${protectedKeys.join(', ')}`,
+      });
+    }
+  })
 );
 
 // Connector schema
@@ -55,6 +69,7 @@ export const ConfigSchema = lazySchema(() =>
           contextWindowLength: z.coerce.number().optional(),
           temperature: z.coerce.number().optional(),
           enableNativeFunctionCalling: z.boolean().optional(),
+          extraBody: ExtraBodySchema.optional(),
         })
         .strict(),
     ],

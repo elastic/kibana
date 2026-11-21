@@ -14,6 +14,7 @@ import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FilePickerField,
   SelectField,
+  TextAreaField,
   TextField,
   ToggleField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
@@ -49,6 +50,8 @@ import {
   openAiConfig,
 } from './constants';
 import { CRT_REQUIRED, KEY_REQUIRED } from '../../common/auth/translations';
+import { OptionalFieldLabel } from '../../common/genai_connectors';
+import { extraBodyDeserializer, extraBodySerializer, extraBodyValidator } from './extra_body';
 
 interface OpenAIConnectorFormData extends ConnectorFormSchema<Config, Secrets> {
   __internal__?: {
@@ -149,6 +152,26 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
               euiFieldProps: {
                 disabled: readOnly,
                 'data-test-subj': 'config.enableNativeFunctionCallingSwitch',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.extraBody"
+            component={TextAreaField}
+            config={{
+              label: i18n.EXTRA_BODY_LABEL,
+              helpText: i18n.EXTRA_BODY_HELP_TEXT,
+              serializer: extraBodySerializer,
+              deserializer: extraBodyDeserializer,
+              validations: [{ validator: extraBodyValidator }],
+            }}
+            componentProps={{
+              labelAppend: OptionalFieldLabel,
+              euiFieldProps: {
+                readOnly,
+                rows: 4,
+                'data-test-subj': 'config.extraBodyInput',
               },
             }}
           />
