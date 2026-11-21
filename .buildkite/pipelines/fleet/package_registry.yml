@@ -144,6 +144,46 @@ steps:
         - exit_status: '-1'
           limit: 1
 
+  # Live Elastic Defend enrollment (Docker Fleet Server + Endpoint VM). Excluded
+  # from the generic Scout lanes (scout_ci_config.yml excluded_configs), so it
+  # needs its own steps here. Each step boots its own stack and runs the UI
+  # config first, then the API config.
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh stateful
+    label: 'Scout EDR Real Fleet'
+    key: scout-edr-real-fleet-stateful
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+    timeout_in_minutes: 120
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/test/scout_edr_real_fleet.sh serverless
+    label: 'Scout EDR Real Fleet on Serverless'
+    key: scout-edr-real-fleet-serverless
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      enableNestedVirtualization: true
+      machineType: n2-highmem-4
+    timeout_in_minutes: 120
+    depends_on: build
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
   - command: |
       echo "--- Promoting base image to temp..."
       docker buildx imagetools create -t "$PACKAGE_REGISTRY_TEMP_IMAGE" "$PACKAGE_REGISTRY_BASE_IMAGE"
@@ -161,6 +201,8 @@ steps:
       - defend-workflows-serverless
       - osquery-cypress-stateful
       - osquery-cypress-serverless
+      - scout-edr-real-fleet-stateful
+      - scout-edr-real-fleet-serverless
       - scout_test_lanes
     if: "build.branch == 'main'"
     retry:
