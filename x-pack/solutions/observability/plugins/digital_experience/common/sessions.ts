@@ -6,6 +6,7 @@
  */
 
 import type { CoreWebVital } from './core_web_vitals';
+import type { FrustrationCounts } from './frustration';
 import { OTEL_LOGS_INDEX, OTEL_TRACES_INDEX } from './otel_data';
 
 /**
@@ -59,6 +60,8 @@ export const SESSIONS_JOURNEY_SIZE = 10;
  * URLs that differ only in their query or hash collapse into one page.
  */
 export const SESSIONS_JOURNEY_URL_CANDIDATES = 3 * SESSIONS_JOURNEY_SIZE;
+/** Most frustrated element selectors and page paths kept per session, for the Overview to filter the sessions list on. */
+export const SESSIONS_FRUSTRATION_VALUES = 20;
 
 export const SESSION_SORT_FIELDS = [
   'start_time',
@@ -67,6 +70,7 @@ export const SESSION_SORT_FIELDS = [
   'click_count',
   'js_error_count',
   'http_failed_request_count',
+  'frustration_count',
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
@@ -177,6 +181,7 @@ export interface SessionSummary {
   jsErrorCount: number;
   httpRequestCount: number;
   failedRequestCount: number;
+  frustration: FrustrationCounts;
   bounced: boolean;
   entryPage: string | null;
   exitPage: string | null;
@@ -207,6 +212,7 @@ export interface SessionListKpis {
   bounceRate: number | null;
   sessionsWithJsErrors: number;
   sessionsWithFailedRequests: number;
+  sessionsWithFrustration: number;
   webVitals: SessionWebVitals;
 }
 
@@ -222,7 +228,12 @@ export interface SessionListResponse {
 }
 
 /** The events the journey lists; the API leaves out all others, which Discover shows. */
-export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
+export type SessionTimelineEventKind =
+  | 'page_view'
+  | 'click'
+  | 'error'
+  | 'web_vital'
+  | 'frustration';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
@@ -300,6 +311,7 @@ export interface SessionPageVisit {
   durationMs: number;
   clickCount: number;
   errorCount: number;
+  frustrationCount: number;
   webVitals: SessionWebVitals;
   /** Set on a visit that loaded the page document, rather than an in-app navigation. */
   load: SessionPageLoad | null;

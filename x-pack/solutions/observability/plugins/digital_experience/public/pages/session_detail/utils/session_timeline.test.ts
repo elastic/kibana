@@ -24,6 +24,7 @@ const visit = (page: string, startMs: number, durationMs: number): SessionPageVi
   durationMs,
   clickCount: 0,
   errorCount: 0,
+  frustrationCount: 0,
   webVitals: emptyWebVitals(),
   load: null,
 });

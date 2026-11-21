@@ -13,6 +13,7 @@ import type { MemoryHistory } from 'history';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { emptyFrustration } from '../../../common/frustration';
 import {
   emptyWebVitals,
   type SessionListResponse,
@@ -82,6 +83,7 @@ const session = (overrides: Partial<SessionSummary> = {}): SessionSummary => ({
   jsErrorCount: 2,
   httpRequestCount: 12,
   failedRequestCount: 1,
+  frustration: emptyFrustration(),
   bounced: false,
   entryPage: '/',
   exitPage: '/cart',
@@ -113,6 +115,7 @@ const listResponse = (overrides: Partial<SessionListResponse> = {}): SessionList
     bounceRate: 0.2,
     sessionsWithJsErrors: 4,
     sessionsWithFailedRequests: 2,
+    sessionsWithFrustration: 0,
     webVitals: emptyWebVitals(),
   },
   ...overrides,

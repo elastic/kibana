@@ -262,6 +262,7 @@ export const buildPageVisits = (
         durationMs: 0,
         clickCount: 0,
         errorCount: 0,
+        frustrationCount: 0,
         webVitals: emptyWebVitals(),
         load: null,
       };

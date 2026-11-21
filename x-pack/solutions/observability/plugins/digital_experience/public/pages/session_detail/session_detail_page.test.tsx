@@ -15,6 +15,7 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { emptyFrustration } from '../../../common/frustration';
 import {
   emptyWebVitals,
   type SessionDetailResponse,
@@ -106,6 +107,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
     jsErrorCount: 1,
     httpRequestCount: 8,
     failedRequestCount: 2,
+    frustration: emptyFrustration(),
     bounced: false,
     entryPage: '/',
     exitPage: '/cart',
@@ -139,6 +141,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       durationMs: 30_000,
       clickCount: 1,
       errorCount: 0,
+      frustrationCount: 0,
       webVitals: { ...emptyWebVitals(), lcp: 1800 },
       load: {
         navigationStart: START,
@@ -155,6 +158,7 @@ const detail = (overrides: Partial<SessionDetailResponse> = {}): SessionDetailRe
       durationMs: 30_000,
       clickCount: 0,
       errorCount: 1,
+      frustrationCount: 0,
       webVitals: { ...emptyWebVitals(), cls: 0.3 },
       load: null,
     },

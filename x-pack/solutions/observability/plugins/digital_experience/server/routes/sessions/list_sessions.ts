@@ -12,6 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { CORE_WEB_VITALS, type CoreWebVital } from '../../../common/core_web_vitals';
+import { emptyFrustration } from '../../../common/frustration';
 import {
   SESSIONS_INDEX_PATTERN,
   SESSIONS_LOOKBACK_DAYS,
@@ -219,6 +220,7 @@ export const toSessionSummary = (doc: StoredSessionDocument): SessionSummary => 
     jsErrorCount: numberOr(doc.js_error_count, 0),
     httpRequestCount: numberOr(doc.http_request_count, 0),
     failedRequestCount: numberOr(doc.http_failed_request_count, 0),
+    frustration: emptyFrustration(),
     bounced: doc.bounced ?? pageViewCount === 1,
     entryPage: stringOrNull(doc.entry_page),
     exitPage: stringOrNull(doc.exit_page),
@@ -295,6 +297,7 @@ export const parseListSessionsResponse = (
         sessionsWithPageViews > 0 ? (kpis?.bounced.doc_count ?? 0) / sessionsWithPageViews : null,
       sessionsWithJsErrors: kpis?.with_js_errors.doc_count ?? 0,
       sessionsWithFailedRequests: kpis?.with_failed_requests.doc_count ?? 0,
+      sessionsWithFrustration: 0,
       webVitals,
     },
   };

@@ -9,6 +9,7 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ENVIRONMENT_ALL_VALUE, ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { omit } from 'lodash';
+import { emptyFrustration } from '../../../common/frustration';
 import { SESSIONS_INDEX_PATTERN, SESSIONS_LOOKBACK_DAYS } from '../../../common/sessions';
 import {
   buildListSessionsRequest,
@@ -254,6 +255,7 @@ describe('toSessionSummary', () => {
       jsErrorCount: 2,
       httpRequestCount: 12,
       failedRequestCount: 1,
+      frustration: emptyFrustration(),
       bounced: false,
       entryPage: '/',
       exitPage: '/cart',
@@ -280,6 +282,7 @@ describe('toSessionSummary', () => {
       jsErrorCount: 0,
       httpRequestCount: 0,
       failedRequestCount: 0,
+      frustration: emptyFrustration(),
       bounced: false,
       entryPage: null,
       exitPage: null,
@@ -356,6 +359,7 @@ describe('parseListSessionsResponse', () => {
         bounceRate: 0.5,
         sessionsWithJsErrors: 5,
         sessionsWithFailedRequests: 7,
+        sessionsWithFrustration: 0,
         webVitals: { lcp: 2100, inp: null, cls: null, fcp: null, ttfb: null },
       },
     });
@@ -423,6 +427,7 @@ describe('parseListSessionsResponse', () => {
         bounceRate: null,
         sessionsWithJsErrors: 0,
         sessionsWithFailedRequests: 0,
+        sessionsWithFrustration: 0,
         webVitals: { lcp: null, inp: null, cls: null, fcp: null, ttfb: null },
       },
     });
