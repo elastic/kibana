@@ -60,11 +60,18 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
   return callbacks?.[name] !== undefined;
 }
 
-/** Returns the LETs the main query reads with FROM, directly or through other LETs. */
+/**
+ * Returns the LETs the main query reads with FROM, directly or through other LETs,
+ * in declaration order.
+ */
 const getUsedNamedSubqueries = (
   rootCommands: ESQLCommand[],
   namedSubqueries: NamedSubquery[]
-): Set<NamedSubquery> => {
+): NamedSubquery[] => {
+  if (namedSubqueries.length === 0) {
+    return [];
+  }
+
   const used = new Set<NamedSubquery>();
   const pending: Array<{ commands: ESQLCommand[]; available: readonly NamedSubquery[] }> = [
     { commands: rootCommands, available: namedSubqueries },
@@ -91,30 +98,7 @@ const getUsedNamedSubqueries = (
     }
   }
 
-  return used;
-};
-
-/**
- * True when the query reads a LET and uses METADATA, in the main query or in a LET it reads.
- * We can't know every METADATA column Elasticsearch adds in this case, so we let it do the check.
- */
-const readsNamedSubqueryWithMetadata = (
-  rootCommands: ESQLCommand[],
-  namedSubqueries: NamedSubquery[]
-): boolean => {
-  if (namedSubqueries.length === 0) {
-    return false;
-  }
-
-  const usedNamedSubqueries = [...getUsedNamedSubqueries(rootCommands, namedSubqueries)];
-
-  if (usedNamedSubqueries.length === 0) {
-    return false;
-  }
-
-  const commands = [...rootCommands, ...usedNamedSubqueries.flatMap(({ query }) => query.commands)];
-
-  return Walker.matchAll(commands, { type: 'option', name: 'metadata' }).length > 0;
+  return namedSubqueries.filter((namedSubquery) => used.has(namedSubquery));
 };
 
 /**
@@ -151,18 +135,33 @@ async function validateAst(
   // The LET bindings of the header; empty when the query has none.
   const namedSubqueries = getNamedSubqueries(headerCommands);
 
-  // Only Elasticsearch can validate these queries semantically.
-  if (readsNamedSubqueryWithMetadata(rootCommands, namedSubqueries)) {
-    return { errors: parserErrors, warnings: [] };
-  }
+  const usedNamedSubqueries = getUsedNamedSubqueries(rootCommands, namedSubqueries);
 
+  // The main query and the body of every LET it reads, which Elasticsearch analyzes like the main
+  // query. A LET body sees the SET commands and the LETs declared before it.
+  const pipelines = [
+    { commands: rootCommands, header: headerCommands },
+    ...usedNamedSubqueries.map(({ command, query }) => ({
+      commands: query.commands,
+      header: headerCommands.slice(0, headerCommands.indexOf(command)),
+    })),
+  ];
+
+  // Look up indices and policies in every pipeline: in `LET a = (FROM logs); ROW x = 1 | WHERE x IN
+  // (FROM a)` only the body of `a` reads an index.
   const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
     await Promise.all([
       shouldValidateCallback(callbacks, 'getSources')
-        ? retrieveSources(rootCommands, callbacks)
+        ? retrieveSources(
+            pipelines.flatMap(({ commands }) => commands),
+            callbacks
+          )
         : new Set<string>(),
       shouldValidateCallback(callbacks, 'getPolicies')
-        ? retrievePolicies(rootCommands, callbacks)
+        ? retrievePolicies(
+            pipelines.flatMap(({ commands }) => commands),
+            callbacks
+          )
         : new Map(),
       shouldValidateCallback(callbacks, 'getJoinIndices')
         ? callbacks?.getJoinIndices?.()
@@ -212,8 +211,15 @@ async function validateAst(
    * The reason is that building the list of columns available in each command requires
    * the full command subsequence that precedes that command.
    */
-  const subqueries = getSubqueriesToValidate(rootCommands, headerCommands);
-  for (const subquery of subqueries) {
+  // Each subquery keeps the commands of its pipeline, which its command is validated against.
+  const subqueries = pipelines.flatMap(({ commands, header }) =>
+    getSubqueriesToValidate(commands, header).map((subquery) => ({
+      subquery,
+      pipelineCommands: commands,
+    }))
+  );
+
+  for (const { subquery, pipelineCommands } of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
@@ -249,7 +255,7 @@ async function validateAst(
     const commandMessages = validateCommand(
       currentCommand,
       references,
-      currentCommand.name === 'fork' ? subquery.commands : rootCommands,
+      currentCommand.name === 'fork' ? subquery.commands : pipelineCommands,
       isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,

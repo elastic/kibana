@@ -33,7 +33,7 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
             'LET other_index = (FROM index | KEEP keywordField); FROM index | WHERE keywordField IN (FROM other_index)',
         },
         {
-          name: 'a LET overwriting an EVAL column in a tuple IN subquery',
+          name: 'a tuple IN subquery that reads a LET where EVAL overwrites a ROW column',
           query:
             'LET a = (ROW i = 1, s = "a" | EVAL i = 2); ROW x = 2, y = "a" | WHERE (y, x) IN (FROM a)',
         },
@@ -50,6 +50,54 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
       });
     });
 
+    it.each([
+      { name: 'Abc', query: 'LET Abc = (ROW TEST = 1); ROW TEST = 2' },
+      { name: 'ABC', query: 'LET ABC = (ROW TEST = 1); FROM ABC | KEEP TEST' },
+    ])('rejects the non-lowercase LET name $name', async ({ name, query }) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(query, [`LET binding name "${name}" must be lowercase`]);
+    });
+
+    it('rejects a repeated LET declaration', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('LET a = (ROW x = 1); LET a = (ROW x = 2); ROW x = 3', [
+        'Duplicate LET binding name "a"',
+      ]);
+    });
+
+    it.each([
+      { name: 'a later LET', query: 'LET a = (FROM b); LET b = (ROW x = 1); FROM a', ref: 'b' },
+      { name: 'a later LET in TS', query: 'LET a = (TS b); LET b = (ROW k = 1); FROM a', ref: 'b' },
+      {
+        name: 'a later LET in LOOKUP JOIN',
+        query: 'LET a = (ROW k = 1 | LOOKUP JOIN b ON k); LET b = (ROW k = 1); FROM a',
+        ref: 'b',
+      },
+      {
+        name: 'itself, even with an index of the same name',
+        query: 'LET index = (FROM index); FROM index',
+        ref: 'index',
+      },
+      {
+        name: 'a later LET from an unused LET',
+        query: 'LET a = (FROM b); LET b = (ROW x = 1); ROW y = 1',
+        ref: 'b',
+      },
+      {
+        name: 'a later LET inside a FROM subquery',
+        query: 'LET a = (FROM index, (FROM b)); LET b = (ROW x = 1); FROM a',
+        ref: 'b',
+      },
+    ])('rejects a LET body that reads $name', async ({ query, ref }) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(query, [
+        `Forward reference in LET bindings: "${ref}" cannot be referenced before its declaration`,
+      ]);
+    });
+
     it.each(['LET a = (ROW x = 1); TS a', 'LET index = (ROW x = 1); TS index'])(
       'does not treat a LET binding as an index for TS: %s',
       async (query) => {
@@ -59,34 +107,16 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
       }
     );
 
+    it.each(['a', 'lookup_index'])('rejects LET %s as the LOOKUP JOIN target', async (name) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(`LET ${name} = (ROW k = 1); ROW k = 1 | LOOKUP JOIN ${name} ON k`, [
+        'Subqueries are not supported in LOOKUP JOIN',
+      ]);
+    });
+
     describe('METADATA', () => {
-      it.each([
-        {
-          name: 'on a LET without indices',
-          query: 'LET a = (ROW value = 1); FROM a METADATA _id | KEEP missingField',
-        },
-        {
-          name: 'in a LET read through another LET',
-          query: 'LET a = (FROM index METADATA _id); LET b = (FROM a); FROM b | KEEP missingField',
-        },
-        {
-          name: 'in a LET body read before FUSE',
-          query:
-            'LET a = (FROM index METADATA _id, _index, _score); FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE',
-        },
-        {
-          name: 'in a LET read by an IN subquery',
-          query:
-            'LET a = (FROM index METADATA _id | KEEP _id); ROW x = "a" | WHERE x IN (FROM a) | KEEP missingField',
-        },
-      ])('leaves the semantic validation to Elasticsearch $name', async ({ query }) => {
-        const { expectErrors, callbacks } = await setup();
-
-        await expectErrors(query, [], []);
-        expect(callbacks.getColumnsFor).not.toHaveBeenCalled();
-      });
-
-      it('keeps syntax errors', async () => {
+      it('reports an error for an incomplete LIMIT after FROM with METADATA', async () => {
         const { validate } = await setup();
 
         const { errors } = await validate('LET a = (ROW x = 1); FROM a METADATA _id | LIMIT');
@@ -96,26 +126,95 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
 
       it.each([
         {
-          name: 'without LET bindings',
+          name: 'a duplicate LET name',
+          query: 'LET a = (ROW x = 1); LET a = (ROW x = 2); FROM a METADATA _id',
+          error: 'Duplicate LET binding name "a"',
+        },
+        {
+          name: 'a forward reference',
+          query: 'LET a = (FROM b METADATA _id); LET b = (ROW x = 1); FROM a',
+          error:
+            'Forward reference in LET bindings: "b" cannot be referenced before its declaration',
+        },
+      ])('reports $name when the query uses METADATA', async ({ query, error }) => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(query, [error]);
+      });
+
+      it.each([
+        {
+          name: 'FROM requests METADATA from a LET without indices',
+          query: 'LET a = (ROW value = 1); FROM a METADATA _id | KEEP missingField',
+        },
+        {
+          name: 'one LET reads another LET with METADATA',
+          query: 'LET a = (FROM index METADATA _id); LET b = (FROM a); FROM b | KEEP missingField',
+        },
+        {
+          name: 'an IN subquery reads a LET with METADATA',
+          query:
+            'LET a = (FROM index METADATA _id | KEEP _id); ROW x = "a" | WHERE x IN (FROM a) | KEEP missingField',
+        },
+        {
+          name: 'FROM requests METADATA without a LET',
           query: 'FROM index METADATA * | KEEP missingField',
         },
         {
-          name: 'next to an unused LET',
+          name: 'FROM requests METADATA alongside an unused LET',
           query: 'LET a = (ROW x = 1); FROM index METADATA _id | KEEP missingField',
         },
         {
-          name: 'when only an unused LET has METADATA',
+          name: 'only an unused LET requests METADATA',
           query:
             'LET a = (ROW x = 1); LET unused = (FROM index METADATA _id); FROM a | KEEP missingField',
         },
-      ])('keeps the column validation $name', async ({ query }) => {
+      ])('reports an unknown KEEP column when $name', async ({ query }) => {
         const { expectErrors } = await setup();
 
         await expectErrors(query, ['Unknown column "missingField"']);
       });
     });
 
-    it('keeps validating columns against the columns of a LET binding', async () => {
+    it('ignores an unknown column inside an unused LET', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('LET a = (ROW x = 1 | KEEP missing); ROW y = 2', []);
+    });
+
+    it('reports an unknown column inside a LET read by FROM', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('LET a = (ROW x = 1 | KEEP missing); FROM a', [
+        'Unknown column "missing"',
+      ]);
+    });
+
+    it('reports an unknown column in an EVAL expression inside a LET read by FROM', async () => {
+      const { expectErrors } = await setup();
+
+      await expectErrors('LET a = (ROW x = 1 | EVAL y = missing + 1); FROM a', [
+        'Unknown column "missing"',
+      ]);
+    });
+
+    it.each([
+      {
+        name: 'an index read by a LET when the main query starts with ROW',
+        query:
+          'LET a = (FROM index | KEEP integerField); ROW x = 1 | WHERE x IN (FROM a | KEEP integerField)',
+      },
+      {
+        name: 'an ENRICH policy used only in a LET',
+        query: 'LET a = (FROM index | ENRICH policy); FROM a',
+      },
+    ])('accepts $name', async ({ query }) => {
+      const { expectErrors } = await setup();
+
+      await expectErrors(query, []);
+    });
+
+    it('rejects a column excluded by KEEP in the referenced LET', async () => {
       const { expectErrors } = await setup();
 
       await expectErrors('LET a = (FROM index | KEEP keywordField); FROM a | KEEP doubleField', [
