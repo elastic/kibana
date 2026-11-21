@@ -118,7 +118,9 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
       const optionalTechniques = new Set(expected.optionalMitreIds ?? []);
 
       // Optional techniques are credited, never required: including one must not be punished as a
-      // false positive, and omitting one must not be punished as a miss.
+      // false positive, and omitting one must not be punished as a miss. "Including one" means the
+      // whole family: the schema cannot express a sub-technique without its parent, and a sub of
+      // an optional parent is strictly more specific than the tag the dataset blessed.
       //
       // Exception: an optional technique that is the *parent* of a required sub-technique (e.g.
       // T1078 when T1078.001 is required) must be kept in the scored set so ordinalMitreF1 can
@@ -128,10 +130,21 @@ export const createMitreAccuracyEvaluator = (): RuleEvaluator =>
       const expectedParentsOfRequired = new Set(
         [...expectedTechniques].map(parentTechniqueId).filter((p): p is string => p != null)
       );
+      const isNeutralOptionalTag = (t: string): boolean => {
+        if (optionalTechniques.has(t)) return !expectedParentsOfRequired.has(t);
+        const parent = parentTechniqueId(t);
+        if (parent != null) {
+          return optionalTechniques.has(parent) && !expectedParentsOfRequired.has(parent);
+        }
+        return (
+          !expectedTechniques.has(t) &&
+          [...generatedTechniques].some(
+            (s) => parentTechniqueId(s) === t && optionalTechniques.has(s)
+          )
+        );
+      };
       const scoredTechniques = new Set(
-        [...generatedTechniques].filter(
-          (t) => !optionalTechniques.has(t) || expectedParentsOfRequired.has(t)
-        )
+        [...generatedTechniques].filter((t) => !isNeutralOptionalTag(t))
       );
 
       // Ordinal F1: exact sub-technique = 1, parent-without-sub = 0.5. An

@@ -214,6 +214,73 @@ describe('createMitreAccuracyEvaluator', () => {
       expect(result.score).toBeLessThan(1);
     });
   });
+
+  describe('optional families (sub-technique under an optional parent)', () => {
+    const nestedRule = (techniques: Array<{ id: string; subtechnique?: Array<{ id: string }> }>) =>
+      makeRule({ threat: [{ technique: techniques }] });
+
+    it('is neutral when a sub-technique of an optional parent is tagged', async () => {
+      // hard-t1609 shape: T1609 required; T1059 optional; model tags T1059.004.
+      const result = await evaluator.evaluate(
+        makeArgs(
+          nestedRule([{ id: 'T1609' }, { id: 'T1059', subtechnique: [{ id: 'T1059.004' }] }]),
+          {
+            mitreIds: ['T1609'],
+            optionalMitreIds: ['T1611', 'T1059', 'T1053'],
+          }
+        )
+      );
+      expect(result.metadata).toMatchObject({ precision: 1, recall: 1 });
+      expect(result.score).toBe(1);
+    });
+
+    it('is neutral when a parent is co-tagged alongside a present optional sub', async () => {
+      // gap-t1027 shape: T1027 required; T1059.001 optional; the schema cannot
+      // express the sub without the parent, so the parent tag is structural.
+      const result = await evaluator.evaluate(
+        makeArgs(
+          nestedRule([{ id: 'T1027' }, { id: 'T1059', subtechnique: [{ id: 'T1059.001' }] }]),
+          { mitreIds: ['T1027'], optionalMitreIds: ['T1140', 'T1059.001'] }
+        )
+      );
+      expect(result.score).toBe(1);
+    });
+
+    it('still penalises a wrong member of the graded family', async () => {
+      // gap-t1053-005 shape: T1053.005 required; T1053 optional. A sibling
+      // sub-technique (.003) is a near-miss on the technique being measured,
+      // not a detail of an optional tag — it must keep its penalty.
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1053', subtechnique: [{ id: 'T1053.003' }] }]), {
+          mitreIds: ['T1053.005'],
+          optionalMitreIds: ['T1053'],
+        })
+      );
+      expect(result.metadata).toMatchObject({ recall: 0.5 });
+      expect(result.score).toBeLessThan(1);
+    });
+
+    it('keeps the parent near-miss credit when only the parent of a required sub is tagged', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1053', subtechnique: [] }]), {
+          mitreIds: ['T1053.005'],
+          optionalMitreIds: ['T1053'],
+        })
+      );
+      expect(result.metadata).toMatchObject({ precision: 0.5, recall: 0.5 });
+      expect(result.score).toBe(0.5);
+    });
+
+    it('scores 0, not NaN, when only optional-family tags are present', async () => {
+      const result = await evaluator.evaluate(
+        makeArgs(nestedRule([{ id: 'T1059', subtechnique: [{ id: 'T1059.004' }] }]), {
+          mitreIds: ['T1609'],
+          optionalMitreIds: ['T1059'],
+        })
+      );
+      expect(result.score).toBe(0);
+    });
+  });
 });
 
 describe('createSeverityValidityEvaluator', () => {
