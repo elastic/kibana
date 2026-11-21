@@ -644,7 +644,8 @@ export class InvestigationsService {
     const counter = await this.es.update<{ value: number }, unknown, { value: number }>({
       index: INVESTIGATION_CONFIG_INDEX,
       id: `display_counter:${this.deps.spaceId}`,
-      retry_on_conflict: 10,
+      // One hot document under concurrent creates: retry generously rather than fail the create.
+      retry_on_conflict: 100,
       refresh: false,
       _source: true,
       scripted_upsert: true,
