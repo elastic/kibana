@@ -182,7 +182,6 @@ export const PerOsPolicySettingsForm = memo(
         <AdvancedSection
           {...commonProps}
           omitKeys={OMITTED_ADVANCED_KEYS}
-          fullWidthToggle
           data-test-subj={getTestId('advancedSection')}
         />
       </div>
