@@ -480,11 +480,15 @@ const dataLayerToExpression = (
 
   const xAxisOperation = datasourceLayer?.getOperationForColumnId(layer.xAccessor);
 
+  // Number range buckets (e.g. ES|QL BUCKET over a histogram field) are drawn as a histogram of their lower bounds
+  const isXRange = xAxisOperation?.dataType === 'number_range';
+
   const isHistogramDimension = Boolean(
-    xAxisOperation &&
-      xAxisOperation.isBucketed &&
-      xAxisOperation.scale &&
-      xAxisOperation.scale !== 'ordinal'
+    isXRange ||
+      (xAxisOperation &&
+        xAxisOperation.isBucketed &&
+        xAxisOperation.scale &&
+        xAxisOperation.scale !== 'ordinal')
   );
 
   const dataFromType = layer.seriesType.split('_');
@@ -504,10 +508,9 @@ const dataLayerToExpression = (
     layerId: layer.layerId,
     simpleView: Boolean(layer.simpleView),
     xAccessor: layer.xAccessor,
-    xScaleType: getScaleType(
-      metadata[layer.layerId][layer.xAccessor],
-      ScaleType.Linear
-    ) as XScaleType,
+    xScaleType: (isXRange
+      ? ScaleType.Linear
+      : getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)) as XScaleType,
     isHistogram: isHistogramDimension,
     isPercentage,
     isStacked,
