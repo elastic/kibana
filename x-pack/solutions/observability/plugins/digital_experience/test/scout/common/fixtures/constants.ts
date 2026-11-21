@@ -75,6 +75,23 @@ export const OTEL_SHOP_USAGE = {
     { cssSelector: '.nav-link', tagName: 'A', count: 1 },
   ],
   totalClicks: 4,
+  // The frustration documents are not clicks: they add to `frustration` and not to `totalClicks`.
+  frustration: { rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  frustratedElements: [
+    {
+      cssSelector: '#pay',
+      tagName: 'BUTTON',
+      rageClicks: 1,
+      deadClicks: 1,
+      errorClicks: 0,
+      total: 2,
+      sessions: 1,
+      topPage: '/products',
+    },
+  ],
+  frustratedPages: [
+    { page: '/products', rageClicks: 1, deadClicks: 1, errorClicks: 0, total: 2, sessions: 1 },
+  ],
 } as const;
 
 /** The Errors tab of `OTEL_APPS.shop` inside `TIME_RANGE`. */

@@ -61,6 +61,32 @@ test.describe(
       await expect(digitalExperience.otelOverviewTopClicks).toContainText('#add-to-cart');
     });
 
+    test('lists the frustrated elements, linking to the sessions that hit them', async ({
+      page,
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+
+      const [element] = testData.OTEL_SHOP_USAGE.frustratedElements;
+      await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
+        `${element.rageClicks} rage`
+      );
+      await expect(digitalExperience.frustrationRow(element.cssSelector)).toContainText(
+        `${element.deadClicks} dead`
+      );
+
+      await digitalExperience.frustrationSessionsLink(element.cssSelector).click();
+
+      await expect(page).toHaveURL(/\/otel-shop\/sessions/);
+      await expect(page).toHaveURL(/withFrustration=true/);
+      await expect(page).toHaveURL(
+        new RegExp(`frustrationTarget=${encodeURIComponent(element.cssSelector)}`)
+      );
+    });
+
     test('shows the top errors on the Overview, linked to the Errors tab', async ({
       page,
       pageObjects: { digitalExperience },

@@ -10,6 +10,7 @@ import { test } from '../fixtures';
 import {
   DETAILED_SESSION,
   FIREFOX_SESSIONS,
+  FRUSTRATED_SESSION,
   SESSION_COUNT,
   SESSIONS_APP,
   SESSIONS_TIME_RANGE,
@@ -88,6 +89,26 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
       );
       await expect(page).toHaveURL(/search=jane/);
     });
+  });
+
+  test('counts the frustrated sessions, and keeps only them with the Frustrated filter', async ({
+    page,
+    pageObjects: { digitalExperience },
+  }) => {
+    await digitalExperience.gotoSessions(SESSIONS_APP, { perPage: '10' }, SESSIONS_TIME_RANGE);
+
+    // The count and its share of the sessions run together in the text, so the count is not exact.
+    await expect(digitalExperience.sessionsKpi('withFrustration')).toContainText(
+      /Frustrated sessions\s*[1-9]/
+    );
+    await expect(digitalExperience.sessionsKpi('total')).toContainText(String(SESSION_COUNT));
+
+    await digitalExperience.sessionsFrustrationFilter.click();
+
+    await expect(digitalExperience.sessionsTable.rows).toHaveCount(1);
+    await expect(digitalExperience.sessionsKpi('total')).toContainText(/^Sessions\s*1$/);
+    await expect(digitalExperience.sessionRow(FRUSTRATED_SESSION.id)).toBeVisible();
+    await expect(page).toHaveURL(/withFrustration=true/);
   });
 
   test('opens a session with its waterfall and journey, then goes back to the same list', async ({

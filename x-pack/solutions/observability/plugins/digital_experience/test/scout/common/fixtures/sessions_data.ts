@@ -39,6 +39,16 @@ export const DETAILED_SESSION = {
 /** Sessions with JS errors: the detailed one and `dx-session-02`. */
 export const SESSIONS_WITH_JS_ERRORS = 2;
 
+/** The one session with frustration: two rage clicks and a dead click on `FRUSTRATED_TARGET`. */
+export const FRUSTRATED_SESSION = {
+  index: 3,
+  id: 'dx-session-04',
+  rageClicks: 2,
+  deadClicks: 1,
+} as const;
+
+export const FRUSTRATED_TARGET = '#pay';
+
 /** Sessions on Firefox: every third one. */
 export const FIREFOX_SESSIONS = 4;
 
@@ -67,6 +77,7 @@ const summaryOf = (
   { id = sessionId(index), environment = 'production' }: { id?: string; environment?: string } = {}
 ) => {
   const isDetailed = index === 0;
+  const isFrustrated = index === FRUSTRATED_SESSION.index;
   const startMs = sessionStartOffsetMs(index);
   const durationMs = isDetailed ? 150 * SECOND_MS : (index + 1) * 10 * SECOND_MS;
   const errorCount = index < SESSIONS_WITH_JS_ERRORS ? index + 1 : 0;
@@ -92,6 +103,14 @@ const summaryOf = (
     environment,
     // The detailed session's raw events have one click.
     click_count: isDetailed ? 1 : index,
+    rage_click_count: isFrustrated ? FRUSTRATED_SESSION.rageClicks : 0,
+    dead_click_count: isFrustrated ? FRUSTRATED_SESSION.deadClicks : 0,
+    error_click_count: 0,
+    frustration_count: isFrustrated
+      ? FRUSTRATED_SESSION.rageClicks + FRUSTRATED_SESSION.deadClicks
+      : 0,
+    frustration_targets: isFrustrated ? [FRUSTRATED_TARGET] : [],
+    frustration_pages: isFrustrated ? [journey[1]] : [],
     bounced: false,
     entry_page: journey[0],
     exit_page: journey[journey.length - 1],

@@ -60,6 +60,9 @@ apiTest.describe('Digital Experience usage API', { tag: DIGITAL_EXPERIENCE_TAGS 
       expect(usage.breakdowns).toStrictEqual(OTEL_SHOP_USAGE.breakdowns);
       expect(usage.topClicks).toStrictEqual(OTEL_SHOP_USAGE.topClicks);
       expect(usage.totalClicks).toBe(OTEL_SHOP_USAGE.totalClicks);
+      expect(usage.frustration).toStrictEqual(OTEL_SHOP_USAGE.frustration);
+      expect(usage.frustratedElements).toStrictEqual(OTEL_SHOP_USAGE.frustratedElements);
+      expect(usage.frustratedPages).toStrictEqual(OTEL_SHOP_USAGE.frustratedPages);
     }
   );
 
