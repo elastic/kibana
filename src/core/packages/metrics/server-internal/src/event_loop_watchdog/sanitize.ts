@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 export const MAX_NAME_LENGTH = 48;
 export const MAX_LOCATION_LENGTH = 120;
 /** Longest profile directory shown in a log line. */
-export const MAX_LOGGED_DIR_LENGTH = 64;
+export const MAX_LOGGED_DIR_LENGTH = 32;
 const ELLIPSIS = '...';
 
 /** Keeps the start of a function name, capped at `MAX_NAME_LENGTH` characters. */

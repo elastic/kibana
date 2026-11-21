@@ -59,8 +59,19 @@ export interface BlockLogMeta extends LogMeta {
 /** Why a capture stopped. */
 export type CaptureStopReason = 'block_ended' | 'max_duration';
 
-/** Whether a capture was admitted for file output, or why no file was attempted. */
-export type ProfileFileOutcome = AdmissionOutcome | 'no_directory' | 'empty';
+/**
+ * Whether a capture's profile file was written, or why no file was attempted:
+ * - `written` and `write_failed`: the capture was admitted, and the write succeeded or failed.
+ * - `same_frame` and `hour_limit`: admission refused the capture.
+ * - `no_directory`: no profile directory is set.
+ * - `empty`: the profile has no busy samples.
+ */
+export type ProfileFileOutcome =
+  | 'written'
+  | 'write_failed'
+  | Exclude<AdmissionOutcome, 'admitted'>
+  | 'no_directory'
+  | 'empty';
 
 export interface ProfileLogMeta extends LogMeta {
   kibana: {

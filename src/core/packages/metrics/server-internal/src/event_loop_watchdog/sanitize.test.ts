@@ -44,7 +44,7 @@ describe('capDir', () => {
     const dir = capDir(`/mnt/${'shared_volume/'.repeat(10)}watchdog-profiles`);
     expect(dir).toHaveLength(MAX_LOGGED_DIR_LENGTH);
     expect(dir.startsWith('...')).toBe(true);
-    expect(dir.endsWith('/shared_volume/watchdog-profiles')).toBe(true);
+    expect(dir).toBe('...ared_volume/watchdog-profiles');
   });
 
   it('leaves a directory of up to MAX_LOGGED_DIR_LENGTH characters unchanged', () => {
