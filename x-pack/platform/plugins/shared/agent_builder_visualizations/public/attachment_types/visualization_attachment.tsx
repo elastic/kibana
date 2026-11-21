@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  VISUALIZATION_ATTACHMENT_TYPE,
-  VisualizationAttachmentData,
+import {
+  getVisualizationLabel,
+  type VISUALIZATION_ATTACHMENT_TYPE,
+  type VisualizationAttachmentData,
 } from '@kbn/agent-builder-visualizations-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { type AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -38,10 +39,8 @@ export const createVisualizationAttachmentDefinition = (
   services: VisualizationServices
 ): AttachmentUIDefinition<VisualizationAttachment> => {
   return {
-    getLabel: (attachment: VisualizationAttachment): string => {
-      const { title } = attachment.data.visualization ?? {};
-      return typeof title === 'string' && title.length > 0 ? title : defaultVisualizationLabel;
-    },
+    getLabel: (attachment: VisualizationAttachment): string =>
+      getVisualizationLabel(attachment.data) ?? defaultVisualizationLabel,
     getIcon: () => 'productLens',
     getMaxWidth: (attachment) => {
       const { data } = attachment;
