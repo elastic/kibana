@@ -17,6 +17,7 @@ project:
   owner: '@elastic/workchat-eng'
   sourceRoot: src/platform/packages/shared/kbn-connector-cli
 dependsOn:
+  - '@kbn/connector-specs'
   - '@kbn/dev-cli-runner'
   - '@kbn/tooling-log'
 tags:
