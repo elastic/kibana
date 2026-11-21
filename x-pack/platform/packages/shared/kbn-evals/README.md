@@ -335,6 +335,23 @@ EVAL_INCLUDE_EIS_MODELS=1
 EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 ```
 
+#### Nightshift evals (`elastic/nightshift-evals`)
+
+A second, separate path runs the tasks of the `nightshift-evals` repo. It runs next to the
+suites above and does not change how they are selected. Kibana runs from source, so there is
+no Kibana build step.
+
+Add the label `ci:nightshift-evals` to a PR to start it. The label configures nothing. The run
+executes every task listed in `ci/tasks.yaml` of `nightshift-evals` (branch `main`, or
+`NIGHTSHIFT_EVALS_REF` when set), one step per task, with Kibana's default model. Per task the
+file sets `args` (required: flags for `uv run eval <task>`), `downloads` (GCS data) and
+`timeoutMinutes`. To change what runs, change that file; no Kibana change is needed. A task
+without `args` fails the plan step, so an old file can not run every example.
+
+The result shows as a `nightshift-evals` commit status, a build annotation and a PR comment.
+The pipelines are `kibana-nightshift-evals-pr` and `kibana-nightshift-evals-weekly`
+(Sundays, 20:00 GMT). Both run the same tasks with the same flags.
+
 ---
 
 ## 2. Creating a new evaluation suite

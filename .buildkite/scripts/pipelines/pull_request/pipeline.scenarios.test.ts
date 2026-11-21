@@ -60,6 +60,10 @@ jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
 
+jest.mock('../../../pipelines/nightshift_evals/nightshift_evals_pipeline.ts', () => ({
+  getNightshiftEvalTriggerStep: jest.fn().mockReturnValue(null),
+}));
+
 const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
