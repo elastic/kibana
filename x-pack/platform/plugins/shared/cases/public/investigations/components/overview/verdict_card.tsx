@@ -67,10 +67,9 @@ interface VerdictViewProps {
   onNavigateTab: (tab: TabId, opts?: { itemId?: string }) => void;
 }
 
-const NoVerdictView: React.FC<Pick<VerdictViewProps, 'isClosed' | 'onOpenModal'>> = ({
-  isClosed,
-  onOpenModal,
-}) => {
+const NoVerdictView: React.FC<
+  Pick<VerdictViewProps, 'isClosed' | 'onOpenModal'> & { closedVerdict?: string }
+> = ({ isClosed, onOpenModal, closedVerdict }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -95,11 +94,15 @@ const NoVerdictView: React.FC<Pick<VerdictViewProps, 'isClosed' | 'onOpenModal'>
               `}
               data-test-subj="investigationVerdictValue"
             >
-              {i18n.NOT_SET}
+              {closedVerdict ?? i18n.NOT_SET}
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
-            {isClosed ? i18n.NO_VERDICT_CLOSED : i18n.NO_AGENT_ASSESSMENT}
+            {closedVerdict
+              ? i18n.VERDICT_FROM_CLOSE
+              : isClosed
+              ? i18n.NO_VERDICT_CLOSED
+              : i18n.NO_AGENT_ASSESSMENT}
           </EuiText>
         </EuiFlexItem>
         {!isClosed ? (
@@ -435,6 +438,14 @@ export const VerdictCard: React.FC<VerdictCardProps> = ({ record, onNavigateTab,
   if (agent) {
     return <AgentVerdictView {...shared} agent={agent} flyout={flyout} />;
   }
-  return <NoVerdictView isClosed={isClosed} onOpenModal={onOpenModal} />;
+  return (
+    <NoVerdictView
+      isClosed={isClosed}
+      onOpenModal={onOpenModal}
+      closedVerdict={
+        record.close_outcome ? VERDICT_LABELS[record.close_outcome.verdict] : undefined
+      }
+    />
+  );
 };
 VerdictCard.displayName = 'VerdictCard';

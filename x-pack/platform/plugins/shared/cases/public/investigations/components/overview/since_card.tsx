@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { ActivityLink, InvestigationRecord } from '../../../../common/investigations/types';
-import { useSinceLastHandoff } from '../../hooks';
+import { useSinceLastHandoff, useInvestigationsNavigation } from '../../hooks';
 import { ICONS } from '../../icons';
 import { RelativeTime } from '../shared/relative_time';
 import { isTabId } from '../tabs/tab_props';
@@ -31,13 +31,21 @@ export interface SinceCardProps {
 /** What changed since the last handoff. Renders nothing when nothing changed. */
 export const SinceCard: React.FC<SinceCardProps> = ({ record, onNavigateTab, onOpenClaim }) => {
   const { data } = useSinceLastHandoff(record.id, undefined);
+  const { navigate, getRecordPath } = useInvestigationsNavigation();
 
   if (!data || data.items.length === 0) {
     return null;
   }
 
-  const openTarget = (target: ActivityLink) => {
-    if (target.kind === 'tab' && isTabId(target.id)) {
+  const openTarget = (target: ActivityLink, key?: string) => {
+    if (
+      target.kind === 'tab' &&
+      target.id === 'evidence' &&
+      (key === 'alerts' || key === 'indicators')
+    ) {
+      // Open Evidence filtered to what arrived since the handoff.
+      navigate(`${getRecordPath(record.id, { tab: 'evidence' })}&ev_new=1`);
+    } else if (target.kind === 'tab' && isTabId(target.id)) {
       onNavigateTab(target.id);
     } else if (target.kind === 'claim' && target.id) {
       onOpenClaim(target.id);
@@ -92,7 +100,7 @@ export const SinceCard: React.FC<SinceCardProps> = ({ record, onNavigateTab, onO
                   size="s"
                   iconType={ICONS.chevronRight}
                   iconSide="right"
-                  onClick={() => item.target && openTarget(item.target)}
+                  onClick={() => item.target && openTarget(item.target, item.key)}
                   data-test-subj={`investigationSinceAction-${item.key}`}
                 >
                   {item.target.label ?? i18n.OPEN}

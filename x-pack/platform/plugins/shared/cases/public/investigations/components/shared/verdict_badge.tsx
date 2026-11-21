@@ -27,9 +27,18 @@ export interface EffectiveVerdict {
 
 /** The analyst verdict when set, otherwise the agent verdict, otherwise nothing. */
 export const getEffectiveVerdict = (
-  record: Pick<InvestigationRecord, 'analyst_verdict' | 'agent_verdict'>
+  record: Pick<InvestigationRecord, 'analyst_verdict' | 'agent_verdict'> &
+    Partial<Pick<InvestigationRecord, 'close_outcome'>>
 ): EffectiveVerdict => {
-  const { analyst_verdict: analyst, agent_verdict: agent } = record;
+  const { analyst_verdict: analyst, agent_verdict: agent, close_outcome: outcome } = record;
+  // The verdict chosen when closing is the final one.
+  if (outcome) {
+    return {
+      label: VERDICT_LABELS[outcome.verdict],
+      classification: outcome.verdict,
+      source: 'analyst',
+    };
+  }
   if (analyst) {
     return {
       label: VERDICT_LABELS[analyst.verdict],

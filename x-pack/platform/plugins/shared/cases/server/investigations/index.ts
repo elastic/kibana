@@ -17,6 +17,7 @@ import {
   INVESTIGATION_AGENT_ID,
   INVESTIGATION_CONVERSATION_TEMPLATE_ID,
 } from '../../common/investigations/types';
+import { INVESTIGATIONS_OWNER } from '../../common/investigations/constants';
 import { ensureInvestigationIndices } from './indices';
 import { InvestigationsService } from './service';
 import type { AlertsClientLike } from './service';
@@ -77,7 +78,12 @@ export const setupInvestigations = ({
     const user = coreStart.security.authc.getCurrentUser(request);
     const username = user?.username ?? 'unknown';
     const actor: Actor | undefined = asAgent
-      ? { type: 'agent', id: asAgent.id, name: asAgent.name, on_behalf_of: user?.full_name || username }
+      ? {
+          type: 'agent',
+          id: asAgent.id,
+          name: asAgent.name,
+          on_behalf_of: user?.full_name || username,
+        }
       : undefined;
     let availability: Promise<{ available: boolean; reason?: string }> | undefined;
     const isAvailable = () => {
@@ -87,12 +93,17 @@ export const setupInvestigations = ({
         }
         const license = await pluginsStart.licensing.getLicense();
         if (!license.isActive || !license.hasAtLeast('enterprise')) {
-          return { available: false, reason: 'Agent Builder needs an Enterprise or trial license.' };
+          return {
+            available: false,
+            reason: 'Agent Builder needs an Enterprise or trial license.',
+          };
         }
         const { authz } = pluginsStart.security;
         if (authz.mode.useRbacForRequest(request)) {
           const check = authz.checkPrivilegesDynamicallyWithRequest(request);
-          const { hasAllRequested } = await check({ kibana: authz.actions.api.get('agentBuilder:read') });
+          const { hasAllRequested } = await check({
+            kibana: authz.actions.api.get('agentBuilder:read'),
+          });
           if (!hasAllRequested) {
             return { available: false, reason: 'You do not have access to Agent Builder.' };
           }
@@ -117,15 +128,28 @@ export const setupInvestigations = ({
       },
       allowBackdate: config.investigations.allowBackdate,
       actor,
+      canUpdateCases: async () => {
+        const { authz } = pluginsStart.security;
+        if (!authz.mode.useRbacForRequest(request)) return true;
+        const check = authz.checkPrivilegesDynamicallyWithRequest(request);
+        const { hasAllRequested } = await check({
+          kibana: [authz.actions.cases.get(INVESTIGATIONS_OWNER, 'updateCase')],
+        });
+        return hasAllRequested;
+      },
       getAlertsClient: async () =>
-        (await pluginsStart.ruleRegistry.getRacClientWithRequest(request)) as unknown as AlertsClientLike,
+        (await pluginsStart.ruleRegistry.getRacClientWithRequest(
+          request
+        )) as unknown as AlertsClientLike,
       agent: {
         isAvailable,
         agentId: INVESTIGATION_AGENT_ID,
         agentName: 'Investigation agent',
         createConversation: pluginsStart.agentBuilder
           ? async ({ title, recordId }) => {
-              const client = await pluginsStart.agentBuilder?.conversations.getScopedClient({ request });
+              const client = await pluginsStart.agentBuilder?.conversations.getScopedClient({
+                request,
+              });
               if (!client) throw new Error('Agent Builder conversations are unavailable');
               const created = await client.create({
                 agentId: INVESTIGATION_AGENT_ID,

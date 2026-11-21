@@ -73,7 +73,11 @@ import type {
   UpdateRecordRequest,
   Verdict,
 } from '../../common/investigations/types';
-import { VERDICT_LABELS, INDICATOR_TYPE_LABELS, EVIDENCE_TYPE_LABELS } from '../../common/investigations/types';
+import {
+  VERDICT_LABELS,
+  INDICATOR_TYPE_LABELS,
+  EVIDENCE_TYPE_LABELS,
+} from '../../common/investigations/types';
 import { DEFAULT_INVESTIGATION_TYPES, DEFAULT_PROCEDURE_TEMPLATES } from './default_templates';
 import {
   PRIORITY_RANK,
@@ -89,6 +93,7 @@ import {
   plural,
   sha256,
   toCsvCell,
+  validateIndicatorValue,
 } from './utils';
 import { buildReport } from './report';
 
@@ -102,8 +107,15 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K>
 type StoredItem = DistributiveOmit<InvestigationItem, 'version'> & { ref_num: number };
 
 export interface AlertsClientLike {
-  bulkUpdateCases(args: { alerts: Array<{ id: string; index: string }>; caseIds: string[] }): Promise<unknown>;
-  bulkUpdate(args: { ids: string[]; status: 'open' | 'closed' | 'acknowledged'; index: string }): Promise<unknown>;
+  bulkUpdateCases(args: {
+    alerts: Array<{ id: string; index: string }>;
+    caseIds: string[];
+  }): Promise<unknown>;
+  bulkUpdate(args: {
+    ids: string[];
+    status: 'open' | 'closed' | 'acknowledged';
+    index: string;
+  }): Promise<unknown>;
 }
 
 export interface InvestigationsServiceDeps {
@@ -119,6 +131,8 @@ export interface InvestigationsServiceDeps {
   /** Default actor for writes; agent tools pass an agent actor. */
   actor?: Actor;
   getAlertsClient: () => Promise<AlertsClientLike | undefined>;
+  /** Whether the caller holds the Cases update privilege for the investigations owner. */
+  canUpdateCases: () => Promise<boolean>;
   agent: {
     isAvailable: () => Promise<{ available: boolean; reason?: string }>;
     createConversation?: (args: { title: string; recordId: string }) => Promise<string>;
@@ -176,7 +190,10 @@ const toMap = (list: Bucket[]): Record<string, number> =>
 const term = (field: string, value: string | number | boolean): QueryDslQueryContainer => ({
   term: { [field]: value },
 });
-const terms = (field: string, values: Array<string | number | boolean>): QueryDslQueryContainer => ({
+const terms = (
+  field: string,
+  values: Array<string | number | boolean>
+): QueryDslQueryContainer => ({
   terms: { [field]: values },
 });
 
@@ -207,7 +224,11 @@ const ITEM_SORT_FIELDS: Record<string, string> = {
 };
 
 const pluralNoun = (noun: string): string =>
-  /[^aeiou]y$/.test(noun) ? `${noun.slice(0, -1)}ies` : /(s|sh|ch|x)$/.test(noun) ? `${noun}es` : `${noun}s`;
+  /[^aeiou]y$/.test(noun)
+    ? `${noun.slice(0, -1)}ies`
+    : /(s|sh|ch|x)$/.test(noun)
+    ? `${noun}es`
+    : `${noun}s`;
 
 const isLayoutOnly = (patch: ItemPatch): boolean => {
   const keys = Object.keys(patch).filter((k) => patch[k as keyof ItemPatch] !== undefined);
@@ -259,9 +280,7 @@ export class InvestigationsService {
   }
 
   private canRead(record: StoredRecord): boolean {
-    return (
-      !record.restricted_to?.length || record.restricted_to.includes(this.deps.user.username)
-    );
+    return !record.restricted_to?.length || record.restricted_to.includes(this.deps.user.username);
   }
 
   private restrictionFilter(): QueryDslQueryContainer {
@@ -291,6 +310,22 @@ export class InvestigationsService {
       page: 1,
     });
     InvestigationsService.ownerAuthCache.set(key, Date.now());
+  }
+
+  private writeCheck?: Promise<boolean>;
+
+  /** Writes need the Cases update privilege, not just read access to the case. */
+  private async ensureCanWrite(): Promise<void> {
+    this.writeCheck ??= this.deps.canUpdateCases().catch(() => false);
+    if (!(await this.writeCheck)) {
+      throw Boom.forbidden('You have read-only access to investigations.');
+    }
+  }
+
+  private async loadForWrite(recordId: string): ReturnType<InvestigationsService['load']> {
+    const loaded = await this.load(recordId);
+    await this.ensureCanWrite();
+    return loaded;
   }
 
   /** Authorizes against the case and loads the record document. */
@@ -333,19 +368,45 @@ export class InvestigationsService {
     if (!recordIds.length) return;
     try {
       await Promise.all([
-        this.es.deleteByQuery({ index: INVESTIGATION_ITEMS_INDEX, refresh: true, conflicts: 'proceed', query: terms('record_id', recordIds) }),
-        this.es.deleteByQuery({ index: INVESTIGATION_ACTIVITY_INDEX, refresh: true, conflicts: 'proceed', query: terms('record_id', recordIds) }),
-        this.es.deleteByQuery({ index: INVESTIGATION_RECORDS_INDEX, refresh: true, conflicts: 'proceed', query: terms('id', recordIds) }),
+        this.es.deleteByQuery({
+          index: INVESTIGATION_ITEMS_INDEX,
+          refresh: true,
+          conflicts: 'proceed',
+          query: terms('record_id', recordIds),
+        }),
+        this.es.deleteByQuery({
+          index: INVESTIGATION_ACTIVITY_INDEX,
+          refresh: true,
+          conflicts: 'proceed',
+          query: terms('record_id', recordIds),
+        }),
+        this.es.deleteByQuery({
+          index: INVESTIGATION_RECORDS_INDEX,
+          refresh: true,
+          conflicts: 'proceed',
+          query: terms('id', recordIds),
+        }),
       ]);
-      this.deps.logger.info(`Removed ${recordIds.length} investigation record(s) whose case no longer exists`);
+      this.deps.logger.info(
+        `Removed ${recordIds.length} investigation record(s) whose case no longer exists`
+      );
     } catch (error) {
       this.deps.logger.warn(`Could not remove orphaned investigation records: ${error}`);
     }
   }
 
-  private toRecord(source: StoredRecord, seqNo?: number, primaryTerm?: number): InvestigationRecord {
-    const { ref_counters: _refCounters, verdict_effective: _v, priority_rank: _p, severity_rank: _s, ...rest } =
-      source;
+  private toRecord(
+    source: StoredRecord,
+    seqNo?: number,
+    primaryTerm?: number
+  ): InvestigationRecord {
+    const {
+      ref_counters: _refCounters,
+      verdict_effective: _v,
+      priority_rank: _p,
+      severity_rank: _s,
+      ...rest
+    } = source;
     return {
       ...rest,
       counters: { ...emptyCounters(), ...(rest.counters ?? {}) },
@@ -371,7 +432,11 @@ export class InvestigationsService {
 
   private async appendActivity(
     recordId: string,
-    entries: Array<Omit<ActivityEntry, 'id' | 'record_id' | 'space_id' | 'links'> & { links?: ActivityEntry['links'] }>
+    entries: Array<
+      Omit<ActivityEntry, 'id' | 'record_id' | 'space_id' | 'links'> & {
+        links?: ActivityEntry['links'];
+      }
+    >
   ): Promise<ActivityEntry[]> {
     if (!entries.length) return [];
     const docs: ActivityEntry[] = entries.map((entry) => ({
@@ -391,10 +456,16 @@ export class InvestigationsService {
     return docs;
   }
 
-  public async findActivity(recordId: string, req: FindActivityRequest): Promise<FindActivityResponse> {
+  public async findActivity(
+    recordId: string,
+    req: FindActivityRequest
+  ): Promise<FindActivityResponse> {
     const { record } = await this.load(recordId);
     const recordIds = [recordId, ...(record.merged_from ?? [])];
-    const perPage = Math.min(req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage, INVESTIGATION_LIMITS.maxPerPage);
+    const perPage = Math.min(
+      req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage,
+      INVESTIGATION_LIMITS.maxPerPage
+    );
     const page = Math.max(req.page ?? 1, 1);
     const filter: QueryDslQueryContainer[] = [terms('record_id', recordIds)];
     if (req.since) filter.push({ range: { ts: { gt: req.since } } });
@@ -421,7 +492,8 @@ export class InvestigationsService {
       sort: [{ ts: { order: req.sort_order ?? 'desc' } }, { id: { order: 'asc' } }],
       aggs: { latest: { max: { field: 'ts' } } },
     });
-    const latest = (res.aggregations?.latest as { value_as_string?: string } | undefined)?.value_as_string;
+    const latest = (res.aggregations?.latest as { value_as_string?: string } | undefined)
+      ?.value_as_string;
     return {
       entries: res.hits.hits.map((h) => h._source as ActivityEntry),
       total: typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0,
@@ -431,8 +503,11 @@ export class InvestigationsService {
     };
   }
 
-  public async createActivity(recordId: string, req: CreateActivityRequest): Promise<ActivityEntry> {
-    await this.load(recordId);
+  public async createActivity(
+    recordId: string,
+    req: CreateActivityRequest
+  ): Promise<ActivityEntry> {
+    await this.loadForWrite(recordId);
     const actor = this.actor(req.actor);
     const [entry] = await this.appendActivity(recordId, [
       {
@@ -455,7 +530,10 @@ export class InvestigationsService {
   /* Counters                                                          */
   /* ---------------------------------------------------------------- */
 
-  public async computeCounters(recordId: string, mergedFrom: string[] = []): Promise<RecordCounters> {
+  public async computeCounters(
+    recordId: string,
+    mergedFrom: string[] = []
+  ): Promise<RecordCounters> {
     const [items, activity] = await Promise.all([
       this.es.search({
         index: INVESTIGATION_ITEMS_INDEX,
@@ -589,7 +667,10 @@ export class InvestigationsService {
   }
 
   /** Atomically reserves `count` refs per kind; returns the first number of each range. */
-  private async reserveRefs(recordId: string, counts: Partial<Record<ItemKind, number>>): Promise<Record<string, number>> {
+  private async reserveRefs(
+    recordId: string,
+    counts: Partial<Record<ItemKind, number>>
+  ): Promise<Record<string, number>> {
     const inc = Object.fromEntries(Object.entries(counts).filter(([, n]) => (n ?? 0) > 0));
     if (!Object.keys(inc).length) return {};
     const res = await this.es.update<StoredRecord, unknown, StoredRecord>({
@@ -721,7 +802,11 @@ export class InvestigationsService {
       analyst_verdict: null,
       verdict_effective: null,
       close_outcome: null,
-      origin: req.origin ?? { type: actor.type === 'agent' ? 'agent' : 'user', label: `Started by ${actor.name}`, actor },
+      origin: req.origin ?? {
+        type: actor.type === 'agent' ? 'agent' : 'user',
+        label: `Started by ${actor.name}`,
+        actor,
+      },
       conversation_id: null,
       conversation_ids: [],
       threads: [],
@@ -761,7 +846,9 @@ export class InvestigationsService {
         action: 'record.created',
         target: { kind: 'record', id: record.id, title: req.title },
         message: /\b(from .+)$/.test(record.origin.label)
-          ? `Started the investigation ${(/\b(from .+)$/.exec(record.origin.label) as RegExpExecArray)[1]}`
+          ? `Started the investigation ${
+              (/\b(from .+)$/.exec(record.origin.label) as RegExpExecArray)[1]
+            }`
           : 'Started the investigation',
         details: null,
         after: { description: req.description, summary: req.summary ?? null },
@@ -779,8 +866,18 @@ export class InvestigationsService {
           title: alert.rule_name ?? `Alert ${alert.id}`,
           evidence: {
             type: 'alert' as const,
-            source: { label: 'Alerts index', kind: 'alert' as const, index: alert.index, id: alert.id },
-            alert: { id: alert.id, index: alert.index, rule_id: alert.rule_id ?? null, rule_name: alert.rule_name ?? null },
+            source: {
+              label: 'Alerts index',
+              kind: 'alert' as const,
+              index: alert.index,
+              id: alert.id,
+            },
+            alert: {
+              id: alert.id,
+              index: alert.index,
+              rule_id: alert.rule_id ?? null,
+              rule_name: alert.rule_name ?? null,
+            },
           },
         })),
         actor,
@@ -806,23 +903,32 @@ export class InvestigationsService {
         doc: { conversation_id: conversationId, conversation_ids: [conversationId] },
       });
     } catch (error) {
-      this.deps.logger.warn(`Investigation ${recordId}: could not create its conversation: ${error}`);
+      this.deps.logger.warn(
+        `Investigation ${recordId}: could not create its conversation: ${error}`
+      );
     }
   }
 
   public async findRecords(req: FindRecordsRequest): Promise<FindRecordsResponse> {
     await this.ensureCanReadOwner();
-    const perPage = Math.min(req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage, INVESTIGATION_LIMITS.maxPerPage);
+    const perPage = Math.min(
+      req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage,
+      INVESTIGATION_LIMITS.maxPerPage
+    );
     const page = Math.max(req.page ?? 1, 1);
     if ((page - 1) * perPage + perPage > INVESTIGATION_LIMITS.maxDeepPageFrom) {
       throw Boom.badRequest('Page is too deep; narrow the search or filters.');
     }
-    const filter: QueryDslQueryContainer[] = [term('space_id', this.deps.spaceId), this.restrictionFilter()];
+    const filter: QueryDslQueryContainer[] = [
+      term('space_id', this.deps.spaceId),
+      this.restrictionFilter(),
+    ];
     const mustNot: QueryDslQueryContainer[] = [];
     if (req.status?.length) filter.push(terms('status', req.status));
     if (req.priority?.length) filter.push(terms('priority', req.priority));
     if (req.severity?.length) filter.push(terms('severity', req.severity));
-    if (req.investigation_type?.length) filter.push(terms('investigation_type', req.investigation_type));
+    if (req.investigation_type?.length)
+      filter.push(terms('investigation_type', req.investigation_type));
     if (req.verdict?.length) filter.push(terms('verdict_effective', req.verdict));
     if (req.tags?.length) filter.push(terms('tags', req.tags));
     if (req.owner) {
@@ -868,14 +974,14 @@ export class InvestigationsService {
       query: { bool: { filter, must, must_not: mustNot } },
       sort,
     });
-    let records = res.hits.hits.map((h) => this.toRecord(h._source as StoredRecord, h._seq_no, h._primary_term));
+    let records = res.hits.hits.map((h) =>
+      this.toRecord(h._source as StoredRecord, h._seq_no, h._primary_term)
+    );
     let total = typeof res.hits.total === 'number' ? res.hits.total : res.hits.total?.value ?? 0;
     if (records.length) {
       // Cases can be deleted from the classic Cases pages; drop and clean up their records.
       const checked = await this.deps.casesClient.cases.bulkGet({ ids: records.map((r) => r.id) });
-      const missing = new Set(
-        checked.errors.filter((e) => e.status === 404).map((e) => e.caseId)
-      );
+      const missing = new Set(checked.errors.filter((e) => e.status === 404).map((e) => e.caseId));
       if (missing.size) {
         records = records.filter((r) => !missing.has(r.id));
         total = Math.max(0, total - missing.size);
@@ -902,7 +1008,9 @@ export class InvestigationsService {
     }
     if (!target) throw Boom.badRequest(`Cannot sort on "${field}"`);
     return [
-      { [target]: { order, unmapped_type: unmapped, missing: order === 'asc' ? '_last' : '_last' } },
+      {
+        [target]: { order, unmapped_type: unmapped, missing: order === 'asc' ? '_last' : '_last' },
+      },
       { display_num: { order: 'desc' } },
     ];
   }
@@ -924,7 +1032,10 @@ export class InvestigationsService {
         assignees: theCase.assignees,
         created_at: theCase.created_at,
         updated_at: theCase.updated_at,
-        created_by: { username: theCase.created_by?.username, full_name: theCase.created_by?.full_name },
+        created_by: {
+          username: theCase.created_by?.username,
+          full_name: theCase.created_by?.full_name,
+        },
       },
       agent_available: available && synced.ai_enabled,
     };
@@ -958,8 +1069,11 @@ export class InvestigationsService {
     return this.toRecord({ ...record, ...patch }, res._seq_no, res._primary_term);
   }
 
-  public async updateRecord(recordId: string, req: UpdateRecordRequest): Promise<InvestigationRecord> {
-    const { record, theCase, seqNo, primaryTerm } = await this.load(recordId);
+  public async updateRecord(
+    recordId: string,
+    req: UpdateRecordRequest
+  ): Promise<InvestigationRecord> {
+    const { record, theCase, seqNo, primaryTerm } = await this.loadForWrite(recordId);
     if (req.version && req.version !== encodeVersion(seqNo, primaryTerm)) {
       throw Boom.conflict('The investigation was changed by someone else. Reload and try again.');
     }
@@ -1001,24 +1115,35 @@ export class InvestigationsService {
     }
     if (req.summary !== undefined && req.summary !== record.summary) {
       patch.summary = req.summary;
-      log('record.summary_changed', 'Edited the summary', { before: record.summary, after: req.summary });
+      log('record.summary_changed', 'Edited the summary', {
+        before: record.summary,
+        after: req.summary,
+      });
     }
     if (req.priority !== undefined && req.priority !== record.priority) {
       patch.priority = req.priority;
       patch.priority_rank = PRIORITY_RANK[req.priority];
-      const verb = PRIORITY_RANK[req.priority] > PRIORITY_RANK[record.priority] ? 'Raised' : 'Lowered';
-      log('record.priority_changed', `${verb} the priority from ${record.priority} to ${req.priority}`, {
-        details: req.priority_note ?? null,
-        before: record.priority,
-        after: req.priority,
-      });
+      const verb =
+        PRIORITY_RANK[req.priority] > PRIORITY_RANK[record.priority] ? 'Raised' : 'Lowered';
+      log(
+        'record.priority_changed',
+        `${verb} the priority from ${record.priority} to ${req.priority}`,
+        {
+          details: req.priority_note ?? null,
+          before: record.priority,
+          after: req.priority,
+        }
+      );
     }
     if (req.priority_note !== undefined) patch.priority_note = req.priority_note;
     if (req.severity !== undefined && req.severity !== record.severity) {
       patch.severity = req.severity;
       patch.severity_rank = SEVERITY_RANK[req.severity];
       casePatch.severity = req.severity;
-      log('record.severity_changed', `Changed the severity from ${record.severity} to ${req.severity}`);
+      log(
+        'record.severity_changed',
+        `Changed the severity from ${record.severity} to ${req.severity}`
+      );
     }
     if (req.tags !== undefined) {
       patch.tags = req.tags;
@@ -1029,11 +1154,14 @@ export class InvestigationsService {
       const changed = Object.entries(req.fields).filter(([k, v]) => (record.fields ?? {})[k] !== v);
       if (changed.length) {
         patch.fields = { ...(record.fields ?? {}), ...req.fields };
-        const label = (key: string) => key.replace(/_(keyword|text|long|double|date|bool)$/, '').replace(/_/g, ' ');
+        const label = (key: string) =>
+          key.replace(/_(keyword|text|long|double|date|bool)$/, '').replace(/_/g, ' ');
         log(
           'record.fields_changed',
           changed.length === 1
-            ? `Set ${label(changed[0][0])} to ${changed[0][1] === null || changed[0][1] === '' ? 'empty' : String(changed[0][1])}`
+            ? `Set ${label(changed[0][0])} to ${
+                changed[0][1] === null || changed[0][1] === '' ? 'empty' : String(changed[0][1])
+              }`
             : `Changed ${changed.length} fields`,
           {
             before: Object.fromEntries(changed.map(([k]) => [k, (record.fields ?? {})[k] ?? null])),
@@ -1042,7 +1170,10 @@ export class InvestigationsService {
         );
       }
     }
-    if (req.investigation_type !== undefined && req.investigation_type !== record.investigation_type) {
+    if (
+      req.investigation_type !== undefined &&
+      req.investigation_type !== record.investigation_type
+    ) {
       patch.investigation_type = req.investigation_type;
       log('record.type_changed', `Changed the investigation type to ${req.investigation_type}`, {
         before: record.investigation_type,
@@ -1079,7 +1210,9 @@ export class InvestigationsService {
           details: req.handoff_note ?? null,
           before: previous,
           after: nextOwner,
-          links: req.handoff_note ? [{ kind: 'tab', id: 'overview', label: 'Handoff summary' }] : [],
+          links: req.handoff_note
+            ? [{ kind: 'tab', id: 'overview', label: 'Handoff summary' }]
+            : [],
         });
         if (req.handoff_note || (previous && nextOwner && nextOwner.id !== actor.id)) {
           patch.last_handoff = { at: ts, by: actor, to: nextOwner, note: req.handoff_note ?? null };
@@ -1087,21 +1220,29 @@ export class InvestigationsService {
       }
     }
     if (req.agent_verdict !== undefined) {
-      patch.agent_verdict = req.agent_verdict ? { ...req.agent_verdict, set_by: actor, set_at: ts } : null;
+      patch.agent_verdict = req.agent_verdict
+        ? { ...req.agent_verdict, set_by: actor, set_at: ts }
+        : null;
       log(
         'record.agent_verdict_changed',
         req.agent_verdict
           ? `Concluded ${req.agent_verdict.label.toLowerCase()} at ${req.agent_verdict.confidence}%`
           : 'Cleared the agent verdict',
         {
-          before: record.agent_verdict ? { label: record.agent_verdict.label, confidence: record.agent_verdict.confidence } : null,
-          after: req.agent_verdict ? { label: req.agent_verdict.label, confidence: req.agent_verdict.confidence } : null,
+          before: record.agent_verdict
+            ? { label: record.agent_verdict.label, confidence: record.agent_verdict.confidence }
+            : null,
+          after: req.agent_verdict
+            ? { label: req.agent_verdict.label, confidence: req.agent_verdict.confidence }
+            : null,
           links: [{ kind: 'verdict', id: 'V', label: 'Verdict' }],
         }
       );
     }
     if (req.analyst_verdict !== undefined) {
-      patch.analyst_verdict = req.analyst_verdict ? { ...req.analyst_verdict, set_by: actor, set_at: ts } : null;
+      patch.analyst_verdict = req.analyst_verdict
+        ? { ...req.analyst_verdict, set_by: actor, set_at: ts }
+        : null;
       log(
         'record.analyst_verdict_changed',
         req.analyst_verdict
@@ -1125,19 +1266,30 @@ export class InvestigationsService {
       log(
         'record.restriction_changed',
         req.restricted_to.length
-          ? `Restricted the investigation to ${plural(req.restricted_to.length, 'person', 'people')}`
+          ? `Restricted the investigation to ${plural(
+              req.restricted_to.length,
+              'person',
+              'people'
+            )}`
           : 'Removed the access restriction',
         { before: record.restricted_to, after: req.restricted_to }
       );
     }
     if (req.ai_enabled !== undefined && req.ai_enabled !== record.ai_enabled) {
       patch.ai_enabled = req.ai_enabled;
-      log('record.ai_changed', req.ai_enabled ? 'Enabled agents on this investigation' : 'Disabled agents on this investigation');
+      log(
+        'record.ai_changed',
+        req.ai_enabled
+          ? 'Enabled agents on this investigation'
+          : 'Disabled agents on this investigation'
+      );
     }
     if (patch.analyst_verdict !== undefined || patch.agent_verdict !== undefined) {
-      const analyst = patch.analyst_verdict !== undefined ? patch.analyst_verdict : record.analyst_verdict;
+      const analyst =
+        patch.analyst_verdict !== undefined ? patch.analyst_verdict : record.analyst_verdict;
       const agent = patch.agent_verdict !== undefined ? patch.agent_verdict : record.agent_verdict;
-      patch.verdict_effective = record.close_outcome?.verdict ?? analyst?.verdict ?? agent?.classification ?? null;
+      patch.verdict_effective =
+        record.close_outcome?.verdict ?? analyst?.verdict ?? agent?.classification ?? null;
     }
     if (!Object.keys(patch).length) {
       return this.toRecord(record, seqNo, primaryTerm);
@@ -1160,7 +1312,8 @@ export class InvestigationsService {
         // analyst_verdict and keep stale nested values (e.g. an old reason).
         script: {
           lang: 'painless',
-          source: 'for (def e : params.patch.entrySet()) { ctx._source[e.getKey()] = e.getValue(); }',
+          source:
+            'for (def e : params.patch.entrySet()) { ctx._source[e.getKey()] = e.getValue(); }',
           params: { patch },
         },
       });
@@ -1178,20 +1331,29 @@ export class InvestigationsService {
     return (await this.getRecord(recordId)).record;
   }
 
-  public async closeRecord(recordId: string, req: CloseRecordRequest): Promise<InvestigationRecord> {
-    const { record, theCase } = await this.load(recordId);
+  public async closeRecord(
+    recordId: string,
+    req: CloseRecordRequest
+  ): Promise<InvestigationRecord> {
+    const { record, theCase } = await this.loadForWrite(recordId);
     if (record.status === 'closed') throw Boom.badRequest('The investigation is already closed.');
     const actor = this.actor(req.actor);
     const ts = this.ts(req.closed_at);
-    const left = await this.searchItems<TaskItem>(recordId, {
-      bool: {
-        filter: [term('kind', 'task'), term('task.required', true)],
-        must_not: [terms('status', ['done', 'skipped'])],
+    const left = await this.searchItems<TaskItem>(
+      recordId,
+      {
+        bool: {
+          filter: [term('kind', 'task'), term('task.required', true)],
+          must_not: [terms('status', ['done', 'skipped'])],
+        },
       },
-    }, 100);
+      100
+    );
     if (left.length) {
       throw Boom.badRequest(
-        `${plural(left.length, 'required task')} must be done first: ${left.map((t) => t.title).join('; ')}`
+        `${plural(left.length, 'required task')} must be done first: ${left
+          .map((t) => t.title)
+          .join('; ')}`
       );
     }
 
@@ -1211,7 +1373,9 @@ export class InvestigationsService {
               status: 'withdrawn',
               updated_at: ts,
               updated_by: actor,
-              proposal: { decision: { by: actor, at: ts, reason: 'Investigation closed', note: null } },
+              proposal: {
+                decision: { by: actor, at: ts, reason: 'Investigation closed', note: null },
+              },
             },
           },
         ]),
@@ -1271,14 +1435,21 @@ export class InvestigationsService {
         actor,
         action: 'record.closed',
         target: { kind: 'record', id: recordId, title: record.title },
-        message: `Closed the investigation as ${VERDICT_LABELS[req.verdict].toLowerCase()} (${req.reason.toLowerCase()})`,
+        message: `Closed the investigation as ${VERDICT_LABELS[
+          req.verdict
+        ].toLowerCase()} (${req.reason.toLowerCase()})`,
         details: req.summary,
         links: [{ kind: 'tab', id: 'overview', label: 'Outcome' }],
         before: record.close_outcome?.summary ?? null,
         after: req.summary,
       },
     ];
-    const automation: Actor = { type: 'automation', id: 'cases-investigations', name: 'Workflow', on_behalf_of: actor.name };
+    const automation: Actor = {
+      type: 'automation',
+      id: 'cases-investigations',
+      name: 'Workflow',
+      on_behalf_of: actor.name,
+    };
     if (alertsClosed) {
       entries.push({
         ts,
@@ -1330,7 +1501,9 @@ export class InvestigationsService {
           await alertsClient.bulkUpdate({ ids: chunk, status, index });
           count += chunk.length;
         } catch (error) {
-          this.deps.logger.warn(`Investigation ${recordId}: alert status update failed for ${index}: ${error}`);
+          this.deps.logger.warn(
+            `Investigation ${recordId}: alert status update failed for ${index}: ${error}`
+          );
         }
       }
     }
@@ -1338,7 +1511,7 @@ export class InvestigationsService {
   }
 
   public async reopenRecord(recordId: string): Promise<InvestigationRecord> {
-    const { record, theCase } = await this.load(recordId);
+    const { record, theCase } = await this.loadForWrite(recordId);
     if (record.status !== 'closed') throw Boom.badRequest('The investigation is not closed.');
     if (record.merged_into) throw Boom.badRequest('A merged investigation cannot be reopened.');
     const actor = this.actor();
@@ -1363,7 +1536,8 @@ export class InvestigationsService {
         status: nextStatus,
         closed_at: null,
         close_outcome: null,
-        verdict_effective: record.analyst_verdict?.verdict ?? record.agent_verdict?.classification ?? null,
+        verdict_effective:
+          record.analyst_verdict?.verdict ?? record.agent_verdict?.classification ?? null,
         updated_at: ts,
         updated_by: actor,
       },
@@ -1384,9 +1558,13 @@ export class InvestigationsService {
     return (await this.getRecord(recordId)).record;
   }
 
-  public async mergeRecord(recordId: string, otherId: string, keep: 'this' | 'other'): Promise<MergeRecordResponse> {
+  public async mergeRecord(
+    recordId: string,
+    otherId: string,
+    keep: 'this' | 'other'
+  ): Promise<MergeRecordResponse> {
     if (recordId === otherId) throw Boom.badRequest('Cannot merge an investigation with itself.');
-    const [a, b] = await Promise.all([this.load(recordId), this.load(otherId)]);
+    const [a, b] = await Promise.all([this.loadForWrite(recordId), this.loadForWrite(otherId)]);
     const primary = keep === 'this' ? a : b;
     const merged = keep === 'this' ? b : a;
     if (merged.record.merged_into || primary.record.merged_into) {
@@ -1403,25 +1581,41 @@ export class InvestigationsService {
       query: term('record_id', merged.record.id),
       aggs: { kind: { terms: { field: 'kind', size: 20 } } },
     });
-    const counts = toMap(buckets(kindCounts.aggregations?.kind)) as Partial<Record<ItemKind, number>>;
+    const counts = toMap(buckets(kindCounts.aggregations?.kind)) as Partial<
+      Record<ItemKind, number>
+    >;
     const starts = await this.reserveRefs(primary.record.id, counts);
     const next: Record<string, number> = { ...starts };
-    await this.scanItems<InvestigationItem>(merged.record.id, { match_all: {} }, undefined, async (batch) => {
-      const ops = batch.flatMap((item) => {
-        const n = next[item.kind] ?? 1;
-        next[item.kind] = n + 1;
-        const ref = `${ITEM_REF_PREFIX[item.kind]}${n}`;
-        const { version: _v, ...doc } = item;
-        return [
-          { index: { _index: INVESTIGATION_ITEMS_INDEX, _id: item.id } },
-          { ...doc, record_id: primary.record.id, ref, ref_num: n, links: [...(item.links ?? []), { relation: 'derived_from', target_id: merged.record.id }] },
-        ];
-      });
-      if (ops.length) {
-        await this.es.bulk({ refresh: false, operations: ops });
-        moved += batch.length;
+    await this.scanItems<InvestigationItem>(
+      merged.record.id,
+      { match_all: {} },
+      undefined,
+      async (batch) => {
+        const ops = batch.flatMap((item) => {
+          const n = next[item.kind] ?? 1;
+          next[item.kind] = n + 1;
+          const ref = `${ITEM_REF_PREFIX[item.kind]}${n}`;
+          const { version: _v, ...doc } = item;
+          return [
+            { index: { _index: INVESTIGATION_ITEMS_INDEX, _id: item.id } },
+            {
+              ...doc,
+              record_id: primary.record.id,
+              ref,
+              ref_num: n,
+              links: [
+                ...(item.links ?? []),
+                { relation: 'derived_from', target_id: merged.record.id },
+              ],
+            },
+          ];
+        });
+        if (ops.length) {
+          await this.es.bulk({ refresh: false, operations: ops });
+          moved += batch.length;
+        }
       }
-    });
+    );
     await this.es.indices.refresh({ index: INVESTIGATION_ITEMS_INDEX });
 
     await this.deps.casesClient.cases.bulkUpdate({
@@ -1463,9 +1657,23 @@ export class InvestigationsService {
       refresh: true,
       retry_on_conflict: 5,
       doc: {
-        merged_from: Array.from(new Set([...(primary.record.merged_from ?? []), merged.record.id, ...(merged.record.merged_from ?? [])])),
-        conversation_ids: Array.from(new Set([...(primary.record.conversation_ids ?? []), ...(merged.record.conversation_ids ?? [])])),
-        threads: [...(primary.record.threads ?? []), ...(merged.record.threads ?? [])].slice(0, INVESTIGATION_LIMITS.maxThreads),
+        merged_from: Array.from(
+          new Set([
+            ...(primary.record.merged_from ?? []),
+            merged.record.id,
+            ...(merged.record.merged_from ?? []),
+          ])
+        ),
+        conversation_ids: Array.from(
+          new Set([
+            ...(primary.record.conversation_ids ?? []),
+            ...(merged.record.conversation_ids ?? []),
+          ])
+        ),
+        threads: [...(primary.record.threads ?? []), ...(merged.record.threads ?? [])].slice(
+          0,
+          INVESTIGATION_LIMITS.maxThreads
+        ),
         updated_at: ts,
         updated_by: actor,
       },
@@ -1496,7 +1704,10 @@ export class InvestigationsService {
       this.refreshCounters(primary.record.id, actor, { touch: false }),
       this.refreshCounters(merged.record.id, actor, { touch: false }),
     ]);
-    const [p, m] = await Promise.all([this.getRecord(primary.record.id), this.getRecord(merged.record.id)]);
+    const [p, m] = await Promise.all([
+      this.getRecord(primary.record.id),
+      this.getRecord(merged.record.id),
+    ]);
     return { primary: p.record, merged: m.record, items_moved: moved };
   }
 
@@ -1507,12 +1718,16 @@ export class InvestigationsService {
   public async listTypes(): Promise<InvestigationType[]> {
     const types = DEFAULT_INVESTIGATION_TYPES.map((t) => ({ ...t, fields: [...t.fields] }));
     try {
-      const templatesClient = (this.deps.casesClient as unknown as {
-        templates?: { getAllTemplates?: (args: unknown) => Promise<unknown> };
-      }).templates;
-      const found = (await templatesClient?.getAllTemplates?.({ owner: [INVESTIGATIONS_OWNER], page: 1, perPage: 100 })) as
-        | { templates?: Array<{ templateId: string; name: string }> }
-        | undefined;
+      const templatesClient = (
+        this.deps.casesClient as unknown as {
+          templates?: { getAllTemplates?: (args: unknown) => Promise<unknown> };
+        }
+      ).templates;
+      const found = (await templatesClient?.getAllTemplates?.({
+        owner: [INVESTIGATIONS_OWNER],
+        page: 1,
+        perPage: 100,
+      })) as { templates?: Array<{ templateId: string; name: string }> } | undefined;
       for (const tpl of found?.templates ?? []) {
         const match = types.find((t) => t.name.toLowerCase() === tpl.name.toLowerCase());
         if (match) match.template_id = tpl.templateId;
@@ -1525,15 +1740,26 @@ export class InvestigationsService {
 
   public async listProcedureTemplates(): Promise<ProcedureTemplate[]> {
     await this.ensureCanReadOwner();
-    const res = await this.es.search<{ type: string; tasks: ProcedureTemplateTask[]; updated_at: string; updated_by: Actor }>({
+    const res = await this.es.search<{
+      type: string;
+      tasks: ProcedureTemplateTask[];
+      updated_at: string;
+      updated_by: Actor;
+    }>({
       index: INVESTIGATION_CONFIG_INDEX,
       size: 100,
       seq_no_primary_term: true,
-      query: { bool: { filter: [term('doc_type', 'procedure_template'), term('space_id', this.deps.spaceId)] } },
+      query: {
+        bool: {
+          filter: [term('doc_type', 'procedure_template'), term('space_id', this.deps.spaceId)],
+        },
+      },
     });
     const stored = new Map(res.hits.hits.map((h) => [h._source?.type ?? '', h]));
     const system: Actor = { type: 'automation', id: 'defaults', name: 'Default template' };
-    const names = Array.from(new Set([...Object.keys(DEFAULT_PROCEDURE_TEMPLATES), ...stored.keys()])).filter(Boolean);
+    const names = Array.from(
+      new Set([...Object.keys(DEFAULT_PROCEDURE_TEMPLATES), ...stored.keys()])
+    ).filter(Boolean);
     return names.map((type) => {
       const hit = stored.get(type);
       if (hit?._source) {
@@ -1545,12 +1771,21 @@ export class InvestigationsService {
           version: encodeVersion(hit._seq_no, hit._primary_term),
         };
       }
-      return { type, tasks: DEFAULT_PROCEDURE_TEMPLATES[type] ?? [], updated_at: '1970-01-01T00:00:00.000Z', updated_by: system };
+      return {
+        type,
+        tasks: DEFAULT_PROCEDURE_TEMPLATES[type] ?? [],
+        updated_at: '1970-01-01T00:00:00.000Z',
+        updated_by: system,
+      };
     });
   }
 
-  public async saveProcedureTemplate(type: string, tasks: ProcedureTemplateTask[]): Promise<ProcedureTemplate> {
+  public async saveProcedureTemplate(
+    type: string,
+    tasks: ProcedureTemplateTask[]
+  ): Promise<ProcedureTemplate> {
     await this.ensureCanReadOwner();
+    await this.ensureCanWrite();
     const actor = this.actor();
     const ts = now();
     const id = `procedure_template:${this.deps.spaceId}:${type}`;
@@ -1558,13 +1793,30 @@ export class InvestigationsService {
       index: INVESTIGATION_CONFIG_INDEX,
       id,
       refresh: true,
-      document: { doc_type: 'procedure_template', space_id: this.deps.spaceId, type, tasks, updated_at: ts, updated_by: actor },
+      document: {
+        doc_type: 'procedure_template',
+        space_id: this.deps.spaceId,
+        type,
+        tasks,
+        updated_at: ts,
+        updated_by: actor,
+      },
     });
-    return { type, tasks, updated_at: ts, updated_by: actor, version: encodeVersion(res._seq_no, res._primary_term) };
+    return {
+      type,
+      tasks,
+      updated_at: ts,
+      updated_by: actor,
+      version: encodeVersion(res._seq_no, res._primary_term),
+    };
   }
 
-  public async applyProcedure(recordId: string, type: string, replace: boolean): Promise<TaskItem[]> {
-    const { record } = await this.load(recordId);
+  public async applyProcedure(
+    recordId: string,
+    type: string,
+    replace: boolean
+  ): Promise<TaskItem[]> {
+    const { record } = await this.loadForWrite(recordId);
     const actor = this.actor();
     const tasks = await this.applyProcedureInternal(record, type, replace, actor, now());
     await this.refreshCounters(recordId, actor);
@@ -1585,12 +1837,24 @@ export class InvestigationsService {
     const keptTitles = new Set<string>();
     if (replace) {
       const removable = existing.filter((t) => t.status !== 'done' && t.status !== 'skipped');
-      existing.filter((t) => t.status === 'done' || t.status === 'skipped').forEach((t) => keptTitles.add(t.title.toLowerCase()));
+      existing
+        .filter((t) => t.status === 'done' || t.status === 'skipped')
+        .forEach((t) => keptTitles.add(t.title.toLowerCase()));
       if (removable.length) {
         await this.es.deleteByQuery({
           index: INVESTIGATION_ITEMS_INDEX,
           refresh: true,
-          query: { bool: { filter: [term('record_id', record.id), terms('id', removable.map((t) => t.id))] } },
+          query: {
+            bool: {
+              filter: [
+                term('record_id', record.id),
+                terms(
+                  'id',
+                  removable.map((t) => t.id)
+                ),
+              ],
+            },
+          },
         });
       }
     } else {
@@ -1605,11 +1869,19 @@ export class InvestigationsService {
     const inputs: Array<ItemInput & { _id?: string }> = toCreate.map((t, i) => {
       const owner =
         t.owner_type === 'agent'
-          ? { type: 'agent' as const, id: record.agent_id ?? this.deps.agent.agentId, name: record.agent_name ?? this.deps.agent.agentName }
+          ? {
+              type: 'agent' as const,
+              id: record.agent_id ?? this.deps.agent.agentId,
+              name: record.agent_name ?? this.deps.agent.agentName,
+            }
           : t.owner_type === 'automation'
           ? { type: 'automation' as const, id: 'workflow', name: 'Workflow' }
           : t.owner_type === 'team'
-          ? { type: 'team' as const, id: t.owner ?? 'Security Ops', name: t.owner ?? 'Security Ops' }
+          ? {
+              type: 'team' as const,
+              id: t.owner ?? 'Security Ops',
+              name: t.owner ?? 'Security Ops',
+            }
           : { type: 'person' as const, id: null, name: null };
       let auto = t.auto ?? null;
       if (auto?.type === 'claim' && auto.question) {
@@ -1642,7 +1914,13 @@ export class InvestigationsService {
       ? (await this.bulkCreateItemsInternal(record, inputs, actor, { silent: true, ts })).items
       : [];
     if (record.investigation_type !== type) {
-      await this.es.update({ index: INVESTIGATION_RECORDS_INDEX, id: record.id, refresh: true, retry_on_conflict: 3, doc: { investigation_type: type } });
+      await this.es.update({
+        index: INVESTIGATION_RECORDS_INDEX,
+        id: record.id,
+        refresh: true,
+        retry_on_conflict: 3,
+        doc: { investigation_type: type },
+      });
     }
     const required = template.tasks.filter((t) => t.required).length;
     await this.appendActivity(record.id, [
@@ -1651,7 +1929,9 @@ export class InvestigationsService {
         actor,
         action: 'procedure.applied',
         message: `Applied the ${type} procedure`,
-        details: `${plural(template.tasks.length, 'task')}, ${required} required.${replace ? ' Unfinished tasks from the previous procedure were removed.' : ''}`,
+        details: `${plural(template.tasks.length, 'task')}, ${required} required.${
+          replace ? ' Unfinished tasks from the previous procedure were removed.' : ''
+        }`,
         links: [{ kind: 'tab', id: 'procedure', label: 'Procedure' }],
       },
     ]);
@@ -1692,7 +1972,11 @@ export class InvestigationsService {
         index: INVESTIGATION_ITEMS_INDEX,
         size: 1000,
         seq_no_primary_term: true,
-        ...(sourceIncludes ? { _source: { includes: [...sourceIncludes, 'id', 'kind', 'ref', 'title', 'record_id'] } } : {}),
+        ...(sourceIncludes
+          ? {
+              _source: { includes: [...sourceIncludes, 'id', 'kind', 'ref', 'title', 'record_id'] },
+            }
+          : {}),
         query: { bool: { filter: [term('record_id', recordId), query] } },
         sort: [{ ref_num: { order: 'asc' } }, { id: { order: 'asc' } }],
         ...(searchAfter ? { search_after: searchAfter } : {}),
@@ -1706,7 +1990,10 @@ export class InvestigationsService {
     }
   }
 
-  private buildItemQuery(recordId: string, req: FindItemsRequest): {
+  private buildItemQuery(
+    recordId: string,
+    req: FindItemsRequest
+  ): {
     query: QueryDslQueryContainer;
     postFilter: QueryDslQueryContainer[];
   } {
@@ -1715,10 +2002,17 @@ export class InvestigationsService {
     if (req.kind?.length) filter.push(terms('kind', req.kind));
     if (req.target_id) filter.push(term('comment.target_id', req.target_id));
     if (req.ids?.length) filter.push(terms('id', req.ids));
-    if (req.refs?.length) filter.push(terms('ref', req.refs.map((r) => r.toLowerCase())));
+    if (req.refs?.length)
+      filter.push(
+        terms(
+          'ref',
+          req.refs.map((r) => r.toLowerCase())
+        )
+      );
     if (req.created_after) filter.push({ range: { created_at: { gt: req.created_after } } });
     if (req.type?.length) postFilter.push(terms('evidence.type', req.type));
-    if (req.indicator_type?.length) postFilter.push(terms('evidence.indicator.type', req.indicator_type));
+    if (req.indicator_type?.length)
+      postFilter.push(terms('evidence.indicator.type', req.indicator_type));
     if (req.added_by?.length) postFilter.push(terms('created_by.id', req.added_by));
     if (req.added_by_type?.length) postFilter.push(terms('created_by.type', req.added_by_type));
     if (req.status?.length) postFilter.push(terms('status', req.status));
@@ -1730,7 +2024,15 @@ export class InvestigationsService {
         {
           multi_match: {
             query: q,
-            fields: ['title^3', 'text', 'evidence.why', 'claim.question^2', 'claim.conclusion', 'claim.note', 'task.description'],
+            fields: [
+              'title^3',
+              'text',
+              'evidence.why',
+              'claim.question^2',
+              'claim.conclusion',
+              'claim.note',
+              'task.description',
+            ],
             operator: 'and',
           },
         },
@@ -1759,12 +2061,21 @@ export class InvestigationsService {
   }
 
   /** Item search for a record that was already authorized. */
-  public async findItemsUnchecked(recordId: string, req: FindItemsRequest): Promise<FindItemsResponse> {
-    const perPage = Math.min(req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage, INVESTIGATION_LIMITS.maxPerPage);
+  public async findItemsUnchecked(
+    recordId: string,
+    req: FindItemsRequest
+  ): Promise<FindItemsResponse> {
+    const perPage = Math.min(
+      req.per_page ?? INVESTIGATION_LIMITS.defaultPerPage,
+      INVESTIGATION_LIMITS.maxPerPage
+    );
     const page = Math.max(req.page ?? 1, 1);
     const { query, postFilter } = this.buildItemQuery(recordId, req);
     const sortField = ITEM_SORT_FIELDS[req.sort_field ?? 'ref_num'] ?? 'ref_num';
-    const sort: Sort = [{ [sortField]: { order: req.sort_order ?? 'asc', unmapped_type: 'keyword' } }, { id: { order: 'asc' } }];
+    const sort: Sort = [
+      { [sortField]: { order: req.sort_order ?? 'asc', unmapped_type: 'keyword' } },
+      { id: { order: 'asc' } },
+    ];
     const from = req.cursor ? 0 : (page - 1) * perPage;
     if (!req.cursor && from + perPage > INVESTIGATION_LIMITS.maxDeepPageFrom) {
       throw Boom.badRequest('Page is too deep; use the cursor for deep paging.');
@@ -1805,9 +2116,16 @@ export class InvestigationsService {
         indicator_type: toMap(buckets(aggs.indicator_type)),
         status: toMap(buckets(aggs.status)),
         added_by: buckets(aggs.added_by).map((b) => {
-          const top = (b as unknown as { who: { hits: { hits: Array<{ _source: { created_by: Actor } }> } } }).who.hits.hits[0];
+          const top = (
+            b as unknown as { who: { hits: { hits: Array<{ _source: { created_by: Actor } }> } } }
+          ).who.hits.hits[0];
           const who = top?._source.created_by;
-          return { id: b.key, name: who?.name ?? b.key, type: who?.type ?? 'user', count: b.doc_count };
+          return {
+            id: b.key,
+            name: who?.name ?? b.key,
+            type: who?.type ?? 'user',
+            count: b.doc_count,
+          };
         }),
       };
     }
@@ -1828,15 +2146,21 @@ export class InvestigationsService {
   }
 
   private async getItemUnchecked(recordId: string, itemId: string): Promise<InvestigationItem> {
-    const doc = await this.es.get<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, id: itemId }, { ignore: [404] });
+    const doc = await this.es.get<StoredItem>(
+      { index: INVESTIGATION_ITEMS_INDEX, id: itemId },
+      { ignore: [404] }
+    );
     if (!doc.found || !doc._source || doc._source.record_id !== recordId) {
       throw Boom.notFound(`Item ${itemId} not found`);
     }
     return this.toItem(doc as unknown as SearchHit<StoredItem>);
   }
 
-  public async bulkCreateItems(recordId: string, req: BulkCreateItemsRequest): Promise<BulkCreateItemsResponse> {
-    const { record } = await this.load(recordId);
+  public async bulkCreateItems(
+    recordId: string,
+    req: BulkCreateItemsRequest
+  ): Promise<BulkCreateItemsResponse> {
+    const { record } = await this.loadForWrite(recordId);
     if (record.status === 'closed' && !this.deps.allowBackdate) {
       throw Boom.badRequest('The investigation is closed. Reopen it to add items.');
     }
@@ -1894,7 +2218,10 @@ export class InvestigationsService {
 
     const res = await this.es.bulk({
       refresh: docs.length > 200 ? 'wait_for' : true,
-      operations: docs.flatMap((doc) => [{ create: { _index: INVESTIGATION_ITEMS_INDEX, _id: doc.id } }, doc]),
+      operations: docs.flatMap((doc) => [
+        { create: { _index: INVESTIGATION_ITEMS_INDEX, _id: doc.id } },
+        doc,
+      ]),
     });
     const errors: Array<{ index: number; message: string }> = [];
     const created: StoredItem[] = [];
@@ -1904,10 +2231,20 @@ export class InvestigationsService {
       else created.push(docs[i]);
     });
     const items = created.map(
-      (doc, i) => ({ ...doc, version: encodeVersion(res.items[i]?.create?._seq_no, res.items[i]?.create?._primary_term) }) as unknown as InvestigationItem
+      (doc, i) =>
+        ({
+          ...doc,
+          version: encodeVersion(
+            res.items[i]?.create?._seq_no,
+            res.items[i]?.create?._primary_term
+          ),
+        } as unknown as InvestigationItem)
     );
 
-    const alerts = items.filter((i): i is EvidenceItem => i.kind === 'evidence' && i.evidence.type === 'alert' && !!i.evidence.alert?.id);
+    const alerts = items.filter(
+      (i): i is EvidenceItem =>
+        i.kind === 'evidence' && i.evidence.type === 'alert' && !!i.evidence.alert?.id
+    );
     if (alerts.length && opts.linkAlerts) {
       await this.linkAlerts(record.id, alerts);
     }
@@ -1934,14 +2271,23 @@ export class InvestigationsService {
     if (items.length === 1) {
       const item = items[0];
       const target = { kind: item.kind, id: item.id, ref: item.ref, title: item.title };
-      const link = { kind: item.kind === 'timeline_event' ? ('record' as const) : (item.kind as 'evidence'), id: item.id, label: item.ref };
+      const link = {
+        kind: item.kind === 'timeline_event' ? ('record' as const) : (item.kind as 'evidence'),
+        id: item.id,
+        label: item.ref,
+      };
       const verb: Record<ItemKind, string> = {
         evidence: `Added evidence ${describeItem(item)}`,
         claim: `Opened claim ${describeItem(item)}`,
         entity: `Added ${item.title} to the scope`,
         link: `Linked ${item.title}`,
         task: `Added task "${clip(item.title, 120)}"`,
-        comment: `Commented${item.kind === 'comment' && (item as { comment: { target_id: string } }).comment.target_id !== item.record_id ? ' on an item' : ''}`,
+        comment: `Commented${
+          item.kind === 'comment' &&
+          (item as { comment: { target_id: string } }).comment.target_id !== item.record_id
+            ? ' on an item'
+            : ''
+        }`,
         proposal: `Proposed: ${clip(item.title, 140)}`,
         timeline_event: `Added a timeline event: ${clip(item.title, 120)}`,
       };
@@ -1957,7 +2303,10 @@ export class InvestigationsService {
     }
     const byKind = new Map<string, number>();
     for (const item of items) {
-      const key = item.kind === 'evidence' ? EVIDENCE_TYPE_LABELS[item.evidence.type].toLowerCase() : item.kind.replace('_', ' ');
+      const key =
+        item.kind === 'evidence'
+          ? EVIDENCE_TYPE_LABELS[item.evidence.type].toLowerCase()
+          : item.kind.replace('_', ' ');
       byKind.set(key, (byKind.get(key) ?? 0) + 1);
     }
     const allEvidence = items.every((i) => i.kind === 'evidence');
@@ -1965,11 +2314,19 @@ export class InvestigationsService {
       ts: when,
       actor,
       action: 'items.created',
-      message: allEvidence ? `Added ${plural(items.length, 'evidence item')}` : `Added ${plural(items.length, 'item')}`,
+      message: allEvidence
+        ? `Added ${plural(items.length, 'evidence item')}`
+        : `Added ${plural(items.length, 'item')}`,
       details: Array.from(byKind.entries())
         .map(([k, n]) => (n === 1 ? `1 ${k}` : `${n.toLocaleString('en-US')} ${pluralNoun(k)}`))
         .join(', '),
-      links: [{ kind: 'tab', id: allEvidence ? 'evidence' : 'overview', label: allEvidence ? 'Evidence' : 'Overview' }],
+      links: [
+        {
+          kind: 'tab',
+          id: allEvidence ? 'evidence' : 'overview',
+          label: allEvidence ? 'Evidence' : 'Overview',
+        },
+      ],
     };
   }
 
@@ -1979,7 +2336,10 @@ export class InvestigationsService {
       const ev = doc.evidence;
       if (ev.indicator?.value) ev.indicator = { ...ev.indicator, value: ev.indicator.value.trim() };
       if (ev.snapshot && !ev.snapshot_hash) {
-        ev.snapshot_hash = ev.snapshot.kind === 'file' && ev.snapshot.sha256 ? ev.snapshot.sha256 : hashSnapshot(ev.snapshot);
+        ev.snapshot_hash =
+          ev.snapshot.kind === 'file' && ev.snapshot.sha256
+            ? ev.snapshot.sha256
+            : hashSnapshot(ev.snapshot);
       }
       if (ev.snapshot && !ev.preserved_at) ev.preserved_at = doc.created_at;
     }
@@ -1988,7 +2348,10 @@ export class InvestigationsService {
       doc.claim.opposing_evidence_ids = doc.claim.opposing_evidence_ids ?? [];
       doc.claim.gaps = doc.claim.gaps ?? [];
       if (actor.type === 'agent' && isCreate) doc.claim.needs_review = true;
-      doc.title = doc.claim.conclusion && (doc.status === 'supported' || doc.status === 'refuted') ? doc.claim.conclusion : doc.claim.question;
+      doc.title =
+        doc.claim.conclusion && (doc.status === 'supported' || doc.status === 'refuted')
+          ? doc.claim.conclusion
+          : doc.claim.question;
     }
     if (doc.kind === 'entity') {
       doc.entity.evidence_ids = doc.entity.evidence_ids ?? [];
@@ -2005,18 +2368,30 @@ export class InvestigationsService {
   private async linkAlerts(recordId: string, alerts: EvidenceItem[]): Promise<void> {
     const alertsClient = await this.deps.getAlertsClient().catch(() => undefined);
     if (!alertsClient) return;
-    const refs = alerts.map((a) => ({ id: a.evidence.alert?.id as string, index: a.evidence.alert?.index as string }));
+    const refs = alerts.map((a) => ({
+      id: a.evidence.alert?.id as string,
+      index: a.evidence.alert?.index as string,
+    }));
     for (let i = 0; i < refs.length; i += 1000) {
       try {
-        await alertsClient.bulkUpdateCases({ alerts: refs.slice(i, i + 1000), caseIds: [recordId] });
+        await alertsClient.bulkUpdateCases({
+          alerts: refs.slice(i, i + 1000),
+          caseIds: [recordId],
+        });
       } catch (error) {
-        this.deps.logger.warn(`Investigation ${recordId}: could not record the case on alerts: ${error}`);
+        this.deps.logger.warn(
+          `Investigation ${recordId}: could not record the case on alerts: ${error}`
+        );
       }
     }
   }
 
   /** Pulls observable values out of the attached alert documents and adds them as indicators. */
-  private async extractIndicators(record: StoredRecord, alerts: EvidenceItem[], actor: Actor): Promise<void> {
+  private async extractIndicators(
+    record: StoredRecord,
+    alerts: EvidenceItem[],
+    actor: Actor
+  ): Promise<void> {
     const FIELDS: Array<[string, 'ip' | 'domain' | 'url' | 'file_hash' | 'file_path' | 'email']> = [
       ['source.ip', 'ip'],
       ['destination.ip', 'ip'],
@@ -2063,7 +2438,14 @@ export class InvestigationsService {
       const existing = await this.es.search({
         index: INVESTIGATION_ITEMS_INDEX,
         size: 0,
-        query: { bool: { filter: [term('record_id', record.id), terms('evidence.indicator.value', Array.from(found.keys()))] } },
+        query: {
+          bool: {
+            filter: [
+              term('record_id', record.id),
+              terms('evidence.indicator.value', Array.from(found.keys())),
+            ],
+          },
+        },
         aggs: { v: { terms: { field: 'evidence.indicator.value', size: found.size } } },
       });
       const have = new Set(buckets(existing.aggregations?.v).map((b) => b.key));
@@ -2077,40 +2459,91 @@ export class InvestigationsService {
           evidence: {
             type: 'indicator',
             why: `Extracted from alert ${source.ref}.`,
-            source: { label: 'Extracted from alert', kind: 'alert', index: source.evidence.alert?.index, id: source.evidence.alert?.id },
+            source: {
+              label: 'Extracted from alert',
+              kind: 'alert',
+              index: source.evidence.alert?.index,
+              id: source.evidence.alert?.id,
+            },
             indicator: { type, value },
           },
         }));
       if (!inputs.length) return;
-      const automation: Actor = { type: 'automation', id: 'indicator-extraction', name: 'Indicator extraction', on_behalf_of: actor.name };
-      await this.bulkCreateItemsInternal(record, inputs, automation, { extractIndicators: false, linkAlerts: false });
+      const automation: Actor = {
+        type: 'automation',
+        id: 'indicator-extraction',
+        name: 'Indicator extraction',
+        on_behalf_of: actor.name,
+      };
+      await this.bulkCreateItemsInternal(record, inputs, automation, {
+        extractIndicators: false,
+        linkAlerts: false,
+      });
     } catch (error) {
       this.deps.logger.warn(`Investigation ${record.id}: indicator extraction failed: ${error}`);
     }
   }
 
   /** Completes tasks whose automatic rule is settled by this claim. */
-  private async completeTasksForClaim(recordId: string, claim: ClaimItem, actor: Actor, ts?: string): Promise<void> {
+  private async completeTasksForClaim(
+    recordId: string,
+    claim: ClaimItem,
+    actor: Actor,
+    ts?: string
+  ): Promise<void> {
     const question = claim.claim.question?.toLowerCase();
-    const tasks = await this.searchItems<TaskItem>(recordId, {
-      bool: {
-        filter: [term('kind', 'task'), term('task.auto.type', 'claim')],
-        must_not: [terms('status', ['done', 'skipped'])],
-        should: [term('task.auto.claim_id', claim.id), ...(question ? [term('task.auto.question', question)] : [])],
-        minimum_should_match: 1,
+    const tasks = await this.searchItems<TaskItem>(
+      recordId,
+      {
+        bool: {
+          filter: [term('kind', 'task'), term('task.auto.type', 'claim')],
+          must_not: [terms('status', ['done', 'skipped'])],
+          should: [
+            term('task.auto.claim_id', claim.id),
+            ...(question ? [term('task.auto.question', question)] : []),
+          ],
+          minimum_should_match: 1,
+        },
       },
-    }, 50);
-    await this.autoComplete(recordId, tasks, `Completed automatically when ${claim.ref} was ${claim.status}.`, actor, ts, { kind: 'claim', id: claim.id, label: claim.ref });
+      50
+    );
+    await this.autoComplete(
+      recordId,
+      tasks,
+      `Completed automatically when ${claim.ref} was ${claim.status}.`,
+      actor,
+      ts,
+      { kind: 'claim', id: claim.id, label: claim.ref }
+    );
   }
 
-  private async completeTasksForProposal(recordId: string, proposal: ProposalItem, actor: Actor): Promise<void> {
-    const tasks = await this.searchItems<TaskItem>(recordId, {
-      bool: {
-        filter: [term('kind', 'task'), term('task.auto.type', 'action'), term('task.auto.category', proposal.proposal.category)],
-        must_not: [terms('status', ['done', 'skipped'])],
+  private async completeTasksForProposal(
+    recordId: string,
+    proposal: ProposalItem,
+    actor: Actor
+  ): Promise<void> {
+    const tasks = await this.searchItems<TaskItem>(
+      recordId,
+      {
+        bool: {
+          filter: [
+            term('kind', 'task'),
+            term('task.auto.type', 'action'),
+            term('task.auto.category', proposal.proposal.category),
+          ],
+          must_not: [terms('status', ['done', 'skipped'])],
+        },
       },
-    }, 50);
-    await this.autoComplete(recordId, tasks, `Completed automatically when "${proposal.title}" was approved.`, actor, undefined, { kind: 'proposal', id: proposal.id, label: proposal.ref });
+      50
+    );
+    await this.autoComplete(
+      recordId,
+      tasks,
+      `Completed automatically when "${proposal.title}" was approved.`,
+      actor,
+      undefined,
+      { kind: 'proposal', id: proposal.id, label: proposal.ref }
+    );
   }
 
   private async autoComplete(
@@ -2123,7 +2556,12 @@ export class InvestigationsService {
   ): Promise<void> {
     if (!tasks.length) return;
     const when = ts ?? now();
-    const automation: Actor = { type: 'automation', id: 'workflow', name: 'Workflow', on_behalf_of: actor.name };
+    const automation: Actor = {
+      type: 'automation',
+      id: 'workflow',
+      name: 'Workflow',
+      on_behalf_of: actor.name,
+    };
     await this.es.bulk({
       refresh: true,
       operations: tasks.flatMap((t) => [
@@ -2154,18 +2592,37 @@ export class InvestigationsService {
 
   private applyPatch(item: StoredItem, patch: ItemPatch, actor: Actor, ts: string): StoredItem {
     const next = { ...item } as StoredItem & Record<string, unknown>;
-    for (const key of ['title', 'text', 'status', 'links', 'restricted', 'exclude_from_ai'] as const) {
+    for (const key of [
+      'title',
+      'text',
+      'status',
+      'links',
+      'restricted',
+      'exclude_from_ai',
+    ] as const) {
       if (patch[key] !== undefined) (next as Record<string, unknown>)[key] = patch[key];
     }
     const kindKey = item.kind as keyof ItemPatch;
     const kindPatch = patch[kindKey];
-    for (const key of ['evidence', 'claim', 'entity', 'link', 'task', 'comment', 'proposal', 'timeline_event'] as const) {
+    for (const key of [
+      'evidence',
+      'claim',
+      'entity',
+      'link',
+      'task',
+      'comment',
+      'proposal',
+      'timeline_event',
+    ] as const) {
       if (patch[key] !== undefined && key !== kindKey) {
         throw Boom.badRequest(`Cannot patch "${key}" on a ${item.kind} item`);
       }
     }
     if (kindPatch && typeof kindPatch === 'object') {
-      next[item.kind] = { ...((item as unknown as Record<string, object>)[item.kind] ?? {}), ...kindPatch };
+      next[item.kind] = {
+        ...((item as unknown as Record<string, object>)[item.kind] ?? {}),
+        ...kindPatch,
+      };
     }
     next.updated_at = ts;
     next.updated_by = actor;
@@ -2195,7 +2652,12 @@ export class InvestigationsService {
     }
     if (item.kind === 'claim') {
       const claim = next as unknown as ClaimItem;
-      if (actor.type === 'agent' && (patch.status !== undefined || patch.claim?.conclusion !== undefined || patch.claim?.confidence !== undefined)) {
+      if (
+        actor.type === 'agent' &&
+        (patch.status !== undefined ||
+          patch.claim?.conclusion !== undefined ||
+          patch.claim?.confidence !== undefined)
+      ) {
         claim.claim = { ...claim.claim, needs_review: true };
       }
       if (patch.status === 'supported' || patch.status === 'refuted') {
@@ -2205,29 +2667,78 @@ export class InvestigationsService {
     return this.normalizeItem(next, actor, false);
   }
 
-  private describeUpdate(before: StoredItem, after: StoredItem, actor: Actor, ts: string): Omit<ActivityEntry, 'id' | 'record_id' | 'space_id'> {
+  private describeUpdate(
+    before: StoredItem,
+    after: StoredItem,
+    actor: Actor,
+    ts: string
+  ): Omit<ActivityEntry, 'id' | 'record_id' | 'space_id'> {
     const target = { kind: before.kind, id: before.id, ref: before.ref, title: after.title };
-    const link = { kind: before.kind === 'timeline_event' || before.kind === 'comment' ? ('record' as const) : (before.kind as 'evidence'), id: before.id, label: before.ref };
+    const link = {
+      kind:
+        before.kind === 'timeline_event' || before.kind === 'comment'
+          ? ('record' as const)
+          : (before.kind as 'evidence'),
+      id: before.id,
+      label: before.ref,
+    };
     const base = { ts, actor, target, links: [link] };
     if (before.kind === 'claim') {
       const b = before as unknown as ClaimItem;
       const a = after as unknown as ClaimItem;
       if (a.status !== b.status) {
-        const pct = a.claim.confidence !== null && a.claim.confidence !== undefined ? ` at ${a.claim.confidence}%` : '';
-        const why = a.status === 'blocked' || a.status === 'open' ? (a.claim.note ? `: ${clip(a.claim.note, 160)}` : '') : '';
-        return { ...base, action: 'claim.status_changed', message: `Marked ${b.ref} ${a.status}${pct}${why}`, details: a.claim.reasoning ?? null, before: { status: b.status, conclusion: b.claim.conclusion }, after: { status: a.status, conclusion: a.claim.conclusion } };
+        const pct =
+          a.claim.confidence !== null && a.claim.confidence !== undefined
+            ? ` at ${a.claim.confidence}%`
+            : '';
+        const why =
+          a.status === 'blocked' || a.status === 'open'
+            ? a.claim.note
+              ? `: ${clip(a.claim.note, 160)}`
+              : ''
+            : '';
+        return {
+          ...base,
+          action: 'claim.status_changed',
+          message: `Marked ${b.ref} ${a.status}${pct}${why}`,
+          details: a.claim.reasoning ?? null,
+          before: { status: b.status, conclusion: b.claim.conclusion },
+          after: { status: a.status, conclusion: a.claim.conclusion },
+        };
       }
       if (b.claim.needs_review && !a.claim.needs_review) {
-        return { ...base, action: 'claim.reviewed', message: `Accepted the conclusion of ${b.ref}` };
+        return {
+          ...base,
+          action: 'claim.reviewed',
+          message: `Accepted the conclusion of ${b.ref}`,
+        };
       }
       if ((a.claim.conclusion ?? '') !== (b.claim.conclusion ?? '')) {
-        return { ...base, action: 'claim.conclusion_changed', message: `Edited the conclusion of ${b.ref}`, before: b.claim.conclusion, after: a.claim.conclusion };
+        return {
+          ...base,
+          action: 'claim.conclusion_changed',
+          message: `Edited the conclusion of ${b.ref}`,
+          before: b.claim.conclusion,
+          after: a.claim.conclusion,
+        };
       }
-      const addedEv = (a.claim.supporting_evidence_ids ?? []).filter((id) => !(b.claim.supporting_evidence_ids ?? []).includes(id));
+      const addedEv = (a.claim.supporting_evidence_ids ?? []).filter(
+        (id) => !(b.claim.supporting_evidence_ids ?? []).includes(id)
+      );
       if (addedEv.length) {
-        return { ...base, action: 'claim.evidence_linked', message: `Linked ${plural(addedEv.length, 'evidence item')} to ${b.ref}` };
+        return {
+          ...base,
+          action: 'claim.evidence_linked',
+          message: `Linked ${plural(addedEv.length, 'evidence item')} to ${b.ref}`,
+        };
       }
-      return { ...base, action: 'claim.updated', message: `Updated claim ${b.ref}`, before: b.claim, after: a.claim };
+      return {
+        ...base,
+        action: 'claim.updated',
+        message: `Updated claim ${b.ref}`,
+        before: b.claim,
+        after: a.claim,
+      };
     }
     if (before.kind === 'task') {
       const a = after as unknown as TaskItem;
@@ -2238,48 +2749,105 @@ export class InvestigationsService {
           doing: `Started task "${clip(a.title, 120)}"`,
           todo: `Reopened task "${clip(a.title, 120)}"`,
         };
-        return { ...base, action: 'task.status_changed', message: msg[a.status ?? 'todo'], details: a.task.skip_reason ?? a.task.note ?? null };
+        return {
+          ...base,
+          action: 'task.status_changed',
+          message: msg[a.status ?? 'todo'],
+          details: a.task.skip_reason ?? a.task.note ?? null,
+        };
       }
       const b = before as unknown as TaskItem;
       if (a.task.owner?.id !== b.task.owner?.id || a.task.owner?.type !== b.task.owner?.type) {
-        return { ...base, action: 'task.assigned', message: `Assigned "${clip(a.title, 100)}" to ${a.task.owner?.name ?? a.task.owner?.id ?? 'nobody'}` };
+        return {
+          ...base,
+          action: 'task.assigned',
+          message: `Assigned "${clip(a.title, 100)}" to ${
+            a.task.owner?.name ?? a.task.owner?.id ?? 'nobody'
+          }`,
+        };
       }
       return { ...base, action: 'task.updated', message: `Edited task "${clip(a.title, 120)}"` };
     }
     if (before.kind === 'proposal') {
       const a = after as unknown as ProposalItem;
       if (a.status !== before.status) {
-        const reason = a.proposal.decision?.reason ? ` (${a.proposal.decision.reason.toLowerCase()})` : '';
+        const reason = a.proposal.decision?.reason
+          ? ` (${a.proposal.decision.reason.toLowerCase()})`
+          : '';
         const msg: Record<string, string> = {
           approved: `Approved ${clip(a.title, 140)}`,
           rejected: `Rejected ${clip(a.title, 140)}${reason}`,
           pending: `Reopened the proposal ${clip(a.title, 140)}`,
           withdrawn: `Withdrew ${clip(a.title, 140)}`,
         };
-        return { ...base, action: 'proposal.decided', message: msg[a.status], details: a.proposal.decision?.note ?? null };
+        return {
+          ...base,
+          action: 'proposal.decided',
+          message: msg[a.status],
+          details: a.proposal.decision?.note ?? null,
+        };
       }
       if (a.title !== before.title) {
-        return { ...base, action: 'proposal.revised', message: `Revised the proposal to "${clip(a.title, 140)}"`, before: before.title, after: a.title };
+        return {
+          ...base,
+          action: 'proposal.revised',
+          message: `Revised the proposal to "${clip(a.title, 140)}"`,
+          before: before.title,
+          after: a.title,
+        };
       }
       return { ...base, action: 'proposal.updated', message: `Updated proposal ${before.ref}` };
     }
     if (before.kind === 'entity' && after.status !== before.status) {
-      return { ...base, action: 'entity.scope_changed', message: `Marked ${after.title} as ${after.status}` };
+      return {
+        ...base,
+        action: 'entity.scope_changed',
+        message: `Marked ${after.title} as ${after.status}`,
+      };
     }
     if (before.kind === 'link' && after.status !== before.status) {
-      return { ...base, action: 'link.status_changed', message: `Marked the link "${clip(after.title, 100)}" as ${after.status}` };
+      return {
+        ...base,
+        action: 'link.status_changed',
+        message: `Marked the link "${clip(after.title, 100)}" as ${after.status}`,
+      };
     }
     if ((after.text ?? '') !== (before.text ?? '')) {
-      return { ...base, action: 'item.text_changed', message: `Edited ${before.kind === 'comment' ? 'a comment' : before.ref}`, before: before.text, after: after.text };
+      return {
+        ...base,
+        action: 'item.text_changed',
+        message: `Edited ${before.kind === 'comment' ? 'a comment' : before.ref}`,
+        before: before.text,
+        after: after.text,
+      };
     }
     if (after.exclude_from_ai !== before.exclude_from_ai) {
-      return { ...base, action: 'item.ai_visibility', message: after.exclude_from_ai ? `Hid ${before.ref} from agents` : `Shared ${before.ref} with agents` };
+      return {
+        ...base,
+        action: 'item.ai_visibility',
+        message: after.exclude_from_ai
+          ? `Hid ${before.ref} from agents`
+          : `Shared ${before.ref} with agents`,
+      };
     }
-    return { ...base, action: 'item.updated', message: `Edited ${before.ref}: ${clip(after.title, 100)}` };
+    return {
+      ...base,
+      action: 'item.updated',
+      message: `Edited ${before.ref}: ${clip(after.title, 100)}`,
+    };
   }
 
-  private async afterUpdate(recordId: string, before: StoredItem, after: StoredItem, actor: Actor): Promise<void> {
-    if (after.kind === 'claim' && after.status !== before.status && (after.status === 'supported' || after.status === 'refuted')) {
+  private async afterUpdate(
+    recordId: string,
+    before: StoredItem,
+    after: StoredItem,
+    actor: Actor
+  ): Promise<void> {
+    if (
+      after.kind === 'claim' &&
+      after.status !== before.status &&
+      (after.status === 'supported' || after.status === 'refuted')
+    ) {
       await this.completeTasksForClaim(recordId, after as unknown as ClaimItem, actor);
     }
     if (after.kind === 'proposal' && after.status === 'approved' && before.status !== 'approved') {
@@ -2287,20 +2855,34 @@ export class InvestigationsService {
     }
   }
 
-  public async updateItem(recordId: string, itemId: string, req: UpdateItemRequest): Promise<InvestigationItem> {
-    await this.load(recordId);
+  public async updateItem(
+    recordId: string,
+    itemId: string,
+    req: UpdateItemRequest
+  ): Promise<InvestigationItem> {
+    await this.loadForWrite(recordId);
     return this.updateItemUnchecked(recordId, itemId, req);
   }
 
-  public async updateItemUnchecked(recordId: string, itemId: string, req: UpdateItemRequest): Promise<InvestigationItem> {
+  public async updateItemUnchecked(
+    recordId: string,
+    itemId: string,
+    req: UpdateItemRequest
+  ): Promise<InvestigationItem> {
+    await this.ensureCanWrite();
     const actor = this.actor(req.actor);
-    const current = await this.es.get<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, id: itemId }, { ignore: [404] });
+    const current = await this.es.get<StoredItem>(
+      { index: INVESTIGATION_ITEMS_INDEX, id: itemId },
+      { ignore: [404] }
+    );
     if (!current.found || !current._source || current._source.record_id !== recordId) {
       throw Boom.notFound(`Item ${itemId} not found`);
     }
     const currentVersion = encodeVersion(current._seq_no, current._primary_term);
     if (req.version !== currentVersion) {
-      throw Boom.conflict(`Item ${current._source.ref} was changed by someone else. Reload it and try again.`);
+      throw Boom.conflict(
+        `Item ${current._source.ref} was changed by someone else. Reload it and try again.`
+      );
     }
     const ts = now();
     const before = current._source;
@@ -2316,7 +2898,9 @@ export class InvestigationsService {
       });
     } catch (error) {
       if (error?.meta?.statusCode === 409) {
-        throw Boom.conflict(`Item ${before.ref} was changed by someone else. Reload it and try again.`);
+        throw Boom.conflict(
+          `Item ${before.ref} was changed by someone else. Reload it and try again.`
+        );
       }
       throw error;
     }
@@ -2330,31 +2914,55 @@ export class InvestigationsService {
     return { ...rest, version: encodeVersion(res._seq_no, res._primary_term) } as InvestigationItem;
   }
 
-  public async bulkUpdateItems(recordId: string, req: BulkUpdateItemsRequest): Promise<BulkUpdateItemsResponse> {
-    await this.load(recordId);
+  public async bulkUpdateItems(
+    recordId: string,
+    req: BulkUpdateItemsRequest
+  ): Promise<BulkUpdateItemsResponse> {
+    await this.loadForWrite(recordId);
     if (req.items.length > INVESTIGATION_LIMITS.maxBulkItems) {
       throw Boom.badRequest(`At most ${INVESTIGATION_LIMITS.maxBulkItems} items per request`);
     }
     const actor = this.actor(req.actor);
     const ts = now();
-    const got = await this.es.mget<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, ids: req.items.map((i) => i.id) });
+    const got = await this.es.mget<StoredItem>({
+      index: INVESTIGATION_ITEMS_INDEX,
+      ids: req.items.map((i) => i.id),
+    });
     const errors: BulkUpdateItemsResponse['errors'] = [];
     const planned: Array<{ before: StoredItem; after: StoredItem; seq: number; term: number }> = [];
     req.items.forEach((change, i) => {
-      const doc = got.docs[i] as { found?: boolean; _source?: StoredItem; _seq_no?: number; _primary_term?: number };
+      const doc = got.docs[i] as {
+        found?: boolean;
+        _source?: StoredItem;
+        _seq_no?: number;
+        _primary_term?: number;
+      };
       if (!doc.found || !doc._source || doc._source.record_id !== recordId) {
         errors.push({ id: change.id, status: 404, message: 'Not found' });
         return;
       }
       const version = encodeVersion(doc._seq_no, doc._primary_term) as string;
       if (change.version && change.version !== version) {
-        errors.push({ id: change.id, status: 409, message: `Item ${doc._source.ref} was changed by someone else` });
+        errors.push({
+          id: change.id,
+          status: 409,
+          message: `Item ${doc._source.ref} was changed by someone else`,
+        });
         return;
       }
       try {
-        planned.push({ before: doc._source, after: this.applyPatch(doc._source, change.patch, actor, ts), seq: doc._seq_no ?? 0, term: doc._primary_term ?? 0 });
+        planned.push({
+          before: doc._source,
+          after: this.applyPatch(doc._source, change.patch, actor, ts),
+          seq: doc._seq_no ?? 0,
+          term: doc._primary_term ?? 0,
+        });
       } catch (error) {
-        errors.push({ id: change.id, status: error?.output?.statusCode ?? 400, message: error.message });
+        errors.push({
+          id: change.id,
+          status: error?.output?.statusCode ?? 400,
+          message: error.message,
+        });
       }
     });
     const updated: InvestigationItem[] = [];
@@ -2362,7 +2970,14 @@ export class InvestigationsService {
       const res = await this.es.bulk({
         refresh: true,
         operations: planned.flatMap((p) => [
-          { index: { _index: INVESTIGATION_ITEMS_INDEX, _id: p.after.id, if_seq_no: p.seq, if_primary_term: p.term } },
+          {
+            index: {
+              _index: INVESTIGATION_ITEMS_INDEX,
+              _id: p.after.id,
+              if_seq_no: p.seq,
+              if_primary_term: p.term,
+            },
+          },
           p.after,
         ]),
       });
@@ -2370,11 +2985,18 @@ export class InvestigationsService {
       res.items.forEach((entry, i) => {
         const op = entry.index;
         if (op?.error) {
-          errors.push({ id: planned[i].after.id, status: op.status, message: op.error.reason ?? op.error.type });
+          errors.push({
+            id: planned[i].after.id,
+            status: op.status,
+            message: op.error.reason ?? op.error.type,
+          });
         } else {
           done.push(planned[i]);
           const { ref_num: _r, ...rest } = planned[i].after;
-          updated.push({ ...rest, version: encodeVersion(op?._seq_no, op?._primary_term) } as InvestigationItem);
+          updated.push({
+            ...rest,
+            version: encodeVersion(op?._seq_no, op?._primary_term),
+          } as InvestigationItem);
         }
       });
       const layoutOnly = req.items.every((change) => isLayoutOnly(change.patch));
@@ -2382,7 +3004,9 @@ export class InvestigationsService {
         return { items: updated, errors };
       }
       if (done.length === 1) {
-        await this.appendActivity(recordId, [this.describeUpdate(done[0].before, done[0].after, actor, ts)]);
+        await this.appendActivity(recordId, [
+          this.describeUpdate(done[0].before, done[0].after, actor, ts),
+        ]);
       } else if (done.length > 1) {
         const statuses = Array.from(new Set(done.map((d) => d.after.status).filter(Boolean)));
         await this.appendActivity(recordId, [
@@ -2390,8 +3014,14 @@ export class InvestigationsService {
             ts,
             actor,
             action: 'items.updated',
-            message: `Updated ${plural(done.length, 'item')}${statuses.length === 1 ? ` to ${statuses[0]}` : ''}`,
-            details: done.slice(0, 10).map((d) => d.before.ref).join(', ') + (done.length > 10 ? ', …' : ''),
+            message: `Updated ${plural(done.length, 'item')}${
+              statuses.length === 1 ? ` to ${statuses[0]}` : ''
+            }`,
+            details:
+              done
+                .slice(0, 10)
+                .map((d) => d.before.ref)
+                .join(', ') + (done.length > 10 ? ', …' : ''),
             links: [],
           },
         ]);
@@ -2403,9 +3033,13 @@ export class InvestigationsService {
   }
 
   public async bulkDeleteItems(recordId: string, ids: string[]): Promise<{ deleted: number }> {
-    await this.load(recordId);
+    await this.loadForWrite(recordId);
     const actor = this.actor();
-    const got = await this.es.mget<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, ids, _source_includes: ['ref', 'title', 'record_id', 'kind'] });
+    const got = await this.es.mget<StoredItem>({
+      index: INVESTIGATION_ITEMS_INDEX,
+      ids,
+      _source_includes: ['ref', 'title', 'record_id', 'kind'],
+    });
     const owned = got.docs
       .map((d) => d as { found?: boolean; _id: string; _source?: StoredItem })
       .filter((d) => d.found && d._source?.record_id === recordId);
@@ -2413,15 +3047,34 @@ export class InvestigationsService {
     const res = await this.es.deleteByQuery({
       index: INVESTIGATION_ITEMS_INDEX,
       refresh: true,
-      query: { bool: { filter: [term('record_id', recordId), terms('id', owned.map((d) => d._id))] } },
+      query: {
+        bool: {
+          filter: [
+            term('record_id', recordId),
+            terms(
+              'id',
+              owned.map((d) => d._id)
+            ),
+          ],
+        },
+      },
     });
     await this.appendActivity(recordId, [
       {
         ts: now(),
         actor,
         action: 'items.deleted',
-        message: owned.length === 1 ? `Removed ${describeItem(owned[0]._source as StoredItem)}` : `Removed ${plural(owned.length, 'item')}`,
-        details: owned.length > 1 ? owned.slice(0, 10).map((d) => d._source?.ref).join(', ') : null,
+        message:
+          owned.length === 1
+            ? `Removed ${describeItem(owned[0]._source as StoredItem)}`
+            : `Removed ${plural(owned.length, 'item')}`,
+        details:
+          owned.length > 1
+            ? owned
+                .slice(0, 10)
+                .map((d) => d._source?.ref)
+                .join(', ')
+            : null,
         before: owned.map((d) => ({ id: d._id, ref: d._source?.ref, title: d._source?.title })),
         links: [],
       },
@@ -2435,19 +3088,27 @@ export class InvestigationsService {
   /* ---------------------------------------------------------------- */
 
   public async importIndicators(recordId: string, csv: string): Promise<ImportIndicatorsResponse> {
-    const { record } = await this.load(recordId);
+    const { record } = await this.loadForWrite(recordId);
     const actor = this.actor();
     const rows = parseCsv(csv);
     if (!rows.length) throw Boom.badRequest('The CSV is empty');
     const header = rows[0].map((h) => h.trim().toLowerCase());
     const hasHeader = header.includes('value') || header.includes('indicator');
     const valueIdx = hasHeader ? Math.max(header.indexOf('value'), header.indexOf('indicator')) : 0;
-    const typeIdx = hasHeader ? Math.max(header.indexOf('type'), header.indexOf('indicator_type')) : -1;
-    const whyIdx = hasHeader ? Math.max(header.indexOf('why'), header.indexOf('note'), header.indexOf('description')) : -1;
+    const typeIdx = hasHeader
+      ? Math.max(header.indexOf('type'), header.indexOf('indicator_type'))
+      : -1;
+    const whyIdx = hasHeader
+      ? Math.max(header.indexOf('why'), header.indexOf('note'), header.indexOf('description'))
+      : -1;
     const data = hasHeader ? rows.slice(1) : rows;
     const errors: ImportIndicatorsResponse['errors'] = [];
     const seen = new Set<string>();
-    const parsed: Array<{ value: string; type: ReturnType<typeof parseIndicatorType>; why: string | null }> = [];
+    const parsed: Array<{
+      value: string;
+      type: ReturnType<typeof parseIndicatorType>;
+      why: string | null;
+    }> = [];
     data.forEach((row, i) => {
       const value = (row[valueIdx] ?? '').trim();
       const line = i + (hasHeader ? 2 : 1);
@@ -2462,7 +3123,13 @@ export class InvestigationsService {
       const key = value.toLowerCase();
       if (seen.has(key)) return;
       seen.add(key);
-      parsed.push({ value, type: parseIndicatorType(typeIdx >= 0 ? row[typeIdx] : undefined, value), why: whyIdx >= 0 ? (row[whyIdx] ?? '').trim() || null : null });
+      const type = parseIndicatorType(typeIdx >= 0 ? row[typeIdx] : undefined, value);
+      const invalid = validateIndicatorValue(type, value);
+      if (invalid) {
+        errors.push({ line, message: `"${clip(value, 80)}" is ${invalid}` });
+        return;
+      }
+      parsed.push({ value, type, why: whyIdx >= 0 ? (row[whyIdx] ?? '').trim() || null : null });
     });
     const existing = new Set<string>();
     for (let i = 0; i < parsed.length; i += 1000) {
@@ -2470,7 +3137,9 @@ export class InvestigationsService {
       const res = await this.es.search({
         index: INVESTIGATION_ITEMS_INDEX,
         size: 0,
-        query: { bool: { filter: [term('record_id', recordId), terms('evidence.indicator.value', chunk)] } },
+        query: {
+          bool: { filter: [term('record_id', recordId), terms('evidence.indicator.value', chunk)] },
+        },
         aggs: { v: { terms: { field: 'evidence.indicator.value', size: chunk.length } } },
       });
       buckets(res.aggregations?.v).forEach((b) => existing.add(b.key));
@@ -2512,9 +3181,15 @@ export class InvestigationsService {
     return { created, skipped_duplicates: Math.max(skippedDuplicates, 0), errors };
   }
 
-  public async exportItems(recordId: string, req: ExportItemsRequest): Promise<{ body: string; contentType: string; filename: string }> {
+  public async exportItems(
+    recordId: string,
+    req: ExportItemsRequest
+  ): Promise<{ body: string; contentType: string; filename: string }> {
     const { record } = await this.load(recordId);
-    const { query, postFilter } = this.buildItemQuery(recordId, { ...req, kind: req.kind?.length ? req.kind : ['evidence'] });
+    const { query, postFilter } = this.buildItemQuery(recordId, {
+      ...req,
+      kind: req.kind?.length ? req.kind : ['evidence'],
+    });
     const rows: EvidenceItem[] = [];
     let searchAfter: Array<string | number> | undefined;
     while (rows.length < 50000) {
@@ -2540,7 +3215,9 @@ export class InvestigationsService {
           rows.map((e) => ({
             id: e.ref,
             type: e.evidence ? EVIDENCE_TYPE_LABELS[e.evidence.type] : e.kind,
-            indicator_type: e.evidence?.indicator ? INDICATOR_TYPE_LABELS[e.evidence.indicator.type] : null,
+            indicator_type: e.evidence?.indicator
+              ? INDICATOR_TYPE_LABELS[e.evidence.indicator.type]
+              : null,
             value: value(e),
             added_by: e.created_by.name,
             added: e.created_at,
@@ -2554,7 +3231,11 @@ export class InvestigationsService {
       };
     }
     if (req.format === 'list') {
-      return { contentType: 'text/plain', filename: `${base}.txt`, body: rows.map(value).join('\n') };
+      return {
+        contentType: 'text/plain',
+        filename: `${base}.txt`,
+        body: rows.map(value).join('\n'),
+      };
     }
     if (req.format === 'stix') {
       const pattern = (e: EvidenceItem): string | null => {
@@ -2571,7 +3252,11 @@ export class InvestigationsService {
           case 'email':
             return `[email-addr:value = '${v}']`;
           case 'file_hash':
-            return v.length === 64 ? `[file:hashes.'SHA-256' = '${v}']` : v.length === 40 ? `[file:hashes.'SHA-1' = '${v}']` : `[file:hashes.MD5 = '${v}']`;
+            return v.length === 64
+              ? `[file:hashes.'SHA-256' = '${v}']`
+              : v.length === 40
+              ? `[file:hashes.'SHA-1' = '${v}']`
+              : `[file:hashes.MD5 = '${v}']`;
           case 'file_path':
             return `[file:name = '${v.split(/[\\/]/).pop()}']`;
           case 'registry_key':
@@ -2600,7 +3285,11 @@ export class InvestigationsService {
       return {
         contentType: 'application/json',
         filename: `${base}.stix.json`,
-        body: JSON.stringify({ type: 'bundle', id: `bundle--${uuidv4()}`, objects, created }, null, 2),
+        body: JSON.stringify(
+          { type: 'bundle', id: `bundle--${uuidv4()}`, objects, created },
+          null,
+          2
+        ),
       };
     }
     const header = 'id,type,indicator_type,value,added_by,added,source,why,sha256';
@@ -2619,28 +3308,58 @@ export class InvestigationsService {
         .map(toCsvCell)
         .join(',')
     );
-    return { contentType: 'text/csv', filename: `${base}.csv`, body: [header, ...lines].join('\n') };
+    return {
+      contentType: 'text/csv',
+      filename: `${base}.csv`,
+      body: [header, ...lines].join('\n'),
+    };
   }
 
   public async preserve(recordId: string, ids: string[]): Promise<InvestigationItem[]> {
-    await this.load(recordId);
+    await this.loadForWrite(recordId);
     const actor = this.actor();
     const ts = now();
     const got = await this.es.mget<StoredItem>({ index: INVESTIGATION_ITEMS_INDEX, ids });
     const updates: Array<{ id: string; version: string; patch: ItemPatch }> = [];
     for (const raw of got.docs) {
-      const doc = raw as { found?: boolean; _id: string; _source?: StoredItem; _seq_no?: number; _primary_term?: number };
-      if (!doc.found || !doc._source || doc._source.record_id !== recordId || doc._source.kind !== 'evidence') continue;
+      const doc = raw as {
+        found?: boolean;
+        _id: string;
+        _source?: StoredItem;
+        _seq_no?: number;
+        _primary_term?: number;
+      };
+      if (
+        !doc.found ||
+        !doc._source ||
+        doc._source.record_id !== recordId ||
+        doc._source.kind !== 'evidence'
+      )
+        continue;
       const item = doc._source as unknown as EvidenceItem & { ref_num: number };
       let snapshot = item.evidence.snapshot ?? null;
       if (item.evidence.type === 'alert' && item.evidence.alert?.id && item.evidence.alert.index) {
         const res = await this.deps.scopedEsClient
-          .search<Record<string, unknown>>({ index: item.evidence.alert.index, size: 1, query: { ids: { values: [item.evidence.alert.id] } } })
+          .search<Record<string, unknown>>({
+            index: item.evidence.alert.index,
+            size: 1,
+            query: { ids: { values: [item.evidence.alert.id] } },
+          })
           .catch(() => undefined);
         const src = res?.hits.hits[0]?._source as Record<string, unknown> | undefined;
         if (src) {
-          const get = (path: string): unknown => path.split('.').reduce<unknown>((o, k) => (o && typeof o === 'object' ? (o as Record<string, unknown>)[k] ?? (o as Record<string, unknown>)[path] : undefined), src) ?? src[path];
-          const str = (v: unknown) => (v === undefined || v === null ? '' : Array.isArray(v) ? v.join(', ') : String(v));
+          const get = (path: string): unknown =>
+            path
+              .split('.')
+              .reduce<unknown>(
+                (o, k) =>
+                  o && typeof o === 'object'
+                    ? (o as Record<string, unknown>)[k] ?? (o as Record<string, unknown>)[path]
+                    : undefined,
+                src
+              ) ?? src[path];
+          const str = (v: unknown) =>
+            v === undefined || v === null ? '' : Array.isArray(v) ? v.join(', ') : String(v);
           snapshot = {
             kind: 'alert',
             severity: str(get('kibana.alert.severity')),
@@ -2650,7 +3369,15 @@ export class InvestigationsService {
             description: str(get('kibana.alert.rule.description')),
             reason: str(get('kibana.alert.reason')),
             mitre: [],
-            fields: ['host.name', 'user.name', 'process.name', 'process.parent.name', 'source.ip', 'destination.ip', 'kibana.alert.workflow_status']
+            fields: [
+              'host.name',
+              'user.name',
+              'process.name',
+              'process.parent.name',
+              'source.ip',
+              'destination.ip',
+              'kibana.alert.workflow_status',
+            ]
               .map((f) => [f, str(get(f))] as [string, string])
               .filter(([, v]) => v),
           };
@@ -2666,7 +3393,14 @@ export class InvestigationsService {
     if (!updates.length) return [];
     const res = await this.bulkUpdateItems(recordId, { items: updates, actor });
     await this.appendActivity(recordId, [
-      { ts, actor, action: 'evidence.preserved', message: `Preserved copies of ${plural(res.items.length, 'item')}`, details: res.items.map((i) => i.ref).join(', '), links: [] },
+      {
+        ts,
+        actor,
+        action: 'evidence.preserved',
+        message: `Preserved copies of ${plural(res.items.length, 'item')}`,
+        details: res.items.map((i) => i.ref).join(', '),
+        links: [],
+      },
     ]);
     return res.items;
   }
@@ -2676,20 +3410,27 @@ export class InvestigationsService {
     file: { buffer: Buffer; filename: string; mimeType?: string },
     why: string | null
   ): Promise<InvestigationItem> {
-    const { record } = await this.load(recordId);
+    const { record } = await this.loadForWrite(recordId);
     const actor = this.actor();
     const { Readable } = await import('stream');
     const digest = sha256(file.buffer);
     const attachment = await this.deps.casesClient.attachments.addFile({
       caseId: recordId,
-      file: Readable.from(file.buffer) as unknown as Parameters<CasesClient['attachments']['addFile']>[0]['file'],
+      file: Readable.from(file.buffer) as unknown as Parameters<
+        CasesClient['attachments']['addFile']
+      >[0]['file'],
       filename: file.filename.replace(/\.[^.]+$/, ''),
       mimeType: file.mimeType,
     });
     const att = attachment as unknown as { id: string; attachmentId?: string | string[] };
-    const fileId = Array.isArray(att.attachmentId) ? att.attachmentId[0] : att.attachmentId ?? att.id;
+    const fileId = Array.isArray(att.attachmentId)
+      ? att.attachmentId[0]
+      : att.attachmentId ?? att.id;
     const size = file.buffer.length;
-    const human = size > 1024 * 1024 ? `${(size / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(size / 1024))} KB`;
+    const human =
+      size > 1024 * 1024
+        ? `${(size / 1024 / 1024).toFixed(1)} MB`
+        : `${Math.max(1, Math.round(size / 1024))} KB`;
     const { items } = await this.bulkCreateItemsInternal(
       record,
       [
@@ -2700,7 +3441,13 @@ export class InvestigationsService {
             type: 'file',
             why,
             source: { label: 'Upload', kind: 'file', file_id: fileId, id: att.id },
-            snapshot: { kind: 'file', name: file.filename, size: human, sha256: digest, mime_type: file.mimeType },
+            snapshot: {
+              kind: 'file',
+              name: file.filename,
+              size: human,
+              sha256: digest,
+              mime_type: file.mimeType,
+            },
             snapshot_hash: digest,
           },
         },
@@ -2721,8 +3468,20 @@ export class InvestigationsService {
     size = 20
   ): Promise<RelatedRecord[]> {
     const should: QueryDslQueryContainer[] = [];
-    if (values.indicators.length) should.push(terms('evidence.indicator.value', values.indicators.map((v) => v.toLowerCase())));
-    if (values.entities.length) should.push(terms('entity.name', values.entities.map((v) => v.toLowerCase())));
+    if (values.indicators.length)
+      should.push(
+        terms(
+          'evidence.indicator.value',
+          values.indicators.map((v) => v.toLowerCase())
+        )
+      );
+    if (values.entities.length)
+      should.push(
+        terms(
+          'entity.name',
+          values.entities.map((v) => v.toLowerCase())
+        )
+      );
     if (values.alerts.length) should.push(terms('evidence.alert.id', values.alerts));
     if (!should.length) return [];
     const res = await this.es.search({
@@ -2740,28 +3499,63 @@ export class InvestigationsService {
         records: {
           terms: { field: 'record_id', size: size * 2 },
           aggs: {
-            ind: { terms: { field: 'evidence.indicator.value', size: 5, ...(values.indicators.length ? { include: values.indicators.map((v) => v.toLowerCase()) } : {}) } },
-            ent: { terms: { field: 'entity.name', size: 5, ...(values.entities.length ? { include: values.entities.map((v) => v.toLowerCase()) } : {}) } },
-            alr: { filter: values.alerts.length ? terms('evidence.alert.id', values.alerts) : { match_none: {} } },
+            ind: {
+              terms: {
+                field: 'evidence.indicator.value',
+                size: 5,
+                ...(values.indicators.length
+                  ? { include: values.indicators.map((v) => v.toLowerCase()) }
+                  : {}),
+              },
+            },
+            ent: {
+              terms: {
+                field: 'entity.name',
+                size: 5,
+                ...(values.entities.length
+                  ? { include: values.entities.map((v) => v.toLowerCase()) }
+                  : {}),
+              },
+            },
+            alr: {
+              filter: values.alerts.length
+                ? terms('evidence.alert.id', values.alerts)
+                : { match_none: {} },
+            },
           },
         },
       },
     });
-    const recBuckets = buckets(res.aggregations?.records) as Array<Bucket & Record<string, AggregationsAggregate>>;
+    const recBuckets = buckets(res.aggregations?.records) as Array<
+      Bucket & Record<string, AggregationsAggregate>
+    >;
     if (!recBuckets.length) return [];
-    const docs = await this.es.mget<StoredRecord>({ index: INVESTIGATION_RECORDS_INDEX, ids: recBuckets.map((b) => b.key) });
+    const docs = await this.es.mget<StoredRecord>({
+      index: INVESTIGATION_RECORDS_INDEX,
+      ids: recBuckets.map((b) => b.key),
+    });
     const byId = new Map(
       docs.docs
         .map((d) => d as { found?: boolean; _id: string; _source?: StoredRecord })
-        .filter((d) => d.found && d._source && d._source.space_id === this.deps.spaceId && this.canRead(d._source))
+        .filter(
+          (d) =>
+            d.found &&
+            d._source &&
+            d._source.space_id === this.deps.spaceId &&
+            this.canRead(d._source)
+        )
         .map((d) => [d._id, d._source as StoredRecord])
     );
     return recBuckets
       .filter((b) => byId.has(b.key))
       .map((b) => {
         const r = byId.get(b.key) as StoredRecord;
-        const ind = buckets(b.ind).map((x) => x.key).filter((k) => values.indicators.length);
-        const ent = buckets(b.ent).map((x) => x.key).filter(() => values.entities.length);
+        const ind = buckets(b.ind)
+          .map((x) => x.key)
+          .filter((k) => values.indicators.length);
+        const ent = buckets(b.ent)
+          .map((x) => x.key)
+          .filter(() => values.entities.length);
         const alr = filterCount(b.alr);
         const reasons: RelatedRecord['reasons'] = [
           ...ent.map((v) => ({ type: 'entity' as const, value: v })),
@@ -2792,8 +3586,14 @@ export class InvestigationsService {
   }
 
   /** Every indicator value, entity name and alert id on a record (composite paging, capped). */
-  private async recordValues(recordId: string): Promise<{ indicators: string[]; entities: string[]; alerts: string[] }> {
-    const collect = async (field: string, filter: QueryDslQueryContainer, cap: number): Promise<string[]> => {
+  private async recordValues(
+    recordId: string
+  ): Promise<{ indicators: string[]; entities: string[]; alerts: string[] }> {
+    const collect = async (
+      field: string,
+      filter: QueryDslQueryContainer,
+      cap: number
+    ): Promise<string[]> => {
       const out: string[] = [];
       let after: Record<string, string | number | null> | undefined;
       while (out.length < cap) {
@@ -2801,9 +3601,19 @@ export class InvestigationsService {
           index: INVESTIGATION_ITEMS_INDEX,
           size: 0,
           query: { bool: { filter: [term('record_id', recordId), filter] } },
-          aggs: { v: { composite: { size: 2000, sources: [{ v: { terms: { field } } }], ...(after ? { after } : {}) } } },
+          aggs: {
+            v: {
+              composite: {
+                size: 2000,
+                sources: [{ v: { terms: { field } } }],
+                ...(after ? { after } : {}),
+              },
+            },
+          },
         });
-        const agg = res.aggregations?.v as { buckets: Array<{ key: { v: string } }>; after_key?: Record<string, string> } | undefined;
+        const agg = res.aggregations?.v as
+          | { buckets: Array<{ key: { v: string } }>; after_key?: Record<string, string> }
+          | undefined;
         const page = agg?.buckets ?? [];
         out.push(...page.map((b) => b.key.v));
         if (page.length < 2000 || !agg?.after_key) break;
@@ -2813,7 +3623,11 @@ export class InvestigationsService {
     };
     const [indicators, entities, alerts] = await Promise.all([
       collect('evidence.indicator.value', { exists: { field: 'evidence.indicator.value' } }, 10000),
-      collect('entity.name', { bool: { filter: [term('kind', 'entity')], must_not: [term('status', 'dismissed')] } }, 2000),
+      collect(
+        'entity.name',
+        { bool: { filter: [term('kind', 'entity')], must_not: [term('status', 'dismissed')] } },
+        2000
+      ),
       collect('evidence.alert.id', { exists: { field: 'evidence.alert.id' } }, 10000),
     ]);
     return { indicators, entities, alerts };
@@ -2822,18 +3636,49 @@ export class InvestigationsService {
   public async related(recordId: string): Promise<RelatedRecordsResponse> {
     const { record } = await this.load(recordId);
     const values = await this.recordValues(recordId);
-    const exclude = [recordId, ...(record.merged_from ?? []), ...(record.merged_into ? [record.merged_into] : [])];
+    const exclude = [
+      recordId,
+      ...(record.merged_from ?? []),
+      ...(record.merged_into ? [record.merged_into] : []),
+    ];
     const related = await this.otherRecordsMatching(values, exclude);
-    const mergedIds = [...(record.merged_from ?? []), ...(record.merged_into ? [record.merged_into] : [])];
+    const mergedIds = [
+      ...(record.merged_from ?? []),
+      ...(record.merged_into ? [record.merged_into] : []),
+    ];
     if (mergedIds.length) {
-      const docs = await this.es.mget<StoredRecord>({ index: INVESTIGATION_RECORDS_INDEX, ids: mergedIds });
+      const docs = await this.es.mget<StoredRecord>({
+        index: INVESTIGATION_RECORDS_INDEX,
+        ids: mergedIds,
+      });
       for (const raw of docs.docs) {
         const d = raw as { found?: boolean; _source?: StoredRecord };
         if (!d.found || !d._source || !this.canRead(d._source)) continue;
         const r = d._source;
         related.unshift({
-          record: { id: r.id, display_id: r.display_id, title: r.title, status: r.status, priority: r.priority, created_at: r.created_at, updated_at: r.updated_at, owner: r.owner ?? null, close_outcome: r.close_outcome ?? null, counters: { ...emptyCounters(), ...(r.counters ?? {}) }, summary: r.summary ?? null, origin: r.origin },
-          reasons: [{ type: 'merged', value: r.merged_into === recordId ? 'Merged into this investigation' : 'This investigation was merged into it' }],
+          record: {
+            id: r.id,
+            display_id: r.display_id,
+            title: r.title,
+            status: r.status,
+            priority: r.priority,
+            created_at: r.created_at,
+            updated_at: r.updated_at,
+            owner: r.owner ?? null,
+            close_outcome: r.close_outcome ?? null,
+            counters: { ...emptyCounters(), ...(r.counters ?? {}) },
+            summary: r.summary ?? null,
+            origin: r.origin,
+          },
+          reasons: [
+            {
+              type: 'merged',
+              value:
+                r.merged_into === recordId
+                  ? 'Merged into this investigation'
+                  : 'This investigation was merged into it',
+            },
+          ],
           shared_values: [],
         });
       }
@@ -2844,19 +3689,28 @@ export class InvestigationsService {
   public async findDuplicates(req: DuplicateCheckRequest): Promise<{ related: RelatedRecord[] }> {
     await this.ensureCanReadOwner();
     const related = await this.otherRecordsMatching(
-      { indicators: req.indicator_values ?? [], entities: req.entity_names ?? [], alerts: req.alert_ids ?? [] },
+      {
+        indicators: req.indicator_values ?? [],
+        entities: req.entity_names ?? [],
+        alerts: req.alert_ids ?? [],
+      },
       req.exclude_record_id ? [req.exclude_record_id] : [],
       10
     );
     const cutoff = Date.now() - 30 * 24 * 3600 * 1000;
     return {
       related: related.filter(
-        (r) => r.record.status !== 'closed' || Date.parse(r.record.close_outcome?.closed_at ?? r.record.updated_at) >= cutoff
+        (r) =>
+          r.record.status !== 'closed' ||
+          Date.parse(r.record.close_outcome?.closed_at ?? r.record.updated_at) >= cutoff
       ),
     };
   }
 
-  public async lookupIndicators(values: string[], excludeRecordId?: string): Promise<IndicatorLookupResponse> {
+  public async lookupIndicators(
+    values: string[],
+    excludeRecordId?: string
+  ): Promise<IndicatorLookupResponse> {
     await this.ensureCanReadOwner();
     const lower = Array.from(new Set(values.map((v) => v.toLowerCase()))).slice(0, 500);
     if (!lower.length) return { values: {} };
@@ -2876,8 +3730,12 @@ export class InvestigationsService {
         },
       },
     });
-    const valueBuckets = buckets(res.aggregations?.v) as Array<Bucket & { r: AggregationsAggregate }>;
-    const recordIds = Array.from(new Set(valueBuckets.flatMap((b) => buckets(b.r).map((x) => x.key))));
+    const valueBuckets = buckets(res.aggregations?.v) as Array<
+      Bucket & { r: AggregationsAggregate }
+    >;
+    const recordIds = Array.from(
+      new Set(valueBuckets.flatMap((b) => buckets(b.r).map((x) => x.key)))
+    );
     const records = new Map<string, StoredRecord>();
     if (recordIds.length) {
       const docs = await this.es.mget<StoredRecord>({
@@ -2887,7 +3745,13 @@ export class InvestigationsService {
       });
       for (const raw of docs.docs) {
         const d = raw as { found?: boolean; _id: string; _source?: StoredRecord };
-        if (d.found && d._source && d._source.space_id === this.deps.spaceId && this.canRead(d._source)) records.set(d._id, d._source);
+        if (
+          d.found &&
+          d._source &&
+          d._source.space_id === this.deps.spaceId &&
+          this.canRead(d._source)
+        )
+          records.set(d._id, d._source);
       }
     }
     const out: IndicatorLookupResponse['values'] = {};
@@ -2914,7 +3778,15 @@ export class InvestigationsService {
     const recent = await this.es.search({
       index: INVESTIGATION_ITEMS_INDEX,
       size: 0,
-      query: { bool: { filter: [term('record_id', recordId), term('kind', 'evidence'), { range: { created_at: { gt: since } } }] } },
+      query: {
+        bool: {
+          filter: [
+            term('record_id', recordId),
+            term('kind', 'evidence'),
+            { range: { created_at: { gt: since } } },
+          ],
+        },
+      },
       aggs: {
         type: { terms: { field: 'evidence.type', size: 20 } },
         rules: { terms: { field: 'evidence.alert.rule_name', size: 1 } },
@@ -2927,16 +3799,26 @@ export class InvestigationsService {
       const rule = buckets(aggs.rules)[0];
       out.push({
         key: 'alerts',
-        headline: `+${byType.alert.toLocaleString('en-US')} alerts, ${counters.alerts.toLocaleString('en-US')} in total`,
+        headline: `+${byType.alert.toLocaleString(
+          'en-US'
+        )} alerts, ${counters.alerts.toLocaleString('en-US')} in total`,
         detail: rule ? `Most are "${rule.key}" alerts.` : 'New alerts were attached.',
         target: { kind: 'tab', id: 'evidence', label: 'Evidence' },
       });
     }
     if (byType.indicator) {
-      const kinds = buckets(aggs.ind).map((b) => `${b.doc_count} ${INDICATOR_TYPE_LABELS[b.key as keyof typeof INDICATOR_TYPE_LABELS]?.toLowerCase() ?? b.key}`);
+      const kinds = buckets(aggs.ind).map(
+        (b) =>
+          `${b.doc_count} ${
+            INDICATOR_TYPE_LABELS[b.key as keyof typeof INDICATOR_TYPE_LABELS]?.toLowerCase() ??
+            b.key
+          }`
+      );
       out.push({
         key: 'indicators',
-        headline: `+${byType.indicator.toLocaleString('en-US')} indicators, ${counters.indicators.toLocaleString('en-US')} in total`,
+        headline: `+${byType.indicator.toLocaleString(
+          'en-US'
+        )} indicators, ${counters.indicators.toLocaleString('en-US')} in total`,
         detail: kinds.length ? `Including ${kinds.join(', ')}.` : 'New indicators were added.',
         target: { kind: 'tab', id: 'evidence', label: 'Review new evidence' },
       });
@@ -2944,7 +3826,15 @@ export class InvestigationsService {
     const verdicts = await this.es.search<ActivityEntry>({
       index: INVESTIGATION_ACTIVITY_INDEX,
       size: 50,
-      query: { bool: { filter: [term('record_id', recordId), term('action', 'record.agent_verdict_changed'), { range: { ts: { gt: since } } }] } },
+      query: {
+        bool: {
+          filter: [
+            term('record_id', recordId),
+            term('action', 'record.agent_verdict_changed'),
+            { range: { ts: { gt: since } } },
+          ],
+        },
+      },
       sort: [{ ts: { order: 'asc' } }],
     });
     const vh = verdicts.hits.hits.map((h) => h._source as ActivityEntry);
@@ -2964,7 +3854,11 @@ export class InvestigationsService {
         target: { kind: 'tab', id: 'overview', label: 'Verdict' },
       });
     }
-    const stale = await this.searchItems<ClaimItem>(recordId, { bool: { filter: [term('kind', 'claim'), { exists: { field: 'claim.stale_reason' } }] } }, 20);
+    const stale = await this.searchItems<ClaimItem>(
+      recordId,
+      { bool: { filter: [term('kind', 'claim'), { exists: { field: 'claim.stale_reason' } }] } },
+      20
+    );
     if (stale.length) {
       out.push({
         key: 'stale_claims',
@@ -2977,7 +3871,9 @@ export class InvestigationsService {
       const left = await this.es.search<ActivityEntry>({
         index: INVESTIGATION_ACTIVITY_INDEX,
         size: 1,
-        query: { bool: { filter: [term('record_id', recordId), term('action', 'record.owner_changed')] } },
+        query: {
+          bool: { filter: [term('record_id', recordId), term('action', 'record.owner_changed')] },
+        },
         sort: [{ ts: { order: 'desc' } }],
       });
       const at = left.hits.hits[0]?._source?.ts;
@@ -2985,7 +3881,9 @@ export class InvestigationsService {
       out.push({
         key: 'owner',
         headline: 'The owner left',
-        detail: days ? `Nobody has owned this for ${plural(days, 'day')}.` : 'Nobody owns this investigation.',
+        detail: days
+          ? `Nobody has owned this for ${plural(days, 'day')}.`
+          : 'Nobody owns this investigation.',
         target: { kind: 'tab', id: 'activity', label: 'Activity' },
       });
     }
@@ -2994,7 +3892,10 @@ export class InvestigationsService {
 
   public async history(recordId: string, targetId?: string): Promise<ChangeHistoryResponse> {
     const { record } = await this.load(recordId);
-    const filter: QueryDslQueryContainer[] = [terms('record_id', [recordId, ...(record.merged_from ?? [])]), terms('action', HISTORY_ACTIONS)];
+    const filter: QueryDslQueryContainer[] = [
+      terms('record_id', [recordId, ...(record.merged_from ?? [])]),
+      terms('action', HISTORY_ACTIONS),
+    ];
     if (targetId) filter.push(term('target.id', targetId));
     const res = await this.es.search<ActivityEntry>({
       index: INVESTIGATION_ACTIVITY_INDEX,
@@ -3025,7 +3926,8 @@ export class InvestigationsService {
         what = `Note ${e.target?.ref ?? ''}`.trim();
         text = typeof after === 'string' ? after : null;
       }
-      if (text) versions.push({ ts: e.ts, actor: e.actor, what, text, target_id: e.target?.id ?? null });
+      if (text)
+        versions.push({ ts: e.ts, actor: e.actor, what, text, target_id: e.target?.id ?? null });
     }
     return { versions };
   }
@@ -3062,19 +3964,30 @@ export class InvestigationsService {
     return { markdown, filename: `${record.display_id}-report.md` };
   }
 
-  public async createThread(recordId: string, req: CreateThreadRequest): Promise<{ record: InvestigationRecord; thread: ThreadRef }> {
-    const { record } = await this.load(recordId);
+  public async createThread(
+    recordId: string,
+    req: CreateThreadRequest
+  ): Promise<{ record: InvestigationRecord; thread: ThreadRef }> {
+    const { record } = await this.loadForWrite(recordId);
     const create = this.deps.agent.createConversation;
     const { available, reason } = await this.deps.agent.isAvailable();
     if (!create || !available) {
-      throw Boom.badRequest(reason ?? 'Agent Builder is not available, so threads cannot be created.');
+      throw Boom.badRequest(
+        reason ?? 'Agent Builder is not available, so threads cannot be created.'
+      );
     }
     if ((record.threads ?? []).length >= INVESTIGATION_LIMITS.maxThreads) {
       throw Boom.badRequest(`At most ${INVESTIGATION_LIMITS.maxThreads} threads per investigation`);
     }
     const actor = this.actor();
     const conversationId = await create({ title: `${record.display_id}: ${req.title}`, recordId });
-    const thread: ThreadRef = { conversation_id: conversationId, title: req.title, created_at: now(), created_by: actor, anchor: req.anchor ?? null };
+    const thread: ThreadRef = {
+      conversation_id: conversationId,
+      title: req.title,
+      created_at: now(),
+      created_by: actor,
+      anchor: req.anchor ?? null,
+    };
     await this.es.update({
       index: INVESTIGATION_RECORDS_INDEX,
       id: recordId,
@@ -3114,7 +4027,11 @@ export class InvestigationsService {
       index: INVESTIGATION_RECORDS_INDEX,
       size: 1,
       _source: ['id'],
-      query: { bool: { filter: [term('conversation_ids', conversationId), term('space_id', this.deps.spaceId)] } },
+      query: {
+        bool: {
+          filter: [term('conversation_ids', conversationId), term('space_id', this.deps.spaceId)],
+        },
+      },
     });
     return res.hits.hits[0]?._source?.id ?? null;
   }
@@ -3125,9 +4042,24 @@ export class InvestigationsService {
     const newest = await this.es.search<StoredItem>({
       index: INVESTIGATION_ITEMS_INDEX,
       size: INVESTIGATION_LIMITS.digestNewestItems,
-      query: { bool: { filter: [term('record_id', recordId)], must_not: [term('exclude_from_ai', true), term('kind', 'comment')] } },
+      query: {
+        bool: {
+          filter: [term('record_id', recordId)],
+          must_not: [term('exclude_from_ai', true), term('kind', 'comment')],
+        },
+      },
       sort: [{ created_at: { order: 'desc' } }],
-      _source: { includes: ['ref', 'kind', 'title', 'status', 'created_at', 'created_by.name', 'evidence.type'] },
+      _source: {
+        includes: [
+          'ref',
+          'kind',
+          'title',
+          'status',
+          'created_at',
+          'created_by.name',
+          'evidence.type',
+        ],
+      },
     });
     const c = { ...emptyCounters(), ...(record.counters ?? {}) };
     const verdict = record.analyst_verdict
@@ -3138,13 +4070,27 @@ export class InvestigationsService {
     const lines = [
       `<investigation_digest id="${record.display_id}" record_id="${record.id}" as_of="${now()}">`,
       `Title: ${clip(record.title, 160)}`,
-      `Status: ${record.status} | Priority: ${record.priority} | Type: ${record.investigation_type} | Owner: ${record.owner?.name ?? 'none'} | Verdict: ${verdict}`,
-      record.summary ? `Summary: ${clip(record.summary, 400)}` : `Description: ${clip(record.description, 300)}`,
-      `Evidence: ${c.evidence} (${c.alerts} alerts, ${c.indicators} indicators) | Claims: ${c.claims} (${c.claims_by_status.open ?? 0} open, ${c.claims_by_status.blocked ?? 0} blocked, ${c.claims_needs_review} need review) | Scope: ${c.entities_in_scope} in scope, ${c.entities_suspected} suspected | Tasks: ${c.tasks_done}/${c.tasks - c.tasks_skipped} done, ${c.required_tasks_left} required left | Proposals pending: ${c.proposals_pending}`,
+      `Status: ${record.status} | Priority: ${record.priority} | Type: ${
+        record.investigation_type
+      } | Owner: ${record.owner?.name ?? 'none'} | Verdict: ${verdict}`,
+      record.summary
+        ? `Summary: ${clip(record.summary, 400)}`
+        : `Description: ${clip(record.description, 300)}`,
+      `Evidence: ${c.evidence} (${c.alerts} alerts, ${c.indicators} indicators) | Claims: ${
+        c.claims
+      } (${c.claims_by_status.open ?? 0} open, ${c.claims_by_status.blocked ?? 0} blocked, ${
+        c.claims_needs_review
+      } need review) | Scope: ${c.entities_in_scope} in scope, ${
+        c.entities_suspected
+      } suspected | Tasks: ${c.tasks_done}/${c.tasks - c.tasks_skipped} done, ${
+        c.required_tasks_left
+      } required left | Proposals pending: ${c.proposals_pending}`,
       'Newest items:',
       ...newest.hits.hits.map((h) => {
         const s = h._source as StoredItem & { evidence?: { type?: string } };
-        return `- ${s.ref} ${s.kind}${s.evidence?.type ? `/${s.evidence.type}` : ''}${s.status ? ` [${s.status}]` : ''}: ${clip(s.title, 100)} (${s.created_by?.name ?? '?'})`;
+        return `- ${s.ref} ${s.kind}${s.evidence?.type ? `/${s.evidence.type}` : ''}${
+          s.status ? ` [${s.status}]` : ''
+        }: ${clip(s.title, 100)} (${s.created_by?.name ?? '?'})`;
       }),
       'Read more with the investigation tools, one page at a time. Refer to items by ref (E12, C3, T5).',
       '</investigation_digest>',

@@ -120,6 +120,12 @@ export const PROCEDURE_SUMMARY = (type: string, done: number, total: number, lef
     values: { type, done, total, left },
   });
 
+export const PROCEDURE_NONE = (type: string) =>
+  i18n.translate('xpack.cases.investigations.overview.procedureNone', {
+    defaultMessage: '{type}: no procedure applied.',
+    values: { type },
+  });
+
 export const PROCEDURE_LINK = i18n.translate('xpack.cases.investigations.overview.procedureLink', {
   defaultMessage: 'Procedure',
 });
@@ -201,6 +207,13 @@ export const NEXT_FINISH_TASKS = (count: number) =>
 export const NEXT_REOPEN = i18n.translate('xpack.cases.investigations.overview.nextReopen', {
   defaultMessage: 'Reopen if new activity appears',
 });
+
+export const NEXT_APPLY_PROCEDURE = i18n.translate(
+  'xpack.cases.investigations.overview.nextApplyProcedure',
+  {
+    defaultMessage: 'Apply a procedure, or close the investigation with a structured outcome',
+  }
+);
 
 export const NEXT_CLOSE = i18n.translate('xpack.cases.investigations.overview.nextClose', {
   defaultMessage: 'Close the investigation with a structured outcome',
@@ -433,3 +446,10 @@ export const SUPERSEDED_NOTICE = (verdict: string) =>
       'Superseded by the analyst determination: {verdict}. This analysis stays on record.',
     values: { verdict },
   });
+
+export const VERDICT_FROM_CLOSE = i18n.translate(
+  'xpack.cases.investigations.overview.verdictFromClose',
+  {
+    defaultMessage: 'Set by the closing outcome. No separate determination was recorded.',
+  }
+);

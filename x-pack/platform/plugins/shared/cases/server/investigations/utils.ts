@@ -167,3 +167,22 @@ export const decodeCursor = (cursor: string): Array<string | number> => {
 
 export const plural = (n: number, one: string, many = `${one}s`): string =>
   `${n} ${n === 1 ? one : many}`;
+
+/** Checks a value against its indicator type; returns a reason when it does not fit. */
+export const validateIndicatorValue = (type: IndicatorType, value: string): string | null => {
+  const v = value.trim();
+  switch (type) {
+    case 'ip':
+      return IPV4.test(v) || IPV6.test(v) ? null : 'not a valid IP address';
+    case 'domain':
+      return DOMAIN.test(v) ? null : 'not a valid domain';
+    case 'url':
+      return URL_RE.test(v) && !/\s/.test(v) ? null : 'not a valid URL';
+    case 'file_hash':
+      return HASH.test(v) ? null : 'not an MD5, SHA-1, SHA-256 or SHA-512 hash';
+    case 'email':
+      return EMAIL.test(v) ? null : 'not a valid email address';
+    default:
+      return null;
+  }
+};
