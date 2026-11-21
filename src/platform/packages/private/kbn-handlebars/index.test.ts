@@ -21,6 +21,57 @@ it('Handlebars.create', () => {
 describe('Handlebars.compileAST', () => {
   describe('compiler options', () => {
     describe('noEscape', () => {
+      describe('non-string values', () => {
+        const html = { toString: () => '<b>&</b>' };
+
+        it('should escape an array with default value set for `noEscape`', () => {
+          expectTemplate('{{value}}')
+            .withInput({ value: ['<b>', '&'] })
+            .toCompileTo('&lt;b&gt;,&amp;');
+        });
+
+        it('should escape an object with a custom `toString` with default value set for `noEscape`', () => {
+          expectTemplate('{{value}}')
+            .withInput({ value: html })
+            .toCompileTo('&lt;b&gt;&amp;&lt;/b&gt;');
+        });
+
+        it('should escape `{{this}}` for a non-string context with default value set for `noEscape`', () => {
+          expectTemplate('{{#with value}}{{this}}{{/with}}')
+            .withInput({ value: ['A & B'] })
+            .toCompileTo('A &amp; B');
+        });
+
+        it('should escape a non-string helper result with default value set for `noEscape`', () => {
+          expectTemplate('{{toArray}}')
+            .withHelper('toArray', () => ['<i>'])
+            .toCompileTo('&lt;i&gt;');
+        });
+
+        it('should not escape a `SafeString` helper result', () => {
+          expectTemplate('{{safe}}')
+            .withHelper('safe', () => new Handlebars.SafeString('<i>'))
+            .toCompileTo('<i>');
+        });
+
+        it('should render numbers, booleans and nullish values like strings', () => {
+          expectTemplate('{{zero}}|{{num}}|{{yes}}|{{no}}|{{nil}}|{{missing}}')
+            .withInput({ zero: 0, num: 42, yes: true, no: false, nil: null })
+            .toCompileTo('0|42|true|false||');
+        });
+
+        it('should not escape a non-string value in a triple-stash', () => {
+          expectTemplate('{{{value}}}').withInput({ value: html }).toCompileTo('<b>&</b>');
+        });
+
+        it('should not escape a non-string value with `noEscape` set to true', () => {
+          expectTemplate('{{value}}')
+            .withCompileOptions({ noEscape: true })
+            .withInput({ value: html })
+            .toCompileTo('<b>&</b>');
+        });
+      });
+
       describe('basic', () => {
         it('should escape a non-nested value with default value set for `noEscape`', () => {
           expectTemplate('{{value}}').withInput({ value: '<foo>' }).toCompileTo('&lt;foo&gt;');
@@ -773,5 +824,59 @@ describe('blocks', () => {
         expect(calls).toEqual(0);
       });
     });
+  });
+});
+
+describe('rendering after an error', () => {
+  const boom = (value: string) => {
+    if (value === 'bad') throw new Error('boom');
+    return value;
+  };
+
+  const catchBlockError = function (this: object, options: HelperOptions) {
+    try {
+      return options.fn(this);
+    } catch (error) {
+      return 'caught';
+    }
+  };
+
+  forEachCompileFunctionName((compileName) => {
+    it(`should not leak block params into the next render after a helper throws for #${compileName}`, () => {
+      const render = Handlebars[compileName](
+        '{{#each items as |item|}}{{boom item}}{{/each}}|{{item}}'
+      );
+      const helpers = { boom };
+
+      expect(() => render({ items: ['bad'], item: 'top' }, { helpers })).toThrow('boom');
+      expect(render({ items: [], item: 'top' }, { helpers })).toEqual('|top');
+    });
+
+    it(`should not leak block params into the next render after a value fails to convert to a string for #${compileName}`, () => {
+      const render = Handlebars[compileName]('{{#each items as |item|}}{{item}}{{/each}}|{{item}}');
+
+      expect(() => render({ items: [Object.create(null)], item: 'top' })).toThrow(TypeError);
+      expect(render({ items: [], item: 'top' })).toEqual('|top');
+    });
+  });
+
+  it('should keep rendering the rest of the template when a helper catches an error from its block', () => {
+    expectTemplate(
+      '{{name}}|{{#try}}{{#with obj}}{{#each items as |item|}}{{boom item}}{{/each}}{{/with}}{{/try}}|{{name}}|{{item}}'
+    )
+      .withInput({ obj: { items: ['bad'] }, name: 'top', item: 'root item' })
+      .withHelper('boom', boom)
+      .withHelper('try', catchBlockError)
+      .toCompileTo('top|caught|top|root item');
+  });
+
+  it('should restore the parent block data when a helper catches an error from its block', () => {
+    expectTemplate(
+      '{{#each outer}}{{#try}}{{#each ../items}}{{boom this}}{{/each}}{{/try}}|{{@index}}{{/each}}'
+    )
+      .withInput({ outer: ['a'], items: ['ok', 'bad'] })
+      .withHelper('boom', boom)
+      .withHelper('try', catchBlockError)
+      .toCompileTo('caught|0');
   });
 });
