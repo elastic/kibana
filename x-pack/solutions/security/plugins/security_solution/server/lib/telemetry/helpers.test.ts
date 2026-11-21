@@ -34,6 +34,8 @@ import type { PolicyConfig, PolicyData } from '../../../common/endpoint/types';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep } from 'lodash';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import { setExportProviders } from '../../../common/endpoint/models/export_providers';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -313,6 +315,27 @@ describe('test endpoint policy data config extraction', () => {
   test('can succeed when policy config is null or empty', async () => {
     const endpointPolicyConfig = extractEndpointPolicyConfig(stubPolicyData);
     expect(endpointPolicyConfig).toBeNull();
+  });
+
+  test('removes export providers from every OS without changing the policy data', async () => {
+    const policyValue = setExportProviders(policyFactory(), [
+      { id: 'azure-1', type: 'azure_blob', account_name: 'acct', container: 'dumps' },
+    ]);
+    const policyData = set(cloneDeep(stubPolicyData), 'inputs[0].config', {
+      policy: { value: policyValue },
+    });
+
+    const endpointPolicyConfig = extractEndpointPolicyConfig(policyData);
+
+    expect(endpointPolicyConfig?.value).toEqual(policyFactory());
+    expect(policyData.inputs[0].config.policy.value).toBe(policyValue);
+    expect(policyValue.windows.response_actions?.export_providers).toHaveLength(1);
+  });
+
+  test('can succeed when the policy has no value', async () => {
+    const policyData = set(cloneDeep(stubPolicyData), 'inputs[0].config', { policy: {} });
+
+    expect(extractEndpointPolicyConfig(policyData)).toEqual({});
   });
 });
 
