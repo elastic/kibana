@@ -40,6 +40,7 @@ export async function getServiceGroupAlerts({
   const params = {
     size: 0,
     track_total_hits: false,
+    _source: false,
     query: {
       bool: {
         filter: [...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE), ...existsQuery(SERVICE_NAME)],
