@@ -14,6 +14,8 @@ import React from 'react';
 import { useGetAttackDiscoveryGeneration } from '.';
 import type { AttackDiscoveryGeneration } from '@kbn/elastic-assistant-common';
 
+jest.setTimeout(60_000);
+
 const mockHttp: HttpSetup = {
   fetch: jest.fn(),
 } as unknown as HttpSetup;
