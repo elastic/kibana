@@ -261,12 +261,13 @@ apiTest.describe(
       // scheduling, but the runs the enables started keep going until they finish or are
       // cancelled, and a review still mid-model-call when the account disappears fails against
       // the deleted account and can raise a proposal after the dismissal below has finished.
-      await attempt(async () => {
-        if (api) await resetWorker(api, WORKER_ID);
-      });
-      await attempt(async () => {
-        if (api) await resetWorker(api, FORENSICS_WORKER_ID);
-      });
+      // Only workers with a captured baseline: one whose read failed was never touched and has
+      // nothing to restore.
+      for (const { workerId } of workerBaselines) {
+        await attempt(async () => {
+          if (api) await resetWorker(api, workerId);
+        });
+      }
       for (const [workflowId, knownIds] of executionBaselines) {
         await attempt(async () => {
           if (api) await cancelNewExecutions(api, workflowId, knownIds);

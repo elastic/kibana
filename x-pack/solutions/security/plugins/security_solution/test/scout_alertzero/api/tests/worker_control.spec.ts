@@ -11,6 +11,7 @@ import {
   tags,
   testData,
   cancelNewExecutions,
+  captureWorkerBaseline,
   createServiceAccount,
   deleteServiceAccount,
   getAdminApi,
@@ -21,10 +22,12 @@ import {
   patchWorker,
   pollUntil,
   resetWorker,
+  restoreWorkerBaseline,
   updateWorker,
   withAlertZeroEnabledInSpace,
   withPlaceholderModel,
 } from '../fixtures';
+import type { WorkerBaseline } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 
@@ -103,11 +106,12 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   // does not pin it (an override makes it read-only), so this suite turns it on itself and puts
   // the captured baseline back in teardown.
   let restoreAlertZero: (() => Promise<void>) | undefined;
-  // The worker's pre-suite state, captured in beforeAll; stays `undefined` if the read failed
-  // (e.g. it raced the gate enable). A clean worker reads as `{ enabled: false }`. Teardown restores it instead of resetting to disabled: this suite
-  // does not own the worker, and another suite (or an operator) may have deliberately left it
-  // enabled with its own account bound.
-  let workerBaseline: { enabled: boolean; serviceAccountId?: string } | undefined;
+  // The worker as this suite found it (enabled, account, autonomy). Teardown restores it instead
+  // of leaving it disabled: this suite does not own the worker, and another suite (or an
+  // operator) may have deliberately left it enabled with its own account bound.
+  let workerBaseline: WorkerBaseline | undefined;
+  // Set by every spec that writes to the worker; teardown leaves an untouched worker alone.
+  let workerTouched = false;
 
   apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -117,18 +121,14 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       headers: cookieHeader,
       spaceId: 'default',
     });
-    try {
-      const api = await getAdminApi(apiClient, samlAuth);
-      const before = await getWorker(api, WORKER_ID);
-      workerBaseline = {
-        enabled: before.enabled,
-        ...(before.settings.serviceAccountId !== undefined
-          ? { serviceAccountId: before.settings.serviceAccountId }
-          : {}),
-      };
-    } catch {
-      // The catalog read raced the gate enable; teardown falls back to the reset it can do.
-    }
+    // Required before any spec may write to the worker: without it teardown could not put the
+    // worker back. Polled because the first catalog read can race the gate enable.
+    const api = await getAdminApi(apiClient, samlAuth);
+    workerBaseline = await pollUntil(
+      `worker ${WORKER_ID} baseline`,
+      () => captureWorkerBaseline(api, WORKER_ID),
+      { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+    );
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
@@ -155,7 +155,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
     // whatever spec runs next.
     await attempt(async () => {
-      if (api) await resetWorker(api, WORKER_ID);
+      if (api && workerTouched) await resetWorker(api, WORKER_ID);
     });
     // End the runs this suite's enables started; run before the accounts go away below so a
     // drained run cannot fail after the fact on its deleted service account.
@@ -169,34 +169,9 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
         if (api) await deleteServiceAccount(api, id);
       });
     }
-    // Restore the worker's pre-suite state instead of clearing it: another suite or an operator
-    // may have deliberately left it enabled with its own account bound, and only the mutating
-    // specs below would have dirtied it anyway. A baseline that read the worker already clean
-    // is satisfied by the `resetWorker` above; one that read it enabled re-binds and re-enables.
-    // Every step is attempt-wrapped: a restore must not shadow the account deletions' errors.
+    // Put back the account, autonomy and enabled state the worker had before the suite.
     await attempt(async () => {
-      if (!api || !workerBaseline) {
-        return;
-      }
-      const baselineAccount = workerBaseline.serviceAccountId;
-      if (baselineAccount !== undefined) {
-        const current = await getWorker(api, WORKER_ID);
-        if (current.settings.serviceAccountId !== baselineAccount) {
-          await updateWorker(api, WORKER_ID, {
-            settingsRevision: current.settingsRevision ?? null,
-            settings: { serviceAccountId: baselineAccount },
-          });
-        }
-      }
-      if (workerBaseline.enabled) {
-        const current = await getWorker(api, WORKER_ID);
-        if (!current.enabled) {
-          // The baseline snapshot's drain baselines: an enable here starts a real run, but the
-          // worker was already enabled before this suite, so that run is the state we restore,
-          // not one to cancel.
-          await updateWorker(api, WORKER_ID, { enabled: true });
-        }
-      }
+      if (api && workerTouched && workerBaseline) await restoreWorkerBaseline(api, workerBaseline);
     });
     await attempt(async () => {
       await restoreAlertZero?.();
@@ -232,6 +207,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       const restoreModel = await withPlaceholderModel(api);
       try {
         // Do not trust spec order: another spec may have left an account bound to this worker.
+        workerTouched = true;
         await resetWorker(api, WORKER_ID);
         const before = await getWorker(api, WORKER_ID);
         expect(before.settings.serviceAccountId).toBeUndefined();
@@ -260,6 +236,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
+      workerTouched = true;
       const before = await getWorker(api, WORKER_ID);
       await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
@@ -293,6 +270,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       );
       const serviceAccountId = await createServiceAccount(api);
       serviceAccountIds.push(serviceAccountId);
+      workerTouched = true;
       const before = await getWorker(api, WORKER_ID);
       const configured = await updateWorker(api, WORKER_ID, {
         settingsRevision: before.settingsRevision ?? null,
