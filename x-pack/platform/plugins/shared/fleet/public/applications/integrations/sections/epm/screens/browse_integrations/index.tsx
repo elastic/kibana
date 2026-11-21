@@ -21,8 +21,15 @@ import {
   useBreadcrumbs,
   useStartServices,
 } from '../../../../hooks';
+import { useEmbeddedContext } from '../../../../../../hooks/use_embedded_context';
+import { ONBOARDING_ENABLED_FLAG } from '../../../../../../services/aws_onboarding_override';
+import {
+  getOnboardingPocPath,
+  ONBOARDING_POC_PACKAGE,
+} from '../../../../../../ingest_hub/onboarding_poc/route';
 import { NoEprCallout } from '../../components/no_epr_callout';
 import { categoryExists } from '../home';
+import type { IntegrationCardItem } from '../home';
 
 import { ResponsivePackageGrid } from './components/responsive_package_grid';
 import { SearchAndFiltersBar } from './components/search_and_filters_bar';
@@ -39,12 +46,30 @@ import {
   type CreatedIntegrationRow,
 } from './components/manage_integrations_table';
 
-export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
-  prereleaseIntegrationsEnabled,
-}) => {
-  useBreadcrumbs('integrations_all');
+export interface BrowseIntegrationsPageProps {
+  prereleaseIntegrationsEnabled: boolean;
+  /**
+   * Render the catalogue for embedding outside the Integrations app (e.g. inside a modal):
+   * skips the breadcrumb / document title side effects and the entry points that navigate
+   * out of the catalogue.
+   */
+  embedded?: boolean;
+  /** Called instead of navigating when a non-collection integration card is clicked. */
+  onIntegrationSelected?: (card: IntegrationCardItem) => void;
+}
 
-  const { automaticImport, cloud } = useStartServices();
+export const BrowseIntegrationsPage: React.FC<BrowseIntegrationsPageProps> = ({
+  prereleaseIntegrationsEnabled,
+  embedded: embeddedProp,
+  onIntegrationSelected,
+}) => {
+  const { isEmbedded } = useEmbeddedContext();
+  const embedded = embeddedProp ?? isEmbedded;
+  useBreadcrumbs('integrations_all', {}, { enabled: !embedded });
+
+  const { automaticImport, cloud, featureFlags } = useStartServices();
+  // PoC (ingest-dev#10467): behind the onboarding flag, picking Nginx in the modal opens the generic wizard form.
+  const isOnboardingPocEnabled = featureFlags.useBooleanValue(ONBOARDING_ENABLED_FLAG, false);
   const { pathname, search } = useLocation();
   const history = useHistory();
 
@@ -122,10 +147,31 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   const filteredCards = useMemo(
     () =>
       rawFilteredCards.map((card) => {
-        if (!card.isCollectionCard) return card;
-        return { ...card, onCardClick: () => openCollection(card.name) };
+        if (card.isCollectionCard) {
+          // PoC (ingest-dev#10467): embedded, behind the flag, the Nginx tile opens the generic form
+          // directly. The variant chooser flyout renders under the modal, so it can't be used here.
+          if (embedded && isOnboardingPocEnabled && card.name === ONBOARDING_POC_PACKAGE) {
+            return {
+              ...card,
+              onCardClick: () => history.push(getOnboardingPocPath(ONBOARDING_POC_PACKAGE)),
+            };
+          }
+          return { ...card, onCardClick: () => openCollection(card.name) };
+        }
+        // Embedded hosts handle the selection themselves; the default click navigates to Fleet.
+        if (onIntegrationSelected) {
+          return { ...card, onCardClick: () => onIntegrationSelected(card) };
+        }
+        return card;
       }),
-    [rawFilteredCards, openCollection]
+    [
+      rawFilteredCards,
+      openCollection,
+      onIntegrationSelected,
+      embedded,
+      isOnboardingPocEnabled,
+      history,
+    ]
   );
 
   // Resolve the open collection card from rawFilteredCards so the flyout variants
@@ -243,9 +289,9 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           categories={mainCategories}
           selectedCategories={selectedCategories}
           onCategoryChange={onCategoryChange}
-          showCreatedIntegrations={canReadAutomaticImportIntegrations}
+          showCreatedIntegrations={!embedded && canReadAutomaticImportIntegrations}
           CreateIntegrationCardButton={
-            canCreateAutomaticImport || canUploadPackages
+            !embedded && (canCreateAutomaticImport || canUploadPackages)
               ? automaticImport?.components.CreateIntegrationSideCardButton
               : undefined
           }

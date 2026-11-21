@@ -13,6 +13,7 @@ import type { Page, DynamicPagePathValues } from '../constants';
 import { INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
 import { useStartServices } from '.';
+import { useEmbeddedContext } from '../../../hooks/use_embedded_context';
 
 const BASE_BREADCRUMB: ChromeBreadcrumb = {
   href: pagePathGetters.integrations()[1],
@@ -112,9 +113,21 @@ const breadcrumbGetters: {
   ],
 };
 
-export function useBreadcrumbs(page: Page, values: DynamicPagePathValues = {}) {
+export function useBreadcrumbs(
+  page: Page,
+  values: DynamicPagePathValues = {},
+  options: { enabled?: boolean } = {}
+) {
   const { chrome, http, application } = useStartServices();
   const pageRef = useRef<Page | undefined>();
+  const { isEmbedded } = useEmbeddedContext();
+  const { enabled = !isEmbedded } = options;
+
+  // When the page is embedded in another app (e.g. the catalogue rendered inside a modal),
+  // rewriting the chrome breadcrumbs and the document title would clobber the host's own.
+  if (!enabled) {
+    return;
+  }
 
   if (pageRef.current === page) {
     return;

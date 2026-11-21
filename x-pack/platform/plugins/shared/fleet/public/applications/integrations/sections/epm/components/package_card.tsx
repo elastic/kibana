@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiBadge,
   EuiCard,
@@ -33,6 +34,7 @@ import type { IntegrationCardItem } from '../screens/home';
 
 import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
+import { useEmbeddedContext } from '../../../../../hooks/use_embedded_context';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
 import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 import { CollectionSizeBadge } from '../screens/home/components/collection_size_badge';
@@ -214,12 +216,20 @@ export function PackageCard({
   }
 
   const { application, http } = useStartServices();
+  const { isEmbedded } = useEmbeddedContext();
+  const history = useHistory();
 
   const onCardClick = () => {
     // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
     const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
     if (url.startsWith(integrationsBase)) {
       const path = url.slice(integrationsBase.length);
+      // Embedded, the Integrations routes are mounted on the host's router: stay inside it
+      // instead of navigating the whole app away from the host.
+      if (isEmbedded) {
+        history.push(path);
+        return;
+      }
       // When navigating straight to the add-integration page, pass the current URL as
       // onCancelUrl so the Cancel button returns the user to where they came from
       // (e.g. the integrations catalog) rather than the integration detail page.

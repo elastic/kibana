@@ -37,7 +37,6 @@
     - 'x-pack/platform/test/fleet_api_integration/**/*.*'
     - 'x-pack/platform/plugins/shared/streams/**/*.*'
     - 'x-pack/platform/plugins/shared/streams_app/**/*.*'
-    - 'x-pack/platform/plugins/shared/ingest_hub/**/*.*'
     - 'x-pack/platform/plugins/shared/fields_metadata/**/*.*'
     - 'x-pack/solutions/observability/plugins/observability_onboarding/**/*.*'
     - 'src/platform/packages/shared/kbn-grok-ui/**/*.*'

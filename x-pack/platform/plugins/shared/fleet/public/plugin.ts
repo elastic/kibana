@@ -98,6 +98,9 @@ import type {
 } from './types';
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
+import { createIngestHubStart, registerIngestHubApps } from './ingest_hub/register';
+import { setFleetAppServices } from './services/start_services';
+import type { IngestFlow, IngestHubStart } from './ingest_hub/types';
 import { getFleetDeepLinks } from './deep_links';
 
 export type { FleetConfigType } from '../common/types';
@@ -123,6 +126,8 @@ export interface FleetStart {
       ) => Promise<SendRequestResponse<GetBulkAssetsResponse, RequestError>>;
     };
   };
+  /** Ingest Hub, folded into Fleet from the ingest_hub plugin. */
+  ingestHub: IngestHubStart;
 }
 
 export interface FleetSetupDeps {
@@ -150,6 +155,7 @@ export interface FleetStartDeps {
   embeddable: EmbeddableStart;
   logsDataAccess: LogsDataAccessPluginStart;
   reporting?: ReportingStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface FleetStartServices extends CoreStart, Exclude<FleetStartDeps, 'cloud'> {
@@ -169,8 +175,10 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
   private extensions: UIExtensionsStorage = {};
   private experimentalFeatures: ExperimentalFeatures;
   private storage = new Storage(localStorage);
+  private cloudSetup?: CloudSetup;
   private appUpdater$ = new Subject<AppUpdater>();
   private logger: Logger;
+  private ingestFlows: IngestFlow[] = [];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<FleetConfigType>();
@@ -186,6 +194,8 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
+
+    this.cloudSetup = deps.cloud;
 
     // registerEventType is on AnalyticsServiceSetup (setup), not AnalyticsServiceStart (start).
     registerAwsOnboardingEvents(core.analytics);
@@ -223,7 +233,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           cloud,
           authz: fleetStart.authz,
         };
-        const { renderApp, teardownIntegrations } = await import('./applications/integrations');
+        const { renderApp, teardownIntegrations } = await import(
+          /* webpackChunkName: "fleet-integrations-app" */ './applications/integrations'
+        );
 
         const Tracker =
           deps.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -318,6 +330,14 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       });
     }
 
+    // Ingest Hub and Onboarding apps, folded in from the ingest_hub plugin.
+    registerIngestHubApps({
+      core,
+      kibanaVersion: this.kibanaVersion,
+      ingestFlows: this.ingestFlows,
+      cloudSetup: deps.cloud,
+    });
+
     if (deps.globalSearch) {
       const { globalSearch } = deps;
       import('./search_provider')
@@ -396,10 +416,18 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set the custom integrations language clients
     setCustomIntegrationsStart(deps.customIntegrations);
 
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
     //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
-    return {
+    const startContract: FleetStart = {
       authz,
       config: this.config,
+      ingestHub: createIngestHubStart({
+        core,
+        deps: { spaces: deps.spaces, cloud: deps.cloud },
+        isServerless,
+        ingestFlows: this.ingestFlows,
+      }),
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();
 
@@ -429,6 +457,24 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
         },
       },
     };
+
+    // Integrations UI rendered inside another app (the Add integration modal) needs Fleet's own
+    // start services, which a host plugin cannot assemble; hold them for the embedded provider.
+    const cloud = this.cloudSetup && deps.cloud ? { ...this.cloudSetup, ...deps.cloud } : undefined;
+    setFleetAppServices({
+      startServices: {
+        ...core,
+        ...deps,
+        storage: this.storage,
+        cloud,
+        authz,
+      },
+      config: this.config,
+      kibanaVersion: this.kibanaVersion,
+      extensions: this.extensions,
+    });
+
+    return startContract;
   }
 
   public stop() {}

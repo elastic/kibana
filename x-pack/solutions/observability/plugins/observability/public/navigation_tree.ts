@@ -751,7 +751,7 @@ export const createDefinition = (
     navigationTree$: combineLatest([
       pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
-      pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      pluginsStart.fleet?.ingestHub.navigationAvailable$ || of(false),
       coreStart.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
       map(([{ status }, chatExperience, ingestHubAvailable, significantEventsAvailable]) =>
