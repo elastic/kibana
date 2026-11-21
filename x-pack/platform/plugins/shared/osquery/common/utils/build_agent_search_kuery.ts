@@ -8,6 +8,30 @@
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 /**
+ * Host-only clauses of the agent search: case variants on the keyword fields
+ * plus analyzed hostname wildcard and phrase matching. Does not match agent id,
+ * policy id, platform or policy name, so a hostname that happens to equal one
+ * of those values does not pull in unrelated agents.
+ */
+export const buildHostSearchKueryParts = (searchValue: string): string[] => {
+  const escapedSearch = escapeKuery(searchValue);
+
+  const hostKeywordClauses = [...new Set([searchValue, searchValue.toUpperCase()])].map(
+    (value) => `local_metadata.host.hostname.keyword:*${escapeKuery(value)}*`
+  );
+
+  return [
+    ...hostKeywordClauses,
+    `local_metadata.host.name.keyword:*${escapeKuery(searchValue.toLowerCase())}*`,
+    `local_metadata.host.hostname:*${escapedSearch}*`,
+    `local_metadata.host.hostname:"${escapeQuotes(searchValue)}"`,
+  ];
+};
+
+export const buildHostSearchKuery = (searchValue: string): string =>
+  searchValue ? buildHostSearchKueryParts(searchValue).join(' or ') : '';
+
+/**
  * Builds the Kuery string for searching agents.
  * Searches across host.name (as displayed in Security alerts) and host.hostname
  * (as displayed on Fleet agents), along with agent id, policy id, platform, and policy name.
@@ -21,15 +45,8 @@ export const buildAgentSearchKuery = (searchValue: string): string => {
 
   const escapedSearch = escapeKuery(searchValue);
 
-  const hostKeywordClauses = [...new Set([searchValue, searchValue.toUpperCase()])].map(
-    (value) => `local_metadata.host.hostname.keyword:*${escapeKuery(value)}*`
-  );
-
   const queryParts = [
-    ...hostKeywordClauses,
-    `local_metadata.host.name.keyword:*${escapeKuery(searchValue.toLowerCase())}*`,
-    `local_metadata.host.hostname:*${escapedSearch}*`,
-    `local_metadata.host.hostname:"${escapeQuotes(searchValue)}"`,
+    ...buildHostSearchKueryParts(searchValue),
     `local_metadata.elastic.agent.id:*${escapedSearch}*`,
     `policy_id: *${escapedSearch}*`,
     `local_metadata.os.platform: *${escapedSearch}*`,

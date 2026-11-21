@@ -30,6 +30,7 @@
     ],
     "optionalPlugins": [
       "cps",
+      "agentBuilder",
       "fleet",
       "home",
       "lens",

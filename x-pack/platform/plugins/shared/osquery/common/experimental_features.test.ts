@@ -91,6 +91,7 @@ describe('getExperimentalAllowedValues', () => {
       'rruleScheduling',
       'crossProjectSearch',
       'workflowsExtensionsEnabled',
+      'agentBuilderTools',
     ]);
   });
 });
@@ -102,6 +103,7 @@ describe('allowedExperimentalValues', () => {
       rruleScheduling: true,
       crossProjectSearch: true,
       workflowsExtensionsEnabled: false,
+      agentBuilderTools: false,
     });
   });
 });
