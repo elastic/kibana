@@ -603,10 +603,32 @@ describe('runFindingsPass', () => {
   });
 
   describe('proposals', () => {
-    const proposed = (titles: string[] = []) => ({
-      listTitles: jest.fn().mockResolvedValue(titles),
-      propose: jest.fn().mockResolvedValue(undefined),
+    const existingProposal = (
+      overrides: Partial<{
+        id: string;
+        title: string;
+        comment: string;
+        status: 'pending' | 'no_action' | 'expired';
+        decision: 'approved' | 'dismissed';
+        impact: string;
+        confidence: string;
+      }>
+    ) => ({
+      id: 'p-1',
+      title: 'Restore the missing secrets',
+      comment: 'Re-create the four secret ids.',
+      status: 'pending' as const,
+      impact: 'low',
+      confidence: 'high',
+      ...overrides,
     });
+
+    const proposed = (items: Array<ReturnType<typeof existingProposal>> = []) => ({
+      list: jest.fn().mockResolvedValue(items),
+      propose: jest.fn().mockResolvedValue(undefined),
+      revise: jest.fn().mockResolvedValue(undefined),
+    });
+
     const withProposals = {
       ...output,
       proposals: [
@@ -639,27 +661,191 @@ describe('runFindingsPass', () => {
       });
     });
 
-    it('never proposes from a live pass', async () => {
+    it('never reads or writes proposals from a live pass', async () => {
       const proposals = proposed();
       const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
 
       await run(deps, memory);
 
+      expect(proposals.list).not.toHaveBeenCalled();
       expect(proposals.propose).not.toHaveBeenCalled();
+      expect(proposals.revise).not.toHaveBeenCalled();
     });
 
-    it('does not propose again what the conversation already has, however it is worded', async () => {
-      const proposals = proposed(['  restore the MISSING secrets ']);
+    it('does not propose or revise again when an open proposal already matches', async () => {
+      const proposals = proposed([existingProposal({ title: '  restore the MISSING secrets ' })]);
       const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
 
       await run(deps, memory, { answer: 'Root cause: bad deploy' });
 
+      expect(proposals.revise).not.toHaveBeenCalled();
       expect(proposals.propose).toHaveBeenCalledTimes(1);
       expect(proposals.propose).toHaveBeenCalledWith(
         expect.objectContaining({
           proposal: expect.objectContaining({ title: 'Roll back the image' }),
         })
       );
+    });
+
+    it('supersedes an open proposal in place via revise when supersedes names its P-handle', async () => {
+      const proposals = proposed([
+        existingProposal({
+          id: 'p-s3',
+          title: 'Add retry and backoff for S3 SlowDown',
+          comment: 'Retry 503 SlowDown responses with exponential backoff.',
+        }),
+      ]);
+      const refined = {
+        ...output,
+        proposals: [
+          {
+            supersedes: 'P1',
+            title: 'Add retry/backoff and error mapping for S3 SlowDown',
+            comment: 'Retry 503 SlowDown with backoff and map unrecoverable S3 errors cleanly.',
+            impact: 'low',
+            confidence: 'high',
+          },
+        ],
+      };
+      const { deps, chatComplete, memory } = setup({ answers: [answerWith(refined)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: S3 SlowDown without error mapping' });
+
+      const sent = JSON.stringify(chatComplete.mock.calls[0][0].messages);
+      expect(sent).toContain('P1: Add retry and backoff for S3 SlowDown');
+      expect(sent).toContain('Retry 503 SlowDown responses with exponential backoff.');
+      expect(proposals.propose).not.toHaveBeenCalled();
+      expect(proposals.revise).toHaveBeenCalledTimes(1);
+      expect(proposals.revise).toHaveBeenCalledWith({
+        request,
+        proposalId: 'p-s3',
+        proposal: {
+          title: 'Add retry/backoff and error mapping for S3 SlowDown',
+          comment: 'Retry 503 SlowDown with backoff and map unrecoverable S3 errors cleanly.',
+          impact: 'low',
+          confidence: 'high',
+        },
+      });
+    });
+
+    it('skips revise when supersedes points at an open proposal whose content did not change', async () => {
+      const proposals = proposed([existingProposal({ id: 'p-1' })]);
+      const unchanged = {
+        ...output,
+        proposals: [
+          {
+            supersedes: 'P1',
+            title: 'Restore the missing secrets',
+            comment: 'Re-create   the four secret ids.',
+          },
+        ],
+      };
+      const { deps, memory } = setup({ answers: [answerWith(unchanged)], proposals });
+
+      await run(deps, memory, { answer: 'No change.' });
+
+      expect(proposals.revise).not.toHaveBeenCalled();
+      expect(proposals.propose).not.toHaveBeenCalled();
+    });
+
+    it('revises in place when the model keeps an open proposal title and updates its comment', async () => {
+      const proposals = proposed([
+        existingProposal({
+          id: 'p-1',
+          title: 'Restore the missing secrets',
+          comment: 'Check which secrets are missing.',
+        }),
+      ]);
+      const { deps, memory } = setup({ answers: [answerWith(withProposals)], proposals });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.revise).toHaveBeenCalledWith({
+        request,
+        proposalId: 'p-1',
+        proposal: {
+          title: 'Restore the missing secrets',
+          comment: 'Re-create the four secret ids.',
+          impact: 'low',
+          confidence: 'high',
+        },
+      });
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows closed proposals as read-only context and never re-proposes or revises them', async () => {
+      const proposals = proposed([
+        existingProposal({
+          id: 'p-closed',
+          title: 'Restore the missing secrets',
+          status: 'no_action',
+          decision: 'approved',
+        }),
+      ]);
+      const { deps, chatComplete, memory } = setup({
+        answers: [
+          answerWith({
+            ...output,
+            proposals: [
+              {
+                supersedes: 'p-closed',
+                title: 'Restore the missing secrets',
+                comment: 'Updated instructions.',
+              },
+              withProposals.proposals[1],
+            ],
+          }),
+        ],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      const sent = JSON.stringify(chatComplete.mock.calls[0][0].messages);
+      expect(sent).toContain('[applied] Restore the missing secrets');
+      expect(proposals.revise).not.toHaveBeenCalled();
+      expect(proposals.propose).toHaveBeenCalledTimes(1);
+      expect(proposals.propose).toHaveBeenCalledWith(
+        expect.objectContaining({
+          proposal: expect.objectContaining({ title: 'Roll back the image' }),
+        })
+      );
+    });
+
+    it('caps net-new open proposals at five while still allowing supersedes updates', async () => {
+      const openFive = Array.from({ length: 5 }, (_, i) =>
+        existingProposal({
+          id: `p-${i + 1}`,
+          title: `Open action ${i + 1}`,
+          comment: `Step ${i + 1}`,
+        })
+      );
+      const proposals = proposed(openFive);
+      const { deps, memory } = setup({
+        answers: [
+          answerWith({
+            ...output,
+            proposals: [
+              {
+                supersedes: 'P2',
+                title: 'Open action 2 (refined)',
+                comment: 'Refined step 2 with concrete flags.',
+              },
+              {
+                title: 'Sixth brand-new action',
+                comment: 'Would exceed the five-open cap.',
+              },
+            ],
+          }),
+        ],
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Root cause: bad deploy' });
+
+      expect(proposals.revise).toHaveBeenCalledTimes(1);
+      expect(proposals.revise).toHaveBeenCalledWith(expect.objectContaining({ proposalId: 'p-2' }));
+      expect(proposals.propose).not.toHaveBeenCalled();
     });
 
     it('proposes a repeated title once', async () => {
@@ -692,26 +878,6 @@ describe('runFindingsPass', () => {
       await expect(run(deps, memory, { answer: 'Root cause: bad deploy' })).resolves.toBe(true);
 
       expect(writer.setImpact).toHaveBeenCalled();
-    });
-
-    it('tells a follow-up round what is already proposed, so it does not repeat it', async () => {
-      const proposals = proposed(['Roll back the image']);
-      const { deps, writer, memory } = setup({ proposals });
-      writer.getFindings.mockResolvedValue({
-        hypotheses: [{ candidate: 'Bad deploy', confidence: 0.8, status: 'confirmed' }],
-        impactEntities: [],
-      });
-
-      await run(deps, memory);
-
-      expect(memory.remember).toHaveBeenCalledWith(
-        expect.objectContaining({
-          atGroups: 0,
-          answer: expect.objectContaining({
-            proposals: [{ title: 'Roll back the image', comment: 'Already proposed.' }],
-          }),
-        })
-      );
     });
   });
 

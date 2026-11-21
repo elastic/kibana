@@ -171,10 +171,17 @@ describe('proposals', () => {
   it('keeps an impact and a confidence the store knows, and leaves out one it does not', () => {
     const [known, unknown] =
       parse([
-        { title: 'a', comment: 'c', impact: 'low', confidence: 'high' },
-        { title: 'b', comment: 'c', impact: 'catastrophic', confidence: 'certain' },
+        { supersedes: ' P1 ', title: 'a', comment: 'c', impact: 'low', confidence: 'high' },
+        {
+          supersedes: '   ',
+          title: 'b',
+          comment: 'c',
+          impact: 'catastrophic',
+          confidence: 'certain',
+        },
       ]) ?? [];
-    expect(known).toMatchObject({ impact: 'low', confidence: 'high' });
+    expect(known).toMatchObject({ supersedes: 'P1', impact: 'low', confidence: 'high' });
+    expect(unknown).not.toHaveProperty('supersedes');
     expect(unknown).not.toHaveProperty('impact');
     expect(unknown).not.toHaveProperty('confidence');
   });

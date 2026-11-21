@@ -6,16 +6,24 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
+import {
+  ProposalConflictError,
+  ProposalNotFoundError,
+  type ProposalsPluginStart,
+} from '@kbn/proposals-plugin/server';
+import {
+  PROPOSAL_CATEGORY_TODO,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+} from '@kbn/proposals-common';
 import type { RecorderProposals } from './run_pass';
 
-/** The titles read per conversation. A conversation has a handful of proposals, not hundreds. */
+/** The proposals read per conversation. A conversation has a handful of proposals, not hundreds. */
 const MAX_LISTED_PROPOSALS = 50;
 
 /**
- * What the findings recorder needs from the proposals plugin: the titles already proposed in a
- * conversation, and a way to propose.
+ * What the findings recorder needs from the proposals plugin: the proposals already on a
+ * conversation, a way to propose a new one, and a way to revise an open one in place.
  */
 export const createRecorderProposals = ({
   proposals,
@@ -24,9 +32,9 @@ export const createRecorderProposals = ({
   proposals: ProposalsPluginStart;
   getSpaceId: (request: KibanaRequest) => string;
 }): RecorderProposals => ({
-  listTitles: async ({ request, conversationId }) => {
+  list: async ({ request, conversationId }) => {
     // The list reads as the internal user, so the caller's own privilege decides what they may see.
-    // Without it, a user who can use the investigation but not proposals would have the titles
+    // Without it, a user who can use the investigation but not proposals would have the proposals
     // shown to the recorder's model.
     try {
       await proposals.getProposalPrivileges().assertCanRead(request);
@@ -39,13 +47,25 @@ export const createRecorderProposals = ({
         origin: 'nightshift',
         excludeSuperseded: true,
         excludeExpired: false,
+        order: 'newest',
         size: MAX_LISTED_PROPOSALS,
         from: 0,
       },
       getSpaceId(request),
       request
     );
-    return found.map(({ title }) => title);
+    // `order: 'newest'` returns newest-first; reversing gives stable oldest-first P1, P2, ... order.
+    return [...found]
+      .reverse()
+      .map(({ id, title, comment, status, decision, impact, confidence }) => ({
+        id,
+        title,
+        comment,
+        status,
+        ...(decision ? { decision } : {}),
+        impact,
+        confidence,
+      }));
   },
 
   propose: async ({ request, conversationId, proposal }) => {
@@ -63,5 +83,34 @@ export const createRecorderProposals = ({
         skipDiscardReason: true,
       },
     });
+  },
+
+  revise: async ({ request, proposalId, proposal }) => {
+    await proposals.getProposalPrivileges().assertCanManage(request);
+    const spaceId = getSpaceId(request);
+    const service = proposals.getProposalsService();
+    try {
+      const { proposalId: liveId } = await service.getLatestRevision(proposalId, spaceId);
+      const impact = proposalImpactSchema.safeParse(proposal.impact).data;
+      const confidence = proposalConfidenceSchema.safeParse(proposal.confidence).data;
+      await service.revise(
+        {
+          id: liveId,
+          title: proposal.title,
+          comment: proposal.comment,
+          ...(impact !== undefined ? { impact } : {}),
+          ...(confidence !== undefined ? { confidence } : {}),
+        },
+        spaceId,
+        request
+      );
+    } catch (error) {
+      // A human may apply, decline or supersede the proposal while the recorder is answering;
+      // their decision stands and must not fail the rest of the round's proposals.
+      if (error instanceof ProposalConflictError || error instanceof ProposalNotFoundError) {
+        return;
+      }
+      throw error;
+    }
   },
 });
