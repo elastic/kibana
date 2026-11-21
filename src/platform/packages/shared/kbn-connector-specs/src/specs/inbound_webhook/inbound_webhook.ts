@@ -81,7 +81,7 @@ export const InboundWebhook: ConnectorSpec = {
       defaultMessage: 'Receive HTTP events into Kibana workflows via a public ingest URL.',
     }),
     icon: 'plugs',
-    minimumLicense: 'gold',
+    minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
     docsUrl: '',

@@ -270,6 +270,23 @@ describe('getConnectorSpecAsJsonSchema', () => {
     }
   });
 
+  it('returns Slack action schemas and alerting hint without the test action', async () => {
+    const result = await getConnectorSpecAsJsonSchema({
+      context: createContext(),
+      id: '.slack2',
+      configurationUtilities,
+    });
+
+    expect(result.actionSchemas.sendMessage).toEqual(
+      expect.objectContaining({
+        scope: 'write',
+        input: expect.objectContaining({ type: 'object' }),
+      })
+    );
+    expect(result.actionSchemas._test).toBeUndefined();
+    expect(result.alerting).toEqual({ defaultAction: 'sendMessage', messageField: 'text' });
+  });
+
   it('returns isTestable true when the spec opts in to testing', async () => {
     const result = await getConnectorSpecAsJsonSchema({
       context: createContext(),

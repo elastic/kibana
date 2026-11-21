@@ -25,6 +25,17 @@ export const transformGetConnectorSpecResponse = (
       : {}),
   },
   schema: spec.schema,
+  action_schemas: spec.actionSchemas,
+  ...(spec.alerting !== undefined
+    ? {
+        alerting: {
+          default_action: spec.alerting.defaultAction,
+          ...(spec.alerting.messageField !== undefined
+            ? { message_field: spec.alerting.messageField }
+            : {}),
+        },
+      }
+    : {}),
   is_testable: spec.isTestable,
   actions: spec.actions.map(formatConnectorSpecAction),
 });

@@ -41,6 +41,43 @@ Zod Schema → Field Definitions → Widget Components → React Elements
 
 **Fields** (data layer) define what to validate → **Widgets** (UI layer) define how to render
 
+## Widgets
+
+Default schema mappings:
+
+- `z.string()` → Text (or Password when `sensitive` meta is set)
+- `z.number()` → Number
+- `z.boolean()` → Boolean (`EuiSwitch`)
+- `z.enum()` → Select
+- `z.object()` → Object
+- `z.discriminatedUnion()` → Form fieldset
+- `z.literal()` → disabled Text
+- `z.url()` → Text
+
+When a field has no `label` meta, the last path segment is converted with `startCase` (for example `threadTs` → `Thread Ts`). When `helpText` is absent, `description` meta is used.
+
+`FormGeneratorFieldContext` lets a parent inject extra label content (for example an "Add variable" button) into generated text fields:
+
+```tsx
+import { FormGeneratorFieldContext, generateFormFields } from '@kbn/response-ops-form-generator';
+
+<FormGeneratorFieldContext.Provider
+  value={{
+    renderLabelAppend: ({ path, currentValue, setValue }) => (
+      <AddMessageVariables
+        paramsProperty={path}
+        messageVariables={messageVariables}
+        onSelectEventHandler={(variable) =>
+          setValue(`${currentValue ?? ''}{{${variable.name}}}`)
+        }
+      />
+    ),
+  }}
+>
+  <Form form={form}>{generateFormFields({ schema })}</Form>
+</FormGeneratorFieldContext.Provider>
+```
+
 ## Development
 
 ```sh

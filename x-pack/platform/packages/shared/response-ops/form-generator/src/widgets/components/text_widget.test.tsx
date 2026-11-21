@@ -13,6 +13,7 @@ import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextWidget } from './text_widget';
+import { FormGeneratorFieldContext } from '../../field_context';
 import { getMeta, setMeta } from '@kbn/connector-specs/src/connector_spec_ui';
 
 const meta = { getMeta, setMeta };
@@ -197,5 +198,47 @@ describe('TextWidget', () => {
     await user.tab();
 
     expect(await screen.findByText('Username is required')).toBeDefined();
+  });
+
+  it('renders labelAppend from FormGeneratorFieldContext and forwards setValue', async () => {
+    const user = userEvent.setup();
+
+    const TestForm = () => {
+      const { form } = useForm({ defaultValue: { username: '' } });
+      return (
+        <FormGeneratorFieldContext.Provider
+          value={{
+            renderLabelAppend: ({ path, setValue }) => (
+              <button
+                type="button"
+                data-test-subj="context-label-append"
+                onClick={() => setValue('from-context')}
+              >
+                append-{path}
+              </button>
+            ),
+          }}
+        >
+          <Form form={form}>
+            <TextWidget
+              meta={meta}
+              formConfig={{}}
+              path="username"
+              schema={z.string()}
+              fieldProps={{ label: 'Username', euiFieldProps: {} }}
+              fieldConfig={{
+                validations: [{ validator: () => undefined }],
+              }}
+            />
+          </Form>
+        </FormGeneratorFieldContext.Provider>
+      );
+    };
+
+    render(<TestForm />, { wrapper });
+
+    expect(screen.getByTestId('context-label-append')).toHaveTextContent('append-username');
+    await user.click(screen.getByTestId('context-label-append'));
+    expect(screen.getByLabelText('Username', { selector: 'input' })).toHaveValue('from-context');
   });
 });

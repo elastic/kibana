@@ -39,6 +39,10 @@ describe('JinaReaderConnector', () => {
     expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('contextEngine');
   });
 
+  it('requires an enterprise license', () => {
+    expect(JinaReaderConnector.metadata.minimumLicense).toBe('enterprise');
+  });
+
   describe('browse action', () => {
     it('should browse URL and return markdown content', async () => {
       const mockResponse = {

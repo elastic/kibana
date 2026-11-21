@@ -30,6 +30,7 @@ function minimalConnectorSpecForForm(): ConnectorSpecResponse {
       supportedFeatureIds: ['alerting'],
     },
     schema: { type: 'object', properties: {} },
+    actions: [],
     isTestable: false,
   };
 }
@@ -48,6 +49,7 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       is_testable: true,
+      actions: [],
     });
 
     const expectedClientSpec = (): ConnectorSpecResponse => ({
@@ -60,6 +62,8 @@ describe('action_type_model_utils', () => {
       },
       schema: { type: 'object', properties: {} },
       isTestable: true,
+      actionSchemas: {},
+      actions: [],
     });
 
     beforeEach(() => {
@@ -95,15 +99,45 @@ describe('action_type_model_utils', () => {
         },
       },
       isTestable: false,
+      actionSchemas: {
+        sendMessage: {
+          input: {
+            type: 'object',
+            required: ['text'],
+            properties: { text: { type: 'string', minLength: 1 } },
+          },
+          scope: 'write',
+        },
+      },
+      alerting: { defaultAction: 'sendMessage', messageField: 'text' },
     };
 
-    it('maps base spec metadata, subtype, and validateParams', async () => {
+    it('maps base spec metadata, subtype, defaultActionParams, and validateParams', async () => {
       const model = transformSpecToActionTypeModel(baseSpec, docLinks);
       expect(model.id).toBe('test-connector');
       expect(model.actionTypeTitle).toBe('Test Connector');
       expect(model.selectMessage).toBe('A test connector description');
       expect(model.subtype).toBeUndefined();
-      expect(await model.validateParams({}, null)).toEqual({ errors: {} });
+      expect(model.defaultActionParams).toEqual({
+        subAction: 'sendMessage',
+        subActionParams: {},
+      });
+      expect(
+        await model.validateParams({ subAction: 'sendMessage', subActionParams: {} }, null)
+      ).toEqual(
+        expect.objectContaining({
+          errors: expect.objectContaining({ text: expect.any(Array) }),
+        })
+      );
+      const valid = await model.validateParams(
+        { subAction: 'sendMessage', subActionParams: { text: 'hello' } },
+        null
+      );
+      expect(
+        Object.values(valid.errors).every(
+          (messages) => Array.isArray(messages) && messages.length === 0
+        )
+      ).toBe(true);
     });
 
     it('sets isTestable from the spec response', () => {
@@ -334,6 +368,7 @@ describe('action_type_model_utils', () => {
           },
           schema: { type: 'object', properties: {} },
           isTestable: false,
+          actions: [],
         },
         docLinks
       );
