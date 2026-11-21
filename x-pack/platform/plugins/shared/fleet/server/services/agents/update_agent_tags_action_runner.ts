@@ -15,7 +15,7 @@ import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
 
-import { FleetError, FleetVersionConflictError } from '../../errors';
+import { FleetError, FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
 
@@ -27,6 +27,19 @@ import {
   createErrorActionResults,
 } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
+import { updateByQueryAndWait } from './update_by_query_task';
+
+/**
+ * Whether the retry of an update tags action leaves out the agents the update already changed.
+ *
+ * It restarts behind the action's kuery, and `updateAgentTags` only narrows that kuery for an
+ * update that adds one tag or removes one tag: an agent that has the tag (or no longer has it)
+ * does not match again. For a rename, or an update of several tags, the retry goes through every
+ * agent again, so what a failed attempt recorded would be recorded a second time.
+ */
+export const retrySkipsUpdatedAgents = (tagsToAdd: string[] = [], tagsToRemove: string[] = []) =>
+  (tagsToAdd.length === 1 && tagsToRemove.length === 0) ||
+  (tagsToRemove.length === 1 && tagsToAdd.length === 0);
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -38,6 +51,10 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       {
         tagsToAdd: this.actionParams?.tagsToAdd,
         tagsToRemove: this.actionParams?.tagsToRemove,
+        retrySkipsUpdated: retrySkipsUpdatedAgents(
+          this.actionParams?.tagsToAdd,
+          this.actionParams?.tagsToRemove
+        ),
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         spaceId: this.actionParams.spaceId,
@@ -67,6 +84,8 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
+    /** See {@link retrySkipsUpdatedAgents}: whether a retry leaves out the agents updated here. */
+    retrySkipsUpdated?: boolean;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.
@@ -119,7 +138,7 @@ export async function updateTagsBatch(
 
   let res;
   try {
-    res = await esClient.updateByQuery({
+    res = await updateByQueryAndWait(esClient, {
       query: {
         terms: {
           _id: agentIds,
@@ -127,7 +146,6 @@ export async function updateTagsBatch(
       },
       index: AGENTS_INDEX,
       refresh: true,
-      wait_for_completion: true,
       script: {
         source: `
       if (ctx._source.tags == null) {
@@ -157,13 +175,25 @@ export async function updateTagsBatch(
       conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
     });
   } catch (error) {
-    throw new FleetError(
-      'Caught error while batch updating tags: ' + JSON.stringify(error).slice(0, 1000)
-    );
+    // a FleetError has no enumerable fields, JSON.stringify would drop its message
+    const details = error instanceof FleetError ? error.message : JSON.stringify(error);
+    throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
   }
 
   if (appContextService.getLogger().isLevelEnabled('debug')) {
     appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+  }
+
+  const cancelledMessage = () =>
+    `Update by query cancelled (${res.canceled}) after updating ${res.updated ?? 0} of ${
+      res.total ?? 'an unknown number of'
+    } agents, retrying`;
+
+  if (res.canceled && !options.retrySkipsUpdated) {
+    // Nothing is recorded for a cancelled update whose retry goes through these agents again: it
+    // updates and records every one of them, so recording the ones updated here would count them
+    // twice. The update is the same for an agent that was already updated.
+    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
@@ -253,6 +283,12 @@ export async function updateTagsBatch(
         .debug(`action conflict result wrote on ${versionConflictCount} agents`);
     }
     throw new FleetVersionConflictError(`Version conflict of ${versionConflictCount} agents`);
+  }
+
+  if (res.canceled) {
+    // The update was cancelled for running too long. The agents it did update are recorded above,
+    // and the retry selects the rest, because the agents that were updated no longer match.
+    throw new UpdateByQueryCancelledError(cancelledMessage());
   }
 
   return { actionId, updated: res.updated, took: res.took };
