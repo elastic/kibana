@@ -341,8 +341,12 @@ export class SpacesPage {
     await this.page.testSubj.click('save-space-button');
   }
 
-  async confirmModal() {
-    await this.page.testSubj.click('confirmModalConfirmButton');
+  async confirmSaveAndWaitForReload() {
+    // The post-reload grid is DOM-identical to the SPA-redirected one; only the load event differs.
+    await Promise.all([
+      this.page.waitForEvent('load', { timeout: 30_000 }),
+      this.page.testSubj.click('confirmModalConfirmButton'),
+    ]);
   }
 
   /** Opens the solution-view dropdown (idempotent) and selects the given solution. */
