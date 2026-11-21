@@ -731,3 +731,93 @@ describe('makeRehydrateProcessSelectors', () => {
     });
   });
 });
+
+describe('makeRehydrateProcessSelectors on flat _source (columnar index modes)', () => {
+  // An index in `logsdb_columnar` mode regenerates `_source` flat: `host.name`, not `{ host: { name } }`.
+  const flatStart = (overrides: Record<string, unknown> = {}) => ({
+    '@timestamp': '2026-09-26T10:00:00.000Z',
+    'host.name': 'WIN-ANALYST01',
+    'process.entity_id': 'ent-1',
+    'process.pid': 4312,
+    'process.name': 'powershell.exe',
+    'process.executable': 'C:\\Windows\\powershell.exe',
+    'event.type': ['start'],
+    ...overrides,
+  });
+
+  const rehydrate = (source: Record<string, unknown>) =>
+    makeRehydrateProcessSelectors(
+      esClientWith([found('logs-endpoint.events.process-default', 'ev-1', source)])
+    )({ alerts: [], events: [eventRef('logs-endpoint.events.process-default', 'ev-1')] });
+
+  it('maps a flat event doc to the same selector as the nested shape', async () => {
+    const flat = await rehydrate(flatStart());
+    const nested = await rehydrate({
+      '@timestamp': '2026-09-26T10:00:00.000Z',
+      host: { name: 'WIN-ANALYST01' },
+      process: {
+        entity_id: 'ent-1',
+        pid: 4312,
+        name: 'powershell.exe',
+        executable: 'C:\\Windows\\powershell.exe',
+      },
+      event: { type: ['start'] },
+    });
+
+    expect(flat).toHaveLength(1);
+    expect(flat).toEqual(nested);
+    expect(flat[0]).toMatchObject({
+      hostName: 'WIN-ANALYST01',
+      entityId: 'ent-1',
+      pid: 4312,
+      processKey: 'entity_id:ent-1',
+      processName: 'powershell.exe',
+      processExecutable: 'C:\\Windows\\powershell.exe',
+      observedAt: '2026-09-26T10:00:00.000Z',
+    });
+  });
+
+  it('falls back to host.hostname and to a pid-based key on a flat doc', async () => {
+    const selectors = await rehydrate(
+      flatStart({
+        'host.name': undefined,
+        'host.hostname': 'fallback-host',
+        'process.entity_id': undefined,
+      })
+    );
+
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({ hostName: 'fallback-host', processKey: 'pid:4312' });
+  });
+
+  it('still skips a flat end event and a flat doc without a host', async () => {
+    expect(await rehydrate(flatStart({ 'event.type': ['end'] }))).toHaveLength(0);
+    expect(await rehydrate(flatStart({ 'host.name': undefined }))).toHaveLength(0);
+  });
+
+  it('accepts a one-element array and repeated identical values for the process fields', async () => {
+    const selectors = await rehydrate(
+      flatStart({
+        'process.entity_id': ['ent-1'],
+        'process.pid': [4312, 4312],
+        'process.name': ['powershell.exe', 'powershell.exe'],
+      })
+    );
+
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({
+      entityId: 'ent-1',
+      pid: 4312,
+      processName: 'powershell.exe',
+    });
+  });
+
+  it.each([
+    ['process.entity_id', ['ent-1', 'ent-2']],
+    ['process.pid', [4312, 9001]],
+    ['process.name', ['powershell.exe', 'cmd.exe']],
+    ['process.executable', ['C:\\Windows\\powershell.exe', 'C:\\Windows\\cmd.exe']],
+  ])('skips a record whose %s holds several different values', async (field, values) => {
+    expect(await rehydrate(flatStart({ [field]: values }))).toHaveLength(0);
+  });
+});

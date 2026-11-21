@@ -7,6 +7,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { splitRemoteCluster } from '../../../../../common/remote_cluster';
+import {
+  countDistinctSourceValues,
+  readSourceNumber,
+  readSourceString,
+  readSourceStrings,
+} from '../common/read_source_value';
 import { STALE_PROCESS_AGE_MS } from './select_process_actions';
 import type { ProcessSelector } from './types';
 
@@ -52,12 +58,12 @@ const REHYDRATE_SOURCE_FIELDS = [
   'event.action',
 ];
 
-interface RehydrateSource {
-  '@timestamp'?: string;
-  host?: { name?: string; hostname?: string };
-  process?: { entity_id?: string; pid?: number; name?: string; executable?: string };
-  event?: { type?: string | string[]; action?: string | string[] };
-}
+/**
+ * The `_source` of a re-read document, nested (`{ host: { name } }`) or flat (`{ 'host.name' }`):
+ * an index in a columnar index mode regenerates `_source` flat, so it is read through
+ * `readSourceValue` and friends rather than by property access.
+ */
+type RehydrateSource = Record<string, unknown>;
 
 interface RehydrateRef {
   index: string;
@@ -94,33 +100,51 @@ interface ExitedAggregations {
   exited: { buckets: Array<{ key: string; exited_at: { value_as_string: string } }> };
 }
 
-const asTypeList = (value: string | string[] | undefined): string[] =>
-  value === undefined ? [] : Array.isArray(value) ? value : [value];
+/**
+ * The fields that identify one process. A selector is built from the first value of each, so a
+ * record where any of them holds several different values could mix two processes and is skipped.
+ * A single value, a one-element array and repeated identical values are all unambiguous.
+ */
+const PROCESS_IDENTITY_FIELDS = [
+  'process.entity_id',
+  'process.pid',
+  'process.name',
+  'process.executable',
+] as const;
+
+const hasAmbiguousProcess = (source: RehydrateSource): boolean =>
+  PROCESS_IDENTITY_FIELDS.some((field) => countDistinctSourceValues(source, field) > 1);
 
 const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate | undefined => {
-  const hostName = source.host?.name ?? source.host?.hostname;
+  const hostName =
+    readSourceString(source, 'host.name') ?? readSourceString(source, 'host.hostname');
   if (!hostName) {
     return undefined;
   }
-  const entityId = source.process?.entity_id;
-  const pid = typeof source.process?.pid === 'number' ? source.process.pid : undefined;
+  if (hasAmbiguousProcess(source)) {
+    return undefined;
+  }
+  const entityId = readSourceString(source, 'process.entity_id');
+  const pid = readSourceNumber(source, 'process.pid');
   if (entityId === undefined && pid === undefined) {
     return undefined;
   }
-  if (asTypeList(source.event?.type).some((type) => type.toLowerCase().includes('end'))) {
+  if (readSourceStrings(source, 'event.type').some((type) => type.toLowerCase().includes('end'))) {
     return undefined;
   }
+  const processExecutable = readSourceString(source, 'process.executable');
+  const timestamp = readSourceString(source, '@timestamp') ?? MISSING_TIMESTAMP;
   return {
     hostName,
     processKey: entityId !== undefined ? `entity_id:${entityId}` : `pid:${pid}`,
     pid,
     entityId,
-    processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
-    processExecutable: source.process?.executable,
-    timestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
+    processName: readSourceString(source, 'process.name') ?? processExecutable ?? 'unknown process',
+    processExecutable,
+    timestamp,
     techniqueId: ref.matched?.technique_id,
     techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
-    rankTimestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
+    rankTimestamp: timestamp,
     iocMatched: ref.matched?.ioc === true,
   };
 };

@@ -901,28 +901,40 @@ steps:
               type: keyword
               script:
                 source: |-
-                  def v = params._source?.host?.name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.host?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.cloud?.account?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.source?.ip;
-                  if (v != null && v != '') { emit(v.toString()); return; }
+                  String read(Map src, String path) {
+                    def flat = src.get(path);
+                    if (flat != null) { return flat.toString(); }
+                    def cur = src;
+                    for (String part : path.splitOnToken('.')) {
+                      if (!(cur instanceof Map)) { return null; }
+                      cur = ((Map) cur).get(part);
+                      if (cur == null) { return null; }
+                    }
+                    return cur.toString();
+                  }
+                  for (String path : ['host.name', 'host.id', 'cloud.account.id', 'source.ip']) {
+                    def v = read(params._source, path);
+                    if (v != null && v != '') { emit(v); return; }
+                  }
             effective_actor:
               type: keyword
               script:
                 source: |-
-                  def v = params._source?.user?.name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.user?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.aws?.cloudtrail?.user_identity?.arn;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.azure?.auditlogs?.properties?.initiated_by?.user?.user_principal_name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.gcp?.audit?.authentication_info?.principal_email;
-                  if (v != null && v != '') { emit(v.toString()); return; }
+                  String read(Map src, String path) {
+                    def flat = src.get(path);
+                    if (flat != null) { return flat.toString(); }
+                    def cur = src;
+                    for (String part : path.splitOnToken('.')) {
+                      if (!(cur instanceof Map)) { return null; }
+                      cur = ((Map) cur).get(part);
+                      if (cur == null) { return null; }
+                    }
+                    return cur.toString();
+                  }
+                  for (String path : ['user.name', 'user.id', 'aws.cloudtrail.user_identity.arn', 'azure.auditlogs.properties.initiated_by.user.user_principal_name', 'gcp.audit.authentication_info.principal_email']) {
+                    def v = read(params._source, path);
+                    if (v != null && v != '') { emit(v); return; }
+                  }
           query:
             bool:
               filter:
@@ -983,28 +995,40 @@ steps:
               type: keyword
               script:
                 source: |-
-                  def v = params._source?.host?.name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.host?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.cloud?.account?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.source?.ip;
-                  if (v != null && v != '') { emit(v.toString()); return; }
+                  String read(Map src, String path) {
+                    def flat = src.get(path);
+                    if (flat != null) { return flat.toString(); }
+                    def cur = src;
+                    for (String part : path.splitOnToken('.')) {
+                      if (!(cur instanceof Map)) { return null; }
+                      cur = ((Map) cur).get(part);
+                      if (cur == null) { return null; }
+                    }
+                    return cur.toString();
+                  }
+                  for (String path : ['host.name', 'host.id', 'cloud.account.id', 'source.ip']) {
+                    def v = read(params._source, path);
+                    if (v != null && v != '') { emit(v); return; }
+                  }
             effective_actor:
               type: keyword
               script:
                 source: |-
-                  def v = params._source?.user?.name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.user?.id;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.aws?.cloudtrail?.user_identity?.arn;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.azure?.auditlogs?.properties?.initiated_by?.user?.user_principal_name;
-                  if (v != null && v != '') { emit(v.toString()); return; }
-                  v = params._source?.gcp?.audit?.authentication_info?.principal_email;
-                  if (v != null && v != '') { emit(v.toString()); return; }
+                  String read(Map src, String path) {
+                    def flat = src.get(path);
+                    if (flat != null) { return flat.toString(); }
+                    def cur = src;
+                    for (String part : path.splitOnToken('.')) {
+                      if (!(cur instanceof Map)) { return null; }
+                      cur = ((Map) cur).get(part);
+                      if (cur == null) { return null; }
+                    }
+                    return cur.toString();
+                  }
+                  for (String path : ['user.name', 'user.id', 'aws.cloudtrail.user_identity.arn', 'azure.auditlogs.properties.initiated_by.user.user_principal_name', 'gcp.audit.authentication_info.principal_email']) {
+                    def v = read(params._source, path);
+                    if (v != null && v != '') { emit(v); return; }
+                  }
           query:
             bool:
               filter:
