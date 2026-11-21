@@ -78,7 +78,7 @@ overrides:
   '@types/prop-types': '15.7.5'
   '@types/react': '18.2.79'
   '@types/react-dom': '18.2.25'
-  '@typescript-eslint/utils': '8.60.0'
+  '@typescript-eslint/utils': '8.73.0'
   'adm-zip': '0.6.1'
   'apache-arrow': '20.x - 21.x'
   'baseline-browser-mapping': '2.9.14'
