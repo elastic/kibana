@@ -46,6 +46,10 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/isomer-components'
+  - '@kbn/isomer-plugin'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
