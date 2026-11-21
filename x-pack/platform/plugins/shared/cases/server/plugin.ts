@@ -356,7 +356,8 @@ export class CasePlugin
           attachmentsEnabled: this.caseConfig.attachments?.enabled === true,
           templatesEnabled: this.caseConfig.templates?.enabled === true,
         },
-        this.logger
+        this.logger,
+        this.investigations
       );
     }
 

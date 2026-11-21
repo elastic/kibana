@@ -60,6 +60,12 @@ export const platformCoreCasesTools = {
   manageAttachments: casesTool('manage_attachments'),
   observables: casesTool('observables'),
   findTemplates: casesTool('find_templates'),
+  investigationReadItems: casesTool('investigation_read_items'),
+  investigationAddEvidence: casesTool('investigation_add_evidence'),
+  investigationUpsertClaim: casesTool('investigation_upsert_claim'),
+  investigationSetTaskStatus: casesTool('investigation_set_task_status'),
+  investigationUpsertEntity: casesTool('investigation_upsert_entity'),
+  investigationProposeAction: casesTool('investigation_propose_action'),
 } as const;
 
 /**

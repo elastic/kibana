@@ -880,7 +880,7 @@ export class InvestigationsService {
       throw Boom.conflict('The investigation was changed by someone else. Reload and try again.');
     }
     const actor = this.actor(req.actor);
-    const ts = now();
+    const ts = this.ts(req.ts);
     const patch: Partial<StoredRecord> = {};
     const casePatch: Record<string, unknown> = {};
     const entries: Array<Omit<ActivityEntry, 'id' | 'record_id' | 'space_id'>> = [];

@@ -26,7 +26,10 @@ export { InvestigationsService } from './service';
 export interface InvestigationsSetup {
   routes: CaseRoute[];
   /** Builds a request-scoped service (used by Agent Builder tools and hooks). */
-  getServiceForRequest: (request: KibanaRequest, opts?: { actor?: Actor }) => Promise<InvestigationsService>;
+  getServiceForRequest: (
+    request: KibanaRequest,
+    opts?: { asAgent?: { id: string; name: string } }
+  ) => Promise<InvestigationsService>;
   start: (core: CoreStart) => Promise<void>;
 }
 
@@ -67,11 +70,14 @@ export const setupInvestigations = ({
   const buildService = async (
     request: KibanaRequest,
     casesClient: CasesClient,
-    actor?: Actor
+    asAgent?: { id: string; name: string }
   ): Promise<InvestigationsService> => {
     const [coreStart, pluginsStart] = await core.getStartServices();
     const user = coreStart.security.authc.getCurrentUser(request);
     const username = user?.username ?? 'unknown';
+    const actor: Actor | undefined = asAgent
+      ? { type: 'agent', id: asAgent.id, name: asAgent.name, on_behalf_of: user?.full_name || username }
+      : undefined;
     let availability: Promise<{ available: boolean; reason?: string }> | undefined;
     const isAvailable = () => {
       availability ??= (async () => {
@@ -142,7 +148,7 @@ export const setupInvestigations = ({
   return {
     routes,
     getServiceForRequest: async (request, opts) =>
-      buildService(request, await getCasesClient(request), opts?.actor),
+      buildService(request, await getCasesClient(request), opts?.asAgent),
     start: async (coreStart) => {
       try {
         await ensureInvestigationIndices(coreStart.elasticsearch.client.asInternalUser, log);

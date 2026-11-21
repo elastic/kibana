@@ -784,6 +784,8 @@ export interface UpdateRecordRequest {
   /** Optimistic concurrency on the record document ("seq_no:primary_term"). */
   version?: string;
   actor?: Actor;
+  /** Honoured only when `allowBackdate` is on (seeding historical changes). */
+  ts?: string;
 }
 
 export interface CloseRecordRequest {

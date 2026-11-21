@@ -354,6 +354,7 @@ export const updateRecordBody = schema.object({
   ai_enabled: schema.maybe(schema.boolean()),
   version: schema.maybe(str(64)),
   actor: schema.maybe(actorSchema),
+  ts: schema.maybe(isoDate()),
 });
 
 export const closeRecordBody = schema.object({
