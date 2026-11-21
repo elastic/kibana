@@ -78,7 +78,7 @@ export class WMSCreateSourceEditor extends Component<Props, State> {
     const sourceConfig =
       serviceUrl && layers
         ? {
-            serviceUrl,
+            service_url: serviceUrl,
             layers,
             styles,
           }

@@ -65,7 +65,7 @@ export const GeoPointContentWithMap: FC<{
     let ignore = false;
     mapsPlugin.createLayerDescriptors
       .createESSearchSourceLayerDescriptor({
-        indexPatternId: dataView.id,
+        index_pattern_id: dataView.id,
         geoFieldName: config.fieldName,
         geoFieldType: config.type as ES_GEO_FIELD_TYPE,
       })
@@ -84,15 +84,15 @@ export const GeoPointContentWithMap: FC<{
               },
             ],
             dataViewId: dataView.id,
-            dateField: dataView.timeFieldName ?? timeFieldName,
-            geoField: config.fieldName,
+            date_field: dataView.timeFieldName ?? timeFieldName,
+            geo_field: config.fieldName,
             esql,
-            narrowByGlobalSearch: true,
-            narrowByGlobalTime: true,
-            narrowByMapBounds: true,
+            narrow_by_global_search: true,
+            narrow_by_global_time: true,
+            narrow_by_map_bounds: true,
             id: (searchLayerDescriptor.sourceDescriptor as { id: string }).id,
             type: 'ESQL',
-            applyForceRefresh: true,
+            apply_force_refresh: true,
           };
 
           setLayerList([

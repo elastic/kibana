@@ -29,19 +29,19 @@ interface State {}
 
 export class UpdateSourceEditor extends Component<Props, State> {
   _onTooltipPropertiesSelect = (propertyNames: string[]) => {
-    this.props.onChange({ propName: 'tooltipProperties', value: propertyNames });
+    this.props.onChange({ propName: 'tooltip_properties', value: propertyNames });
   };
 
   _handleChange = (settings: MVTSettings) => {
     const changes: OnSourceChangeArgs[] = [];
     if (settings.layerName !== this.props.source.getTileSourceLayer()) {
-      changes.push({ propName: 'layerName', value: settings.layerName });
+      changes.push({ propName: 'layer_name', value: settings.layerName });
     }
     if (settings.minSourceZoom !== this.props.source.getMinZoom()) {
-      changes.push({ propName: 'minSourceZoom', value: settings.minSourceZoom });
+      changes.push({ propName: 'min_source_zoom', value: settings.minSourceZoom });
     }
     if (settings.maxSourceZoom !== this.props.source.getMaxZoom()) {
-      changes.push({ propName: 'maxSourceZoom', value: settings.maxSourceZoom });
+      changes.push({ propName: 'max_source_zoom', value: settings.maxSourceZoom });
     }
     if (!_.isEqual(settings.fields, this._getFieldDescriptors())) {
       changes.push({ propName: 'fields', value: settings.fields });
@@ -60,7 +60,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
       }
 
       if (!_.isEqual(sanitizedTooltips, this.props.tooltipFields)) {
-        changes.push({ propName: 'tooltipProperties', value: sanitizedTooltips });
+        changes.push({ propName: 'tooltip_properties', value: sanitizedTooltips });
       }
     }
     this.props.onChange(...changes);

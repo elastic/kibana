@@ -30,10 +30,10 @@ export const mockSourceLayer = {
   sourceDescriptor: {
     id: 'uuidv4()',
     type: 'ES_SEARCH',
-    applyGlobalQuery: true,
-    geoField: 'source.geo.location',
-    filterByMapBounds: false,
-    tooltipProperties: [
+    apply_global_query: true,
+    geo_field: 'source.geo.location',
+    filter_by_map_bounds: false,
+    tooltip_properties: [
       'host.name',
       'source.ip',
       'source.domain',
@@ -42,8 +42,8 @@ export const mockSourceLayer = {
     ],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    top_hits_size: 1,
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
   },
   style: {
     type: 'VECTOR',
@@ -87,10 +87,10 @@ export const mockDestinationLayer = {
   sourceDescriptor: {
     id: 'uuidv4()',
     type: 'ES_SEARCH',
-    applyGlobalQuery: true,
-    geoField: 'destination.geo.location',
-    filterByMapBounds: true,
-    tooltipProperties: [
+    apply_global_query: true,
+    geo_field: 'destination.geo.location',
+    filter_by_map_bounds: true,
+    tooltip_properties: [
       'host.name',
       'destination.ip',
       'destination.domain',
@@ -99,9 +99,9 @@ export const mockDestinationLayer = {
     ],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-    scalingType: 'LIMIT',
+    top_hits_size: 1,
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scaling_type: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
@@ -144,10 +144,10 @@ export const mockClientLayer = {
   sourceDescriptor: {
     id: 'uuidv4()',
     type: 'ES_SEARCH',
-    applyGlobalQuery: true,
-    geoField: 'client.geo.location',
-    filterByMapBounds: false,
-    tooltipProperties: [
+    apply_global_query: true,
+    geo_field: 'client.geo.location',
+    filter_by_map_bounds: false,
+    tooltip_properties: [
       'host.name',
       'client.ip',
       'client.domain',
@@ -156,8 +156,8 @@ export const mockClientLayer = {
     ],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    top_hits_size: 1,
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
   },
   style: {
     type: 'VECTOR',
@@ -206,10 +206,10 @@ export const mockServerLayer = {
   sourceDescriptor: {
     id: 'uuidv4()',
     type: 'ES_SEARCH',
-    applyGlobalQuery: true,
-    geoField: 'server.geo.location',
-    filterByMapBounds: true,
-    tooltipProperties: [
+    apply_global_query: true,
+    geo_field: 'server.geo.location',
+    filter_by_map_bounds: true,
+    tooltip_properties: [
       'host.name',
       'server.ip',
       'server.domain',
@@ -218,9 +218,9 @@ export const mockServerLayer = {
     ],
     useTopHits: false,
     topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-    scalingType: 'LIMIT',
+    top_hits_size: 1,
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scaling_type: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
@@ -267,11 +267,11 @@ const mockApmDataStreamServerLayer = {
 export const mockLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
-    applyGlobalQuery: true,
+    apply_global_query: true,
     id: 'uuidv4()',
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-    sourceGeoField: 'source.geo.location',
-    destGeoField: 'destination.geo.location',
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    source_geo_field: 'source.geo.location',
+    dest_geo_field: 'destination.geo.location',
     metrics: [
       { type: 'sum', field: 'source.bytes', label: 'source.bytes' },
       { type: 'sum', field: 'destination.bytes', label: 'destination.bytes' },
@@ -332,11 +332,11 @@ export const mockLineLayer = {
 export const mockClientServerLineLayer = {
   sourceDescriptor: {
     type: 'ES_PEW_PEW',
-    applyGlobalQuery: true,
+    apply_global_query: true,
     id: 'uuidv4()',
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-    sourceGeoField: 'client.geo.location',
-    destGeoField: 'server.geo.location',
+    index_pattern_id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    source_geo_field: 'client.geo.location',
+    dest_geo_field: 'server.geo.location',
     metrics: [
       { type: 'sum', field: 'client.bytes', label: 'client.bytes' },
       { type: 'sum', field: 'server.bytes', label: 'server.bytes' },

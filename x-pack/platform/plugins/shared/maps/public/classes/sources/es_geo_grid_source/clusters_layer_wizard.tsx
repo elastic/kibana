@@ -104,7 +104,7 @@ export const clustersLayerWizardConfig: LayerWizard = {
       });
 
       const layerDescriptor =
-        sourceDescriptor.requestType === RENDER_AS.HEX
+        sourceDescriptor.request_type === RENDER_AS.HEX
           ? MvtVectorLayer.createDescriptor({
               sourceDescriptor,
               style,

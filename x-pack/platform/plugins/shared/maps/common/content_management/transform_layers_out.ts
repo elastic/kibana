@@ -27,6 +27,19 @@ export function transformLayersOut(layers: StoredLayer[]) {
         };
         transformed.sourceDescriptor = restOfSource;
       }
+      transformed.sourceDescriptor = convertCamelCasedKeysToSnakeCase(
+        transformed.sourceDescriptor
+      ) as typeof transformed.sourceDescriptor;
+    }
+    if ('joins' in transformed && Array.isArray(transformed.joins)) {
+      transformed.joins = transformed.joins.map((join) =>
+        join.right
+          ? {
+              ...join,
+              right: convertCamelCasedKeysToSnakeCase(join.right) as typeof join.right,
+            }
+          : join
+      );
     }
     return transformed;
   });

@@ -28,11 +28,11 @@ export const getMapsLink = async (context: VisualizeFieldContext) => {
       sourceDescriptor: {
         id: uuidv4(),
         type: SOURCE_TYPES.ES_SEARCH,
-        tooltipProperties: hasTooltips ? context.contextualFields : [],
+        tooltip_properties: hasTooltips ? context.contextualFields : [],
         label: dataView.getIndexPattern(),
-        indexPatternId: context.dataViewSpec.id,
-        geoField: context.fieldName,
-        scalingType: SCALING_TYPES.MVT,
+        index_pattern_id: context.dataViewSpec.id,
+        geo_field: context.fieldName,
+        scaling_type: SCALING_TYPES.MVT,
       },
     },
   ];

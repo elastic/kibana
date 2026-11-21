@@ -44,23 +44,23 @@ export const sourceTitle = i18n.translate(
 
 export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVectorSource {
   static createDescriptor({
-    urlTemplate,
-    layerName,
-    minSourceZoom,
-    maxSourceZoom,
+    url_template: urlTemplate,
+    layer_name: layerName,
+    min_source_zoom: minSourceZoom,
+    max_source_zoom: maxSourceZoom,
     fields,
-    tooltipProperties,
+    tooltip_properties: tooltipProperties,
   }: Partial<TiledSingleLayerVectorSourceDescriptor>): Required<TiledSingleLayerVectorSourceDescriptor> {
     return {
       type: SOURCE_TYPES.MVT_SINGLE_LAYER,
-      urlTemplate: urlTemplate ? urlTemplate : '',
-      layerName: layerName ? layerName : '',
-      minSourceZoom:
+      url_template: urlTemplate ? urlTemplate : '',
+      layer_name: layerName ? layerName : '',
+      min_source_zoom:
         typeof minSourceZoom === 'number' ? Math.max(MIN_ZOOM, minSourceZoom) : MIN_ZOOM,
-      maxSourceZoom:
+      max_source_zoom:
         typeof maxSourceZoom === 'number' ? Math.min(MAX_ZOOM, maxSourceZoom) : MAX_ZOOM,
       fields: fields ? fields : [],
-      tooltipProperties: tooltipProperties ? tooltipProperties : [],
+      tooltip_properties: tooltipProperties ? tooltipProperties : [],
     };
   }
 
@@ -71,7 +71,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
     super(sourceDescriptor);
     this._descriptor = MVTSingleLayerVectorSource.createDescriptor(sourceDescriptor);
 
-    this._tooltipFields = this._descriptor.tooltipProperties
+    this._tooltipFields = this._descriptor.tooltip_properties
       .map((fieldName) => {
         return this.getFieldByName(fieldName);
       })
@@ -135,13 +135,13 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }
 
   getTileSourceLayer(): string {
-    return this._descriptor.layerName;
+    return this._descriptor.layer_name;
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
     return [
       { label: getDataSourceLabel(), value: sourceTitle },
-      { label: getUrlLabel(), value: this._descriptor.urlTemplate },
+      { label: getUrlLabel(), value: this._descriptor.url_template },
     ];
   }
 
@@ -150,7 +150,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }
 
   async getTileUrl(): Promise<string> {
-    return this._descriptor.urlTemplate;
+    return this._descriptor.url_template;
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
@@ -162,11 +162,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
   }
 
   getMinZoom(): number {
-    return this._descriptor.minSourceZoom;
+    return this._descriptor.min_source_zoom;
   }
 
   getMaxZoom(): number {
-    return this._descriptor.maxSourceZoom;
+    return this._descriptor.max_source_zoom;
   }
 
   async getBoundsForFilters(

@@ -17,7 +17,7 @@ import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_me
 
 const AUTO_SELECT = 'auto_select';
 
-export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'isAutoSelect'>;
+export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'is_auto_select'>;
 
 interface Props {
   config?: EmsTmsSourceConfig;
@@ -79,7 +79,7 @@ export class TileServiceSelect extends Component<Props, State> {
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({
       id: isAutoSelect ? undefined : value,
-      isAutoSelect,
+      is_auto_select: isAutoSelect,
     });
   };
 
@@ -88,7 +88,7 @@ export class TileServiceSelect extends Component<Props, State> {
 
     let selectedId: string | undefined;
     if (this.props.config) {
-      selectedId = this.props.config.isAutoSelect ? AUTO_SELECT : this.props.config.id!;
+      selectedId = this.props.config.is_auto_select ? AUTO_SELECT : this.props.config.id!;
     }
 
     return (

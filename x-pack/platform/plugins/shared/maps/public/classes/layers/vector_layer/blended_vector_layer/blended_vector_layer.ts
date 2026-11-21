@@ -59,14 +59,14 @@ function getAggType(
 
 function getClusterSource(documentSource: IESSource, documentStyle: IVectorStyle): ESGeoGridSource {
   const clusterSourceDescriptor = ESGeoGridSource.createDescriptor({
-    indexPatternId: documentSource.getIndexPatternId(),
-    geoField: documentSource.getGeoFieldName(),
-    requestType: RENDER_AS.POINT,
+    index_pattern_id: documentSource.getIndexPatternId(),
+    geo_field: documentSource.getGeoFieldName(),
+    request_type: RENDER_AS.POINT,
     resolution: GRID_RESOLUTION.COARSE,
   }) as Writable<ESGeoGridSourceDescriptor>;
-  clusterSourceDescriptor.applyGlobalQuery = documentSource.getApplyGlobalQuery();
-  clusterSourceDescriptor.applyGlobalTime = documentSource.getApplyGlobalTime();
-  clusterSourceDescriptor.applyForceRefresh = documentSource.getApplyForceRefresh();
+  clusterSourceDescriptor.apply_global_query = documentSource.getApplyGlobalQuery();
+  clusterSourceDescriptor.apply_global_time = documentSource.getApplyGlobalTime();
+  clusterSourceDescriptor.apply_force_refresh = documentSource.getApplyForceRefresh();
   clusterSourceDescriptor.metrics = [
     {
       type: AGG_TYPE.COUNT,

@@ -28,7 +28,7 @@ export function createBasemapLayerDescriptor(): LayerDescriptor | null {
   if (isEmsEnabled) {
     const layerDescriptor = EmsVectorTileLayer.createDescriptor({
       locale: AUTOSELECT_EMS_LOCALE,
-      sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
+      sourceDescriptor: EMSTMSSource.createDescriptor({ is_auto_select: true }),
     });
     return layerDescriptor;
   }

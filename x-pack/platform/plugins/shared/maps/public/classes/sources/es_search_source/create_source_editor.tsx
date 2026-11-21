@@ -82,9 +82,9 @@ export class CreateSourceEditor extends Component<Props, State> {
     const sourceConfig =
       indexPattern && geoFieldName
         ? {
-            indexPatternId: indexPattern.id,
-            geoField: geoFieldName,
-            scalingType: SCALING_TYPES.MVT,
+            index_pattern_id: indexPattern.id,
+            geo_field: geoFieldName,
+            scaling_type: SCALING_TYPES.MVT,
           }
         : null;
     const isPointsOnly = field ? field.type === 'geo_point' : false;

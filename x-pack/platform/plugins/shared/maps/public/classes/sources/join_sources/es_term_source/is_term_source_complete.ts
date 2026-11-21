@@ -8,5 +8,5 @@
 import type { ESTermSourceDescriptor } from '../../../../../common/descriptor_types';
 
 export function isTermSourceComplete(descriptor: Partial<ESTermSourceDescriptor>) {
-  return descriptor.indexPatternId !== undefined && descriptor.term !== undefined;
+  return descriptor.index_pattern_id !== undefined && descriptor.term !== undefined;
 }

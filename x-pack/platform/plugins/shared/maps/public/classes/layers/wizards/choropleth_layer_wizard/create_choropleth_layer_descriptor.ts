@@ -94,12 +94,12 @@ function createChoroplethLayerDescriptor({
       right: {
         type: SOURCE_TYPES.ES_TERM_SOURCE,
         id: joinId,
-        indexPatternId: rightIndexPatternId,
+        index_pattern_id: rightIndexPatternId,
         term: rightTermField,
         metrics: [metricsDescriptor],
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        applyForceRefresh: true,
+        apply_global_query: true,
+        apply_global_time: true,
+        apply_force_refresh: true,
       } as ESTermSourceDescriptor,
     },
   ];
@@ -131,7 +131,7 @@ export function createEmsChoroplethLayerDescriptor({
   return createChoroplethLayerDescriptor({
     sourceDescriptor: EMSFileSource.createDescriptor({
       id: leftEmsFileId,
-      tooltipProperties: [leftEmsField],
+      tooltip_properties: [leftEmsField],
     }),
     leftField: leftEmsField,
     rightIndexPatternId,
@@ -155,13 +155,13 @@ export function createEsChoroplethLayerDescriptor({
 }) {
   return createChoroplethLayerDescriptor({
     sourceDescriptor: ESSearchSource.createDescriptor({
-      indexPatternId: leftIndexPatternId,
-      geoField: leftGeoField,
-      scalingType: SCALING_TYPES.MVT,
-      tooltipProperties: [leftJoinField],
-      applyGlobalQuery: false,
-      applyGlobalTime: false,
-      applyForceRefresh: false,
+      index_pattern_id: leftIndexPatternId,
+      geo_field: leftGeoField,
+      scaling_type: SCALING_TYPES.MVT,
+      tooltip_properties: [leftJoinField],
+      apply_global_query: false,
+      apply_global_time: false,
+      apply_force_refresh: false,
     }),
     leftField: leftJoinField,
     rightIndexPatternId,

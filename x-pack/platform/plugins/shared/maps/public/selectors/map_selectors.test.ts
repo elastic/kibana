@@ -280,8 +280,8 @@ describe('getQueryableUniqueIndexPatternIds', () => {
       },
       visible,
       sourceDescriptor: ESSearchSource.createDescriptor({
-        indexPatternId,
-        geoField: 'field',
+        index_pattern_id: indexPatternId,
+        geo_field: 'field',
       }),
     };
   }

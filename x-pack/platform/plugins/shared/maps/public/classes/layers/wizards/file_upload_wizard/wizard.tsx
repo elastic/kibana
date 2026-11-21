@@ -72,9 +72,9 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
 
   _addDocumentLayer = _.once((results: FileUploadGeoResults) => {
     const esSearchSourceConfig = {
-      indexPatternId: results.indexPatternId,
-      geoField: results.geoFieldName,
-      scalingType: SCALING_TYPES.MVT,
+      index_pattern_id: results.indexPatternId,
+      geo_field: results.geoFieldName,
+      scaling_type: SCALING_TYPES.MVT,
     };
     this.props.previewLayers([
       createDefaultLayerDescriptor(esSearchSourceConfig, this.props.mapColors),

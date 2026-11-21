@@ -153,8 +153,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
                 right: {
                   type: SOURCE_TYPES.ES_DISTANCE_SOURCE,
                   id: uuidv4(),
-                  applyGlobalQuery: true,
-                  applyGlobalTime: true,
+                  apply_global_query: true,
+                  apply_global_time: true,
                 },
               } as Partial<JoinDescriptor>);
             }}
@@ -175,8 +175,8 @@ export function JoinEditor({ joins, layer, onChange, leftJoinFields, layerDispla
                 right: {
                   type: SOURCE_TYPES.ES_TERM_SOURCE,
                   id: uuidv4(),
-                  applyGlobalQuery: true,
-                  applyGlobalTime: true,
+                  apply_global_query: true,
+                  apply_global_time: true,
                 },
               } as Partial<JoinDescriptor>);
             }}

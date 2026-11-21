@@ -155,10 +155,10 @@ describe('getGeoJsonWithMeta', () => {
   const createSource = () =>
     new ESQLSource({
       esql: ESQL,
-      geoField: 'geo.coordinates',
-      narrowByGlobalSearch: false,
-      narrowByMapBounds: false,
-      narrowByGlobalTime: false,
+      geo_field: 'geo.coordinates',
+      narrow_by_global_search: false,
+      narrow_by_map_bounds: false,
+      narrow_by_global_time: false,
     });
 
   beforeEach(() => {
@@ -223,10 +223,10 @@ describe('getSyncMeta', () => {
   const createSource = (esql: string) =>
     new ESQLSource({
       esql,
-      geoField: 'geo.coordinates',
-      narrowByGlobalSearch: false,
-      narrowByMapBounds: false,
-      narrowByGlobalTime: false,
+      geo_field: 'geo.coordinates',
+      narrow_by_global_search: false,
+      narrow_by_map_bounds: false,
+      narrow_by_global_time: false,
     });
   const GEOTILE_ESQL =
     'FROM logs | STATS count = COUNT(*) BY ST_GEOTILE(geo.coordinates, ?_geotile_precision)';
@@ -248,7 +248,7 @@ describe('getGeotilePrecision', () => {
   const createSource = (resolution?: GRID_RESOLUTION) =>
     new ESQLSource({
       esql: 'FROM logs | STATS BY ST_GEOTILE(geo.coordinates, ?_geotile_precision)',
-      geoField: 'geo.coordinates',
+      geo_field: 'geo.coordinates',
       resolution,
     });
 
@@ -274,7 +274,7 @@ describe('getGeotilePrecision', () => {
 describe('getGeohexPrecision', () => {
   const GEOHEX_ESQL = 'FROM logs | STATS BY ST_GEOHEX(geo.coordinates, ?_geohex_precision)';
   const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
-    new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
+    new ESQLSource({ esql, geo_field: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
     expect(createSource(GEOHEX_ESQL).getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({
@@ -304,7 +304,7 @@ describe('getGeohexPrecision', () => {
 describe('getGeohashPrecision', () => {
   const GEOHASH_ESQL = 'FROM logs | STATS BY ST_GEOHASH(geo.coordinates, ?_geohash_precision)';
   const createSource = (esql: string, resolution?: GRID_RESOLUTION) =>
-    new ESQLSource({ esql, geoField: 'geo.coordinates', resolution });
+    new ESQLSource({ esql, geo_field: 'geo.coordinates', resolution });
 
   test('should default to fine resolution', () => {
     expect(createSource(GEOHASH_ESQL).getSyncMeta({ zoom: 4.5 } as any)).toMatchObject({

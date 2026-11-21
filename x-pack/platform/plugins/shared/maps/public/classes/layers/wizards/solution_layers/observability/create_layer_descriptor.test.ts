@@ -52,20 +52,20 @@ describe('createLayerDescriptor', () => {
         {
           leftField: 'iso2',
           right: {
-            applyGlobalQuery: true,
-            applyGlobalTime: true,
+            apply_global_query: true,
+            apply_global_time: true,
             id: '12345',
-            indexPatternId: 'apm_static_data_view_id_default',
+            index_pattern_id: 'apm_static_data_view_id_default',
             metrics: [
               {
                 field: 'transaction.duration.us',
                 type: 'avg',
               },
             ],
-            applyForceRefresh: true,
+            apply_force_refresh: true,
             term: 'client.geo.country_iso_code',
             type: 'ES_TERM_SOURCE',
-            whereQuery: {
+            where_query: {
               language: 'kuery',
               query: 'processor.event:"transaction"',
             },
@@ -78,7 +78,7 @@ describe('createLayerDescriptor', () => {
       disableTooltips: false,
       sourceDescriptor: {
         id: emsWorldLayerId,
-        tooltipProperties: ['name', 'iso2'],
+        tooltip_properties: ['name', 'iso2'],
         type: 'EMS_FILE',
       },
       style: {
@@ -134,20 +134,20 @@ describe('createLayerDescriptor', () => {
         query: 'processor.event:"transaction"',
       },
       sourceDescriptor: {
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        geoField: 'client.geo.location',
+        apply_global_query: true,
+        apply_global_time: true,
+        geo_field: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_data_view_id_default',
+        index_pattern_id: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',
             type: 'avg',
           },
         ],
-        requestType: 'heatmap',
+        request_type: 'heatmap',
         resolution: 'MOST_FINE',
-        applyForceRefresh: true,
+        apply_force_refresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {
@@ -180,20 +180,20 @@ describe('createLayerDescriptor', () => {
         query: 'processor.event:"transaction"',
       },
       sourceDescriptor: {
-        applyGlobalQuery: true,
-        applyGlobalTime: true,
-        geoField: 'client.geo.location',
+        apply_global_query: true,
+        apply_global_time: true,
+        geo_field: 'client.geo.location',
         id: '12345',
-        indexPatternId: 'apm_static_data_view_id_default',
+        index_pattern_id: 'apm_static_data_view_id_default',
         metrics: [
           {
             field: 'transaction.duration.us',
             type: 'avg',
           },
         ],
-        requestType: 'point',
+        request_type: 'point',
         resolution: 'MOST_FINE',
-        applyForceRefresh: true,
+        apply_force_refresh: true,
         type: 'ES_GEO_GRID',
       },
       style: {

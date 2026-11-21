@@ -49,7 +49,7 @@ export function TermJoinPopoverContent(props: Props) {
     const { term, ...rest } = props.sourceDescriptor;
     props.onSourceDescriptorChange({
       ...rest,
-      indexPatternId,
+      index_pattern_id: indexPatternId,
     });
   }
 
@@ -129,7 +129,7 @@ export function TermJoinPopoverContent(props: Props) {
       >
         <IndexPatternSelect
           placeholder={getDataViewSelectPlaceholder()}
-          indexPatternId={props.sourceDescriptor.indexPatternId ?? ''}
+          indexPatternId={props.sourceDescriptor.index_pattern_id ?? ''}
           onChange={onRightDataViewChange}
           isClearable={false}
         />

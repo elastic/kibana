@@ -28,10 +28,10 @@ import { MvtVectorLayer } from './mvt_vector_layer';
 import type { IJoinSource } from '../../../sources/join_sources';
 
 const defaultConfig = {
-  urlTemplate: 'https://example.com/{x}/{y}/{z}.pbf',
-  layerName: 'foobar',
-  minSourceZoom: 4,
-  maxSourceZoom: 14,
+  url_template: 'https://example.com/{x}/{y}/{z}.pbf',
+  layer_name: 'foobar',
+  min_source_zoom: 4,
+  max_source_zoom: 14,
 };
 
 function createLayer(
@@ -43,7 +43,7 @@ function createLayer(
     type: SOURCE_TYPES.MVT_SINGLE_LAYER,
     ...defaultConfig,
     fields: [],
-    tooltipProperties: [],
+    tooltip_properties: [],
     ...sourceOptions,
   };
   const mvtSource = new MVTSingleLayerVectorSource(sourceDescriptor);
