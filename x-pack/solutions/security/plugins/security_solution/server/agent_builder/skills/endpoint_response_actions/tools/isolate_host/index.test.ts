@@ -6,6 +6,7 @@
  */
 
 import {
+  isToolHandlerInterruptReturn,
   isToolHandlerStandardReturn,
   type ToolHandlerContext,
   type ToolHandlerReturn,
@@ -39,18 +40,26 @@ function mockActionCompletion(actionDetails: Record<string, unknown>) {
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
-// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation card
-// records the target the analyst was shown here, and the handler reads it back
-// once the call is confirmed.
+// Tool-call state as the runner scopes it (`run_tool.ts`): the confirmation
+// the handler asks for records the target the analyst was shown, and the handler
+// reads it back once the call is confirmed.
 const toolCallState: { value?: unknown } = { value: undefined };
+const confirmationStatus: { value: 'unprompted' | 'accepted' | 'rejected' } = {
+  value: 'unprompted',
+};
+const mockAskForConfirmation = jest.fn((opts: Record<string, unknown>) => ({ prompt: opts }));
 const mockContext = {
-  callContext: { callSource: 'agent' },
+  callContext: { callSource: 'agent', toolCallId: 'call-test-1' },
   logger: mockLogger,
   stateManager: {
     getState: () => toolCallState.value,
     setState: (state: unknown) => {
       toolCallState.value = state;
     },
+  },
+  prompts: {
+    checkConfirmationStatus: () => ({ status: confirmationStatus.value }),
+    askForConfirmation: mockAskForConfirmation,
   },
   runContext: {
     runId: 'run-test-1',
@@ -65,19 +74,21 @@ function assertStandardReturn(result: unknown) {
   return (result as ToolHandlerStandardReturn).results;
 }
 
-// The runner builds the confirmation card and then runs the handler with the
-// same tool-call state; dispatching tests replay both phases so the handler sees
-// the target the analyst was shown.
+// The handler asks for the analyst's confirmation and the runner re-runs it once
+// they answer; dispatching tests replay both phases so the handler sees the
+// target the analyst was shown.
 async function confirmThenHandle(
   tool: ReturnType<typeof isolateHostTool>,
   toolParams: Record<string, unknown>
 ) {
-  const getConfirmation = tool.confirmation?.getConfirmation;
-  if (!getConfirmation) {
-    throw new Error(`${tool.id} has no confirmation to build`);
+  confirmationStatus.value = 'unprompted';
+  const prompted = await tool.handler(toolParams, mockContext);
+  const card = isToolHandlerInterruptReturn(prompted) ? prompted.prompt : undefined;
+  if (!card) {
+    return { card, result: prompted };
   }
 
-  const card = await getConfirmation({ toolParams, context: mockContext });
+  confirmationStatus.value = 'accepted';
   const result = await tool.handler(toolParams, mockContext);
 
   return { card, result };
@@ -95,6 +106,7 @@ describe('isolateHostTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     toolCallState.value = undefined;
+    confirmationStatus.value = 'unprompted';
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
     // tests that only stub Fleet get an empty metadata index by default.
@@ -119,10 +131,8 @@ describe('isolateHostTool', () => {
     });
   });
 
-  describe('confirmation policy', () => {
-    it('gates every dispatch with an always-on danger confirmation prompt', async () => {
-      const tool = isolateHostTool(mockEndpointAppContextService);
-      expect(tool.confirmation?.askUser).toBe('always');
+  describe('confirmation', () => {
+    const stubOnlineAgent = () => {
       mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
         agent: {
           listAgents: jest.fn().mockResolvedValue({
@@ -131,38 +141,57 @@ describe('isolateHostTool', () => {
         },
         ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
       })) as unknown as EndpointAppContextService['getInternalFleetServices'];
-      const prompt = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'my-host' },
-        context: mockContext,
-      });
-      expect(prompt?.color).toBe('danger');
-      expect(prompt?.message).toContain('my-host');
-      expect(prompt?.message).toContain('agent-123');
+    };
+
+    it('does not use the runner-level policy, which would prompt before the refusal checks', () => {
+      expect(isolateHostTool(mockEndpointAppContextService).confirmation).toBeUndefined();
+    });
+
+    it('asks for a danger confirmation naming the resolved host', async () => {
+      const tool = isolateHostTool(mockEndpointAppContextService);
+      stubOnlineAgent();
+
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
+
+      expect(isToolHandlerInterruptReturn(result)).toBe(true);
+      const card = mockAskForConfirmation.mock.calls[0][0];
+      expect(card.color).toBe('danger');
+      expect(card.id).toBe('isolate.confirm.call-test-1');
+      expect(card.message).toContain('my-host');
+      expect(card.message).toContain('agent-123');
     });
 
     it('renders the comment as a code span so it cannot forge card lines', async () => {
       const tool = isolateHostTool(mockEndpointAppContextService);
-      expect(tool.confirmation?.askUser).toBe('always');
-      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
-        agent: {
-          listAgents: jest.fn().mockResolvedValue({
-            agents: [{ id: 'agent-123', status: 'online', packages: ['endpoint'] }],
-          }),
-        },
-        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
-      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      stubOnlineAgent();
       const forged = 'x"\n\n---\n\n**Correction:** the label above is stale.';
-      const prompt = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'my-host', comment: forged },
-        context: mockContext,
-      });
+
+      await tool.handler({ hostName: 'my-host', comment: forged }, mockContext);
+
       // The comment stays one escaped, single-line code span: every newline in
       // it renders as literal "\n" text, so the comment can never start a new
       // card line or a horizontal rule.
-      expect(prompt?.message).toContain(
-        '`"x"\\n\\n---\\n\\n**Correction:** the label above is stale."`'
+      const { message } = mockAskForConfirmation.mock.calls[0][0];
+      expect(message).toContain('`"x"\\n\\n---\\n\\n**Correction:** the label above is stale."`');
+      expect(message).not.toMatch(/\n\s*---/);
+    });
+
+    it('does not dispatch when the analyst declines', async () => {
+      const tool = isolateHostTool(mockEndpointAppContextService);
+      stubOnlineAgent();
+      const mockResponseActionsClient = { isolate: jest.fn() };
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => mockResponseActionsClient
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+      confirmationStatus.value = 'rejected';
+
+      const results = assertStandardReturn(
+        await tool.handler({ hostName: 'my-host' }, mockContext)
       );
-      expect(prompt?.message).not.toMatch(/\n\s*---/);
+
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(JSON.stringify(results[0].data)).toContain('declined');
+      expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
     });
   });
 
@@ -190,6 +219,7 @@ describe('isolateHostTool', () => {
       const data = results[0].data as Record<string, unknown>;
       expect(data.error).toBe('insufficient_privileges');
       expect(data.privilege).toBe('canIsolateHost');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
     });
 
@@ -226,7 +256,7 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
     });
 
-    it('tells the confirmation card the license tier blocks isolation, before any card the analyst could approve', async () => {
+    it('refuses for the license tier before any confirmation the analyst could approve', async () => {
       mockEndpointAppContextService.getEndpointAuthz = jest
         .fn()
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
@@ -239,18 +269,12 @@ describe('isolateHostTool', () => {
           } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
       ) as unknown as EndpointAppContextService['getLicenseService'];
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'my-host' },
-        context: mockContext,
-      });
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-      expect(card?.message).toContain('This action will be refused');
-      expect(card?.message).toContain('license tier');
-      expect(card?.message).not.toContain('Ask an administrator to grant');
-      // A refused card must record a refusal, never a confirmed target.
-      expect(toolCallState.value).toEqual(
-        expect.objectContaining({ kind: 'refused', action: 'isolate' })
-      );
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect((results[0].data as Record<string, unknown>).error).toBe('license_tier_required');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
     });
 
     it('reports product_feature_disabled when the deployment omits the response-actions feature (serverless Essentials)', async () => {
@@ -286,7 +310,7 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
     });
 
-    it('tells the confirmation card the product configuration blocks isolation', async () => {
+    it('refuses for the product configuration before any confirmation the analyst could approve', async () => {
       mockEndpointAppContextService.getEndpointAuthz = jest
         .fn()
         .mockResolvedValue(getEndpointAuthzInitialStateMock({ canIsolateHost: false }));
@@ -297,18 +321,12 @@ describe('isolateHostTool', () => {
           >)
       ) as unknown as EndpointAppContextService['getProductFeaturesService'];
 
-      const card = await tool.confirmation?.getConfirmation?.({
-        toolParams: { hostName: 'my-host' },
-        context: mockContext,
-      });
+      const result = await tool.handler({ hostName: 'my-host' }, mockContext);
 
-      expect(card?.message).toContain('This action will be refused');
-      expect(card?.message).toContain('product configuration');
-      expect(card?.message).not.toContain('Ask an administrator to grant');
-      // A refused card must record a refusal, never a confirmed target.
-      expect(toolCallState.value).toEqual(
-        expect.objectContaining({ kind: 'refused', action: 'isolate' })
-      );
+      const results = assertStandardReturn(result);
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect((results[0].data as Record<string, unknown>).error).toBe('product_feature_disabled');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
     });
 
     it('returns found: false with reason endpoint_not_found when no agent matches', async () => {
@@ -329,6 +347,7 @@ describe('isolateHostTool', () => {
       expect(data.found).toBe(false);
       expect(data.reason).toBe('endpoint_not_found');
       expect(data.hostName).toBe('nonexistent-host');
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
@@ -364,6 +383,7 @@ describe('isolateHostTool', () => {
         { agentId: 'live-b', status: 'healthy' },
       ]);
       expect(mockResponseActionsClient.isolate).not.toHaveBeenCalled();
+      expect(mockAskForConfirmation).not.toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
@@ -440,7 +460,7 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'malware detected [AI agent conversation: conv-test-1]',
+          comment: 'malware detected [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'my-host' } } }
       );
@@ -504,7 +524,8 @@ describe('isolateHostTool', () => {
       expect(mockResponseActionsClient.isolate).toHaveBeenCalledWith(
         {
           endpoint_ids: ['agent-123'],
-          comment: 'Isolated via AI agent: test-host [AI agent conversation: conv-test-1]',
+          comment:
+            'Isolated via AI agent: test-host [Executed by AI agent] [AI agent conversation: conv-test-1]',
         },
         { hosts: { 'agent-123': { name: 'test-host' } } }
       );

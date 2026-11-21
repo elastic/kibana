@@ -6,6 +6,7 @@
  */
 
 import {
+  buildResponseActionComment,
   endpointNotFoundData,
   formatForConfirmationCard,
   insufficientPrivilegesResult,
@@ -33,6 +34,7 @@ import {
   MAX_PARAMETER_KEYS,
 } from './types';
 import { ToolResultType } from '@kbn/agent-builder-common';
+import type { RunContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
@@ -807,5 +809,38 @@ describe('waitForActionCompletion', () => {
     expect(logger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to fetch completion status for action [a-1]')
     );
+  });
+});
+
+describe('buildResponseActionComment', () => {
+  const runContext = {
+    runId: 'run-1',
+    stack: [{ type: 'agent', agentId: 'agent-1', conversationId: 'conv-1' }],
+  } as unknown as RunContext;
+
+  it('marks the comment as executed by the AI agent and anchors it to the conversation', () => {
+    expect(buildResponseActionComment('Isolated via AI agent: host-1', runContext)).toBe(
+      'Isolated via AI agent: host-1 [Executed by AI agent] [AI agent conversation: conv-1]'
+    );
+  });
+
+  it('keeps the analyst comment and still marks it as executed by the AI agent', () => {
+    const comment = buildResponseActionComment('default', runContext, 'malware detected');
+
+    expect(comment).toBe('malware detected [Executed by AI agent] [AI agent conversation: conv-1]');
+  });
+
+  it('falls back to the run id when there is no conversation id', () => {
+    const noConversation = { runId: 'run-9', stack: [] } as unknown as RunContext;
+
+    expect(buildResponseActionComment('x', noConversation)).toBe(
+      'x [Executed by AI agent] [AI agent conversation: run-9]'
+    );
+  });
+
+  it('is still marked when no correlation id exists', () => {
+    const none = { runId: '', stack: [] } as unknown as RunContext;
+
+    expect(buildResponseActionComment('x', none)).toBe('x [Executed by AI agent]');
   });
 });

@@ -302,7 +302,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
         name: 'endpoint-response-actions: running processes',
         description:
           'Validates that the agent resolves a hostname and calls running_processes ' +
-          'to enumerate active processes on the endpoint, pausing at the confirmation card.',
+          'to enumerate active processes on the endpoint, without a confirmation card.',
         examples: [
           {
             input: {
@@ -312,8 +312,8 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
                 'Passed host name "eval-host-isolate" to the running processes tool (the tool resolves it to an endpoint/agent ID internally)',
-                'Called the endpoint-response-actions.get_running_processes inline tool directly, and the output lists that call under pending_confirmations',
-                'Did not claim the process list was already retrieved before the analyst confirmed, and did not invent any process names',
+                'Called the endpoint-response-actions.get_running_processes inline tool directly, and the output does not list that call under pending_confirmations',
+                'Did not ask the analyst to confirm before listing the processes, and did not invent any process names',
               ],
               tool_sequence: ['endpoint-response-actions.get_running_processes'],
             },
