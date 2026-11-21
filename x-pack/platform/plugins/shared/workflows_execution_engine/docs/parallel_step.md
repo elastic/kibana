@@ -240,6 +240,10 @@ Constraints this creates:
   `/nested flow-control/`.
 - ❌ **`waitForInput`** → rejected: `/not supported inside a parallel branch/`
   (depends on the main-loop delay mechanism the parallel executor doesn't run).
+- ✅ **`workflow.awaitExecutions`**: polls durably like other poll steps and awaits only
+  executions started in its own branch. It can't take a step-level `timeout`, so
+  `branch-timeout` (or the step's 24h cap) bounds the wait. To join every branch,
+  await after the parallel step with `from-steps: [<parallel step>]`.
 - ❌ **Step-level `on-failure`** (`retry` / `continue` / `fallback`) on a branch
   step → rejected: `/unsupported flow-control \("enter-continue"\)/`. See the
   limitation note below.

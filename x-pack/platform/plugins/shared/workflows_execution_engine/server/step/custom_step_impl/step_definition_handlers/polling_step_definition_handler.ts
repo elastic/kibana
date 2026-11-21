@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { PollStepDefaults } from '@kbn/workflows-extensions/server';
 import type {
@@ -22,7 +21,7 @@ import type { StepExecutionRuntime } from '../../../workflow_context_manager/ste
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import { toExecutionError } from '../../errors';
 import type { RunStepResult } from '../../node_implementation';
-import type { CustomStepDefinitionHandler } from '../types';
+import type { CustomStepDefinitionHandler, CustomStepGraphNode } from '../types';
 
 /**
  * After the first poll continuation, force Task Manager scheduling even when sleep is under
@@ -38,7 +37,7 @@ type PolicyCalculationResult =
 export class PollPolicyStepHandler implements CustomStepDefinitionHandler {
   constructor(
     private readonly stepDefinition: ServerPollStepDefinition,
-    private readonly node: AtomicGraphNode,
+    private readonly node: CustomStepGraphNode,
     private readonly stepExecutionRuntime: StepExecutionRuntime,
     private readonly workflowLogger: IWorkflowEventLogger
   ) {}

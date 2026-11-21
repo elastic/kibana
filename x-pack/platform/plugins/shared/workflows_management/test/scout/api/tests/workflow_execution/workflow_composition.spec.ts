@@ -95,6 +95,33 @@ steps:
       message: "{{steps.run_health_check.output | json}}"
 `;
 
+const getAsyncJoinParentYaml = (childWorkflowId: string, mode: 'fail-fast' | 'settled') => `
+name: Monitor Services Async Join (${mode})
+enabled: true
+description: Dispatches health checks asynchronously and joins their results
+triggers:
+  - type: manual
+
+steps:
+  - name: dispatch_health_checks
+    type: foreach
+    foreach: '["api-gateway", "payments-service", "auth-service"]'
+    steps:
+      - name: dispatch_health_check
+        type: workflow.executeAsync
+        with:
+          workflow-id: ${childWorkflowId}
+          inputs:
+            service_name: "{{ foreach.item }}"
+
+  - name: join_health_checks
+    type: workflow.awaitExecutions
+    timeout: 1m
+    with:
+      from-steps: [dispatch_health_checks]
+      mode: ${mode}
+`;
+
 const FAILING_CHILD_YAML = `
 name: Notify via Slack
 enabled: true
@@ -125,6 +152,44 @@ async function waitForExecution(workflowsApi: WorkflowsApiService, executionId: 
     errorMessage: (exec) =>
       `Execution ${executionId} did not terminate within ${SYNC_POLL_TIMEOUT}ms (last status: ${exec?.status})`,
   });
+}
+
+interface AwaitedExecutionResult {
+  executionId: string;
+  status: string;
+  error?: { message: string };
+}
+
+async function getJoinStep(workflowsApi: WorkflowsApiService, executionId: string) {
+  const execution = await workflowsApi.getExecution(executionId, { includeOutput: true });
+  const stepExecutions = execution?.stepExecutions ?? [];
+  const joinStep = stepExecutions.find(
+    (s) => s.stepId === 'join_health_checks' && s.stepType === 'workflow.awaitExecutions'
+  );
+  const dispatchedExecutionIds = stepExecutions
+    .filter((s) => s.stepId === 'dispatch_health_check' && s.stepType === 'workflow.executeAsync')
+    .map((s) => (s.output as { executionId: string }).executionId);
+  const output = joinStep?.output as { results: AwaitedExecutionResult[] } | undefined;
+  return { joinStep, dispatchedExecutionIds, results: output?.results ?? [] };
+}
+
+async function expectResultsForDispatched(
+  workflowsApi: WorkflowsApiService,
+  results: AwaitedExecutionResult[],
+  dispatchedExecutionIds: string[],
+  expectedWorkflowId: string
+) {
+  expect(dispatchedExecutionIds).toHaveLength(3);
+  expect(dispatchedExecutionIds.every((id) => typeof id === 'string' && id.length > 0)).toBe(true);
+  expect(new Set(dispatchedExecutionIds).size).toBe(3);
+  expect(results.map(({ executionId }) => executionId).sort()).toStrictEqual(
+    [...dispatchedExecutionIds].sort()
+  );
+
+  const childExecutions = await Promise.all(
+    dispatchedExecutionIds.map((id) => workflowsApi.getExecution(id))
+  );
+  childExecutions.forEach((child) => expect(child?.workflowId).toBe(expectedWorkflowId));
 }
 
 // ---------------------------------------------------------------------------
@@ -182,6 +247,85 @@ spaceTest.describe('Workflow composition', { tag: tags.deploymentAgnostic }, () 
     const childExecution = await workflowsApi.getExecution(output?.executionId as string);
     expect(childExecution).toBeDefined();
   });
+
+  // -- Async strategy joined with workflow.awaitExecutions -------------------
+
+  spaceTest(
+    'async join: awaits every child started in a foreach and returns their results',
+    async () => {
+      const parent = await workflowsApi.create(
+        getAsyncJoinParentYaml(childWorkflowId, 'fail-fast')
+      );
+      const { workflowExecutionId } = await workflowsApi.run(parent.id, {});
+
+      const parentExecution = await waitForExecution(workflowsApi, workflowExecutionId);
+      expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      const { joinStep, dispatchedExecutionIds, results } = await getJoinStep(
+        workflowsApi,
+        workflowExecutionId
+      );
+      expect(joinStep?.status).toBe(ExecutionStatus.COMPLETED);
+      await expectResultsForDispatched(
+        workflowsApi,
+        results,
+        dispatchedExecutionIds,
+        childWorkflowId
+      );
+      expect(results.every(({ status }) => status === ExecutionStatus.COMPLETED)).toBe(true);
+    }
+  );
+
+  spaceTest('async join: fails fast when a child fails', async () => {
+    const failingChild = await workflowsApi.create(FAILING_CHILD_YAML);
+    const parent = await workflowsApi.create(getAsyncJoinParentYaml(failingChild.id, 'fail-fast'));
+    const { workflowExecutionId } = await workflowsApi.run(parent.id, {});
+
+    const parentExecution = await waitForExecution(workflowsApi, workflowExecutionId);
+    expect(parentExecution?.status).toBe(ExecutionStatus.FAILED);
+
+    const { joinStep, dispatchedExecutionIds, results } = await getJoinStep(
+      workflowsApi,
+      workflowExecutionId
+    );
+    expect(joinStep?.status).toBe(ExecutionStatus.FAILED);
+    expect(joinStep?.error?.message).toContain('Awaited execution');
+    expect(joinStep?.error?.message).toContain('ended with status failed');
+    await expectResultsForDispatched(
+      workflowsApi,
+      results,
+      dispatchedExecutionIds,
+      failingChild.id
+    );
+  });
+
+  spaceTest(
+    'async join (settled): completes and reports the failed children in results',
+    async () => {
+      const failingChild = await workflowsApi.create(FAILING_CHILD_YAML);
+      const parent = await workflowsApi.create(getAsyncJoinParentYaml(failingChild.id, 'settled'));
+      const { workflowExecutionId } = await workflowsApi.run(parent.id, {});
+
+      const parentExecution = await waitForExecution(workflowsApi, workflowExecutionId);
+      expect(parentExecution?.status).toBe(ExecutionStatus.COMPLETED);
+
+      const { joinStep, dispatchedExecutionIds, results } = await getJoinStep(
+        workflowsApi,
+        workflowExecutionId
+      );
+      expect(joinStep?.status).toBe(ExecutionStatus.COMPLETED);
+      await expectResultsForDispatched(
+        workflowsApi,
+        results,
+        dispatchedExecutionIds,
+        failingChild.id
+      );
+      results.forEach((result) => {
+        expect(result.status).toBe(ExecutionStatus.FAILED);
+        expect(typeof result.error?.message).toBe('string');
+      });
+    }
+  );
 
   // -- Sync strategy ---------------------------------------------------------
 

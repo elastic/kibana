@@ -21,6 +21,8 @@ import {
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
+  WorkflowAwaitExecutionsStepInputSchema,
+  WorkflowAwaitExecutionsStepOutputSchema,
   WorkflowExecuteAsyncStepOutputSchema,
   WorkflowExecuteStepInputSchema,
   WorkflowFailStepInputSchema,
@@ -440,6 +442,54 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
     workflow-id: "child_workflow"
     inputs:
       alertId: "{{ workflow.event.id }}"`,
+      ],
+    },
+  },
+  {
+    id: 'workflow.awaitExecutions',
+    label: 'Await Workflow Executions',
+    description:
+      'Wait for executions started by workflow.executeAsync to finish and collect their results. Fails fast on the first unsuccessful execution (without cancelling the others), or waits for all of them in settled mode. Only executions started by this run can be awaited. Waits at most 24 hours, even when the step timeout is longer',
+    category: StepCategory.FlowControl,
+    stability: 'tech_preview',
+    inputSchema: WorkflowAwaitExecutionsStepInputSchema,
+    outputSchema: WorkflowAwaitExecutionsStepOutputSchema,
+    documentation: {
+      examples: [
+        `- name: wait_for_agent
+  type: workflow.awaitExecutions
+  timeout: 10m
+  with:
+    from-steps: [run_agent]`,
+        `- name: join_enrichments
+  type: workflow.awaitExecutions
+  timeout: 30m
+  with:
+    from-steps: [enrich_hosts, enrich_users]`,
+        `- name: fan_out
+  type: parallel
+  foreach: "{{ inputs.hosts }}"
+  steps:
+    - name: start_scan
+      type: workflow.executeAsync
+      with:
+        workflow-id: "scan_host"
+        inputs:
+          host: "{{ foreach.item }}"
+- name: collect_all_results
+  type: workflow.awaitExecutions
+  with:
+    from-steps: [fan_out]
+    mode: settled`,
+        `- name: start_batch
+  type: workflow.execute
+  with:
+    workflow-id: "start_host_scans"
+- name: wait_for_batch
+  type: workflow.awaitExecutions
+  timeout: 30m
+  with:
+    execution-ids: "{{ steps.start_batch.output.executionIds }}"`,
       ],
     },
   },

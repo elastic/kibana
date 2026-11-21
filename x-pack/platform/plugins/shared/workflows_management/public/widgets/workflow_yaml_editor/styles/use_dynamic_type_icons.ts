@@ -97,6 +97,10 @@ export const predefinedStepTypes = [
     displayName: 'Workflow Execute Async',
   },
   {
+    actionTypeId: 'workflow.awaitExecutions',
+    displayName: 'Workflow Await Executions',
+  },
+  {
     actionTypeId: 'workflow.output',
     displayName: 'Workflow Output',
   },

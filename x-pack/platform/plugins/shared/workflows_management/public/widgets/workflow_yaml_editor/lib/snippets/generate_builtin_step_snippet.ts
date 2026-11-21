@@ -138,6 +138,14 @@ export function generateBuiltInStepSnippet(
         },
       };
       break;
+    case 'workflow.awaitExecutions':
+      parameters = {
+        timeout: '10m',
+        with: {
+          'from-steps': ['previous_step'],
+        },
+      };
+      break;
     case 'workflow.output': {
       // Plain values, not Monaco tabstops: the actions menu inserts this text as-is.
       const withBlock: Record<string, unknown> = {};
