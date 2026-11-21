@@ -144,4 +144,29 @@ describe('Session state container', () => {
       expect(state.get().isSaving).toBe(false);
     });
   });
+
+  describe('getMeta', () => {
+    test('keeps the browser start time after the session is stored', () => {
+      state.transitions.start({ appName });
+      const { startTime } = state.get();
+      state.transitions.store({
+        ...mockSavedObject,
+        attributes: {
+          ...mockSavedObject.attributes,
+          created: new Date(Date.now() + 60_000).toISOString(),
+        },
+      });
+
+      expect(state.selectors.getMeta().startTime).toEqual(startTime);
+    });
+
+    test('uses the saved object creation time for restored sessions', () => {
+      state.transitions.restore(mockSavedObject.attributes.sessionId);
+      state.transitions.setSearchSessionSavedObject(mockSavedObject);
+
+      expect(state.selectors.getMeta().startTime).toEqual(
+        new Date(mockSavedObject.attributes.created)
+      );
+    });
+  });
 });
