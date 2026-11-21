@@ -17,7 +17,11 @@ import { getSharedInvestigationsQueryClient } from '@kbn/agentic-investigations-
 import { AccessBoundary } from './components/access_boundary';
 import type { SubscriptionAvailability } from '../common/availability';
 import { AppChromeLayout } from './components/app_chrome';
-import type { AlertZeroStartDependencies } from './types';
+import {
+  ClassicPageTemplateHost,
+  resolveClassicPageTemplate,
+} from './components/app_chrome/classic_page_template_host';
+import type { AlertZeroStartDependencies, ClassicPageTemplate } from './types';
 import { AlertZeroRoutes } from './routes';
 
 interface RenderAppParams {
@@ -27,6 +31,7 @@ interface RenderAppParams {
   availability$: Observable<SubscriptionAvailability>;
   spaceSupported$: Observable<boolean>;
   isServerless: boolean;
+  classicPageTemplate?: ClassicPageTemplate;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -43,13 +48,21 @@ export const renderApp = async ({
   availability$,
   spaceSupported$,
   isServerless,
+  classicPageTemplate,
 }: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
-  // Shared with the investigation flyout's "Proposed actions" slot (registered by the
-  // agenticInvestigations plugin), so a decision made in either invalidates the other's cache
-  // directly instead of needing a cross-boundary signal to bridge two separate ones.
-  const queryClient = await getSharedInvestigationsQueryClient();
+  const [queryClient, pageTemplate] = await Promise.all([
+    // Shared with the investigation flyout's "Proposed actions" slot (registered by the
+    // agenticInvestigations plugin), so a decision made in either invalidates the other's cache
+    // directly instead of needing a cross-boundary signal to bridge two separate ones.
+    getSharedInvestigationsQueryClient(),
+    resolveClassicPageTemplate({
+      template: classicPageTemplate,
+      chrome: coreStart.chrome,
+      spaces: startDeps.spaces,
+    }),
+  ]);
 
   /**
    * `KibanaContextProvider` backs `useKibana()` from `@kbn/kibana-react-plugin`, which the app uses
@@ -69,17 +82,19 @@ export const renderApp = async ({
     >
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
-          <div style={rootStyle}>
-            <AccessBoundary
-              availability$={availability$}
-              spaceSupported$={spaceSupported$}
-              serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
-            >
-              <AppChromeLayout>
-                <AlertZeroRoutes />
-              </AppChromeLayout>
-            </AccessBoundary>
-          </div>
+          <ClassicPageTemplateHost template={pageTemplate}>
+            <div style={rootStyle}>
+              <AccessBoundary
+                availability$={availability$}
+                spaceSupported$={spaceSupported$}
+                serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
+              >
+                <AppChromeLayout>
+                  <AlertZeroRoutes />
+                </AppChromeLayout>
+              </AccessBoundary>
+            </div>
+          </ClassicPageTemplateHost>
         </Router>
       </QueryClientProvider>
     </KibanaContextProvider>

@@ -24,8 +24,9 @@ import {
   type Observable,
 } from 'rxjs';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
-import type { AlertZeroClientConfig } from './types';
+import type { AlertZeroClientConfig, ClassicPageTemplate } from './types';
 import { AlertZeroPublicPlugin } from './plugin';
+import { renderApp } from './application';
 
 jest.mock('./application', () => ({ renderApp: jest.fn(() => jest.fn()) }));
 
@@ -168,10 +169,8 @@ describe('AlertZeroPublicPlugin app registration', () => {
       plugin.start(coreStart, { licensing: createLicensing(), spaces: createSpaces('security') });
       const update = await nextUpdate;
       expect(update?.status).toBe(AppStatus.accessible);
-      expect(update?.visibleIn).toEqual(
-        canRead ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : []
-      );
-      expect(update?.deepLinks?.length).toBe(canRead ? 2 : 0);
+      expect(update?.visibleIn).toEqual(canRead ? ['projectSideNav', 'globalSearch'] : []);
+      expect(update?.deepLinks?.length).toBe(canRead ? 3 : 0);
       plugin.stop();
     }
   );
@@ -204,10 +203,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
       license$.next(licensingMock.createLicense({ license }));
       expect(onUpdate).toHaveBeenLastCalledWith({
         status: AppStatus.accessible,
-        visibleIn: license.visible ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+        visibleIn: license.visible ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: license.visible ? expect.any(Array) : [],
       });
-      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     }
     subscription.unsubscribe();
     plugin.stop();
@@ -236,10 +235,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
     contract.setServerlessTierAvailable(true);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+      visibleIn: ['projectSideNav', 'globalSearch'],
       deepLinks: expect.any(Array),
     });
-    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     contract.setServerlessTierAvailable(false);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -294,10 +293,10 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
       expect(onUpdate).toHaveBeenLastCalledWith({
         status: AppStatus.accessible,
-        visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
+        visibleIn: ['projectSideNav', 'globalSearch'],
         deepLinks: expect.any(Array),
       });
-      expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
       subscription.unsubscribe();
       plugin.stop();
     }
@@ -384,6 +383,38 @@ describe('AlertZeroPublicPlugin workflow step registration', () => {
     const { registerStepDefinition } = setupPlugin(false);
 
     expect(registerStepDefinition).not.toHaveBeenCalled();
+  });
+});
+
+describe('AlertZeroPublicPlugin Classic page template', () => {
+  const setupPlugin = (enabled: boolean) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const coreSetup = coreMock.createSetup();
+    coreSetup.getStartServices.mockResolvedValue([coreMock.createStart(), {}, {}] as never);
+    const contract = plugin.setup(
+      coreSetup as never,
+      { workflowsExtensions: { registerStepDefinition: jest.fn() } } as never
+    );
+    return { contract, coreSetup };
+  };
+
+  it('should pass the page template Security Solution sets to the app when it mounts', async () => {
+    const { contract, coreSetup } = setupPlugin(true);
+    const template: ClassicPageTemplate = jest.fn(() => null);
+    contract.setClassicPageTemplate?.(template);
+
+    const [[{ mount }]] = (coreSetup.application.register as jest.Mock).mock.calls;
+    await mount({} as never);
+
+    expect(renderApp).toHaveBeenLastCalledWith(
+      expect.objectContaining({ classicPageTemplate: template })
+    );
+  });
+
+  it('should offer no page template setter when the deployment kill switch is off', () => {
+    const { contract } = setupPlugin(false);
+
+    expect(contract.setClassicPageTemplate).toBeUndefined();
   });
 });
 

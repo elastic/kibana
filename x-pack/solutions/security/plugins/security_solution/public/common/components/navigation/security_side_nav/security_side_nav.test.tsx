@@ -60,6 +60,19 @@ const alertsNavLink: NavigationLink = {
   description: 'alerts description',
 };
 
+/** AlertZero's deep links, listed out of order to check that the navigation sorts them. */
+const alertZeroApp = (inClassicNav: boolean) =>
+  ({
+    visibleIn: [],
+    deepLinks: [
+      { id: 'watches', title: 'Watches', order: -1 },
+      { id: 'home', title: 'AlertZero', order: -3 },
+      { id: 'escalations', title: 'Escalations', order: -2 },
+    ].map((deepLink) => ({ ...deepLink, visibleIn: inClassicNav ? ['classicSideNav'] : [] })),
+  } as unknown as PublicAppInfo);
+
+const ALERTZERO_NAV_IDS = ['alertzero:home', 'alertzero:escalations', 'alertzero:watches'];
+
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
   ...jest.requireActual('@kbn/security-solution-side-nav'),
@@ -155,33 +168,31 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render the AlertZero external link when the AlertZero app is in the Classic nav', () => {
+  it("should list AlertZero's Classic nav deep links first, in their order, when they are in the Classic nav", () => {
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: ['classicSideNav'] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp(true)]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        items: expect.arrayContaining([
-          expect.objectContaining({
-            id: SecurityPageName.externalLinkAlertZero,
-            label: 'AlertZero',
-            position: 'top',
-          }),
-        ]),
-      })
-    );
+    const [{ items, categories }] =
+      mockSolutionSideNav.mock.calls[mockSolutionSideNav.mock.calls.length - 1];
+
+    expect(items.slice(0, 3)).toEqual([
+      expect.objectContaining({ id: 'alertzero:home', label: 'AlertZero', position: 'top' }),
+      expect.objectContaining({ id: 'alertzero:escalations', label: 'Escalations' }),
+      expect.objectContaining({ id: 'alertzero:watches', label: 'Watches' }),
+    ]);
+    expect(categories?.[0].linkIds.slice(0, 3)).toEqual(ALERTZERO_NAV_IDS);
   });
 
-  it('should not render the AlertZero external link when the AlertZero app is not in the Classic nav', () => {
+  it("should not list AlertZero's deep links when they are not in the Classic nav", () => {
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: [] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp(false)]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
     const [{ items }] = mockSolutionSideNav.mock.calls[mockSolutionSideNav.mock.calls.length - 1];
-    expect(items.map(({ id }) => id)).not.toContain(SecurityPageName.externalLinkAlertZero);
+    expect(items.filter(({ id }) => ALERTZERO_NAV_IDS.includes(id))).toEqual([]);
   });
 
   it('should render the loader if items are still empty', () => {
@@ -430,13 +441,14 @@ describe('SecuritySideNav', () => {
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: ['classicSideNav'] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp(true)]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
 
     expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
-      'alertzero'
+      'alertzero',
+      { deepLinkId: 'escalations' }
     );
     expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
       'agent_builder',
@@ -455,7 +467,7 @@ describe('SecuritySideNav', () => {
       expect.objectContaining({
         items: expect.arrayContaining([
           expect.objectContaining({
-            id: SecurityPageName.externalLinkAlertZero,
+            id: 'alertzero:home',
             href: '/test-basepath/s/my-space/app/alertzero',
           }),
           expect.objectContaining({

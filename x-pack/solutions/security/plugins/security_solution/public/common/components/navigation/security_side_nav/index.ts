@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SecuritySideNav } from './security_side_nav';
+export { SecuritySideNav, SecuritySideNavContent } from './security_side_nav';

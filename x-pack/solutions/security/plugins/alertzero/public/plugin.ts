@@ -46,6 +46,7 @@ import type {
   AlertZeroPublicStart,
   AlertZeroSetupDependencies,
   AlertZeroStartDependencies,
+  ClassicPageTemplate,
 } from './types';
 
 // Kept as a literal rather than `ALERTZERO_PLUGIN_NAME`: the i18n extractor only reads
@@ -82,6 +83,7 @@ export class AlertZeroPublicPlugin
    */
   private readonly appUpdater$ = new Subject<AppUpdater>();
   private uiEventsRegistered = false;
+  private classicPageTemplate?: ClassicPageTemplate;
 
   constructor(context: PluginInitializerContext<AlertZeroClientConfig>) {
     this.config = context.config.get();
@@ -109,9 +111,8 @@ export class AlertZeroPublicPlugin
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
-      visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
-      // Lower than every Security entry in the Classic nav (1–13), so AlertZero heads that category.
-      order: -3,
+      // Not `classicSideNav`: the Classic nav lists AlertZero's pages as deep links (see `getAlertZeroDeepLinks`).
+      visibleIn: ['projectSideNav', 'globalSearch'],
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),
@@ -135,11 +136,17 @@ export class AlertZeroPublicPlugin
           availability$: this.availability$,
           spaceSupported$: this.spaceSupported$,
           isServerless: this.isServerless,
+          classicPageTemplate: this.classicPageTemplate,
         });
       },
     });
 
-    return { enabled: true };
+    return {
+      enabled: true,
+      setClassicPageTemplate: (template) => {
+        this.classicPageTemplate = template;
+      },
+    };
   }
 
   public start(core: CoreStart, startDeps: AlertZeroStartDependencies): AlertZeroPublicStart {
@@ -180,7 +187,7 @@ export class AlertZeroPublicPlugin
         settingEnabled && spaceSupported && canRead && availability === 'available';
       this.appUpdater$.next(() => ({
         status: settingEnabled || !spaceSupported ? AppStatus.accessible : AppStatus.inaccessible,
-        visibleIn: showNavigation ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+        visibleIn: showNavigation ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
       }));
     });
