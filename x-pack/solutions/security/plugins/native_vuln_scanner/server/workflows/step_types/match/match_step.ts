@@ -39,7 +39,12 @@ const toOutput = (summary: ScanSummary): MatchOutput => ({
   ),
   distinct_cves: summary.distinctCves,
   kev: summary.kev,
-  knowledge: summary.knowledge,
+  knowledge: {
+    written: summary.knowledge.written,
+    unchanged: summary.knowledge.unchanged,
+    failed: summary.knowledge.failed,
+    skipped_releases: summary.knowledge.skippedReleases,
+  },
 });
 
 /**
@@ -92,7 +97,8 @@ export const buildMatchStepDefinition = ({
             logger,
             loadFeed: buildFeedLoader(feeds, includeUnfixed),
             includeUnfixed,
-            onKnowledgeStored: (os, stored) => markKnowledgeStored(releaseKey(os), stored),
+            onKnowledgeStored: (os, stored) =>
+              markKnowledgeStored(releaseKey(os), includeUnfixed, stored),
             now,
           },
           { signal, runId }

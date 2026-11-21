@@ -32,6 +32,7 @@ export interface KnowledgeDoc {
   /** The vendor's last-modified date; `modified` below says whether this excerpt was cut. */
   vendor_modified?: string;
   feed_snapshot_time?: string;
+  /** Last write pass that checked this doc; a 304 skips the pass, so it can lag the feed's refresh. */
   last_seen_in_feed: string;
   /** Hash of the content fields only, so a rescan of unchanged text writes nothing. */
   content_hash: string;

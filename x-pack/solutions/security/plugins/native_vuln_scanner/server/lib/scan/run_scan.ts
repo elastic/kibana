@@ -62,8 +62,14 @@ export interface ScanSummary {
   /** Feed provenance the run actually used, keyed like `releases`. */
   feedInfo: Record<string, { sourceUrl?: string; snapshotTime?: string; ageSeconds?: number }>;
   /** Vendor-text docs written to the knowledge index; a failure there never fails the scan. */
-  knowledge: KnowledgeWriteResult;
+  knowledge: KnowledgeWriteResult & {
+    /** Releases whose write a 304 skipped because their text was already stored. */
+    skippedReleases: string[];
+  };
 }
+
+/** Bounds the skipped-release list; a deployment has a handful of OS releases. */
+export const MAX_SKIPPED_RELEASES = 32;
 
 export class ScanFailedError extends Error {
   /** `summary` keeps what the other releases did, so the failed run can still report it. */
@@ -257,7 +263,7 @@ export const runScan = async (
     kev: { status: 'not_attempted', listed: 0 },
     distinctCves: 0,
     feedInfo: {},
-    knowledge: { written: 0, unchanged: 0, failed: 0 },
+    knowledge: { written: 0, unchanged: 0, failed: 0, skippedReleases: [] },
   };
 
   const inventory = await readInventory({ es, packRepository, logger }, signal);
@@ -349,6 +355,8 @@ export const runScan = async (
         summary.knowledge.unchanged += stored.unchanged;
         summary.knowledge.failed += stored.failed;
         onKnowledgeStored?.(os, stored.failed === 0);
+      } else if (summary.knowledge.skippedReleases.length < MAX_SKIPPED_RELEASES) {
+        summary.knowledge.skippedReleases.push(key);
       }
       summary.distinctCves = cves.size;
       summary.releases[key] = 'matched';

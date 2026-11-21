@@ -49,7 +49,13 @@ export interface SummaryDoc {
   /** Distinct CVE ids among this run's matched findings (unfixed included). */
   distinct_cves?: number;
   /** Vendor-text docs this run wrote to the knowledge index. */
-  knowledge?: { written: number; unchanged: number; failed: number };
+  knowledge?: {
+    written: number;
+    unchanged: number;
+    failed: number;
+    /** Releases (`family:version`) whose write was skipped because a 304 left the text stored. */
+    skipped_releases?: string[];
+  };
 }
 
 export type PackState = 'missing' | 'ok' | 'differs';

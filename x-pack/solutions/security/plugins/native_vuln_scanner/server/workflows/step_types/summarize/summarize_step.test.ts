@@ -97,6 +97,12 @@ describe('native_vuln.summarize handler', () => {
     expect(doc?.knowledge).toEqual({ written: 661, unchanged: 0, failed: 2 });
   });
 
+  it('records the releases whose knowledge write was skipped on a 304', async () => {
+    const knowledge = { written: 0, unchanged: 0, failed: 0, skipped_releases: ['rhel:9'] };
+    const { doc } = await run({ fetch: fetched, match: matched({ knowledge }) });
+    expect(doc?.knowledge).toEqual(knowledge);
+  });
+
   it('leaves knowledge out of the summary when the match step did not report it', async () => {
     const { doc } = await run({ fetch: fetched, match: matched() });
     expect(doc).not.toHaveProperty('knowledge');

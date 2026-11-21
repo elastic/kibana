@@ -40,14 +40,22 @@ describe('feed cache', () => {
   it('tracks whether the knowledge write for the cached bytes was clean', () => {
     setCachedFeed('rhel:9', feed('"b"'));
     expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
-    markKnowledgeStored('rhel:9', true);
+    markKnowledgeStored('rhel:9', false, true);
     expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(true);
-    markKnowledgeStored('rhel:9', false);
+    markKnowledgeStored('rhel:9', false, false);
     expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBe(false);
     // New bytes (new etag) start unstored again.
     setCachedFeed('rhel:9', feed('"c"'));
     expect(getCachedFeed('rhel:9', false)?.knowledgeStored).toBeUndefined();
-    expect(() => markKnowledgeStored('rhel:10', true)).not.toThrow();
+    expect(() => markKnowledgeStored('rhel:10', false, true)).not.toThrow();
+  });
+
+  it('marks the variant getCachedFeed would serve, and no other', () => {
+    setCachedFeed('rhel:9', { ...feed('"b"'), includeUnfixed: true });
+    markKnowledgeStored('rhel:9', false, true);
+    expect(getCachedFeed('rhel:9', true)?.knowledgeStored).toBeUndefined();
+    markKnowledgeStored('rhel:9', true, true);
+    expect(getCachedFeed('rhel:9', true)?.knowledgeStored).toBe(true);
   });
 
   it('retains only the releases it is told to keep', () => {

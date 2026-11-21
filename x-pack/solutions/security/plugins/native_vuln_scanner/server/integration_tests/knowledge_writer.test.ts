@@ -172,7 +172,12 @@ describe('knowledge index', () => {
     expect(first.knowledge.written).toBeGreaterThan(0);
 
     const second = await scan(kibana, 'run-2');
-    expect(second.knowledge).toEqual({ written: 0, unchanged: first.knowledge.written, failed: 0 });
+    expect(second.knowledge).toEqual({
+      written: 0,
+      unchanged: first.knowledge.written,
+      failed: 0,
+      skippedReleases: [],
+    });
     expect(await count(FINDINGS_INDEX)).toBe(first.findings);
   });
 

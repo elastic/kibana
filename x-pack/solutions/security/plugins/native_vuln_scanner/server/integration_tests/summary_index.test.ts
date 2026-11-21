@@ -38,7 +38,7 @@ const doc = (runId: string): SummaryDoc => ({
     { release: 'rhel:9', status: 'failed', error: 'Advisory feed returned HTTP 503' },
   ],
   failures: ['rhel:9: Advisory feed returned HTTP 503'],
-  knowledge: { written: 661, unchanged: 0, failed: 0 },
+  knowledge: { written: 661, unchanged: 0, failed: 0, skipped_releases: ['ubuntu:noble'] },
 });
 
 describe('run summary index', () => {

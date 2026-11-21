@@ -41,8 +41,12 @@ export const setCachedFeed = (release: string, feed: CachedFeed): void => {
 };
 
 /** Records whether the knowledge write for the cached bytes of `release` completed cleanly. */
-export const markKnowledgeStored = (release: string, stored: boolean): void => {
-  const cached = cache.get(release);
+export const markKnowledgeStored = (
+  release: string,
+  includeUnfixed: boolean,
+  stored: boolean
+): void => {
+  const cached = getCachedFeed(release, includeUnfixed);
   if (cached) cached.knowledgeStored = stored;
 };
 

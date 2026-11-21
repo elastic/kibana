@@ -28,6 +28,7 @@ export const summaryMappings: MappingTypeMapping = {
         written: { type: 'integer' },
         unchanged: { type: 'integer' },
         failed: { type: 'integer' },
+        skipped_releases: keyword,
       },
     },
     feeds: {

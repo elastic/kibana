@@ -202,6 +202,7 @@ describe('runScan', () => {
         written: indexedIds(deps).length,
         unchanged: 0,
         failed: 0,
+        skippedReleases: [],
       });
       expect(summary.knowledge.written).toBeGreaterThan(0);
     });
@@ -301,6 +302,7 @@ describe('runScan', () => {
         written: 0,
         unchanged: docIds.length,
         failed: 0,
+        skippedReleases: [],
       });
     });
 
@@ -316,7 +318,12 @@ describe('runScan', () => {
       expect(summary.findings).toBeGreaterThan(0);
       expect(deps.es.mget).not.toHaveBeenCalled();
       expect(deps.es.bulk).not.toHaveBeenCalled();
-      expect(summary.knowledge).toEqual({ written: 0, unchanged: 0, failed: 0 });
+      expect(summary.knowledge).toEqual({
+        written: 0,
+        unchanged: 0,
+        failed: 0,
+        skippedReleases: ['rhel:9'],
+      });
     });
 
     it('reports each release write to onKnowledgeStored, clean or not', async () => {
@@ -352,6 +359,21 @@ describe('runScan', () => {
       deps.onKnowledgeStored = onKnowledgeStored;
       await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
       expect(onKnowledgeStored).not.toHaveBeenCalled();
+    });
+
+    it('lists a release whose write was skipped on a 304 with a clean prior write', async () => {
+      const { deps } = setup([rhelAgent('a1', '9'), rhelAgent('a10', '10')], async (os) => {
+        const loaded = await rhel9Feed();
+        return os.version === '9' ? { ...loaded, changed: false } : loaded;
+      });
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      expect(summary.knowledge.skippedReleases).toEqual(['rhel:9']);
+    });
+
+    it('lists no skipped release when every write ran', async () => {
+      const { deps } = setup([rhelAgent('a1', '9')]);
+      const summary = await runScan(deps, { signal: new AbortController().signal, runId: 'r1' });
+      expect(summary.knowledge.skippedReleases).toEqual([]);
     });
 
     it('counts a thrown write as failed only for ids the feed has text for', async () => {

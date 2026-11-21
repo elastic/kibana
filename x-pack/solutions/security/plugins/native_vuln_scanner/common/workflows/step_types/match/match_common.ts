@@ -58,7 +58,13 @@ export const matchOutputSchema = lazySchema(() =>
       .optional(),
     /** Vendor-text docs written to the knowledge index; failures there never fail the scan. */
     knowledge: z
-      .object({ written: z.number(), unchanged: z.number(), failed: z.number() })
+      .object({
+        written: z.number(),
+        unchanged: z.number(),
+        failed: z.number(),
+        /** Releases (`family:version`) whose write was skipped because a 304 left the text stored. */
+        skipped_releases: z.array(z.string().max(64)).max(32).optional(),
+      })
       .optional(),
   })
 );

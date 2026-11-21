@@ -36,6 +36,7 @@ export const knowledgeMappings: MappingTypeMapping = {
     published: date,
     vendor_modified: date,
     feed_snapshot_time: date,
+    // Last write pass that checked this doc; a 304 skips the pass, so it can lag the feed's refresh.
     last_seen_in_feed: date,
     ...keywords('content_hash', 'attribution', 'license', 'license_url', 'source_url'),
     modified: { type: 'boolean' },
