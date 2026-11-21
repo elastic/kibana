@@ -17,8 +17,32 @@ import { useSaveDreamingConfig } from '../../../hooks/use_save_dreaming_config';
 import { DreamingPanel } from './dreaming_panel';
 
 jest.mock('../../../hooks/use_ai_index_dreaming', () => ({ useAiIndexDreaming: jest.fn() }));
+jest.mock('../../../hooks/use_latest_workflow_execution', () => ({
+  useLatestWorkflowExecution: jest.fn(() => ({
+    executions: [],
+    unavailableWorkflowIds: [],
+    isRunning: false,
+    activeExecutionId: undefined,
+    isError: false,
+    isLoading: false,
+  })),
+}));
+jest.mock('../../../hooks/use_workflow_summaries', () => ({
+  useWorkflowSummaries: () => ({
+    summaries: new Map(),
+    isLoading: false,
+    missingReadPrivilege: false,
+  }),
+}));
 jest.mock('../../../hooks/use_save_dreaming_config', () => ({ useSaveDreamingConfig: jest.fn() }));
 jest.mock('../../../hooks/use_dreaming_templates', () => ({ useDreamingTemplates: jest.fn() }));
+jest.mock('../../../hooks/use_run_dreaming', () => ({
+  useRunDreaming: () => ({ runDreaming: jest.fn(), isLoading: false }),
+}));
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: () => ({ canExecuteWorkflow: true }),
+}));
 const navigateToContextEngine = jest.fn();
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({ navigateToContextEngine }),
@@ -59,7 +83,11 @@ const renderPanel = (
   { aiIndex, dreaming }: ReturnType<typeof aiIndexWith>,
   isLoading: boolean = false
 ) => {
-  jest.mocked(useAiIndexDreaming).mockReturnValue({ dreaming, isLoading });
+  jest.mocked(useAiIndexDreaming).mockReturnValue({
+    dreaming,
+    workflowIds: dreaming ? ['wf-dreaming'] : [],
+    isLoading,
+  });
   return render(
     <I18nProvider>
       <EuiProvider>
@@ -175,10 +203,11 @@ describe('DreamingPanel', () => {
     renderPanel(aiIndexWith({ ...factsOnly, schedule: { interval: '1h' } }));
 
     expect(screen.getByTestId('contextAiIndexDreamingInterval')).toHaveValue('1h');
-    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
+    // Change interval before toggling the switch; the field is hidden while the schedule is off.
     fireEvent.change(screen.getByTestId('contextAiIndexDreamingInterval'), {
       target: { value: '6h' },
     });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
     fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
 
     await waitFor(() =>
@@ -187,6 +216,15 @@ describe('DreamingPanel', () => {
         config: expect.objectContaining({ enabled: false, schedule: { interval: '6h' } }),
       })
     );
+  });
+
+  it('hides the interval while the schedule is off', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, enabled: false }));
+
+    expect(screen.queryByTestId('contextAiIndexDreamingInterval')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingEnabled'));
+
+    expect(screen.getByTestId('contextAiIndexDreamingInterval')).toBeInTheDocument();
   });
 
   it('does not save an interval shorter than the floor', () => {
@@ -208,6 +246,13 @@ describe('DreamingPanel', () => {
 
     expect(screen.getByTestId('contextDreamingConfigFact-policy')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexDreamingSave')).not.toBeInTheDocument();
+  });
+
+  it('shows the runs section when dreaming is set up', () => {
+    renderPanel(aiIndexWith(factsOnly));
+
+    expect(screen.getByTestId('contextAiIndexDreamingRunsSection')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingRunNow')).toBeInTheDocument();
   });
 
   it('lets a managed AI index’s dreaming be edited', () => {

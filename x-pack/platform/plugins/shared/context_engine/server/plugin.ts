@@ -234,6 +234,12 @@ export class ContextEnginePlugin
       }
       return this.scheduleService;
     };
+    const getDreamingScheduleService = () => {
+      if (!this.dreamingScheduleService) {
+        throw new Error('Dreaming schedule service not available; plugin has not started');
+      }
+      return this.dreamingScheduleService;
+    };
     const isContextEngineEnabled = async (spaceId: string) => {
       const [coreStart] = await coreSetup.getStartServices();
       return isContextEngineEnabledInSpace({
@@ -291,6 +297,7 @@ export class ContextEnginePlugin
         return agentBuilder.found ? agentBuilder.contract : undefined;
       },
       getWorkflowsManagementApi: () => this.workflowsManagementApiPromise,
+      getDreamingScheduleService,
       getSpaces: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.spaces;
