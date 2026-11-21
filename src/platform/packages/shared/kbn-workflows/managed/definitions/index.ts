@@ -74,7 +74,10 @@ import {
   ENDPOINT_CONFIGURATION_TROUBLESHOOTING_FIND_ARTIFACTS_WORKFLOW,
 } from './endpoint/configuration_troubleshooting';
 import { ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW } from './endpoint/knowledge_search';
-import { NATIVE_VULN_SCANNER_SCAN_WORKFLOW } from './native_vuln_scanner';
+import {
+  NATIVE_VULN_SCANNER_REFRESH_WORKFLOW,
+  NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
+} from './native_vuln_scanner';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
@@ -264,6 +267,8 @@ export {
   THREAT_INTEL_WORKFLOW_IDS,
 } from './threat_intel';
 export {
+  NATIVE_VULN_SCANNER_REFRESH_WORKFLOW,
+  NATIVE_VULN_SCANNER_REFRESH_WORKFLOW_ID,
   NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
   NATIVE_VULN_SCANNER_SCAN_WORKFLOW_ID,
   NATIVE_VULN_SCANNER_WORKFLOW_IDS,
