@@ -28,6 +28,7 @@ export {
   buildJoinedFilter,
   appendWhereClauseToESQLQuery,
   appendStatsByToQuery,
+  appendCategorizeToESQLQuery,
   appendLimitToQuery,
   buildMetricsInfoQuery,
   getESQLQueryColumns,

@@ -330,6 +330,7 @@ function DiscoverDocumentsComponent({
   );
 
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const cellActionsMetadata = useAdditionalCellActions({
     dataSource,
@@ -337,6 +338,7 @@ function DiscoverDocumentsComponent({
     query,
     filters,
     timeRange: requestParams.timeRangeAbsolute,
+    esqlVariables,
   });
 
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -386,7 +388,6 @@ function DiscoverDocumentsComponent({
       }),
     [rowHeight, dataGridUiState, services.storage, configRowHeight]
   );
-  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   // Same ES|QL table the histogram uses, so Summary cells can fetch without waiting for the chart.
   const {
