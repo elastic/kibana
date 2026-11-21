@@ -36,19 +36,19 @@
     ]
   },
   "reference/query-languages/esql/commands/fork.md": {
-    "hash": "e09ccfdaeadf921826472898ced81624e80d4cf7b9f410a53745469ae34994ef",
+    "hash": "4278a5719f9ee717730ec81b7bacd384e707509ebbc838b4db15ddd1a1d18f7b",
     "outputFiles": [
       "esql-fork.txt"
     ]
   },
   "reference/query-languages/esql/commands/from.md": {
-    "hash": "d25a4b80acc1dabe6b09eca48eebeef15becb96fde765d9c1aef49a319f3a79d",
+    "hash": "e5e49c125f785d74b7bc84b24b63135a77c2c70620e25ae86d8d234e2ad03b71",
     "outputFiles": [
       "esql-from.txt"
     ]
   },
   "reference/query-languages/esql/commands/fuse.md": {
-    "hash": "b3cac878d86a762b9229ce78b7af49bbea22a0da65778ff34af6aea3f1c33b21",
+    "hash": "e769bd18a1d34bf6a72573d15adfe16187e1e3e65f2be47de5ddcdbbd13ac18d",
     "outputFiles": [
       "esql-fuse.txt"
     ]
@@ -72,7 +72,7 @@
     ]
   },
   "reference/query-languages/esql/commands/limit.md": {
-    "hash": "acc611e5ff3e36d0b93fc277b884eac09ff2144852b583ae5928a9315f298d7d",
+    "hash": "ff46b4656a9349cca14a773325f8a7c0f85089c8274af692d7570b6f98510227",
     "outputFiles": [
       "esql-limit.txt"
     ]
@@ -84,13 +84,13 @@
     ]
   },
   "reference/query-languages/esql/commands/mv_expand.md": {
-    "hash": "ae01dee502a0a4772683f9660107857f807e83d96149befa6f138ddcf5a1d373",
+    "hash": "b4c30f0689cf5b9dcf5b18b9041f35b7c3f4d320d8401bd116cb9ce03ced2097",
     "outputFiles": [
       "esql-mv_expand.txt"
     ]
   },
   "reference/query-languages/esql/commands/promql.md": {
-    "hash": "6b3b5ea1b9137bab7c8a967b8fe4bf9c725d07cb24ac5bf49107c864323ca4ee",
+    "hash": "de26d4ce1882e88d10535f3b0a6c4f1cf0d5eba0cacdad9d5fa65f62ccf5d763",
     "outputFiles": [
       "esql-promql.txt"
     ]
@@ -138,7 +138,7 @@
     ]
   },
   "reference/query-languages/esql/commands/ts.md": {
-    "hash": "7605ddcf5c04a613f826a1c715835401650ee2d72e4f49ca8a5e544c2f0a478e",
+    "hash": "8ec9390c5ffe8b838433c080b1ec7dd3ed4a6bcc6d315c32c0bc34f414636fcb",
     "outputFiles": [
       "esql-ts.txt"
     ]
@@ -582,7 +582,7 @@
     }
   },
   "reference/query-languages/esql/functions-operators/operators.md": {
-    "hash": "969976b9c1ce04172dc90d9a34a11f4beff9227993becb5568213a7ecbd63cf0",
+    "hash": "134f675c85012e12129ef3962e5be79334802bffd6158bd07e685906565210e4",
     "outputFiles": [
       "esql-binary operators.txt",
       "esql-unary operators.txt",
@@ -592,7 +592,7 @@
     ],
     "sections": {
       "esql-binary operators.txt": {
-        "hash": "976bda02c65dbeafe5bb481f622f9c3d0c0c10be7a5bd6dc884f421a4ae7433b"
+        "hash": "0a6012b39253d3bcb319c60a190c43579ed7a58e582abacd95f32f56c8dc62c9"
       },
       "esql-unary operators.txt": {
         "hash": "a87366545a196fe824722b3179091463be95f48d75513e00da17f5cf87ca6eb5"
@@ -604,7 +604,7 @@
         "hash": "884d2e12bada72a5986f569994b4f3740e93d4ee25bbf2031d73e81881afb097"
       },
       "esql-infix operators.txt": {
-        "hash": "7928875fc642693594e6a4b277ad0db38be284d8d2e4535f774921e152644374"
+        "hash": "4bd1de1f5bb53d88038cffde861ce326b6c100a333e82a3817233f500c33ccc6"
       }
     }
   },
@@ -798,7 +798,7 @@
     }
   },
   "reference/query-languages/esql/functions-operators/time-series-aggregation-functions.md": {
-    "hash": "f30b0731f3fa7292e05b0374503941b6d745f7501459d7842b28ed37012928a9",
+    "hash": "9090ab84bbba2b4cf7bb053d796b2fbd37556adf5453daedb861772dd76793ff",
     "outputFiles": [
       "esql-metric type compatibility.txt"
     ],
@@ -861,7 +861,7 @@
         "hash": "7db08238f5fd83f675fb522c755ab75051d35b8c6626be59887941906be9aff9"
       },
       "esql-metric type compatibility.txt": {
-        "hash": "229aafa4b15a030a8858753a2ed0b4be43649d9fc9a06b302ebb0c83a6eea044"
+        "hash": "f097ce9060172ccb9aa0792db7a7813c04de75a8bdaef3f32d6abb36af81a7f8"
       }
     }
   },
@@ -965,7 +965,7 @@
     }
   },
   "reference/query-languages/esql/commands/dedup.md": {
-    "hash": "2c2b73a8eab50782abbae595243139a3991b0cc3dbad1329087c3b9ae9048d7e",
+    "hash": "f1290b9188df54c1d8f0b568fef1391ca1e3ecd266243f616c4e19cda56c877d",
     "outputFiles": [
       "esql-dedup.txt"
     ]
@@ -977,7 +977,7 @@
     ]
   },
   "reference/query-languages/esql/commands/highlight.md": {
-    "hash": "b694b3167d9d36692a1c85560129d1f0ac7e5f9d394e083ed35eb9b83360d1d8",
+    "hash": "ae425ca743ba369082cf773f1ebe6bc3f7010d5a6820f8816f2b0084d74db13c",
     "outputFiles": [
       "esql-highlight.txt"
     ]
@@ -989,7 +989,7 @@
     ]
   },
   "reference/query-languages/esql/commands/metrics-info.md": {
-    "hash": "b1a5c219d80fc9a08a19fd2536bfdb117779fcc6a0be478fde283fefaf8f3e32",
+    "hash": "4a11e6066ffca8c47bbefcb5d3145ed4aec9959749670d68d675b09d19e336cd",
     "outputFiles": [
       "esql-metrics-info.txt"
     ]
@@ -1019,7 +1019,7 @@
     ]
   },
   "reference/query-languages/esql/commands/ts-info.md": {
-    "hash": "2e0cc7b1b4aae7a102fa13b380b4e05837ed5d6108c32b6338583f9a1a264c81",
+    "hash": "1d281c96b1606f95784641358159684129678a9d4b8c58494c9051fa7140e824",
     "outputFiles": [
       "esql-ts-info.txt"
     ]

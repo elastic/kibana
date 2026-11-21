@@ -1,6 +1,6 @@
 # BINARY OPERATORS
 
-Binary operators compare two values or perform arithmetic on two values. If either value is multivalued, the result is `null`.
+Binary operators compare values, perform arithmetic, and return a result based on the operator and operand types.
 
 ## Syntax
 
@@ -8,17 +8,19 @@ Binary operators compare two values or perform arithmetic on two values. If eith
 
 ### Parameters
 
-#### left
+#### lhs
 
-The left operand in the binary operation.
+The left-hand side value or field used by the operator.
 
-#### right
+#### rhs
 
-The right operand in the binary operation.
+The right-hand side value or field used by the operator.
 
 #### operator
 
-The binary operator to apply:
+The binary operator applied to `lhs` and `rhs`.
+
+Supported operators include:
 
 - Equality
 - Inequality `!=`
@@ -34,45 +36,12 @@ The binary operator to apply:
 
 ## Examples
 
-Compare two values for equality:
-
-```esql
-ROW a = 1, b = 1
-| EVAL result = a == b
-```
-
-Check whether one value is less than another:
-
-```esql
-ROW a = 1, b = 2
-| EVAL result = a < b
-```
-
-Add two numeric values:
-
-```esql
-ROW a = 1, b = 2
-| EVAL result = a + b
-```
-
-Divide one numeric value by another:
-
-```esql
-ROW a = 10, b = 3
-| EVAL result = a / b
-```
-
-Return the remainder after division:
-
-```esql
-ROW a = 10, b = 3
-| EVAL result = a % b
-```
-
 ## Limitations
 
 If either operand is multivalued, the result is `null`.
 
-Division of two integer types yields an integer result, rounding toward `0`. To perform floating-point division, cast one argument to `DOUBLE`.
+Equality, inequality, and comparison operators are pushed to the underlying search index only when one side of the comparison is constant and the other side is a field in the index that has both a mapping index and doc values.
 
-For `dense_vector` division operations, both operands should be `dense_vector` values. Vectors with unequal dimensions return `null`.
+Division of two integer types yields an integer result, rounding toward `0`. For floating-point division, cast one argument to `DOUBLE`.
+
+For dense vector division, both arguments should be dense vectors. Dense vectors with unequal dimensions return `null`.
