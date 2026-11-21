@@ -1,0 +1,287 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { expect } from '@kbn/scout-security/api';
+import {
+  apiTest,
+  tags,
+  testData,
+  cancelNewExecutions,
+  captureWorkerBaseline,
+  createServiceAccount,
+  deleteServiceAccount,
+  getAdminApi,
+  getWorker,
+  listChatCompletionConnectors,
+  listExecutionIds,
+  listWorkers,
+  patchWorker,
+  pollUntil,
+  resetWorker,
+  restoreWorkerBaseline,
+  updateWorker,
+  withAlertZeroEnabledInSpace,
+  withPlaceholderModel,
+} from '../fixtures';
+import type { WorkerBaseline } from '../fixtures';
+
+const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
+
+/**
+ * Worker control plane against the real server. Proves the managed catalog is installed
+ * (which requires service accounts and the alertzero, proposals and agenticInvestigations
+ * plugins to be on) and that enabling a Worker is gated on a service account. Enabling a
+ * worker also requires an AI model to be available in the space (Kibana answers 400
+ * otherwise), so the tests that enable a worker carry the same no-connector guard as the
+ * attack-discovery flow: they skip with an explicit reason when the stack was booted
+ * without a chat-completion AI connector. One of them enables a worker, which Task
+ * Manager immediately runs for real as its service account — a model-calling run. That run
+ * outlives the disable (Task Manager keeps it going), so before the accounts are deleted
+ * teardown cancels exactly the runs this suite started and waits for them to stop, per the
+ * cleanup contract: a run left in flight can mutate shared-space state after the suite, or
+ * collide with the next use of the worker's `cancel-in-progress` concurrency key.
+ */
+apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.classic] }, () => {
+  const serviceAccountIds: string[] = [];
+  // Each worker workflow this suite enabled, with the executions that existed BEFORE its first
+  // enable, so teardown can cancel only the runs this suite started — never another suite's.
+  // The baseline is snapshotted after the settings write has installed the workflow and before
+  // the enable that starts a real run, and it is never replaced: a later snapshot would absorb
+  // the run an earlier enable of the same suite started, and teardown would then leave it.
+  const enabledWorkflows: { workflowId: string; knownExecutionIds: string[] }[] = [];
+
+  const snapshotBeforeEnable = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>,
+    workflowId: string
+  ): Promise<void> => {
+    if (enabledWorkflows.some((entry) => entry.workflowId === workflowId)) {
+      return; // keep the earliest baseline for this workflow
+    }
+    enabledWorkflows.push({
+      workflowId,
+      knownExecutionIds: await listExecutionIds(api, workflowId),
+    });
+  };
+
+  // The floor worker's run executes the shared Attack Discovery runner as its service account,
+  // and the runner dispatches one review per generated attack. Those children are separate
+  // executions (and separate workflows), so cancelling only the floor worker's own run leaves
+  // them mid-model-call when the account is deleted. Baselined together with the worker's
+  // workflow, before the enable that starts them.
+  const snapshotWorkerWorkflowsBeforeEnable = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>
+  ): Promise<void> => {
+    await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
+    for (const workflowId of testData.ATTACK_DISCOVERY_RUN_WORKFLOW_IDS) {
+      await snapshotBeforeEnable(api, workflowId);
+    }
+  };
+
+  // The settings write installs the managed workflow, but the catalog surfaces it through the
+  // SML indexer asynchronously, so the read can lag the install. Without the baseline the
+  // teardown cannot tell this suite's runs from anyone else's, so a workflow that never shows
+  // up is a hard failure rather than a skipped snapshot.
+  const waitForInstalledWorkflowId = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>
+  ): Promise<string> => {
+    const installed = await pollUntil(
+      `worker ${WORKER_ID} to have a workflow installed`,
+      async () => {
+        const candidate = await getWorker(api, WORKER_ID);
+        return candidate.workflowId ? candidate : undefined;
+      },
+      { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+    );
+    if (!installed.workflowId) {
+      throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
+    }
+    return installed.workflowId;
+  };
+
+  // Worker routes are gated on the per-space AlertZero setting; the server config deliberately
+  // does not pin it (an override makes it read-only), so this suite turns it on itself and puts
+  // the captured baseline back in teardown.
+  let restoreAlertZero: (() => Promise<void>) | undefined;
+  // The worker as this suite found it (enabled, account, autonomy). Teardown restores it instead
+  // of leaving it disabled: this suite does not own the worker, and another suite (or an
+  // operator) may have deliberately left it enabled with its own account bound.
+  let workerBaseline: WorkerBaseline | undefined;
+  // Set by every spec that writes to the worker; teardown leaves an untouched worker alone.
+  let workerTouched = false;
+
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
+    apiTest.setTimeout(testData.BASELINE_TIMEOUT_MS + testData.BASELINE_SETUP_BUDGET_MS);
+    const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+    restoreAlertZero = await withAlertZeroEnabledInSpace({
+      apiClient,
+      apiServices,
+      headers: cookieHeader,
+      spaceId: 'default',
+    });
+    // Required before any spec may write to the worker: without it teardown could not put the
+    // worker back. The capture polls, because the first catalog read can race the gate enable.
+    const api = await getAdminApi(apiClient, samlAuth);
+    workerBaseline = await captureWorkerBaseline(api, WORKER_ID);
+  });
+
+  apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    // One drain per enabled workflow, each up to DRAIN_BUDGET_MS, then the account cleanup.
+    // Without this a slow drain trips the default hook timeout before the accounts are deleted.
+    apiTest.setTimeout(
+      enabledWorkflows.length * testData.DRAIN_BUDGET_MS + testData.TEARDOWN_CLEANUP_BUDGET_MS
+    );
+    // Every step runs even when an earlier one throws (a drain timeout, say), so one failure
+    // cannot leak the superuser service accounts or the per-space gate. Failures are reported
+    // together.
+    const errors: unknown[] = [];
+    const attempt = async (step: () => Promise<unknown>) => {
+      try {
+        await step();
+      } catch (error) {
+        errors.push(error);
+      }
+    };
+    let api: Awaited<ReturnType<typeof getAdminApi>> | undefined;
+    await attempt(async () => {
+      api = await getAdminApi(apiClient, samlAuth);
+    });
+    // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
+    // whatever spec runs next.
+    await attempt(async () => {
+      if (api && workerTouched) await resetWorker(api, WORKER_ID);
+    });
+    // End the runs this suite's enables started; run before the accounts go away below so a
+    // drained run cannot fail after the fact on its deleted service account.
+    for (const { workflowId, knownExecutionIds } of enabledWorkflows) {
+      await attempt(async () => {
+        if (api) await cancelNewExecutions(api, workflowId, knownExecutionIds);
+      });
+    }
+    for (const id of serviceAccountIds) {
+      await attempt(async () => {
+        if (api) await deleteServiceAccount(api, id);
+      });
+    }
+    // Put back the account, autonomy and enabled state the worker had before the suite.
+    await attempt(async () => {
+      if (api && workerTouched && workerBaseline) await restoreWorkerBaseline(api, workerBaseline);
+    });
+    await attempt(async () => {
+      await restoreAlertZero?.();
+    });
+    if (errors.length > 0) {
+      throw new Error(
+        `AlertZero worker control cleanup failed: ${errors
+          .map((error) => (error instanceof Error ? error.message : String(error)))
+          .join('; ')}`
+      );
+    }
+  });
+
+  apiTest('lists the managed security workers', async ({ apiClient, samlAuth }) => {
+    const api = await getAdminApi(apiClient, samlAuth);
+    const ids = (await listWorkers(api)).map((worker) => worker.id);
+    for (const expected of [
+      testData.FLOOR_ALERT_TRIAGE_WORKER_ID,
+      WORKER_ID,
+      testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID,
+    ]) {
+      expect(ids).toContain(expected);
+    }
+  });
+
+  apiTest(
+    'refuses to enable a worker that has no service account',
+    async ({ apiClient, samlAuth }) => {
+      const api = await getAdminApi(apiClient, samlAuth);
+      // The model gate runs before the service-account check, so a stack without a model would
+      // refuse the enable as `noModel` before reaching this guard. A placeholder model clears the
+      // gate; the rejected enable never starts a run, so it is never called.
+      const restoreModel = await withPlaceholderModel(api);
+      try {
+        // Do not trust spec order: another spec may have left an account bound to this worker.
+        workerTouched = true;
+        await resetWorker(api, WORKER_ID);
+        const before = await getWorker(api, WORKER_ID);
+        expect(before.settings.serviceAccountId).toBeUndefined();
+
+        const response = await patchWorker(api, WORKER_ID, { enabled: true });
+        expect(response.statusCode).toBe(400);
+        expect((response.body as { message?: string }).message).toBe(
+          `Cannot apply a worker that is enabled without a service account to worker "${WORKER_ID}"`
+        );
+        expect((await getWorker(api, WORKER_ID)).enabled).toBe(false);
+      } finally {
+        await restoreModel();
+      }
+    }
+  );
+
+  apiTest(
+    'resets a worker that a previous spec left enabled with a service account bound',
+    async ({ apiClient, samlAuth }) => {
+      const api = await getAdminApi(apiClient, samlAuth);
+      // Enabling requires an available AI model in the space; skip rather than fail on a
+      // stack booted without a chat-completion AI connector.
+      apiTest.skip(
+        (await listChatCompletionConnectors(api)).length === 0,
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
+      );
+      const serviceAccountId = await createServiceAccount(api);
+      serviceAccountIds.push(serviceAccountId);
+      workerTouched = true;
+      const before = await getWorker(api, WORKER_ID);
+      await updateWorker(api, WORKER_ID, {
+        settingsRevision: before.settingsRevision ?? null,
+        settings: { serviceAccountId },
+      });
+      // Snapshot the workflow's executions AFTER the settings write (which is what installs the
+      // managed workflow on a fresh stack, so `before.workflowId` can still be absent) and
+      // BEFORE enabling: the enable below makes Task Manager run the worker at once as its
+      // service account, and teardown must be able to cancel exactly that run (see afterAll),
+      // not whatever else shares the workflow.
+      await snapshotWorkerWorkflowsBeforeEnable(api);
+      await updateWorker(api, WORKER_ID, { enabled: true });
+
+      await resetWorker(api, WORKER_ID);
+
+      const after = await getWorker(api, WORKER_ID);
+      expect(after.enabled).toBe(false);
+      expect(after.settings.serviceAccountId).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'enables a worker once a service account is selected, then disables it',
+    async ({ apiClient, samlAuth }) => {
+      const api = await getAdminApi(apiClient, samlAuth);
+      // Enabling requires an available AI model in the space; skip rather than fail on a
+      // stack booted without a chat-completion AI connector.
+      apiTest.skip(
+        (await listChatCompletionConnectors(api)).length === 0,
+        'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
+      );
+      const serviceAccountId = await createServiceAccount(api);
+      serviceAccountIds.push(serviceAccountId);
+      workerTouched = true;
+      const before = await getWorker(api, WORKER_ID);
+      const configured = await updateWorker(api, WORKER_ID, {
+        settingsRevision: before.settingsRevision ?? null,
+        settings: { serviceAccountId },
+      });
+      expect(configured.settings.serviceAccountId).toBe(serviceAccountId);
+      // Same snapshot point as the reset spec above — after the settings write installs the
+      // workflow, before the enable starts a real run that teardown must be able to end
+      // (see afterAll). The helper keeps the reset spec's earlier baseline if the workflow is
+      // the same, so that spec's run is still cancelled as one of ours.
+      await snapshotWorkerWorkflowsBeforeEnable(api);
+
+      expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
+      expect((await updateWorker(api, WORKER_ID, { enabled: false })).enabled).toBe(false);
+    }
+  );
+});
