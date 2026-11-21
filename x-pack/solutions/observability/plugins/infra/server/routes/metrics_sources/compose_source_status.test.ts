@@ -80,14 +80,13 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     // An unexpected failure (for example an authorization error) is not a timeout, so it stays
-    // at error level. The source and pattern are carried in the message so an operator can tell
-    // which configured source failed, and the original Error is attached as metadata (asserted
-    // by identity) so its type and stack survive.
+    // at error level. The original Error is passed as the primary argument (asserted by identity)
+    // so the logging pipeline records its structured exception attributes, and the source and
+    // pattern are carried as structured labels so an operator can tell which source failed.
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [message, meta] = logger.error.mock.calls[0];
-    expect(message).toContain('default');
-    expect(message).toContain(metricAlias);
-    expect(meta).toEqual({ error });
+    const [loggedError, meta] = logger.error.mock.calls[0];
+    expect(loggedError).toBe(error);
+    expect(meta?.labels).toEqual({ sourceId: 'default', metricAlias });
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -122,10 +121,9 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [message, meta] = logger.error.mock.calls[0];
-    expect(message).toContain('default');
-    expect(message).toContain(metricAlias);
-    expect(meta).toEqual({ error });
+    const [loggedError, meta] = logger.error.mock.calls[0];
+    expect(loggedError).toBe(error);
+    expect(meta?.labels).toEqual({ sourceId: 'default', metricAlias });
     expect(logger.debug).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });

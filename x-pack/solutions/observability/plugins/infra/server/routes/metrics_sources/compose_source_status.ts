@@ -91,16 +91,18 @@ export const composeSourceStatus = async ({
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it
-      // visible at error level. Carry the source and pattern in the message so an operator can
-      // tell which configured source failed, and attach the original error as metadata so its
-      // type and stack are preserved.
+      // visible at error level. Pass the original error as the primary argument so the logging
+      // pipeline records the structured `exception.type` / `exception.message` /
+      // `exception.stacktrace` attributes (an error carried only as `{ error }` meta does not
+      // populate them), and carry the source and pattern as structured `labels` so an operator
+      // can still tell which configured source failed.
       const error = err instanceof Error ? err : new Error(String(err));
-      logger.error(
-        `Metric index status check failed for source "${toSingleLine(
-          sourceId
-        )}" (pattern: ${toSingleLine(metricAlias)}): ${error.message}`,
-        { error }
-      );
+      logger.error(error, {
+        labels: {
+          sourceId: toSingleLine(sourceId),
+          metricAlias: toSingleLine(metricAlias),
+        },
+      });
     }
 
     return {
