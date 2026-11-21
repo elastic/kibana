@@ -16,6 +16,7 @@ import {
 import type {
   Proposal,
   ProposalConfidence,
+  ProposalGate,
   ProposalImpact,
   ProposalOrigin,
 } from '@kbn/proposals-common';
@@ -35,21 +36,37 @@ export interface NewProposal {
   category?: string;
   /**
    * Waives the discard reason: declining the proposal is recorded without asking why. Honoured
-   * on the direct path only — a proposal that runs an action is decided behind its gate, and
-   * that decision is always justified.
+   * on the gateless path only — a gated proposal's dismissal is recorded behind its gate, which
+   * does not carry the flag.
    */
   skipDiscardReason?: boolean;
+  /**
+   * Who decides the proposal. `none` writes it directly and decides it through the service, with
+   * no execution parked behind it; `workflow` starts `system-create-proposal`. Omitted, a to-do is
+   * gateless and everything else is gated.
+   */
+  gate?: ProposalGate;
+  /** Managed action workflow to run once approved, as the approver. */
+  actionWorkflowId?: string;
+  /** Passed to the action workflow as its single `actionInput` object. */
+  actionInput?: Record<string, unknown>;
+  /**
+   * The id to create the proposal under, for a caller that derives it from what it proposes. An
+   * id that already exists is refused with `ProposalAlreadyExistsError` on the gateless path, and
+   * fails the gate's create step on the gated one.
+   */
+  id?: string;
 }
 
 export interface CreatedProposal {
   /**
-   * The gate that will decide the proposal. Absent for a to-do, which the
-   * service writes and decides directly.
+   * The gate that will decide the proposal. Absent for a gateless proposal,
+   * which the service writes and decides directly.
    */
   workflowExecutionId?: string;
   /**
    * Absent when the gate workflow had not stored it by the end of the wait.
-   * Always present for a to-do, which is created synchronously.
+   * Always present for a gateless proposal, which is created synchronously.
    */
   proposal?: Proposal;
 }
@@ -79,10 +96,12 @@ const asConfidence = (value: string | undefined): ProposalConfidence | undefined
  * Creates a proposal in a conversation as the user behind the request. Shared by the agent tool
  * and by in-process callers that propose without an agent run.
  *
- * Two paths, picked by category and nothing else. A to-do is carried out by the analyst and runs
- * nothing, so it is written directly and decided by the service: a gate behind it would only park
- * an execution nobody resumes until the analyst gets to it. Everything else keeps the gate, which
- * is what records a decision that executes an action.
+ * Two paths, picked by the caller's `gate`. Omitted, it is inferred from the category: a to-do is
+ * carried out by the analyst and runs nothing, so it is written directly and decided by the
+ * service, since a gate behind it would only park an execution nobody resumes until the analyst
+ * gets to it. Everything else keeps the gate. A caller that proposes many actions at once, with no
+ * deadline, asks for `none` explicitly: approving one starts its action as the approver without
+ * an execution having been parked on it.
  */
 export const createProposalCreator = ({
   getProposalsService,
@@ -119,12 +138,29 @@ export const createProposalCreator = ({
   };
 
   const create: ProposalCreator = async ({ request, spaceId, conversationId, proposal }) => {
-    const { title, comment, origin, impact, confidence, category, skipDiscardReason } = proposal;
+    const {
+      title,
+      comment,
+      origin,
+      impact,
+      confidence,
+      category,
+      skipDiscardReason,
+      actionWorkflowId,
+      actionInput,
+      id,
+    } = proposal;
+    const gate = proposal.gate ?? (category === PROPOSAL_CATEGORY_TODO ? 'none' : 'workflow');
 
-    if (category === PROPOSAL_CATEGORY_TODO) {
-      // Workflows are not consulted at all here, so a to-do needs only
-      // `manage_proposals` — the privilege the gated branch checks as well.
-      await privileges.assertCanManage(request);
+    if (gate === 'none') {
+      // A proposal without an action never consults Workflows, so it needs only
+      // `manage_proposals` — the privilege the gated branch checks as well. One
+      // with an action does: its action is resolved now and started on approval.
+      if (actionWorkflowId === undefined) {
+        await privileges.assertCanManage(request);
+      } else {
+        await assertAvailable(request);
+      }
       const created = await getProposalsService().create(
         {
           gate: 'none',
@@ -132,7 +168,10 @@ export const createProposalCreator = ({
           title,
           comment,
           origin,
-          category: PROPOSAL_CATEGORY_TODO,
+          ...(category !== undefined && { category }),
+          ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+          ...(actionInput !== undefined && { actionInput }),
+          ...(id !== undefined && { id }),
           ...(skipDiscardReason !== undefined && { skipDiscardReason }),
           ...(asImpact(impact) !== undefined && { impact: asImpact(impact) }),
           confidence: asConfidence(confidence) ?? 'medium',
@@ -155,6 +194,9 @@ export const createProposalCreator = ({
         ...(impact !== undefined && { impact }),
         ...(confidence !== undefined && { confidence }),
         ...(category !== undefined && { category }),
+        ...(actionWorkflowId !== undefined && { actionWorkflowId }),
+        ...(actionInput !== undefined && { actionInput }),
+        ...(id !== undefined && { proposalId: id }),
       },
       // The gate parks on the analyst's decision; only its start is awaited.
       waitForCompletion: false,

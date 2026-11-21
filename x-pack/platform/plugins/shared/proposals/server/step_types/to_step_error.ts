@@ -11,6 +11,7 @@ import {
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalInvalidGateError,
+  ProposalInvalidIdError,
   ProposalNotFoundError,
 } from '../services/errors';
 
@@ -29,6 +30,7 @@ const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
   [ProposalNotFoundError, 'NotFoundError'],
   [ProposalInvalidActionInputError, 'ValidationError'],
   [ProposalInvalidGateError, 'ValidationError'],
+  [ProposalInvalidIdError, 'ValidationError'],
 ];
 
 export const toStepError = (error: unknown, fallbackMessage: string): ExecutionError => {

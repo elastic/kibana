@@ -50611,7 +50611,6 @@
     "xpack.proposals.dismissReason.other": "Outro",
     "xpack.proposals.dismissReason.riskAccepted": "Nenhuma ação necessária (o risco é aceitável)",
     "xpack.proposals.featureName": "Ações propostas",
-    "xpack.proposals.proposalCard.conflictError": "Esta proposta não está mais disponível para decisão. Atualize a página para ver o status atual.",
     "xpack.proposals.proposalCard.dismiss": "Descartar",
     "xpack.proposals.proposalCard.genericError": "Não foi possível registrar a decisão. Tente novamente.",
     "xpack.proposals.proposalCard.loadError": "Não foi possível carregar esta proposta. Tente atualizar a página.",

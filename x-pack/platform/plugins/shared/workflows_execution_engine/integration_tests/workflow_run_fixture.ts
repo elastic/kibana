@@ -107,10 +107,13 @@ export class WorkflowRunFixture {
     workflowYaml,
     inputs,
     event,
+    workflowId = 'fake_foreach_id',
   }: {
     workflowYaml: string;
     inputs?: Record<string, unknown>;
     event?: Record<string, unknown>;
+    /** The id the execution runs under, which steps read from their context. */
+    workflowId?: string;
   }) {
     // clean up before running workflow
     this.cleanup();
@@ -118,7 +121,7 @@ export class WorkflowRunFixture {
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
       spaceId: this.spaceId,
-      workflowId: 'fake_foreach_id',
+      workflowId,
       isTestRun: false,
       workflowDefinition,
       context: {

@@ -49,6 +49,12 @@ triggers:
             Set when the caller's autonomy approved. Skips the decide check,
             which has no decider to authorize, and runs the action as the
             inherited service account.
+        releasedAt:
+          type: string
+          description: >
+            The release mark of the gateless approval that started this run.
+            The proposals service only takes this run's writes while the
+            proposal still carries that mark. Blank when a gate started it.
       required:
         - proposalId
         - approved

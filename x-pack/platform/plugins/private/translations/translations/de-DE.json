@@ -50477,7 +50477,6 @@
     "xpack.proposals.dismissReason.other": "Andere",
     "xpack.proposals.dismissReason.riskAccepted": "Keine Aktionen erforderlich (Risiko ist akzeptabel)",
     "xpack.proposals.featureName": "Vorgeschlagene Aktionen",
-    "xpack.proposals.proposalCard.conflictError": "Dieser Vorschlag steht nicht mehr zur Entscheidung zur Verfügung. Aktualisieren Sie die Seite, um ihren aktuellen Status zu sehen.",
     "xpack.proposals.proposalCard.dismiss": "Verwerfen",
     "xpack.proposals.proposalCard.genericError": "Die Entscheidung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     "xpack.proposals.proposalCard.loadError": "Dieser Vorschlag kann nicht geladen werden. Versuchen Sie, die Seite neu zu laden.",

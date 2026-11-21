@@ -8,11 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_TITLE_LENGTH,
   proposalCategorySchema,
   proposalConfidenceSchema,
+  proposalGateSchema,
   proposalImpactSchema,
   proposalOriginSchema,
 } from '../proposal';
@@ -20,41 +21,46 @@ import { optionalStepInput } from './optional_step_input';
 
 export const CreateProposalStepId = 'proposals.createProposal' as const;
 
-export const createProposalStepInputSchema = z.object({
-  conversationId: z.string().describe('Conversation this proposal belongs to.'),
-  title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
-    'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow\u2019s own name, or `Proposed action` when the action has no name either.'
-  ),
-  comment: z
-    .string()
-    .describe(
-      'Explains what is being proposed, rendered as markdown. Required: a proposal a human cannot read is not reviewable.'
+export const createProposalStepInputSchema = lazySchema(() =>
+  z.object({
+    conversationId: z.string().describe('Conversation this proposal belongs to.'),
+    title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
+      'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow\u2019s own name, or `Proposed action` when the action has no name either.'
     ),
-  actionWorkflowId: optionalStepInput(z.string()).describe(
-    'Managed action workflow to run once approved. Omit for a non-action proposal.'
-  ),
-  actionInput: optionalStepInput(z.record(z.string(), z.unknown())).describe(
-    'Inputs passed to the action workflow.'
-  ),
-  impact: optionalStepInput(proposalImpactSchema).describe(
-    'Impact snapshotted at creation. Takes precedence over the action workflow\u2019s own declared impact, since the caller knows the situation the proposal came out of.'
-  ),
-  category: optionalStepInput(proposalCategorySchema).describe(
-    'Grouping axis for the decision queue. Overrides the action workflow\u2019s own declared category, and is the only way a proposal with no action gets one \u2014 consumers group by it, so without it such a proposal has nowhere to appear.'
-  ),
-  confidence: optionalStepInput(proposalConfidenceSchema).describe(
-    'Confidence in the recommendation.'
-  ),
-  origin: proposalOriginSchema.describe(
-    'Which system is producing this proposal, so a solution\u2019s queue can show its own and not another\u2019s. Required and undefaulted: a default would attribute every caller that forgot it to whichever system the default named.'
-  ),
-  expiresIn: optionalStepInput(z.string()).describe(
-    'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
-  ),
-  proposalId: optionalStepInput(z.uuid()).describe(
-    'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
-  ),
-});
+    comment: z
+      .string()
+      .describe(
+        'Explains what is being proposed, rendered as markdown. Required: a proposal a human cannot read is not reviewable.'
+      ),
+    actionWorkflowId: optionalStepInput(z.string()).describe(
+      'Managed action workflow to run once approved. Omit for a non-action proposal.'
+    ),
+    actionInput: optionalStepInput(z.record(z.string(), z.unknown())).describe(
+      'Inputs passed to the action workflow.'
+    ),
+    impact: optionalStepInput(proposalImpactSchema).describe(
+      'Impact snapshotted at creation. Takes precedence over the action workflow\u2019s own declared impact, since the caller knows the situation the proposal came out of.'
+    ),
+    category: optionalStepInput(proposalCategorySchema).describe(
+      'Grouping axis for the decision queue. Overrides the action workflow\u2019s own declared category, and is the only way a proposal with no action gets one \u2014 consumers group by it, so without it such a proposal has nowhere to appear.'
+    ),
+    confidence: optionalStepInput(proposalConfidenceSchema).describe(
+      'Confidence in the recommendation.'
+    ),
+    origin: proposalOriginSchema.describe(
+      'Which system is producing this proposal, so a solution\u2019s queue can show its own and not another\u2019s. Required and undefaulted: a default would attribute every caller that forgot it to whichever system the default named.'
+    ),
+    expiresIn: optionalStepInput(z.string()).describe(
+      'How long the analyst has to decide, as a duration like `24h`. Resolved to an absolute deadline at creation.'
+    ),
+    proposalId: optionalStepInput(z.uuid()).describe(
+      'The id to create the proposal under, instead of a random one, for a caller that derives it from what it is proposing. An id that already exists fails the step with a conflict and creates nothing. Omit for a proposal that is always new.'
+    ),
+    gate: optionalStepInput(proposalGateSchema).describe(
+      'Who decides the proposal. Omit, or pass `workflow`, to record this execution on it so that approving it resumes this execution. Pass `none` for a proposal decided directly through the API, with nothing parked on it: approving one that carries an action runs the action as the approver. A `none` proposal has no deadline, so it cannot be combined with `expiresIn`.'
+    ),
+  })
+);
 
 export const createProposalStepOutputSchema = z.object({
   proposalId: z.string(),
@@ -101,7 +107,7 @@ export const createProposalStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('xpack.proposals.steps.createProposal.documentation.details', {
       defaultMessage:
-        'Writes a pending proposal and returns its id. The current workflow execution is recorded on the proposal, so approving it resumes this execution. Category and other display metadata are resolved from the action workflow definition.',
+        'Writes a pending proposal and returns its id. Unless gate is none, the current workflow execution is recorded on the proposal, so approving it resumes this execution. Category and other display metadata are resolved from the action workflow definition.',
     }),
     examples: [
       `- name: create_proposal

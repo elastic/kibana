@@ -11,6 +11,7 @@ import type { ProposalsService } from '../services/proposals_service';
 import type { ResolveProposalUser } from '../services/resolve_proposal_user';
 import type { ResolveWorkerUser } from '../services/resolve_worker_user';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
+import { getWorkflowCaller } from './get_workflow_caller';
 import { parseStepInput } from './parse_step_input';
 import { resolveStepUser } from './resolve_step_user';
 import { toStepError } from './to_step_error';
@@ -78,7 +79,8 @@ export const getUpdateProposalStepDefinition = ({
             rationale: input.rationale,
             executionError: input.executionError,
           },
-          spaceId
+          spaceId,
+          getWorkflowCaller(workflowContext)
         );
 
         return {
