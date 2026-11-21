@@ -156,7 +156,8 @@ export function httpHandlerFromKbnClient({
         const jitterMs = Math.floor(
           Math.random() * Math.min(1000, Math.max(100, baseDelayMs * 0.15))
         );
-        const delayMs = baseDelayMs + jitterMs;
+        // The 60s cap is a hard ceiling: jitter must not push the wait past it.
+        const delayMs = Math.min(MAX_RETRY_AFTER_MS, baseDelayMs + jitterMs);
 
         log.warning(
           `HTTP ${status} from Kibana; retrying in ${Math.round(delayMs / 1000)}s (attempt ${

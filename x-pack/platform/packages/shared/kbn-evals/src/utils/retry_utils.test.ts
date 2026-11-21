@@ -174,20 +174,241 @@ describe('withRetry', () => {
     }
   });
 
+  it.each(['0.0', '1e3', '+5', '2026-11-21T09:00:00Z'])(
+    'falls back to the message hint when Retry-After is malformed (%p)',
+    async (malformed) => {
+      jest.useFakeTimers({ now: new Date('2026-11-21T10:00:00.000Z') });
+      try {
+        const error = Object.assign(new Error('Too Many Requests, retry after 30 seconds'), {
+          statusCode: 429,
+          headers: new Headers({ 'retry-after': malformed }),
+        });
+        const onRetry = jest.fn();
+        const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
+        const result = withRetry(fn, {
+          maxAttempts: 2,
+          minDelayMs: 10,
+          maxDelayMs: 60_000,
+          jitter: false,
+          onRetry,
+        });
+        result.catch(() => undefined);
+
+        await jest.advanceTimersByTimeAsync(29_999);
+        expect(fn).toHaveBeenCalledTimes(1);
+        await jest.advanceTimersByTimeAsync(1);
+        await expect(result).resolves.toBe('ok');
+        expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 30_000 }));
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  describe('delay cap with jitter', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      // Largest value Math.random can return: maximum jitter.
+      jest.spyOn(Math, 'random').mockReturnValue(0.999999);
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+      jest.restoreAllMocks();
+    });
+
+    const rateLimited = (retryAfter?: string) =>
+      Object.assign(makeKbnClientRequesterError(429, 'Too Many Requests'), {
+        headers: new Headers(retryAfter === undefined ? {} : { 'retry-after': retryAfter }),
+      });
+
+    it.each([
+      ['Retry-After equal to maxDelayMs', '60', 1_000, 60_000],
+      ['exponential backoff that reaches maxDelayMs', undefined, 50_000, 50_000],
+    ])('never schedules past maxDelayMs for %s', async (_name, retryAfter, minDelayMs, cap) => {
+      const onRetry = jest.fn();
+      const fn = jest
+        .fn()
+        .mockRejectedValueOnce(rateLimited(retryAfter))
+        .mockResolvedValueOnce('ok');
+      const result = withRetry(fn, {
+        maxAttempts: 2,
+        minDelayMs,
+        maxDelayMs: cap,
+        jitter: true,
+        onRetry,
+      });
+      result.catch(() => undefined);
+
+      await jest.advanceTimersByTimeAsync(cap - 1);
+      expect(fn).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBe('ok');
+      expect(fn).toHaveBeenCalledTimes(2);
+      expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: cap }));
+    });
+
+    it('still adds jitter on top of Retry-After below the cap', async () => {
+      const onRetry = jest.fn();
+      const fn = jest.fn().mockRejectedValueOnce(rateLimited('30')).mockResolvedValueOnce('ok');
+      const result = withRetry(fn, {
+        maxAttempts: 2,
+        minDelayMs: 1,
+        maxDelayMs: 60_000,
+        jitter: true,
+        onRetry,
+      });
+      result.catch(() => undefined);
+
+      await jest.advanceTimersByTimeAsync(30_998);
+      expect(fn).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBe('ok');
+      // base 30_000 + floor(0.999999 * min(1000, max(100, 4500))) = 30_999
+      expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 30_999 }));
+    });
+  });
+
+  describe('Retry-After header versus a longer message hint', () => {
+    beforeEach(() => jest.useFakeTimers({ now: new Date('2026-11-21T10:00:00.000Z') }));
+    afterEach(() => jest.useRealTimers());
+
+    const withBodyHint = (retryAfter: string) =>
+      Object.assign(new Error('Too Many Requests, retry after 90 seconds'), {
+        statusCode: 429,
+        headers: new Headers({ 'retry-after': retryAfter }),
+      });
+
+    it.each(['Sat, 21 Nov 2026 09:59:00 GMT'])(
+      'uses normal backoff for a past HTTP-date (%p) instead of the stale message hint',
+      async (retryAfter) => {
+        const onRetry = jest.fn();
+        const fn = jest
+          .fn()
+          .mockRejectedValueOnce(withBodyHint(retryAfter))
+          .mockResolvedValueOnce('ok');
+        const result = withRetry(fn, {
+          maxAttempts: 2,
+          minDelayMs: 10,
+          maxDelayMs: 60_000,
+          jitter: false,
+          onRetry,
+        });
+
+        await jest.advanceTimersByTimeAsync(10);
+        await expect(result).resolves.toBe('ok');
+        expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 10 }));
+      }
+    );
+
+    it.each(['1.5', '9'.repeat(400)])(
+      'surfaces the error when Retry-After %p cannot be honoured within maxDelayMs',
+      async (retryAfter) => {
+        // "1.5" is malformed, so the 90s message hint applies; 400 nines is valid
+        // delay-seconds that overflows to Infinity. Both exceed the 60s ceiling.
+        const error = withBodyHint(retryAfter);
+        const fn = jest.fn().mockRejectedValueOnce(error).mockResolvedValueOnce('ok');
+
+        await expect(
+          withRetry(fn, { minDelayMs: 1, maxDelayMs: 60_000, jitter: false })
+        ).rejects.toBe(error);
+        expect(fn).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('keeps a tiny maxDelayMs a hard ceiling under maximum jitter', async () => {
+      jest.spyOn(Math, 'random').mockReturnValue(0.999999);
+      try {
+        const onRetry = jest.fn();
+        const fn = jest
+          .fn()
+          .mockRejectedValueOnce(makeStatusError(503))
+          .mockResolvedValueOnce('ok');
+        const result = withRetry(fn, {
+          maxAttempts: 2,
+          minDelayMs: 1,
+          maxDelayMs: 2,
+          jitter: true,
+          onRetry,
+        });
+
+        await jest.advanceTimersByTimeAsync(1);
+        expect(fn).toHaveBeenCalledTimes(1);
+        await jest.advanceTimersByTimeAsync(1);
+        await expect(result).resolves.toBe('ok');
+        expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ delayMs: 2 }));
+      } finally {
+        jest.restoreAllMocks();
+      }
+    });
+  });
+
   describe('parseRetryAfterHeaderMs', () => {
     beforeEach(() => jest.useFakeTimers({ now: new Date('2026-11-21T10:00:00.000Z') }));
     afterEach(() => jest.useRealTimers());
 
     it.each([
       ['30', 30_000],
-      ['Sat, 21 Nov 2026 10:00:45 GMT', 45_000],
+      [' 30 ', 30_000],
       ['0', 0],
+      ['Sat, 21 Nov 2026 10:00:45 GMT', 45_000],
       ['Sat, 21 Nov 2026 09:59:00 GMT', 0],
-      ['-5', undefined],
-      ['soon', undefined],
-      [undefined, undefined],
-    ])('parses %p as %p ms', (value, expected) => {
+      // obsolete formats recipients must still accept (RFC 9110 section 5.6.7)
+      ['Saturday, 21-Nov-26 10:00:45 GMT', 45_000],
+      ['Sat Nov 21 10:00:45 2026', 45_000],
+      ['Sat Nov  1 10:00:45 2026', 0],
+      // a two-digit year more than 50 years ahead is the most recent past year with those digits
+      ['Saturday, 21-Nov-99 10:00:45 GMT', 0],
+    ])('parses valid %p as %p ms', (value, expected) => {
       expect(parseRetryAfterHeaderMs(value)).toBe(expected);
+    });
+
+    // Now is 2026-11-21T10:00:00Z, so the 50-calendar-year boundary is 2076-11-21T10:00:00Z.
+    it.each([
+      [
+        'before the boundary',
+        'Saturday, 21-Nov-76 09:59:59 GMT',
+        Date.UTC(2076, 10, 21, 9, 59, 59),
+      ],
+      ['at the boundary', 'Saturday, 21-Nov-76 10:00:00 GMT', Date.UTC(2076, 10, 21, 10)],
+      ['after the boundary', 'Saturday, 21-Nov-76 10:00:01 GMT', undefined],
+      ['well inside the window', 'Saturday, 21-Nov-70 10:00:00 GMT', Date.UTC(2070, 10, 21, 10)],
+    ])('resolves an RFC 850 two-digit year %s', (_name, value, futureUtcMs) => {
+      // Beyond the boundary the date is the most recent past year (1976): already elapsed.
+      expect(parseRetryAfterHeaderMs(value)).toBe(
+        futureUtcMs === undefined ? 0 : futureUtcMs - Date.now()
+      );
+    });
+
+    it.each([
+      '-5',
+      '0.0',
+      '1.5',
+      '1e3',
+      '+5',
+      '0x10',
+      '1_000',
+      'Infinity',
+      'NaN',
+      'soon',
+      '',
+      '   ',
+      '2026-11-21T09:00:00Z',
+      '2026-11-21T10:00:30Z',
+      'Nov 21 2026 10:00:30',
+      'Sat, 21 Nov 2026 10:00:30',
+      'Sat, 21 Nov 2026 10:00:30 PST',
+      'Sat, 31 Nov 2026 10:00:30 GMT',
+      'Sat, 30 Feb 2026 10:00:30 GMT',
+      'Sat, 21 Nov 2026 24:00:30 GMT',
+      'Sat, 21 Nov 2026 10:60:30 GMT',
+      'Sat, 21 Foo 2026 10:00:30 GMT',
+      'Foo, 21 Nov 2026 10:00:30 GMT',
+      '30 seconds',
+      undefined,
+      null,
+      30,
+    ])('rejects malformed %p', (value) => {
+      expect(parseRetryAfterHeaderMs(value)).toBeUndefined();
     });
   });
 

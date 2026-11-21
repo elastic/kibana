@@ -9,8 +9,8 @@ import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { httpHandlerFromKbnClient } from './http_handler_from_kbn_client';
 
-const rateLimited = (retryAfter: string) =>
-  Object.assign(new Error('Too Many Requests'), {
+const rateLimited = (retryAfter: string, message = 'Too Many Requests') =>
+  Object.assign(new Error(message), {
     status: 429,
     headers: new Headers({ 'retry-after': retryAfter }),
   });
@@ -29,16 +29,19 @@ describe('httpHandlerFromKbnClient retries', () => {
     else process.env.KBN_EVALS_HTTP_RETRIES = originalHttpRetries;
   });
 
-  const setup = (retryAfter: string) => {
+  const setup = (retryAfter: string, message?: string) => {
     const request = jest
       .fn()
-      .mockRejectedValueOnce(rateLimited(retryAfter))
+      .mockRejectedValueOnce(rateLimited(retryAfter, message))
       .mockResolvedValueOnce({ data: 'ok' });
     const fetch = httpHandlerFromKbnClient({
       kbnClient: { request } as unknown as KbnClient,
       log: { warning: jest.fn() } as unknown as ToolingLog,
     });
-    return { request, result: fetch('/api/status') };
+    const result = fetch('/api/status');
+    // A red run must fail on assertions, not on a rejection nobody awaited yet.
+    result.catch(() => undefined);
+    return { request, result };
   };
 
   it('waits for an HTTP-date Retry-After before retrying', async () => {
@@ -69,6 +72,67 @@ describe('httpHandlerFromKbnClient retries', () => {
     );
     expect(Math.max(...delays)).toBeLessThanOrEqual(61);
   });
+
+  it('never waits past the 60s cap when jitter is at its maximum', async () => {
+    // Largest value Math.random can return: maximum jitter.
+    jest.spyOn(Math, 'random').mockReturnValue(0.999999);
+    const { request, result } = setup('60');
+
+    await jest.advanceTimersByTimeAsync(59_999);
+    expect(request).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(result).resolves.toBe('ok');
+    expect(request).toHaveBeenCalledTimes(2);
+  });
+
+  it('still adds jitter on top of Retry-After below the cap', async () => {
+    jest.spyOn(Math, 'random').mockReturnValue(0.999999);
+    const { request, result } = setup('30');
+
+    // base 30_000 + floor(0.999999 * min(1000, max(100, 4500))) = 30_999
+    await jest.advanceTimersByTimeAsync(30_998);
+    expect(request).toHaveBeenCalledTimes(1);
+    await jest.advanceTimersByTimeAsync(1);
+    await expect(result).resolves.toBe('ok');
+  });
+
+  it.each(['0.0', '1e3', '2026-11-21T09:00:00Z'])(
+    'falls back to the message hint when Retry-After is malformed (%p)',
+    async (malformed) => {
+      const { request, result } = setup(malformed, 'Too Many Requests, retry after 30 seconds');
+
+      await jest.advanceTimersByTimeAsync(29_999);
+      expect(request).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBe('ok');
+      expect(request).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it.each(['0', 'Sat, 21 Nov 2026 09:59:00 GMT'])(
+    'uses normal backoff for Retry-After %p instead of a stale longer message hint',
+    async (retryAfter) => {
+      const { request, result } = setup(retryAfter, 'Too Many Requests, retry after 90 seconds');
+
+      // attempt 0 backoff is 1s (random mocked to 0): the 90s body hint must be ignored.
+      await jest.advanceTimersByTimeAsync(999);
+      expect(request).toHaveBeenCalledTimes(1);
+      await jest.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBe('ok');
+      expect(request).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it.each(['1.5', '9'.repeat(400)])(
+    'surfaces the 429 when Retry-After %p cannot be honoured within 60s',
+    async (retryAfter) => {
+      // "1.5" is malformed, so the 90s message hint applies; 400 nines overflows to Infinity.
+      const { request, result } = setup(retryAfter, 'Too Many Requests, retry after 90 seconds');
+
+      await expect(result).rejects.toMatchObject({ status: 429 });
+      expect(request).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it('surfaces the 429 instead of retrying early when Retry-After exceeds 60s', async () => {
     const { request, result } = setup('90');
