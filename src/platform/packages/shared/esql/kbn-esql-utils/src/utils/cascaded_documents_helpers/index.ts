@@ -40,13 +40,17 @@ import { extractCategorizeTokens } from '../extract_categorize_tokens';
 import { getOperator } from '../append_to_query/utils';
 import {
   convertTimeseriesCommandNodeToFrom,
+  getArgsFromRenameFunction,
   hasTimeseriesInfoCommand,
 } from '../query_parsing_helpers';
 import {
   isSupportedStatsFunction,
   type SupportedFieldTypes,
   type FieldValue,
+  type NodeAggregatedValues,
   type StatsCommandSummary,
+  buildValuesAggregateFilterExpressions,
+  combineFilterExpressionsWithAnd,
   getESQLQueryDataSourceCommand,
   getStatsCommandToOperateOn,
   getStatsCommandRuntimeFields,
@@ -55,6 +59,9 @@ import {
   getStatsGroupFieldType,
   removeBackticks,
   isSupportedFieldType,
+  isTimeseriesSourceQuery,
+  getUnsupportedTimeseriesCascadeShape,
+  type UnsupportedTimeseriesCascadeShape,
   requiresMatchPhrase,
   isCategorizeFunctionWithFunctionArgument,
 } from './utils';
@@ -83,15 +90,81 @@ export interface AppliedStatsFunction {
   aggregation: string;
 }
 
+/**
+ * Why a query yields no cascade metadata.
+ *
+ * {@link getESQLStatsQueryMeta} returns empty `groupByFields` both for queries that simply don't
+ * describe a grouping and for queries that do but use a shape the cascade experience cannot serve.
+ * The reason tells those cases apart, so callers can surface or track the ones they care about
+ * instead of inferring intent from an empty result.
+ */
+export const ESQL_STATS_QUERY_META_EXCLUSION_REASON = {
+  /** The query could not be parsed, or computing its metadata threw unexpectedly. */
+  PARSE_FAILURE: 'parse_failure',
+  /** TS_INFO/METRICS_INFO rows are synthetic metric metadata, there are no documents behind them. */
+  TIMESERIES_INFO_SOURCE: 'timeseries_info_source',
+  /** The source command wraps a subquery, whose documents we cannot resolve back to. */
+  SUBQUERY_SOURCE: 'subquery_source',
+  /** The query declares no STATS command to drive the cascade from. */
+  NO_STATS_COMMAND: 'no_stats_command',
+  /** The STATS command driving the cascade declares no grouping options. */
+  NO_GROUPING_OPTIONS: 'no_grouping_options',
+  /**
+   * A grouping option is missing its definition, so the query is malformed,
+   * ideally this would should already be caught by input validation in the editor
+   */
+  MALFORMED_GROUPING: 'malformed_grouping',
+  /** A grouping option applies a function the cascade experience does not support. */
+  UNSUPPORTED_GROUPING_FUNCTION: 'unsupported_grouping_function',
+  /** A KEEP command strips the grouping option from the resulting records. */
+  GROUP_FIELD_STRIPPED_BY_KEEP: 'group_field_stripped_by_keep',
+  /**
+   * A RENAME command gives the grouping option another name in the resulting records.
+   * The records then carry the new name while the cascade looks the group up by the name the
+   * STATS command declared, so every record collapses into a single "not set" group whose
+   * documents resolve to none.
+   */
+  GROUP_FIELD_RENAMED_AFTER_STATS: 'group_field_renamed_after_stats',
+  /**
+   * A TS source query declaring more than one STATS command,
+   * see {@link getUnsupportedTimeseriesCascadeShape} for why this cannot be resolved.
+   */
+  TIMESERIES_MULTIPLE_STATS: 'timeseries_multiple_stats',
+  /**
+   * A TS source query whose FORK holds a STATS command, which carries the same problem as
+   * {@link ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_MULTIPLE_STATS}, since the FORK and
+   * everything in it is copied into the FROM query built for a leaf node.
+   */
+  TIMESERIES_STATS_IN_FORK: 'timeseries_stats_in_fork',
+} as const;
+
+const TIMESERIES_SHAPE_EXCLUSION_REASON: Record<
+  UnsupportedTimeseriesCascadeShape,
+  ESQLStatsQueryMetaExclusionReason
+> = {
+  'multiple-stats': 'timeseries_multiple_stats',
+  'stats-in-fork': 'timeseries_stats_in_fork',
+};
+
+export type ESQLStatsQueryMetaExclusionReason =
+  (typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON)[keyof typeof ESQL_STATS_QUERY_META_EXCLUSION_REASON];
+
 export interface ESQLStatsQueryMeta {
   groupByFields: Array<{ field: string; type: string }>;
   appliedFunctions: AppliedStatsFunction[];
+  /**
+   * Why the query yielded no metadata, set whenever `groupByFields` is empty.
+   */
+  exclusionReason?: ESQLStatsQueryMetaExclusionReason;
 }
 
-const EMPTY_ESQL_STATS_QUERY_META: ESQLStatsQueryMeta = {
+const excludedESQLStatsQueryMeta = (
+  exclusionReason: ESQLStatsQueryMetaExclusionReason
+): ESQLStatsQueryMeta => ({
   groupByFields: [],
   appliedFunctions: [],
-};
+  exclusionReason,
+});
 
 const getStatsGroupingField = (
   summary: StatsCommandSummary,
@@ -102,6 +175,7 @@ const getStatsGroupingField = (
  * This method is used to get the metadata on STATS command to drive the cascade experience from an ESQL query,
  * if a valid STATS command is found information about the group by fields and applied functions is returned.
  * This method will exclude queries contain commands that are not valid for the cascade experience,
+ * reporting why it did so through {@link ESQLStatsQueryMeta.exclusionReason}.
  */
 export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   try {
@@ -110,7 +184,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
     // Unexpected AST/parse failures must not take down Discover (or other callers).
     // eslint-disable-next-line no-console
     console.error('Failed to compute ES|QL stats query metadata for cascade documents', error);
-    return EMPTY_ESQL_STATS_QUERY_META;
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.PARSE_FAILURE);
   }
 };
 
@@ -121,7 +195,9 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   if (hasTimeseriesInfoCommand(queryString)) {
     // TS_INFO/METRICS_INFO rows are synthetic metric metadata rather than documents,
     // so there's no underlying document to drive a cascade experience from
-    return { groupByFields, appliedFunctions };
+    return excludedESQLStatsQueryMeta(
+      ESQL_STATS_QUERY_META_EXCLUSION_REASON.TIMESERIES_INFO_SOURCE
+    );
   }
 
   const esqlQuery = EsqlQuery.fromSrc(queryString);
@@ -133,15 +209,23 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
     (cmd) => cmd.text === summarizedStatsCommand?.command.text
   );
 
-  if (
-    dataSourceCommand?.args.some(isSubQuery) ||
-    !summarizedStatsCommand ||
-    Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0
-  ) {
-    return { groupByFields, appliedFunctions };
+  if (dataSourceCommand?.args.some(isSubQuery)) {
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.SUBQUERY_SOURCE);
+  }
+
+  if (!summarizedStatsCommand) {
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.NO_STATS_COMMAND);
+  }
+
+  if (Object.keys(summarizedStatsCommand.grouping ?? {}).length === 0) {
+    return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.NO_GROUPING_OPTIONS);
   }
 
   const grouping = Object.values(summarizedStatsCommand.grouping);
+
+  // records why we stopped collecting grouping options,
+  // it only describes the query when no grouping option survived the loop below
+  let groupingExclusionReason: ESQLStatsQueryMetaExclusionReason | undefined;
 
   for (let j = 0; j < grouping.length; j++) {
     const group = grouping[j];
@@ -149,7 +233,7 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
     const groupDefinition = getFieldDefinitionFromArg(group.arg);
     if (!groupDefinition) {
       // query received is malformed without complete grouping definition, there's no need to proceed further
-      return { groupByFields: [], appliedFunctions: [] };
+      return excludedESQLStatsQueryMeta(ESQL_STATS_QUERY_META_EXCLUSION_REASON.MALFORMED_GROUPING);
     }
 
     // unnamed grouping functions are wrapped in backticks in the generated AST so we strip them off if they exist,
@@ -204,6 +288,8 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
       // if the group field has a grouping function that is not supported,
       // this nullifies the entire query to count as a valid query for the cascade experience
       groupByFields.splice(0, groupByFields.length);
+      groupingExclusionReason =
+        ESQL_STATS_QUERY_META_EXCLUSION_REASON.UNSUPPORTED_GROUPING_FUNCTION;
       break;
     }
 
@@ -234,6 +320,34 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
     if (offendingKeepCommand) {
       // we found a keep command that strips the current group field from the resulting records,
       // so we break out of the loop as that invalidates the possibility of grouping by the current group field
+      groupingExclusionReason = ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_STRIPPED_BY_KEEP;
+      break;
+    }
+
+    // a rename command after the declaring stats command leaves the records holding the new name
+    // while the cascade looks the group up by the name the stats command declared, so the lookup
+    // misses on every record and the rows collapse into a single group that resolves to no documents
+    const offendingRenameCommand = esqlQuery.ast.commands
+      .slice(groupDeclarationStatsCommandIndex)
+      .some(
+        (cmd) =>
+          cmd.name === 'rename' &&
+          cmd.args.some((arg) => {
+            if (!isFunctionExpression(arg)) {
+              return false;
+            }
+
+            // RENAME accepts both "old AS new" and "new = old", which hold their operands in
+            // opposite order, so the helper is what tells us which side is being renamed away
+            const { original } = getArgsFromRenameFunction(arg);
+
+            return original && removeBackticks(original.name) === removeBackticks(groupFieldName);
+          })
+      );
+
+    if (offendingRenameCommand) {
+      groupingExclusionReason =
+        ESQL_STATS_QUERY_META_EXCLUSION_REASON.GROUP_FIELD_RENAMED_AFTER_STATS;
       break;
     }
 
@@ -244,7 +358,19 @@ const computeESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
   }
 
   if (groupByFields.length === 0) {
-    return { groupByFields, appliedFunctions };
+    return excludedESQLStatsQueryMeta(
+      groupingExclusionReason ?? ESQL_STATS_QUERY_META_EXCLUSION_REASON.NO_GROUPING_OPTIONS
+    );
+  }
+
+  const unsupportedTimeseriesShape = getUnsupportedTimeseriesCascadeShape(esqlQuery);
+
+  if (unsupportedTimeseriesShape) {
+    // the query declares valid grouping options, but we cannot build leaf queries for its rows,
+    // so we withhold the cascade experience from it entirely
+    return excludedESQLStatsQueryMeta(
+      TIMESERIES_SHAPE_EXCLUSION_REASON[unsupportedTimeseriesShape]
+    );
   }
 
   Object.values(summarizedStatsCommand.aggregates).forEach((aggregate) => {
@@ -285,6 +411,11 @@ export interface CascadeQueryArgs {
    * Mapping of node paths to their corresponding values, used to populate the query with literal values
    */
   nodePathMap: Record<string, string>;
+  /**
+   * Values displayed for the aggregates of the node we are generating a query for,
+   * used to constrain the documents fetched for cascade queries that omit the STATS command
+   */
+  nodeAggregatedValues?: NodeAggregatedValues;
 }
 
 /**
@@ -297,6 +428,7 @@ export const constructCascadeQuery = ({
   nodeType,
   nodePath,
   nodePathMap,
+  nodeAggregatedValues,
 }: CascadeQueryArgs): AggregateQuery | undefined => {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
@@ -308,6 +440,18 @@ export const constructCascadeQuery = ({
 
   if (!summarizedStatsCommand || Object.keys(summarizedStatsCommand?.grouping ?? {}).length === 0) {
     throw new Error('Query does not have a valid stats command with grouping options');
+  }
+
+  const unsupportedTimeseriesShape = getUnsupportedTimeseriesCascadeShape(EditorESQLQuery);
+
+  if (unsupportedTimeseriesShape) {
+    // `getESQLStatsQueryMeta` already withholds the grouping options for these queries so the
+    // cascade is never offered for them, this guards against a stale cascade state reaching here
+    throw new Error(
+      unsupportedTimeseriesShape === 'stats-in-fork'
+        ? 'TS source queries with a STATS command inside a FORK are not supported'
+        : 'TS source queries with multiple STATS commands are not supported'
+    );
   }
 
   if (nodeType === 'leaf') {
@@ -365,25 +509,31 @@ export const constructCascadeQuery = ({
     );
 
     const groupValueDefinition = getFieldDefinitionFromArg(groupValue.arg);
+
     if (isColumn(groupValueDefinition)) {
-      return handleStatsByColumnLeafOperation(
-        EditorESQLQuery,
+      return handleStatsByColumnLeafOperation({
+        editorQuery: EditorESQLQuery,
         operatingStatsCommandIndex,
-        groupValue,
-        dataView.fields,
+        operatingStatsCommandSummary: summarizedStatsCommand,
+        columnNode: groupValue,
+        dataViewFields: dataView.fields,
         esqlVariables,
-        nodePathMap[pathSegment]
-      );
+        operationValue: nodePathMap[pathSegment],
+        nodeAggregatedValues,
+      });
     } else if (isFunctionExpression(groupValueDefinition)) {
       switch (groupValueDefinition.name) {
         case 'categorize': {
-          return handleStatsByCategorizeLeafOperation(
-            EditorESQLQuery,
+          return handleStatsByCategorizeLeafOperation({
+            editorQuery: EditorESQLQuery,
             operatingStatsCommandIndex,
-            groupValue,
+            operatingStatsCommandSummary: summarizedStatsCommand,
+            categorizeCommandNode: groupValue,
+            dataViewFields: dataView.fields,
             esqlVariables,
-            nodePathMap
-          );
+            nodePathMap,
+            nodeAggregatedValues,
+          });
         }
         default: {
           throw new Error(
@@ -397,18 +547,42 @@ export const constructCascadeQuery = ({
   }
 };
 
+interface LeafOperationArgs {
+  editorQuery: EsqlQuery;
+  operatingStatsCommandIndex: number;
+  /**
+   * summary of the stats command driving the cascade experience, it declares the aggregates displayed for the node
+   */
+  operatingStatsCommandSummary: StatsCommandSummary;
+  dataViewFields: DataView['fields'];
+  esqlVariables: ESQLControlVariable[] | undefined;
+  nodeAggregatedValues: NodeAggregatedValues | undefined;
+}
+
+interface StatsByColumnLeafOperationArgs extends LeafOperationArgs {
+  columnNode: FieldSummary;
+  operationValue: unknown;
+}
+
+interface StatsByCategorizeLeafOperationArgs extends LeafOperationArgs {
+  categorizeCommandNode: FieldSummary;
+  nodePathMap: Record<string, string>;
+}
+
 /**
  * @description adds a where command with current value for a matched column option as a side-effect on the passed query,
  * helps us with fetching documents that match the value of a specified column on a stats operation in the data cascade experience.
  */
-function handleStatsByColumnLeafOperation(
-  editorQuery: EsqlQuery,
-  operatingStatsCommandIndex: number,
-  columnNode: FieldSummary,
-  dataViewFields: DataView['fields'],
-  esqlVariables: ESQLControlVariable[] | undefined,
-  operationValue: unknown
-): AggregateQuery {
+function handleStatsByColumnLeafOperation({
+  editorQuery,
+  operatingStatsCommandIndex,
+  operatingStatsCommandSummary,
+  columnNode,
+  dataViewFields,
+  esqlVariables,
+  operationValue,
+  nodeAggregatedValues,
+}: StatsByColumnLeafOperationArgs): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
   const columnDefinition = getFieldDefinitionFromArg(columnNode.arg);
@@ -424,12 +598,23 @@ function handleStatsByColumnLeafOperation(
     ))
   ) {
     if (typeof operationColumnNameParamValue === 'string') {
-      // we expect the operation column name parameter value to be a string, so we check for that and update the operation column name to the param value if it is
+      // We expect the operation column name parameter value to be a string,
+      // so we check for that guarding against a situation where we received a non-string value
+      // and only update the operation column name when this condition is met.
       operationColumnName = operationColumnNameParamValue;
     }
   }
 
   const shouldUseMatchPhrase = requiresMatchPhrase(operationColumnName, dataViewFields);
+
+  const supportsInlineStatsCommand = !(
+    // INLINE STATS is not supported for TS queries, and computing the aggregates of a TS query
+    // with FROM semantics yields values that contradict what the cascade row displays,
+    // so for such queries we omit the STATS command entirely, the same way we do when a match phrase is required
+    (shouldUseMatchPhrase || isTimeseriesSourceQuery(editorQuery))
+  );
+
+  let omittedStatsCommand = false;
 
   const commandsUpToOperatingStatsCommand = editorQuery.ast.commands.slice(
     0,
@@ -449,17 +634,17 @@ function handleStatsByColumnLeafOperation(
     ) {
       const hasAggregates = cmd.args.some(isFunctionExpression);
 
-      if (hasAggregates && !shouldUseMatchPhrase) {
-        // when we aren't using match phrase replace
-        // replace occurrence of stats command with inline stats
+      if (hasAggregates && supportsInlineStatsCommand) {
         mutate.generic.commands.insert(
           cascadeOperationQuery.ast,
           synth.cmd(`INLINE ${BasicPrettyPrinter.print(cmd)}`, { withFormatting: false }),
           0
         );
       } else {
-        // if the stats command does not have any aggregates, or will require a match phrase query,
-        // then we omit the STATS command to simply apply the where command to the query
+        // if the stats command does not have any aggregates, requires a match phrase query,
+        // or sources its data from a TS command, then we skip the inline stats treatment,
+        // omit the STATS command to simply apply the where command to the query
+        omittedStatsCommand = true;
         continue;
       }
     } else {
@@ -471,28 +656,43 @@ function handleStatsByColumnLeafOperation(
     }
   }
 
+  const columnFilterExpression =
+    operationValue === GROUP_NOT_SET_VALUE
+      ? Builder.expression.func.postfix('IS NULL', [
+          Builder.identifier({ name: operationColumnName }),
+        ])
+      : shouldUseMatchPhrase
+      ? Builder.expression.func.call('match_phrase', [
+          Builder.identifier({ name: operationColumnName }),
+          Builder.expression.literal.string(operationValue as string),
+        ])
+      : Builder.expression.func.binary('==', [
+          Builder.expression.column({
+            args: [Builder.identifier({ name: operationColumnName })],
+          }),
+          Number.isNaN(Number(operationValue)) ||
+          dataViewFields.getByName(operationColumnName)?.type === 'string'
+            ? Builder.expression.literal.string(operationValue as string)
+            : Builder.expression.literal.integer(Number(operationValue)),
+        ]);
+
   // build a where command with match expressions for the selected column
   const filterCommand = Builder.command({
     name: 'where',
     args: [
-      operationValue === GROUP_NOT_SET_VALUE
-        ? Builder.expression.func.postfix('IS NULL', [
-            Builder.identifier({ name: operationColumnName }),
-          ])
-        : shouldUseMatchPhrase
-        ? Builder.expression.func.call('match_phrase', [
-            Builder.identifier({ name: operationColumnName }),
-            Builder.expression.literal.string(operationValue as string),
-          ])
-        : Builder.expression.func.binary('==', [
-            Builder.expression.column({
-              args: [Builder.identifier({ name: operationColumnName })],
-            }),
-            Number.isNaN(Number(operationValue)) ||
-            dataViewFields.getByName(operationColumnName)?.type === 'string'
-              ? Builder.expression.literal.string(operationValue as string)
-              : Builder.expression.literal.integer(Number(operationValue)),
-          ]),
+      combineFilterExpressionsWithAnd([
+        columnFilterExpression,
+        // when the inline stats treatment is not applied we remove the stats command pre-existing on the command,
+        // hence we need to compensate by ensuring aggregates derived from functions that act as filters are accounted for
+        ...(omittedStatsCommand
+          ? buildValuesAggregateFilterExpressions({
+              statsSummary: operatingStatsCommandSummary,
+              nodeAggregatedValues,
+              dataViewFields,
+              esqlVariables,
+            })
+          : []),
+      ]),
     ],
   });
 
@@ -506,13 +706,13 @@ function handleStatsByColumnLeafOperation(
 /**
  * Handles the stats command for a leaf operation that contains a categorize function by modifying the query and adding necessary commands.
  */
-function handleStatsByCategorizeLeafOperation(
-  editorQuery: EsqlQuery,
-  operatingStatsCommandIndex: number,
-  categorizeCommandNode: FieldSummary,
-  esqlVariables: ESQLControlVariable[] | undefined,
-  nodePathMap: Record<string, string>
-): AggregateQuery {
+function handleStatsByCategorizeLeafOperation({
+  editorQuery,
+  operatingStatsCommandIndex,
+  categorizeCommandNode,
+  esqlVariables,
+  nodePathMap,
+}: StatsByCategorizeLeafOperationArgs): AggregateQuery {
   // create a new query to populate with the cascade operation query
   const cascadeOperationQuery = EsqlQuery.fromSrc('');
 
@@ -534,8 +734,9 @@ function handleStatsByCategorizeLeafOperation(
   });
 
   // we select the first argument because that's the field being categorized
-  // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize | here}
+  // {@link https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/grouping-functions#esql-categorize here}
   const categorizedFieldDefinition = getFieldDefinitionFromArg(categorizeCommandNode.arg);
+
   const categorizedField = (
     categorizedFieldDefinition as ESQLFunction<'variadic-call', 'categorize'>
   ).args[0];
@@ -569,28 +770,28 @@ function handleStatsByCategorizeLeafOperation(
 
   const matchValue = nodePathMap[removeBackticks(categorizeCommandNode.field)];
 
+  const categorizeMatchExpression = Builder.expression.func.call('match', [
+    // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
+    Builder.identifier({
+      name: categorizedFieldName.replace(/\.keyword\b/i, ''),
+    }),
+    Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
+    Builder.expression.map({
+      entries: [
+        Builder.expression.entry(
+          'auto_generate_synonyms_phrase_query',
+          Builder.expression.literal.boolean(false)
+        ),
+        Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
+        Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
+      ],
+    }),
+  ]);
+
   // build a where command with match expressions for the selected categorize function
   const categorizeWhereCommand = Builder.command({
     name: 'where',
-    args: [
-      Builder.expression.func.call('match', [
-        // this search doesn't work well on the keyword field when used with the match function, so we remove the keyword suffix to get the actual field name
-        Builder.identifier({
-          name: categorizedFieldName.replace(/\.keyword\b/i, ''),
-        }),
-        Builder.expression.literal.string(extractCategorizeTokens(matchValue).join(' ')),
-        Builder.expression.map({
-          entries: [
-            Builder.expression.entry(
-              'auto_generate_synonyms_phrase_query',
-              Builder.expression.literal.boolean(false)
-            ),
-            Builder.expression.entry('fuzziness', Builder.expression.literal.integer(0)),
-            Builder.expression.entry('operator', Builder.expression.literal.string('AND')),
-          ],
-        }),
-      ]),
-    ],
+    args: [categorizeMatchExpression],
   });
 
   mutate.generic.commands.append(cascadeOperationQuery.ast, categorizeWhereCommand);

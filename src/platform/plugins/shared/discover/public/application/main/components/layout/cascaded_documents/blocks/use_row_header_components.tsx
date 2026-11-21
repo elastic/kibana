@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isNil } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
@@ -54,6 +55,7 @@ import { useDiscoverServices } from '../../../../../../hooks/use_discover_servic
 interface RowContext {
   groupId: string;
   groupValue: string;
+  aggregatedValues: ESQLDataGroupNode['aggregatedValues'];
 }
 
 interface RowClickActionContext {
@@ -162,6 +164,7 @@ const contextRowActions: Array<
             nodeType: 'leaf',
             nodePath: [this.rowContext.groupId],
             nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
+            nodeAggregatedValues: this.rowContext.aggregatedValues,
           }),
         },
       });
@@ -451,7 +454,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
           const aggregatedValue = rowData.aggregatedValues[selectedColumn];
           const isArrayType =
             Array.isArray(aggregatedValue) ||
-            (aggregatedValue === undefined && columnTypes.get(selectedColumn) === 'array');
+            // a null is recorded for an aggregate every result row held null for, and displays
+            // exactly as an aggregate that never appeared does
+            (isNil(aggregatedValue) && columnTypes.get(selectedColumn) === 'array');
 
           const aggregation = editorQueryMeta.appliedFunctions.find(
             ({ identifier }) => identifier === selectedColumn
@@ -526,7 +531,11 @@ export function useEsqlDataCascadeRowHeaderComponents(
           iconType: 'boxesVertical',
           'aria-label': `${rowData.id}-cascade-row-actions`,
           'data-test-subj': `${rowData.id}-dscCascadeRowContextActionButton`,
-          onClick: togglePopover?.bind({ groupId, groupValue }),
+          onClick: togglePopover?.bind({
+            groupId,
+            groupValue,
+            aggregatedValues: rowData.aggregatedValues,
+          }),
         },
       ];
     },
