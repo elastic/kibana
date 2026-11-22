@@ -6,6 +6,10 @@
  */
 
 import { SESSION_ATTRIBUTE_FIELDS } from '../../../common/session_attribute_fields';
+import {
+  SESSIONS_FRUSTRATION_URL_CANDIDATES,
+  SESSIONS_FRUSTRATION_VALUES,
+} from '../../../common/sessions';
 import { FULL_HASH_RANGE, HASH_SPACE } from './hash_ranges';
 import {
   SESSION_ATTRIBUTE_GROUPS,
@@ -153,6 +157,45 @@ describe('sessionSummaryQuery', () => {
     expect(query).toContain('load_time_p75 = MAX(load_time_p75)');
     // A session without a timed page load has no row in that branch.
     expect(query).toContain('load_time_samples = COALESCE(load_time_samples, 0)');
+  });
+
+  it('counts the frustration signals per session', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'rage_click_count = COUNT(*) WHERE event == "browser.frustration.rage_click"'
+    );
+    expect(query).toContain(
+      'dead_click_count = COUNT(*) WHERE event == "browser.frustration.dead_click"'
+    );
+    expect(query).toContain(
+      'error_click_count = COUNT(*) WHERE event == "browser.frustration.error_click"'
+    );
+    expect(query).toContain('frustration_count = COUNT(*) WHERE is_frustration');
+    expect(query).toContain(
+      'is_frustration = event IN ("browser.frustration.rage_click", "browser.frustration.dead_click", "browser.frustration.error_click")'
+    );
+    expect(query).toContain('frustration_count = MAX(frustration_count)');
+  });
+
+  it('counts the signals of each frustrated selector and URL in their own branches, and keeps the most signaled', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+
+    expect(query).toContain(
+      'STATS target_signals = COUNT(*)\n            BY service = resource.attributes.service.name, session = attributes.session.id, target = attributes.browser.css_selector'
+    );
+    expect(query).toContain(
+      'STATS url_signals = COUNT(*)\n            BY service = resource.attributes.service.name, session = attributes.session.id, frustration_url = attributes.url.full'
+    );
+    expect(query).toContain(
+      `frustration_targets = TOP(target_signals, ${SESSIONS_FRUSTRATION_VALUES}, "desc", target) WHERE target IS NOT NULL`
+    );
+    expect(query).toContain(
+      `frustration_urls = TOP(url_signals, ${SESSIONS_FRUSTRATION_URL_CANDIDATES}, "desc", frustration_url) WHERE frustration_url IS NOT NULL`
+    );
+    // Unbounded per session, so not collected in the session branch.
+    expect(query).not.toContain('VALUES(attributes.browser.css_selector)');
+    expect(query).not.toContain('VALUES(attributes.url.full)');
   });
 
   it('reads every attribute field from its group’s latest event', () => {
