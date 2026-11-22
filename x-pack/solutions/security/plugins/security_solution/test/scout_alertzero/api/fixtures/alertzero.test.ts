@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { BASELINE_TIMEOUT_MS } from './constants';
 import { captureWorkerBaseline } from './alertzero';
 import * as kbn from './kbn';
 import type { AlertZeroApi, ApiResult, Method } from './kbn';
 
-jest.mock('./kbn', () => {
-  const actual = jest.requireActual('./kbn');
-  return { ...actual, pollUntil: jest.fn(actual.pollUntil) };
-});
+// The SWC transform does not hoist `jest.mock` calls made through the imported `jest`
+// (only the ambient-global form), so the module mock silently never applies. A spy on
+// the real module namespace captures the same options without depending on hoisting;
+// `alertzero.ts` resolves `pollUntil` through that namespace at call time.
+const pollUntilSpy = jest.spyOn(kbn, 'pollUntil');
 
 /** The options object the last `captureWorkerBaseline` call handed to `pollUntil`. */
-const pollOptions = () => jest.mocked(kbn.pollUntil).mock.calls[0][2];
+const pollOptions = () => pollUntilSpy.mock.calls[0][2];
 
 const WORKER_ID = 'system-security-floor-attack-discovery';
 
@@ -40,7 +42,7 @@ const neverRespondingApi = (signals: AbortSignal[]): AlertZeroApi => ({
 describe('captureWorkerBaseline', () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.mocked(kbn.pollUntil).mockClear();
+    pollUntilSpy.mockClear();
   });
 
   afterEach(() => {

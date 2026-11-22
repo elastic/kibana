@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import type { ApiClientFixture } from '@kbn/scout-security';
 import { POLL_INTERVAL_MS } from './constants';
 import { createApi, pollUntil } from './kbn';
