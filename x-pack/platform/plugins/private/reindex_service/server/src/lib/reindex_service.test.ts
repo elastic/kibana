@@ -10,6 +10,7 @@ jest.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => 
 }));
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -36,6 +37,34 @@ const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
   } as TransportResult<T>);
+
+const createMockIndicesStatsResponse = (
+  indexName: string,
+  {
+    docsCount,
+    storeSizeBytes,
+    failedShards = 0,
+  }: { docsCount: number; storeSizeBytes: number; failedShards?: number }
+): IndicesStatsResponse => {
+  const indexStats = {
+    primaries: {
+      docs: { count: docsCount, total_size_in_bytes: storeSizeBytes },
+      store: { size_in_bytes: storeSizeBytes, reserved_in_bytes: 0 },
+    },
+  };
+
+  return {
+    _shards: {
+      total: 1,
+      successful: failedShards === 0 ? 1 : 0,
+      failed: failedShards,
+    },
+    _all: indexStats,
+    indices: {
+      [indexName]: indexStats,
+    },
+  };
+};
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
@@ -633,6 +662,225 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.errorMessage).not.toBeNull();
         expect(log.error).toHaveBeenCalledWith(expect.any(String));
       });
+
+      it('omits source.size for indices with small average document size', async () => {
+        clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+          createMockIndicesStatsResponse('myIndex', {
+            docsCount: 10000,
+            storeSizeBytes: 10 * 1024 * 1024, // 1 KiB avg
+          })
+        );
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(reindexOp);
+
+        expect(clusterClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
+          index: 'myIndex',
+          metric: ['docs', 'store'],
+          level: 'indices',
+          expand_wildcards: 'all',
+        });
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: 'myIndex' },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
+        });
+      });
+
+      it('dynamically scales down source.size for medium-to-large documents', async () => {
+        clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+          createMockIndicesStatsResponse('myIndex', {
+            docsCount: 100,
+            storeSizeBytes: 200 * 1024 * 1024, // 2 MiB avg -> floor(10 / 2) = 5
+          })
+        );
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(reindexOp);
+
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: 'myIndex', size: 5 },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
+        });
+      });
+
+      it('sets source.size to 1 for large-document .ml-state-* indices', async () => {
+        const mlStateOp = {
+          ...reindexOp,
+          attributes: {
+            ...reindexOp.attributes,
+            indexName: '.ml-state-000001',
+            newIndexName: '.reindexed-v9-ml-state-000001',
+          },
+        } as ReindexSavedObject;
+        clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+          createMockIndicesStatsResponse('.ml-state-000001', {
+            docsCount: 485,
+            storeSizeBytes: Math.round(2562.4 * 1024 * 1024), // ~5.28 MiB avg -> 1
+          })
+        );
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(mlStateOp);
+
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: '.ml-state-000001', size: 1 },
+          dest: { index: '.reindexed-v9-ml-state-000001' },
+          slices: 'auto',
+        });
+      });
+
+      it('clamps source.size to a minimum of 1 when average document size exceeds target batch size', async () => {
+        clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+          createMockIndicesStatsResponse('myIndex', {
+            docsCount: 10,
+            storeSizeBytes: 300 * 1024 * 1024, // 30 MiB avg -> clamped to 1
+          })
+        );
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(reindexOp);
+
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: 'myIndex', size: 1 },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
+        });
+      });
+
+      describe.each(['.ml-state-000001', '.reindexed-v8-ml-state-000001'])(
+        'fallback batch size for %s when stats are unavailable or incomplete',
+        (mlIndexName) => {
+          const mlOp = {
+            ...reindexOp,
+            attributes: {
+              ...reindexOp.attributes,
+              indexName: mlIndexName,
+              newIndexName: `${mlIndexName}-reindexed`,
+            },
+          } as ReindexSavedObject;
+
+          it('falls back to size 2 and logs debug when indices.stats throws', async () => {
+            clusterClient.asCurrentUser.indices.stats.mockRejectedValueOnce(
+              new Error('stats failed')
+            );
+            clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+            await service.processNextStep(mlOp);
+
+            expect(log.debug).toHaveBeenCalledWith(
+              expect.stringContaining(`Failed to retrieve index stats for ${mlIndexName}`)
+            );
+            expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+              refresh: true,
+              wait_for_completion: false,
+              source: { index: mlIndexName, size: 2 },
+              dest: { index: `${mlIndexName}-reindexed` },
+              slices: 'auto',
+            });
+          });
+
+          it.each([
+            ['zero docs', { docsCount: 0, storeSizeBytes: 0 }],
+            ['non-finite docs', { docsCount: Number.NaN, storeSizeBytes: 1024 }],
+            ['non-finite store size', { docsCount: 10, storeSizeBytes: Number.POSITIVE_INFINITY }],
+            ['partial shard failure', { docsCount: 10000, storeSizeBytes: 1024, failedShards: 1 }],
+          ])('falls back to size 2 on %s', async (_label, statsOpts) => {
+            clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+              createMockIndicesStatsResponse(mlIndexName, statsOpts)
+            );
+            clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+            await service.processNextStep(mlOp);
+
+            expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+              refresh: true,
+              wait_for_completion: false,
+              source: { index: mlIndexName, size: 2 },
+              dest: { index: `${mlIndexName}-reindexed` },
+              slices: 'auto',
+            });
+          });
+        }
+      );
+
+      it('omits source.size and logs debug for normal indices when indices.stats throws', async () => {
+        clusterClient.asCurrentUser.indices.stats.mockRejectedValueOnce(new Error('stats failed'));
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(reindexOp);
+
+        expect(log.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to retrieve index stats for myIndex')
+        );
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: 'myIndex' },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
+        });
+      });
+
+      it.each([
+        ['zero docs', { docsCount: 0, storeSizeBytes: 0 }],
+        [
+          'partial shard failure',
+          { docsCount: 100, storeSizeBytes: 200 * 1024 * 1024, failedShards: 1 },
+        ],
+      ])('omits source.size for normal indices on %s', async (_label, statsOpts) => {
+        clusterClient.asCurrentUser.indices.stats.mockResponseOnce(
+          createMockIndicesStatsResponse('myIndex', statsOpts)
+        );
+        clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+        await service.processNextStep(reindexOp);
+
+        expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+          refresh: true,
+          wait_for_completion: false,
+          source: { index: 'myIndex' },
+          dest: { index: 'myIndex-reindex-0' },
+          slices: 'auto',
+        });
+      });
+
+      it.each(['.ml-stateful', 'reindexed-v8-ml-state-000001'])(
+        'does not apply .ml-state-* fallback to non-matching index name %s',
+        async (nonMatchingIndexName) => {
+          const nonMatchingOp = {
+            ...reindexOp,
+            attributes: {
+              ...reindexOp.attributes,
+              indexName: nonMatchingIndexName,
+              newIndexName: `${nonMatchingIndexName}-reindexed`,
+            },
+          } as ReindexSavedObject;
+          clusterClient.asCurrentUser.indices.stats.mockRejectedValueOnce(
+            new Error('stats failed')
+          );
+          clusterClient.asCurrentUser.reindex.mockResponseOnce({ task: 'xyz' });
+
+          await service.processNextStep(nonMatchingOp);
+
+          expect(clusterClient.asCurrentUser.reindex).toHaveBeenLastCalledWith({
+            refresh: true,
+            wait_for_completion: false,
+            source: { index: nonMatchingIndexName },
+            dest: { index: `${nonMatchingIndexName}-reindexed` },
+            slices: 'auto',
+          });
+        }
+      );
     });
 
     describe('reindexStarted', () => {
