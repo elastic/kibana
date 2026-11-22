@@ -70,7 +70,7 @@ describe('describeDataset', () => {
 
     const timeRange =
       '@timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
-    expect(query.mock.calls[0][0].query).toBe('FROM logs-* | LIMIT 0');
+    expect(query.mock.calls[0][0].query).toBe(`FROM logs-* | WHERE ${timeRange} | LIMIT 0`);
     expect(query.mock.calls[1][0].query).toBe(
       `FROM logs-* METADATA _id, _source | WHERE ${timeRange} | LIMIT 1000`
     );

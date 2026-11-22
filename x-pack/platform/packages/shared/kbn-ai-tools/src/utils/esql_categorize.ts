@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { esql } from '@elastic/esql';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { orderBy, uniqBy } from 'lodash';
+import { esqlTimeRange } from './esql_time_range';
 
 export interface CategorizeWithSampleRow {
   count: number;
@@ -48,9 +48,15 @@ export function buildCategorizeWithSampleQuery({
   excludeTokens,
   countThreshold,
   order = 'ASC',
+  start,
+  end,
+  kql,
 }: {
   indices: string | string[];
   field: string;
+  start?: number;
+  end?: number;
+  kql?: string;
   limit?: number;
   samplingProbability: number;
   outputFormat?: CategorizeOutputFormat;
@@ -62,17 +68,22 @@ export function buildCategorizeWithSampleQuery({
 
   let query = esql.from(Array.isArray(indices) ? indices : [indices]);
 
+  if (start !== undefined && end !== undefined) {
+    query = query.where`${esqlTimeRange(start, end)}`;
+  }
+  if (kql) {
+    query = query.where`KQL(${esql.str(kql)})`;
+  }
+
+  // Documents without the field would all land in one empty pattern.
   // Exclusion predicates must sit before SAMPLE and STATS, on the indexed field.
-  const whereClauses = [];
+  const whereClauses = [esql.exp`${fieldCol} IS NOT NULL`];
   for (const tokens of excludeTokens ?? []) {
     if (tokens.length > 0) {
       whereClauses.push(esql.exp`NOT MATCH(${fieldCol}, ${esql.str(tokens)}, {"operator": "AND"})`);
     }
   }
-  if (whereClauses.length > 0) {
-    const condition = whereClauses.reduce((acc, current) => esql.exp`${acc} AND ${current}`);
-    query = query.where`${condition}`;
-  }
+  query = query.where`${whereClauses.reduce((acc, current) => esql.exp`${acc} AND ${current}`)}`;
 
   if (samplingProbability < 1) {
     query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
@@ -131,29 +142,34 @@ export async function categorizeWithNoiseExclusion({
   field,
   total,
   samplingProbability,
-  filter,
+  start,
+  end,
+  kql,
   noiseFraction = NOISE_FRACTION_DEFAULT,
   maxDocsToSample = CATEGORIZE_MAX_DOCS_TO_SAMPLE,
 }: {
   esClient: TracedElasticsearchClient;
   indices: string | string[];
   field: string;
+  /** Documents holding a value for `field` within the range and KQL below. */
   total: number;
   samplingProbability: number;
-  filter?: QueryDslQueryContainer;
+  start?: number;
+  end?: number;
+  kql?: string;
   noiseFraction?: number;
   maxDocsToSample?: number;
 }): Promise<CategorizeWithSampleRow[]> {
   const p1 = samplingProbability;
   const run = (operationName: string, query: string) =>
-    runCategorizeEsql(esClient, operationName, query, filter);
+    esClient.esql(operationName, { query }) as unknown as Promise<ESQLSearchResponse>;
+  const scope = { indices, field, start, end, kql };
 
   // In sampled space a `noiseFraction` pattern appears at `noiseFraction*total*p1` docs.
   const sampledThreshold = noiseFraction * total * p1;
 
   const headQuery = buildCategorizeWithSampleQuery({
-    indices,
-    field,
+    ...scope,
     samplingProbability: p1,
     outputFormat: 'tokens',
     countThreshold: sampledThreshold,
@@ -167,8 +183,7 @@ export async function categorizeWithNoiseExclusion({
     // No head to strip; a plain sampled categorize is the cheapest safe option.
     // DESC: unthresholded, so ASC silently truncates to the rarest 1000 on wide streams.
     const plainQuery = buildCategorizeWithSampleQuery({
-      indices,
-      field,
+      ...scope,
       samplingProbability: p1,
       outputFormat: 'tokens',
       order: 'DESC',
@@ -193,8 +208,7 @@ export async function categorizeWithNoiseExclusion({
   const p2 = residual > maxDocsToSample ? maxDocsToSample / residual : 1;
 
   const rareQuery = buildCategorizeWithSampleQuery({
-    indices,
-    field,
+    ...scope,
     samplingProbability: p2,
     outputFormat: 'tokens',
     excludeTokens,
@@ -205,18 +219,6 @@ export async function categorizeWithNoiseExclusion({
   );
 
   return dedupeByPattern([...headRows, ...rareRows]);
-}
-
-async function runCategorizeEsql(
-  esClient: TracedElasticsearchClient,
-  operationName: string,
-  query: string,
-  filter?: QueryDslQueryContainer
-): Promise<ESQLSearchResponse> {
-  return esClient.esql(operationName, {
-    query,
-    ...(filter ? { filter } : {}),
-  }) as unknown as Promise<ESQLSearchResponse>;
 }
 
 function normalizeCounts(

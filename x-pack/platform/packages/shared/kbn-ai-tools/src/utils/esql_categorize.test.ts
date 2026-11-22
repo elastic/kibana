@@ -33,7 +33,22 @@ describe('buildCategorizeWithSampleQuery', () => {
     });
 
     expect(query).toBe(
-      'FROM logs-* | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message) | SORT count ASC | LIMIT 1000'
+      'FROM logs-* | WHERE message IS NOT NULL | STATS count = COUNT(*), `sample` = TOP(message::KEYWORD, 1, "desc") BY pattern = CATEGORIZE(message) | SORT count ASC | LIMIT 1000'
+    );
+  });
+
+  it('inlines the time range and KQL before SAMPLE', () => {
+    const query = buildCategorizeWithSampleQuery({
+      indices: 'logs-*',
+      field: 'message',
+      samplingProbability: 0.5,
+      start: 100,
+      end: 200,
+      kql: 'service.name:"checkout"',
+    });
+
+    expect(query).toContain(
+      'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name:\\"checkout\\"") | WHERE message IS NOT NULL | SAMPLE 0.5 | STATS'
     );
   });
 
@@ -79,7 +94,7 @@ describe('buildCategorizeWithSampleQuery', () => {
     });
 
     expect(query).toContain(
-      'WHERE NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
+      'WHERE body.text IS NOT NULL AND NOT MATCH(body.text, "request completed", {"operator": "AND"}) AND NOT MATCH(body.text, "metadata updated", {"operator": "AND"})'
     );
     expect(query.indexOf('NOT MATCH')).toBeLessThan(query.indexOf('STATS'));
   });

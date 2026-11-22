@@ -139,7 +139,7 @@ describe('getDiverseSampleDocuments', () => {
     ]);
   });
 
-  it('keeps the source-fetch filter param time-bounded only, with matching pushed inline', async () => {
+  it('sends every query with an inline time range and no request filter', async () => {
     const { esClient, esql } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(10))
@@ -156,10 +156,20 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(esql.mock.calls[2][1].query).toContain('MATCH_PHRASE(message,');
-    const fetchFilter = esql.mock.calls[2][1].filter;
-    expect(fetchFilter.bool.filter).toBeDefined();
-    expect(fetchFilter.bool.should).toBeUndefined();
+    const timeRange =
+      'WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z"';
+    expect(esql.mock.calls[0][1].query).toBe(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL | STATS total = COUNT(*)`
+    );
+    expect(esql.mock.calls[1][1].query).toContain(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL`
+    );
+    expect(esql.mock.calls[2][1].query).toContain(
+      `FROM logs-a METADATA _id, _source | ${timeRange} | WHERE (MATCH_PHRASE(message,`
+    );
+    for (const [, params] of esql.mock.calls) {
+      expect(params).not.toHaveProperty('filter');
+    }
   });
 
   it('probes only the message field candidates, under the caller signal', async () => {
@@ -184,7 +194,7 @@ describe('getDiverseSampleDocuments', () => {
 
     expect(schemaQuery).toHaveBeenCalledTimes(1);
     expect(schemaQuery.mock.calls[0][0].query).toBe(
-      'SET unmapped_fields = "NULLIFY"; FROM logs-* | KEEP message, body.text | LIMIT 0'
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | KEEP message, body.text | LIMIT 0'
     );
     expect(schemaQuery.mock.calls[0][1]).toEqual({ signal });
   });
@@ -264,7 +274,6 @@ describe('getDiverseSampleDocuments', () => {
   it("returns no hits when no message field exists (backfilled by the caller's random arm)", async () => {
     const { esClient, esql, schemaQuery } = createEsClient();
     schemaQuery.mockResolvedValueOnce(schemaResponse([{ name: 'host.name', type: 'keyword' }]));
-    esql.mockResolvedValueOnce(countResponse(10));
 
     const result = await getDiverseSampleDocuments({
       esClient,
@@ -277,7 +286,7 @@ describe('getDiverseSampleDocuments', () => {
     });
 
     expect(schemaQuery).toHaveBeenCalledTimes(1);
-    expect(esql).toHaveBeenCalledTimes(1);
+    expect(esql).not.toHaveBeenCalled();
     expect(result).toEqual({ hits: [] });
   });
 
