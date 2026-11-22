@@ -65,7 +65,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         state,
         parentApi,
         willHaveInitialFilter: state.value !== undefined,
-        getInitialFilter: (dataView) => buildFilter(dataView, uuid, state),
+        getInitialFilter: (dataSource) => buildFilter(dataSource, uuid, state),
         editorStateManager,
       });
 
@@ -115,8 +115,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         controlFetch$,
         dataSources$: dataControlManager.api.dataSources$,
         fieldName$: dataControlManager.api.fieldName$,
-        esqlQuery$: dataControlManager.api.esqlQuery$,
-        valuesSource$: dataControlManager.api.valuesSource$,
+        valuesSourceFetchPlan$: dataControlManager.api.valuesSourceFetchPlan$,
         useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           // clear previous loading error on next loading start
@@ -211,11 +210,11 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
         sectionId$,
       ])
         .pipe(debounceTime(0))
-        .subscribe(([dataViews, fieldName, value, sectionId]) => {
-          const dataView = dataViews?.[0];
-          if (!dataView) return;
+        .subscribe(([dataSources, fieldName, value, sectionId]) => {
+          const dataSource = dataSources?.[0];
+          if (!dataSource) return;
 
-          const newFilter = buildFilter(dataView, uuid, {
+          const newFilter = buildFilter(dataSource, uuid, {
             field_name: fieldName,
             value,
             sectionId,

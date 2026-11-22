@@ -43,6 +43,11 @@ interface AssignToUsersProps {
   onChange: (selected: UserProfileWithAvatar[]) => void;
   /** Size of the `+` button. */
   buttonIconSize?: 'xs' | 's';
+  /**
+   * Color of the `+` button. Defaults to EUI's primary (blue). Nightshift home cards
+   * pass `text` so the control matches the neighboring chat / overflow icons.
+   */
+  buttonIconColor?: 'primary' | 'text';
 }
 
 /**
@@ -69,6 +74,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
     onSearchChange,
     onChange,
     buttonIconSize = 'xs',
+    buttonIconColor,
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -95,6 +101,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
           isDisabled={isProfilesLoading}
           data-test-subj={`assignToUsersAdd-${conversationId}`}
           size={buttonIconSize}
+          color={buttonIconColor}
         />
       </EuiToolTip>
     );
