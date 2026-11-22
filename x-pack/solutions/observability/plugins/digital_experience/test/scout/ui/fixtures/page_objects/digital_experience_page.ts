@@ -16,6 +16,8 @@ import { TIME_RANGE } from '../../../common/fixtures/constants';
 
 const APP_PATH = '/app/digital_experience';
 
+const panelHeadingTestId = (title: string) => `embeddablePanelHeading-${title.replace(/\s/g, '')}`;
+
 type OverviewFilterName =
   | 'browser'
   | 'os'
@@ -57,6 +59,11 @@ export class DigitalExperiencePage {
   public readonly networkSlowestResources: Locator;
   public readonly otelOverviewTopClicks: Locator;
   public readonly otelOverviewFrustration: Locator;
+  public readonly frustrationDashboardLink: Locator;
+  public readonly frustrationPageTitle: Locator;
+  public readonly frustrationDashboardSlot: Locator;
+  public readonly frustrationDashboardErrors: Locator;
+  public readonly frustrationSaveAsDashboard: Locator;
   public readonly overviewClearFilters: Locator;
   public readonly overviewAllFilters: Locator;
   public readonly overviewFiltersFlyout: Locator;
@@ -131,6 +138,20 @@ export class DigitalExperiencePage {
     this.networkSlowestResources = page.getByTestId('digitalExperienceNetworkSlowestResources');
     this.otelOverviewTopClicks = page.getByTestId('digitalExperienceOverviewTopClicks');
     this.otelOverviewFrustration = page.getByTestId('digitalExperienceOverviewFrustration');
+    this.frustrationDashboardLink = page.getByTestId(
+      'digitalExperienceOverviewFrustrationDashboardLink'
+    );
+    this.frustrationPageTitle = page.getByRole('heading', {
+      level: 1,
+      name: 'Frustration signals',
+    });
+    this.frustrationDashboardSlot = page.getByTestId('digitalExperienceFrustrationDashboardSlot');
+    this.frustrationDashboardErrors = this.frustrationDashboardSlot.locator(
+      '[data-test-subj="embeddableError"], [data-test-subj="embeddable-lens-failure"]'
+    );
+    this.frustrationSaveAsDashboard = page.getByTestId(
+      'digitalExperienceFrustrationSaveAsDashboard'
+    );
     this.overviewClearFilters = page.getByTestId('digitalExperienceOverviewClearFilters');
     this.overviewAllFilters = page.getByTestId('digitalExperienceOverviewAllFilters');
     this.overviewFiltersFlyout = page.getByTestId('digitalExperienceOverviewFiltersFlyout');
@@ -385,6 +406,33 @@ export class DigitalExperiencePage {
   /** The row of an element in the Overview's Frustration panel, found by its CSS selector. */
   frustrationRow(selector: string): Locator {
     return this.page.getByTestId(`digitalExperienceOverviewFrustrationRow-${selector}`);
+  }
+
+  /** The heading of a panel of the frustration dashboard, found by its title. */
+  frustrationPanelHeading(title: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** The heading of a panel of a dashboard the frustration panels were saved as. */
+  savedDashboardPanelHeading(title: string): Locator {
+    return this.page.getByTestId(panelHeadingTestId(title));
+  }
+
+  /** A panel of the frustration dashboard, with its heading and content, found by its title. */
+  frustrationPanel(title: string): Locator {
+    return this.frustrationDashboardSlot
+      .getByTestId('embeddablePanel')
+      .filter({ has: this.page.getByTestId(panelHeadingTestId(title)) });
+  }
+
+  /** The button that collapses or expands a section of the frustration dashboard. */
+  frustrationSectionToggle(sectionId: string): Locator {
+    return this.frustrationDashboardSlot.getByTestId(`kbnGridSectionTitle-${sectionId}`);
+  }
+
+  /** The metric of a metric panel of the frustration dashboard, found by its title. */
+  frustrationMetric(title: string): Locator {
+    return this.frustrationPanel(title).getByTestId('mtrVis');
   }
 
   /** The "Open sessions" link of an element's row in the Frustration panel. */

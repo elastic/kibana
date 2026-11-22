@@ -45,6 +45,10 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   VIEW_SESSIONS: 'viewSessions',
   /** The user opens the full list behind a summary, e.g. every error from the Overview. */
   VIEW_ALL: 'viewAll',
+  /** The user opens a dashboard of an application from its Overview. */
+  VIEW_DASHBOARD: 'viewDashboard',
+  /** The user saves a page's panels as a Kibana dashboard. */
+  SAVE_AS_DASHBOARD: 'saveAsDashboard',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
   /** The user jumps from the session timeline to one of its page visits. */
@@ -106,6 +110,7 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
   OS_SESSIONS_LINK: 'overviewOsSessionsLink',
   FRUSTRATION_SESSIONS_LINK: 'overviewFrustrationSessionsLink',
+  FRUSTRATION_DASHBOARD_LINK: 'overviewFrustrationDashboardLink',
   BROWSER_FILTER: 'overviewBrowserFilter',
   OS_FILTER: 'overviewOsFilter',
   DEVICE_FILTER: 'overviewDeviceFilter',
@@ -124,6 +129,10 @@ export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   ALL_FILTERS_RESET: 'overviewAllFiltersReset',
   CLEAR_FILTERS: 'overviewClearFilters',
   PERCENTILE: 'overviewPercentile',
+} as const;
+
+export const FRUSTRATION_EBT_ELEMENTS = {
+  USAGE_RETRY: 'frustrationUsageRetry',
 } as const;
 
 export const ERRORS_EBT_ELEMENTS = {
