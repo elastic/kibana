@@ -8,12 +8,10 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { registerInternalGetMetadataRoute } from './get_metadata';
 
 const createClientMock = () => ({
   getRegistered: jest.fn().mockReturnValue({}),
-  getUserProvided: jest.fn().mockResolvedValue({}),
 });
 
 const setup = () => {
@@ -48,59 +46,29 @@ describe('registerInternalGetMetadataRoute', () => {
   it.each([
     ['/internal/kibana/settings/metadata', 'client'],
     ['/internal/kibana/global_settings/metadata', 'globalClient'],
-  ] as const)(
-    '%s returns the definitions merged with user values from the %s',
-    async (path, clientName) => {
-      const mocks = setup();
-      const scopeClient = mocks[clientName];
-      scopeClient.getRegistered.mockReturnValue({
-        title: { name: 'Title', value: 'Kibana', description: 'The title of the page' },
-        theme: { name: 'Theme', value: 'light', options: ['light', 'dark'] },
-      });
-      scopeClient.getUserProvided.mockResolvedValue({
-        title: { userValue: 'My Kibana' },
-        unregistered: { userValue: 'leftover', isOverridden: true },
-      });
+  ] as const)('%s returns the registered definitions from the %s', async (path, clientName) => {
+    const mocks = setup();
+    const scopeClient = mocks[clientName];
+    scopeClient.getRegistered.mockReturnValue({
+      title: { name: 'Title', value: 'Kibana', description: 'The title of the page' },
+      theme: { name: 'Theme', value: 'light', options: ['light', 'dark'] },
+    });
 
-      await mocks.callRoute(path);
+    await mocks.callRoute(path);
 
-      expect(mocks.response.ok).toHaveBeenCalledWith({
-        body: {
-          settings: {
-            title: {
-              name: 'Title',
-              value: 'Kibana',
-              description: 'The title of the page',
-              userValue: 'My Kibana',
-            },
-            theme: { name: 'Theme', value: 'light', options: ['light', 'dark'] },
-            unregistered: { userValue: 'leftover', isOverridden: true },
+    expect(mocks.response.ok).toHaveBeenCalledWith({
+      body: {
+        settings: {
+          title: {
+            name: 'Title',
+            value: 'Kibana',
+            description: 'The title of the page',
           },
+          theme: { name: 'Theme', value: 'light', options: ['light', 'dark'] },
         },
-      });
-      const otherClient = mocks[clientName === 'client' ? 'globalClient' : 'client'];
-      expect(otherClient.getRegistered).not.toHaveBeenCalled();
-      expect(otherClient.getUserProvided).not.toHaveBeenCalled();
-    }
-  );
-
-  it('returns the status code of a saved objects error', async () => {
-    const { client, response, callRoute } = setup();
-    const error = SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Forbidden'));
-    client.getUserProvided.mockRejectedValue(error);
-
-    await callRoute('/internal/kibana/settings/metadata');
-
-    expect(response.customError).toHaveBeenCalledWith({ body: error, statusCode: 403 });
-    expect(response.ok).not.toHaveBeenCalled();
-  });
-
-  it('rethrows other errors', async () => {
-    const { client, callRoute } = setup();
-    client.getUserProvided.mockRejectedValue(new Error('Unexpected failure'));
-
-    await expect(callRoute('/internal/kibana/settings/metadata')).rejects.toThrow(
-      'Unexpected failure'
-    );
+      },
+    });
+    const otherClient = mocks[clientName === 'client' ? 'globalClient' : 'client'];
+    expect(otherClient.getRegistered).not.toHaveBeenCalled();
   });
 });

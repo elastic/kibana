@@ -118,8 +118,9 @@ export interface IUiSettingsClient {
 }
 
 /**
- * Full settings metadata including display information (name, description, category, etc.)
- * merged with user-provided values. Used by the Advanced Settings management UI.
+ * Full settings metadata including display information (name, description, category, etc.).
+ * It holds the registered definitions only. Current values come from `IUiSettingsClient.getAll()`.
+ * Used by the Advanced Settings management UI.
  * @public
  */
 export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams & UserProvidedValues>;
