@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { Duration } from 'moment';
+import { PROFILING_DIR_MAX_LENGTH } from './event_loop_watchdog/sanitize';
 
 /** @internal */
 export const OPS_CONFIG_PATH = 'ops' as const;
@@ -17,12 +18,7 @@ export const OPS_CONFIG_PATH = 'ops' as const;
 /** @internal */
 const OPS_METRICS_INTERVAL = '5s';
 
-/**
- * Maximum length of `profiling.dir`, in characters. The stats line includes the directory while
- * profiling is on, so this keeps that line within the worker's log line limit.
- * @internal
- */
-export const PROFILING_DIR_MAX_LENGTH = 1024;
+export { PROFILING_DIR_MAX_LENGTH };
 
 /** @internal */
 interface OpsConfigCGroupOverridesOps {

@@ -1480,6 +1480,16 @@ describe('runWatchdogWorker', () => {
         expect(lastStats().profiling.diagnosticDir).toBeUndefined();
       });
 
+      it('leaves a directory longer than PROFILING_DIR_MAX_LENGTH off the stats', () => {
+        const tooLong = `/${'d'.repeat(PROFILING_DIR_MAX_LENGTH)}`;
+        start({ profiling: { ...profilingData, diagnosticDir: tooLong } });
+        setSlot(Slot.profiling, 1);
+        jest.advanceTimersByTime(STATS_INTERVAL_MS);
+        const { profiling } = lastStats();
+        expect(profiling.diagnosticDir).toBeUndefined();
+        expect(profiling.files).toEqual({ written: 0, sameFrame: 0, hourLimit: 0, writeFailed: 0 });
+      });
+
       it('writes a running-phase capture with the running phase in the file name', async () => {
         const writeFile = jest.spyOn(fsPromises, 'writeFile').mockResolvedValue();
         startWriting();

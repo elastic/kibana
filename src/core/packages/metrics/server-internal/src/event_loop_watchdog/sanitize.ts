@@ -12,6 +12,13 @@ import { fileURLToPath } from 'node:url';
 
 export const MAX_NAME_LENGTH = 48;
 export const MAX_LOCATION_LENGTH = 120;
+/**
+ * Maximum length of `profiling.dir`, in characters. The stats line includes the directory while
+ * profiling is on, so this keeps that line within the worker's log line limit. A longer
+ * `--diagnostic-dir` is left off the stats line.
+ * @internal
+ */
+export const PROFILING_DIR_MAX_LENGTH = 1024;
 const ELLIPSIS = '...';
 
 /** Keeps the start of a function name, capped at `MAX_NAME_LENGTH` characters. */

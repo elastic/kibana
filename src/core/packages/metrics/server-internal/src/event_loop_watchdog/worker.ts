@@ -30,6 +30,7 @@ import {
 } from './profile_capture';
 import { fileName, prepareProfile } from './profile_file';
 import { summarizeProfile, type CallerSummary, type ProfileSummary } from './profile_summary';
+import { PROFILING_DIR_MAX_LENGTH } from './sanitize';
 import type {
   BlockLogMeta,
   CaptureStopReason,
@@ -469,6 +470,11 @@ export const runWatchdogWorker = (
     const droppedBefore = logger.getDroppedLogLineCount();
     const snapshot = stats.snapshot(now);
     const profilingOn = Atomics.load(shared, Slot.profiling) === 1n;
+    const { diagnosticDir } = profiling;
+    const statsDir =
+      profilingOn && diagnosticDir && diagnosticDir.length <= PROFILING_DIR_MAX_LENGTH
+        ? diagnosticDir
+        : undefined;
     logger.info<StatsLogMeta>(
       `Event loop watchdog stats for the last ${Math.round(snapshot.periodMs / 1000)}s: ${blocks(
         snapshot.starting.blocks
@@ -483,7 +489,7 @@ export const runWatchdogWorker = (
               droppedLogLines: droppedBefore - reportedDroppedLogLines,
               profiling: {
                 ...counts,
-                diagnosticDir: profilingOn ? profiling.diagnosticDir : undefined,
+                diagnosticDir: statsDir,
               },
             },
           },
