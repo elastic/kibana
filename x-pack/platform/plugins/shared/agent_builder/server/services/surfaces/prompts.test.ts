@@ -13,6 +13,7 @@ import {
   decodePromptSelection,
   encodePromptSelection,
   promptsToNodes,
+  resolvedPromptsToNodes,
   PROMPT_RESPONSE_EVENT,
   PROMPT_SUBMIT_EVENT,
 } from './prompts';
@@ -206,6 +207,74 @@ describe('promptsToNodes', () => {
       type: 'markdown',
       text: 'Reply with the number of an option, or with your own answer.',
     });
+  });
+});
+
+describe('resolvedPromptsToNodes', () => {
+  let runtime: KibanaIsomerRuntime;
+
+  beforeAll(async () => {
+    runtime = await isomerPluginMock.createStartContract().getRuntime();
+  });
+
+  it('shows a confirmation with the answer it got, and no buttons', () => {
+    expect(resolvedPromptsToNodes([confirmation], { c1: { allow: false } })).toEqual([
+      { type: 'markdown', text: '**Delete index**\n\nThis deletes `logs-old`.' },
+      { type: 'context', items: [{ text: 'Answer: Keep' }] },
+    ]);
+  });
+
+  it('shows each question with the chosen options, a custom answer, or that it was skipped', () => {
+    const survey: PromptRequest = {
+      type: AgentPromptType.ask_user_question,
+      id: 'q2',
+      questions: [
+        {
+          question: 'Which services?',
+          options: [{ label: 'checkout' }, { label: 'payments' }],
+          multi_select: true,
+        },
+        { question: 'Which region?', options: [{ label: 'us' }], multi_select: false },
+        { question: 'Anything else?', options: [{ label: 'no' }], multi_select: false },
+      ],
+    };
+
+    expect(
+      resolvedPromptsToNodes([survey], {
+        q2: { answers: [{ choice: [0, 1] }, { custom: 'ap-south' }, { skipped: true }] },
+      })
+    ).toEqual([
+      { type: 'markdown', text: 'Which services?' },
+      { type: 'context', items: [{ text: 'Answer: checkout, payments' }] },
+      { type: 'markdown', text: 'Which region?' },
+      { type: 'context', items: [{ text: 'Answer: ap-south' }] },
+      { type: 'markdown', text: 'Anything else?' },
+      { type: 'context', items: [{ text: 'Answer: Skipped' }] },
+    ]);
+  });
+
+  it('shows an authorization as authorized or declined', () => {
+    expect(resolvedPromptsToNodes([authorization], { a1: { authorized: true } }).at(-1)).toEqual({
+      type: 'context',
+      items: [{ text: 'Answer: Authorized' }],
+    });
+  });
+
+  it('cuts an answer too long for the surface, so the prompts still render', () => {
+    const nodes = resolvedPromptsToNodes([question], {
+      q1: { answers: [{ custom: 'x'.repeat(5000) }] },
+    });
+
+    expect(runtime.validate({ type: 'view', body: nodes }).valid).toBe(true);
+    expect(nodes.at(-1)).toMatchObject({
+      items: [{ text: expect.stringMatching(/^Answer: x+…$/) }],
+    });
+  });
+
+  it('shows a prompt without a response as it was asked', () => {
+    expect(resolvedPromptsToNodes([confirmation], {})).toEqual([
+      { type: 'markdown', text: '**Delete index**\n\nThis deletes `logs-old`.' },
+    ]);
   });
 });
 

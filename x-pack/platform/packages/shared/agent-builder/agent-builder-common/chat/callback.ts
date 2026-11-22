@@ -6,6 +6,7 @@
  */
 
 import type { SerializedExecutionError } from '../agents/execution_status';
+import type { PromptResponse } from '../agents/prompts';
 import type { ChatEvent } from './events';
 import type { SurfacePayload } from './surface_payload';
 import type { ExecutionTerminatedEvent } from './timeline_events';
@@ -21,9 +22,25 @@ export type ChatCallbackExecutionTerminatedEvent = ExecutionTerminatedEvent & {
   tool_calls?: ChatCallbackToolCall[];
 };
 
+/**
+ * Tells the callback of an execution that paused on prompts that they were answered, from its
+ * surface or from Kibana, so the surface stops offering them. A callback-only event, sent with
+ * the paused execution's id once the run that resumes the conversation starts.
+ */
+export interface ChatCallbackPromptResolvedEvent {
+  type: 'prompt_resolved';
+  data: {
+    /** The response to each answered prompt, by prompt id. */
+    responses: Record<string, PromptResponse>;
+  };
+  /** The answered prompts rendered for the surface, without anything left to answer. */
+  surface_payload?: SurfacePayload;
+}
+
 export type ChatCallbackEvent =
   | Exclude<ChatEvent, ExecutionTerminatedEvent>
-  | ChatCallbackExecutionTerminatedEvent;
+  | ChatCallbackExecutionTerminatedEvent
+  | ChatCallbackPromptResolvedEvent;
 
 export interface ChatCallbackEventResponse {
   execution_id: string;

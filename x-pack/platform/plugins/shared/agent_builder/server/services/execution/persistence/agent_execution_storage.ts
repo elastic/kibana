@@ -45,6 +45,7 @@ const storageSettings = {
         },
       }),
       parent_execution_id: types.keyword({}),
+      conversation_id: types.keyword({}),
       space_id: types.keyword({}),
       owner: types.object({
         dynamic: false,
@@ -91,6 +92,8 @@ export interface AgentExecutionProperties {
   execution_mode?: string;
   interactivity?: InteractivityConfig;
   parent_execution_id?: string;
+  /** The conversation the execution runs in, which the executions of a conversation are found by. */
+  conversation_id?: string;
   space_id: string;
   owner?: UserIdAndName;
   run_as?: { type: 'service_account'; service_account_id: string };

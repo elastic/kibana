@@ -185,6 +185,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     }
 
     const now = new Date().toISOString();
+    const conversationId = 'conversationId' in agentParams ? agentParams.conversationId : undefined;
     const document: AgentExecutionProperties = {
       execution_id: executionId,
       '@timestamp': now,
@@ -194,6 +195,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       execution_mode: executionMode,
       ...(interactivity ? { interactivity } : {}),
       parent_execution_id: parentExecutionId,
+      ...(conversationId ? { conversation_id: conversationId } : {}),
       space_id: spaceId,
       ...(owner ? { owner } : {}),
       ...(runAs
@@ -381,6 +383,10 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       for (const [key, value] of Object.entries(filter.metadata)) {
         must.push({ term: { [`metadata.${key}`]: value } });
       }
+    }
+
+    if (filter.conversationId) {
+      must.push({ term: { conversation_id: filter.conversationId } });
     }
 
     if (filter.status?.length) {
