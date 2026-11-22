@@ -125,6 +125,15 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
         );
       });
 
+      it('accepts KEY BY and SCORE BY instead of METADATA in FUSE inside a LET read by FROM', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'LET a = (FROM index | EVAL k = keywordField, s = doubleField | FORK (LIMIT 10) (LIMIT 10) | FUSE KEY BY k SCORE BY s); FROM a',
+          []
+        );
+      });
+
       it('reports a missing FUSE key when the LET supplies the other key and a custom score', async () => {
         const { expectErrors } = await setup();
 

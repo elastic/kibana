@@ -6,13 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isSource, isSubQuery, walk } from '@elastic/esql';
-import type {
-  ESQLAst,
-  ESQLAstAllCommands,
-  ESQLAstFuseCommand,
-  ESQLSingleAstItem,
-} from '@elastic/esql/types';
+import { isColumn, isSource, isSubQuery, walk } from '@elastic/esql';
+import type { ESQLAst, ESQLAstAllCommands, ESQLAstFuseCommand } from '@elastic/esql/types';
 import type { ICommandContext } from '../types';
 import { buildMissingMetadataMessage, extractFuseArgs } from './utils';
 import { tagSemanticError } from '../../definitions/utils/errors';
@@ -42,7 +37,7 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const missingFields: string[] = [...REQUIRED_METADATA_FIELDS];
+  const metadataFields = new Set<string>();
   const sourceCommand = ast.find((_command) =>
     ['ts', 'from'].includes(_command.name.toLocaleLowerCase())
   );
@@ -51,18 +46,19 @@ export const validate = (
     walk(sourceCommand, {
       visitCommandOption: (node) => {
         if (node.name.toLocaleLowerCase() === 'metadata') {
-          const metadataFields = node.args.map((arg) =>
-            (arg as ESQLSingleAstItem)?.name?.toLocaleLowerCase()
-          );
-          for (const field of REQUIRED_METADATA_FIELDS) {
-            if (metadataFields.includes(field)) {
-              missingFields.splice(missingFields.indexOf(field), 1);
-            }
+          for (const { name } of node.args.filter(isColumn)) {
+            metadataFields.add(name.toLocaleLowerCase());
           }
         }
       },
     });
   }
+
+  // KEY BY replaces the default _id and _index keys, and SCORE BY the default _score.
+  const { keyBy, scoreBy } = extractFuseArgs(command as ESQLAstFuseCommand);
+  const missingFields = REQUIRED_METADATA_FIELDS.filter(
+    (field) => !(field === '_score' ? scoreBy : keyBy) && !metadataFields.has(field)
+  );
 
   if (
     missingFields.length > 0 &&
@@ -70,10 +66,7 @@ export const validate = (
     readsNamedSubquery(sourceCommand, context.namedSubqueries)
   ) {
     // The default fields can reach FUSE through a LET without appearing in the outer FROM.
-    const { keyBy, scoreBy } = extractFuseArgs(command as ESQLAstFuseCommand);
-    const missing = missingFields.filter(
-      (field) => !(field === '_score' ? scoreBy : keyBy) && !context.columns.has(field)
-    );
+    const missing = missingFields.filter((field) => !context.columns.has(field));
     if (missing.length > 0) {
       messages.push(
         tagSemanticError(buildMissingMetadataMessage(command, missing.join(', ')), 'getColumnsFor')
