@@ -18,6 +18,8 @@ export interface ChatCallbackRequestBodyPayload extends ChatRequestBodyPayload {
     type: ConversationOriginType;
     author?: ConversationRoundAuthor;
   };
+  /** Values of the options a reader chose on the origin's surface to answer the pending prompts. */
+  prompt_selections?: string[];
   callback: {
     url: string;
   };

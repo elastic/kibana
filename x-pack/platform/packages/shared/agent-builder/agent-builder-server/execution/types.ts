@@ -116,6 +116,12 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
   /**
+   * Options a reader chose on the origin's surface to answer the prompts the conversation is
+   * paused on, as the surface carried them. Resolved into `nextInput.prompts` when the request is
+   * received, and not kept.
+   */
+  promptSelections?: string[];
+  /**
    * Display decoration for the user message this request writes. Honoured only when the request
    * principal is a service account, which has no display name on any backend; silently dropped
    * for interactive users. Never affects the actor's `id`, `username` or `type`.
