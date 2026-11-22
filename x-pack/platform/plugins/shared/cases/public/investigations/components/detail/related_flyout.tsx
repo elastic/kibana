@@ -38,6 +38,9 @@ export interface RelatedFlyoutProps {
   related: RelatedRecord;
   /** Display id of the investigation being viewed. */
   currentDisplayId: string;
+  /** The investigation is explicitly linked to the one being viewed. */
+  isLinked?: boolean;
+  onUnlink?: () => void;
   onClose: () => void;
   onOpenInvestigation: (recordId: string) => void;
 }
@@ -46,6 +49,8 @@ export interface RelatedFlyoutProps {
 export const RelatedFlyout: React.FC<RelatedFlyoutProps> = ({
   related,
   currentDisplayId,
+  isLinked = false,
+  onUnlink,
   onClose,
   onOpenInvestigation,
 }) => {
@@ -162,9 +167,25 @@ export const RelatedFlyout: React.FC<RelatedFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} data-test-subj="investigationRelatedFlyoutClose">
-              {i18n.FLYOUT_CLOSE}
-            </EuiButtonEmpty>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onClose} data-test-subj="investigationRelatedFlyoutClose">
+                  {i18n.FLYOUT_CLOSE}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              {isLinked && onUnlink ? (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="danger"
+                    iconType={ICONS.unlink}
+                    onClick={onUnlink}
+                    data-test-subj="investigationRelatedFlyoutUnlink"
+                  >
+                    {i18n.UNLINK}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

@@ -376,65 +376,80 @@ export const MERGE_SUCCESS = (merged: string, primary: string, moved: number) =>
     values: { merged, primary, moved },
   });
 
-/* Restrict access */
+/* Restrict access (the Cases restricted model: members are the assignees) */
 export const RESTRICT_TITLE = i18n.translate(`${PREFIX}.restrictTitle`, {
-  defaultMessage: 'Restrict access',
+  defaultMessage: 'Restrict this investigation to its assignees',
 });
 export const RESTRICT_INTRO = i18n.translate(`${PREFIX}.restrictIntro`, {
   defaultMessage:
-    'Limit this investigation to named people. Investigation pages, the queue, search and agents honour it.',
+    'Only assignees can see a restricted investigation. You will be added as an assignee so you keep access.',
 });
 export const RESTRICT_CASES_WARNING = i18n.translate(`${PREFIX}.restrictCasesWarning`, {
-  defaultMessage: 'The classic Cases pages do not.',
+  defaultMessage:
+    'The classic Cases page still shows a restricted investigation until Cases restricts it too.',
 });
 export const RESTRICT_PEOPLE_LABEL = i18n.translate(`${PREFIX}.restrictPeopleLabel`, {
-  defaultMessage: 'People who can open this investigation',
+  defaultMessage: 'Assignees',
 });
-export const RESTRICT_PEOPLE_PLACEHOLDER = i18n.translate(`${PREFIX}.restrictPeoplePlaceholder`, {
-  defaultMessage: 'Choose people or type a username and press Enter',
+export const RESTRICT_PEOPLE_EMPTY = i18n.translate(`${PREFIX}.restrictPeopleEmpty`, {
+  defaultMessage: 'No one is assigned yet.',
 });
-export const RESTRICT_PEOPLE_HELP = i18n.translate(`${PREFIX}.restrictPeopleHelp`, {
-  defaultMessage: 'Use usernames. Suggestions come from the people on this investigation.',
+export const RESTRICT_PEOPLE_LOADING = i18n.translate(`${PREFIX}.restrictPeopleLoading`, {
+  defaultMessage: 'Loading assignees',
+});
+export const RESTRICT_EDIT_ASSIGNEES = i18n.translate(`${PREFIX}.restrictEditAssignees`, {
+  defaultMessage: 'Edit assignees',
+});
+export const RESTRICT_UNKNOWN_USER = i18n.translate(`${PREFIX}.restrictUnknownUser`, {
+  defaultMessage: 'Unknown user',
 });
 export const RESTRICT_EFFECT = i18n.translate(`${PREFIX}.restrictEffect`, {
   defaultMessage:
-    'Everyone else sees "Investigation not found" when they open it, and it disappears from the queue and search.',
-});
-export const RESTRICT_STAY_ON_LIST = i18n.translate(`${PREFIX}.restrictStayOnList`, {
-  defaultMessage: 'You have to stay on the list. Without you the investigation would lock you out.',
-});
-export const RESTRICT_USERNAME_TOO_LONG = i18n.translate(`${PREFIX}.restrictUsernameTooLong`, {
-  defaultMessage: 'A username can have at most 512 characters.',
+    'Everyone else sees "Investigation not found" when they open it, and it disappears from the queue and search. Its alerts stop listing this investigation.',
 });
 export const RESTRICT_SAVE = i18n.translate(`${PREFIX}.restrictSave`, {
-  defaultMessage: 'Save restriction',
+  defaultMessage: 'Restrict',
+});
+export const RESTRICT_SAVED = i18n.translate(`${PREFIX}.restrictSaved`, {
+  defaultMessage: 'Investigation restricted to its assignees.',
+});
+export const RESTRICT_ERROR = i18n.translate(`${PREFIX}.restrictError`, {
+  defaultMessage: 'Could not restrict the investigation',
+});
+export const RESTRICTED_TITLE = i18n.translate(`${PREFIX}.restrictedTitle`, {
+  defaultMessage: 'This investigation is restricted',
+});
+export const RESTRICTED_INTRO = i18n.translate(`${PREFIX}.restrictedIntro`, {
+  defaultMessage:
+    'Only its assignees can see it. Change the assignees from the header. Making it visible to everyone lets everyone with access to Investigations open it again and lists it on its alerts.',
 });
 export const RESTRICT_REMOVE = i18n.translate(`${PREFIX}.restrictRemove`, {
-  defaultMessage: 'Remove restriction',
+  defaultMessage: 'Make visible to everyone',
 });
-export const RESTRICT_SAVED = (count: number) =>
-  i18n.translate(`${PREFIX}.restrictSaved`, {
-    defaultMessage: 'Access restricted to {count, plural, one {# person} other {# people}}.',
-    values: { count },
-  });
 export const RESTRICT_REMOVED = i18n.translate(`${PREFIX}.restrictRemoved`, {
-  defaultMessage: 'Restriction removed. Everyone with access to Investigations can open it.',
+  defaultMessage: 'Investigation visible to everyone with access to Investigations.',
+});
+export const RESTRICT_REMOVE_ERROR = i18n.translate(`${PREFIX}.restrictRemoveError`, {
+  defaultMessage: 'Could not make the investigation visible to everyone',
 });
 
 /* Header additions */
 export const HEADER_RESTRICT_ACCESS = i18n.translate(`${PREFIX}.headerRestrictAccess`, {
-  defaultMessage: 'Restrict access',
+  defaultMessage: 'Restrict to assigned people',
+});
+export const HEADER_MAKE_VISIBLE = i18n.translate(`${PREFIX}.headerMakeVisible`, {
+  defaultMessage: 'Make visible to everyone',
 });
 export const HEADER_RESTRICTED_BADGE = i18n.translate(`${PREFIX}.headerRestrictedBadge`, {
   defaultMessage: 'Restricted',
 });
 export const HEADER_RESTRICTED_TOOLTIP_TITLE = i18n.translate(
   `${PREFIX}.headerRestrictedTooltipTitle`,
-  { defaultMessage: 'Only these people can open this investigation' }
+  { defaultMessage: 'Only assignees can open this investigation' }
 );
 export const HEADER_RESTRICTED_BADGE_ARIA = (people: string) =>
   i18n.translate(`${PREFIX}.headerRestrictedBadgeAria`, {
-    defaultMessage: 'Restricted to {people}. Change access restriction.',
+    defaultMessage: 'Restricted to its assignees: {people}. Open access settings.',
     values: { people },
   });
 export const HEADER_MERGED_INTO = (displayId: string) =>
@@ -452,31 +467,31 @@ export const HEADER_MERGED_BODY = i18n.translate(`${PREFIX}.headerMergedBody`, {
 
 /* Change type */
 export const CHANGE_TYPE_TITLE = i18n.translate(`${PREFIX}.changeTypeTitle`, {
-  defaultMessage: 'Change type',
+  defaultMessage: 'Change template',
 });
 export const APPLY_TYPE_TITLE = i18n.translate(`${PREFIX}.applyTypeTitle`, {
-  defaultMessage: 'Apply a type',
+  defaultMessage: 'Apply a template',
 });
 export const CHANGE_TYPE_LABEL = i18n.translate(`${PREFIX}.changeTypeLabel`, {
-  defaultMessage: 'Type',
+  defaultMessage: 'Template',
 });
 export const CHANGE_TYPE_PLACEHOLDER = i18n.translate(`${PREFIX}.changeTypePlaceholder`, {
-  defaultMessage: 'Select a type',
+  defaultMessage: 'Select a template',
 });
 export const CHANGE_TYPE_HINT = i18n.translate(`${PREFIX}.changeTypeHint`, {
   defaultMessage:
-    "The current type's fields will be hidden, but their saved values stay on the investigation. Values with the same field name and kind are kept in the new type.",
+    "The current template's fields will be hidden, but their saved values stay on the investigation. Values with the same field name and kind are kept in the new template.",
 });
 export const CHANGE_TYPE_NO_TYPES = i18n.translate(`${PREFIX}.changeTypeNoTypes`, {
-  defaultMessage: 'There are no investigation types to choose from.',
+  defaultMessage: 'There are no investigation templates to choose from.',
 });
 export const CHANGE_TYPE_TYPES_ERROR = i18n.translate(`${PREFIX}.changeTypeTypesError`, {
-  defaultMessage: 'Could not load the investigation types.',
+  defaultMessage: 'Could not load the investigation templates.',
 });
 export const CHANGE_TYPE_SERVER_ERROR_TITLE = i18n.translate(
   `${PREFIX}.changeTypeServerErrorTitle`,
   {
-    defaultMessage: 'The type could not be changed',
+    defaultMessage: 'The template could not be changed',
   }
 );
 
@@ -485,7 +500,7 @@ export const CLOSE_FIELDS_TITLE = i18n.translate(`${PREFIX}.closeFieldsTitle`, {
   defaultMessage: 'Required before closing',
 });
 export const CLOSE_FIELDS_HELP = i18n.translate(`${PREFIX}.closeFieldsHelp`, {
-  defaultMessage: 'The type of this investigation needs these fields filled in to close it.',
+  defaultMessage: 'The template of this investigation needs these fields filled in to close it.',
 });
 
 /* Pause time tracking */

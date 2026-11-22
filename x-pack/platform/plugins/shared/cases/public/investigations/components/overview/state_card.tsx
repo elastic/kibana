@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiText,
   useEuiTheme,
@@ -23,9 +24,10 @@ import { MarkdownRenderer } from '../../../components/markdown_editor';
 import { VERDICT_LABELS } from '../../../../common/investigations/types';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
-import { useActivity, useItems } from '../../hooks';
+import { useActivity, useItems, useTimings } from '../../hooks';
 import { ICONS } from '../../icons';
 import type { ModalName } from '../modals/modal_props';
+import { formatDuration } from '../shared/formatters';
 import { RelativeTime } from '../shared/relative_time';
 import * as sharedI18n from '../shared/translations';
 import { useNow } from '../shared/use_now';
@@ -86,6 +88,7 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
     per_page: INVESTIGATION_LIMITS.maxPerPage,
   });
   const { data: activityData } = useActivity(record.id, ACTIVITY_REQUEST);
+  const { data: timings, isError: timingsFailed } = useTimings(record.id);
 
   const scope = useMemo(
     () => summarizeScope((entityData?.items ?? []).filter(isEntity)),
@@ -248,6 +251,53 @@ export const StateCard: React.FC<StateCardProps> = ({ record, onNavigateTab, onO
         </StateCell>
         <StateCell label={i18n.RUNNING_NOW} testSubj="investigationStateRunning">
           {describeRunningNow(record, entries, now)}
+        </StateCell>
+        <StateCell label={i18n.TIMINGS} wide testSubj="investigationStateTimings">
+          {timingsFailed ? (
+            <EuiText size="s" color="subdued">
+              {i18n.TIMINGS_UNAVAILABLE}
+            </EuiText>
+          ) : (
+            <EuiFlexGroup gutterSize="xl" responsive={false} wrap>
+              {[
+                {
+                  id: 'firstResponse',
+                  label: i18n.TIME_TO_FIRST_RESPONSE,
+                  seconds: timings?.time_to_first_response,
+                },
+                {
+                  id: 'inProgress',
+                  label: i18n.TIME_IN_PROGRESS,
+                  seconds: timings?.time_in_progress,
+                },
+                { id: 'toClose', label: i18n.TIME_TO_CLOSE, seconds: timings?.time_to_close },
+              ].map(({ id, label, seconds }) => (
+                <EuiFlexItem grow={false} key={id}>
+                  <EuiText size="xs" color="subdued">
+                    {label}
+                  </EuiText>
+                  <EuiText size="s" data-test-subj={`investigationTiming-${id}`}>
+                    {timings ? (
+                      <strong>
+                        {seconds === null || seconds === undefined
+                          ? i18n.TIMING_NOT_YET
+                          : formatDuration(seconds * 1000)}
+                      </strong>
+                    ) : (
+                      <EuiLoadingSpinner size="s" />
+                    )}
+                  </EuiText>
+                </EuiFlexItem>
+              ))}
+              {timings && timings.time_paused > 0 ? (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="investigationTimingsPaused">
+                    {i18n.TIMINGS_EXCLUDES_PAUSED(formatDuration(timings.time_paused * 1000))}
+                  </EuiText>
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          )}
         </StateCell>
         <StateCell label={i18n.NEXT} wide testSubj="investigationStateNext">
           <EuiFlexGroup gutterSize="m" responsive={false} wrap>

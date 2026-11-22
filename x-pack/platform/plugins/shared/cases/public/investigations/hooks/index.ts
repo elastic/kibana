@@ -16,6 +16,7 @@ export {
   useReopenRecord,
   useRelated,
   useSinceLastHandoff,
+  useTimings,
   useUpdateRecord,
 } from './use_records';
 export {
@@ -30,6 +31,7 @@ export {
   useUploadFile,
 } from './use_items';
 export type { UpdateItemVariables } from './use_items';
+export { useLinkRecord, useUnlinkRecord } from './use_links';
 export { useAddComment, useComments, useDeleteComment, useUpdateComment } from './use_comments';
 export { useActivity, useCreateActivity, useLivePolling } from './use_activity';
 export {
@@ -40,6 +42,12 @@ export {
   useSaveStatuses,
   useStatuses,
 } from './use_config';
+export {
+  useInvestigationTemplates,
+  useRefreshInvestigationTemplates,
+} from './use_investigation_templates';
+export { useBulkRecordRun } from './use_bulk_actions';
+export type { BulkRecordOutcome, BulkRecordResult, BulkRunState } from './use_bulk_actions';
 export { getHttpErrorMessage, getHttpErrorStatus } from './errors';
 export { useInvestigationToasts } from './use_investigation_toasts';
 export { useInvestigationBreadcrumbs, useInvestigationsNavigation } from './use_navigation';

@@ -420,14 +420,15 @@ const EVIDENCE_TYPE = {
   Check: 'finding',
   Conversation: 'conversation',
 };
+// Indicator types are Cases observable type keys (OBSERVABLE_TYPES_BUILTIN in common/constants/observables.ts).
 const INDICATOR_TYPE = {
-  'IP address': 'ip',
-  Domain: 'domain',
-  URL: 'url',
-  'File hash': 'file_hash',
-  'File path': 'file_path',
-  'Email address': 'email',
-  'Registry key': 'registry_key',
+  'IP address': 'observable-type-ipv4',
+  Domain: 'observable-type-domain',
+  URL: 'observable-type-url',
+  'File hash': 'observable-type-file-hash',
+  'File path': 'observable-type-file-path',
+  'Email address': 'observable-type-email',
+  'Registry key': 'observable-type-file-path',
 };
 const SOURCE_KIND = {
   alert: 'alert',
@@ -562,7 +563,7 @@ export const evidenceInput = (ctx, e, { createdAt, alert } = {}) => {
   };
   if (type === 'indicator') {
     const value = det?.value ?? e.title;
-    evidence.indicator = { type: INDICATOR_TYPE[det?.itype ?? e.itype] ?? 'other', value };
+    evidence.indicator = { type: INDICATOR_TYPE[det?.itype ?? e.itype] ?? 'observable-type-hostname', value };
   }
   if (type === 'alert' && alert) {
     evidence.source = { label: e.src, kind: 'alert', index: alert.index, id: alert.id };
@@ -688,6 +689,7 @@ export const createRecordStep = async (ctx, { createdProto, creator, description
     priority: sc.priority.l.toLowerCase(),
     tags: ['uipoc-seed', `uipoc-seed-${ctx.id}`, ...(sc.tag ? [sc.tag] : []), ...tagsExtra],
     origin: { type: sc.originAgent ? 'agent' : 'user', label: sc.origin, actor: creator },
+    access: { mode: 'default' },
     ai_enabled: sc.ai,
     create_conversation: sc.ai,
     apply_procedure: false,

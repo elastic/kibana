@@ -8,10 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
-import {
-  EVIDENCE_TYPE_LABELS,
-  INDICATOR_TYPE_LABELS,
-} from '../../../../common/investigations/types';
+import { EVIDENCE_TYPE_LABELS } from '../../../../common/investigations/types';
 import type {
   EvidenceType,
   FindItemsRequest,
@@ -86,8 +83,9 @@ const OWNED_PARAMS: readonly string[] = [
 const isEvidenceType = (value: string): value is EvidenceType =>
   Object.prototype.hasOwnProperty.call(EVIDENCE_TYPE_LABELS, value);
 
+// Cases observable type keys are at most 36 characters; custom ones are not known here.
 const isIndicatorType = (value: string): value is IndicatorType =>
-  Object.prototype.hasOwnProperty.call(INDICATOR_TYPE_LABELS, value);
+  value.length > 0 && value.length <= 64;
 
 const isSortKey = (value: string): value is EvidenceSortKey =>
   Object.prototype.hasOwnProperty.call(EVIDENCE_SORT_FIELDS, value);

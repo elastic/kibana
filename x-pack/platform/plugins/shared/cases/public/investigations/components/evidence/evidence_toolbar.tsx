@@ -17,10 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  EVIDENCE_TYPE_LABELS,
-  INDICATOR_TYPE_LABELS,
-} from '../../../../common/investigations/types';
+import { EVIDENCE_TYPE_LABELS } from '../../../../common/investigations/types';
 import type {
   EvidenceType,
   IndicatorType,
@@ -30,6 +27,7 @@ import { ICONS } from '../../icons';
 import { FacetPopover } from './facet_popover';
 import type { FacetOption } from './facet_popover';
 import { hasActiveEvidenceFilters } from './evidence_state';
+import { useIndicatorTypes } from './use_indicator_types';
 import type { EvidenceState } from './evidence_state';
 import * as i18n from './translations';
 
@@ -51,7 +49,7 @@ export interface EvidenceToolbarProps {
 const toOptions = <T extends string>(
   counts: Record<string, number> | undefined,
   selected: T[],
-  labels: Record<T, string>
+  getLabel: (value: string) => string
 ): FacetOption[] => {
   const known = Object.entries(counts ?? {}).map(([value, count]) => ({ value, count }));
   selected.forEach((value) => {
@@ -64,7 +62,7 @@ const toOptions = <T extends string>(
     .map(({ value, count }) => ({
       value,
       count,
-      label: value in labels ? labels[value as T] : value,
+      label: getLabel(value),
     }));
 };
 
@@ -79,6 +77,7 @@ export const EvidenceToolbar: React.FC<EvidenceToolbarProps> = ({
   onImport,
   onAdd,
 }) => {
+  const { getLabel: getIndicatorTypeLabel } = useIndicatorTypes();
   const [searchText, setSearchText] = useState(state.search);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -104,13 +103,18 @@ export const EvidenceToolbar: React.FC<EvidenceToolbarProps> = ({
   }, [searchText]);
 
   const typeOptions = useMemo(
-    () => toOptions<EvidenceType>(facets?.type, state.types, EVIDENCE_TYPE_LABELS),
+    () =>
+      toOptions<EvidenceType>(
+        facets?.type,
+        state.types,
+        (value) => EVIDENCE_TYPE_LABELS[value as EvidenceType] ?? value
+      ),
     [facets?.type, state.types]
   );
   const indicatorTypeOptions = useMemo(
     () =>
-      toOptions<IndicatorType>(facets?.indicator_type, state.indicatorTypes, INDICATOR_TYPE_LABELS),
-    [facets?.indicator_type, state.indicatorTypes]
+      toOptions<IndicatorType>(facets?.indicator_type, state.indicatorTypes, getIndicatorTypeLabel),
+    [facets?.indicator_type, state.indicatorTypes, getIndicatorTypeLabel]
   );
   const addedByOptions = useMemo<FacetOption[]>(() => {
     const options = (facets?.added_by ?? []).map(({ id, name, count }) => ({

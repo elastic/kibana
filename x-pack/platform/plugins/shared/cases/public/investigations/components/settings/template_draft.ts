@@ -20,7 +20,7 @@ import type {
   TaskOwnerType,
   TaskPriority,
 } from '../../../../common/investigations/types';
-import * as i18n from './translations';
+import * as i18n from '../procedure/translations';
 
 /** A task list holds at most this many tasks, sub-tasks included (the Cases task limit). */
 export const MAX_TEMPLATE_TASKS = MAX_TASKS_PER_CASE;

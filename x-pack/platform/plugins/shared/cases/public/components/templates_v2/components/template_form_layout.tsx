@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import type { UseFormReturn } from 'react-hook-form';
 import { FormProvider } from 'react-hook-form';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { AppHeaderTitle } from '@kbn/app-header';
+import type { AppHeaderProps, AppHeaderTitle } from '@kbn/app-header';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isMap, parseDocument } from 'yaml';
@@ -100,6 +100,11 @@ interface TemplateFormLayoutProps {
    * page apply solution-aware defaults (e.g. sync alerts on only for Security).
    */
   initialSettings?: TemplateSettings;
+  /**
+   * Replaces the header's back button, which goes to the Cases templates page by default. Lets an
+   * app that embeds the editor return to its own list.
+   */
+  back?: AppHeaderProps['back'];
 }
 
 // The template editor is always rendered `fullHeight` (see CasesPageLayout). On Security Solution a
@@ -189,6 +194,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   templateId,
   initialIsEnabled = true,
   initialSettings,
+  back,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { docLinks } = useKibana().services;
@@ -596,7 +602,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
 
   const templateFormBadges = useMemo(() => getTemplateFormBadges(hasChanges), [hasChanges]);
 
-  const templateFormBack = useMemo(
+  const casesTemplatesBack = useMemo(
     () => ({
       href: getCasesTemplatesUrl(),
       // `AppHeader` renders this as "Back to {label}", so pass just the destination name.
@@ -610,6 +616,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
     }),
     [getCasesTemplatesUrl, navigateToCasesTemplates]
   );
+  const templateFormBack = back ?? casesTemplatesBack;
 
   // Only Security Solution renders the fixed timeline bottom bar, so only it needs the reservation.
   const { owner } = useCasesContext();

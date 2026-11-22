@@ -27,6 +27,10 @@ import type {
   InvestigationRecord,
   RecordCounters,
 } from '../../../../common/investigations/types';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { getName } from '../../../components/user_profiles/display_name';
+import { RUN_WORKFLOW } from '../../../components/workflows/translations';
+import { useCanRunCaseWorkflow } from '../../../components/workflows/use_run_case_workflow';
 import { useInvestigationsNavigation, useRecord, useUpdateRecord } from '../../hooks';
 import { useInvestigationsServices } from '../../services';
 import { ICONS } from '../../icons';
@@ -36,6 +40,8 @@ import { VerdictBadge, getEffectiveVerdict } from '../shared/verdict_badge';
 import * as sharedI18n from '../shared/translations';
 import type { OpenModal } from '../modals/modal_props';
 import * as modalsI18n from '../modals/translations';
+import { useExternalTicketMenuItems } from '../external_ticket';
+import type { TicketMenuItem } from '../external_ticket';
 import { AssigneesControl } from './assignees_control';
 import { PriorityControl } from './priority_control';
 import { StatusControl } from './status_control';
@@ -172,32 +178,37 @@ const MergedIntoCallout: React.FC<{ primaryId: string }> = ({ primaryId }) => {
 };
 MergedIntoCallout.displayName = 'MergedIntoCallout';
 
-/** A lock badge with the people who may open the record. Click it to change the restriction. */
-const RestrictedBadge: React.FC<{ usernames: string[]; onClick: () => void }> = ({
-  usernames,
+/** A lock badge on a restricted record, with its assignees. Click it to open the access settings. */
+const RestrictedBadge: React.FC<{ assigneeUids: string[]; onClick: () => void }> = ({
+  assigneeUids,
   onClick,
-}) => (
-  <EuiToolTip
-    title={modalsI18n.HEADER_RESTRICTED_TOOLTIP_TITLE}
-    content={
-      <ul data-test-subj="investigationRestrictedPeople">
-        {usernames.map((username) => (
-          <li key={username}>{username}</li>
-        ))}
-      </ul>
-    }
-  >
-    <EuiBadge
-      color="hollow"
-      iconType={ICONS.restricted}
-      onClick={onClick}
-      onClickAriaLabel={modalsI18n.HEADER_RESTRICTED_BADGE_ARIA(usernames.join(', '))}
-      data-test-subj="investigationRestrictedBadge"
+}) => {
+  const { data: profiles } = useBulkGetUserProfiles({ uids: assigneeUids });
+  const names = assigneeUids.map((uid) => getName(profiles?.get(uid)?.user));
+
+  return (
+    <EuiToolTip
+      title={modalsI18n.HEADER_RESTRICTED_TOOLTIP_TITLE}
+      content={
+        <ul data-test-subj="investigationRestrictedPeople">
+          {names.map((name, index) => (
+            <li key={assigneeUids[index]}>{name}</li>
+          ))}
+        </ul>
+      }
     >
-      {modalsI18n.HEADER_RESTRICTED_BADGE}
-    </EuiBadge>
-  </EuiToolTip>
-);
+      <EuiBadge
+        color="hollow"
+        iconType={ICONS.restricted}
+        onClick={onClick}
+        onClickAriaLabel={modalsI18n.HEADER_RESTRICTED_BADGE_ARIA(names.join(', '))}
+        data-test-subj="investigationRestrictedBadge"
+      >
+        {modalsI18n.HEADER_RESTRICTED_BADGE}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+};
 RestrictedBadge.displayName = 'RestrictedBadge';
 
 interface ActionPanelsOptions {
@@ -205,6 +216,9 @@ interface ActionPanelsOptions {
   hasType: boolean;
   isClosed: boolean;
   isMerged: boolean;
+  isRestricted: boolean;
+  canRunWorkflow: boolean;
+  ticketItems: TicketMenuItem[];
   openModal: OpenModal;
   openAsCase: () => void;
   closeMenu: () => void;
@@ -219,6 +233,9 @@ const useActionPanels = ({
   hasType,
   isClosed,
   isMerged,
+  isRestricted,
+  canRunWorkflow,
+  ticketItems,
   openModal,
   openAsCase,
   closeMenu,
@@ -275,8 +292,19 @@ const useActionPanels = ({
             disabled: isMerged,
             'data-test-subj': 'investigationActionChangeType',
           },
+          ...(canRunWorkflow
+            ? [
+                {
+                  name: RUN_WORKFLOW,
+                  icon: ICONS.runWorkflow,
+                  onClick: choose('runWorkflow'),
+                  'data-test-subj': 'investigationActionRunWorkflow',
+                },
+              ]
+            : []),
+          ...ticketItems,
           {
-            name: modalsI18n.HEADER_RESTRICT_ACCESS,
+            name: isRestricted ? modalsI18n.HEADER_MAKE_VISIBLE : modalsI18n.HEADER_RESTRICT_ACCESS,
             icon: ICONS.restricted,
             onClick: choose('restrict'),
             'data-test-subj': 'investigationActionRestrict',
@@ -301,7 +329,18 @@ const useActionPanels = ({
         ],
       },
     ];
-  }, [hasDetermination, hasType, isClosed, isMerged, openModal, openAsCase, closeMenu]);
+  }, [
+    hasDetermination,
+    hasType,
+    isClosed,
+    isMerged,
+    isRestricted,
+    canRunWorkflow,
+    ticketItems,
+    openModal,
+    openAsCase,
+    closeMenu,
+  ]);
 
 export interface DetailHeaderProps {
   record: InvestigationRecord;
@@ -318,7 +357,8 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
 
   const isClosed = record.status === 'closed';
   const isMerged = Boolean(record.merged_into);
-  const isRestricted = record.restricted_to.length > 0;
+  const isRestricted = record.access.mode === 'restricted';
+  const canRunWorkflow = useCanRunCaseWorkflow();
   const verdict = getEffectiveVerdict(record);
   const scope = getScopeSummary(record.counters);
   const flag = record.fields.flag_keyword;
@@ -334,11 +374,15 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
   const openAsCase = useCallback(() => {
     void application.navigateToApp(SECURITY_APP_ID, { path: getCasePath(caseId) });
   }, [application, caseId]);
+  const ticketItems = useExternalTicketMenuItems(ICONS.upload, closeMenu);
   const panels = useActionPanels({
     hasDetermination: Boolean(record.analyst_verdict ?? record.human_verdict),
     hasType: Boolean(record.template_id),
     isClosed,
     isMerged,
+    isRestricted,
+    canRunWorkflow,
+    ticketItems,
     openModal,
     openAsCase,
     closeMenu,
@@ -433,7 +477,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ record, openModal })
         {isRestricted ? (
           <EuiFlexItem grow={false}>
             <RestrictedBadge
-              usernames={record.restricted_to}
+              assigneeUids={record.assignees}
               onClick={() => openModal('restrict')}
             />
           </EuiFlexItem>

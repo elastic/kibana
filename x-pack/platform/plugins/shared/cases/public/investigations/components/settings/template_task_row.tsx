@@ -28,7 +28,12 @@ import type { TaskOwnerType, TaskPriority } from '../../../../common/investigati
 import { CRITICAL, HIGH, LOW, MEDIUM } from '../../../components/severity/translations';
 import type { WorkflowListItem } from '../../api/client';
 import { ICONS } from '../../icons';
-import { OWNER_TYPES, OWNER_TYPE_LABELS, PHASES, TASK_PRIORITIES } from './procedure_helpers';
+import {
+  OWNER_TYPES,
+  OWNER_TYPE_LABELS,
+  PHASES,
+  TASK_PRIORITIES,
+} from '../procedure/procedure_helpers';
 import { DUE_UNITS } from './template_draft';
 import type {
   AutoKind,
@@ -38,7 +43,7 @@ import type {
   DraftTask,
   DueUnit,
 } from './template_draft';
-import * as i18n from './translations';
+import * as i18n from '../procedure/translations';
 
 const AUTO_KINDS: readonly AutoKind[] = ['manual', 'claim', 'action'];
 

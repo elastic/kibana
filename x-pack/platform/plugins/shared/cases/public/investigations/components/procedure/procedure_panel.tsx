@@ -43,6 +43,7 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import {
   useBulkDeleteItems,
   useInvestigationToasts,
+  useInvestigationsNavigation,
   useProcedureTemplates,
   useUpdateItem,
 } from '../../hooks';
@@ -51,6 +52,7 @@ import { investigationKeys } from '../../api/query_keys';
 import { ICONS } from '../../icons';
 import { useInvestigationsServices } from '../../services';
 import { converse } from '../conversation/conversation_api';
+import { TEMPLATES_PATH, getTaskListPath } from '../settings/paths';
 import { ConfirmModal, EmptyState, ErrorState, LoadingState, useNow } from '../shared';
 import { isTaskItem, useAllItems } from '../scope/use_all_items';
 import { useItemsByIds } from '../scope/use_items_by_ids';
@@ -72,7 +74,6 @@ import type { TaskFilter, TaskGroup } from './procedure_helpers';
 import { TaskFormModal } from './task_form_modal';
 import { TaskRow } from './task_row';
 import type { TaskRowHandlers } from './task_row';
-import { TemplateEditor } from './template_editor';
 import * as i18n from './translations';
 
 const HIGHLIGHT_MS = 3500;
@@ -94,6 +95,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const { euiTheme } = useEuiTheme();
   const { showSuccess, showError } = useInvestigationToasts();
   const { http } = useInvestigationsServices();
+  const { navigate, getHref } = useInvestigationsNavigation();
   const queryClient = useQueryClient();
   const { permissions } = useCasesContext();
   const now = useNow();
@@ -111,7 +113,6 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const [cancelTask, setCancelTask] = useState<TaskItem | null>(null);
   const [deleteTask, setDeleteTask] = useState<TaskItem | null>(null);
   const [formTarget, setFormTarget] = useState<FormTarget | null>(null);
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [isApplyOpen, setIsApplyOpen] = useState(false);
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
   const [agentRunTaskId, setAgentRunTaskId] = useState<string | null>(null);
@@ -425,9 +426,6 @@ export const ProcedurePanel: React.FC<TabProps> = ({
           onClose={() => setFormTarget(null)}
         />
       ) : null}
-      {isEditorOpen ? (
-        <TemplateEditor record={record} onClose={() => setIsEditorOpen(false)} />
-      ) : null}
       {isApplyOpen ? (
         <ApplyProcedureModal
           record={record}
@@ -463,11 +461,17 @@ export const ProcedurePanel: React.FC<TabProps> = ({
       {i18n.ADD_TASK}
     </EuiButton>
   ) : null;
+  // Task lists are edited in one place: the template's task list in Investigation settings.
+  const taskListPath = template ? getTaskListPath(template.template_id) : TEMPLATES_PATH;
   const configureButton = (
     <EuiButton
       size="s"
       iconType={ICONS.template}
-      onClick={() => setIsEditorOpen(true)}
+      href={getHref(taskListPath)}
+      onClick={(event: React.MouseEvent) => {
+        event.preventDefault();
+        navigate(taskListPath);
+      }}
       data-test-subj="investigationProcedureConfigure"
     >
       {i18n.CONFIGURE}

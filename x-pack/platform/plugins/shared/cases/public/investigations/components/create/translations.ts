@@ -56,25 +56,26 @@ export const DESCRIPTION_TOO_LONG = (max: number) =>
   });
 
 export const TYPE_LABEL = i18n.translate('xpack.cases.investigations.create.typeLabel', {
-  defaultMessage: 'Investigation type',
+  defaultMessage: 'Template',
 });
 export const TYPE_HELP = i18n.translate('xpack.cases.investigations.create.typeHelp', {
-  defaultMessage: 'The type sets the procedure and its required tasks.',
+  defaultMessage:
+    'The template sets the fields to fill in and the task list, with its required tasks.',
 });
 export const TYPE_REQUIRED = i18n.translate('xpack.cases.investigations.create.typeRequired', {
-  defaultMessage: 'Choose an investigation type.',
+  defaultMessage: 'Choose a template.',
 });
 export const TYPE_PLACEHOLDER = i18n.translate(
   'xpack.cases.investigations.create.typePlaceholder',
   {
-    defaultMessage: 'Select a type',
+    defaultMessage: 'Select a template',
   }
 );
 export const TYPES_NONE = i18n.translate('xpack.cases.investigations.create.typesNone', {
-  defaultMessage: 'There are no investigation types yet. Add one on the Cases templates page.',
+  defaultMessage: 'There are no investigation templates yet. Create one in Investigation settings.',
 });
 export const TYPES_ERROR = i18n.translate('xpack.cases.investigations.create.typesError', {
-  defaultMessage: 'Could not load the investigation types.',
+  defaultMessage: 'Could not load the investigation templates.',
 });
 
 export const PRIORITY_LABEL = i18n.translate('xpack.cases.investigations.create.priorityLabel', {
@@ -100,10 +101,10 @@ export const TOO_MANY_TAGS = (max: number) =>
     values: { max },
   });
 
-export const TYPE_FIELDS_SECTION = (type: string) =>
+export const TYPE_FIELDS_SECTION = (template: string) =>
   i18n.translate('xpack.cases.investigations.create.typeFieldsSection', {
-    defaultMessage: '{type} details',
-    values: { type },
+    defaultMessage: '{template} details',
+    values: { template },
   });
 export const ENTITIES_LABEL = i18n.translate('xpack.cases.investigations.create.entitiesLabel', {
   defaultMessage: 'Hosts and users involved',

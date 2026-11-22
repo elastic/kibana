@@ -2,12 +2,31 @@
 // template fields (rules filled), case comments from several people including a reply, two assignees, task
 // priorities, due dates and a subtask, and the custom paused status "Waiting on the employee".
 // The team chat and its thread are case comments, each posted as the person who wrote it.
+import { kbn, log } from '../client.mjs';
 import { newCtx, runStandard, actorOf, summarize, postCaseComment, patchRecord, HOUR, DAY, MIN } from './common.mjs';
 
 export const id = 'C';
 
 const WAITING_STATUS_KEY = 'waiting_on_the_employee';
 const WAITING_REASON = "Waiting on the employee's reply";
+
+const TICKET_CONNECTOR = { id: 'uipoc-tickets', name: 'UIPOC Ticketing', type: '.cases-webhook', fields: null };
+
+/**
+ * Sets the ticketing connector (created by setup.mjs) and pushes the record once, so INV-240 shows a
+ * pushed incident. Needs the fake ticket server (ticket_server.mjs); without it the seed goes on and
+ * says so.
+ */
+const pushToTicketing = async (recordId) => {
+  const base = `/internal/cases/investigations/${recordId}/external_ticket`;
+  try {
+    await kbn('PUT', base, { connector: TICKET_CONNECTOR });
+    const { json } = await kbn('POST', `${base}/_push`);
+    log(`INV-240 pushed to ${TICKET_CONNECTOR.name} as ${json.external_service?.external_id}`);
+  } catch (e) {
+    log(`WARNING: INV-240 was not pushed to ${TICKET_CONNECTOR.name} (is ticket_server.mjs running and setup.mjs done?): ${e.message}`);
+  }
+};
 
 /** Chat messages become case comments; thread replies quote their parent comment (`reply_to`). */
 const chatAsComments = async (ctx) => {
@@ -71,8 +90,7 @@ export const run = async () => {
         chat = await chatAsComments(c);
       },
       finalTouch: { actor: pk, tsMs: ctx.clock.ms(lastLogMs) },
-      // TODO(pushed ticket, later item): push this record to a connector (ServiceNow / Jira) once the push route is in
-      // the contract, so the "pushed ticket" state shows on INV-240. Not faked here: nothing writes a `record.pushed` entry.
+      // Pushed once at the very end, after the status change, so the incident is up to date.
       afterAll: async (c) => {
         // Last, backdated: the team asked the user for details and has been waiting since. The status pauses time
         // tracking, so the pause runs from this moment.
@@ -83,6 +101,7 @@ export const run = async () => {
           actor: pk,
           ts: new Date(pausedAt).toISOString(),
         });
+        await pushToTicketing(c.recordId);
       },
     },
     { ensureAlerts: async () => [] }

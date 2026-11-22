@@ -20,16 +20,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EVIDENCE_TYPE_LABELS,
-  INDICATOR_TYPE_LABELS,
-} from '../../../../common/investigations/types';
+import { EVIDENCE_TYPE_LABELS } from '../../../../common/investigations/types';
 import type { ClaimItem, EvidenceItem } from '../../../../common/investigations/types';
 import { EVIDENCE_TYPE_ICONS, ICONS } from '../../icons';
 import { ActorBadge } from '../shared/actor_badge';
 import { formatAbsoluteUtc, formatRelativeTime } from '../shared/formatters';
 import { useNow } from '../shared/use_now';
 import { SeenElsewhereCell } from './seen_elsewhere';
+import { useIndicatorTypes } from './use_indicator_types';
 import type { SeenElsewhereInfo } from './seen_elsewhere';
 import { EVIDENCE_PAGE_SIZE_OPTIONS } from './evidence_state';
 import type { EvidenceSortKey, EvidenceState } from './evidence_state';
@@ -85,6 +83,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
   onOpenClaim,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { getLabel: getIndicatorTypeLabel } = useIndicatorTypes();
 
   const now = useNow();
 
@@ -138,7 +137,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
                   margin-block-start: ${euiTheme.size.xxs};
                 `}
               >
-                {INDICATOR_TYPE_LABELS[item.evidence.indicator.type]}
+                {getIndicatorTypeLabel(item.evidence.indicator.type)}
               </EuiText>
             ) : null}
             {item.evidence.source_expired ? (
@@ -316,6 +315,7 @@ export const EvidenceTable: React.FC<EvidenceTableProps> = ({
       commentCounts,
       euiTheme.font.familyCode,
       euiTheme.size.xxs,
+      getIndicatorTypeLabel,
       now,
       onOpen,
       onOpenClaim,

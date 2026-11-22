@@ -13,35 +13,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
   EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelectable,
   EuiSpacer,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
-  getDefaultClosingReasonLabel,
-} from '@kbn/response-ops-detections-close-reason';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
 import { findStatusByKey, getEffectiveStatuses } from '../../../../common/investigations/statuses';
-import {
-  CLOSE_REASONS,
-  CLOSE_REASON_TO_VERDICT,
-  MAX_CLOSE_REASON_LENGTH,
-  VERDICT_LABELS,
-} from '../../../../common/investigations/types';
 import { parseCaseFieldErrors } from '../../../../common/investigations/template_fields';
-import type { RecordCounters, TaskItem, Verdict } from '../../../../common/investigations/types';
+import type { RecordCounters, TaskItem } from '../../../../common/investigations/types';
 import {
   getHttpErrorMessage,
   useCloseRecord,
@@ -49,22 +36,18 @@ import {
   useItems,
   useStatuses,
 } from '../../hooks';
-import { MarkdownEditor } from '../../../components/markdown_editor';
 import { ICONS } from '../../icons';
-import { useInvestigationsServices } from '../../services';
 import { collectExtendedFieldValues } from '../fields/field_utils';
 import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
 import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
 import { CloseRequiredFields } from './close_required_fields';
+import { CloseNotesField, CloseReasonSection } from './close_reason_fields';
 import type { InvestigationModalProps } from './modal_props';
 import * as i18n from './translations';
 
 const MAX_LISTED_TASKS = 8;
-const REASON_ROW_HEIGHT = 32;
-/** Lens visualisations are not offered in closing notes. */
-const DISABLED_UI_PLUGINS = ['lens'];
 const NO_LABELS: string[] = [];
 
 /** One plain sentence per list item, from the single message the server refuses with. */
@@ -74,23 +57,6 @@ const toMessageList = (message: string): string[] =>
     .map((part) => part.trim().replace(/\.$/, ''))
     .filter((part) => part.length > 0)
     .map((part) => `${part}.`);
-
-/** What closing with this reason does to the human verdict, in the words Cases uses. */
-export const getVerdictLine = (
-  closeReason: string,
-  aiVerdict: Verdict | null | undefined
-): string => {
-  const verdict = CLOSE_REASON_TO_VERDICT[closeReason];
-  if (!verdict) {
-    return i18n.CLOSE_VERDICT_LINE_NONE;
-  }
-  if (!aiVerdict) {
-    return i18n.CLOSE_VERDICT_LINE_SETS(VERDICT_LABELS[verdict]);
-  }
-  return aiVerdict === verdict
-    ? i18n.CLOSE_VERDICT_LINE_AGREES(VERDICT_LABELS[verdict])
-    : i18n.CLOSE_VERDICT_LINE_DIFFERS(VERDICT_LABELS[verdict], VERDICT_LABELS[aiVerdict]);
-};
 
 interface RequiredTasksSectionProps {
   recordId: string;
@@ -227,96 +193,6 @@ const getMissingItems = ({
   ...emptyFields.map((label) => i18n.CLOSE_MISSING_FIELD(label)),
 ];
 
-interface CloseReasonSectionProps {
-  selectedReason: string | null;
-  closeReason: string;
-  aiVerdict: Verdict | null | undefined;
-  onReasonChange: (reason: string | null) => void;
-}
-
-/**
- * Cases' close reasons plus the ones the space adds in the `securitySolution:detectionsCloseReasons`
- * setting (Cases rejects any other custom reason for this owner).
- */
-const useCloseReasons = (): string[] => {
-  const { uiSettings } = useInvestigationsServices();
-  return useMemo(() => {
-    const spaceReasons = (uiSettings.get<string[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY) ?? [])
-      .map((reason) => reason.trim())
-      .filter((reason) => reason && reason.length <= MAX_CLOSE_REASON_LENGTH);
-    return Array.from(new Set([...CLOSE_REASONS, ...spaceReasons]));
-  }, [uiSettings]);
-};
-
-/** The reason picker and the line saying what the reason does. */
-const CloseReasonSection: React.FC<CloseReasonSectionProps> = ({
-  selectedReason,
-  closeReason,
-  aiVerdict,
-  onReasonChange,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const listId = useGeneratedHtmlId({ prefix: 'investigationCloseReasons' });
-  const reasons = useCloseReasons();
-  const options = useMemo<EuiSelectableOption[]>(
-    () =>
-      reasons.map((reason) => ({
-        key: reason,
-        label: getDefaultClosingReasonLabel(reason),
-        checked: selectedReason === reason ? ('on' as const) : undefined,
-        'data-test-subj': `investigationCloseReason-${reason}`,
-      })),
-    [reasons, selectedReason]
-  );
-
-  return (
-    <>
-      <EuiFormRow label={i18n.CLOSE_REASON_LABEL} fullWidth>
-        <EuiSelectable
-          id={listId}
-          aria-label={i18n.CLOSE_REASON_LABEL}
-          singleSelection="always"
-          searchable
-          searchProps={{
-            placeholder: i18n.CLOSE_REASON_SEARCH_PLACEHOLDER,
-            compressed: true,
-            'data-test-subj': 'investigationCloseReasonSearch',
-          }}
-          options={options}
-          onChange={(next) => {
-            const selected = next.find((option) => option.checked === 'on');
-            onReasonChange(selected?.key ?? null);
-          }}
-          listProps={{ bordered: true, rowHeight: REASON_ROW_HEIGHT }}
-          height={REASON_ROW_HEIGHT * Math.min(options.length, 5)}
-          data-test-subj="investigationCloseReason"
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiFormRow>
-      {selectedReason !== null ? (
-        <div
-          aria-live="polite"
-          css={css`
-            margin-block-start: ${euiTheme.size.s};
-          `}
-          data-test-subj="investigationCloseVerdictLine"
-        >
-          <EuiText size="s" color="subdued">
-            {getVerdictLine(closeReason, aiVerdict)}
-          </EuiText>
-        </div>
-      ) : null}
-    </>
-  );
-};
-CloseReasonSection.displayName = 'CloseReasonSection';
-
 /** A plain list of what still has to be done before the confirm button works. */
 const MissingList: React.FC<{ items: string[]; isChecking: boolean }> = ({ items, isChecking }) => (
   <EuiText size="s" data-test-subj="investigationCloseMissing">
@@ -352,7 +228,6 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose,
 
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [notes, setNotes] = useState('');
-  const notesEditorId = useGeneratedHtmlId({ prefix: 'investigationCloseNotes' });
   const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const tasksQuery = useItems(record.id, {
@@ -472,26 +347,7 @@ export const CloseModal: React.FC<InvestigationModalProps> = ({ record, onClose,
             onReasonChange={setSelectedReason}
           />
           <EuiSpacer size="m" />
-          <EuiFormRow
-            label={i18n.CLOSE_NOTES_LABEL}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {i18n.OPTIONAL}
-              </EuiText>
-            }
-            helpText={i18n.CLOSE_NOTES_HELP}
-            fullWidth
-          >
-            <MarkdownEditor
-              ariaLabel={i18n.CLOSE_NOTES_LABEL}
-              editorId={notesEditorId}
-              value={notes}
-              onChange={(value) => setNotes(value.slice(0, INVESTIGATION_LIMITS.maxTextLength))}
-              height={120}
-              disabledUiPlugins={DISABLED_UI_PLUGINS}
-              data-test-subj="investigationCloseNotes"
-            />
-          </EuiFormRow>
+          <CloseNotesField value={notes} onChange={setNotes} />
         </EuiForm>
         <EuiSpacer size="m" />
         <CloseRequiredFields

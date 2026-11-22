@@ -77,22 +77,31 @@ const NOUNS = ['workstation', 'mail gateway', 'file server', 'VPN session', 'bui
 const VERBS = ['Suspicious activity on', 'Unusual sign-in to', 'Malicious attachment reaching', 'Beaconing from'];
 
 /** Shared pool of ~200 indicator values; records draw from it so values repeat across records. */
+// Indicator types are Cases observable type keys; the label is what Cases shows for the key.
+const OBSERVABLE = {
+  ipv4: { key: 'observable-type-ipv4', label: 'IPv4' },
+  domain: { key: 'observable-type-domain', label: 'Domain' },
+  hash: { key: 'observable-type-file-hash', label: 'File hash' },
+  url: { key: 'observable-type-url', label: 'URL' },
+};
+const INDICATOR_LABELS = Object.fromEntries(Object.values(OBSERVABLE).map(({ key, label }) => [key, label]));
+
 const INDICATOR_POOL = (() => {
   const rand = mulberry32(424242);
   const pool = [];
   for (let i = 0; i < 80; i++) {
-    pool.push({ type: 'ip', value: `${int(rand, 11, 223)}.${int(rand, 0, 255)}.${int(rand, 0, 255)}.${int(rand, 1, 254)}` });
+    pool.push({ type: OBSERVABLE.ipv4.key, value: `${int(rand, 11, 223)}.${int(rand, 0, 255)}.${int(rand, 0, 255)}.${int(rand, 1, 254)}` });
   }
   for (let i = 0; i < 50; i++) {
-    pool.push({ type: 'domain', value: `pool-${i}-${int(rand, 1000, 9999)}.${pick(rand, ['example', 'test', 'invalid'])}` });
+    pool.push({ type: OBSERVABLE.domain.key, value: `pool-${i}-${int(rand, 1000, 9999)}.${pick(rand, ['example', 'test', 'invalid'])}` });
   }
   for (let i = 0; i < 40; i++) {
     let hash = '';
     for (let j = 0; j < 64; j++) hash += '0123456789abcdef'[int(rand, 0, 15)];
-    pool.push({ type: 'file_hash', value: hash });
+    pool.push({ type: OBSERVABLE.hash.key, value: hash });
   }
   for (let i = 0; i < 30; i++) {
-    pool.push({ type: 'url', value: `https://pool-${i}.example/${int(rand, 1000, 9999)}/payload` });
+    pool.push({ type: OBSERVABLE.url.key, value: `https://pool-${i}.example/${int(rand, 1000, 9999)}/payload` });
   }
   return pool;
 })();
@@ -114,6 +123,7 @@ const buildRecordBody = (rand, index) => {
       impact_as_keyword: `${int(rand, 1, 500)} hosts, ${int(rand, 1, 500)} users`,
       ...(number && { [number.key]: String(int(rand, number.min, number.max)) }),
     },
+    access: { mode: 'default' },
     ai_enabled: false,
     apply_procedure: false,
     create_conversation: false,
@@ -136,7 +146,7 @@ const buildItem = (rand, recordIndex, j, usedValues) => {
         if (!usedValues.has(candidate.value)) indicator = candidate;
       }
     }
-    if (!indicator) indicator = { type: 'domain', value: `u${recordIndex}-${j}.example` };
+    if (!indicator) indicator = { type: OBSERVABLE.domain.key, value: `u${recordIndex}-${j}.example` };
     usedValues.add(indicator.value);
     return {
       kind: 'evidence',
@@ -148,7 +158,7 @@ const buildItem = (rand, recordIndex, j, usedValues) => {
         indicator,
         snapshot: {
           kind: 'indicator',
-          facts: [['Type', indicator.type]],
+          facts: [['Type', INDICATOR_LABELS[indicator.type]]],
           intel: [['Reputation', pick(rand, ['malicious', 'suspicious', 'unknown'])]],
           seen: [['Sightings', String(int(rand, 1, 40))]],
         },
@@ -503,12 +513,12 @@ const measureItems = async (recordId) => {
     results['items deep page via cursor (41st)'] = { runs: 0, error: error.message.slice(0, 300), note: 'ERROR' };
   }
 
-  // Prefer an `ip` indicator that exists on the record, so the filter and the search hit something.
+  // Prefer an IPv4 indicator that exists on the record, so the filter and the search hit something.
   const sample = (
     await kbn('GET', `${base}?${new URLSearchParams({ per_page: '100', type: 'indicator' })}`)
   ).json.items.map((item) => item.evidence?.indicator).filter(Boolean);
-  const target = sample.find((indicator) => indicator.type === 'ip') ?? sample[0];
-  const indicatorType = target?.type === 'ip' || !target ? 'ip' : target.type;
+  const target = sample.find((indicator) => indicator.type === OBSERVABLE.ipv4.key) ?? sample[0];
+  const indicatorType = target?.type ?? OBSERVABLE.ipv4.key;
   const searchValue = target?.value ?? INDICATOR_POOL[0].value;
 
   results[`items filtered (type=indicator&indicator_type=${indicatorType})`] = await timeCall(
@@ -529,7 +539,7 @@ const measureItems = async (recordId) => {
     evidence: {
       type: 'indicator',
       source: { label: 'Bulk add', kind: 'manual' },
-      indicator: { type: 'domain', value: `bulk-${stamp}-${k}.example` },
+      indicator: { type: OBSERVABLE.domain.key, value: `bulk-${stamp}-${k}.example` },
     },
   }));
   const bulkRes = await kbn('POST', `${base}/_bulk_create`, {

@@ -156,16 +156,9 @@ const evidenceTypeSchema = lits([
   'finding',
   'conversation',
 ] as const);
-const indicatorTypeSchema = lits([
-  'ip',
-  'domain',
-  'url',
-  'file_hash',
-  'file_path',
-  'email',
-  'registry_key',
-  'other',
-] as const);
+// A Cases observable type key (built in or custom); the service checks it against the Cases
+// configuration and accepts the old short names (ip, domain, file_hash, ...) as aliases.
+const indicatorTypeSchema = str(64, 1);
 
 const evidenceFields = {
   type: evidenceTypeSchema,
@@ -428,6 +421,7 @@ export const itemPatchSchema = schema.object({
 });
 
 export const recordIdParams = schema.object({ id: id() });
+const recordAccessSchema = schema.object({ mode: lits(['default', 'restricted'] as const) });
 export const recordItemParams = schema.object({ id: id(), item_id: id() });
 
 export const createRecordBody = schema.object({
@@ -446,7 +440,7 @@ export const createRecordBody = schema.object({
   apply_procedure: schema.maybe(schema.boolean()),
   alerts: schema.maybe(schema.arrayOf(alertRefSchema, { maxSize: L.maxBulkItems })),
   display_id: schema.maybe(str(64, 1)),
-  restricted_to: schema.maybe(schema.arrayOf(str(512, 1), { maxSize: L.maxRestrictedTo })),
+  access: schema.maybe(recordAccessSchema),
   created_at: schema.maybe(isoDate()),
   actor: schema.maybe(actorSchema),
 });
@@ -458,6 +452,7 @@ export const findRecordsQuery = schema.object({
   assignees: queryArray(str(512)),
   priority: queryArray(prioritySchema),
   investigation_type: queryArray(str(256)),
+  access: queryArray(lits(['default', 'restricted'] as const), 2),
   owner: schema.maybe(str(512)),
   verdict: queryArray(verdictSchema),
   tags: queryArray(str(L.maxTagLength)),
@@ -508,7 +503,7 @@ export const updateRecordBody = schema.object({
     )
   ),
   status: schema.maybe(lits(['open', 'in-progress'] as const)),
-  restricted_to: schema.maybe(schema.arrayOf(str(512, 1), { maxSize: L.maxRestrictedTo })),
+  access: schema.maybe(recordAccessSchema),
   ai_enabled: schema.maybe(schema.boolean()),
   version: schema.maybe(str(64)),
   actor: schema.maybe(actorSchema),
@@ -723,3 +718,26 @@ export const updateCommentBody = schema.object({
   content: schema.string({ minLength: 1, maxLength: 30000 }),
   version: schema.string({ minLength: 1, maxLength: 512 }),
 });
+
+/* Items 10 and 11: external ticket */
+export const updateExternalTicketBody = schema.object({
+  connector: schema.maybe(
+    schema.nullable(
+      schema.object({
+        id: str(512, 1),
+        name: str(512, 1),
+        type: str(128, 1),
+        fields: schema.nullable(
+          schema.recordOf(str(256, 1), boundedJson(64 * 1024), {
+            validate: (v) => (Object.keys(v).length > 100 ? 'At most 100 fields' : undefined),
+          })
+        ),
+      })
+    )
+  ),
+  auto_push: schema.maybe(schema.boolean()),
+});
+
+/* Item 17: explicit links */
+export const linkRecordBody = schema.object({ other_id: id() });
+export const recordLinkParams = schema.object({ id: id(), other_id: id() });

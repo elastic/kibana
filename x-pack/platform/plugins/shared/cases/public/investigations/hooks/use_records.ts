@@ -25,6 +25,7 @@ import {
   getRecord,
   getRelatedRecords,
   getSinceLastHandoff,
+  getTimings,
   reopenRecord,
   mergeRecord,
   updateRecord,
@@ -193,4 +194,15 @@ export const useCreateThread = (recordId: string) => {
     },
     onError: (error) => showError(error, i18n.CREATE_THREAD_ERROR),
   });
+};
+
+/** Time to first response, time in progress and time to close (Cases metrics, less paused time). */
+export const useTimings = (recordId: string) => {
+  const { http } = useInvestigationsServices();
+
+  return useQuery(
+    [...investigationKeys.recordScope(recordId), 'timings'],
+    () => getTimings(http, recordId),
+    { enabled: recordId.length > 0, retry: false }
+  );
 };

@@ -18,6 +18,7 @@ const REASON_FORMATTERS: Record<
   indicator: i18n.REASON_INDICATOR,
   alert: i18n.REASON_ALERT,
   merged: i18n.REASON_MERGED,
+  linked: () => i18n.LINKED_BADGE,
 };
 
 /** One readable sentence fragment per reason the server found. */

@@ -36,8 +36,8 @@ import type { OpenModal } from '../modals/modal_props';
 import { PausedBadge } from '../shared/paused_badge';
 import * as i18n from './translations';
 
-const LIST_WIDTH = '24rem';
-const ROW_HEIGHT = 32;
+export const STATUS_LIST_WIDTH = '24rem';
+export const STATUS_ROW_HEIGHT = 32;
 // Group headings are taller than the status rows.
 const GROUP_HEIGHT = 44;
 const MAX_LIST_HEIGHT = 420;
@@ -48,7 +48,18 @@ const CATEGORY_COLORS: Record<InvestigationStatus, 'primary' | 'success' | 'holl
   closed: 'hollow',
 };
 
-const toOptions = (
+/** The height of the status list for these options, grouped by category. */
+export const getStatusListHeight = (options: EuiSelectableOption[]): number =>
+  Math.min(
+    options.reduce(
+      (total, option) => total + (option.isGroupLabel ? GROUP_HEIGHT : STATUS_ROW_HEIGHT),
+      0
+    ),
+    MAX_LIST_HEIGHT
+  );
+
+/** The configured statuses as selectable options grouped by category, as the status picker lists them. */
+export const toStatusOptions = (
   statuses: CaseStatusConfiguration[],
   currentKey: string
 ): EuiSelectableOption[] =>
@@ -100,11 +111,8 @@ export const StatusControl: React.FC<StatusControlProps> = ({
   const statuses = useMemo(() => getEffectiveStatuses(configuration?.statuses), [configuration]);
   const current = getRecordStatus(statuses, record);
   const isClosed = record.status === 'closed';
-  const options = useMemo(() => toOptions(statuses, current.key), [statuses, current.key]);
-  const listHeight = Math.min(
-    options.reduce((total, option) => total + (option.isGroupLabel ? GROUP_HEIGHT : ROW_HEIGHT), 0),
-    MAX_LIST_HEIGHT
-  );
+  const options = useMemo(() => toStatusOptions(statuses, current.key), [statuses, current.key]);
+  const listHeight = getStatusListHeight(options);
 
   const resumeTarget = findStatusByKey(statuses, record.resume_to_status_key);
   const isPaused = Boolean(record.paused_at);
@@ -176,7 +184,7 @@ export const StatusControl: React.FC<StatusControlProps> = ({
           >
             <div
               css={css`
-                inline-size: ${LIST_WIDTH};
+                inline-size: ${STATUS_LIST_WIDTH};
               `}
             >
               <EuiSelectable
@@ -184,7 +192,7 @@ export const StatusControl: React.FC<StatusControlProps> = ({
                 singleSelection="always"
                 options={options}
                 onChange={onChange}
-                listProps={{ rowHeight: ROW_HEIGHT, showIcons: true }}
+                listProps={{ rowHeight: STATUS_ROW_HEIGHT, showIcons: true }}
                 height={listHeight}
                 data-test-subj="investigationStatusList"
               >

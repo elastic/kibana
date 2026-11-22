@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
@@ -21,7 +22,16 @@ import { CasesProvider } from '../components/cases_context';
 import type { CasesPublicStartDependencies } from '../types';
 import { DetailPage } from './components/detail/detail_page';
 import { QueuePage } from './components/queue/queue_page';
+import {
+  NEW_TEMPLATE_PATH,
+  SETTINGS_PATH,
+  TASK_LIST_PATH_PATTERN,
+  TEMPLATES_PATH,
+  TEMPLATE_PATH_PATTERN,
+} from './components/settings/paths';
 import { SettingsPage } from './components/settings/settings_page';
+import { TemplateCreatePage } from './components/settings/template_create_page';
+import { TemplateEditPage } from './components/settings/template_edit_page';
 
 export interface InvestigationsAppProps {
   coreStart: CoreStart;
@@ -58,11 +68,13 @@ export const InvestigationsApp: React.FC<InvestigationsAppProps> = ({
   getFilesClient,
 }) => {
   const queryClient = useMemo(createQueryClient, []);
+  // `storage` backs the "seen" flags of the Cases template editor.
+  const storage = useMemo(() => new Storage(localStorage), []);
   // The plugin `security` contract (with `userProfiles`, needed by the Cases user picker) replaces
   // the core `security` service, which only has `authc` and `serviceAccounts`.
   const services = useMemo(
-    () => ({ ...pluginsStart, ...coreStart, security: pluginsStart.security }),
-    [coreStart, pluginsStart]
+    () => ({ ...pluginsStart, ...coreStart, security: pluginsStart.security, storage }),
+    [coreStart, pluginsStart, storage]
   );
   const permissions = useMemo(
     () => canUseCases(coreStart.application.capabilities)(CASES_OWNERS),
@@ -87,7 +99,11 @@ export const InvestigationsApp: React.FC<InvestigationsAppProps> = ({
             <div css={rootStyles} data-test-subj="investigationsApp">
               <Routes>
                 <Route exact path="/" component={QueuePage} />
-                <Route exact path="/settings" component={SettingsPage} />
+                <Route exact path={SETTINGS_PATH} component={SettingsPage} />
+                <Route exact path={TEMPLATES_PATH} component={SettingsPage} />
+                <Route exact path={NEW_TEMPLATE_PATH} component={TemplateCreatePage} />
+                <Route exact path={TASK_LIST_PATH_PATTERN} component={SettingsPage} />
+                <Route exact path={TEMPLATE_PATH_PATTERN} component={TemplateEditPage} />
                 <Route exact path="/:id" component={DetailPage} />
                 <Route path="*">
                   <Redirect to="/" />

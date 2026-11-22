@@ -115,25 +115,8 @@ export const ADDABLE_EVIDENCE_TYPES: readonly EvidenceType[] = [
   'note',
 ] as const;
 
-export type IndicatorType =
-  | 'ip'
-  | 'domain'
-  | 'url'
-  | 'file_hash'
-  | 'file_path'
-  | 'email'
-  | 'registry_key'
-  | 'other';
-export const INDICATOR_TYPE_LABELS: Record<IndicatorType, string> = {
-  ip: 'IP address',
-  domain: 'Domain',
-  url: 'URL',
-  file_hash: 'File hash',
-  file_path: 'File path',
-  email: 'Email address',
-  registry_key: 'Registry key',
-  other: 'Other',
-};
+/** A Cases observable type key (built in, or custom from the Cases configuration). */
+export type IndicatorType = string;
 
 export type ClaimStatus = 'open' | 'supported' | 'blocked' | 'refuted';
 export type EntityType = 'host' | 'user' | 'nhi' | 'external';
@@ -398,12 +381,16 @@ export interface InvestigationRecord {
   ai_enabled: boolean;
   agent_id?: string | null;
   agent_name?: string | null;
-  /** When non-empty, only these usernames may read the record through investigation routes. */
-  restricted_to: string[];
+  /** Who may open the record: everyone with access to Investigations, or only its assignees. */
+  access: RecordAccess;
+  /** Ids of explicitly linked investigations (stored on both records). */
+  linked_records?: string[];
   counters: RecordCounters;
   last_handoff?: { at: string; by: Actor; to?: Actor | null; note?: string | null } | null;
   merged_into?: string | null;
   merged_from: string[];
+  /** Push changes to the external ticket automatically (Item 10/11). */
+  auto_push?: boolean;
   /** "seq_no:primary_term" of the record document; returned on read. */
   version?: string;
 }
@@ -919,7 +906,8 @@ export interface CreateRecordRequest {
   apply_procedure?: boolean;
   alerts?: AlertRefInput[];
   display_id?: string;
-  restricted_to?: string[];
+  /** `restricted` adds the caller to the assignees; only assignees can then open the record. */
+  access?: RecordAccess;
   /** Honoured only when `xpack.cases.investigations.allowBackdate` is true (seeding). */
   created_at?: string;
   actor?: Actor;
@@ -938,6 +926,8 @@ export interface FindRecordsRequest {
   assignees?: string[];
   priority?: InvestigationPriority[];
   investigation_type?: string[];
+  /** Access modes to include. Restricted records are only returned to their assignees. */
+  access?: RecordAccessMode[];
   owner?: string;
   /** 'unassigned' matches records with no owner. */
   verdict?: Verdict[];
@@ -1008,7 +998,8 @@ export interface UpdateRecordRequest {
   status_key?: string;
   /** Required when the target status pauses time tracking. */
   pause_reason?: string;
-  restricted_to?: string[];
+  /** Restrict to the assignees (adds the caller as an assignee) or make visible to everyone. */
+  access?: RecordAccess;
   ai_enabled?: boolean;
   /** Optimistic concurrency on the record document ("seq_no:primary_term"). */
   version?: string;
@@ -1205,7 +1196,7 @@ export interface RelatedRecord {
     | 'summary'
     | 'origin'
   >;
-  reasons: Array<{ type: 'indicator' | 'entity' | 'alert' | 'merged'; value: string }>;
+  reasons: Array<{ type: 'indicator' | 'entity' | 'alert' | 'merged' | 'linked'; value: string }>;
   shared_values: string[];
 }
 
@@ -1319,4 +1310,80 @@ export interface UpdateCommentRequest {
 /** Result of starting a task's workflow run. */
 export interface RunTaskWorkflowResponse {
   task: TaskItem;
+}
+
+/* Item 16 Timings */
+
+/** Seconds; `null` when the moment has not happened yet. Paused time is already taken out. */
+export interface InvestigationTimings {
+  time_to_first_response: number | null;
+  time_in_progress: number | null;
+  time_to_close: number | null;
+  time_paused: number;
+}
+
+/* Items 10 and 11 External ticket (push, auto push, sync) */
+
+/** The Cases connector set on the case (never `.none`). */
+export interface ExternalTicketConnector {
+  id: string;
+  name: string;
+  type: string;
+  fields: Record<string, unknown> | null;
+}
+
+/** The incident created by the last push (Cases `external_service`). */
+export interface ExternalTicketService {
+  connector_id: string;
+  connector_name: string;
+  external_id: string;
+  external_title: string;
+  external_url: string;
+  pushed_at: string;
+  pushed_by: { username?: string | null; full_name?: string | null; profile_uid?: string };
+}
+
+export interface ExternalTicketSync {
+  at: string;
+  by: Actor;
+  /** What the sync applied or left alone, in plain words. Empty when the ticket had nothing new. */
+  changes: string[];
+}
+
+export interface ExternalTicketResponse {
+  connector: ExternalTicketConnector | null;
+  external_service: ExternalTicketService | null;
+  needs_update: boolean;
+  has_been_pushed: boolean;
+  auto_push: boolean;
+  last_sync: ExternalTicketSync | null;
+  /** Connectors Cases supports for pushing. */
+  connectors: Array<{ id: string; name: string; type: string }>;
+}
+
+export interface UpdateExternalTicketRequest {
+  /** `null` removes the connector. */
+  connector?: ExternalTicketConnector | null;
+  auto_push?: boolean;
+}
+
+/* Item 12: restricted access (Cases model) */
+
+export type RecordAccessMode = 'default' | 'restricted';
+
+export interface RecordAccess {
+  mode: RecordAccessMode;
+}
+
+/* Item 17: explicit links */
+
+export interface LinkRecordRequest {
+  other_id: string;
+}
+
+export interface LinkRecordResponse {
+  /** This record, with `linked_records` updated. */
+  record: InvestigationRecord;
+  /** The record on the other side of the link. */
+  other: { id: string; display_id: string; title: string };
 }

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiComboBox,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -22,194 +23,284 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
-import { useInvestigationToasts, useUpdateRecord } from '../../hooks';
-import { useCurrentActor } from '../proposals/use_current_actor';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { SuggestUsersPopover } from '../../../components/case_view/components/suggest_users_popover';
+import { HoverableUserWithAvatar } from '../../../components/user_profiles/hoverable_user_with_avatar';
+import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { getHttpErrorMessage, useInvestigationToasts, useUpdateRecord } from '../../hooks';
+import { ICONS } from '../../icons';
 import type { InvestigationModalProps } from './modal_props';
 import * as i18n from './translations';
 
-/** Usernames of the POC environment, offered as suggestions next to the people on the record. */
-const POC_USERNAMES = [
-  'elastic',
-  'priya.k',
-  'braxton.w',
-  'dana.r',
-  'marcus.r',
-  'aisha.l',
-  'jun.t',
-  'viewer.v',
-] as const;
+const NO_PROFILES = new Map<string, UserProfileWithAvatar>();
 
-const MAX_USERNAME_LENGTH = 512;
-/** Leaves room for the suggestions list so it does not cover the footer buttons. */
-const MIN_BODY_HEIGHT = '23rem';
+/** The assignees as Cases shows them: an avatar and a name per person. */
+const AssigneeList: React.FC<{ profiles: UserProfileWithAvatar[]; isLoading: boolean }> = ({
+  profiles,
+  isLoading,
+}) => {
+  if (isLoading) {
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued">
+            {i18n.RESTRICT_PEOPLE_LOADING}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  if (profiles.length === 0) {
+    return (
+      <EuiText size="s" color="subdued" data-test-subj="investigationRestrictPeopleEmpty">
+        {i18n.RESTRICT_PEOPLE_EMPTY}
+      </EuiText>
+    );
+  }
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="investigationRestrictPeople">
+      {profiles.map((profile) => (
+        <EuiFlexItem key={profile.uid} data-test-subj="investigationRestrictPerson">
+          <HoverableUserWithAvatar userInfo={profile} />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+AssigneeList.displayName = 'AssigneeList';
 
-const toOption = (username: string): EuiComboBoxOptionOption => ({
-  label: username,
-  key: username,
-});
+/** The assignees that can still open a restricted investigation, resolved to profiles. */
+const useAssigneeProfiles = (uids: string[]) => {
+  const { data: profiles, isLoading } = useBulkGetUserProfiles({ uids });
+  const resolved = useMemo(
+    () =>
+      uids
+        .map((uid) => (profiles ?? NO_PROFILES).get(uid))
+        .filter((profile): profile is UserProfileWithAvatar => profile !== undefined),
+    [profiles, uids]
+  );
+  return { profiles: resolved, isLoading: isLoading && uids.length > 0 };
+};
 
-const sameMembers = (a: string[], b: string[]): boolean =>
-  a.length === b.length && a.every((username) => b.includes(username));
-
-/** Limits the investigation to named people. The person editing always stays on the list. */
-export const RestrictModal: React.FC<InvestigationModalProps> = ({ record, onClose }) => {
+/** Restricts the investigation: picks the assignees and makes them the only people who can see it. */
+const RestrictForm: React.FC<InvestigationModalProps> = ({ record, onClose }) => {
   const titleId = useGeneratedHtmlId();
-  const currentUser = useCurrentActor();
-  const currentUsername = currentUser?.id ?? null;
-  const isRestricted = record.restricted_to.length > 0;
+  const { showSuccess } = useInvestigationToasts();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { mutate: save, isLoading: isSaving } = useUpdateRecord(record.id, {
+    silentErrors: true,
+  });
+  const { profiles: assigned, isLoading: isLoadingProfiles } = useAssigneeProfiles(
+    record.assignees
+  );
 
-  const [edited, setEdited] = useState<string[] | null>(null);
+  const [edited, setEdited] = useState<UserProfileWithAvatar[] | null>(null);
+  const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selected =
-    edited ?? (isRestricted ? record.restricted_to : currentUsername ? [currentUsername] : []);
+  // You keep access, so you start on the list (Cases adds the person who restricts).
+  const initial = useMemo(
+    () =>
+      currentUserProfile && !assigned.some(({ uid }) => uid === currentUserProfile.uid)
+        ? [currentUserProfile, ...assigned]
+        : assigned,
+    [assigned, currentUserProfile]
+  );
+  const selected = edited ?? initial;
+  const isReady = !isLoadingProfiles;
 
-  const { showSuccess } = useInvestigationToasts();
-  const { mutate: save, isLoading: isSaving } = useUpdateRecord(record.id);
-  const { mutate: removeRestriction, isLoading: isRemoving } = useUpdateRecord(record.id, {
-    successMessage: i18n.RESTRICT_REMOVED,
-  });
-  const isBusy = isSaving || isRemoving;
+  const togglePicker = useCallback(() => setIsPickerOpen((open) => !open), []);
+  const closePicker = useCallback(() => setIsPickerOpen(false), []);
 
-  const suggestions = useMemo(() => {
-    const participants = record.participants
-      .filter((actor) => actor.type === 'user')
-      .map((actor) => actor.id);
-    const ordered = [
-      ...(currentUsername ? [currentUsername] : []),
-      ...participants,
-      ...POC_USERNAMES,
-    ];
-    return Array.from(new Set(ordered)).map(toOption);
-  }, [record.participants, currentUsername]);
-
-  const onChange = (options: EuiComboBoxOptionOption[]) => {
-    const next = options.map(({ label }) => label);
-    if (currentUsername && !next.includes(currentUsername)) {
-      setError(i18n.RESTRICT_STAY_ON_LIST);
-      return;
-    }
+  const restrict = () => {
     setError(null);
-    setEdited(next);
+    save(
+      { access: { mode: 'restricted' }, assignees: selected.map(({ uid }) => uid) },
+      {
+        onSuccess: () => {
+          showSuccess(i18n.RESTRICT_SAVED);
+          onClose();
+        },
+        onError: (saveError) => setError(getHttpErrorMessage(saveError)),
+      }
+    );
   };
-
-  const onCreateOption = (searchValue: string) => {
-    const username = searchValue.trim();
-    if (username.length === 0 || selected.includes(username)) {
-      return;
-    }
-    if (username.length > MAX_USERNAME_LENGTH) {
-      setError(i18n.RESTRICT_USERNAME_TOO_LONG);
-      return;
-    }
-    setError(null);
-    setEdited([...selected, username]);
-  };
-
-  const keepsCurrentUser = currentUsername !== null && selected.includes(currentUsername);
-  const isTooMany = selected.length > INVESTIGATION_LIMITS.maxRestrictedTo;
-  const isUnchanged = isRestricted && sameMembers(selected, record.restricted_to);
-  const canSave = keepsCurrentUser && !isTooMany && !isUnchanged && !isBusy;
 
   return (
     <EuiModal
       onClose={onClose}
       aria-labelledby={titleId}
-      css={css`
-        width: min(560px, 100%);
-      `}
       data-test-subj="investigationRestrictModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>{i18n.RESTRICT_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody
-        css={css`
-          min-height: ${MIN_BODY_HEIGHT};
-        `}
-      >
+      <EuiModalBody>
         <EuiText size="s" data-test-subj="investigationRestrictIntro">
-          <p>
-            {i18n.RESTRICT_INTRO} <strong>{i18n.RESTRICT_CASES_WARNING}</strong>
-          </p>
+          <p>{i18n.RESTRICT_INTRO}</p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFormRow
-          label={i18n.RESTRICT_PEOPLE_LABEL}
-          helpText={i18n.RESTRICT_PEOPLE_HELP}
-          isInvalid={error !== null || (currentUsername !== null && !keepsCurrentUser)}
-          error={error ?? i18n.RESTRICT_STAY_ON_LIST}
-          fullWidth
-        >
-          <EuiComboBox
-            fullWidth
-            aria-label={i18n.RESTRICT_PEOPLE_LABEL}
-            placeholder={i18n.RESTRICT_PEOPLE_PLACEHOLDER}
-            options={suggestions}
-            selectedOptions={selected.map(toOption)}
-            onChange={onChange}
-            onCreateOption={onCreateOption}
-            isClearable={false}
-            isInvalid={error !== null || (currentUsername !== null && !keepsCurrentUser)}
-            data-test-subj="investigationRestrictPeople"
-          />
+        <EuiFormRow label={i18n.RESTRICT_PEOPLE_LABEL} fullWidth>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+            <EuiFlexItem>
+              <AssigneeList profiles={selected} isLoading={!isReady} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="investigationRestrictPicker">
+              <SuggestUsersPopover
+                assignedUsersWithProfiles={selected.map((profile) => ({
+                  uid: profile.uid,
+                  profile,
+                }))}
+                currentUserProfile={currentUserProfile}
+                isLoading={isSaving}
+                isPopoverOpen={isPickerOpen}
+                onUsersChange={setEdited}
+                onClosePopover={closePicker}
+                togglePopover={togglePicker}
+                button={
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType={ICONS.edit}
+                    onClick={togglePicker}
+                    isDisabled={isSaving}
+                    data-test-subj="investigationRestrictEditAssignees"
+                  >
+                    {i18n.RESTRICT_EDIT_ASSIGNEES}
+                  </EuiButtonEmpty>
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiText size="s" color="subdued">
           <p>{i18n.RESTRICT_EFFECT}</p>
         </EuiText>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          size="s"
+          color="warning"
+          iconType={ICONS.warning}
+          title={i18n.RESTRICT_CASES_WARNING}
+          data-test-subj="investigationRestrictCasesWarning"
+        />
+        {error ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="danger"
+              iconType={ICONS.error}
+              title={i18n.RESTRICT_ERROR}
+              data-test-subj="investigationRestrictError"
+            >
+              {error}
+            </EuiCallOut>
+          </>
+        ) : null}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {isRestricted ? (
-              <EuiButtonEmpty
-                color="danger"
-                isLoading={isRemoving}
-                isDisabled={isBusy}
-                onClick={() => removeRestriction({ restricted_to: [] }, { onSuccess: onClose })}
-                data-test-subj="investigationRestrictRemove"
-              >
-                {i18n.RESTRICT_REMOVE}
-              </EuiButtonEmpty>
-            ) : null}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose} isDisabled={isBusy}>
-                  {i18n.CANCEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  isLoading={isSaving}
-                  isDisabled={!canSave}
-                  onClick={() =>
-                    save(
-                      { restricted_to: selected },
-                      {
-                        onSuccess: () => {
-                          showSuccess(i18n.RESTRICT_SAVED(selected.length));
-                          onClose();
-                        },
-                      }
-                    )
-                  }
-                  data-test-subj="investigationRestrictSave"
-                >
-                  {i18n.RESTRICT_SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonEmpty onClick={onClose} isDisabled={isSaving}>
+          {i18n.CANCEL}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          isLoading={isSaving}
+          isDisabled={!isReady || selected.length === 0}
+          onClick={restrict}
+          data-test-subj="investigationRestrictSave"
+        >
+          {i18n.RESTRICT_SAVE}
+        </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
 };
+RestrictForm.displayName = 'RestrictForm';
+
+/** A restricted investigation: who can see it, and the one control to make it visible again. */
+const RestrictedDetails: React.FC<InvestigationModalProps> = ({ record, onClose }) => {
+  const titleId = useGeneratedHtmlId();
+  const [error, setError] = useState<string | null>(null);
+  const { showSuccess } = useInvestigationToasts();
+  const { mutate: makeVisible, isLoading } = useUpdateRecord(record.id, { silentErrors: true });
+  const { profiles, isLoading: isLoadingProfiles } = useAssigneeProfiles(record.assignees);
+
+  const onMakeVisible = () => {
+    setError(null);
+    makeVisible(
+      { access: { mode: 'default' } },
+      {
+        onSuccess: () => {
+          showSuccess(i18n.RESTRICT_REMOVED);
+          onClose();
+        },
+        onError: (saveError) => setError(getHttpErrorMessage(saveError)),
+      }
+    );
+  };
+
+  return (
+    <EuiModal
+      onClose={onClose}
+      aria-labelledby={titleId}
+      data-test-subj="investigationRestrictModal"
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle id={titleId}>{i18n.RESTRICTED_TITLE}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText size="s" data-test-subj="investigationRestrictIntro">
+          <p>{i18n.RESTRICTED_INTRO}</p>
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFormRow label={i18n.RESTRICT_PEOPLE_LABEL} fullWidth>
+          <AssigneeList profiles={profiles} isLoading={isLoadingProfiles} />
+        </EuiFormRow>
+        {error ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              size="s"
+              color="danger"
+              iconType={ICONS.error}
+              title={i18n.RESTRICT_REMOVE_ERROR}
+              data-test-subj="investigationRestrictError"
+            >
+              {error}
+            </EuiCallOut>
+          </>
+        ) : null}
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose} isDisabled={isLoading}>
+          {i18n.CLOSE_BUTTON}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          isLoading={isLoading}
+          onClick={onMakeVisible}
+          data-test-subj="investigationRestrictRemove"
+        >
+          {i18n.RESTRICT_REMOVE}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};
+RestrictedDetails.displayName = 'RestrictedDetails';
+
+/** Take action > Restrict to assigned people, or Make visible to everyone for a restricted record. */
+export const RestrictModal: React.FC<InvestigationModalProps> = (props) =>
+  props.record.access.mode === 'restricted' ? (
+    <RestrictedDetails {...props} />
+  ) : (
+    <RestrictForm {...props} />
+  );
 RestrictModal.displayName = 'RestrictModal';

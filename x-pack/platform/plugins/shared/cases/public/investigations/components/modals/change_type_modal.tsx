@@ -35,7 +35,7 @@ import {
 } from '../../hooks';
 import { ICONS } from '../../icons';
 import { collectExtendedFieldValues, toCamelExtendedFields } from '../fields/field_utils';
-import { ManageTypesLink } from '../fields/manage_types_link';
+import { ManageTemplatesLink } from '../fields/manage_templates_link';
 import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { useTypeFields } from '../fields/use_type_fields';
 import * as fieldsI18n from '../fields/translations';
@@ -143,7 +143,7 @@ export const ChangeTypeModal: React.FC<InvestigationModalProps> = ({ record, onC
         <EuiFormRow
           fullWidth
           label={i18n.CHANGE_TYPE_LABEL}
-          labelAppend={<ManageTypesLink />}
+          labelAppend={<ManageTemplatesLink />}
           isInvalid={isTypesError}
           error={isTypesError ? i18n.CHANGE_TYPE_TYPES_ERROR : undefined}
         >

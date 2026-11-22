@@ -52,7 +52,7 @@ import { SeveritySelector } from '../../../components/severity/selector';
 import { useInvestigationsServices } from '../../services';
 import { collectExtendedFieldValues } from '../fields/field_utils';
 import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
-import { ManageTypesLink } from '../fields/manage_types_link';
+import { ManageTemplatesLink } from '../fields/manage_templates_link';
 import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ConfirmModal } from '../shared/confirm_modal';
 import { DuplicateStatus } from './duplicate_callout';
@@ -318,7 +318,7 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
             <EuiFormRow
               label={i18n.TYPE_LABEL}
               helpText={i18n.TYPE_HELP}
-              labelAppend={<ManageTypesLink />}
+              labelAppend={<ManageTemplatesLink />}
               fullWidth
               isInvalid={Boolean(showError(errors.templateId)) || isTypesError}
               error={isTypesError ? i18n.TYPES_ERROR : showError(errors.templateId)}

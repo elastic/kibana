@@ -33,22 +33,38 @@ import type { InvestigationModalProps } from './modal_props';
 import * as i18n from './translations';
 
 const NO_REASONS: string[] = [];
+const NO_ERRORS: string[] = [];
+
+export interface PauseReasonModalProps {
+  statusKey: string | undefined;
+  /** The reason selected when the modal opens. */
+  initialReason?: string | null;
+  isSaving: boolean;
+  /** Messages the caller got back from the server, shown above the buttons. */
+  serverErrors?: string[];
+  /** The sentence under the title; defaults to the single-investigation wording. */
+  getBody?: (statusLabel: string) => string;
+  onConfirm: (reason: string) => void;
+  onClose: () => void;
+}
 
 /**
- * Moves the investigation to a status that pauses time tracking. The reason comes from the
- * configured pause reasons, as in the Cases pause modal.
+ * The pause reason picker: the configured pause reasons, as in the Cases pause modal. The caller
+ * decides what confirming does, so it serves one investigation and a whole selection alike.
  */
-export const PauseModal: React.FC<InvestigationModalProps> = ({ record, onClose, statusKey }) => {
+export const PauseReasonModal: React.FC<PauseReasonModalProps> = ({
+  statusKey,
+  initialReason = null,
+  isSaving,
+  serverErrors = NO_ERRORS,
+  getBody = i18n.PAUSE_BODY,
+  onConfirm: confirmReason,
+  onClose,
+}) => {
   const titleId = useGeneratedHtmlId();
   const listId = useGeneratedHtmlId({ prefix: 'investigationPauseReasons' });
   const { data: configuration, isLoading, error, refetch } = useStatuses();
-  const { mutate: updateRecord, isLoading: isSaving } = useUpdateRecord(record.id, {
-    silentErrors: true,
-  });
-  const [reason, setReason] = useState<string | null>(
-    record.paused_at ? record.pause_reason ?? null : null
-  );
-  const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const [reason, setReason] = useState<string | null>(initialReason);
 
   const target = useMemo(
     () => findStatusByKey(getEffectiveStatuses(configuration?.statuses), statusKey),
@@ -71,14 +87,7 @@ export const PauseModal: React.FC<InvestigationModalProps> = ({ record, onClose,
     if (!statusKey || reason === null) {
       return;
     }
-    setServerErrors([]);
-    updateRecord(
-      { status_key: statusKey, pause_reason: reason },
-      {
-        onSuccess: onClose,
-        onError: (saveError) => setServerErrors([getHttpErrorMessage(saveError)]),
-      }
-    );
+    confirmReason(reason);
   };
 
   const renderBody = () => {
@@ -94,7 +103,7 @@ export const PauseModal: React.FC<InvestigationModalProps> = ({ record, onClose,
     return (
       <>
         <EuiText size="s">
-          <p data-test-subj="investigationPauseBody">{i18n.PAUSE_BODY(statusLabel)}</p>
+          <p data-test-subj="investigationPauseBody">{getBody(statusLabel)}</p>
         </EuiText>
         <EuiSpacer size="m" />
         <EuiFormRow
@@ -172,6 +181,40 @@ export const PauseModal: React.FC<InvestigationModalProps> = ({ record, onClose,
         </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
+  );
+};
+PauseReasonModal.displayName = 'PauseReasonModal';
+
+/** Moves the investigation to a status that pauses time tracking. */
+export const PauseModal: React.FC<InvestigationModalProps> = ({ record, onClose, statusKey }) => {
+  const { mutate: updateRecord, isLoading: isSaving } = useUpdateRecord(record.id, {
+    silentErrors: true,
+  });
+  const [serverErrors, setServerErrors] = useState<string[]>([]);
+
+  const onConfirm = (reason: string) => {
+    if (!statusKey) {
+      return;
+    }
+    setServerErrors([]);
+    updateRecord(
+      { status_key: statusKey, pause_reason: reason },
+      {
+        onSuccess: onClose,
+        onError: (saveError) => setServerErrors([getHttpErrorMessage(saveError)]),
+      }
+    );
+  };
+
+  return (
+    <PauseReasonModal
+      statusKey={statusKey}
+      initialReason={record.paused_at ? record.pause_reason ?? null : null}
+      isSaving={isSaving}
+      serverErrors={serverErrors}
+      onConfirm={onConfirm}
+      onClose={onClose}
+    />
   );
 };
 PauseModal.displayName = 'PauseModal';

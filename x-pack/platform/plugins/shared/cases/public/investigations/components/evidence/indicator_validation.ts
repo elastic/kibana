@@ -5,67 +5,64 @@
  * 2.0.
  */
 
+import {
+  OBSERVABLE_TYPE_DOMAIN,
+  OBSERVABLE_TYPE_EMAIL,
+  OBSERVABLE_TYPE_FILE_HASH,
+  OBSERVABLE_TYPE_FILE_PATH,
+  OBSERVABLE_TYPE_HOSTNAME,
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_IPV6,
+  OBSERVABLE_TYPE_URL,
+} from '../../../../common/constants/observables';
+import { getValidatorForObservableType } from '../../../../common/observables/validators';
+import * as observableI18n from '../../../components/observables/translations';
 import type { IndicatorType } from '../../../../common/investigations/types';
 import * as i18n from './translations';
 
 export const MAX_INDICATOR_LENGTH = 2048;
 
-const IPV4 = /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/;
-const IPV6 = /^(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}$/i;
-const DOMAIN = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z][a-z0-9-]{1,62}$/i;
-const HASH =
-  /^(?:[a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{56}|[a-f0-9]{64}|[a-f0-9]{96}|[a-f0-9]{128})$/i;
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const REGISTRY_KEY = /^(?:HK[A-Z_]+|HKEY_[A-Z_]+)\\.+/i;
-const URL_PROTOCOLS = ['http:', 'https:', 'ftp:', 'ftps:'];
-
-const isUrl = (value: string): boolean => {
-  try {
-    const parsed = new URL(value);
-    return URL_PROTOCOLS.includes(parsed.protocol) && parsed.hostname.length > 0;
-  } catch {
-    return false;
-  }
-};
-
-/** An error message when `value` is not a valid indicator of `type`, otherwise `undefined`. */
+/** An error message when `value` is not valid for the Cases observable type `type`, otherwise `undefined`. */
 export const validateIndicatorValue = (
   type: IndicatorType,
   rawValue: string
 ): string | undefined => {
   const value = rawValue.trim();
   if (value.length === 0) {
-    return i18n.INDICATOR_VALUE_REQUIRED;
+    return observableI18n.REQUIRED_VALUE;
   }
   if (value.length > MAX_INDICATOR_LENGTH) {
     return i18n.INDICATOR_VALUE_TOO_LONG(MAX_INDICATOR_LENGTH);
   }
-  switch (type) {
-    case 'ip':
-      return IPV4.test(value) || IPV6.test(value) ? undefined : i18n.INDICATOR_INVALID_IP;
-    case 'domain':
-      return DOMAIN.test(value) ? undefined : i18n.INDICATOR_INVALID_DOMAIN;
-    case 'url':
-      return isUrl(value) ? undefined : i18n.INDICATOR_INVALID_URL;
-    case 'file_hash':
-      return HASH.test(value) ? undefined : i18n.INDICATOR_INVALID_HASH;
-    case 'email':
-      return EMAIL.test(value) ? undefined : i18n.INDICATOR_INVALID_EMAIL;
-    case 'registry_key':
-      return REGISTRY_KEY.test(value) ? undefined : i18n.INDICATOR_INVALID_REGISTRY_KEY;
-    default:
-      return undefined;
+  const error = getValidatorForObservableType(type)(value);
+  if (!error) {
+    return undefined;
   }
+  return error.code === 'ERR_NOT_EMAIL'
+    ? observableI18n.INVALID_EMAIL
+    : observableI18n.INVALID_VALUE;
 };
 
-/** An example value to show as the placeholder for each type. */
-export const INDICATOR_PLACEHOLDERS: Record<IndicatorType, string> = {
-  ip: '198.51.100.7',
-  domain: 'update.example.com',
-  url: 'https://example.com/payload.bin',
-  file_hash: '9f2c4be71d0a6e83b5c2f19d7a40e6c8d35b1f72a9e04c6d8b7f3a21e5c0a1e4',
-  file_path: 'C:\\Users\\svc-build\\AppData\\Local\\Temp\\upd.dll',
-  email: 'billing@example.com',
-  registry_key: 'HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater',
-  other: 'Any other observable',
+/** An example value to show as the placeholder for a Cases observable type. */
+export const getIndicatorPlaceholder = (type: IndicatorType): string => {
+  switch (type) {
+    case OBSERVABLE_TYPE_IPV4.key:
+      return '198.51.100.7';
+    case OBSERVABLE_TYPE_IPV6.key:
+      return '2001:db8::7';
+    case OBSERVABLE_TYPE_DOMAIN.key:
+      return 'update.example.com';
+    case OBSERVABLE_TYPE_HOSTNAME.key:
+      return 'ws-0142';
+    case OBSERVABLE_TYPE_URL.key:
+      return 'https://example.com/payload.bin';
+    case OBSERVABLE_TYPE_FILE_HASH.key:
+      return '9f2c4be71d0a6e83b5c2f19d7a40e6c8d35b1f72a9e04c6d8b7f3a21e5c0a1e4';
+    case OBSERVABLE_TYPE_FILE_PATH.key:
+      return 'C:\\Users\\svc-build\\AppData\\Local\\Temp\\upd.dll';
+    case OBSERVABLE_TYPE_EMAIL.key:
+      return 'billing@example.com';
+    default:
+      return i18n.INDICATOR_OTHER_EXAMPLE;
+  }
 };

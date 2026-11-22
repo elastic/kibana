@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { ICONS } from '../../icons';
 import type { TabId } from '../tabs/tab_props';
+import { ExternalTicketCard } from '../external_ticket';
 import { AtAGlanceCard, useMessageCount } from './at_a_glance_card';
 import { FieldsCard } from './fields_card';
 import { RecentActivityCard } from './recent_activity_card';
@@ -145,6 +146,9 @@ export const SidePanel: React.FC<SidePanelProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RelatedCard record={record} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ExternalTicketCard record={record} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RecentActivityCard record={record} onNavigateTab={onNavigateTab} />

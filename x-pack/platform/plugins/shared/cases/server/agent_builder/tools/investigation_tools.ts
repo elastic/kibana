@@ -21,6 +21,8 @@ import type {
   TaskItem,
 } from '../../../common/investigations/types';
 import { INVESTIGATION_LIMITS } from '../../../common/investigations/constants';
+import { INDICATOR_TYPE_ALIAS_NAMES } from '../../../common/investigations/observable_types';
+import { OBSERVABLE_TYPES_BUILTIN_KEYS } from '../../../common/constants/observables';
 
 type GetService = InvestigationsSetup['getServiceForRequest'];
 
@@ -68,6 +70,12 @@ const resolve = async (
   }
   return { service, recordId: linked };
 };
+
+/** Cases built-in observable type keys, plus the old short names as aliases. */
+const INDICATOR_TYPE_ENUM = [...OBSERVABLE_TYPES_BUILTIN_KEYS, ...INDICATOR_TYPE_ALIAS_NAMES] as [
+  string,
+  ...string[]
+];
 
 const compact = (item: InvestigationItem) => ({
   id: item.id,
@@ -197,17 +205,11 @@ const addEvidenceSchema = lazySchema(() =>
           why: z.string().max(2048).optional(),
           text: z.string().max(10000).optional(),
           indicator_type: z
-            .enum([
-              'ip',
-              'domain',
-              'url',
-              'file_hash',
-              'file_path',
-              'email',
-              'registry_key',
-              'other',
-            ])
-            .optional(),
+            .enum(INDICATOR_TYPE_ENUM)
+            .optional()
+            .describe(
+              'A Cases observable type key. The old short names (ip, domain, file_hash, ...) are accepted as aliases; omit it or use "other" to infer the type from the value.'
+            ),
           indicator_value: z.string().max(2048).optional(),
         })
       )

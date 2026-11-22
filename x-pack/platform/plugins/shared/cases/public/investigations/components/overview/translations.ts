@@ -453,3 +453,43 @@ export const VERDICT_FROM_CLOSE = i18n.translate(
     defaultMessage: 'Set by the closing outcome. No separate determination was recorded.',
   }
 );
+
+/* Item 16 Timings */
+export const TIMINGS = i18n.translate('xpack.cases.investigations.overview.timings', {
+  defaultMessage: 'Timings',
+});
+
+export const TIME_TO_FIRST_RESPONSE = i18n.translate(
+  'xpack.cases.investigations.overview.timeToFirstResponse',
+  {
+    defaultMessage: 'Time to first response',
+  }
+);
+
+export const TIME_IN_PROGRESS = i18n.translate(
+  'xpack.cases.investigations.overview.timeInProgress',
+  {
+    defaultMessage: 'Time in progress',
+  }
+);
+
+export const TIME_TO_CLOSE = i18n.translate('xpack.cases.investigations.overview.timeToClose', {
+  defaultMessage: 'Time to close',
+});
+
+export const TIMING_NOT_YET = i18n.translate('xpack.cases.investigations.overview.timingNotYet', {
+  defaultMessage: 'Not yet',
+});
+
+export const TIMINGS_UNAVAILABLE = i18n.translate(
+  'xpack.cases.investigations.overview.timingsUnavailable',
+  {
+    defaultMessage: 'Timings are not available right now.',
+  }
+);
+
+export const TIMINGS_EXCLUDES_PAUSED = (duration: string) =>
+  i18n.translate('xpack.cases.investigations.overview.timingsExcludesPaused', {
+    defaultMessage: 'excludes {duration} paused',
+    values: { duration },
+  });

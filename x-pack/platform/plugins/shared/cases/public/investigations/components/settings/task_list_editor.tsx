@@ -20,10 +20,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiFormRow,
   EuiIcon,
   EuiScreenReaderOnly,
-  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -32,7 +30,6 @@ import {
 } from '@elastic/eui';
 import type { DropResult } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import {
   getHttpErrorMessage,
@@ -57,20 +54,20 @@ import {
   validateDraft,
 } from './template_draft';
 import type { DraftSubtask, DraftTask } from './template_draft';
-import * as i18n from './translations';
+import * as i18n from '../procedure/translations';
+import * as settingsI18n from './translations';
 
-export interface TemplateEditorProps {
-  record: InvestigationRecord;
+export interface TaskListEditorProps {
+  /** Cases template id of the investigation template whose task list is edited. */
+  templateId: string;
   onClose: () => void;
 }
 
-type PendingAction = 'discard-close' | 'discard-type';
-
 /**
- * Edits the reusable task list of an investigation type: one list per Cases template, with the
- * built-in default shown until a list is saved.
+ * Edits the reusable task list of one investigation template, with the built-in default shown
+ * until a list is saved.
  */
-export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose }) => {
+export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const { showSuccess } = useInvestigationToasts();
@@ -85,13 +82,11 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
     return createDraftKey(counter.current);
   }, []);
 
-  const [templateId, setTemplateId] = useState<string | null>(null);
-  const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [draft, setDraft] = useState<DraftTask[]>([]);
   const [baseline, setBaseline] = useState('[]');
   const [showErrors, setShowErrors] = useState(false);
-  const [pending, setPending] = useState<PendingAction | null>(null);
-  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
@@ -99,37 +94,19 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
   const templates = templatesQuery.data?.templates;
   const readOnly = !permissions.settings || isForbidden;
 
-  // Start on the task list of the record's type once the lists are known.
-  useEffect(() => {
-    if (!templates || templateId !== null) {
-      return;
-    }
-    const initial =
-      templates.find(
-        (template) =>
-          (record.template_id && template.template_id === record.template_id) ||
-          template.type === record.investigation_type
-      ) ?? templates[0];
-    if (initial) {
-      setTemplateId(initial.template_id);
-    }
-  }, [templates, templateId, record.template_id, record.investigation_type]);
-
-  // Load the draft for the chosen list once, not on every refetch of the lists.
-  useEffect(() => {
-    if (!templates || templateId === null || loadedId === templateId) {
-      return;
-    }
-    const template = templates.find((candidate) => candidate.template_id === templateId);
-    const loaded = toDraft(template?.tasks ?? [], nextKey);
-    setDraft(loaded);
-    setBaseline(serializeDraft(loaded));
-    setLoadedId(templateId);
-    setShowErrors(false);
-    setSaveError(null);
-  }, [templates, templateId, loadedId, nextKey]);
-
   const selected = templates?.find((template) => template.template_id === templateId);
+
+  // Load the draft once, not on every refetch of the lists.
+  useEffect(() => {
+    if (!selected || loaded) {
+      return;
+    }
+    const initial = toDraft(selected.tasks, nextKey);
+    setDraft(initial);
+    setBaseline(serializeDraft(initial));
+    setLoaded(true);
+  }, [selected, loaded, nextKey]);
+
   const isDirty = serializeDraft(draft) !== baseline;
   const errors = useMemo(() => validateDraft(draft), [draft]);
   const totalTasks = countDraftTasks(draft);
@@ -196,28 +173,17 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
     );
   };
 
-  const requestClose = () => (isDirty ? setPending('discard-close') : onClose());
-  const requestListChange = (next: string) => {
-    if (next === templateId) {
-      return;
-    }
-    if (isDirty) {
-      setPendingId(next);
-      setPending('discard-type');
-      return;
-    }
-    setTemplateId(next);
-  };
+  const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
   const handleSave = async () => {
     setShowErrors(true);
     setSaveError(null);
-    if (hasErrors || !templateId) {
+    if (hasErrors || !selected) {
       return;
     }
     try {
       await saveTemplate.mutateAsync({ templateId, tasks: toTemplateTasks(draft) });
-      showSuccess(i18n.EDITOR_SAVED(selected?.type ?? ''));
+      showSuccess(i18n.EDITOR_SAVED(selected.type));
       setBaseline(serializeDraft(draft));
       onClose();
     } catch (error) {
@@ -239,6 +205,18 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
           title={i18n.EDITOR_LOAD_ERROR}
           error={templatesQuery.error}
           onRetry={() => void templatesQuery.refetch()}
+        />
+      );
+    }
+    if (!selected) {
+      return (
+        <EuiCallOut
+          announceOnMount
+          color="warning"
+          size="s"
+          title={settingsI18n.TASK_LIST_UNAVAILABLE_TITLE}
+          text={<p>{settingsI18n.TASK_LIST_UNAVAILABLE_BODY}</p>}
+          data-test-subj="investigationTemplateUnavailable"
         />
       );
     }
@@ -374,26 +352,14 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>{i18n.EDITOR_TITLE}</h2>
+            <h2 id={flyoutTitleId}>{settingsI18n.TASK_LIST_TITLE}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="m" alignItems="center" wrap responsive={false}>
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFormRow label={i18n.EDITOR_TYPE_LABEL} display="rowCompressed">
-                <EuiSelect
-                  compressed
-                  value={templateId ?? ''}
-                  options={(templates ?? []).map((template) => ({
-                    value: template.template_id,
-                    text: template.saved
-                      ? template.type
-                      : i18n.EDITOR_TYPE_DEFAULT_OPTION(template.type),
-                  }))}
-                  isLoading={templatesQuery.isLoading}
-                  onChange={(event) => requestListChange(event.target.value)}
-                  data-test-subj="investigationTemplateType"
-                />
-              </EuiFormRow>
+              <EuiText size="s" data-test-subj="investigationTemplateName">
+                <strong>{selected?.type ?? ''}</strong>
+              </EuiText>
             </EuiFlexItem>
             {selected ? (
               <EuiFlexItem grow={false}>
@@ -405,18 +371,17 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
                 </EuiBadge>
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
-              <EuiText
-                size="xs"
-                color="subdued"
-                css={css`
-                  max-width: ${euiTheme.breakpoint.s}px;
-                `}
-              >
-                {i18n.EDITOR_HINT}
-              </EuiText>
-            </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="xs" />
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              max-width: ${euiTheme.breakpoint.s}px;
+            `}
+          >
+            {settingsI18n.TASK_LIST_HINT}
+          </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
         <EuiFlyoutFooter>
@@ -431,7 +396,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
                 <EuiButton
                   fill
                   isLoading={saveTemplate.isLoading}
-                  isDisabled={!templates || templateId === null}
+                  isDisabled={!selected}
                   onClick={() => void handleSave()}
                   data-test-subj="investigationTemplateSave"
                 >
@@ -447,7 +412,7 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
           </div>
         </EuiScreenReaderOnly>
       </EuiFlyout>
-      {pending ? (
+      {isDiscardOpen ? (
         <ConfirmModal
           title={i18n.EDITOR_DISCARD_TITLE}
           body={<p>{i18n.EDITOR_DISCARD_BODY}</p>}
@@ -455,23 +420,14 @@ export const TemplateEditor: React.FC<TemplateEditorProps> = ({ record, onClose 
           cancelLabel={i18n.EDITOR_KEEP_EDITING}
           destructive
           onConfirm={() => {
-            if (pending === 'discard-type' && pendingId) {
-              setTemplateId(pendingId);
-              setPendingId(null);
-              setPending(null);
-              return;
-            }
-            setPending(null);
+            setIsDiscardOpen(false);
             onClose();
           }}
-          onCancel={() => {
-            setPending(null);
-            setPendingId(null);
-          }}
+          onCancel={() => setIsDiscardOpen(false)}
           data-test-subj="investigationTemplateDiscardModal"
         />
       ) : null}
     </>
   );
 };
-TemplateEditor.displayName = 'TemplateEditor';
+TaskListEditor.displayName = 'TaskListEditor';

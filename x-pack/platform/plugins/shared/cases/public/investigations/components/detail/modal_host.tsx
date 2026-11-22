@@ -18,6 +18,7 @@ import { PauseModal } from '../modals/pause_modal';
 import * as modalI18n from '../modals/translations';
 import { ReportModal } from '../modals/report_modal';
 import { RestrictModal } from '../modals/restrict_modal';
+import { RunWorkflowModal } from '../modals/run_workflow_modal';
 import { ConfirmModal } from '../shared/confirm_modal';
 
 const TAKE_ACTION_SELECTOR = '[data-test-subj="investigationTakeAction"]';
@@ -65,6 +66,8 @@ export const ModalHost: React.FC<ModalHostProps> = ({ name, options, record, onC
       return <PauseModal record={record} onClose={handleClose} statusKey={options?.statusKey} />;
     case 'restrict':
       return <RestrictModal record={record} onClose={handleClose} />;
+    case 'runWorkflow':
+      return <RunWorkflowModal record={record} onClose={handleClose} />;
     case 'changeType':
       return <ChangeTypeModal record={record} onClose={handleClose} />;
     case 'reopen':

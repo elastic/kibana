@@ -27,8 +27,8 @@ export interface ApplyProcedureModalProps {
 }
 
 /**
- * Applies the task list of the record's investigation type. The type itself is changed only by
- * Take action, Change type. With tasks, the unfinished ones are replaced.
+ * Applies the task list of the record's investigation template. The template itself is changed only by
+ * Take action, Change template. With tasks, the unfinished ones are replaced.
  */
 export const ApplyProcedureModal: React.FC<ApplyProcedureModalProps> = ({
   record,

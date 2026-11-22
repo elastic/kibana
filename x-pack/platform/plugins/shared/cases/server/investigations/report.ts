@@ -47,18 +47,28 @@ export const buildReport = ({
   const ln: string[] = [];
   ln.push(`# ${record.display_id}: ${record.title}`, '');
   ln.push(
-    `Status: ${statusLabel(record)}. Owner: ${record.owner?.name ?? 'Unassigned'}. Priority: ${record.priority}. Type: ${record.investigation_type}.`,
-    `Opened ${fmt(record.created_at)} (${record.origin.label}).${record.closed_at ? ` Closed ${fmt(record.closed_at)}.` : ''}`,
+    `Status: ${statusLabel(record)}. Owner: ${record.owner?.name ?? 'Unassigned'}. Priority: ${
+      record.priority
+    }. Type: ${record.investigation_type}.`,
+    `Opened ${fmt(record.created_at)} (${record.origin.label}).${
+      record.closed_at ? ` Closed ${fmt(record.closed_at)}.` : ''
+    }`,
     ''
   );
-  ln.push('## Summary', '', record.close_outcome?.summary ?? record.summary ?? record.description, '');
+  ln.push(
+    '## Summary',
+    '',
+    record.close_outcome?.summary ?? record.summary ?? record.description,
+    ''
+  );
   const agent = record.agent_verdict;
   const analyst = record.analyst_verdict;
   ln.push('## Verdict', '');
   if (analyst) {
     ln.push(
-      `Analyst determination: ${VERDICT_LABELS[analyst.verdict]} (set by ${analyst.set_by.name}).${analyst.reason ? ` ${analyst.reason}` : ''}` +
-        (agent ? ` Agent verdict (superseded): ${agent.label} (${agent.confidence}%).` : '')
+      `Analyst determination: ${VERDICT_LABELS[analyst.verdict]} (set by ${analyst.set_by.name}).${
+        analyst.reason ? ` ${analyst.reason}` : ''
+      }${agent ? ` Agent verdict (superseded): ${agent.label} (${agent.confidence}%).` : ''}`
     );
   } else if (agent) {
     ln.push(`Agent verdict: ${agent.label} (${agent.confidence}%). No analyst determination yet.`);
@@ -68,7 +78,9 @@ export const buildReport = ({
   if (record.close_outcome) {
     ln.push(
       '',
-      `Closed by ${record.close_outcome.closed_by.name}. Close reason: ${record.close_outcome.close_reason.replace(/_/g, ' ')}.${
+      `Closed by ${
+        record.close_outcome.closed_by.name
+      }. Close reason: ${record.close_outcome.close_reason.replace(/_/g, ' ')}.${
         record.close_outcome.human_verdict
           ? ` Verdict: ${VERDICT_LABELS[record.close_outcome.human_verdict]}.`
           : ''
@@ -81,7 +93,11 @@ export const buildReport = ({
     ln.push('## Timeline of the activity', '');
     for (const item of timeline as TimelineEventItem[]) {
       const ev = item.timeline_event;
-      ln.push(`- ${fmt(ev.occurred_at)}: ${item.title} [${ev.actor.name}]${ev.flag === 'suspected' ? ' (suspected)' : ''}`);
+      ln.push(
+        `- ${fmt(ev.occurred_at)}: ${item.title} [${ev.actor.name}]${
+          ev.flag === 'suspected' ? ' (suspected)' : ''
+        }`
+      );
     }
     ln.push('');
   }
@@ -89,10 +105,18 @@ export const buildReport = ({
   ln.push('## Claims', '');
   if (!claims.length) ln.push('- No claims.');
   for (const c of claims) {
-    const conf = c.claim.confidence !== null && c.claim.confidence !== undefined ? `, ${c.claim.confidence}%` : '';
-    const text = c.status === 'supported' || c.status === 'refuted' ? c.claim.conclusion ?? c.claim.question : c.claim.question;
+    const conf =
+      c.claim.confidence !== null && c.claim.confidence !== undefined
+        ? `, ${c.claim.confidence}%`
+        : '';
+    const text =
+      c.status === 'supported' || c.status === 'refuted'
+        ? c.claim.conclusion ?? c.claim.question
+        : c.claim.question;
     ln.push(
-      `- ${c.ref} (${c.status}${conf}): ${text}${c.claim.note ? ` Note: ${c.claim.note}` : ''} Raised by ${c.created_by.name}.${c.claim.needs_review ? ' Needs review.' : ''}`
+      `- ${c.ref} (${c.status}${conf}): ${text}${
+        c.claim.note ? ` Note: ${c.claim.note}` : ''
+      } Raised by ${c.created_by.name}.${c.claim.needs_review ? ' Needs review.' : ''}`
     );
   }
   ln.push('', '## Actions and approvals', '');
@@ -111,22 +135,37 @@ export const buildReport = ({
   if (!tasks.length) ln.push('- No procedure applied.');
   for (const t of tasks) {
     const box = t.status === 'completed' ? '[x]' : t.status === 'cancelled' ? '[n/a]' : '[ ]';
-    const by = t.task.completed_by ? ` (${t.task.completed_by.name}${t.task.note ? `: ${t.task.note}` : ''}${t.task.cancel_reason ? `: ${t.task.cancel_reason}` : ''})` : '';
+    const by = t.task.completed_by
+      ? ` (${t.task.completed_by.name}${t.task.note ? `: ${t.task.note}` : ''}${
+          t.task.cancel_reason ? `: ${t.task.cancel_reason}` : ''
+        })`
+      : '';
     ln.push(`- ${box} ${t.title}${t.task.required ? '' : ' (optional)'}${by}`);
   }
   const byType = Object.entries(counters.evidence_by_type)
     .filter(([, n]) => (n ?? 0) > 0)
-    .map(([k, n]) => `${(n ?? 0).toLocaleString('en-US')} ${EVIDENCE_TYPE_LABELS[k as keyof typeof EVIDENCE_TYPE_LABELS]?.toLowerCase() ?? k}`);
+    .map(
+      ([k, n]) =>
+        `${(n ?? 0).toLocaleString('en-US')} ${
+          EVIDENCE_TYPE_LABELS[k as keyof typeof EVIDENCE_TYPE_LABELS]?.toLowerCase() ?? k
+        }`
+    );
   ln.push(
     '',
     '## Evidence',
     '',
-    `${counters.evidence.toLocaleString('en-US')} items${byType.length ? `: ${byType.join(', ')}` : ''}. Each item keeps its source, who added it and, where preserved, a copy with a SHA-256 hash.`,
+    `${counters.evidence.toLocaleString('en-US')} items${
+      byType.length ? `: ${byType.join(', ')}` : ''
+    }. Each item keeps its source, who added it and, where preserved, a copy with a SHA-256 hash.`,
     ''
   );
   ln.push('## Response log', '');
   for (const e of activity) {
-    ln.push(`- ${fmt(e.ts)} ${e.actor.name}${e.actor.on_behalf_of ? ` on behalf of ${e.actor.on_behalf_of}` : ''}: ${e.message}`);
+    ln.push(
+      `- ${fmt(e.ts)} ${e.actor.name}${
+        e.actor.on_behalf_of ? ` on behalf of ${e.actor.on_behalf_of}` : ''
+      }: ${e.message}`
+    );
   }
   ln.push('', `Generated ${fmt(new Date().toISOString())}.`);
   return ln.join('\n');

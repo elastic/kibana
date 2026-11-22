@@ -46,7 +46,7 @@ export const FILTER_PRIORITY = i18n.translate('xpack.cases.investigations.queue.
   defaultMessage: 'Priority',
 });
 export const FILTER_TYPE = i18n.translate('xpack.cases.investigations.queue.filterType', {
-  defaultMessage: 'Type',
+  defaultMessage: 'Template',
 });
 export const FILTER_VERDICT = i18n.translate('xpack.cases.investigations.queue.filterVerdict', {
   defaultMessage: 'Verdict',
@@ -96,7 +96,7 @@ export const COLUMN_PRIORITY = i18n.translate('xpack.cases.investigations.queue.
   defaultMessage: 'Priority',
 });
 export const COLUMN_TYPE = i18n.translate('xpack.cases.investigations.queue.columnType', {
-  defaultMessage: 'Type',
+  defaultMessage: 'Template',
 });
 export const COLUMN_OWNER = i18n.translate('xpack.cases.investigations.queue.columnOwner', {
   defaultMessage: 'Owner',
@@ -203,11 +203,14 @@ export const FILTER_FIELDS_NO = i18n.translate('xpack.cases.investigations.queue
 });
 export const FILTER_FIELDS_NONE = i18n.translate(
   'xpack.cases.investigations.queue.filterFieldsNone',
-  { defaultMessage: 'The investigation types have no fields to filter by.' }
+  { defaultMessage: 'The investigation templates have no fields to filter by.' }
 );
 export const FILTER_FIELDS_HELP = i18n.translate(
   'xpack.cases.investigations.queue.filterFieldsHelp',
-  { defaultMessage: 'Fields come from the investigation types. Text fields match the exact value.' }
+  {
+    defaultMessage:
+      'Fields come from the investigation templates. Text fields match the exact value.',
+  }
 );
 export const COLUMNS_BUTTON = i18n.translate('xpack.cases.investigations.queue.columnsButton', {
   defaultMessage: 'Columns',

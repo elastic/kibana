@@ -100,6 +100,8 @@ export const ICONS = {
   pause: 'pause',
   resume: 'play',
   case: 'briefcase',
+  runWorkflow: 'play',
+  unlink: 'linkSlash',
 } as const;
 
 export const ACTOR_ICONS: Record<ActorType, string> = {

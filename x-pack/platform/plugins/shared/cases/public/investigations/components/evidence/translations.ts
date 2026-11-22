@@ -496,7 +496,8 @@ export const KIND_ENTITY_DESCRIPTION = i18n.translate(
 export const KIND_INDICATOR_DESCRIPTION = i18n.translate(
   'xpack.cases.investigations.evidence.kindIndicatorDescription',
   {
-    defaultMessage: 'An IP address, domain, URL, file hash, file path or other observable.',
+    defaultMessage:
+      'An observable: an IP address, domain, URL, file hash, file path or a custom type.',
   }
 );
 
@@ -832,10 +833,10 @@ export const INDICATOR_FACT_VALUE = i18n.translate(
   }
 );
 
-export const INDICATOR_VALUE_REQUIRED = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorValueRequired',
+export const INDICATOR_OTHER_EXAMPLE = i18n.translate(
+  'xpack.cases.investigations.evidence.indicatorOtherExample',
   {
-    defaultMessage: 'Enter the indicator value.',
+    defaultMessage: 'The value as it appears in your data',
   }
 );
 
@@ -844,50 +845,6 @@ export const INDICATOR_VALUE_TOO_LONG = (max: number) =>
     defaultMessage: 'The value can be at most {max, number} characters.',
     values: { max },
   });
-
-export const INDICATOR_INVALID_IP = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidIp',
-  {
-    defaultMessage: 'Enter a valid IPv4 or IPv6 address.',
-  }
-);
-
-export const INDICATOR_INVALID_DOMAIN = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidDomain',
-  {
-    defaultMessage: 'Enter a valid domain name, for example update.example.com.',
-  }
-);
-
-export const INDICATOR_INVALID_URL = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidUrl',
-  {
-    defaultMessage: 'Enter a full URL that starts with http://, https:// or ftp://.',
-  }
-);
-
-export const INDICATOR_INVALID_HASH = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidHash',
-  {
-    defaultMessage:
-      'Enter a hexadecimal hash of 32 (MD5), 40 (SHA-1), 64 (SHA-256) or 128 (SHA-512) characters.',
-  }
-);
-
-export const INDICATOR_INVALID_EMAIL = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidEmail',
-  {
-    defaultMessage: 'Enter a valid email address.',
-  }
-);
-
-export const INDICATOR_INVALID_REGISTRY_KEY = i18n.translate(
-  'xpack.cases.investigations.evidence.indicatorInvalidRegistryKey',
-  {
-    defaultMessage:
-      'Enter a registry key that starts with a hive such as HKLM\\ or HKEY_LOCAL_MACHINE\\.',
-  }
-);
 
 export const IMPORT_SUBMIT = i18n.translate('xpack.cases.investigations.evidence.importSubmit', {
   defaultMessage: 'Import',
@@ -942,7 +899,7 @@ export const IMPORT_PASTE_LABEL = i18n.translate(
 export const IMPORT_PASTE_PLACEHOLDER = i18n.translate(
   'xpack.cases.investigations.evidence.importPastePlaceholder',
   {
-    defaultMessage: 'type,value,why\nip,198.51.100.7,Beacon destination',
+    defaultMessage: 'type,value,why\nIPv4,198.51.100.7,Beacon destination',
   }
 );
 

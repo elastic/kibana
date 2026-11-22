@@ -14,7 +14,7 @@ export const PAGE_DESCRIPTION = i18n.translate(
   'xpack.cases.investigations.settings.pageDescription',
   {
     defaultMessage:
-      'Define the statuses your team uses to work investigations and the reasons analysts can give when they pause one.',
+      'Define the statuses your team uses to work investigations, the reasons analysts can give when they pause one, and the templates that set the fields and task list of each kind of investigation.',
   }
 );
 export const BACK_TO_QUEUE = i18n.translate('xpack.cases.investigations.settings.backToQueue', {
@@ -66,13 +66,6 @@ export const STATUSES_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'Each status belongs to one of three categories: Open, In progress, or Closed. Alerts, automations, and reports work from the category, so they keep working the way they do today. Each category has a default status, used whenever an investigation moves to that category without a more specific status.',
-  }
-);
-export const MANAGE_TYPES_HELP = i18n.translate(
-  'xpack.cases.investigations.settings.manageTypesHelp',
-  {
-    defaultMessage:
-      'Investigation types, their fields and their procedures live in Cases templates.',
   }
 );
 
@@ -318,3 +311,216 @@ export const REMOVE_REASON_BODY = i18n.translate(
 export const NO_REASONS = i18n.translate('xpack.cases.investigations.settings.noReasons', {
   defaultMessage: 'No pause reasons yet.',
 });
+
+/* Tabs */
+export const TAB_STATUSES = i18n.translate('xpack.cases.investigations.settings.tabStatuses', {
+  defaultMessage: 'Statuses',
+});
+export const TAB_TEMPLATES = i18n.translate('xpack.cases.investigations.settings.tabTemplates', {
+  defaultMessage: 'Investigation templates',
+});
+export const TABS_ARIA = i18n.translate('xpack.cases.investigations.settings.tabsAria', {
+  defaultMessage: 'Investigation settings sections',
+});
+
+/* Investigation templates */
+export const TEMPLATES_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.templatesTitle',
+  {
+    defaultMessage: 'Investigation templates',
+  }
+);
+export const TEMPLATES_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.templatesDescription',
+  {
+    defaultMessage:
+      'A template sets the fields an investigation collects and the task list it starts with. Analysts pick a template when they create an investigation or apply one to an existing investigation.',
+  }
+);
+export const TEMPLATES_LOADING = i18n.translate(
+  'xpack.cases.investigations.settings.templatesLoading',
+  { defaultMessage: 'Loading investigation templates' }
+);
+export const TEMPLATES_LOAD_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.templatesLoadError',
+  { defaultMessage: 'Could not load the investigation templates' }
+);
+export const TEMPLATES_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.investigations.settings.templatesTableCaption',
+  { defaultMessage: 'Investigation templates' }
+);
+export const TEMPLATES_EMPTY_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.templatesEmptyTitle',
+  { defaultMessage: 'No investigation templates yet' }
+);
+export const TEMPLATES_EMPTY_BODY = i18n.translate(
+  'xpack.cases.investigations.settings.templatesEmptyBody',
+  {
+    defaultMessage:
+      'Create a template so analysts can choose what kind of investigation they are starting.',
+  }
+);
+export const TEMPLATES_NO_PERMISSION = i18n.translate(
+  'xpack.cases.investigations.settings.templatesNoPermission',
+  {
+    defaultMessage:
+      'Creating and changing templates needs the Cases templates privilege. Ask an administrator for access.',
+  }
+);
+export const CREATE_TEMPLATE = i18n.translate(
+  'xpack.cases.investigations.settings.createTemplate',
+  {
+    defaultMessage: 'Create template',
+  }
+);
+export const COLUMN_NAME = i18n.translate('xpack.cases.investigations.settings.columnName', {
+  defaultMessage: 'Name',
+});
+export const COLUMN_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.columnDescription',
+  { defaultMessage: 'Description' }
+);
+export const COLUMN_FIELDS = i18n.translate('xpack.cases.investigations.settings.columnFields', {
+  defaultMessage: 'Fields',
+});
+export const COLUMN_TASKS = i18n.translate('xpack.cases.investigations.settings.columnTasks', {
+  defaultMessage: 'Tasks',
+});
+export const COLUMN_VERSION = i18n.translate('xpack.cases.investigations.settings.columnVersion', {
+  defaultMessage: 'Version',
+});
+export const COLUMN_UPDATED = i18n.translate('xpack.cases.investigations.settings.columnUpdated', {
+  defaultMessage: 'Task list updated',
+});
+export const COLUMN_ENABLED = i18n.translate('xpack.cases.investigations.settings.columnEnabled', {
+  defaultMessage: 'Enabled',
+});
+export const COLUMN_ACTIONS = i18n.translate('xpack.cases.investigations.settings.columnActions', {
+  defaultMessage: 'Actions',
+});
+export const NO_DESCRIPTION = i18n.translate('xpack.cases.investigations.settings.noDescription', {
+  defaultMessage: 'No description',
+});
+export const TASKS_UNAVAILABLE = i18n.translate(
+  'xpack.cases.investigations.settings.tasksUnavailable',
+  { defaultMessage: 'Not available while the template is disabled' }
+);
+export const BUILT_IN_TASK_LIST = i18n.translate(
+  'xpack.cases.investigations.settings.builtInTaskList',
+  { defaultMessage: 'Built-in default' }
+);
+export const VERSION_VALUE = (version: number) =>
+  i18n.translate('xpack.cases.investigations.settings.versionValue', {
+    defaultMessage: 'v{version}',
+    values: { version },
+  });
+export const ENABLED_BADGE = i18n.translate('xpack.cases.investigations.settings.enabledBadge', {
+  defaultMessage: 'Enabled',
+});
+export const DISABLED_BADGE = i18n.translate('xpack.cases.investigations.settings.disabledBadge', {
+  defaultMessage: 'Disabled',
+});
+export const EDIT_TEMPLATE = i18n.translate('xpack.cases.investigations.settings.editTemplate', {
+  defaultMessage: 'Edit template',
+});
+export const EDIT_TEMPLATE_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.editTemplateAria', {
+    defaultMessage: 'Edit the template {name}',
+    values: { name },
+  });
+export const EDIT_TASK_LIST = i18n.translate('xpack.cases.investigations.settings.editTaskList', {
+  defaultMessage: 'Edit task list',
+});
+export const EDIT_TASK_LIST_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.editTaskListAria', {
+    defaultMessage: 'Edit the task list of the template {name}',
+    values: { name },
+  });
+export const DISABLE_TEMPLATE = i18n.translate(
+  'xpack.cases.investigations.settings.disableTemplate',
+  { defaultMessage: 'Disable' }
+);
+export const ENABLE_TEMPLATE = i18n.translate(
+  'xpack.cases.investigations.settings.enableTemplate',
+  {
+    defaultMessage: 'Enable',
+  }
+);
+export const DISABLE_TEMPLATE_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.disableTemplateAria', {
+    defaultMessage: 'Disable the template {name}',
+    values: { name },
+  });
+export const ENABLE_TEMPLATE_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.enableTemplateAria', {
+    defaultMessage: 'Enable the template {name}',
+    values: { name },
+  });
+export const DISABLE_TEMPLATE_TITLE = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.disableTemplateTitle', {
+    defaultMessage: 'Disable the template "{name}"?',
+    values: { name },
+  });
+export const DISABLE_TEMPLATE_BODY = i18n.translate(
+  'xpack.cases.investigations.settings.disableTemplateBody',
+  {
+    defaultMessage:
+      'Analysts can no longer choose it for new investigations. Investigations that already use it keep their fields and task list.',
+  }
+);
+export const TEMPLATE_DISABLED_TOAST = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.templateDisabledToast', {
+    defaultMessage: 'Disabled the template {name}.',
+    values: { name },
+  });
+export const TEMPLATE_ENABLED_TOAST = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.templateEnabledToast', {
+    defaultMessage: 'Enabled the template {name}.',
+    values: { name },
+  });
+export const TEMPLATE_TOGGLE_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.templateToggleError',
+  { defaultMessage: 'Could not change the template' }
+);
+
+/* Create and edit a template */
+export const BACK_TO_TEMPLATES = i18n.translate(
+  'xpack.cases.investigations.settings.backToTemplates',
+  { defaultMessage: 'Investigation templates' }
+);
+export const NEW_TEMPLATE_BREADCRUMB = i18n.translate(
+  'xpack.cases.investigations.settings.newTemplateBreadcrumb',
+  { defaultMessage: 'New template' }
+);
+export const NO_TEMPLATE_PERMISSION_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.noTemplatePermissionTitle',
+  { defaultMessage: 'You cannot create or change templates' }
+);
+export const TEMPLATE_LOAD_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.templateLoadError',
+  { defaultMessage: 'Could not load the template' }
+);
+export const TEMPLATE_NOT_INVESTIGATION = i18n.translate(
+  'xpack.cases.investigations.settings.templateNotInvestigation',
+  { defaultMessage: 'This template is not an investigation template.' }
+);
+
+/* Task list */
+export const TASK_LIST_TITLE = i18n.translate('xpack.cases.investigations.settings.taskListTitle', {
+  defaultMessage: 'Edit task list',
+});
+export const TASK_LIST_HINT = i18n.translate('xpack.cases.investigations.settings.taskListHint', {
+  defaultMessage:
+    'The tasks a new investigation starts with when it uses this template. Analysts can apply the list again from the Procedure tab.',
+});
+export const TASK_LIST_UNAVAILABLE_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.taskListUnavailableTitle',
+  { defaultMessage: 'This template has no task list to edit' }
+);
+export const TASK_LIST_UNAVAILABLE_BODY = i18n.translate(
+  'xpack.cases.investigations.settings.taskListUnavailableBody',
+  {
+    defaultMessage:
+      'Only enabled investigation templates have a task list. Enable the template, or check that it still exists.',
+  }
+);

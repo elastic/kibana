@@ -7,10 +7,7 @@
 
 import { createHash } from 'crypto';
 import Boom from '@hapi/boom';
-import type {
-  IndicatorType,
-  InvestigationPriority,
-} from '../../common/investigations/types';
+import type { InvestigationPriority } from '../../common/investigations/types';
 
 export const encodeVersion = (seqNo?: number, primaryTerm?: number): string | undefined =>
   seqNo === undefined || primaryTerm === undefined ? undefined : `${seqNo}:${primaryTerm}`;
@@ -48,55 +45,6 @@ export const PRIORITY_RANK: Record<InvestigationPriority, number> = {
   medium: 2,
   high: 3,
   critical: 4,
-};
-
-const IPV4 = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
-const IPV6 = /^[0-9a-f:]+:[0-9a-f:]*$/i;
-const HASH = /^([a-f0-9]{32}|[a-f0-9]{40}|[a-f0-9]{64}|[a-f0-9]{128})$/i;
-const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-const URL_RE = /^[a-z][a-z0-9+.-]*:\/\//i;
-const DOMAIN = /^(?=.{1,253}$)([a-z0-9-]{1,63}\.)+[a-z]{2,63}$/i;
-
-/** Best-effort indicator type from its value. */
-export const inferIndicatorType = (value: string): IndicatorType => {
-  const v = value.trim();
-  if (IPV4.test(v) || IPV6.test(v)) return 'ip';
-  if (HASH.test(v)) return 'file_hash';
-  if (EMAIL.test(v)) return 'email';
-  if (URL_RE.test(v)) return 'url';
-  if (/^HK(LM|CU|CR|U|CC)\\/i.test(v) || /^HKEY_/i.test(v)) return 'registry_key';
-  if (/^[a-z]:\\/i.test(v) || v.startsWith('/')) return 'file_path';
-  if (DOMAIN.test(v)) return 'domain';
-  return 'other';
-};
-
-const INDICATOR_TYPE_ALIASES: Record<string, IndicatorType> = {
-  ip: 'ip',
-  'ip address': 'ip',
-  ipv4: 'ip',
-  ipv6: 'ip',
-  domain: 'domain',
-  hostname: 'domain',
-  url: 'url',
-  hash: 'file_hash',
-  'file hash': 'file_hash',
-  file_hash: 'file_hash',
-  sha256: 'file_hash',
-  md5: 'file_hash',
-  sha1: 'file_hash',
-  'file path': 'file_path',
-  file_path: 'file_path',
-  path: 'file_path',
-  email: 'email',
-  'email address': 'email',
-  'registry key': 'registry_key',
-  registry_key: 'registry_key',
-  other: 'other',
-};
-
-export const parseIndicatorType = (raw: string | undefined, value: string): IndicatorType => {
-  const key = (raw ?? '').trim().toLowerCase();
-  return INDICATOR_TYPE_ALIASES[key] ?? inferIndicatorType(value);
 };
 
 /** Minimal RFC 4180 CSV parser (quotes, escaped quotes, CRLF). */
@@ -165,22 +113,3 @@ export const decodeCursor = (cursor: string): Array<string | number> => {
 
 export const plural = (n: number, one: string, many = `${one}s`): string =>
   `${n} ${n === 1 ? one : many}`;
-
-/** Checks a value against its indicator type; returns a reason when it does not fit. */
-export const validateIndicatorValue = (type: IndicatorType, value: string): string | null => {
-  const v = value.trim();
-  switch (type) {
-    case 'ip':
-      return IPV4.test(v) || IPV6.test(v) ? null : 'not a valid IP address';
-    case 'domain':
-      return DOMAIN.test(v) ? null : 'not a valid domain';
-    case 'url':
-      return URL_RE.test(v) && !/\s/.test(v) ? null : 'not a valid URL';
-    case 'file_hash':
-      return HASH.test(v) ? null : 'not an MD5, SHA-1, SHA-256 or SHA-512 hash';
-    case 'email':
-      return EMAIL.test(v) ? null : 'not a valid email address';
-    default:
-      return null;
-  }
-};

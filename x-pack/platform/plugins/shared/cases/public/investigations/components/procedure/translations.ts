@@ -17,10 +17,10 @@ export const LOAD_ERROR = i18n.translate('xpack.cases.investigations.procedure.l
   defaultMessage: 'The procedure could not be loaded',
 });
 export const CONFIGURE = i18n.translate('xpack.cases.investigations.procedure.configure', {
-  defaultMessage: 'Edit task lists',
+  defaultMessage: 'Edit task list',
 });
 export const TYPE_NOT_SET = i18n.translate('xpack.cases.investigations.procedure.typeNotSet', {
-  defaultMessage: 'No type set',
+  defaultMessage: 'No template set',
 });
 export const PROGRESS_LABEL = i18n.translate('xpack.cases.investigations.procedure.progressLabel', {
   defaultMessage: 'Procedure progress',
@@ -48,7 +48,7 @@ export const ALL_REQUIRED_DONE = i18n.translate(
 export const HEADER_NOTE = (type: string) =>
   i18n.translate('xpack.cases.investigations.procedure.headerNote', {
     defaultMessage:
-      'The {type} task list sets these tasks. Claims and approved actions complete their tasks automatically, and each completion names who or what did it. Change the type with Take action, Change type.',
+      'The {type} task list sets these tasks. Claims and approved actions complete their tasks automatically, and each completion names who or what did it. Change the template with Take action, Change template.',
     values: { type },
   });
 export const CLOSE_INVESTIGATION = i18n.translate(
@@ -504,26 +504,10 @@ export const APPLY_SUCCESS = (type: string) =>
   });
 export const NO_TEMPLATE_FOR_TYPE = i18n.translate(
   'xpack.cases.investigations.procedure.noTemplateForType',
-  { defaultMessage: 'This type has no tasks yet. Add some in Edit task lists first.' }
+  { defaultMessage: 'This template has no tasks yet. Add some in Edit task list first.' }
 );
 
 /* Task list editor */
-export const EDITOR_TITLE = i18n.translate('xpack.cases.investigations.procedure.editorTitle', {
-  defaultMessage: 'Task lists',
-});
-export const EDITOR_HINT = i18n.translate('xpack.cases.investigations.procedure.editorHint', {
-  defaultMessage:
-    'Reusable task lists, one for each investigation type. A new investigation of a type starts with its task list.',
-});
-export const EDITOR_TYPE_LABEL = i18n.translate(
-  'xpack.cases.investigations.procedure.editorTypeLabel',
-  { defaultMessage: 'Investigation type' }
-);
-export const EDITOR_TYPE_DEFAULT_OPTION = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.editorTypeDefaultOption', {
-    defaultMessage: '{type} (default)',
-    values: { type },
-  });
 export const EDITOR_SAVED_BADGE = i18n.translate(
   'xpack.cases.investigations.procedure.editorSavedBadge',
   { defaultMessage: 'Saved' }
@@ -676,10 +660,10 @@ export const EDITOR_TASK_NUMBER = (number: number) =>
 export const EDITOR_SAVE = i18n.translate('xpack.cases.investigations.procedure.editorSave', {
   defaultMessage: 'Save task list',
 });
-export const EDITOR_SAVED = (type: string) =>
+export const EDITOR_SAVED = (template: string) =>
   i18n.translate('xpack.cases.investigations.procedure.editorSaved', {
-    defaultMessage: 'Saved the {type} task list.',
-    values: { type },
+    defaultMessage: 'Saved the {template} task list.',
+    values: { template },
   });
 export const EDITOR_SAVE_ERROR = i18n.translate(
   'xpack.cases.investigations.procedure.editorSaveError',

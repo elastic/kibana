@@ -47,7 +47,12 @@ export interface QueueTableProps {
   /** Form fields shown as extra columns after the built-in ones. */
   fieldColumns: QueueFieldDef[];
   onChange: (change: Partial<QueueState>) => void;
+  /** Row checkboxes are shown when this is given. */
+  onSelectionChange?: (selected: InvestigationRecord[]) => void;
+  selected?: InvestigationRecord[];
 }
+
+const NO_SELECTION: InvestigationRecord[] = [];
 
 const truncateStyle = css`
   display: block;
@@ -91,6 +96,8 @@ export const QueueTable: React.FC<QueueTableProps> = ({
   statuses,
   fieldColumns,
   onChange,
+  onSelectionChange,
+  selected = NO_SELECTION,
 }) => {
   const assigneeUids = useMemo(
     () => Array.from(new Set(records.flatMap((record) => record.assignees))),
@@ -364,6 +371,7 @@ export const QueueTable: React.FC<QueueTableProps> = ({
           sort: { field: state.sortField as keyof InvestigationRecord, direction: state.sortOrder },
         }}
         onChange={handleChange}
+        selection={onSelectionChange ? { selected, onSelectionChange } : undefined}
         rowProps={(record) => ({ 'data-test-subj': `investigationRow-${record.display_id}` })}
         data-test-subj="investigationsQueueTable"
       />

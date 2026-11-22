@@ -65,7 +65,7 @@ export const INVESTIGATION_LIMITS = {
   maxImportBytes: 10 * 1024 * 1024,
   maxSnapshotRows: 200,
   maxThreads: 100,
-  maxRestrictedTo: 100,
+  maxLinkedRecords: 50,
   digestNewestItems: 5,
   maxDeepPageFrom: MAX_DOCS_PER_PAGE,
 } as const;

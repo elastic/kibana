@@ -165,16 +165,17 @@ export const FIELDS = i18n.translate('xpack.cases.investigations.detail.fields',
   defaultMessage: 'Fields',
 });
 export const FIELDS_NO_TYPE = i18n.translate('xpack.cases.investigations.detail.fieldsNoType', {
-  defaultMessage: 'No type applied. Use Take action, then Apply a type, to see its fields here.',
+  defaultMessage:
+    'No template applied. Use Take action, then Apply a template, to see its fields here.',
 });
 export const FIELDS_NONE = i18n.translate('xpack.cases.investigations.detail.fieldsNone', {
-  defaultMessage: 'This type has no fields.',
+  defaultMessage: 'This template has no fields.',
 });
 export const CHANGE_TYPE = i18n.translate('xpack.cases.investigations.detail.changeType', {
-  defaultMessage: 'Change type',
+  defaultMessage: 'Change template',
 });
 export const APPLY_TYPE = i18n.translate('xpack.cases.investigations.detail.applyType', {
-  defaultMessage: 'Apply a type',
+  defaultMessage: 'Apply a template',
 });
 
 export const RELATED = i18n.translate('xpack.cases.investigations.detail.related', {
@@ -413,3 +414,60 @@ export const REOPEN_TO_CHANGE_STATUS = i18n.translate(
   'xpack.cases.investigations.detail.reopenToChangeStatus',
   { defaultMessage: 'Reopen the investigation to change its status.' }
 );
+
+/* Explicit links (item 17) */
+export const LINK_INVESTIGATION = i18n.translate(
+  'xpack.cases.investigations.detail.linkInvestigation',
+  { defaultMessage: 'Link investigation…' }
+);
+export const LINK_TITLE = i18n.translate('xpack.cases.investigations.detail.linkTitle', {
+  defaultMessage: 'Link investigation',
+});
+export const LINK_INTRO = (displayId: string) =>
+  i18n.translate('xpack.cases.investigations.detail.linkIntro', {
+    defaultMessage:
+      "Linking shows each investigation in the other one's related list and records it in both histories. {displayId} stays open and separate.",
+    values: { displayId },
+  });
+export const LINK_SEARCH_LABEL = i18n.translate(
+  'xpack.cases.investigations.detail.linkSearchLabel',
+  { defaultMessage: 'Find an investigation' }
+);
+export const LINK_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.cases.investigations.detail.linkSearchPlaceholder',
+  { defaultMessage: 'Search by id or title' }
+);
+export const LINK_RESULTS = i18n.translate('xpack.cases.investigations.detail.linkResults', {
+  defaultMessage: 'Investigations to link',
+});
+export const LINK_SEARCH_EMPTY = i18n.translate(
+  'xpack.cases.investigations.detail.linkSearchEmpty',
+  { defaultMessage: 'No investigations to link.' }
+);
+export const LINK_SEARCH_ERROR = i18n.translate(
+  'xpack.cases.investigations.detail.linkSearchError',
+  { defaultMessage: 'Could not search investigations.' }
+);
+export const LINK_CANCEL = i18n.translate('xpack.cases.investigations.detail.linkCancel', {
+  defaultMessage: 'Cancel',
+});
+export const LINK_SUBMIT = i18n.translate('xpack.cases.investigations.detail.linkSubmit', {
+  defaultMessage: 'Link',
+});
+export const UNLINK = i18n.translate('xpack.cases.investigations.detail.unlink', {
+  defaultMessage: 'Unlink',
+});
+export const UNLINK_CONFIRM_TITLE = (displayId: string) =>
+  i18n.translate('xpack.cases.investigations.detail.unlinkConfirmTitle', {
+    defaultMessage: 'Unlink {displayId}?',
+    values: { displayId },
+  });
+export const UNLINK_CONFIRM_BODY = (displayId: string, otherDisplayId: string) =>
+  i18n.translate('xpack.cases.investigations.detail.unlinkConfirmBody', {
+    defaultMessage:
+      "{otherDisplayId} stops being linked to {displayId}. They can still appear in each other's related list when they share entities, indicators or alerts.",
+    values: { displayId, otherDisplayId },
+  });
+export const LINKED_BADGE = i18n.translate('xpack.cases.investigations.detail.linkedBadge', {
+  defaultMessage: 'Linked',
+});

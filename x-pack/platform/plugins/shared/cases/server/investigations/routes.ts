@@ -37,7 +37,9 @@ import type {
   FindActivityRequest,
   FindItemsRequest,
   FindRecordsRequest,
+  LinkRecordRequest,
   ProcedureTemplateTask,
+  UpdateExternalTicketRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
 } from '../../common/investigations/types';
@@ -65,6 +67,7 @@ import {
   findRecordsQuery,
   historyQuery,
   importBody,
+  linkRecordBody,
   indicatorLookupQuery,
   mergeRecordBody,
   preserveBody,
@@ -72,8 +75,10 @@ import {
   procedureTemplateParams,
   recordIdParams,
   recordItemParams,
+  recordLinkParams,
   sinceQuery,
   toArray,
+  updateExternalTicketBody,
   updateItemBody,
   updateRecordBody,
 } from './schemas';
@@ -138,6 +143,7 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
           'priority',
           'severity',
           'investigation_type',
+          'access',
           'verdict',
           'tags',
           'field',
@@ -394,6 +400,15 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
             (request.query as { since?: string }).since
           ),
         });
+      },
+    }),
+    route({
+      method: 'get',
+      path: `${base}/{id}/timings`,
+      params: { params: recordIdParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({ body: await service.timings((request.params as { id: string }).id) });
       },
     }),
     route({
@@ -656,6 +671,77 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
             ),
           },
         });
+      },
+    }),
+    // Items 10 and 11: external ticket (push, auto push, sync).
+    route({
+      method: 'get',
+      path: `${base}/{id}/external_ticket`,
+      params: { params: recordIdParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: await service.getExternalTicket((request.params as { id: string }).id),
+        });
+      },
+    }),
+    route({
+      method: 'put',
+      path: `${base}/{id}/external_ticket`,
+      params: { params: recordIdParams, body: updateExternalTicketBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: await service.updateExternalTicket(
+            (request.params as { id: string }).id,
+            request.body as UpdateExternalTicketRequest
+          ),
+        });
+      },
+    }),
+    route({
+      method: 'post',
+      path: `${base}/{id}/external_ticket/_push`,
+      params: { params: recordIdParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: await service.pushExternalTicket((request.params as { id: string }).id),
+        });
+      },
+    }),
+    route({
+      method: 'post',
+      path: `${base}/{id}/external_ticket/_sync`,
+      params: { params: recordIdParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: await service.syncExternalTicket((request.params as { id: string }).id),
+        });
+      },
+    }),
+    /* Item 17: explicit links */
+    route({
+      method: 'post',
+      path: `${base}/{id}/links`,
+      params: { params: recordIdParams, body: linkRecordBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { other_id: otherId } = request.body as LinkRecordRequest;
+        return response.ok({
+          body: await service.linkRecords((request.params as { id: string }).id, otherId),
+        });
+      },
+    }),
+    route({
+      method: 'delete',
+      path: `${base}/{id}/links/{other_id}`,
+      params: { params: recordLinkParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id, other_id: otherId } = request.params as { id: string; other_id: string };
+        return response.ok({ body: await service.unlinkRecords(id, otherId) });
       },
     }),
   ] as CaseRoute[];

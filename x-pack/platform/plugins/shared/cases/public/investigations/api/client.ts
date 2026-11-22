@@ -37,6 +37,7 @@ import type {
   CreateThreadRequest,
   DuplicateCheckRequest,
   ExportItemsRequest,
+  ExternalTicketResponse,
   FindActivityRequest,
   FindActivityResponse,
   FindCommentsRequest,
@@ -51,7 +52,9 @@ import type {
   IndicatorLookupResponse,
   InvestigationItem,
   InvestigationRecord,
+  InvestigationTimings,
   InvestigationType,
+  LinkRecordResponse,
   MergeRecordRequest,
   MergeRecordResponse,
   ProcedureTemplate,
@@ -66,6 +69,7 @@ import type {
   TaskItem,
   ThreadRef,
   UpdateCommentRequest,
+  UpdateExternalTicketRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
 } from '../../../common/investigations/types';
@@ -403,4 +407,54 @@ export const getWorkflows = (http: HttpStart) =>
   http.fetch<{ results: WorkflowListItem[]; total: number }>('/api/workflows', {
     method: 'GET',
     query: { size: 100, enabled: true },
+  });
+
+/* ------------------------------------------------------------------ */
+/* Explicit links (item 17)                                            */
+/* ------------------------------------------------------------------ */
+
+/** Links two investigations on both sides. Rejects with 404 when the other one cannot be read. */
+export const linkRecord = (http: HttpStart, recordId: string, otherId: string) =>
+  http.fetch<LinkRecordResponse>(recordPath(recordId, '/links'), {
+    method: 'POST',
+    body: JSON.stringify({ other_id: otherId }),
+  });
+
+export const unlinkRecord = (http: HttpStart, recordId: string, otherId: string) =>
+  http.fetch<LinkRecordResponse>(recordPath(recordId, `/links/${encodeURIComponent(otherId)}`), {
+    method: 'DELETE',
+  });
+
+/* Item 16 Timings */
+export const getTimings = (http: HttpStart, recordId: string) =>
+  http.fetch<InvestigationTimings>(recordPath(recordId, '/timings'), { method: 'GET' });
+
+/* ------------------------------------------------------------------ */
+/* External ticket: push and sync (items 10 and 11)                    */
+/* ------------------------------------------------------------------ */
+
+export const getExternalTicket = (http: HttpStart, recordId: string) =>
+  http.fetch<ExternalTicketResponse>(recordPath(recordId, '/external_ticket'), { method: 'GET' });
+
+/** Sets or removes the Cases connector and the automatic push switch. */
+export const updateExternalTicket = (
+  http: HttpStart,
+  recordId: string,
+  body: UpdateExternalTicketRequest
+) =>
+  http.fetch<ExternalTicketResponse>(recordPath(recordId, '/external_ticket'), {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+
+/** The Cases push: creates the incident, or updates it after the first push. */
+export const pushExternalTicket = (http: HttpStart, recordId: string) =>
+  http.fetch<ExternalTicketResponse>(recordPath(recordId, '/external_ticket/_push'), {
+    method: 'POST',
+  });
+
+/** Pulls what changed in the incident (title, description, status). */
+export const syncExternalTicket = (http: HttpStart, recordId: string) =>
+  http.fetch<ExternalTicketResponse>(recordPath(recordId, '/external_ticket/_sync'), {
+    method: 'POST',
   });

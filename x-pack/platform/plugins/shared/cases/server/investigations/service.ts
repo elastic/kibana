@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import type {
@@ -16,7 +17,13 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { CasesClient } from '../client';
-import { COMMENT_ATTACHMENT_TYPE, MAX_ASSIGNEES_PER_CASE } from '../../common/constants';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  MAX_ASSIGNEES_PER_CASE,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '../../common/constants';
+import { CaseMetricsFeature } from '../../common/types/api';
 import {
   INVESTIGATION_ACTIVITY_INDEX,
   INVESTIGATION_CONFIG_INDEX,
@@ -57,6 +64,8 @@ import type {
   DuplicateCheckRequest,
   EvidenceItem,
   ExportItemsRequest,
+  ExternalTicketResponse,
+  ExternalTicketSync,
   FindActivityRequest,
   FindActivityResponse,
   FindItemsRequest,
@@ -68,11 +77,13 @@ import type {
   IndicatorLookupResponse,
   InvestigationItem,
   InvestigationRecord,
+  InvestigationTimings,
   InvestigationType,
   ItemFacets,
   ItemInput,
   ItemKind,
   ItemPatch,
+  LinkRecordResponse,
   MergeRecordResponse,
   ProcedureTemplate,
   ProcedureTemplateTask,
@@ -85,13 +96,13 @@ import type {
   TaskItem,
   TaskWorkflowRun,
   ThreadRef,
+  UpdateExternalTicketRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
   Verdict,
 } from '../../common/investigations/types';
 import {
   VERDICT_LABELS,
-  INDICATOR_TYPE_LABELS,
   CLOSE_REASON_TO_VERDICT,
   isTaskFinished,
   EVIDENCE_TYPE_LABELS,
@@ -107,6 +118,7 @@ import {
   getDefaultStatus,
   getEffectiveStatuses,
   getPauseFieldsForUpdate,
+  getPausedSeconds,
   getRecordStatus,
   StatusRuleError,
   validatePauseReasons,
@@ -127,12 +139,26 @@ import {
   encodeVersion,
   hashSnapshot,
   parseCsv,
-  parseIndicatorType,
   plural,
   sha256,
   toCsvCell,
-  validateIndicatorValue,
 } from './utils';
+import {
+  getObservableTypes,
+  getObservableTypeLabel,
+  indicatorStixPattern,
+  resolveIndicatorForWrite,
+} from './indicator_types';
+import {
+  expandIndicatorTypeFilter,
+  matchIndicatorTypeKey,
+  resolveIndicatorTypeKey,
+} from '../../common/investigations/observable_types';
+import {
+  getObservablesFromEcs,
+  getHashFields,
+} from '../../common/observables/get_observables_from_ecs';
+import type { FlattedEcsData } from '../../common/observables/get_observables_from_ecs';
 import { buildReport } from './report';
 
 type StoredRecord = Omit<InvestigationRecord, 'version'> & {
@@ -152,6 +178,10 @@ export interface AlertsClientLike {
     ids: string[];
     status: 'open' | 'closed' | 'acknowledged';
     index: string;
+  }): Promise<unknown>;
+  removeCaseIdFromAlerts(args: {
+    alerts: Array<{ id: string; index: string }>;
+    caseId: string;
   }): Promise<unknown>;
 }
 
@@ -267,6 +297,12 @@ const TASK_STATUSES: ReadonlyArray<TaskItem['status']> = [
 ];
 /** Reads leave very recent case actions to the investigation write that made them. */
 const OWN_WRITE_GRACE_MS = 5000;
+/** Alerts read per search, and new indicators written per bulk, when extracting observables. */
+const EXTRACTION_ALERT_BATCH = 200;
+const EXTRACTION_WRITE_BATCH = 500;
+/** Case user actions that count as a response to a new investigation. */
+const FIRST_RESPONSE_ACTION_TYPES = new Set(['comment', 'status', 'assignees']);
+const FIRST_RESPONSE_MAX_PAGES = 5;
 const DUE_WITHIN_MS: Record<DueWithin['unit'], number> = {
   minutes: 60_000,
   hours: 3_600_000,
@@ -446,7 +482,7 @@ const describeItem = (item: { kind: ItemKind; ref: string; title: string }): str
 
 /**
  * Owns every read and write of investigation records, items and activity. Every public method
- * authorizes against the case first, then applies `restricted_to`, then touches the indices.
+ * authorizes against the case first, then applies the record's access, then touches the indices.
  */
 export class InvestigationsService {
   constructor(private readonly deps: InvestigationsServiceDeps) {}
@@ -481,16 +517,20 @@ export class InvestigationsService {
     return now();
   }
 
-  private canRead(record: StoredRecord): boolean {
-    return !record.restricted_to?.length || record.restricted_to.includes(this.deps.user.username);
+  /** A restricted record is open to its assignees only (the Cases restricted model). */
+  private canRead(record: StoredRecord, assignees: string[] = record.assignees ?? []): boolean {
+    if (record.access?.mode !== 'restricted') return true;
+    const uid = this.deps.user.profileUid;
+    return Boolean(uid) && assignees.includes(uid as string);
   }
 
   private restrictionFilter(): QueryDslQueryContainer {
+    const uid = this.deps.user.profileUid;
     return {
       bool: {
         should: [
-          { bool: { must_not: { exists: { field: 'restricted_to' } } } },
-          term('restricted_to', this.deps.user.username),
+          { bool: { must_not: [term('access.mode', 'restricted')] } },
+          ...(uid ? [term('assignees', uid)] : []),
         ],
         minimum_should_match: 1,
       },
@@ -498,6 +538,9 @@ export class InvestigationsService {
   }
 
   private static ownerAuthCache = new Map<string, number>();
+
+  /** One pending automatic push per record; a later write resets the timer (item 11). */
+  private static readonly autoPushTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   /** Cases authorization is per owner and space; verify the caller can read Security cases. */
   private async ensureCanReadOwner(): Promise<void> {
@@ -554,7 +597,13 @@ export class InvestigationsService {
       throw Boom.notFound(`Investigation ${recordId} not found`);
     }
     const record = doc._source;
-    if (record.space_id !== this.deps.spaceId || !this.canRead(record)) {
+    if (
+      record.space_id !== this.deps.spaceId ||
+      !this.canRead(
+        record,
+        (theCase.assignees ?? []).map(({ uid }) => uid)
+      )
+    ) {
       throw Boom.notFound(`Investigation ${recordId} not found`);
     }
     return {
@@ -615,7 +664,8 @@ export class InvestigationsService {
       threads: rest.threads ?? [],
       conversation_ids: rest.conversation_ids ?? [],
       merged_from: rest.merged_from ?? [],
-      restricted_to: rest.restricted_to ?? [],
+      access: rest.access ?? { mode: 'default' },
+      linked_records: rest.linked_records ?? [],
       tags: rest.tags ?? [],
       fields: rest.fields ?? {},
       version: encodeVersion(seqNo, primaryTerm),
@@ -639,8 +689,11 @@ export class InvestigationsService {
       }
     >
   ): Promise<ActivityEntry[]> {
-    if (!entries.length) return [];
-    const docs: ActivityEntry[] = entries.map((entry) => ({
+    const kept = this.quietHistory
+      ? entries.filter((entry) => !entry.action.startsWith('record.'))
+      : entries;
+    if (!kept.length) return [];
+    const docs: ActivityEntry[] = kept.map((entry) => ({
       ...entry,
       id: uuidv4(),
       record_id: recordId,
@@ -969,6 +1022,13 @@ export class InvestigationsService {
     const priority = req.priority ?? 'medium';
     const template = req.template_id ? await this.getInvestigationTemplate(req.template_id) : null;
     const investigationType = template?.name ?? req.investigation_type ?? 'Investigation';
+    const restrictedCreatorUid =
+      req.access?.mode === 'restricted' ? this.deps.user.profileUid ?? null : null;
+    if (req.access?.mode === 'restricted' && !restrictedCreatorUid) {
+      throw Boom.badRequest(
+        'A restricted investigation must have at least one assignee. Create it with the default access mode.'
+      );
+    }
     const theCase = await this.deps.casesClient.cases.create({
       title: req.title,
       description: req.description,
@@ -978,6 +1038,7 @@ export class InvestigationsService {
       category: investigationType.slice(0, 50),
       connector: { id: 'none', name: 'none', type: '.none' as const, fields: null },
       settings: { syncAlerts: true },
+      ...(restrictedCreatorUid ? { assignees: [{ uid: restrictedCreatorUid }] } : {}),
       ...(template
         ? { template: { id: template.id }, extended_fields: req.extended_fields ?? {} }
         : {}),
@@ -1002,7 +1063,7 @@ export class InvestigationsService {
       priority_rank: PRIORITY_RANK[priority],
       priority_note: null,
       tags: req.tags ?? [],
-      assignees: [],
+      assignees: restrictedCreatorUid ? [restrictedCreatorUid] : [],
       owner: null,
       participants: actor.type === 'automation' ? [] : [actor],
       created_at: createdAt,
@@ -1035,9 +1096,8 @@ export class InvestigationsService {
       ai_enabled: aiEnabled,
       agent_id: aiEnabled ? this.deps.agent.agentId : null,
       agent_name: aiEnabled ? this.deps.agent.agentName : null,
-      restricted_to: req.restricted_to?.length
-        ? Array.from(new Set([...req.restricted_to, this.deps.user.username]))
-        : [],
+      access: { mode: restrictedCreatorUid ? 'restricted' : 'default' },
+      linked_records: [],
       counters: emptyCounters(),
       last_handoff: null,
       merged_into: null,
@@ -1175,6 +1235,10 @@ export class InvestigationsService {
     }
     if (req.investigation_type?.length)
       filter.push(terms('investigation_type', req.investigation_type));
+    if (req.access?.length === 1) {
+      if (req.access[0] === 'restricted') filter.push(term('access.mode', 'restricted'));
+      else mustNot.push(term('access.mode', 'restricted'));
+    }
     if (req.verdict?.length) filter.push(terms('verdict_effective', req.verdict));
     if (req.tags?.length) filter.push(terms('tags', req.tags));
     if (req.owner) {
@@ -1299,9 +1363,13 @@ export class InvestigationsService {
       collected.splice(0, collected.length, ...settled);
     }
     if (!collected.length) return;
+    if (ownWrite) this.scheduleAutoPush(record, collected);
     const newest = collected[0].created_at;
     await this.addFileEvidenceFromCase(record, collected, ownWrite);
-    const entries = await this.describeCaseUserActions(record, [...collected].reverse(), ownWrite);
+    const entries =
+      this.quietHistory && ownWrite
+        ? []
+        : await this.describeCaseUserActions(record, [...collected].reverse(), ownWrite);
     if (entries.length) {
       await this.es.bulk({
         refresh: true,
@@ -2119,18 +2187,35 @@ export class InvestigationsService {
         );
       }
     }
-    if (req.restricted_to !== undefined) {
-      patch.restricted_to = req.restricted_to;
+    const currentAccess = record.access?.mode ?? 'default';
+    const nextAccess = req.access?.mode;
+    const accessChanged = nextAccess !== undefined && nextAccess !== currentAccess;
+    if (accessChanged) {
+      patch.access = { mode: nextAccess };
+      if (nextAccess === 'restricted') {
+        // Restricting adds the person doing it to the assignees, so they keep access.
+        const uid = this.deps.user.profileUid;
+        const assigned = (
+          (casePatch.assignees as Array<{ uid: string }> | undefined) ??
+          theCase.assignees ??
+          []
+        ).map(({ uid: assignee }) => assignee);
+        if (uid && !assigned.includes(uid)) {
+          if (assigned.length + 1 > MAX_ASSIGNEES_PER_CASE) {
+            throw Boom.badRequest(
+              `Cannot restrict the investigation: the assignees limit of ${MAX_ASSIGNEES_PER_CASE} prevents adding you as an assignee.`
+            );
+          }
+          casePatch.assignees = [...assigned, uid].map((assignee) => ({ uid: assignee }));
+          patch.assignees = [...assigned, uid];
+        }
+      }
       log(
-        'record.restriction_changed',
-        req.restricted_to.length
-          ? `Restricted the investigation to ${plural(
-              req.restricted_to.length,
-              'person',
-              'people'
-            )}`
-          : 'Removed the access restriction',
-        { before: record.restricted_to, after: req.restricted_to }
+        'record.access_changed',
+        nextAccess === 'restricted'
+          ? 'Restricted the investigation to its assignees'
+          : 'Made the investigation visible to everyone',
+        { before: { mode: currentAccess }, after: { mode: nextAccess } }
       );
     }
     if (req.ai_enabled !== undefined && req.ai_enabled !== record.ai_enabled) {
@@ -2160,6 +2245,18 @@ export class InvestigationsService {
     }
     if (!Object.keys(patch).length && !Object.keys(casePatch).length) {
       return this.toRecord(record, seqNo, primaryTerm);
+    }
+    const finalAssignees = (
+      (casePatch.assignees as Array<{ uid: string }> | undefined) ??
+      theCase.assignees ??
+      []
+    ).map(({ uid }) => uid);
+    const finalAccess = patch.access?.mode ?? currentAccess;
+    if (finalAccess === 'restricted' && finalAssignees.length === 0) {
+      throw Boom.badRequest('A restricted investigation must have at least one assignee');
+    }
+    if (accessChanged) {
+      await this.syncAlertCaseIds(recordId, nextAccess === 'restricted' ? 'remove' : 'add');
     }
 
     const caseWriteStartedAt = new Date().toISOString();
@@ -2218,7 +2315,9 @@ export class InvestigationsService {
       });
     }
     await this.refreshCounters(recordId, actor, { touch: false });
-    if (patch.restricted_to?.length && !patch.restricted_to.includes(this.deps.user.username)) {
+    const { profileUid } = this.deps.user;
+    if (finalAccess === 'restricted' && !(profileUid && finalAssignees.includes(profileUid))) {
+      // The person who just left a restricted investigation can no longer read it.
       return this.toRecord({ ...record, ...patch } as StoredRecord);
     }
     return (await this.getRecord(recordId)).record;
@@ -3451,7 +3550,9 @@ export class InvestigationsService {
     if (req.created_after) filter.push({ range: { created_at: { gt: req.created_after } } });
     if (req.type?.length) postFilter.push(terms('evidence.type', req.type));
     if (req.indicator_type?.length)
-      postFilter.push(terms('evidence.indicator.type', req.indicator_type));
+      postFilter.push(
+        terms('evidence.indicator.type', expandIndicatorTypeFilter(req.indicator_type))
+      );
     if (req.added_by?.length) postFilter.push(terms('created_by.id', req.added_by));
     if (req.added_by_type?.length) postFilter.push(terms('created_by.type', req.added_by_type));
     if (req.status?.length) postFilter.push(terms('status', req.status));
@@ -3535,7 +3636,7 @@ export class InvestigationsService {
             aggs: {
               kind: { terms: { field: 'kind', size: 20 } },
               type: { terms: { field: 'evidence.type', size: 20 } },
-              indicator_type: { terms: { field: 'evidence.indicator.type', size: 20 } },
+              indicator_type: { terms: { field: 'evidence.indicator.type', size: 40 } },
               status: { terms: { field: 'status', size: 20 } },
               added_by: {
                 terms: { field: 'created_by.id', size: 50 },
@@ -3625,11 +3726,15 @@ export class InvestigationsService {
    */
   private async bulkCreateItemsInternal(
     record: StoredRecord,
-    inputs: Array<ItemInput & { _id?: string }>,
+    rawInputs: Array<ItemInput & { _id?: string }>,
     actor: Actor,
     opts: { extractIndicators?: boolean; linkAlerts?: boolean; silent?: boolean; ts?: string } = {}
   ): Promise<{ items: InvestigationItem[]; errors: Array<{ index: number; message: string }> }> {
-    if (!inputs.length) return { items: [], errors: [] };
+    if (!rawInputs.length) return { items: [], errors: [] };
+    // Item 13: indicator types are Cases observable type keys, values go through the Cases validators.
+    const checked = await this.checkIndicatorInputs(rawInputs);
+    const { inputs, originalIndex } = checked;
+    if (!inputs.length) return { items: [], errors: checked.errors };
     const counts: Partial<Record<ItemKind, number>> = {};
     for (const input of inputs) counts[input.kind] = (counts[input.kind] ?? 0) + 1;
     await this.ensureTaskLimits(record.id, inputs);
@@ -3666,12 +3771,13 @@ export class InvestigationsService {
         doc,
       ]),
     });
-    const errors: Array<{ index: number; message: string }> = [];
+    const errors: Array<{ index: number; message: string }> = [...checked.errors];
     const created: StoredItem[] = [];
     res.items.forEach((entry, i) => {
       const op = entry.create;
-      if (op?.error) errors.push({ index: i, message: op.error.reason ?? op.error.type });
-      else created.push(docs[i]);
+      if (op?.error) {
+        errors.push({ index: originalIndex[i], message: op.error.reason ?? op.error.type });
+      } else created.push(docs[i]);
     });
     const items = created.map(
       (doc, i) =>
@@ -3688,10 +3794,11 @@ export class InvestigationsService {
       (i): i is EvidenceItem =>
         i.kind === 'evidence' && i.evidence.type === 'alert' && !!i.evidence.alert?.id
     );
-    if (alerts.length && opts.linkAlerts) {
+    if (alerts.length && opts.linkAlerts && record.access?.mode !== 'restricted') {
+      // A restricted investigation never shows up on its alerts.
       await this.linkAlerts(record.id, alerts);
     }
-    if (alerts.length && opts.extractIndicators && alerts.length <= 200) {
+    if (alerts.length && opts.extractIndicators) {
       await this.extractIndicators(record, alerts, actor);
     }
     for (const item of items) {
@@ -3777,7 +3884,14 @@ export class InvestigationsService {
   private normalizeItem(doc: StoredItem, actor: Actor, isCreate: boolean): StoredItem {
     if (doc.kind === 'evidence') {
       const ev = doc.evidence;
-      if (ev.indicator?.value) ev.indicator = { ...ev.indicator, value: ev.indicator.value.trim() };
+      if (ev.indicator?.value) {
+        const value = ev.indicator.value.trim();
+        // Old short names (ip, file_hash, ...) become the Cases key; custom keys stay as they are.
+        ev.indicator = {
+          type: matchIndicatorTypeKey(ev.indicator.type, value) ?? ev.indicator.type,
+          value,
+        };
+      }
       if (ev.snapshot && !ev.snapshot_hash) {
         ev.snapshot_hash =
           ev.snapshot.kind === 'file' && ev.snapshot.sha256
@@ -3836,72 +3950,137 @@ export class InvestigationsService {
     }
   }
 
-  /** Pulls observable values out of the attached alert documents and adds them as indicators. */
+  /* ---------------------------------------------------------------- */
+  /* Item 13: observables use the Cases definitions                    */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Resolves every indicator input to a Cases observable type key and validates its value with the
+   * Cases validators. Invalid inputs are reported by their position and left out.
+   */
+  private async checkIndicatorInputs<T extends ItemInput>(
+    raw: T[]
+  ): Promise<{
+    inputs: T[];
+    originalIndex: number[];
+    errors: Array<{ index: number; message: string }>;
+  }> {
+    const hasIndicator = (input: ItemInput): boolean =>
+      input.kind === 'evidence' && !!input.evidence.indicator?.value;
+    if (!raw.some(hasIndicator)) {
+      return { inputs: raw, originalIndex: raw.map((_, index) => index), errors: [] };
+    }
+    const types = await getObservableTypes(this.deps.casesClient);
+    const inputs: T[] = [];
+    const originalIndex: number[] = [];
+    const errors: Array<{ index: number; message: string }> = [];
+    raw.forEach((input, index) => {
+      if (input.kind !== 'evidence' || !input.evidence.indicator?.value) {
+        inputs.push(input);
+        originalIndex.push(index);
+        return;
+      }
+      const { type: rawType, value } = input.evidence.indicator;
+      const resolved = resolveIndicatorForWrite(types, rawType, value);
+      if (resolved.error !== undefined) {
+        errors.push({ index, message: resolved.error });
+        return;
+      }
+      inputs.push({
+        ...input,
+        evidence: { ...input.evidence, indicator: { type: resolved.type, value: value.trim() } },
+      });
+      originalIndex.push(index);
+    });
+    return { inputs, originalIndex, errors };
+  }
+
+  /** Observables (Cases type key and value) in each attached alert, read in batches from the alert indices. */
+  private async collectAlertObservables(
+    alerts: EvidenceItem[]
+  ): Promise<Map<string, { type: string; value: string; source: EvidenceItem }>> {
+    const fieldNames = Array.from(
+      new Set([
+        'source.ip',
+        'destination.ip',
+        'host.name',
+        'file.path',
+        'dns.question.name',
+        'agent.id',
+        ...getHashFields(),
+      ])
+    );
+    const alertsById = new Map<string, EvidenceItem>();
+    const idsByIndex = new Map<string, string[]>();
+    for (const alert of alerts) {
+      const { id, index } = alert.evidence.alert ?? {};
+      if (id && index) {
+        alertsById.set(id, alert);
+        idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
+      }
+    }
+    const found = new Map<string, { type: string; value: string; source: EvidenceItem }>();
+    for (const [index, ids] of idsByIndex) {
+      for (let from = 0; from < ids.length; from += EXTRACTION_ALERT_BATCH) {
+        const batch = ids.slice(from, from + EXTRACTION_ALERT_BATCH);
+        const res = await this.deps.scopedEsClient.search<Record<string, unknown>>({
+          index,
+          size: batch.length,
+          query: { ids: { values: batch } },
+          fields: fieldNames,
+          _source: false,
+        });
+        for (const hit of res.hits.hits) {
+          const source = hit._id ? alertsById.get(hit._id) : undefined;
+          const ecs: FlattedEcsData[] = Object.entries(hit.fields ?? {}).map(([field, value]) => ({
+            field,
+            value: (Array.isArray(value) ? value : [value]).map(String),
+          }));
+          for (const observable of source ? getObservablesFromEcs([ecs]) : []) {
+            const value = observable.value.trim();
+            const key = value.toLowerCase();
+            if (source && value.length && value.length < 2048 && !found.has(key)) {
+              found.set(key, { type: observable.typeKey, value, source });
+            }
+          }
+        }
+      }
+    }
+    return found;
+  }
+
+  /**
+   * Pulls observables out of the attached alert documents with the Cases extractor
+   * (`getObservablesFromEcs`) and adds them as indicators typed with Cases observable type keys.
+   * Alerts are read and the new indicators written in batches, so the number of alerts is not limited.
+   */
   private async extractIndicators(
     record: StoredRecord,
     alerts: EvidenceItem[],
     actor: Actor
   ): Promise<void> {
-    const FIELDS: Array<[string, 'ip' | 'domain' | 'url' | 'file_hash' | 'file_path' | 'email']> = [
-      ['source.ip', 'ip'],
-      ['destination.ip', 'ip'],
-      ['file.hash.sha256', 'file_hash'],
-      ['process.hash.sha256', 'file_hash'],
-      ['dll.hash.sha256', 'file_hash'],
-      ['file.path', 'file_path'],
-      ['url.full', 'url'],
-      ['dns.question.name', 'domain'],
-      ['destination.domain', 'domain'],
-      ['email.from.address', 'email'],
-    ];
     try {
-      const byIndex = new Map<string, string[]>();
-      for (const a of alerts) {
-        const list = byIndex.get(a.evidence.alert?.index as string) ?? [];
-        list.push(a.evidence.alert?.id as string);
-        byIndex.set(a.evidence.alert?.index as string, list);
-      }
-      const found = new Map<string, { type: (typeof FIELDS)[number][1]; source: EvidenceItem }>();
-      for (const [index, ids] of byIndex) {
-        const res = await this.deps.scopedEsClient.search<Record<string, unknown>>({
-          index,
-          size: ids.length,
-          query: { ids: { values: ids } },
-          fields: FIELDS.map(([f]) => f),
-          _source: false,
-        });
-        for (const hit of res.hits.hits) {
-          const source = alerts.find((a) => a.evidence.alert?.id === hit._id);
-          for (const [field, type] of source ? FIELDS : []) {
-            const values = (hit.fields?.[field] as unknown[] | undefined) ?? [];
-            for (const v of values) {
-              if (source && typeof v === 'string' && v.length && v.length < 2048) {
-                const key = v.toLowerCase();
-                if (!found.has(key)) found.set(key, { type, source });
-              }
-            }
-          }
-        }
-      }
+      const found = await this.collectAlertObservables(alerts);
       if (!found.size) return;
-      const existing = await this.es.search({
-        index: INVESTIGATION_ITEMS_INDEX,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              term('record_id', record.id),
-              terms('evidence.indicator.value', Array.from(found.keys())),
-            ],
+      const values = Array.from(found.keys());
+      const have = new Set<string>();
+      for (let from = 0; from < values.length; from += EXTRACTION_WRITE_BATCH) {
+        const chunk = values.slice(from, from + EXTRACTION_WRITE_BATCH);
+        const existing = await this.es.search({
+          index: INVESTIGATION_ITEMS_INDEX,
+          size: 0,
+          query: {
+            bool: {
+              filter: [term('record_id', record.id), terms('evidence.indicator.value', chunk)],
+            },
           },
-        },
-        aggs: { v: { terms: { field: 'evidence.indicator.value', size: found.size } } },
-      });
-      const have = new Set(buckets(existing.aggregations?.v).map((b) => b.key));
+          aggs: { v: { terms: { field: 'evidence.indicator.value', size: chunk.length } } },
+        });
+        buckets(existing.aggregations?.v).forEach((b) => have.add(b.key));
+      }
       const inputs: ItemInput[] = Array.from(found.entries())
         .filter(([key]) => !have.has(key))
-        .slice(0, 500)
-        .map(([value, { type, source }]) => ({
+        .map(([, { type, value, source }]) => ({
           kind: 'evidence',
           title: value,
           links: [{ relation: 'derived_from', target_id: source.id }],
@@ -3924,10 +4103,19 @@ export class InvestigationsService {
         name: 'Indicator extraction',
         on_behalf_of: actor.name,
       };
-      await this.bulkCreateItemsInternal(record, inputs, automation, {
-        extractIndicators: false,
-        linkAlerts: false,
-      });
+      const created: InvestigationItem[] = [];
+      for (let from = 0; from < inputs.length; from += EXTRACTION_WRITE_BATCH) {
+        const res = await this.bulkCreateItemsInternal(
+          record,
+          inputs.slice(from, from + EXTRACTION_WRITE_BATCH),
+          automation,
+          { extractIndicators: false, linkAlerts: false, silent: true }
+        );
+        created.push(...res.items);
+      }
+      if (created.length) {
+        await this.appendActivity(record.id, [this.describeCreate(created, automation)]);
+      }
     } catch (error) {
       this.deps.logger.warn(`Investigation ${record.id}: indicator extraction failed: ${error}`);
     }
@@ -4565,9 +4753,10 @@ export class InvestigationsService {
     const data = hasHeader ? rows.slice(1) : rows;
     const errors: ImportIndicatorsResponse['errors'] = [];
     const seen = new Set<string>();
+    const types = await getObservableTypes(this.deps.casesClient);
     const parsed: Array<{
       value: string;
-      type: ReturnType<typeof parseIndicatorType>;
+      type: string;
       why: string | null;
     }> = [];
     data.forEach((row, i) => {
@@ -4584,13 +4773,20 @@ export class InvestigationsService {
       const key = value.toLowerCase();
       if (seen.has(key)) return;
       seen.add(key);
-      const type = parseIndicatorType(typeIdx >= 0 ? row[typeIdx] : undefined, value);
-      const invalid = validateIndicatorValue(type, value);
-      if (invalid) {
-        errors.push({ line, message: `"${clip(value, 80)}" is ${invalid}` });
+      const rawType = typeIdx >= 0 ? (row[typeIdx] ?? '').trim() : '';
+      // A type the file names must be a Cases observable type (key, label or an old short name);
+      // an empty or unknown type is read from the value.
+      const type = resolveIndicatorTypeKey(rawType, value, types);
+      const resolved = resolveIndicatorForWrite(types, type, value);
+      if (resolved.error !== undefined) {
+        errors.push({ line, message: `"${clip(value, 80)}": ${resolved.error}` });
         return;
       }
-      parsed.push({ value, type, why: whyIdx >= 0 ? (row[whyIdx] ?? '').trim() || null : null });
+      parsed.push({
+        value,
+        type: resolved.type,
+        why: whyIdx >= 0 ? (row[whyIdx] ?? '').trim() || null : null,
+      });
     });
     const existing = new Set<string>();
     for (let i = 0; i < parsed.length; i += 1000) {
@@ -4667,6 +4863,11 @@ export class InvestigationsService {
       searchAfter = hits[hits.length - 1].sort as Array<string | number>;
     }
     const value = (e: EvidenceItem) => e.evidence?.indicator?.value ?? e.title;
+    const observableTypes = await getObservableTypes(this.deps.casesClient);
+    const typeLabel = (e: EvidenceItem): string | null =>
+      e.evidence?.indicator
+        ? getObservableTypeLabel(observableTypes, e.evidence.indicator.type)
+        : null;
     const base = `${record.display_id}-evidence`;
     if (req.format === 'json') {
       return {
@@ -4676,9 +4877,7 @@ export class InvestigationsService {
           rows.map((e) => ({
             id: e.ref,
             type: e.evidence ? EVIDENCE_TYPE_LABELS[e.evidence.type] : e.kind,
-            indicator_type: e.evidence?.indicator
-              ? INDICATOR_TYPE_LABELS[e.evidence.indicator.type]
-              : null,
+            indicator_type: typeLabel(e),
             value: value(e),
             added_by: e.created_by.name,
             added: e.created_at,
@@ -4701,30 +4900,7 @@ export class InvestigationsService {
     if (req.format === 'stix') {
       const pattern = (e: EvidenceItem): string | null => {
         const ind = e.evidence?.indicator;
-        if (!ind) return null;
-        const v = ind.value.replace(/'/g, "\\'");
-        switch (ind.type) {
-          case 'ip':
-            return v.includes(':') ? `[ipv6-addr:value = '${v}']` : `[ipv4-addr:value = '${v}']`;
-          case 'domain':
-            return `[domain-name:value = '${v}']`;
-          case 'url':
-            return `[url:value = '${v}']`;
-          case 'email':
-            return `[email-addr:value = '${v}']`;
-          case 'file_hash':
-            return v.length === 64
-              ? `[file:hashes.'SHA-256' = '${v}']`
-              : v.length === 40
-              ? `[file:hashes.'SHA-1' = '${v}']`
-              : `[file:hashes.MD5 = '${v}']`;
-          case 'file_path':
-            return `[file:name = '${v.split(/[\\/]/).pop()}']`;
-          case 'registry_key':
-            return `[windows-registry-key:key = '${v}']`;
-          default:
-            return null;
-        }
+        return ind ? indicatorStixPattern(ind.type, ind.value) : null;
       };
       const created = now();
       const objects = rows
@@ -4758,7 +4934,7 @@ export class InvestigationsService {
       [
         e.ref,
         e.evidence ? EVIDENCE_TYPE_LABELS[e.evidence.type] : e.kind,
-        e.evidence?.indicator ? INDICATOR_TYPE_LABELS[e.evidence.indicator.type] : '',
+        typeLabel(e) ?? '',
         value(e),
         e.created_by.name,
         e.created_at,
@@ -5102,7 +5278,8 @@ export class InvestigationsService {
       ...(record.merged_from ?? []),
       ...(record.merged_into ? [record.merged_into] : []),
     ];
-    const related = await this.otherRecordsMatching(values, exclude);
+    const computed = await this.otherRecordsMatching(values, exclude);
+    const related = await this.withLinkedRecords(record, computed);
     const mergedIds = [
       ...(record.merged_from ?? []),
       ...(record.merged_into ? [record.merged_into] : []),
@@ -5202,7 +5379,7 @@ export class InvestigationsService {
       const docs = await this.es.mget<StoredRecord>({
         index: INVESTIGATION_RECORDS_INDEX,
         ids: recordIds,
-        _source_includes: ['id', 'display_id', 'title', 'space_id', 'restricted_to'],
+        _source_includes: ['id', 'display_id', 'title', 'space_id', 'access', 'assignees'],
       });
       for (const raw of docs.docs) {
         const d = raw as { found?: boolean; _id: string; _source?: StoredRecord };
@@ -5229,6 +5406,69 @@ export class InvestigationsService {
   /* ---------------------------------------------------------------- */
   /* Since last handoff, history, report, threads                      */
   /* ---------------------------------------------------------------- */
+
+  /* ---------------------------------------------------------------- */
+  /* Item 16: timings                                                  */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * Time to first response, time in progress and time to close, in seconds. Durations come from the
+   * Cases lifespan metrics, less the time the record spent in pausing statuses; the first response is
+   * the first comment, status change or assignment by someone other than the case's creator.
+   */
+  public async timings(recordId: string): Promise<InvestigationTimings> {
+    const { record } = await this.load(recordId);
+    const { casesClient } = this.deps;
+    const [metrics, theCase] = await Promise.all([
+      casesClient.metrics.getCaseMetrics({
+        caseId: record.case_id,
+        features: [CaseMetricsFeature.LIFESPAN],
+      }),
+      casesClient.cases.get({ id: record.case_id, includeComments: false }),
+    ]);
+    const lifespan = metrics.lifespan;
+    const paused = getPausedSeconds(record);
+    const afterPause = (seconds: number): number => Math.max(Math.round(seconds - paused), 0);
+
+    const createdAt = Date.parse(theCase.created_at);
+    const creator = theCase.created_by;
+    const isCreator = (user: { username?: string | null; profile_uid?: string | null }): boolean =>
+      creator.profile_uid && user.profile_uid
+        ? creator.profile_uid === user.profile_uid
+        : creator.username === user.username;
+    let firstResponse: number | null = null;
+    for (let page = 1; page <= FIRST_RESPONSE_MAX_PAGES && firstResponse === null; page++) {
+      const res = await casesClient.userActions.find({
+        caseId: record.case_id,
+        params: { sortOrder: 'asc', perPage: 100, page },
+      });
+      const response = res.userActions.find(
+        (action) =>
+          FIRST_RESPONSE_ACTION_TYPES.has(action.type) &&
+          !isCreator(action.created_by) &&
+          Date.parse(action.created_at) >= createdAt
+      );
+      if (response) {
+        firstResponse = Math.max(
+          Math.round((Date.parse(response.created_at) - createdAt) / 1000),
+          0
+        );
+      }
+      if (res.userActions.length < 100) break;
+    }
+
+    const inProgressMs = lifespan?.statusInfo.inProgressDuration ?? 0;
+    const closeDate = lifespan?.closeDate ? Date.parse(lifespan.closeDate) : null;
+    return {
+      time_to_first_response: firstResponse,
+      time_in_progress: inProgressMs > 0 ? afterPause(inProgressMs / 1000) : null,
+      time_to_close:
+        record.status === 'closed' && closeDate !== null
+          ? afterPause((closeDate - createdAt) / 1000)
+          : null,
+      time_paused: Math.round(paused),
+    };
+  }
 
   public async since(recordId: string, sinceParam?: string): Promise<SinceLastHandoffResponse> {
     const { record } = await this.load(recordId);
@@ -5268,12 +5508,9 @@ export class InvestigationsService {
       });
     }
     if (byType.indicator) {
+      const observableTypes = await getObservableTypes(this.deps.casesClient);
       const kinds = buckets(aggs.ind).map(
-        (b) =>
-          `${b.doc_count} ${
-            INDICATOR_TYPE_LABELS[b.key as keyof typeof INDICATOR_TYPE_LABELS]?.toLowerCase() ??
-            b.key
-          }`
+        (b) => `${b.doc_count} ${getObservableTypeLabel(observableTypes, b.key).toLowerCase()}`
       );
       out.push({
         key: 'indicators',
@@ -5479,6 +5716,220 @@ export class InvestigationsService {
   }
 
   /* ---------------------------------------------------------------- */
+  /* Items 12 and 17: restricted access and explicit links            */
+  /* ---------------------------------------------------------------- */
+
+  /** Removes the case id from the record's alerts (restricting) or puts it back (unrestricting). */
+  private async syncAlertCaseIds(recordId: string, change: 'add' | 'remove'): Promise<void> {
+    const alertsClient = await this.deps.getAlertsClient().catch(() => undefined);
+    if (!alertsClient) return;
+    const byIndex = new Map<string, string[]>();
+    await this.scanItems<EvidenceItem>(
+      recordId,
+      { bool: { filter: [term('kind', 'evidence'), term('evidence.type', 'alert')] } },
+      ['evidence.alert'],
+      (batch) => {
+        for (const item of batch) {
+          const alert = item.evidence?.alert;
+          if (alert?.id && alert.index) {
+            const list = byIndex.get(alert.index) ?? [];
+            list.push(alert.id);
+            byIndex.set(alert.index, list);
+          }
+        }
+      }
+    );
+    for (const [index, ids] of byIndex) {
+      for (let i = 0; i < ids.length; i += 1000) {
+        const alerts = ids.slice(i, i + 1000).map((id) => ({ id, index }));
+        if (change === 'remove') {
+          await alertsClient.removeCaseIdFromAlerts({ alerts, caseId: recordId });
+        } else {
+          await alertsClient.bulkUpdateCases({ alerts, caseIds: [recordId] });
+        }
+      }
+    }
+  }
+
+  private async changeLink(
+    recordId: string,
+    otherId: string,
+    change: 'add' | 'remove',
+    ts: string
+  ): Promise<void> {
+    await this.es.update({
+      index: INVESTIGATION_RECORDS_INDEX,
+      id: recordId,
+      refresh: true,
+      retry_on_conflict: 5,
+      script: {
+        lang: 'painless',
+        source: `
+          if (ctx._source.linked_records == null) { ctx._source.linked_records = new ArrayList(); }
+          if (params.change == 'add') {
+            if (!ctx._source.linked_records.contains(params.other)) {
+              ctx._source.linked_records.add(params.other);
+            }
+          } else {
+            ctx._source.linked_records.removeIf(id -> id == params.other);
+          }
+          ctx._source.updated_at = params.ts;`,
+        params: { change, other: otherId, ts },
+      },
+    });
+  }
+
+  /** Links two investigations. The link is stored on both and both get an Activity entry. */
+  public async linkRecords(recordId: string, otherId: string): Promise<LinkRecordResponse> {
+    if (recordId === otherId) {
+      throw Boom.badRequest('An investigation cannot be linked to itself.');
+    }
+    const { record } = await this.loadForWrite(recordId);
+    const { record: other } = await this.load(otherId);
+    const alreadyLinked =
+      (record.linked_records ?? []).includes(otherId) &&
+      (other.linked_records ?? []).includes(recordId);
+    if (!alreadyLinked) {
+      const limit = INVESTIGATION_LIMITS.maxLinkedRecords;
+      const isFull = (side: StoredRecord, otherRecordId: string): boolean =>
+        !(side.linked_records ?? []).includes(otherRecordId) &&
+        (side.linked_records ?? []).length >= limit;
+      if (isFull(record, otherId) || isFull(other, recordId)) {
+        throw Boom.badRequest(`An investigation can be linked to at most ${limit} others.`);
+      }
+      const actor = this.actor();
+      const ts = now();
+      await Promise.all([
+        this.changeLink(recordId, otherId, 'add', ts),
+        this.changeLink(otherId, recordId, 'add', ts),
+      ]);
+      await Promise.all([
+        this.appendActivity(recordId, [
+          {
+            ts,
+            actor,
+            action: 'record.linked',
+            target: { kind: 'record', id: otherId, title: other.title },
+            message: `Linked this investigation to ${other.display_id}`,
+            details: other.title,
+            links: [{ kind: 'record', id: otherId, label: other.display_id }],
+          },
+        ]),
+        this.appendActivity(otherId, [
+          {
+            ts,
+            actor,
+            action: 'record.linked',
+            target: { kind: 'record', id: recordId, title: record.title },
+            message: `Linked this investigation to ${record.display_id}`,
+            details: record.title,
+            links: [{ kind: 'record', id: recordId, label: record.display_id }],
+          },
+        ]),
+      ]);
+    }
+    return {
+      record: (await this.getRecord(recordId)).record,
+      other: { id: other.id, display_id: other.display_id, title: other.title },
+    };
+  }
+
+  /** Removes the link from both records. The other side may already be gone or hidden. */
+  public async unlinkRecords(recordId: string, otherId: string): Promise<LinkRecordResponse> {
+    const { record } = await this.loadForWrite(recordId);
+    const other = await this.load(otherId)
+      .then(({ record: loaded }) => loaded)
+      .catch((error) => {
+        if (Boom.isBoom(error) && error.output.statusCode === 404) return undefined;
+        throw error;
+      });
+    const isLinked =
+      (record.linked_records ?? []).includes(otherId) ||
+      (other?.linked_records ?? []).includes(recordId);
+    if (!isLinked) {
+      throw Boom.notFound('These investigations are not linked.');
+    }
+    const actor = this.actor();
+    const ts = now();
+    await Promise.all([
+      this.changeLink(recordId, otherId, 'remove', ts),
+      ...(other ? [this.changeLink(otherId, recordId, 'remove', ts)] : []),
+    ]);
+    await this.appendActivity(recordId, [
+      {
+        ts,
+        actor,
+        action: 'record.unlinked',
+        target: { kind: 'record', id: otherId, title: other?.title ?? null },
+        message: `Unlinked this investigation from ${other?.display_id ?? 'another investigation'}`,
+        details: other?.title ?? null,
+        links: other ? [{ kind: 'record', id: otherId, label: other.display_id }] : [],
+      },
+    ]);
+    if (other) {
+      await this.appendActivity(otherId, [
+        {
+          ts,
+          actor,
+          action: 'record.unlinked',
+          target: { kind: 'record', id: recordId, title: record.title },
+          message: `Unlinked this investigation from ${record.display_id}`,
+          details: record.title,
+          links: [{ kind: 'record', id: recordId, label: record.display_id }],
+        },
+      ]);
+    }
+    return {
+      record: (await this.getRecord(recordId)).record,
+      other: {
+        id: otherId,
+        display_id: other?.display_id ?? otherId,
+        title: other?.title ?? '',
+      },
+    };
+  }
+
+  /** Puts the records linked to `record` first in its related list, with the reason "Linked". */
+  private async withLinkedRecords(
+    record: StoredRecord,
+    computed: RelatedRecord[]
+  ): Promise<RelatedRecord[]> {
+    const ids = record.linked_records ?? [];
+    if (!ids.length) return computed;
+    const docs = await this.es.mget<StoredRecord>({ index: INVESTIGATION_RECORDS_INDEX, ids });
+    const linked = (docs.docs as Array<{ found?: boolean; _source?: StoredRecord }>)
+      .map((d) => (d.found ? d._source : undefined))
+      .filter(
+        (r): r is StoredRecord =>
+          r !== undefined && r.space_id === this.deps.spaceId && this.canRead(r)
+      );
+    const linkedIds = new Set(linked.map((r) => r.id));
+    const byId = new Map(computed.map((item) => [item.record.id, item]));
+    const first: RelatedRecord[] = linked.map((r) => {
+      const found = byId.get(r.id);
+      return {
+        record: found?.record ?? {
+          id: r.id,
+          display_id: r.display_id,
+          title: r.title,
+          status: r.status,
+          priority: r.priority,
+          created_at: r.created_at,
+          updated_at: r.updated_at,
+          owner: r.owner ?? null,
+          close_outcome: r.close_outcome ?? null,
+          counters: { ...emptyCounters(), ...(r.counters ?? {}) },
+          summary: r.summary ?? null,
+          origin: r.origin,
+        },
+        reasons: [{ type: 'linked' as const, value: 'Linked' }, ...(found?.reasons ?? [])],
+        shared_values: found?.shared_values ?? [],
+      };
+    });
+    return [...first, ...computed.filter((item) => !linkedIds.has(item.record.id))];
+  }
+
+  /* ---------------------------------------------------------------- */
   /* Agent support                                                     */
   /* ---------------------------------------------------------------- */
 
@@ -5587,4 +6038,461 @@ export class InvestigationsService {
     ];
     return lines.join('\n');
   }
+
+  /* ---------------------------------------------------------------- */
+  /* Items 10 and 11: external ticket (push, auto push, sync)          */
+  /* ---------------------------------------------------------------- */
+
+  /** True on the service a sync uses, so what it pulled is never pushed back. */
+  private suppressAutoPush = false;
+  /** Writes made by a ticket sync: the one sync entry describes them, so they add none of their own. */
+  private quietHistory = false;
+
+  private ticketStateId(recordId: string): string {
+    return `external_ticket_state:${recordId}`;
+  }
+
+  private async getTicketState(recordId: string): Promise<ExternalTicketState | undefined> {
+    const doc = await this.es
+      .get<ExternalTicketState>({
+        index: INVESTIGATION_CONFIG_INDEX,
+        id: this.ticketStateId(recordId),
+      })
+      .catch(() => undefined);
+    return doc?._source;
+  }
+
+  private async saveTicketState(
+    recordId: string,
+    patch: Partial<Omit<ExternalTicketState, 'type' | 'record_id'>>
+  ): Promise<void> {
+    const current = await this.getTicketState(recordId);
+    await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: this.ticketStateId(recordId),
+      refresh: true,
+      document: {
+        ...current,
+        ...patch,
+        type: 'external_ticket_state',
+        record_id: recordId,
+      } satisfies ExternalTicketState,
+    });
+  }
+
+  private async buildExternalTicket(
+    record: StoredRecord,
+    theCase: Awaited<ReturnType<CasesClient['cases']['get']>>
+  ): Promise<ExternalTicketResponse> {
+    const caseConnector = theCase.connector;
+    const connector =
+      caseConnector && caseConnector.type !== '.none'
+        ? {
+            id: caseConnector.id,
+            name: caseConnector.name,
+            type: caseConnector.type as string,
+            fields: (caseConnector.fields as Record<string, unknown> | null) ?? null,
+          }
+        : null;
+    const [available, pushInfo, state] = await Promise.all([
+      this.deps.casesClient.configure.getConnectors().catch(() => []),
+      connector
+        ? this.deps.casesClient.userActions
+            .getConnectors({ caseId: record.case_id })
+            .catch(() => ({}))
+        : Promise.resolve({}),
+      this.getTicketState(record.id),
+    ]);
+    const push = connector
+      ? (
+          pushInfo as Record<
+            string,
+            { push?: { needsToBePushed: boolean; hasBeenPushed: boolean } }
+          >
+        )[connector.id]?.push
+      : undefined;
+    const externalService = theCase.external_service ?? null;
+    const hasBeenPushed = Boolean(push?.hasBeenPushed);
+    let needsUpdate = Boolean(push?.needsToBePushed);
+    if (needsUpdate && hasBeenPushed && externalService && state?.sync_action_ids?.length) {
+      needsUpdate = await this.hasUnpushedChanges(
+        record,
+        externalService.pushed_at,
+        new Set(state.sync_action_ids)
+      );
+    }
+    return {
+      connector,
+      external_service: externalService
+        ? {
+            connector_id: externalService.connector_id,
+            connector_name: externalService.connector_name,
+            external_id: externalService.external_id,
+            external_title: externalService.external_title,
+            external_url: externalService.external_url,
+            pushed_at: externalService.pushed_at,
+            pushed_by: externalService.pushed_by,
+          }
+        : null,
+      needs_update: needsUpdate,
+      has_been_pushed: hasBeenPushed,
+      auto_push: Boolean(record.auto_push),
+      last_sync: state?.last_sync ?? null,
+      connectors: available.map((c) => ({ id: c.id, name: c.name, type: c.actionTypeId })),
+    };
+  }
+
+  /**
+   * Cases says the incident needs an update when any case action is newer than the push. Actions a
+   * sync wrote (what it pulled from the ticket) do not count, so a sync alone never asks for a push.
+   */
+  private async hasUnpushedChanges(
+    record: StoredRecord,
+    pushedAt: string,
+    syncActionIds: Set<string>
+  ): Promise<boolean> {
+    const res = await this.deps.casesClient.userActions.find({
+      caseId: record.case_id,
+      params: { sortOrder: 'desc', perPage: 100, page: 1 },
+    });
+    return res.userActions.some(
+      (action) =>
+        action.created_at > pushedAt &&
+        !syncActionIds.has(action.id) &&
+        TICKET_CHANGE_ACTION_TYPES.includes(action.type) &&
+        (action.type !== 'comment' || action.action === 'create')
+    );
+  }
+
+  public async getExternalTicket(recordId: string): Promise<ExternalTicketResponse> {
+    const { record, theCase } = await this.load(recordId);
+    return this.buildExternalTicket(record, theCase);
+  }
+
+  public async updateExternalTicket(
+    recordId: string,
+    req: UpdateExternalTicketRequest
+  ): Promise<ExternalTicketResponse> {
+    const { record, theCase } = await this.loadForWrite(recordId);
+    const actor = this.actor();
+    if (req.connector !== undefined) {
+      const next =
+        req.connector && req.connector.type !== '.none'
+          ? { ...req.connector, fields: req.connector.fields ?? null }
+          : { id: 'none', name: 'none', type: '.none', fields: null };
+      const current = theCase.connector;
+      const same =
+        current?.id === next.id &&
+        JSON.stringify(current?.fields ?? null) === JSON.stringify(next.fields);
+      if (!same) {
+        if (next.id !== 'none') {
+          const supported = await this.deps.casesClient.configure.getConnectors();
+          if (!supported.some((c) => c.id === next.id)) {
+            throw Boom.badRequest(`${next.name} is not a connector Cases can push to.`);
+          }
+        }
+        const startedAt = now();
+        await this.deps.casesClient.cases.bulkUpdate({
+          cases: [{ id: recordId, version: theCase.version, connector: next }],
+        } as Parameters<CasesClient['cases']['bulkUpdate']>[0]);
+        await this.ingestCaseUserActions(record, { startedAt, actor, ts: now() });
+      }
+    }
+    if (req.auto_push !== undefined && req.auto_push !== Boolean(record.auto_push)) {
+      await this.es.update({
+        index: INVESTIGATION_RECORDS_INDEX,
+        id: recordId,
+        refresh: true,
+        retry_on_conflict: 3,
+        doc: { auto_push: req.auto_push },
+      });
+    }
+    const fresh = await this.load(recordId);
+    return this.buildExternalTicket(fresh.record, fresh.theCase);
+  }
+
+  public async pushExternalTicket(recordId: string): Promise<ExternalTicketResponse> {
+    const { record, theCase } = await this.loadForWrite(recordId);
+    const connectorId = theCase.connector?.type !== '.none' ? theCase.connector?.id : undefined;
+    if (!connectorId) throw Boom.badRequest('Choose an external ticket connector first.');
+    await this.pushNow(record, connectorId, this.actor());
+    const fresh = await this.load(recordId);
+    return this.buildExternalTicket(fresh.record, fresh.theCase);
+  }
+
+  /** The Cases manual push, with its case actions copied to Activity under `actor`. */
+  private async pushNow(record: StoredRecord, connectorId: string, actor: Actor): Promise<void> {
+    const startedAt = now();
+    const pushed = await this.deps.casesClient.cases.push({
+      caseId: record.case_id,
+      connectorId,
+      pushType: 'manual',
+    });
+    await this.ingestCaseUserActions(record, { startedAt, actor, ts: now() });
+    // What the ticket looks like now is the starting point for the next sync.
+    const external = pushed.external_service;
+    if (external) {
+      const incident = await this.readIncident(connectorId, external.external_id).catch(
+        () => undefined
+      );
+      const state = await this.getTicketState(record.id);
+      if (incident) {
+        await this.saveTicketState(record.id, {
+          baseline: {
+            title: incident.title,
+            description: incident.description,
+            // A status the ticket moved to is news for the next sync, not something a push overwrites.
+            status: state?.baseline?.status ?? incident.status,
+          },
+        });
+      }
+    }
+  }
+
+  /** Schedules one push shortly after a write; a later write restarts the wait. */
+  private scheduleAutoPush(record: StoredRecord, actions: CaseUserAction[]): void {
+    if (this.suppressAutoPush || !record.auto_push) return;
+    if (!actions.some((action) => AUTO_PUSH_ACTION_TYPES.includes(action.type))) return;
+    const key = `${this.deps.spaceId}:${record.id}`;
+    const pending = InvestigationsService.autoPushTimers.get(key);
+    if (pending) clearTimeout(pending);
+    const timer = setTimeout(() => {
+      InvestigationsService.autoPushTimers.delete(key);
+      this.runAutoPush(record.id).catch((error) =>
+        this.deps.logger.warn(`Investigation ${record.id}: automatic push failed: ${error}`)
+      );
+    }, AUTO_PUSH_DEBOUNCE_MS);
+    timer.unref?.();
+    InvestigationsService.autoPushTimers.set(key, timer);
+  }
+
+  private async runAutoPush(recordId: string): Promise<void> {
+    const { record, theCase } = await this.loadForWrite(recordId);
+    const connector = theCase.connector;
+    if (!record.auto_push || !connector || connector.type === '.none') return;
+    const ticket = await this.buildExternalTicket(record, theCase);
+    // Only an incident that already exists is kept up to date; the first push stays a choice.
+    if (!ticket.has_been_pushed || !ticket.needs_update) return;
+    await this.pushNow(record, connector.id, {
+      type: 'automation',
+      id: 'cases-investigations-auto-push',
+      name: 'Automatic push',
+      on_behalf_of: this.deps.user.fullName,
+    });
+  }
+
+  /** Reads an incident from a Cases Webhook connector: its `getIncidentUrl`, title, description and status. */
+  private async readIncident(
+    connectorId: string,
+    externalId: string
+  ): Promise<{ title: string | null; description: string | null; status: string | null }> {
+    const connectors = await this.deps.casesClient.configure.getConnectors();
+    const connector = connectors.find((c) => c.id === connectorId);
+    if (!connector) throw Boom.badRequest('The connector is no longer available.');
+    const config = (connector.config ?? {}) as Record<string, unknown>;
+    const template = typeof config.getIncidentUrl === 'string' ? config.getIncidentUrl : '';
+    if (!template) {
+      throw Boom.badRequest(`${connector.name} cannot be read: it has no incident URL.`);
+    }
+    const render = (text: string) =>
+      text.replace(/\{\{\{?\s*external\.system\.id\s*\}?\}\}/g, encodeURIComponent(externalId));
+    const url = new URL(render(template));
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      throw Boom.badRequest(`${connector.name} has an incident URL that is not http or https.`);
+    }
+    const method = String(config.getIncidentMethod ?? 'get').toUpperCase();
+    const headers: Record<string, string> = { accept: 'application/json' };
+    if (config.headers && typeof config.headers === 'object') {
+      for (const [name, value] of Object.entries(config.headers as Record<string, unknown>)) {
+        if (typeof value === 'string') headers[name] = value;
+      }
+    }
+    const body =
+      method === 'POST' && typeof config.getIncidentJson === 'string'
+        ? render(config.getIncidentJson)
+        : undefined;
+    let res: Response;
+    try {
+      const deadline = timeoutSignal(10_000);
+      try {
+        res = await fetch(url, {
+          method,
+          headers: body ? { ...headers, 'content-type': 'application/json' } : headers,
+          body,
+          signal: deadline,
+        });
+      } finally {
+        deadline.dispose();
+      }
+    } catch (error) {
+      throw Boom.failedDependency(`Could not reach ${connector.name}: ${caseErrorMessage(error)}`);
+    }
+    if (!res.ok) {
+      throw Boom.failedDependency(
+        `${connector.name} answered ${res.status} for incident ${externalId}.`
+      );
+    }
+    const incident = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+    const text = (value: unknown): string | null =>
+      typeof value === 'string' ? value : value == null ? null : String(value);
+    return {
+      title: text(incident.title),
+      description: text(incident.description),
+      status:
+        text(incident.status)
+          ?.toLowerCase()
+          .replace(/[\s-]+/g, '_') ?? null,
+    };
+  }
+
+  /**
+   * Pulls what changed in the ticket since the last push or sync. Title and description are applied
+   * both ways (the ticket wins when it changed), the status only comes from the ticket, tags and
+   * comments only go to it. Nothing pulled here is pushed back.
+   */
+  public async syncExternalTicket(recordId: string): Promise<ExternalTicketResponse> {
+    const { record, theCase } = await this.loadForWrite(recordId);
+    const connector = theCase.connector;
+    const external = theCase.external_service;
+    if (!connector || connector.type === '.none') {
+      throw Boom.badRequest('Choose an external ticket connector first.');
+    }
+    if (!external || external.connector_id !== connector.id) {
+      throw Boom.badRequest(
+        `This investigation has not been pushed to ${connector.name} yet, so there is nothing to sync from.`
+      );
+    }
+    const incident = await this.readIncident(connector.id, external.external_id);
+    const state = await this.getTicketState(recordId);
+    const baseline = state?.baseline ?? null;
+    const asConnector: Actor = {
+      type: 'automation',
+      id: connector.id,
+      name: connector.name,
+      on_behalf_of: this.deps.user.fullName,
+    };
+    const syncing = new InvestigationsService({ ...this.deps, actor: asConnector });
+    syncing.suppressAutoPush = true;
+    syncing.quietHistory = true;
+    const startedAt = now();
+    const changes: string[] = [];
+    const patch: UpdateRecordRequest = {};
+    const title = incident.title?.trim().slice(0, MAX_TITLE_LENGTH);
+    if (title && title !== record.title && title !== baseline?.title) {
+      patch.title = title;
+      changes.push('title');
+    }
+    const description = incident.description?.slice(0, MAX_DESCRIPTION_LENGTH);
+    if (
+      description != null &&
+      description !== record.description &&
+      description !== baseline?.description
+    ) {
+      patch.description = description;
+      changes.push('description');
+    }
+
+    // The ticket's own words map onto the case statuses. A pushed ticket starts as `open`, so
+    // without a baseline an `open` ticket carries no news.
+    const statusMoved =
+      incident.status != null &&
+      (baseline ? incident.status !== baseline.status : incident.status !== 'open');
+    let closeRequested = false;
+    let baselineStatus = incident.status;
+    if (statusMoved && record.status !== 'closed') {
+      if (incident.status === 'in_progress' && record.status === 'open') {
+        patch.status = 'in-progress';
+        changes.push('status (in progress)');
+      } else if (incident.status === 'open' && record.status === 'in-progress') {
+        patch.status = 'open';
+        changes.push('status (open)');
+      } else if (incident.status === 'closed') {
+        closeRequested = true;
+      }
+    }
+    if (Object.keys(patch).length) await syncing.updateRecord(recordId, patch);
+    if (closeRequested) {
+      try {
+        await syncing.closeRecord(recordId, { close_reason: 'other' });
+        changes.push('status (closed)');
+      } catch (error) {
+        if (!Boom.isBoom(error) || error.output.statusCode !== 400) throw error;
+        // Required tasks or fields still block the close: the record stays open, and the entry says why.
+        const reason = error.message.replace(/^The investigation cannot close yet\.\s*/, '');
+        changes.push(
+          `status left open because the ticket is closed but the investigation cannot close yet. ${reason}`.trim()
+        );
+        baselineStatus = baseline?.status ?? 'open';
+      }
+    }
+
+    // Case actions the sync wrote do not make the ticket need an update.
+    const written = (
+      await this.deps.casesClient.userActions.find({
+        caseId: record.case_id,
+        params: { sortOrder: 'desc', perPage: 100, page: 1 },
+      })
+    ).userActions.filter((action) => action.created_at >= startedAt);
+    const at = now();
+    const lastSync: ExternalTicketSync = { at, by: this.currentUserActor(), changes };
+    await this.saveTicketState(recordId, {
+      last_sync: lastSync,
+      baseline: {
+        title: incident.title,
+        description: incident.description,
+        status: baselineStatus,
+      },
+      sync_action_ids: [...(state?.sync_action_ids ?? []), ...written.map((a) => a.id)].slice(-200),
+    });
+    if (changes.length) {
+      await this.appendActivity(recordId, [
+        {
+          ts: at,
+          actor: asConnector,
+          action: 'record.synced',
+          target: { kind: 'record', id: recordId, title: patch.title ?? record.title },
+          message: `Synced from ${connector.name}: ${changes.join(', ')}`,
+          details: null,
+          links: [],
+          origin: 'connector',
+        },
+      ]);
+    }
+    await this.refreshCounters(recordId, asConnector, { touch: false });
+    const fresh = await this.load(recordId);
+    return this.buildExternalTicket(fresh.record, fresh.theCase);
+  }
+}
+
+/** Case actions that make an incident out of date (the ones Cases counts for a Webhook connector). */
+const TICKET_CHANGE_ACTION_TYPES: string[] = [
+  'title',
+  'description',
+  'tags',
+  'comment',
+  'status',
+  'severity',
+  'connector',
+];
+/** Case actions that start the automatic push timer. */
+const AUTO_PUSH_ACTION_TYPES: string[] = [
+  'title',
+  'description',
+  'tags',
+  'comment',
+  'status',
+  'severity',
+  'extended_fields',
+];
+const AUTO_PUSH_DEBOUNCE_MS = 3000;
+
+/** Per-record ticket bookkeeping kept in the configuration index. */
+interface ExternalTicketState {
+  type: 'external_ticket_state';
+  record_id: string;
+  last_sync?: ExternalTicketSync | null;
+  /** Ticket values at the last push or sync: a sync applies only what changed since. */
+  baseline?: { title: string | null; description: string | null; status: string | null } | null;
+  /** Case user actions written by a sync; they do not make the incident need an update. */
+  sync_action_ids?: string[];
 }

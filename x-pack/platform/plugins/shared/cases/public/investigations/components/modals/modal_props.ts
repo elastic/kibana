@@ -16,6 +16,7 @@ export type ModalName =
   | 'reopen'
   | 'restrict'
   | 'changeType'
+  | 'runWorkflow'
   | 'pause';
 
 /** Extra input for the modals that act on a chosen status. */

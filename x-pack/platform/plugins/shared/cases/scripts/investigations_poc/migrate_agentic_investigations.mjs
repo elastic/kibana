@@ -426,6 +426,7 @@ const migrateConversation = async (hit) => {
       template_id: type.template_id,
       extended_fields: { impact_as_keyword: impactOf(plannedItems) },
       priority,
+      access: { mode: 'default' },
       ai_enabled: true,
       create_conversation: false,
       apply_procedure: false,

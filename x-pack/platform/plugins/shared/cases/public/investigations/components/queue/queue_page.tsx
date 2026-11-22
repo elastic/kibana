@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
 import { getEffectiveStatuses } from '../../../../common/investigations/statuses';
 import {
@@ -30,6 +31,7 @@ import { ErrorState } from '../shared/error_state';
 import { LoadingState } from '../shared/loading_state';
 import { QueueFilters } from './queue_filters';
 import { QueueTable } from './queue_table';
+import { QueueBulkActions } from './bulk/bulk_actions';
 import { useQueueFields } from './use_queue_fields';
 import * as i18n from './translations';
 import { hasActiveFilters, toFindRequest, useQueueUrlState } from './use_queue_url_state';
@@ -40,7 +42,9 @@ export const QueuePage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { state, update, clearFilters } = useQueueUrlState();
   const { goToRecord, navigate } = useInvestigationsNavigation();
+  const { permissions } = useCasesContext();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useInvestigationBreadcrumbs();
 
@@ -60,8 +64,19 @@ export const QueuePage: React.FC = () => {
     [fields, state.columns]
   );
 
-  const records = data?.records ?? [];
+  const records = useMemo(() => data?.records ?? [], [data]);
   const total = data?.total ?? 0;
+  // The selection is one page of the queue: it keeps only what the page still shows.
+  const selected = useMemo(
+    () => records.filter(({ id }) => selectedIds.includes(id)),
+    [records, selectedIds]
+  );
+  useEffect(() => {
+    setSelectedIds((ids) => {
+      const shown = ids.filter((id) => records.some((record) => record.id === id));
+      return shown.length === ids.length ? ids : shown;
+    });
+  }, [records]);
   const filtered = hasActiveFilters(state);
 
   const settingsButton = (
@@ -135,6 +150,11 @@ export const QueuePage: React.FC = () => {
         statuses={statuses}
       />
       <EuiSpacer size="m" />
+      <QueueBulkActions
+        selected={selected}
+        statuses={statuses}
+        onClear={() => setSelectedIds([])}
+      />
       {isError ? (
         <ErrorState title={i18n.ERROR_TITLE} error={error} onRetry={() => void refetch()} />
       ) : isLoading ? (
@@ -159,6 +179,10 @@ export const QueuePage: React.FC = () => {
             statuses={statuses}
             fieldColumns={fieldColumns}
             onChange={update}
+            selected={selected}
+            onSelectionChange={
+              permissions.update ? (next) => setSelectedIds(next.map(({ id }) => id)) : undefined
+            }
           />
         </>
       )}

@@ -126,3 +126,27 @@ export const DELETE_COMMENT_ERROR = i18n.translate(
   'xpack.cases.investigations.hooks.deleteCommentError',
   { defaultMessage: 'Could not delete the comment' }
 );
+
+export const LINK_RECORD_ERROR = i18n.translate(
+  'xpack.cases.investigations.hooks.linkRecordError',
+  {
+    defaultMessage: 'Could not link the investigations',
+  }
+);
+
+export const LINK_RECORD_SUCCESS = (displayId: string) =>
+  i18n.translate('xpack.cases.investigations.hooks.linkRecordSuccess', {
+    defaultMessage: 'Linked to {displayId}.',
+    values: { displayId },
+  });
+
+export const UNLINK_RECORD_ERROR = i18n.translate(
+  'xpack.cases.investigations.hooks.unlinkRecordError',
+  { defaultMessage: 'Could not unlink the investigations' }
+);
+
+export const UNLINK_RECORD_SUCCESS = (displayId: string) =>
+  i18n.translate('xpack.cases.investigations.hooks.unlinkRecordSuccess', {
+    defaultMessage: 'Unlinked from {displayId}.',
+    values: { displayId },
+  });

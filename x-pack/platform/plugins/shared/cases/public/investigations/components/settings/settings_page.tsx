@@ -8,36 +8,36 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPageHeader,
   EuiSpacer,
-  EuiText,
+  EuiTab,
+  EuiTabs,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useCasesContext } from '../../../components/cases_context/use_cases_context';
+import { matchPath, useLocation } from 'react-router-dom';
 import { useInvestigationBreadcrumbs, useInvestigationsNavigation } from '../../hooks';
 import { ICONS } from '../../icons';
-import { ManageTypesLink } from '../fields/manage_types_link';
-import { ErrorState } from '../shared/error_state';
-import { LoadingState } from '../shared/loading_state';
-import { PauseReasonsSection } from './pause_reasons_section';
-import { hasPausingStatus } from './status_utils';
-import { StatusesSection } from './statuses_section';
-import { useStatusesEditor } from './use_statuses_editor';
+import { SETTINGS_PATH, TASK_LIST_PATH_PATTERN, TEMPLATES_PATH } from './paths';
+import { StatusesTab } from './statuses_tab';
+import { TemplatesTab } from './templates_tab';
 import * as i18n from './translations';
 
-/** `/settings`: the status list and pause reasons of the space. */
+/**
+ * `/settings`: the status list and pause reasons of the space. `/settings/templates` lists the
+ * investigation templates, and `/settings/templates/:templateId/tasks` opens a template's task list.
+ */
 export const SettingsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { goToQueue } = useInvestigationsNavigation();
-  const { permissions } = useCasesContext();
-  const editor = useStatusesEditor();
-  const { config, isLoading, loadError, retryLoad, isReadOnly, isSaving, save, reload } = editor;
+  const { goToQueue, navigate, getHref } = useInvestigationsNavigation();
+  const { pathname } = useLocation();
 
   useInvestigationBreadcrumbs(i18n.PAGE_TITLE);
+
+  const isTemplates = pathname.startsWith(TEMPLATES_PATH);
+  const taskListTemplateId =
+    matchPath<{ templateId: string }>(pathname, { path: TASK_LIST_PATH_PATTERN, exact: true })
+      ?.params.templateId ?? undefined;
 
   return (
     <div
@@ -63,63 +63,32 @@ export const SettingsPage: React.FC = () => {
         description={i18n.PAGE_DESCRIPTION}
         bottomBorder={false}
       />
-      {permissions.manageTemplates ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.MANAGE_TYPES_HELP}
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ManageTypesLink />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : null}
+      <EuiTabs data-test-subj="investigationsSettingsTabs" aria-label={i18n.TABS_ARIA}>
+        <EuiTab
+          isSelected={!isTemplates}
+          href={getHref(SETTINGS_PATH)}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            navigate(SETTINGS_PATH);
+          }}
+          data-test-subj="investigationsSettingsTabStatuses"
+        >
+          {i18n.TAB_STATUSES}
+        </EuiTab>
+        <EuiTab
+          isSelected={isTemplates}
+          href={getHref(TEMPLATES_PATH)}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            navigate(TEMPLATES_PATH);
+          }}
+          data-test-subj="investigationsSettingsTabTemplates"
+        >
+          {i18n.TAB_TEMPLATES}
+        </EuiTab>
+      </EuiTabs>
       <EuiSpacer size="l" />
-      {isReadOnly ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType={ICONS.lock}
-            title={i18n.READ_ONLY_TITLE}
-            data-test-subj="investigationsSettingsReadOnly"
-          >
-            <p>{i18n.READ_ONLY_BODY}</p>
-          </EuiCallOut>
-          <EuiSpacer size="l" />
-        </>
-      ) : null}
-      {loadError ? (
-        <ErrorState title={i18n.LOAD_ERROR_TITLE} error={loadError} onRetry={retryLoad} />
-      ) : isLoading || !config ? (
-        <LoadingState label={i18n.LOADING} />
-      ) : (
-        <EuiFlexGroup direction="column" gutterSize="xl">
-          <EuiFlexItem>
-            <StatusesSection
-              config={config}
-              isReadOnly={isReadOnly}
-              isSaving={isSaving}
-              save={save}
-              onReload={reload}
-            />
-          </EuiFlexItem>
-          {hasPausingStatus(config.statuses) ? (
-            <EuiFlexItem>
-              <PauseReasonsSection
-                config={config}
-                isReadOnly={isReadOnly}
-                isSaving={isSaving}
-                save={save}
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      )}
+      {isTemplates ? <TemplatesTab taskListTemplateId={taskListTemplateId} /> : <StatusesTab />}
     </div>
   );
 };

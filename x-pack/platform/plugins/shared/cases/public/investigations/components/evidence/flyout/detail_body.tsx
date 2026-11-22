@@ -18,11 +18,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { INDICATOR_TYPE_LABELS } from '../../../../../common/investigations/types';
 import type { EvidenceItem, EvidenceSnapshot } from '../../../../../common/investigations/types';
 import { MarkdownRenderer } from '../../../../components/markdown_editor';
 import { ICONS } from '../../../icons';
 import { formatAbsoluteUtc } from '../../shared/formatters';
+import { IndicatorTypeBadge } from '../indicator_type_badge';
 import { SeenElsewhereList } from '../seen_elsewhere';
 import { useSeenElsewhere } from '../use_evidence_queries';
 import { DataTable, DetailSection, DocumentFields, PairsList } from './primitives';
@@ -187,7 +187,7 @@ const IndicatorDetail: React.FC<{
   <div data-test-subj="investigationEvidenceDetail-indicator">
     {evidence.indicator ? (
       <>
-        <EuiBadge color="hollow">{INDICATOR_TYPE_LABELS[evidence.indicator.type]}</EuiBadge>
+        <IndicatorTypeBadge type={evidence.indicator.type} />
         <EuiSpacer size="s" />
         <Code>{evidence.indicator.value}</Code>
         <EuiSpacer size="l" />
@@ -452,7 +452,7 @@ const NoSnapshot: React.FC<{
     <div data-test-subj="investigationEvidenceDetail-none">
       {evidence.indicator ? (
         <>
-          <EuiBadge color="hollow">{INDICATOR_TYPE_LABELS[evidence.indicator.type]}</EuiBadge>
+          <IndicatorTypeBadge type={evidence.indicator.type} />
           <EuiSpacer size="s" />
           <Code>{evidence.indicator.value}</Code>
           <EuiSpacer size="l" />

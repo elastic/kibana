@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { INDICATOR_TYPE_LABELS } from '../../../../../common/investigations/types';
+import { OBSERVABLE_TYPE_IPV4 } from '../../../../../common/constants/observables';
 import type {
   ImportIndicatorsResponse,
   IndicatorType,
@@ -25,10 +25,11 @@ import { INVESTIGATION_LIMITS } from '../../../../../common/investigations/const
 import { useImportIndicators } from '../../../hooks';
 import { ICONS } from '../../../icons';
 import {
-  INDICATOR_PLACEHOLDERS,
+  getIndicatorPlaceholder,
   MAX_INDICATOR_LENGTH,
   validateIndicatorValue,
 } from '../indicator_validation';
+import { useIndicatorTypes } from '../use_indicator_types';
 import { SeenElsewhereList } from '../seen_elsewhere';
 import { useSeenElsewhere } from '../use_evidence_queries';
 import { AddFormLayout } from './add_form_layout';
@@ -42,11 +43,6 @@ import * as i18n from '../translations';
 
 const FORM_ID = 'investigationEvidenceAddIndicator';
 const LOOKUP_DEBOUNCE_MS = 300;
-
-const TYPE_OPTIONS = (Object.keys(INDICATOR_TYPE_LABELS) as IndicatorType[]).map((type) => ({
-  value: type,
-  text: INDICATOR_TYPE_LABELS[type],
-}));
 
 type Mode = 'single' | 'import';
 
@@ -66,8 +62,9 @@ export const IndicatorForm: React.FC<IndicatorFormProps> = ({
   const shared = useSharedFields(recordId);
   const { create, isLoading: isSaving } = useCreateEvidence(recordId);
   const importIndicators = useImportIndicators(recordId);
+  const { options: typeOptions, getLabel: getTypeLabel } = useIndicatorTypes();
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [indicatorType, setIndicatorType] = useState<IndicatorType>('ip');
+  const [indicatorType, setIndicatorType] = useState<IndicatorType>(OBSERVABLE_TYPE_IPV4.key);
   const [value, setValue] = useState('');
   const [showErrors, setShowErrors] = useState(false);
   const [lookupValue, setLookupValue] = useState('');
@@ -106,7 +103,7 @@ export const IndicatorForm: React.FC<IndicatorFormProps> = ({
             snapshot: {
               kind: 'indicator',
               facts: [
-                [i18n.INDICATOR_FACT_TYPE, INDICATOR_TYPE_LABELS[indicatorType]],
+                [i18n.INDICATOR_FACT_TYPE, getTypeLabel(indicatorType)],
                 [i18n.INDICATOR_FACT_VALUE, trimmedValue],
               ],
               intel: [],
@@ -208,9 +205,9 @@ export const IndicatorForm: React.FC<IndicatorFormProps> = ({
           <EuiFormRow label={i18n.INDICATOR_TYPE_LABEL} fullWidth>
             <EuiSelect
               fullWidth
-              options={TYPE_OPTIONS}
+              options={typeOptions.map(({ key, label }) => ({ value: key, text: label }))}
               value={indicatorType}
-              onChange={(event) => setIndicatorType(event.target.value as IndicatorType)}
+              onChange={(event) => setIndicatorType(event.target.value)}
               data-test-subj="investigationEvidenceAddIndicatorType"
             />
           </EuiFormRow>
@@ -224,7 +221,7 @@ export const IndicatorForm: React.FC<IndicatorFormProps> = ({
               fullWidth
               value={value}
               isInvalid={Boolean(visibleValueError)}
-              placeholder={i18n.INDICATOR_EXAMPLE(INDICATOR_PLACEHOLDERS[indicatorType])}
+              placeholder={i18n.INDICATOR_EXAMPLE(getIndicatorPlaceholder(indicatorType))}
               maxLength={MAX_INDICATOR_LENGTH + 1}
               onChange={(event) => setValue(event.target.value)}
               css={css`
