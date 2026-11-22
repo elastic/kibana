@@ -61,16 +61,5 @@ describe('FUSE Validation', () => {
         ['[FUSE] The FROM command is missing the _id METADATA field.']
       );
     });
-
-    test('still requires _score with KEY BY alone', () => {
-      fuseExpectErrors(
-        `FROM index METADATA _id
-                    | FORK
-                      (WHERE keywordField != "" | LIMIT 100)
-                      (SORT doubleField ASC NULLS LAST)
-                    | FUSE KEY BY keywordField`,
-        ['[FUSE] The FROM command is missing the _score METADATA field.']
-      );
-    });
   });
 });

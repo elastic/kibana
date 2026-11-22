@@ -252,11 +252,10 @@ async function validateAst(
       ? unmappedFieldsStrategyFromHeader
       : UnmappedFieldsStrategy.DEFAULT;
 
-    // FORK and FUSE check the pipeline that contains them, which can be an IN or FROM subquery.
     const commandMessages = validateCommand(
       currentCommand,
       references,
-      ['fork', 'fuse'].includes(currentCommand.name) ? subquery.commands : pipelineCommands,
+      currentCommand.name === 'fork' ? subquery.commands : pipelineCommands,
       isTimeseriesSourceCommand(subquery.commands),
       {
         ...callbacks,

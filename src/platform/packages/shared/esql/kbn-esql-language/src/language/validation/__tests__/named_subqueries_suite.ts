@@ -116,42 +116,6 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
     });
 
     describe('METADATA', () => {
-      it('accepts METADATA in a LET body read before FUSE', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors(
-          'LET a = (FROM index METADATA _id, _index, _score); FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE',
-          []
-        );
-      });
-
-      it('accepts KEY BY and SCORE BY instead of METADATA in FUSE inside a LET read by FROM', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors(
-          'LET a = (FROM index | EVAL k = keywordField, s = doubleField | FORK (LIMIT 10) (LIMIT 10) | FUSE KEY BY k SCORE BY s); FROM a',
-          []
-        );
-      });
-
-      it('accepts FUSE in an IN subquery over a LET with METADATA', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors(
-          'LET a = (FROM index METADATA _id, _index, _score); ROW x = "a" | WHERE x IN (FROM a | FORK (LIMIT 1) (LIMIT 2) | FUSE | KEEP keywordField)',
-          []
-        );
-      });
-
-      it('reports a missing FUSE key when the LET supplies the other key and a custom score', async () => {
-        const { expectErrors } = await setup();
-
-        await expectErrors(
-          'LET a = (FROM index METADATA _id | KEEP _id | EVAL s = 1.0); FROM (FROM a) | FORK (LIMIT 1) (LIMIT 2) | FUSE SCORE BY s',
-          ['[FUSE] The FROM command is missing the _index METADATA field.']
-        );
-      });
-
       it('reports an error for an incomplete LIMIT after FROM with METADATA', async () => {
         const { validate } = await setup();
 
