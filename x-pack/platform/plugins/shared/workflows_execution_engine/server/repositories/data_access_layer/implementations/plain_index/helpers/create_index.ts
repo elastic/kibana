@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { retryTransientEsErrors } from '../../../../../lib/retry_transient_es_errors';
 
 interface CreateIndexOptions {
@@ -29,6 +31,15 @@ const INDEX_SETTINGS = {
   ...REPLICA_SETTINGS,
   ...HIDDEN_SETTINGS,
 } as const;
+
+export const isRetryableIndexInitializationError = (
+  error: EsErrors.ElasticsearchClientError
+): boolean =>
+  isRetryableEsClientError(error) ||
+  (error instanceof EsErrors.ResponseError &&
+    error.statusCode === 404 &&
+    error.body?.ok === false &&
+    error.body?.message === 'Unknown resource.');
 
 export const createIndexWithMappings = async ({
   esClient,
@@ -65,7 +76,6 @@ export const createIndexWithMappings = async ({
       return;
     }
 
-    logger?.error(`Failed to create index ${indexName}: ${error}`);
     throw error;
   }
 };
@@ -127,7 +137,9 @@ export const createOrUpdateIndex = async ({
       logger?.debug(`Updated mappings for existing index ${indexName}`);
     }
   } catch (error) {
-    logger?.error(`Failed to create or update index ${indexName}: ${error}`);
+    if (!isRetryableIndexInitializationError(error)) {
+      logger.error(`Failed to create or update index ${indexName}: ${error}`);
+    }
     throw error;
   }
 };

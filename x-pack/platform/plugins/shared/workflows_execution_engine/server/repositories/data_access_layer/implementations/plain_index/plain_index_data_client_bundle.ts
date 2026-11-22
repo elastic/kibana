@@ -6,9 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { createOrUpdateIndex } from './helpers';
+import { createOrUpdateIndex, isRetryableIndexInitializationError } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
 import {
@@ -24,9 +23,12 @@ import type {
   WorkflowExecutionsDataClient,
 } from '../../types';
 
+const INDEX_INITIALIZATION_TIMEOUT_MS = 20 * 60 * 1000;
+
 export class PlainIndexDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
   private stopped = false;
+  private finishRetryDelay?: () => void;
 
   constructor(private readonly deps: CreateDataClientDeps) {}
 
@@ -42,6 +44,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
   async stop(): Promise<void> {
     this.stopped = true;
+    this.finishRetryDelay?.();
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -62,6 +65,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
     let attempt = 0;
+    const startedAt = Date.now();
 
     while (!this.stopped) {
       try {
@@ -81,15 +85,34 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
         ]);
         return esClient;
       } catch (error) {
-        if (!isRetryableEsClientError(error)) {
+        if (this.stopped) {
+          break;
+        }
+
+        if (!isRetryableIndexInitializationError(error)) {
+          throw error;
+        }
+        if (Date.now() - startedAt >= INDEX_INITIALIZATION_TIMEOUT_MS) {
+          logger.error('Failed to initialize workflow execution indices', { error });
           throw error;
         }
         attempt++;
         const ms = Math.min(1000 * Math.pow(2, attempt), 30_000);
         logger.warn(`Transient error during index init, retrying in ${ms}ms`, { error });
-        await new Promise((resolve) => setTimeout(resolve, ms));
+        await this.waitForRetry(ms);
       }
     }
-    throw new Error('Index initialization aborted: plugin stopped');
+    return esClient;
+  }
+
+  private async waitForRetry(ms: number): Promise<void> {
+    await new Promise<void>((resolve) => {
+      const timeout = setTimeout(resolve, ms);
+      this.finishRetryDelay = () => {
+        clearTimeout(timeout);
+        resolve();
+      };
+    });
+    this.finishRetryDelay = undefined;
   }
 }
