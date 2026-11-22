@@ -20,6 +20,7 @@ import {
   FP_TP_ANALYSIS_STEP_ID,
   FP_TP_ANALYZE_STEP_ID,
   MATCH_FINGERPRINTS_STEP_ID,
+  MODEL_OUTPUT_EXHAUSTED_PATTERN,
   MODEL_REFUSAL_PATTERN,
   PUBLIC_API_VERSION,
   RESOLVE_FANOUT_STEP_ID,
@@ -542,9 +543,19 @@ export const readGenerationFault = async ({
     return undefined;
   }
   const messages = (await readBatchErrors({ client, run, spaceId, log })) ?? [];
-  const refused =
-    messages.length === failed && messages.every((message) => MODEL_REFUSAL_PATTERN.test(message));
-  return { kind: refused ? 'refused' : 'failed', ...(messages[0] ? { message: messages[0] } : {}) };
+  // Like refusal: the model classification holds only when every failed batch says the same
+  // thing and every failure is accounted for. Any unreadable, missing or foreign failure leaves
+  // the run `failed`, which gates.
+  const modelKindOf = (batchErrors: string[]): 'refused' | 'exhausted' | undefined => {
+    if (batchErrors.length !== failed || batchErrors.length === 0) return undefined;
+    if (batchErrors.every((message) => MODEL_REFUSAL_PATTERN.test(message))) return 'refused';
+    if (batchErrors.every((message) => MODEL_OUTPUT_EXHAUSTED_PATTERN.test(message))) {
+      return 'exhausted';
+    }
+    return undefined;
+  };
+  const kind = modelKindOf(messages);
+  return { kind: kind ?? 'failed', ...(messages[0] ? { message: messages[0] } : {}) };
 };
 
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';

@@ -903,9 +903,35 @@ describe('createEvaluateDataset', () => {
       }
     });
 
+    it('keeps a generation that exhausted its attempts on model output a scored MODEL_FAULT, not a failed row', async () => {
+      const output = emptyRun({
+        generationFault: {
+          kind: 'exhausted',
+          message:
+            'Maximum hallucination failures (5) reached. Try sending fewer alerts to this model.',
+        },
+      });
+      for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted']) {
+        expect(await scoreOf(name, output)).toMatchObject({ score: 0, label: 'MODEL_FAULT' });
+      }
+    });
+
     it('does not let the gate fail a dataset whose generation refused every batch', async () => {
       collect.mockResolvedValue(
         emptyRun({ generationFault: { kind: 'refused', message: 'I cannot help' } })
+      );
+      await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+    });
+
+    it('does not let the gate fail a dataset whose generation exhausted its attempts on model output', async () => {
+      collect.mockResolvedValue(
+        emptyRun({
+          generationFault: {
+            kind: 'exhausted',
+            message:
+              'Maximum generation attempts (5) reached. Try sending fewer alerts to this model.',
+          },
+        })
       );
       await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
     });

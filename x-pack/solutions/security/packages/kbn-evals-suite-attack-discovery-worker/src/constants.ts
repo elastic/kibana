@@ -32,6 +32,15 @@ export const BATCHED_GENERATION_WORKFLOW_ID = 'system-security-attack-discovery-
 export const MODEL_REFUSAL_PATTERN =
   /refused to complete the response|finish_reason: content_filter/i;
 
+/**
+ * The generation graph giving up on the model's own output: every attempt was discarded because
+ * the output hallucinated or degenerated into repetition (see
+ * `throw_if_error_counts_exceeded`). Matched against generation batch errors only; like
+ * `MODEL_REFUSAL_PATTERN` it must hold for every failed batch before it classifies a run.
+ */
+export const MODEL_OUTPUT_EXHAUSTED_PATTERN =
+  /Maximum (?:hallucination failures \(\d+\)|generation attempts \(\d+\)) reached\. Try sending fewer alerts to this model\./;
+
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';
 

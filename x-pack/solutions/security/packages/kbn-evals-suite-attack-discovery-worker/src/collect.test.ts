@@ -908,6 +908,64 @@ describe('readGenerationFault', () => {
     expect(getChildren).toHaveBeenCalledWith('space', 'run-1');
   });
 
+  describe('when every failed batch is the generation graph giving up on model output', () => {
+    const HALLUCINATION_EXHAUSTED =
+      'Maximum hallucination failures (5) reached. Try sending fewer alerts to this model.';
+    const ATTEMPTS_EXHAUSTED =
+      'Maximum generation attempts (3) reached. Try sending fewer alerts to this model.';
+    const twoFailed = () =>
+      runCompleted({
+        run_outcome: 'failed_all_batches',
+        alerts_analyzed: 0,
+        batches_total: 2,
+        batches_failed: 2,
+      });
+
+    it('is exhausted when every failed batch was a hallucination-exhaustion error', async () => {
+      const getChildren = jest.fn().mockResolvedValue([batchChild([HALLUCINATION_EXHAUSTED])]);
+      await expect(read(allFailed, getChildren)).resolves.toEqual({
+        kind: 'exhausted',
+        message: HALLUCINATION_EXHAUSTED,
+      });
+    });
+
+    it('is exhausted when every failed batch was an attempts-exhaustion error', async () => {
+      const getChildren = jest.fn().mockResolvedValue([batchChild([ATTEMPTS_EXHAUSTED])]);
+      await expect(read(allFailed, getChildren)).resolves.toEqual({
+        kind: 'exhausted',
+        message: ATTEMPTS_EXHAUSTED,
+      });
+    });
+
+    it('is exhausted when the batch error carries the graph errors after the exhaustion line', async () => {
+      // The producer appends the accumulated errors after the exhaustion message.
+      const withErrors = `${HALLUCINATION_EXHAUSTED}\nError: alert batch 2 produced no attacks`;
+      const getChildren = jest.fn().mockResolvedValue([batchChild([withErrors])]);
+      await expect(read(allFailed, getChildren)).resolves.toMatchObject({ kind: 'exhausted' });
+    });
+
+    it('is failed when exhaustion is mixed with a refusal', async () => {
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild([HALLUCINATION_EXHAUSTED, REFUSAL])]);
+      await expect(read(twoFailed(), getChildren)).resolves.toMatchObject({ kind: 'failed' });
+    });
+
+    it('is failed when exhaustion is mixed with an infrastructure error', async () => {
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild([ATTEMPTS_EXHAUSTED, 'connector timed out'])]);
+      await expect(read(twoFailed(), getChildren)).resolves.toMatchObject({ kind: 'failed' });
+    });
+
+    it('is failed when an exhaustion error is edited or truncated away from the producer text', async () => {
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild(['Maximum hallucination failures reached'])]);
+      await expect(read(allFailed, getChildren)).resolves.toMatchObject({ kind: 'failed' });
+    });
+  });
+
   it('is failed when a batch failed for another reason', async () => {
     const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL, 'connector timed out'])]);
     await expect(read(allFailed, getChildren)).resolves.toEqual({
