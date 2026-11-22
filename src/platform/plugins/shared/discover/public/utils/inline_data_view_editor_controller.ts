@@ -13,8 +13,8 @@ import type {
   InlineDataViewEditSession,
 } from '../services/inline_data_view_edit_session';
 
-/** The step of an inline edit that failed: opening the editor or applying its result. */
-export type InlineDataViewEditPhase = 'open' | 'commit';
+/** The step that failed: opening the editor, applying an edit or finalizing a created view. */
+export type InlineDataViewEditPhase = 'open' | 'commit' | 'create';
 
 type CloseEditor = () => void;
 

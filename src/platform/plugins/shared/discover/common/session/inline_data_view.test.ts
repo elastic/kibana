@@ -112,6 +112,17 @@ describe('inline Data View identity equivalence', () => {
       })
     ).toBe(generateInlineDataViewId(inlineSpecWithRuntimeField));
   });
+
+  it('ignores the order of field filters', () => {
+    const withFieldFilters = (values: string[]): DataViewSpec => ({
+      ...inlineSpecWithRuntimeField,
+      sourceFilters: values.map((value) => ({ value })),
+    });
+
+    expect(generateInlineDataViewId(withFieldFilters(['secret.*', 'internal.*']))).toBe(
+      generateInlineDataViewId(withFieldFilters(['internal.*', 'secret.*']))
+    );
+  });
 });
 
 describe('getInlineDataView', () => {

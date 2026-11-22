@@ -31,3 +31,27 @@ export const updateFiltersReferences = async ({
     usedDataViews: [],
   } as ActionExecutionContext);
 };
+
+/** Retargets only the current app filters, so pinned filters shared with other tabs keep their view. */
+export const updateAppFiltersReferences = ({
+  prevDataView,
+  nextDataView,
+  services: { filterManager },
+}: {
+  prevDataView: DataView;
+  nextDataView: DataView;
+  services: DiscoverServices;
+}) => {
+  const appFilters = filterManager.getAppFilters();
+  if (!appFilters.some(({ meta }) => meta.index === prevDataView.id)) {
+    return;
+  }
+
+  filterManager.setAppFilters(
+    appFilters.map((filter) =>
+      filter.meta.index === prevDataView.id
+        ? { ...filter, meta: { ...filter.meta, index: nextDataView.id } }
+        : filter
+    )
+  );
+};

@@ -821,6 +821,36 @@ describe('tab_state_data_view actions', () => {
       expect(adHocDataViewsAfter[1].id).not.toBe(dataViewAdHoc.id);
     });
 
+    it('retargets only app filters when the view is used in multiple tabs', async () => {
+      const { internalState, tabId, services, addNewTab, initializeSingleTab } = await setup({
+        dataView: dataViewAdHoc,
+      });
+      await addNewTab({ tab: getTabStateMock({ id: 'second-tab' }) });
+      await initializeSingleTab({ tabId: 'second-tab' });
+      internalState.dispatch(
+        internalStateActions.assignNextDataView({ tabId: 'second-tab', dataView: dataViewAdHoc })
+      );
+      const editedFilter = { meta: { index: dataViewAdHoc.id }, query: { match_all: {} } };
+      const otherFilter = { meta: { index: 'other-id' }, query: { match_all: {} } };
+      const { filterManager } = services;
+      jest.spyOn(filterManager, 'getAppFilters').mockReturnValue([editedFilter, otherFilter]);
+      const setAppFilters = jest.spyOn(filterManager, 'setAppFilters').mockImplementation();
+      jest.mocked(services.uiActions.getAction).mockClear();
+
+      const result = await internalState.dispatch(
+        internalStateActions.applyAdHocDataViewEdit({
+          tabId,
+          confirmedDataView: createInlineView(dataViewAdHoc.toSpec()),
+        })
+      );
+
+      expect(setAppFilters).toHaveBeenCalledWith([
+        { ...editedFilter, meta: { index: result?.id } },
+        otherFilter,
+      ]);
+      expect(services.uiActions.getAction).not.toHaveBeenCalled();
+    });
+
     it('should be no-op for persisted data views', async () => {
       const { internalState, tabId, services } = await setup();
       // setup() initializes with dataViewMockWithTimeField which is persisted

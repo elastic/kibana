@@ -77,6 +77,20 @@ describe('createDiscoverDataViewEditorAdapter', () => {
     expect(onSave).toHaveBeenCalledWith(finalized);
   });
 
+  it('reports a failed creation to the UI instead of notifying Discover', async () => {
+    const { editor, dataViewEditor, inlineDataViews, onEditError } = setup();
+    const error = new Error('Unable to load fields');
+    inlineDataViews.completeCreation.mockRejectedValue(error);
+    const onSave = jest.fn();
+
+    editor.openEditor({ onSave });
+    const [forwarded] = dataViewEditor.openEditor.mock.calls[0];
+    await forwarded.onSave(createDataView({ id: 'created', title: 'logs-*' }));
+
+    expect(onEditError).toHaveBeenCalledWith(error, 'create');
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it.each<DataViewSpec>([
     { id: 'saved', title: 'logs-*', version: '1' },
     { id: 'esql', title: 'logs-*', type: ESQL_TYPE },

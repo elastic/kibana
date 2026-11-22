@@ -52,8 +52,16 @@ export const createDiscoverDataViewEditorAdapter = ({
   // Created and copied views get the identity of their final spec.
   const openCreation = (options: DataViewEditorProps) => {
     const onSaveInlineDataView = async (createdDataView: DataView) => {
-      // The editor rejects custom IDs for inline creation, so this instance is owned here.
-      const finalizedDataView = await inlineDataViews.completeCreation(createdDataView);
+      let finalizedDataView: DataView;
+      try {
+        // The editor rejects custom IDs for inline creation, so this instance is owned here.
+        finalizedDataView = await inlineDataViews.completeCreation(createdDataView);
+      } catch (error) {
+        // Report the error here, since the editor has already closed and won't show it.
+        onEditError(error instanceof Error ? error : new Error(String(error)), 'create');
+        return;
+      }
+
       return options.onSave(finalizedDataView);
     };
 

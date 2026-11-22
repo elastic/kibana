@@ -485,19 +485,25 @@ export const initializeTabs = createInternalStateAsyncThunk(
       needsDataViewList ? dispatch(loadDataViewListOnce()) : undefined,
     ]);
 
-    // Without the list, a navigation spec's ID cannot be classified as saved or inline.
-    if (dataViewListResult && loadDataViewList.rejected.match(dataViewListResult)) {
-      throw dataViewListResult.error;
-    }
-
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       rememberDiscoverSession(services.core.http, services.chrome, persistedDiscoverSession);
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const savedDataViewIds = dataViewListResult
-      ? getState().savedDataViews.map(({ id }) => id)
-      : undefined;
+    const getSavedDataViewIds = (): readonly string[] | undefined => {
+      if (!dataViewListResult) {
+        return undefined;
+      }
+
+      // Use the spec's version to spot saved views, so Discover still opens if the list fails.
+      if (loadDataViewList.rejected.match(dataViewListResult)) {
+        const { id, version } = initialTabState?.dataViewSpec ?? {};
+        return id && typeof version === 'string' ? [id] : [];
+      }
+
+      return getState().savedDataViews.map(({ id }) => id);
+    };
+    const savedDataViewIds = getSavedDataViewIds();
     const { inlineDataViewIds, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,

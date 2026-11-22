@@ -33,7 +33,10 @@ import {
 } from '../runtime_state';
 import { internalStateActions } from '..';
 import { selectTab } from '../selectors';
-import { updateFiltersReferences } from '../../utils/update_filter_references';
+import {
+  updateAppFiltersReferences,
+  updateFiltersReferences,
+} from '../../utils/update_filter_references';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -353,15 +356,12 @@ export const applyAdHocDataViewEdit: InternalStateThunkActionCreator<
       return nextDataView;
     }
 
-    await updateFiltersReferences({
-      prevDataView,
-      nextDataView,
-      services,
-    });
-
     if (isUsedInMultipleTabs) {
+      // Only move app filters, so pinned filters keep pointing at the view other tabs still use.
+      updateAppFiltersReferences({ prevDataView, nextDataView, services });
       dispatch(internalStateActions.appendAdHocDataViews(nextDataView));
     } else {
+      await updateFiltersReferences({ prevDataView, nextDataView, services });
       dispatch(internalStateActions.replaceAdHocDataViewWithId(prevDataView.id!, nextDataView));
     }
 

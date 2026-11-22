@@ -152,6 +152,22 @@ describe('createInlineDataViewService', () => {
       expect(create).toHaveBeenNthCalledWith(1, { ...inlineSpec, id: inlineDataViewId });
     });
 
+    it('shares one replacement when concurrent callers find a cached view edited in place', async () => {
+      const { clearInstanceCache, service } = setup();
+      const stale = await service.resolve(inlineSpec);
+      stale.timeFieldName = 'edited_in_place';
+
+      const [first, second] = await Promise.all([
+        service.resolve(inlineSpec),
+        service.resolve(inlineSpec),
+      ]);
+
+      expect(first).not.toBe(stale);
+      expect(second).toBe(first);
+      expect(first.timeFieldName).toBe('@timestamp');
+      expect(clearInstanceCache.mock.calls).toStrictEqual([[inlineDataViewId]]);
+    });
+
     it.each<[string, DataViewSpec]>([
       ['ES|QL', { ...inlineSpec, id: 'esql-id', type: ESQL_TYPE }],
       ['managed', { ...inlineSpec, id: 'profile-id', managed: true }],

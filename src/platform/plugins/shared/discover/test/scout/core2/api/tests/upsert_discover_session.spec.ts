@@ -684,4 +684,36 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
 
     expect(response).toHaveStatusCode(403);
   });
+
+  apiTest(
+    'returns 403 without creating a session when a viewer PUTs a new ID',
+    async ({ apiClient }) => {
+      const id = createId('put-forbidden-create');
+      const path = `${DISCOVER_SESSION_API_BASE_PATH}/${id}`;
+
+      const response = await apiClient.put(path, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        body: {
+          title: 'Forbidden Discover session',
+          tabs: [createEsqlTab('main', 'FROM logs-* | LIMIT 10')],
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(403);
+
+      const readResponse = await apiClient.get(path, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(readResponse).toHaveStatusCode(404);
+    }
+  );
 });

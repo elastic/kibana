@@ -613,6 +613,12 @@ const getDataViewEditorErrorTitle = (phase: InlineDataViewEditPhase) => {
     });
   }
 
+  if (phase === 'create') {
+    return i18n.translate('discover.dataViewEditor.createErrorTitle', {
+      defaultMessage: 'Unable to create data view',
+    });
+  }
+
   return i18n.translate('discover.dataViewEditor.commitErrorTitle', {
     defaultMessage: 'Unable to apply data view changes',
   });

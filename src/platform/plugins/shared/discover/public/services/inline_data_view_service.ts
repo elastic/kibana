@@ -66,17 +66,38 @@ export const createInlineDataViewService = ({
   dataViews: Pick<DataViewsContract, 'create' | 'clearInstanceCache'>;
   searchSource: Pick<ISearchStartSearchSource, 'create'>;
 }): InlineDataViewService => {
+  // Share one replacement per ID, so parallel callers don't evict each other's new instance.
+  const pendingReplacements = new Map<string, Promise<DataView>>();
+
   // Other apps, such as Lens, can edit a cached instance in place, so reuse it only while it
   // still matches its ID.
   const getConsistentDataView = async (id: string, createDataView: () => Promise<DataView>) => {
+    const pendingReplacement = pendingReplacements.get(id);
+    if (pendingReplacement) {
+      return pendingReplacement;
+    }
+
     const cachedDataView = await createDataView();
     if (generateInlineDataViewId(getInlineDataViewIdentitySpec(cachedDataView)) === id) {
       return cachedDataView;
     }
 
-    dataViews.clearInstanceCache(id);
+    const startedReplacement = pendingReplacements.get(id);
+    if (startedReplacement) {
+      return startedReplacement;
+    }
 
-    return createDataView();
+    dataViews.clearInstanceCache(id);
+    const replacement = createDataView();
+    pendingReplacements.set(id, replacement);
+
+    try {
+      return await replacement;
+    } finally {
+      if (pendingReplacements.get(id) === replacement) {
+        pendingReplacements.delete(id);
+      }
+    }
   };
 
   const finalize = async (dataView: DataView) => {

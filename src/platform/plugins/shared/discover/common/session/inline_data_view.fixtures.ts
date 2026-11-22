@@ -158,7 +158,7 @@ export const inlineDataViewIdCases: Array<
       ...inlineSpecWithRuntimeField,
       sourceFilters: [{ value: 'secret.*' }, { value: 'internal.*' }],
     },
-    'discover-inline-6115eb9c87e425787e5b8bd53240a4a736d699fefa9635bc6a10cde567b5c951',
+    'discover-inline-c6b93fda9f218052fae0dcbbd6fb080138fe83835da34d30da8ae796031a9810',
   ],
   [
     'popularity without display overrides',

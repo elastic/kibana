@@ -67,6 +67,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
   dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({ query: '', language: 'kuery' }));
 
   dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+  dataPlugin.query.filterManager.getAppFilters = jest.fn(() => []);
   dataPlugin.query.filterManager.getUpdates$ = jest.fn(() => of({}) as unknown as Observable<void>);
 
   dataPlugin.query.timefilter.timefilter.createFilter = jest.fn();

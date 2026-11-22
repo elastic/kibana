@@ -84,7 +84,8 @@ const getCanonicalInlineDataViewSpec = (dataView: DataViewSpec) => {
     ...omitBy(
       {
         field_settings: fieldSettings,
-        field_filters: spec.field_filters,
+        // Sort so the same exclusions in a different order still produce the same ID.
+        field_filters: spec.field_filters?.toSorted(),
         scripted_fields: scriptedFields,
       },
       isEmpty
