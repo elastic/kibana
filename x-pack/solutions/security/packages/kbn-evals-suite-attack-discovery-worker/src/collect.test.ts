@@ -942,6 +942,16 @@ describe('readGenerationFault', () => {
       await expect(read(twoFailed(), getChildren)).resolves.toMatchObject({ kind: 'failed' });
     });
 
+    it('cites the mix when all readable batch errors mix refusal and hallucination exhaustion', async () => {
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild([HALLUCINATION_EXHAUSTED]), batchChild([REFUSAL])]);
+      await expect(read(twoFailed(), getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: 'mixed model refusal and hallucination exhaustion',
+      });
+    });
+
     it('is failed when hallucination exhaustion is mixed with an infrastructure error', async () => {
       const getChildren = jest
         .fn()
@@ -957,6 +967,17 @@ describe('readGenerationFault', () => {
       await expect(read(allFailed, getChildren)).resolves.toEqual({
         kind: 'failed',
         message: ATTEMPTS_EXHAUSTED,
+      });
+    });
+
+    it('does not classify a batch as exhausted when the hallucination phrase appears only in appended details', async () => {
+      // The attempt-limit producer appends the accumulated errors after its headline; a phrase
+      // echoed there must not classify the batch. The headline decides.
+      const withDetail = `${ATTEMPTS_EXHAUSTED}\nEarlier: Maximum hallucination failures (5) reached.`;
+      const getChildren = jest.fn().mockResolvedValue([batchChild([withDetail])]);
+      await expect(read(allFailed, getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: withDetail,
       });
     });
 

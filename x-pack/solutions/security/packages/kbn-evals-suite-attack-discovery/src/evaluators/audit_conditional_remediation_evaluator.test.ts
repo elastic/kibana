@@ -321,6 +321,8 @@ describe('findUnconditionalContainment', () => {
     it.each([
       'Observed T1562.008 impair defenses: disable cloud logs.',
       'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
+      'Do not follow the recommended response for T1562.008 impair defenses: disable cloud logs.',
+      'Not recommended: remediation for T1562.008 Impair Defenses: Disable Cloud Logs.',
     ])('still masks without a directive heading: %s', (text) => {
       expect(findUnconditionalContainment(text)).toEqual([]);
     });

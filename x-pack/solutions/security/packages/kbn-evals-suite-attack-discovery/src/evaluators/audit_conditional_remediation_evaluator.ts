@@ -304,9 +304,20 @@ const KEPT_COLON = '\u0002';
 const DIRECTIVE_BEFORE_ID =
   /\b(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
 
-/** Whether the text before the id is a recommendation heading that turns the colon into an action introducer. */
-const afterDirectiveHeading = (offset: number, fullText: string): boolean =>
-  DIRECTIVE_BEFORE_ID.test(fullText.slice(Math.max(0, offset - 60), offset));
+/** Text that rejects the recommendation, so the colon introduces what is being rejected, not an action. */
+const REJECTED_BEFORE_HEADING =
+  /\b(?:do not|don't|avoid|refrain from|not recommended|no need|never|reject\w*|declin\w*|disregard|ignore)\b[^.]*$/i;
+
+/**
+ * Whether the text before the id is a recommendation heading that turns the colon into an action
+ * introducer. Text that rejects the recommendation ("Do not follow the recommended response
+ * for ...") does not: the colon there introduces what is being rejected, not an action.
+ */
+const afterDirectiveHeading = (offset: number, fullText: string): boolean => {
+  const beforeId = fullText.slice(Math.max(0, offset - 80), offset);
+  if (REJECTED_BEFORE_HEADING.test(beforeId)) return false;
+  return DIRECTIVE_BEFORE_ID.test(beforeId);
+};
 
 const keepTechniqueNameColon = (match: string, offset: number, fullText: string): string => {
   const name = match.replace(/^T\d{4}(?:\.\d{3})?/, '').slice(0, -1);

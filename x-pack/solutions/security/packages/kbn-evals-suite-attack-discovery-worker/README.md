@@ -40,13 +40,13 @@ swallowed whatever stopped it, so there is no output to score, and scoring the e
 read as a quiet model (`AlertsRetrieved` 0, `PositiveControlRecall` 0). Every evaluator reports
 `ROW_FAILED` with "runner completed but analyzed 0 alerts, N seeded" and the generation or runner
 error when one was read. Only a generation where every batch error is a recognized model refusal,
-or where every batch error is the generation graph discarding every parsed response for
-hallucination (`Maximum hallucination failures reached`, classified `exhausted` only when every
-failed batch says so), stays a scored `MODEL_FAULT` (reported, not gating). The
+or where every batch ended at the generation graph's hallucination limit (`Maximum hallucination
+failures reached`, the terminal headline, with all batch errors accounted for), stays a scored
+`MODEL_FAULT` (reported, not gating). The
 generation-attempt limit still gates: connector failures thrown before a response can also
 exhaust the attempts, so that error does not establish a model-output fault. Every other
-all-batches-failed case fails the row: failures that are not refusals or hallucination
-exhaustion, whose cause is unknown, a mix of refusals, exhaustion and other failures, and
+all-batches-failed case fails the row: failures that are not refusals or hallucination-limit
+terminations, whose cause is unknown, a mix of refusals, exhaustion and other failures, and
 batch errors that could not be read.
 
 If the executor itself throws (its own span or model lookup, not one of our rows), `runExperiment`

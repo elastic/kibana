@@ -562,12 +562,21 @@ export const readGenerationFault = async ({
     (message) =>
       !MODEL_REFUSAL_PATTERN.test(message) && !MODEL_OUTPUT_EXHAUSTED_PATTERN.test(message)
   );
+  // All readable and all model-caused, but not one kind: cite the mix, so the row failure names
+  // both causes instead of only "analyzed 0 alerts".
+  const mixedModelKinds =
+    messages.length === failed &&
+    failed > 0 &&
+    messages.some((message) => MODEL_REFUSAL_PATTERN.test(message)) &&
+    messages.some((message) => MODEL_OUTPUT_EXHAUSTED_PATTERN.test(message));
   return {
     kind: kind ?? 'failed',
     ...(kind
       ? { message: messages[0] }
       : nonModelError
       ? { message: nonModelError }
+      : mixedModelKinds
+      ? { message: 'mixed model refusal and hallucination exhaustion' }
       : messages.length !== failed
       ? { message: `${messages.length} of ${failed} batch errors readable` }
       : {}),
