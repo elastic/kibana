@@ -19,5 +19,6 @@ export const useEvalsPermissions = () => {
   return {
     canRead: !!capabilities?.[EVALS_UI_PRIVILEGES.show],
     canManage: !!capabilities?.[EVALS_UI_PRIVILEGES.manage],
+    canReview: !!capabilities?.[EVALS_UI_PRIVILEGES.review],
   };
 };

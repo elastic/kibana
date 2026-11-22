@@ -106,7 +106,7 @@ describe('EvaluatorsPage', () => {
       mutateAsync: deleteMutateAsync,
       isLoading: false,
     } as unknown as ReturnType<typeof useDeleteEvaluator>);
-    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: true });
+    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: true, canReview: true });
   });
 
   it('lists every evaluator with its kind, origin and version', () => {
@@ -176,7 +176,7 @@ describe('EvaluatorsPage', () => {
   });
 
   it('hides every management affordance without the manage privilege', () => {
-    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: false });
+    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: false, canReview: false });
     renderPage();
 
     expect(screen.queryByRole('button', { name: 'Create evaluator' })).not.toBeInTheDocument();
@@ -194,7 +194,7 @@ describe('EvaluatorsPage', () => {
   });
 
   it('does not invite a read-only user to create one', () => {
-    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: false });
+    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: false, canReview: false });
     renderPage([BUILT_IN, CODE_BUILT_IN]);
 
     setFilter('Origin', 'user_defined');
