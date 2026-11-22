@@ -91,6 +91,18 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
     });
 
     describe('WHERE IN subqueries', () => {
+      it.each([
+        'ROW x = "a" | WHERE x IN (FROM index METADATA _id, _index, _score | FORK (LIMIT 1) (LIMIT 2) | FUSE | KEEP keywordField)',
+        'FROM index | WHERE keywordField IN (FROM index METADATA _id, _index, _score | FORK (LIMIT 1) (LIMIT 2) | FUSE | KEEP keywordField)',
+      ])(
+        'checks the METADATA of the FROM that feeds a FUSE in an IN subquery: %s',
+        async (query) => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(query, []);
+        }
+      );
+
       it('accepts a FORK in an IN subquery inside a FORK branch', async () => {
         const { expectErrors } = await setup();
 

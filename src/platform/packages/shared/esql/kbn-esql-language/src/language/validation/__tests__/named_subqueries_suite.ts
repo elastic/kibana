@@ -134,6 +134,15 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
         );
       });
 
+      it('accepts FUSE in an IN subquery over a LET with METADATA', async () => {
+        const { expectErrors } = await setup();
+
+        await expectErrors(
+          'LET a = (FROM index METADATA _id, _index, _score); ROW x = "a" | WHERE x IN (FROM a | FORK (LIMIT 1) (LIMIT 2) | FUSE | KEEP keywordField)',
+          []
+        );
+      });
+
       it('reports a missing FUSE key when the LET supplies the other key and a custom score', async () => {
         const { expectErrors } = await setup();
 
