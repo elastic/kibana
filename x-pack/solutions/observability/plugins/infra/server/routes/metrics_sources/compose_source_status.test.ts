@@ -87,7 +87,7 @@ describe('composeSourceStatus', () => {
     // pattern so the context survives Kibana's default console layout, while the original name and
     // stack are preserved so the exception type and stacktrace stay faithful to the real failure.
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [loggedError] = logger.error.mock.calls[0];
+    const loggedError = logger.error.mock.calls[0][0] as Error;
     expect(loggedError).toBeInstanceOf(Error);
     expect(loggedError.message).toBe(
       'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
@@ -128,7 +128,7 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [loggedError] = logger.error.mock.calls[0];
+    const loggedError = logger.error.mock.calls[0][0] as Error;
     expect(loggedError).toBeInstanceOf(Error);
     expect(loggedError.message).toContain('Metric index status check failed for source "default"');
     expect(loggedError.message).toContain(error.message);
