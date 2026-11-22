@@ -32,9 +32,22 @@ const { handles } = isomerDistillery.createStyleModule(
       line-height: ${font.lineHeight.s};
       text-decoration: none;
     `,
+    event: css`
+      font-family: inherit;
+      cursor: pointer;
+    `,
+    // The `<button>` reset of an event button without a style, whose fill a style sets instead.
+    plain: css`
+      background: none;
+    `,
     primary: css`
       border-color: ${color.background.filled.primary};
       background: ${color.background.filled.primary};
+      color: ${color.text.inverse};
+    `,
+    danger: css`
+      border-color: ${color.background.filled.danger};
+      background: ${color.background.filled.danger};
       color: ${color.text.inverse};
     `,
   })
@@ -56,10 +69,24 @@ export const actionsReactRenderer = (
 ) => (
   <p {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
     {node.buttons.map((button, index) => {
-      const { label, primary } = button;
+      const { label, style, event } = button;
+      const tone = style && handles[style];
+
+      if (event) {
+        return (
+          <button
+            key={index}
+            type="button"
+            className={classNames(context, handles.button, handles.event, tone ?? handles.plain)}
+            onClick={() => context.onEvent?.(event)}
+          >
+            {oneLine(label)}
+          </button>
+        );
+      }
       // A button the host can't resolve is shown as text, like a URL it can't open.
       const href = reactButtonHref(button, context);
-      const className = classNames(context, handles.button, primary ? handles.primary : undefined);
+      const className = classNames(context, handles.button, tone);
       return href ? (
         <a key={index} href={href} className={className}>
           {oneLine(label)}
