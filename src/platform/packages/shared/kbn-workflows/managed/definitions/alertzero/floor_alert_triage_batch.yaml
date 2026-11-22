@@ -684,7 +684,7 @@ steps:
       space_id: "{{ workflow.spaceId }}"
 
   # ---------------------------------------------------------------------------
-  # 7b. Keep the verdicts as verdict cache records (the flag `alertzero.triageVerdictCache`).
+  # 7c. Keep the verdicts as verdict cache records (the flag `alertzero.triageVerdictCache`).
   #
   #     The first alert of each strict key in this batch is a run for that key. A key with no record
   #     gets a pending one from a confident false or true positive. A key with a pending record from
@@ -700,10 +700,9 @@ steps:
     with:
       verdicts: "${{ steps.classify_alerts.output.verdicts }}"
       confidence_floor: "${{ inputs.confidence_floor }}"
-      space_id: "{{ workflow.spaceId }}"
 
   # ---------------------------------------------------------------------------
-  # 7b. Group the confident false positives into proposals.
+  # 7d. Group the confident false positives into proposals.
   #
   #     The alerts of one pattern (the wide pattern key) join the open proposal of that
   #     pattern, or start one. Several patterns in a batch give several new proposals, and
@@ -1042,7 +1041,7 @@ steps:
             {% if variables.failed_tag_chunk_count > 0 %}⚠️ Some alerts could not be tagged after retries; they are not visible in this Investigation.{% endif %}
 
   # ---------------------------------------------------------------------------
-  # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
+  # 7e. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
   #     below the floor) still need a durable record. When the batch made or joined exactly one
   #     proposal, they go into its Investigation, so the batch has one. Otherwise (no proposal, or
   #     several, so no single Investigation is the obvious home) they get an Investigation of their

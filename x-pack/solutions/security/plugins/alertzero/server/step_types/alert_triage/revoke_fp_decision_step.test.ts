@@ -379,16 +379,25 @@ describe('triage revoke decision step', () => {
       expect(output).toMatchObject({ status: 'ok', failures: 0, alerts_reopened: 2 });
     });
 
-    it('does not fail the revoke when the cache record cannot be deleted: it only logs, and the alerts are put back', async () => {
+    it('counts a cache record that cannot be deleted as a failure, so the revoke is run again, and still puts the alerts back', async () => {
+      // In `on` mode an active record keeps giving its verdict to the alerts of the key, so a left-over record must not read as done.
       const { run, update } = setup({});
       update.mockImplementation(async ({ id }) => {
-        if (id === CACHE_ID) throw Object.assign(new Error('forbidden'), { statusCode: 403 });
+        if (id === CACHE_ID) throw Object.assign(new Error('unavailable'), { statusCode: 503 });
         return {};
       });
 
       const { output } = await run();
 
-      expect(output).toMatchObject({ status: 'ok', failures: 0, alerts_reopened: 2 });
+      expect(output).toMatchObject({ status: 'ok', failures: 1, alerts_reopened: 2 });
+    });
+
+    it('retries a version conflict on the cache record, because the write step can update it at the same time', async () => {
+      const { run, update } = setup({});
+
+      await run();
+
+      expect(cacheUpdates(update)).toEqual([expect.objectContaining({ retry_on_conflict: 3 })]);
     });
   });
 });

@@ -168,7 +168,6 @@ const setup = ({
       getCacheConfirm: async () => confirm,
     }).handler({
       input: {
-        space_id: 'default',
         analysis_tag_prefix: 'alert_analysis:',
         lookback_hours: 24,
         min_severity: 'low',
@@ -177,6 +176,7 @@ const setup = ({
       },
       contextManager: {
         callKibanaApi,
+        getContext: () => ({ workflow: { spaceId: 'default' } }),
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ mget }),
       },

@@ -91,6 +91,8 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
           return result('disabled');
         }
 
+        // The run's own space, never an input: it is part of every key hash and of the record permissions.
+        const { spaceId } = contextManager.getContext().workflow;
         const verdictById = new Map(input.verdicts.map((verdict) => [verdict.alert_id, verdict]));
         const { alerts } = await loadAlertsByIds(contextManager, [...verdictById.keys()]);
         const batchAlerts = alerts.flatMap((doc) => {
@@ -102,7 +104,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
         ).length;
         const representatives = pickKeyRepresentatives({
           alerts: batchAlerts,
-          spaceId: input.space_id,
+          spaceId,
         });
         const counts = {
           keys_seen: representatives.length,
@@ -155,7 +157,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
                     if_primary_term: existing.primaryTerm,
                   },
                 },
-            buildCacheDocument({ record: action.record, spaceId: input.space_id, now })
+            buildCacheDocument({ record: action.record, spaceId, now })
           );
         }
 
@@ -166,7 +168,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
         for (const alert of batchAlerts) {
           const { strict } = buildPatternKeys(alert.doc);
           if (strict === undefined) continue;
-          const keyHash = hashKey(input.space_id, strict);
+          const keyHash = hashKey(spaceId, strict);
           alertsByKey.set(keyHash, [...(alertsByKey.get(keyHash) ?? []), alert]);
         }
         for (const [keyHash, group] of alertsByKey) {
@@ -201,7 +203,7 @@ export const getTriageWriteVerdictCacheStepDefinition = ({
                 if_primary_term: existing.primaryTerm,
               },
             },
-            buildCacheDocument({ record: updated, spaceId: input.space_id, now })
+            buildCacheDocument({ record: updated, spaceId, now })
           );
         }
         if (planned.length === 0) return result('none', { ...counts, left_alone: leftAlone });

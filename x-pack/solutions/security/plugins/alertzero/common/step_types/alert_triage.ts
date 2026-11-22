@@ -238,7 +238,6 @@ const writeVerdictCacheInputSchema = lazySchema(() =>
       .min(0)
       .max(1)
       .describe('The confidence a verdict needs before it is cached.'),
-    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
   })
 );
 
@@ -290,7 +289,6 @@ export type MatchVerdictCacheStatus = (typeof MATCH_VERDICT_CACHE_STATUSES)[numb
 
 const matchVerdictCacheInputSchema = lazySchema(() =>
   z.object({
-    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     analysis_tag_prefix: idSchema.describe(
       'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
     ),
@@ -371,7 +369,6 @@ export type JevFirstLineStatus = (typeof JEV_FIRST_LINE_STATUSES)[number];
 
 const jevFirstLineInputSchema = lazySchema(() =>
   z.object({
-    space_id: idSchema.describe('Space of the alerts. It is part of every key hash.'),
     analysis_tag_prefix: idSchema.describe(
       'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
     ),

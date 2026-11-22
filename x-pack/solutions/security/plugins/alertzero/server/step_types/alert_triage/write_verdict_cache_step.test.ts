@@ -64,6 +64,7 @@ const setup = ({
   bulkStatus,
   loadFails = false,
   race,
+  runSpace = 'default',
 }: {
   mode?: VerdictCacheMode;
   enabled?: boolean;
@@ -74,6 +75,8 @@ const setup = ({
   loadFails?: boolean;
   /** Runs after the step read the records and before it writes: another batch writes in between. */
   race?: (store: Map<string, StoredDoc>) => void;
+  /** The space of the workflow run. */
+  runSpace?: string;
 }) => {
   const store = new Map<string, StoredDoc>();
   let alertPool = alerts;
@@ -129,9 +132,10 @@ const setup = ({
       isContextEngineEnabled,
       getMode: async () => mode,
     }).handler({
-      input: { verdicts, confidence_floor: 0.85, space_id: 'default', ...extra },
+      input: { verdicts, confidence_floor: 0.85, ...extra },
       contextManager: {
         callKibanaApi,
+        getContext: () => ({ workflow: { spaceId: runSpace } }),
         getFakeRequest: () => ({}),
         getScopedEsClient: () => ({ mget, bulk }),
       },
@@ -183,6 +187,17 @@ describe('triage write verdict cache step', () => {
       expect(output).toMatchObject({ skip_reason: 'disabled' });
       expect(bulk).not.toHaveBeenCalled();
     });
+  });
+
+  it('stamps each record with the space of the run, which is also part of its key hash', async () => {
+    const { run, store } = setup({ runSpace: 'team', alerts: [alert('a-1', 'a.exe')] });
+
+    await run([verdict('a-1')]);
+
+    const [[id, { _source: source }]] = [...store.entries()];
+    const { strict } = buildPatternKeys(processSource('a.exe'));
+    expect(id).toBe(verdictCacheId(hashKey('team', strict ?? '')));
+    expect(source).toMatchObject({ permissions: { kibana: { privileges: [{ space: 'team' }] } } });
   });
 
   describe('run 1', () => {

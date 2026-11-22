@@ -52,8 +52,9 @@ import {
  *
  * The verdict cache keeps a record for the same key (`verdict-cache-<hash>`, the hash is the one of the decision id). Once the decision
  * is deleted, that record is soft-deleted too, so that a revoked pattern is not reused. The worker's role has no `delete` on the
- * index, so the record gets the lifecycle `deleted`, like the decision. A missing record is fine, and a record that could not be
- * deleted is only logged: the cache runs in shadow and acts on nothing.
+ * index, so the record gets the lifecycle `deleted`, like the decision. A missing record is fine. A record that could not be
+ * deleted counts in `failures`, because in `on` mode an active record keeps giving its verdict to the alerts of the key. The
+ * alerts are still put back, and a run again deletes the record.
  *
  * The caller needs write access to the decisions index, which the worker's role has and users do
  * not. Without it the step reports `denied` and touches nothing, because a user cannot tell a hidden
@@ -66,6 +67,7 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
       const id = input.decision_id;
       const isApproval = id.startsWith(FP_DECISION_ID_PREFIX);
       let failures = 0;
+      let cacheFailures = 0;
       let status: RevokeFpDecisionStatus = 'ok';
 
       const es = contextManager.getScopedEsClient();
@@ -125,9 +127,12 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
               governance: { lifecycle: { status: 'deleted' } },
             },
             refresh: true,
+            // The write verdict cache step can update the same record at the same time.
+            retry_on_conflict: 3,
           });
         } catch (error) {
           if (statusCodeOf(error) !== 404) {
+            cacheFailures++;
             logger.warn(
               `Could not delete the verdict cache record of decision ${id}: ${
                 error instanceof Error ? error.message : error
@@ -187,6 +192,13 @@ export const getTriageRevokeFpDecisionStepDefinition = () =>
         );
       }
 
-      return { output: { status, alerts_reopened: reopened, alerts_released: released, failures } };
+      return {
+        output: {
+          status,
+          alerts_reopened: reopened,
+          alerts_released: released,
+          failures: failures + cacheFailures,
+        },
+      };
     },
   });

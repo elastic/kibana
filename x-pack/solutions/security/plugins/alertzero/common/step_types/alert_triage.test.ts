@@ -46,7 +46,6 @@ describe('alertzero.triage.writeVerdictCache input', () => {
   const parse = (input: Record<string, unknown>) =>
     triageWriteVerdictCacheStepCommonDefinition.inputSchema.safeParse({
       confidence_floor: 0.85,
-      space_id: 'default',
       ...input,
     });
 

@@ -152,6 +152,8 @@ export const getTriageJevFirstLineStepDefinition = ({
           return result('failed');
         }
 
+        // The run's own space, never an input: it is part of every key hash and of the record permissions.
+        const { spaceId } = contextManager.getContext().workflow;
         const now = new Date();
         const workDeadline = now.getTime() + DECISION_MATCH_WORK_BUDGET_MS;
         const filters = {
@@ -317,7 +319,7 @@ export const getTriageJevFirstLineStepDefinition = ({
                   : ALERT_ANALYSIS_FIELDS,
               }
             );
-            const strictHashes = hashCandidates(found.candidates, input.space_id);
+            const strictHashes = hashCandidates(found.candidates, spaceId);
             const eligible = found.candidates.filter(({ doc }) => isJevEligible(doc));
             const docById = new Map(eligible.map(({ id, doc }) => [id, doc]));
 
@@ -361,7 +363,7 @@ export const getTriageJevFirstLineStepDefinition = ({
                   `${TRIAGE_STRICT_KEY_TAG_PREFIX}${hash}`,
                   ...(wide === undefined
                     ? []
-                    : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(input.space_id, wide)}`]),
+                    : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(spaceId, wide)}`]),
                 ]);
               }
             }

@@ -131,6 +131,8 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
           return result('disabled');
         }
 
+        // The run's own space, never an input: it is part of every key hash and of the record permissions.
+        const { spaceId } = contextManager.getContext().workflow;
         const confirm = await getCacheConfirm();
         const now = new Date();
         const workDeadline = now.getTime() + DECISION_MATCH_WORK_BUDGET_MS;
@@ -169,7 +171,7 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                   : NOVELTY_SOURCE_FIELDS,
               }
             );
-            const hashes = hashCandidates(found.candidates, input.space_id);
+            const hashes = hashCandidates(found.candidates, spaceId);
             const stored = await readCacheRecords({
               mget: (params) => esClient.mget(params),
               hashes: [...new Set(hashes.values())],
@@ -242,7 +244,7 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                       : [`${TRIAGE_STRICT_KEY_TAG_PREFIX}${strictHash}`]),
                     ...(wide === undefined
                       ? []
-                      : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(input.space_id, wide)}`]),
+                      : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(spaceId, wide)}`]),
                   ],
                   remove: [],
                 });
