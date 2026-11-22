@@ -103,16 +103,18 @@ import getApi from '@elastic/elasticsearch/lib/api/api/get';
 // import updateByQueryApi from '@elastic/elasticsearch/lib/api/api/update_by_query';
 // import updateByQueryRethrottleApi from '@elastic/elasticsearch/lib/api/api/update_by_query_rethrottle';
 // import { bulkApi } from './bulk';
+import type { Transport } from '@elastic/elasticsearch';
 import type { ProxyFetch } from './proxy_transport';
 import { createProxyTransport } from './proxy_transport';
-import type { EsClient } from './types';
+import type { EsClient, EsClientTransport } from './types';
 
 /**
  * Creates an elasticsearch-js API client whose requests go through the Elasticsearch proxy.
  */
 export const createEsClient = (proxyFetch: ProxyFetch): EsClient => {
-  // The generated API modules only call `transport.request`, which the proxy transport implements.
-  const transport = createProxyTransport(proxyFetch) as EsClient['transport'];
+  // The generated API modules require a Node `Transport` but only call `transport.request`, which the
+  // proxy transport implements. `EsClient` exposes it as `EsClientTransport` only.
+  const transport = createProxyTransport(proxyFetch) as EsClientTransport & Transport;
 
   return {
     transport,

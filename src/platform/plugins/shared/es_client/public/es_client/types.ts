@@ -8,14 +8,18 @@
  */
 
 import type {
-  Transport,
   TransportRequestOptions,
   TransportRequestOptionsWithMeta,
   TransportRequestParams,
   TransportResult,
 } from '@elastic/elasticsearch';
 import type API from '@elastic/elasticsearch/lib/api/index';
-import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  BulkResponse,
+  GetRequest,
+  GetResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 /**
  * The result of a request sent with `meta: true`. It is the part of elasticsearch-js'
@@ -49,22 +53,38 @@ export interface EsClientTransport {
   ): Promise<TResponse>;
 }
 
-/** Puts an overload that resolves `meta: true` calls with `EsClientResult` ahead of an API's own overloads. */
-type WithEsClientResult<TApi> = TApi extends (
-  this: infer TThis,
+/**
+ * A generated API method without its elasticsearch-js `this`, which requires a Node `Transport`.
+ * Calls with `meta: true` resolve with `EsClientResult`.
+ */
+type EsClientMethod<TApi> = TApi extends (
+  this: never,
   ...args: infer TArgs
 ) => Promise<infer TResponse>
-  ? ((
-      this: TThis,
-      params: TArgs[0],
-      options: TransportRequestOptionsWithMeta
-    ) => Promise<EsClientResult<TResponse>>) &
-      TApi
-  : TApi;
+  ? {
+      (params: TArgs[0], options: TransportRequestOptionsWithMeta): Promise<
+        EsClientResult<TResponse>
+      >;
+      (...args: TArgs): Promise<TResponse>;
+    }
+  : never;
 
-type WithEsClientResults<TNamespace> = {
-  [TKey in keyof TNamespace]: WithEsClientResult<TNamespace[TKey]>;
+/** A generated API namespace without its `transport` field, which is a Node `Transport`. */
+type EsClientNamespace<TNamespace> = {
+  [TKey in keyof TNamespace as TNamespace[TKey] extends (...args: never[]) => unknown
+    ? TKey
+    : never]: EsClientMethod<TNamespace[TKey]>;
 };
+
+/** `get`, typed by hand because mapping its overloads would drop the document type parameter. */
+interface EsClientGetMethod {
+  <TDocument = unknown>(params: GetRequest, options: TransportRequestOptionsWithMeta): Promise<
+    EsClientResult<GetResponse<TDocument>>
+  >;
+  <TDocument = unknown>(params: GetRequest, options?: TransportRequestOptions): Promise<
+    GetResponse<TDocument>
+  >;
+}
 
 /** The elasticsearch-js APIs the client exposes. The others are disabled in `create_es_client.ts`. */
 type EnabledApiName = 'count' | 'delete' | 'get' | 'indices';
@@ -72,9 +92,11 @@ type EnabledApiName = 'count' | 'delete' | 'get' | 'indices';
 type ApiMembers = Pick<API, EnabledApiName>;
 
 type EsClientApi = {
-  [TKey in keyof ApiMembers]: ApiMembers[TKey] extends (...args: never[]) => unknown
-    ? WithEsClientResult<ApiMembers[TKey]>
-    : WithEsClientResults<ApiMembers[TKey]>;
+  [TKey in keyof ApiMembers]: TKey extends 'get'
+    ? EsClientGetMethod
+    : ApiMembers[TKey] extends (...args: never[]) => unknown
+    ? EsClientMethod<ApiMembers[TKey]>
+    : EsClientNamespace<ApiMembers[TKey]>;
 };
 
 /** The `this` of client methods, which send requests through `this.transport`. */
@@ -93,7 +115,6 @@ export type BulkApi = <TDocument = unknown, TPartialDocument = Partial<TDocument
  * resolve with `EsClientResult`, and `transport` only implements `request`.
  */
 export type EsClient = EsClientApi & {
-  // The generated API methods require `this.transport` to be an elasticsearch-js `Transport`.
-  readonly transport: EsClientTransport & Transport;
-  // bulk: WithEsClientResult<BulkApi>;
+  readonly transport: EsClientTransport;
+  // bulk: EsClientMethod<BulkApi>;
 };
