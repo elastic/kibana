@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
-        "line": 93,
-        "column": 26
+        "line": 99,
+        "column": 25
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
-        "line": 106,
-        "column": 28
+        "line": 112,
+        "column": 27
       }
     },
     {
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
-        "line": 124,
+        "line": 130,
         "column": 25
       }
     },
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
-        "line": 147,
-        "column": 15
+        "line": 153,
+        "column": 18
       }
     },
     {
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/add_monitor_permissions.spec.ts",
-        "line": 173,
-        "column": 18
+        "line": 179,
+        "column": 25
       }
     },
     {
