@@ -787,6 +787,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               ? decideRenderRetry(failedToExecuteErr, renderRetryState, {
                   attempts,
                   maxAttempts: maxAttempts.maxTaskAttempts,
+                  claimedRunAt: taskInstance.runAt,
                 })
               : undefined;
             if (renderRetry) {

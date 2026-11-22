@@ -76,6 +76,9 @@ const digitalExperienceRoutes = {
           '/{serviceName}/network': {
             element: <ApplicationRoute tab="network" />,
           },
+          '/{serviceName}/reports': {
+            element: <ApplicationRoute tab="reports" />,
+          },
           '/{serviceName}': {
             element: <ApplicationRoute tab="overview" />,
           },

@@ -14,8 +14,8 @@ import {
 
 /**
  * Canonical shape of a composite summary index document. This single schema is the source of
- * truth for both writing the document (see `buildCompositeSummaryDoc`) and decoding it on read,
- * so the persisted and decoded shapes can never drift apart.
+ * truth for both encoding the document on write (see `buildCompositeSummaryDoc`) and decoding it
+ * on read, so the persisted and decoded shapes can never drift apart.
  */
 const compositeSloSummaryDocumentSchema = z.object({
   spaceId: z.string(),
@@ -38,7 +38,7 @@ const compositeSloSummaryDocumentSchema = z.object({
   members: z.array(compositeSloMemberWithSummarySchema).optional(),
 });
 
-type CompositeSLOSummaryDocument = z.infer<typeof compositeSloSummaryDocumentSchema>;
+type CompositeSLOSummaryDocument = z.input<typeof compositeSloSummaryDocumentSchema>;
 
 export { compositeSloSummaryDocumentSchema };
 export type { CompositeSLOSummaryDocument };

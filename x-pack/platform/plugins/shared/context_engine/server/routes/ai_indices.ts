@@ -29,6 +29,7 @@ import {
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_DREAMING_PATH,
+  DREAMING_TEMPLATES_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_GROUPS_PATH,
@@ -57,6 +58,7 @@ import type {
   UpdateKiResponse,
 } from '../../common/http_api/knowledge_indicators';
 import { DREAMING_DISABLED, type GetAiIndexDreamingResponse } from '../../common/dreaming';
+import type { ListDreamingTemplatesResponse } from '../../common/dreaming_templates';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -89,6 +91,7 @@ import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKiGroups, getKis } from '../ai_indices/ki_list';
 import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
+import { DREAMING_TEMPLATES } from '../dreaming/dreaming_templates';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
@@ -124,7 +127,8 @@ import {
 import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
-import { withContextEngineFeatureFlag } from './with_feature_flag';
+import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
+import { MEMORY_DISABLED_MESSAGE, withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -144,17 +148,12 @@ const DELETE_SECURITY: RouteSecurity = {
 const CONTEXT_ENGINE_DISABLED_NOTE =
   'Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).';
 
-const CONTEXT_ENGINE_DOCS_NOTE =
-  '**For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**';
-
 const CONTEXT_ENGINE_DISABLED_DESCRIPTION = 'Context Engine is turned off in this space.';
 
 const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
   WorkflowsManagementOperationPrivileges.delete.every(
     (privilege) => request.authzResult?.[privilege] === true
   );
-
-const MEMORY_DISABLED_MESSAGE = 'Context Engine memory is turned off.';
 
 const toPublicAiIndex = ({
   dreaming: _dreaming,
@@ -348,7 +347,7 @@ export const registerAiIndexRoutes = ({
         const auditLogger = security.audit.logger;
         const { id, memory_enabled: _memoryEnabled, ...properties } = request.body;
         try {
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -440,7 +439,7 @@ export const registerAiIndexRoutes = ({
           const aiIndexService = getAiIndexService();
           const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           const { memory_enabled: _memoryEnabled, ...properties } = request.body;
-          await validateEsqlSources(properties.sources);
+          await validateEsqlSources(properties.sources, properties.dest);
           await validateConnectorSources({
             sources: properties.sources,
             actions: await getActions(),
@@ -1146,6 +1145,26 @@ export const registerAiIndexRoutes = ({
           );
           return handleAiIndexError(error, response, logger);
         }
+      })
+    );
+
+  router.versioned
+    .get({
+      path: DREAMING_TEMPLATES_PATH,
+      security: READ_SECURITY,
+      access: 'internal',
+      summary: 'List example dreaming configurations',
+      description:
+        'Returns the built-in example dreaming configurations offered when setting up an AI Index. Returns a 404 response while the global memory setting is off.',
+    })
+    .addVersion(
+      { version: AI_INDEX_INTERNAL_API_VERSION, validate: false },
+      withContextEngineFeatureFlag(async (_ctx, request, response) => {
+        if (!(await isMemoryEnabled(request))) {
+          return response.notFound({ body: { message: MEMORY_DISABLED_MESSAGE } });
+        }
+        const body: ListDreamingTemplatesResponse = { templates: DREAMING_TEMPLATES };
+        return response.ok({ body });
       })
     );
 
