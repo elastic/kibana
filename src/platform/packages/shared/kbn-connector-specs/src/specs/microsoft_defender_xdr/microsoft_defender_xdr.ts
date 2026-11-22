@@ -285,9 +285,15 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Each alert in the response includes an evidence array with device evidence containing mdeDeviceId fields that can be passed to the Microsoft Defender for Endpoint connector.',
       input: GetIncidentInputSchema,
       handler: async (ctx, input: GetIncidentInput) =>
-        graphRequest(ctx, 'get', `/security/incidents/${encodeURIComponent(input.incidentId)}`, 'getIncident', {
-          params: { $expand: 'alerts' },
-        }),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/incidents/${encodeURIComponent(input.incidentId)}`,
+          'getIncident',
+          {
+            params: { $expand: 'alerts' },
+          }
+        ),
     },
 
     updateIncident: {
@@ -308,7 +314,13 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         if (fields.determination !== undefined) body.determination = fields.determination;
         if (fields.severity !== undefined) body.severity = fields.severity;
         if (fields.customTags !== undefined) body.customTags = fields.customTags;
-        return graphRequest(ctx, 'patch', `/security/incidents/${encodeURIComponent(incidentId)}`, 'updateIncident', { body });
+        return graphRequest(
+          ctx,
+          'patch',
+          `/security/incidents/${encodeURIComponent(incidentId)}`,
+          'updateIncident',
+          { body }
+        );
       },
     },
 
@@ -320,9 +332,15 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'notes, investigation findings, or escalation decisions directly on the incident for audit trail purposes.',
       input: AddIncidentCommentInputSchema,
       handler: async (ctx, input: AddIncidentCommentInput) =>
-        graphRequest(ctx, 'post', `/security/incidents/${encodeURIComponent(input.incidentId)}/comments`, 'addIncidentComment', {
-          body: { comment: input.comment },
-        }),
+        graphRequest(
+          ctx,
+          'post',
+          `/security/incidents/${encodeURIComponent(input.incidentId)}/comments`,
+          'addIncidentComment',
+          {
+            body: { comment: input.comment },
+          }
+        ),
     },
 
     listAlerts: {
@@ -336,7 +354,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       handler: async (ctx, input: ListAlertsInput) => {
         const params: Record<string, string | number> = { $top: input.top, $skip: input.skip };
         if (input.filter) params.$filter = input.filter;
-        const data = await graphRequest(ctx, 'get', '/security/alerts_v2', 'listAlerts', { params });
+        const data = await graphRequest(ctx, 'get', '/security/alerts_v2', 'listAlerts', {
+          params,
+        });
         return { value: data?.value ?? [], nextLink: data?.['@odata.nextLink'] ?? null };
       },
     },
@@ -350,7 +370,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Device evidence includes mdeDeviceId which can be passed to the Microsoft Defender for Endpoint connector for containment or live-response actions.',
       input: GetAlertInputSchema,
       handler: async (ctx, input: GetAlertInput) =>
-        graphRequest(ctx, 'get', `/security/alerts_v2/${encodeURIComponent(input.alertId)}`, 'getAlert'),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/alerts_v2/${encodeURIComponent(input.alertId)}`,
+          'getAlert'
+        ),
     },
 
     updateAlert: {
@@ -368,7 +393,13 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         if (fields.assignedTo !== undefined) body.assignedTo = fields.assignedTo;
         if (fields.classification !== undefined) body.classification = fields.classification;
         if (fields.determination !== undefined) body.determination = fields.determination;
-        return graphRequest(ctx, 'patch', `/security/alerts_v2/${encodeURIComponent(alertId)}`, 'updateAlert', { body });
+        return graphRequest(
+          ctx,
+          'patch',
+          `/security/alerts_v2/${encodeURIComponent(alertId)}`,
+          'updateAlert',
+          { body }
+        );
       },
     },
 
@@ -383,8 +414,18 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
       handler: async (ctx, input: RunHuntingQueryInput) => {
         const body: Record<string, unknown> = { Query: input.query };
         if (input.timespan) body.Timespan = input.timespan;
-        const data = await graphRequest(ctx, 'post', '/security/runHuntingQuery', 'runHuntingQuery', { body });
-        return { schema: data?.schema ?? [], results: data?.results ?? [], stats: data?.stats ?? null };
+        const data = await graphRequest(
+          ctx,
+          'post',
+          '/security/runHuntingQuery',
+          'runHuntingQuery',
+          { body }
+        );
+        return {
+          schema: data?.schema ?? [],
+          results: data?.results ?? [],
+          stats: data?.stats ?? null,
+        };
       },
     },
 
@@ -397,9 +438,15 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'or to retrieve rule IDs for reference.',
       input: ListDetectionRulesInputSchema,
       handler: async (ctx, input: ListDetectionRulesInput) => {
-        const data = await graphRequest(ctx, 'get', '/security/rules/detectionRules', 'listDetectionRules', {
-          params: { $top: input.top, $skip: input.skip },
-        });
+        const data = await graphRequest(
+          ctx,
+          'get',
+          '/security/rules/detectionRules',
+          'listDetectionRules',
+          {
+            params: { $top: input.top, $skip: input.skip },
+          }
+        );
         return { value: data?.value ?? [], nextLink: data?.['@odata.nextLink'] ?? null };
       },
     },
@@ -412,7 +459,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'including its KQL query, schedule, alert template, and trigger settings.',
       input: GetDetectionRuleInputSchema,
       handler: async (ctx, input: GetDetectionRuleInput) =>
-        graphRequest(ctx, 'get', `/security/rules/detectionRules/${encodeURIComponent(input.ruleId)}`, 'getDetectionRule'),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/rules/detectionRules/${encodeURIComponent(input.ruleId)}`,
+          'getDetectionRule'
+        ),
     },
 
     createDetectionRule: {
@@ -451,8 +503,15 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         if (fields.status !== undefined) body.status = fields.status;
         if (fields.queryText !== undefined) body.queryCondition = { queryText: fields.queryText };
         if (fields.period !== undefined) body.schedule = { frequency: fields.period };
-        if (fields.alertTemplate !== undefined) body.detectionAction = { alertTemplate: fields.alertTemplate };
-        return graphRequest(ctx, 'patch', `/security/rules/detectionRules/${encodeURIComponent(ruleId)}`, 'updateDetectionRule', { body });
+        if (fields.alertTemplate !== undefined)
+          body.detectionAction = { alertTemplate: fields.alertTemplate };
+        return graphRequest(
+          ctx,
+          'patch',
+          `/security/rules/detectionRules/${encodeURIComponent(ruleId)}`,
+          'updateDetectionRule',
+          { body }
+        );
       },
     },
 
@@ -465,7 +524,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'This action is irreversible — confirm the rule ID with listDetectionRules or getDetectionRule first.',
       input: DeleteDetectionRuleInputSchema,
       handler: async (ctx, input: DeleteDetectionRuleInput) => {
-        await graphRequest(ctx, 'delete', `/security/rules/detectionRules/${encodeURIComponent(input.ruleId)}`, 'deleteDetectionRule');
+        await graphRequest(
+          ctx,
+          'delete',
+          `/security/rules/detectionRules/${encodeURIComponent(input.ruleId)}`,
+          'deleteDetectionRule'
+        );
         return { deleted: true, ruleId: input.ruleId };
       },
     },
@@ -478,9 +542,15 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'analyst observations, or escalation decisions directly on the alert for audit trail purposes.',
       input: AddAlertCommentInputSchema,
       handler: async (ctx, input: AddAlertCommentInput) =>
-        graphRequest(ctx, 'post', `/security/alerts_v2/${encodeURIComponent(input.alertId)}/comments`, 'addAlertComment', {
-          body: { comment: input.comment },
-        }),
+        graphRequest(
+          ctx,
+          'post',
+          `/security/alerts_v2/${encodeURIComponent(input.alertId)}/comments`,
+          'addAlertComment',
+          {
+            body: { comment: input.comment },
+          }
+        ),
     },
 
     mergeIncidents: {
@@ -500,7 +570,9 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         if (input.mergeReasons !== undefined) {
           body.mergeReasons = (input.mergeReasons as CorrelationReason[]).join(',');
         }
-        return graphRequest(ctx, 'post', '/security/incidents/mergeIncidents', 'mergeIncidents', { body });
+        return graphRequest(ctx, 'post', '/security/incidents/mergeIncidents', 'mergeIncidents', {
+          body,
+        });
       },
     },
 
@@ -513,7 +585,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Requires the ThreatIntelligence.Read.All Graph permission.',
       input: GetThreatIntelHostInputSchema,
       handler: async (ctx, input: GetThreatIntelHostInput) =>
-        graphRequest(ctx, 'get', `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}`, 'getThreatIntelHost'),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}`,
+          'getThreatIntelHost'
+        ),
     },
 
     getThreatIntelHostReputation: {
@@ -526,7 +603,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Requires the ThreatIntelligence.Read.All Graph permission.',
       input: GetThreatIntelHostInputSchema,
       handler: async (ctx, input: GetThreatIntelHostInput) =>
-        graphRequest(ctx, 'get', `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/reputation`, 'getThreatIntelHostReputation'),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/reputation`,
+          'getThreatIntelHostReputation'
+        ),
     },
 
     getPassiveDnsRecords: {
@@ -539,7 +621,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Requires the ThreatIntelligence.Read.All Graph permission.',
       input: GetThreatIntelHostInputSchema,
       handler: async (ctx, input: GetThreatIntelHostInput) => {
-        const data = await graphRequest(ctx, 'get', `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/passivedns`, 'getPassiveDnsRecords');
+        const data = await graphRequest(
+          ctx,
+          'get',
+          `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/passivedns`,
+          'getPassiveDnsRecords'
+        );
         return { value: data?.value ?? [], nextLink: data?.['@odata.nextLink'] ?? null };
       },
     },
@@ -554,7 +641,12 @@ export const MicrosoftDefenderXdr: ConnectorSpec = {
         'Requires the ThreatIntelligence.Read.All Graph permission.',
       input: GetWhoisRecordInputSchema,
       handler: async (ctx, input: GetWhoisRecordInput) =>
-        graphRequest(ctx, 'get', `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/whois`, 'getWhoisRecord'),
+        graphRequest(
+          ctx,
+          'get',
+          `/security/threatIntelligence/hosts/${encodeURIComponent(input.host)}/whois`,
+          'getWhoisRecord'
+        ),
     },
 
     listSecureScores: {
