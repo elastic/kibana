@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import { BASELINE_TIMEOUT_MS } from './constants';
 import { captureWorkerBaseline } from './alertzero';
+import * as kbn from './kbn';
 import type { AlertZeroApi, ApiResult, Method } from './kbn';
+
+jest.mock('./kbn', () => {
+  const actual = jest.requireActual('./kbn');
+  return { ...actual, pollUntil: jest.fn(actual.pollUntil) };
+});
+
+/** The options object the last `captureWorkerBaseline` call handed to `pollUntil`. */
+const pollOptions = () => jest.mocked(kbn.pollUntil).mock.calls[0][2];
 
 const WORKER_ID = 'system-security-floor-attack-discovery';
 
@@ -30,10 +40,50 @@ const neverRespondingApi = (signals: AbortSignal[]): AlertZeroApi => ({
 describe('captureWorkerBaseline', () => {
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.mocked(kbn.pollUntil).mockClear();
   });
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('hands pollUntil the deadline it shares with the per-read signal, not a default one', async () => {
+    const api: AlertZeroApi = {
+      internal: async <T>() => ({ statusCode: 200, body: { workers: [] } } as ApiResult<T>),
+      public: () => Promise.reject(new Error('not used')),
+    };
+    const start = Date.now();
+
+    const promise = captureWorkerBaseline(api, WORKER_ID);
+    const assertion = expect(promise).rejects.toThrow('Timed out after');
+    await jest.advanceTimersByTimeAsync(BASELINE_TIMEOUT_MS + 5_000);
+    await assertion;
+
+    // The handoff under test: the poll must run on the same deadline the per-read signal
+    // is cut off at. Dropping `deadline` here falls back to a poll-local one and leaves the
+    // request signal to expire on its own — a hung read then bleeds past this budget.
+    const { deadline } = pollOptions() ?? {};
+    expect(deadline).toBeGreaterThanOrEqual(start);
+    expect(deadline).toBeLessThanOrEqual(start + BASELINE_TIMEOUT_MS);
+  });
+
+  it('issues no worker request at or after the shared deadline', async () => {
+    const signals: AbortSignal[] = [];
+    const api = neverRespondingApi(signals);
+    const requestStartsAt = [Date.now()];
+
+    const promise = captureWorkerBaseline(api, WORKER_ID);
+    const assertion = expect(promise).rejects.toThrow('Timed out after');
+    // Advance exactly to the deadline before any poll-interval tick could fire: the poll
+    // must stop there instead of spending its own (later) timeoutMs budget on another read.
+    await jest.advanceTimersByTimeAsync(BASELINE_TIMEOUT_MS - Date.now() + requestStartsAt[0]);
+    await jest.advanceTimersByTimeAsync(5_000);
+    await assertion;
+
+    const deadline = pollOptions()?.deadline ?? Number.POSITIVE_INFINITY;
+    expect(requestStartsAt.every((startedAt) => startedAt < deadline)).toBe(true);
+    // The last issued request was already canceled by the deadline, not still hanging.
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
   });
 
   it('captures the baseline from the first readable worker record', async () => {

@@ -5,8 +5,67 @@
  * 2.0.
  */
 
+import type { ApiClientFixture } from '@kbn/scout-security';
 import { POLL_INTERVAL_MS } from './constants';
-import { pollUntil } from './kbn';
+import { createApi, pollUntil } from './kbn';
+
+/** An api client whose requests hang until their abort signal fires, recording every signal. */
+const hangingApiClient = (signals: AbortSignal[]): ApiClientFixture => ({
+  get: hang(signals),
+  post: hang(signals),
+  put: hang(signals),
+  delete: hang(signals),
+  patch: hang(signals),
+  head: hang(signals),
+});
+
+function hang(signals: AbortSignal[]) {
+  return <T>(_url: string, options?: { signal?: AbortSignal }) =>
+    new Promise<T>((_resolve, reject) => {
+      const { signal } = options ?? {};
+      if (signal) {
+        signals.push(signal);
+        signal.addEventListener('abort', () => reject(new Error('request aborted')));
+      }
+    });
+}
+
+describe('createApi', () => {
+  it('forwards the abort signal on internal() so callers can cancel a hung request', async () => {
+    const signals: AbortSignal[] = [];
+    const api = createApi(hangingApiClient(signals), { cookie: 'saml=es-session' });
+    const controller = new AbortController();
+
+    const request = api.internal('GET', '/internal/alertzero/workers', {
+      signal: controller.signal,
+    });
+
+    // `internal` awaits `send` first, so the client call runs a few microtasks later.
+    for (let i = 0; i < 10 && signals.length === 0; i++) {
+      await Promise.resolve();
+    }
+    expect(signals).toHaveLength(1); // exactly one request
+    expect(signals[0]).toBe(controller.signal); // the exact signal reached the client
+    controller.abort();
+    await expect(request).rejects.toThrow('request aborted');
+  });
+
+  it('forwards the abort signal on public() so callers can cancel a hung request', async () => {
+    const signals: AbortSignal[] = [];
+    const api = createApi(hangingApiClient(signals), { cookie: 'saml=es-session' });
+    const controller = new AbortController();
+
+    const request = api.public('GET', '/api/actions/connectors', { signal: controller.signal });
+
+    for (let i = 0; i < 10 && signals.length === 0; i++) {
+      await Promise.resolve();
+    }
+    expect(signals).toHaveLength(1);
+    expect(signals[0]).toBe(controller.signal);
+    controller.abort();
+    await expect(request).rejects.toThrow('request aborted');
+  });
+});
 
 describe('pollUntil', () => {
   beforeEach(() => {

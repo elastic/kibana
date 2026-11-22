@@ -2,6 +2,11 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    // `jest` is ambient for the whole tree because the fixture unit tests
+    // (test/scout_alertzero/**/*.test.ts, run by jest.config.js there) live inside this
+    // tsconfig's include glob; a nested tsconfig cannot exclude them from the parent.
+    // Scout specs import their own test bindings (eslint scout_expect_import enforces
+    // expect imports), so the widened globals don't mask a missing import there.
     "types": ["jest", "node"]
   },
   "include": ["**/*"],
