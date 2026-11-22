@@ -444,6 +444,7 @@ describe('scoreFieldChanges', () => {
 
     expect(result.failedCalls).toBeGreaterThan(0);
     expect(Object.keys(result.failureReasons)).toEqual(['indicator: the model answered 429']);
+    expect(result.results).not.toHaveLength(0);
     expect(result.results.every(({ scores }) => scores.indicator === undefined)).toBe(true);
     expect(result.results.every(({ scores }) => scores.choice === 0.2)).toBe(true);
   });

@@ -6,7 +6,7 @@
  */
 
 /**
- * Takes a stratified sample of generated alerts for a calibration run on a real model (plan, Tuesday task 8) and for the
+ * Takes a stratified sample of generated alerts for a calibration run on a real model and for the
  * check that the content of the alerts matches the truth. The Alert Triage worker does not take a random sample: it plans
  * one batch per rule in the order of its plan, so a run on the whole day over-represents the first rules (in the smoke test
  * only 4% of the analyzed alerts were true positives, against 17.6% in the day). The sample fixes that:

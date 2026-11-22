@@ -6,7 +6,7 @@
  */
 
 /**
- * Mutation tests of the verdict cache guards (plan, Thursday tasks 4 and 6). They answer: when a record of a false positive
+ * Mutation tests of the verdict cache guards. They answer: when a record of a false positive
  * covers a key, which bad variants does the novelty guard catch, which does it miss, and how often does it stop an alert that
  * was right to reuse (a false alarm, which costs model work and saves nothing)?
  *

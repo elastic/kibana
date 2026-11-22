@@ -6,7 +6,7 @@
  */
 
 /**
- * Offline experiment (plan, Thursday task 7): can a decision model (Jev) classify an alert that no stored verdict covers?
+ * Offline experiment: can a decision model (Jev) classify an alert that no stored verdict covers?
  * Nothing in the product changes. The script asks the model about each generated alert of a sample, in three wordings and
  * twice each, and compares the answers with the truth of the generator and with the verdicts that Haiku gave to the same alerts.
  *

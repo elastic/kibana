@@ -6,7 +6,7 @@
  */
 
 import type { GuardLimits, ModelCall, WorkerSettings } from './guard_real_run';
-import { evaluateGuard, patchableSettings, unfinishedQuery } from './guard_real_run';
+import { evaluateGuard, parseLimit, patchableSettings, unfinishedQuery } from './guard_real_run';
 
 const HAIKU = '.anthropic-claude-4.5-haiku-chat_completion';
 const FAKE = 'fake-connector-id';
@@ -105,5 +105,16 @@ describe('unfinishedQuery', () => {
       'skipped',
     ]);
     expect(query.bool.filter[0]).toEqual({ range: { createdAt: { gte: '2026-11-16T21:37:00Z' } } });
+  });
+});
+
+describe('parseLimit', () => {
+  // A cap that is not a number compares false with every count, so the guard would never stop the spend.
+  it.each([['8O'], [''], [undefined], ['0'], ['-5']])('refuses %p', (value) => {
+    expect(() => parseLimit('--max-calls', value)).toThrow('--max-calls must be a number above 0');
+  });
+
+  it('reads a positive number', () => {
+    expect(parseLimit('--max-calls', '80')).toBe(80);
   });
 });

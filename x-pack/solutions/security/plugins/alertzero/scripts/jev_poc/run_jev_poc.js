@@ -58,6 +58,20 @@ if (!ES_URL || !API_KEY) {
   console.error('Set QA_ES_URL and QA_ES_API_KEY.');
   process.exit(1);
 }
+// The API key goes in a header, so it must never travel over plain http to another host.
+const isSafeRemoteUrl = (url) => {
+  if (url.startsWith('https://')) return true;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1');
+  } catch {
+    return false;
+  }
+};
+if (!isSafeRemoteUrl(ES_URL)) {
+  console.error('QA_ES_URL must be an https URL, or http on localhost.');
+  process.exit(1);
+}
 
 const dataset = JSON.parse(fs.readFileSync(DATASET, 'utf8'));
 const isGrouped = Array.isArray(dataset.groups);
@@ -214,9 +228,13 @@ const decide = async ({ input, question }) => {
 
 const THRESHOLDS = [0.5, 0.7, 0.8, 0.9, 0.95, 0.98, 0.99];
 
+// Alerts that got no score in a variant, because every call failed. A variant must not look safer because of them.
+const unscored = {};
+
 const runVariant = async (name) => {
   const variant = VARIANTS[name];
   const rows = [];
+  unscored[name] = { fp: 0, tp: 0 };
   let printedRaw = false;
   for (const group of groups) {
     for (const alert of group.alerts) {
@@ -251,6 +269,8 @@ const runVariant = async (name) => {
           spread: Math.max(...probs) - Math.min(...probs),
           ms: Math.round(times.reduce((a, b) => a + b, 0) / times.length),
         });
+      } else {
+        unscored[name][alert.label === 'tp' ? 'tp' : 'fp']++;
       }
     }
   }
@@ -318,14 +338,17 @@ const sweep = (rows) => {
       `${totals.tps} true positives`
   );
   console.log(
-    'cell = extra skipped / extras, then wrong skips as <n>w. Look for the most extra at 0w.'
+    'cell = extra skipped / extras, then wrong skips / scored true positives as <n>/<m>w. ' +
+      'Look for the most extra at 0w. A variant with unscored alerts is not comparable.'
   );
   console.log(head);
   for (const name of variantNames) {
     const cells = sweep(results[name]).map((s) =>
-      `${s.extra}/${s.totals.extras}/${s.missed}w`.padEnd(10)
+      `${s.extra}/${s.totals.extras}/${s.missed}/${s.totals.tps}w`.padEnd(10)
     );
-    console.log(name.padEnd(18) + cells.join(''));
+    const { fp, tp } = unscored[name];
+    const note = fp + tp > 0 ? `  UNSCORED: ${tp} true positives, ${fp} false positives` : '';
+    console.log(name.padEnd(18) + cells.join('') + note);
   }
 
   if (totals.hitTps > 0) {

@@ -95,6 +95,20 @@ if (!OFFLINE && (!ES_URL || !API_KEY)) {
   console.error('Set QA_ES_URL and QA_ES_API_KEY, or use --dry-run.');
   process.exit(1);
 }
+// The API key goes in a header, so it must never travel over plain http to another host.
+const isSafeRemoteUrl = (url) => {
+  if (url.startsWith('https://')) return true;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1');
+  } catch {
+    return false;
+  }
+};
+if (!OFFLINE && !isSafeRemoteUrl(ES_URL)) {
+  console.error('QA_ES_URL must be an https URL, or http on localhost.');
+  process.exit(1);
+}
 if (!OFFLINE && !CONFIRM) {
   console.error(
     `This sends alert content (command lines, paths, ${

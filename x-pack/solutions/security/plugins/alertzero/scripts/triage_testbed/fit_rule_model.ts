@@ -25,7 +25,7 @@
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/fit_rule_model_cli.js --id <name> \
  *     --runs '<from>,<to>;<from>,<to>;...' --data <folder with truth.ndjson> --es http://localhost:9200 \
- *     --expect-cluster elasticsearch --connector-id <the real connector> --base-config <config json> [--notes-dir <the results folder with ledger.md and runs/>]
+ *     --expect-cluster elasticsearch --connector-id <the real connector> --base-config <config json> --notes-dir <the results folder with ledger.md and runs/>
  */
 
 import fs from 'fs';
@@ -226,6 +226,10 @@ export const fitFromRuns = ({
     plain.filter((row) => row.answer === row.truth).map((row) => row.confidence)
   );
 
+  // Inconclusive answers are left out of every rate above, so their own share is measured over all answers of the runs.
+  const allRows = [...rowsByRun.values()].flat();
+  const inconclusive = share(allRows.filter((row) => row.answer === 'inc').length, allRows.length);
+
   const flipRate = {
     falsePositiveAsTruePositive: share(count(settled('fp'), 'tp'), settled('fp').length),
     truePositiveAsFalsePositive: share(count(settled('tp'), 'fp'), settled('tp').length),
@@ -242,10 +246,17 @@ export const fitFromRuns = ({
         previous.flipRate.truePositiveAsFalsePositive
       ),
     },
-    inconclusiveRate: 0,
-    variantMissRate: Object.fromEntries(
-      Object.entries(variants).map(([type, v]) => [type, Number((v.missed / v.settled).toFixed(3))])
-    ),
+    inconclusiveRate: keep(inconclusive.value, previous.inconclusiveRate),
+    // A variant type that no run showed keeps its earlier rate: dropping it would make the fake always catch that variant.
+    variantMissRate: {
+      ...previous.variantMissRate,
+      ...Object.fromEntries(
+        Object.entries(variants).map(([type, v]) => [
+          type,
+          Number((v.missed / v.settled).toFixed(3)),
+        ])
+      ),
+    },
     ruleModel,
     confidenceByKind,
     confidence: {
@@ -306,12 +317,12 @@ const REQUIRED_ARGS = [
   'expectCluster',
   'connectorId',
   'baseConfig',
+  'notesDir',
 ] as const;
 
 export const main = async (): Promise<void> => {
   const partial: Partial<FitRuleModelArgs> = {
     alertIndex: '.alerts-security.alerts-default',
-    notesDir: path.resolve(__dirname, '../../../../../../../../notes/results'),
   };
   for (let i = 2; i < process.argv.length; i++) {
     const key = FLAGS[process.argv[i]];

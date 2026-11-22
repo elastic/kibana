@@ -6,7 +6,7 @@
  */
 
 /**
- * How often do run 1 and run 2 of a strict key disagree, and why? (Plan, Thursday task 6.) The verdict cache makes a record of a
+ * How often do run 1 and run 2 of a strict key disagree, and why? The verdict cache makes a record of a
  * key from the verdict of its first alert (run 1) and makes it active only when the next alert of the key, in a later batch (run 2),
  * gets the same verdict at the confidence floor. Anything else makes the key unstable. Run 2 is another alert, so a disagreement
  * holds two causes, and this analysis tells them apart with the truth of the generated alerts:

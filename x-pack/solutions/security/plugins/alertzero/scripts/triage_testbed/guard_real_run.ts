@@ -136,6 +136,15 @@ const messageOf = (error: Error | string): string =>
   error instanceof Error ? error.message : String(error);
 
 /** Decides from the model calls so far. Pure. */
+/** A spend cap from the command line. It must be a number above 0, or the guard would never stop the run. */
+export const parseLimit = (flag: string, value: string | undefined): number => {
+  const limit = Number(value);
+  if (!Number.isFinite(limit) || limit <= 0) {
+    throw new Error(`${flag} must be a number above 0, got "${value}"`);
+  }
+  return limit;
+};
+
 export const evaluateGuard = ({
   calls,
   expectedConnector,
@@ -358,9 +367,9 @@ export const main = async (): Promise<void> => {
     timeoutMinutes,
   } = args;
   const limits: GuardLimits = {
-    maxCalls: Number(args.maxCalls),
-    maxInputTokens: Number(args.maxInputTokens),
-    maxOutputTokens: Number(args.maxOutputTokens),
+    maxCalls: parseLimit('--max-calls', args.maxCalls),
+    maxInputTokens: parseLimit('--max-input-tokens', args.maxInputTokens),
+    maxOutputTokens: parseLimit('--max-output-tokens', args.maxOutputTokens),
   };
   const alsoAllowed = args.alsoAllowed ? args.alsoAllowed.split(',') : [];
   const deadline = Date.now() + Number(timeoutMinutes) * 60000;

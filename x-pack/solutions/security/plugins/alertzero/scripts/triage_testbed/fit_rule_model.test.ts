@@ -146,7 +146,12 @@ describe('fit_rule_model', () => {
 
     const { proposedConfig } = fitFromRuns({ rowsByRun: rows, previous: DEFAULT_CONFIG });
 
-    expect(proposedConfig.variantMissRate).toEqual({ new_hash: 1, encoded_command_line: 0 });
+    // The types the runs showed are fitted. The others keep the rate of the config the fit starts from.
+    expect(proposedConfig.variantMissRate).toEqual({
+      ...DEFAULT_CONFIG.variantMissRate,
+      new_hash: 1,
+      encoded_command_line: 0,
+    });
   });
 
   it('fits the confidence of wrong answers from flipped batches and from variants that show a sign, not from invisible ones', () => {
@@ -166,6 +171,45 @@ describe('fit_rule_model', () => {
 
     // 10 flipped answers at 0.8 and one visible variant miss at 0.6 (11 answers: a mean and a half width, no table). new_hash is left out.
     expect(proposedConfig.confidence.wrong.mean).toBeCloseTo(0.782, 2);
+  });
+
+  it('fits the inconclusive share over all answers, so that the fake answers inconclusive as often as the model', () => {
+    const rows = new Map([
+      [
+        'a',
+        [
+          ...tps('r', 'process', 0),
+          row('r', 'process', 'tp', 'inc'),
+          row('s', 'file', 'fp', 'inc'),
+        ],
+      ],
+      ['b', fps('s', 'file').slice(0, 8)],
+    ]);
+
+    const { proposedConfig } = fitFromRuns({ rowsByRun: rows, previous: DEFAULT_CONFIG });
+
+    // 2 inconclusive answers of 20.
+    expect(proposedConfig.inconclusiveRate).toBe(0.1);
+  });
+
+  it('keeps the miss rate of a variant type that no run showed', () => {
+    const previous = {
+      ...DEFAULT_CONFIG,
+      variantMissRate: { untrusted_signer: 0.62, new_hash: 1 },
+    };
+    const rows = new Map([
+      [
+        'a',
+        [
+          row('s', 'process', 'tp', 'tp', { variant: 'new_hash' }),
+          row('s', 'process', 'tp', 'fp', { variant: 'new_hash' }),
+        ],
+      ],
+    ]);
+
+    const { proposedConfig } = fitFromRuns({ rowsByRun: rows, previous });
+
+    expect(proposedConfig.variantMissRate).toEqual({ untrusted_signer: 0.62, new_hash: 0.5 });
   });
 
   it('replaces an inconclusive distribution that the fake cannot sample', () => {

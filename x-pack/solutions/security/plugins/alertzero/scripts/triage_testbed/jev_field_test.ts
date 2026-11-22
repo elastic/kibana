@@ -6,7 +6,7 @@
  */
 
 /**
- * Offline test of the decision model (Jev) on its own, one field at a time (plan, Thursday task 5). The Jev guard of the verdict
+ * Offline test of the decision model (Jev) on its own, one field at a time. The Jev guard of the verdict
  * cache scores a reused alert and compares the score with the score of the first alert of its key. It fires when the two differ by
  * more than a threshold. This test shows which changes of one field move the score, so that the threshold and the question can
  * be chosen from data.

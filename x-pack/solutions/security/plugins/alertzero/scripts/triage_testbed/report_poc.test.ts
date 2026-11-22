@@ -289,6 +289,23 @@ describe('buildWaitSection', () => {
     expect(section.closedWithoutVerdict).toBeNull();
   });
 
+  it('leaves building blocks out of the count of the share, because the share divides by the other alerts', () => {
+    const section = buildWaitSection({
+      alerts: [
+        created('j1', 1, ['az:false_positive', JEV_VERDICT_TAG]),
+        created('b1', 1, ['az:false_positive', JEV_VERDICT_TAG], true),
+        created('b2', 1, ['az:false_positive', JEV_VERDICT_TAG], true),
+      ],
+      calls: [],
+      sweeps: [sweepAt(15)],
+      counts: { nonBuildingBlock: 10, nonBuildingBlockWithoutVerdict: 9 },
+    });
+
+    expect(section.alertsWithTime).toBe(3);
+    expect(section.within['60']).toBe(1);
+    expect(section.shareOfAllWithin['60']).toBe(0.1);
+  });
+
   it('reports the alerts closed without a verdict apart, so that they are not read as backlog', () => {
     const section = buildWaitSection({
       alerts: [],

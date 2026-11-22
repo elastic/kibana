@@ -8,7 +8,7 @@
 /**
  * The report of one run of the Alert Triage worker: the fixed scorecard of the plan ("Measure against a baseline"),
  * computed from what the run left in Elasticsearch, the truth file of the generated data, and the model calls.
- * It writes `notes/results/runs/<run id>.json` and appends ONE row to the scorecard ledger `notes/results/ledger.md`. It never
+ * It writes `<notes dir>/runs/<run id>.json` and appends ONE row to the scorecard ledger `<notes dir>/ledger.md`. It never
  * overwrites a row: a run id that is already in the ledger is an error. A run that failed or stopped early also
  * gets a row (`--note`).
  *
@@ -25,6 +25,7 @@
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/report_run_cli.js \
  *     --run-id <id> --from <ISO time> --to <ISO time> --data <gen folder> --es http://localhost:9200 \
  *     --expect-cluster elasticsearch --llm fake|real --seed 1 --slice "2 h real-time" --flags "all off" \
+ *     --notes-dir <results folder> \
  *     [--connector-id <id>] [--fake-log <fake_llm.log>] [--baseline <run id>] [--note "<text>"] [--no-ledger]
  *   The user and password come from the variable ES_AUTH (default elastic:changeme, the local snapshot default).
  */
@@ -195,8 +196,6 @@ interface RunReport {
   comparedToBaseline?: { runId: string; differences: ScorecardDiff };
 }
 
-// The default results folder sits next to the worktree (it holds `results.md`, `ledger.md` and `runs/`). `--notes-dir` overrides it.
-const DEFAULT_NOTES_DIR = path.resolve(__dirname, '../../../../../../../../notes/results');
 const FAKE_CONNECTOR_NOTE = 'fake';
 const VERDICT_TAGS: Readonly<Record<string, ShortVerdict>> = {
   'az:false_positive': 'fp',
@@ -832,14 +831,23 @@ const FLAGS: Readonly<Record<string, StringArg>> = {
   '--exclude-reason': 'excludeReason',
 };
 
-const REQUIRED_ARGS = ['runId', 'from', 'to', 'data', 'es', 'expectCluster', 'llm'] as const;
+// The results folder is outside the repository and has no default: it holds `ledger.md` and `runs/`.
+const REQUIRED_ARGS = [
+  'runId',
+  'from',
+  'to',
+  'data',
+  'es',
+  'expectCluster',
+  'llm',
+  'notesDir',
+] as const;
 
 const parseArgs = (argv: readonly string[]): ReportArgs => {
   const args: Partial<Record<StringArg, string>> & { ledger: boolean } = {
     alertIndex: '.alerts-security.alerts-default',
     flags: 'all off',
     ledger: true,
-    notesDir: DEFAULT_NOTES_DIR,
   };
   for (let i = 2; i < argv.length; i++) {
     const key = FLAGS[argv[i]];

@@ -6,7 +6,7 @@
  */
 
 /**
- * Fits the settings of the fake LLM (`fake_llm.ts`) to a REAL run (plan, Tuesday task 8). It reads the model calls
+ * Fits the settings of the fake LLM (`fake_llm.ts`) to a REAL run. It reads the model calls
  * of the run (the raw answers of the model, not the tags that the workflow wrote: the workflow turns a
  * false-positive verdict under the confidence gate into `inconclusive`, which would bias the fit) and joins them to
  * the truth file.
@@ -26,7 +26,7 @@
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/calibrate_fake_llm_cli.js \
  *     --run-id <id> --from <ISO time> --to <ISO time> --data <folder with truth.ndjson> --es http://localhost:9200 \
- *     --expect-cluster elasticsearch --connector-id <the real connector> [--previous-config <fake_llm.log>] [--notes-dir <the results folder with ledger.md and runs/>]
+ *     --expect-cluster elasticsearch --connector-id <the real connector> [--previous-config <fake_llm.log>] --notes-dir <the results folder with ledger.md and runs/>
  *   Needs a run on a REAL connector. A run on the fake connector is refused.
  */
 
@@ -559,12 +559,12 @@ const REQUIRED_ARGS = [
   'es',
   'expectCluster',
   'connectorId',
+  'notesDir',
 ] as const;
 
 export const main = async (): Promise<void> => {
   const args: Partial<CalibrateArgs> = {
     alertIndex: '.alerts-security.alerts-default',
-    notesDir: path.resolve(__dirname, '../../../../../../../../notes/results'),
   };
   for (let i = 2; i < process.argv.length; i++) {
     const key = FLAGS[process.argv[i]];

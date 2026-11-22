@@ -11,7 +11,7 @@
  * The planner (`allocate_budget.ts`) gives every served rule its own batch, and every batch costs a fixed
  * overhead on top of one unit per alert. Small batches pay that overhead for few alerts. This section says how
  * the calls of a run are spread by size and which share of the cost units went to overhead. It is the baseline
- * for the change that holds back small batches (plan `batching_and_jev_process_plan.md`, step 4).
+ * for the change that holds back small batches.
  *
  * The token fit splits the input tokens of a call into a fixed part (system prompt, rule enrichment) and a part
  * per alert, by least squares over the calls. The budget unit is accounting; the fixed tokens are the real money

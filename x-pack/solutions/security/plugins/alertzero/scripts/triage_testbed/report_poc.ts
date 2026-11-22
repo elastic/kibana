@@ -298,7 +298,7 @@ export interface WaitSection {
   nonBuildingBlockWithoutVerdict: number | null;
   /** Alerts closed without a verdict, left out of both counts above: the worker never sees a closed alert. */
   closedWithoutVerdict: number | null;
-  /** Alerts that got a verdict within N minutes of their creation, counted over all sources. */
+  /** Alerts that are not building blocks and got a verdict within N minutes of their creation, counted over all sources. */
   within: Record<'15' | '30' | '60', number>;
   /** The same as a share of all alerts that are not building blocks, so that alerts without a verdict count against it. */
   shareOfAllWithin: Record<'15' | '30' | '60', number | null>;
@@ -335,6 +335,8 @@ export const buildWaitSection = ({
   const sweepEnds = sweeps.map((sweep) => Date.parse(sweep.startedAt)).sort((a, b) => a - b);
 
   const waits: number[] = [];
+  // The share below divides by the alerts that are not building blocks, so its count leaves them out too.
+  const nonBuildingBlockWaits: number[] = [];
   const bySource: Record<VerdictSource, number[]> = { model: [], cache: [], jev: [] };
   let withoutTime = 0;
   const severityWaits = new Map<string, { all: number[]; model: number[] }>();
@@ -352,6 +354,7 @@ export const buildWaitSection = ({
     waits.push(wait);
     bySource[source].push(wait);
     if (!alert.buildingBlock) {
+      nonBuildingBlockWaits.push(wait);
       const severity = alert.severity ?? 'unknown';
       const entry = severityWaits.get(severity) ?? { all: [], model: [] };
       entry.all.push(wait);
@@ -363,7 +366,7 @@ export const buildWaitSection = ({
   const within = Object.fromEntries(
     WAIT_MINUTES.map((minutes) => [
       String(minutes),
-      waits.filter((wait) => wait <= minutes * 60).length,
+      nonBuildingBlockWaits.filter((wait) => wait <= minutes * 60).length,
     ])
   ) as WaitSection['within'];
   const total = counts?.nonBuildingBlock;

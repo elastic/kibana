@@ -16,10 +16,14 @@
  * The index gets the mapping of an existing alert index on the same cluster (`--mapping-from`), so that the
  * fields are the real alert mapping.
  *
+ * Safety: the script deletes and recreates `--index`, so it runs only when the cluster name of `--es` equals
+ * `--expect-cluster`. An unknown flag stops it, so a mistyped guard is never ignored.
+ *
  * Usage:
  *   node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/run_pack3_esql_cli.js \
  *     --data <folder with alerts.ndjson> --profile <profile.json> --queries <query_pack3_sweep_windows.md> \
- *     [--es http://localhost:9220] [--index az-gen-s1] --mapping-from <existing alert index> [--tolerance 0.1]
+ *     --expect-cluster <cluster name> [--es http://localhost:9220] [--index az-gen-s1] \
+ *     --mapping-from <existing alert index> [--tolerance 0.1]
  *   The user and password come from the variable ES_AUTH (default elastic:changeme, the local snapshot default).
  */
 
@@ -41,6 +45,7 @@ interface Args {
   profile: string;
   queries: string;
   es: string;
+  expectCluster: string;
   index: string;
   mappingFrom: string;
   tolerance: number;
@@ -94,12 +99,19 @@ const parseArgs = (argv: readonly string[]): Args => {
     '--profile': 'profile',
     '--queries': 'queries',
     '--es': 'es',
+    '--expect-cluster': 'expectCluster',
     '--index': 'index',
     '--mapping-from': 'mappingFrom',
     '--tolerance': 'tolerance',
   };
-  for (let i = 2; i < argv.length; i++) if (flags[argv[i]]) values[flags[argv[i]]] = argv[++i];
-  const required = (name: 'data' | 'profile' | 'queries' | 'mappingFrom'): string => {
+  for (let i = 2; i < argv.length; i++) {
+    const key = flags[argv[i]];
+    if (key === undefined) throw new Error(`unknown flag ${argv[i]}`);
+    values[key] = argv[++i];
+  }
+  const required = (
+    name: 'data' | 'profile' | 'queries' | 'mappingFrom' | 'expectCluster'
+  ): string => {
     const value = values[name];
     if (!value) throw new Error(`--${name} is required`);
     return value;
@@ -112,6 +124,7 @@ const parseArgs = (argv: readonly string[]): Args => {
     profile,
     queries,
     es: String(values.es),
+    expectCluster: required('expectCluster'),
     index: String(values.index),
     mappingFrom: required('mappingFrom'),
     tolerance: Number(values.tolerance),
@@ -228,6 +241,12 @@ export const main = async (): Promise<void> => {
   const args = parseArgs(process.argv);
   const profile = JSON.parse(fs.readFileSync(args.profile, 'utf8')) as Profile;
   const request = makeClient(args.es);
+  const { cluster_name: cluster } = JSON.parse(await request('GET', '/')) as {
+    cluster_name: string;
+  };
+  if (cluster !== args.expectCluster) {
+    throw new Error(`refusing to write: cluster is "${cluster}", expected "${args.expectCluster}"`);
+  }
 
   const loaded = await loadIndex(request, args);
   const queries = readQueries(args.queries, args.index);

@@ -22,7 +22,7 @@
  * Settings (all can be overridden with `--config '<json>'`, see DEFAULT_CONFIG):
  * - flipRate: the share of alerts that get the wrong verdict, SPLIT BY DIRECTION, because the two errors cost
  *   differently. `truePositiveAsFalsePositive` is the dangerous one: a true positive that gets a false-positive
- *   verdict can be closed or reused. Starting values come from the pair rates of the dump (see `results.md`):
+ *   verdict can be closed or reused. Starting values come from the pair rates of the dump:
  *   6.0% of false-positive records met a true-positive fresh verdict at 24 h, and 10.7% of true-positive records
  *   met a false-positive one. They are pair rates, not error rates against the truth, so replace them after the
  *   real baseline runs. (The 18% of the plan is the share of KEYS that hold both verdicts, not of alerts.)
@@ -37,7 +37,7 @@
  *   model cannot tell that it is wrong.
  * - ruleModel: the real model does not flip alerts one by one. In two runs on the same 550 alerts, 501 of 513 verdicts were equal and
  *   every change sat in two rules of 22; in one rule all 10 true positives went from found to "false positive" as a batch
- *   (`results.md`, runs 5 and 6). So a share of the rules (`unstableRuleShare`, chosen by a hash of the seed and the rule) is
+ *   (two real baseline runs). So a share of the rules (`unstableRuleShare`, chosen by a hash of the seed and the rule) is
  *   unstable, and in a run (`--run`, default 1) such a rule flips with the chance `unstableFlipChance`: then ALL its true
  *   positives that are not planted variants get a false-positive verdict. The same seed and run give the same flips. The
  *   per-alert `flipRate` stays for the case of a model that flips alerts alone, and is 0 in the fitted settings.

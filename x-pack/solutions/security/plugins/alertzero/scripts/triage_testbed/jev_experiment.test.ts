@@ -364,7 +364,11 @@ describe('makeDecide', () => {
       global.fetch = original;
     }
   };
-  const decide = makeDecide({ url: 'https://qa.example', apiKey: 'k', endpoint: '.jev' });
+  const decide = makeDecide({
+    url: 'https://qa.example',
+    apiKey: 'secret-key-123',
+    endpoint: '.jev',
+  });
 
   it('reads the probability of true_positive for the choice wording, in both shapes of the answer', async () => {
     const asList = answer({
@@ -398,7 +402,7 @@ describe('makeDecide', () => {
         { headers: Record<string, string>; body: string }
       ];
       expect(url).toBe('https://qa.example/_inference/decision/.jev');
-      expect(init.headers.Authorization).toBe('ApiKey k');
+      expect(init.headers.Authorization).toBe('ApiKey secret-key-123');
       expect(JSON.parse(init.body)).toMatchObject({
         input: 'the alert',
         task_settings: { questions: { indicator: { type: 'predicate' } } },
@@ -409,7 +413,7 @@ describe('makeDecide', () => {
   it('throws, without the key in the message, when the model answers with an error or with no probability', async () => {
     await withFetch(answer({}, false), async () => {
       await expect(decide('x', 'choice')).rejects.toThrow('503');
-      await expect(decide('x', 'choice')).rejects.not.toThrow(/ApiKey/);
+      await expect(decide('x', 'choice')).rejects.not.toThrow(/secret-key-123/);
     });
     await withFetch(answer({ decision: { answers: {} } }), async () => {
       await expect(decide('x', 'choice')).rejects.toThrow('no probability');
@@ -616,9 +620,16 @@ describe('batches, as Alert Analysis sends them', () => {
         pause: noPause,
       });
 
-      expect(
-        result.scored.every(({ keyed }) => ['single', 'repeated', 'none'].includes(keyed))
-      ).toBe(true);
+      const single = await scoreAlerts({
+        alerts,
+        decide: async () => ({ score: 0.5, ms: 1 }),
+        repeats: 1,
+        concurrency: 1,
+      });
+      const keyedById = (list: ReadonlyArray<{ id: string; keyed: string }>) =>
+        Object.fromEntries(list.map(({ id, keyed }) => [id, keyed]));
+      expect(result.scored).toHaveLength(alerts.length);
+      expect(keyedById(result.scored)).toEqual(keyedById(single.scored));
     });
 
     it('leaves every alert of a batch without a score when its call fails three times, and counts one failed call', async () => {
@@ -967,6 +978,8 @@ describe('extra fields in the input', () => {
       pause: async () => undefined,
     });
 
+    expect(seen).not.toHaveLength(0);
+    expect(batchSeen).not.toHaveLength(0);
     expect(seen.every((input) => input.includes('258 events'))).toBe(true);
     expect(batchSeen.every((input) => input.includes('258 events'))).toBe(true);
     expect(
