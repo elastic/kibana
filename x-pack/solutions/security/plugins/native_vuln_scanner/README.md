@@ -14,7 +14,7 @@ xpack.nativeVulnScanner.enabled: true
 
 The scanner reads inventory results from an osquery pack named exactly `software-inventory`
 (and only that name — the schedule-id lookup in `server/lib/inventory/schedule_ids.ts`
-matches on it). The pack must contain the four queries below, with these exact query ids,
+matches on it). The pack must contain the five queries below, with these exact query ids,
 run in snapshot mode on Linux. Until the pack exists and is assigned to your agent policies,
 the scan exits early with `No "software-inventory" osquery pack found; nothing to scan`
 and produces no findings.
@@ -25,10 +25,14 @@ and produces no findings.
 | `native_vuln_scanner_rpm_packages` | `SELECT name, epoch, version, release, arch, source FROM rpm_packages;` |
 | `native_vuln_scanner_os_version` | `SELECT platform, platform_like, codename, major, name, version FROM os_version;` |
 | `native_vuln_scanner_kernel_info` | `SELECT version FROM kernel_info;` |
+| `native_vuln_scanner_language_packages` | `SELECT ecosystem, namespace, name, version, purl, path, manager, install_time FROM elastic_language_packages;` |
 
-All four run with `platform: linux` and `snapshot: true` — one run reports the full table,
+All five run with `platform: linux` and `snapshot: true` — one run reports the full table,
 which is what makes one result per host a complete inventory. The definitions in
 `server/lib/inventory/queries.ts` are the source of truth for the SQL and ids.
+`elastic_language_packages` is an osquerybeat extension table (Python and npm, one purl per
+row); on agents whose beats predate it the query returns no rows and the scanner simply
+collects no language packages.
 
 ### Interval and time to first findings
 
