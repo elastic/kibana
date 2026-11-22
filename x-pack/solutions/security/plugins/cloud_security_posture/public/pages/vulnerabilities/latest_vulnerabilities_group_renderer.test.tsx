@@ -27,17 +27,19 @@ const renderFixGroup = (
     options ?? {};
   return render(
     <TestProvider>
-      {groupPanelRenderer(
-        selectedGroup,
-        {
-          key_as_string: key,
-          key: [key],
-          doc_count: 3,
-          ...bucket,
-        } as RawBucket<VulnerabilitiesGroupingAggregation>,
-        undefined,
-        false
-      ) as React.ReactElement}
+      {
+        groupPanelRenderer(
+          selectedGroup,
+          {
+            key_as_string: key,
+            key: [key],
+            doc_count: 3,
+            ...bucket,
+          } as RawBucket<VulnerabilitiesGroupingAggregation>,
+          undefined,
+          false
+        ) as React.ReactElement
+      }
     </TestProvider>
   );
 };
