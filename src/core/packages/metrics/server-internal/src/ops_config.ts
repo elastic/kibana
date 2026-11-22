@@ -18,8 +18,8 @@ export const OPS_CONFIG_PATH = 'ops' as const;
 const OPS_METRICS_INTERVAL = '5s';
 
 /**
- * Maximum length of `profiling.dir`, in characters. Log lines show only the end of a long
- * directory, so this limit only bounds the setting.
+ * Maximum length of `profiling.dir`, in characters. The stats line includes the directory while
+ * profiling is on, so this keeps that line within the worker's log line limit.
  * @internal
  */
 export const PROFILING_DIR_MAX_LENGTH = 1024;
