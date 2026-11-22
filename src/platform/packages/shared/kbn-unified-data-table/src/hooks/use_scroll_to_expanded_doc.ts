@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useRef, type RefObject } from 'react';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { InTableSearchScrollToCell } from '@kbn/data-grid-in-table-search';
 import { VIRTUALIZED_SELECTOR } from '../constants';
 import { useRestorableRef } from '../restorable_state';
 import type { DataGridPaginationMode } from '../types';
@@ -38,6 +39,11 @@ export interface UseScrollToExpandedDocProps {
   onChangePageIndex: (pageIndex: number) => void;
   dataGridRef: RefObject<EuiDataGridRefProps>;
   dataGridWrapper: HTMLElement | null;
+  /**
+   * Overrides how the grid scrolls to the expanded row. Needed when the grid uses `renderCustomGridBody`,
+   * since EUI's `scrollToItem` is a no-op without its own virtualized body.
+   */
+  scrollToCell?: InTableSearchScrollToCell;
 }
 
 /** Keeps the expanded document's row visible when opening links or paginating the doc viewer. */
@@ -51,6 +57,7 @@ export const useScrollToExpandedDoc = ({
   onChangePageIndex,
   dataGridRef,
   dataGridWrapper,
+  scrollToCell,
 }: UseScrollToExpandedDocProps) => {
   const scrolledToDocId = useRestorableRef('scrolledToExpandedDocId', undefined);
   const isPaginated = paginationMode === 'multiPage' && isPaginationEnabled;
@@ -81,17 +88,29 @@ export const useScrollToExpandedDoc = ({
       }
     }
 
+    const visibleRowIndex = isPaginated ? rowIndex % pageSize : rowIndex;
+
+    if (scrollToCell) {
+      scrollToCell({ rowIndex: visibleRowIndex, columnIndex: 0, align: 'center' });
+      return 'scrolled';
+    }
+
     if (!dataGridRef.current?.scrollToItem) {
       return 'retry';
     }
 
-    dataGridRef.current.scrollToItem({
-      rowIndex: isPaginated ? rowIndex % pageSize : rowIndex,
-      align: 'center',
-    });
+    dataGridRef.current.scrollToItem({ rowIndex: visibleRowIndex, align: 'center' });
 
     return 'scrolled';
-  }, [dataGridRef, displayedRows, expandedDoc, isPaginated, onChangePageIndex, pageSize]);
+  }, [
+    dataGridRef,
+    displayedRows,
+    expandedDoc,
+    isPaginated,
+    onChangePageIndex,
+    pageSize,
+    scrollToCell,
+  ]);
 
   useEffect(() => {
     if (!expandedDoc) {

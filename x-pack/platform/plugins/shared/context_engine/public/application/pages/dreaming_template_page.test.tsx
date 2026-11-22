@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { AI_INDEX_INTERNAL_API_VERSION, DREAMING_TEMPLATES_PATH } from '../../../common/constants';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
 import { CONTEXT_ENGINE_PATHS, getAiIndexDreamingTemplatePath } from '../paths';
@@ -22,14 +23,10 @@ import { DreamingTemplatePage } from './dreaming_template_page';
 
 jest.mock('../hooks/use_memory_enabled', () => ({ useMemoryEnabled: jest.fn() }));
 
-const INDEX = {
-  templates: [
-    { id: 'customer_support', name: 'Customer support', description: 'Tickets and docs.' },
-    { id: 'legal_assistant', name: 'Legal assistant', description: 'Contracts.' },
-  ],
-};
-
 const SUPPORT = {
+  id: 'customer_support',
+  name: 'Customer support',
+  description: 'Tickets and docs.',
   summary: 'Customer support knowledge base.',
   rationale: 'Support knowledge centers on issues.',
   dreaming: {
@@ -42,6 +39,9 @@ const SUPPORT = {
 };
 
 const LEGAL = {
+  id: 'legal_assistant',
+  name: 'Legal assistant',
+  description: 'Contracts.',
   summary: 'Legal knowledge.',
   rationale: 'Rules and the documents that apply them.',
   dreaming: {
@@ -51,17 +51,16 @@ const LEGAL = {
   },
 };
 
-const renderPage = () => {
+const renderPage = ({ loadError }: { loadError?: Error } = {}) => {
   const services = coreMock.createStart();
-  jest
-    .mocked(services.http.staticAssets.getPluginAssetHref)
-    .mockImplementation((path) => `/assets/${path}`);
-  services.http.get.mockImplementation((async (path: string) => {
-    if (path === '/assets/dreaming_templates/index.json') return INDEX;
-    if (path === '/assets/dreaming_templates/customer_support.json') return SUPPORT;
-    if (path === '/assets/dreaming_templates/legal_assistant.json') return LEGAL;
-    throw new Error(`unexpected ${path}`);
-  }) as typeof services.http.get);
+  if (loadError) {
+    services.http.get.mockRejectedValue(loadError);
+  } else {
+    services.http.get.mockImplementation((async (path: string) => {
+      if (path === DREAMING_TEMPLATES_PATH) return { templates: [SUPPORT, LEGAL] };
+      throw new Error(`unexpected ${path}`);
+    }) as typeof services.http.get);
+  }
   services.http.put.mockResolvedValue({ dreaming: { enabled: true } });
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
@@ -140,9 +139,15 @@ describe('DreamingTemplatePage', () => {
     expect(screen.getByTestId('contextDreamingConfigEntitiesSwitch')).not.toBeChecked();
     expect(screen.queryByTestId('contextDreamingConfigEntities')).not.toBeInTheDocument();
     expect(services.http.get).toHaveBeenCalledWith(
-      '/assets/dreaming_templates/index.json',
-      expect.objectContaining({ prependBasePath: false })
+      DREAMING_TEMPLATES_PATH,
+      expect.objectContaining({ version: AI_INDEX_INTERNAL_API_VERSION })
     );
+  });
+
+  it('shows an error callout when loading the examples fails', async () => {
+    renderPage({ loadError: new Error('Boom') });
+
+    expect(await screen.findByTestId('contextDreamingTemplatesError')).toHaveTextContent('Boom');
   });
 
   it('keeps an edited description until another example is picked', async () => {

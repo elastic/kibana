@@ -39,24 +39,25 @@ const renderRulesTab = (props: TestProps) => {
   };
 };
 
-const getRuleNames = () =>
+// `hidden: true` skips the computed-visibility filter, which dominates these polled reads.
+const getRows = () =>
   within(screen.getByTestId('searchBoostRulesTable'))
-    .getAllByRole('row')
-    .slice(1)
-    .map((row) => within(row).getAllByRole('cell')[0].textContent);
+    .getAllByRole('row', { hidden: true })
+    .slice(1);
 
-const getPriorities = () =>
-  within(screen.getByTestId('searchBoostRulesTable'))
-    .getAllByRole('row')
-    .slice(1)
-    .map((row) => Number(within(row).getAllByRole('cell')[3].textContent));
+const getCells = (row: HTMLElement) => within(row).getAllByRole('cell', { hidden: true });
+
+const getRuleNames = () => getRows().map((row) => getCells(row)[0].textContent);
+
+const getPriorities = () => getRows().map((row) => Number(getCells(row)[3].textContent));
 
 const waitForCount = (text: string) =>
   waitFor(() => expect(screen.getByTestId('searchBoostRulesCount')).toHaveTextContent(text));
 
 const waitForRuleNames = (names: string[]) => waitFor(() => expect(getRuleNames()).toEqual(names));
 
-const getRow = async (name: string) => (await screen.findByText(name)).closest('tr')!;
+// Found by the rule link, since a default rule and its profile share the name.
+const getRow = async (name: string) => (await screen.findByRole('link', { name })).closest('tr')!;
 
 describe('RulesTab', () => {
   afterEach(() => {
@@ -67,10 +68,10 @@ describe('RulesTab', () => {
     renderRulesTab({ rules: mockRules });
 
     await waitForRuleNames([
-      '_default_data_streamsDefault',
-      '_default_indicesDefault',
       'apache-logs',
       'catalog',
+      'default_data_streamsDefault',
+      'default_indicesDefault',
       'old-archives',
       'web-logs',
     ]);
@@ -93,7 +94,7 @@ describe('RulesTab', () => {
 
     expect(await screen.findByTestId('searchBoostRuleNoMatches')).toHaveTextContent('0 indices');
     expect(screen.getAllByTestId('searchBoostRuleMatches').map((link) => link.textContent)).toEqual(
-      ['1 data stream', '4 indices', '1 data stream', '2 indices', '1 data stream']
+      ['1 data stream', '2 indices', '1 data stream', '4 indices', '1 data stream']
     );
   });
 
@@ -101,7 +102,7 @@ describe('RulesTab', () => {
     const user = userEvent.setup();
     renderRulesTab({ rules: mockRules });
 
-    await user.click(within(await getRow('_default_indices')).getByText('4 indices'));
+    await user.click(within(await getRow('default_indices')).getByText('4 indices'));
 
     const popover = await screen.findByRole('dialog', { name: 'Matching indices' });
     expect(within(popover).getByText('6 matches, 2 outranked')).toBeInTheDocument();
@@ -169,7 +170,7 @@ describe('RulesTab', () => {
     expect(getTypeFilter('data_streams')).toHaveTextContent('3');
 
     await user.click(getTypeFilter('data_streams'));
-    await waitForRuleNames(['_default_data_streamsDefault', 'apache-logs', 'web-logs']);
+    await waitForRuleNames(['apache-logs', 'default_data_streamsDefault', 'web-logs']);
 
     await user.type(screen.getByPlaceholderText('Search boost rules'), ' catalog');
     await waitFor(() => expect(getTypeFilter('indices')).toHaveTextContent('1'));
@@ -304,7 +305,7 @@ describe('RulesTab', () => {
         onDelete,
       });
 
-      const defaultRow = await getRow('_default_indices');
+      const defaultRow = await getRow('default_indices');
       expect(within(defaultRow).getByRole('button', { name: 'Edit' })).toBeInTheDocument();
       expect(within(defaultRow).queryByRole('button', { name: /^All actions/ })).toBeNull();
 

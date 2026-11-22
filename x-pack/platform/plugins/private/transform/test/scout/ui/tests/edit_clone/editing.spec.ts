@@ -19,6 +19,12 @@ import {
 
 const UPDATED_DESCRIPTION = 'updated description';
 
+const FREQUENCY_UNIT_LABELS: Record<string, string> = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+};
+
 const pivotConfig = getPivotTransformConfig('editing');
 const latestConfig: TransformRequest = {
   ...getLatestTransformConfig('editing'),
@@ -49,8 +55,13 @@ const assertEditFlyoutUpdates = async (
   await expect(input('NumFailureRetries')).toHaveValue('');
   await input('NumFailureRetries').fill(numFailureRetries);
 
-  await expect(input('Frequency')).toHaveValue(String(config.frequency ?? ''));
-  await input('Frequency').fill('10m');
+  const [, frequencyValue = '', frequencyUnit = 'm'] =
+    /^(\d+)(s|m|h)$/.exec(String(config.frequency ?? '')) ?? [];
+  await expect(input('Frequency')).toHaveValue(frequencyValue);
+  await expect(transformManagement.editFlyoutFrequencyUnitSelect).toHaveText(
+    FREQUENCY_UNIT_LABELS[frequencyUnit]
+  );
+  await input('Frequency').fill('10');
 };
 
 const assertUpdatedTransform = async (
@@ -109,7 +120,7 @@ test.describe('Edit transform', { tag: tags.deploymentAgnostic }, () => {
     await test.step('updates the fields in the edit flyout', async () => {
       await assertEditFlyoutUpdates(transformManagement, pivotConfig, '0');
       // The pivot destination has no date field to apply a retention policy to.
-      await expect(transformManagement.editFlyoutRetentionPolicySwitch).toBeDisabled();
+      await expect(transformManagement.editFlyoutRetentionPolicySwitch).toBeHidden();
     });
 
     await test.step('saves the transform and shows the update', async () => {
