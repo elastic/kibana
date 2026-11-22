@@ -909,7 +909,10 @@ describe('readGenerationFault', () => {
   });
 
   describe('when every failed batch is the generation graph giving up on model output', () => {
-    const HALLUCINATION_EXHAUSTED = 'Maximum hallucination failures (5) reached.';
+    // The real run_batch error: the run step surfaces the generation execution's error, which
+    // `extractGenerationWorkflowResult` prefixes with "Generation workflow failed: ".
+    const HALLUCINATION_EXHAUSTED =
+      'Generation workflow failed: Maximum hallucination failures (5) reached.';
     const ATTEMPTS_EXHAUSTED =
       'Maximum generation attempts (3) reached. Try sending fewer alerts to this model.';
     const twoFailed = () =>
@@ -973,12 +976,21 @@ describe('readGenerationFault', () => {
     it('does not classify a batch as exhausted when the hallucination phrase appears only in appended details', async () => {
       // The attempt-limit producer appends the accumulated errors after its headline; a phrase
       // echoed there must not classify the batch. The headline decides.
-      const withDetail = `${ATTEMPTS_EXHAUSTED}\nEarlier: Maximum hallucination failures (5) reached.`;
+      const withDetail = `Generation workflow failed: Maximum generation attempts (3) reached. Try sending fewer alerts to this model.\nEarlier: Maximum hallucination failures (5) reached.`;
       const getChildren = jest.fn().mockResolvedValue([batchChild([withDetail])]);
       await expect(read(allFailed, getChildren)).resolves.toEqual({
         kind: 'failed',
         message: withDetail,
       });
+    });
+
+    it('classifies an unprefixed hallucination headline too', async () => {
+      // The prefix is what the run step surfaces today; the unprefixed headline is the producer's
+      // own text, so it still classifies if the wrapping ever changes.
+      const getChildren = jest
+        .fn()
+        .mockResolvedValue([batchChild(['Maximum hallucination failures (5) reached.'])]);
+      await expect(read(allFailed, getChildren)).resolves.toMatchObject({ kind: 'exhausted' });
     });
 
     it('is failed when a hallucination-exhaustion error is edited or truncated away from the producer text', async () => {

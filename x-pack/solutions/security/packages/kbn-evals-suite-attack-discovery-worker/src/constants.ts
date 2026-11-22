@@ -34,15 +34,18 @@ export const MODEL_REFUSAL_PATTERN =
 
 /**
  * The generation graph's hallucination-failure limit ending a batch (see
- * `throw_if_error_counts_exceeded`): the producer's terminal headline, with the accumulated
- * errors appended after it. Anchored to the start of the message so a phrase echoed only in the
- * appended details — which the attempt-limit diagnostic can carry — never classifies a batch. The
- * attempts-exhaustion line is deliberately NOT matched: `generationAttempts` also counts connector
- * exceptions thrown before any response was received, so that error does not establish a
- * model-output failure. Matched against generation batch errors only; like
- * `MODEL_REFUSAL_PATTERN` it must hold for every failed batch.
+ * `throw_if_error_counts_exceeded`): the producer's terminal headline. The collector reads the
+ * error through the run step, which prefixes a failed generation execution with
+ * `Generation workflow failed: ` (`extractGenerationWorkflowResult`), so the anchor allows that
+ * known prefix and nothing else — a phrase echoed only in the appended details, which the
+ * attempt-limit diagnostic can carry, never classifies a batch. The attempts-exhaustion line is
+ * deliberately NOT matched: `generationAttempts` also counts connector exceptions thrown before
+ * any response was received, so that error does not establish a model-output failure. Matched
+ * against generation batch errors only; like `MODEL_REFUSAL_PATTERN` it must hold for every
+ * failed batch.
  */
-export const MODEL_OUTPUT_EXHAUSTED_PATTERN = /^Maximum hallucination failures \(\d+\) reached\./;
+export const MODEL_OUTPUT_EXHAUSTED_PATTERN =
+  /^(?:Generation workflow failed: )?Maximum hallucination failures \(\d+\) reached\./;
 
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';

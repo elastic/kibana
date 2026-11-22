@@ -304,14 +304,18 @@ const KEPT_COLON = '\u0002';
 const DIRECTIVE_BEFORE_ID =
   /\b(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
 
-/** Text that rejects the recommendation, so the colon introduces what is being rejected, not an action. */
+/**
+ * Text rejecting the recommendation: a negation governing the heading phrase in the same clause
+ * (no colon or period between, close by). A negated instruction before a colon ("Do not wait for
+ * approval: Recommended response for ...") is a separate clause and does not reject the heading.
+ */
 const REJECTED_BEFORE_HEADING =
-  /\b(?:do not|don't|avoid|refrain from|not recommended|no need|never|reject\w*|declin\w*|disregard|ignore)\b[^.]*$/i;
+  /\b(?:do not|don't|never|avoid|refrain from|disregard|ignore|reject\w*|declin\w*)\b[^:.]{0,30}(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
 
 /**
  * Whether the text before the id is a recommendation heading that turns the colon into an action
- * introducer. Text that rejects the recommendation ("Do not follow the recommended response
- * for ...") does not: the colon there introduces what is being rejected, not an action.
+ * introducer. A heading the surrounding text rejects ("Do not follow the recommended response
+ * for ...") does not turn it: the colon there introduces what is being rejected, not an action.
  */
 const afterDirectiveHeading = (offset: number, fullText: string): boolean => {
   const beforeId = fullText.slice(Math.max(0, offset - 80), offset);
