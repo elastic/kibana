@@ -363,8 +363,28 @@ export const reindexServiceFactory = (
       // Do any other cleanup work necessary
       reindexOp = await cleanupChanges(reindexOp);
     } else {
+      if (taskResponse.error) {
+        throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
+      }
+
+      if (taskResponse.task.status?.canceled || taskResponse.task.cancelled) {
+        throw error.reindexTaskFailed(
+          `Reindexing task was canceled unexpectedly: ${JSON.stringify(taskResponse)}`
+        );
+      }
+
+      if (!taskResponse.response) {
+        throw error.reindexTaskFailed(
+          `Reindexing task completed without a response: ${JSON.stringify(taskResponse)}`
+        );
+      }
+
+      if (taskResponse.response.timed_out) {
+        throw error.reindexTaskFailed(`Reindexing timed out: ${JSON.stringify(taskResponse)}`);
+      }
+
       // Check that no failures occurred
-      if (taskResponse.response?.failures?.length) {
+      if (taskResponse.response.failures?.length) {
         // Include the entire task result in the error message. This should be guaranteed
         // to be JSON-serializable since it just came back from Elasticsearch.
         throw error.reindexTaskFailed(`Reindexing failed: ${JSON.stringify(taskResponse)}`);
