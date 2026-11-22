@@ -91,6 +91,12 @@ export {
 } from './constants';
 
 export {
+  ALERTZERO_BALANCED_RECOMMENDED_ENDPOINTS,
+  ALERTZERO_EFFICIENT_RECOMMENDED_ENDPOINTS,
+  ALERTZERO_FRONTIER_RECOMMENDED_ENDPOINTS,
+} from './inference_recommended_endpoints';
+
+export {
   SECURITY_ROLE_API_VERSION,
   WORKER_SERVICE_ACCOUNT_NAMES,
   buildSecurityRoleUrl,

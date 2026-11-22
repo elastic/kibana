@@ -13,6 +13,9 @@ import {
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
   ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_RECOMMENDED_ENDPOINTS,
+  ALERTZERO_EFFICIENT_RECOMMENDED_ENDPOINTS,
+  ALERTZERO_FRONTIER_RECOMMENDED_ENDPOINTS,
 } from '@kbn/alertzero-common';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
@@ -53,6 +56,21 @@ describe('registerAlertZeroInferenceFeatures', () => {
       ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
       ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     ]);
+  });
+
+  // Other plugins (the `attack_discovery` Model Settings row) recommend the same shared lists, so
+  // each tier registers the shared list's contents, so the AlertZero rows and the
+  // `attack_discovery` row cannot drift apart.
+  it.each([
+    [ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID, ALERTZERO_EFFICIENT_RECOMMENDED_ENDPOINTS],
+    [ALERTZERO_BALANCED_INFERENCE_FEATURE_ID, ALERTZERO_BALANCED_RECOMMENDED_ENDPOINTS],
+    [ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID, ALERTZERO_FRONTIER_RECOMMENDED_ENDPOINTS],
+  ])('registers %s with the shared recommended endpoints', (featureId, expected) => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    expect(registeredTier(register, featureId).recommendedEndpoints).toEqual([...expected]);
   });
 
   // A list on the parent would become the silent default for any tier whose own

@@ -21,6 +21,7 @@ import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 import { checkManagedWorkflowIntegrity } from '../../../managed_workflows/check_managed_workflow_integrity';
+import { DEFAULT_RUN_STEP_FEATURE_ID } from './constants';
 
 /**
  * Server-side implementation of the Attack Discovery run step.
@@ -111,7 +112,7 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
-              featureId,
+              featureId: featureId ?? DEFAULT_RUN_STEP_FEATURE_ID,
               inference: pluginsStart.inference,
               logger,
               request,

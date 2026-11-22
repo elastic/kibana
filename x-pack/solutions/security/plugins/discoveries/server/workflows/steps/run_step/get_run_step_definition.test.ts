@@ -272,7 +272,7 @@ describe('getRunStepDefinition', () => {
       expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
     });
 
-    it('resolves the default connector when connector_id is omitted', async () => {
+    it('resolves the default connector from the Attack Discovery feature when connector_id and feature_id are omitted', async () => {
       const contextWithoutConnectorId = {
         ...baseMockContext,
         input: {
@@ -288,7 +288,7 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithoutConnectorId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
-        featureId: undefined,
+        featureId: 'attack_discovery',
         inference: undefined,
         logger: mockLogger,
         request: { headers: {} },
