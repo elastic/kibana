@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
 
 export const COMMON_HEADERS = {
@@ -16,8 +17,12 @@ export const COMMON_HEADERS = {
 };
 
 export const PROXY_PATH = 'internal/es_client';
-export const TEST_INDEX = 'es-client-test';
-export const FORBIDDEN_INDEX = 'es-client-forbidden';
+// Unique per run so setup and cleanup only touch this run's indices on a shared deployment.
+const RUN_ID = randomUUID().slice(0, 8);
+
+export const TEST_INDEX = `es-client-test-${RUN_ID}`;
+// Must stay outside the scoped role's index pattern.
+export const FORBIDDEN_INDEX = `es-client-forbidden-${RUN_ID}`;
 
 export const INDEX_SCOPED_ROLE: ElasticsearchRoleDescriptor = {
   cluster: [],
