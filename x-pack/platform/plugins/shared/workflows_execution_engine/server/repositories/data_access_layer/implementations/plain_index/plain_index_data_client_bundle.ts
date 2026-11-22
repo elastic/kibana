@@ -65,14 +65,17 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
   private async init(esClient: ElasticsearchClient): Promise<ElasticsearchClient> {
     try {
-      await Promise.all([
-        this.initIndex(esClient, WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS),
-        this.initIndex(
-          esClient,
-          WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS
-        ),
-      ]);
+      await rejectOnAbort(
+        Promise.all([
+          this.initIndex(esClient, WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS),
+          this.initIndex(
+            esClient,
+            WORKFLOWS_STEP_EXECUTIONS_INDEX,
+            WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS
+          ),
+        ]),
+        this.retryController.signal
+      );
       return esClient;
     } catch (error) {
       this.retryController.abort(error);
@@ -107,22 +110,17 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
         }
         const ms = Math.min(1000 * Math.pow(2, attempt), 30_000, remainingTime);
         logger.warn(`Transient error during ${indexName} init, retrying in ${ms}ms`, { error });
-        await waitForRetry(ms, signal);
+        await new Promise((resolve) => setTimeout(resolve, ms));
+        signal.throwIfAborted();
       }
     }
   }
 }
 
-const waitForRetry = (ms: number, signal: AbortSignal): Promise<void> =>
+const rejectOnAbort = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
   new Promise((resolve, reject) => {
     signal.throwIfAborted();
-    const onAbort = () => {
-      clearTimeout(timeout);
-      reject(signal.reason);
-    };
-    const timeout = setTimeout(() => {
-      signal.removeEventListener('abort', onAbort);
-      resolve();
-    }, ms);
+    const onAbort = () => reject(signal.reason);
     signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
   });

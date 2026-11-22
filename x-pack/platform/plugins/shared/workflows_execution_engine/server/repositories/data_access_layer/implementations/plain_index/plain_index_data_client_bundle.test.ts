@@ -138,8 +138,9 @@ describe('PlainIndexDataClientBundle', () => {
       await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
 
       await initialization;
+      const { length: attempts } = esClient.indices.create.mock.calls;
       await jest.advanceTimersByTimeAsync(60_000);
-      expect(jest.getTimerCount()).toBe(0);
+      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
     });
 
     it('keeps retrying existing transient errors after 20 minutes', async () => {
@@ -158,20 +159,33 @@ describe('PlainIndexDataClientBundle', () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it('stops waiting when the plugin stops', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
+    it('stops retrying when the plugin stops', async () => {
+      const { bundle, coreStart, esClient } = createBundle();
       esClient.indices.create.mockRejectedValue(unknownResourceError);
 
       const initialization = expect(bundle.initStart(coreStart)).rejects.toThrow(
         'Index initialization stopped'
       );
       await jest.advanceTimersByTimeAsync(0);
-      expect(logger.warn).toHaveBeenCalledTimes(2);
-      expect(jest.getTimerCount()).toBe(2);
       await bundle.stop();
 
       await initialization;
-      expect(jest.getTimerCount()).toBe(0);
+      const { length: attempts } = esClient.indices.create.mock.calls;
+      await jest.advanceTimersByTimeAsync(60_000);
+      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
+    });
+
+    it('stops during an active index request', async () => {
+      const { bundle, coreStart, esClient } = createBundle();
+      esClient.indices.create.mockImplementation(() => new Promise(() => {}));
+
+      const initialization = expect(bundle.initStart(coreStart)).rejects.toThrow(
+        'Index initialization stopped'
+      );
+      await jest.advanceTimersByTimeAsync(0);
+      await bundle.stop();
+
+      await initialization;
     });
 
     it('rejects a nonretryable error without retrying', async () => {
@@ -192,7 +206,9 @@ describe('PlainIndexDataClientBundle', () => {
       );
 
       await expect(bundle.initStart(coreStart)).rejects.toBe(error);
-      expect(jest.getTimerCount()).toBe(0);
+      const { length: attempts } = esClient.indices.create.mock.calls;
+      await jest.advanceTimersByTimeAsync(60_000);
+      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
     });
   });
 });
