@@ -198,13 +198,8 @@ export async function categorizeWithNoiseExclusion({
 
   const excludeTokens = headRows.map((row) => row.pattern).filter((pattern) => pattern.length > 0);
   const headDocs = headRows.reduce((sum, row) => sum + row.count, 0);
+  // Zero is no reason to skip pass 2: a multivalued field counts a document once per value.
   const residual = Math.max(0, total - headDocs);
-
-  // A sampled residual is only an estimate, so skip pass 2 only when pass 1 was unsampled.
-  if (p1 >= 1 && residual === 0) {
-    return dedupeByPattern(headRows);
-  }
-
   const p2 = residual > maxDocsToSample ? maxDocsToSample / residual : 1;
 
   const rareQuery = buildCategorizeWithSampleQuery({

@@ -105,6 +105,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -125,7 +126,7 @@ describe('getDiverseSampleDocuments', () => {
     expect(categorizeQuery).toContain('WHERE count >');
     expect(categorizeQuery).toContain('| SORT count ASC | LIMIT 1000');
 
-    const fetchQuery = esql.mock.calls[2][1].query;
+    const fetchQuery = esql.mock.calls[3][1].query;
     expect(fetchQuery).toContain('FROM logs-a, logs-b METADATA _id, _source');
     expect(fetchQuery).toContain(
       'WHERE (MATCH_PHRASE(message, "error one") OR MATCH_PHRASE(message, "warn two")) ' +
@@ -144,6 +145,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     await getDiverseSampleDocuments({
@@ -165,6 +167,9 @@ describe('getDiverseSampleDocuments', () => {
       `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL`
     );
     expect(esql.mock.calls[2][1].query).toContain(
+      `FROM logs-a | ${timeRange} | WHERE message IS NOT NULL AND NOT MATCH(message,`
+    );
+    expect(esql.mock.calls[3][1].query).toContain(
       `FROM logs-a METADATA _id, _source | ${timeRange} | WHERE (MATCH_PHRASE(message,`
     );
     for (const [, params] of esql.mock.calls) {
@@ -177,6 +182,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse());
 
     const { signal } = new AbortController();
@@ -204,6 +210,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(viewFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -229,6 +236,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(aliasFetchResponse());
 
     const result = await getDiverseSampleDocuments({
@@ -301,6 +309,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse([[10, 'body value', 'body pattern']]))
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { body: { text: 'body value' } }]]));
 
     const result = await getDiverseSampleDocuments({
@@ -316,7 +325,7 @@ describe('getDiverseSampleDocuments', () => {
     expect(esql.mock.calls[1][1].query).toContain(
       'CATEGORIZE(body.text, {"output_format": "tokens"})'
     );
-    expect(esql.mock.calls[2][1].query).toContain(
+    expect(esql.mock.calls[3][1].query).toContain(
       'WHERE MATCH_PHRASE(body.text, "body value") AND (body.text::KEYWORD IN ("body value"))'
     );
     expect(result.hits).toEqual([
@@ -336,6 +345,7 @@ describe('getDiverseSampleDocuments', () => {
             [5, 'warn two', 'warn'],
           ])
         )
+        .mockResolvedValueOnce(categorizeResponse([]))
         .mockResolvedValueOnce(
           concreteFetchResponse([
             ['doc-1', { message: 'error one' }],
@@ -369,6 +379,7 @@ describe('getDiverseSampleDocuments', () => {
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
+      .mockResolvedValueOnce(categorizeResponse([]))
       .mockResolvedValueOnce(concreteFetchResponse([['doc-1', { message: 'error one' }]]))
       .mockResolvedValueOnce(concreteFetchResponse([]));
 
@@ -382,11 +393,11 @@ describe('getDiverseSampleDocuments', () => {
       logger,
     });
 
-    expect(esql.mock.calls[2][1].query).toContain(
+    expect(esql.mock.calls[3][1].query).toContain(
       'WHERE (MATCH_PHRASE(message, "error one") OR MATCH_PHRASE(message, "warn two")) ' +
         'AND (message::KEYWORD IN ("error one", "warn two"))'
     );
-    expect(esql.mock.calls[3][1].query).toContain(
+    expect(esql.mock.calls[4][1].query).toContain(
       'WHERE MATCH_PHRASE(message, "warn two") AND (message::KEYWORD IN ("warn two"))'
     );
     expect(result.hits).toEqual([{ _index: '', _id: 'doc-1', _source: { message: 'error one' } }]);

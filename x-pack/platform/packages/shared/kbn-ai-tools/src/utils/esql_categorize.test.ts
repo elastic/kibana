@@ -212,8 +212,11 @@ describe('categorizeWithNoiseExclusion', () => {
     ]);
   });
 
-  it('skips pass 2 when counts are exact and the head is the whole population', async () => {
-    const esql = jest.fn().mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]));
+  it('runs pass 2 even when head counts add up to the population', async () => {
+    const esql = jest
+      .fn()
+      .mockResolvedValueOnce(categorizeResponse([[100, 'all', 'all']]))
+      .mockResolvedValueOnce(categorizeResponse([[1, 'rare', 'rare']]));
 
     const rows = await categorizeWithNoiseExclusion({
       esClient: createTracedEsClient(esql),
@@ -223,8 +226,11 @@ describe('categorizeWithNoiseExclusion', () => {
       samplingProbability: 1,
     });
 
-    expect(esql).toHaveBeenCalledTimes(1);
-    expect(rows).toEqual([{ count: 100, pattern: 'all', sample: 'all' }]);
+    expect(esql).toHaveBeenCalledTimes(2);
+    expect(rows).toEqual([
+      { count: 100, pattern: 'all', sample: 'all' },
+      { count: 1, pattern: 'rare', sample: 'rare' },
+    ]);
   });
 
   it('sorts by count descending and dedupes head remnants left by approximate exclusion', async () => {

@@ -423,11 +423,13 @@ export async function getSigEventsLogPatternsEsql({
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
   const signal = timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   try {
+    // A full-schema probe fails when no index maps `@timestamp`; the `fields` probe nullifies it.
     const columns = await getEsqlColumnSchema({
       esClient: esClient.client,
       index: samplingSource,
       start,
       end,
+      fields,
       signal,
     });
     // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
