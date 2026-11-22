@@ -1,5 +1,5 @@
 {
-  "sha1": "0d4d59daf94f403b990f71dbed0656f4cc5906b4",
+  "sha1": "bbeb41a2652f3a4db1a4d1a368d117050fdadb17",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -919,7 +919,7 @@
     {
       "id": "670d85d4e7806a5-3f5db4d3dfa9dd0",
       "title": "Onboarding bulk status API returns not_started for every requested source id that has never been onboarded",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -928,14 +928,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 21,
-        "column": 44
+        "line": 22,
+        "column": 5
       }
     },
     {
       "id": "670d85d4e7806a5-3ee47c15c4bf695",
       "title": "Onboarding bulk status API rejects an empty sourceIds array",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -944,14 +944,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 46,
-        "column": 6
+        "line": 45,
+        "column": 9
       }
     },
     {
       "id": "670d85d4e7806a5-4d182347c2af93f",
       "title": "Onboarding bulk status API returns 403 when significant events is disabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -960,8 +960,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 53,
-        "column": 28
+        "line": 54,
+        "column": 15
       }
     },
     {

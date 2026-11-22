@@ -1,5 +1,5 @@
 {
-  "sha1": "74702c854e8b565c7d712e1ca8089d8c938c0a82",
+  "sha1": "5f2bf91b64ff7a308437ce13c09c0d701472f1fa",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -187,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 36,
+        "line": 39,
         "column": 54
       }
     },
@@ -201,7 +201,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 47,
+        "line": 50,
         "column": 20
       }
     },
@@ -215,7 +215,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 56,
+        "line": 59,
         "column": 13
       }
     },
@@ -229,7 +229,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 67,
+        "line": 70,
         "column": 17
       }
     },
@@ -243,7 +243,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 79,
+        "line": 82,
         "column": 11
       }
     },
@@ -257,7 +257,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 94,
+        "line": 97,
         "column": 13
       }
     },
@@ -271,7 +271,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 180,
+        "line": 183,
         "column": 15
       }
     },
@@ -285,7 +285,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 283,
+        "line": 286,
         "column": 9
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 315,
+        "line": 318,
         "column": 15
       }
     },
@@ -313,8 +313,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 340,
+        "line": 343,
         "column": 15
+      }
+    },
+    {
+      "id": "b1d0dbe7a23ff8e-50e0697398e8026",
+      "title": "Digital Experience EDOT Browser application saves the filters as a view, applies it from the Views menu, and deletes it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
+        "line": 377,
+        "column": 9
       }
     },
     {
@@ -327,8 +341,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 374,
-        "column": 9
+        "line": 456,
+        "column": 10
       }
     },
     {
@@ -341,8 +355,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 397,
-        "column": 11
+        "line": 472,
+        "column": 26
       }
     },
     {
@@ -355,8 +369,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 451,
-        "column": 7
+        "line": 529,
+        "column": 11
       }
     },
     {
@@ -369,8 +383,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 509,
-        "column": 15
+        "line": 591,
+        "column": 9
       }
     },
     {
@@ -383,8 +397,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/otel_application_overview.spec.ts",
-        "line": 546,
-        "column": 22
+        "line": 630,
+        "column": 11
       }
     },
     {
@@ -468,7 +482,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout/ui/tests/global.teardown.ts",
         "line": 19,
-        "column": 27
+        "column": 22
       }
     }
   ]

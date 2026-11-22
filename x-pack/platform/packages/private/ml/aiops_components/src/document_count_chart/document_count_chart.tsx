@@ -9,16 +9,14 @@ import React, { type FC, useCallback, useEffect, useMemo, useState } from 'react
 import moment from 'moment';
 
 import type {
+  BarStyleAccessor,
   BrushEndListener,
   ElementClickListener,
-  XYChartElementEvent,
+  RectAnnotationSpec,
   XYBrushEvent,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { Axis, Chart, HistogramBarSeries, Position, ScaleType, Settings } from '@elastic/charts';
-import type {
-  BarStyleAccessor,
-  RectAnnotationSpec,
-} from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { getTimeZone } from '@kbn/visualization-utils';
 import { i18n } from '@kbn/i18n';

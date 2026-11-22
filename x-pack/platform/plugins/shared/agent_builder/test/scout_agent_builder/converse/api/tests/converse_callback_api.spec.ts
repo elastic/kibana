@@ -15,6 +15,7 @@ import {
   ConversationOriginType,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
+  isExecutionTerminatedEvent,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -78,11 +79,12 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
-      for (const conversationId of conversationIds) {
-        await asAdmin.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
-        );
-      }
+      // Concurrent deletes share a single index refresh cycle; serially they add up to ~5s each.
+      await Promise.all(
+        [...conversationIds].map((conversationId) =>
+          asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`)
+        )
+      );
 
       await callbackServer.stop();
       llmProxy.close();
@@ -162,6 +164,15 @@ apiTest.describe(
       return roundComplete;
     };
 
+    const getExecutionTerminatedEvent = (requests: CallbackTestServerRequest[]) => {
+      for (const event of getEvents(requests)) {
+        if (isExecutionTerminatedEvent(event)) {
+          return event;
+        }
+      }
+      throw new Error('No execution_terminated event was delivered to the callback');
+    };
+
     const getExecutionId = (requests: CallbackTestServerRequest[]): string =>
       (requests[0].body as ChatCallbackEventResponse).execution_id;
 
@@ -214,12 +225,18 @@ apiTest.describe(
         expect(payload.execution_id).toBe(accepted.execution_id);
         expect(payload.event).toBeDefined();
 
-        // Only the retried round_complete event carries an idempotency key.
-        const expectedIdempotencyKey = isRoundCompleteEvent(payload.event)
-          ? accepted.execution_id
-          : undefined;
+        // Only the retried terminal events carry an idempotency key.
+        const expectedIdempotencyKey =
+          isExecutionTerminatedEvent(payload.event) || isRoundCompleteEvent(payload.event)
+            ? accepted.execution_id
+            : undefined;
         expect(payload.idempotency_key).toBe(expectedIdempotencyKey);
       }
+
+      // execution_terminated is delivered right before round_complete, which ends the round.
+      const [terminated, last] = getEvents(callbackRequests).slice(-2);
+      expect(isExecutionTerminatedEvent(terminated)).toBe(true);
+      expect(isRoundCompleteEvent(last)).toBe(true);
 
       const roundComplete = getRoundCompleteEvent(callbackRequests);
       expect(roundComplete.data.round.response.message).toBe(mockedLlmResponse);
@@ -235,6 +252,13 @@ apiTest.describe(
           ],
         },
       ]);
+
+      // execution_terminated carries the same rendered surface payload.
+      expect(isExecutionTerminatedEvent(terminated) && terminated.surface_payload).toStrictEqual(
+        surfacePayload
+      );
+      // A direct answer makes no tool calls.
+      expect(isExecutionTerminatedEvent(terminated) && terminated.tool_calls).toStrictEqual([]);
 
       const conversationId = getConversationId(callbackRequests);
       expect(conversationId.length).toBeGreaterThan(0);
@@ -343,6 +367,10 @@ apiTest.describe(
         expect(blocks).toContain(attachmentContent);
         expect(blocks).toContain('Anything else?');
         expect(blocks).not.toContain('render_attachment');
+
+        // execution_terminated carries the same payload, rendered from the stored conversation.
+        const terminated = getExecutionTerminatedEvent(callbackRequests);
+        expect(terminated.surface_payload).toStrictEqual(roundComplete.surface_payload);
       }
     );
 

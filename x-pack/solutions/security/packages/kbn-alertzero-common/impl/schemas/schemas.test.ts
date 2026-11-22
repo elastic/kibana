@@ -71,6 +71,7 @@ describe('AlertZero schema smoke tests', () => {
       },
       settingsRevision: null,
       workflowId: null,
+      workflowOutdated: false,
       blockingReasons: [],
     };
     const worker = Worker.parse(workerBody);
@@ -226,5 +227,44 @@ describe('HuntCoordinatorResult excluded_report_iocs', () => {
         excluded_report_iocs: { count: 7 },
       }).excluded_report_iocs
     ).toEqual({ count: 7 });
+  });
+
+  // The result is validated whole when it is stored, so a bound on a gap string would turn one
+  // long gap into a failed hunt. Gap text is truncated where it is rendered instead.
+  it('accepts a gap whose technique_id is a long string the model emitted', () => {
+    const techniqueId =
+      'T1059.001 - COMMAND AND SCRIPTING INTERPRETER: POWERSHELL (ENCODED COMMAND)';
+    expect(techniqueId.length).toBeGreaterThan(64);
+    expect(
+      HuntCoordinatorResult.safeParse({
+        ...baseResult,
+        completeness: 'incomplete_final',
+        incomplete: [
+          {
+            reason: 'unknown_technique_id',
+            technique_id: techniqueId,
+            detail: `${techniqueId} is not in the ATT&CK catalog, so it was never searched for.`,
+          },
+        ],
+      }).success
+    ).toBe(true);
+  });
+
+  it('accepts a gap whose detail embeds a long report artifact', () => {
+    expect(
+      HuntCoordinatorResult.safeParse({
+        ...baseResult,
+        completeness: 'incomplete_final',
+        incomplete: [
+          {
+            reason: 'collapsed',
+            technique_id: 'T1105',
+            detail: `its report artifacts (https://example.test/${'a'.repeat(
+              2048
+            )}) were searched by the query for T1071`,
+          },
+        ],
+      }).success
+    ).toBe(true);
   });
 });
