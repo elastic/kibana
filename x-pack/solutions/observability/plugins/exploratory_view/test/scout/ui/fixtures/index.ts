@@ -7,7 +7,6 @@
 
 import type {
   ObltTestFixtures,
-  ObltWorkerFixtures,
   ObltParallelTestFixtures,
   ObltParallelWorkerFixtures,
 } from '@kbn/scout-oblt';
@@ -29,17 +28,15 @@ export const test = baseTest.extend<ExploratoryViewTestFixtures>({
     {
       pageObjects,
       page,
-      kbnUrl,
     }: {
       pageObjects: ObltTestFixtures['pageObjects'];
       page: ObltTestFixtures['page'];
-      kbnUrl: ObltWorkerFixtures['kbnUrl'];
     },
     use: (pageObjects: ExploratoryViewTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects: ExploratoryViewTestFixtures['pageObjects'] = {
       ...pageObjects,
-      exploratoryView: createLazyPageObject(ExploratoryViewPage, page, kbnUrl),
+      exploratoryView: createLazyPageObject(ExploratoryViewPage, page),
     };
 
     await use(extendedPageObjects);
@@ -60,17 +57,15 @@ export const spaceTest = spaceBaseTest.extend<
     {
       pageObjects,
       page,
-      kbnUrl,
     }: {
       pageObjects: ObltParallelTestFixtures['pageObjects'];
       page: ObltParallelTestFixtures['page'];
-      kbnUrl: ObltParallelWorkerFixtures['kbnUrl'];
     },
     use: (pageObjects: ExploratoryViewParallelTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects: ExploratoryViewParallelTestFixtures['pageObjects'] = {
       ...pageObjects,
-      exploratoryView: createLazyPageObject(ExploratoryViewPage, page, kbnUrl),
+      exploratoryView: createLazyPageObject(ExploratoryViewPage, page),
     };
 
     await use(extendedPageObjects);

@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt/ui';
+import { type ScoutPage } from '@kbn/scout-oblt';
 
 export class ExploratoryViewPage {
   public readonly echLegendItemLocator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(private readonly page: ScoutPage) {
     this.echLegendItemLocator = this.page.locator('[data-testid="echLegendItemLabel"]');
   }
 
+  /** `createExploratoryViewUrl` keeps the whole series config in the hash, so only that is forwarded. */
   async goto(urlPath: string): Promise<void> {
-    await this.page.goto(this.kbnUrl.get(urlPath));
+    const [, hash = ''] = urlPath.split('#');
+    await this.page.gotoApp('exploratory-view', {
+      hash,
+      readyWhen: this.page.testSubj.locator('exploratoryViewMainContainer'),
+    });
   }
 
   async waitForLoadingToFinish(): Promise<void> {
-    await expect(this.page.testSubj.locator('kbnLoadingMessage')).toBeHidden();
     await this.page.testSubj.locator('exploratoryViewMainContainer').waitFor();
   }
 
