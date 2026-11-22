@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type InventoryQueryKind = 'deb_packages' | 'rpm_packages' | 'os_version' | 'kernel_info';
+export type InventoryQueryKind =
+  | 'deb_packages'
+  | 'rpm_packages'
+  | 'os_version'
+  | 'kernel_info'
+  | 'language_packages';
 
 export interface InventoryQuery {
   id: string;
@@ -31,6 +36,8 @@ const linuxSnapshot = (id: string, query: string): InventoryQuery => ({
  * Queries of the `software-inventory` pack. `deb_packages.version` already carries the epoch;
  * rpm needs `epoch` and `release` to rebuild `epoch:version-release`. `source` is the dpkg source
  * package or the rpm SOURCERPM file name. `kernel_info.version` is the `uname -r` release.
+ * `elastic_language_packages` is the osquerybeat extension table (Python and npm, one purl per
+ * row); absent on agents whose beats predate it, which is why it is optional everywhere.
  */
 export const INVENTORY_QUERIES: Readonly<Record<InventoryQueryKind, InventoryQuery>> = {
   deb_packages: linuxSnapshot(
@@ -46,6 +53,10 @@ export const INVENTORY_QUERIES: Readonly<Record<InventoryQueryKind, InventoryQue
     'SELECT platform, platform_like, codename, major, name, version FROM os_version;'
   ),
   kernel_info: linuxSnapshot('native_vuln_scanner_kernel_info', 'SELECT version FROM kernel_info;'),
+  language_packages: linuxSnapshot(
+    'native_vuln_scanner_language_packages',
+    'SELECT ecosystem, namespace, name, version, purl, path, manager, install_time FROM elastic_language_packages;'
+  ),
 };
 
 /** Inventory query kind by query id: how a live-query result, which carries no schedule id, is classified. */

@@ -37,6 +37,59 @@ describe('normalizeInventories', () => {
     });
   });
 
+  it('carries language package rows through as purl-keyed entries', () => {
+    const [host] = normalizeInventories([
+      agent({
+        agentId: 'a2',
+        language: [
+          {
+            ecosystem: 'pypi',
+            name: 'requests',
+            version: '2.31.0',
+            purl: 'pkg:pypi/requests@2.31.0',
+            path: '/usr/lib/python3/dist-packages/requests-2.31.0.dist-info/METADATA',
+            manager: 'pip',
+          },
+          {
+            ecosystem: 'npm',
+            namespace: 'babel',
+            name: 'core',
+            version: '7.24.0',
+            purl: 'pkg:npm/%40babel/core@7.24.0',
+          },
+          { ecosystem: 'pypi', name: '', version: '1.0', purl: 'pkg:pypi/@1.0' },
+        ],
+      }),
+    ]).hosts;
+    expect(host.inventory.languagePackages).toEqual([
+      {
+        ecosystem: 'pypi',
+        namespace: undefined,
+        name: 'requests',
+        version: '2.31.0',
+        purl: 'pkg:pypi/requests@2.31.0',
+        path: '/usr/lib/python3/dist-packages/requests-2.31.0.dist-info/METADATA',
+        manager: 'pip',
+        installTime: undefined,
+      },
+      {
+        ecosystem: 'npm',
+        namespace: 'babel',
+        name: 'core',
+        version: '7.24.0',
+        purl: 'pkg:npm/%40babel/core@7.24.0',
+        path: undefined,
+        manager: undefined,
+        installTime: undefined,
+      },
+    ]);
+  });
+
+  it('leaves languagePackages undefined when the agent reported none (older beats)', () => {
+    const [host] = normalizeInventories([agent({ agentId: 'a3' })]).hosts;
+    expect(host.inventory.languagePackages).toBeUndefined();
+  });
+
   it('reads rpm rows on a rhel host and leaves module streams unknown', () => {
     const [host] = normalizeInventories([
       agent({

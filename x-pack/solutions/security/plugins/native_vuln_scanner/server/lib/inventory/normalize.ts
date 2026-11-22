@@ -6,7 +6,7 @@
  */
 
 import type { HostMeta } from '../findings';
-import type { HostInventory, InstalledPackage } from '../matcher';
+import type { HostInventory, InstalledPackage, LanguagePackage } from '../matcher';
 
 /** One osquery result row as stored under `osquery.*`; osquerybeat types numeric columns. */
 export type OsqueryRow = Readonly<Record<string, unknown>>;
@@ -19,6 +19,7 @@ export interface AgentInventoryRows {
   rpm?: readonly OsqueryRow[];
   os?: OsqueryRow;
   kernel?: OsqueryRow;
+  language?: readonly OsqueryRow[];
 }
 
 export interface NormalizedHost {
@@ -114,6 +115,33 @@ export const normalizeRpmRow = (
 type HostOs = HostInventory['os'];
 
 /**
+ * One row of `elastic_language_packages`. Rows missing `purl` or `version` cannot be matched
+ * against anything, so they are dropped with a reason; `namespace` is npm-only (`@scope`).
+ */
+export const normalizeLanguageRow = (
+  row: OsqueryRow,
+  skipped: Record<string, number> = {}
+): LanguagePackage | undefined => {
+  const purl = text(row.purl);
+  const version = text(row.version);
+  const name = text(row.name);
+  if (!purl || !version || !name) {
+    count(skipped, 'language_missing_field');
+    return undefined;
+  }
+  return {
+    ecosystem: text(row.ecosystem) ?? 'unknown',
+    namespace: text(row.namespace),
+    name,
+    version,
+    purl,
+    path: text(row.path),
+    manager: text(row.manager),
+    installTime: text(row.install_time),
+  };
+};
+
+/**
  * Maps `os_version` to the feed key. osquery reports `platform` from os-release `ID` and forces
  * `rhel` whenever `/etc/redhat-release` exists (so RHEL rebuilds report `rhel` too);
  * `platform_like` is deliberately not consulted — Amazon Linux 2 (`ID_LIKE="centos rhel fedora"`)
@@ -167,9 +195,19 @@ export const normalizeInventories = (agents: Iterable<AgentInventoryRows>): Norm
       continue;
     }
     const kernelRelease = agent.kernel ? text(agent.kernel.version) : undefined;
+    // Optional everywhere: an agent whose beats predate the extension table reports no rows.
+    const languagePackages = (agent.language ?? []).flatMap(
+      (row) => normalizeLanguageRow(row, skippedRows) ?? []
+    );
     hosts.push({
       // Module streams are not collectable with stock osquery, so they stay unknown.
-      inventory: { id: agent.agentId, os, kernelRelease, packages },
+      inventory: {
+        id: agent.agentId,
+        os,
+        kernelRelease,
+        packages,
+        languagePackages: languagePackages.length > 0 ? languagePackages : undefined,
+      },
       meta: {
         id: agent.agentId,
         name: agent.hostName,

@@ -7,4 +7,10 @@
 
 export type { AdvisoryIndex } from './match';
 export { buildAdvisoryIndex, matchHost, rhelKernelEvr, sourceRpmName } from './match';
-export type { Finding, HostInventory, InstalledPackage, MatchStats } from './types';
+export type {
+  Finding,
+  HostInventory,
+  InstalledPackage,
+  LanguagePackage,
+  MatchStats,
+} from './types';

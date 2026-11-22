@@ -168,7 +168,7 @@ export const readInventory = async (
   if (Object.keys(scheduleIds).length === 0) {
     logger.warn(
       'No "software-inventory" osquery pack found, so there is nothing to scan. Create the pack ' +
-        'with its four inventory queries and assign it to an agent policy (see the ' +
+        'with its inventory queries and assign it to an agent policy (see the ' +
         'native_vuln_scanner README); the next scan picks it up.'
     );
     return { hosts: [], skippedHosts: {}, skippedRows: {}, packMissing: true };

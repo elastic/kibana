@@ -167,6 +167,7 @@ describe('readAgentInventories', () => {
                             'native_vuln_scanner_rpm_packages',
                             'native_vuln_scanner_os_version',
                             'native_vuln_scanner_kernel_info',
+                            'native_vuln_scanner_language_packages',
                           ],
                         },
                       },
@@ -430,5 +431,19 @@ describe('AgentAccumulator', () => {
 
     expect(accumulator.heldRowCount()).toBe(3);
     expect(accumulator.build().deb?.map((row) => row.name)).toEqual(['new-0', 'new-1', 'new-2']);
+  });
+
+  it('holds language package rows alongside the OS rows of the same run', () => {
+    const accumulator = new AgentAccumulator('a1');
+    const run = { key: 'lang@1', time: 1000 };
+    accumulator.add('language_packages', { osquery: { purl: 'pkg:pypi/requests@2.31.0' } }, run);
+    accumulator.add('language_packages', { osquery: { purl: 'pkg:npm/express@4.18.2' } }, run);
+    accumulator.add('os_version', { osquery: { platform: 'ubuntu' } }, { key: 'os@1', time: 1000 });
+
+    expect(accumulator.build().language?.map((row) => row.purl)).toEqual([
+      'pkg:pypi/requests@2.31.0',
+      'pkg:npm/express@4.18.2',
+    ]);
+    expect(accumulator.build().os).toEqual({ platform: 'ubuntu' });
   });
 });

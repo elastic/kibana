@@ -6,6 +6,7 @@
  */
 
 import { INVENTORY_PACK_BODY } from './pack_body';
+import { INVENTORY_QUERIES } from './queries';
 
 /** Pins the fields osquery's `validatePackScheduleFields` and create-pack schema check. */
 describe('INVENTORY_PACK_BODY', () => {
@@ -31,5 +32,25 @@ describe('INVENTORY_PACK_BODY', () => {
       'platform',
     ];
     expect(Object.keys(INVENTORY_PACK_BODY).filter((key) => !accepted.includes(key))).toEqual([]);
+  });
+
+  it('queries the language-packages extension table with its full column set', () => {
+    const query = INVENTORY_QUERIES.language_packages;
+    expect(query.id).toBe('native_vuln_scanner_language_packages');
+    expect(query.platform).toBe('linux');
+    expect(query.snapshot).toBe(true);
+    for (const column of [
+      'ecosystem',
+      'namespace',
+      'name',
+      'version',
+      'purl',
+      'path',
+      'manager',
+      'install_time',
+    ]) {
+      expect(query.query).toContain(column);
+    }
+    expect(query.query).toContain('FROM elastic_language_packages');
   });
 });

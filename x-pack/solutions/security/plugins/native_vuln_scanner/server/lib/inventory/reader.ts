@@ -124,6 +124,7 @@ export class AgentAccumulator {
       rpm: rowsByKind.get('rpm_packages'),
       os: rowsByKind.get('os_version')?.[0],
       kernel: rowsByKind.get('kernel_info')?.[0],
+      language: rowsByKind.get('language_packages'),
     };
   }
 }

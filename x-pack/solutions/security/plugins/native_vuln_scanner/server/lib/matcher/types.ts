@@ -16,6 +16,19 @@ export interface InstalledPackage {
   source?: string;
 }
 
+/** One Python/npm row of the `elastic_language_packages` extension table. */
+export interface LanguagePackage {
+  ecosystem: string;
+  namespace?: string;
+  name: string;
+  version: string;
+  /** Package URL; OSV matching is an equality join on it (phase 3). */
+  purl: string;
+  path?: string;
+  manager?: string;
+  installTime?: string;
+}
+
 export interface HostInventory {
   id: string;
   os: AdvisoryRecord['os'];
@@ -24,6 +37,12 @@ export interface HostInventory {
   /** Enabled module streams as `name:stream`; undefined when they were not collected. */
   enabledModules?: readonly string[];
   packages: readonly InstalledPackage[];
+  /**
+   * Python/npm packages from the `elastic_language_packages` extension table; undefined when the
+   * agent's beats predate the table (or it found nothing), so phase-3 matching can tell an old
+   * agent from an empty one.
+   */
+  languagePackages?: readonly LanguagePackage[];
 }
 
 export type MatchedAdvisory = Pick<
