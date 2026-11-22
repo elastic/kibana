@@ -80,13 +80,15 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     // An unexpected failure (for example an authorization error) is not a timeout, so it stays
-    // at error level. The original Error is passed as the primary argument (asserted by identity)
-    // so the logging pipeline records its structured exception attributes, and the source and
-    // pattern are carried as structured labels so an operator can tell which source failed.
+    // at error level. The source and pattern go in the message so they survive Kibana's default
+    // console layout (which does not render structured labels), and the original Error is carried
+    // as `{ error }` meta so the JSON/ECS layout still records the structured exception for OTel.
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [loggedError, meta] = logger.error.mock.calls[0];
-    expect(loggedError).toBe(error);
-    expect(meta?.labels).toEqual({ sourceId: 'default', metricAlias });
+    const [message, meta] = logger.error.mock.calls[0];
+    expect(message).toBe(
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
+    );
+    expect(meta?.error).toBe(error);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -121,9 +123,9 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [loggedError, meta] = logger.error.mock.calls[0];
-    expect(loggedError).toBe(error);
-    expect(meta?.labels).toEqual({ sourceId: 'default', metricAlias });
+    const [message, meta] = logger.error.mock.calls[0];
+    expect(message).toContain('Metric index status check failed for source "default"');
+    expect(meta?.error).toBe(error);
     expect(logger.debug).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
