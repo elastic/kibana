@@ -26,7 +26,7 @@ import {
   type PollPolicy,
   type ServerPollStepDefinition,
 } from '@kbn/workflows-extensions/server';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import { hasExecutionChain } from '../../utils';

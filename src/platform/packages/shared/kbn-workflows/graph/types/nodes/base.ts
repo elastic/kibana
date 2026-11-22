@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_HITL_GRAPH_NODE_ID_LENGTH } from '../../../common/hitl';
 import {
   DataSetStepSchema,
