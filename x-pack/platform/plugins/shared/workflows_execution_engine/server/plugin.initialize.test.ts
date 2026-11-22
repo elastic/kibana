@@ -88,4 +88,25 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
     expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
   });
+
+  it('handles a detached initStart rejection', async () => {
+    const plugin = createPlugin();
+    plugin.setup(coreMock.createSetup() as any, {
+      taskManager: taskManagerMock.createSetup(),
+      cloud: {} as any,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+    });
+    mockDataClientBundleInitStart.mockRejectedValue(new Error('initialization failed'));
+
+    plugin.start(coreMock.createStart(), {
+      taskManager: taskManagerMock.createStart(),
+      actions: {} as any,
+      cloud: {} as any,
+      workflowsExtensions: {} as any,
+      licensing: licensingMock.createStart(),
+    });
+
+    expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
+    await Promise.resolve();
+  });
 });

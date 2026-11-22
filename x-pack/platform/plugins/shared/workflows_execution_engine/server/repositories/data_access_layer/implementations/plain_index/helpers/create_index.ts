@@ -32,14 +32,15 @@ const INDEX_SETTINGS = {
   ...HIDDEN_SETTINGS,
 } as const;
 
+export const isUnknownResourceError = (error: EsErrors.ElasticsearchClientError): boolean =>
+  error instanceof EsErrors.ResponseError &&
+  error.statusCode === 404 &&
+  error.body?.ok === false &&
+  error.body?.message === 'Unknown resource.';
+
 export const isRetryableIndexInitializationError = (
   error: EsErrors.ElasticsearchClientError
-): boolean =>
-  isRetryableEsClientError(error) ||
-  (error instanceof EsErrors.ResponseError &&
-    error.statusCode === 404 &&
-    error.body?.ok === false &&
-    error.body?.message === 'Unknown resource.');
+): boolean => isRetryableEsClientError(error) || isUnknownResourceError(error);
 
 export const createIndexWithMappings = async ({
   esClient,
@@ -86,60 +87,53 @@ export const createOrUpdateIndex = async ({
   mappings,
   logger,
 }: CreateIndexOptions): Promise<void> => {
-  try {
-    const indexExists = await esClient.indices.exists({
-      index: indexName,
+  const indexExists = await esClient.indices.exists({
+    index: indexName,
+  });
+
+  if (!indexExists) {
+    // Create new index
+    await createIndexWithMappings({
+      esClient,
+      indexName,
+      mappings,
+      logger,
     });
-
-    if (!indexExists) {
-      // Create new index
-      await createIndexWithMappings({
-        esClient,
-        indexName,
-        mappings,
-        logger,
-      });
-    } else {
-      try {
-        await retryTransientEsErrors(
-          () =>
-            esClient.indices.putSettings({
-              index: indexName,
-              settings: REPLICA_SETTINGS,
-            }),
-          { logger }
-        );
-        logger?.debug(`Updated replica settings for existing index ${indexName}`);
-      } catch (settingsError) {
-        logger?.warn(
-          `Failed to update replica settings for index ${indexName}: ${settingsError.message}`
-        );
-      }
-
+  } else {
+    try {
       await retryTransientEsErrors(
         () =>
           esClient.indices.putSettings({
             index: indexName,
-            settings: HIDDEN_SETTINGS,
+            settings: REPLICA_SETTINGS,
           }),
         { logger }
       );
-      logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+      logger?.debug(`Updated replica settings for existing index ${indexName}`);
+    } catch (settingsError) {
+      logger?.warn(
+        `Failed to update replica settings for index ${indexName}: ${settingsError.message}`
+      );
+    }
 
-      await retryTransientEsErrors(
-        () =>
-          esClient.indices.putMapping({
-            index: indexName,
-            ...mappings,
-          }),
-        { logger }
-      );
-      logger?.debug(`Updated mappings for existing index ${indexName}`);
-    }
-  } catch (error) {
-    if (!isRetryableIndexInitializationError(error)) {
-      logger.error(`Failed to create or update index ${indexName}: ${error}`);
-    }
-    throw error;
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putSettings({
+          index: indexName,
+          settings: HIDDEN_SETTINGS,
+        }),
+      { logger }
+    );
+    logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putMapping({
+          index: indexName,
+          ...mappings,
+        }),
+      { logger }
+    );
+    logger?.debug(`Updated mappings for existing index ${indexName}`);
   }
 };
