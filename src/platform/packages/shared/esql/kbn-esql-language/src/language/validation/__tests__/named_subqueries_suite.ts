@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { validateQuery } from '../validation';
 import type { Setup } from './helpers';
 
 export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
@@ -116,6 +117,22 @@ export const runNamedSubqueriesValidationSuite = (setup: Setup) => {
     });
 
     describe('METADATA', () => {
+      it('reports a known false positive when FUSE inherits METADATA from a LET', async () => {
+        const { callbacks, expectElasticsearchAccepts } = await setup();
+        const query =
+          'LET a = (FROM index METADATA _id, _index, _score | KEEP _id, _index, _score); FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE';
+
+        // Check this known mismatch separately from the suite's client and Elasticsearch comparison.
+        const { errors } = await validateQuery(query, callbacks);
+        expect(errors).toEqual([
+          expect.objectContaining({
+            code: 'fuseMissingMetadata',
+            text: '[FUSE] The FROM command is missing the _id, _index, _score METADATA field.',
+          }),
+        ]);
+        await expectElasticsearchAccepts?.(query);
+      });
+
       it('reports an error for an incomplete LIMIT after FROM with METADATA', async () => {
         const { validate } = await setup();
 
