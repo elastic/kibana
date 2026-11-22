@@ -13,6 +13,8 @@ interface Doc {
   agent: string;
   /** Scheduled run: the schedule id. */
   schedule?: string;
+  /** Scheduled run: the per-execution id osquerybeat stamps as `response_id`. */
+  response?: string;
   /** Live run: the query id (`action_data.id`), the action id and the space it ran in. */
   live?: { queryId: string; action?: string; space?: string };
   /** Seconds since epoch: `osquery_meta.unix_time` of a scheduled run, `@timestamp` of a live one. */
@@ -32,14 +34,20 @@ const SCHEDULES = {
   kernel_info: ['kernel'],
 };
 
-const hit = ({ agent, schedule, live: liveRun, time, row }: Doc, sort: number) => ({
+const hit = ({ agent, schedule, response, live: liveRun, time, row }: Doc, sort: number) => ({
   _index: 'i',
   _id: `${agent}-${schedule ?? liveRun?.action}-${time}-${sort}`,
   _source: {
     '@timestamp': new Date(time * 1000).toISOString(),
     agent: { id: agent },
     host: { name: `${agent}-host` },
-    ...(schedule ? { schedule_id: schedule, osquery_meta: { unix_time: time } } : {}),
+    ...(schedule
+      ? {
+          schedule_id: schedule,
+          ...(response ? { response_id: response } : {}),
+          osquery_meta: { unix_time: time },
+        }
+      : {}),
     ...(liveRun
       ? {
           action_id: liveRun.action,
@@ -323,6 +331,62 @@ describe('readAgentInventories', () => {
         { agent: 'rhel', live: live(OS, undefined), time: 1000, row: { platform: 'x' } },
       ]);
       expect(agents).toEqual([]);
+    });
+  });
+
+  describe('scheduled run identity', () => {
+    const read = async (results: Doc[]) =>
+      collect(readAgentInventories(setup(results), { scheduleIds: SCHEDULES, pageSize: 2 }));
+
+    it('keeps two runs of one query in the same second separate when both carry a response_id', async () => {
+      const [agent] = await read([
+        // Same osquery_meta.unix_time, two executions: run-b's rows must not merge with
+        // run-a's (the pre-response_id key would have folded all three rows into one run).
+        {
+          agent: 'a1',
+          schedule: 'deb-new',
+          response: 'run-b',
+          time: 200,
+          row: { name: 'bash', version: '5' },
+        },
+        {
+          agent: 'a1',
+          schedule: 'deb-new',
+          response: 'run-a',
+          time: 200,
+          row: { name: 'apt', version: '2' },
+        },
+        {
+          agent: 'a1',
+          schedule: 'deb-new',
+          response: 'run-b',
+          time: 200,
+          row: { name: 'curl', version: '8' },
+        },
+      ]);
+      expect(agent.deb).toEqual([
+        { name: 'bash', version: '5' },
+        { name: 'curl', version: '8' },
+      ]);
+    });
+
+    it('still merges rows of one run when docs carry no response_id (older beats)', async () => {
+      const [agent] = await read([
+        { agent: 'a1', schedule: 'deb-new', time: 200, row: { name: 'apt', version: '2' } },
+        { agent: 'a1', schedule: 'deb-new', time: 200, row: { name: 'bash', version: '5' } },
+      ]);
+      expect(agent.deb).toEqual([
+        { name: 'apt', version: '2' },
+        { name: 'bash', version: '5' },
+      ]);
+    });
+
+    it('groups on response_id across runs that differ in both id and time', async () => {
+      const [agent] = await read([
+        { agent: 'a1', schedule: 'os', response: 'run-b', time: 300, row: { platform: 'noble' } },
+        { agent: 'a1', schedule: 'os', response: 'run-a', time: 200, row: { platform: 'jammy' } },
+      ]);
+      expect(agent.os).toEqual({ platform: 'noble' });
     });
   });
 

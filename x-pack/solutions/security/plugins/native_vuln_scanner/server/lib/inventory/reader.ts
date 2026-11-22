@@ -37,6 +37,8 @@ interface ResultSource {
   host?: { name?: string; hostname?: string };
   /** Scheduled runs only. */
   schedule_id?: string;
+  /** One id per scheduled query execution, stamped by osquerybeat. */
+  response_id?: string;
   osquery_meta?: { unix_time?: number | string };
   /** Live-query runs only: one id per query execution. */
   action_id?: string;
@@ -68,16 +70,16 @@ const toMillis = (value: number | string | undefined): number => {
 
 /**
  * Identifies the run a result belongs to and when it happened; `undefined` for a foreign space or
- * a live doc without `action_id`.
+ * a live doc without `action_id`. Scheduled runs group on `response_id`, stamped once per
+ * execution by osquerybeat, so two runs in the same second stay separate; older beats without it
+ * fall back to `schedule_id@unix_time`.
  */
 const describeRun = (source: ResultSource): { key: string; time: number } | undefined => {
   const timestamp = toMillis(source['@timestamp']);
   if (source.schedule_id) {
     const unixTime = source.osquery_meta?.unix_time;
-    return {
-      key: `${source.schedule_id}@${unixTime ?? ''}`,
-      time: unixTime === undefined ? timestamp : Number(unixTime) * 1000 || timestamp,
-    };
+    const time = unixTime === undefined ? timestamp : Number(unixTime) * 1000 || timestamp;
+    return { key: `${source.schedule_id}@${source.response_id ?? unixTime ?? ''}`, time };
   }
   if (!source.action_id || source.action_data?.space_id !== DEFAULT_SPACE_ID) return undefined;
   return { key: `live:${source.action_id}`, time: timestamp };
@@ -171,6 +173,7 @@ export async function* readAgentInventories(
             'host.name',
             'host.hostname',
             'schedule_id',
+            'response_id',
             'osquery_meta.unix_time',
             'action_id',
             'action_data.id',
