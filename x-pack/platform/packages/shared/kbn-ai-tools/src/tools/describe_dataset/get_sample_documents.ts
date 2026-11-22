@@ -39,8 +39,6 @@ interface GetSampleDocumentsEsqlParams {
   kql?: string;
   size?: number;
   sampleSize?: number;
-  /** Margin over `sampleSize` asked of `SAMPLE` to absorb its variance. */
-  oversamplingFactor?: number;
   whereCondition?: WhereCondition;
   /**
    * Controls the ES|QL `SET unmapped_fields=...` prefix:
@@ -169,7 +167,6 @@ export async function getSampleDocumentsEsql({
   kql,
   size = 1000,
   sampleSize,
-  oversamplingFactor = SAMPLE_PROBABILITY_FACTOR,
   whereCondition,
   unmappedFields,
   dslFilter,
@@ -234,7 +231,7 @@ export async function getSampleDocumentsEsql({
       return { hits: [], total: 0 };
     }
 
-    const sampleProbability = Math.min(1, (oversamplingFactor * sampleSize) / total);
+    const sampleProbability = Math.min(1, (SAMPLE_PROBABILITY_FACTOR * sampleSize) / total);
     const sampleLimit = SAMPLE_LIMIT_FACTOR * sampleSize;
     const sampleResponse = await runQuery({
       query: buildQuery({ sampleProbability, limit: sampleLimit }),

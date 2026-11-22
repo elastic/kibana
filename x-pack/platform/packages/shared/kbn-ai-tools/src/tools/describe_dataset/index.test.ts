@@ -118,7 +118,7 @@ describe('describeDataset', () => {
     });
 
     const queries = query.mock.calls.map(([{ query: esql }]) => esql);
-    expect(queries).toContainEqual(expect.stringContaining('| SAMPLE 0.012 | LIMIT 10000'));
+    expect(queries).toContainEqual(expect.stringContaining('| SAMPLE 0.03 | LIMIT 10000'));
     expect(analysis.total).toBe(100_000);
     expect(analysis.sampled).toBe(2);
   });

@@ -14,9 +14,6 @@ import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_ti
 import { getSampleDocumentsEsql } from './get_sample_documents';
 import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
-// The analysis only needs roughly `sampleSize` documents, so it skips most of the sampling margin.
-const SAMPLE_OVERSAMPLING_FACTOR = 1.2;
-
 export async function describeDataset({
   esClient,
   start,
@@ -53,7 +50,6 @@ export async function describeDataset({
         end,
         kql,
         sampleSize,
-        oversamplingFactor: SAMPLE_OVERSAMPLING_FACTOR,
         abortSignal: requestSignal,
       }),
       runEsqlPopulationCount({
