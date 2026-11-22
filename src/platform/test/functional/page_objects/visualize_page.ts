@@ -553,9 +553,15 @@ export class VisualizePageObject extends FtrService {
         option = dashboardId ? 'existing-dashboard-option' : 'new-dashboard-option';
       }
       this.log.debug('save modal dashboard selector, choosing option:', option);
-      const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
-      const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
-      await label.click();
+      // The modal is still settling (entry animation, dashboard picker loading) while this runs,
+      // so a single click can land on stale coordinates without Selenium reporting a failure.
+      await this.retry.waitForWithTimeout(`${option} to be selected`, 10_000, async () => {
+        const dashboardSelector = await this.testSubjects.find('add-to-dashboard-options');
+        const label = await dashboardSelector.findByCssSelector(`label[for="${option}"]`);
+        await label.click();
+        const radio = await this.find.byCssSelector(`#${option}`);
+        return await radio.isSelected();
+      });
 
       if (dashboardId) {
         // TODO - selecting an existing dashboard
