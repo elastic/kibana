@@ -71,24 +71,29 @@ describe('composeSourceStatus', () => {
   });
 
   it('keeps an unexpected probe failure visible as a structured error with the source context and reports unknown', async () => {
-    const error = new Error('cluster unhealthy');
-    const hasMetricIndices = jest.fn().mockRejectedValue(error);
+    const original = new TypeError('cluster unhealthy');
+    original.stack = 'TypeError: cluster unhealthy\n    at probe';
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
 
     await expect(compose(hasMetricIndices)).resolves.toEqual({
       metricIndicesExist: false,
       remoteClustersExist: true,
       metricIndicesStatus: 'unknown',
     });
-    // An unexpected failure (for example an authorization error) is not a timeout, so it stays
-    // at error level. The source and pattern go in the message so they survive Kibana's default
-    // console layout (which does not render structured labels), and the original Error is carried
-    // as `{ error }` meta so the JSON/ECS layout still records the structured exception for OTel.
+    // An unexpected failure (for example an authorization error) is not a timeout, so it stays at
+    // error level. It is passed as the Error itself (not a string with `{ error }` meta) so the
+    // OTel appender keeps the `exception.type` / `exception.message` / `exception.stacktrace`
+    // attributes, which it reads from the first Error argument. The message carries the source and
+    // pattern so the context survives Kibana's default console layout, while the original name and
+    // stack are preserved so the exception type and stacktrace stay faithful to the real failure.
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [message, meta] = logger.error.mock.calls[0];
-    expect(message).toBe(
+    const [loggedError] = logger.error.mock.calls[0];
+    expect(loggedError).toBeInstanceOf(Error);
+    expect(loggedError.message).toBe(
       'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
     );
-    expect(meta?.error).toBe(error);
+    expect(loggedError.name).toBe('TypeError');
+    expect(loggedError.stack).toBe(original.stack);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -123,9 +128,10 @@ describe('composeSourceStatus', () => {
       metricIndicesStatus: 'unknown',
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
-    const [message, meta] = logger.error.mock.calls[0];
-    expect(message).toContain('Metric index status check failed for source "default"');
-    expect(meta?.error).toBe(error);
+    const [loggedError] = logger.error.mock.calls[0];
+    expect(loggedError).toBeInstanceOf(Error);
+    expect(loggedError.message).toContain('Metric index status check failed for source "default"');
+    expect(loggedError.message).toContain(error.message);
     expect(logger.debug).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });

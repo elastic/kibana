@@ -91,17 +91,22 @@ export const composeSourceStatus = async ({
       );
     } else {
       // Any other failure is unexpected (for example an authorization error), so keep it
-      // visible at error level. Put the source and pattern in the message itself so the context
-      // survives in Kibana's default console layout, which renders `%message` but not structured
-      // labels, and carry the original error as `{ error }` meta so the JSON/ECS layout still
-      // records the structured `error.type` / `error.message` / `error.stack_trace` for OTel.
-      const error = err instanceof Error ? err : new Error(String(err));
-      logger.error(
+      // visible at error level. Pass the Error itself as the first argument: the OTel appender
+      // reads `exception.type` / `exception.message` / `exception.stacktrace` from
+      // `LogRecord.error`, which is only populated from the first argument when it is an Error, so
+      // passing it as `{ error }` meta would drop those attributes. Prefix the message with the
+      // source and pattern so the context still survives Kibana's default console layout (which
+      // renders `%message` but not structured labels), while keeping the original name and stack
+      // so `exception.type` / `exception.stacktrace` stay faithful to the underlying failure.
+      const original = err instanceof Error ? err : new Error(String(err));
+      const error = new Error(
         `Metric index status check failed for source "${toSingleLine(
           sourceId
-        )}" (pattern: ${toSingleLine(metricAlias)}): ${error.message}`,
-        { error }
+        )}" (pattern: ${toSingleLine(metricAlias)}): ${original.message}`
       );
+      error.name = original.name;
+      error.stack = original.stack;
+      logger.error(error);
     }
 
     return {
