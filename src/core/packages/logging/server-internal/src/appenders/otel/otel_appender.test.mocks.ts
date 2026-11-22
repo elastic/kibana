@@ -59,15 +59,13 @@ jest.mock('@opentelemetry/exporter-logs-otlp-proto', () => ({
   OTLPLogExporter: mockOTLPLogExporter,
 }));
 
-jest.mock('@elastic/opentelemetry-node/sdk', () => ({
-  resources: {
-    detectResources: mockDetectResources,
-    resourceFromAttributes: mockResourceFromAttributes,
-    envDetector: 'envDetector',
-    hostDetector: 'hostDetector',
-    osDetector: 'osDetector',
-    processDetector: 'processDetector',
-  },
+jest.mock('@opentelemetry/resources', () => ({
+  detectResources: mockDetectResources,
+  resourceFromAttributes: mockResourceFromAttributes,
+  envDetector: 'envDetector',
+  hostDetector: 'hostDetector',
+  osDetector: 'osDetector',
+  processDetector: 'processDetector',
 }));
 
 jest.mock('@opentelemetry/api', () => {
@@ -92,6 +90,7 @@ jest.mock('@opentelemetry/api', () => {
 export const mockGetConfiguration = jest.fn();
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: mockGetConfiguration,
+  getKibanaName: jest.fn(),
 }));
 
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and

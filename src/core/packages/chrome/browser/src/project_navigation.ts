@@ -304,7 +304,7 @@ export interface ProjectNavigationLinkItem {
   isExternal?: boolean;
 }
 
-/** One titled list inside a hover registration. */
+/** One titled supplementary list registered against a navigation target. */
 export interface ProjectNavigationLinkList {
   /** Unique within the registration. Rendered ids are `${id}:${item.id}`. */
   id: string;
@@ -313,8 +313,9 @@ export interface ProjectNavigationLinkList {
 }
 
 /**
- * Everything one feature contributes to an existing deep link's hover popover. One per target.
- * Chrome attaches this to primary and footer hover only, not More.
+ * Everything one feature contributes to an existing deep link's supplementary navigation. One per
+ * target. Chrome attaches the lists to primary and footer items, where they render in the hover
+ * popover and in an existing side panel, but not in More.
  */
 export interface ProjectNavigationLinks {
   id: string;

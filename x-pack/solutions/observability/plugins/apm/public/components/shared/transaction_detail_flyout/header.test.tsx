@@ -83,7 +83,7 @@ describe('useTransactionDetailFlyoutHeader', () => {
     expect(link).toHaveTextContent('GET /api/orders');
     expect(link).toHaveAttribute('data-ebt-action', 'viewSpan');
     expect(link).toHaveAttribute('data-ebt-element', 'transactionDetailFlyoutTitle');
-    expect(link.closest('h3')).toBeInTheDocument();
+    expect(link.closest('h2')).toBeInTheDocument();
   });
 
   it('shows a tooltip describing the title link destination', async () => {
