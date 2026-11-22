@@ -212,6 +212,11 @@ describe('sessionSummaryQuery', () => {
     });
   });
 
+  it('reads the mobile flag apart from the user agent, so an event with only the flag keeps the browser', () => {
+    expect(SESSION_ATTRIBUTE_GROUPS.user_agent).not.toContain('mobile');
+    expect(SESSION_ATTRIBUTE_GROUPS.mobile).toEqual(['mobile']);
+  });
+
   it('cleans the attributes once per session, after the last stage', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
     const lastStage = query.lastIndexOf('BY service, session');

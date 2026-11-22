@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH } from '../../../../../common/sessions';
 import type { FrustratedElement, FrustratedPage } from '../../../../../common/types/usage';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { createUiSettingsMock } from '../../../../test_utils/ui_settings_mock';
@@ -119,6 +120,18 @@ describe('FrustrationPanel', () => {
     expect(
       screen.getByTestId('digitalExperienceOverviewFrustrationSessionsLink-#checkout')
     ).toHaveAccessibleName('Open sessions with frustration on #checkout');
+  });
+
+  it('has no sessions link for a selector too long to filter by', () => {
+    const cssSelector = '#a'.repeat(SESSIONS_LIST_MAX_FRUSTRATION_FILTER_LENGTH);
+    renderPanel({ elements: [{ ...ELEMENTS[0], cssSelector }] });
+
+    expect(
+      screen.getByTestId(`digitalExperienceOverviewFrustrationRow-${cssSelector}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`digitalExperienceOverviewFrustrationSessionsLink-${cssSelector}`)
+    ).not.toBeInTheDocument();
   });
 
   it('shows a row per element with its tag, page and exact sessions', () => {

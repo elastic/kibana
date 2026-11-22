@@ -90,7 +90,9 @@ export const texts = (values: readonly string[]): string =>
 export const SESSION_ATTRIBUTE_GROUPS = {
   environment: ['environment'],
   user: ['user'],
-  user_agent: ['browser', 'browserVersion', 'os', 'device', 'mobile'],
+  user_agent: ['browser', 'browserVersion', 'os', 'device'],
+  // Own group: an event with only this flag would otherwise blank the browser and OS.
+  mobile: ['mobile'],
   geo: ['countryIso', 'region', 'city'],
   app: ['appVersion'],
 } as const satisfies Record<string, readonly SessionAttribute[]>;

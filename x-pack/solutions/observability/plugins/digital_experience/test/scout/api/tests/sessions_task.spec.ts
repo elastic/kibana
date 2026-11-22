@@ -269,7 +269,7 @@ apiTest.describe(
           const noSamples = { count: 0, good: 0, needs_improvement: 0, poor: 0 };
           expect(await getSummary(esClient, SESSION)).toStrictEqual({
             session: { id: SESSION },
-            service: { name: APP },
+            service: { name: APP, version: null },
             start_time: at(0),
             end_time: at(30 * SECOND_MS),
             duration_ms: 30 * SECOND_MS,
@@ -283,7 +283,7 @@ apiTest.describe(
             dead_click_count: 1,
             error_click_count: 0,
             frustration_count: 3,
-            frustration_targets: [DEAD_TARGET, FRUSTRATED_TARGET],
+            frustration_targets: [FRUSTRATED_TARGET, DEAD_TARGET],
             frustration_pages: ['/home'],
             http_request_count: 3,
             http_failed_request_count: 2,

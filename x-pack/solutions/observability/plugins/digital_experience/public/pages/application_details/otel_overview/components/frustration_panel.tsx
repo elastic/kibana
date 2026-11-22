@@ -152,14 +152,12 @@ const sessionsLinkLabel = (name: string) => {
   });
 };
 
-/** The sessions with frustration on one element or page; every one when the value is too long to filter by. */
+/** The sessions with frustration on one element or page; none when the value is too long to filter by. */
 const frustrationQueryOf = (
   param: 'frustrationTarget' | 'frustrationPage',
   value: string
-): SessionsListUrlQuery => {
-  return frustrationFilterRt.is(value)
-    ? { withFrustration: true, [param]: value }
-    : { withFrustration: true };
+): SessionsListUrlQuery | undefined => {
+  return frustrationFilterRt.is(value) ? { withFrustration: true, [param]: value } : undefined;
 };
 
 const SESSIONS_LINK = i18n.translate('xpack.digitalExperience.overview.frustration.sessionsLink', {
@@ -183,7 +181,7 @@ function FrustrationRow({
   isLowerBound: boolean;
   /** Under the badges, e.g. the page an element is mostly frustrated on. */
   detail?: string | null;
-  sessionsHref: string;
+  sessionsHref?: string;
 }) {
   const { formatNumber } = useFormatters();
   return (
@@ -229,19 +227,21 @@ function FrustrationRow({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiLink
-          href={sessionsHref}
-          aria-label={sessionsLinkLabel(name)}
-          data-test-subj={`digitalExperienceOverviewFrustrationSessionsLink-${name}`}
-          {...getEbtProps({
-            action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSIONS,
-            element: APPLICATION_OVERVIEW_EBT_ELEMENTS.FRUSTRATION_SESSIONS_LINK,
-          })}
-        >
-          {SESSIONS_LINK}
-        </EuiLink>
-      </EuiFlexItem>
+      {sessionsHref && (
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            href={sessionsHref}
+            aria-label={sessionsLinkLabel(name)}
+            data-test-subj={`digitalExperienceOverviewFrustrationSessionsLink-${name}`}
+            {...getEbtProps({
+              action: DIGITAL_EXPERIENCE_EBT_ACTIONS.VIEW_SESSIONS,
+              element: APPLICATION_OVERVIEW_EBT_ELEMENTS.FRUSTRATION_SESSIONS_LINK,
+            })}
+          >
+            {SESSIONS_LINK}
+          </EuiLink>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -267,6 +267,7 @@ export function FrustrationPanel({
   const [tab, setTab] = useState<FrustrationTab>('elements');
   const [pageIndex, setPageIndex] = useState(0);
   const isEmpty = frustration.total === 0;
+  const rowHref = (query: SessionsListUrlQuery | undefined) => query && sessionsHref(query);
 
   const items: BarListItem[] =
     tab === 'elements'
@@ -283,7 +284,7 @@ export function FrustrationPanel({
                 counts={element}
                 sessions={sessions}
                 isLowerBound={false}
-                sessionsHref={sessionsHref(frustrationQueryOf('frustrationTarget', cssSelector))}
+                sessionsHref={rowHref(frustrationQueryOf('frustrationTarget', cssSelector))}
               />
             ),
           };
@@ -299,7 +300,7 @@ export function FrustrationPanel({
                 counts={page}
                 sessions={sessions}
                 isLowerBound
-                sessionsHref={sessionsHref(frustrationQueryOf('frustrationPage', path))}
+                sessionsHref={rowHref(frustrationQueryOf('frustrationPage', path))}
               />
             ),
           };
