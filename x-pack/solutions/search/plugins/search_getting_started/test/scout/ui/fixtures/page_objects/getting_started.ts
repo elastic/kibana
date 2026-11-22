@@ -11,8 +11,9 @@ export class GettingStarted {
   constructor(private readonly page: ScoutPage) {}
 
   async goto() {
-    await this.page.gotoApp('elasticsearch/getting_started');
-    await this.page.testSubj.waitForSelector('search-getting-started');
+    await this.page.gotoApp('elasticsearch/getting_started', {
+      readyWhen: this.page.testSubj.locator('search-getting-started'),
+    });
   }
 
   async getHeader() {
