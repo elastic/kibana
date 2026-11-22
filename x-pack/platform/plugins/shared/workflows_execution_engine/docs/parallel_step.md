@@ -242,8 +242,9 @@ Constraints this creates:
   (depends on the main-loop delay mechanism the parallel executor doesn't run).
 - ✅ **`workflow.awaitExecutions`**: polls durably like other poll steps. With `from-steps`,
   executions started in sibling branches of the same fan-out are skipped; executions started
-  outside the parallel step are still awaited, and explicit `execution-ids` are not filtered by
-  branch (only by run lineage). It can't take a step-level `timeout`, so
+  outside the parallel step are still awaited, subject to the usual loop and retry scoping
+  (inside a `foreach`, `while` or retry, only the current iteration or attempt). Explicit
+  `execution-ids` are not filtered by branch (only by run lineage). It can't take a step-level `timeout`, so
   `branch-timeout` (or the step's 24h cap) bounds the wait. To join every branch,
   await after the parallel step with `from-steps: [<parallel step>]`.
 - ❌ **Step-level `on-failure`** (`retry` / `continue` / `fallback`) on a branch
