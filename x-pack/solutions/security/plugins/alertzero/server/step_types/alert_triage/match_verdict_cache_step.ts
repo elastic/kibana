@@ -13,6 +13,7 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   DECISION_MATCH_WORK_BUDGET_MS,
+  TRIAGE_CACHE_CONFIRM_TAG_PREFIX,
   TRIAGE_STRICT_KEY_TAG_PREFIX,
   TRIAGE_WIDE_KEY_TAG_PREFIX,
 } from '../../alert_triage/constants';
@@ -34,6 +35,7 @@ import {
   VERDICT_CACHE_NO_REUSE_KINDS,
   isAuditSample,
   matchReusableRecords,
+  pickConfirmAlerts,
   type VerdictCacheMode,
   type VerdictCacheRecord,
 } from '../../alert_triage/verdict_cache';
@@ -44,7 +46,24 @@ export interface MatchVerdictCacheStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
   /** The flag mode. A missing or mistyped value reads as `off`, so it cannot tag alerts. */
   getMode: () => Promise<VerdictCacheMode>;
+  /** The flag `alertzero.triageCacheConfirm`. Absent or false: no alert is tagged to confirm a pending record. */
+  getCacheConfirm?: () => Promise<boolean>;
 }
+
+const TAGS_FIELD = 'kibana.alert.workflow_tags';
+
+/** All workflow tags of a candidate (`getField` would return only the first). */
+const tagsOf = (doc: Readonly<Record<string, unknown>>): string[] => {
+  const value = TAGS_FIELD.split('.').reduce<unknown>(
+    (current, key) =>
+      typeof current === 'object' && current !== null
+        ? (current as Record<string, unknown>)[key]
+        : undefined,
+    doc
+  );
+  const list = Array.isArray(value) ? value : [value];
+  return list.filter((tag): tag is string => typeof tag === 'string');
+};
 
 const HOUR_MS = 60 * 60 * 1000;
 
@@ -67,6 +86,7 @@ const NOTHING = {
   tag_failures: 0,
   deferred: 0,
   out_of_time: false,
+  confirm_tagged: 0,
 };
 
 /**
@@ -84,12 +104,18 @@ const NOTHING = {
  * The decisions are separate: this step does not look at them. With both flags on, an alert that a decision matched can also carry
  * this tag. (shortcut: decisions first is not enforced here, because the decisions step runs first and tags what it matches.)
  *
+ * With the flag `alertzero.triageCacheConfirm` on, it also tags one waiting alert of each `pending` record that many waiting alerts
+ * share (`pickConfirmAlerts`) with `az:cache_confirm:<record id>`. The planner serves that alert first, so its verdict is run 2 of the
+ * record sooner. The tag stays until the alert is analyzed or reused. (shortcut: a tag left on an alert whose record turned
+ * `unstable` still moves it up the queue once.)
+ *
  * It fails open. A step that cannot read the setting, the alerts or the records reports `failed` and tags nothing, so every
  * alert goes through analysis as before.
  */
 export const getTriageMatchVerdictCacheStepDefinition = ({
   isContextEngineEnabled,
   getMode,
+  getCacheConfirm = async () => false,
 }: MatchVerdictCacheStepDependencies) =>
   createServerStepDefinition({
     ...triageMatchVerdictCacheStepCommonDefinition,
@@ -105,6 +131,7 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
           return result('disabled');
         }
 
+        const confirm = await getCacheConfirm();
         const now = new Date();
         const workDeadline = now.getTime() + DECISION_MATCH_WORK_BUDGET_MS;
         const filters = {
@@ -137,7 +164,9 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
               {
                 after,
                 excludeTagPrefixes: [TRIAGE_WOULD_REUSE_TAG_PREFIX],
-                extraSourceFields: NOVELTY_SOURCE_FIELDS,
+                extraSourceFields: confirm
+                  ? [...NOVELTY_SOURCE_FIELDS, TAGS_FIELD]
+                  : NOVELTY_SOURCE_FIELDS,
               }
             );
             const hashes = hashCandidates(found.candidates, input.space_id);
@@ -290,6 +319,35 @@ export const getTriageMatchVerdictCacheStepDefinition = ({
                     error instanceof Error ? error.message : error
                   }`
                 );
+              }
+            }
+
+            if (confirm && !outOfTime()) {
+              const alreadyTagged = new Set<string>();
+              for (const { doc } of found.candidates) {
+                for (const tag of tagsOf(doc)) {
+                  if (tag.startsWith(TRIAGE_CACHE_CONFIRM_TAG_PREFIX)) {
+                    alreadyTagged.add(tag.slice(TRIAGE_CACHE_CONFIRM_TAG_PREFIX.length));
+                  }
+                }
+              }
+              const picks = pickConfirmAlerts({ hashes, recordsByHash, now, alreadyTagged });
+              for (const [recordId, alertId] of picks) {
+                try {
+                  await tagInChunks(write, {
+                    alertIds: [alertId],
+                    add: [`${TRIAGE_CACHE_CONFIRM_TAG_PREFIX}${recordId}`],
+                    remove: [],
+                  });
+                  totals.confirm_tagged++;
+                } catch (error) {
+                  totals.tag_failures++;
+                  logger.warn(
+                    `Could not tag an alert to confirm cache record ${recordId}: ${
+                      error instanceof Error ? error.message : error
+                    }`
+                  );
+                }
               }
             }
 

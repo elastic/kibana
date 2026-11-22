@@ -286,6 +286,18 @@ describe('buildWaitSection', () => {
     expect(section.within['60']).toBe(1);
     expect(section.shareOfAllWithin['60']).toBe(0.1);
     expect(section.nonBuildingBlockWithoutVerdict).toBe(9);
+    expect(section.closedWithoutVerdict).toBeNull();
+  });
+
+  it('reports the alerts closed without a verdict apart, so that they are not read as backlog', () => {
+    const section = buildWaitSection({
+      alerts: [],
+      calls: [],
+      sweeps: [sweepAt(15)],
+      counts: { nonBuildingBlock: 7, nonBuildingBlockWithoutVerdict: 3, closedWithoutVerdict: 2 },
+    });
+
+    expect(section.closedWithoutVerdict).toBe(2);
   });
 
   it('leaves out an alert that has no verdict tag', () => {
@@ -297,5 +309,68 @@ describe('buildWaitSection', () => {
 
     expect(section.alertsWithTime).toBe(0);
     expect(section.p50Seconds).toBeNull();
+  });
+
+  describe('by severity', () => {
+    const withSeverity = (tagged: TaggedAlert, severity?: string): TaggedAlert => ({
+      ...tagged,
+      ...(severity ? { severity } : {}),
+    });
+    const section = buildWaitSection({
+      alerts: [
+        withSeverity(created('h1', 0, ['az:true_positive']), 'high'),
+        withSeverity(created('h2', 0, ['az:true_positive']), 'high'),
+        withSeverity(created('l1', 0, ['az:false_positive']), 'low'),
+        withSeverity(created('l2', 1, ['az:false_positive', JEV_VERDICT_TAG]), 'low'),
+        withSeverity(created('b1', 0, ['az:false_positive'], true), 'high'),
+        created('u1', 0, ['az:false_positive']),
+      ],
+      calls: [callOf(['h1'], 10), callOf(['h2'], 20), callOf(['l1', 'b1', 'u1'], 90)],
+      sweeps: [sweepAt(15)],
+      counts: {
+        nonBuildingBlock: 8,
+        nonBuildingBlockWithoutVerdict: 3,
+        bySeverity: {
+          high: { alerts: 3, withoutVerdict: 1 },
+          low: { alerts: 3, withoutVerdict: 1 },
+          medium: { alerts: 1, withoutVerdict: 1 },
+          unknown: { alerts: 1, withoutVerdict: 0 },
+        },
+      },
+    });
+
+    it('gives the wait of the high alerts apart, the alerts that a held rule must not delay', () => {
+      // h1 waited 10 minutes and h2 20 minutes. The building block b1 is high too, but it is left out.
+      expect(section.bySeverity.high).toEqual({
+        alerts: 3,
+        withVerdict: 2,
+        withoutVerdict: 1,
+        shareWithin60: Number((2 / 3).toFixed(4)),
+        p50Seconds: 600,
+        p95Seconds: 1200,
+        model: { count: 2, p50Seconds: 600, p95Seconds: 1200 },
+      });
+    });
+
+    it('splits the model wait from the Jev wait, because only the model path is held', () => {
+      // l1 waited 90 minutes for the model, l2 14 minutes for Jev (the sweep at 15).
+      expect(section.bySeverity.low.model).toEqual({
+        count: 1,
+        p50Seconds: 5400,
+        p95Seconds: 5400,
+      });
+      expect(section.bySeverity.low.withVerdict).toBe(2);
+      expect(section.bySeverity.low.shareWithin60).toBe(Number((1 / 3).toFixed(4)));
+    });
+
+    it('lists a severity that has alerts but no verdict, and an alert without a severity as unknown', () => {
+      expect(section.bySeverity.medium).toMatchObject({
+        alerts: 1,
+        withVerdict: 0,
+        withoutVerdict: 1,
+        p50Seconds: null,
+      });
+      expect(section.bySeverity.unknown).toMatchObject({ alerts: 1, withVerdict: 1 });
+    });
   });
 });

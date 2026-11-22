@@ -8,6 +8,7 @@
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { hashKey } from '../../alert_triage/key_tags';
 import {
+  TRIAGE_CACHE_CONFIRM_TAG_PREFIX,
   TRIAGE_STRICT_KEY_TAG_PREFIX,
   TRIAGE_WIDE_KEY_TAG_PREFIX,
 } from '../../alert_triage/constants';
@@ -17,6 +18,7 @@ import {
   TRIAGE_CACHE_REUSE_TAG_PREFIX,
   TRIAGE_WOULD_REUSE_TAG_PREFIX,
   isAuditSample,
+  VERDICT_CACHE_CONFIRM_MIN_WAITING,
   VERDICT_CACHE_TTL_MS,
   buildCacheDocument,
   nextCacheAction,
@@ -106,6 +108,7 @@ const setup = ({
   unreadable = false,
   tagFailsFor,
   reuseTagFailsFor,
+  confirm = false,
 }: {
   alerts: Array<[string, Record<string, unknown>]>;
   records?: VerdictCacheRecord[];
@@ -117,6 +120,8 @@ const setup = ({
   tagFailsFor?: string;
   /** The call that applies the verdict of this record id (`on` mode) fails. */
   reuseTagFailsFor?: string;
+  /** The flag `alertzero.triageCacheConfirm`. */
+  confirm?: boolean;
 }) => {
   const store = new Map(
     records.map((record) => [verdictCacheId(record.keyHash), storedOf(record)])
@@ -160,6 +165,7 @@ const setup = ({
     getTriageMatchVerdictCacheStepDefinition({
       isContextEngineEnabled: async () => enabled,
       getMode: async () => mode,
+      getCacheConfirm: async () => confirm,
     }).handler({
       input: {
         space_id: 'default',
@@ -629,5 +635,63 @@ describe('triage match verdict cache step', () => {
       reusable_records: 1,
     });
     expect(tagCalls().map(({ ids }) => ids)).toEqual([['a-1'], ['b-1']]);
+  });
+
+  describe('confirming a pending record early', () => {
+    const many = (executable: string, count: number, tags: string[] = []) =>
+      Array.from({ length: count }, (_, i): [string, Record<string, unknown>] => [
+        `${executable}-${i}`,
+        { ...source(executable), 'kibana.alert.workflow_tags': i === 0 ? tags : [] },
+      ]);
+    const confirmTagsOf = (calls: Array<{ ids: string[]; tags: { tags_to_add: string[] } }>) =>
+      calls.filter(({ tags }) =>
+        tags.tags_to_add.some((tag) => tag.startsWith(TRIAGE_CACHE_CONFIRM_TAG_PREFIX))
+      );
+
+    // The record needs run 2 from a later batch. Tagging one waiting alert lets the planner serve it first, so the record can turn
+    // active before the rest of the backlog waits behind other rules.
+    it('tags one waiting alert of a pending record that many waiting alerts share, with the id of the record', async () => {
+      const { run, tagCalls } = setup({
+        mode: 'on',
+        confirm: true,
+        alerts: many('a.exe', VERDICT_CACHE_CONFIRM_MIN_WAITING),
+        records: [recordOf('a.exe', 'pending')],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ status: 'ok', confirm_tagged: 1 });
+      expect(confirmTagsOf(tagCalls())).toEqual([
+        expect.objectContaining({
+          ids: ['a.exe-0'],
+          tags: expect.objectContaining({
+            tags_to_add: [`${TRIAGE_CACHE_CONFIRM_TAG_PREFIX}${verdictCacheId(hashOf('a.exe'))}`],
+          }),
+        }),
+      ]);
+    });
+
+    it('tags nothing with the flag off, or when a waiting alert already carries the tag for the record', async () => {
+      const recordId = verdictCacheId(hashOf('a.exe'));
+      const off = setup({
+        mode: 'on',
+        alerts: many('a.exe', VERDICT_CACHE_CONFIRM_MIN_WAITING),
+        records: [recordOf('a.exe', 'pending')],
+      });
+      const asked = setup({
+        mode: 'on',
+        confirm: true,
+        alerts: many('a.exe', VERDICT_CACHE_CONFIRM_MIN_WAITING, [
+          'az:claimed',
+          `${TRIAGE_CACHE_CONFIRM_TAG_PREFIX}${recordId}`,
+        ]),
+        records: [recordOf('a.exe', 'pending')],
+      });
+
+      expect((await off.run()).output).toMatchObject({ confirm_tagged: 0 });
+      expect((await asked.run()).output).toMatchObject({ confirm_tagged: 0 });
+      expect(confirmTagsOf(off.tagCalls())).toEqual([]);
+      expect(confirmTagsOf(asked.tagCalls())).toEqual([]);
+    });
   });
 });

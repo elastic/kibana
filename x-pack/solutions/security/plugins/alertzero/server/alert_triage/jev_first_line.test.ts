@@ -10,12 +10,16 @@ import {
   JEV_BATCH_SIZE,
   isJevAuditSample,
   isJevEligible,
+  isJevProcessShadowCandidate,
   jevBatchInput,
   jevBatchQuestions,
   laneOf,
+  isNearBenignBound,
   planJevBatches,
+  processKeyState,
   readJevScores,
   toJevFirstLineMode,
+  toJevProcessShadow,
 } from './jev_first_line';
 import { isAuditSample } from './verdict_cache';
 
@@ -152,6 +156,22 @@ describe('laneOf', () => {
   });
 });
 
+describe('isNearBenignBound', () => {
+  // Attacks in a burst batch reached the benign lane at 0.03 to 0.05; benign alerts in batches scored 0 to 0.02.
+  it('flags a benign score above 0.02 from a batch of more than one alert', () => {
+    expect(isNearBenignBound({ attackProbability: 0.03, confidence: 0.94 }, 2)).toBe(true);
+    expect(isNearBenignBound({ attackProbability: 0.05, confidence: 0.9 }, 50)).toBe(true);
+  });
+
+  it('does not flag a clear benign score, a score outside the benign lane, or an alert that was alone', () => {
+    expect(isNearBenignBound({ attackProbability: 0.02, confidence: 0.96 }, 50)).toBe(false);
+    expect(isNearBenignBound({ attackProbability: 0, confidence: 1 }, 50)).toBe(false);
+    expect(isNearBenignBound({ attackProbability: 0.04, confidence: 0.89 }, 50)).toBe(false);
+    expect(isNearBenignBound({ attackProbability: 0.2, confidence: 0.6 }, 50)).toBe(false);
+    expect(isNearBenignBound({ attackProbability: 0.04, confidence: 0.92 }, 1)).toBe(false);
+  });
+});
+
 describe('isJevEligible', () => {
   it('scores the alerts of a registry, file or cloud key only', () => {
     expect(isJevEligible(registryDoc())).toBe(true);
@@ -192,6 +212,48 @@ describe('isJevEligible', () => {
       })
     ).toBe(false);
     expect(isJevEligible({ 'kibana.alert.rule.uuid': 'r' })).toBe(false);
+  });
+});
+
+describe('the process shadow', () => {
+  const processDoc = {
+    'kibana.alert.rule.uuid': 'r',
+    'kibana.alert.rule.revision': 1,
+    'process.executable': 'C:\\a.exe',
+    'process.code_signature.subject_name': 'Acme',
+  };
+
+  it('is on only for the exact value `on`, so a mistyped flag sends nothing to the model', () => {
+    expect(toJevProcessShadow('on')).toBe(true);
+    for (const value of ['', 'off', 'shadow', 'On', 'true'])
+      expect(toJevProcessShadow(value)).toBe(false);
+  });
+
+  it('takes process alerts only, which the first line itself leaves out', () => {
+    expect(isJevProcessShadowCandidate(processDoc)).toBe(true);
+    expect(isJevEligible(processDoc)).toBe(false);
+    expect(isJevProcessShadowCandidate(registryDoc())).toBe(false);
+    expect(isJevProcessShadowCandidate({ 'kibana.alert.rule.uuid': 'r' })).toBe(false);
+  });
+
+  it('reads a record past its end as expired, because only an expired or pending record can let Jev in later', () => {
+    const now = new Date('2026-11-20T12:00:00.000Z');
+    expect(processKeyState(undefined, now)).toBe('no_record');
+    expect(processKeyState({ state: 'pending', expiresAt: '2026-11-20T13:00:00.000Z' }, now)).toBe(
+      'pending'
+    );
+    expect(processKeyState({ state: 'active', expiresAt: '2026-11-20T13:00:00.000Z' }, now)).toBe(
+      'active'
+    );
+    expect(processKeyState({ state: 'unstable', expiresAt: '2026-11-20T13:00:00.000Z' }, now)).toBe(
+      'unstable'
+    );
+    expect(processKeyState({ state: 'active', expiresAt: '2026-11-20T11:00:00.000Z' }, now)).toBe(
+      'expired'
+    );
+    expect(processKeyState({ state: 'pending', expiresAt: '2026-11-20T12:00:00.000Z' }, now)).toBe(
+      'expired'
+    );
   });
 });
 

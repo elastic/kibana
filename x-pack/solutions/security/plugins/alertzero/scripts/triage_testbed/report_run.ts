@@ -34,7 +34,10 @@ import fs from 'fs';
 import path from 'path';
 import readline from 'readline';
 import { buildCacheSection, cacheNote, readCacheData, type CacheSection } from './report_cache';
+import { batchNote, buildBatchSection, type BatchSection } from './report_batches';
+import { buildQueueSection, queueNote, type QueueSection } from './report_queue';
 import {
+  type AlertCounts,
   buildPocSection,
   buildWaitSection,
   pocNote,
@@ -147,6 +150,10 @@ export interface Scorecard {
   poc?: PocSection;
   /** The wait from creation to verdict over every source, and the alerts that have no verdict at the end. */
   wait?: WaitSection;
+  /** The size of each model call and the overhead share of the cost units. */
+  batches?: BatchSection;
+  /** The model queue by kind and process key state, and the Jev process shadow. */
+  queue?: QueueSection;
 }
 
 export type ScorecardDiff = Record<
@@ -578,7 +585,7 @@ interface EsHit<T> {
 }
 
 /** All hits of a query, in pages with `search_after`. */
-const fetchAll = async <T>(
+export const fetchAll = async <T>(
   request: EsRequest,
   index: string,
   body: object
@@ -635,7 +642,7 @@ export interface RunData {
   steps: WorkflowStep[];
   alerts: TaggedAlert[];
   /** Counts from the alert index, read before the reset: alerts that are not building blocks, and those without a verdict tag. */
-  alertCounts: { nonBuildingBlock: number; nonBuildingBlockWithoutVerdict: number };
+  alertCounts: AlertCounts;
 }
 
 export const readRun = async (
@@ -719,16 +726,47 @@ export const readRun = async (
   const countAlerts = async (query: object): Promise<number> =>
     (await request<{ count: number }>('POST', `/${alertIndex}/_count`, { query })).count;
   const notBuildingBlock = { exists: { field: 'kibana.alert.building_block_type' } };
-  const alertCounts = {
-    nonBuildingBlock: await countAlerts({ bool: { must_not: [notBuildingBlock] } }),
-    nonBuildingBlockWithoutVerdict: await countAlerts({
-      bool: {
-        must_not: [
-          notBuildingBlock,
-          { terms: { 'kibana.alert.workflow_tags': Object.keys(VERDICT_TAGS) } },
-        ],
+  const verdictTag = { terms: { 'kibana.alert.workflow_tags': Object.keys(VERDICT_TAGS) } };
+  // The worker searches only open and acknowledged alerts. A closed alert without a verdict was closed before it could see it
+  // (the generator copies the closed share of the profile), so it is out of scope, not backlog.
+  const closedWithoutVerdict = {
+    bool: {
+      filter: [{ term: { 'kibana.alert.workflow_status': 'closed' } }],
+      must_not: [verdictTag],
+    },
+  };
+  const inScope = { bool: { must_not: [notBuildingBlock, closedWithoutVerdict] } };
+  const withoutVerdict = {
+    bool: { must_not: [notBuildingBlock, closedWithoutVerdict, verdictTag] },
+  };
+  const bySeverity = async (query: object): Promise<Record<string, number>> => {
+    const response = await request<{
+      aggregations: { severity: { buckets: Array<{ key: string; doc_count: number }> } };
+    }>('POST', `/${alertIndex}/_search`, {
+      size: 0,
+      query,
+      aggs: {
+        severity: { terms: { field: 'kibana.alert.severity', size: 10, missing: 'unknown' } },
       },
+    });
+    return Object.fromEntries(
+      response.aggregations.severity.buckets.map(({ key, doc_count: count }) => [key, count])
+    );
+  };
+  const nonBuildingBlockBySeverity = await bySeverity(inScope);
+  const withoutVerdictBySeverity = await bySeverity(withoutVerdict);
+  const alertCounts = {
+    nonBuildingBlock: await countAlerts(inScope),
+    nonBuildingBlockWithoutVerdict: await countAlerts(withoutVerdict),
+    closedWithoutVerdict: await countAlerts({
+      bool: { filter: [closedWithoutVerdict], must_not: [notBuildingBlock] },
     }),
+    bySeverity: Object.fromEntries(
+      Object.entries(nonBuildingBlockBySeverity).map(([severity, alerts]) => [
+        severity,
+        { alerts, withoutVerdict: withoutVerdictBySeverity[severity] ?? 0 },
+      ])
+    ),
   };
   return {
     calls,
@@ -864,7 +902,18 @@ export const main = async (): Promise<void> => {
     : '';
   const cacheSentence = scorecard.verdictCache ? cacheNote(scorecard.verdictCache) : '';
   const pocSentence = scorecard.poc ? pocNote(scorecard.poc) : '';
-  const note = [args.note, exclusionNote, cacheSentence, pocSentence].filter(Boolean).join(' ');
+  scorecard.batches = buildBatchSection(run.calls);
+  scorecard.queue = buildQueueSection({ alerts: run.alerts, truth });
+  const note = [
+    args.note,
+    exclusionNote,
+    cacheSentence,
+    pocSentence,
+    batchNote(scorecard.batches),
+    queueNote(scorecard.queue),
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const connectorIds = scorecard.costAndTokens.connectorIds;
   if (args.connectorId) {

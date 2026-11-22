@@ -23,7 +23,7 @@
  * Usage:
  *   REMOTE_ES_URL=... REMOTE_ES_API_KEY=... node x-pack/solutions/security/plugins/alertzero/scripts/triage_testbed/jev_experiment_cli.js \
  *     --data <sample folder> --out <report.json> [--es http://localhost:9200 --haiku-window <from>,<to> ...] \
- *     --endpoint <inference endpoint id> [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50]] \
+ *     --endpoint <inference endpoint id> [--repeats 2] [--concurrency 4] [--limit N] [--batch [--batch-size 50] [--sweep-minutes 15]] \
  *     [--extra-fields kibana.alert.reason,...] \
  *     [--dry-run | --confirm-data-ok]
  *
@@ -634,18 +634,27 @@ export const batchInput = (docs: readonly Doc[], extraFields: readonly string[] 
 
 /**
  * The batches of a sample, as the Alert Triage worker plans them: one batch per rule, in the order of the alerts (oldest first,
- * then by id), split into consecutive batches of at most `size` alerts.
+ * then by id), split into consecutive batches of at most `size` alerts. With `sweepMs`, a rule gets one group per window of that
+ * length (by `@timestamp`), as the worker sees only the alerts that arrived since its last sweep.
  */
 export const planBatches = (
   alerts: readonly SampleAlert[],
-  size: number = ANALYSIS_BATCH_SIZE
+  size: number = ANALYSIS_BATCH_SIZE,
+  sweepMs?: number
 ): SampleAlert[][] => {
-  const byRule = new Map<string, SampleAlert[]>();
-  for (const alert of alerts) {
-    byRule.set(ruleOf(alert.doc), [...(byRule.get(ruleOf(alert.doc)) ?? []), alert]);
-  }
   const timestampOf = ({ doc }: SampleAlert): number =>
     Date.parse(String(getField(doc as Record<string, unknown>, '@timestamp') ?? '')) || 0;
+  const groupOf = (alert: SampleAlert): string => {
+    if (sweepMs === undefined) return ruleOf(alert.doc);
+    const timestamp = timestampOf(alert);
+    if (timestamp === 0)
+      throw new Error(`alert ${alert.id} has no @timestamp to place it in a sweep`);
+    return `${ruleOf(alert.doc)}|${Math.floor(timestamp / sweepMs)}`;
+  };
+  const byRule = new Map<string, SampleAlert[]>();
+  for (const alert of alerts) {
+    byRule.set(groupOf(alert), [...(byRule.get(groupOf(alert)) ?? []), alert]);
+  }
   return [...byRule.values()].flatMap((group) => {
     const ordered = [...group].sort(
       (a, b) => timestampOf(a) - timestampOf(b) || a.id.localeCompare(b.id)
@@ -797,13 +806,18 @@ export const scoreAlertsInBatches = async ({
   concurrency,
   extraFields = [],
   batchSize = ANALYSIS_BATCH_SIZE,
+  sweepMs,
   pause = defaultPause,
-}: ScoringOptions & { decideBatch: DecideBatch; batchSize?: number }): Promise<ScoringResult> => {
+}: ScoringOptions & {
+  decideBatch: DecideBatch;
+  batchSize?: number;
+  sweepMs?: number;
+}): Promise<ScoringResult> => {
   const keyed = keyedOf(alerts);
   const { tally, withRetry } = makeRetrier(pause);
   const callLatenciesMs: number[] = [];
   const scored: ScoredAlert[] = [];
-  await pool(planBatches(alerts, batchSize), concurrency, async (batch) => {
+  await pool(planBatches(alerts, batchSize, sweepMs), concurrency, async (batch) => {
     const input = batchInput(
       batch.map(({ doc }) => doc),
       extraFields
@@ -922,7 +936,19 @@ type ValueFlagKey =
   | 'concurrency'
   | 'limit'
   | 'batchSize'
+  | 'sweepMinutes'
   | 'extraFields';
+
+/** The API key travels in a header, so plain http is allowed only to this machine (a local stack that forwards to EIS). */
+export const isSafeRemoteUrl = (url: string): boolean => {
+  if (url.startsWith('https://')) return true;
+  try {
+    const { protocol, hostname } = new URL(url);
+    return protocol === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1');
+  } catch {
+    return false;
+  }
+};
 
 export const main = async (): Promise<void> => {
   const args: Partial<Record<ValueFlagKey, string>> = {
@@ -939,6 +965,7 @@ export const main = async (): Promise<void> => {
     '--concurrency': 'concurrency',
     '--limit': 'limit',
     '--batch-size': 'batchSize',
+    '--sweep-minutes': 'sweepMinutes',
     '--extra-fields': 'extraFields',
   };
   const haikuWindows: string[] = [];
@@ -963,7 +990,10 @@ export const main = async (): Promise<void> => {
   const alerts = limit === undefined ? all : all.slice(0, limit);
   const batchSize = args.batchSize === undefined ? ANALYSIS_BATCH_SIZE : Number(args.batchSize);
   const extraFields = (args.extraFields ?? '').split(',').filter(Boolean);
-  const batches = planBatches(alerts, batchSize);
+  const sweepMs = args.sweepMinutes === undefined ? undefined : Number(args.sweepMinutes) * 60_000;
+  if (sweepMs !== undefined && !(sweepMs > 0))
+    throw new Error('--sweep-minutes must be a positive number');
+  const batches = planBatches(alerts, batchSize, sweepMs);
   const calls = (batch ? batches.length : alerts.length) * WORDING_NAMES.length * repeats;
   process.stdout.write(
     `${alerts.length} alerts, ${
@@ -992,7 +1022,9 @@ export const main = async (): Promise<void> => {
   const url = process.env.REMOTE_ES_URL;
   const apiKey = process.env.REMOTE_ES_API_KEY;
   if (!url || !apiKey) throw new Error('REMOTE_ES_URL and REMOTE_ES_API_KEY must be set');
-  if (!url.startsWith('https://')) throw new Error('REMOTE_ES_URL must be an https URL');
+  if (!isSafeRemoteUrl(url)) {
+    throw new Error('REMOTE_ES_URL must be an https URL, or http on localhost');
+  }
   if (!endpoint) throw new Error('--endpoint <inference endpoint id> is required');
 
   const haiku: Record<string, Map<string, string>> = {};
@@ -1020,6 +1052,7 @@ export const main = async (): Promise<void> => {
         concurrency,
         extraFields,
         batchSize,
+        sweepMs,
       })
     : await scoreAlerts({
         alerts,

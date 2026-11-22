@@ -21,23 +21,35 @@ import { hashCandidates } from '../../alert_triage/fp_decisions';
 import {
   JEV_AUDIT_TAG,
   JEV_LANE_TAG_PREFIX,
+  JEV_SHADOW_GUARD_HIT_TAG,
+  JEV_SHADOW_LANE_TAG_PREFIX,
+  JEV_SHADOW_STATE_TAG_PREFIX,
   JEV_VERDICT_TAG,
   isJevAuditSample,
   isJevEligible,
+  isJevProcessShadowCandidate,
   jevBatchInput,
   jevBatchQuestions,
   laneOf,
+  isNearBenignBound,
   planJevBatches,
+  processKeyState,
   readJevScores,
   type JevFirstLineMode,
   type JevLane,
 } from '../../alert_triage/jev_first_line';
 import { hashKey } from '../../alert_triage/key_tags';
+import {
+  NOVELTY_SOURCE_FIELDS,
+  checkNovelty,
+  noveltyValuesOfAlert,
+} from '../../alert_triage/novelty_guard';
 import { buildPatternKeys } from '../../alert_triage/pattern_key';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import { TRIAGE_WOULD_REUSE_TAG_PREFIX } from '../../alert_triage/verdict_cache';
 import type { JevDecide } from './jev_client';
 import { fetchDecisionCandidates, tagAlerts, type DecisionCursor } from './ports';
+import { readCacheRecords } from './verdict_cache_store';
 
 export interface JevFirstLineStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -46,6 +58,8 @@ export interface JevFirstLineStepDependencies {
   /** The id of the inference endpoint of the decision model, from a feature flag. An empty id means that none is set. */
   getEndpointId: () => Promise<string>;
   getDecide: (endpointId: string) => JevDecide;
+  /** The process shadow flag (`toJevProcessShadow`). Absent reads as off. */
+  getProcessShadow?: () => Promise<boolean>;
   /** A port, so that tests do not wait between the retries of a call. */
   pause?: (ms: number) => Promise<void>;
 }
@@ -72,9 +86,25 @@ const NOTHING = {
   audit_sampled: 0,
   calls: 0,
   failed_calls: 0,
+  near_bound_middle: 0,
   tag_failures: 0,
   out_of_time: false,
+  shadow_eligible: 0,
+  shadow_scored: 0,
+  shadow_lane_benign: 0,
+  shadow_lane_attack: 0,
+  shadow_lane_middle: 0,
+  shadow_guard_hits: 0,
+  shadow_calls: 0,
+  shadow_failed_calls: 0,
+  shadow_errors: 0,
 };
+
+interface ScoreCounts {
+  calls: number;
+  failed_calls: number;
+  near_bound_middle: number;
+}
 
 const defaultPause = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -83,7 +113,11 @@ const defaultPause = (ms: number): Promise<void> =>
  * The Jev first line. It scores the pending alerts of the eligible kinds (registry, file and cloud) in batches of one rule and tags
  * the lane: `az:jev_lane:<lane>`. An alert that carries the tag is left out of later searches, so a sweep scores it once. In `on` an
  * alert of the benign lane also takes a false positive verdict (`az:false_positive`, `az:jev_verdict` and its key tags), so the
- * planner skips it. Every other alert, and every alert in `shadow`, is analyzed as before.
+ * planner skips it. Every other alert, and every alert in `shadow`, is analyzed as before. A benign score from a batch of more than one
+ * alert that lies near the bound (`isNearBenignBound`) goes to the middle lane, so the alert is analyzed.
+ *
+ * With the process shadow on, the step also scores the pending process alerts the same way and tags only the lane, the state of
+ * the cache record of the key and a novelty guard hit (`az:jev_shadow_*`). It writes no verdict, so they are analyzed as before.
  *
  * It fails open. A call that fails three times leaves its alerts untagged, so they are analyzed. A step that cannot read the setting
  * or the alerts reports `failed`. The decisions and the verdict cache run before it: an alert that they tagged is not scored.
@@ -93,6 +127,7 @@ export const getTriageJevFirstLineStepDefinition = ({
   getMode,
   getEndpointId,
   getDecide,
+  getProcessShadow = async () => false,
   pause = defaultPause,
 }: JevFirstLineStepDependencies) =>
   createServerStepDefinition({
@@ -126,6 +161,7 @@ export const getTriageJevFirstLineStepDefinition = ({
         };
         const write = tagAlerts(contextManager);
         const decide = getDecide(endpointId);
+        const processShadow = await getProcessShadow();
         const totals = { ...NOTHING };
         const outOfTime = () => {
           if (Date.now() <= workDeadline) return false;
@@ -167,6 +203,98 @@ export const getTriageJevFirstLineStepDefinition = ({
           }
         };
 
+        // Scores alerts in batches, a few calls at a time. A benign score near the bound goes to the middle lane, because the
+        // other attacks of a batch can pull an attack's score down. An alert without a score has no lane and is analyzed.
+        const scoreLanes = async (
+          alerts: ReadonlyArray<{ id: string; doc: Readonly<Record<string, unknown>> }>,
+          counts: ScoreCounts
+        ): Promise<Map<string, JevLane>> => {
+          const lanes = new Map<string, JevLane>();
+          const batches = planJevBatches(alerts);
+          let next = 0;
+          const worker = async (): Promise<void> => {
+            while (next < batches.length) {
+              const batch = batches[next++];
+              if (outOfTime()) return;
+              counts.calls++;
+              const answers = await callWithRetry(
+                jevBatchInput(batch.map(({ doc }) => doc)),
+                batch.length
+              );
+              if (answers === undefined) {
+                counts.failed_calls++;
+                continue;
+              }
+              readJevScores(answers, batch.length).forEach((score, index) => {
+                if (score === undefined) return;
+                const nearBound = isNearBenignBound(score, batch.length);
+                if (nearBound) counts.near_bound_middle++;
+                lanes.set(batch[index].id, nearBound ? 'middle' : laneOf(score));
+              });
+            }
+          };
+          await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+
+          return lanes;
+        };
+
+        // The process shadow: a measurement only. It scores process alerts like the first line and tags the lane, the state of
+        // the cache record of the key and a guard hit. It writes no verdict. A failure here is counted and logged, and does not
+        // stop the step, because no alert depends on it.
+        const shadowProcessAlerts = async (
+          alerts: ReadonlyArray<{ id: string; doc: Readonly<Record<string, unknown>> }>,
+          strictHashes: ReadonlyMap<string, string>
+        ): Promise<void> => {
+          if (alerts.length === 0) return;
+          try {
+            totals.shadow_eligible += alerts.length;
+            const stored = await readCacheRecords({
+              mget: (params) => contextManager.getScopedEsClient().mget(params),
+              hashes: [...new Set(alerts.flatMap(({ id }) => strictHashes.get(id) ?? []))],
+            });
+            const counts: ScoreCounts = {
+              calls: 0,
+              failed_calls: 0,
+              near_bound_middle: 0,
+            };
+            const lanes = await scoreLanes(alerts, counts);
+            totals.shadow_calls += counts.calls;
+            totals.shadow_failed_calls += counts.failed_calls;
+            const byTags = new Map<string, string[]>();
+            for (const { id, doc } of alerts) {
+              const lane = lanes.get(id);
+              if (lane === undefined) continue;
+              const hash = strictHashes.get(id);
+              const record = hash === undefined ? undefined : stored.get(hash)?.record;
+              const fired =
+                record !== undefined &&
+                checkNovelty({ lists: record.novelty, values: noveltyValuesOfAlert(doc) }).fired
+                  .length > 0;
+              const tags = [
+                `${JEV_SHADOW_LANE_TAG_PREFIX}${lane}`,
+                `${JEV_SHADOW_STATE_TAG_PREFIX}${processKeyState(record, now)}`,
+                ...(fired ? [JEV_SHADOW_GUARD_HIT_TAG] : []),
+              ];
+              byTags.set(tags.join(' '), [...(byTags.get(tags.join(' ')) ?? []), id]);
+            }
+            for (const [joined, ids] of byTags) {
+              const tags = joined.split(' ');
+              if (!(await tag(ids, tags))) continue;
+              totals.shadow_scored += ids.length;
+              const lane = tags[0].slice(JEV_SHADOW_LANE_TAG_PREFIX.length) as JevLane;
+              totals[`shadow_lane_${lane}`] += ids.length;
+              if (tags.includes(JEV_SHADOW_GUARD_HIT_TAG)) totals.shadow_guard_hits += ids.length;
+            }
+          } catch (error) {
+            totals.shadow_errors++;
+            logger.warn(
+              `The process shadow did not run on ${alerts.length} alerts: ${
+                error instanceof Error ? error.message : error
+              }`
+            );
+          }
+        };
+
         let pageFailed = false;
         try {
           let after: DecisionCursor | undefined;
@@ -179,37 +307,21 @@ export const getTriageJevFirstLineStepDefinition = ({
               filters,
               {
                 after,
-                excludeTagPrefixes: [JEV_LANE_TAG_PREFIX, TRIAGE_WOULD_REUSE_TAG_PREFIX],
-                extraSourceFields: ALERT_ANALYSIS_FIELDS,
+                excludeTagPrefixes: [
+                  JEV_LANE_TAG_PREFIX,
+                  JEV_SHADOW_LANE_TAG_PREFIX,
+                  TRIAGE_WOULD_REUSE_TAG_PREFIX,
+                ],
+                extraSourceFields: processShadow
+                  ? [...new Set([...ALERT_ANALYSIS_FIELDS, ...NOVELTY_SOURCE_FIELDS])]
+                  : ALERT_ANALYSIS_FIELDS,
               }
             );
             const strictHashes = hashCandidates(found.candidates, input.space_id);
             const eligible = found.candidates.filter(({ doc }) => isJevEligible(doc));
             const docById = new Map(eligible.map(({ id, doc }) => [id, doc]));
 
-            // Score the batches, a few calls at a time.
-            const lanes = new Map<string, JevLane>();
-            const batches = planJevBatches(eligible);
-            let next = 0;
-            const worker = async (): Promise<void> => {
-              while (next < batches.length) {
-                const batch = batches[next++];
-                if (outOfTime()) return;
-                totals.calls++;
-                const answers = await callWithRetry(
-                  jevBatchInput(batch.map(({ doc }) => doc)),
-                  batch.length
-                );
-                if (answers === undefined) {
-                  totals.failed_calls++;
-                  continue;
-                }
-                readJevScores(answers, batch.length).forEach((score, index) => {
-                  if (score !== undefined) lanes.set(batch[index].id, laneOf(score));
-                });
-              }
-            };
-            await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+            const lanes = await scoreLanes(eligible, totals);
 
             // Tag the lanes. In `on` the benign lane also takes the verdict.
             for (const lane of ['benign', 'attack', 'middle'] as const) {
@@ -252,6 +364,13 @@ export const getTriageJevFirstLineStepDefinition = ({
                     : [`${TRIAGE_WIDE_KEY_TAG_PREFIX}${hashKey(input.space_id, wide)}`]),
                 ]);
               }
+            }
+
+            if (processShadow) {
+              await shadowProcessAlerts(
+                found.candidates.filter(({ doc }) => isJevProcessShadowCandidate(doc)),
+                strictHashes
+              );
             }
 
             totals.candidates += found.candidates.length;

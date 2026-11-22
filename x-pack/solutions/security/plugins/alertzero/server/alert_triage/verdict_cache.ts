@@ -321,6 +321,48 @@ export const matchReusableRecords = ({
   return matches;
 };
 
+/** Waiting alerts a key needs before one of them is sent early to confirm its `pending` record. */
+export const VERDICT_CACHE_CONFIRM_MIN_WAITING = 10;
+
+/**
+ * One waiting alert per `pending` record worth confirming early, by record id: the first alert in `hashes` order (the oldest).
+ * A record is worth it when it is live, its key kind can be reused, at least `VERDICT_CACHE_CONFIRM_MIN_WAITING` waiting alerts
+ * share its key, and no waiting alert is already tagged for it (`alreadyTagged`).
+ */
+export const pickConfirmAlerts = ({
+  hashes,
+  recordsByHash,
+  now,
+  alreadyTagged,
+}: {
+  hashes: ReadonlyMap<string, string>;
+  recordsByHash: ReadonlyMap<string, VerdictCacheRecord>;
+  now: Date;
+  alreadyTagged: ReadonlySet<string>;
+}): Map<string, string> => {
+  const waiting = new Map<string, string[]>();
+  for (const [alertId, hash] of hashes) {
+    waiting.set(hash, [...(waiting.get(hash) ?? []), alertId]);
+  }
+  const picks = new Map<string, string>();
+  for (const [hash, alertIds] of waiting) {
+    const record = recordsByHash.get(hash);
+    const id = verdictCacheId(hash);
+    if (
+      record === undefined ||
+      record.state !== 'pending' ||
+      Date.parse(record.expiresAt) <= now.getTime() ||
+      VERDICT_CACHE_NO_REUSE_KINDS.includes(describePatternKey(record.strictKey).kind) ||
+      alertIds.length < VERDICT_CACHE_CONFIRM_MIN_WAITING ||
+      alreadyTagged.has(id)
+    ) {
+      continue;
+    }
+    picks.set(id, alertIds[0]);
+  }
+  return picks;
+};
+
 // ---------------------------------------------------------------------------
 // The first alert of each key in a batch
 // ---------------------------------------------------------------------------

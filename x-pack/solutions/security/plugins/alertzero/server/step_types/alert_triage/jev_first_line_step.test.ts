@@ -14,13 +14,23 @@ import {
 import {
   JEV_AUDIT_TAG,
   JEV_LANE_TAG_PREFIX,
+  JEV_SHADOW_GUARD_HIT_TAG,
+  JEV_SHADOW_LANE_TAG_PREFIX,
+  JEV_SHADOW_STATE_TAG_PREFIX,
   JEV_VERDICT_TAG,
   isJevAuditSample,
   type JevFirstLineMode,
 } from '../../alert_triage/jev_first_line';
 import { hashKey } from '../../alert_triage/key_tags';
+import { NOVELTY_SOURCE_FIELDS, noveltyValuesOfAlert } from '../../alert_triage/novelty_guard';
 import { buildPatternKeys } from '../../alert_triage/pattern_key';
-import { TRIAGE_WOULD_REUSE_TAG_PREFIX } from '../../alert_triage/verdict_cache';
+import {
+  TRIAGE_WOULD_REUSE_TAG_PREFIX,
+  buildCacheDocument,
+  nextCacheAction,
+  verdictCacheId,
+  type VerdictCacheRecord,
+} from '../../alert_triage/verdict_cache';
 import type { JevDecide } from './jev_client';
 import { getTriageJevFirstLineStepDefinition } from './jev_first_line_step';
 
@@ -38,7 +48,7 @@ const registryAlert = (marker: string, rule = 'rule-1', minute = 1): Source => (
   'host.os.type': 'windows',
 });
 
-const processAlert = (marker: string): Source => ({
+const processAlert = (marker: string, hash = 'aaaa'): Source => ({
   '@timestamp': '2026-11-18T10:00:00.000Z',
   'kibana.alert.rule.uuid': 'rule-p',
   'kibana.alert.rule.revision': 1,
@@ -46,7 +56,41 @@ const processAlert = (marker: string): Source => ({
   'host.os.type': 'windows',
   'process.executable': `C:\\Tools\\${marker}.exe`,
   'process.code_signature.subject_name': 'Acme',
+  'process.hash.sha256': hash,
 });
+
+/** A cache record of the key of a process alert, made by the production state machine, that has seen the alert's values. */
+const processRecord = (
+  doc: Source,
+  state: 'pending' | 'active',
+  now = new Date()
+): VerdictCacheRecord => {
+  const { strict } = buildPatternKeys(doc);
+  if (strict === undefined) throw new Error('no strict key');
+  const base = { keyHash: hashKey('default', strict), strictKey: strict, floor: 0.85, now };
+  const noveltyValues = noveltyValuesOfAlert(doc);
+  const fresh = (alertId: string) => ({
+    alertId,
+    classification: 'false_positive',
+    confidenceScore: 0.95,
+  });
+  const run1 = nextCacheAction({
+    existing: undefined,
+    fresh: fresh('first'),
+    noveltyValues,
+    ...base,
+  });
+  if (run1.type !== 'write') throw new Error('no record');
+  if (state === 'pending') return run1.record;
+  const run2 = nextCacheAction({
+    existing: run1.record,
+    fresh: fresh('second'),
+    noveltyValues,
+    ...base,
+  });
+  if (run2.type !== 'write') throw new Error('no record');
+  return run2.record;
+};
 
 const aggregationAlert = (): Source => ({
   '@timestamp': '2026-11-18T10:00:00.000Z',
@@ -94,6 +138,9 @@ const setup = ({
   getDecideThrows = false,
   endpointId = 'decision-endpoint',
   tagFailsFor,
+  processShadow = false,
+  records = [],
+  mgetFails = false,
 }: {
   alerts: Array<[string, Source]>;
   mode?: JevFirstLineMode;
@@ -104,7 +151,26 @@ const setup = ({
   endpointId?: string;
   /** A tag call whose first tag is this one fails. */
   tagFailsFor?: string;
+  processShadow?: boolean;
+  records?: VerdictCacheRecord[];
+  mgetFails?: boolean;
 }) => {
+  const store = new Map(
+    records.map((record) => [
+      verdictCacheId(record.keyHash),
+      buildCacheDocument({ record, spaceId: 'default', now: new Date() }),
+    ])
+  );
+  const mget = jest.fn(async ({ ids }: { ids: string[] }) => {
+    if (mgetFails) throw new Error('records unavailable');
+    return {
+      docs: ids.map((_id) =>
+        store.has(_id)
+          ? { _id, found: true, _source: store.get(_id), _seq_no: 1, _primary_term: 1 }
+          : { _id, found: false }
+      ),
+    };
+  });
   const callKibanaApi = jest.fn(
     async ({ path, body }: { path: string; body?: Record<string, any> }) => {
       if (path.endsWith('/signals/search')) {
@@ -131,6 +197,7 @@ const setup = ({
         endpointsUsed.push(id);
         return decide;
       },
+      getProcessShadow: async () => processShadow,
       pause,
     }).handler({
       input: {
@@ -141,7 +208,11 @@ const setup = ({
         exclude_building_blocks: false,
         excluded_rule_tags: [],
       },
-      contextManager: { callKibanaApi, getFakeRequest: () => ({}) },
+      contextManager: {
+        callKibanaApi,
+        getFakeRequest: () => ({}),
+        getScopedEsClient: () => ({ mget }),
+      },
       logger: { warn },
     } as unknown as StepHandlerContext<unknown, unknown>);
   const tagCalls = () =>
@@ -149,7 +220,7 @@ const setup = ({
       .filter(([{ path }]) => path.endsWith('/signals/tags'))
       .map(([{ body }]) => body as { ids: string[]; tags: { tags_to_add: string[] } })
       .map(({ ids, tags }) => ({ ids, add: tags.tags_to_add }));
-  return { run, decide, callKibanaApi, tagCalls, pause, warn, endpointsUsed };
+  return { run, decide, callKibanaApi, tagCalls, pause, warn, endpointsUsed, mget };
 };
 
 describe('triage Jev first line step', () => {
@@ -422,6 +493,65 @@ describe('triage Jev first line step', () => {
     });
   });
 
+  describe('a benign score near the bound in a batch', () => {
+    /** In a batch, an alert marked NEAR scores just inside the benign lane, as the attacks of a burst batch did in the offline tests. */
+    const nearDecide = () => {
+      const real = fakeDecide();
+      return jest.fn(async (input: string, questions: Record<string, Record<string, unknown>>) => {
+        const answers = await real(input, questions);
+        const blocks = input
+          .split(/\n\n(?=Alert \d+:)/)
+          .filter((block) => block.startsWith('Alert '));
+        blocks.forEach((block, index) => {
+          if (block.includes('NEAR')) answers[`alert_${index + 1}`] = answer(0.04, 0.92);
+        });
+        return answers;
+      });
+    };
+
+    it('puts the alert in the middle lane without a verdict, so that it is analyzed, and makes no extra call', async () => {
+      const decide = nearDecide();
+      const { run, tagCalls } = setup({
+        decide,
+        alerts: [
+          ['n', registryAlert('NEAR-1')],
+          ['b', registryAlert('BENIGN-1', 'rule-1', 2)],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({
+        calls: 1,
+        near_bound_middle: 1,
+        lane_benign: 1,
+        lane_middle: 1,
+        applied: 1,
+      });
+      expect(decide).toHaveBeenCalledTimes(1);
+      expect(tagCalls()).toContainEqual({ ids: ['n'], add: [`${JEV_LANE_TAG_PREFIX}middle`] });
+      expect(tagCalls().find(({ ids }) => ids.includes('n') && ids.length > 0)?.add).not.toContain(
+        'az:false_positive'
+      );
+    });
+
+    it('keeps the benign verdict for a score at or below the cut, and for an alert that was alone in its batch', async () => {
+      // The one-alert batch of rule-2 scores inside the near-bound window, so only the batch-size guard keeps it benign.
+      const { run } = setup({
+        decide: nearDecide(),
+        alerts: [
+          ['b', registryAlert('BENIGN-1')],
+          ['b2', registryAlert('BENIGN-2', 'rule-1', 2)],
+          ['n', registryAlert('NEAR-1', 'rule-2')],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({ near_bound_middle: 0, lane_benign: 3, applied: 3 });
+    });
+  });
+
   describe('failures', () => {
     it('leaves the alerts of a call that fails three times untagged, so that they are analyzed, and waits longer between the tries', async () => {
       const decide = fakeDecide();
@@ -499,6 +629,116 @@ describe('triage Jev first line step', () => {
 
       expect(output).toMatchObject({ status: 'failed', scored: 0 });
       expect(tagCalls()).toEqual([]);
+    });
+  });
+
+  describe('the process shadow', () => {
+    const lane = (value: string) => `${JEV_SHADOW_LANE_TAG_PREFIX}${value}`;
+    const state = (value: string) => `${JEV_SHADOW_STATE_TAG_PREFIX}${value}`;
+
+    it('scores nothing for process alerts with the shadow off, so their analysis is as before', async () => {
+      const { run, decide, mget } = setup({ alerts: [['p-1', processAlert('BENIGN-1')]] });
+
+      const { output } = await run();
+
+      expect(decide).not.toHaveBeenCalled();
+      expect(mget).not.toHaveBeenCalled();
+      expect(output).toMatchObject({ shadow_eligible: 0, shadow_calls: 0 });
+    });
+
+    it('fetches the guard fields and leaves out shadow-scored alerts with the shadow on, so no alert is scored twice', async () => {
+      const searchOf = async (processShadow: boolean) => {
+        const { run, callKibanaApi } = setup({ alerts: [], processShadow });
+        await run();
+        return callKibanaApi.mock.calls.find(([{ path }]) => path.endsWith('/signals/search'))?.[0]
+          .body;
+      };
+
+      const on = await searchOf(true);
+      expect(on?._source).toEqual(expect.arrayContaining([...NOVELTY_SOURCE_FIELDS]));
+      expect(on?.query.bool.must_not).toContainEqual({
+        prefix: { 'kibana.alert.workflow_tags': JEV_SHADOW_LANE_TAG_PREFIX },
+      });
+
+      const off = await searchOf(false);
+      const guardOnly = NOVELTY_SOURCE_FIELDS.filter((field) => !off?._source.includes(field));
+      expect(guardOnly.length).toBeGreaterThan(0);
+    });
+
+    it('tags lane and key state only, never a verdict, so every process alert is still analyzed', async () => {
+      const pendingDoc = processAlert('BENIGN-2');
+      const { run, tagCalls } = setup({
+        processShadow: true,
+        records: [processRecord(pendingDoc, 'pending')],
+        alerts: [
+          ['p-1', processAlert('BENIGN-1')],
+          ['p-2', pendingDoc],
+          ['p-3', processAlert('ATTACK-3')],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(tagCalls()).toEqual(
+        expect.arrayContaining([
+          { ids: ['p-1'], add: [lane('benign'), state('no_record')] },
+          { ids: ['p-2'], add: [lane('benign'), state('pending')] },
+          { ids: ['p-3'], add: [lane('attack'), state('no_record')] },
+        ])
+      );
+      const added = tagCalls().flatMap(({ add }) => add);
+      expect(added).not.toContain('az:false_positive');
+      expect(added).not.toContain(JEV_VERDICT_TAG);
+      expect(added.some((tag) => tag.startsWith(JEV_LANE_TAG_PREFIX))).toBe(false);
+      expect(output).toMatchObject({
+        status: 'ok',
+        scored: 0,
+        applied: 0,
+        calls: 0,
+        shadow_eligible: 3,
+        shadow_scored: 3,
+        shadow_lane_benign: 2,
+        shadow_lane_attack: 1,
+        shadow_calls: 1,
+      });
+    });
+
+    it('marks a guard hit against the record of the key, the case that must never reach a Jev verdict', async () => {
+      const seen = processAlert('BENIGN-1');
+      const { run, tagCalls } = setup({
+        processShadow: true,
+        records: [processRecord(seen, 'pending')],
+        alerts: [['p-1', processAlert('BENIGN-1', 'bbbb')]],
+      });
+
+      const { output } = await run();
+
+      expect(tagCalls()).toEqual([
+        { ids: ['p-1'], add: [lane('benign'), state('pending'), JEV_SHADOW_GUARD_HIT_TAG] },
+      ]);
+      expect(output).toMatchObject({ shadow_guard_hits: 1 });
+    });
+
+    it('keeps the first line working when the records cannot be read, and counts the shadow error', async () => {
+      const { run, tagCalls, warn } = setup({
+        processShadow: true,
+        mgetFails: true,
+        alerts: [
+          ['a-1', registryAlert('BENIGN-1')],
+          ['p-1', processAlert('BENIGN-2')],
+        ],
+      });
+
+      const { output } = await run();
+
+      expect(output).toMatchObject({
+        status: 'ok',
+        applied: 1,
+        shadow_errors: 1,
+        shadow_scored: 0,
+      });
+      expect(tagCalls().some(({ add }) => add.includes(lane('benign')))).toBe(false);
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('process shadow'));
     });
   });
 });

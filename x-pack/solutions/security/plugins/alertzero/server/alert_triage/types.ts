@@ -15,6 +15,8 @@ export interface TriageAlert {
    */
   detection?: string;
   riskScore: number;
+  /** `kibana.alert.severity`, when the alert has one. */
+  severity?: string;
   /** Alert creation time, epoch milliseconds. */
   timestamp: number;
   status: string;

@@ -64,6 +64,24 @@ export const OPEN_ALERT_STATUSES = ['open', 'acknowledged'] as const;
 /** Ascending, so a minimum severity selects its own index and everything after it. */
 export const ALERT_SEVERITIES = ['low', 'medium', 'high', 'critical'] as const;
 
+/**
+ * The switch for serving urgent rules first. `on`: a rule with a high or critical alert gets a full batch before any other
+ * rule gets its first share, so one busy high rule does not wait behind many medium rules. Off unless a deployment sets `on`.
+ */
+export const SEVERITY_FIRST_FLAG = 'alertzero.triageSeverityFirst';
+export const toSeverityFirst = (value: string): boolean => value === 'on';
+
+/**
+ * The switch for confirming cache keys early. `on`: when a key has a `pending` verdict cache record and many alerts waiting, the
+ * cache match step tags one of them, and the planner serves it first. Its verdict is run 2, so the record can turn `active` and cover
+ * the rest. Off unless a deployment sets `on`.
+ */
+export const CACHE_CONFIRM_FLAG = 'alertzero.triageCacheConfirm';
+export const toCacheConfirm = (value: string): boolean => value === 'on';
+
+/** On a waiting alert the planner serves first, so its verdict can confirm a pending cache record: `az:cache_confirm:<record id>`. */
+export const TRIAGE_CACHE_CONFIRM_TAG_PREFIX = 'az:cache_confirm:';
+
 export type AlertSeverity = (typeof ALERT_SEVERITIES)[number];
 
 /** Most alerts one grouped proposal holds. The close action's `maxItems` is the same number. */

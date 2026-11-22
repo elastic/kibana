@@ -16,6 +16,7 @@ import {
   batchInput,
   batchQuestions,
   buildJevReport,
+  isSafeRemoteUrl,
   makeDecide,
   makeDecideBatch,
   planBatches,
@@ -500,6 +501,34 @@ describe('batches, as Alert Analysis sends them', () => {
 
       expect(batches).toHaveLength(2);
     });
+
+    it('with a sweep window, batches only the alerts of a rule that arrived in the same window, as one worker sweep sees them', () => {
+      const batches = planBatches(
+        [
+          sample('a-1', 'A', 1),
+          sample('a-2', 'A', 14),
+          sample('a-3', 'A', 16),
+          sample('b-1', 'B', 2),
+        ],
+        50,
+        15 * 60_000
+      );
+
+      expect(batches.map((batch) => batch.map(({ id }) => id))).toEqual([
+        ['a-1', 'a-2'],
+        ['a-3'],
+        ['b-1'],
+      ]);
+    });
+
+    it('with a sweep window, refuses an alert without a timestamp instead of placing it in a made-up sweep', () => {
+      const noTime: SampleAlert = {
+        ...sample('x', 'A', 1),
+        doc: { 'kibana.alert.rule.uuid': 'A' },
+      };
+
+      expect(() => planBatches([noTime], 50, 15 * 60_000)).toThrow('has no @timestamp');
+    });
   });
 
   describe('batchInput and batchQuestions', () => {
@@ -944,5 +973,17 @@ describe('extra fields in the input', () => {
       buildJevReport({ alerts: [], extraFields: ['kibana.alert.reason'] }).extraFields
     ).toEqual(['kibana.alert.reason']);
     expect(buildJevReport({ alerts: [] }).extraFields).toEqual([]);
+  });
+});
+
+describe('isSafeRemoteUrl', () => {
+  // The API key goes in a header: it must never cross a network in plain text.
+  it('allows https anywhere and http only to this machine', () => {
+    expect(isSafeRemoteUrl('https://project.es.qa.example.co')).toBe(true);
+    expect(isSafeRemoteUrl('http://localhost:9200')).toBe(true);
+    expect(isSafeRemoteUrl('http://127.0.0.1:9200')).toBe(true);
+    expect(isSafeRemoteUrl('http://project.es.qa.example.co')).toBe(false);
+    expect(isSafeRemoteUrl('http://localhost.example.co:9200')).toBe(false);
+    expect(isSafeRemoteUrl('not a url')).toBe(false);
   });
 });

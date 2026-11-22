@@ -56,6 +56,7 @@ const ALERT_FIELDS = {
   ruleId: 'kibana.alert.rule.uuid',
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
+  severity: 'kibana.alert.severity',
   status: 'kibana.alert.workflow_status',
   reason: 'kibana.alert.workflow_reason',
   tags: 'kibana.alert.workflow_tags',
@@ -87,12 +88,14 @@ const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
   const tags = readField(_source, ALERT_FIELDS.tags);
   const timestamp = readField(_source, ALERT_FIELDS.timestamp);
   const detection = getDetection(_source);
+  const severity = readField(_source, ALERT_FIELDS.severity);
   return {
     id: _id,
     ruleId: String(readField(_source, ALERT_FIELDS.ruleId) ?? ''),
     ruleName: String(readField(_source, ALERT_FIELDS.ruleName) ?? ''),
     ...(detection ? { detection } : {}),
     riskScore: Number(readField(_source, ALERT_FIELDS.riskScore) ?? 0),
+    ...(typeof severity === 'string' ? { severity } : {}),
     timestamp: typeof timestamp === 'number' ? timestamp : Date.parse(String(timestamp)) || 0,
     status: String(readField(_source, ALERT_FIELDS.status) ?? ''),
     tags: Array.isArray(tags) ? tags.map(String) : [],

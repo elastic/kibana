@@ -61,6 +61,9 @@ export const registerStepDefinitions = ({
   getVerdictCacheMode,
   getJevFirstLineMode,
   getJevEndpointId,
+  getJevProcessShadow,
+  getSeverityFirst,
+  getCacheConfirm,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -79,6 +82,9 @@ export const registerStepDefinitions = ({
   getVerdictCacheMode: () => Promise<VerdictCacheMode>;
   getJevFirstLineMode: () => Promise<JevFirstLineMode>;
   getJevEndpointId: () => Promise<string>;
+  getJevProcessShadow?: () => Promise<boolean>;
+  getSeverityFirst: () => Promise<boolean>;
+  getCacheConfirm: () => Promise<boolean>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -109,7 +115,9 @@ export const registerStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
-  workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
+  workflowsExtensions.registerStepDefinition(
+    getTriagePlanSweepStepDefinition({ getSeverityFirst })
+  );
   workflowsExtensions.registerStepDefinition(
     getTriageLoadAlertsStepDefinition({ getWorkflowsManagement })
   );
@@ -137,6 +145,7 @@ export const registerStepDefinitions = ({
     getTriageMatchVerdictCacheStepDefinition({
       isContextEngineEnabled,
       getMode: getVerdictCacheMode,
+      getCacheConfirm,
     })
   );
   workflowsExtensions.registerStepDefinition(
@@ -144,6 +153,7 @@ export const registerStepDefinitions = ({
       isContextEngineEnabled,
       getMode: getJevFirstLineMode,
       getEndpointId: getJevEndpointId,
+      getProcessShadow: getJevProcessShadow,
       getDecide: (endpointId) => {
         if (!getInternalEsClient) throw new Error('No Elasticsearch client for the decision model');
         return makeJevDecide(getInternalEsClient(), endpointId);

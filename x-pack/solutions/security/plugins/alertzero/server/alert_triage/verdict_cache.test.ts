@@ -6,7 +6,7 @@
  */
 
 import { hashKey } from './key_tags';
-import { buildPatternKeys } from './pattern_key';
+import { buildPatternKeys, describePatternKey } from './pattern_key';
 import {
   VERDICT_CACHE_KI_TYPE,
   VERDICT_CACHE_NOVELTY_CAP,
@@ -17,7 +17,9 @@ import {
   matchReusableRecords,
   mergeNovelty,
   nextCacheAction,
+  pickConfirmAlerts,
   pickKeyRepresentatives,
+  VERDICT_CACHE_CONFIRM_MIN_WAITING,
   readCacheRecord,
   recordShadowOutcome,
   toCacheVerdict,
@@ -519,5 +521,58 @@ describe('matchReusableRecords', () => {
     });
 
     expect(matches.size).toBe(0);
+  });
+});
+
+describe('pickConfirmAlerts', () => {
+  const waitingOn = (hash: string, count: number): Array<[string, string]> =>
+    Array.from({ length: count }, (_, i) => [`${hash}-w${i}`, hash]);
+  const pick = (
+    record: VerdictCacheRecord,
+    count: number,
+    extra: { now?: Date; tagged?: string[] } = {}
+  ) =>
+    pickConfirmAlerts({
+      hashes: new Map(waitingOn(KEY_HASH, count)),
+      recordsByHash: new Map([[KEY_HASH, record]]),
+      now: extra.now ?? NOW,
+      alreadyTagged: new Set(extra.tagged ?? []),
+    });
+
+  // One early run 2 can make the record cover every waiting alert of the key, so a key with many waiting alerts gets one.
+  it('picks the oldest waiting alert of a pending record that enough waiting alerts share', () => {
+    expect([...pick(pending(), VERDICT_CACHE_CONFIRM_MIN_WAITING)]).toEqual([
+      [verdictCacheId(KEY_HASH), `${KEY_HASH}-w0`],
+    ]);
+  });
+
+  it('picks nothing for a key with too few waiting alerts, because the batch overhead would not pay back', () => {
+    expect(pick(pending(), VERDICT_CACHE_CONFIRM_MIN_WAITING - 1).size).toBe(0);
+  });
+
+  it('picks nothing for an active, unstable or expired record, or one already asked for', () => {
+    const active = written(act(pending(), fresh('alert-2')));
+    const unstable = written(act(pending(), fresh('alert-2', 'true_positive')));
+    const many = VERDICT_CACHE_CONFIRM_MIN_WAITING * 2;
+
+    expect(pick(active, many).size).toBe(0);
+    expect(pick(unstable, many).size).toBe(0);
+    expect(pick(pending(), many, { now: later(VERDICT_CACHE_TTL_MS + 1000) }).size).toBe(0);
+    expect(pick(pending(), many, { tagged: [verdictCacheId(KEY_HASH)] }).size).toBe(0);
+  });
+
+  it('picks nothing for a key kind the cache never reuses, because its record can never cover the waiting alerts', () => {
+    const cloudKey = strictKeyOf({
+      'kibana.alert.rule.uuid': 'cloud-rule',
+      'kibana.alert.rule.name': 'Cloud Rule',
+      'kibana.alert.rule.revision': 1,
+      cloud: { account: { id: '1234' } },
+      event: { action: 'AssumeRole' },
+    });
+    expect(describePatternKey(cloudKey).kind).toBe('cloud');
+
+    expect(
+      pick({ ...pending(), strictKey: cloudKey }, VERDICT_CACHE_CONFIRM_MIN_WAITING * 2).size
+    ).toBe(0);
   });
 });

@@ -29,15 +29,21 @@ import {
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
 import {
+  CACHE_CONFIRM_FLAG,
+  SEVERITY_FIRST_FLAG,
   TRIAGE_DECISION_AUTO_CLOSE_FLAG,
   TRIAGE_GROUPING_FLAG,
+  toCacheConfirm,
   toDecisionAutoCloseMode,
+  toSeverityFirst,
   type DecisionAutoCloseMode,
 } from './alert_triage/constants';
 import {
   JEV_ENDPOINT_FLAG,
   JEV_FIRST_LINE_FLAG,
+  JEV_PROCESS_SHADOW_FLAG,
   toJevFirstLineMode,
+  toJevProcessShadow,
   type JevFirstLineMode,
 } from './alert_triage/jev_first_line';
 import {
@@ -154,6 +160,12 @@ export class AlertZeroPlugin
   private verdictCacheMode: VerdictCacheMode = 'off';
   private jevFirstLineMode: JevFirstLineMode = 'off';
   private jevEndpointId = '';
+  private jevProcessShadow = false;
+  private jevProcessShadowFlagSubscription?: Subscription;
+  private severityFirst = false;
+  private severityFirstFlagSubscription?: Subscription;
+  private cacheConfirm = false;
+  private cacheConfirmFlagSubscription?: Subscription;
   private jevEndpointFlagSubscription?: Subscription;
   private verdictCacheFlagSubscription?: Subscription;
   private jevFirstLineFlagSubscription?: Subscription;
@@ -303,6 +315,9 @@ export class AlertZeroPlugin
       getVerdictCacheMode: async () => this.verdictCacheMode,
       getJevFirstLineMode: async () => this.jevFirstLineMode,
       getJevEndpointId: async () => this.jevEndpointId,
+      getJevProcessShadow: async () => this.jevProcessShadow,
+      getSeverityFirst: async () => this.severityFirst,
+      getCacheConfirm: async () => this.cacheConfirm,
       logger: stepsLogger,
     });
 
@@ -416,6 +431,24 @@ export class AlertZeroPlugin
       .getStringValue$<string>(JEV_ENDPOINT_FLAG, '')
       .subscribe((endpointId) => {
         this.jevEndpointId = endpointId.trim();
+      });
+    // The Jev shadow on process alerts, a measurement only: it tags and writes no verdict. Off unless a deployment sets `on`.
+    this.jevProcessShadowFlagSubscription = core.featureFlags
+      .getStringValue$<string>(JEV_PROCESS_SHADOW_FLAG, 'off')
+      .subscribe((value) => {
+        this.jevProcessShadow = toJevProcessShadow(value);
+      });
+    // Serve rules with a high or critical alert first, with a full batch. Off unless a deployment sets `on`.
+    this.severityFirstFlagSubscription = core.featureFlags
+      .getStringValue$<string>(SEVERITY_FIRST_FLAG, 'off')
+      .subscribe((value) => {
+        this.severityFirst = toSeverityFirst(value);
+      });
+    // Confirm pending verdict cache records early with one waiting alert. Off unless a deployment sets `on`.
+    this.cacheConfirmFlagSubscription = core.featureFlags
+      .getStringValue$<string>(CACHE_CONFIRM_FLAG, 'off')
+      .subscribe((value) => {
+        this.cacheConfirm = toCacheConfirm(value);
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -641,5 +674,8 @@ export class AlertZeroPlugin
     this.verdictCacheFlagSubscription?.unsubscribe();
     this.jevFirstLineFlagSubscription?.unsubscribe();
     this.jevEndpointFlagSubscription?.unsubscribe();
+    this.jevProcessShadowFlagSubscription?.unsubscribe();
+    this.severityFirstFlagSubscription?.unsubscribe();
+    this.cacheConfirmFlagSubscription?.unsubscribe();
   }
 }

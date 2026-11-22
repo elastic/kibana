@@ -337,6 +337,11 @@ const matchVerdictCacheOutputSchema = lazySchema(() =>
     tag_failures: z.number(),
     deferred: z.number().describe('Records left for the next sweep because time ran out.'),
     out_of_time: z.boolean(),
+    confirm_tagged: z
+      .number()
+      .describe(
+        'With `alertzero.triageCacheConfirm` on: waiting alerts tagged `az:cache_confirm:<record id>`, one per pending record that many waiting alerts share. The planner serves them first.'
+      ),
   })
 );
 
@@ -400,8 +405,32 @@ const jevFirstLineOutputSchema = lazySchema(() =>
     failed_calls: z
       .number()
       .describe('Calls that failed after the retries. Their alerts are analyzed.'),
+    near_bound_middle: z
+      .number()
+      .describe(
+        'Alerts with a benign score above 0.02 from a batch of more than one alert, put in the middle lane. They are analyzed. Counted in `lane_middle`.'
+      ),
     tag_failures: z.number(),
     out_of_time: z.boolean(),
+    shadow_eligible: z
+      .number()
+      .describe('Process shadow (a measurement, no verdict): pending process alerts read.'),
+    shadow_scored: z.number().describe('Process shadow: alerts that got a score and a lane tag.'),
+    shadow_lane_benign: z.number(),
+    shadow_lane_attack: z.number(),
+    shadow_lane_middle: z.number(),
+    shadow_guard_hits: z
+      .number()
+      .describe(
+        'Process shadow: scored alerts with a value that the cache record of their key has not seen.'
+      ),
+    shadow_calls: z
+      .number()
+      .describe('Process shadow: calls to the model, not counted in `calls`.'),
+    shadow_failed_calls: z.number(),
+    shadow_errors: z
+      .number()
+      .describe('Process shadow: pages on which the shadow failed (a record read, for example).'),
   })
 );
 

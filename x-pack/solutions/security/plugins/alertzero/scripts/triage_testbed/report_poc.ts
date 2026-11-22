@@ -261,6 +261,31 @@ const nearestRank = (values: readonly number[], q: number): number | null => {
 
 const WAIT_MINUTES = [15, 30, 60] as const;
 
+/**
+ * Counts from the alert index, read before the reset. A severity of `unknown` means the alert has none. Every count leaves out the
+ * alerts that are closed without a verdict: the worker never sees a closed alert. `closedWithoutVerdict` counts them.
+ */
+export interface AlertCounts {
+  nonBuildingBlock: number;
+  nonBuildingBlockWithoutVerdict: number;
+  closedWithoutVerdict?: number;
+  bySeverity?: Record<string, { alerts: number; withoutVerdict: number }>;
+}
+
+/** The wait of the alerts of one severity. A held rule must not make urgent alerts wait longer. */
+export interface SeverityWait {
+  /** Alerts that are not building blocks, from the alert index (null without counts). */
+  alerts: number | null;
+  withVerdict: number;
+  withoutVerdict: number | null;
+  /** Alerts with a verdict within 60 minutes, as a share of all alerts of the severity, so alerts without a verdict count against it. */
+  shareWithin60: number | null;
+  p50Seconds: number | null;
+  p95Seconds: number | null;
+  /** The model verdicts alone: the path that a held rule delays. */
+  model: { count: number; p50Seconds: number | null; p95Seconds: number | null };
+}
+
 export interface WaitSection {
   /** How the time of each source is known. Read it before you trust a number. */
   method: string;
@@ -271,6 +296,8 @@ export interface WaitSection {
   /** Alerts that are not building blocks, and how many of them have no verdict at the end. Read from the alert index. */
   nonBuildingBlockAlerts: number | null;
   nonBuildingBlockWithoutVerdict: number | null;
+  /** Alerts closed without a verdict, left out of both counts above: the worker never sees a closed alert. */
+  closedWithoutVerdict: number | null;
   /** Alerts that got a verdict within N minutes of their creation, counted over all sources. */
   within: Record<'15' | '30' | '60', number>;
   /** The same as a share of all alerts that are not building blocks, so that alerts without a verdict count against it. */
@@ -278,6 +305,8 @@ export interface WaitSection {
   p50Seconds: number | null;
   p95Seconds: number | null;
   bySource: Record<VerdictSource, { count: number; p50Seconds: number | null }>;
+  /** The wait per `kibana.alert.severity`, for alerts that are not building blocks. */
+  bySeverity: Record<string, SeverityWait>;
 }
 
 /**
@@ -295,7 +324,7 @@ export const buildWaitSection = ({
   alerts: readonly TaggedAlert[];
   calls: readonly ModelCall[];
   sweeps: readonly Sweep[];
-  counts?: { nonBuildingBlock: number; nonBuildingBlockWithoutVerdict: number };
+  counts?: AlertCounts;
 }): WaitSection => {
   const modelTime = new Map<string, number>();
   calls
@@ -308,6 +337,7 @@ export const buildWaitSection = ({
   const waits: number[] = [];
   const bySource: Record<VerdictSource, number[]> = { model: [], cache: [], jev: [] };
   let withoutTime = 0;
+  const severityWaits = new Map<string, { all: number[]; model: number[] }>();
   for (const alert of alerts) {
     if (!alert.tags.some((tag) => VERDICT_BY_TAG[tag] !== undefined)) continue;
     const source = sourceOf(alert.tags);
@@ -321,6 +351,13 @@ export const buildWaitSection = ({
     const wait = Math.max(0, (verdictAt - created) / 1000);
     waits.push(wait);
     bySource[source].push(wait);
+    if (!alert.buildingBlock) {
+      const severity = alert.severity ?? 'unknown';
+      const entry = severityWaits.get(severity) ?? { all: [], model: [] };
+      entry.all.push(wait);
+      if (source === 'model') entry.model.push(wait);
+      severityWaits.set(severity, entry);
+    }
   }
 
   const within = Object.fromEntries(
@@ -332,6 +369,31 @@ export const buildWaitSection = ({
   const total = counts?.nonBuildingBlock;
   const round1 = (value: number | null): number | null =>
     value === null ? null : Number(value.toFixed(1));
+  const severities = new Set([...severityWaits.keys(), ...Object.keys(counts?.bySeverity ?? {})]);
+  const bySeverity: Record<string, SeverityWait> = Object.fromEntries(
+    [...severities].sort().map((severity) => {
+      const { all, model } = severityWaits.get(severity) ?? { all: [], model: [] };
+      const counted = counts?.bySeverity?.[severity];
+      return [
+        severity,
+        {
+          alerts: counted?.alerts ?? null,
+          withVerdict: all.length,
+          withoutVerdict: counted?.withoutVerdict ?? null,
+          shareWithin60: counted?.alerts
+            ? Number((all.filter((wait) => wait <= 3600).length / counted.alerts).toFixed(4))
+            : null,
+          p50Seconds: round1(nearestRank(all, 0.5)),
+          p95Seconds: round1(nearestRank(all, 0.95)),
+          model: {
+            count: model.length,
+            p50Seconds: round1(nearestRank(model, 0.5)),
+            p95Seconds: round1(nearestRank(model, 0.95)),
+          },
+        },
+      ];
+    })
+  );
   return {
     method:
       'Model verdicts: the end of the model call. Jev and cache verdicts: the end of the first sweep after creation (no time is stored on the alert), so these are a little late, and the cache time is a floor.',
@@ -339,6 +401,7 @@ export const buildWaitSection = ({
     alertsWithoutTime: withoutTime,
     nonBuildingBlockAlerts: counts?.nonBuildingBlock ?? null,
     nonBuildingBlockWithoutVerdict: counts?.nonBuildingBlockWithoutVerdict ?? null,
+    closedWithoutVerdict: counts?.closedWithoutVerdict ?? null,
     within,
     shareOfAllWithin: Object.fromEntries(
       WAIT_MINUTES.map((minutes) => [
@@ -353,5 +416,6 @@ export const buildWaitSection = ({
       cache: { count: bySource.cache.length, p50Seconds: round1(nearestRank(bySource.cache, 0.5)) },
       jev: { count: bySource.jev.length, p50Seconds: round1(nearestRank(bySource.jev, 0.5)) },
     },
+    bySeverity,
   };
 };

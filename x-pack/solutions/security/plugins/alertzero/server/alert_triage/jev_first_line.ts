@@ -68,6 +68,13 @@ export const JEV_BENIGN_MAX_ATTACK_PROBABILITY = 0.05;
 export const JEV_ATTACK_MIN_PROBABILITY = 0.98;
 export const JEV_BENIGN_MIN_CONFIDENCE = 0.9;
 
+/**
+ * In a batch of more than one alert, the benign lane ends at this attack probability instead of 0.05. Attacks of one rule in one
+ * batch pull each other's scores down: in the offline tests, the attacks that a burst batch pushed into the benign lane scored 0.03 to
+ * 0.05, and none of them was benign alone. Benign alerts score 0 to 0.02 in batches.
+ */
+export const JEV_BATCH_BENIGN_MAX_ATTACK_PROBABILITY = 0.02;
+
 /** Alerts in one call. The batch size of Alert Analysis (`consts.batch_size` of its workflow). */
 export const JEV_BATCH_SIZE = 50;
 
@@ -180,10 +187,51 @@ export const laneOf = ({ attackProbability, confidence }: JevScore): JevLane => 
   return attackProbability >= JEV_ATTACK_MIN_PROBABILITY ? 'attack' : 'middle';
 };
 
+/** Whether a benign score from a batch of more than one alert lies too near the bound, so that the alert goes to the middle lane. */
+export const isNearBenignBound = (score: JevScore, batchSize: number): boolean =>
+  batchSize > 1 &&
+  laneOf(score) === 'benign' &&
+  score.attackProbability > JEV_BATCH_BENIGN_MAX_ATTACK_PROBABILITY;
+
 /** Whether Jev scores the alert: it has a strict key of an eligible kind. */
 export const isJevEligible = (doc: Doc): boolean => {
   const { strict } = buildPatternKeys(doc as Record<string, unknown>);
   return strict !== undefined && JEV_ELIGIBLE_KINDS.includes(describePatternKey(strict).kind);
+};
+
+/**
+ * The switch of the Jev shadow on process alerts, a measurement only. With `on` (and the first line not `off`), Jev also scores the
+ * pending process alerts and tags the lane, the state of the verdict cache record of the key and a novelty guard hit. It writes no
+ * verdict, so every process alert is analyzed as before. Every other value reads as off.
+ */
+export const JEV_PROCESS_SHADOW_FLAG = 'alertzero.triageJevProcessShadow';
+
+export const toJevProcessShadow = (value: string): boolean => value === 'on';
+
+/** The lane of a process alert in the shadow: `az:jev_shadow_lane:<lane>`. It keeps the alert out of later Jev searches. */
+export const JEV_SHADOW_LANE_TAG_PREFIX = 'az:jev_shadow_lane:';
+
+/** The state of the verdict cache record of the key of a shadow-scored process alert: `az:jev_shadow_state:<state>`. */
+export const JEV_SHADOW_STATE_TAG_PREFIX = 'az:jev_shadow_state:';
+
+/** A shadow-scored process alert that has a value the record of its key has not seen (the novelty guard fired). */
+export const JEV_SHADOW_GUARD_HIT_TAG = 'az:jev_shadow_guard_hit';
+
+export type ProcessKeyState = 'no_record' | 'pending' | 'active' | 'unstable' | 'expired';
+
+/** The state of the verdict cache record of a key at `now`. A record past its end is `expired`, whatever its state. */
+export const processKeyState = (
+  record: { state: 'pending' | 'active' | 'unstable'; expiresAt: string } | undefined,
+  now: Date
+): ProcessKeyState => {
+  if (record === undefined) return 'no_record';
+  return Date.parse(record.expiresAt) > now.getTime() ? record.state : 'expired';
+};
+
+/** Whether the shadow scores the alert: it has a strict key of the process kind. */
+export const isJevProcessShadowCandidate = (doc: Doc): boolean => {
+  const { strict } = buildPatternKeys(doc as Record<string, unknown>);
+  return strict !== undefined && describePatternKey(strict).kind === 'process';
 };
 
 /**
