@@ -708,4 +708,20 @@ describe('CreateDestinationModal', () => {
       expect(screen.queryAllByText(/Step \d is incomplete/)).toHaveLength(0);
     });
   });
+
+  it('shows a duplicate name error while the name is still being typed', () => {
+    const defaultUnitDestinationName = 'Debug';
+    const duplicateNameError = 'A destination with this name already exists.';
+    renderModal();
+
+    setFieldValue('streamsCreateDestinationName', defaultUnitDestinationName);
+
+    expect(screen.getByText(duplicateNameError)).toBeInTheDocument();
+    expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeDisabled();
+
+    setFieldValue('streamsCreateDestinationName', 'Prod logs');
+
+    expect(screen.queryByText(duplicateNameError)).not.toBeInTheDocument();
+    expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeEnabled();
+  });
 });
