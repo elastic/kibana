@@ -228,7 +228,11 @@ describe('triage revoke decision step', () => {
 
     const { output } = await run();
 
-    expect(update).toHaveBeenCalledTimes(1);
+    // The revoke also soft-deletes the verdict cache record of the key, so count only the decision.
+    const decisionUpdates = update.mock.calls.filter(
+      ([{ id }]) => !id.startsWith('verdict-cache-')
+    );
+    expect(decisionUpdates).toHaveLength(1);
     expect(output).toEqual(expect.objectContaining({ status: 'ok' }));
   });
 
