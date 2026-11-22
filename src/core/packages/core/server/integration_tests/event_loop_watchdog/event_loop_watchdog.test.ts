@@ -43,7 +43,7 @@ interface WorkerLogLine {
           profiled: number;
           captureFailed: number;
           skippedCooldown: number;
-          files: { written: number; writeFailed: number };
+          files: { written: number; sameFrame: number; writeFailed: number };
         };
       };
       profile?: {
