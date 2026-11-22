@@ -63,7 +63,6 @@ const KEY_FIELD_RANK = new Map(
   )
 );
 
-// Custom status codes (`rpc.status_code`, `statusCode`) rank with the standard ones.
 const STATUS_CODE_FIELD = /(^|[._])status_?code$/i;
 const STATUS_CODE_RANK = (KEY_FIELDS.indexOf('status_code') + 1) * KEY_FIELD_PREFIXES.length - 0.5;
 
@@ -91,19 +90,16 @@ const MAX_TEXT_VALUES = 2;
 const MIN_EXAMPLES = 2;
 const MIN_VALUE_SHARE = 0.01;
 const MIN_NUMERIC_VALUE_SHARE = 0.05;
-// With fewer values every one is listed anyway, and splitting the sample the
-// same way can be a coincidence.
+// With fewer values, splitting the sample the same way can be a coincidence.
 const MIN_CORRELATED_CARDINALITY = MAX_VALUES + 1;
 const VALUE_LENGTH_LIMIT = 200;
 const CONSTANT_VALUE_LENGTH_LIMIT = 80;
-// Score floor for a numeric field summarised by its range, so latency-like
-// fields outrank near-constant flags.
+// Keeps range-summarised numeric fields (latencies) above near-constant flags.
 const NUMERIC_RANGE_SCORE = 0.5;
 
 const FIELDS_BUDGET_CHARS = 8000;
 const CONSTANT_FIELDS_BUDGET_CHARS = 1500;
 const OTHER_FIELDS_BUDGET_CHARS = 2500;
-// Siblings left without values collapse to `parent.* (N fields)` from this count.
 const MIN_FAMILY_SIZE = 4;
 
 const NO_VALUE_LABEL = '(no value)';
@@ -144,8 +140,7 @@ export const formatDatasetAnalysis = (
     summarize(group, sampled).lines,
   ]);
 
-  // Groups splitting the sample the same way map one-to-one: one carries the
-  // distribution, the others point at it.
+  // Groups splitting the sample the same way map one-to-one, so one distribution serves them all.
   const units = Object.values(
     groupBy(
       groups.filter(
@@ -291,8 +286,6 @@ const summarize = ({ field, keyRank }: FieldGroup, sampled: number): Summary => 
     ? MAX_KEY_VALUES
     : MAX_VALUES;
 
-  // Past the cap, rare values say little: a couple still show the field's shape,
-  // and a range describes a numeric field better.
   const minShare = isNumeric ? MIN_NUMERIC_VALUE_SHARE : MIN_VALUE_SHARE;
   const frequent =
     values.length <= maxValues

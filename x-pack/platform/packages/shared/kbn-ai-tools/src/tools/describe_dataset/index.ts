@@ -31,7 +31,6 @@ export async function describeDataset({
   end: number;
   index: string | string[];
   kql?: string;
-  /** Draws a random sample of this size instead of the first documents in storage order. */
   sampleSize?: number;
   signal?: AbortSignal;
 }) {

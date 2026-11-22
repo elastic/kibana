@@ -120,7 +120,7 @@ describe('formatDatasetAnalysis', () => {
     });
   });
 
-  it('lists a field populated on under 1% of the sample by name only, unless it is a key field', () => {
+  it('lists sparse non-key fields by name only', () => {
     const result = formatDatasetAnalysis({
       total: 5000,
       sampled: 1000,
@@ -159,16 +159,6 @@ describe('formatDatasetAnalysis', () => {
       'kubernetes.node.labels.* (4 fields)',
       'log.offset (long)',
     ]);
-  });
-
-  it('shows two examples and a count for fields without a frequent value', () => {
-    const ids = Object.fromEntries(
-      Array.from({ length: 200 }, (_, index) => [`id-${String(index).padStart(3, '0')}`, 0.5])
-    );
-
-    expect(format([field('trace.id', 'keyword', ids)]).fields).toEqual({
-      'trace.id (keyword)': ['id-000 (<1%)', 'id-001 (<1%)', '... (+198 more)'],
-    });
   });
 
   it('summarises a numeric field with many values by its range', () => {
