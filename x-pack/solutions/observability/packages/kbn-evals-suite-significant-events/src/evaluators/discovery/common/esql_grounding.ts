@@ -24,9 +24,8 @@ export function createExecuteEsqlGroundingEvaluator<
     kind: 'CODE',
     direction: 'maximize',
     evaluate: ({ output }) => {
-      const { noOfToolCalls, noOfToolCallsWithResults } = summarizeEsqlGrounding(
-        output.steps ?? []
-      );
+      const { noOfToolCalls, noOfToolCallsWithResults, noOfToolCallsWithErrors } =
+        summarizeEsqlGrounding(output.steps ?? []);
 
       if (noOfToolCalls === 0) {
         return Promise.resolve({
@@ -37,11 +36,21 @@ export function createExecuteEsqlGroundingEvaluator<
       }
 
       const grounded = noOfToolCallsWithResults > 0;
+      const failureReason =
+        noOfToolCallsWithErrors === 0
+          ? `All ${noOfToolCalls} execute_esql call(s) returned zero rows`
+          : `${noOfToolCallsWithErrors} of ${noOfToolCalls} execute_esql call(s) failed with a query error${
+              noOfToolCallsWithErrors < noOfToolCalls ? ' and the rest returned zero rows' : ''
+            }`;
       return Promise.resolve({
         score: grounded ? 1 : 0,
         explanation: grounded
-          ? `${noOfToolCallsWithResults}/${noOfToolCalls} execute_esql call(s) returned rows`
-          : `All ${noOfToolCalls} execute_esql call(s) returned zero rows — analysis not grounded in data`,
+          ? `${noOfToolCallsWithResults}/${noOfToolCalls} execute_esql call(s) returned rows${
+              noOfToolCallsWithErrors > 0
+                ? ` (${noOfToolCallsWithErrors} failed with a query error)`
+                : ''
+            }`
+          : `${failureReason} — analysis not grounded in data`,
       });
     },
   };

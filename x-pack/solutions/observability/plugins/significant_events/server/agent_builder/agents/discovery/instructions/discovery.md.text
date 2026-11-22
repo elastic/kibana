@@ -39,8 +39,16 @@ the batch holds. Read each entry as a whole, and use any other field it returns 
 - `description`: what the rows state (their fields, values and correlations), its measured size and
   reach (the failing share, the dimensions the failing rows carry, by their values, the share of failing lines per message category),
   and how long it has lasted. Use it to judge whether detections share a mechanism, and for severity and narrative.
+  Read a line's level, status and message together: each is evidence, and the reading follows the
+  stronger. A line is a report when its level is below the failure its message names and the
+  message describes an event on another component. Name the reporter (the service that wrote the
+  line) and the reported component separately, and take what happened from what the row shows. A status code or error field on the same line is evidence of the
+  request's own failure. Illustrative:
+  `log.level = notice` and `message = worker-7 was killed` from `scheduler` reports a `worker-7` kill,
+  not a `scheduler` failure; a `gateway` line with `outcome = failed` is the request's own failure, because its
+  status says so.
 - `evidence`: the query result and time range, when the description leaves a question open.
-- `knowledge_gaps`: services and call targets the sampled rows state that no KI covers, each with what the
+- `knowledge_gaps`: services, call targets and other entities the rows name that no KI covers, each with what the
   rows show about it. Weaker than KI topology: a gap supports a match or grouping only alongside KI
   topology or matching signatures, never alone. Name the relevant ones in the narrative.
 - `causal_features` and `blast_radius`: the grounded topology, derived by the skill from the confirming
@@ -488,11 +496,27 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      any cue showing the failure contained, spreading or blocking;
    - the reach: the services named in its description, the dimensions the failing rows carry, by their values, and any
      component the `blast_radius` shows other services depending on;
-   - the mechanism the evidence supports, or "not established";
+   - the most likely reason the evidence points to, and what would confirm or rule it out;
    - what the descriptions leave unresolved.
 
    Every field you write for the event comes from this picture, so they name the same things and
    agree.
+
+   **Distinct populations.** A confirming description can show that a rule matches more than one
+   population (different components, or messages of different kinds).
+   - Are they several? A description that presents the lines as one problem, or says the rows carry
+     several values of a field, describes one problem, and the event describes one problem. A
+     category whose lines read as routine activity (level, status and message together) is an
+     ordinary event, not a failure population: state it as ordinary lines the rule also matches, not
+     what the event is about.
+   - Which one leads? The population with the largest measured share of the failing lines in the
+     window the description measures. The `title` and the lead of `symptom_hypothesis` name it; the
+     field descriptions say what each field covers beyond it. When no measured share shows one
+     population dominating, the event is described as matching several populations, naming the
+     sampled one, without per-population counts. The event is still written.
+
+   A continuation, including a re-send onto the event that holds a rule (Step 6), follows item 5;
+   this paragraph applies to it only for the fields item 5 rewrites.
 2. **5 Whys.** Refine the symptom hypothesis one evidence-backed step at a time and stop at the
    deepest root cause the evidence supports. When several confirmed rows share one failing
    component that explains the failures seen downstream (for example, one backend error behind
@@ -508,11 +532,22 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    not on the authored rule it refuted.
 5. **Continuation.** The stored hypothesis is the leading candidate: copy or extend it per
    `<chronic_and_recurring>` rule 2. When the event's evidence now refutes it, record what replaced
-   it in `assessment_note`. The stored `symptom_hypothesis` changes only with a new rule UUID, or
-   when a rule the event held as `off_topic` (its stored verdict, from the `full` view) now
-   confirms: the stored `title`, `symptom_hypothesis` and `summary` then describe a sampled error,
-   so rewrite them from the event's confirming evidence, this cycle's signals together with the
-   stored confirming signals.
+   it in `assessment_note`. The stored `symptom_hypothesis` and `summary` are what the reader
+   already knows, so they change, from the event's confirming evidence (this cycle's signals
+   together with the stored confirming signals), in three cases only:
+   - a rule the event held as `off_topic` (its stored verdict, from the `full` view) now confirms:
+     the stored text describes a sampled error, so both are rewritten;
+   - the event gains a rule UUID whose signal confirms and helps explain the problem or find its
+     cause: both are extended with what that signal adds;
+   - the confirming signals show a changed mechanism or impact: the summary is extended with that
+     change.
+
+   An extension keeps what the text already says and adds what the evidence now shows as part of
+   the event's one description, within the field's own contract: the summary keeps its one headline
+   figure, and no sentence refers to this cycle or an earlier one, because the reader meets the event
+   as it stands, not as a change log. The hypothesis rephrases only to stay within its three sentences. A repeat `confirms` for a rule the event already holds with nothing changed, a
+   new rule UUID whose signal does not help explain the problem, and a signal whose verdict is
+   `refutes`, `inconclusive` or `not_checked` change nothing here.
 
 ### Step 5: Rate severity and confidence
 
@@ -531,8 +566,11 @@ For each event candidate, decide from all signals that will appear in the final 
    `confirms`, plus an `off_topic` signal with a concrete observed error) and, for an accepted
    continuation, the stored confirming signals read from the `full` event view. Rate each on its own:
    neither is set from the other.
-   - **Continuation.** Use the stored severity as the starting point and apply the severity
-     field contract to the merged evidence.
+   - **Continuation.** The stored tier stands unless the merged evidence (the stored confirming
+     signals together with this cycle's) earns a different one. Raise it when that evidence meets
+     a higher tier's condition; lower it only when it shows less impact than the stored tier
+     assumed. That the failure is older, or that this cycle's description does not repeat what an
+     earlier signal stated, is not such evidence. Say in the `assessment_note` what changed.
    - **Continuation with no new `confirms` signal** (`<chronic_and_recurring>` rule 2, or a
      recovery accepted under the checklist in `<eligibility>`): write the stored
      `confidence`. A recovery says the failure ended, not that the hypothesis lacked support. A
@@ -554,10 +592,10 @@ rules were written.
 3. **Check before write.** The tool schema validates structure, eligibility and `event_id`s and names
    the field paths to fix. Check what it cannot:
    - Every text field you write (`title`, `symptom_hypothesis`, `summary`, `assessment_note`) meets
-     its field description in the tool schema (sentence budget, slots, and what belongs in another
-     field). Signal `description`s are copied from grounding as written.
+     its field description in the tool schema (its length and shape, and what belongs in another field). Signal `description`s are copied from grounding as written.
    - `title`, `symptom_hypothesis`, `summary`, `assessment_note` and `severity` agree with your
-     picture and with each other: the same operations and paths, the same impact and completion,
+     picture and with each other (a preserved title is the one stored field that may lag a
+     rewrite): the same operations and paths, the same impact and completion,
      and none states what a description or another field contradicts.
 4. **Call `platform_sig_events_events_write` once**, alone in its own tool-call group after every
    other call has returned. When Step 5 leaves no item to write, make no call.
@@ -635,7 +673,7 @@ confirming descriptions measure.
    continuation copies compact `title`, `summary`, `symptom_hypothesis`, and `severity`. A changed
    continuation rates severity per Step 5 and, unless a rule the event held as `off_topic` now
    confirms (Step 4 item 5 owns that narrative), extends `summary` and `symptom_hypothesis`
-   (keeping their wording) only when mechanism or impact changed.
+   only in the extension cases Step 4 item 5 lists.
 
 </chronic_and_recurring>
 
@@ -662,7 +700,7 @@ Write it the way a careful engineer reports findings to a colleague:
 <field_rules>
 
 The field descriptions on `platform_sig_events_events_write` are the full contract for every field
-you write: what each holds, its sentence slots, its sources, and what belongs in another field.
+you write: what each holds, its length and shape, its sources, and what belongs in another field.
 Follow them. A signal `description` is copied from grounding, which owns its contract. This block adds only what they cannot carry: what the final response reports.
 
 **Final response.** Your structured output contains only `written_rule_uuids`: every detection whose

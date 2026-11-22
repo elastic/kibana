@@ -207,7 +207,7 @@ const signalBaseSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .describe(
         dedent`
-      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it: never shorten, merge, or reword it, and never add what the queries did not observe.
+      What this signal's queries observed and what it affects, as written by grounding. Keep it exactly as grounding wrote it, its paragraphs (a blank line between them) included: never shorten, merge, or reword it, and never add what the queries did not observe.
       ${NO_RAW_SENSITIVE_VALUES_RULE}
     `
       ),
@@ -411,7 +411,7 @@ export const significantEventBaseSchema = lazySchema(() =>
       Stable incident label. Format: "<Affected scope> — <observed condition>".
       Choose the narrowest stable affected scope that this event's assigned signals directly evidence: operation, then unique service/entity, then flow, then domain. Use flow or domain only when multiple distinct services or operations are grouped in this same event. A single-detection or single-service event must not use a customer journey, product flow, or domain label when a narrower service or operation is confirmed. Never use a generic source name.
       The observed condition names the concrete failure, degradation, or exposure shown in grounding — a specific operation, endpoint, error class, or connection path. Do not use broad umbrellas such as "backend connection failures", "transaction flows", or "submission flows" when evidence names a narrower mechanism. Do not state lifecycle or tense (e.g. "continues", "detected", "active", "resolved").
-      Preserve the title verbatim across continuation and recovery when no new detection rule UUIDs are introduced; a continuation that adds related rules may update title and symptom_hypothesis. Exclude IPs, counts, measurements, and current-cycle-only details.
+      Always preserve the title verbatim across continuation and recovery. Exclude IPs, counts, measurements, and current-cycle-only details.
 
       Examples: "API gateway — upstream connection refused"; "Indexer — database pool exhausted"; "Platform tier — connection refused across worker, scheduler, and API services" (multi-service cascade grouped in one event).
     `
@@ -427,7 +427,7 @@ export const significantEventBaseSchema = lazySchema(() =>
         ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
         Good: "inventory-db refuses connections on port 5432, so checkout stock reads fail." Bad: "A backend connectivity issue is impacting multiple flows."
         Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
-        On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
+        On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports, rephrasing only to stay within three sentences; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
@@ -438,8 +438,13 @@ export const significantEventBaseSchema = lazySchema(() =>
         dedent`
         Objective, self-contained account of the observed state and potential impact.
         ${SUMMARY_ROLE_RULE}
-        Good: "\`inventory-db\` refuses connections on port 5432 (SQLState 08001), failing \`checkout\` stock reads. Impact is confirmed for 18.5% of the operation's log lines; first seen at 09:20 and still present in the latest hour." Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
-        On a continuation, build on the stored summary: keep its existing wording, including its opening sentence, for the signatures and paths it already covers (rephrase only to stay within three sentences), add sentences only for what is newly confirmed, and never rewrite it; leave it unchanged when nothing new matters to an operator. Counts and timestamps change every cycle, so keep them out of it. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
+        Good (three short paragraphs): "The \`export-renderer\` job fails with \`error = timed out\` when it calls \`storage\`, and its exports do not complete. Impact is confirmed, with 18.5% of the job's log lines failing in the 09:00 UTC hour.
+
+        \`storage\` timed out first and \`export-renderer\` retries followed: the signals show that order and leave open whether the retries are a consequence of the timeouts.
+
+        First seen 03-07 09:20 UTC."
+        Bad: "The verification returned no rows, so a backend connectivity issue is probably causing instability."
+        On a continuation, build on the stored summary: keep what it already says and add what is new in the part it belongs to (a further problem in part 1, a relation or chain between problems in part 2). When a rule the event held as off-topic now confirms, the stored summary described a sampled error: rewrite it from the confirming evidence. A single healthy or unrelated signal leaves what other signals on the event still confirm in place.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
       ),

@@ -36,6 +36,7 @@ import {
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
 import { continuationSeverityStabilityEvaluator } from './continuation/continuation_severity_stability';
+import { continuationNarrativeEvolutionEvaluator } from './continuation/continuation_narrative_evolution';
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { severityExactEvaluator } from './severity/severity_exact';
@@ -93,6 +94,7 @@ export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
     continuationStabilityEvaluator,
     continuationRoutingEvaluator,
     continuationSeverityStabilityEvaluator,
+    continuationNarrativeEvolutionEvaluator,
     continuationTopologyStabilityEvaluator,
     continuationEventIdProvenanceEvaluator,
     continuationTrajectoryEvaluator,

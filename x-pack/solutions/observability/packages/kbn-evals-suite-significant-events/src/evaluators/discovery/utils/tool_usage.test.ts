@@ -470,6 +470,42 @@ describe('summarizeEsqlGrounding', () => {
     expect(summarizeEsqlGrounding(steps)).toEqual({
       noOfToolCalls: 2,
       noOfToolCallsWithResults: 1,
+      noOfToolCallsWithErrors: 0,
+    });
+  });
+
+  it('counts a call that returned an error result separately from an empty one', () => {
+    const failed: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EXECUTE_ESQL,
+      tool_call_id: 'esql-3',
+      tool_call_group_id: 'esql-group',
+      params: { query: 'FROM logs | WHERE severity_text == "error"' },
+      results: [{ type: 'error', data: { message: 'verification_exception: ambiguities' } }],
+    };
+    expect(summarizeEsqlGrounding([...steps, failed])).toEqual({
+      noOfToolCalls: 3,
+      noOfToolCallsWithResults: 1,
+      noOfToolCallsWithErrors: 1,
+    });
+  });
+
+  it('counts a call that returned rows and an error result as both', () => {
+    const mixed: ConverseStep = {
+      type: 'tool_call',
+      tool_id: TOOL_ID_EXECUTE_ESQL,
+      tool_call_id: 'esql-4',
+      tool_call_group_id: 'esql-group',
+      params: { query: 'FROM logs | LIMIT 1' },
+      results: [
+        { type: 'esql_results', data: { columns: [{ name: '@timestamp' }], values: [['t']] } },
+        { type: 'error', data: { message: 'partial failure' } },
+      ],
+    };
+    expect(summarizeEsqlGrounding([mixed])).toEqual({
+      noOfToolCalls: 1,
+      noOfToolCallsWithResults: 1,
+      noOfToolCallsWithErrors: 1,
     });
   });
 
@@ -477,6 +513,7 @@ describe('summarizeEsqlGrounding', () => {
     expect(summarizeEsqlGrounding([{ type: 'tool_call', tool_id: TOOL_ID_KI_SEARCH }])).toEqual({
       noOfToolCalls: 0,
       noOfToolCallsWithResults: 0,
+      noOfToolCallsWithErrors: 0,
     });
   });
 });

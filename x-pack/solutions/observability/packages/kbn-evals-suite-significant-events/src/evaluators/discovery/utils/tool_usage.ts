@@ -321,12 +321,15 @@ export interface EsqlGroundingSummary {
   noOfToolCalls: number;
   /** How many of those returned at least one row. */
   noOfToolCallsWithResults: number;
+  /** How many returned an error result (query rejected), counted whether or not rows came back too. */
+  noOfToolCallsWithErrors: number;
 }
 
-/** `execute_esql` call count and how many returned rows. */
+/** `execute_esql` call count, how many returned rows, and how many failed. */
 export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSummary {
   let noOfToolCalls = 0;
   let noOfToolCallsWithResults = 0;
+  let noOfToolCallsWithErrors = 0;
 
   for (const step of steps) {
     if (
@@ -341,7 +344,10 @@ export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSumm
     if (didExecuteEsqlToolReturnRows(results)) {
       noOfToolCallsWithResults++;
     }
+    if (results.some((result) => isRecord(result) && result.type === 'error')) {
+      noOfToolCallsWithErrors++;
+    }
   }
 
-  return { noOfToolCalls, noOfToolCallsWithResults };
+  return { noOfToolCalls, noOfToolCallsWithResults, noOfToolCallsWithErrors };
 }
