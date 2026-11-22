@@ -464,8 +464,10 @@ describe('event loop watchdog in a child process', () => {
       expect(restarts(result)).toEqual([]);
     }, 150_000);
 
-    it('profiles three large blocks in a row in the same worker', async () => {
-      const result = await runHarness('profile_repeated', { timeoutMs: 180_000 });
+    it('profiles three large blocks in a row in the same worker, and writes one file for the same top frame', async () => {
+      const { result, profile: written } = await runWritingHarness('profile_repeated', {
+        timeoutMs: 180_000,
+      });
       expectCleanExit(result);
       const profiles = profileLogLines(result);
       // A restarted worker numbers its captures from #1 again.
@@ -480,6 +482,17 @@ describe('event loop watchdog in a child process', () => {
         expect(profile?.frames.length).toBeGreaterThan(0);
         expect(profile?.kibanaFrames.length).toBeGreaterThan(0);
       }
+      // All three captures share a top frame, so only the first is written.
+      expect(profiles.map((line) => line.kibana?.event_loop_watchdog?.profile?.file)).toEqual([
+        'admitted',
+        'same_frame',
+        'same_frame',
+      ]);
+      const files = statsOf(result).map(({ profiling }) => profiling?.files);
+      expect(files.reduce((sum, counts) => sum + (counts?.written ?? 0), 0)).toBe(1);
+      expect(files.reduce((sum, counts) => sum + (counts?.sameFrame ?? 0), 0)).toBe(2);
+      expect(files.reduce((sum, counts) => sum + (counts?.writeFailed ?? 0), 0)).toBe(0);
+      expectViewableProfile(written);
       expect(restarts(result)).toEqual([]);
     }, 210_000);
 
