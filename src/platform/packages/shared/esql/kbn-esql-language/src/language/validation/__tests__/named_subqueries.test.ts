@@ -11,3 +11,14 @@ import { setup } from './helpers';
 import { runNamedSubqueriesValidationSuite } from './named_subqueries_suite';
 
 runNamedSubqueriesValidationSuite(setup);
+
+// The integration cluster uses a Basic license, which cannot run FUSE.
+it('reports missing METADATA on FUSE even when it inherits it from a LET', async () => {
+  const { expectErrors } = await setup();
+  const query =
+    'LET a = (FROM index METADATA _id, _index, _score | KEEP _id, _index, _score); FROM a | FORK (LIMIT 10) (LIMIT 10) | FUSE';
+
+  await expectErrors(query, [
+    '[FUSE] The FROM command is missing the _id, _index, _score METADATA field.',
+  ]);
+});
