@@ -13,7 +13,7 @@ import type {
   UserProvidedValues,
 } from '@kbn/core-ui-settings-common';
 
-type SettingDefinitions = Record<string, Omit<UiSettingsParams, 'schema'> & UserProvidedValues>;
+type SettingDefinition = Omit<UiSettingsParams, 'schema'>;
 type RuntimeSettings = Record<string, UiSettingsRuntimeEntry & UserProvidedValues>;
 
 /**
@@ -21,18 +21,12 @@ type RuntimeSettings = Record<string, UiSettingsRuntimeEntry & UserProvidedValue
  * definitions, which provide the display metadata such as `description` and `options`.
  */
 export const mergeSettingDefinitions = (
-  definitions: Readonly<SettingDefinitions>,
+  definitions: Readonly<Record<string, SettingDefinition>>,
   runtimeSettings: Readonly<RuntimeSettings>
-): SettingDefinitions =>
+): Record<string, SettingDefinition & UserProvidedValues> =>
   Object.fromEntries(
-    Object.entries(definitions).map(([id, definition]) => {
-      const runtimeSetting = runtimeSettings[id];
-
-      if (!runtimeSetting) {
-        return [id, definition];
-      }
-
-      const { userValue, isOverridden, ...displayMetadata } = definition;
-      return [id, { ...displayMetadata, ...runtimeSetting }];
-    })
+    Object.entries(definitions).map(([id, definition]) => [
+      id,
+      { ...definition, ...runtimeSettings[id] },
+    ])
   );

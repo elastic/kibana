@@ -23,27 +23,17 @@ describe('mergeSettingDefinitions', () => {
 
   it('keeps display metadata from the definition and values from the runtime state', () => {
     const merged = mergeSettingDefinitions(
-      { theme: { ...definition, userValue: 'light' } },
+      { theme: definition },
       { theme: { name: 'Theme', type: 'select', value: 'light', userValue: 'dark' } }
     );
 
     expect(merged).toEqual({ theme: { ...definition, userValue: 'dark' } });
   });
 
-  it('drops the saved value from the definition when the runtime state has none', () => {
-    const merged = mergeSettingDefinitions(
-      { theme: { ...definition, userValue: 'dark', isOverridden: true } },
-      { theme: { name: 'Theme', type: 'select', value: 'light' } }
-    );
-
-    expect(merged.theme).not.toHaveProperty('userValue');
-    expect(merged.theme).not.toHaveProperty('isOverridden');
-  });
-
   it('returns the definition unchanged when the setting has no runtime state', () => {
-    const merged = mergeSettingDefinitions({ theme: { ...definition, userValue: 'dark' } }, {});
+    const merged = mergeSettingDefinitions({ theme: definition }, {});
 
-    expect(merged).toEqual({ theme: { ...definition, userValue: 'dark' } });
+    expect(merged).toEqual({ theme: definition });
   });
 
   it('ignores runtime settings that have no definition', () => {

@@ -227,7 +227,6 @@ describe('Settings application', () => {
             name: 'Test setting',
             type: 'string',
             value: 'default',
-            userValue: 'saved',
           },
         };
       }),
@@ -303,7 +302,6 @@ describe('Settings application', () => {
         description: 'A setting with display metadata',
         type: 'string',
         value: 'default',
-        userValue: 'saved',
       },
     };
     const metadata = {
@@ -352,11 +350,15 @@ describe('Settings application', () => {
     client.getAll.mockReturnValue(createUserValues('visible-value'));
     const namespaceDefinitions: UiSettingsMetadataState = {
       'visible:setting': {
-        ...createUserValues('visible-value')['visible:setting'],
+        name: 'Visible setting',
+        type: 'string',
+        value: 'default',
         solutionViews: ['oblt'],
       },
       'hidden:setting': {
-        ...createUserValues('visible-value')['hidden:setting'],
+        name: 'Hidden setting',
+        type: 'string',
+        value: 'default',
         solutionViews: ['es'],
       },
     };
@@ -404,7 +406,6 @@ describe('Settings application', () => {
                   name: 'Test setting',
                   type: 'string',
                   value: 'default',
-                  userValue: 'saved',
                 },
               }
             : {}

@@ -123,7 +123,7 @@ export interface IUiSettingsClient {
  * Used by the Advanced Settings management UI.
  * @public
  */
-export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams & UserProvidedValues>;
+export type UiSettingsMetadataState = Record<string, PublicUiSettingsParams>;
 
 /**
  * Client for fetching full settings metadata on demand.
