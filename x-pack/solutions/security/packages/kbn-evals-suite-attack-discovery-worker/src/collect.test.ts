@@ -909,8 +909,7 @@ describe('readGenerationFault', () => {
   });
 
   describe('when every failed batch is the generation graph giving up on model output', () => {
-    const HALLUCINATION_EXHAUSTED =
-      'Maximum hallucination failures (5) reached. Try sending fewer alerts to this model.';
+    const HALLUCINATION_EXHAUSTED = 'Maximum hallucination failures (5) reached.';
     const ATTEMPTS_EXHAUSTED =
       'Maximum generation attempts (3) reached. Try sending fewer alerts to this model.';
     const twoFailed = () =>
@@ -929,14 +928,6 @@ describe('readGenerationFault', () => {
       });
     });
 
-    it('is exhausted when every failed batch was an attempts-exhaustion error', async () => {
-      const getChildren = jest.fn().mockResolvedValue([batchChild([ATTEMPTS_EXHAUSTED])]);
-      await expect(read(allFailed, getChildren)).resolves.toEqual({
-        kind: 'exhausted',
-        message: ATTEMPTS_EXHAUSTED,
-      });
-    });
-
     it('is exhausted when the batch error carries the graph errors after the exhaustion line', async () => {
       // The producer appends the accumulated errors after the exhaustion message.
       const withErrors = `${HALLUCINATION_EXHAUSTED}\nError: alert batch 2 produced no attacks`;
@@ -944,21 +935,32 @@ describe('readGenerationFault', () => {
       await expect(read(allFailed, getChildren)).resolves.toMatchObject({ kind: 'exhausted' });
     });
 
-    it('is failed when exhaustion is mixed with a refusal', async () => {
+    it('is failed when hallucination exhaustion is mixed with a refusal', async () => {
       const getChildren = jest
         .fn()
         .mockResolvedValue([batchChild([HALLUCINATION_EXHAUSTED, REFUSAL])]);
       await expect(read(twoFailed(), getChildren)).resolves.toMatchObject({ kind: 'failed' });
     });
 
-    it('is failed when exhaustion is mixed with an infrastructure error', async () => {
+    it('is failed when hallucination exhaustion is mixed with an infrastructure error', async () => {
       const getChildren = jest
         .fn()
-        .mockResolvedValue([batchChild([ATTEMPTS_EXHAUSTED, 'connector timed out'])]);
+        .mockResolvedValue([batchChild([HALLUCINATION_EXHAUSTED, 'connector timed out'])]);
       await expect(read(twoFailed(), getChildren)).resolves.toMatchObject({ kind: 'failed' });
     });
 
-    it('is failed when an exhaustion error is edited or truncated away from the producer text', async () => {
+    it('is failed, and still gates, when every batch hit the generation-attempt limit', async () => {
+      // The attempt limit is deliberately not exhaustion-classified: `generationAttempts` also
+      // counts connector exceptions raised before any model response, so reaching the limit does
+      // not establish a model-output failure. An infra outage can produce exactly this run.
+      const getChildren = jest.fn().mockResolvedValue([batchChild([ATTEMPTS_EXHAUSTED])]);
+      await expect(read(allFailed, getChildren)).resolves.toEqual({
+        kind: 'failed',
+        message: ATTEMPTS_EXHAUSTED,
+      });
+    });
+
+    it('is failed when a hallucination-exhaustion error is edited or truncated away from the producer text', async () => {
       const getChildren = jest
         .fn()
         .mockResolvedValue([batchChild(['Maximum hallucination failures reached'])]);

@@ -33,13 +33,13 @@ export const MODEL_REFUSAL_PATTERN =
   /refused to complete the response|finish_reason: content_filter/i;
 
 /**
- * The generation graph giving up on the model's own output: every attempt was discarded because
- * the output hallucinated or degenerated into repetition (see
- * `throw_if_error_counts_exceeded`). Matched against generation batch errors only; like
- * `MODEL_REFUSAL_PATTERN` it must hold for every failed batch before it classifies a run.
+ * The generation graph discarding every parsed response for hallucination (see
+ * `throw_if_error_counts_exceeded`). The attempts-exhaustion line is deliberately NOT matched:
+ * `generationAttempts` also counts connector exceptions thrown before any response was received,
+ * so that error does not establish a model-output failure. Matched against generation batch
+ * errors only; like `MODEL_REFUSAL_PATTERN` it must hold for every failed batch.
  */
-export const MODEL_OUTPUT_EXHAUSTED_PATTERN =
-  /Maximum (?:hallucination failures \(\d+\)|generation attempts \(\d+\)) reached\. Try sending fewer alerts to this model\./;
+export const MODEL_OUTPUT_EXHAUSTED_PATTERN = /Maximum hallucination failures \(\d+\) reached\./;
 
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';

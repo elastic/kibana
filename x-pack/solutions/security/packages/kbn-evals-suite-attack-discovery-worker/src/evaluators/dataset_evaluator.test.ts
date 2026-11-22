@@ -857,6 +857,36 @@ describe('createEvaluateDataset', () => {
         dispatchedReviewExecutionIds: [],
         ...overrides,
       });
+    /** The runner completed, but the outcome event reports `failed_all_batches` with nothing
+     * persisted or indexed — the shape a real exhaustion produces. */
+    const failedAllBatchesRun = (overrides: Partial<WorkerArtifacts> = {}) =>
+      emptyRun({
+        outcomes: [
+          {
+            stepId: 'report_run_completed',
+            status: 'completed',
+            runOutcome: 'failed_all_batches',
+            input: {
+              run_outcome: 'failed_all_batches',
+              alerts_analyzed: 0,
+              batches_total: 1,
+              batches_failed: 1,
+              attacks_persisted: 0,
+            },
+          },
+          outcome('report_worker_run_completed'),
+        ],
+        indexedAttackCount: 0,
+        fingerprintReviewCount: 0,
+        fingerprintReviewedAttackIds: [],
+        generationUsage: {
+          discoveryCount: 0,
+          connectorIds: [],
+          models: [],
+          discoveriesWithoutConnector: 0,
+        },
+        ...overrides,
+      });
     const { seededAlertCount } = emptyRun();
     const scoreOf = async (name: string, output: WorkerArtifacts) => {
       const evaluator = [
@@ -903,12 +933,11 @@ describe('createEvaluateDataset', () => {
       }
     });
 
-    it('keeps a generation that exhausted its attempts on model output a scored MODEL_FAULT, not a failed row', async () => {
-      const output = emptyRun({
+    it('keeps a generation that exhausted its hallucination budget a scored MODEL_FAULT, not a failed row', async () => {
+      const output = failedAllBatchesRun({
         generationFault: {
           kind: 'exhausted',
-          message:
-            'Maximum hallucination failures (5) reached. Try sending fewer alerts to this model.',
+          message: 'Maximum hallucination failures (5) reached.',
         },
       });
       for (const name of ['AlertsRetrieved', 'DiscoveriesPersisted']) {
@@ -923,13 +952,14 @@ describe('createEvaluateDataset', () => {
       await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
     });
 
-    it('does not let the gate fail a dataset whose generation exhausted its attempts on model output', async () => {
+    // The runner reports `failed_all_batches` with zero persisted and indexed discoveries: the
+    // shape a real exhaustion produces, with no attack to score anywhere downstream.
+    it('does not let the gate fail a dataset whose generation exhausted its hallucination budget', async () => {
       collect.mockResolvedValue(
-        emptyRun({
+        failedAllBatchesRun({
           generationFault: {
             kind: 'exhausted',
-            message:
-              'Maximum generation attempts (5) reached. Try sending fewer alerts to this model.',
+            message: 'Maximum hallucination failures (5) reached.',
           },
         })
       );

@@ -166,12 +166,9 @@ export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
 /**
  * Why a runner that reports `completed` still produced nothing to score: it analyzed none of the
  * seeded alerts. The run swallowed whatever stopped it, so its error (when one was read) goes in
- * the explanation. A generation the model refused in every batch, or one where the generation
- * graph exhausted its attempts on the model's own output (hallucinations or repeated
- * generations, classified `exhausted` only when every failed batch says so), stays a scored
- * `MODEL_FAULT` instead (see `readGenerationFault`). Any other batch failure (a broken alert
- * query, a persistence error, a cause nobody could read) says nothing about the model, so it
- * fails the row.
+ * the explanation. Only a generation fault the model itself caused (see `readGenerationFault`)
+ * stays a scored `MODEL_FAULT` instead; anything else — including the generation-attempt limit,
+ * which connector failures can also reach — fails the row.
  */
 const emptyCompletedRunError = (output: WorkerArtifacts): string | undefined => {
   if (

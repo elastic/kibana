@@ -140,8 +140,9 @@ export interface WorkerOutcomeEvent {
 /**
  * Why generation produced nothing, read from the runner's outcome event. `refused` means every
  * failed batch was refused by the model, `exhausted` means every failed batch was the generation
- * graph giving up on the model's own output (hallucinations or repeated generations, see
- * `MODEL_OUTPUT_EXHAUSTED_PATTERN`), `failed` means a batch failed for any other reason (or the
+ * graph discarding every parsed response for hallucination (see
+ * `MODEL_OUTPUT_EXHAUSTED_PATTERN`; the attempt-limit error is deliberately excluded because it
+ * also counts connector failures), `failed` means a batch failed for any other reason (or the
  * reason could not be read), and `empty` means generation succeeded but found no attack.
  */
 export interface GenerationFault {
