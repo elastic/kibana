@@ -54,6 +54,16 @@ ctx._source.event.created = created;
 if (params.keepKev == true && params.doc.vulnerability.kev == null && prevKev != null) {
   ctx._source.vulnerability.kev = prevKev;
 }
+// Recompute the risk score after the kev block may have been restored above; must mirror
+// toRiskScore in finding_doc.ts, including the KEV-without-CVSS case (floored at 9).
+def v = ctx._source.vulnerability;
+if (v != null && v.kev != null) {
+  def base = v.score == null || v.score.base == null ? null : v.score.base;
+  if (v.score == null) { v.score = [:]; }
+  v.score.risk = Math.max(base == null ? 0 : base, 9);
+} else if (v != null && v.score != null && v.score.base != null) {
+  v.score.risk = v.score.base;
+}
 `;
 
 export const FIX_SCRIPT = `

@@ -19,7 +19,12 @@ export { RadioGroup } from './src/components/csp_boxed_radio_group';
 export { getSeverityStatusColor, getCvsScoreColor } from './src/utils/get_finding_colors';
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
-export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
+export {
+  CVSScoreBadge,
+  SeverityStatusBadge,
+  KevBadge,
+  VULNERABILITIES_KEV_BADGE_SUBJ,
+} from './src/components/vulnerability_badges';
 export { useGetMisconfigurationStatusColor } from './src/hooks/use_get_misconfiguration_status_color';
 export {
   useMisconfigurationFindings,

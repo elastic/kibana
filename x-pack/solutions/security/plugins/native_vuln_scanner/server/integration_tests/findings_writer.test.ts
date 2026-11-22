@@ -268,18 +268,21 @@ describe('findings writer', () => {
       ransomware_use: 'Known',
     };
 
-    // (a) the strict mapping accepts a valid kev block.
+    // (a) the strict mapping accepts a valid kev block, and the risk score takes the KEV floor.
     expect(await write(10, { kev })).toMatchObject({ written: 1, kevListed: 1, failures: {} });
     expect((await stored())?.vulnerability.kev).toEqual(expectedKev);
+    expect((await stored())?.vulnerability.score?.risk).toBe(9);
 
-    // (b) an outage run (no catalog, keepKev) keeps the stored block.
+    // (b) an outage run (no catalog, keepKev) keeps the stored block and its floored risk.
     expect(await write(11, { keepKev: true })).toMatchObject({ written: 1, kevListed: 0 });
     expect((await stored())?.vulnerability.kev).toEqual(expectedKev);
+    expect((await stored())?.vulnerability.score?.risk).toBe(9);
     expect((await stored())?.native_vuln_scanner.state).toBe('active');
 
-    // (c) a run whose catalog no longer lists the CVE removes it.
+    // (c) a run whose catalog no longer lists the CVE removes it and the risk falls back to base.
     expect(await write(12, { kev: new Map(), keepKev: false })).toMatchObject({ written: 1 });
     expect((await stored())?.vulnerability).not.toHaveProperty('kev');
+    expect((await stored())?.vulnerability.score?.risk).toBe(7.8);
 
     // Once removed, an outage run has nothing to keep.
     await write(13, { keepKev: true });

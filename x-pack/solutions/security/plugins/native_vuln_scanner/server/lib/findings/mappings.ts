@@ -54,7 +54,9 @@ export const findingsMappings: MappingTypeMapping = {
       properties: {
         ...keywords('id', 'title', 'reference', 'severity', 'cwe', 'classification'),
         ...keywords('enumeration'),
-        score: { properties: { base: { type: 'float' }, version: keyword } },
+        score: {
+          properties: { base: { type: 'float' }, risk: { type: 'float' }, version: keyword },
+        },
         cvss: { properties: { nvd: cvssVendor, redhat: cvssVendor } },
         description: { type: 'text' },
         published_date: date,

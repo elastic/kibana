@@ -69,7 +69,12 @@ export interface FindingDoc {
     title: string;
     reference: string[];
     severity: FindingSeverity;
-    score?: { base: number; version: string };
+    score?: {
+      base?: number;
+      version?: string;
+      /** Same 0–10 scale as `base`, KEV-listed findings floored at {@link KEV_RISK_FLOOR}. */
+      risk?: number;
+    };
     cvss?: Partial<Record<'nvd' | 'redhat', CvssVendorScore>>;
     cwe?: string[];
     description: string;
@@ -161,6 +166,17 @@ export const toSeverity = (...labels: Array<string | undefined>): FindingSeverit
   return 'UNKNOWN';
 };
 
+/** KEV floor: a CISA-listed CVE never ranks below this, whatever its CVSS base says. */
+export const KEV_RISK_FLOOR = 9;
+
+/**
+ * The published prioritisation formula: CVSS base as-is, raised to {@link KEV_RISK_FLOOR}
+ * when the CVE is listed in the CISA Known Exploited Vulnerabilities catalog, so KEV
+ * findings always sort above non-KEV ones on the same 0–10 scale.
+ */
+export const toRiskScore = ({ base, kev }: { base?: number; kev?: boolean }): number | undefined =>
+  kev ? Math.max(base ?? 0, KEV_RISK_FLOOR) : base;
+
 /** Stable id for one CVE on one installed package build of one host. */
 export const findingId = ({ hostId, cve, package: pkg }: Finding): string =>
   createHash('sha256')
@@ -229,6 +245,14 @@ export const toFindingDoc = (
     primary?.source ?? (finding.scheme === 'dpkg' ? 'ubuntu' : 'redhat');
   const id = findingId(finding);
   const name = host.name ?? host.id;
+  const risk = toRiskScore({ base: cve.cvss?.score, kev: kev !== undefined });
+  const score =
+    cve.cvss || risk !== undefined
+      ? {
+          ...(cve.cvss ? { base: cve.cvss.score, version: cve.cvss.version } : {}),
+          ...(risk !== undefined ? { risk } : {}),
+        }
+      : undefined;
   return {
     '@timestamp': now,
     ecs: { version: EcsVersion },
@@ -257,13 +281,9 @@ export const toFindingDoc = (
       title: primary?.title || cve.id,
       reference: references(finding),
       severity: toSeverity(cve.severity, ...advisories.map((a) => a.severity)),
-      ...(cve.cvss
-        ? {
-            score: { base: cve.cvss.score, version: cve.cvss.version },
-            cvss: { [CVSS_KEY[source]]: toCvssVendorScore(cve.cvss) },
-            classification: 'CVSS' as const,
-          }
-        : {}),
+      ...(score !== undefined ? { score } : {}),
+      ...(cve.cvss ? { cvss: { [CVSS_KEY[source]]: toCvssVendorScore(cve.cvss) } } : {}),
+      ...(cve.cvss ? { classification: 'CVSS' as const } : {}),
       ...(cve.cwe ? { cwe: [cve.cwe] } : {}),
       description: findingDescription(finding, source, host.os.version, knowledge),
       ...(cve.published ? { published_date: cve.published } : {}),

@@ -75,6 +75,7 @@ export const VULNERABILITY_FIELDS = {
   VULNERABILITY_TITLE: 'vulnerability.title',
   VULNERABILITY_ID: 'vulnerability.id',
   SCORE_BASE: 'vulnerability.score.base',
+  SCORE_RISK: 'vulnerability.score.risk',
   RESOURCE_NAME: 'resource.name',
   RESOURCE_ID: 'resource.id',
   SEVERITY: 'vulnerability.severity',
@@ -87,6 +88,7 @@ export const VULNERABILITY_FIELDS = {
   DESCRIPTION: 'vulnerability.description',
   VENDOR: 'observer.vendor',
   ADVISORIES: 'native_vuln_scanner.advisories.id',
+  KEV_KNOWN_EXPLOITED: 'vulnerability.kev.known_exploited',
 } as const;
 
 export const VULNERABILITY_GROUPING_OPTIONS = {

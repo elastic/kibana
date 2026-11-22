@@ -256,6 +256,41 @@ describe('toFindingDoc', () => {
     expect(toFindingDoc(finding(), HOST, CTX).vulnerability).not.toHaveProperty('kev');
   });
 
+  describe('risk score', () => {
+    const KEV = {
+      dateAdded: '2026-11-18',
+      dueDate: '2026-12-02',
+      knownRansomwareCampaignUse: 'Known' as const,
+    };
+    const noCvss = (): Finding => {
+      const f = finding();
+      return { ...f, cve: { id: f.cve.id } };
+    };
+
+    it('is the CVSS base as-is for an unlisted CVE', () => {
+      expect(toFindingDoc(finding(), HOST, CTX).vulnerability.score?.risk).toBe(7);
+    });
+
+    it('is floored at 9 for a KEV-listed CVE, whatever the CVSS base', () => {
+      expect(toFindingDoc(finding(), HOST, { ...CTX, kev: KEV }).vulnerability.score?.risk).toBe(9);
+      const f = finding();
+      const { cvss } = f.cve;
+      if (!cvss) throw new Error('fixture must carry cvss');
+      const doc = toFindingDoc({ ...f, cve: { ...f.cve, cvss: { ...cvss, score: 9.8 } } }, HOST, {
+        ...CTX,
+        kev: KEV,
+      });
+      expect(doc.vulnerability.score?.risk).toBe(9.8);
+    });
+
+    it('is the 9 floor for a KEV-listed CVE without CVSS, and absent without either', () => {
+      expect(toFindingDoc(noCvss(), HOST, { ...CTX, kev: KEV }).vulnerability.score).toEqual({
+        risk: 9,
+      });
+      expect(toFindingDoc(noCvss(), HOST, CTX).vulnerability).not.toHaveProperty('score');
+    });
+  });
+
   it('puts a CVE link first so the UI can pair it with the id', () => {
     const { reference } = toFindingDoc(finding(), HOST, CTX).vulnerability;
     expect(reference[0]).toBe('https://access.redhat.com/security/cve/CVE-2026-23868');

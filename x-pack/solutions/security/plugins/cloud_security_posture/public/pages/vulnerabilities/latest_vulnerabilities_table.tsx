@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
 import { get } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +20,7 @@ import {
   ActionableBadge,
   CVSScoreBadge,
   SeverityStatusBadge,
+  KevBadge,
   getNormalizedSeverity,
   MultiValueCellPopover,
   findReferenceLink,
@@ -207,7 +209,18 @@ export const LatestVulnerabilitiesTable = ({
       'vulnerability.severity': ({ rowIndex }: EuiDataGridCellValueElementProps) => (
         <CspVulnerabilityFindingRenderer row={tableRows[rowIndex]}>
           {({ finding }) => (
-            <SeverityStatusBadge severity={getNormalizedSeverity(finding.vulnerability.severity)} />
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              `}
+            >
+              <SeverityStatusBadge
+                severity={getNormalizedSeverity(finding.vulnerability.severity)}
+              />
+              <KevBadge kev={finding.vulnerability.kev} />
+            </div>
           )}
         </CspVulnerabilityFindingRenderer>
       ),

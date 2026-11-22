@@ -23,6 +23,8 @@ export const VULNERABILITY_HEADER_REFERENCE_LINK = 'vulnerability-header-referen
 export const VULNERABILITY_HEADER_TITLE = 'vulnerability-header-reference-title';
 export const VULNERABILITY_HEADER_ID = 'vulnerability-header-reference-id';
 export const VULNERABILITY_HEADER_CVE_BADGE = 'vulnerability-header-cve-badge';
+export const VULNERABILITY_KEV_PANEL_FLYOUT = 'vulnerability_flyout_kev_panel';
+export const VULNERABILITY_KEV_FILTER_CHIP = 'vulnerabilities_kev_filter_chip';
 export const getVulnerabilityLinkTestId = (id: string) => `vulnerability-reference-link-${id}`;
 export const getVulnerabilityIdTestId = (id: string) => `vulnerability-id-${id}`;
 export const VULNERABILITY_OVERVIEW_TAB_ID = 'vulnerability-overview-tab-id';
