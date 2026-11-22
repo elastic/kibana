@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fsPromises from 'node:fs/promises';
 import type { ManagedWorker, ManagedWorkerOptions } from '@kbn/core-threads-server-internal';
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from './event_loop_watchdog';
 import type { WatchdogWorkerData } from './types';
 import { HEARTBEAT_INTERVAL_MS, Slot, WATCHDOG_WORKER_NAME } from './constants';
+import { PROFILING_DIR_MAX_LENGTH } from './sanitize';
 
 jest.mock('@kbn/core-threads-server-internal', () => ({ createManagedWorker: jest.fn() }));
 
@@ -243,6 +245,118 @@ describe('EventLoopWatchdog', () => {
       expect(profilingLines()).toEqual([ON, OFF]);
       resolveStop();
       await stopped;
+    });
+  });
+
+  describe('profile directory check', () => {
+    const NO_DIR_WARNING =
+      "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files.";
+    const fsError = (code: string, message: string) => Object.assign(new Error(message), { code });
+    const warnings = () => logger.warn.mock.calls;
+    /** Lets the asynchronous directory check finish. */
+    const settle = async () => {
+      for (let i = 0; i < 5; i++) {
+        await Promise.resolve();
+      }
+    };
+    let access: jest.SpyInstance;
+
+    beforeEach(() => {
+      access = jest.spyOn(fsPromises, 'access').mockResolvedValue();
+    });
+    afterEach(() => access.mockRestore());
+
+    it("doesn't check the directory while profiling stays off", async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(false);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([]);
+    });
+
+    it("doesn't check the directory while the worker is stopped, and checks once it starts", async () => {
+      const watchdog = create({});
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([]);
+      watchdog.start();
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+    });
+
+    it("doesn't warn when profiling turns on with a writable directory", async () => {
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(access).toHaveBeenCalledWith('/diag', fsPromises.constants.W_OK);
+      expect(warnings()).toEqual([]);
+    });
+
+    it('warns when profiling turns on without a directory, and still turns profiling on', async () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(access).not.toHaveBeenCalled();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      expect(slots()[Slot.profiling]).toBe(1n);
+    });
+
+    it("warns when profiling turns on and the directory doesn't exist", async () => {
+      access.mockRejectedValue(
+        fsError('ENOENT', "ENOENT: no such file or directory, access '/diag'")
+      );
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written (ENOENT). Profile file writes will fail.",
+        ],
+      ]);
+      expect(slots()[Slot.profiling]).toBe(1n);
+    });
+
+    it("warns when profiling turns on and the directory can't be written", async () => {
+      access.mockRejectedValue(fsError('EACCES', "EACCES: permission denied, access '/diag'"));
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          "Event loop watchdog profiling is on, but the profile directory /diag can't be written (EACCES). Profile file writes will fail.",
+        ],
+      ]);
+    });
+
+    it('shows the full directory in the warning', async () => {
+      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 2)}z`;
+      access.mockRejectedValue(fsError('EACCES', `EACCES: permission denied, access '${long}'`));
+      const watchdog = create({ diagnosticDir: long });
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([
+        [
+          `Event loop watchdog profiling is on, but the profile directory ${long} can't be written (EACCES). Profile file writes will fail.`,
+        ],
+      ]);
+    });
+
+    it('warns again each time profiling turns back on', async () => {
+      const watchdog = create({});
+      watchdog.start();
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING]]);
+      watchdog.setProfiling(false);
+      watchdog.setProfiling(true);
+      await settle();
+      expect(warnings()).toEqual([[NO_DIR_WARNING], [NO_DIR_WARNING]]);
     });
   });
 

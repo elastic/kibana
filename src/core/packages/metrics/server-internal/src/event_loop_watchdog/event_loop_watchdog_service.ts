@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'node:fs/promises';
 import {
   EMPTY,
   catchError,
@@ -203,33 +202,7 @@ export class EventLoopWatchdogService {
         // Profiling starts off, so there's nothing to apply until a flag is first on.
         skipWhile((enabled) => !enabled)
       )
-      .subscribe((enabled) => {
-        watchdog.setProfiling(enabled);
-        if (enabled) {
-          void this.checkProfileDir();
-        }
-      });
-  }
-
-  /** Warns each time profiling turns on if profile files can't be written. */
-  private async checkProfileDir(): Promise<void> {
-    const dir = this.profileDir;
-    if (dir === undefined) {
-      this.logger.warn(
-        "Event loop watchdog profiling is on, but no profile directory is set. Set ops.eventLoopWatchdog.profiling.dir or Node's --diagnostic-dir to write profile files."
-      );
-      return;
-    }
-    try {
-      await Fs.access(dir, Fs.constants.W_OK);
-    } catch (error) {
-      // The error code, not the message: the message repeats the directory.
-      this.logger.warn(
-        `Event loop watchdog profiling is on, but the profile directory ${dir} can't be written (${
-          error.code ?? error.message
-        }). Profile file writes will fail.`
-      );
-    }
+      .subscribe((enabled) => watchdog.setProfiling(enabled));
   }
 
   private logFailure(level: 'warn' | 'error', message: string, error: Error): void {
