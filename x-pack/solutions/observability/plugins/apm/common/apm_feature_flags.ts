@@ -16,7 +16,6 @@ export enum ApmFeatureFlagName {
   SourcemapApiAvailable = 'sourcemapApiAvailable',
   StorageExplorerAvailable = 'storageExplorerAvailable',
   RuleFormV2Enabled = 'ruleFormV2Enabled',
-  ManagedTailSamplingAvailable = 'managedTailSamplingAvailable',
 }
 
 const apmFeatureFlagMap = {
@@ -44,9 +43,6 @@ const apmFeatureFlagMap = {
   [ApmFeatureFlagName.RuleFormV2Enabled]: {
     default: false,
   },
-  [ApmFeatureFlagName.ManagedTailSamplingAvailable]: {
-    default: false,
-  },
 };
 
 type ApmFeatureFlagMap = typeof apmFeatureFlagMap;
@@ -69,3 +65,6 @@ export function getApmFeatureFlags(): ApmFeatureFlags {
 
 // to be removed in https://github.com/elastic/kibana/issues/300607
 export const APM_SERVICE_MAP_GROUPING_ENABLED_FEATURE_FLAG_KEY = 'apm.serviceMapGroupingEnabled';
+
+// Off (fallback false) until https://github.com/elastic/kibana/issues/302264 turns it on for Serverless
+export const APM_MANAGED_TAIL_SAMPLING_ENABLED_FEATURE_FLAG_KEY = 'apm.managedTailSamplingEnabled';
