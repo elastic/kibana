@@ -88,6 +88,8 @@ dependsOn:
   - '@kbn/app-menu'
   - '@kbn/security-solution-features'
   - '@kbn/ui-callout'
+  - '@kbn/elastic-assistant'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod
