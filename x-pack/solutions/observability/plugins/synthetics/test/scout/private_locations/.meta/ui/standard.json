@@ -10,14 +10,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/ui/tests/private_locations.spec.ts",
-        "line": 27,
-        "column": 13
+        "line": 25,
+        "column": 8
       }
     }
   ]
