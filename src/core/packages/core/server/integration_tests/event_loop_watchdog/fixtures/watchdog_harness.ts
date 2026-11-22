@@ -260,6 +260,30 @@ const scenarios: Record<string, () => Promise<void>> = {
     }
     await watchdog.stop();
   },
+  // Three large captures in one worker, each under its own nearest Kibana function, so each
+  // capture has its own top frame and all three are written.
+  profile_repeated_frames: async () => {
+    const run = await loadDeepCode(2_000, 40);
+    const callers = [
+      function firstFrame(ms: number) {
+        run(ms);
+      },
+      function secondFrame(ms: number) {
+        run(ms);
+      },
+      function thirdFrame(ms: number) {
+        run(ms);
+      },
+    ];
+    const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
+    watchdog.setProfiling(true);
+    await sleep(STATS_INTERVAL_MS * 2);
+    for (const caller of callers) {
+      caller(12_000);
+      await sleep(STATS_INTERVAL_MS * 3);
+    }
+    await watchdog.stop();
+  },
   // The worker crashes while it profiles the main thread; the profiler's thread afterwards shows
   // whether the profiler is still sampling.
   profile_crash: async () => {

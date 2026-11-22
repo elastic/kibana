@@ -496,6 +496,43 @@ describe('event loop watchdog in a child process', () => {
       expect(restarts(result)).toEqual([]);
     }, 210_000);
 
+    it('writes three large profiles in a row in the same worker, one per top frame', async () => {
+      const profileDir = mkdtempSync(Path.join(Os.tmpdir(), 'watchdog-profiles-'));
+      try {
+        const result = await runHarness('profile_repeated_frames', {
+          timeoutMs: 180_000,
+          profileDir,
+        });
+        expectCleanExit(result);
+        const profiles = profileLogLines(result).map(
+          (line) => line.kibana?.event_loop_watchdog?.profile
+        );
+        expect(profiles.map((profile) => profile?.file)).toEqual([
+          'admitted',
+          'admitted',
+          'admitted',
+        ]);
+        expect(new Set(profiles.map((profile) => profile?.kibanaFrames[0]?.location)).size).toBe(3);
+        for (const profile of profiles) {
+          expect(profile?.nodes).toBeGreaterThanOrEqual(11_900);
+        }
+        const counts = statsOf(result).map(({ profiling }) => profiling?.files);
+        expect(counts.reduce((sum, files) => sum + (files?.written ?? 0), 0)).toBe(3);
+        expect(counts.reduce((sum, files) => sum + (files?.writeFailed ?? 0), 0)).toBe(0);
+        // A file cut mid-write fails to parse.
+        const files = readdirSync(profileDir);
+        expect(files).toHaveLength(3);
+        for (const file of files) {
+          expectViewableProfile(
+            JSON.parse(readFileSync(Path.join(profileDir, file), 'utf8')) as CpuProfile
+          );
+        }
+        expect(restarts(result)).toEqual([]);
+      } finally {
+        rmSync(profileDir, { recursive: true, force: true });
+      }
+    }, 210_000);
+
     it("ends the main thread's profile when the worker crashes while profiling", async () => {
       const result = await runHarness('profile_crash');
       expectCleanExit(result);
