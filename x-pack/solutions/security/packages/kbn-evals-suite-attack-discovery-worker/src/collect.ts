@@ -555,7 +555,23 @@ export const readGenerationFault = async ({
     return undefined;
   };
   const kind = modelKindOf(messages);
-  return { kind: kind ?? 'failed', ...(messages[0] ? { message: messages[0] } : {}) };
+  // The first non-model error explains why the exemption did not apply; a run whose readable
+  // errors are all model errors but whose failures are not all accounted for (some batch errors
+  // were missing) says so instead of citing a model refusal as the gating cause.
+  const nonModelError = messages.find(
+    (message) =>
+      !MODEL_REFUSAL_PATTERN.test(message) && !MODEL_OUTPUT_EXHAUSTED_PATTERN.test(message)
+  );
+  return {
+    kind: kind ?? 'failed',
+    ...(kind
+      ? { message: messages[0] }
+      : nonModelError
+      ? { message: nonModelError }
+      : messages.length !== failed
+      ? { message: `${messages.length} of ${failed} batch errors readable` }
+      : {}),
+  };
 };
 
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';

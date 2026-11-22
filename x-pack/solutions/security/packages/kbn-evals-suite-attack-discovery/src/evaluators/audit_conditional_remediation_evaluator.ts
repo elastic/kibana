@@ -300,9 +300,23 @@ const MAX_TECHNIQUE_NAME_LENGTH = 70;
 const KEPT_COMMA = '\u0001';
 const KEPT_COLON = '\u0002';
 
-const keepTechniqueNameColon = (match: string): string => {
+/** A recommendation heading that ends right before the technique id, so the colon after its name introduces the recommended action. */
+const DIRECTIVE_BEFORE_ID =
+  /\b(?:recommend\w*|suggest\w*|propos\w*)\s+\w*(?:response|remediation|action|measure|step|fix|containment)s?\s+for\s+$/i;
+
+/** Whether the text before the id is a recommendation heading that turns the colon into an action introducer. */
+const afterDirectiveHeading = (offset: number, fullText: string): boolean =>
+  DIRECTIVE_BEFORE_ID.test(fullText.slice(Math.max(0, offset - 60), offset));
+
+const keepTechniqueNameColon = (match: string, offset: number, fullText: string): string => {
   const name = match.replace(/^T\d{4}(?:\.\d{3})?/, '').slice(0, -1);
-  if (name.length > MAX_TECHNIQUE_NAME_LENGTH || HEADING_NOT_A_NAME.test(name)) return match;
+  if (
+    name.length > MAX_TECHNIQUE_NAME_LENGTH ||
+    HEADING_NOT_A_NAME.test(name) ||
+    afterDirectiveHeading(offset, fullText)
+  ) {
+    return match;
+  }
   return `${match.slice(0, -1)}${KEPT_COLON}`;
 };
 
@@ -310,9 +324,16 @@ const keepKnownTechniqueColon = (
   match: string,
   id: string,
   name: string,
-  subName: string
-): string =>
-  isKnownTechniqueName(id, name, subName) ? `${match.slice(0, -1)}${KEPT_COLON}` : match;
+  subName: string,
+  offset: number,
+  fullText: string
+): string => {
+  // A recommendation heading right before the id ("Recommended response for T1562.008 impair
+  // defenses: disable cloud logs") introduces an action, not the technique's other name; the
+  // colon must stay a clause boundary so the instruction stays reachable by the gate.
+  if (afterDirectiveHeading(offset, fullText)) return match;
+  return isKnownTechniqueName(id, name, subName) ? `${match.slice(0, -1)}${KEPT_COLON}` : match;
+};
 
 const splitClauses = (sentence: string): string[] =>
   sentence

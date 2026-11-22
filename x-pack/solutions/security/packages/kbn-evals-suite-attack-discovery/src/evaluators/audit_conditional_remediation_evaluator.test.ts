@@ -309,6 +309,23 @@ describe('findUnconditionalContainment', () => {
     });
   });
 
+  describe('directive headings before a technique name', () => {
+    it.each([
+      'Recommended response for T1562.008 impair defenses: disable cloud logs.',
+      'Suggested remediation for T1562.008 Impair Defenses: Disable Cloud Logs.',
+      'Recommended remediation for T1562.008 impair defenses: disable or modify cloud logs.',
+    ])('flags the instruction the heading introduces: %s', (heading) => {
+      expect(findUnconditionalContainment(heading)).toHaveLength(1);
+    });
+
+    it.each([
+      'Observed T1562.008 impair defenses: disable cloud logs.',
+      'The actor used T1562.008 (impair defenses: disable cloud logs) on the trail.',
+    ])('still masks without a directive heading: %s', (text) => {
+      expect(findUnconditionalContainment(text)).toEqual([]);
+    });
+  });
+
   it('documented limits: a gate with no condition word is flagged', () => {
     expect(
       findUnconditionalContainment('For any principal confirmed compromised, revoke its sessions.')
