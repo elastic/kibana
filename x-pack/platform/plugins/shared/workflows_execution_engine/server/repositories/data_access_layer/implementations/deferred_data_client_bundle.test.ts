@@ -27,6 +27,7 @@ describe('DeferredDataClientBundle', () => {
   };
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
   let coreStart: ReturnType<typeof coreMock.createStart>;
+  let logger: ReturnType<typeof loggerMock.create>;
   let bundle: DeferredDataClientBundle;
 
   beforeEach(() => {
@@ -42,11 +43,12 @@ describe('DeferredDataClientBundle', () => {
 
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
+    logger = loggerMock.create();
 
     bundle = new DeferredDataClientBundle({
       source: 'plain_index',
       dataRetention: '90d',
-      logger: loggerMock.create(),
+      logger,
     });
   });
 
@@ -92,6 +94,28 @@ describe('DeferredDataClientBundle', () => {
       await startPromise;
 
       expect(innerBundle.initStart).toHaveBeenCalledWith(coreStart);
+    });
+
+    it('logs an inner initStart failure once', async () => {
+      const error = new Error('initialization failed');
+      innerBundle.initStart.mockRejectedValue(error);
+      await bundle.initSetup(coreSetup);
+
+      await expect(bundle.initStart(coreStart)).rejects.toBe(error);
+      await expect(bundle.initStart(coreStart)).rejects.toBe(error);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith('Failed to initialize workflow execution storage', {
+        error,
+      });
+    });
+
+    it('does not log an initStart failure after stop', async () => {
+      innerBundle.initStart.mockRejectedValue(new Error('Index initialization stopped'));
+      await bundle.initSetup(coreSetup);
+      await bundle.stop();
+
+      await expect(bundle.initStart(coreStart)).rejects.toThrow('Index initialization stopped');
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 

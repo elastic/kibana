@@ -1458,8 +1458,7 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
-    // Deferred clients retain the rejected promise; this prevents an unhandled detached rejection.
-    void this.dataClientBundle.initStart(coreStart).catch(() => {});
+    void this.dataClientBundle.initStart(coreStart);
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);

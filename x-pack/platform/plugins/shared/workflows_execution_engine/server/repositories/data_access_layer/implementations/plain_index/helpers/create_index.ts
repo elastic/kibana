@@ -8,7 +8,6 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { retryTransientEsErrors } from '../../../../../lib/retry_transient_es_errors';
 
 interface CreateIndexOptions {
@@ -37,10 +36,6 @@ export const isUnknownResourceError = (error: EsErrors.ElasticsearchClientError)
   error.statusCode === 404 &&
   error.body?.ok === false &&
   error.body?.message === 'Unknown resource.';
-
-export const isRetryableIndexInitializationError = (
-  error: EsErrors.ElasticsearchClientError
-): boolean => isRetryableEsClientError(error) || isUnknownResourceError(error);
 
 export const createIndexWithMappings = async ({
   esClient,

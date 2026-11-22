@@ -27,6 +27,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
   private readonly dataClientBundle: DataClientBundle;
   private startPromise: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
+  private stopped = false;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
     this.dataClientBundle = this.createDataClientBundle();
@@ -46,11 +47,17 @@ export class DeferredDataClientBundle implements DataClientBundle {
 
     if (!this.startPromise) {
       this.startPromise = this.setupPromise.then(() => this.dataClientBundle.initStart(coreStart));
+      this.startPromise.catch((error) => {
+        if (!this.stopped) {
+          this.deps.logger.error('Failed to initialize workflow execution storage', { error });
+        }
+      });
     }
     return this.startPromise;
   }
 
   stop(): Promise<void> {
+    this.stopped = true;
     return this.dataClientBundle.stop();
   }
 

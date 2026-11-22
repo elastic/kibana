@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { withTimeout } from '@kbn/std';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import {
-  createOrUpdateIndex,
-  isRetryableIndexInitializationError,
-  isUnknownResourceError,
-} from './helpers';
+import { createOrUpdateIndex, isUnknownResourceError } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
 import {
@@ -29,18 +26,12 @@ import type {
 } from '../../types';
 
 const INDEX_INITIALIZATION_TIMEOUT_MS = 20 * 60 * 1000;
-const INDEX_INITIALIZATION_STOPPED_MESSAGE = 'Index initialization stopped';
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
-  private readonly stopSignal: Promise<void>;
-  private resolveStop?: () => void;
+  private readonly retryController = new AbortController();
 
-  constructor(private readonly deps: CreateDataClientDeps) {
-    this.stopSignal = new Promise((resolve) => {
-      this.resolveStop = resolve;
-    });
-  }
+  constructor(private readonly deps: CreateDataClientDeps) {}
 
   async initSetup(_coreSetup: CoreSetup): Promise<void> {}
 
@@ -49,11 +40,11 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
       coreStart.elasticsearch.client.asInternalUser,
       this.deps.logger
     );
-    this.esClient = await this.init(esClient, this.deps.logger);
+    this.esClient = await this.init(esClient);
   }
 
   async stop(): Promise<void> {
-    this.resolveStop?.();
+    this.retryController.abort(new Error('Index initialization stopped'));
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -72,91 +63,66 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
     });
   }
 
-  private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
-    let attempt = 0;
-    let unknownResourceDeadline: number | undefined;
-    let lastUnknownResourceError: Error | undefined;
-
-    while (true) {
-      const remainingTime =
-        unknownResourceDeadline === undefined ? undefined : unknownResourceDeadline - Date.now();
-      if (remainingTime !== undefined && remainingTime <= 0 && lastUnknownResourceError) {
-        logger.error('Failed to initialize workflow execution indices', {
-          error: lastUnknownResourceError,
-        });
-        throw lastUnknownResourceError;
-      }
-
-      const attemptPromise = Promise.race([
-        Promise.allSettled([
-          createOrUpdateIndex({
-            esClient,
-            indexName: WORKFLOWS_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-            logger,
-          }),
-          createOrUpdateIndex({
-            esClient,
-            indexName: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-            mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-            logger,
-          }),
-        ]),
-        this.stopSignal.then(() => {
-          throw new Error(INDEX_INITIALIZATION_STOPPED_MESSAGE);
-        }),
+  private async init(esClient: ElasticsearchClient): Promise<ElasticsearchClient> {
+    try {
+      await Promise.all([
+        this.initIndex(esClient, WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS),
+        this.initIndex(
+          esClient,
+          WORKFLOWS_STEP_EXECUTIONS_INDEX,
+          WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS
+        ),
       ]);
-
-      const outcome =
-        remainingTime === undefined
-          ? { timedout: false as const, value: await attemptPromise }
-          : await withTimeout({ promise: attemptPromise, timeoutMs: remainingTime });
-
-      if (outcome.timedout) {
-        const error =
-          lastUnknownResourceError ??
-          new Error('Workflow execution index initialization timed out');
-        logger.error('Failed to initialize workflow execution indices', { error });
-        throw error;
-      }
-
-      const errors = outcome.value.flatMap((result) =>
-        result.status === 'rejected' ? [result.reason] : []
-      );
-      if (errors.length === 0) {
-        return esClient;
-      }
-
-      const terminalError = errors.find((error) => !isRetryableIndexInitializationError(error));
-      if (terminalError) {
-        logger.error('Failed to initialize workflow execution indices', { error: terminalError });
-        throw terminalError;
-      }
-
-      if (errors.every(isUnknownResourceError)) {
-        unknownResourceDeadline ??= Date.now() + INDEX_INITIALIZATION_TIMEOUT_MS;
-        lastUnknownResourceError = errors[0];
-      } else {
-        unknownResourceDeadline = undefined;
-        lastUnknownResourceError = undefined;
-      }
-
-      attempt++;
-      const retryDelay = Math.min(1000 * Math.pow(2, attempt), 30_000);
-      const delay = unknownResourceDeadline
-        ? Math.min(retryDelay, Math.max(0, unknownResourceDeadline - Date.now()))
-        : retryDelay;
-      logger.warn(`Transient error during index init, retrying in ${delay}ms`, {
-        error: errors[0],
-      });
-      await this.waitForRetry(delay);
+      return esClient;
+    } catch (error) {
+      this.retryController.abort(error);
+      throw error;
     }
   }
 
-  private async waitForRetry(ms: number): Promise<void> {
-    const outcome = await withTimeout({ promise: this.stopSignal, timeoutMs: ms, unref: true });
-    if (!outcome.timedout) {
-      throw new Error(INDEX_INITIALIZATION_STOPPED_MESSAGE);
+  private async initIndex(
+    esClient: ElasticsearchClient,
+    indexName: string,
+    mappings: MappingTypeMapping
+  ): Promise<void> {
+    const { logger } = this.deps;
+    const { signal } = this.retryController;
+    let unknownResourceDeadline = Infinity;
+
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await createOrUpdateIndex({ esClient, indexName, mappings, logger });
+        return;
+      } catch (error) {
+        const isUnknownResource = isUnknownResourceError(error);
+        if (!isUnknownResource && !isRetryableEsClientError(error)) {
+          throw error;
+        }
+        unknownResourceDeadline = isUnknownResource
+          ? Math.min(unknownResourceDeadline, Date.now() + INDEX_INITIALIZATION_TIMEOUT_MS)
+          : Infinity;
+        const remainingTime = unknownResourceDeadline - Date.now();
+        if (remainingTime <= 0) {
+          throw error;
+        }
+        const ms = Math.min(1000 * Math.pow(2, attempt), 30_000, remainingTime);
+        logger.warn(`Transient error during ${indexName} init, retrying in ${ms}ms`, { error });
+        await waitForRetry(ms, signal);
+      }
     }
   }
 }
+
+const waitForRetry = (ms: number, signal: AbortSignal): Promise<void> =>
+  new Promise((resolve, reject) => {
+    signal.throwIfAborted();
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(signal.reason);
+    };
+    const timeout = setTimeout(() => {
+      signal.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal.addEventListener('abort', onAbort, { once: true });
+  });

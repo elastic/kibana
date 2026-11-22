@@ -102,7 +102,7 @@ describe('PlainIndexDataClientBundle', () => {
       return { bundle, coreStart, esClient, logger };
     };
 
-    it('retries an unknown resource response without logging an error', async () => {
+    it('retries an unknown resource response', async () => {
       const { bundle, coreStart, esClient, logger } = createBundle();
       esClient.indices.create
         .mockRejectedValueOnce(unknownResourceError)
@@ -116,33 +116,46 @@ describe('PlainIndexDataClientBundle', () => {
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('logs an error when unknown resource responses continue for 20 minutes', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
+    it('stops retrying unknown resource responses after 20 minutes', async () => {
+      const { bundle, coreStart, esClient } = createBundle();
       esClient.indices.create.mockRejectedValue(unknownResourceError);
-
-      const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
-      await jest.advanceTimersByTimeAsync(0);
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      jest.setSystemTime(Date.now() + 20 * 60 * 1000);
-      await jest.advanceTimersByTimeAsync(2_000);
-
-      await initialization;
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.error).toHaveBeenCalledTimes(1);
-    });
-
-    it('times out an active index initialization attempt', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
-      esClient.indices.create
-        .mockRejectedValueOnce(unknownResourceError)
-        .mockRejectedValueOnce(unknownResourceError)
-        .mockImplementation(() => new Promise(() => {}));
 
       const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
       await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
 
       await initialization;
-      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('tracks the 20-minute limit for each index', async () => {
+      const { bundle, coreStart, esClient } = createBundle();
+      esClient.indices.create.mockImplementation(({ index }) =>
+        Promise.reject(
+          index === WORKFLOWS_EXECUTIONS_INDEX ? unknownResourceError : serviceUnavailableError
+        )
+      );
+
+      const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
+      await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
+
+      await initialization;
+      await jest.advanceTimersByTimeAsync(60_000);
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it('keeps retrying existing transient errors after 20 minutes', async () => {
+      const { bundle, coreStart, esClient, logger } = createBundle();
+      const recoversAt = Date.now() + 25 * 60 * 1000;
+      esClient.indices.create.mockImplementation(({ index }) =>
+        Date.now() < recoversAt
+          ? Promise.reject(serviceUnavailableError)
+          : Promise.resolve({ acknowledged: true, shards_acknowledged: true, index: String(index) })
+      );
+
+      const initialization = bundle.initStart(coreStart);
+      await jest.advanceTimersByTimeAsync(26 * 60 * 1000);
+
+      await expect(initialization).resolves.toBeUndefined();
+      expect(logger.warn).toHaveBeenCalled();
     });
 
     it('stops waiting when the plugin stops', async () => {
@@ -153,59 +166,33 @@ describe('PlainIndexDataClientBundle', () => {
         'Index initialization stopped'
       );
       await jest.advanceTimersByTimeAsync(0);
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(jest.getTimerCount()).toBeGreaterThan(0);
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+      expect(jest.getTimerCount()).toBe(2);
       await bundle.stop();
 
       await initialization;
-      expect(logger.error).not.toHaveBeenCalled();
+      expect(jest.getTimerCount()).toBe(0);
     });
 
-    it('logs a nonretryable initialization error once', async () => {
+    it('rejects a nonretryable error without retrying', async () => {
       const { bundle, coreStart, esClient, logger } = createBundle();
       const error = new Error('mapping conflict');
       esClient.indices.create.mockRejectedValue(error);
 
       await expect(bundle.initStart(coreStart)).rejects.toBe(error);
       expect(logger.warn).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('stops when either index has a nonretryable error', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
+    it('stops the other index when one index has a nonretryable error', async () => {
+      const { bundle, coreStart, esClient } = createBundle();
       const error = new Error('mapping conflict');
-      esClient.indices.create.mockImplementation(({ index }) => {
-        if (index === WORKFLOWS_EXECUTIONS_INDEX) {
-          return Promise.reject(unknownResourceError);
-        }
-        return Promise.reject(error);
-      });
+      esClient.indices.create.mockImplementation(({ index }) =>
+        Promise.reject(index === WORKFLOWS_EXECUTIONS_INDEX ? unknownResourceError : error)
+      );
 
       await expect(bundle.initStart(coreStart)).rejects.toBe(error);
-      expect(logger.warn).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledTimes(1);
-    });
-
-    it('keeps retrying existing transient errors after 20 minutes', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
-      let failures = 0;
-      esClient.indices.create.mockImplementation(({ index }) => {
-        if (index === WORKFLOWS_EXECUTIONS_INDEX && failures++ < 4) {
-          return Promise.reject(serviceUnavailableError);
-        }
-        return Promise.resolve({
-          acknowledged: true,
-          shards_acknowledged: true,
-          index: String(index),
-        });
-      });
-
-      const initialization = bundle.initStart(coreStart);
-      await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
-
-      await expect(initialization).resolves.toBeUndefined();
-      expect(logger.warn).toHaveBeenCalled();
-      expect(logger.error).not.toHaveBeenCalled();
+      expect(jest.getTimerCount()).toBe(0);
     });
   });
 });
