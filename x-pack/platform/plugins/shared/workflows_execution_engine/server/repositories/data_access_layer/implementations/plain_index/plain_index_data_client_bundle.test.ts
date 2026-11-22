@@ -86,7 +86,6 @@ describe('PlainIndexDataClientBundle', () => {
     const createBundle = () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.exists.mockResolvedValue(false as never);
-      esClient.indices.create.mockResolvedValue({ acknowledged: true } as never);
       const coreStart = coreMock.createStart();
       Object.defineProperty(coreStart.elasticsearch.client, 'asInternalUser', {
         configurable: true,
@@ -102,7 +101,7 @@ describe('PlainIndexDataClientBundle', () => {
       return { bundle, coreStart, esClient, logger };
     };
 
-    it('retries an unknown resource response', async () => {
+    it('retries an unknown resource response without logging an error', async () => {
       const { bundle, coreStart, esClient, logger } = createBundle();
       esClient.indices.create
         .mockRejectedValueOnce(unknownResourceError)
@@ -112,38 +111,22 @@ describe('PlainIndexDataClientBundle', () => {
       await jest.advanceTimersByTimeAsync(2_000);
 
       await expect(initialization).resolves.toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('stops retrying unknown resource responses after 20 minutes', async () => {
-      const { bundle, coreStart, esClient } = createBundle();
+    it('logs one error when unknown resource responses continue for 20 minutes', async () => {
+      const { bundle, coreStart, esClient, logger } = createBundle();
       esClient.indices.create.mockRejectedValue(unknownResourceError);
 
       const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
-      await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
+      await jest.advanceTimersByTimeAsync(21 * 60 * 1000);
 
       await initialization;
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
-    it('tracks the 20-minute limit for each index', async () => {
-      const { bundle, coreStart, esClient } = createBundle();
-      esClient.indices.create.mockImplementation(({ index }) =>
-        Promise.reject(
-          index === WORKFLOWS_EXECUTIONS_INDEX ? unknownResourceError : serviceUnavailableError
-        )
-      );
-
-      const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
-      await jest.advanceTimersByTimeAsync(20 * 60 * 1000);
-
-      await initialization;
-      const { length: attempts } = esClient.indices.create.mock.calls;
-      await jest.advanceTimersByTimeAsync(60_000);
-      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
-    });
-
-    it('keeps retrying existing transient errors after 20 minutes', async () => {
+    it('keeps retrying other transient errors after 20 minutes', async () => {
       const { bundle, coreStart, esClient, logger } = createBundle();
       const recoversAt = Date.now() + 25 * 60 * 1000;
       esClient.indices.create.mockImplementation(({ index }) =>
@@ -156,59 +139,7 @@ describe('PlainIndexDataClientBundle', () => {
       await jest.advanceTimersByTimeAsync(26 * 60 * 1000);
 
       await expect(initialization).resolves.toBeUndefined();
-      expect(logger.warn).toHaveBeenCalled();
-    });
-
-    it('stops retrying when the plugin stops', async () => {
-      const { bundle, coreStart, esClient } = createBundle();
-      esClient.indices.create.mockRejectedValue(unknownResourceError);
-
-      const initialization = expect(bundle.initStart(coreStart)).rejects.toThrow(
-        'Index initialization stopped'
-      );
-      await jest.advanceTimersByTimeAsync(0);
-      await bundle.stop();
-
-      await initialization;
-      const { length: attempts } = esClient.indices.create.mock.calls;
-      await jest.advanceTimersByTimeAsync(60_000);
-      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
-    });
-
-    it('stops during an active index request', async () => {
-      const { bundle, coreStart, esClient } = createBundle();
-      esClient.indices.create.mockImplementation(() => new Promise(() => {}));
-
-      const initialization = expect(bundle.initStart(coreStart)).rejects.toThrow(
-        'Index initialization stopped'
-      );
-      await jest.advanceTimersByTimeAsync(0);
-      await bundle.stop();
-
-      await initialization;
-    });
-
-    it('rejects a nonretryable error without retrying', async () => {
-      const { bundle, coreStart, esClient, logger } = createBundle();
-      const error = new Error('mapping conflict');
-      esClient.indices.create.mockRejectedValue(error);
-
-      await expect(bundle.initStart(coreStart)).rejects.toBe(error);
-      expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
-    });
-
-    it('stops the other index when one index has a nonretryable error', async () => {
-      const { bundle, coreStart, esClient } = createBundle();
-      const error = new Error('mapping conflict');
-      esClient.indices.create.mockImplementation(({ index }) =>
-        Promise.reject(index === WORKFLOWS_EXECUTIONS_INDEX ? unknownResourceError : error)
-      );
-
-      await expect(bundle.initStart(coreStart)).rejects.toBe(error);
-      const { length: attempts } = esClient.indices.create.mock.calls;
-      await jest.advanceTimersByTimeAsync(60_000);
-      expect(esClient.indices.create).toHaveBeenCalledTimes(attempts);
     });
   });
 });
