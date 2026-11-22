@@ -50,6 +50,15 @@ const logger: Logger = {
 
 const BLOCK_GAP_MS = 500;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const HOUR_MS = 60 * 60 * 1000;
+/** Waits past the next clock hour if it's within `ms`, so the next `ms` stay in one hour. */
+const keepWithinClockHour = async (ms: number) => {
+  const untilNextHour = HOUR_MS - (Date.now() % HOUR_MS);
+  if (untilNextHour < ms) {
+    await sleep(untilNextHour + 1_000);
+  }
+};
 const blockFor = (ms: number) => {
   const end = Date.now() + ms;
   while (Date.now() < end) {
@@ -254,6 +263,8 @@ const scenarios: Record<string, () => Promise<void>> = {
     const watchdog = await startRunning({ ...PROFILING, maxDurationMs: perPhase(10_000) });
     watchdog.setProfiling(true);
     await sleep(STATS_INTERVAL_MS * 2);
+    // Admission allows one file per top frame per clock hour, so all three captures must share it.
+    await keepWithinClockHour(90_000);
     for (let i = 0; i < 3; i++) {
       run(12_000);
       await sleep(STATS_INTERVAL_MS * 3);
