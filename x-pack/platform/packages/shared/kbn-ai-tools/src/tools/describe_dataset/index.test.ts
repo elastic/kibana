@@ -99,6 +99,30 @@ describe('describeDataset', () => {
     );
   });
 
+  it('draws a random sample when a sample size is given', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockImplementation(async ({ query: esql }: { query: string }) =>
+      esql.includes('STATS')
+        ? countResponse(100_000)
+        : esql.includes('LIMIT 0')
+        ? schemaResponse()
+        : hitsResponse()
+    );
+
+    const analysis = await describeDataset({
+      esClient,
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      sampleSize: 1000,
+    });
+
+    const queries = query.mock.calls.map(([{ query: esql }]) => esql);
+    expect(queries).toContainEqual(expect.stringContaining('| SAMPLE 0.012 | LIMIT 10000'));
+    expect(analysis.total).toBe(100_000);
+    expect(analysis.sampled).toBe(2);
+  });
+
   it('uses the population count instead of sampled hit count for total', async () => {
     const { esClient, query } = createEsClient();
     query

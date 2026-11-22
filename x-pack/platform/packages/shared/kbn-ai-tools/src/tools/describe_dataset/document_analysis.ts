@@ -12,6 +12,10 @@ export interface DocumentAnalysisField {
   values: Array<{ value: string | number | boolean; count: number }>;
   empty: boolean;
   documentsWithValue: number;
+  /** Equal for two fields holding the same values on the same sampled documents. */
+  fingerprint?: string;
+  /** Equal for two fields whose values map one-to-one across the sampled documents. */
+  partition?: string;
 }
 
 export interface DocumentAnalysis {

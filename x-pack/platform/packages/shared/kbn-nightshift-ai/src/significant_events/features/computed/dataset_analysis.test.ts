@@ -6,18 +6,19 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { describeDataset, formatDocumentAnalysis, getMappingConflicts } from '@kbn/ai-tools';
+import { describeDataset, getMappingConflicts } from '@kbn/ai-tools';
 import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { datasetAnalysisGenerator } from './dataset_analysis';
+import { formatDatasetAnalysis } from './format_dataset_analysis';
 
 jest.mock('@kbn/ai-tools', () => ({
   describeDataset: jest.fn(),
-  formatDocumentAnalysis: jest.fn(),
   getMappingConflicts: jest.fn(),
 }));
+jest.mock('./format_dataset_analysis', () => ({ formatDatasetAnalysis: jest.fn() }));
 
 const describeDatasetMock = jest.mocked(describeDataset);
-const formatDocumentAnalysisMock = jest.mocked(formatDocumentAnalysis);
+const formatDatasetAnalysisMock = jest.mocked(formatDatasetAnalysis);
 const getMappingConflictsMock = jest.mocked(getMappingConflicts);
 
 const target: AnalysisTarget = {
@@ -36,7 +37,7 @@ describe('datasetAnalysisGenerator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     describeDatasetMock.mockResolvedValue({} as never);
-    formatDocumentAnalysisMock.mockReturnValue(formatted as never);
+    formatDatasetAnalysisMock.mockReturnValue(formatted as never);
   });
 
   it('passes conflicts from the full stream hierarchy to the formatter keyed by field', async () => {
@@ -55,13 +56,17 @@ describe('datasetAnalysisGenerator', () => {
     });
 
     expect(result).toEqual({ analysis: formatted });
-    expect(formatDocumentAnalysisMock.mock.calls[0][1]).toEqual(
+    expect(formatDatasetAnalysisMock.mock.calls[0][1]).toEqual(
       expect.objectContaining({
         conflicts: {
           'exception.message': { types: ['keyword', 'text'], suggestedCast: 'keyword' },
           'host.name': { types: ['ip', 'keyword'] },
         },
       })
+    );
+
+    expect(describeDatasetMock.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ index: 'logs.test-default', sampleSize: 1000 })
     );
 
     const conflictCall = getMappingConflictsMock.mock.calls[0][0];
@@ -83,7 +88,7 @@ describe('datasetAnalysisGenerator', () => {
     });
 
     expect(result).toEqual({ analysis: formatted });
-    expect(formatDocumentAnalysisMock.mock.calls[0][1]).toEqual(
+    expect(formatDatasetAnalysisMock.mock.calls[0][1]).toEqual(
       expect.objectContaining({ conflicts: {} })
     );
   });

@@ -14,12 +14,16 @@ import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_ti
 import { getSampleDocumentsEsql } from './get_sample_documents';
 import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
+// The analysis only needs roughly `sampleSize` documents, so it skips most of the sampling margin.
+const SAMPLE_OVERSAMPLING_FACTOR = 1.2;
+
 export async function describeDataset({
   esClient,
   start,
   end,
   index,
   kql,
+  sampleSize,
   signal,
 }: {
   esClient: ElasticsearchClient;
@@ -27,6 +31,8 @@ export async function describeDataset({
   end: number;
   index: string | string[];
   kql?: string;
+  /** Draws a random sample of this size instead of the first documents in storage order. */
+  sampleSize?: number;
   signal?: AbortSignal;
 }) {
   const deadline = signal ? undefined : timeoutSignal(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
@@ -47,6 +53,8 @@ export async function describeDataset({
         start,
         end,
         kql,
+        sampleSize,
+        oversamplingFactor: SAMPLE_OVERSAMPLING_FACTOR,
         abortSignal: requestSignal,
       }),
       runEsqlPopulationCount({

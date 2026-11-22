@@ -98,4 +98,20 @@ describe('mergeSampleDocumentsWithSchema', () => {
       })
     );
   });
+
+  it('fingerprints fields by their values and by how they split the documents', () => {
+    const hits = [
+      { host: 'a', hostname: 'a', ip: '10.0.0.1', level: 'info' },
+      { host: 'b', hostname: 'b', ip: '10.0.0.2', level: 'info' },
+      { host: 'a', hostname: 'a', ip: '10.0.0.1', level: 'error' },
+    ].map((_source, index) => ({ _index: 'test', _id: String(index), _source } as SearchHit));
+
+    const { fields } = mergeSampleDocumentsWithSchema({ total: 3, hits, schema: [] });
+    const byName = Object.fromEntries(fields.map((field) => [field.name, field]));
+
+    expect(byName.hostname.fingerprint).toBe(byName.host.fingerprint);
+    expect(byName.ip.fingerprint).not.toBe(byName.host.fingerprint);
+    expect(byName.ip.partition).toBe(byName.host.partition);
+    expect(byName.level.partition).not.toBe(byName.host.partition);
+  });
 });
