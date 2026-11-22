@@ -48,6 +48,13 @@ describe('WriteAdmission', () => {
     expect(admission.admit('src/new.ts:1', HOUR_START + HOUR_MS + 1)).toBe('admitted');
   });
 
+  it('keeps the signatures when the clock is set back to an earlier hour', () => {
+    const admission = new WriteAdmission();
+    fillHour(admission);
+    expect(admission.admit('src/frame_0.ts:1', HOUR_START - 1)).toBe('same_frame');
+    expect(admission.admit('src/new.ts:1', HOUR_START - 1)).toBe('hour_limit');
+  });
+
   it('uses clock hours, not an hour from the first admission', () => {
     const admission = new WriteAdmission();
     const lastMinute = HOUR_START + HOUR_MS - 60_000;

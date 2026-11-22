@@ -28,7 +28,7 @@ export const profileSignature = ({ topKibanaFrame, frames }: ProfileSummary): st
 
 /**
  * Admits up to `FILES_PER_HOUR` profile files per clock hour, one per signature. A failed write
- * still uses its slot. The signatures clear when the hour changes.
+ * still uses its slot. The signatures clear when a later hour starts; a clock set back keeps them.
  */
 export class WriteAdmission {
   private hour = -1;
@@ -37,7 +37,7 @@ export class WriteAdmission {
   /** `nowMs` is wall-clock time so that hours match the log timestamps. */
   public admit(signature: string, nowMs: number): AdmissionOutcome {
     const hour = Math.floor(nowMs / HOUR_MS);
-    if (hour !== this.hour) {
+    if (hour > this.hour) {
       this.hour = hour;
       this.written.clear();
     }
