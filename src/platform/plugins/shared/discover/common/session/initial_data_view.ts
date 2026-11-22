@@ -42,6 +42,11 @@ export const getNavigationDataView = (
   return spec;
 };
 
+/** Returns the ID of a navigation spec only if the spec itself shows it was saved. */
+export const getSavedIdsFromNavigationSpec = (spec: DataViewSpec | undefined): string[] =>
+  // A saved version is what makes a view persisted, so it is the only proof without the list.
+  spec?.id && typeof spec.version === 'string' ? [spec.id] : [];
+
 /** Selects the definition or ID to load without applying availability or error fallbacks. */
 export const getRequestedDataView = ({
   dataViewId,

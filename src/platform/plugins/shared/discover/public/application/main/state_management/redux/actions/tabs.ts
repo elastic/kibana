@@ -50,6 +50,7 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import { createInlineDataViewIdCompatibility } from '../../../../../../common/session/inline_data_view_id_compatibility';
+import { getSavedIdsFromNavigationSpec } from '../../../../../../common/session/initial_data_view';
 import {
   getInlineDataViewIdentity,
   normalizeInlineAppState,
@@ -495,10 +496,9 @@ export const initializeTabs = createInternalStateAsyncThunk(
         return undefined;
       }
 
-      // Use the spec's version to spot saved views, so Discover still opens if the list fails.
+      // Fall back to what the spec shows about itself, so Discover still opens if the list fails.
       if (loadDataViewList.rejected.match(dataViewListResult)) {
-        const { id, version } = initialTabState?.dataViewSpec ?? {};
-        return id && typeof version === 'string' ? [id] : [];
+        return getSavedIdsFromNavigationSpec(initialTabState?.dataViewSpec);
       }
 
       return getState().savedDataViews.map(({ id }) => id);

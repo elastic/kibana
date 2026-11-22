@@ -37,7 +37,8 @@ interface InlineDataViewEditorController {
   dispose: CloseEditor;
 }
 
-const toError = (error: unknown): Error => {
+/** Normalizes a thrown value so it can be reported with a stack and message. */
+export const toError = (error: unknown): Error => {
   if (error instanceof Error) {
     return error;
   }

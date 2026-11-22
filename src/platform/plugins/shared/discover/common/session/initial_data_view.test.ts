@@ -13,7 +13,23 @@ import {
   getInitialDataViewId,
   getNavigationDataView,
   getRequestedDataView,
+  getSavedIdsFromNavigationSpec,
 } from './initial_data_view';
+
+describe('getSavedIdsFromNavigationSpec', () => {
+  it.each<[string, DataViewSpec | undefined, string[]]>([
+    [
+      'a spec with a saved version',
+      { id: 'saved-id', title: 'logs-*', version: 'WzEsMV0=' },
+      ['saved-id'],
+    ],
+    ['a spec without a version', { id: 'inline-id', title: 'logs-*' }, []],
+    ['a spec without an ID', { title: 'logs-*', version: 'WzEsMV0=' }, []],
+    ['no spec', undefined, []],
+  ])('returns the saved IDs proven by %s', (_description, spec, expected) => {
+    expect(getSavedIdsFromNavigationSpec(spec)).toStrictEqual(expected);
+  });
+});
 
 describe('getInitialDataViewId', () => {
   it.each<[Parameters<typeof getInitialDataViewId>[0], string | undefined]>([
