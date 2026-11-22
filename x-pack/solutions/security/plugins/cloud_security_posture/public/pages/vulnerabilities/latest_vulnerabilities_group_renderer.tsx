@@ -22,7 +22,13 @@ import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
 import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
 import { VULNERABILITIES_GROUPING_COUNTER } from './test_subjects';
-import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT, VULNERABILITIES } from './translations';
+import {
+  NULL_GROUPING_MESSAGES,
+  NULL_GROUPING_UNIT,
+  NO_FIX_YET_BADGE,
+  VULNERABILITIES,
+} from './translations';
+import { FIX_GROUP_NO_FIX, splitFixGroupKey } from './hooks/fix_group_runtime_fields';
 import {
   firstNonNullValue,
   LoadingGroup,
@@ -53,6 +59,60 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
     : '';
 
   switch (selectedGroup) {
+    case VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_ADVISORY_PACKAGE:
+    case VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_PACKAGE_FIXED: {
+      if (nullGroupMessage) {
+        return renderNullGroup(NULL_GROUPING_MESSAGES.DEFAULT);
+      }
+      const rawKey = String(bucket.key_as_string ?? '');
+      const [first, second] = splitFixGroupKey(rawKey) ?? [rawKey, ''];
+      const isAdvisoryGroup =
+        selectedGroup === VULNERABILITY_GROUPING_OPTIONS.FIX_GROUP_ADVISORY_PACKAGE;
+      const fixVersion = isAdvisoryGroup
+        ? firstNonNullValue(bucket.fixVersion?.buckets?.[0]?.key)
+        : undefined;
+      const hasNoFix = isAdvisoryGroup ? !fixVersion : second === FIX_GROUP_NO_FIX;
+      return (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="none">
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <EuiTextBlockTruncate lines={1}>{first}</EuiTextBlockTruncate>
+                </EuiText>
+              </EuiFlexItem>
+              {second && second !== FIX_GROUP_NO_FIX && (
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    <EuiTextBlockTruncate lines={1}>{second}</EuiTextBlockTruncate>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+              {isAdvisoryGroup && fixVersion && (
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    <EuiTextBlockTruncate lines={1}>
+                      <FormattedMessage
+                        id="xpack.csp.vulnerabilities.grouping.fixGroup.fixVersion"
+                        defaultMessage="fix version: {fixVersion}"
+                        values={{ fixVersion }}
+                      />
+                    </EuiTextBlockTruncate>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          {hasNoFix && (
+            <EuiFlexItem grow={0}>
+              <EuiBadge color="warning" data-test-subj="fix-group-no-fix-badge">
+                {NO_FIX_YET_BADGE}
+              </EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    }
     case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_ID:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_ID)

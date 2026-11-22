@@ -27,6 +27,7 @@ import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common
 import { VULNERABILITY_FIELDS } from '../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { getCaseInsensitiveSortScript } from '../utils/custom_sort_script';
+import { getFixGroupRuntimeMappings } from './fix_group_runtime_fields';
 type LatestFindingsRequest = IKibanaSearchRequest<SearchRequest>;
 type LatestFindingsResponse = IKibanaSearchResponse<
   SearchResponse<CspVulnerabilityFinding, FindingsAggs>
@@ -79,6 +80,7 @@ export const getVulnerabilitiesQuery = (
     },
   },
   ...(pageParam ? { from: pageParam } : {}),
+  runtime_mappings: getFixGroupRuntimeMappings(),
 });
 
 export const useLatestVulnerabilities = (options: VulnerabilitiesQuery) => {
