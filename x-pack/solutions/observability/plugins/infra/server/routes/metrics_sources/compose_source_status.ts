@@ -94,18 +94,22 @@ export const composeSourceStatus = async ({
       // visible at error level. Pass the Error itself as the first argument: the OTel appender
       // reads `exception.type` / `exception.message` / `exception.stacktrace` from
       // `LogRecord.error`, which is only populated from the first argument when it is an Error, so
-      // passing it as `{ error }` meta would drop those attributes. Prefix the message with the
-      // source and pattern so the context still survives Kibana's default console layout (which
-      // renders `%message` but not structured labels), while keeping the original name and stack
-      // so `exception.type` / `exception.stacktrace` stay faithful to the underlying failure.
+      // passing it as `{ error }` meta would drop those attributes.
       const original = err instanceof Error ? err : new Error(String(err));
-      const error = new Error(
-        `Metric index status check failed for source "${toSingleLine(
-          sourceId
-        )}" (pattern: ${toSingleLine(metricAlias)}): ${original.message}`
-      );
+      const message = `Metric index status check failed for source "${toSingleLine(
+        sourceId
+      )}" (pattern: ${toSingleLine(metricAlias)}): ${original.message}`;
+      const error = new Error(message);
       error.name = original.name;
-      error.stack = original.stack;
+      // Kibana's `%message` pattern conversion renders `error.stack` in place of `error.message`
+      // when a stack is present, so copying the original stack verbatim would hide the source and
+      // pattern from the default console and OTel log body. Rewrite the stack's header line (the
+      // `name: message` line) to carry the enriched message while keeping the original frames, so
+      // the context survives in the rendered output and the stacktrace stays faithful.
+      if (original.stack) {
+        const [, ...frames] = original.stack.split('\n');
+        error.stack = [`${error.name}: ${message}`, ...frames].join('\n');
+      }
       logger.error(error);
     }
 

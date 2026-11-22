@@ -14,6 +14,13 @@ import { composeSourceStatus } from './compose_source_status';
 
 const metricAlias = 'metrics-*,metricbeat-*';
 
+// Mirrors how Kibana's `%message` pattern conversion renders a logged Error: when a stack is
+// present it renders `error.stack` in place of `error.message`
+// (src/core/packages/logging/common-internal/src/layouts/conversions/message.ts). We cannot import
+// that Core-private conversion from a plugin test, so we replicate its rule here to assert the
+// context survives in the rendered body rather than only in the mocked logger argument.
+const renderMessage = (error: Error): string => error.stack ?? error.message;
+
 describe('composeSourceStatus', () => {
   const logger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
@@ -83,17 +90,18 @@ describe('composeSourceStatus', () => {
     // An unexpected failure (for example an authorization error) is not a timeout, so it stays at
     // error level. It is passed as the Error itself (not a string with `{ error }` meta) so the
     // OTel appender keeps the `exception.type` / `exception.message` / `exception.stacktrace`
-    // attributes, which it reads from the first Error argument. The message carries the source and
-    // pattern so the context survives Kibana's default console layout, while the original name and
-    // stack are preserved so the exception type and stacktrace stay faithful to the real failure.
+    // attributes, which it reads from the first Error argument.
     expect(logger.error).toHaveBeenCalledTimes(1);
     const loggedError = logger.error.mock.calls[0][0] as Error;
     expect(loggedError).toBeInstanceOf(Error);
-    expect(loggedError.message).toBe(
-      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
-    );
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy';
+    expect(loggedError.message).toBe(expectedMessage);
     expect(loggedError.name).toBe('TypeError');
-    expect(loggedError.stack).toBe(original.stack);
+    // Kibana's `%message` conversion renders `error.stack` (not `error.message`) when a stack is
+    // present, so assert against that rendered body: the header carries the source and pattern
+    // context, and the original frames are preserved after it.
+    expect(renderMessage(loggedError)).toBe(`TypeError: ${expectedMessage}\n    at probe`);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
