@@ -78,3 +78,4 @@ bump-cli
 monaco-marker-data-provider
 tabbable
 @opentelemetry/otlp-grpc-exporter-base
+@jest/globals
