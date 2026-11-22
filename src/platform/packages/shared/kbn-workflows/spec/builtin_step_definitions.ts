@@ -21,6 +21,7 @@ import {
   WaitForInputStepInputSchema,
   WaitStepInputSchema,
   WhileStepConfigSchema,
+  WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS,
   WorkflowAwaitExecutionsStepInputSchema,
   WorkflowAwaitExecutionsStepOutputSchema,
   WorkflowExecuteAsyncStepOutputSchema,
@@ -448,8 +449,7 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
   {
     id: 'workflow.awaitExecutions',
     label: 'Await Workflow Executions',
-    description:
-      'Wait for executions started by workflow.executeAsync to finish and collect their results. Fails fast on the first unsuccessful execution (without cancelling the others), or waits for all of them in settled mode. Only executions started by this run can be awaited. Waits at most 24 hours, even when the step timeout is longer',
+    description: `Wait for executions started by workflow.executeAsync to finish and collect their results. Fails fast on the first unsuccessful execution (without cancelling the others), or waits for all of them in settled mode. Only executions started by this run can be awaited, at most ${WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS} per step. Waits at most 24 hours, even when the step timeout is longer`,
     category: StepCategory.FlowControl,
     stability: 'tech_preview',
     inputSchema: WorkflowAwaitExecutionsStepInputSchema,

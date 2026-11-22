@@ -7,7 +7,7 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowExecution, StackFrame, WorkflowAwaitExecutionsStep } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS } from '@kbn/workflows';
 import type {
   DurablePhaseResult,
   PollHandlerContext,
@@ -452,6 +452,18 @@ describe('createAwaitExecutionsStepDefinition', () => {
       await expect(start({ 'from-steps': ['scan_host'] })).resolves.toEqual({
         state: { executionIds: expectedIds, mode: 'fail-fast' },
       });
+    });
+
+    it('fails when the referenced steps resolve to more executions than the limit', async () => {
+      innerStepIdsByStep = { scan_host: [] };
+      const overLimit = WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS + 1;
+      for (let index = 0; index < overLimit; index++) {
+        addStartStepExecution('scan_host', `host-${index}`);
+      }
+
+      await expect(start({ 'from-steps': ['scan_host'] })).rejects.toThrow(
+        `"from-steps" can await at most ${WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS} executions, got ${overLimit}.`
+      );
     });
 
     it('fails when the referenced steps started no executions', async () => {

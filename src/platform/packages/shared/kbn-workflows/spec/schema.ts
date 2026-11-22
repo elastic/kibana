@@ -1315,7 +1315,9 @@ export const WorkflowAwaitExecutionsStepInputSchema = lazySchema(() =>
             'contains others (parallel, foreach, if) covers every workflow.executeAsync run inside it, ' +
             'including each loop iteration. When the await is inside the same loop or retry as the ' +
             'referenced step, only executions from its current iteration or attempt are awaited; ' +
-            'place the await after the loop to collect every iteration.'
+            'place the await after the loop to collect every iteration. The listed steps can resolve ' +
+            `to at most ${WORKFLOW_AWAIT_EXECUTIONS_MAX_IDS} executions in total; more fails the step ` +
+            'after the executions have started.'
         ),
       'execution-ids': z
         .union([
