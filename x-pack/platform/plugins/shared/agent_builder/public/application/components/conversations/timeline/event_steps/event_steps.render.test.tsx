@@ -9,11 +9,23 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
+  createModelReasoningStep,
+  createReasoningStep,
   createSubstitutionStep,
   createToolCallStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import { EventSteps } from './event_steps';
+
+jest.mock('../response/chat_message_text', () => {
+  // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
+  const _React = require('react');
+  return {
+    ChatMessageText: ({ content }: { content: string }) =>
+      _React.createElement('span', null, content),
+  };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -76,5 +88,80 @@ describe('EventSteps — stopped turn threads isAborted to the labels', () => {
     renderWithProviders(<EventSteps steps={[toolStep('tc-1', 'search')]} />);
     expect(screen.getByText('running…')).toBeInTheDocument();
     expect(screen.queryByText('stopped')).not.toBeInTheDocument();
+  });
+});
+
+describe('EventSteps — model reasoning', () => {
+  const INTENT = 'I will search the logs.';
+  const THOUGHTS = 'The user wants 404s, so the web logs index is the place to look.';
+
+  it('expands the intent line to show the model reasoning of its tool call group', async () => {
+    renderWithProviders(
+      <EventSteps
+        steps={[
+          createModelReasoningStep({ reasoning: THOUGHTS, tool_call_group_id: 'g1' }),
+          createReasoningStep({ reasoning: INTENT, tool_call_group_id: 'g1' }),
+        ]}
+      />
+    );
+    expect(screen.queryByText(THOUGHTS)).not.toBeInTheDocument();
+
+    const intentRow = screen.getByRole('button', { name: INTENT });
+    expect(intentRow).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(intentRow);
+    expect(intentRow).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('agentBuilderModelReasoning')).toHaveTextContent(THOUGHTS);
+
+    await userEvent.click(intentRow);
+    expect(intentRow).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText(THOUGHTS)).not.toBeInTheDocument();
+  });
+
+  it('leaves an intent line without model reasoning as plain text', () => {
+    renderWithProviders(
+      <EventSteps steps={[createReasoningStep({ reasoning: INTENT, tool_call_group_id: 'g1' })]} />
+    );
+    expect(screen.getByText(INTENT)).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText(INTENT).closest('[aria-expanded]')).toBeNull();
+  });
+
+  it('does not expand an intent line from the model reasoning of another tool call group', () => {
+    renderWithProviders(
+      <EventSteps
+        steps={[
+          createModelReasoningStep({ reasoning: THOUGHTS, tool_call_group_id: 'g1' }),
+          createReasoningStep({ reasoning: INTENT, tool_call_group_id: 'g2' }),
+        ]}
+      />
+    );
+    expect(screen.getByText(INTENT)).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+  });
+
+  it('shows no model reasoning for a tool call group without an intent line', () => {
+    renderWithProviders(
+      <EventSteps
+        steps={[
+          createModelReasoningStep({ reasoning: THOUGHTS, tool_call_group_id: 'g1' }),
+          createToolCallStep({
+            tool_call_id: 'tc-1',
+            tool_id: 'search',
+            params: {},
+            results: [],
+            tool_call_group_id: 'g1',
+          }),
+        ]}
+      />
+    );
+    expect(screen.getByTestId('agentBuilderToolCallStep')).toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderModelReasoningStep')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('agentBuilderModelReasoning')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when the only step is model reasoning without a tool call group', () => {
+    renderWithProviders(<EventSteps steps={[createModelReasoningStep({ reasoning: THOUGHTS })]} />);
+    expect(screen.queryByTestId('agentBuilderThinkingPanel')).not.toBeInTheDocument();
   });
 });

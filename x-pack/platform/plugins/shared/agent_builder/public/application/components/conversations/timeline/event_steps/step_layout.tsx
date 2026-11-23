@@ -62,6 +62,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
         onClick={isClickable ? onClick : undefined}
         role={isClickable ? 'button' : undefined}
         tabIndex={isClickable ? 0 : undefined}
+        aria-expanded={isClickable && isExpandable ? isExpanded : undefined}
         onKeyDown={
           isClickable
             ? (event) => {
