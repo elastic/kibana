@@ -48,6 +48,12 @@ export {
   type ManagedWorkflowTelemetryFields,
 } from './pick_managed_workflow_fields/pick_managed_workflow_fields';
 export {
+  parseTemplateOriginFields,
+  pickTemplateOriginFields,
+  type TemplateOriginFields,
+  type TemplateOriginFieldsSource,
+} from './pick_template_origin_fields/pick_template_origin_fields';
+export {
   isValidWorkflowDocumentVersion,
   pickWorkflowDocumentVersion,
 } from './pick_workflow_document_version/pick_workflow_document_version';
@@ -56,3 +62,11 @@ export {
   type ToWorkflowExecutionEngineModelOptions,
   type WorkflowExecutionEngineModelSource,
 } from './to_workflow_execution_engine_model/to_workflow_execution_engine_model';
+export {
+  DYNAMIC_VALUE_REGEX,
+  isDynamicValue,
+  LIQUID_TAG_VALUE_REGEX,
+  isLiquidTagValue,
+  VARIABLE_VALUE_REGEX,
+  isVariableValue,
+} from './template_value/template_value';

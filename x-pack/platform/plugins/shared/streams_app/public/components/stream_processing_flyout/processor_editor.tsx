@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -118,6 +118,7 @@ interface ProcessorEditorProps {
   /** `unchecked` when the configuration service could not be reached to check the processor. */
   onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
+  onChange: () => void;
   /** Deletes the step being edited; omitted when creating a processor. */
   onDelete?: () => void;
 }
@@ -160,9 +161,15 @@ export function ProcessorEditor({
   componentIds,
   onCommit,
   onCancel,
+  onChange,
   onDelete,
 }: ProcessorEditorProps) {
   const form = useProcessorForm({ catalogue, step, telemetry });
+  useEffect(() => {
+    if (form.isDirty) {
+      onChange();
+    }
+  }, [form.isDirty, onChange]);
   const { type, component, definition, signals, doesNotFit } = form;
   const check = useComponentCheck(checkComponent);
   const [outcome, setOutcome] = useState<CheckOutcome>();

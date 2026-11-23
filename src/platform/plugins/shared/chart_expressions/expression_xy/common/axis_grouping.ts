@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import { ChartPosition } from '@kbn/chart-expressions-common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 export const LEFT_AXIS_GROUP_ID = 'left';
@@ -18,7 +18,7 @@ export interface AxisSeriesDescriptor {
   accessor: string;
   fieldFormat: SerializedFieldFormat;
   requestedGroupId: string;
-  requestedGroupPosition?: Position;
+  requestedGroupPosition?: ChartPosition;
 }
 
 export type GroupedAxisSeries<T extends AxisSeriesDescriptor = AxisSeriesDescriptor> = Record<
@@ -52,9 +52,9 @@ export const groupAxisSeries = <T extends AxisSeriesDescriptor>(
   descriptors.forEach((descriptor) => {
     groups[descriptor.requestedGroupId] ??= [];
     groups[descriptor.requestedGroupId].push(descriptor);
-    if (descriptor.requestedGroupPosition === Position.Left) {
+    if (descriptor.requestedGroupPosition === ChartPosition.Left) {
       leftGroupIds.push(descriptor.requestedGroupId);
-    } else if (descriptor.requestedGroupPosition === Position.Right) {
+    } else if (descriptor.requestedGroupPosition === ChartPosition.Right) {
       rightGroupIds.push(descriptor.requestedGroupId);
     }
   });

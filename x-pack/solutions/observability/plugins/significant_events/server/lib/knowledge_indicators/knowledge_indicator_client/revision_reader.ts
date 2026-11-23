@@ -77,6 +77,24 @@ export class RevisionReader {
     return executeCountQuery({ esClient: this.esClient, query });
   }
 
+  /** Returns the newest timestamp among latest revisions matching the filters. */
+  async fetchLatestRevisionTimestamp(
+    where?: LatestSourceWhereCondition,
+    postGroupingWhere?: LatestSourceWhereCondition
+  ): Promise<string | null> {
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, where);
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
+    query = query.pipe`STATS latest_timestamp = MAX(@timestamp)`;
+
+    const response = await runEsqlQuery(this.esClient, query.print('basic'));
+    const timestamp = response?.values[0]?.[0];
+    return typeof timestamp === 'string' ? timestamp : null;
+  }
+
   async fetchLatestRevisions(
     where?: LatestSourceWhereCondition,
     postGroupingWhere?: LatestSourceWhereCondition,
