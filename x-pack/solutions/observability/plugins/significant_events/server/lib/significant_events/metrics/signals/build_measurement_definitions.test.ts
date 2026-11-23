@@ -189,8 +189,25 @@ describe('buildMeasurementDefinitions', () => {
     );
     const previewQuery = renderPreview(previewPlans[0]);
     const groupings = [...previewQuery.matchAll(/\n  BY ([^\n]+)/g)].map((match) => match[1]);
+    const perMinuteGroupings = [...definitions[0].esql_per_minute.matchAll(/\n  BY ([^\n]+)/g)].map(
+      (match) => match[1]
+    );
 
     expect(definitions[0].esql).not.toContain('minute');
+    expect({
+      hasTimestampFilter: definitions[0].esql_per_minute.includes('@timestamp >='),
+      firstGrouping: perMinuteGroupings[0],
+      laterGroupingsStartWithMinute: perMinuteGroupings
+        .slice(1)
+        .every((grouping) => grouping.startsWith('minute, ')),
+      keepsMinute: definitions[0].esql_per_minute.includes('| KEEP minute, '),
+    }).toEqual({
+      hasTimestampFilter: false,
+      firstGrouping:
+        'minute = BUCKET(@timestamp, 1 minute), orchestrator.cluster.name, kubernetes.namespace, workload, kubernetes.pod.name, kubernetes.container.name',
+      laterGroupingsStartWithMinute: true,
+      keepsMinute: true,
+    });
     expect(previewQuery).toContain(
       '| WHERE @timestamp >= "2026-11-23T09:45:00.000Z"\n    AND @timestamp < "2026-11-23T10:00:00.000Z"'
     );
@@ -222,6 +239,7 @@ describe('buildMeasurementDefinitions', () => {
       expect(definitions).toHaveLength(1);
       const [definition] = definitions;
       expect(Parser.parse(definition.esql).errors).toEqual([]);
+      expect(Parser.parse(definition.esql_per_minute).errors).toEqual([]);
       expect(Parser.parse(renderPreview(previewPlans[0])).errors).toEqual([]);
     });
   });

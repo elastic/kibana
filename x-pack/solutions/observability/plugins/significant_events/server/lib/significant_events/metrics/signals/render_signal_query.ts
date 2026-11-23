@@ -294,9 +294,6 @@ export const renderSignalQuery = ({
   perMinute: boolean;
   timeRange?: SignalQueryTimeRange;
 }): { entityFields: string[]; esql: string } => {
-  if (perMinute && !timeRange) {
-    throw new Error('Per minute queries require a time range.');
-  }
   const workloadKind = WORKLOAD_KIND_BY_SUBTYPE[subtype];
   const additionalEntityFields = template.additionalEntityFields ?? [];
   const entityFields = workloadKind
@@ -338,7 +335,9 @@ export const renderSignalQuery = ({
       ...workloadPipeline,
       ...renderEntityFieldDerivations(additionalEntityFields),
       aggregation,
-      ...(perMinute ? [renderPreviewRanking(entityFields, template.hint.comparison === '<')] : []),
+      ...(perMinute && timeRange
+        ? [renderPreviewRanking(entityFields, template.hint.comparison === '<')]
+        : []),
     ].join('\n'),
   };
 };

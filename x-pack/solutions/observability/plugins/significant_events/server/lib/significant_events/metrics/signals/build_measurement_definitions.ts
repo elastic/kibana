@@ -101,6 +101,10 @@ export const buildMeasurementDefinitions = ({
         ...renderOptions,
         perMinute: false,
       });
+      const { esql: perMinuteEsql } = renderSignalQuery({
+        ...renderOptions,
+        perMinute: true,
+      });
       definitions.push({
         signal: template.signal,
         type_ki_id: typeKI.id,
@@ -111,6 +115,7 @@ export const buildMeasurementDefinitions = ({
         value_column: 'value',
         context_columns: [...template.contextColumns],
         esql: definitionEsql,
+        esql_per_minute: perMinuteEsql,
         hint: { ...template.hint, source: variants[0].source },
         measurements: variants.map(({ schema, dataset, field, formula, source }) => ({
           schema,

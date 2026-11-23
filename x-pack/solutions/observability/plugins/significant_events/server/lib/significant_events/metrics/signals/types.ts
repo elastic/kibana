@@ -124,6 +124,7 @@ export interface MeasurementDefinition {
   value_column: 'value';
   context_columns: string[];
   esql: string;
+  esql_per_minute: string;
   hint: MeasurementDefinitionHint;
   measurements: SignalMeasurement[];
   preview?: MeasurementDefinitionPreview;

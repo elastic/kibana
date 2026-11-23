@@ -35,6 +35,7 @@ const createDefinition = (signal: string, comparison: SignalComparison): Measure
   value_column: 'value',
   context_columns: [],
   esql: 'stored query',
+  esql_per_minute: 'stored per minute query',
   hint: { comparison, threshold: 0.9, window: '5 minutes', source },
   measurements: [
     {
