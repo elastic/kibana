@@ -32,9 +32,10 @@ export const BOUNDARY_TIMESTAMPS = {
  * (`telemetry.distro.name: elastic`) on a mobile `os.name`, with the upstream `telemetry.sdk.*`.
  * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
  * still sends `telemetry.sdk.name: android` without the distribution, an Android app with sessions
- * on the edges of the periods, an Android app without numeric releases, an iOS app on two-part
- * releases, and two services that must never show up as mobile: a backend Java service, and EDOT
- * Browser on an iPhone, which is the Elastic distribution on `os.name: iOS` too.
+ * on the edges of the periods, an Android app without numeric releases, one whose releases all
+ * showed up at once, an iOS app on two-part releases, and two services that must never show up as
+ * mobile: a backend Java service, and EDOT Browser on an iPhone, which is the Elastic distribution
+ * on `os.name: iOS` too.
  */
 export const MOBILE_APPS = {
   reactNative: 'scout-shop-mobile',
@@ -42,6 +43,7 @@ export const MOBILE_APPS = {
   legacyAndroid: 'scout-legacy-android',
   boundaryAndroid: 'scout-boundary-android',
   nightlyAndroid: 'scout-nightly-android',
+  tiedAndroid: 'scout-tied-android',
   shortVersionIos: 'scout-short-version-ios',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
@@ -167,6 +169,17 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     timestamp,
   })),
   // iOS short versions have two parts: 1.10 first, then 1.9, which text order puts last too.
+  // Releases that aren't numeric, all first seen at the same time: the highest as text, whatever
+  // order they're indexed in.
+  ...['build-x', 'build-z', 'build-y'].map((version) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.tiedAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version,
+    installationId: 'installation-tied',
+    sessionId: 'tied-1',
+  })),
   ...[
     { version: '1.10', timestamp: EARLIER_TIMESTAMP },
     { version: '1.9', timestamp: LATER_TIMESTAMP },
@@ -279,6 +292,15 @@ export const EXPECTED_MOBILE_ROWS = [
     serviceName: MOBILE_APPS.nightlyAndroid,
     platforms: ['android'],
     latestRelease: 'build-a',
+    sessions: { count: 1 },
+    users: { count: 1 },
+    errorRate: 0,
+  },
+  {
+    // Releases first seen at the same time: always the highest as text, never one by chance.
+    serviceName: MOBILE_APPS.tiedAndroid,
+    platforms: ['android'],
+    latestRelease: 'build-z',
     sessions: { count: 1 },
     users: { count: 1 },
     errorRate: 0,

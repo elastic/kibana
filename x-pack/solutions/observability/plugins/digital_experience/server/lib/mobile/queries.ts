@@ -51,19 +51,20 @@ export const RELEASE_VERSION_PATTERN = '(0|[1-9][0-9]*)([.](0|[1-9][0-9]*))*';
 /**
  * Each application's newest release on any platform, compared as versions so `2.10.0` is after
  * `2.9.0`, one row per application, so no cut on releases can leave one without. Without a
- * numeric release, the one that first showed up last.
+ * numeric release, the one that first showed up last, the highest as text among those that showed
+ * up at the same time, so the same data always gives the same release.
  */
 export const withLatestReleases = (query: ComposerQuery): ComposerQuery =>
   withRelease(query).pipe`STATS ${resultColumn('firstSeen')} = MIN(@timestamp)
       BY ${mobileColumn('serviceName')}, ${mobileColumn('serviceVersion')}`
-    .pipe`EVAL ${resultColumn('numericRelease')} = CASE(
+    .pipe`INLINE STATS ${resultColumn('lastFirstSeen')} = MAX(${resultColumn('firstSeen')})
+      BY ${mobileColumn('serviceName')}`.pipe`EVAL ${resultColumn('numericRelease')} = CASE(
       ${mobileColumn('serviceVersion')} RLIKE ${RELEASE_VERSION_PATTERN},
       TO_VERSION(${mobileColumn('serviceVersion')}),
       NULL
     )`.pipe`STATS ${resultColumn('numericRelease')} = MAX(${resultColumn('numericRelease')}),
-      ${resultColumn('newestRelease')} = LAST(${mobileColumn('serviceVersion')}, ${resultColumn(
-    'firstSeen'
-  )})
+      ${resultColumn('newestRelease')} = MAX(${mobileColumn('serviceVersion')})
+        WHERE ${resultColumn('firstSeen')} == ${resultColumn('lastFirstSeen')}
       BY ${mobileColumn('serviceName')}`.pipe`EVAL ${resultColumn('latestRelease')} = COALESCE(
       TO_STRING(${resultColumn('numericRelease')}),
       ${resultColumn('newestRelease')}

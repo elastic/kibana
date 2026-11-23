@@ -65,11 +65,17 @@ describe('withLatestReleases', () => {
   });
 
   it('falls back to the release that first showed up last, per application', () => {
-    expect(query).toContain(
-      'newest_release = LAST(`service.version`, first_seen) BY `service.name`'
-    );
+    expect(query).toContain('INLINE STATS last_first_seen = MAX(first_seen) BY `service.name`');
     expect(query).toContain(
       'EVAL latest_release = COALESCE(TO_STRING(numeric_release), newest_release)'
+    );
+  });
+
+  it('breaks a tie of first seen by the highest release as text, so a refresh never changes it', () => {
+    // LAST(version, first_seen) would return either of two releases first seen at the same time.
+    expect(query).not.toMatch(/\bLAST\(/);
+    expect(query).toContain(
+      'newest_release = MAX(`service.version`) WHERE first_seen == last_first_seen BY `service.name`'
     );
   });
 

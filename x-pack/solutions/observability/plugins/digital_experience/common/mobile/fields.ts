@@ -64,6 +64,7 @@ export const RESULT_COLUMNS = {
   numericRelease: 'numeric_release',
   newestRelease: 'newest_release',
   firstSeen: 'first_seen',
+  lastFirstSeen: 'last_first_seen',
   osName: 'os_name',
   environments: 'environments',
   environmentNames: 'environment_names',
