@@ -5,19 +5,12 @@
  * 2.0.
  */
 
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { DECISION_TASK_TYPE, EisInferenceEndpointMetadata } from '@kbn/inference-common';
-
-/**
- * The task types an inference endpoint can have: Elasticsearch has `decision`, which its client's
- * types lack. Remove `DECISION_TASK_TYPE` here once `InferenceTaskType` includes it.
- */
-export type InferenceEndpointTaskType = InferenceTaskType | typeof DECISION_TASK_TYPE;
+import type { EisInferenceEndpointMetadata, InferenceTaskType } from '@kbn/inference-common';
 
 export interface InferenceEndpoint {
   inferenceId: string;
-  taskType: InferenceEndpointTaskType;
+  taskType: InferenceTaskType;
   service: string;
   serviceSettings?: Record<string, unknown>;
   // Fix this typing when ES response is updated to include metadata
@@ -30,7 +23,7 @@ export const getInferenceEndpoints = async ({
   taskType,
 }: {
   esClient: ElasticsearchClient;
-  taskType?: InferenceEndpointTaskType;
+  taskType?: InferenceTaskType;
 }): Promise<InferenceEndpoint[]> => {
   const response = await esClient.inference.get();
 

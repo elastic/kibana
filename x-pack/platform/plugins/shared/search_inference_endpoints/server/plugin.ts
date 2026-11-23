@@ -32,7 +32,7 @@ import {
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
-  InferenceFeatureTaskType,
+  InferenceTaskType,
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginSetupDependencies,
   SearchInferenceEndpointsPluginStart,
@@ -102,10 +102,7 @@ export class SearchInferenceEndpointsPlugin
       return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
     };
 
-    const getConnectorList = async (
-      request: KibanaRequest,
-      taskType?: InferenceFeatureTaskType
-    ) => {
+    const getConnectorList = async (request: KibanaRequest, taskType?: InferenceTaskType) => {
       const [, pluginsStart] = await core.getStartServices();
       return getConnectorListByTaskType(pluginsStart.inference, request, taskType);
     };
@@ -113,7 +110,7 @@ export class SearchInferenceEndpointsPlugin
     const getConnectorById = async (
       id: string,
       request: KibanaRequest,
-      taskType?: InferenceFeatureTaskType
+      taskType?: InferenceTaskType
     ) => {
       const [, pluginsStart] = await core.getStartServices();
       return getConnectorByIdAndTaskType(pluginsStart.inference, id, request, taskType);

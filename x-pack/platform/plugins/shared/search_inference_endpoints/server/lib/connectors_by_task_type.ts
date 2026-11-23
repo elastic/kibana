@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { CHAT_COMPLETION_TASK_TYPE } from '../../common/constants';
-import type { InferenceFeatureTaskType } from '../types';
+import type { InferenceTaskType } from '../types';
 
 type InferenceConnectorApis = Pick<InferenceServerStart, 'getConnectorList' | 'getConnectorById'>;
 
@@ -17,7 +17,7 @@ type InferenceConnectorApis = Pick<InferenceServerStart, 'getConnectorList' | 'g
 export const getConnectorListByTaskType = (
   inference: InferenceConnectorApis,
   request: KibanaRequest,
-  taskType: InferenceFeatureTaskType = CHAT_COMPLETION_TASK_TYPE
+  taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE
 ): Promise<InferenceConnector[]> => {
   if (taskType === CHAT_COMPLETION_TASK_TYPE) {
     return inference.getConnectorList(request);
@@ -31,7 +31,7 @@ export const getConnectorByIdAndTaskType = async (
   inference: InferenceConnectorApis,
   id: string,
   request: KibanaRequest,
-  taskType: InferenceFeatureTaskType = CHAT_COMPLETION_TASK_TYPE
+  taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE
 ): Promise<InferenceConnector> => {
   if (taskType === CHAT_COMPLETION_TASK_TYPE) {
     return inference.getConnectorById(id, request);
@@ -48,6 +48,5 @@ export const getConnectorByIdAndTaskType = async (
 };
 
 /** An unregistered feature counts as a chat completion one, as it did before task types. */
-export const isChatCompletionFeature = (feature?: {
-  taskType: InferenceFeatureTaskType;
-}): boolean => !feature || feature.taskType === CHAT_COMPLETION_TASK_TYPE;
+export const isChatCompletionFeature = (feature?: { taskType: InferenceTaskType }): boolean =>
+  !feature || feature.taskType === CHAT_COMPLETION_TASK_TYPE;

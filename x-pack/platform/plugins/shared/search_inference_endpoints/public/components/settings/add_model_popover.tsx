@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { InferenceConnectorType, isTemplateRequiredConnector } from '@kbn/inference-common';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector, InferenceTaskType } from '@kbn/inference-common';
 import { useConnectors } from '../../hooks/use_connectors';
 import { isConnectorUnavailableUnderRegionPolicy } from '../../utils/is_unavailable_under_region_policy';
 import { getConnectorIcon } from '../../utils/connector_display';
@@ -40,7 +40,7 @@ interface AddModelPopoverProps {
   existingEndpointIds: string[];
   onAdd: (endpointId: string) => void;
   /** When set, only connectors compatible with this inference task type are listed. */
-  taskType?: string;
+  taskType?: InferenceTaskType;
   panelWidth?: number;
   /**
    * When true, the list contains only endpoints with

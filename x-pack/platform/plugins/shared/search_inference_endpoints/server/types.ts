@@ -7,18 +7,14 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
-  InferenceEndpointTaskType,
-  InferenceServerSetup,
-  InferenceServerStart,
-} from '@kbn/inference-plugin/server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
+  ApiInferenceConnector,
+  InferenceConnector,
+  InferenceTaskType,
+} from '@kbn/inference-common';
 
 export type { InferenceTaskType, InferenceConnector };
-
-/** The task types a feature can use. */
-export type InferenceFeatureTaskType = InferenceEndpointTaskType;
 
 export interface RecommendedEndpoint {
   id: string;
@@ -32,7 +28,7 @@ export interface InferenceFeatureConfig {
   parentFeatureId?: string;
   featureName: string;
   featureDescription: string;
-  taskType: InferenceFeatureTaskType;
+  taskType: InferenceTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: RecommendedEndpointInput[];
   isTechPreview?: boolean;

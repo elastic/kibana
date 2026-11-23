@@ -8,7 +8,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceTaskType } from '@kbn/inference-common';
 import {
   aiAnonymizationSettings,
   parseLegacyAnonymizationRules,
@@ -42,10 +42,7 @@ import type {
 import { getConnectorList, type ConnectorListFilter } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
-import {
-  getInferenceEndpoints,
-  type InferenceEndpointTaskType,
-} from './util/get_inference_endpoints';
+import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
 import { shouldStreamInferenceEndpoint } from './util/should_stream_inference_endpoint';
@@ -472,7 +469,7 @@ export class InferencePlugin
           logger: this.logger,
         });
       },
-      getInferenceEndpoints: async (taskType?: InferenceEndpointTaskType) => {
+      getInferenceEndpoints: async (taskType?: InferenceTaskType) => {
         const esClient = core.elasticsearch.client.asInternalUser;
         return getInferenceEndpoints({ esClient, taskType });
       },

@@ -30,6 +30,7 @@ import type {
   FeatureChatCompleteAPI,
   InferenceClient,
   InferenceConnector,
+  InferenceTaskType,
 } from '@kbn/inference-common';
 import type { InferenceChatModel, InferenceChatModelBaseParams } from '@kbn/inference-langchain';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
@@ -39,7 +40,7 @@ import type {
 } from '@kbn/anonymization-plugin/server';
 import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
 import type { ConnectorListFilter } from './util/get_connector_list';
-import type { InferenceEndpoint, InferenceEndpointTaskType } from './util/get_inference_endpoints';
+import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -312,7 +313,7 @@ export interface InferenceServerStart {
    * @param taskType - Optional task type to filter by (e.g. 'chat_completion')
    * @returns A promise that resolves to an array of inference endpoints
    */
-  getInferenceEndpoints: (taskType?: InferenceEndpointTaskType) => Promise<InferenceEndpoint[]>;
+  getInferenceEndpoints: (taskType?: InferenceTaskType) => Promise<InferenceEndpoint[]>;
 
   /**
    * Retrieves a specific Elasticsearch inference endpoint by its ID.

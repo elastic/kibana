@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { InferenceTaskType } from '@kbn/inference-common';
 import type { InferenceConnectorsResponse } from '../../common/types';
 import { CHAT_COMPLETION_TASK_TYPE, INFERENCE_CONNECTORS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
@@ -13,7 +14,7 @@ import { useKibana } from './use_kibana';
 const INFERENCE_CONNECTORS_API = '/internal/inference/connectors';
 
 /** Lists the models of a task type: chat models by default, else that task type's inference endpoints. */
-export const useConnectors = (taskType: string = CHAT_COMPLETION_TASK_TYPE) => {
+export const useConnectors = (taskType: InferenceTaskType = CHAT_COMPLETION_TASK_TYPE) => {
   const { services } = useKibana();
   const isChatCompletion = taskType === CHAT_COMPLETION_TASK_TYPE;
 

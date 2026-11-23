@@ -7,9 +7,7 @@
 
 import type { RawInferenceConnector, RawConnector } from './connectors';
 import { InferenceConnectorType, allSupportedConnectorTypes } from './connectors';
-
-export const COMPLETION_TASK_TYPE = 'chat_completion';
-export const DECISION_TASK_TYPE = 'decision';
+import { COMPLETION_TASK_TYPE } from '../inference_endpoints';
 
 /**
  * Checks if a given connector type is compatible for inference.

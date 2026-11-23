@@ -21,7 +21,7 @@ import type {
 } from './types';
 
 export type { InferenceServerClient, InferenceServerSetup, InferenceServerStart };
-export type { InferenceEndpoint, InferenceEndpointTaskType } from './util/get_inference_endpoints';
+export type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 export {
   naturalLanguageToEsql,
