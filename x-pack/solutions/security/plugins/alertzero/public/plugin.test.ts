@@ -169,7 +169,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       const update = await nextUpdate;
       expect(update?.status).toBe(AppStatus.accessible);
       expect(update?.visibleIn).toEqual(canRead ? ['projectSideNav', 'globalSearch'] : []);
-      expect(update?.deepLinks?.length).toBe(canRead ? 2 : 0);
+      expect(update?.deepLinks?.length).toBe(canRead ? 3 : 0);
       plugin.stop();
     }
   );
@@ -205,7 +205,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
         visibleIn: license.visible ? ['projectSideNav', 'globalSearch'] : [],
         deepLinks: license.visible ? expect.any(Array) : [],
       });
-      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+      if (license.visible) expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     }
     subscription.unsubscribe();
     plugin.stop();
@@ -237,7 +237,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
       visibleIn: ['projectSideNav', 'globalSearch'],
       deepLinks: expect.any(Array),
     });
-    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(2);
+    expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
     contract.setServerlessTierAvailable(false);
     expect(onUpdate).toHaveBeenLastCalledWith({
       status: AppStatus.accessible,
@@ -274,19 +274,35 @@ describe('AlertZeroPublicPlugin app registration', () => {
     expect(statuses).toEqual([AppStatus.inaccessible, AppStatus.accessible]);
   });
 
-  describe('in a Classic space', () => {
-    const startWithSpace = async (spaces: ReturnType<typeof createSpaces>, setting = true) => {
-      const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(setting));
-      const { updater$ } = coreSetup.application.register.mock.calls[0][0];
-      if (!updater$) throw new Error('Missing application updater');
-      const onUpdate = jest.fn();
-      const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
-      plugin.start(coreStart, { licensing: createLicensing(), spaces });
-      await flushPromises();
-      return { onUpdate, plugin, subscription };
-    };
+  const startWithSpace = async (spaces: ReturnType<typeof createSpaces>, setting = true) => {
+    const { coreSetup, plugin, coreStart } = setupPlugin(new BehaviorSubject(setting));
+    const { updater$ } = coreSetup.application.register.mock.calls[0][0];
+    if (!updater$) throw new Error('Missing application updater');
+    const onUpdate = jest.fn();
+    const subscription = updater$.pipe(map((update) => update({} as never))).subscribe(onUpdate);
+    plugin.start(coreStart, { licensing: createLicensing(), spaces });
+    await flushPromises();
+    return { onUpdate, plugin, subscription };
+  };
 
-    it.each([[createSpaces('classic')], [createSpaces()]])(
+  it.each([['classic' as const], [undefined]])(
+    'shows navigation in a Classic space (%s) when the setting is on',
+    async (solution) => {
+      const { onUpdate, plugin, subscription } = await startWithSpace(createSpaces(solution));
+
+      expect(onUpdate).toHaveBeenLastCalledWith({
+        status: AppStatus.accessible,
+        visibleIn: ['projectSideNav', 'globalSearch'],
+        deepLinks: expect.any(Array),
+      });
+      expect(onUpdate.mock.lastCall?.[0].deepLinks).toHaveLength(3);
+      subscription.unsubscribe();
+      plugin.stop();
+    }
+  );
+
+  describe('in an unsupported space', () => {
+    it.each([[createSpaces('oblt')], [createSpaces('es')]])(
       'keeps the app accessible but hides navigation when the setting is on',
       async (spaces) => {
         const { onUpdate, plugin, subscription } = await startWithSpace(spaces);
@@ -302,10 +318,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
     );
 
     it('keeps the app accessible but hides navigation when the setting is off', async () => {
-      const { onUpdate, plugin, subscription } = await startWithSpace(
-        createSpaces('classic'),
-        false
-      );
+      const { onUpdate, plugin, subscription } = await startWithSpace(createSpaces('oblt'), false);
 
       expect(onUpdate).toHaveBeenLastCalledWith({
         status: AppStatus.accessible,
@@ -336,7 +349,7 @@ describe('AlertZeroPublicPlugin app registration', () => {
 
       plugin.start(withSetting(coreMock.createStart(), new BehaviorSubject(true)), {
         licensing: createLicensing(),
-        spaces: createSpaces('classic'),
+        spaces: createSpaces('oblt'),
         agenticInvestigations: {},
         proposals: {},
         agentBuilder,
