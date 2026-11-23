@@ -135,7 +135,7 @@ describe('StatefulTimeline', () => {
   });
 
   describe('data view sync', () => {
-    const mountWithSavedTimeline = (savePromptDismissed: boolean) => {
+    const renderWithSavedTimeline = (savePromptDismissed: boolean) => {
       const store = createMockStore({
         ...mockGlobalState,
         timeline: {
@@ -154,7 +154,7 @@ describe('StatefulTimeline', () => {
       // The page data view differs from the one saved on the timeline, which triggers the sync.
       jest.mocked(useDataView).mockReturnValue(withIndices(['synced-*'], 'synced-data-view'));
 
-      mount(
+      render(
         <TestProviders store={store}>
           <StatefulTimeline {...props} />
         </TestProviders>
@@ -167,7 +167,7 @@ describe('StatefulTimeline', () => {
     });
 
     test('keeps the save prompt dismissal that the sync would re-arm', () => {
-      mountWithSavedTimeline(true);
+      renderWithSavedTimeline(true);
 
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: timelineActions.updateDataView.type })
@@ -176,7 +176,7 @@ describe('StatefulTimeline', () => {
     });
 
     test('does not dismiss the save prompt when the user did not', () => {
-      mountWithSavedTimeline(false);
+      renderWithSavedTimeline(false);
 
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: timelineActions.updateDataView.type })
