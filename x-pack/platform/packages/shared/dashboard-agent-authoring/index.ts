@@ -12,6 +12,8 @@ export {
 } from './src/upsert';
 export type { DashboardUpsert, DashboardUpsertResult } from './src/upsert';
 
+export { revertRefreshIntervalWithoutTimeRange } from './src/refresh_interval';
+
 export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './src/layout';
 export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
 

@@ -23,6 +23,7 @@ import {
   executeDashboardUpsert,
   getErrorMessage,
   hasValidNewDashboardMetadata,
+  revertRefreshIntervalWithoutTimeRange,
   upsertDashboardSchema,
   type DashboardValidator,
 } from '@kbn/dashboard-agent-authoring';
@@ -282,11 +283,26 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         }
 
         // Data-aware default time range computation
-        const dashboardData = await applyDefaultDashboardTimeRange({
+        const dashboardDataWithTimeRange = await applyDefaultDashboardTimeRange({
           dashboardData: generatedDashboardData,
           esClient,
           logger,
         });
+
+        // Runs after the default time range, which can supply the time range auto-refresh needs.
+        const { dashboardData, failure: refreshIntervalFailure } =
+          revertRefreshIntervalWithoutTimeRange({
+            originalDashboardData: latestVersion?.data,
+            dashboardData: dashboardDataWithTimeRange,
+          });
+        if (refreshIntervalFailure) {
+          failures.push(refreshIntervalFailure);
+        }
+        // Reverting the refresh interval can leave the dashboard as it was.
+        if (latestVersion && isEqual(dashboardData, latestVersion.data)) {
+          logger.info('Dashboard was not updated because it did not change');
+          return toDashboardResult(dashboardData, dashboardAttachmentId, latestVersion.version);
+        }
 
         const description = `Dashboard: ${dashboardData.title}`;
         const attachment = isNewDashboard
