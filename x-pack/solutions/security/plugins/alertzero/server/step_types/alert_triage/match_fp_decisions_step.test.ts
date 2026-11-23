@@ -1155,6 +1155,55 @@ describe('triage match decisions step in on mode', () => {
     });
   });
 
+  it('reads the verdicts again for each page, so a verdict recorded after page one blocks the closes of page two', async () => {
+    const first = [
+      { _id: 'a', _source: source('C:\\x.exe'), sort: [1, 'a'] },
+      ...Array.from({ length: ALERT_FETCH_LIMIT - 1 }, (_unused, i) => ({
+        _id: `old${i}`,
+        _source: source(`C:\\other${i}.exe`),
+        sort: [i + 2, `u${i}`],
+      })),
+    ];
+    const { run, callKibanaApi, closes, tags } = setup({
+      mode: 'on',
+      alerts: [],
+      decisions: approved('C:\\x.exe'),
+    });
+    const inner = callKibanaApi.getMockImplementation()!;
+    let pages = 0;
+    let verdictReads = 0;
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) => {
+        const { path, body } = params;
+        if (path.endsWith('/signals/search') && body?.aggs) {
+          // No verdict when page one is read, one by the time page two is.
+          const buckets = ++verdictReads > 1 ? [{ key: strictKeyTag(hashOf('C:\\x.exe')) }] : [];
+          return { body: { aggregations: { keys: { buckets } } } };
+        }
+        if (
+          path.endsWith('/signals/search') &&
+          body?.size !== 0 &&
+          !body?.query?.bool?.filter?.[0]?.ids
+        ) {
+          pages++;
+          const hits =
+            pages === 1 ? first : [{ _id: 'b', _source: source('C:\\x.exe'), sort: [20_000, 'b'] }];
+          return { body: { hits: { hits } } };
+        }
+        return inner(params);
+      }
+    );
+
+    const { output } = await run();
+
+    expect(closes().flatMap(({ signal_ids: ids }) => ids)).toEqual(['a']);
+    expect(tags()).toContainEqual({
+      ids: ['b'],
+      tags: { tags_to_add: [`az:would_close:${idOf('C:\\x.exe')}`], tags_to_remove: [] },
+    });
+    expect(output).toEqual(expect.objectContaining({ closed: 1, blocked_by_verdict: 1 }));
+  });
+
   it('closes nothing for an approved decision whose key has a later true positive or inconclusive verdict', async () => {
     const { run, tags, closes, notes } = setup({
       mode: 'on',

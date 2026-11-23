@@ -177,15 +177,16 @@ export const createDecisionSweep = ({
   // --- Approved decisions: close the alerts ---
 
   /**
-   * Whether the key of each decision has a true positive or inconclusive verdict. One search per
-   * call covers every decision not read before, and the answer is kept for the rest of the sweep.
+   * The decisions whose key has a true positive or inconclusive verdict. A verdict can be recorded
+   * at any time, so only a positive answer is kept for the sweep: a decision that had none is read
+   * again for each page, one search for all the decisions of the page that are not known to have
+   * one. A decision that has one stays blocked for the sweep.
    */
-  const conflicts = new Map<string, boolean>();
+  const conflicting = new Set<string>();
   const loadConflicts = async (ids: string[]) => {
-    const unread = ids.filter((id) => !conflicts.has(id));
-    if (unread.length === 0) return;
-    const conflicting = await findDecisionsWithConflictingVerdicts(contextManager, unread);
-    unread.forEach((id) => conflicts.set(id, conflicting.has(id)));
+    const unknown = ids.filter((id) => !conflicting.has(id));
+    const found = await findDecisionsWithConflictingVerdicts(contextManager, unknown);
+    found.forEach((id) => conflicting.add(id));
   };
 
   /** A decision with a conflicting verdict closes nothing: its matches are tagged, as in shadow. */
@@ -299,7 +300,7 @@ export const createDecisionSweep = ({
         logger.info(`Decision ${id} was revoked or expired during the sweep: it closes nothing`);
         return;
       }
-      if (conflicts.get(id) === true) return await blockByVerdict(id, alertIds);
+      if (conflicting.has(id)) return await blockByVerdict(id, alertIds);
       const allowed = await closeAllowance(id, alertIds);
       if (allowed.length === 0) return;
       tagged = allowed;
