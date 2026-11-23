@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { partition } from 'lodash';
 
 import type {
   FormBasedLayer,
@@ -23,16 +22,14 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
-  generateEsqlQuery,
   getFailureTooltipText,
-  isEsqlQuerySuccess,
   type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-common';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
-import { operationDefinitionMap } from '../../../datasources/form_based/operations';
+import { getLayerEsqlQuery } from '../../../datasources/form_based/esql_availability';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { layerTypes } from '../../..';
 import { useLensSelector, selectPersistedDoc } from '../../../state_management';
@@ -213,34 +210,16 @@ export const useEsqlConversionCheck = (
         continue;
       }
 
-      const { columnOrder } = layer;
-      const columns = { ...layer.columns };
-      const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
-      const [, esAggEntries] = partition(
-        columnEntries,
-        ([, col]) =>
-          (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-            operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
-          col.operationType !== 'static_value'
-      );
+      const esqlLayer = getLayerEsqlQuery({
+        layer,
+        indexPattern: framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+        uiSettings: coreStart.uiSettings,
+        dateRange: framePublicAPI.dateRange,
+        nowInstant: startDependencies.data.nowProvider.get(),
+        columnRoles,
+      });
 
-      let esqlLayer;
-      try {
-        esqlLayer = generateEsqlQuery(
-          esAggEntries,
-          layer,
-          framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
-          coreStart.uiSettings,
-          framePublicAPI.dateRange,
-          startDependencies.data.nowProvider.get(),
-          columnRoles
-        );
-      } catch (e) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
-        continue;
-      }
-
-      if (!isEsqlQuerySuccess(esqlLayer)) {
+      if (!esqlLayer.success) {
         convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, esqlLayer.reason));
         continue;
       }
@@ -394,47 +373,33 @@ function tryConvertTrendlineLayer(
     })
   );
 
-  const columnEntries = layer.columnOrder.map((colId) => [colId, columns[colId]] as const);
-  const [, esAggEntries] = partition(
-    columnEntries,
-    ([, col]) =>
-      (operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
-        operationDefinitionMap[col.operationType]?.input === 'managedReference') &&
-      col.operationType !== 'static_value'
-  );
-
-  try {
-    const esqlLayer = generateEsqlQuery(
-      esAggEntries,
-      { ...layer, columns },
-      framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
-      coreStart.uiSettings,
-      framePublicAPI.dateRange,
-      startDependencies.data.nowProvider.get(),
-      columnRoles
-    );
-    if (!isEsqlQuerySuccess(esqlLayer)) {
-      return { success: false, reason: esqlLayer?.reason };
-    }
-
-    return {
-      success: true,
-      layer: {
-        id: trendlineLayerId,
-        icon: 'layers',
-        name: 'Trendline',
-        type: layerTypes.DATA,
-        query: esqlLayer.esql,
-        isConvertibleToEsql: true,
-        conversionData: {
-          esAggsIdMap: esqlLayer.esAggsIdMap,
-          partialRows: esqlLayer.partialRows,
-        },
-      },
-    };
-  } catch {
-    return { success: false };
+  const esqlLayer = getLayerEsqlQuery({
+    layer: { ...layer, columns },
+    indexPattern: framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+    uiSettings: coreStart.uiSettings,
+    dateRange: framePublicAPI.dateRange,
+    nowInstant: startDependencies.data.nowProvider.get(),
+    columnRoles,
+  });
+  if (!esqlLayer.success) {
+    return { success: false, reason: esqlLayer.reason };
   }
+
+  return {
+    success: true,
+    layer: {
+      id: trendlineLayerId,
+      icon: 'layers',
+      name: 'Trendline',
+      type: layerTypes.DATA,
+      query: esqlLayer.esql,
+      isConvertibleToEsql: true,
+      conversionData: {
+        esAggsIdMap: esqlLayer.esAggsIdMap,
+        partialRows: esqlLayer.partialRows,
+      },
+    },
+  };
 }
 
 function isValidDatasourceState(
