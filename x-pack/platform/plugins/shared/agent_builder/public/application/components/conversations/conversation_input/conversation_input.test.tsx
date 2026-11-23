@@ -100,16 +100,21 @@ jest.mock('./message_editor', () => ({
   MessageEditor: ({
     onSubmit,
     onPasteFile,
+    placeholder,
   }: {
     onSubmit: () => void;
     onPasteFile?: (file: File) => string | undefined;
+    placeholder: string;
   }) => {
     mockOnEditorRender();
     mockEditorProps.onPasteFile = onPasteFile;
     return (
-      <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-        submit
-      </button>
+      <>
+        <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
+          submit
+        </button>
+        <span data-test-subj="mock-message-editor-placeholder">{placeholder}</span>
+      </>
     );
   },
   CommandBadgeSerializationError: class extends Error {},
@@ -132,16 +137,19 @@ jest.mock('@kbn/ebt-click', () => ({ getEbtProps: () => ({}) }));
 jest.mock('./input_actions', () => ({
   InputActions: ({
     showTriggerModeSelector,
+    showSubmitWhileRunning,
     triggerMode,
     onTriggerModeChange,
     onMentionClick,
   }: {
     showTriggerModeSelector: boolean;
+    showSubmitWhileRunning: boolean;
     triggerMode: string;
     onTriggerModeChange: (mode: string) => void;
     onMentionClick?: () => void;
   }) => (
     <>
+      {showSubmitWhileRunning && <span data-test-subj="mock-submit-while-running" />}
       {onMentionClick && (
         <button type="button" data-test-subj="mock-mention-button" onClick={onMentionClick} />
       )}
@@ -389,6 +397,221 @@ describe('ConversationInput', () => {
     });
   });
 
+  describe('while a run holds the conversation', () => {
+    beforeEach(() => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseConversationStream.mockReturnValue({
+        pendingMessage: undefined,
+        isResuming: false,
+        isResponseLoading: true,
+        canCancel: true,
+      } as never);
+    });
+
+    it('steers the run', async () => {
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-submit-while-running')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        'Ask anything'
+      );
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(mockSendSteer).toHaveBeenCalledWith('hello agent', { onUnsent: expect.any(Function) });
+      expect(submitMessage).not.toHaveBeenCalled();
+      await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+    });
+
+    it('does not offer a send in a shared conversation, and says why', () => {
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('mock-submit-while-running')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        "Messages can't be sent to a running agent in a shared conversation"
+      );
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
+
+    it('shows the usual placeholder in a shared conversation once the run is over', () => {
+      mockedUseIsSharedConversation.mockReturnValue(true);
+      mockedUseConversationStream.mockReturnValue({
+        pendingMessage: undefined,
+        isResuming: false,
+        isResponseLoading: false,
+        canCancel: false,
+      } as never);
+      renderInput(<ConversationInput />);
+
+      expect(screen.getByTestId('mock-message-editor-placeholder')).toHaveTextContent(
+        'Ask anything'
+      );
+    });
+
+    it('steers while the attachments of the active turn are still staged in the composer', async () => {
+      mockedUseConversationContext.mockReturnValue({
+        attachments: [{ id: 'a1', type: 'text', data: {} }],
+        upsertAttachments: jest.fn(),
+        removeAttachment: jest.fn(),
+        resetAttachments: jest.fn(),
+        isEmbeddedContext: false,
+        conversationActions: {} as never,
+      } as never);
+      renderInput(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(mockSendSteer).toHaveBeenCalledWith('hello agent', {
+        onUnsent: expect.any(Function),
+      });
+      expect(addErrorToast).not.toHaveBeenCalled();
+      await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
+    });
+
+    it('refuses an image paste instead of uploading it', () => {
+      renderInput(<ConversationInput />);
+
+      const pasted = mockEditorProps.onPasteFile?.(
+        new File([''], 'shot.png', { type: 'image/png' })
+      );
+
+      expect(pasted).toBeUndefined();
+      expect(addErrorToast).toHaveBeenCalledTimes(1);
+      expect(mockHandlePasteFile).not.toHaveBeenCalled();
+    });
+
+    it('keeps the draft and refuses the steer when it holds a pasted image', () => {
+      editorController.getPlaceholderNames.mockReturnValueOnce(['shot.png']);
+      renderInput(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(mockSendSteer).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+      expect(addErrorToast).toHaveBeenCalledTimes(1);
+    });
+
+    it('puts the text back when the steer fails after the submit', () => {
+      renderInput(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      const { onUnsent } = mockSendSteer.mock.calls[0][1];
+      onUnsent('hello agent');
+
+      expect(editorController.setContent).toHaveBeenCalledWith('hello agent');
+    });
+
+    it('keeps the text for the conversation it was sent to when the composer has moved on', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+        keepUnsentFor: mockKeepUnsentFor,
+      });
+      const { rerender } = renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      const { onUnsent } = mockSendSteer.mock.calls[0][1];
+
+      mockedUseConversationId.mockReturnValue('conv-2');
+      rerenderInput(rerender);
+      onUnsent('hello agent');
+
+      expect(mockKeepUnsentFor).toHaveBeenCalledWith(
+        { agentId: 'elastic-ai-agent', conversationId: 'conv-1' },
+        'hello agent'
+      );
+      expect(editorController.setContent).not.toHaveBeenCalled();
+    });
+
+    it('keeps the text for its conversation when the composer is gone', () => {
+      mockedUseConversationId.mockReturnValue('conv-1');
+      mockedUseInputDraft.mockReturnValue({
+        draft: null,
+        saveDraft: jest.fn(),
+        clearDraft: jest.fn(),
+        keepUnsentFor: mockKeepUnsentFor,
+      });
+      const { unmount } = renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+      const { onUnsent } = mockSendSteer.mock.calls[0][1];
+
+      unmount();
+      onUnsent('hello agent');
+
+      expect(mockKeepUnsentFor).toHaveBeenCalledWith(
+        { agentId: 'elastic-ai-agent', conversationId: 'conv-1' },
+        'hello agent'
+      );
+    });
+
+    it('puts the text back into an empty composer when the steer is refused', async () => {
+      mockSendSteer.mockResolvedValue(false);
+      renderInput(<ConversationInput />);
+
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      await waitFor(() => expect(editorController.setContent).toHaveBeenCalledWith('hello agent'));
+    });
+
+    describe('with text typed while the steer is pending', () => {
+      const typeMeanwhile = (content: string) => {
+        editorController.getContent.mockReturnValue(content);
+        const lastOptions =
+          mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0];
+        act(() => lastOptions?.onContentChange?.());
+      };
+
+      it('clears the composer at the submit and keeps the newer text on success', async () => {
+        let settle: (sent: boolean) => void = () => {};
+        mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+        expect(editorController.clear).toHaveBeenCalledTimes(1);
+        typeMeanwhile('a second thought');
+
+        await act(async () => settle(true));
+
+        expect(editorController.clear).toHaveBeenCalledTimes(1);
+        expect(editorController.setContent).not.toHaveBeenCalled();
+      });
+
+      it('keeps the newer text when the steer fails', async () => {
+        let settle: (sent: boolean) => void = () => {};
+        mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+        typeMeanwhile('a second thought');
+
+        await act(async () => settle(false));
+
+        expect(editorController.setContent).not.toHaveBeenCalled();
+        expect(editorController.clear).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  it('does not steer a send refused as busy in a shared conversation', () => {
+    mockedUseConversationId.mockReturnValue('conv-1');
+    mockedUseIsSharedConversation.mockReturnValue(true);
+    renderInput(<ConversationInput />);
+
+    fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+    expect(mockSendSteer).not.toHaveBeenCalled();
+    expect(submitMessage).toHaveBeenCalledWith('hello agent', { onRejected: steerIfBusyHandler });
+    expect(mockSteerIfBusy).toHaveBeenCalledWith('hello agent', {
+      onUnsent: expect.any(Function),
+      steerable: false,
+    });
+  });
+
   it('retries an unanswered steer through the steer path once the run has ended', async () => {
     mockedUseConversationId.mockReturnValue('conv-1');
     mockIsUnansweredSteer.mockImplementation((message: string) => message === 'hello agent');
@@ -624,78 +847,32 @@ describe('ConversationInput', () => {
         } as never);
       });
 
-      it('posts to the team instead of steering the running agent when skipping the agent', async () => {
+      // A shared conversation is never steered: the run would read the message as its owner.
+      it('does not send when asking the agent', () => {
+        renderInput(<ConversationInput />);
+
+        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+        expect(mockSendSteer).not.toHaveBeenCalled();
+        expect(submitMessage).not.toHaveBeenCalled();
+        expect(sendUserMessage).not.toHaveBeenCalled();
+        expect(editorController.clear).not.toHaveBeenCalled();
+      });
+
+      it('does not send when skipping the agent', () => {
         renderInput(<ConversationInput />);
 
         selectTalkToUsers();
         fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
 
-        expect(sendUserMessage).toHaveBeenCalledWith('hello agent');
-        expect(mockSendSteer).not.toHaveBeenCalled();
-        expect(submitMessage).not.toHaveBeenCalled();
-        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
-      });
-
-      it('steers the running agent when asking the agent', async () => {
-        renderInput(<ConversationInput />);
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-        expect(mockSendSteer).toHaveBeenCalledWith('hello agent', {
-          onUnsent: expect.any(Function),
-        });
         expect(sendUserMessage).not.toHaveBeenCalled();
-        expect(submitMessage).not.toHaveBeenCalled();
-        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
-      });
-
-      it('steers while the attachments of the active turn are still staged in the composer', async () => {
-        mockedUseConversationContext.mockReturnValue({
-          attachments: [{ id: 'a1', type: 'text', data: {} }],
-          upsertAttachments: jest.fn(),
-          removeAttachment: jest.fn(),
-          resetAttachments: jest.fn(),
-          isEmbeddedContext: false,
-          conversationActions: {} as never,
-        } as never);
-        renderInput(<ConversationInput />);
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-        expect(mockSendSteer).toHaveBeenCalledWith('hello agent', {
-          onUnsent: expect.any(Function),
-        });
-        expect(addErrorToast).not.toHaveBeenCalled();
-        await waitFor(() => expect(editorController.clear).toHaveBeenCalledTimes(1));
-      });
-
-      it('refuses an image paste instead of uploading it', () => {
-        renderInput(<ConversationInput />);
-
-        const pasted = mockEditorProps.onPasteFile?.(
-          new File([''], 'shot.png', { type: 'image/png' })
-        );
-
-        expect(pasted).toBeUndefined();
-        expect(addErrorToast).toHaveBeenCalledTimes(1);
-        expect(mockHandlePasteFile).not.toHaveBeenCalled();
-      });
-
-      it('keeps the draft and refuses the steer when it holds a pasted image', () => {
-        editorController.getPlaceholderNames.mockReturnValueOnce(['shot.png']);
-        renderInput(<ConversationInput />);
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
         expect(mockSendSteer).not.toHaveBeenCalled();
         expect(editorController.clear).not.toHaveBeenCalled();
-        expect(addErrorToast).toHaveBeenCalledTimes(1);
       });
 
-      it('still uploads a pasted image when skipping the agent', () => {
+      it('still uploads a pasted image', () => {
         mockHandlePasteFile.mockReturnValue('shot.png');
         renderInput(<ConversationInput />);
-        selectTalkToUsers();
 
         const file = new File([''], 'shot.png', { type: 'image/png' });
         const pasted = mockEditorProps.onPasteFile?.(file);
@@ -703,109 +880,6 @@ describe('ConversationInput', () => {
         expect(pasted).toBe('shot.png');
         expect(mockHandlePasteFile).toHaveBeenCalledWith(file);
         expect(addErrorToast).not.toHaveBeenCalled();
-      });
-
-      it('puts the text back when the steer fails after the submit', () => {
-        renderInput(<ConversationInput />);
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        const { onUnsent } = mockSendSteer.mock.calls[0][1];
-        onUnsent('hello agent');
-
-        expect(editorController.setContent).toHaveBeenCalledWith('hello agent');
-      });
-
-      it('keeps the text for the conversation it was sent to when the composer has moved on', () => {
-        mockedUseConversationId.mockReturnValue('conv-1');
-        mockedUseInputDraft.mockReturnValue({
-          draft: null,
-          saveDraft: jest.fn(),
-          clearDraft: jest.fn(),
-          keepUnsentFor: mockKeepUnsentFor,
-        });
-        const { rerender } = renderInput(<ConversationInput />);
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        const { onUnsent } = mockSendSteer.mock.calls[0][1];
-
-        mockedUseConversationId.mockReturnValue('conv-2');
-        rerenderInput(rerender);
-        onUnsent('hello agent');
-
-        expect(mockKeepUnsentFor).toHaveBeenCalledWith(
-          { agentId: 'elastic-ai-agent', conversationId: 'conv-1' },
-          'hello agent'
-        );
-        expect(editorController.setContent).not.toHaveBeenCalled();
-      });
-
-      it('keeps the text for its conversation when the composer is gone', () => {
-        mockedUseConversationId.mockReturnValue('conv-1');
-        mockedUseInputDraft.mockReturnValue({
-          draft: null,
-          saveDraft: jest.fn(),
-          clearDraft: jest.fn(),
-          keepUnsentFor: mockKeepUnsentFor,
-        });
-        const { unmount } = renderInput(<ConversationInput />);
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        const { onUnsent } = mockSendSteer.mock.calls[0][1];
-
-        unmount();
-        onUnsent('hello agent');
-
-        expect(mockKeepUnsentFor).toHaveBeenCalledWith(
-          { agentId: 'elastic-ai-agent', conversationId: 'conv-1' },
-          'hello agent'
-        );
-      });
-
-      it('puts the text back into an empty composer when the steer is refused', async () => {
-        mockSendSteer.mockResolvedValue(false);
-        renderInput(<ConversationInput />);
-
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-
-        await waitFor(() =>
-          expect(editorController.setContent).toHaveBeenCalledWith('hello agent')
-        );
-      });
-
-      describe('with text typed while the steer is pending', () => {
-        const typeMeanwhile = (content: string) => {
-          editorController.getContent.mockReturnValue(content);
-          const lastOptions =
-            mockedUseMessageEditor.mock.calls[mockedUseMessageEditor.mock.calls.length - 1][0];
-          act(() => lastOptions?.onContentChange?.());
-        };
-
-        it('clears the composer at the submit and keeps the newer text on success', async () => {
-          let settle: (sent: boolean) => void = () => {};
-          mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
-          renderInput(<ConversationInput />);
-
-          fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-          expect(editorController.clear).toHaveBeenCalledTimes(1);
-          typeMeanwhile('a second thought');
-
-          await act(async () => settle(true));
-
-          expect(editorController.clear).toHaveBeenCalledTimes(1);
-          expect(editorController.setContent).not.toHaveBeenCalled();
-        });
-
-        it('keeps the newer text when the steer fails', async () => {
-          let settle: (sent: boolean) => void = () => {};
-          mockSendSteer.mockReturnValue(new Promise<boolean>((resolve) => (settle = resolve)));
-          renderInput(<ConversationInput />);
-
-          fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-          typeMeanwhile('a second thought');
-
-          await act(async () => settle(false));
-
-          expect(editorController.setContent).not.toHaveBeenCalled();
-          expect(editorController.clear).toHaveBeenCalledTimes(1);
-        });
       });
     });
   });
@@ -872,23 +946,6 @@ describe('ConversationInput', () => {
           'aria-hidden',
           'false'
         );
-      });
-
-      it('lets a mention switch the mode again after a steered send', async () => {
-        mockedUseConversationStream.mockReturnValue({
-          pendingMessage: undefined,
-          isResuming: false,
-          isResponseLoading: true,
-          canCancel: true,
-        } as never);
-        renderInput(<ConversationInput />);
-        fireEvent.change(modeValue(), { target: { value: 'always' } });
-        fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
-        expect(mockSendSteer).toHaveBeenCalledTimes(1);
-
-        type(`${julian} look`);
-
-        expect(modeValue()).toHaveValue('never');
       });
 
       it('asks the agent when the message starts with the agent, also after skipping the agent', async () => {
