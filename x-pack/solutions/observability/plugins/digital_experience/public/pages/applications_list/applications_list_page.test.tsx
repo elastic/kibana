@@ -300,6 +300,15 @@ describe('ApplicationsListPage mobile applications', () => {
     }
   );
 
+  it('keeps a Mobile tab on a Web tab without rows when the URL picks it', async () => {
+    mockApplicationType('web');
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(await screen.findByTestId('digitalExperienceApplicationTypeTab-mobile')).toBeVisible();
+    expect(screen.queryByTestId('digitalExperienceMobileApplicationsTable')).toBeNull();
+  });
+
   it('says on the Web tab that sessions are not set up, beside mobile applications', async () => {
     mockApplicationType('web');
     mockSessionsStatus({ status: NOT_SET_UP });
