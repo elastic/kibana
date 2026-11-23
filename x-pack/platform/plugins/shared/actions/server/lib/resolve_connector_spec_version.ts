@@ -33,7 +33,6 @@ const parseSpecVersion = (value: string): { major: number; minor?: number } | un
   return { major: Number(majorPart), minor: Number(minorPart) };
 };
 
-/** Resolves a connector's schema version and builds validators for the selected spec. */
 export const resolveConnectorSpecVersion = ({
   actionType,
   specVersion,

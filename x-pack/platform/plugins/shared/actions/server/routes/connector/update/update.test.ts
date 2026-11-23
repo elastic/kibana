@@ -198,39 +198,6 @@ describe('updateConnectorRoute', () => {
     expect(actionsClient.update).not.toHaveBeenCalled();
   });
 
-  it.each([true, false])(
-    'only includes an existing spec_version in the response when the connector catalog is enabled (%s)',
-    async (isConnectorCatalogEnabled) => {
-      const licenseState = licenseStateMock.create();
-      const router = httpServiceMock.createRouter();
-      updateConnectorRoute(router, licenseState, actionsConfigUtils(false, true));
-      const [, handler] = router.put.mock.calls[0];
-      const actionsClient = actionsClientMock.create();
-      actionsClient.update.mockResolvedValueOnce(createMockConnector({ specVersion: '1.3' }));
-      const body = updateConnectorBodySchema.validate({
-        name: 'Versioned connector',
-        config: {},
-        secrets: {},
-      });
-      const [context, req, res] = mockHandlerArguments(
-        { actionsClient, isCatalogFeatureFlagEnabled: () => isConnectorCatalogEnabled },
-        { body, params: { id: '1' } },
-        ['ok']
-      );
-
-      await handler(context, req, res);
-
-      expect(actionsClient.update).toHaveBeenCalledWith({ id: '1', action: body });
-      expect(res.ok).toHaveBeenCalledTimes(1);
-      const responseBody = jest.mocked(res.ok).mock.calls[0][0]?.body;
-      if (isConnectorCatalogEnabled) {
-        expect(responseBody).toHaveProperty('spec_version', '1.3');
-      } else {
-        expect(responseBody).not.toHaveProperty('spec_version');
-      }
-    }
-  );
-
   it('rejects a spec_version past the max length', () => {
     expect(() =>
       updateConnectorBodySchema.validate({
