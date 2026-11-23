@@ -35,6 +35,11 @@ const getRandomCall = () =>
 
 const TIMESTAMP_COLUMN = { name: '@timestamp', type: 'date' };
 
+const COUNT_RESPONSE = (total: number) => ({
+  columns: [{ name: 'total', type: 'long' }],
+  values: [[total]],
+});
+
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: '',
   _id: id,
@@ -106,11 +111,14 @@ describe('fetchSampleDocuments', () => {
   });
 
   it('rejects with a 400 that explains the missing @timestamp and samples nothing', async () => {
-    getEsqlColumnSchemaMock.mockResolvedValueOnce([{ name: 'message', type: 'text' }]);
+    // The narrowed probe drops a column no index maps; documents exist, so the source is at fault.
+    getEsqlColumnSchemaMock.mockResolvedValueOnce([]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(3));
 
     await expect(
       fetchSampleDocuments({
-        esClient: elasticsearchServiceMock.createElasticsearchClient(),
+        esClient,
         index: 'logs.test-default',
         start: 100,
         end: 200,
@@ -134,9 +142,11 @@ describe('fetchSampleDocuments', () => {
 
   it('returns an empty sample without sampling when a wildcard matches no index yet', async () => {
     getEsqlColumnSchemaMock.mockResolvedValueOnce([]);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResponse(COUNT_RESPONSE(0));
 
     const result = await fetchSampleDocuments({
-      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      esClient,
       index: 'logs.test-default',
       start: 100,
       end: 200,
@@ -339,6 +349,9 @@ describe('fetchSampleDocuments', () => {
     expect(result.filtersCapped).toBe(true);
     expect(result.hasFilteredDocuments).toBe(true);
     expect(getEsqlColumnSchemaMock).toHaveBeenCalledTimes(1);
+    expect(getEsqlColumnSchemaMock).toHaveBeenCalledWith(
+      expect.objectContaining({ fields: ['@timestamp', 'service.name'] })
+    );
   });
 
   it('excludes grouped values with NOT IN and joins slots with AND', async () => {

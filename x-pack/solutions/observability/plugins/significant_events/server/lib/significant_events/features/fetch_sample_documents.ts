@@ -13,7 +13,11 @@ import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getEsqlColumnSchema, getSampleDocumentsEsql, type EsqlColumnSchema } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
-import { conditionToESQLFilterAst, getTimestampColumnProblem } from '@kbn/nightshift-shared';
+import {
+  SOURCE_TIMESTAMP_FIELD,
+  conditionToESQLFilterAst,
+  getTimestampColumnProblem,
+} from '@kbn/nightshift-shared';
 import { getConditionFields } from '@kbn/streamlang';
 import { partition } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
@@ -101,28 +105,44 @@ export async function fetchSampleDocuments({
   const { filters: entityFilters, omitted } = getEntityFilters(features, maxEntityFilters);
   const samplingSignal = timeoutSignal(samplingTimeoutMs);
   try {
-    // No time range here: a request-level range narrows the lookup to indices with data in the
-    // window, while the sampling query's WHERE does not, so the two could disagree on a column's type.
+    // Only the columns the arms read: the full schema of a wide source can time out. No time
+    // range here: a request-level range narrows the lookup to indices with data in the window,
+    // while the sampling query's WHERE does not, so the two could disagree on a column's type.
     const columns = await withSamplingErrorContext(
-      getEsqlColumnSchema({ esClient, index, signal: samplingSignal }),
+      getEsqlColumnSchema({
+        esClient,
+        index,
+        fields: [
+          SOURCE_TIMESTAMP_FIELD,
+          ...new Set(entityFilters.flatMap((filter) => getFilterFields(filter))),
+        ],
+        signal: samplingSignal,
+      }),
       { index, samplingTimeoutMs, query: 'Column probe' }
     );
-    // A wildcard that matches no index yet probes as zero columns. That is a source with no data
-    // yet, which create accepts, not a query without @timestamp: an empty sample lets the
-    // workflow end on its "no documents" skip instead of failing the run.
-    if (columns.length === 0) {
-      logger.debug(() => `No index behind [${index}] exists yet; nothing to sample.`);
-      return {
-        documents: [],
-        totalFilters: features.length,
-        filtersCapped: omitted > 0,
-        hasFilteredDocuments: false,
-      };
-    }
-    // Every arm filters on @timestamp. Sources saved before the source API required it can still
-    // lack one; tell the user why instead of failing each arm on "Unknown column".
+    // Every arm filters on @timestamp. A narrowed probe drops unmapped columns, so a missing one
+    // looks the same for a source with data but no @timestamp (saved before the source API
+    // required it) and for a wildcard with no index yet. Only the first is the source's fault.
     const timestampProblem = getTimestampColumnProblem(columns);
     if (timestampProblem) {
+      const isTimestampUnmapped = !columns.some(({ name }) => name === SOURCE_TIMESTAMP_FIELD);
+      if (
+        isTimestampUnmapped &&
+        !(await withSamplingErrorContext(
+          hasAnyDocument({ esClient, index, signal: samplingSignal }),
+          { index, samplingTimeoutMs, query: 'Column probe' }
+        ))
+      ) {
+        // A source with no data yet, which create accepts: an empty sample lets the workflow
+        // end on its "no documents" skip instead of failing the run.
+        logger.debug(() => `No documents behind [${index}] yet; nothing to sample.`);
+        return {
+          documents: [],
+          totalFilters: features.length,
+          filtersCapped: omitted > 0,
+          hasFilteredDocuments: false,
+        };
+      }
       throw new StatusError(`Cannot sample [${index}]: ${timestampProblem}`, 400);
     }
 
@@ -377,6 +397,24 @@ async function fetchEntityFilteredDocuments({
     abortSignal,
   });
 }
+
+/** One cheap `LIMIT 1` count: tells a source with no data yet apart from one with unmapped columns. */
+const hasAnyDocument = async ({
+  esClient,
+  index,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  signal: AbortSignal;
+}): Promise<boolean> => {
+  const response = (await esClient.esql.query(
+    { query: esql.from([index]).limit(1).pipe`STATS total = COUNT(*)`.print('basic') },
+    { signal }
+  )) as unknown as { values: unknown[][] };
+  const total = response.values[0]?.[0];
+  return typeof total === 'number' && total > 0;
+};
 
 const getFilterFields = (filter: EntityFilter): string[] =>
   isEntityValuesFilter(filter)
