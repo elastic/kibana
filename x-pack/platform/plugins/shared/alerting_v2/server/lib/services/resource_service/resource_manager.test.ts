@@ -99,6 +99,7 @@ describe('ResourceManager', () => {
     manager.startInitialization();
 
     await expect(manager.waitForResources(['r1'])).rejects.toThrow('Error initializing resource');
+    // A second wait must reuse the stored failure instead of re-running the initializer.
     await expect(manager.waitForResources(['r1'])).rejects.toThrow('Error initializing resource');
 
     expect(init.initialize).toHaveBeenCalledTimes(1);
@@ -160,14 +161,15 @@ describe('ResourceManager', () => {
         createInitializer(async () => {})
       );
       manager.registerResource(
-        'slow',
+        'never-ready',
+        // Never settles, so this resource cannot become ready during the test.
         createInitializer(() => new Promise<void>(() => {}))
       );
       manager.startInitialization();
 
       await expect(manager.waitForResources(['needed'])).resolves.toBeUndefined();
 
-      expect(manager.isReady('slow')).toBe(false);
+      expect(manager.isReady('never-ready')).toBe(false);
     });
 
     it('resolves when a resource that was not requested failed', async () => {
@@ -185,7 +187,7 @@ describe('ResourceManager', () => {
       );
       manager.startInitialization();
 
-      await expect(manager.ensureResourceReady('broken')).rejects.toThrow('broken failure');
+      await expect(manager.waitForResources(['broken'])).rejects.toThrow('broken failure');
       await expect(manager.waitForResources(['needed'])).resolves.toBeUndefined();
     });
 
