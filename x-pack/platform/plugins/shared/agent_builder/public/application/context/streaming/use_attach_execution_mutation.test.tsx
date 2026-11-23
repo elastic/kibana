@@ -35,8 +35,9 @@ jest.mock('../../hooks/use_agent_builder_service', () => ({
 }));
 
 const conversationId = 'conv-1';
+const streamId = 'stream-1';
 const executionId = 'round-1::execution::1';
-const vars = { conversationId, executionId };
+const vars = { conversationId, executionId, streamId };
 
 const started = createExecutionStartedEvent({
   id: `${executionId}::execution_started`,
@@ -147,7 +148,9 @@ describe('useAttachExecutionMutation', () => {
       source.complete();
     });
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
     expect(mockGet).toHaveBeenCalledTimes(1);
   });
@@ -209,7 +212,9 @@ describe('useAttachExecutionMutation', () => {
       )
     );
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     expect(mockGet).toHaveBeenCalledTimes(1);
     expect(result.current.isLoading).toBe(false);
   });
@@ -226,7 +231,9 @@ describe('useAttachExecutionMutation', () => {
       source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
     });
 
-    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    await waitFor(() =>
+      expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId, streamId)
+    );
     expect(mockGet).not.toHaveBeenCalled();
     expect(mockAbort).not.toHaveBeenCalled();
   });

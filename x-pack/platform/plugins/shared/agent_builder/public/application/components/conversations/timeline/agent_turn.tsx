@@ -15,6 +15,7 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { EventSteps } from './event_steps/event_steps';
+import { groupSteps } from './event_steps/group_steps';
 import { AgentResponse } from './agent_response';
 import { executionTerminatedToResponse } from './items/execution_terminated_event';
 import { ExecutionFailedEvent } from './items/execution_failed_event';
@@ -53,8 +54,8 @@ const renderContent = (
   const { executionId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
-      <EuiFlexGroup direction="column" gutterSize="s">
-        {item.steps.length > 0 && (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        {groupSteps(item.steps).length > 0 && (
           <EuiFlexItem grow={false}>
             <EventSteps
               steps={item.steps}

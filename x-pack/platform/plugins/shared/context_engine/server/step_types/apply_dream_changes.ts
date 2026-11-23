@@ -20,6 +20,7 @@ import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 import { isVisibleInSpace } from '../dreaming/permissions';
 import { referencedIds, resolveChangeSet, vocabularyOf } from '../dreaming/resolve_change_set';
+import { findEntitiesCiting, redirectSupersededEntities } from '../dreaming/superseded_by';
 import type { DreamingKiStepDependencies } from './helpers';
 import {
   assertDreamingAvailable,
@@ -114,8 +115,29 @@ export const getApplyDreamChangesStepDefinition = ({
         existing,
         memoryPermissions,
       });
+      const redirected = await redirectSupersededEntities(resolved.operations, {
+        findKi: async (kiId) =>
+          (
+            await findKiRevision({
+              esClient,
+              aiIndexId,
+              dest: aiIndex.dest,
+              kiId,
+              includeSource: true,
+              abortSignal: context.abortSignal,
+            })
+          )?.source as DreamedKi | undefined,
+        findCiting: (kiId) =>
+          findEntitiesCiting({
+            esClient,
+            dest: aiIndex.dest,
+            kiId,
+            abortSignal: context.abortSignal,
+          }),
+        spaceId,
+      });
       const { operations, dropped } = await keepVerifiedPatterns(
-        resolved.operations,
+        redirected,
         createVerifyEsql({ esClient, logger, abortSignal: context.abortSignal })
       );
       const planned = dryRun ? new Map<string, PlannedWrite>() : undefined;

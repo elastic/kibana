@@ -43,7 +43,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
-        capabilities: { attachmentTools: true, apiTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
@@ -277,7 +277,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true, apiTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -295,7 +295,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true, apiTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -376,7 +376,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true, apiTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -473,7 +473,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
-          capabilities: { attachmentTools: true, apiTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
             { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
@@ -510,7 +510,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
-        capabilities: { attachmentTools: true, apiTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
@@ -555,7 +555,7 @@ describe('getResearchAgentPrompt', () => {
     const off = {
       instructions: '',
       aiIndices: [],
-      capabilities: { attachmentTools: false, apiTools: true },
+      capabilities: { attachmentTools: false, apiTools: true, bashTool: true },
     };
 
     it('replaces the ATTACHMENTS section with the notice and drops inline rendering when off', async () => {
@@ -600,6 +600,74 @@ describe('getResearchAgentPrompt', () => {
       const offPrompt = await systemPrompt({ configuration: off });
 
       expect(on.length - offPrompt.length).toBeGreaterThanOrEqual(1000);
+    });
+  });
+
+  describe('bash_tool capability', () => {
+    const bashLine = 'run a bash command in a sandboxed shell';
+    const tableRenderer = {
+      type: 'table',
+      payloadSchema: z.object({ columns: z.array(z.string()) }),
+      getAgentDescription: () => 'Renders a dataset as an interactive table.',
+    };
+    const withCapability = (bashTool: boolean) => ({
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: true, apiTools: true, bashTool },
+    });
+    const systemPrompt = async (overrides: Record<string, any>) =>
+      asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
+
+    it('lists bash in the FILESYSTEM section when the flag and the capability are on', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain(bashLine);
+    });
+
+    it('does not list bash when the capability is off, but keeps read_file and list_files', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(false),
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
+      expect(prompt).toContain('## FILESYSTEM (VFS)');
+      expect(prompt).toContain('read_file');
+      expect(prompt).toContain('list_files');
+    });
+
+    it('keeps the render-payload workflow when the flag and the capability are on', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain('Use the bash tool to write the payload');
+    });
+
+    it('drops the render-payload workflow along with bash when the capability is off', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(false),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
+      expect(prompt).not.toContain('Use the bash tool to write the payload');
+      expect(prompt).not.toContain('#### type: "table"');
+    });
+
+    it('does not list bash when the flag is off', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        experimentalFeatures: { aiIndices: false, bash: false, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
     });
   });
 });
