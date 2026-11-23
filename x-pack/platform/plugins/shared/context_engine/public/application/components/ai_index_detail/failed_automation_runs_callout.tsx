@@ -18,10 +18,11 @@ import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getWorkflowExecutionPath } from '../../utils/get_workflow_execution_path';
 import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
-const scrollToAutomations = () => {
-  document
-    .getElementById(AUTOMATIONS_PANEL_ID)
-    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+/** Scrolls to the Automations panel and moves keyboard focus there, so Tab continues from it. */
+const goToAutomations = () => {
+  const automationsPanel = document.getElementById(AUTOMATIONS_PANEL_ID);
+  automationsPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  automationsPanel?.focus({ preventScroll: true });
 };
 
 interface FailedAutomationRunsCalloutProps {
@@ -79,7 +80,7 @@ export const FailedAutomationRunsCallout = ({ workflowIds }: FailedAutomationRun
             {failedRuns.length > 1 ? (
               // Several failures: the automation rows below list each one with its own run link.
               <EuiLink
-                onClick={scrollToAutomations}
+                onClick={goToAutomations}
                 data-test-subj="contextOverviewFailedRunsViewAutomationsLink"
                 {...getEbtProps({
                   element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageOverview,

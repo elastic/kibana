@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { AiIndexAutomation, GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import type { UseAutomationsEditorResult } from '../../hooks/use_automations_editor';
@@ -21,6 +22,7 @@ import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import type { WorkflowSummary } from '../../hooks/use_workflow_summaries';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
+import { AUTOMATIONS_PANEL_ID } from './automations_panel_id';
 
 jest.mock('../../hooks/use_automations_editor', () => ({
   useAutomationsEditor: jest.fn(),
@@ -116,12 +118,14 @@ type PanelProps = React.ComponentProps<typeof AutomationsPanel>;
 
 interface RenderPanelOptions {
   canCreateWorkflow?: boolean;
+  /** The AI index tab the panel is on. */
+  pathname?: string;
 }
 
 /** Rerender re-wraps in the same providers so tests can flip the mocked hook and re-render in one call. */
 const renderPanel = (
   props: Partial<PanelProps> = {},
-  { canCreateWorkflow = true }: RenderPanelOptions = {}
+  { canCreateWorkflow = true, pathname = '/ai_index/my-ai-index/settings' }: RenderPanelOptions = {}
 ) => {
   const onSaved = jest.fn();
   const services = coreMock.createStart();
@@ -136,14 +140,16 @@ const renderPanel = (
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <AutomationsPanel
-            isLoading={false}
-            aiIndex={aiIndex}
-            onSaved={onSaved}
-            isManaged={false}
-            {...props}
-            {...overrides}
-          />
+          <MemoryRouter initialEntries={[pathname]}>
+            <AutomationsPanel
+              isLoading={false}
+              aiIndex={aiIndex}
+              onSaved={onSaved}
+              isManaged={false}
+              {...props}
+              {...overrides}
+            />
+          </MemoryRouter>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
@@ -268,7 +274,7 @@ describe('AutomationsPanel', () => {
     expect(createAndAttach).not.toHaveBeenCalled();
   });
 
-  it('opens the created workflow in the Workflows app', async () => {
+  it('opens the created workflow in the Workflows app, with back returning to the Settings tab', async () => {
     const createAndAttach = jest.fn().mockResolvedValue('wf-created');
     mockUseAutomationsEditor.mockReturnValue(editorResult({ createAndAttach }));
 
@@ -278,8 +284,20 @@ describe('AutomationsPanel', () => {
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
+        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index%2Fsettings',
       });
+    });
+  });
+
+  it('links automation rows back to the tab they are shown on', () => {
+    mockUseAutomationsEditor.mockReturnValue(
+      editorResult({ automations: [{ type: 'workflow', value: 'wf-1' }], workflowIds: ['wf-1'] })
+    );
+
+    const { services } = renderPanel({}, { pathname: '/ai_index/my-ai-index' });
+
+    expect(services.application.getUrlForApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-1?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
     });
   });
 
@@ -295,6 +313,12 @@ describe('AutomationsPanel', () => {
       expect(createAndAttach).toHaveBeenCalledTimes(1);
     });
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('takes focus from the failed-runs warning without joining the Tab order', () => {
+    renderPanel();
+
+    expect(document.getElementById(AUTOMATIONS_PANEL_ID)).toHaveAttribute('tabindex', '-1');
   });
 
   it('renders one row per automation', () => {

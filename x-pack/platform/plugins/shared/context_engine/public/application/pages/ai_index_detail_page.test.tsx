@@ -73,13 +73,14 @@ jest.mock('../hooks/use_data_connectors', () => ({
 }));
 
 const mockMgetWorkflows = jest.fn();
+const mockCreateWorkflow = jest.fn();
 const mockGetWorkflowExecutions = jest.fn();
 
 jest.mock('@kbn/workflows-ui', () => ({
   useWorkflowsApi: () => ({
     mgetWorkflows: mockMgetWorkflows,
     getWorkflowExecutions: mockGetWorkflowExecutions,
-    createWorkflow: jest.fn(),
+    createWorkflow: mockCreateWorkflow,
   }),
   useWorkflowsCapabilities: () => ({
     canExecuteWorkflow: true,
@@ -257,6 +258,7 @@ const removeAutomationFromRow = async (rowIndex: number) => {
 describe('AiIndexDetailPage', () => {
   beforeEach(() => {
     mockMgetWorkflows.mockResolvedValue([]);
+    mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockGetWorkflowExecutions.mockResolvedValue({ results: [] });
     mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
@@ -933,6 +935,44 @@ describe('AiIndexDetailPage', () => {
     await waitForAiIndexDetailLoaded();
 
     expect(await screen.findByTestId('contextAddAutomationButton')).toBeEnabled();
+  });
+
+  it('creates a workflow from the Settings tab, attaches it, and opens the editor', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services, undefined, getAiIndexSettingsPath(aiIndex.id));
+
+    await waitForAiIndexDetailLoaded();
+
+    fireEvent.click(await screen.findByTestId('contextAddAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(mockCreateWorkflow).toHaveBeenCalledWith({
+        yaml: expect.stringContaining('my-ai-index automation'),
+      });
+    });
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [{ type: 'workflow', value: 'wf-created' }],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+            traces: [],
+          }),
+        })
+      );
+    });
+
+    // The Workflows back button returns to the Settings tab, where the user started.
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index%2Fsettings',
+    });
   });
 
   it('keeps the rows rendered while the summaries for an edited list resolve', async () => {

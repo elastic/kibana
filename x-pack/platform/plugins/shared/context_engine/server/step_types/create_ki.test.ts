@@ -225,6 +225,45 @@ describe('getCreateKiStepDefinition', () => {
     );
   });
 
+  it('keeps the first @timestamp on a rerun into an index dest, so the KI keeps its added date', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'logs-index-profile',
+              _index: 'ai-index-idx-my-ai-index',
+              _source: {
+                ...kiInput,
+                id: 'logs-index-profile',
+                '@timestamp': '2026-10-01T08:00:00.000Z',
+              },
+            },
+          ],
+        },
+      }),
+      index: jest.fn().mockResolvedValue({ _id: 'logs-index-profile' }),
+    };
+    const context = createMockStepContext({
+      input: { ai_index_id: 'my-ai-index', ki_id: 'logs-index-profile', ki: kiInput },
+      esClient,
+    });
+    const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+
+    const { handler } = getCreateKiStepDefinition({
+      getAiIndexService: () => service,
+      isContextEngineEnabled: enabled,
+      checkWritePrivilege: allowed,
+      verifyKi,
+      ...mockKiStepTelemetry(),
+    });
+    await handler(context);
+
+    const [{ document }] = esClient.index.mock.calls[0];
+    expect(document['@timestamp']).toBe('2026-10-01T08:00:00.000Z');
+    expect(document.updated_at).not.toBe('2026-10-01T08:00:00.000Z');
+  });
+
   it('rejects a user_id change on a rerun', async () => {
     const esClient = {
       search: jest.fn().mockResolvedValue({

@@ -131,6 +131,7 @@ describe('FailedAutomationRunsCallout', () => {
     ]);
     const automationsPanel = document.createElement('div');
     automationsPanel.id = AUTOMATIONS_PANEL_ID;
+    automationsPanel.tabIndex = -1;
     automationsPanel.scrollIntoView = jest.fn();
     document.body.appendChild(automationsPanel);
 
@@ -142,6 +143,7 @@ describe('FailedAutomationRunsCallout', () => {
       behavior: 'smooth',
       block: 'start',
     });
+    expect(automationsPanel).toHaveFocus();
 
     automationsPanel.remove();
   });

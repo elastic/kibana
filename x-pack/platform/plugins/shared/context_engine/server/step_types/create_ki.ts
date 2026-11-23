@@ -20,7 +20,12 @@ import {
   resolveOrCreateAiIndex,
   withKiWriteTelemetry,
 } from './helpers';
-import { findKiRevision, putKiRevision } from '../ai_indices/ki_revision';
+import {
+  findKiRevision,
+  isKiDeleted,
+  putKiRevision,
+  rewrittenKiTimestamp,
+} from '../ai_indices/ki_revision';
 import { assertSameUserId } from '../ai_indices/ki_write';
 import { toStepError } from './to_step_error';
 import type { VerifyKi } from './verify_ki';
@@ -91,7 +96,11 @@ export const getCreateKiStepDefinition = ({
             dest,
             kiId: id,
             document: {
-              '@timestamp': now,
+              '@timestamp': rewrittenKiTimestamp(
+                dest,
+                existing && !isKiDeleted(existing.source) ? existing.source : undefined,
+                now
+              ),
               ...omit(ki, 'user_id'),
               ...(userId !== undefined ? { user_id: userId } : {}),
               id,

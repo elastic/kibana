@@ -253,6 +253,31 @@ describe('applyOperations', () => {
     expect(putKiRevision).toHaveBeenCalledWith(expect.objectContaining({ existing: undefined }));
   });
 
+  it('keeps the first @timestamp when it rewrites a KI on an index dest, but not on a data stream', async () => {
+    const bob: DreamedKi = {
+      id: 'entity-person-bob',
+      type: 'entity.person',
+      title: 'Bob',
+      '@timestamp': '2026-10-01T08:00:00.000Z',
+    };
+    const upsertBob: DreamingOperation = {
+      op: 'upsert_entity',
+      id: 'entity-person-bob',
+      type: 'person',
+      title: 'Bob',
+      attributes: {},
+      sourceMemoryIds: ['m-1'],
+    };
+    stored.set(bob.id, bob);
+
+    await applyOperations(context(), [upsertBob]);
+    await applyOperations(context({ type: 'data_stream', value: 'ai-index-ds-a' }), [upsertBob]);
+
+    const [onIndex, onDataStream] = written();
+    expect(onIndex['@timestamp']).toBe('2026-10-01T08:00:00.000Z');
+    expect(onDataStream['@timestamp']).not.toBe('2026-10-01T08:00:00.000Z');
+  });
+
   it('retries a write that lost to a concurrent one', async () => {
     jest
       .mocked(putKiRevision)
