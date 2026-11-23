@@ -372,13 +372,14 @@ describe('updateIncident handler', () => {
     expect(body).not.toHaveProperty('comment');
   });
 
-  it('accepts determination notMalicious through the schema', () => {
+  it('preserves determination notMalicious in the parsed output', () => {
     const result = UpdateIncidentInputSchema.safeParse({
       incidentId: '5',
       classification: 'falsePositive',
       determination: 'notMalicious',
     });
     expect(result.success).toBe(true);
+    expect(result.data).toHaveProperty('determination', 'notMalicious');
   });
 });
 
@@ -494,13 +495,14 @@ describe('updateAlert handler', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts determination notMalicious through the schema', () => {
+  it('preserves determination notMalicious in the parsed output', () => {
     const result = UpdateAlertInputSchema.safeParse({
       alertId: 'alert-7',
       classification: 'falsePositive',
       determination: 'notMalicious',
     });
     expect(result.success).toBe(true);
+    expect(result.data).toHaveProperty('determination', 'notMalicious');
   });
 });
 
