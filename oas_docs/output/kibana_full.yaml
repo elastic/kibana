@@ -28740,6 +28740,8 @@ paths:
                   minLength: 1
                   title: Data view name
                   type: string
+                spaces:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
                 time_field:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
               required:
@@ -29020,6 +29022,8 @@ paths:
                   minLength: 1
                   title: Data view name
                   type: string
+                spaces:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
                 time_field:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
               required:
@@ -176202,6 +176206,15 @@ components:
         - ref_id
       title: Data view reference
       type: object
+    Kibana_HTTP_APIs_kbn-data-view-spaces-schema:
+      description: 'The IDs of the spaces where the data view is available. Use `*` to make it available in all spaces. Example: ["default", "marketing"].'
+      items:
+        maxLength: 256
+        minLength: 1
+        type: string
+      maxItems: 100
+      title: Spaces
+      type: array
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
@@ -177891,6 +177904,8 @@ components:
           description: 'Deprecated scripted fields, keyed by field name. This property is read-only: it is only returned in responses, and sending it in a create or update request fails with a 400.'
           title: Scripted fields
           type: object
+        spaces:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-data-view-spaces-schema'
         time_field:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-time-field-schema'
       required:
