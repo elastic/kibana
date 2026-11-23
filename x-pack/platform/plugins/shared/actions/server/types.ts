@@ -68,6 +68,7 @@ export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
   getSkippedPreconfiguredConnectorIds: () => Set<string>;
+  isCatalogFeatureFlagEnabled: () => boolean;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -243,6 +244,7 @@ export interface ActionTypeCoreFields<
    * Spec this type was generated from; only set for spec-backed types
    */
   spec?: ConnectorSpec;
+  specs?: Map<string, ConnectorSpec>; // <specVersion, full spec>
   subFeature?: SubFeature;
   isDeprecated?: boolean;
   /**
@@ -350,6 +352,7 @@ export type ClassicActionType<
 };
 
 export interface RawAction extends Record<string, unknown> {
+  specVersion?: string;
   actionTypeId: string;
   name: string;
   isMissingSecrets: boolean;

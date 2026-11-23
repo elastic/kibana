@@ -30,7 +30,7 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 |-------------|------------|-------------|-------------------|------------|
 | `Team:Entity Analytics` | `server/lib/entity_analytics/` | `public/entity_analytics/` | `server/lib/entity_analytics/register_entity_analytics_routes.ts` | `common/api/entity_analytics/` |
 | `Team:Detection Engineering` | `server/lib/detection_engine/` | `public/detection_engine/` | `server/lib/detection_engine/rule_management/api/register_routes.ts` | `common/api/detection_engine/` |
-| `Team:Threat Hunting` | `server/lib/timeline/` | `public/timelines/` | `server/lib/timeline/routes/index.ts` | `common/api/timeline/` |
+| `Team:Security Investigations` | `server/lib/timeline/` | `public/timelines/` | `server/lib/timeline/routes/index.ts` | `common/api/timeline/` |
 | `Team: SecuritySolution` | varies | varies | varies | varies |
 
 ### Entity Analytics Sub-areas
@@ -65,7 +65,7 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 | `@elastic/security-solution` | `Team: SecuritySolution` | `security_solution/` (root-level, shared) |
 | `@elastic/security-entity-analytics` | `Team:Entity Analytics` | `server/lib/entity_analytics/`, `public/entity_analytics/` |
 | `@elastic/security-detection-engineering` | `Team:Detection Engineering` | `server/lib/detection_engine/`, `lists/`, `server/lib/detection_engine/rule_management/`, `prebuilt_rules/` |
-| `@elastic/security-threat-hunting-investigations` | `Team:Threat Hunting` | `server/lib/timeline/`, `public/timelines/`, `timelines/` |
+| `@elastic/security-threat-hunting-investigations` | `Team:Security Investigations` | `server/lib/timeline/`, `public/timelines/`, `timelines/` |
 | `@elastic/security-generative-ai` | `Team:Security Generative AI` | `elastic_assistant/`, `public/attack_discovery/` |
 | `@elastic/security-defend-workflows` | `Team:Defend Workflows` | `public/management/`, `server/endpoint/`, `osquery/` |
 | `@elastic/kibana-cloud-security-posture` | `Team:Cloud Security` | `cloud_security_posture/`, `cloud_defend/` |
@@ -131,11 +131,10 @@ All paths relative to `x-pack/solutions/security/plugins/security_solution/`.
 |-----------|----------|
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/` |
 | Scout (Playwright) | `x-pack/solutions/security/plugins/security_solution/test/scout/` |
-| API Integration (general) | `x-pack/test/security_solution_api_integration/` |
-| API Integration (Security) | `x-pack/solutions/security/test/security_solution_api_integration/` |
-| Entity Analytics API tests | `test_suites/entity_analytics/` (within either API integration path) |
-| Detection Engine API tests | `test_suites/detections_response/` (within either API integration path) |
-| Investigation API tests | `test_suites/investigation/` (within either API integration path) |
+| API Integration (Security) | `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` |
+| Entity Analytics API tests | `test_suites/entity_analytics/` (within the API integration path) |
+| Detection Engine API tests | `test_suites/detections_response/` (within the API integration path) |
+| Investigation API tests | `test_suites/investigation/` (within the API integration path) |
 | Unit Tests | Co-located `*.test.ts` / `*.test.tsx` next to source files |
 
 ---

@@ -10,7 +10,7 @@ xpack.entityInventory.enabled: true
 
 ## Routes
 
-The routes exist only when the plugin is enabled. Both are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
+The routes exist only when the plugin is enabled. All are internal: send `x-elastic-internal-origin: kibana`, and `kbn-xsrf` on `POST`.
 
 ### `GET /internal/entity_inventory/types`
 
@@ -67,8 +67,9 @@ Response:
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `took` | Wall time of the request in milliseconds, probes included. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0; why it failed is in `errors`. |
+| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata. |
+| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
 
@@ -91,6 +92,22 @@ Errors that fail the request:
 | The definition cannot be turned into queries | 400 |
 
 The route does not cap the window length: it checks only that `from` and `to` are instants and that `from` is earlier than `to`. The limit lives in the UI, which clamps its picker to `ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS` (3 days, `entity_inventory_app/public/application/constants.ts`). A direct caller is therefore unbounded — `{"from":"1970-01-01T00:00:00Z","to":"2200-01-01T00:00:00Z"}` is a valid request — which is acceptable while the route is internal and both plugins are off by default.
+
+### `POST /internal/entity_inventory/entities/{type}/_plan`
+
+Lets a caller, such as a benchmark, run the inventory's generated queries itself: it plans the request exactly as `_list` does, probes included, and returns the probes and the list queries `_list` would send for the same request, without running the list queries. Planning and the request body are shared with `_list`, so the queries are the ones `_list` sends.
+
+Body: the same as `_list` (`from`, `to`, `limit`, strict).
+
+Response:
+
+| key | |
+| --- | --- |
+| `probes` | One entry per distinct source pattern, in source order: `indexPattern`, `request`, and `hasTimeSeries`, whether the probe found a readable time-series index (null when the probe failed). |
+| `queries` | One entry per plan query `_list` would send, in plan order: `indexPattern`, `engine` (`TS` or `FROM`) and `request`. A source whose probe failed has none, as in `_list`. |
+| `errors` | `{ indexPattern, status, reason }` per source whose probe failed. |
+
+Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
 
 ### Access control (interim)
 

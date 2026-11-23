@@ -76,7 +76,7 @@ import {
 } from './execution_runner';
 import {
   getPendingResumeRound,
-  resolveExecutionConnectorId,
+  resolveAgentBuilderDefaultEndpoint,
   serializeExecutionError,
 } from './utils';
 import { AbortMonitor } from './task/abort_monitor';
@@ -96,7 +96,7 @@ import {
   createConversationIdSetEvent,
   createConversationUpdatedEvent,
 } from './utils/events';
-import { userMessageActor } from '../conversation/client/rounds_to_events';
+import { runTimelineExecutionId, userMessageActor } from '../conversation/client/rounds_to_events';
 
 /** The still-recorded parent execution that spawned a sub-agent execution. */
 interface ParentExecution {
@@ -234,6 +234,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       const connector = await this.resolveExecutionConnector({
         agentId,
         connectorId: params.connectorId,
+        inferenceFeatureId: params.inferenceFeatureId,
         request,
       });
       if (connector) {
@@ -316,7 +317,15 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
     if (conversationParams && conversation && conversationParams.storeConversation !== false) {
       const pendingResumeRound = getPendingResumeRound(conversation);
-      const activeExecution: AcquireActiveExecution = { action: 'acquire', executionId };
+      const activeExecution: AcquireActiveExecution = {
+        action: 'acquire',
+        executionId,
+        timelineExecutionId: runTimelineExecutionId({
+          events: conversation.events,
+          pausedRoundId: pendingResumeRound?.id,
+          roundId,
+        }),
+      };
 
       try {
         if (pendingResumeRound) {
@@ -939,6 +948,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     };
   }
 
+  async assertCanRunAgent({
+    request,
+    agentId,
+  }: {
+    request: KibanaRequest;
+    agentId: string;
+  }): Promise<void> {
+    await this.resolveExecutionIdentity({ request, agentId });
+  }
+
   /** Whether the request's credential already is the service account the execution runs as. */
   private requestRunsAs(request: KibanaRequest, runAs: NonNullable<AgentExecution['runAs']>) {
     const principal = this.deps.security.authc.getPrincipal(request);
@@ -1018,43 +1037,39 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return (await executionClient.peek(executionId)) !== undefined;
   }
 
+  /**
+   * The connector a run is known to use before it starts, for up-front validation.
+   * A feature-sourced run resolves nothing here, the inference plugin handles it.
+   */
   private async resolveExecutionConnector({
     agentId,
     connectorId,
+    inferenceFeatureId,
     request,
   }: {
     agentId: string;
     connectorId?: string;
+    inferenceFeatureId?: string;
     request: KibanaRequest;
   }): Promise<InferenceConnector | undefined> {
     const { inference, searchInferenceEndpoints, agentService } = this.deps;
-    const getInferenceFeatureId = async (): Promise<string | undefined> => {
+    const resolve = async (): Promise<InferenceConnector | undefined> => {
       if (connectorId !== undefined) {
+        return inference.getConnectorById(connectorId, request);
+      }
+      if (inferenceFeatureId !== undefined) {
         return undefined;
       }
       const agentRegistry = await agentService.getRegistry({ request });
-      return (await agentRegistry.get(agentId)).configuration.inference_feature_id;
+      const { inference_feature_id: agentInferenceFeatureId } = (await agentRegistry.get(agentId))
+        .configuration;
+      if (agentInferenceFeatureId !== undefined) {
+        return undefined;
+      }
+      return resolveAgentBuilderDefaultEndpoint({ request, searchInferenceEndpoints });
     };
-    return (
-      getInferenceFeatureId()
-        .then((inferenceFeatureId) =>
-          resolveExecutionConnectorId({
-            connectorId,
-            inferenceFeatureId,
-            request,
-            searchInferenceEndpoints,
-          })
-        )
-        .then(
-          ({ connectorId: resolvedConnectorId, connector }) =>
-            connector ??
-            (resolvedConnectorId
-              ? inference.getConnectorById(resolvedConnectorId, request)
-              : undefined)
-        )
-        // Leaves resolution failures to the runner, which records them against the execution
-        .catch(() => undefined)
-    );
+    // Leaves resolution failures to the runner, which records them against the execution
+    return resolve().catch(() => undefined);
   }
 
   /**

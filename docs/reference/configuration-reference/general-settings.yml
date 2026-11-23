@@ -1785,10 +1785,13 @@ groups:
 
       - setting: xpack.upgrade_assistant.ui.enabled
         description: |
-          Set this value to false to disable the Upgrade Assistant UI.
+          Shows or hides the Upgrade Assistant UI without disabling the plugin. Set this value to `true` to show the UI, or to `false` to hide it.
         datatype: bool
-        default: true
+        default: false
         applies_to:
           stack: ga
           ech: unavailable
           self: ga
+        note: |
+          :applies_to: stack: ga =9.0
+          In this version, this setting defaults to `true`.

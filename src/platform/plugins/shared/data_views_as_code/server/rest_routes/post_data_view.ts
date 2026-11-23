@@ -26,7 +26,7 @@ export const registerPostDataViewAsCodeRoute = ({
       enableQueryVersion: true,
       summary: 'Create a data view',
       description:
-        'Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict.',
+        "Creates a data view and returns it. Kibana generates the data view ID. If a data view with the same name already exists, the request fails with a conflict. Scripted fields are deprecated and can't be set through this API; sending `scripted_fields` fails with a `400`.",
       options: {
         tags: ['oas-tag:data-views-v2'],
         availability: {

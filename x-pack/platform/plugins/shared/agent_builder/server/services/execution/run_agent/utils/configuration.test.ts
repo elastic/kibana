@@ -52,7 +52,7 @@ describe('resolveConfiguration', () => {
           { aiIndicesEnabled, request }
         );
 
-        expect(resolved.capabilities).toEqual({ attachmentTools: true });
+        expect(resolved.capabilities).toEqual({ attachmentTools: true, apiTools: true });
       });
 
       it('is off only for enabled: false', async () => {
@@ -61,7 +61,7 @@ describe('resolveConfiguration', () => {
           { aiIndicesEnabled, request }
         );
 
-        expect(resolved.capabilities).toEqual({ attachmentTools: false });
+        expect(resolved.capabilities).toEqual({ attachmentTools: false, apiTools: true });
       });
     });
   });

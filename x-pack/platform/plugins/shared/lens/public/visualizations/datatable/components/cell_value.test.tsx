@@ -723,18 +723,18 @@ describe('datatable cell renderer', () => {
       sortingDirection: 'none',
     };
 
-    it('should adjust link color for dark background in light mode', () => {
+    it('should use a high-contrast link color for dark background in light mode', () => {
       const backgroundColor = '#000000';
-      const expectedColor = '#4b78c9';
+      const expectedColor = '#FFFFFF';
       const isDarkMode = false;
       renderThemedCellRenderer(columnConfig, isDarkMode, backgroundColor);
 
       expect(screen.getByRole('button')).toHaveStyle(`color: ${expectedColor}`);
     });
 
-    it('should adjust link color for light background in dark mode', () => {
+    it('should use a high-contrast link color for light background in dark mode', () => {
       const backgroundColor = '#FFFFFF';
-      const expectedColor = '#1750BA';
+      const expectedColor = '#07101F';
       const isDarkMode = true;
       renderThemedCellRenderer(columnConfig, isDarkMode, backgroundColor);
 
@@ -763,7 +763,7 @@ describe('datatable cell renderer', () => {
       expect(screen.getByRole('button').style.color).toBe('');
     });
 
-    it('should not adjust link color when colorMode is text', () => {
+    it('should use the mapped color as the link color when colorMode is text', () => {
       const backgroundColor = '#FF0000'; // A distinct background color
       const isDarkMode = false;
       const columnConfigNonCellColorMode: DatatableArgs = {
@@ -776,7 +776,7 @@ describe('datatable cell renderer', () => {
         ],
       };
       renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
-      expect(screen.getByRole('button').style.color).toBe('');
+      expect(screen.getByRole('button')).toHaveStyle(`color: ${backgroundColor}`);
     });
   });
 

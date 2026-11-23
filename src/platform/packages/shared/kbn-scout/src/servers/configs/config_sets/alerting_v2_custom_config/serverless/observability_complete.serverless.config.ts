@@ -24,7 +24,7 @@ import type { ScoutServerConfig } from '../../../../../types';
 // those assertions are local-only: Cloud attaches to an existing deployment.
 const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
   REPO_ROOT,
-  'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+  'src/platform/test_plugins/analytics/analytics_ftr_helpers'
 )}`;
 
 export const servers: ScoutServerConfig = {

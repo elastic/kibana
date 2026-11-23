@@ -42,6 +42,7 @@ export const createSourceCreateTool = ({
   getScopedClients,
   server,
   logger,
+  telemetry,
   maintenanceService,
 }: SourceToolDeps & {
   maintenanceService: MaintenanceStateReader;
@@ -103,14 +104,17 @@ export const createSourceCreateTool = ({
     logger,
     requireSourceChangePrivilege: true,
   }),
-  handler: async (toolParams, { request }) =>
+  handler: async (toolParams, { request, runContext }) =>
     runSourceTool({
       action: 'create source',
       privilege: 'changeSources',
+      toolId: NIGHTSHIFT_SOURCE_CREATE_TOOL_ID,
       request,
+      runContext,
       getScopedClients,
       server,
       logger,
+      telemetry,
       run: async ({ sourcesClient }) => {
         const onboardingPaused = await getOnboardingPausedFlag({ maintenanceService, request });
         return {

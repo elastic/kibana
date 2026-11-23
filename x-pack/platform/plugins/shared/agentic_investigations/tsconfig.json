@@ -45,6 +45,7 @@
     "@kbn/proposals-plugin",
     "@kbn/proposals-common",
     "@kbn/agentic-investigations-common",
+    "@kbn/agentic-investigations-impact",
     "@kbn/agent-builder-plugin",
     "@kbn/i18n-react",
     "@kbn/ui-callout",
