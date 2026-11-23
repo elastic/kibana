@@ -10,6 +10,7 @@ import {
   START_MIGRATION_MODAL,
   TRANSLATED_WORKFLOWS_RESULT_TABLE,
   WORKFLOW_MIGRATION_READY_PANEL,
+  WORKFLOWS_FLYOUT_TRANSLATE_BTN,
 } from '../../../../screens/siem_migrations';
 import { deleteConnectors } from '../../../../tasks/api_calls/common';
 import { suppressGlobalAnnouncements } from '../../../../tasks/api_calls/suppress_global_announcements';
@@ -106,6 +107,8 @@ describe(
     });
 
     it('should start the translation from the page when the flyout was closed without translating', () => {
+      // the translate button is enabled once the migration and its stories are created
+      cy.get(WORKFLOWS_FLYOUT_TRANSLATE_BTN).should('not.be.disabled');
       cy.get('[data-test-subj="workflowDataFlyoutCloseButton"]').click();
       visit(TRANSLATED_WORKFLOWS_PAGE_URL);
 
