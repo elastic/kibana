@@ -45,6 +45,8 @@ Password
 
 You can test connectors when you create or edit the connector in {{kib}}. The test calls `GET /` to verify connectivity and return cluster name and version information.
 
+Credentials without the `monitor` cluster privilege can still pass the test, for example an API key that grants only `read` on indices. When the cluster denies `GET /` to those credentials, the test calls `GET /_security/_authenticate` instead. If that call succeeds, the test passes and confirms that the cluster accepts the credentials. It doesn't return the cluster name and version or check index privileges. Other errors, such as incorrect credentials, still fail the test.
+
 ## Connector actions [elasticsearch-connector-actions]
 
 The Elasticsearch connector has the following actions:
