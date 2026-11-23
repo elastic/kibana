@@ -27,6 +27,9 @@ const transformAPIKeyNames = (keys: SecurityApiKey[]) => {
   });
 };
 
+// `search_after` needs an order identical across requests, which index order (`_doc`) is not.
+const SORT_TIEBREAKER_FIELDS = ['name', 'creation'] as const;
+
 export function defineQueryApiKeysAndAggregationsRoute({
   router,
   getAuthenticationService,
@@ -168,7 +171,12 @@ export function defineQueryApiKeysAndAggregationsRoute({
           }
         }
 
-        const transformedSort = sort && [{ [sort.field]: { order: sort.direction } }];
+        const transformedSort = sort && [
+          { [sort.field]: { order: sort.direction } },
+          ...SORT_TIEBREAKER_FIELDS.filter((field) => field !== sort.field).map((field) => ({
+            [field]: { order: 'asc' as const },
+          })),
+        ];
         let queryResult: Partial<QueryApiKeyResult>;
         try {
           const queryResponse = await esClient.asCurrentUser.security.queryApiKeys({

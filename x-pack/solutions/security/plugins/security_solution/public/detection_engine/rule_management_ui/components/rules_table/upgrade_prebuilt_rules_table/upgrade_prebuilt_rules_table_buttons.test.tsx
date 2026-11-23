@@ -1,0 +1,939 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { UserEvent } from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import { ThreeWayDiffConflict } from '../../../../../../common/api/detection_engine';
+import type {
+  RuleUpgradeCustomizationCounts,
+  RuleUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
+import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { useUserData } from '../../../../../detections/components/user_info';
+import { initialState as initialUserDataState } from '../../../../../detections/components/user_info/__mocks__';
+
+jest.mock('./upgrade_prebuilt_rules_table_context');
+jest.mock(
+  '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status'
+);
+jest.mock('../../../../../detections/components/user_info');
+
+const mockUseUpgradePrebuiltRulesTableContext = useUpgradePrebuiltRulesTableContext as jest.Mock;
+const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as jest.Mock;
+const mockUseUserData = useUserData as jest.Mock;
+
+describe('UpgradePrebuiltRulesTableButtons', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({ isRulesCustomizationEnabled: true });
+    mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: true }]);
+  });
+
+  describe('Selected scope (upgrade to TARGET)', () => {
+    it('sends every selected rule to upgradeRulesToTarget after confirming the danger modal', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const getSelectedRulesCustomizationCounts = jest
+        .fn()
+        .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 });
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
+      ];
+
+      mockContext({ upgradeRulesToTarget, getSelectedRulesCustomizationCounts });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-customized', 'rule-plain']);
+    });
+
+    it('includes the non-customized rule id alongside the customized one, no filtering to the customized subset', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        const [ruleIds] = upgradeRulesToTarget.mock.calls[0];
+        expect(ruleIds).toEqual(expect.arrayContaining(['rule-customized', 'rule-plain']));
+        expect(ruleIds).toHaveLength(2);
+      });
+    });
+
+    it('the modal body renders both counts and no rule name', async () => {
+      const user = userEvent.setup();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
+      ];
+
+      mockContext({
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 3, customizedCount: 2, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      expect(modal).toHaveTextContent('Modifications on 2 of them will be overwritten');
+      expect(modal).toHaveTextContent('3');
+      expect(modal).toHaveTextContent('2');
+      expect(modal).not.toHaveTextContent('rule type change');
+      expect(modal).not.toHaveTextContent('rule-customized');
+      expect(modal).not.toHaveTextContent('rule-plain');
+    });
+
+    it('shows the modal with a rule type change warning for an uncustomized selection whose Elastic version changes the rule type', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-1' }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-2' }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 0, ruleTypeChangeCount: 1 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
+      expect(warning).toHaveTextContent('1 of 2 has a rule type change');
+      expect(warning).toHaveTextContent('review your actions and exceptions');
+      expect(modal).not.toHaveTextContent('customizations that will be overwritten');
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+
+      await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-1', 'rule-2']);
+      });
+    });
+
+    it('does not display the modal before the dropdown action is confirmed', () => {
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-plain' })];
+
+      mockContext({
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
+      });
+
+      renderButtons(selectedRules);
+
+      expect(
+        screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+    });
+
+    it('a zero-customized target set upgrades immediately with no modal', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-1' }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-2' }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-3' }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 3, customizedCount: 0, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-1', 'rule-2', 'rule-3']);
+      expect(
+        screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+    });
+
+    it('cancelling the confirmation modal does not upgrade rules', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-2', isCustomized: true }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      await user.click(screen.getByTestId('confirmModalCancelButton'));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+        ).not.toBeInTheDocument();
+      });
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('the secondary segment stays enabled when the primary is disabled by non-solvable conflicts, and still reaches upgradeRulesToTarget', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({
+          ruleId: 'rule-1',
+          isCustomized: true,
+          hasNonSolvableUnresolvedConflicts: true,
+        }),
+        createRuleUpgradeStateMock({
+          ruleId: 'rule-2',
+          isCustomized: true,
+          hasNonSolvableUnresolvedConflicts: true,
+        }),
+      ];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 2, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeSelectedRulesButton-secondary')).toBeEnabled();
+
+      await openSelectedRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      await user.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('clicking the primary segment calls upgradeRules with the selected ids and never calls upgradeRulesToTarget', async () => {
+      const user = userEvent.setup();
+      const upgradeRules = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1' })];
+
+      mockContext({ upgradeRules, upgradeRulesToTarget });
+      renderButtons(selectedRules);
+
+      await user.click(screen.getByTestId('upgradeSelectedRulesButton'));
+
+      expect(upgradeRules).toHaveBeenCalledWith(['rule-1']);
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('disables both Selected segments while a request is in flight', () => {
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1' })];
+
+      mockContext({ loadingRules: ['rule-1'] });
+      renderButtons(selectedRules);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeSelectedRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('disables both Selected segments when the user lacks edit privileges', () => {
+      mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: false }]);
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1' })];
+
+      mockContext();
+      renderButtons(selectedRules);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeSelectedRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('keeps the conflicts tooltip off the secondary segment when all selected rules have non-solvable conflicts', () => {
+      const allConflictsRules = [
+        createRuleUpgradeStateMock({
+          ruleId: 'rule-1',
+          isCustomized: true,
+          hasNonSolvableUnresolvedConflicts: true,
+        }),
+      ];
+
+      mockContext();
+      renderButtons(allConflictsRules);
+
+      fireEvent.mouseOver(screen.getByTestId('upgradeSelectedRulesButton-secondary'));
+      expect(
+        screen.queryByText(/have conflicts that must be manually resolved/)
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the no-permissions tooltip independently on the secondary segment (not borrowed from the primary)', async () => {
+      mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: false }]);
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      expect(
+        screen.queryByText("You don't have permissions to update rules")
+      ).not.toBeInTheDocument();
+
+      fireEvent.mouseOver(screen.getByTestId('upgradeSelectedRulesButton-secondary'));
+
+      expect(
+        await screen.findByText("You don't have permissions to update rules")
+      ).toBeInTheDocument();
+    });
+
+    it('shows the no-permissions tooltip independently on the primary segment', async () => {
+      mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: false }]);
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      fireEvent.mouseOver(screen.getByTestId('upgradeSelectedRulesButton'));
+
+      expect(
+        await screen.findByText("You don't have permissions to update rules")
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('All scope (upgrade to TARGET)', () => {
+    it('confirming the All modal upgrades the whole filtered set with no arguments', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        fetchedCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      expect(modal).toHaveTextContent('12');
+      expect(modal).toHaveTextContent('4');
+      expect(modal).toHaveTextContent('Modifications on 4 of them will be overwritten');
+      await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeAllRulesToTarget).toHaveBeenCalledWith();
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('confirms against freshly fetched counts', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const fetchAllRulesCustomizationCounts = jest
+        .fn()
+        .mockResolvedValue({ total: 4, customizedCount: 2, ruleTypeChangeCount: undefined });
+
+      mockContext({ upgradeAllRulesToTarget, fetchAllRulesCustomizationCounts });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      expect(fetchAllRulesCustomizationCounts).toHaveBeenCalledTimes(1);
+      expect(modal).toHaveTextContent('Modifications on 2 of them will be overwritten');
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('does not force-upgrade when the fresh review fetch returns no data', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        fetchAllRulesCustomizationCounts: jest.fn().mockResolvedValue(null),
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('upgradeAllRulesToTargetAction')).not.toBeInTheDocument();
+      });
+      expect(
+        screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('still confirms a zero-customized target set because rule type changes cannot be ruled out for the whole set', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        fetchedCounts: {
+          total: 9,
+          customizedCount: 0,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      const warning = within(modal).getByTestId('forceUpgradeToTargetModalRuleTypeChangeWarning');
+      expect(warning).toHaveTextContent('changes the rule type will be updated as well');
+      expect(warning).toHaveTextContent('review your actions and exceptions');
+      expect(modal).not.toHaveTextContent('customizations that will be overwritten');
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+
+      await user.click(within(modal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeAllRulesToTarget).toHaveBeenCalledWith();
+    });
+
+    it('cancelling the confirmation modal does not upgrade rules', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        fetchedCounts: {
+          total: 5,
+          customizedCount: 5,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons([]);
+
+      await openAllRulesToTargetAction(user);
+      const modal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      await user.click(within(modal).getByTestId('confirmModalCancelButton'));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+        ).not.toBeInTheDocument();
+      });
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('clicking the primary All segment calls upgradeAllRules and never upgradeAllRulesToTarget', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRules = jest.fn();
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({ upgradeAllRules, upgradeAllRulesToTarget });
+      renderButtons([]);
+
+      await user.click(screen.getByTestId('upgradeAllRulesButton'));
+
+      expect(upgradeAllRules).toHaveBeenCalledTimes(1);
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('disables both All segments when hasRulesToUpgrade is false', () => {
+      mockContext({ hasRulesToUpgrade: false });
+      renderButtons([]);
+
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('disables both All segments while a request is in flight', () => {
+      mockContext({ loadingRules: ['rule-1'] });
+      renderButtons([]);
+
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('disables only the All secondary segment while the upgrade review has not loaded yet', () => {
+      mockContext({ isFetched: false });
+      renderButtons([]);
+
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeEnabled();
+      expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
+    });
+
+    it('never force-upgrades while the upgrade review has not loaded yet', () => {
+      const upgradeAllRulesToTarget = jest.fn();
+
+      mockContext({ upgradeAllRulesToTarget, isFetched: false });
+      renderButtons([]);
+
+      // The disabled segment swallows the click, so the popover and the action never appear.
+      fireEvent.click(screen.getByTestId('upgradeAllRulesButton-secondary'));
+
+      expect(screen.queryByTestId('upgradeAllRulesToTargetAction')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('disables both All segments when the user lacks edit privileges', () => {
+      mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: false }]);
+      mockContext();
+      renderButtons([]);
+
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeAllRulesButton-secondary')).toBeDisabled();
+    });
+  });
+
+  describe('prebuilt rules customization disabled', () => {
+    beforeEach(() => {
+      mockUsePrebuiltRulesCustomizationStatus.mockReturnValue({
+        isRulesCustomizationEnabled: false,
+      });
+    });
+
+    it('renders plain buttons without the "Update to Elastic version" secondary segment', () => {
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeEnabled();
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeEnabled();
+      expect(screen.queryByTestId('upgradeSelectedRulesButton-secondary')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('upgradeAllRulesButton-secondary')).not.toBeInTheDocument();
+    });
+
+    it('primary buttons still call upgradeRules and upgradeAllRules', async () => {
+      const user = userEvent.setup();
+      const upgradeRules = jest.fn();
+      const upgradeAllRules = jest.fn();
+
+      mockContext({ upgradeRules, upgradeAllRules });
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      await user.click(screen.getByTestId('upgradeSelectedRulesButton'));
+      await user.click(screen.getByTestId('upgradeAllRulesButton'));
+
+      expect(upgradeRules).toHaveBeenCalledWith(['rule-1']);
+      expect(upgradeAllRules).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the no-permissions tooltip on the plain buttons', async () => {
+      mockUseUserData.mockReturnValue([{ ...initialUserDataState, canUserCRUD: false }]);
+      mockContext();
+      renderButtons([createRuleUpgradeStateMock({ ruleId: 'rule-1' })]);
+
+      expect(screen.getByTestId('upgradeSelectedRulesButton')).toBeDisabled();
+      expect(screen.getByTestId('upgradeAllRulesButton')).toBeDisabled();
+
+      fireEvent.mouseOver(screen.getByTestId('upgradeAllRulesButton'));
+
+      expect(
+        await screen.findByText("You don't have permissions to update rules")
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('confirmation-gate independence', () => {
+    it('confirming the All modal while the Selected modal is open only calls upgradeAllRulesToTarget, and the Selected modal is unaffected', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        fetchedCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+
+      await openAllRulesToTargetAction(user);
+      const allModal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      await user.click(within(allModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+      expect(
+        screen.getByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+      ).toBeInTheDocument();
+    });
+
+    it('cancelling the Selected modal while the All modal is open leaves both upgrade functions uncalled, and confirming the All modal afterwards only fires the All action', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        fetchedCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons(selectedRules);
+
+      await openAllRulesToTargetAction(user);
+      await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+
+      await openSelectedRulesToTargetAction(user);
+      const selectedModal = await screen.findByTestId(
+        'forceUpgradeSelectedRulesToTargetConfirmModal'
+      );
+      await user.click(within(selectedModal).getByTestId('confirmModalCancelButton'));
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+        ).not.toBeInTheDocument();
+      });
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+
+      const allModal = screen.getByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      await user.click(within(allModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+    });
+
+    it('does not suppress a repeat invocation of the same scope: the Selected modal reappears on the second invocation', async () => {
+      const user = userEvent.setup();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
+
+      mockContext({
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      const firstModal = await screen.findByTestId('forceUpgradeSelectedRulesToTargetConfirmModal');
+      await user.click(within(firstModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(
+        screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+
+      await openSelectedRulesToTargetAction(user);
+      const secondModal = await screen.findByTestId(
+        'forceUpgradeSelectedRulesToTargetConfirmModal'
+      );
+      expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      await user.click(within(secondModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('running the All flow before the Selected flow produces the same per-scope outcomes as the forward order', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: true })];
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        fetchedCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons(selectedRules);
+
+      await openAllRulesToTargetAction(user);
+      const allModal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      await user.click(within(allModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeRulesToTarget).not.toHaveBeenCalled();
+
+      await openSelectedRulesToTargetAction(user);
+      const selectedModal = await screen.findByTestId(
+        'forceUpgradeSelectedRulesToTargetConfirmModal'
+      );
+      await user.click(within(selectedModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(upgradeAllRulesToTarget).toHaveBeenCalledTimes(1);
+    });
+
+    it('the Selected call receives every selected id and the All call receives no arguments at all', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [
+        createRuleUpgradeStateMock({ ruleId: 'rule-customized', isCustomized: true }),
+        createRuleUpgradeStateMock({ ruleId: 'rule-plain', isCustomized: false }),
+      ];
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 2, customizedCount: 1, ruleTypeChangeCount: 0 }),
+        fetchedCounts: {
+          total: 12,
+          customizedCount: 4,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+      const selectedModal = await screen.findByTestId(
+        'forceUpgradeSelectedRulesToTargetConfirmModal'
+      );
+      await user.click(within(selectedModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledWith(['rule-customized', 'rule-plain']);
+      });
+
+      await openAllRulesToTargetAction(user);
+      const allModal = await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal');
+      await user.click(within(allModal).getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(upgradeAllRulesToTarget).toHaveBeenCalledWith();
+      });
+    });
+
+    it('skips the Selected confirmation modal when no selected rules are customized while the All flow still shows its confirmation modal for customized rules', async () => {
+      const user = userEvent.setup();
+      const upgradeAllRulesToTarget = jest.fn();
+      const upgradeRulesToTarget = jest.fn();
+      const selectedRules = [createRuleUpgradeStateMock({ ruleId: 'rule-1', isCustomized: false })];
+
+      mockContext({
+        upgradeAllRulesToTarget,
+        upgradeRulesToTarget,
+        getSelectedRulesCustomizationCounts: jest
+          .fn()
+          .mockReturnValue({ total: 1, customizedCount: 0, ruleTypeChangeCount: 0 }),
+        fetchedCounts: {
+          total: 3,
+          customizedCount: 3,
+          ruleTypeChangeCount: undefined,
+        },
+      });
+      renderButtons(selectedRules);
+
+      await openSelectedRulesToTargetAction(user);
+
+      await waitFor(() => {
+        expect(upgradeRulesToTarget).toHaveBeenCalledTimes(1);
+      });
+      expect(
+        screen.queryByTestId('forceUpgradeSelectedRulesToTargetConfirmModal')
+      ).not.toBeInTheDocument();
+
+      await openAllRulesToTargetAction(user);
+
+      expect(
+        await screen.findByTestId('forceUpgradeAllRulesToTargetConfirmModal')
+      ).toBeInTheDocument();
+      expect(upgradeAllRulesToTarget).not.toHaveBeenCalled();
+    });
+  });
+});
+
+async function openSelectedRulesToTargetAction(user: UserEvent) {
+  await user.click(screen.getByTestId('upgradeSelectedRulesButton-secondary'));
+  await waitForEuiPopoverOpen();
+  await user.click(screen.getByTestId('upgradeSelectedRulesToTargetAction'));
+}
+
+async function openAllRulesToTargetAction(user: UserEvent) {
+  await user.click(screen.getByTestId('upgradeAllRulesButton-secondary'));
+  await waitForEuiPopoverOpen();
+  await user.click(screen.getByTestId('upgradeAllRulesToTargetAction'));
+}
+
+function renderButtons(selectedRules: RuleUpgradeState[]) {
+  return render(
+    <I18nProvider>
+      <UpgradePrebuiltRulesTableButtons selectedRules={selectedRules} />
+    </I18nProvider>
+  );
+}
+
+function mockContext({
+  hasRulesToUpgrade = true,
+  loadingRules = [],
+  isRefetching = false,
+  isUpgradingSecurityPackages = false,
+  isFetched = true,
+  fetchedCounts = { total: 0, customizedCount: 0, ruleTypeChangeCount: undefined },
+  upgradeRules = jest.fn(),
+  upgradeAllRules = jest.fn(),
+  upgradeRulesToTarget = jest.fn(),
+  upgradeAllRulesToTarget = jest.fn(),
+  getSelectedRulesCustomizationCounts = jest
+    .fn()
+    .mockReturnValue({ total: 0, customizedCount: 0, ruleTypeChangeCount: 0 }),
+  fetchAllRulesCustomizationCounts = jest.fn().mockResolvedValue(fetchedCounts),
+}: {
+  hasRulesToUpgrade?: boolean;
+  loadingRules?: string[];
+  isRefetching?: boolean;
+  isUpgradingSecurityPackages?: boolean;
+  isFetched?: boolean;
+  fetchedCounts?: RuleUpgradeCustomizationCounts | null;
+  upgradeRules?: jest.Mock;
+  upgradeAllRules?: jest.Mock;
+  upgradeRulesToTarget?: jest.Mock;
+  upgradeAllRulesToTarget?: jest.Mock;
+  getSelectedRulesCustomizationCounts?: jest.Mock;
+  fetchAllRulesCustomizationCounts?: jest.Mock;
+} = {}) {
+  mockUseUpgradePrebuiltRulesTableContext.mockReturnValue({
+    state: {
+      hasRulesToUpgrade,
+      loadingRules,
+      isRefetching,
+      isUpgradingSecurityPackages,
+      isFetched,
+    },
+    actions: {
+      upgradeRules,
+      upgradeAllRules,
+      upgradeRulesToTarget,
+      upgradeAllRulesToTarget,
+      getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
+    },
+  });
+}
+
+function createRuleUpgradeStateMock({
+  ruleId,
+  isCustomized = false,
+  hasNonSolvableUnresolvedConflicts = false,
+}: {
+  ruleId: string;
+  isCustomized?: boolean;
+  hasNonSolvableUnresolvedConflicts?: boolean;
+}): RuleUpgradeState {
+  return {
+    id: `${ruleId}-so-id`,
+    rule_id: ruleId,
+    version: 2,
+    revision: 1,
+    has_base_version: true,
+    current_rule: createRuleResponseMock({
+      rule_id: ruleId,
+      rule_source: isCustomized
+        ? { type: 'external', is_customized: true }
+        : {
+            type: 'external',
+            is_customized: false,
+          },
+    }),
+    target_rule: createRuleResponseMock({ rule_id: ruleId }),
+    diff: {
+      num_fields_with_updates: 0,
+      num_fields_with_conflicts: 0,
+      num_fields_with_non_solvable_conflicts: 0,
+      fields: {},
+    },
+    conflict: ThreeWayDiffConflict.NONE,
+    fieldsUpgradeState: {},
+    hasUnresolvedConflicts: hasNonSolvableUnresolvedConflicts,
+    hasNonSolvableUnresolvedConflicts,
+  } as RuleUpgradeState;
+}
+
+function createRuleResponseMock(rewrites?: Partial<RuleResponse>): RuleResponse {
+  return {
+    version: 2,
+    revision: 1,
+    rule_source: {
+      type: 'external',
+      is_customized: false,
+    },
+    ...rewrites,
+  } as RuleResponse;
+}

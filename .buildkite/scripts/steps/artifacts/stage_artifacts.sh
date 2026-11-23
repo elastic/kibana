@@ -7,9 +7,10 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 
+# Only stage artifacts produced by this build
 function download {
-  download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "$1" . --build "$BUILDKITE_BUILD_ID"
+  download_artifact "$1.sha512.txt" . --build "$BUILDKITE_BUILD_ID"
   sha512sum -c "$1.sha512.txt"
   rm "$1.sha512.txt"
 }
@@ -21,6 +22,7 @@ download "kibana-$FULL_VERSION-docker-image-amd64.tar.gz"
 download "kibana-$FULL_VERSION-docker-image-arm64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-amd64.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-image-arm64.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-image-amd64.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image-amd64.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-image-arm64.tar.gz"
 
@@ -32,6 +34,7 @@ download "kibana-$FULL_VERSION-aarch64.rpm"
 download "kibana-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-ironbank-$FULL_VERSION-docker-build-context.tar.gz"
+download "kibana-ubi-$FULL_VERSION-docker-build-context.tar.gz"
 download "kibana-wolfi-$FULL_VERSION-docker-build-context.tar.gz"
 
 download "kibana-cloud-fips-$FULL_VERSION-docker-build-context.tar.gz"

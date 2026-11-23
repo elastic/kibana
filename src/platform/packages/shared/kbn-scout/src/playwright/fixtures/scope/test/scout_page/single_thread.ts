@@ -12,7 +12,7 @@ import type { Page, TestInfo } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import type { ScoutPage } from '.';
 import { attachBrowserConsoleErrors, collectBrowserConsoleErrors } from './browser_console_errors';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
+import { navigateToApp, type GotoAppOptions } from './goto_app';
 import { checkA11y } from '../../../../utils';
 import type { KibanaUrl, ScoutLogger } from '../../worker';
 
@@ -101,8 +101,8 @@ export function extendPlaywrightPage({
   // Extend page with '@kbn/test-subj-selector' support
   extendedPage.testSubj = extendPageWithTestSubject(page);
   // Method to navigate to specific Kibana apps
-  extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
-    page.goto(kbnUrl.app(appName, { pathOptions }));
+  extendedPage.gotoApp = (appName: string, options?: GotoAppOptions) =>
+    navigateToApp(page, (pathOptions) => kbnUrl.app(appName, { pathOptions }), options);
 
   extendedPage.checkA11y = (options) => checkA11y(page, options);
 

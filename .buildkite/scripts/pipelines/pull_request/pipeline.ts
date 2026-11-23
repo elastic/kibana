@@ -15,8 +15,9 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
+import { runPreBuild } from './pre_build.ts';
+import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
+import { loadBuildkiteJson } from '../../../pipeline-utils/load_buildkite_json.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -34,6 +35,9 @@ import {
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
 
+const prConfigs =
+  loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
+
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;
 const cancelable: GetPipelineOptions = { cancelOnGateFailure: true };
@@ -48,9 +52,10 @@ const ALL_UI_TEST_SUITES = GITHUB_PR_LABELS.includes('ci:all-ui-test-suites');
 const REQUIRED_PATHS = prConfig.always_require_ci_on_changed!.map((r) => new RegExp(r, 'i'));
 const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new RegExp(r, 'i'));
 
-// yarn.lock covers external dependency changes, which the package graph below cannot see.
+// this covers external dependency changes, which the package graph below cannot see.
 const STORYBOOK_BUILD_CRITICAL_PATHS = [
-  /^yarn\.lock$/,
+  /^pnpm-lock\.yaml$/,
+  /^pnpm-workspace\.yaml$/,
   /^\.buildkite\/scripts\/steps\/storybooks\//,
 ];
 
@@ -98,6 +103,9 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       return;
     }
 
+    // Runs alongside the pipeline generation below, so it doesn't delay the build.
+    const frequentCancellationsTip = postFrequentCancellationsTip();
+
     // Scout-test-only diffs can't change OAS, API contracts, or Saved Objects, so skip those checks below.
     const prChanges = await getPrChangesCached();
     const scoutTestsOnly = isScoutTestsOnlyDiff(
@@ -133,6 +141,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       console.warn(
         'Isolated changes to renovate.json or .buildkite/pipelines/pull_request/renovate.yml. Skipping main PR pipeline.'
       );
+      await frequentCancellationsTip;
       emitPipeline(pipeline);
       return;
     }
@@ -166,7 +175,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       (await doAnySuiteRelevantChangesMatch([
         /^src\/platform\/plugins\/shared\/data/,
         /^x-pack\/platform\/plugins\/shared\/actions/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/event_log/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
@@ -244,7 +253,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (
       (GITHUB_PR_LABELS.includes('ci:build-cloud-image') &&
-        !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
         !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
         !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')) ||
       (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/build_cloud_image\.yml/]))
@@ -256,7 +264,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
 
     if (
       (GITHUB_PR_LABELS.includes('ci:build-cloud-fips-image') &&
-        !GITHUB_PR_LABELS.includes('ci:deploy-cloud') &&
         !GITHUB_PR_LABELS.includes('ci:cloud-deploy') &&
         !GITHUB_PR_LABELS.includes('ci:cloud-redeploy')) ||
       (await doAnyChangesMatch([
@@ -269,7 +276,6 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:deploy-cloud') ||
       GITHUB_PR_LABELS.includes('ci:cloud-deploy') ||
       GITHUB_PR_LABELS.includes('ci:cloud-redeploy') ||
       (await doAnyChangesMatch([/^\.buildkite\/pipelines\/pull_request\/deploy_cloud\.yml/]))
@@ -383,7 +389,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
         /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
@@ -484,7 +490,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/solutions\/security\/packages/,
-        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/alerting\//,
         /^x-pack\/platform\/plugins\/shared\/cases/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
@@ -570,6 +576,7 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     flushCancelOnGateFailureMetadata();
+    await frequentCancellationsTip;
     emitPipeline(pipeline);
   } catch (ex) {
     console.error('Error while generating the pipeline steps: ' + ex.message, ex);

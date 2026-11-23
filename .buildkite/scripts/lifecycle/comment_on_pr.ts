@@ -57,7 +57,7 @@ export function commentOnPR({
   }
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   const args = parseArgs<{
     context?: string;
     message: string;

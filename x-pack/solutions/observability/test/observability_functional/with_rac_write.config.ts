@@ -59,7 +59,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${resolve(
           __dirname,
-          '../../../../platform/test/functional_with_es_ssl/plugins/alerts'
+          '../../../../platform/test_plugins/response_ops/functional_with_es_ssl/alerts'
         )}`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,

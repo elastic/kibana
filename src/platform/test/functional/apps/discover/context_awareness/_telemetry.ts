@@ -228,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('field usage events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
+        await discover.waitForDiscoverAppOnScreen();
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
       });

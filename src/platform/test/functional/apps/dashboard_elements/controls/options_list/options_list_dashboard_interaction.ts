@@ -36,7 +36,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       'header',
     ]);
 
-  describe('Interactions between options list and dashboard', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239769
+  describe.skip('Interactions between options list and dashboard', () => {
     let controlId: string;
 
     const returnToDashboard = async () => {

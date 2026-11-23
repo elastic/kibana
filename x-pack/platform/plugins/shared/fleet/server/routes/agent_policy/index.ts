@@ -230,6 +230,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_PATTERN,
       fleetAuthz: {
         fleet: { readAgentPolicies: true },
+        integrations: { readIntegrationPolicies: true },
       },
       summary: `Get a full agent policy`,
       description: `Get a full agent policy by ID.`,
@@ -251,6 +252,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       path: AGENT_POLICY_API_ROUTES.FULL_INFO_DOWNLOAD_PATTERN,
       fleetAuthz: {
         fleet: { readAgentPolicies: true },
+        integrations: { readIntegrationPolicies: true },
       },
       enableQueryVersion: true,
       summary: `Download an agent policy`,

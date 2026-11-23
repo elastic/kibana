@@ -111,9 +111,26 @@ describe('console parser', () => {
 
   it('leaves the request end unset for an unterminated triple-quoted value', () => {
     const input = 'POST _query\n{\n  "script": """\n  some content';
-    const { requests } = parser(input) as ConsoleParserResult;
+    const { requests, errors } = parser(input) as ConsoleParserResult;
 
     expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
+  });
+
+  it('does not treat request-like lines inside an unterminated triple-quoted string as requests', () => {
+    const input = 'POST _query\n{\n  "script": """\n  GET _all\n  {\n\n  }';
+    const { requests, errors } = parser(input) as ConsoleParserResult;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
+  });
+
+  it('does not snap to comment-like lines inside an unterminated triple-quoted string', () => {
+    const input = 'POST _query\n{\n  "script": """\n  some content\n# a comment\nGET _search';
+    const { requests, errors } = parser(input) as ConsoleParserResult;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
   });
 
   it('recovers the next request after a syntax error following a triple-quoted value', () => {

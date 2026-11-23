@@ -19,6 +19,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('save and return work flow', () => {
     before(async () => {
@@ -112,7 +113,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('save as', () => {
         it('should return to dashboard and add new panel', async () => {
           await maps.saveMap('Clone of map embeddable example');
-          await header.waitUntilLoadingHasFinished();
+          await dashboard.waitForRenderComplete();
+          await retry.waitForWithTimeout(
+            'new map panel to appear on dashboard',
+            10000,
+            async () => (await dashboard.getPanelCount()) === 3
+          );
           const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
         });

@@ -24,6 +24,12 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authc.getPrincipal', () => {
+    it('returns null', () => {
+      expect(implementation.authc.getPrincipal({} as any)).toBeNull();
+    });
+  });
+
   describe('authc.apiKeys', () => {
     it('returns stub object', async () => {
       const { apiKeys } = implementation.authc;

@@ -292,6 +292,7 @@ export class CommonPageObject extends FtrService {
       disableWelcomePrompt = true,
       insertTimestamp = true,
       retryOnFatalError = true,
+      skipUrlValidation = false,
     } = {}
   ) {
     let appUrl: string;
@@ -355,6 +356,9 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        if (skipUrlValidation) {
+          return currentUrl;
+        }
         const decodedAppUrl = decodeURIComponent(appUrl);
         const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
@@ -381,15 +385,17 @@ export class CommonPageObject extends FtrService {
         return currentUrl;
       });
 
-      await this.retry.tryForTime(this.defaultFindTimeout, async () => {
-        await this.sleep(501);
-        const currentUrl = await this.browser.getCurrentUrl();
-        this.log.debug('in navigateTo url = ' + currentUrl);
-        if (lastUrl !== currentUrl) {
-          lastUrl = currentUrl;
-          throw new Error('URL changed, waiting for it to settle');
-        }
-      });
+      if (!skipUrlValidation) {
+        await this.retry.tryForTime(this.defaultFindTimeout, async () => {
+          await this.sleep(501);
+          const currentUrl = await this.browser.getCurrentUrl();
+          this.log.debug('in navigateTo url = ' + currentUrl);
+          if (lastUrl !== currentUrl) {
+            lastUrl = currentUrl;
+            throw new Error('URL changed, waiting for it to settle');
+          }
+        });
+      }
     });
   }
 
@@ -419,7 +425,7 @@ export class CommonPageObject extends FtrService {
 
   async ensureModalOverlayHidden() {
     return this.retry.try(async () => {
-      const shown = await this.testSubjects.exists('confirmModalTitleText', { timeout: 500 });
+      const shown = await this.testSubjects.exists('confirmModalTitleText');
       if (shown) {
         throw new Error('Modal overlay is showing');
       }
@@ -526,7 +532,7 @@ export class CommonPageObject extends FtrService {
   async waitForSaveModalToClose() {
     this.log.debug('Waiting for save modal to close');
     await this.retry.try(async () => {
-      if (await this.testSubjects.exists('savedObjectSaveModal', { timeout: 5000 })) {
+      if (await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 })) {
         throw new Error('save modal still open');
       }
     });
@@ -577,7 +583,7 @@ export class CommonPageObject extends FtrService {
     if (isValidatorCssString) {
       await this.find.byCssSelector(validator);
     } else {
-      await this.testSubjects.exists(validator);
+      await this.testSubjects.existOrFail(validator, { timeout: 5000 });
     }
   }
 

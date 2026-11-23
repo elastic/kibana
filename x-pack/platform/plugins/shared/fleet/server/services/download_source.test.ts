@@ -16,7 +16,7 @@ import type { DownloadSourceSOAttributes } from '../types';
 
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
-import { downloadSourceService } from './download_source';
+import { downloadSourceService, savedObjectToDownloadSource } from './download_source';
 import { appContextService } from './app_context';
 import { agentPolicyService } from './agent_policy';
 
@@ -319,6 +319,59 @@ describe('Download Service', () => {
       expect(
         async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
       ).not.toThrow();
+    });
+  });
+
+  describe('savedObjectToDownloadSource', () => {
+    it('uses canonical source_id over poisoned attributes.id', () => {
+      const so = mockDownloadSourceSO('canonical-id', {
+        id: 'poisoned-id',
+        name: 'Test',
+        host: 'http://test.co',
+        is_default: false,
+      });
+
+      const result = savedObjectToDownloadSource(so as any);
+
+      expect(result.id).toBe('canonical-id');
+    });
+
+    it('uses so.id fallback when source_id absent and attributes.id is poisoned', () => {
+      const so = {
+        id: 'so-uuid-fallback',
+        type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          id: 'poisoned-id',
+          name: 'Test',
+          host: 'http://test.co',
+          is_default: false,
+        },
+      };
+
+      const result = savedObjectToDownloadSource(so as any);
+
+      expect(result.id).toBe('so-uuid-fallback');
+    });
+  });
+
+  describe('update ID stripping', () => {
+    it('does not persist body id to saved object attributes', async () => {
+      const soClientMock = getMockedSoClient();
+
+      await downloadSourceService.update(soClientMock, 'download-source-test', {
+        id: 'evil-injected-id',
+        name: 'Updated name',
+        host: 'http://test.co',
+        is_default: false,
+      });
+
+      const updateCall = soClientMock.update.mock.calls.find(
+        (call) => call[1] === 'download-source-test'
+      );
+      expect(updateCall).toBeDefined();
+      expect(updateCall![2]).not.toHaveProperty('id');
+      expect(updateCall![2]).toMatchObject({ name: 'Updated name' });
     });
   });
 });

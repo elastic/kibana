@@ -42,7 +42,7 @@ export function ObservabilityAlertsCommonProvider({
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const retryOnStale = getService('retryOnStale');
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
   const navigateToTimeWithData = async () => {
     await pageObjects.common.navigateToUrlWithBrowserHistory(
@@ -203,7 +203,7 @@ export function ObservabilityAlertsCommonProvider({
     await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
-      async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
+      async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR)
     );
   });
 
@@ -315,7 +315,7 @@ export function ObservabilityAlertsCommonProvider({
   const alertDataHasLoaded = async () => {
     await retry.waitFor(
       'Alert Table is loaded',
-      async () => await testSubjects.exists('alertsTableIsLoaded', { timeout: 2500 })
+      async () => await testSubjects.exists('alertsTableIsLoaded')
     );
   };
 

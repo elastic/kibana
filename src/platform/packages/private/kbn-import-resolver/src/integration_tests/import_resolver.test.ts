@@ -43,6 +43,16 @@ describe('#resolve()', () => {
     `);
   });
 
+  it('does not resolve zod-prefixed packages as zod', () => {
+    expect(resolver.resolve('zod-to-json-schema', FIXTURES_DIR)).toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/zod-to-json-schema/index.js,
+        "nodeModule": "zod-to-json-schema",
+        "type": "file",
+      }
+    `);
+  });
+
   it('resolves nested node_module imports', () => {
     expect(resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box')))
       .toMatchInlineSnapshot(`
@@ -55,9 +65,9 @@ describe('#resolve()', () => {
   });
 
   it('resolves requests to src/', () => {
-    expect(resolver.resolve('src/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
+    expect(resolver.resolve('src/core/packages/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/src/core/public/index.ts,
+        "absolute": <absolute path>/src/core/packages/core/public/index.ts,
         "type": "file",
       }
     `);

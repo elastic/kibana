@@ -58,13 +58,14 @@ export const createParser = () => {
       lastRequest.endOffset = requestEndOffset;
       requests.push(lastRequest);
     },
-    error = function (m, errorAt = at, errorEndAt) {
+    error = function (m, errorAt = at, errorEndAt, unterminated = false) {
       throw {
         name: 'SyntaxError',
         message: m,
         at: errorAt,
         endAt: errorEndAt,
         text: text,
+        unterminated: unterminated,
       };
     },
     reset = function (newAt) {
@@ -86,7 +87,9 @@ export const createParser = () => {
       let currentAt = at,
         i = text.indexOf(upTo, currentAt);
       if (i < 0) {
-        error(errorMessage || 'Expected \'' + upTo + '\'');
+        // Flag the error so `multi_request()` error recovery knows the delimiter never
+        // closes and the rest of the input is string content.
+        error(errorMessage || 'Expected \'' + upTo + '\'', currentAt, undefined, true);
       }
       // Example: `"query": """...""",` can be followed by more fields in the same body.
       // If the closing `"""` is stored as the request end, autocomplete below it shows request
@@ -499,6 +502,17 @@ export const createParser = () => {
           white();
         } catch (e) {
           addError(e.message, e.at, e.endAt);
+          // An unterminated string swallows the rest of the input: request- and comment-looking
+          // lines below the error are string content, not recovery anchors (the search for the
+          // closing delimiter already scanned to the end of the input).
+          // https://github.com/elastic/kibana/issues/284396
+          if (e.unterminated) {
+            // Consume the swallowed content so the parser does not also flag it as a leftover
+            // 'Syntax error' on top of the unterminated-delimiter error.
+            at = text.length;
+            ch = '';
+            return;
+          }
           // snap
           const remainingText = text.substr(at);
           // Match the verb without a trailing `\b` so that lines starting with

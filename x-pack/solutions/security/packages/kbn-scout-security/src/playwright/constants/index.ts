@@ -8,3 +8,8 @@
 export * as archives from './archives';
 export * as detection_rules from './detection_rules';
 export { FULL_KIBANA_SECURITY_ROLE } from './roles';
+export {
+  ELASTIC_INTERNAL_ORIGIN_HEADER,
+  PUBLIC_API_HEADERS,
+  INTERNAL_API_HEADERS,
+} from './api_headers';

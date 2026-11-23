@@ -28,6 +28,7 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
   numOfRulesWithoutConflicts,
   numOfRulesWithSolvableConflicts,
   numOfRulesWithNonSolvableConflicts,
+  numOfRulesWithRuleTypeChange,
   onCancel,
   onConfirm,
 }: UpgradeWithConflictsModalProps): JSX.Element {
@@ -51,6 +52,7 @@ export const UpgradeWithConflictsModal = memo(function ConfirmUpgradeWithConflic
           numOfRulesWithoutConflicts={numOfRulesWithoutConflicts}
           numOfRulesWithSolvableConflicts={numOfRulesWithSolvableConflicts}
           numOfRulesWithNonSolvableConflicts={numOfRulesWithNonSolvableConflicts}
+          numOfRulesWithRuleTypeChange={numOfRulesWithRuleTypeChange}
         />
       </EuiModalBody>
 
