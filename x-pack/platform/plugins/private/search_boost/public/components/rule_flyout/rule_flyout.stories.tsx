@@ -142,7 +142,7 @@ const DATA_STREAMS_RULE: BoostRule = {
 };
 
 const meta: Meta<RuleFlyoutProps> = {
-  title: 'Search boost/Boost rule flyout',
+  title: 'Search boost/Flyouts/Boost rule',
   component: RuleFlyout,
   // Remount when the rule changes, so the form starts from it.
   render: (args) => <RuleFlyout key={args.rule?.name ?? 'new'} {...args} />,

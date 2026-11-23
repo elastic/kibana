@@ -26,7 +26,7 @@ import {
 import { css } from '@emotion/react';
 
 import type { BoostProfileType } from '../../../common/types';
-import { SHOW_HIDDEN_LABEL, getOutrankedTooltip } from '../../translations';
+import { getOutrankedTooltip } from '../../translations';
 import type { MatchedTarget } from './target_matches';
 import {
   LIST_OPTIONS_LABEL,
@@ -35,6 +35,7 @@ import {
   NO_MATCHES_COUNT,
   NO_MATCHES_DETECTED,
   NO_TARGETS_DETECTED,
+  SHOW_HIDDEN_LABEL,
   SHOW_UNMATCHED_LABEL,
   TARGET_LIST_PROMPTS,
   UNFILTERED_LIST_REASON,
