@@ -12,12 +12,13 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
   RunWorkflowResponseDto,
+  TemplateOriginFieldsSource,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import type { BulkCreateWorkflowsResponse } from '@kbn/workflows-ui';
+import type { BulkCreateWorkflowsResponse, BulkDeleteWorkflowsResponse } from '@kbn/workflows-ui';
 import { useRunWorkflow, useWorkflowsApi } from '@kbn/workflows-ui';
 import { rewriteWorkflowReferences } from '../../../common/lib/export/rewrite_workflow_references';
 import type { WorkflowPreview } from '../../../common/lib/export/workflow_preview';
@@ -26,6 +27,7 @@ import type {
   WorkflowStepTriggerTab,
   WorkflowTriggerTab,
 } from '../../../features/run_workflow/ui/types';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
@@ -35,6 +37,8 @@ export interface UpdateWorkflowParams {
   workflow: Partial<WorkflowDetailDto>;
   /** Workflow definition from list/detail cache; used for enable/disable telemetry metadata. */
   workflowDefinition?: Partial<WorkflowYaml> | null;
+  /** Template the workflow was created from (list/detail cache); used for telemetry. */
+  templateOrigin?: TemplateOriginFieldsSource;
   isBulkAction?: boolean;
   bulkActionCount?: number;
   /**
@@ -86,6 +90,7 @@ export function useWorkflowActions() {
   const queryClient = useQueryClient();
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
+  const { workflowsManagement } = useKibana().services;
 
   const updateWorkflow = useMutation<
     UpdatedWorkflowResponseDto,
@@ -171,6 +176,7 @@ export function useWorkflowActions() {
         }),
         origin: 'workflow_list',
         error: errorObj,
+        templateOrigin: variables.templateOrigin,
       });
     },
     onSuccess: (_, variables) => {
@@ -188,6 +194,7 @@ export function useWorkflowActions() {
         }),
         origin: 'workflow_list',
         error: undefined,
+        templateOrigin: variables.templateOrigin,
       });
 
       queryClient.invalidateQueries({
@@ -197,7 +204,12 @@ export function useWorkflowActions() {
     },
   });
 
-  const deleteWorkflows = useMutation<void, HttpError, { ids: string[] }, OptimisticContext>({
+  const deleteWorkflows = useMutation<
+    BulkDeleteWorkflowsResponse,
+    HttpError,
+    { ids: string[] },
+    OptimisticContext
+  >({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => api.bulkDeleteWorkflows(ids),
     // Optimistic update: immediately remove workflows from UI before server responds
@@ -249,15 +261,19 @@ export function useWorkflowActions() {
         });
       });
     },
-    onSuccess: (_, variables) => {
-      // Report telemetry for successful deletion
+    onSuccess: ({ failures }, variables) => {
+      const failureErrors = new Map(failures.map(({ id, error }) => [id, error]));
       variables.ids.forEach((workflowId) => {
+        const failureError = failureErrors.get(workflowId);
         telemetry.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
-          error: undefined,
+          error: failureError === undefined ? undefined : new Error(failureError),
         });
+        if (failureError === undefined) {
+          workflowsManagement.recentlyViewed.remove(workflowId);
+        }
       });
 
       // Refetch to ensure data is in sync with server

@@ -156,6 +156,10 @@ Array [
   },
   Object {
     "cost": 4,
+    "taskType": "digital_experience:mobile-sessions-summaries",
+  },
+  Object {
+    "cost": 4,
     "taskType": "digital_experience:sessions-summaries",
   },
   Object {
