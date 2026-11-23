@@ -67,7 +67,17 @@ describe('executeEsql', () => {
         { 'entity.id': 'b', cpu: null, 'host.ip': '10.0.0.3' },
       ],
       isPartial: false,
-      stats: { took: 12, documentsFound: 340, valuesLoaded: 680, rowCount: 2 },
+      stats: {
+        took: 12,
+        documentsFound: 340,
+        valuesLoaded: 680,
+        rowsEmitted: null,
+        cpuNanos: null,
+        driverNanos: null,
+        bytesRead: null,
+        shards: null,
+        rowCount: 2,
+      },
     });
   });
 
@@ -86,7 +96,17 @@ describe('executeEsql', () => {
       columns: [{ name: 'entity.id', type: 'keyword' }],
       rows: [],
       isPartial: false,
-      stats: { took: 1, documentsFound: 0, valuesLoaded: 0, rowCount: 0 },
+      stats: {
+        took: 1,
+        documentsFound: 0,
+        valuesLoaded: 0,
+        rowsEmitted: null,
+        cpuNanos: null,
+        driverNanos: null,
+        bytesRead: null,
+        shards: null,
+        rowCount: 0,
+      },
     });
   });
 
@@ -95,7 +115,99 @@ describe('executeEsql', () => {
 
     const { stats } = await executeEsql(client, query);
 
-    expect(stats).toEqual({ took: null, documentsFound: null, valuesLoaded: null, rowCount: 1 });
+    expect(stats).toEqual({
+      took: null,
+      documentsFound: null,
+      valuesLoaded: null,
+      rowsEmitted: null,
+      cpuNanos: null,
+      driverNanos: null,
+      bytesRead: null,
+      shards: null,
+      rowCount: 1,
+    });
+  });
+
+  // The metadata fields as Elasticsearch 9.7 writes them with `include_execution_metadata: true`.
+  it('reads the driver, byte and shard metadata', async () => {
+    const client = setup({
+      took: 544,
+      is_partial: false,
+      documents_found: 1,
+      values_loaded: 1,
+      rows_emitted: 6,
+      bytes_read: 3094,
+      cpu_nanos: 21765000,
+      driver_nanos: 50847500,
+      columns: [{ name: '@timestamp', type: 'date' }],
+      values: [['2026-11-12T09:34:03.875Z']],
+      _clusters: {
+        total: 1,
+        successful: 1,
+        running: 0,
+        skipped: 0,
+        partial: 0,
+        failed: 0,
+        details: {
+          '(local)': {
+            status: 'successful',
+            indices: 'metrics-*',
+            took: 544,
+            _shards: { total: 149, successful: 149, skipped: 0, failed: 0 },
+          },
+        },
+      },
+    });
+
+    const { stats } = await executeEsql(client, query);
+
+    expect(stats).toEqual({
+      took: 544,
+      documentsFound: 1,
+      valuesLoaded: 1,
+      rowsEmitted: 6,
+      cpuNanos: 21765000,
+      driverNanos: 50847500,
+      bytesRead: 3094,
+      shards: { total: 149, successful: 149, skipped: 0, failed: 0 },
+      rowCount: 1,
+    });
+  });
+
+  it('sums the shards of every cluster and leaves a count no cluster reports null', async () => {
+    const client = setup({
+      columns: [],
+      values: [],
+      _clusters: {
+        total: 3,
+        successful: 2,
+        running: 0,
+        skipped: 1,
+        partial: 0,
+        failed: 0,
+        details: {
+          '(local)': {
+            status: 'successful',
+            indices: 'metrics-*',
+            _shards: { total: 3, failed: 1 },
+          },
+          remote: { status: 'successful', indices: 'metrics-*', _shards: { total: 2, failed: 0 } },
+          skipped: { status: 'skipped', indices: 'metrics-*' },
+        },
+      },
+    });
+
+    const { stats } = await executeEsql(client, query);
+
+    expect(stats.shards).toEqual({ total: 5, successful: null, skipped: null, failed: 1 });
+  });
+
+  it('reports no shards when the response has no cluster details', async () => {
+    const client = setup({ columns: [], values: [], _clusters: { details: {} } });
+
+    const { stats } = await executeEsql(client, query);
+
+    expect(stats.shards).toBeNull();
   });
 
   it('reports a partial result', async () => {

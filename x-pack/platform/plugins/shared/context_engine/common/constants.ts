@@ -28,6 +28,8 @@ export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
  */
 export const AI_INDEX_KI_GROUPS_PATH = `${AI_INDEX_KI_LIST_PATH}/_groups`;
 export const SESSION_EVENTS_SAVE_PATH = `${PUBLIC_API_PATH}/memory/_save_event`;
+export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/memory/_forget`;
+export const SESSION_MEMORY_REMEMBER_PATH = `${PUBLIC_API_PATH}/memory/_remember`;
 
 /** Shared bounds for session memory and session events HTTP routes. */
 export const MAX_MEMORY_ID_LENGTH = 256;
@@ -43,6 +45,9 @@ export const MAX_SESSION_EVENT_TEXT_LENGTH = 1024 * 1024;
 
 /** The most unique memory ids one forget call takes, which keeps its search under the result window. */
 export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
+export const MAX_SESSION_MEMORY_ATTRIBUTES = 50;
+export const MAX_SESSION_MEMORY_ATTRIBUTE_KEY_LENGTH = 256;
+export const MAX_SESSION_MEMORY_ATTRIBUTE_VALUE_LENGTH = 1024;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;

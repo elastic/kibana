@@ -28,9 +28,9 @@ export const mockProfiles: BoostProfile[] = [
     name: 'default_data_streams_7d',
     is_builtin: true,
     type: 'data_streams',
-    recent: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    standard: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    background: { min_boost: 0, max_boost: 0.5 },
+    recent: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    standard: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    background: { min_boost: 1, max_boost: 1 },
   },
   {
     name: 'catalog-fast',

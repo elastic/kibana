@@ -486,10 +486,20 @@
       "grant_type": {
         "__one_of": [
           "access_token",
-          "password"
+          "password",
+          "_user_managed_service_account"
         ]
       },
       "access_token": "",
+      "client_authentication": {
+        "scheme": {
+          "__one_of": [
+            "SharedSecret"
+          ]
+        },
+        "value": ""
+      },
+      "service_account_token": "",
       "username": "",
       "password": "",
       "run_as": ""
