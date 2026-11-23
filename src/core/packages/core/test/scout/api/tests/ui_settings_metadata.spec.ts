@@ -41,8 +41,11 @@ apiTest.describe('ui settings metadata', { tag: tags.deploymentAgnostic }, () =>
     createdSpace = true;
     await kbnClient.uiSettings.update({ [SAVED_SETTING]: SAVED_VALUE }, { space: spaceId });
 
-    // Custom roles can't log in on Cloud Hosted without a custom SAML realm.
-    const role = config.isCloud ? 'viewer' : NO_SETTINGS_PRIVILEGES_ROLE;
+    // Custom roles can't log in on Cloud without a custom SAML provider.
+    let role: KibanaRole | string = NO_SETTINGS_PRIVILEGES_ROLE;
+    if (config.isCloud && !config.customSamlProviderName) {
+      role = 'viewer';
+    }
     ({ cookieHeader } = await samlAuth.asInteractiveUser(role));
   });
 

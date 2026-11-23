@@ -1,5 +1,5 @@
 {
-  "sha1": "eef7cdce86c89f8b3d50a3c3a06bc7331e165d3d",
+  "sha1": "b756bed23b3025206bbe83827a6c184217f80d31",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -618,7 +618,7 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
-        "line": 49,
+        "line": 52,
         "column": 11
       }
     },
@@ -638,7 +638,7 @@
       ],
       "location": {
         "file": "src/core/packages/core/test/scout/api/tests/ui_settings_metadata.spec.ts",
-        "line": 65,
+        "line": 68,
         "column": 13
       }
     },
