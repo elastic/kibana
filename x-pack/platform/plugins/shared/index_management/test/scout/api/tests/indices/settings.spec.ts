@@ -95,11 +95,13 @@ apiTest.describe('Index settings API', { tag: tags.deploymentAgnostic }, () => {
   // Serverless manages replicas itself, so it edits another setting.
   let editableSetting: [name: string, value: string];
 
-  apiTest.beforeAll(async ({ requestAuth, samlAuth, config }) => {
+  apiTest.beforeAll(async ({ requestAuth, config }) => {
     credentials = await requestAuth.getApiKey('admin');
-    // The settings editor calls the proxy as the signed-in user, who may only read index metadata.
-    const { cookieHeader } = await samlAuth.asInteractiveUser(INDEX_METADATA_ROLE);
-    proxyHeaders = { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...cookieHeader };
+    // The settings editor calls the proxy as the current user, who may only read index metadata.
+    // An API key rather than a custom-role session, because ECH can only log in as custom roles
+    // through a custom SAML realm.
+    const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(INDEX_METADATA_ROLE);
+    proxyHeaders = { ...COMMON_HEADERS, ...ES_CLIENT_PROXY_HEADERS, ...apiKeyHeader };
     expectedDefaults = forDeployment(config, {
       stateful: EXPECTED_DEFAULTS,
       serverless: EXPECTED_DEFAULTS_SERVERLESS,
