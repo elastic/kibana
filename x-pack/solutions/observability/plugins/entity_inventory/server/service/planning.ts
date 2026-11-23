@@ -21,6 +21,8 @@ export interface SourceProbes {
   errors: SourceError[];
   /** The patterns whose probe failed. */
   failedPatterns: ReadonlySet<string>;
+  /** Wall time of the concurrent probes, in fractional milliseconds. */
+  durationMs: number;
 }
 
 /**
@@ -34,11 +36,13 @@ export const probeAndPlanSources = async (
   signal: AbortSignal | undefined
 ): Promise<{ probes: SourceProbes; allPlans: QueryPlan[] }> => {
   const { sources } = getDynamicBlock(definition);
+  const probesStartedAtMs = performance.now();
   const results = await probeSources(
     esClient,
     sources.map(({ indexPattern }) => indexPattern),
     { signal }
   );
+  const durationMs = performance.now() - probesStartedAtMs;
   const errors: SourceError[] = [];
   results.forEach((probe, indexPattern) => {
     if (probe.failed) {
@@ -54,7 +58,7 @@ export const probeAndPlanSources = async (
       return { hasTimeSeries: probe !== undefined && !probe.failed && probe.hasTimeSeries };
     })
   );
-  return { probes: { results, errors, failedPatterns }, allPlans };
+  return { probes: { results, errors, failedPatterns, durationMs }, allPlans };
 };
 
 /**

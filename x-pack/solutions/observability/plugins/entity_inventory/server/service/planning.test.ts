@@ -41,6 +41,10 @@ const answerProbes = (
 };
 
 describe('probeAndPlanSources', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('plans one FROM query per source when no pattern has a time-series index', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     answerProbes(esClient);
@@ -83,6 +87,20 @@ describe('probeAndPlanSources', () => {
     expect([...probes.failedPatterns]).toEqual([STATE]);
     // The columns of a failed source are still derived, so its plan is kept for the caller to drop.
     expect(allPlans.map(({ indexPattern }) => indexPattern)).toEqual([KUBELET, STATE]);
+  });
+
+  it('measures the wall time of the probes', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-01T12:00:00.000Z') });
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    // Each probe takes 25ms of wall time: two probes.
+    esClient.esql.query.mockImplementation(async () => {
+      jest.advanceTimersByTime(25);
+      return probeResponse(false);
+    });
+
+    const { probes } = await probeAndPlanSources(esClient, definition, undefined);
+
+    expect(probes.durationMs).toBe(50);
   });
 
   it('passes the abort signal to the probes', async () => {

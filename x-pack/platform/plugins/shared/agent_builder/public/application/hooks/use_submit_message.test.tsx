@@ -126,6 +126,29 @@ describe('useSubmitMessage', () => {
     expect(navigateToAgentBuilderUrl).not.toHaveBeenCalled();
   });
 
+  it('hands the rejection handler to the send of an existing conversation', async () => {
+    setState({ conversationId: 'existing' });
+    const onRejected = jest.fn();
+    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
+
+    await act(() => result.current.submitMessage('hello', { onRejected }));
+
+    expect(sendMessage).toHaveBeenCalledWith({
+      message: 'hello',
+      conversationId: 'existing',
+      onRejected,
+    });
+  });
+
+  it('does not hand the rejection handler to the send of a conversation it just created', async () => {
+    setState({});
+    const { result } = renderHook(() => useSubmitMessage(), { wrapper });
+
+    await act(() => result.current.submitMessage('hello', { onRejected: jest.fn() }));
+
+    expect(sendMessage).toHaveBeenCalledWith({ message: 'hello', conversationId: 'conv-1' });
+  });
+
   it('shows an error and sends nothing when the conversation cannot be created', async () => {
     setState({});
     create.mockRejectedValue(new Error('boom'));

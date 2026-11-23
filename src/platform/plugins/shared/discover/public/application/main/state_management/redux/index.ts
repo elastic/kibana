@@ -81,7 +81,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
-  selectTabSavedSearchByValueAttributes,
+  selectTabEmbeddableTab,
 } from './selectors';
 
 export {
@@ -93,6 +93,7 @@ export {
   createRuntimeStateManager,
   useRuntimeState,
   selectTabRuntimeState,
+  setTabChartBreakdownFieldNames,
   selectDataSourceProfileId,
   selectCurrentProfileStateDefinition,
   selectCurrentProfileUrlState,

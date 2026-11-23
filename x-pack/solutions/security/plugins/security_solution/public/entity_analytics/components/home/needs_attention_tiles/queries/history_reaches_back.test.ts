@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import {
   REACHES_BACK_COLUMN,
   buildAlertsHistoryReachesBackQuery,

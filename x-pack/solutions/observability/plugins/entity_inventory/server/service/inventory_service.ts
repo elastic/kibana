@@ -13,10 +13,12 @@ import type {
   InventoryRow,
   InventoryType,
   InventoryTypeColumn,
+  ListProbeDiagnostic,
   ListQueryDiagnostic,
   ListResponse,
   PlanResponse,
   Provenance,
+  QueryExecutionStats,
   SourceError,
   UnavailableColumn,
 } from '../../common';
@@ -34,7 +36,7 @@ import {
   toEsqlRequestBody,
   toSourceError,
 } from '../inventory/executor';
-import type { EsqlQueryResult, PlanResult, ProbeResult } from '../inventory/executor';
+import type { EsqlQueryResult, EsqlStats, PlanResult, ProbeResult } from '../inventory/executor';
 import {
   buildColumns,
   ENTITY_ID_COLUMN,
@@ -58,6 +60,8 @@ interface ListPlan {
   queries: GeneratedQuery[];
   /** One entry per source whose probe failed; its plans are left out of `plans` and `queries`. */
   probeErrors: SourceError[];
+  /** Wall time of the concurrent probes, in fractional milliseconds. */
+  probesMs: number;
 }
 
 const toUnavailableColumns = (
@@ -72,23 +76,77 @@ const toUnavailableColumns = (
       : [];
   });
 
+type ExecutionStats = Omit<QueryExecutionStats, 'isPartial'>;
+
+const NO_EXECUTION_STATS: ExecutionStats = {
+  took: null,
+  documentsFound: null,
+  valuesLoaded: null,
+  rowsEmitted: null,
+  cpuNanos: null,
+  driverNanos: null,
+  bytesRead: null,
+  shards: null,
+};
+
+const toExecutionStats = (stats: EsqlStats | null): ExecutionStats => {
+  if (stats === null) {
+    return NO_EXECUTION_STATS;
+  }
+  const {
+    took,
+    documentsFound,
+    valuesLoaded,
+    rowsEmitted,
+    cpuNanos,
+    driverNanos,
+    bytesRead,
+    shards,
+  } = stats;
+  return {
+    took,
+    documentsFound,
+    valuesLoaded,
+    rowsEmitted,
+    cpuNanos,
+    driverNanos,
+    bytesRead,
+    shards,
+  };
+};
+
 const toQueryDiagnostic = (
   { indexPattern, engine }: QueryPlan,
   { esql, params }: GeneratedQuery,
   outcome: PromiseSettledResult<EsqlQueryResult>
 ): ListQueryDiagnostic => {
-  const stats =
-    outcome.status === 'fulfilled'
-      ? outcome.value.stats
-      : { took: null, documentsFound: null, rowCount: 0 };
+  const base = { indexPattern, engine, esql, params };
+  if (outcome.status === 'rejected') {
+    return { ...base, ...NO_EXECUTION_STATS, rowCount: 0, isPartial: null };
+  }
+  const { stats, isPartial } = outcome.value;
+  return { ...base, ...toExecutionStats(stats), rowCount: stats.rowCount, isPartial };
+};
+
+const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
+  if (probe.failed) {
+    return 'failed';
+  }
+  return probe.hasTimeSeries ? 'time_series' : 'no_time_series';
+};
+
+const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeDiagnostic => {
+  const {
+    query: { esql, params },
+    execution: { stats, isPartial },
+  } = probe;
   return {
     indexPattern,
-    engine,
     esql,
     params,
-    took: stats.took,
-    documentsFound: stats.documentsFound,
-    rowCount: stats.rowCount,
+    outcome: toProbeOutcome(probe),
+    ...toExecutionStats(stats),
+    isPartial,
   };
 };
 
@@ -143,23 +201,23 @@ export class InventoryService {
    * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
    * reported in `errors[]`; neither fails the request. A partial result is also reported in
    * `errors[]` and its rows are kept. `truncated` is true only when the row limit left rows out.
-   * `queries[]` lists every plan query sent, `provenance` covers the returned
-   * rows only, and `took` is the wall time of the whole call.
+   * `queries[]` lists every plan query sent and `probes[]` every probe, each with the stats
+   * Elasticsearch returned; `provenance` covers the returned rows only, and `timings` gives the wall time
+   * of the whole call (`totalMs`) and of each phase, measured with `performance.now()`.
    */
   list = async ({ type, window, limit, signal }: ListRequest): Promise<ListResponse> => {
-    const startedAt = Date.now();
+    const startedAtMs = performance.now();
     const definition = await this.getDynamicDefinition(type);
-    const { plans, identity, columns, queries, probeErrors } = await this.planList(
-      definition,
-      window,
-      limit,
-      signal
-    );
+    const definedAtMs = performance.now();
+    const { probes, plans, identity, columns, queries, probeErrors, probesMs } =
+      await this.planList(definition, window, limit, signal);
+    const plannedAtMs = performance.now();
 
     // Settled, not raced: one failing source must not hide the rows of the others.
     const outcomes = await Promise.allSettled(
       queries.map((query) => executeEsql(this.esClient, query, { signal }))
     );
+    const queriedAtMs = performance.now();
 
     const errors: SourceError[] = [...probeErrors];
     const unavailableColumns: UnavailableColumn[] = [];
@@ -195,16 +253,25 @@ export class InventoryService {
     const ordered = orderRows(merged.rows);
     const { truncated } = summarizeResults(results, limit, ordered.length);
     const rows = fillColumns(applyLimit(ordered, limit), columns);
+    const processedAtMs = performance.now();
 
     return {
       columns: toResponseColumns(columns),
       rows,
       provenance: restrictProvenance(merged.provenance, rows),
       truncated,
-      took: Date.now() - startedAt,
       queries: outcomes.map((outcome, planIndex) =>
         toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome)
       ),
+      probes: [...probes].map(([indexPattern, probe]) => toProbeDiagnostic(indexPattern, probe)),
+      timings: {
+        definitionMs: definedAtMs - startedAtMs,
+        planningMs: plannedAtMs - definedAtMs,
+        probesMs,
+        queriesMs: queriedAtMs - plannedAtMs,
+        processingMs: processedAtMs - queriedAtMs,
+        totalMs: processedAtMs - startedAtMs,
+      },
       errors,
       unavailableColumns,
     };
@@ -297,6 +364,7 @@ export class InventoryService {
         columns,
         queries: runnable.map(({ query }) => query),
         probeErrors: probes.errors,
+        probesMs: probes.durationMs,
       };
     } catch (error) {
       throw toTypeDefinitionError(this.logger, definition, error);
