@@ -1324,7 +1324,7 @@ describe('When calling package policy', () => {
         expect(UpgradePackagePoliciesResponseBodySchema.validate(body)).toEqual(body);
       });
 
-      it('returns the first error when another failure comes with an agent version block', async () => {
+      it('returns the other failure when it comes with an agent version block', async () => {
         const conflictItem = {
           id: '3',
           success: false,
@@ -1342,8 +1342,8 @@ describe('When calling package policy', () => {
         await upgradePackagePolicyHandler(context, request, response);
         expect(response.ok).not.toHaveBeenCalled();
         expect(response.customError).toHaveBeenCalledWith({
-          statusCode: 400,
-          body: { message: 'Cannot upgrade test to 1.0.0' },
+          statusCode: 409,
+          body: { message: 'Conflict' },
         });
       });
 

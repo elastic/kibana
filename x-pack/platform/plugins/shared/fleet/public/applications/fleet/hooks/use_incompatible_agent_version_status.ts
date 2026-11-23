@@ -83,7 +83,9 @@ export const getIncompatibleAgentVersionStatus = (
     ({ id, active_agents_per_version: activeAgentsPerVersion }) =>
       (activeAgentsPerVersion ?? []).map((versionCount) => ({
         ...versionCount,
+        // Without version-specific policies, every agent receives the inputs whatever the condition
         lacksInputsAlready:
+          requiresAcknowledgement &&
           !!currentCondition?.agentPolicyIds.includes(id) &&
           agentLosesPackageInputs(versionCount.version, currentCondition.versionCondition),
       }))

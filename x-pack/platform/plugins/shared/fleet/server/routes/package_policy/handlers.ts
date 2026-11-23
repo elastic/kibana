@@ -776,12 +776,12 @@ export const upgradePackagePolicyHandler: FleetRequestHandler<
 
   // When some package policies were upgraded and the others were only blocked by the agent version
   // guard, the per-item results are returned as a 200, so that the blocked package policies don't
-  // hide the upgraded ones. Any other failure returns the first error, as before.
+  // hide the upgraded ones. Otherwise, the first failure that acknowledging the incompatibility
+  // wouldn't resolve is returned, falling back to the first agent version block.
   const failures = body.filter((item) => item.statusCode && item.statusCode !== 200);
-  const isPartialAgentVersionBlock =
-    body.some((item) => item.success) &&
-    failures.every((item) => !!item.body?.attributes?.agent_version_block);
-  const firstFatalError = isPartialAgentVersionBlock ? undefined : failures[0];
+  const otherFailure = failures.find((item) => !item.body?.attributes?.agent_version_block);
+  const isPartialAgentVersionBlock = body.some((item) => item.success) && !otherFailure;
+  const firstFatalError = isPartialAgentVersionBlock ? undefined : otherFailure ?? failures[0];
 
   if (firstFatalError) {
     return response.customError({

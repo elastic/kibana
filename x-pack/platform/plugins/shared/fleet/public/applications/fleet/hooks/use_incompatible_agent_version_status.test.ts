@@ -274,6 +274,28 @@ describe('getIncompatibleAgentVersionStatus', () => {
     });
   });
 
+  it('keeps the warning for agents failing the current condition without version-specific policies', () => {
+    ExperimentalFeaturesService.init({
+      ...allowedExperimentalValues,
+      enableVersionSpecificPolicies: false,
+    });
+
+    const result = getIncompatibleAgentVersionStatus(
+      createPackageInfo('^9.4.0'),
+      [createAgentPolicy([{ version: '9.3.1', count: 2 }])],
+      undefined,
+      { versionCondition: '^9.4.0', agentPolicyIds: ['policy-1'] }
+    );
+
+    // Those agents still receive the inputs, so the incompatibility is still worth showing
+    expect(result).toEqual({
+      status: 'ALL',
+      versionCondition: '^9.4.0',
+      agentPolicyCount: 1,
+      requiresAcknowledgement: false,
+    });
+  });
+
   describe('with the agent version block returned by Fleet', () => {
     const serverAgentVersionBlock: AgentVersionBlock = {
       package_name: 'test',
