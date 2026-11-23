@@ -10,6 +10,7 @@ import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types'
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
 
@@ -39,6 +40,107 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
+type TagsMatch = 'yes' | 'no' | 'unknown';
+
+/**
+ * Whether an agent the update has just changed matches a kuery, as far as its tags can tell.
+ *
+ * Such an agent has every tag the update adds, and none that it removes (unless it also adds it).
+ * That decides a clause on the `tags` field for those tags, and with `not`, `and` and `or` the
+ * clauses around it. Everything else, another field, a wildcard, a tag the update does not touch,
+ * is `unknown`.
+ */
+const matchesUpdatedAgent = (
+  node: KueryNode | undefined,
+  tagsToAdd: Set<string>,
+  tagsToRemove: Set<string>
+): TagsMatch => {
+  if (node?.type !== 'function') {
+    return 'unknown';
+  }
+  const args: KueryNode[] = node.arguments ?? [];
+  const matches = (arg: KueryNode | undefined) => matchesUpdatedAgent(arg, tagsToAdd, tagsToRemove);
+
+  switch (node.function) {
+    case 'is': {
+      const [field, value] = args;
+      if (field?.type !== 'literal' || field.value !== 'tags' || value?.type !== 'literal') {
+        return 'unknown';
+      }
+      const tag = String(value.value);
+      if (tagsToAdd.has(tag)) {
+        return 'yes';
+      }
+      return tagsToRemove.has(tag) ? 'no' : 'unknown';
+    }
+    case 'not': {
+      const match = matches(args[0]);
+      return match === 'unknown' ? 'unknown' : match === 'yes' ? 'no' : 'yes';
+    }
+    case 'and': {
+      const results = args.map(matches);
+      if (results.includes('no')) {
+        return 'no';
+      }
+      return results.length > 0 && results.every((result) => result === 'yes') ? 'yes' : 'unknown';
+    }
+    case 'or': {
+      const results = args.map(matches);
+      if (results.includes('yes')) {
+        return 'yes';
+      }
+      return results.length > 0 && results.every((result) => result === 'no') ? 'no' : 'unknown';
+    }
+    default:
+      return 'unknown';
+  }
+};
+
+/**
+ * Whether the retry of an update tags action leaves out the agents the update already changed.
+ *
+ * It restarts behind the action's kuery, so it leaves them out when they can no longer match it.
+ * That is so for an update that adds one tag or removes one tag, which `updateAgentTags` narrows
+ * the kuery for, and it can be so for another update through a kuery of the caller's: the tag
+ * rename in the UI searches for the agents that have the old tag, which the renamed agents no
+ * longer have. So the kuery is read, as the search of the agents reads it, and the answer is yes
+ * only when the tags it names, whole, and only in the places that decide it, show that an updated
+ * agent does not match.
+ *
+ * It is only used for a batch that is cancelled on every run: the agents it updated are recorded
+ * when the retry is going to leave them out, as nothing else will. Whatever the kuery does not
+ * settle (another field, a wildcard, a tag the update does not touch) counts as no, and nothing is
+ * recorded then. For an `or` of a clause on the tags and one that does not settle, the retry leaves
+ * out some of the agents that were updated and not others, and no count is right for that.
+ */
+export const retrySkipsUpdatedAgents = (
+  tagsToAdd: string[] = [],
+  tagsToRemove: string[] = [],
+  kuery: string = ''
+): boolean => {
+  if (
+    (tagsToAdd.length === 1 && tagsToRemove.length === 0) ||
+    (tagsToRemove.length === 1 && tagsToAdd.length === 0)
+  ) {
+    return true;
+  }
+  if (kuery.trim() === '') {
+    return false;
+  }
+  try {
+    return (
+      matchesUpdatedAgent(
+        fromKueryExpression(removeSOAttributes(kuery)),
+        new Set(tagsToAdd),
+        new Set(tagsToRemove)
+      ) === 'no'
+    );
+  } catch (error) {
+    // Not a kuery that can be read, so there is nothing in it to leave agents out.
+    return false;
+  }
+};
+
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
@@ -49,6 +151,11 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       {
         tagsToAdd: this.actionParams?.tagsToAdd,
         tagsToRemove: this.actionParams?.tagsToRemove,
+        retrySkipsUpdated: retrySkipsUpdatedAgents(
+          this.actionParams?.tagsToAdd,
+          this.actionParams?.tagsToRemove,
+          this.actionParams?.kuery
+        ),
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         spaceId: this.actionParams.spaceId,
@@ -78,6 +185,8 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
+    /** See {@link retrySkipsUpdatedAgents}: only used for a batch that is cancelled on every run. */
+    retrySkipsUpdated?: boolean;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.
@@ -127,6 +236,9 @@ export async function updateTagsBatch(
     .debug(
       `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
     );
+
+  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
+  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   // The agents were in the caller's space when they were selected. The update can run for minutes,
   // and again after being cancelled, so it checks the space itself too: an agent that has moved out
@@ -199,40 +311,51 @@ export async function updateTagsBatch(
       res.updated ?? 0
     } of ${res.total ?? 'an unknown number of'} agents`;
     if (attempt >= UPDATE_BY_QUERY_MAX_ATTEMPTS) {
-      // The agents that failed are the one thing in this outcome that a retry would not tell
-      // again, as far as the reason goes, so they are not lost with it. They are recorded when no
-      // retry of the action is left to run them again, and logged until then.
+      // Nothing more is run for this batch here, and the retry of the action restarts behind its
+      // kuery. What the cancelled run did is recorded now when that retry leaves it out, as it
+      // would not be recorded at all: the agents it updated. The agents that failed are not
+      // updated, so the retry runs them again, and they are recorded when there is no retry left
+      // to do that, and logged until then.
       const failures = res.failures ?? [];
-      if (failures.length > 0) {
-        if (options.retryCount === MAX_RETRY_COUNT) {
-          await createAgentAction(esClient, soClient, {
-            id: actionId,
-            agents: failures.map((failure) => failure.id),
-            namespaces,
-            created_at: new Date().toISOString(),
-            type: 'UPDATE_TAGS',
-            total:
-              options.total ??
-              (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
-          });
+      const recordedUpdatedIds = getUuidArray(options.retrySkipsUpdated ? res.updated ?? 0 : 0);
+      const recordedFailures = options.retryCount === MAX_RETRY_COUNT ? failures : [];
+      if (recordedUpdatedIds.length > 0 || recordedFailures.length > 0) {
+        await createAgentAction(esClient, soClient, {
+          id: actionId,
+          agents: recordedUpdatedIds.concat(recordedFailures.map((failure) => failure.id)),
+          namespaces,
+          created_at: new Date().toISOString(),
+          type: 'UPDATE_TAGS',
+          total:
+            options.total ??
+            (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
+        });
+        if (recordedUpdatedIds.length > 0) {
           await bulkCreateAgentActionResults(
             esClient,
-            failures.map((failure) => ({
+            recordedUpdatedIds.map((id) => ({ agentId: id, actionId, namespaces }))
+          );
+        }
+        if (recordedFailures.length > 0) {
+          await bulkCreateAgentActionResults(
+            esClient,
+            recordedFailures.map((failure) => ({
               agentId: failure.id,
               actionId,
               namespace: spaceId,
               error: failure.cause.reason ?? undefined,
             }))
           );
-        } else {
-          appContextService
-            .getLogger()
-            .warn(
-              `Update by query of action ${actionId} failed for ${
-                failures.length
-              } agents: ${JSON.stringify(failures).slice(0, 1000)}`
-            );
         }
+      }
+      if (failures.length > recordedFailures.length) {
+        appContextService
+          .getLogger()
+          .warn(
+            `Update by query of action ${actionId} failed for ${
+              failures.length
+            } agents: ${JSON.stringify(failures).slice(0, 1000)}`
+          );
       }
       throw new UpdateByQueryCancelledError(`${cancelled}, giving up after ${attempt} attempts`);
     }
@@ -244,9 +367,6 @@ export async function updateTagsBatch(
   if (appContextService.getLogger().isLevelEnabled('debug')) {
     appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
   }
-
-  // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
-  const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());
 
   const updatedCount = res.updated ?? 0;
   const updatedIds = getUuidArray(updatedCount);

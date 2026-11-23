@@ -16,7 +16,11 @@ import { UpdateByQueryCancelledError } from '../../errors';
 import { createClientMock } from './action.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
-import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
+import {
+  UpdateAgentTagsActionRunner,
+  retrySkipsUpdatedAgents,
+  updateTagsBatch,
+} from './update_agent_tags_action_runner';
 
 jest.mock('../spaces/helpers');
 jest.mock('../app_context', () => {
@@ -527,13 +531,20 @@ describe('update_agent_tags', () => {
         ...cancelledTask,
         response: { ...cancelledTask.response, failures },
       };
-      const batch = (retryCount?: number) =>
+      const batch = (retryCount?: number, retrySkipsUpdated?: boolean) =>
         updateTagsBatch(
           soClient,
           esClient,
           agents,
           {},
-          { tagsToAdd: ['new'], tagsToRemove: ['old'], kuery: '', total: 5, retryCount }
+          {
+            tagsToAdd: ['new'],
+            tagsToRemove: ['old'],
+            kuery: '',
+            total: 5,
+            retryCount,
+            retrySkipsUpdated,
+          }
         );
 
       it('should record why agents failed when no retry of the action is left', async () => {
@@ -545,6 +556,36 @@ describe('update_agent_tags', () => {
         expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
           'error reason',
         ]);
+      });
+
+      it('should record the agents it updated when the retry of the action leaves them out', async () => {
+        mockRuns(cancelledWithFailures, cancelledWithFailures);
+
+        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+
+        // the 3 agents updated, and not the one that failed, which the retry runs again
+        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(3);
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should record both when no retry of the action is left', async () => {
+        mockRuns(cancelledWithFailures, cancelledWithFailures);
+
+        await expect(batch(MAX_RETRY_COUNT, true)).rejects.toThrow(/giving up/);
+
+        expect(esClient.create).toHaveBeenCalledTimes(1);
+        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(4);
+        expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
+          'error reason',
+        ]);
+      });
+
+      it('should not record the agents it updated when the retry of the action goes through them again', async () => {
+        mockRuns(cancelledTask, cancelledTask);
+
+        await expect(batch(1, false)).rejects.toThrow(/giving up/);
+
+        expect(esClient.create).not.toHaveBeenCalled();
       });
 
       it('should leave them to the retry of the action while there is one', async () => {
@@ -579,6 +620,49 @@ describe('update_agent_tags', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       expect(esClient.create).not.toHaveBeenCalled();
     });
+  });
+
+  describe('retrySkipsUpdatedAgents', () => {
+    it.each([
+      // the update adds one tag or removes one tag
+      [['a'], [], '', true],
+      [[], ['a'], '', true],
+      // a rename, or several tags, with a kuery that does not leave out the updated agents
+      [['a'], ['b'], '', false],
+      [['a'], ['b'], 'status:online', false],
+      [['a', 'b'], [], 'status:online', false],
+      [[], ['a', 'b'], '', false],
+      [[], [], '', false],
+      // the tag rename in the UI: agents with the old tag, which the renamed agents no longer have
+      [['new'], ['old'], 'tags:"old"', true],
+      [['new'], ['old'], 'tags:old', true],
+      [['new'], ['old'], '(tags:"old") AND status:online', true],
+      [['new'], ['old'], 'tags:old OR NOT tags:new', true],
+      [['x'], ['a', 'b'], 'tags:(a or b)', true],
+      // a tag the update adds, in a clause that is negated
+      [['a', 'b'], [], 'NOT tags:a', true],
+      [['a', 'b'], [], 'not (tags:a or tags:b)', true],
+      // clauses that the updated agents still match, or that nothing is known about
+      [['a', 'b'], [], 'tags:a', false],
+      [['new'], ['old'], 'tags:"old" OR status:online', false],
+      [['new'], ['old'], 'tags:other', false],
+      [['new'], ['old'], 'tags:old*', false],
+      [['new'], ['old'], 'NOT tags:other', false],
+      [['a'], ['a'], 'tags:a', false],
+      // a tag only counts whole
+      [['linux', 'web'], [], 'tags:linux-prod', false],
+      [['', 'b'], [], 'status:online', false],
+      // the kuery is read as the search of the agents reads it
+      [['new'], ['old'], 'fleet-agents.tags:"old"', true],
+      [['new'], ['old'], 'fleet-agents.status:online', false],
+      // not a kuery that can be read
+      [['a', 'b'], [], 'tags:(', false],
+    ])(
+      'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
+      (tagsToAdd, tagsToRemove, kuery, expected) => {
+        expect(retrySkipsUpdatedAgents(tagsToAdd, tagsToRemove, kuery)).toBe(expected);
+      }
+    );
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
