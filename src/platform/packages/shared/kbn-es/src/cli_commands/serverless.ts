@@ -154,6 +154,10 @@ export const serverless: Command = {
       },
     }) as unknown as ServerlessCliOptions;
 
+    // getopts sets every `string` option that isn't passed to `''`. Treat an empty value as unset
+    // so that UIAM keeps its default lifetime instead of failing the lifetime validation.
+    options.uiamEphemeralTokenExpiration = options.uiamEphemeralTokenExpiration || undefined;
+
     if (!options.esProjectType) {
       throw createCliError(
         `--projectType flag is required and must be a string: ${supportedProjectTypesStr}`
