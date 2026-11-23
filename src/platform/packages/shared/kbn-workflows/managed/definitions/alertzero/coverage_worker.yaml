@@ -101,8 +101,8 @@ steps:
   # for example when Agentic Investigations is turned off in kibana.yml. The watch route
   # runs the same checks as the AlertZero UI and API: 404 when AlertZero is off or the
   # space is not supported, 403 without the subscription or the AlertZero read
-  # privilege, 503 when a required plugin
-  # (Agentic Investigations, proposals, Agent Builder) is missing.
+  # privilege, 503 when a required plugin (Agentic Investigations, proposals, Agent
+  # Builder) is missing.
   - name: check_alertzero
     type: kibana.request
     on-failure:
@@ -142,8 +142,8 @@ steps:
     with:
       message: >-
         AlertZero or one of its dependencies (Agentic Investigations, proposals) is
-        unavailable in this space, or this Worker cannot read AlertZero. Rule Coverage can't open investigations or proposals.
-        No reviews were started. {{ steps.check_alertzero.error.message }}
+        unavailable in this space, or this Worker cannot read AlertZero. Rule Coverage
+        can't open investigations or proposals. No reviews were started. {{ steps.check_alertzero.error.message }}
 
   # Step 1 of 8: list the reviews that are active in this space. A review is active from
   # its start until it ends. Each review has the concurrency key
