@@ -39,7 +39,7 @@ const resolvePayloads = async (
  * Public contract for the alert status changed event publisher.
  *
  * Called with persisted status changes by the rule executor, by the alert
- * events client, and by the alert actions client for user activate and
+ * events client, and by the user-action subscriber for user activate and
  * deactivate actions. The publisher owns the opt-in check, so callers never
  * ask it themselves.
  */
@@ -53,8 +53,9 @@ export interface AlertStatusChangedEventPublisherContract {
  *
  * Bound `inRequestScope` because the bus threads `KibanaRequest` on every
  * publish: the rule executor's container has Task Manager's `fakeRequest`
- * bound to `Request`, and the alert events and alert actions clients' scope
- * has the request it was created with.
+ * bound to `Request`, and the alert events client's scope and the scope the
+ * user-action subscriber forks per request have the request they were created
+ * with.
  *
  * Nothing is published unless an integration has opted in for that request.
  * The answer is asked once per instance, so once per rule run, and only when

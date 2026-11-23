@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+
 /**
  * Common envelope shared by every alert-action domain event.
  *
@@ -156,6 +159,20 @@ export type EpisodeUnsnoozedEvent = BaseAlertActionEvent<
   Record<string, never>
 >;
 
+/**
+ * Status change a persisted lifecycle (activate/deactivate) write caused.
+ * Present only when Elasticsearch accepted the write and it moved the status;
+ * the new status follows from the event type.
+ */
+export interface EpisodeStatusChange {
+  /** Status before the write, chained across writes to the same episode; `null` when unknown. */
+  readonly previousStatus: AlertEpisodeStatus | null;
+  /** Severity stored on the alert's latest event, or `null`. */
+  readonly severity: AlertEventSeverity | null;
+  /** Source stored on the alert's latest event. */
+  readonly source: string;
+}
+
 /** Discriminator value for {@link EpisodeActivatedEvent}. */
 export const EPISODE_ACTIVATED_EVENT_TYPE = 'episode.activated' as const;
 
@@ -163,6 +180,8 @@ export const EPISODE_ACTIVATED_EVENT_TYPE = 'episode.activated' as const;
 export interface EpisodeActivatedPayload {
   /** Reason the alerting episode was activated. */
   readonly reason: string;
+  /** Set when the persisted write changed the alert status. */
+  readonly statusChange?: EpisodeStatusChange;
 }
 
 /**
@@ -180,6 +199,8 @@ export const EPISODE_DEACTIVATED_EVENT_TYPE = 'episode.deactivated' as const;
 export interface EpisodeDeactivatedPayload {
   /** Reason the alerting episode was deactivated. */
   readonly reason: string;
+  /** Set when the persisted write changed the alert status. */
+  readonly statusChange?: EpisodeStatusChange;
 }
 
 /**

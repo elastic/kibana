@@ -204,6 +204,44 @@ describe('AlertActionEventPublisher', () => {
       );
     });
 
+    it.each([
+      ['activate', EPISODE_ACTIVATED_EVENT_TYPE],
+      ['deactivate', EPISODE_DEACTIVATED_EVENT_TYPE],
+    ] as const)(
+      'attaches the status change of a %s action to the event payload',
+      (actionType, eventType) => {
+        const action = createAction({ action_type: actionType, reason: 'why' });
+        const statusChange = {
+          previousStatus: 'inactive',
+          severity: 'high',
+          source: 'internal',
+        } as const;
+
+        publisher.emitEpisodeActions(request, [action], new Map([[action, statusChange]]));
+
+        expect(eventBus.publish).toHaveBeenCalledWith(
+          { type: eventType, ...baseEnvelope, payload: { reason: 'why', statusChange } },
+          { request, origin: { actor: 'user', channel: 'api' } }
+        );
+      }
+    );
+
+    it('leaves the payload without statusChange for lifecycle actions the map does not name', () => {
+      const named = createAction({ action_type: 'activate', reason: 'a' });
+      const other = createAction({ action_type: 'deactivate', reason: 'b' });
+      const statusChange = { previousStatus: null, severity: null, source: 'internal' } as const;
+
+      publisher.emitEpisodeActions(request, [named, other], new Map([[named, statusChange]]));
+
+      expect(eventBus.publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: EPISODE_DEACTIVATED_EVENT_TYPE,
+          payload: { reason: 'b' },
+        }),
+        expect.anything()
+      );
+    });
+
     it('does not publish for an unknown action type', () => {
       publisher.emitEpisodeActions(request, [createAction({ action_type: 'unknown' })]);
 
