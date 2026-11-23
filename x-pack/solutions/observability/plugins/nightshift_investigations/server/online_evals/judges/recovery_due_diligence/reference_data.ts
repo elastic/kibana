@@ -6,7 +6,6 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { keepHeadAndTail } from '../../keep_head_and_tail';
 import { MAX_TOOL_FIELD_CHARS, truncate } from '../render_round';
 
 /** A tool call of an earlier round, as the evidence carries it. */
@@ -49,7 +48,8 @@ export type EarlierRound = NonNullable<RecoveryReferenceData['earlier_rounds']>[
  */
 const MAX_EARLIER_FIELD_CHARS = 1_500;
 const MAX_EARLIER_CONTEXT_CHARS = 80_000;
-const MAX_EARLIER_ANSWERS_CHARS = 60_000;
+const MAX_EARLIER_ANSWERS_CHARS = 20_000;
+const MAX_EARLIER_CHECKLIST_ANSWERS_CHARS = 60_000;
 
 const stringify = (value: unknown): string =>
   value === undefined ? '' : typeof value === 'string' ? value : JSON.stringify(value);
@@ -62,7 +62,7 @@ export const renderEarlierAnswers = (rounds: readonly EarlierRound[] | undefined
   if (!rounds || rounds.length === 0) return '(not available)';
   const perAnswer = Math.min(
     MAX_TOOL_FIELD_CHARS,
-    shareOf(MAX_EARLIER_ANSWERS_CHARS, rounds.length)
+    shareOf(MAX_EARLIER_CHECKLIST_ANSWERS_CHARS, rounds.length)
   );
   return rounds
     .map(({ answer }, index) => `Round ${index + 1}:\n${truncate(answer, perAnswer)}`)
@@ -71,34 +71,47 @@ export const renderEarlierAnswers = (rounds: readonly EarlierRound[] | undefined
 
 /**
  * The earlier rounds' answers and tool calls with results, for the judge that decides which claims
- * have a source. The rounds share one budget: each gets an equal part, within which its answer is
- * cut short, and its tool calls keep their first and last ones when they do not fit.
+ * have a source. Every tool call is kept; only when they do not all fit within the budget are the
+ * oldest ones dropped, from the start of the first round on, so the latest results stay. Answers
+ * are always kept, cut short to a share of their own budget.
  */
 export const renderEarlierRounds = (rounds: readonly EarlierRound[] | undefined): string => {
   if (!rounds || rounds.length === 0) return '(not available)';
-  const perRound = shareOf(MAX_EARLIER_CONTEXT_CHARS, rounds.length);
-  const answerBudget = Math.min(MAX_TOOL_FIELD_CHARS, Math.floor(perRound / 4));
-  const callsBudget = perRound - answerBudget;
+  const perAnswer = Math.min(
+    MAX_TOOL_FIELD_CHARS,
+    shareOf(MAX_EARLIER_ANSWERS_CHARS, rounds.length)
+  );
+  const answers = rounds.map(({ answer }) => truncate(answer, perAnswer));
+  const calls = rounds.flatMap(({ tool_calls: toolCalls }, roundIndex) =>
+    toolCalls.map(({ tool_id: toolId, arguments: args, result }, index) => ({
+      roundIndex,
+      text: `${index + 1}. ${toolId ?? 'unknown tool'}(${truncate(
+        stringify(args),
+        MAX_EARLIER_FIELD_CHARS
+      )})\n   → ${truncate(stringify(result), MAX_EARLIER_FIELD_CHARS)}`,
+    }))
+  );
+
+  let remaining = MAX_EARLIER_CONTEXT_CHARS - answers.reduce((sum, { length }) => sum + length, 0);
+  let firstKept = calls.length;
+  while (firstKept > 0 && remaining >= calls[firstKept - 1].text.length) {
+    firstKept--;
+    remaining -= calls[firstKept].text.length;
+  }
+
   return rounds
-    .map(({ answer, tool_calls: toolCalls }, roundIndex) => {
-      const calls = toolCalls.map(
-        ({ tool_id: toolId, arguments: args, result }, index) =>
-          `${index + 1}. ${toolId ?? 'unknown tool'}(${truncate(
-            stringify(args),
-            MAX_EARLIER_FIELD_CHARS
-          )})\n   → ${truncate(stringify(result), MAX_EARLIER_FIELD_CHARS)}`
-      );
-      const { headEnd, tailStart, omitted } = keepHeadAndTail(
-        calls.map(({ length }) => length),
-        callsBudget
-      );
+    .map((_, roundIndex) => {
+      const own = calls
+        .map((call, index) => ({ ...call, index }))
+        .filter((c) => c.roundIndex === roundIndex);
+      const kept = own.filter(({ index }) => index >= firstKept);
+      const dropped = own.length - kept.length;
       return [
         `### Round ${roundIndex + 1}`,
         'Tool calls:',
-        ...calls.slice(0, headEnd),
-        ...(omitted > 0 ? [`[${omitted} tool calls omitted here]`] : []),
-        ...calls.slice(tailStart),
-        `Answer:\n${truncate(answer, answerBudget)}`,
+        ...(dropped > 0 ? [`[${dropped} earlier tool calls omitted here]`] : []),
+        ...kept.map(({ text }) => text),
+        `Answer:\n${answers[roundIndex]}`,
       ].join('\n');
     })
     .join('\n\n');

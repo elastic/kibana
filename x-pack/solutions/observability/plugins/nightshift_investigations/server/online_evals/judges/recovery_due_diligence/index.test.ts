@@ -253,20 +253,39 @@ describe('renderEarlierRounds', () => {
     expect(renderEarlierRounds(undefined)).toBe('(not available)');
   });
 
-  it('cuts long results and drops the middle calls when they do not fit', () => {
+  it('keeps every tool call when they fit, even when a later round has none', () => {
+    const initial = {
+      answer: 'Initial answer.',
+      tool_calls: Array.from({ length: 40 }, (_, index) => ({
+        tool_id: 'tool',
+        arguments: {},
+        result: `result ${index}`.padEnd(1_000, 'x'),
+      })),
+    };
+
+    const rendered = renderEarlierRounds([initial, { answer: 'Follow-up.', tool_calls: [] }]);
+
+    expect(rendered).not.toContain('omitted');
+    expect(rendered).toContain('40. tool({})');
+    expect(rendered).toContain('Follow-up.');
+  });
+
+  it('drops the oldest tool calls first when they do not fit, and keeps the latest', () => {
     const toolCalls = Array.from({ length: 200 }, (_, index) => ({
       tool_id: 'tool',
       arguments: {},
-      result: `${index}`.padEnd(3_000, 'x'),
+      result: `call-${index}-`.padEnd(3_000, 'x'),
     }));
 
     const rendered = renderEarlierRounds([{ answer: 'a', tool_calls: toolCalls }]);
 
-    expect(rendered).toContain('tool calls omitted here');
+    expect(rendered).toContain('earlier tool calls omitted here');
+    expect(rendered).not.toContain('call-0-');
+    expect(rendered).toContain('call-199-');
     expect(rendered.length).toBeLessThan(80_000);
   });
 
-  it('shares one budget across the rounds, so many tool-heavy rounds stay under the judge input limit', () => {
+  it('fits all rounds under the judge input limit, however heavy they are', () => {
     const heavyRound = {
       answer: 'a'.repeat(20_000),
       tool_calls: Array.from({ length: 100 }, (_, index) => ({
