@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const { TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB } = require('@kbn/scout-info');
 
 /**
  * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
@@ -41,6 +42,11 @@ const scoutRestrictedFtrPatterns = {
   message:
     "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
 };
+
+const SCOUT_TEST_FILE_GLOBS = [
+  `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
+  'packages/**/test/scout{_*,}/**/*.ts',
+];
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -186,6 +192,7 @@ const DEV_DIRECTORIES = [
   'storybook',
   'scripts',
   'test',
+  'test_plugins',
   'test-d',
   'test_utils',
   'test_utilities',
@@ -223,8 +230,12 @@ const DEV_PATTERNS = [
   'src/platform/kbn-ui/_tooling/**/*',
 ];
 
-/** Restricted imports with suggested alternatives */
-const RESTRICTED_IMPORTS = [
+/**
+ * Security-related restricted imports. These are enforced by the dedicated
+ * `@kbn/eslint/security_imports_restriction` rule so that local
+ * `no-restricted-imports` overrides cannot silently drop them.
+ */
+const SECURITY_RESTRICTED_IMPORTS = [
   {
     name: 'lodash',
     importNames: ['set', 'setWith', 'template'],
@@ -283,6 +294,15 @@ const RESTRICTED_IMPORTS = [
     name: 'lodash/fp/template',
     message: 'lodash.template is unsafe, and not compatible with our content security policy.',
   },
+  {
+    name: 'axios',
+    message:
+      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
+  },
+];
+
+/** Restricted imports with suggested alternatives */
+const RESTRICTED_IMPORTS = [
   {
     name: 'react-use',
     message: 'Please use react-use/lib/{method} instead.',
@@ -426,11 +446,6 @@ const RESTRICTED_IMPORTS = [
     name: `fp-ts/lib`,
     message: `Please, use fp-ts to avoid duplicating the package import`,
   },
-  {
-    name: 'axios',
-    message:
-      'Do not introduce new axios usage. Use the native `fetch` API instead (available in Node.js 22 and modern browsers). Existing consumers are being migrated incrementally; the allowlist in AXIOS_LEGACY_CONSUMERS will shrink over time.',
-  },
 ];
 
 /**
@@ -465,11 +480,11 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/private/osquery-plugin-cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
@@ -487,12 +502,9 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
-  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/config/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
@@ -893,6 +905,7 @@ module.exports = {
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
         'x-pack/solutions/*/test/serverless/*/configs/**/*',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/platform/test/upgrade_assistant_integration/**/*',
@@ -901,8 +914,8 @@ module.exports = {
         'x-pack/platform/test/serverless/*/test_suites/**/*',
         'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
+        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/**/*',
+        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/**/config*.ts',
         '**/playwright.config.ts',
         '**/playwright.v2.config.ts',
         '**/*.playwright.config.ts',
@@ -1049,6 +1062,7 @@ module.exports = {
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
           {
@@ -1403,6 +1417,9 @@ module.exports = {
         'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
+      ],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
@@ -1419,7 +1436,10 @@ module.exports = {
     },
     // Allow node.js imports for security solution test packages
     {
-      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
@@ -1451,6 +1471,7 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
         'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1478,6 +1499,9 @@ module.exports = {
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1513,6 +1537,9 @@ module.exports = {
         'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1728,13 +1755,7 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
-        'x-pack/solutions/**/packages/kbn-scout-*/src/playwright/**/*.ts',
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
@@ -1746,36 +1767,50 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
+          },
+        ],
+        'playwright/consistent-spacing-between-blocks': 'error',
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
-        'playwright/no-conditional-in-test': 'warn',
         'playwright/no-duplicate-hooks': 'error',
-        'playwright/no-focused-test': 'error',
+        'playwright/no-element-handle': 'error',
+        'playwright/no-eval': 'error',
         'playwright/no-get-by-title': 'error',
+        'playwright/no-identical-title': 'error',
+        'playwright/no-magic-timeouts': 'warn',
+        'playwright/no-nested-step': 'error',
         'playwright/no-nth-methods': 'error',
         'playwright/no-page-pause': 'error',
+        'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
         'playwright/no-restricted-matchers': 'error',
         'playwright/no-slowed-test': 'error',
-        'playwright/no-standalone-expect': 'error',
-        'playwright/no-unsafe-references': 'error',
+        'playwright/no-test-return-statement': 'error',
+        'playwright/no-unnecessary-assertions': 'error',
         'playwright/no-useless-await': 'error',
         'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
-        'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
         'playwright/prefer-equality-matcher': 'error',
         'playwright/prefer-hooks-in-order': 'error',
         'playwright/prefer-hooks-on-top': 'error',
+        'playwright/prefer-native-locators': 'warn',
         'playwright/prefer-strict-equal': 'error',
         'playwright/prefer-to-be': 'error',
         'playwright/prefer-to-contain': 'error',
         'playwright/prefer-to-have-count': 'error',
         'playwright/prefer-to-have-length': 'error',
-        'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
-        'playwright/valid-describe-callback': 'error',
-        'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
         // Check all function arguments to catch unused destructured params
@@ -1789,6 +1824,17 @@ module.exports = {
             argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
           },
         ],
+      },
+    },
+    {
+      // no-export only applies to spec files — fixture/helper modules legitimately export
+      files: [
+        '**/kbn-scout*/src/playwright/**/*.spec.ts',
+        `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.spec.ts`,
+        'packages/**/test/scout{_*,}/**/*.spec.ts',
+      ],
+      rules: {
+        'playwright/no-export': 'error',
       },
     },
     {
@@ -2297,7 +2343,7 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.js'],
-      globals: { canvas: true, $: true },
+      globals: { canvas: true },
     },
     {
       files: ['x-pack/platform/plugins/private/canvas/public/**/*.js'],
@@ -2306,12 +2352,37 @@ module.exports = {
       },
     },
     {
-      files: ['src/platform/packages/shared/kbn-flot-charts/lib/**/*.js'],
-      env: {
-        jquery: true,
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/**/*.{js,ts,tsx,d.ts}',
+        'x-pack/platform/plugins/private/canvas/public/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/canvas/canvas_plugin_src/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/chart/**/*.{js,ts,tsx}',
+        'x-pack/platform/plugins/private/monitoring/public/components/sparkline/**/*.{js,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ...require('@kbn/eslint-config/restricted_globals'),
+          {
+            name: '$',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+          {
+            name: 'jQuery',
+            message: 'Import jQuery from @kbn/flot-charts instead of using the global.',
+          },
+        ],
       },
     },
-
+    {
+      files: [
+        'src/platform/packages/shared/kbn-flot-charts/index.js',
+        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
+      ],
+      rules: {
+        'import/no-default-export': 'off',
+      },
+    },
     /**
      * TSVB overrides
      */
@@ -2748,18 +2819,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -2805,6 +2880,43 @@ module.exports = {
       },
     },
     {
+      // @rspack/* packages are pure ESM. Direct value imports work in
+      // production (Node require(esm)) but break any Jest test that loads
+      // them, so the optimizer must go through its rspack_runtime shim, which
+      // loads them natively via createRequire (see rspack_runtime.ts).
+      files: [
+        'packages/kbn-rspack-optimizer/**/*.{ts,tsx}',
+        'packages/kbn-plugin-helpers/src/tasks/optimize_rspack.ts',
+      ],
+      rules: {
+        '@typescript-eslint/no-restricted-imports': [
+          'error',
+          {
+            paths: [
+              {
+                name: '@rspack/core',
+                allowTypeImports: true,
+                message:
+                  'Import the `rspack` runtime value from the optimizer rspack_runtime shim instead (@rspack/core is pure ESM and breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rspack/plugin-react-refresh',
+                allowTypeImports: true,
+                message:
+                  'Load via loadReactRefreshRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+              {
+                name: '@rsdoctor/rspack-plugin',
+                allowTypeImports: true,
+                message:
+                  'Load via loadRsdoctorRspackPlugin() from the rspack_runtime shim (pure ESM, breaks under Jest). Type imports are fine.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
       files: ['x-pack/**/cypress/**/*.ts'],
       rules: {
         'no-restricted-imports': [
@@ -2822,10 +2934,11 @@ module.exports = {
       },
     },
     {
-      files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Default for every Scout suite; the solution overrides below re-declare
+      // `no-restricted-imports` for their own paths and take precedence.
+      files: SCOUT_TEST_FILE_GLOBS,
+      // Scout's own `ScoutPage` fixture is built on top of Playwright, so it has to import it.
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/**'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2869,7 +2982,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/observability/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/observability/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2905,7 +3018,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/search/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/search/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2937,7 +3050,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/*.ts'],
+      files: ['x-pack/solutions/security/**/test/{scout,scout_*}/**/*.ts'],
       rules: {
         'no-restricted-imports': [
           'error',
@@ -2974,12 +3087,8 @@ module.exports = {
     },
     // Custom rules for scout tests
     {
-      // Platform & Solutions (plugins and packages, excluding Scout framework's own tests)
-      files: [
-        'src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-        'x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts',
-      ],
+      // Every Scout suite, excluding the Scout framework's own tests
+      files: SCOUT_TEST_FILE_GLOBS,
       excludedFiles: ['src/platform/packages/shared/kbn-scout/test/**'],
       rules: {
         '@kbn/eslint/scout_no_describe_configure': 'error',
@@ -3000,14 +3109,38 @@ module.exports = {
     {
       // Platform & Solutions API Tests
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
           'error',
           { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Security Solution API tests may call endpoints through the generated Scout API clients
+      // exposed by `@kbn/security-solution-test-api-clients/scout`
+      files: ['x-pack/solutions/security/plugins/**/test/{scout,scout_*}/**/api/**/*.ts'],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          {
+            alternativeFixtures: [
+              'esClient',
+              'detectionsApi',
+              'discoveriesApi',
+              'endpointExceptionsApi',
+              'endpointManagementApi',
+              'entityAnalyticsApi',
+              'exceptionsApi',
+              'listsApi',
+              'osqueryApi',
+              'timelinesApi',
+            ],
+          },
         ],
       },
     },
@@ -3047,6 +3180,7 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
         'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {
@@ -3103,22 +3237,24 @@ module.exports = {
     },
     {
       // Allow axios in files that already use it. New axios imports are blocked
-      // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
-      // as consumers migrate to the native `fetch` API. Placed last so it wins
-      // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution block). The trade-off: the allowlisted files that
-      // overlap with that block lose their `*legacy*` pattern check; verified
-      // that none of them currently import any path matching `*legacy*`. The
-      // workflows_management overlap is gone, and this comment can be dropped
-      // entirely once the remaining security_solution consumers migrate. The
-      // js-yaml freeze is handled separately via
-      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
-      // so it does not interact with this override.
+      // globally by SECURITY_RESTRICTED_IMPORTS; this allowlist should only ever
+      // shrink as consumers migrate to the native `fetch` API.
+      // The `no-restricted-imports` entry preserves this block's historical
+      // behavior: it is placed last, so the allowlisted files that overlap with
+      // an earlier override (e.g. the security_solution block) lose that
+      // override's `*legacy*` pattern check; verified that none of them
+      // currently import any path matching `*legacy*`. The workflows_management
+      // overlap is gone, and this entry can be dropped entirely once the
+      // remaining security_solution consumers migrate. The js-yaml freeze is
+      // handled separately via @kbn/eslint/module_migration in
+      // packages/kbn-eslint-config/.eslintrc.js so it does not interact with
+      // this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
-        'no-restricted-imports': [
+        'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/eslint/security_imports_restriction': [
           'error',
-          ...RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
+          ...SECURITY_RESTRICTED_IMPORTS.filter(({ name }) => name !== 'axios'),
         ],
       },
     },

@@ -47,12 +47,14 @@ import {
   getBothSettingsUserActions,
   patchExtendedFieldsCasesRequest,
   patchUpdateExtendedFieldsCasesRequest,
+  patchPairedFieldsCasesRequest,
+  patchPairedClearCasesRequest,
   getExtendedFieldsUserActions,
   patchTemplateCasesRequest,
   patchRemoveTemplateCasesRequest,
   getTemplateUserActions,
 } from '../mocks';
-import { AttachmentType, UserActionTypes } from '../../../../common/types/domain';
+import { AttachmentType, CustomFieldTypes, UserActionTypes } from '../../../../common/types/domain';
 
 describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -478,6 +480,75 @@ describe('UserActionPersister', () => {
       });
     });
 
+    describe('paired-field duplicate suppression (#282474)', () => {
+      it('suppresses the duplicate customFields action when the canonical extended_fields action records the same edit', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedFieldsCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.extended_fields);
+        expect(result['1'][0].parameters.attributes.payload).toEqual({
+          extended_fields: { priority_as_keyword: 'high' },
+        });
+      });
+
+      it('keeps both actions when the update carries no paired keys', () => {
+        const unpaired = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              pairedCustomFieldStorageKeys: undefined,
+            },
+          ],
+        };
+
+        const result = persister.buildUserActions({ updatedCases: unpaired, user: testUser });
+        const types = result['1'].map((ua) => ua.parameters.attributes.type);
+
+        expect(types).toContain(UserActionTypes.customFields);
+        expect(types).toContain(UserActionTypes.extended_fields);
+      });
+
+      it('keeps the customFields action for a paired clear (extended_fields does not record deletions)', () => {
+        const result = persister.buildUserActions({
+          updatedCases: patchPairedClearCasesRequest,
+          user: testUser,
+        });
+
+        expect(result['1']).toHaveLength(1);
+        expect(result['1'][0].parameters.attributes.type).toBe(UserActionTypes.customFields);
+      });
+
+      it('suppresses only the paired keys, keeping actions for unpaired customFields in the same update', () => {
+        const mixed = {
+          cases: [
+            {
+              ...patchPairedFieldsCasesRequest.cases[0],
+              updatedAttributes: {
+                customFields: [
+                  { key: 'priority', type: 'text', value: 'high' },
+                  { key: 'unpaired_key', type: 'text', value: 'standalone' },
+                ],
+                extended_fields: { priority_as_keyword: 'high' },
+              },
+            },
+          ],
+        } as typeof patchPairedFieldsCasesRequest;
+
+        const result = persister.buildUserActions({ updatedCases: mixed, user: testUser });
+        const customFieldActions = result['1'].filter(
+          (ua) => ua.parameters.attributes.type === UserActionTypes.customFields
+        );
+
+        expect(customFieldActions).toHaveLength(1);
+        expect(customFieldActions[0].parameters.attributes.payload).toEqual({
+          customFields: [{ key: 'unpaired_key', type: 'text', value: 'standalone' }],
+        });
+      });
+    });
+
     it('suppresses the customFields user action when templates v2 mirrors the edit into extended_fields', () => {
       // Reproduces the reported bug: replace_custom_field.ts / bulk_update.ts write customFields
       // and its mirrored extended_fields value in the same patch when templates are enabled.
@@ -488,9 +559,12 @@ describe('UserActionPersister', () => {
           {
             ...patchUpdateCustomFieldsCasesRequest.cases[0],
             updatedAttributes: {
-              ...patchUpdateCustomFieldsCasesRequest.cases[0].updatedAttributes,
+              customFields: [
+                { key: 'risk_score', type: CustomFieldTypes.TEXT as const, value: 'high' },
+              ],
               extended_fields: { risk_score: 'high' },
             },
+            pairedCustomFieldStorageKeys: { risk_score: 'risk_score' },
           },
         ],
       };

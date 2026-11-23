@@ -8,7 +8,8 @@
 import React from 'react';
 import type { ErrorMark } from './error_marker';
 import { ErrorMarker } from './error_marker';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
+import { toAnyOfKuery } from '../../../../../../common/utils/kuery_utils';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 
 export function ErrorMarkerWithLink({ mark }: { mark: ErrorMark }) {
@@ -26,10 +27,16 @@ export function ErrorMarkerWithLink({ mark }: { mark: ErrorMark }) {
 
   const traceId = mark.error.trace?.id;
   const transactionId = mark.error.transaction?.id;
+  const spanId = mark.error.span?.id;
 
   const kueryParts = [
     traceId && `${TRACE_ID} : "${traceId}"`,
-    transactionId && `${TRANSACTION_ID} : "${transactionId}"`,
+    // OTel-native error documents only carry `span.id`, so fall back to it when the error
+    // has no `transaction.id`. Classic-data output stays byte-identical when spanId is absent.
+    toAnyOfKuery([
+      [TRANSACTION_ID, transactionId],
+      [SPAN_ID, spanId],
+    ]),
   ].filter(Boolean);
 
   const queryParam = {

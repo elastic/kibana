@@ -19,7 +19,7 @@ import { getSavedObjectKqlFilter } from '../../common';
 import type { MonitorConfigUpdate } from '../bulk_cruds/edit_monitor_bulk';
 import { mergeSourceMonitor } from '../formatters/saved_object_to_monitor';
 import {
-  assertCanUpdateMonitorInAllSpaces,
+  assertCanPerformMonitorBulkActionInAllSpaces,
   validateMonitorPrivateLocationSpaces,
 } from '../monitor_locations_utils';
 import { normalizeAPIConfig, validateMonitor } from '../monitor_validation';
@@ -77,7 +77,7 @@ export class UpdateMonitorAPI {
   private locationPermissionsPromise?: ReturnType<typeof validateLocationPermissions>;
   private readonly spacePermissionCache = new Map<
     string,
-    ReturnType<typeof assertCanUpdateMonitorInAllSpaces>
+    ReturnType<typeof assertCanPerformMonitorBulkActionInAllSpaces>
   >();
 
   constructor(routeContext: RouteContext) {
@@ -392,7 +392,7 @@ export class UpdateMonitorAPI {
     }
 
     /*
-     * `assertCanUpdateMonitorInAllSpaces` returns a Kibana response object on
+     * `assertCanPerformMonitorBulkActionInAllSpaces` returns a Kibana response object on
      * failure (designed for single-PUT early-return). We can't put that in a
      * per-id slot, so collapse to a generic forbidden message. The privilege
      * was already audit-logged by core.
@@ -414,11 +414,15 @@ export class UpdateMonitorAPI {
   private assertCanUpdateInSpaces(
     spaceIds: string[],
     savedObjectType: string
-  ): ReturnType<typeof assertCanUpdateMonitorInAllSpaces> {
+  ): ReturnType<typeof assertCanPerformMonitorBulkActionInAllSpaces> {
     const key = `${savedObjectType}::${[...new Set(spaceIds)].sort().join(',')}`;
     let cached = this.spacePermissionCache.get(key);
     if (!cached) {
-      cached = assertCanUpdateMonitorInAllSpaces(this.routeContext, spaceIds, savedObjectType);
+      cached = assertCanPerformMonitorBulkActionInAllSpaces(
+        this.routeContext,
+        spaceIds,
+        savedObjectType
+      );
       this.spacePermissionCache.set(key, cached);
     }
     return cached;

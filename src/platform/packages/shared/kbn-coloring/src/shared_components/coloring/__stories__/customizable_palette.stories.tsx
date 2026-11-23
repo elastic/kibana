@@ -26,7 +26,6 @@ export const Default = {
       name: 'default',
       params: {
         steps: 1,
-        maxSteps: 10,
         continuity: 'none',
       },
     },
@@ -34,6 +33,7 @@ export const Default = {
       min: 0,
       max: 100,
     },
+    maxSteps: 10,
     showExtraActions: true,
     showRangeTypeSelector: true,
     disableSwitchingContinuity: false,

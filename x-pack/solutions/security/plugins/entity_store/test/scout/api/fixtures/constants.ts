@@ -45,6 +45,7 @@ export const ENTITY_STORE_ROUTES = {
     STATUS: `${PUBLIC_BASE}/status`,
     START: `${PUBLIC_BASE}/start`,
     STOP: `${PUBLIC_BASE}/stop`,
+    UPDATE_API_KEY: `${PUBLIC_BASE}/update_api_key`,
     UNINSTALL: `${PUBLIC_BASE}/uninstall`,
     CRUD_CREATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
     CRUD_UPDATE: (entityType: string) => `${PUBLIC_BASE}/entities/${entityType}`,
@@ -86,6 +87,6 @@ export const HISTORY_INDEX_PATTERN = `${getEntityIndexPattern({
   schemaVersion: ENTITY_SCHEMA_VERSION_V2,
   dataset: ENTITY_HISTORY,
   namespace: 'default',
-})}*`;
+})}.*`;
 
 export const ENTRA_SOURCE_INDEX = 'logs-entityanalytics_entra_id.user-default';

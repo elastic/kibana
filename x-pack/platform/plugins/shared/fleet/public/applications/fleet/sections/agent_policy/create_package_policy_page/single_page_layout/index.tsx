@@ -358,7 +358,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         selectedIlmPolicy,
         packageInfo,
         notifications,
-        packageInfo.title ?? packageInfo.name
+        packageInfo.title ?? packageInfo.name,
+        wasEnabled
       );
     })();
   }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
@@ -868,7 +869,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>

@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { LENS_SO_TYPE } from '../../../../../common/constants/attachments';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../../containers/use_create_attachments';
 import { useRefreshCaseViewPage } from '../../../case_view/use_on_refresh_case_view_page';
@@ -99,8 +100,10 @@ export const useConsumeLensReturn = ({ caseId }: UseConsumeLensReturnArgs): void
           return;
         }
         toasts.addSuccess({
-          title: i18n.ATTACH_SUCCESS_TITLE,
-          text: pending.title,
+          title: i18n.ATTACH_SUCCESS_TITLE({
+            soType: LENS_SO_TYPE,
+            objectTitle: pending.title,
+          }),
         });
         refreshCaseViewPage();
       } catch {

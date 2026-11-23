@@ -34,7 +34,7 @@ log.setWriters([testWriter]);
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
-const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.nvmrc'), 'utf8').trim();
 expect.addSnapshotSerializer(
   createRecursiveSerializer(
     (s) => typeof s === 'string' && s.includes(nodeVersion),

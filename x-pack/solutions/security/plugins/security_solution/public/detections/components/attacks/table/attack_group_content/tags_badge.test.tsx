@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 import { TagsBadge } from './tags_badge';
 import { TestProviders } from '../../../../../common/mock/test_providers';
@@ -42,19 +42,18 @@ describe('TagsBadge', () => {
     expect(getByTestId('attack-tags-badgeDisplayPopoverButton')).toHaveTextContent('3');
   });
 
-  it('should open popover with tags when badge is clicked', async () => {
+  it('should open popover with tags when badge is clicked', () => {
     const tags = ['tag1', 'tag2'];
-    const { getByTestId, findByText } = render(
+    const { getByTestId, getByText } = render(
       <TestProviders>
         <TagsBadge tags={tags} />
       </TestProviders>
     );
 
-    const badgeButton = getByTestId('attack-tags-badgeDisplayPopoverButton');
-    badgeButton.click();
+    fireEvent.click(getByTestId('attack-tags-badgeDisplayPopoverButton'));
 
-    expect(await findByText('Tags')).toBeInTheDocument(); // Title
-    expect(await findByText('tag1')).toBeInTheDocument();
-    expect(await findByText('tag2')).toBeInTheDocument();
+    expect(getByText('Tags')).toBeInTheDocument(); // Title
+    expect(getByText('tag1')).toBeInTheDocument();
+    expect(getByText('tag2')).toBeInTheDocument();
   });
 });

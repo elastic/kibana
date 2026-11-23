@@ -59,6 +59,7 @@ const shouldDisableNone = ({
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
+  allowedFieldTypes?: string[];
   fields: FieldSpec[];
   groupingId: string;
   groupsSelected: string[];
@@ -75,6 +76,7 @@ export interface GroupSelectorProps {
 }
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
+  allowedFieldTypes,
   fields,
   groupsSelected = ['none'],
   onGroupChange,
@@ -176,11 +178,13 @@ const GroupSelectorComponent = ({
               setIsPopoverOpen(false);
             }}
             fields={fields}
+            allowedFieldTypes={allowedFieldTypes}
           />
         ),
       },
     ];
   }, [
+    allowedFieldTypes,
     fields,
     isGroupSelected,
     maxGroupingLevels,

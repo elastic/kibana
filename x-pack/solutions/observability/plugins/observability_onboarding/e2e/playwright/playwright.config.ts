@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dotenv from 'dotenv';
+import { existsSync } from 'fs';
 import { defineConfig, devices } from '@playwright/test';
 import path from 'path';
 import { log } from './lib/logger';
@@ -13,7 +13,9 @@ import { assertEnv } from './lib/assert_env';
 
 const dotEnvPath = process.env.DOTENV_PATH ?? path.join(__dirname, '.env');
 
-dotenv.config({ path: dotEnvPath });
+if (existsSync(dotEnvPath)) {
+  process.loadEnvFile(dotEnvPath);
+}
 
 assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
 

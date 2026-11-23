@@ -23,7 +23,9 @@ export const simulateExistingMlInferencePipeline = async ({
   indexName,
   pipelineName,
 }: SimulateExistingMlInterfacePipelineArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/ml_inference/pipeline_processors/simulate/${pipelineName}`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    indexName
+  )}/ml_inference/pipeline_processors/simulate/${encodeURIComponent(pipelineName)}`;
 
   return await HttpLogic.values.http.post<IngestSimulateResponse>(route, {
     body: JSON.stringify({

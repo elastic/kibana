@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
+import AdmZip from 'adm-zip';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -513,19 +514,6 @@ ${s1Info.status}
       return null;
     },
 
-    uploadFileToEndpoint: async ({
-      hostname,
-      srcPath,
-      destPath = '.',
-    }: {
-      hostname: string;
-      srcPath: string;
-      destPath: string;
-    }): Promise<null> => {
-      await getHostVmClient(hostname).transfer(srcPath, destPath);
-      return null;
-    },
-
     installPackagesOnEndpoint: async ({
       hostname,
       packages,
@@ -544,18 +532,17 @@ ${s1Info.status}
       return null;
     },
 
-    readZippedFileContentOnEndpoint: async ({
-      hostname,
+    readZippedFileContent: async ({
       path,
       password,
     }: {
-      hostname: string;
       path: string;
       password?: string;
     }): Promise<string> => {
-      return (
-        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
-      ).stdout;
+      return new AdmZip(path)
+        .getEntries()
+        .map((entry) => entry.getData(password).toString('utf8'))
+        .join('');
     },
 
     stopEndpointHost: async (hostName) => {

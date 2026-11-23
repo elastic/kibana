@@ -38,7 +38,11 @@ describe('Dashboard Renderer', () => {
   });
 
   it('renders the dashboard control group and dashboard viewport', async () => {
-    render(<DashboardRenderer />);
+    render(
+      <DashboardRenderer
+        getCreationOptions={() => Promise.resolve({ useControlsIntegration: true })}
+      />
+    );
 
     await waitFor(async () => {
       expect(await screen.queryByTestId('dshDashboardViewport')).toBeInTheDocument();

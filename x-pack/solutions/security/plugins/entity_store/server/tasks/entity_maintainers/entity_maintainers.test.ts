@@ -31,6 +31,9 @@ jest.mock('./entity_maintainers_registry', () => ({
     hasId: jest.fn(),
   },
 }));
+jest.mock('../should_delete_orphaned_task', () => ({
+  shouldDeleteOrphanedEntityStoreTask: jest.fn().mockResolvedValue(false),
+}));
 
 const registryMock = jest.requireMock('./entity_maintainers_registry')
   .entityMaintainersRegistry as {

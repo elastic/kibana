@@ -133,6 +133,19 @@ describe('EditForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    // Stub the heavy `triggers_actions_ui` ActionForm that `RuleActionsField`
+    // mounts via `getActionForm` -> `getActionFormLazy` (a `React.lazy`/`Suspense`
+    // subtree). Its first render pays a large one-time lazy-import cost and its
+    // connector/action-type loads never settle under jsdom, which was the
+    // dominant remaining cost that tripped Jest's 5s per-test timeout in CI (see
+    // https://github.com/elastic/kibana/issues/255131). Unlike the sibling
+    // `create_flyout` suite, we cannot blanket-stub `RuleActionsField` here
+    // because tests below assert that `getActionForm` is invoked with specific
+    // props, so we keep `RuleActionsField` live and stub `getActionForm` itself.
+    mockTriggersActionsUi.getActionForm = jest
+      .fn()
+      .mockReturnValue(<div data-test-subj="mockActionForm" />);
+
     mockUseKibana.mockReturnValue({
       services: {
         featureFlags: {
@@ -225,7 +238,7 @@ describe('EditForm', () => {
     await renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Select a connector type')).toBeInTheDocument();
+      expect(screen.getByTestId('mockActionForm')).toBeInTheDocument();
     });
   });
 

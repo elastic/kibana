@@ -2,14 +2,13 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     key: defend-workflows-burn
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -22,14 +21,13 @@ steps:
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     key: defend-workflows-serverless-burn
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -43,8 +41,10 @@ steps:
     key: security-solution-burn
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 60
@@ -60,7 +60,8 @@ steps:
       machineType: n2-standard-4
       diskSizeGb: 130
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      diskType: pd-balanced
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     depends_on:
       - build
     timeout_in_minutes: 50

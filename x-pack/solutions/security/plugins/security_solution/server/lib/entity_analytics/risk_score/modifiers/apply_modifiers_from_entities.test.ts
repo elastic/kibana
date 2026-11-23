@@ -272,6 +272,28 @@ describe('applyScoreModifiersFromEntities', () => {
     expect(doc.criticality_modifier).toBe(2.0);
   });
 
+  it('keeps a saturated score at 100 and Critical, with and without modifiers', () => {
+    const entities = new Map([
+      ['host:h1', buildTestEntity({ id: 'host:h1', criticality: 'high_impact' })],
+    ]);
+
+    const results = applyScoreModifiersFromEntities({
+      now,
+      page: {
+        scores: [
+          buildScore('host:h1', { normalized_score: 100 }),
+          buildScore('host:h2', { normalized_score: 100 }),
+        ],
+        identifierField,
+      },
+      entities,
+    });
+
+    expect(results.map((doc) => doc.calculated_score_norm)).toEqual([100, 100]);
+    expect(results.map((doc) => doc.calculated_level)).toEqual(['Critical', 'Critical']);
+    expect(results[0].modifiers?.[0].contribution).toBe(0);
+  });
+
   it('returns empty array with empty scores', () => {
     const entities = new Map<string, RiskScoreModifierEntity>();
 

@@ -43,6 +43,15 @@ export const createMockOsqueryContext = (): OsqueryAppContext => {
         get: jest.fn().mockReturnValue(''),
       },
     },
+    elasticsearch: {
+      client: {
+        asInternalUser: {
+          search: jest.fn(),
+          indices: { exists: jest.fn().mockResolvedValue(false) },
+        },
+        asScoped: jest.fn().mockReturnValue({ asCurrentUser: { search: jest.fn() } }),
+      },
+    },
   };
 
   return {

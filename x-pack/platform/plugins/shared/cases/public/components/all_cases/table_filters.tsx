@@ -20,6 +20,8 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCasesConfig } from '../../common/lib/kibana';
+import { useGlobalInlineFields } from './hooks/use_global_inline_fields';
 import { TableSearch } from './search';
 import { DateRangeFilter } from './date_range_filter';
 
@@ -32,6 +34,7 @@ export interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  canCreateCase: boolean;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
@@ -53,6 +56,7 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  canCreateCase,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -65,6 +69,12 @@ const CasesTableFiltersComponent = ({
     data: { customFields },
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
+  const { templatesEnabled } = useCasesConfig();
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -77,7 +87,11 @@ const CasesTableFiltersComponent = ({
   );
 
   const isLoadingFilters =
-    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+    isLoading ||
+    isLoadingTags ||
+    isLoadingCategories ||
+    isLoadingCasesConfiguration ||
+    isLoadingGlobalFields;
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -105,6 +119,9 @@ const CasesTableFiltersComponent = ({
     isSelectorView,
     filterOptions,
     customFields,
+    globalInlineFields,
+    areGlobalFieldsLoaded,
+    templatesEnabled,
     isLoading: isLoadingFilters,
   });
 
@@ -125,6 +142,7 @@ const CasesTableFiltersComponent = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
+            disabled={!canCreateCase}
             onClick={handleOnCreateCasePressed}
             iconType="plusCircle"
             data-test-subj="cases-table-add-case-filter-bar"
@@ -151,7 +169,9 @@ const CasesTableFiltersComponent = ({
             background-color: transparent;
           `}
         >
-          {activeFilters.map((filter) => filter.render({ filterOptions }))}
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
           {isSelectorView || (
             <MoreFiltersSelectable
               options={selectableOptions}

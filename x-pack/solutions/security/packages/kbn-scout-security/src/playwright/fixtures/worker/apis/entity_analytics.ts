@@ -30,10 +30,22 @@ const API_VERSIONS = {
   },
 };
 
+export type IndexEntityStoreEntryOptions =
+  | { entityType?: 'host' }
+  | {
+      entityType: 'user';
+      hostId: string;
+      namespace: 'local';
+    };
+
 export interface EntityAnalyticsApiService {
   installEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
   uninstallEntityStoreV2: (entityTypes?: string[]) => Promise<void>;
-  indexEntityStoreEntry: (entityId: string, hostName: string) => Promise<void>;
+  indexEntityStoreEntry: (
+    entityId: string,
+    entityName: string,
+    options?: IndexEntityStoreEntryOptions
+  ) => Promise<void>;
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
   initRiskEngine: () => Promise<void>;
@@ -127,7 +139,11 @@ export const getEntityAnalyticsApiService = ({
       );
     },
 
-    indexEntityStoreEntry: async (entityId: string, hostName: string) => {
+    indexEntityStoreEntry: async (
+      entityId: string,
+      entityName: string,
+      options: IndexEntityStoreEntryOptions = {}
+    ) => {
       if (!esClient) {
         throw new Error('esClient is required to index entity store entries');
       }
@@ -136,12 +152,23 @@ export const getEntityAnalyticsApiService = ({
         'security.entityAnalytics.indexEntityStoreEntry',
         async () => {
           const alias = `entities-latest-${spaceId}`;
+          const entityType = options.entityType ?? 'host';
+          const entityFields =
+            options.entityType === 'user'
+              ? { user: { name: entityName }, host: { id: options.hostId } }
+              : { host: { name: entityName } };
+          const entityNamespace =
+            options.entityType === 'user' ? { namespace: options.namespace } : {};
           await esClient.index({
             index: alias,
             document: {
               '@timestamp': new Date().toISOString(),
-              entity: { id: entityId, EngineMetadata: { Type: 'host' } },
-              host: { name: hostName },
+              entity: {
+                id: entityId,
+                ...entityNamespace,
+                EngineMetadata: { Type: entityType },
+              },
+              ...entityFields,
             },
             refresh: true,
           });

@@ -89,6 +89,12 @@
       "esql-mv_expand.txt"
     ]
   },
+  "reference/query-languages/esql/commands/promql.md": {
+    "hash": "43b0464beac1a890bb9d92d6d8eaa043048a3798706d9354f490b02e8206f8d1",
+    "outputFiles": [
+      "esql-promql.txt"
+    ]
+  },
   "reference/query-languages/esql/commands/rename.md": {
     "hash": "b0d8944225b190becb69d54ac4ba99bd557aa4048b68b96e4212083af31c0bc0",
     "outputFiles": [
@@ -493,28 +499,12 @@
     }
   },
   "reference/query-languages/esql/functions-operators/mv-functions.md": {
-    "hash": "34a73d5889d14b5b1c2669a3c7eda4f55f017b516ea5d2061e64dd4b25eee00b",
+    "hash": "df9e0824db1253cc45c80751ec4688c92cf24a3f3597c573fb6246c833ddd0b7",
     "outputFiles": [
-      "esql-mv_append.txt",
-      "esql-mv_avg.txt",
-      "esql-mv_concat.txt",
-      "esql-mv_contains.txt",
-      "esql-mv_count.txt",
-      "esql-mv_dedupe.txt",
-      "esql-mv_first.txt",
-      "esql-mv_intersection.txt",
-      "esql-mv_last.txt",
-      "esql-mv_max.txt",
-      "esql-mv_median.txt",
-      "esql-mv_median_absolute_deviation.txt",
-      "esql-mv_min.txt",
-      "esql-mv_percentile.txt",
-      "esql-mv_pseries_weighted_sum.txt",
-      "esql-mv_slice.txt",
-      "esql-mv_sort.txt",
-      "esql-mv_sum.txt",
-      "esql-mv_union.txt",
-      "esql-mv_zip.txt"
+      "esql-manipulation functions.txt",
+      "esql-transformation functions.txt",
+      "esql-filter and predicate functions.txt",
+      "esql-reduction functions.txt"
     ],
     "sections": {
       "esql-mv_append.txt": {
@@ -576,11 +566,23 @@
       },
       "esql-mv_zip.txt": {
         "hash": "2f4c4d989efa4409144db034987f24a890dfed489e907a202941cc227a813018"
+      },
+      "esql-manipulation functions.txt": {
+        "hash": "8bd4581aa6e4a62a13d332547092673c344e54fc62717d43e9705b5baeaa8fd3"
+      },
+      "esql-transformation functions.txt": {
+        "hash": "c25cef65c4292a47b52ab1001e574fecd5deb1292db757228978a3d82d3e8f72"
+      },
+      "esql-filter and predicate functions.txt": {
+        "hash": "60282777e36f1a8595a30f09fef3f7d802265553a071ed37239c0db15f11b5d5"
+      },
+      "esql-reduction functions.txt": {
+        "hash": "1c98d139e40fe64ef4b313199bc16eca70b6aa5ca7dad40af5dc79a9733e0649"
       }
     }
   },
   "reference/query-languages/esql/functions-operators/operators.md": {
-    "hash": "1a58fa1f1a2470f5bad0e702683bbf7b7700c98ae444d1cc0537c9e096544d2a",
+    "hash": "e3db266e71d940b63bfb45748003b109c602b7c571b2d332db1f65aa5ecfc310",
     "outputFiles": [
       "esql-binary operators.txt",
       "esql-unary operators.txt",
@@ -590,19 +592,19 @@
     ],
     "sections": {
       "esql-binary operators.txt": {
-        "hash": "c24fc594b509b9460b45cd7703b5c33d892b2f25aaa19802bc3227bdeab8deb6"
+        "hash": "976bda02c65dbeafe5bb481f622f9c3d0c0c10be7a5bd6dc884f421a4ae7433b"
       },
       "esql-unary operators.txt": {
-        "hash": "61fdbf0a7875d3b2ed832566e6d33b2cca6dddaf26745aa19d1fa67d77c61187"
+        "hash": "a87366545a196fe824722b3179091463be95f48d75513e00da17f5cf87ca6eb5"
       },
       "esql-logical operators.txt": {
-        "hash": "81d675bfb6541de0f5671572dc625d930bd638257dcf3aa5ab960339152fbf68"
+        "hash": "3da530e5401d229b8b27ae20ae1ec2761839ca4457ab6f7cb7ca99d46bbf35ba"
       },
       "esql-suffix operators.txt": {
-        "hash": "4455744ec0b64c2fc1f3539fdc7946dccbf3a1ed74e1bcf0719183505b4b11da"
+        "hash": "884d2e12bada72a5986f569994b4f3740e93d4ee25bbf2031d73e81881afb097"
       },
       "esql-infix operators.txt": {
-        "hash": "c945b4ce944f723066df76b2fe48af0609a9d25fe6649d527f0b634a4e27a582"
+        "hash": "32c2b157d343c33c73e03826388945b4116055b5769f425fc5753fefac2c2da7"
       }
     }
   },
@@ -796,27 +798,9 @@
     }
   },
   "reference/query-languages/esql/functions-operators/time-series-aggregation-functions.md": {
-    "hash": "f877604569d7f15010a91aafec8f56a75fb6e690cf02f7731b1ce90d2f029efc",
+    "hash": "f58076ad714399e3005f228a69fb77e83aef76784475d860b6c7ee091d9fdaa3",
     "outputFiles": [
-      "esql-absent_over_time.txt",
-      "esql-avg_over_time.txt",
-      "esql-count_over_time.txt",
-      "esql-count_distinct_over_time.txt",
-      "esql-delta.txt",
-      "esql-deriv.txt",
-      "esql-first_over_time.txt",
-      "esql-idelta.txt",
-      "esql-increase.txt",
-      "esql-irate.txt",
-      "esql-last_over_time.txt",
-      "esql-max_over_time.txt",
-      "esql-min_over_time.txt",
-      "esql-percentile_over_time.txt",
-      "esql-present_over_time.txt",
-      "esql-rate.txt",
-      "esql-stddev_over_time.txt",
-      "esql-variance_over_time.txt",
-      "esql-sum_over_time.txt"
+      "esql-metric type compatibility.txt"
     ],
     "sections": {
       "esql-absent_over_time.txt": {
@@ -875,6 +859,9 @@
       },
       "esql-sum_over_time.txt": {
         "hash": "7db08238f5fd83f675fb522c755ab75051d35b8c6626be59887941906be9aff9"
+      },
+      "esql-metric type compatibility.txt": {
+        "hash": "295f0423b6ce74ebffca84ec042713c41c255cfce6188474244e90fcd57c4fe1"
       }
     }
   },

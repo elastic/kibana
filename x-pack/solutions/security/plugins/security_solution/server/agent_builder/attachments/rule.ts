@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
@@ -22,10 +22,12 @@ import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } 
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  text: z.string().max(500_000),
-  attachmentLabel: z.string().max(1_000).optional(),
-});
+export const ruleAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    text: z.string().max(500_000),
+    attachmentLabel: z.string().max(1_000).optional(),
+  })
+);
 
 const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 

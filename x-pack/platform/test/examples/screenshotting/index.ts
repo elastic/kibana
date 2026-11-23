@@ -55,7 +55,7 @@ export default function ({
     });
 
     it('should capture a screenshot ', async () => {
-      const image = await testSubjects.find('image');
+      const image = await testSubjects.find('image', 60_000);
       const difference = await screenshots.compareAgainstBaseline(
         'screenshotting_example_image',
         updateBaselines,
@@ -83,7 +83,7 @@ export default function ({
       await testSubjects.setValue('expression', 'something');
       await testSubjects.click('run');
 
-      const error = await testSubjects.find('error');
+      const error = await testSubjects.find('error', 60_000);
       const text = await error.getVisibleText();
 
       expect(text).to.contain('Function something could not be found.');

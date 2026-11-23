@@ -38,6 +38,11 @@ export async function search(
   const includedTags = normalizeToArray(searchParams.tags);
   const excludedTags = normalizeToArray(searchParams.excluded_tags);
 
+  // Plain listings get a deterministic newest-first order; search requests keep relevance.
+  const sortOptions = searchParams.query
+    ? {}
+    : { sortField: 'updated_at', sortOrder: 'desc' as const };
+
   const soResponse = await core.savedObjects.client.find<DashboardSavedObjectAttributes>({
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: ['title^3', 'description'],
@@ -54,6 +59,7 @@ export async function search(
     page: searchParams.page,
     defaultSearchOperator: 'AND',
     ...tagsToFindOptions({ included: includedTags, excluded: excludedTags }),
+    ...sortOptions,
   });
 
   const useGASchemas = await getUseGASchemas(core);

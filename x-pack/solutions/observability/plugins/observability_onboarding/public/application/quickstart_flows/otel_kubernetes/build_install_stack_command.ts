@@ -17,7 +17,6 @@ export function buildInstallStackCommand({
   elasticsearchUrl,
   apiKeyEncoded,
   agentVersion,
-  useWiredStreams = false,
   onboardingId,
 }: {
   isMetricsOnboardingEnabled: boolean;
@@ -26,7 +25,6 @@ export function buildInstallStackCommand({
   elasticsearchUrl: string;
   apiKeyEncoded: string;
   agentVersion: string;
-  useWiredStreams?: boolean;
   onboardingId: string;
 }): string {
   const ingestEndpointUrl = isManagedOtlpServiceAvailable
@@ -41,31 +39,17 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
-  // Helm --set replaces list items by index. The current EDOT values file has
-  // nine base daemon processors, so Kibana's custom processors start at 9.
-  let nextLogProcessorIndex = DAEMON_PROCESSOR_START_INDEX;
-
   const onboardingIdConfig = (() => {
     let config = ` \\
   --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].action=upsert' \\
   --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].key=onboarding.id' \\
   --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].value=${onboardingId}' \\
-  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${nextLogProcessorIndex++}]=resource/onboarding_id'`;
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${DAEMON_PROCESSOR_START_INDEX}]=resource/onboarding_id'`;
     if (isMetricsOnboardingEnabled) {
       config += ` \\
   --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[${DAEMON_PROCESSOR_START_INDEX}]=resource/onboarding_id'`;
     }
     return config;
-  })();
-
-  const wiredStreamsConfig = (() => {
-    if (!useWiredStreams) return '';
-
-    return ` \\
-  --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].action=upsert' \\
-  --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].key=elasticsearch.index' \\
-  --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].value=logs.otel' \\
-  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${nextLogProcessorIndex++}]=resource/wired_streams'`;
   })();
 
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}
@@ -76,5 +60,5 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'${onboardingIdConfig}${wiredStreamsConfig}`;
+  --version '${OTEL_KUBE_STACK_VERSION}'${onboardingIdConfig}`;
 }

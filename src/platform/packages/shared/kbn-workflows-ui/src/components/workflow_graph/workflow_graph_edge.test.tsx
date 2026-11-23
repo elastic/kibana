@@ -31,7 +31,7 @@ jest.mock('@xyflow/react', () => {
     ...actual,
     // Render labels inline so they appear in the normal DOM tree.
     // Use data-test-subj because Kibana's RTL setup configures testIdAttribute
-    // to 'data-test-subj' (see kbn-test/src/jest/setup/react_testing_library.js).
+    // to 'data-test-subj' (see kbn-jest/src/setup/react_testing_library.js).
     EdgeLabelRenderer: ({ children }: { children: React.ReactNode }) => (
       <div data-test-subj="edge-label-renderer">{children}</div>
     ),
@@ -270,7 +270,7 @@ describe('WorkflowGraphEdge — fork bus routing gate', () => {
     });
   });
 
-  describe('merge edges (no branchType) remain on smooth-step', () => {
+  describe('untagged edges remain on smooth-step', () => {
     it('uses smooth-step (midpoint label) when branchType and isMerge are both absent', () => {
       // An untagged edge (no branchType, no isMerge) must stay on smooth-step.
       // If it accidentally hit the fork bus or merge bus, the label would land

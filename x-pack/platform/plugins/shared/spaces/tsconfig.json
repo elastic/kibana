@@ -14,6 +14,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/home-plugin",

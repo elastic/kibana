@@ -29,6 +29,7 @@ import { ColumnsPopover } from './columns_popover';
 import { SortFilter } from './sort_filter';
 import { useCasesConfig } from '../../../../common/lib/kibana';
 import { useCasesToast } from '../../../../common/use_cases_toast';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -39,6 +40,7 @@ export interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  canCreateCase: boolean;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
@@ -68,6 +70,7 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  canCreateCase,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -91,6 +94,11 @@ const CasesTableFiltersComponent = ({
 
   const { euiTheme } = useEuiTheme();
   const { templatesEnabled } = useCasesConfig();
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
   const { showInfoToast } = useCasesToast();
   const hasShownHiddenFieldsSearchToast = useRef(false);
 
@@ -114,7 +122,11 @@ const CasesTableFiltersComponent = ({
   );
 
   const isLoadingFilters =
-    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+    isLoading ||
+    isLoadingTags ||
+    isLoadingCategories ||
+    isLoadingCasesConfiguration ||
+    isLoadingGlobalFields;
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -142,6 +154,9 @@ const CasesTableFiltersComponent = ({
     isSelectorView,
     filterOptions,
     customFields,
+    globalInlineFields,
+    areGlobalFieldsLoaded,
+    templatesEnabled,
     isLoading: isLoadingFilters,
   });
 
@@ -169,7 +184,9 @@ const CasesTableFiltersComponent = ({
             background-color: transparent;
           `}
         >
-          {activeFilters.map((filter) => filter.render({ filterOptions }))}
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
           {isSelectorView || (
             <MoreFiltersSelectable
               options={selectableOptions}
@@ -204,6 +221,7 @@ const CasesTableFiltersComponent = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                disabled={!canCreateCase}
                 onClick={handleOnCreateCasePressed}
                 iconType="plusCircle"
                 data-test-subj="cases-table-add-case-filter-bar"
