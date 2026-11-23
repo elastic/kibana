@@ -7,13 +7,33 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
+import { PROPOSAL_CATEGORY_TODO, type ActionCatalogEntry } from '@kbn/proposals-common';
 import type { RecorderProposals } from './run_pass';
 
 /** The titles read per conversation. A conversation has a handful of proposals, not hundreds. */
 const MAX_LISTED_PROPOSALS = 50;
 /** The action workflows shown to the recorder. Each one costs prompt tokens on every final pass. */
 export const MAX_RECORDER_ACTIONS = 20;
+/**
+ * Per workflow, so one long description or schema (the `action` tag is easy to copy along with a
+ * workflow) cannot crowd out the rest of the final-pass prompt.
+ */
+export const MAX_RECORDER_ACTION_DESCRIPTION_LENGTH = 500;
+export const MAX_RECORDER_ACTION_SCHEMA_LENGTH = 2000;
+
+const fitsPrompt = ({ inputSchema }: ActionCatalogEntry): boolean =>
+  JSON.stringify(inputSchema ?? {}).length <= MAX_RECORDER_ACTION_SCHEMA_LENGTH;
+
+const shortenDescription = (action: ActionCatalogEntry): ActionCatalogEntry => {
+  const { description } = action;
+  if (!description || description.length <= MAX_RECORDER_ACTION_DESCRIPTION_LENGTH) {
+    return action;
+  }
+  return {
+    ...action,
+    description: `${description.slice(0, MAX_RECORDER_ACTION_DESCRIPTION_LENGTH)}…`,
+  };
+};
 
 /**
  * What the findings recorder needs from the proposals plugin: the titles already proposed in a
@@ -78,13 +98,16 @@ export const createRecorderProposals = ({
     // Only the space's own workflows: managed actions belong to the solution that installed them
     // (AlertZero's host isolation, say) and are not Nightshift's to propose. And only `always-gate`
     // ones: the input is written by the model, so a person must approve every run of it.
+    // A workflow whose input schema is too large to show is left out rather than cut: the model
+    // could not fill a truncated schema correctly, and an unlisted workflow cannot be proposed.
     listActions: async ({ request }) => {
       const { actions } = await proposals.listActions(getSpaceId(request), request, {
         managedFilter: 'unmanaged',
       });
       return actions
-        .filter(({ approvalPolicy }) => approvalPolicy === 'always-gate')
-        .slice(0, MAX_RECORDER_ACTIONS);
+        .filter((action) => action.approvalPolicy === 'always-gate' && fitsPrompt(action))
+        .slice(0, MAX_RECORDER_ACTIONS)
+        .map(shortenDescription);
     },
 
     propose: async (args) => {

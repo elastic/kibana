@@ -6,7 +6,12 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { createRecorderProposals, MAX_RECORDER_ACTIONS } from './proposals_adapter';
+import {
+  createRecorderProposals,
+  MAX_RECORDER_ACTIONS,
+  MAX_RECORDER_ACTION_DESCRIPTION_LENGTH,
+  MAX_RECORDER_ACTION_SCHEMA_LENGTH,
+} from './proposals_adapter';
 
 const request = httpServerMock.createKibanaRequest();
 
@@ -116,6 +121,35 @@ describe('createRecorderProposals', () => {
     const actions = await adapter.listActions({ request });
 
     expect(actions.map(({ workflowId }) => workflowId)).toEqual(['gated']);
+  });
+
+  it('cuts a long workflow description and leaves out a workflow whose input schema is too large', async () => {
+    const { adapter, listActions } = setup();
+    const huge = 'x'.repeat(MAX_RECORDER_ACTION_SCHEMA_LENGTH);
+    listActions.mockResolvedValue({
+      actions: [
+        {
+          workflowId: 'wordy',
+          name: 'wordy',
+          approvalPolicy: 'always-gate',
+          description: 'd'.repeat(MAX_RECORDER_ACTION_DESCRIPTION_LENGTH + 100),
+          inputSchema: { properties: { actionInput: { type: 'object' } } },
+        },
+        {
+          workflowId: 'huge-schema',
+          name: 'huge-schema',
+          approvalPolicy: 'always-gate',
+          inputSchema: { properties: { actionInput: { description: huge } } },
+        },
+      ],
+      total: 2,
+    });
+
+    const actions = await adapter.listActions({ request });
+
+    expect(actions.map(({ workflowId }) => workflowId)).toEqual(['wordy']);
+    expect(actions[0].description).toBe(`${'d'.repeat(MAX_RECORDER_ACTION_DESCRIPTION_LENGTH)}…`);
+    expect(actions[0].inputSchema).toEqual({ properties: { actionInput: { type: 'object' } } });
   });
 
   it('proposes an action workflow through the gate, with its input and no to-do category', async () => {
