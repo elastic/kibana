@@ -192,8 +192,7 @@ describe('ChangePasswordModal', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/254057
-  describe.skip('render', () => {
+  describe('render', () => {
     const coreStart = coreMock.createStart();
     const authc = securityMock.createSetup().authc;
     const history = createMemoryHistory({ initialEntries: ['/users'] });
@@ -277,7 +276,7 @@ describe('ChangePasswordModal', () => {
     });
 
     it('disables submit button when passwords do not match', async () => {
-      const { unmount } = renderChangePasswordModal('testuser');
+      renderChangePasswordModal('testuser');
 
       expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
@@ -287,15 +286,15 @@ describe('ChangePasswordModal', () => {
       fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
       fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-      });
+      fireEvent.blur(confirmPasswordInput);
 
-      unmount();
+      expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
+
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
     });
 
     it('disables submit button when password is too short', async () => {
-      const { unmount } = renderChangePasswordModal('testuser');
+      renderChangePasswordModal('testuser');
 
       expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
@@ -305,15 +304,15 @@ describe('ChangePasswordModal', () => {
       fireEvent.change(newPasswordInput, { target: { value: 'short' } });
       fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-      });
+      fireEvent.blur(newPasswordInput);
 
-      unmount();
+      expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
+
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
     });
 
     it('enables submit button when valid matching passwords are entered', async () => {
-      const { unmount } = renderChangePasswordModal('testuser');
+      renderChangePasswordModal('testuser');
 
       expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
@@ -326,19 +325,15 @@ describe('ChangePasswordModal', () => {
       await waitFor(() => {
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
       });
-
-      unmount();
     });
 
     it('calls onCancel when cancel button is clicked', () => {
-      const { unmount } = renderChangePasswordModal('testuser');
+      renderChangePasswordModal('testuser');
 
       const cancelButton = screen.getByTestId('changePasswordFormCancelButton');
       fireEvent.click(cancelButton);
 
       expect(onCancelMock).toHaveBeenCalledTimes(1);
-
-      unmount();
     });
 
     describe('when rendered for current user', () => {
@@ -370,10 +365,13 @@ describe('ChangePasswordModal', () => {
       });
 
       it('disables submit button when current password is not provided', async () => {
-        const { unmount } = renderChangePasswordModal('currentuser');
+        renderChangePasswordModal('currentuser');
 
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
+        const currentPasswordInput = screen.getByTestId(
+          'editUserChangePasswordCurrentPasswordInput'
+        );
         const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
         const confirmPasswordInput = screen.getByTestId(
           'editUserChangePasswordConfirmPasswordInput'
@@ -383,33 +381,34 @@ describe('ChangePasswordModal', () => {
         fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
         fireEvent.change(confirmPasswordInput, { target: { value: 'passwd' } });
 
-        await waitFor(() => {
-          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-        });
+        fireEvent.blur(currentPasswordInput);
 
-        unmount();
+        expect(await screen.findByText('Enter your current password.')).toBeInTheDocument();
+
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('disables submit button when only current password is provided', async () => {
-        const { unmount } = renderChangePasswordModal('currentuser');
+        renderChangePasswordModal('currentuser');
 
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
         const currentPasswordInput = screen.getByTestId(
           'editUserChangePasswordCurrentPasswordInput'
         );
+        const newPasswordInput = screen.getByTestId('editUserChangePasswordNewPasswordInput');
 
         fireEvent.change(currentPasswordInput, { target: { value: 'curpwd' } });
 
-        await waitFor(() => {
-          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-        });
+        fireEvent.blur(newPasswordInput);
 
-        unmount();
+        expect(await screen.findByText('Enter a new password.')).toBeInTheDocument();
+
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('disables submit button when passwords do not match', async () => {
-        const { unmount } = renderChangePasswordModal('currentuser');
+        renderChangePasswordModal('currentuser');
 
         const currentPasswordInput = screen.getByTestId(
           'editUserChangePasswordCurrentPasswordInput'
@@ -423,15 +422,15 @@ describe('ChangePasswordModal', () => {
         fireEvent.change(newPasswordInput, { target: { value: 'passwd' } });
         fireEvent.change(confirmPasswordInput, { target: { value: 'other1' } });
 
-        await waitFor(() => {
-          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-        });
+        fireEvent.blur(confirmPasswordInput);
 
-        unmount();
+        expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
+
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('disables submit button when password is too short', async () => {
-        const { unmount } = renderChangePasswordModal('currentuser');
+        renderChangePasswordModal('currentuser');
 
         const currentPasswordInput = screen.getByTestId(
           'editUserChangePasswordCurrentPasswordInput'
@@ -445,15 +444,15 @@ describe('ChangePasswordModal', () => {
         fireEvent.change(newPasswordInput, { target: { value: 'short' } });
         fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
 
-        await waitFor(() => {
-          expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
-        });
+        fireEvent.blur(newPasswordInput);
 
-        unmount();
+        expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
+
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('enables submit button when all password fields are valid for current user', async () => {
-        const { unmount } = renderChangePasswordModal('currentuser');
+        renderChangePasswordModal('currentuser');
 
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
 
@@ -472,8 +471,6 @@ describe('ChangePasswordModal', () => {
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeEnabled();
         });
-
-        unmount();
       });
     });
   });
