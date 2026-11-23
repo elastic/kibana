@@ -39,7 +39,6 @@ interface PathFieldProps {
   label?: React.ReactNode;
   helpText?: React.ReactNode;
   error?: string;
-  labelAppend?: React.ReactNode;
   compressed?: boolean;
 }
 
@@ -67,7 +66,6 @@ export function PathField({
   label,
   helpText,
   error,
-  labelAppend,
   compressed,
 }: PathFieldProps) {
   const { metadata, telemetry } = useDefinitionFormContext();
@@ -92,7 +90,6 @@ export function PathField({
       onChange={(next) => onChange(next === '' ? undefined : next)}
       label={label}
       helpText={helpText}
-      labelAppend={labelAppend}
       placeholder={
         field.ui?.placeholder ??
         i18n.translate('xpack.streams.componentDefinitionForm.path.placeholder', {

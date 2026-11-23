@@ -21,27 +21,18 @@ interface FieldRowItemProps {
   value: ObjectValue;
   pointer: string;
   onFieldChange: (name: string, fieldValue: FormValue | undefined) => void;
-  alternatives?: React.ReactNode;
   compact?: boolean;
 }
 
-export function FieldRowItem({
-  field,
-  value,
-  pointer,
-  onFieldChange,
-  alternatives,
-  compact,
-}: FieldRowItemProps) {
+export function FieldRowItem({ field, value, pointer, onFieldChange, compact }: FieldRowItemProps) {
   const { telemetry, errors, idPrefix } = useDefinitionFormContext();
   const fieldPointer = joinPointer(pointer, field.name);
   const error = errors[fieldPointer];
   const required = isFieldRequired(field, value, telemetry);
   const onChange = (next: FormValue | undefined) => onFieldChange(field.name, next);
-  const { label, labelAppend, helpText } = toRowChrome({
+  const { label, helpText } = toRowChrome({
     label: labelOf(field),
     description: field.description,
-    alternatives,
     compact: compact && field.type !== 'boolean',
   });
 
@@ -55,7 +46,6 @@ export function FieldRowItem({
         label={label}
         helpText={helpText}
         error={error}
-        labelAppend={labelAppend}
       />
     );
   }
@@ -64,7 +54,6 @@ export function FieldRowItem({
     <EuiFormRow
       fullWidth
       label={field.type === 'boolean' ? undefined : label}
-      labelAppend={labelAppend}
       helpText={helpText}
       isInvalid={error !== undefined}
       error={error}

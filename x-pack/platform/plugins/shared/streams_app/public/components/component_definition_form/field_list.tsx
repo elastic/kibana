@@ -52,14 +52,29 @@ const WIDTH_SHARE: Record<CatalogueUiWidth, 1 | 2 | 3 | 4 | 5> = {
   full: 5,
 };
 
+/**
+ * A choice group shows a select of its members next to the input of the chosen one, so it gets
+ * the room of that select on top of the width the member asks for.
+ */
+const CHOICE_WIDTH_SHARE: Record<CatalogueUiWidth, 3 | 4 | 5 | 6 | 7> = {
+  xs: 3,
+  s: 4,
+  m: 5,
+  l: 6,
+  xl: 7,
+  full: 7,
+};
+const CHOICE_SELECT_UNITS = 8;
+
 /** A cell narrower than this wraps onto the next line instead of squeezing its input. */
-const cellStyles = ({ euiTheme }: UseEuiTheme, width: CatalogueUiWidth) => {
+const cellStyles = ({ euiTheme }: UseEuiTheme, width: CatalogueUiWidth, isChoice: boolean) => {
   if (width === 'full') {
     return css`
       flex-basis: 100%;
     `;
   }
-  const units = width === 'xs' ? 6 : width === 's' ? 8 : 10;
+  const units =
+    (width === 'xs' ? 6 : width === 's' ? 8 : 10) + (isChoice ? CHOICE_SELECT_UNITS : 0);
   return css`
     min-inline-size: calc(${euiTheme.size.base} * ${units});
   `;
@@ -161,8 +176,8 @@ export function FieldList({ fields, choiceGroups, value, onChange, pointer }: Fi
                 return (
                   <EuiFlexItem
                     key={cell.key}
-                    grow={WIDTH_SHARE[width]}
-                    css={cellStyles(euiThemeContext, width)}
+                    grow={(cell.group ? CHOICE_WIDTH_SHARE : WIDTH_SHARE)[width]}
+                    css={cellStyles(euiThemeContext, width, cell.group !== undefined)}
                   >
                     {renderCell(cell, true)}
                   </EuiFlexItem>

@@ -251,12 +251,13 @@ describe('ComponentDefinitionForm', () => {
       expect(screen.queryByTestId('componentDefinitionFormFieldRow-value')).toBeNull();
     });
 
-    it('keeps the way to switch a choice next to a field that shares its line', async () => {
+    it('switches a choice of a field that shares its line', async () => {
       const onValues = jest.fn();
       render(<Harness onValues={onValues} />);
 
-      await userEvent.click(
-        screen.getByTestId('componentDefinitionFormChoice-target_path-context')
+      await userEvent.selectOptions(
+        screen.getByTestId('componentDefinitionFormChoice-target_path'),
+        'context'
       );
 
       expect(
@@ -525,6 +526,95 @@ describe('ComponentDefinitionForm', () => {
     expect(within(items[0]).queryByTestId('componentDefinitionFormRow-context')).toBeNull();
   });
 
+  describe('a choice group', () => {
+    const choiceOptions = (groupId: string) =>
+      within(screen.getByTestId(`componentDefinitionFormChoice-${groupId}`))
+        .getAllByRole('option')
+        .map((option) => option.textContent);
+
+    it('is a row under the label of the group, whichever member is chosen', async () => {
+      render(<Harness onValues={jest.fn()} />);
+      const row = () => screen.getByTestId('componentDefinitionFormFieldRow-target');
+
+      expect(within(row()).getByText('Target')).toBeTruthy();
+
+      await userEvent.selectOptions(
+        screen.getByTestId('componentDefinitionFormChoice-target_path'),
+        'context'
+      );
+
+      expect(within(row()).getByText('Target')).toBeTruthy();
+    });
+
+    it('offers to leave unset only a group that can be', async () => {
+      const onValues = jest.fn();
+      render(<Harness onValues={onValues} />);
+
+      expect(choiceOptions('target_path')).toEqual(['Not set', 'Location', 'Context']);
+      expect(choiceOptions('value_source')).toEqual(['Value', 'OTTL value']);
+
+      await userEvent.selectOptions(
+        screen.getByTestId('componentDefinitionFormChoice-target_path'),
+        'Not set'
+      );
+
+      expect(lastCall(onValues)).toEqual({ operations: [{ action: 'upsert' }] });
+      expect(screen.queryByTestId('componentDefinitionFormEnum-location')).toBeNull();
+    });
+
+    it('lists every member of a group with more than two', async () => {
+      const onValues = jest.fn();
+      const set = definitionOf('set');
+      render(
+        <Harness
+          onValues={onValues}
+          definition={{
+            ...set,
+            fields: set.fields.map((field) =>
+              field.type === 'array' && field.items.type === 'object'
+                ? {
+                    ...field,
+                    items: {
+                      ...field.items,
+                      fields: [
+                        ...field.items.fields,
+                        { name: 'template', type: 'string' as const, label: 'Template' },
+                        { name: 'copy_from', type: 'string' as const, label: 'Copy from' },
+                      ],
+                      choice_groups: field.items.choice_groups?.map((group) =>
+                        group.id === 'value_source'
+                          ? { ...group, fields: [...group.fields, 'template', 'copy_from'] }
+                          : group
+                      ),
+                    },
+                  }
+                : field
+            ),
+          }}
+        />
+      );
+
+      expect(choiceOptions('value_source')).toEqual([
+        'Value',
+        'OTTL value',
+        'Template',
+        'Copy from',
+      ]);
+
+      await userEvent.selectOptions(
+        screen.getByTestId('componentDefinitionFormChoice-value_source'),
+        'copy_from'
+      );
+      fireEvent.change(screen.getByTestId('componentDefinitionFormString-copy_from'), {
+        target: { value: 'attributes.env' },
+      });
+
+      expect(lastCall(onValues)).toEqual({
+        operations: [{ location: 'record', action: 'upsert', copy_from: 'attributes.env' }],
+      });
+    });
+  });
+
   it('writes literal values typed into the value field', () => {
     const onValues = jest.fn();
     render(<Harness onValues={onValues} />);
@@ -539,8 +629,9 @@ describe('ComponentDefinitionForm', () => {
   it('switches the value source to an OTTL expression', async () => {
     const onValues = jest.fn();
     render(<Harness onValues={onValues} />);
-    await userEvent.click(
-      screen.getByTestId('componentDefinitionFormChoice-value_source-ottl_value')
+    await userEvent.selectOptions(
+      screen.getByTestId('componentDefinitionFormChoice-value_source'),
+      'ottl_value'
     );
     expect(lastCall(onValues)).toEqual({
       operations: [{ location: 'record', action: 'upsert', ottl_value: '' }],
