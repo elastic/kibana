@@ -26,6 +26,7 @@ jest.mock('@kbn/core-di-browser', () => {
     '../../../services/user_capabilities'
   );
   let agentBuilder: unknown = {};
+  let agentBuilderShow = false;
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -39,6 +40,7 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'application') {
         return {
           getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+          capabilities: { agentBuilder: { show: agentBuilderShow } },
         };
       }
       if (token === 'settings') {
@@ -60,11 +62,17 @@ jest.mock('@kbn/core-di-browser', () => {
     setMockAgentBuilder: (next: unknown) => {
       agentBuilder = next;
     },
+    setMockAgentBuilderShow: (show: boolean) => {
+      agentBuilderShow = show;
+    },
   };
 });
 
-const { setMockAgentBuilder } = jest.requireMock('@kbn/core-di-browser') as {
+const { setMockAgentBuilder, setMockAgentBuilderShow } = jest.requireMock(
+  '@kbn/core-di-browser'
+) as {
   setMockAgentBuilder: (agentBuilder: unknown) => void;
+  setMockAgentBuilderShow: (show: boolean) => void;
 };
 
 let mockIsLicenseValid = true;
@@ -193,6 +201,7 @@ describe('ActionPolicyDetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockAgentBuilder({});
+    setMockAgentBuilderShow(false);
     mockIsLicenseValid = true;
     mockCanReadRules = true;
     mockBulkGet.mockResolvedValue([
@@ -602,6 +611,23 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
 
     it('hides Add to chat when Agent Builder cannot open chat', () => {
+      setMockAgentBuilderShow(true);
+
+      renderFlyout();
+
+      expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('actionPolicyDetailsFlyoutAddToChatButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides Add to chat when the user cannot show Agent Builder', () => {
+      setMockAgentBuilder({
+        openChat: jest.fn(),
+        addAttachment: jest.fn(),
+        events: { ui: { activeConversation$: new BehaviorSubject(null) } },
+      });
+
       renderFlyout();
 
       expect(screen.getByTestId(TEST_SUBJ.takeActionButton)).toBeInTheDocument();
@@ -611,6 +637,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
 
     it('opens a new conversation with the action policy when chat is unbound', () => {
+      setMockAgentBuilderShow(true);
       const openChat = jest.fn();
       const addAttachment = jest.fn();
       setMockAgentBuilder({
@@ -636,6 +663,7 @@ describe('ActionPolicyDetailsFlyout', () => {
     });
 
     it('attaches the action policy to the bound conversation', () => {
+      setMockAgentBuilderShow(true);
       const openChat = jest.fn();
       const addAttachment = jest.fn();
       setMockAgentBuilder({

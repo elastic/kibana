@@ -77,11 +77,13 @@ export const ActionPolicyDetailsFlyout = ({
 }: Props) => {
   const settings = useService(CoreStart('settings'));
   const canReadRules = useService(UserCapabilities).canRead('rules');
+  const application = useService(CoreStart('application'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
   const { addToChat, isAddToChatAvailable } = useActionPolicyManualAddToChat(policy, {
     agentBuilder,
+    application,
   });
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateTimeFormat);
