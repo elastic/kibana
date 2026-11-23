@@ -81,18 +81,20 @@ describe('createEnqueueSourceReconciliation', () => {
     expect(execute).not.toHaveBeenCalled();
   });
 
-  it('stops waiting on a slow availability check at the same deadline', async () => {
+  it('gives the install and the availability check one 30 second deadline between them', async () => {
     jest.useFakeTimers();
     try {
       const { enqueue, execute } = setup({
-        install: Promise.resolve(),
+        install: new Promise<void>((resolve) => setTimeout(resolve, 10_000)),
         available: new Promise<boolean>(() => {}),
       });
 
       const pending = enqueue(args);
-      await jest.advanceTimersByTimeAsync(30_000);
-      await pending;
+      await jest.advanceTimersByTimeAsync(29_999);
+      expect(execute).not.toHaveBeenCalled();
 
+      await jest.advanceTimersByTimeAsync(1);
+      await pending;
       expect(execute).toHaveBeenCalledWith(args);
     } finally {
       jest.useRealTimers();
