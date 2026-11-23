@@ -81,6 +81,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   security: [
     'elastic/alertzero-common-layer',
     'elastic/contextual-security-apps',
+    'elastic/siem-beacon',
     'elastic/core-analysis',
     'elastic/siem-conduit',
     'elastic/kibana-cases',

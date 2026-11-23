@@ -52,7 +52,12 @@ import {
 import type { PackagePolicyClient } from '../package_policy_service';
 
 import { agentPolicyService } from '../agent_policy';
-import { getInstallation, getPackageInfo } from '../epm/packages';
+import {
+  getInstallation,
+  getPackageInfo,
+  getPackagePoliciesUpgradeBreakingChanges,
+  packagePolicyBreakingChangesToError,
+} from '../epm/packages';
 import { runWithCache } from '../epm/packages/cache';
 import { appContextService, cloudConnectorService } from '..';
 import { FleetError, FleetNotFoundError, PackagePolicyRequestError } from '../../errors';
@@ -109,7 +114,8 @@ export interface AgentlessPoliciesService {
 
   bulkUpgradeAgentlessPolicies: (
     policyIds: string[],
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    options?: { acknowledgeBreakingChanges?: boolean }
   ) => Promise<BulkUpgradeAgentlessPoliciesResponse>;
 
   getAgentlessPolicyUpgradeDryRunDiff: (
@@ -837,7 +843,8 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
 
   async bulkUpgradeAgentlessPolicies(
     policyIds: string[],
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    options?: { acknowledgeBreakingChanges?: boolean }
   ): Promise<BulkUpgradeAgentlessPoliciesResponse> {
     this.logger.debug(`Bulk upgrading ${policyIds.length} agentless policies`);
 
@@ -858,10 +865,32 @@ export class AgentlessPoliciesServiceImpl implements AgentlessPoliciesService {
     }
 
     // Skip already-latest policies: report `success: true` without the engine's needless SO re-persist + redeploy churn.
-    const { upgradeIds, noopResults } = await this.partitionAlreadyLatestPolicies(
-      agentlessPackagePolicies
-    );
+    const { upgradeIds: candidateUpgradeIds, noopResults } =
+      await this.partitionAlreadyLatestPolicies(agentlessPackagePolicies);
     results.push(...noopResults);
+
+    // Policies whose upgrade includes unacknowledged breaking changes become per-policy 400
+    // failures and are left unchanged.
+    let upgradeIds = candidateUpgradeIds;
+    if (!options?.acknowledgeBreakingChanges && candidateUpgradeIds.length > 0) {
+      const candidateIdSet = new Set(candidateUpgradeIds);
+      const breakingChangesResults = await getPackagePoliciesUpgradeBreakingChanges(
+        agentlessPackagePolicies.filter(({ id }) => candidateIdSet.has(id))
+      );
+      const rejectedIds = new Set<string>();
+      for (const breakingChangesResult of breakingChangesResults) {
+        const { packagePolicy } = breakingChangesResult;
+        rejectedIds.add(packagePolicy.id);
+        results.push({
+          id: packagePolicy.id,
+          name: packagePolicy.name,
+          success: false,
+          statusCode: 400,
+          body: { message: packagePolicyBreakingChangesToError(breakingChangesResult).message },
+        });
+      }
+      upgradeIds = candidateUpgradeIds.filter((id) => !rejectedIds.has(id));
+    }
 
     if (upgradeIds.length > 0) {
       // Reuse the package-policy bulk upgrade engine: it migrates the config and persists the

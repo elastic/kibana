@@ -3,9 +3,10 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/app-header",
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",

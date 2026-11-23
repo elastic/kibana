@@ -10,6 +10,7 @@ import { UserRt } from '../user/v1';
 import {
   ActionSourceRt,
   ActionSourceTypes,
+  PersistedActionSourceRt,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
@@ -38,18 +39,36 @@ import { WorkflowUserActionRt } from './workflow/v1';
 import { BulkAttachmentsUserActionRt } from './bulk_attachments/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
-export { ActionSourceRt, ActionSourceTypes, isActionSource, isHeaderActionSource, toActionSource };
-export type { ActionSource, ActionSourceType } from './source/v1';
+export {
+  ActionSourceRt,
+  ActionSourceTypes,
+  PersistedActionSourceRt,
+  isActionSource,
+  isHeaderActionSource,
+  toActionSource,
+};
+export type { ActionSource, ActionSourceType, PersistedActionSource } from './source/v1';
 
 export type { UserActionType, UserActionAction } from './action/v1';
 
+const UserActionCommonRequiredAttributesRt = rt.strict({
+  created_at: rt.string,
+  created_by: UserRt,
+  owner: rt.string,
+  action: UserActionActionsRt,
+});
+
 const UserActionCommonAttributesRt = rt.intersection([
-  rt.strict({
-    created_at: rt.string,
-    created_by: UserRt,
-    owner: rt.string,
-    action: UserActionActionsRt,
-  }),
+  UserActionCommonRequiredAttributesRt,
+  rt.exact(
+    rt.partial({
+      source: rt.union([PersistedActionSourceRt, rt.null]),
+    })
+  ),
+]);
+
+const UserActionCommonWriteAttributesRt = rt.intersection([
+  UserActionCommonRequiredAttributesRt,
   rt.exact(
     rt.partial({
       source: rt.union([ActionSourceRt, rt.null]),
@@ -114,6 +133,11 @@ export const CaseUserActionBasicRt = rt.intersection([
 export const CaseUserActionWithoutReferenceIdsRt = rt.intersection([
   UserActionsWithoutIdsRt,
   UserActionCommonAttributesRt,
+]);
+
+export const CaseUserActionWithoutReferenceIdsWriteRt = rt.intersection([
+  UserActionsWithoutIdsRt,
+  UserActionCommonWriteAttributesRt,
 ]);
 
 /**

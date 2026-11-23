@@ -10,19 +10,23 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
 import { CiStatsClient } from '../client.ts';
 
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, JEST_AGENTS, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import {
+  queryMoonJestUnitSelection,
+  queryMoonTestSelection,
+} from '../../affected-packages/moon_test_tasks.ts';
+import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
-import { shouldSkipFtrTests } from './selective_ftr.ts';
+import { getFtrRelevantModules, shouldSkipFtrTests } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
 import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
@@ -50,8 +54,6 @@ export async function pickTestGroupRunOrder() {
     ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
     : null;
 
-  // A diff containing only Scout test files cannot affect any Jest unit/integration
-  // or FTR config, so skip those steps.
   if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
     console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
     bk.setAnnotation(
@@ -91,15 +93,7 @@ export async function pickTestGroupRunOrder() {
   if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
   if (selectiveChangedFiles !== null) {
-    const directlyAffected = await getAffectedPackages(undefined, {
-      changedFiles: selectiveChangedFiles,
-      strategy: 'git',
-      includeDownstream: false,
-      ignoreUncategorizedChanges: true,
-    }).catch((error) => {
-      console.error('Error getting affected packages for FTR skip check', error);
-      return null;
-    });
+    const directlyAffected = await getFtrRelevantModules(selectiveChangedFiles);
 
     if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
       console.log(
@@ -118,12 +112,29 @@ export async function pickTestGroupRunOrder() {
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
       if (unitIncluded) {
-        jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        try {
+          const moonSelection = queryMoonJestUnitSelection(selectiveChangedFiles);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(
+            jestUnitConfigs,
+            selectiveCtx,
+            moonSelection
+          );
+        } catch (error) {
+          console.error('Moon Jest unit comparison failed; using package selection', error);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        }
       }
       if (integrationIncluded) {
+        let moonSelection: MoonTestSelection | undefined;
+        try {
+          moonSelection = queryMoonTestSelection(selectiveChangedFiles, 'jest-integration-tests');
+        } catch (error) {
+          console.error('Moon Jest integration comparison failed; using package selection', error);
+        }
         jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
           jestIntegrationConfigs,
-          selectiveCtx
+          selectiveCtx,
+          moonSelection
         );
       }
     }
@@ -202,6 +213,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Tests',
         parallelism: unit.count,
         key: STEP_KEYS.JEST_UNIT,
+        agent: JEST_AGENTS.UNIT,
         agentDiskSize: AGENT_DISK_GIB.JEST_UNIT,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,
@@ -213,6 +225,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Integration Tests',
         parallelism: integration.count,
         key: STEP_KEYS.JEST_INTEGRATION,
+        agent: JEST_AGENTS.INTEGRATION,
         agentDiskSize: AGENT_DISK_GIB.JEST_INTEGRATION,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,

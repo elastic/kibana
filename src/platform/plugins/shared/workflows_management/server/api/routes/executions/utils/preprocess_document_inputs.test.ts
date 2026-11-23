@@ -10,6 +10,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { preprocessDocumentInputs } from './preprocess_document_inputs';
+import { WorkflowForbiddenError } from '../../../workflow_forbidden_error';
+import { WorkflowTriggerForbiddenError } from '../../../workflow_trigger_forbidden_error';
 import { WorkflowTriggerInputError } from '../../../workflow_trigger_input_error';
 import type { AlertPreprocessingContext } from '../../../workflows_management_api';
 
@@ -24,8 +26,8 @@ const msearchResponses = (...hitsPerIndex: Hit[][]) => ({
   responses: hitsPerIndex.map((hits) => ({ status: 200, hits: { hits } })),
 });
 
-const msearchError = (reason: string) => ({
-  status: 500,
+const msearchError = (reason: string, status = 500) => ({
+  status,
   error: { type: 'search_phase_execution_exception', reason },
 });
 
@@ -248,8 +250,78 @@ describe('preprocessDocumentInputs', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith('Document not found: doc-2 in index logs-b');
     });
 
-    it('surfaces a failure of every index search as an error, not an empty selection', async () => {
-      mockEsClient.msearch.mockResolvedValue({ responses: [msearchError('cluster unavailable')] });
+    // A 4xx from every sub-search means the selection is unusable, so the caller gets a 400.
+    it('surfaces a 4xx rejection of every index search as an input error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('no such remote cluster', 404)],
+      });
+
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow('no such remote cluster');
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    // A 403 from every sub-search means the user may not search at all, which must stay a 403,
+    // not a 400.
+    it('surfaces a 403 from every index search as a forbidden error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('action [indices:data/read/search] is unauthorized', 403)],
+      });
+
+      const result = preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerForbiddenError);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('treats a mix of 403 and other 4xx sub-search failures as a server error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [
+          msearchError('no such remote cluster', 404),
+          msearchError('action [indices:data/read/search] is unauthorized', 403),
+        ],
+      });
+
+      const result = preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'remote:logs' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowForbiddenError);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    // A 5xx, a timeout, a rejection under load or a cluster credentials failure is an
+    // Elasticsearch problem the caller cannot fix and must not read as bad input.
+    it.each([
+      ['a 5xx', 500],
+      ['a 401 credentials failure', 401],
+      ['a 408 timeout', 408],
+      ['a 429 rejection under load', 429],
+    ])('surfaces %s from every index search as a server error', async (_name, status) => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('cluster unavailable', status)],
+      });
 
       const result = preprocessDocumentInputs(
         { event: { triggerType: 'document', documentIds } },
@@ -259,6 +331,29 @@ describe('preprocessDocumentInputs', () => {
 
       await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
       await expect(result).rejects.toThrow('cluster unavailable');
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('treats a mix of 4xx and 5xx sub-search failures as a server error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('no such remote cluster', 404), msearchError('shard failure')],
+      });
+
+      const result = preprocessDocumentInputs(
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'remote:logs' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        },
+        mockContext,
+        mockLogger
+      );
+
+      await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
     });
 
     it('drops documentIds from the expanded event', async () => {
@@ -367,19 +462,27 @@ describe('preprocessDocumentInputs', () => {
 
     it.each([
       ['a non-array', 'doc-1', 'inputs.event.documentIds must be an array.'],
-      ['an entry without _index', [{ _id: 'doc-1' }], 'non-empty string "_id" and "_index"'],
+      [
+        'an entry without _index',
+        [{ _id: 'doc-1' }],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
       ['an entry with an empty _id', [{ _id: '', _index: 'logs' }], 'non-empty string "_id"'],
-      ['a non-object entry', ['doc-1'], 'non-empty string "_id" and "_index"'],
+      [
+        'a non-object entry',
+        ['doc-1'],
+        'non-empty string "_id" (max 512 bytes) and "_index" (max 255 bytes)',
+      ],
       [
         'an over-long _index',
         [{ _id: 'doc-1', _index: 'i'.repeat(256) }],
-        'non-empty string "_id" and "_index"',
+        '"_index" (max 255 bytes)',
       ],
       [
         // 200 characters, but 600 UTF-8 bytes.
         'an _id over 512 bytes of multi-byte characters',
         [{ _id: '日'.repeat(200), _index: 'logs' }],
-        'non-empty string "_id" and "_index"',
+        '"_id" (max 512 bytes)',
       ],
     ])('rejects %s without querying', async (_name, badDocumentIds, message) => {
       const result = preprocessDocumentInputs(

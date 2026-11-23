@@ -84,6 +84,7 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { NightshiftInvestigationsPublicStart } from '@kbn/nightshift-investigations-plugin/public';
+import type { EntityInventoryAppPublicStart } from '@kbn/entity-inventory-app-plugin/public';
 import { isAlertingV2Enabled, shouldShowV1ObservabilityAlertsTable } from '@kbn/alerting-v2-utils';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import { getObservabilityAlertType } from './cases/attachments/alert';
@@ -195,6 +196,7 @@ export interface ObservabilityPublicPluginsStart {
   cps?: CPSPluginStart;
   ingestHub?: IngestHubStart;
   nightshiftInvestigations?: NightshiftInvestigationsPublicStart;
+  entityInventoryApp?: EntityInventoryAppPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -218,7 +220,7 @@ export class Plugin
     {
       id: 'alerts',
       title: getObservabilityAlertsLinkTitle(false),
-      order: 8001,
+      order: 8002,
       path: ALERTS_PATH,
       visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
@@ -249,7 +251,7 @@ export class Plugin
           basePath: CASES_PATH,
           extend: {
             [CasesDeepLinkId.cases]: {
-              order: 8003,
+              order: 8004,
               visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {

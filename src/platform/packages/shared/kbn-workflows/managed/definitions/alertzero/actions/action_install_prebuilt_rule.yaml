@@ -58,6 +58,85 @@ outputs:
   - name: enabled
     type: boolean
 steps:
+  # A proposal whose rule was installed since is stale, so nothing is installed
+  # or enabled. The lookup is by exact signature id; only a 404 means not installed.
+  - name: find_installed_rule
+    type: kibana.request
+    with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
+      method: GET
+      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.actionInput.rule_id | url_encode }}"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+    on-failure:
+      continue: true
+
+  - name: fail_already_installed
+    type: workflow.fail
+    if: "${{ steps.find_installed_rule.error == nil and steps.find_installed_rule.output.id != nil }}"
+    with:
+      message: >-
+        The rule "{{ steps.find_installed_rule.output.name }}" was installed after this
+        proposal was created. Approving again won't work, so decline it.
+
+  - name: fail_rule_lookup
+    type: workflow.fail
+    if: >-
+      ${{ steps.find_installed_rule.error != nil
+        and not (steps.find_installed_rule.error.message contains 'HTTP 404') }}
+    with:
+      message: "{{ steps.find_installed_rule.error.message }}"
+
+  # The installation review lists only the latest version of each rule not yet
+  # installed. The exact rule_id comparison below guards against a filter that
+  # matched some other rule.
+  - name: review_rule
+    type: kibana.request
+    with:
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_review"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "1"
+        x-elastic-internal-origin: kibana
+        Content-Type: application/json
+      body:
+        page: 1
+        per_page: 1
+        filter:
+          term: 'security-rule.rule_id: "{{ inputs.actionInput.rule_id }}"'
+        fields: [rule_id, version, name]
+
+  # Not installed and not installable: dropped from the package, deprecated, or hidden
+  # from this user, such as an ML rule without ML privileges.
+  - name: fail_not_available
+    type: workflow.fail
+    if: "${{ steps.review_rule.output.rules[0].rule_id != inputs.actionInput.rule_id }}"
+    with:
+      message: >-
+        The prebuilt rule {{ inputs.actionInput.rule_id }} is no longer available to
+        install. It may have been removed from the prebuilt rules package. Approving
+        again won't work, so decline it.
+
+  - name: fail_version_changed
+    type: workflow.fail
+    if: >-
+      ${{ steps.review_rule.output.rules[0].rule_id == inputs.actionInput.rule_id
+        and steps.review_rule.output.rules[0].version != inputs.actionInput.version }}
+    with:
+      message: >-
+        The rule "{{ steps.review_rule.output.rules[0].name }}" is now at version
+        {{ steps.review_rule.output.rules[0].version }}, but this proposal was for
+        version {{ inputs.actionInput.version }}. Approving again won't work, so
+        decline it.
+
   - name: install_rule
     type: kibana.request
     with:
@@ -77,6 +156,16 @@ steps:
           - rule_id: "{{ inputs.actionInput.rule_id }}"
             version: "${{ inputs.actionInput.version }}"
 
+  # Installed by someone else between the check above and this install.
+  - name: fail_install_skipped
+    type: workflow.fail
+    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
+    with:
+      message: >-
+        The rule "{{ steps.review_rule.output.rules[0].name | default: inputs.actionInput.rule_id }}"
+        was installed after this proposal was created. Approving again won't work, so
+        decline it.
+
   # A fresh install answers with the new saved object, so enable it by uuid.
   - name: enable_installed_rule
     type: security.enableRule
@@ -85,44 +174,16 @@ steps:
       ids:
         - "{{ steps.install_rule.output.results.created[0].id }}"
 
-  # A rule installed between proposal and approval is reported as skipped with no
-  # saved object in the response, so look it up by its exact signature id. An
-  # enableRule query built from `rule_id` would enable every rule a quote in it
-  # could make match.
-  - name: find_existing_rule
-    type: kibana.request
-    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
-    with:
-      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
-      fetcher:
-        follow_redirects: false
-      method: GET
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.actionInput.rule_id | url_encode }}"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-
-  - name: enable_existing_rule
-    type: security.enableRule
-    if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
-    with:
-      ids:
-        - "{{ steps.find_existing_rule.output.id }}"
-
-  # The install API answers 200 even when it installed nothing (`summary.failed`,
-  # for a version the package no longer carries), and the proposal gate counts any
-  # error-free run as success. Step `if` cannot group with parentheses, so what
-  # landed is computed here and read below as flags.
+  # The install API answers 200 even when it installed nothing (`summary.failed`),
+  # and the proposal gate counts any error-free run as success. Step `if` cannot group with
+  # parentheses, so what landed is computed here and read below as flags.
   - name: outcome
     type: data.set
     with:
-      installed: "${{ steps.install_rule.output.summary.succeeded > 0 or steps.install_rule.output.summary.skipped > 0 }}"
+      installed: "${{ steps.install_rule.output.summary.succeeded > 0 }}"
       enabled: >-
         ${{ steps.enable_installed_rule.output.succeeded > 0
-          or steps.enable_installed_rule.output.skipped > 0
-          or steps.enable_existing_rule.output.succeeded > 0
-          or steps.enable_existing_rule.output.skipped > 0 }}
+          or steps.enable_installed_rule.output.skipped > 0 }}
 
   # A rule that is not installed and enabled fails the action, so the gate records
   # the proposal `failed` and re-offers it instead of reporting `succeeded`.

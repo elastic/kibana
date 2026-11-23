@@ -11,8 +11,7 @@ import type { FlyoutOrigin } from '../../../common/lib/telemetry';
 import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TOOL } from '../../../common/lib/telemetry';
 import { useDefaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../hooks/use_open_flyout';
-import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
-import { getDocumentTitle } from '../../document/main/utils/get_header_title';
+import { getNotesFlyoutTitle, getNotesFlyoutType } from './notes/utils/get_notes_flyout_details';
 import { useFlyoutSessionContext } from '../../session_context';
 import { useFlyoutV2UrlWriter } from '../url_state/flyout_v2_url_writer';
 import { FLYOUT_DESCRIPTOR_KIND, urlParamKeyForHistoryKey } from '../url_state/flyout_v2_url_param';
@@ -29,7 +28,7 @@ export interface OpenNotesParams {
 }
 
 export interface SharedToolsFlyoutApi {
-  /** Opens the notes tools flyout for a document. */
+  /** Opens the notes tools flyout for a document or an attack. */
   openNotes: (params: OpenNotesParams) => void;
 }
 
@@ -69,11 +68,12 @@ export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: FLYOUT_SESSION_KIND.START,
-          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+          title: getNotesFlyoutTitle(hit),
           onClose,
         },
         {
           surface: FLYOUT_SURFACE.TOOL,
+          flyoutType: getNotesFlyoutType(hit),
           tool: FLYOUT_TOOL.NOTES,
           session: FLYOUT_SESSION_KIND.START,
           origin,

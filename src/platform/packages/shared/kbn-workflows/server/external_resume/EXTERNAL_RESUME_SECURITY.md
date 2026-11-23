@@ -44,7 +44,7 @@ On resume, Kibana:
 5. Claims the step via `markStepAsResponded`, which removes `_hitlTokenHash` and `_hitlTokenExpiresAt` before scheduling resume.
 6. Resumes the workflow with the original workflow runner permissions.
 
-The token is single-use because the atomic step claim removes the stored token metadata and prevents subsequent submissions from winning after the first accepted response. Timeout and cancellation paths also remove the stored token metadata from the step input. Expiry is enforced by the stored timestamp and by the normal HITL timeout behavior.
+The token is single-use because the atomic step claim removes the stored token metadata and prevents subsequent submissions from winning after the first accepted response. If the claiming response is not applied (the engine could not hand it to Task Manager and reverted it), the claim is released and the removed metadata is restored unchanged, so the link stays valid until it expires. A step whose response was applied never gets its token metadata back. Timeout and cancellation paths also remove the stored token metadata from the step input. Expiry is enforced by the stored timestamp and by the normal HITL timeout behavior.
 
 ## Threat Model
 
@@ -53,7 +53,7 @@ The token is single-use because the atomic step claim removes the stored token m
 | URL leaked in server logs, proxy logs, browser history, Slack, or email | The URL contains only a random nonce, not an ES credential. Exposure is bounded by expiry and first-use claim. |
 | Attacker has `executionId` and `stepId` only | Cannot resume without the 256-bit token. |
 | Attacker has workflow index read access | Sees only the HMAC and expiry, not the raw token. |
-| Attacker replays a valid URL after use | `markStepAsResponded` removes token metadata and rejects later attempts. |
+| Attacker replays a valid URL after use | `markStepAsResponded` removes token metadata and rejects later attempts. The metadata is only restored when the claiming response was not applied and the step is still waiting. |
 | Attacker uses a valid token after timeout | `_hitlTokenExpiresAt` rejects expired links; timeout cleanup removes the stored token metadata. |
 | Attacker crafts a link for another step | The HMAC binds `executionId` and `stepExecutionId`; using the token against a different step produces an HMAC mismatch. |
 | Attacker with index write access extends TTL | The HMAC binds `expiresAt`; modifying the stored expiry invalidates the signature. |

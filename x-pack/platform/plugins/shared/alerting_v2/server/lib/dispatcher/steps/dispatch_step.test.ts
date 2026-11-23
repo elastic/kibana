@@ -11,6 +11,7 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ActionPoliciesLicenseState } from '../../services/license_service/license_service';
 import { createMockLicenseService } from '../../services/license_service/license_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { buildAlertDetailsUrl } from '../alert_details_url';
 import { DISPATCH_CHUNK_SIZE } from '../constants';
 import {
   createActionGroup,
@@ -18,6 +19,7 @@ import {
   createAlert,
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
+  MOCK_KIBANA_BASE_URL,
   type DispatcherPipelineStateOverrides,
 } from '../fixtures/test_utils';
 import type { DispatchFailure } from '../types';
@@ -25,6 +27,9 @@ import { DISPATCH_FAILURE_REASONS } from './constants';
 import { DispatchStep } from './dispatch_step';
 
 const API_KEY = 'dGVzdC1pZDp0ZXN0LWtleQ==';
+
+const getExpectedAlertUrl = (spaceId: string, alertId: string): string =>
+  buildAlertDetailsUrl({ baseUrl: MOCK_KIBANA_BASE_URL, spaceId, alertId });
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
   result.type === 'continue' ? [...(result.data?.outcome?.failures ?? [])] : [];
@@ -221,6 +226,63 @@ describe('DispatchStep', () => {
     expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(expect.any(Array), expectedRequest);
   });
 
+  it('scopes the scheduling request to the action group space', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [
+          createActionGroup({
+            id: 'g1',
+            policyId: 'p1',
+            spaceId: 'team-a',
+            destinations: [{ type: 'workflow', id: 'workflow-1' }],
+          }),
+        ],
+        policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: API_KEY })]]),
+      }),
+      loggerService
+    );
+
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+    const [[items, request]] = mockWfm.bulkScheduleWorkflow.mock.calls;
+    expect(items).toEqual([expect.objectContaining({ spaceId: 'team-a' })]);
+    expect(request.spaceId).toBe('team-a');
+    expect(mockWfm.getClient).toHaveBeenCalledWith(request);
+  });
+
+  it('scopes the scheduling request to the default space for default space groups', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [
+          createActionGroup({
+            id: 'g1',
+            policyId: 'p1',
+            destinations: [{ type: 'workflow', id: 'workflow-1' }],
+          }),
+        ],
+        policies: new Map([['p1', createActionPolicy({ id: 'p1', apiKey: API_KEY })]]),
+      }),
+      loggerService
+    );
+
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+    const [[, request]] = mockWfm.bulkScheduleWorkflow.mock.calls;
+    expect(request.spaceId).toBe('default');
+  });
+
   it('dispatches to multiple workflow destinations', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
@@ -388,10 +450,53 @@ describe('DispatchStep', () => {
                   space_id: 'default',
                   group_hash: 'hash-1',
                   alert_id: 'ep-1',
+                  alert_url: getExpectedAlertUrl('default', 'ep-1'),
                   alert_status: 'recovering',
                   severity: 'high',
                   data: { host: { name: 'web-1' } },
                 },
+              ],
+            }),
+          }),
+        }),
+      ],
+      expect.anything()
+    );
+  });
+
+  it("builds alert_url from each alert's space and id", async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow.mockResolvedValue([scheduled('exec-1')]);
+
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      spaceId: 'team-a',
+      destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      alerts: [createAlert({ alert_id: 'ep-2', space_id: 'team-a' })],
+    });
+    const policy = createActionPolicy({ id: 'p1', apiKey: API_KEY });
+
+    const state = createDispatcherPipelineState({
+      dispatch: [group],
+      policies: new Map([['p1', policy]]),
+    });
+
+    await step.execute(state, loggerService);
+
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          inputs: expect.objectContaining({
+            payload: expect.objectContaining({
+              alerts: [
+                expect.objectContaining({
+                  alert_url: getExpectedAlertUrl('team-a', 'ep-2'),
+                }),
               ],
             }),
           }),
@@ -677,7 +782,57 @@ describe('DispatchStep', () => {
     ]);
   });
 
-  it('issues one bulkScheduleWorkflow call per API key and never mixes keys', async () => {
+  it('issues one bulkScheduleWorkflow call per space when policies share an API key', async () => {
+    const step = new DispatchStep(mockWfm, mockLicenseService);
+
+    mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+      { status: 'fulfilled', value: [createWorkflowDetailDto()] },
+    ]);
+    mockWfm.bulkScheduleWorkflow
+      .mockResolvedValueOnce([scheduled('exec-a')])
+      .mockResolvedValueOnce([scheduled('exec-b')]);
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [
+          createActionGroup({
+            id: 'g1',
+            policyId: 'p1',
+            spaceId: 'space-a',
+            destinations: [{ type: 'workflow', id: 'workflow-1' }],
+          }),
+          createActionGroup({
+            id: 'g2',
+            policyId: 'p2',
+            spaceId: 'space-b',
+            destinations: [{ type: 'workflow', id: 'workflow-1' }],
+          }),
+        ],
+        policies: new Map([
+          ['p1', createActionPolicy({ id: 'p1', spaceId: 'space-a', apiKey: API_KEY })],
+          ['p2', createActionPolicy({ id: 'p2', spaceId: 'space-b', apiKey: API_KEY })],
+        ]),
+      }),
+      loggerService
+    );
+
+    expect(mockWfm.getWorkflowsByIdsForRequests).toHaveBeenCalledTimes(1);
+    expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
+    const calls = mockWfm.bulkScheduleWorkflow.mock.calls.map(([items, request]) => ({
+      itemSpaces: items.map(({ spaceId }) => spaceId),
+      requestSpace: request.spaceId,
+      authorization: request.headers.authorization,
+    }));
+    expect(calls).toEqual([
+      { itemSpaces: ['space-a'], requestSpace: 'space-a', authorization: `ApiKey ${API_KEY}` },
+      { itemSpaces: ['space-b'], requestSpace: 'space-b', authorization: `ApiKey ${API_KEY}` },
+    ]);
+    expect(getExecutionIds(result, 'g1')).toEqual(['exec-a']);
+    expect(getExecutionIds(result, 'g2')).toEqual(['exec-b']);
+  });
+
+  it('issues one bulkScheduleWorkflow call per API key and space and never mixes keys', async () => {
     const step = new DispatchStep(mockWfm, mockLicenseService);
 
     mockWfm.getWorkflowsByIdsForRequests.mockResolvedValue([

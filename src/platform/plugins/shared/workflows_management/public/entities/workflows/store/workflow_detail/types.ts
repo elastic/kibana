@@ -43,7 +43,8 @@ export interface WorkflowDetailState {
   /** The currently selected execution (when viewing executions tab) */
   execution?: WorkflowExecutionDto;
   executionRequest?: { id: string; requestId: string; loadMore: boolean };
-  executionError?: { id: string; message: string };
+  /** Set while loading `id` keeps failing; `failureCount` is the length of the current streak. */
+  executionError?: { id: string; message: string; isNotFound: boolean; failureCount: number };
   /** `total` from the paginated execution-steps list; used for the truncation callout. */
   stepExecutionsTotal: number;
   /**

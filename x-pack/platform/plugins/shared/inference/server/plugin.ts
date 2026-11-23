@@ -257,9 +257,14 @@ export class InferencePlugin
       const legacySettingsPromise = anonymizationEnabled
         ? undefined
         : readLegacyAnonymizationSettings(request);
+      const anonymizationRulesPromise = createAnonymizationRulesPromise(
+        request,
+        legacySettingsPromise
+      );
+      void anonymizationRulesPromise.catch(() => {});
       return {
         namespace,
-        anonymizationRulesPromise: createAnonymizationRulesPromise(request, legacySettingsPromise),
+        anonymizationRulesPromise,
         regexWorker: (() => {
           if (!this.regexWorker) {
             this.logger.error(

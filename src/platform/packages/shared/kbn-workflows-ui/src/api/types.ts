@@ -184,6 +184,11 @@ export interface WorkflowsConfig {
   eventDrivenExecutionEnabled: boolean;
 }
 
+/** Workflows the caller can read, or `undefined` when no workflow is hidden from them. */
+export interface ReadableWorkflowIdsResponse {
+  workflowIds?: string[];
+}
+
 export interface SearchTriggerEventLogParams {
   kql?: string;
   from?: string;

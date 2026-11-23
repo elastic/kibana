@@ -18,15 +18,14 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   SecurityPageName,
-  USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
 import { EntityAnalyticsNewHomePage } from './pages/entity_analytics_new_home_page';
+import { useNewEntityAnalyticsPage } from './hooks/use_new_entity_analytics_page';
 import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
-import { useKibana } from '../common/lib/kibana';
 
 // ---- Management routes ----
 const EntityAnalyticsManagementWrapper = () => (
@@ -137,11 +136,7 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 
 // ---- Entity analytics home page routes ----
 const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
-  const { featureFlags } = useKibana().services;
-  const isNewHomePageEnabled = featureFlags.useBooleanValue(
-    USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
-    false
-  );
+  const isNewHomePageEnabled = useNewEntityAnalyticsPage();
 
   const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
 

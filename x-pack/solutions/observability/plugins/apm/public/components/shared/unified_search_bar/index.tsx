@@ -23,6 +23,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { OnRefreshChangeProps } from '@elastic/eui/src/components/date_picker/types';
 import type { UIProcessorEvent } from '../../../../common/processor_event';
 import type { TimePickerTimeDefaults } from '../date_picker/typings';
+import { DEFAULT_REFRESH_INTERVAL } from './constants';
 import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
@@ -35,8 +36,6 @@ import { clearCache } from '../../../services/rest/call_api';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
 import { SearchQueryActions } from '../../../services/telemetry';
-
-export const DEFAULT_REFRESH_INTERVAL = 60000;
 
 function useSearchBarParams(defaultKuery?: string) {
   const { path, query } = useApmParams('/*');

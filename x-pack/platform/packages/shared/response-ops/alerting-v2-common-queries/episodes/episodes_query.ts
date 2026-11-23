@@ -114,17 +114,25 @@ const resolveSortField = (sortField: string): string => {
   return sanitizeSortField(sortField);
 };
 
+/**
+ * Reduces the episode events to one row per episode: its latest event, with the
+ * episode-level stats.
+ */
 export const addEpisodeAggregation = (query: ComposerQuery) => {
   /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
    * Matches `buildEpisodeDataRequest`.
    */
 
+  // A single rule run can write many events with the same timestamp for one
+  // episode, so matching on the latest timestamp can keep many rows. LIMIT 1 BY
+  // keeps one of them.
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
     .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`
+    .pipe`LIMIT 1 BY episode.id`;
 };
 
 const addSeriesActionStats = (query: ComposerQuery) => {

@@ -24,6 +24,7 @@ export {
   useProposal,
   useSettleDeclinedProposal,
   RETRY_WAIT_MS,
+  isDecisionShown,
   isInFlux,
 } from './hooks/use_proposals_api';
 

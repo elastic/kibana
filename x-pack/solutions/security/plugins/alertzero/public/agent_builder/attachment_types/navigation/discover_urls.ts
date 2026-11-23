@@ -118,29 +118,59 @@ export const buildSecurityEntityUrl = ({
   });
 };
 
+/**
+ * Longest `/app/r` redirect URL a continuation link may carry. Hashing the state does not
+ * shrink the redirect, which embeds every locator param, and opening it in a new tab is a
+ * real GET: past the Node default header size and common proxy URI limits it fails with a
+ * 431 or 414 before Kibana loads.
+ */
+export const DISCOVER_CONTINUATION_MAX_REDIRECT_URL_LENGTH = 8192;
+
 export const buildDiscoverEsqlUrl = ({
   share,
   esql,
   timeRange = DISCOVER_LOOKUP_TIME_RANGE,
+  useHash = false,
 }: {
   share?: SharePluginStart;
   esql: string;
   /** Defaults to a wide window so historic reports / events are not filtered out. */
   timeRange?: DiscoverLookupTimeRange;
+  /**
+   * Continuation mode: hash the Discover app state and withhold URLs over
+   * {@link DISCOVER_CONTINUATION_MAX_REDIRECT_URL_LENGTH}.
+   */
+  useHash?: boolean;
 }): string | undefined => {
-  if (!share || !esql) {
+  if (!share || esql.trim() === '') {
     return undefined;
   }
 
   const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+  if (!locator) {
+    return undefined;
+  }
+
   // Locator params are typed as SerializableRecord; from/to time ranges are plain strings.
-  return locator?.getRedirectUrl({
+  const params = {
     query: { esql },
     timeRange: {
       from: timeRange.from,
       to: timeRange.to,
     },
-  } as SerializableRecord);
+    ...(useHash ? { useHash } : {}),
+  } as SerializableRecord;
+
+  if (!useHash) {
+    return locator.getRedirectUrl(params);
+  }
+
+  try {
+    const url = locator.getRedirectUrl(params);
+    return url && url.length <= DISCOVER_CONTINUATION_MAX_REDIRECT_URL_LENGTH ? url : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 /**

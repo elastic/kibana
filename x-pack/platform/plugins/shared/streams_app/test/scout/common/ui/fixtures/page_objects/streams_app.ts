@@ -36,6 +36,7 @@ export class StreamsApp {
   public readonly conditionEditorValueComboBox;
   public readonly processorTypeComboBox;
   public readonly dateProcessorFormatsComboBox;
+  private readonly globalToastList;
   public readonly stepsListSaveSettledToast;
   public readonly fieldTypeSuperSelect;
   public readonly previewDataGrid;
@@ -100,10 +101,11 @@ export class StreamsApp {
     this.dateProcessorFormatsComboBox = this.page.components.comboBox(
       'streamsAppDateProcessorFormatsComboBox'
     );
+    this.globalToastList = this.page.components.toast();
     // Either terminal outcome of a steps list "Save changes" round-trip.
-    this.stepsListSaveSettledToast = this.page
-      .getByText("Stream's processors updated")
-      .or(this.page.getByText("An issue occurred saving processors' changes."));
+    this.stepsListSaveSettledToast = this.toastWithText("Stream's processors updated").or(
+      this.toastWithText("An issue occurred saving processors' changes.")
+    );
     this.fieldTypeSuperSelect = this.page.components.superSelect('streamsAppFieldFormTypeSelect');
     this.previewDataGrid = this.page.components.dataGrid('streamsAppPreviewDataGrid');
     this.schemaDataGrid = this.page.components.dataGrid('streamsAppSchemaEditorFieldsTableLoaded');
@@ -119,17 +121,17 @@ export class StreamsApp {
     this.queryStreamFlyoutSaveButton = this.page.getByTestId(
       'streamsAppQueryStreamFlyoutSaveButton'
     );
-    this.queryStreamCreatedSuccessToast = this.page.getByText('Query stream created successfully');
-    this.childQueryStreamCreatedSuccessToast = this.page.getByText('Query stream created');
-    this.queryStreamUpdatedSuccessToast = this.page.getByText('Query stream updated');
+    this.queryStreamCreatedSuccessToast = this.toastWithText('Query stream created successfully');
+    this.childQueryStreamCreatedSuccessToast = this.toastWithText('Query stream created');
+    this.queryStreamUpdatedSuccessToast = this.toastWithText('Query stream updated');
     this.queryStreamDetailsQueryViewerCodeBlock = this.page.getByTestId(
       'queryStreamDetailsQueryViewerCodeBlock'
     );
     this.deleteQueryStreamModalInput = this.page.getByTestId(
       'streamsAppDeleteStreamModalStreamNameInput'
     );
-    this.queryStreamDeletedSuccessToast = this.page.getByText('Stream deleted');
-    this.queryStreamCreateErrorToast = this.page.getByText('Error creating query stream');
+    this.queryStreamDeletedSuccessToast = this.toastWithText('Stream deleted');
+    this.queryStreamCreateErrorToast = this.toastWithText('Error creating query stream');
     this.fetchMoreMatchingSamplesButton = this.page.getByTestId(
       'streamsAppFetchMoreMatchingSamplesButton'
     );
@@ -160,12 +162,19 @@ export class StreamsApp {
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }
 
+  // Scoped to the toast list: core's screen reader announcer repeats every toast's text page-wide.
+  private toastWithText(text: string): Locator {
+    return this.globalToastList.toasts.getByText(text);
+  }
+
   async goto() {
     await this.page.gotoApp('streams');
   }
 
   async gotoStreamMainPage() {
-    await this.page.gotoApp(`streams`);
+    await this.page.gotoApp(`streams`, {
+      readyWhen: this.page.testSubj.locator('streamsTable'),
+    });
   }
 
   async gotoStreamManagementTab(streamName: string, tabName: string) {
@@ -1002,7 +1011,10 @@ export class StreamsApp {
     // Clearing the toast list first keeps the Save button clickable and guarantees that a
     // toast awaited after the click belongs to this save rather than a previous one.
     await this.waitForEmptyGlobalToastList();
-    await this.page.getByRole('button', { name: 'Save changes' }).click();
+    const saveButton = this.page.getByRole('button', { name: 'Save changes' });
+    // Disabled while a simulation is in flight, which outlives the implicit `actionTimeout`.
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+    await saveButton.click();
   }
 
   /**

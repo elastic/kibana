@@ -32,7 +32,6 @@ export const getCypressBaseConfig = (
 
       defaultCommandTimeout: 60000,
       execTimeout: 120000,
-      pageLoadTimeout: 12000,
       // Limit per-test DOM snapshots retained in memory. The long response-actions
       // workflow spec accumulates enough state to crash the browser at the Cypress
       // default of 50. Combined with `experimentalMemoryManagement` below, this

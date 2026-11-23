@@ -43,7 +43,7 @@ export const toHitSelections = (items: TimelineItem[]): HitSelection[] =>
   items.map(({ _id, _index }) => ({ _id, _index: _index ?? '' }));
 
 export interface RunWorkflowSelectionScope {
-  dataViewId: string;
+  dataViewId: string | null;
   indexNames: string[];
   /** Serialized ES query describing the table's current filters. */
   filterQuery: string | undefined;
@@ -63,6 +63,8 @@ export interface RunWorkflowSelectionScope {
  *
  * Capped rather than paged: the bulk menus disable the run on a selection larger than the cap, so
  * no more ids than that are ever needed.
+ *
+ * Returns `undefined` until the search can start.
  */
 export const useRunWorkflowSelectionSearch = ({
   dataViewId,
@@ -72,7 +74,7 @@ export const useRunWorkflowSelectionSearch = ({
   to,
   runtimeMappings,
   queryId,
-}: RunWorkflowSelectionScope): SelectionIdSearchHandler => {
+}: RunWorkflowSelectionScope): SelectionIdSearchHandler | undefined => {
   const [, , searchSelectionIds] = useTimelineEventsHandler({
     dataViewId,
     endDate: to,
@@ -87,7 +89,15 @@ export const useRunWorkflowSelectionSearch = ({
     timerangeKind: 'absolute',
   });
 
-  return searchSelectionIds;
+  // The timeline handler builds its request in an effect, so before that effect runs a search can
+  // only report that it could not start. Must stay declared after `useTimelineEventsHandler` so
+  // this update lands in the same render as the request.
+  const [isRequestPending, setIsRequestPending] = useState(true);
+  useEffect(() => {
+    setIsRequestPending(false);
+  }, []);
+
+  return isRequestPending ? undefined : searchSelectionIds;
 };
 
 type ResolvedSelection =
@@ -100,7 +110,8 @@ type ResolvedSelection =
  *
  * A table only ever hands over the loaded page, so when the user chose "select all N" the rest
  * of the selection has to be fetched before the run payload can be built. Without `isAllSelected`
- * the loaded page *is* the selection and no search runs.
+ * the loaded page *is* the selection and no search runs. While `searchSelectionIds` is undefined
+ * the selection stays loading.
  */
 export const useResolvedRunWorkflowSelection = ({
   isAllSelected,
@@ -109,12 +120,12 @@ export const useResolvedRunWorkflowSelection = ({
 }: {
   isAllSelected: boolean;
   pageSelections: HitSelection[];
-  searchSelectionIds: SelectionIdSearchHandler;
+  searchSelectionIds: SelectionIdSearchHandler | undefined;
 }): ResolvedSelection => {
   const [resolved, setResolved] = useState<ResolvedSelection>({ status: 'loading' });
 
   useEffect(() => {
-    if (!isAllSelected) {
+    if (!isAllSelected || searchSelectionIds === undefined) {
       return;
     }
     // A new search replaces whatever an earlier one resolved to, so the panel never offers a

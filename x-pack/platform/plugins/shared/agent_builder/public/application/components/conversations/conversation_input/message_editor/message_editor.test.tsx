@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useImperativeHandle } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MessageEditor } from './message_editor';
 import { createTextFragment, NON_BREAKING_SPACE } from './utils';
@@ -61,6 +61,18 @@ const ClickableMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuCo
       </button>
     </div>
   )
+);
+
+const mockMenuHandleKeyDown = jest.fn();
+
+const KeyboardMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
+  (_props, ref) => {
+    useImperativeHandle(ref, () => ({
+      isKeyDownEventHandled: (event) => event.key === 'Enter',
+      handleKeyDown: mockMenuHandleKeyDown,
+    }));
+    return <div />;
+  }
 );
 
 const mockOnSubmit = jest.fn();
@@ -271,6 +283,52 @@ describe('MessageEditor', () => {
       shiftKey: false,
     });
     expect(mockOnSubmit).toHaveBeenCalled();
+  });
+
+  describe('Enter with an active command', () => {
+    const renderWithActiveCommand = (hasVisibleContent: boolean) => {
+      const { messageEditor } = createMockMessageEditor();
+      messageEditor.commandMatch = {
+        isActive: true,
+        activeCommand: {
+          command: {
+            id: CommandId.Skill,
+            sequence: '/',
+            name: 'Skill',
+            scheme: 'skill',
+            menuComponent: KeyboardMenuComponent,
+          },
+          commandStartOffset: 0,
+          query: 'foo bar',
+        },
+        hasVisibleContent,
+      };
+      render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          data-test-subj="messageEditor"
+        />
+      );
+    };
+
+    it('lets the visible menu handle Enter', () => {
+      renderWithActiveCommand(true);
+
+      fireEvent.keyDown(screen.getByTestId('messageEditor'), { key: 'Enter' });
+
+      expect(mockMenuHandleKeyDown).toHaveBeenCalled();
+      expect(mockOnSubmit).not.toHaveBeenCalled();
+    });
+
+    it('submits on Enter when the menu is hidden', () => {
+      renderWithActiveCommand(false);
+
+      fireEvent.keyDown(screen.getByTestId('messageEditor'), { key: 'Enter' });
+
+      expect(mockMenuHandleKeyDown).not.toHaveBeenCalled();
+      expect(mockOnSubmit).toHaveBeenCalled();
+    });
   });
 
   it('calls dismissCommand when Escape is pressed', () => {
