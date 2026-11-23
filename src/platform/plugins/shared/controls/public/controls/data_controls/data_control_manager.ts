@@ -230,16 +230,16 @@ export const initializeDataControlManager = async <EditorState extends object = 
               parentProjectRouting$,
             ]).pipe(
               map(([esqlQuery, esqlVariables, projectRouting]) => ({
-                valuesSource,
-                esqlQuery: esqlQuery ?? '',
+                values_source: ControlValuesSource.ESQL as const,
+                esql_query: esqlQuery ?? '',
                 esqlVariables,
                 projectRouting,
               }))
             )
           : dataControlStateManager.api.dataViewId$.pipe(
               map((dataViewId) => ({
-                valuesSource: ControlValuesSource.FIELD as const,
-                dataViewId,
+                values_source: ControlValuesSource.FIELD as const,
+                data_view_id: dataViewId,
               }))
             )
       ),
@@ -254,10 +254,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
         let source: FilterableSource | undefined;
         try {
           source = (await resolveControlSource(key, { parentApi })).filterableSource;
-          if (key.valuesSource !== ControlValuesSource.ESQL) return { key, source };
+          if (key.values_source !== ControlValuesSource.ESQL) return { key, source };
 
           const result = await getESQLSingleColumnValues({
-            query: key.esqlQuery,
+            query: key.esql_query,
             search: dataService.search.search,
             esqlVariables: key.esqlVariables,
             timeRange: dataService.query.timefilter.timefilter.getTime(),

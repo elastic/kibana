@@ -15,16 +15,12 @@ import { i18n } from '@kbn/i18n';
 import { coreServices, dataViewsService } from '../../services/kibana_services';
 import { getSourceFromESQLQuery } from './get_source_from_esql_query';
 
-export interface FieldSourceKey {
-  valuesSource: ControlValuesSource.FIELD;
-  dataViewId?: string;
-}
-export interface EsqlSourceKey {
-  valuesSource: ControlValuesSource.ESQL;
-  esqlQuery: string;
-}
 /** What identifies the source of a control: a data view for a field, the query for a "Write a query" control */
-export type ControlSourceKey = FieldSourceKey | EsqlSourceKey;
+export interface ControlSourceState {
+  values_source?: ControlValuesSource;
+  data_view_id?: string;
+  esql_query?: string;
+}
 
 /** A data source of a control, and what filtering needs from it, which the controls build their filters from */
 export interface ControlSource {
@@ -34,10 +30,10 @@ export interface ControlSource {
 
 /** The data source that a control reads its values from: a data view for a field, what the query reads for a query. */
 export const resolveControlSource = async (
-  key: ControlSourceKey,
+  state: ControlSourceState,
   { parentApi }: { parentApi?: unknown } = {}
 ): Promise<ControlSource> => {
-  const dataSource = await getDataSource(key, parentApi);
+  const dataSource = await getDataSource(state, parentApi);
   return { dataSource, filterableSource: await dataSource.toFilterableSource(coreServices?.http) };
 };
 
@@ -45,17 +41,20 @@ export const resolveControlSource = async (
 export const getDataViewOfSource = (dataSource: DataSource | undefined): DataView | undefined =>
   dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
 
-const getDataSource = async (key: ControlSourceKey, parentApi?: unknown): Promise<DataSource> => {
-  if (key.valuesSource !== ControlValuesSource.ESQL) {
-    return new DataViewSource(await dataViewsService.get(key.dataViewId ?? ''));
+const getDataSource = async (
+  state: ControlSourceState,
+  parentApi?: unknown
+): Promise<DataSource> => {
+  if (state.values_source !== ControlValuesSource.ESQL) {
+    return new DataViewSource(await dataViewsService.get(state.data_view_id ?? ''));
   }
 
-  if (!key.esqlQuery) {
+  if (!state.esql_query) {
     throw new Error(
       i18n.translate('controls.dataControl.esqlMissingQuery', {
         defaultMessage: 'Variable control is missing a query',
       })
     );
   }
-  return getSourceFromESQLQuery(key.esqlQuery, { parentApi });
+  return getSourceFromESQLQuery(state.esql_query, { parentApi });
 };

@@ -54,8 +54,8 @@ import {
   uiActionsService,
 } from '../../../services/kibana_services';
 import { DataControlEditorStrings } from '../data_control_constants';
+import type { ControlTypeFieldStatus } from '../data_control_constants';
 import { getDataViewOfSource, resolveControlSource } from '../../utils/resolve_control_source';
-import type { ControlSourceKey } from '../../utils/resolve_control_source';
 import type { DataControlEditorState } from './types';
 import type { ReopenDataControlEditorOverrides } from '../open_data_control_editor';
 import { ConfigureValuesQuery } from './configure_values_query';
@@ -108,28 +108,51 @@ const useControlActionRegistry = (): ControlActionRegistry => {
   return controlActionRegistry;
 };
 
+type ControlTypeContext = Parameters<CreateControlTypeAction['isCompatible']>[0];
+
+/**
+ * Whether each control type, by action id, can be used for the field of the context. It also gives the
+ * context that it was computed for, since the result of the previous context stays until the next one.
+ */
+const useControlTypeCompatibility = (
+  controlActionRegistry: ControlActionRegistry,
+  controlTypeContext: ControlTypeContext
+) =>
+  useAsync(async () => {
+    const isCompatible: { [actionId: string]: boolean } = {};
+    await asyncForEach(Object.values(controlActionRegistry), async (action) => {
+      isCompatible[action.id] = await action.isCompatible(controlTypeContext);
+    });
+    return { isCompatible, forContext: controlTypeContext };
+  }, [controlActionRegistry, controlTypeContext]);
+
+const getFieldStatus = (
+  fieldName: string | undefined,
+  source: FilterableSource | undefined
+): ControlTypeFieldStatus => {
+  if (!fieldName) return 'noField';
+  if (source && !source.getFieldByName(fieldName)) return 'notInSource';
+  return 'incompatible';
+};
+
 const CompatibleControlTypesComponent = ({
-  field_name,
-  source,
+  controlActionRegistry,
+  controlTypeContext,
+  isCompatible,
   selectedControlType: selectedAction,
   setSelectedControlType: setSelectedAction,
-}: Partial<DataControlEditorState> & {
-  source?: FilterableSource;
+}: {
+  controlActionRegistry: ControlActionRegistry;
+  controlTypeContext: ControlTypeContext;
+  /** Whether each control type, by action id, can be used for the field of the context */
+  isCompatible: { [actionId: string]: boolean };
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
-  const controlActionRegistry = useControlActionRegistry();
-  const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
-
-  const controlTypeContext = useMemo(
-    () => ({
-      trigger: triggers[CONTROL_MENU_TRIGGER],
-      embeddable: undefined, // parentApi isn't necessary for this
-      state: { field_name },
-      source,
-    }),
-    [field_name, source]
-  );
+  const {
+    state: { field_name },
+    source,
+  } = controlTypeContext;
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
     // Destructuring `a` and `b` in the sort() call messes with internal binding of `this` within the underlying
@@ -141,18 +164,6 @@ const CompatibleControlTypesComponent = ({
         : orderComparison;
     });
   }, [controlActionRegistry]);
-
-  useEffect(() => {
-    const asyncGetCompatibility = async () => {
-      const compatibilityMap: { [type: string]: boolean } = {};
-      await asyncForEach(Object.values(controlActionRegistry ?? {}), async (action) => {
-        const compatible = await action.isCompatible(controlTypeContext);
-        compatibilityMap[action.id] = compatible;
-      });
-      setIsCompatible(compatibilityMap);
-    };
-    asyncGetCompatibility();
-  }, [controlActionRegistry, controlTypeContext]);
 
   return (
     <EuiSkeletonRectangle isLoading={!sortedActionArray.length} width="100px" height="100px">
@@ -183,9 +194,7 @@ const CompatibleControlTypesComponent = ({
               key={`disabled__${action.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
-                  fieldSelected: Boolean(field_name),
-                  fieldInSource:
-                    source && field_name ? Boolean(source.getFieldByName(field_name)) : undefined,
+                  fieldStatus: getFieldStatus(field_name, source),
                   controlType: action.type,
                 }
               )}
@@ -251,27 +260,26 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     return dataViewsService.getIdsWithTitle();
   });
 
-  // What the data source of the control is read from: the selected data view in field mode, and the
-  // query in query mode. The query only counts after it has run successfully, so that the source is
-  // not requested on every keystroke.
-  const sourceKey = useMemo<ControlSourceKey | undefined>(() => {
-    if (isESQLValuesSource) {
-      return esqlQueryValidation
-        ? { valuesSource: ControlValuesSource.ESQL, esqlQuery: editorState.esql_query ?? '' }
-        : undefined;
-    }
-    return editorState.data_view_id
-      ? { valuesSource: ControlValuesSource.FIELD, dataViewId: editorState.data_view_id }
-      : undefined;
-  }, [isESQLValuesSource, esqlQueryValidation, editorState.esql_query, editorState.data_view_id]);
+  // A query has a data source once it has run, so that it is not requested on every keystroke
+  const canResolveSource = isESQLValuesSource ? esqlQueryValidation : !!editorState.data_view_id;
 
   const {
     loading: dataSourceLoading,
     value: controlSource,
     error: fieldListError,
   } = useAsync(
-    async () => (sourceKey ? resolveControlSource(sourceKey, { parentApi }) : undefined),
-    [sourceKey]
+    async () =>
+      canResolveSource
+        ? resolveControlSource(
+            {
+              values_source: editorState.values_source,
+              data_view_id: editorState.data_view_id,
+              esql_query: editorState.esql_query,
+            },
+            { parentApi }
+          )
+        : undefined,
+    [canResolveSource, editorState.values_source, editorState.data_view_id, editorState.esql_query]
   );
   const selectedSource = controlSource?.filterableSource;
   // only a field has a data view to pick the field from
@@ -339,38 +347,44 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     [isESQLValuesSource, valuesSourceValid]
   );
 
+  const controlTypeContext = useMemo(
+    () => ({
+      trigger: triggers[CONTROL_MENU_TRIGGER],
+      embeddable: undefined, // parentApi isn't necessary for this
+      state: { field_name: editorState.field_name },
+      source: selectedSource,
+    }),
+    [editorState.field_name, selectedSource]
+  );
+  const { value: compatibility } = useControlTypeCompatibility(
+    controlActionRegistry,
+    controlTypeContext
+  );
+
   /**
    * make sure that the field is compatible with the selected control type and, if it's not, reset the
    * selected control type to the **first** compatible control type. It needs the source of the field, which
    * a query only has after it has run.
    */
   useEffect(() => {
+    if (!compatibility || compatibility.forContext !== controlTypeContext) return;
     if (!selectedSource || !editorState.field_name) return;
-    let cancelled = false;
-    const controlContext = {
-      trigger: triggers[CONTROL_MENU_TRIGGER],
-      embeddable: undefined,
-      state: { field_name: editorState.field_name },
-      source: selectedSource,
-    };
-    (async () => {
-      if (
-        selectedControlType &&
-        (await controlActionRegistry[selectedControlType]?.isCompatible(controlContext))
-      ) {
-        return;
-      }
-      for (const action of Object.values(controlActionRegistry)) {
-        if (await action?.isCompatible(controlContext)) {
-          if (!cancelled) setSelectedControlType(action.type);
-          return;
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [controlActionRegistry, selectedSource, editorState.field_name, selectedControlType]);
+    const selectedAction = selectedControlType
+      ? controlActionRegistry[selectedControlType]
+      : undefined;
+    if (selectedAction && compatibility.isCompatible[selectedAction.id]) return;
+    const firstCompatible = Object.values(controlActionRegistry).find(
+      (action) => compatibility.isCompatible[action.id]
+    );
+    if (firstCompatible) setSelectedControlType(firstCompatible.type);
+  }, [
+    compatibility,
+    controlTypeContext,
+    controlActionRegistry,
+    selectedSource,
+    editorState.field_name,
+    selectedControlType,
+  ]);
 
   const onChangeField = useCallback(
     (nextFieldName: string, nextFieldDisplayName?: string) => {
@@ -518,8 +532,9 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* wrapping in `div` so that focus gets passed properly to the form row */}
             <div>
               <CompatibleControlTypesComponent
-                source={selectedSource}
-                field_name={editorState.field_name}
+                controlActionRegistry={controlActionRegistry}
+                controlTypeContext={controlTypeContext}
+                isCompatible={compatibility?.isCompatible ?? {}}
                 selectedControlType={selectedControlType}
                 setSelectedControlType={setSelectedControlType}
               />

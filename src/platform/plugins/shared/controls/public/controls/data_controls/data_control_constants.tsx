@@ -24,6 +24,9 @@ FROM metrics-*
 | STATS BY host.name
 */`;
 
+/** Why a control type cannot be used: there is no field, it is not a field of the source, or its type does not fit */
+export type ControlTypeFieldStatus = 'noField' | 'notInSource' | 'incompatible';
+
 export const DataControlEditorStrings = {
   manageControl: {
     getFlyoutCreateTitle: () =>
@@ -60,16 +63,13 @@ export const DataControlEditorStrings = {
           defaultMessage: 'Control type',
         }),
       getControlTypeErrorMessage: ({
-        fieldSelected,
-        fieldInSource,
+        fieldStatus,
         controlType,
       }: {
-        fieldSelected?: boolean;
-        /** False when the field is not a field of the source, as for a column that a query renames */
-        fieldInSource?: boolean;
+        fieldStatus: ControlTypeFieldStatus;
         controlType?: string;
       }) => {
-        if (!fieldSelected) {
+        if (fieldStatus === 'noField') {
           return i18n.translate(
             'controls.controlGroup.manageControl.dataSource.controlTypErrorMessage.noField',
             {
@@ -78,7 +78,7 @@ export const DataControlEditorStrings = {
           );
         }
 
-        if (fieldInSource === false) {
+        if (fieldStatus === 'notInSource') {
           return i18n.translate(
             'controls.controlGroup.manageControl.dataSource.controlTypeErrorMessage.fieldNotInSource',
             {

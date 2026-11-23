@@ -37,8 +37,8 @@ describe('resolveControlSource', () => {
 
   it('loads the data view of a field, without reading any query', async () => {
     const { dataSource, filterableSource } = await resolveControlSource({
-      valuesSource: ControlValuesSource.FIELD,
-      dataViewId: 'myDataViewId',
+      values_source: ControlValuesSource.FIELD,
+      data_view_id: 'myDataViewId',
     });
 
     expect(getDataViewOfSource(dataSource)).toBe(dataView);
@@ -50,7 +50,7 @@ describe('resolveControlSource', () => {
   it('derives the source of a query from the query, without loading a data view by id', async () => {
     const parentApi = {};
     const { dataSource, filterableSource } = await resolveControlSource(
-      { valuesSource: ControlValuesSource.ESQL, esqlQuery: 'FROM logs | STATS BY os' },
+      { values_source: ControlValuesSource.ESQL, esql_query: 'FROM logs | STATS BY os' },
       { parentApi }
     );
 
@@ -64,7 +64,7 @@ describe('resolveControlSource', () => {
 
   it('fails for a query control without a query', async () => {
     await expect(
-      resolveControlSource({ valuesSource: ControlValuesSource.ESQL, esqlQuery: '' })
+      resolveControlSource({ values_source: ControlValuesSource.ESQL, esql_query: '' })
     ).rejects.toThrow('Variable control is missing a query');
   });
 

@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { TimeRange } from '@kbn/es-query';
-import { DataViewSource } from '@kbn/data-source';
+import { EsqlSource } from '@kbn/data-source';
 import { createOptionsListControlAction } from '../../../actions/create_options_list_action';
 import { createRangeSliderControlAction } from '../../../actions/create_range_slider_action';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -27,7 +27,7 @@ import {
   getMockedSearchControlFactory,
 } from '../mocks/factory_mocks';
 
-import { dataViewsService, uiActionsService } from '../../../services/kibana_services';
+import { dataService, dataViewsService, uiActionsService } from '../../../services/kibana_services';
 import { DataControlEditor } from './data_control_editor';
 import type { Writable } from '@kbn/utility-types';
 import type { CreateControlTypeAction } from '../../../actions/control_panel_actions';
@@ -38,23 +38,14 @@ jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: () => <div data-test-subj="mock-esql-editor" />,
 }));
 
-const mockGetSourceFromESQLQuery = jest.fn();
-jest.mock('../../utils/get_source_from_esql_query', () => ({
-  getSourceFromESQLQuery: (...args: unknown[]) => mockGetSourceFromESQLQuery(...args),
-}));
-
-const mockGetESQLSingleColumnValues = jest.fn();
-jest.mock('../../../../common/options_list/get_esql_single_column_values', () => {
-  const { getESQLSingleColumnValues } = jest.requireActual(
-    '../../../../common/options_list/get_esql_single_column_values'
+// the response of the ES|QL search, which returns a single column
+const mockQueryResult = (column: string) => {
+  dataService.search.search = jest.fn().mockReturnValue(
+    of({
+      rawResponse: { columns: [{ name: column, type: 'keyword' }], values: [['linux']] },
+    })
   );
-  return {
-    getESQLSingleColumnValues: Object.assign(
-      (...args: unknown[]) => mockGetESQLSingleColumnValues(...args),
-      getESQLSingleColumnValues
-    ),
-  };
-});
+};
 
 const mockDataView = createStubDataView({
   spec: {
@@ -262,8 +253,20 @@ describe('Data control editor', () => {
       // Toggling ES|QL on requires a successful query run before the control can be saved.
       expect(saveButton).toHaveAttribute('aria-disabled', 'true');
     });
+    test('asks to select a field first, as long as there is none', async () => {
+      const controlEditor = await mountComponent({});
+
+      await act(async () => {
+        fireEvent.mouseOver(
+          controlEditor.getByTestId('create__optionsList').parentElement as HTMLElement
+        );
+      });
+
+      expect(await controlEditor.findByText('Select a field first.')).toBeInTheDocument();
+    });
+
     test('does not read the source of a query that has not run yet', async () => {
-      mockGetSourceFromESQLQuery.mockClear();
+      dataViewsService.find = jest.fn();
       const controlEditor = await mountComponent({});
       await selectField(controlEditor, 'machine.os.raw');
 
@@ -271,7 +274,7 @@ describe('Data control editor', () => {
         fireEvent.click(controlEditor.getByTestId('control-editor-input-esql'));
       });
 
-      expect(mockGetSourceFromESQLQuery).not.toHaveBeenCalled();
+      expect(dataViewsService.find).not.toHaveBeenCalled();
     });
   });
 
@@ -289,16 +292,18 @@ describe('Data control editor', () => {
     };
 
     const realActions = [createOptionsListControlAction(), createRangeSliderControlAction()];
-    const mountQueryControl = (
-      source: typeof esqlSource,
-      column: string,
-      controlType = 'options_list_control'
-    ) => {
-      mockGetSourceFromESQLQuery.mockResolvedValue(source);
-      mockGetESQLSingleColumnValues.mockResolvedValue({
-        values: ['linux'],
-        column: { name: column, type: 'keyword' },
-      });
+    let forDatasetSpy: jest.SpyInstance;
+    beforeEach(() => {
+      // no saved data view reads what the query reads, so its source is an ES|QL source
+      dataViewsService.find = jest.fn().mockResolvedValue([]);
+      forDatasetSpy = jest
+        .spyOn(EsqlSource, 'forDataset')
+        .mockResolvedValue(esqlSource as unknown as EsqlSource);
+    });
+    afterEach(() => forDatasetSpy.mockRestore());
+
+    const mountQueryControl = (column: string, controlType = 'options_list_control') => {
+      mockQueryResult(column);
       return mountComponent({
         controlId: 'myControl',
         controlType,
@@ -322,7 +327,7 @@ describe('Data control editor', () => {
     };
 
     test('explains that a range slider needs a number field, for a field of the source that is not one', async () => {
-      const controlEditor = await mountQueryControl(esqlSource, 'os');
+      const controlEditor = await mountQueryControl('os');
       await waitFor(() => {
         expect(controlEditor.getByTestId('create__options_list_control')).toBeEnabled();
       });
@@ -335,7 +340,7 @@ describe('Data control editor', () => {
     });
 
     test('explains that the field is not in the source, for a column that the query renames', async () => {
-      const controlEditor = await mountQueryControl(esqlSource, 'renamed');
+      const controlEditor = await mountQueryControl('renamed');
       await waitFor(() => {
         expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
       });
@@ -348,7 +353,7 @@ describe('Data control editor', () => {
     });
 
     test('selects a compatible type once the query has resolved its source', async () => {
-      const controlEditor = await mountQueryControl(esqlSource, 'os', 'range_slider_control');
+      const controlEditor = await mountQueryControl('os', 'range_slider_control');
 
       await waitFor(() => {
         expect(getPressedAttribute(controlEditor, 'create__options_list_control')).toBe('true');
@@ -357,11 +362,9 @@ describe('Data control editor', () => {
     });
 
     test('goes back to the data view that the query reads, with its field, in field mode', async () => {
-      mockGetSourceFromESQLQuery.mockResolvedValue(new DataViewSource(mockDataView));
-      mockGetESQLSingleColumnValues.mockResolvedValue({
-        values: ['linux'],
-        column: { name: 'machine.os.raw', type: 'keyword' },
-      });
+      // a saved data view reads what the query reads
+      dataViewsService.find = jest.fn().mockResolvedValue([{ id: mockDataView.id }]);
+      mockQueryResult('machine.os.raw');
       const onSave = jest.fn();
       const controlEditor = await mountComponent({
         controlId: 'myControl',
@@ -394,11 +397,7 @@ describe('Data control editor', () => {
     });
 
     test('does not use the id of the source as a data view, neither in field mode nor for the next control', async () => {
-      mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
-      mockGetESQLSingleColumnValues.mockResolvedValue({
-        values: ['linux'],
-        column: { name: 'os', type: 'keyword' },
-      });
+      mockQueryResult('os');
       const onSave = jest.fn();
       const controlEditor = await mountComponent({
         controlId: 'myControl',
