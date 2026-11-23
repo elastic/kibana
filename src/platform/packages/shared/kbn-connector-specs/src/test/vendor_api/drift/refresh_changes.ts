@@ -66,6 +66,8 @@ const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(
 const isParameter = (id: string): boolean => /parameter/.test(id);
 
 const LOCATION = /^(query|header|path|cookie)$/;
+// How a parameter's location is written, so that it is not mistaken for a part of a body.
+const PARAMETER_LOCATION = /^(query|header|path|cookie) parameter$/;
 
 /** What a change is about, and what the text says of it: for a parameter, after its location. */
 const subjectOf = ({
@@ -76,7 +78,7 @@ const subjectOf = ({
   if (isParameter(id)) {
     const at = names.findIndex((name) => LOCATION.test(name));
     if (at >= 0) {
-      return { name: names[at + 1], rest: names.slice(at + 2), location: names[at] };
+      return { name: names[at + 1], rest: names.slice(at + 2), location: `${names[at]} parameter` };
     }
   }
   return { name: names[0], rest: names.slice(1) };
@@ -273,7 +275,7 @@ const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 // The location of a parameter comes before what changed about it.
 const byLocationFirst = (a: string, b: string): number =>
-  Number(LOCATION.test(b)) - Number(LOCATION.test(a)) || byText(a, b);
+  Number(PARAMETER_LOCATION.test(b)) - Number(PARAMETER_LOCATION.test(a)) || byText(a, b);
 
 /** Lines of a diff that are always shown whole. */
 interface FixedPart {

@@ -215,7 +215,7 @@ describe('describeChanges', () => {
           'string | null'
         ),
       ])
-    ).toEqual(object('Request', '- branch: string | null', '+ branch: string (query)'));
+    ).toEqual(object('Request', '- branch: string | null', '+ branch: string (query parameter)'));
   });
 
   it('does not say in brackets what the two lines already say', () => {
@@ -276,7 +276,10 @@ describe('describeChanges', () => {
     ]);
 
     expect(lines).toEqual(
-      object('Request', '! branch: string (query, minLength set to 1, no longer nullable)')
+      object(
+        'Request',
+        '! branch: string (query parameter, minLength set to 1, no longer nullable)'
+      )
     );
   });
 
@@ -340,7 +343,7 @@ describe('describeChanges', () => {
     expect(lines).toEqual(
       areas(
         object('Response', '- count: integer'),
-        object('Request', '- alertId (query)', '- limit: integer'),
+        object('Request', '- alertId (query parameter)', '- limit: integer'),
         list('Schemas', ['removed', '- statusGroupFilter'])
       )
     );
