@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { slack2Message } from '@kbn/connector-topics';
+
 export const SLACK_CONNECTOR_TYPE_ID = '.slack2' as const;
 
 export const SLACK_MESSAGE_EVENT_KEY = 'message' as const;
+/** Public event id for a Slack message. Same string as the `slack2.message` topic name. */
+export const SLACK_MESSAGE_EVENT_ID = slack2Message.name;
 export const SLACK_APP_MENTION_EVENT_KEY = 'app_mention' as const;
 export const SLACK_REACTION_ADDED_EVENT_KEY = 'reaction_added' as const;
 export const SLACK_FILE_SHARED_EVENT_KEY = 'file_shared' as const;
