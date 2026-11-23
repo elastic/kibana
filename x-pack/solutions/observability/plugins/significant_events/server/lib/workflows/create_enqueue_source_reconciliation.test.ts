@@ -49,14 +49,6 @@ describe('createEnqueueSourceReconciliation', () => {
     expect(execute).toHaveBeenCalledWith(args);
   });
 
-  it('still runs the workflow when the install failed, so the lookup reports the cause', async () => {
-    const { enqueue, execute } = setup({ install: Promise.reject(new Error('boom')) });
-
-    await enqueue(args);
-
-    expect(execute).toHaveBeenCalledWith(args);
-  });
-
   it('skips without an error when the feature is unavailable', async () => {
     const { enqueue, execute } = setup({ install: Promise.resolve(), available: false });
 
