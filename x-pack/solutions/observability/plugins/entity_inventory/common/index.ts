@@ -75,16 +75,76 @@ export interface UnavailableColumn {
   field: string;
 }
 
-/** One plan query sent to Elasticsearch; a failed query has null `took` and `documentsFound` and `rowCount` 0. */
-export interface ListQueryDiagnostic {
+/** Shard counts summed over every cluster of `_clusters.details`. */
+export interface QueryShardStats {
+  total: number;
+  successful: number | null;
+  skipped: number | null;
+  failed: number | null;
+}
+
+/**
+ * The execution metadata Elasticsearch returns for one ES|QL query; each field is null when the
+ * query failed or the response did not carry it.
+ */
+export interface QueryExecutionStats {
+  /** Elasticsearch cluster time in milliseconds, not wall time. */
+  took: number | null;
+  /** Documents Elasticsearch visited, not matched. */
+  documentsFound: number | null;
+  /** Field values Elasticsearch read. */
+  valuesLoaded: number | null;
+  /** Rows every operator emitted, summed over every driver. */
+  rowsEmitted: number | null;
+  /** CPU time of every driver, in nanoseconds. */
+  cpuNanos: number | null;
+  /** Elapsed time of every driver, summed, in nanoseconds. */
+  driverNanos: number | null;
+  bytesRead: number | null;
+  shards: QueryShardStats | null;
+  /** Null when the query failed. */
+  isPartial: boolean | null;
+}
+
+/** One plan query sent to Elasticsearch; a failed query has null stats and `rowCount` 0 (see `errors`). */
+export interface ListQueryDiagnostic extends QueryExecutionStats {
   indexPattern: string;
   engine: QueryEngine;
   esql: string;
   params: NamedParams;
-  /** Elasticsearch cluster time in milliseconds, not wall time. */
-  took: number | null;
-  documentsFound: number | null;
   rowCount: number;
+}
+
+/**
+ * What the probe of one source pattern decided: `time_series` and `no_time_series` plan queries,
+ * `failed` runs none (see `errors`).
+ */
+export type ProbeOutcomeKind = 'time_series' | 'no_time_series' | 'failed';
+
+/** One probe the planning sent to Elasticsearch; stats are null when it threw, a verification error included. */
+export interface ListProbeDiagnostic extends QueryExecutionStats {
+  indexPattern: string;
+  esql: string;
+  params: NamedParams;
+  outcome: ProbeOutcomeKind;
+}
+
+/**
+ * Server phases of one `_list` call, in fractional milliseconds of monotonic time. The phases run
+ * one after another, so `definitionMs + planningMs + queriesMs + processingMs` is about `totalMs`.
+ */
+export interface ListTimings {
+  /** Looking up the type's definition. */
+  definitionMs: number;
+  /** Probes and query generation. */
+  planningMs: number;
+  /** The concurrent probes alone; part of `planningMs`. */
+  probesMs: number;
+  /** The concurrent plan queries, from the first sent to the last settled, including converting each response to rows. */
+  queriesMs: number;
+  /** Interpreting, merging, ordering, limiting and filling the rows. */
+  processingMs: number;
+  totalMs: number;
 }
 
 /** One row per entity seen in the window, merged across the type's sources. */
@@ -96,10 +156,43 @@ export interface ListResponse {
   provenance: Provenance;
   /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
   truncated: boolean;
-  /** Wall time of the whole request in milliseconds, probes included. */
-  took: number;
-  /** One entry per plan query sent, in plan order; probes are not listed. */
+  /** One entry per plan query sent, in plan order; probes are in `probes`. */
   queries: ListQueryDiagnostic[];
+  /** One entry per distinct source pattern probed, in source order. */
+  probes: ListProbeDiagnostic[];
+  timings: ListTimings;
   errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
+}
+
+/** The body the inventory sends to Elasticsearch's `POST /_query` for one query. */
+export interface EsqlRequestBody {
+  query: string;
+  params: NamedParams;
+  include_execution_metadata: true;
+}
+
+/** One probe the planning ran, and what it decided. */
+export interface PlanProbe {
+  indexPattern: string;
+  request: EsqlRequestBody;
+  /** Whether the probe found a readable time-series index; null when the probe failed (see `errors`). */
+  hasTimeSeries: boolean | null;
+}
+
+/** One list query `_list` would send for the same request. */
+export interface PlanQuery {
+  indexPattern: string;
+  engine: QueryEngine;
+  request: EsqlRequestBody;
+}
+
+/** The probes the planning ran and the list queries `_list` would send; only the probes are executed. */
+export interface PlanResponse {
+  /** One entry per distinct source pattern, in source order. */
+  probes: PlanProbe[];
+  /** One entry per plan query `_list` would send, in plan order; a source whose probe failed has none. */
+  queries: PlanQuery[];
+  /** One entry per source whose probe failed. */
+  errors: SourceError[];
 }

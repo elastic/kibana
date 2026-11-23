@@ -14,7 +14,7 @@ describe('registerOsqueryWorkflowSteps (server)', () => {
   const asPlugin = (plugin: ReturnType<typeof setup>) =>
     plugin as unknown as WorkflowsExtensionsServerPluginSetup;
 
-  it('registers runQuery with the flag on and the plugin present', () => {
+  it('registers runQuery and runPack with the flag on and the plugin present', () => {
     const plugin = setup();
 
     const registered = registerOsqueryWorkflowSteps({
@@ -25,6 +25,7 @@ describe('registerOsqueryWorkflowSteps (server)', () => {
     expect(registered).toBe(true);
     expect(plugin.registerStepDefinition.mock.calls.map(([definition]) => definition.id)).toEqual([
       'osquery.runQuery',
+      'osquery.runPack',
     ]);
   });
 

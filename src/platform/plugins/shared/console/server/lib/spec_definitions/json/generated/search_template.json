@@ -54,7 +54,8 @@
     ],
     "patterns": [
       "_search/template",
-      "{index}/_search/template"
+      "{index}/_search/template",
+      "{index}/{_slice}/_search/template"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-template",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search-template",

@@ -63,6 +63,8 @@ const createHandlerParams = ({
 }) => {
   const uiSettingsClient = {
     getAll: jest.fn().mockResolvedValue(spaceSettings),
+    get: jest.fn(async (key: string) => spaceSettings[key]),
+    set: jest.fn().mockResolvedValue(undefined),
     setMany: jest.fn().mockResolvedValue(undefined),
   };
   const scheduledWorkflowService = {
@@ -126,13 +128,16 @@ describe('scheduled significant events discovery settings route', () => {
     await route.handler(handlerParams);
 
     expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TARGET_COVERAGE_MINUTES]: 60,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW_INTERVAL_MINUTES]: 15,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE]: 6,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES]: 4,
     });
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      true
+    );
     expect(installDiscoveryAgentsMock).toHaveBeenCalledWith({
       agentBuilder,
       spaceId: 'space-a',
@@ -175,9 +180,11 @@ describe('scheduled significant events discovery settings route', () => {
 
     await route.handler(handlerParams);
 
-    expect(uiSettingsClient.setMany).toHaveBeenCalledWith({
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
-    });
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      false
+    );
     expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith({
       enabled: false,
@@ -381,10 +388,21 @@ describe('scheduled significant events discovery settings route', () => {
     await expect(route.handler(handlerParams)).rejects.toThrow('workflow sync failed');
 
     expect(uiSettingsClient.setMany).toHaveBeenNthCalledWith(1, {
-      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
       [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 45,
     });
-    expect(uiSettingsClient.setMany).toHaveBeenNthCalledWith(2, previousSettings);
+    expect(uiSettingsClient.set).toHaveBeenNthCalledWith(
+      1,
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      true
+    );
+    expect(uiSettingsClient.set).toHaveBeenNthCalledWith(
+      2,
+      OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
+      false
+    );
+    expect(uiSettingsClient.setMany).toHaveBeenNthCalledWith(2, {
+      [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
+    });
   });
 
   it('rejects with 409 and persists nothing when enabling while paused', async () => {
@@ -399,6 +417,7 @@ describe('scheduled significant events discovery settings route', () => {
     });
     // The guard runs before any persistence or reconciliation.
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
   });
 
@@ -415,6 +434,7 @@ describe('scheduled significant events discovery settings route', () => {
       output: { statusCode: 409 },
     });
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
   });
 
   it('rejects with 409 when disabling scheduled discovery while paused', async () => {
@@ -430,6 +450,7 @@ describe('scheduled significant events discovery settings route', () => {
       output: { statusCode: 409 },
     });
     expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(uiSettingsClient.set).not.toHaveBeenCalled();
     expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
   });
 });

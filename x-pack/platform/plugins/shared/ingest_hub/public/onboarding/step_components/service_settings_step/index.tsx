@@ -48,7 +48,11 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import type { SignalFilter } from '../services_step/use_services_step';
 import { StepFooter } from '../step_footer';
-import { supportsPolicySetting } from '../../common/policy_settings';
+import {
+  serializeCustomFields,
+  supportsPolicySetting,
+  type CustomField,
+} from '../../common/policy_settings';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -73,6 +77,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     policySettings,
     isProxyUrlSupported,
     proxyUrlError,
+    isReroutePermissionsSupported,
+    reroutePermissions,
+    reroutePermissionsError,
+    isCustomFieldsSupported,
+    hasServicesIgnoringCustomFields,
+    customFields,
+    customFieldsErrors,
     setPolicySetting,
     conditionErrors,
     bareNamePackage,
@@ -151,6 +162,16 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
   const setProxyUrl = useCallback(
     (proxyUrl: string) => setPolicySetting('proxy_url', proxyUrl),
+    [setPolicySetting]
+  );
+
+  const setReroutePermissions = useCallback(
+    (permissions: string[]) => setPolicySetting('additional_datastreams_permissions', permissions),
+    [setPolicySetting]
+  );
+
+  const setCustomFields = useCallback(
+    (fields: CustomField[]) => setPolicySetting('global_data_tags', serializeCustomFields(fields)),
     [setPolicySetting]
   );
 
@@ -298,7 +319,9 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       descriptionError ||
       namespaceError ||
       proxyUrlError ||
-      conditionErrors
+      conditionErrors ||
+      reroutePermissionsError ||
+      customFieldsErrors
     ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
@@ -326,6 +349,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespaceError,
     proxyUrlError,
     conditionErrors,
+    reroutePermissionsError,
+    customFieldsErrors,
     incompleteInstances,
   ]);
 
@@ -616,6 +641,25 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 value: policySettings.condition ?? '',
                 onChange: setCondition,
                 errors: conditionErrors,
+              }
+            : undefined
+        }
+        reroutePermissions={
+          isReroutePermissionsSupported
+            ? {
+                value: reroutePermissions,
+                onChange: setReroutePermissions,
+                error: reroutePermissionsError,
+              }
+            : undefined
+        }
+        customFields={
+          isCustomFieldsSupported
+            ? {
+                value: customFields,
+                onChange: setCustomFields,
+                errors: customFieldsErrors,
+                hasServicesIgnoringCustomFields,
               }
             : undefined
         }
