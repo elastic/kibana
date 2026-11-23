@@ -487,6 +487,39 @@ describe('SubjectList', () => {
       );
     });
 
+    it('leaves it off the "N alerts" row when the alerts did not all come through the same thing', async () => {
+      const { services } = createShare();
+      renderList(
+        [
+          withVia(alertSubject('a-1')),
+          { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+          alertSubject('a-3'),
+        ],
+        services
+      );
+
+      await waitFor(() =>
+        expect(screen.getByTestId('investigationSubject-alerts')).toHaveAttribute('href')
+      );
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+    });
+
+    it('shows it on each listed alert instead when the alerts did not all come through the same thing', () => {
+      renderList([
+        withVia(alertSubject('a-1')),
+        { ...alertSubject('a-2'), via: { label: 'Checkout alerts' } },
+        alertSubject('a-3'),
+      ]);
+
+      expect(screen.queryByTestId('investigationSubjectVia')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('investigationSubject-alerts'));
+
+      expect(screen.getAllByTestId('investigationSubjectVia').map((el) => el.textContent)).toEqual([
+        'via Payments alerts',
+        'via Checkout alerts',
+      ]);
+    });
+
     it('navigates through the locator inside Kibana, and leaves a modified click to the browser', async () => {
       const { services, navigate } = createShare();
       renderList([withVia(alertSubject('a-1'))], services);

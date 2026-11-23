@@ -19,6 +19,7 @@ import type {
   InvestigationSubjectKey,
   SubjectVia,
 } from '@kbn/agentic-investigations-plugin/common';
+import { MAX_VIA_LABEL_LENGTH, subjectViaSchema } from '@kbn/agentic-investigations-plugin/server';
 import { NIGHTSHIFT_AUTOMATION_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { NightshiftAutomationLocatorParams } from '@kbn/nightshift-shared';
 import type {
@@ -41,9 +42,6 @@ export { toSlackThreadKey };
 
 const MAX_SLACK_FIELD_LENGTH = 256;
 const MAX_SLACK_PERMALINK_LENGTH = 2048;
-// The limits of the subject document's `via`; a longer value would fail the subject write.
-const MAX_VIA_LABEL_LENGTH = 500;
-const MAX_LOCATOR_ID_LENGTH = 256;
 const MAX_AUTOMATION_ID_LENGTH = 256;
 
 /**
@@ -58,17 +56,7 @@ export const workflowSubjectInputSchema = lazySchema(() =>
     id: z.string().min(1).max(MAX_SUBJECT_ID_LENGTH),
     summary: z.string().max(MAX_EVIDENCE_TEXT_LENGTH).optional(),
     triggerType: z.enum(INVESTIGATION_SUBJECT_TRIGGER_TYPES).optional(),
-    via: z
-      .object({
-        label: z.string().min(1).max(MAX_VIA_LABEL_LENGTH),
-        locator: z
-          .object({
-            id: z.string().min(1).max(MAX_LOCATOR_ID_LENGTH),
-            params: z.record(z.string().max(128), z.json()),
-          })
-          .optional(),
-      })
-      .optional(),
+    via: subjectViaSchema.optional(),
     snapshot: investigationAlertSnapshotSchema.optional(),
     slack: z
       .object({

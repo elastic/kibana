@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
@@ -33,7 +34,6 @@ import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
-  viaLabel,
   subjectTriggerLabel,
 } from './translations';
 
@@ -277,32 +277,45 @@ const CompactRow = ({
  * What a trigger came through, as a line under the trigger's row: "via <label>", the label
  * linking to the page its locator resolves to. It sits outside the row, which is a link itself.
  */
-const ViaLine: React.FC<{ via: SubjectVia }> = ({ via: { label, locator } }) => {
+const ViaLine: React.FC<{ via: SubjectVia; isNested?: boolean }> = ({
+  via: { label, locator },
+  isNested = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { href, onClick } = useViaLink(locator);
+  // Lines up with the row's title: past the icon, and past the nesting indent too.
+  const textInset = `${euiTheme.size.xl} + ${euiTheme.size.m}`;
 
   return (
     <EuiText
       size="xs"
       color="subdued"
       data-test-subj="investigationSubjectVia"
+      data-subject-via
       css={css`
         margin-block-start: -${euiTheme.size.xs};
         padding-block-end: ${euiTheme.size.m};
-        padding-inline: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m})
+        padding-inline: calc(
+            ${euiTheme.size.base} + ${textInset} ${isNested ? `+ ${textInset}` : ''}
+          )
           ${euiTheme.size.base};
         ${euiTextTruncate()}
       `}
     >
-      {viaLabel(
-        href === undefined ? (
-          label
-        ) : (
-          <EuiLink href={href} onClick={onClick} data-test-subj="investigationSubjectViaLink">
-            {label}
-          </EuiLink>
-        )
-      )}
+      <FormattedMessage
+        id="xpack.agenticInvestigations.subjects.via"
+        defaultMessage="via {label}"
+        values={{
+          label:
+            href === undefined ? (
+              label
+            ) : (
+              <EuiLink href={href} onClick={onClick} data-test-subj="investigationSubjectViaLink">
+                {label}
+              </EuiLink>
+            ),
+        }}
+      />
     </EuiText>
   );
 };
@@ -344,10 +357,12 @@ const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): Reac
  * The row links where `useSubjectLink` says (the subject's page, else its own link); without a
  * link it is plain text.
  */
-export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
-  subject,
-  isNested = false,
-}) => {
+export const SubjectRow: React.FC<{
+  subject: SubjectRowData;
+  isNested?: boolean;
+  /** Whether the row says what the subject came through. By default only top-level rows do. */
+  showVia?: boolean;
+}> = ({ subject, isNested = false, showVia = !isNested }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
   const {
     onClick: onRowClick,
@@ -359,21 +374,19 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
 
   return (
     <>
-      <div>
-        <CompactRow
-          iconType={SUBJECT_ICONS[displayType]}
-          tone={SUBJECT_ICON_TONES[displayType]}
-          title={getSubjectTitle(subject)}
-          description={getSubjectDescription(subject, isNested)}
-          href={href}
-          isExternal={isExternal}
-          onLinkClick={onRowClick}
-          opensFlyout={canOpenFlyout}
-          isNested={isNested}
-          data-test-subj={`investigationSubject-${subject.type}`}
-        />
-        {via && !isNested && <ViaLine via={via} />}
-      </div>
+      <CompactRow
+        iconType={SUBJECT_ICONS[displayType]}
+        tone={SUBJECT_ICON_TONES[displayType]}
+        title={getSubjectTitle(subject)}
+        description={getSubjectDescription(subject, isNested)}
+        href={href}
+        isExternal={isExternal}
+        onLinkClick={onRowClick}
+        opensFlyout={canOpenFlyout}
+        isNested={isNested}
+        data-test-subj={`investigationSubject-${subject.type}`}
+      />
+      {via && showVia && <ViaLine via={via} isNested={isNested} />}
       {flyout}
     </>
   );
@@ -388,28 +401,37 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
   const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
-  // The alerts of one start come through the same thing: the first one names it.
-  const [{ via }] = alerts;
+  // Alerts added by different starts can come through different things (or none), so the row
+  // names what they came through only when they all share it; otherwise each nested alert does.
+  const sharedVia = useMemo(() => {
+    const [{ via }, ...rest] = alerts;
+    return rest.every((alert) => isEqual(alert.via, via)) ? via : undefined;
+  }, [alerts]);
 
   return (
     <>
-      <div>
-        <CompactRow
-          iconType={SUBJECT_ICONS.alert}
-          tone={SUBJECT_ICON_TONES.alert}
-          title={alertsCountLabel(alerts.length)}
-          description={TRIGGER_LABEL}
-          href={href}
-          isExternal={href !== undefined}
-          onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
-          isExpanded={href === undefined ? isExpanded : undefined}
-          data-test-subj="investigationSubject-alerts"
-        />
-        {via && <ViaLine via={via} />}
-      </div>
+      <CompactRow
+        iconType={SUBJECT_ICONS.alert}
+        tone={SUBJECT_ICON_TONES.alert}
+        title={alertsCountLabel(alerts.length)}
+        description={TRIGGER_LABEL}
+        href={href}
+        isExternal={href !== undefined}
+        onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
+        isExpanded={href === undefined ? isExpanded : undefined}
+        data-test-subj="investigationSubject-alerts"
+      />
+      {sharedVia && <ViaLine via={sharedVia} />}
       {href === undefined &&
         isExpanded &&
-        alerts.map((alert) => <SubjectRow key={subjectKey(alert)} subject={alert} isNested />)}
+        alerts.map((alert) => (
+          <SubjectRow
+            key={subjectKey(alert)}
+            subject={alert}
+            isNested
+            showVia={sharedVia === undefined}
+          />
+        ))}
     </>
   );
 };
@@ -452,7 +474,7 @@ export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
       paddingSize="none"
       css={css`
         overflow: hidden;
-        & > * + * {
+        & > * + *:not([data-subject-via]) {
           border-block-start: ${euiTheme.border.thin};
         }
       `}

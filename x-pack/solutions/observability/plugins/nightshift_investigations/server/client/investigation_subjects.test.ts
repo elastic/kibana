@@ -14,6 +14,7 @@ import {
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
+  workflowSubjectInputSchema,
 } from './investigation_subjects';
 
 const makeAlert = (id: string): AlertSnapshot => ({
@@ -289,5 +290,29 @@ describe('buildFollowUpMessage', () => {
         newAlerts: [],
       })
     ).toMatch(/^This continues the investigation[\s\S]*\n\nCheckout errors re-opened$/);
+  });
+});
+
+describe('workflowSubjectInputSchema', () => {
+  const withParams = (params: Record<string, string>) => ({
+    type: 'alert',
+    id: 'alert-1',
+    via: { label: 'Payments alerts', locator: { id: 'SOME_LOCATOR', params } },
+  });
+
+  it('accepts a via the subject store accepts', () => {
+    expect(workflowSubjectInputSchema.safeParse(withParams({ automationId: 'a-1' })).success).toBe(
+      true
+    );
+  });
+
+  it('rejects locator params the subject store would reject', () => {
+    const tooManyKeys = Object.fromEntries(
+      Array.from({ length: 51 }, (_, index) => [`key${index}`, 'x'])
+    );
+    expect(workflowSubjectInputSchema.safeParse(withParams(tooManyKeys)).success).toBe(false);
+    expect(
+      workflowSubjectInputSchema.safeParse(withParams({ automationId: 'x'.repeat(8_000) })).success
+    ).toBe(false);
   });
 });

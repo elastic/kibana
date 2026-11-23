@@ -19,7 +19,8 @@ import {
 const MAX_ID_LENGTH = 256;
 const MAX_TIMESTAMP_LENGTH = 64;
 const MAX_URL_LENGTH = 2048;
-const MAX_VIA_LABEL_LENGTH = 500;
+/** Bound on a subject's "via" label. */
+export const MAX_VIA_LABEL_LENGTH = 500;
 const MAX_LOCATOR_PARAMS_KEYS = 50;
 const MAX_LOCATOR_PARAMS_KEY_LENGTH = 128;
 /** Serialized size bound on a locator's params, which are opaque to the subject. */
