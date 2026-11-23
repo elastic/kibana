@@ -20,12 +20,9 @@ import {
   debounce,
   of,
   interval,
-  startWith,
 } from 'rxjs';
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo } from 'react';
-import { SearchSessionState, waitUntilNextSessionCompletes$ } from '@kbn/data-plugin/public';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useDatePickerContext } from './use_date_picker';
 import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
@@ -34,10 +31,6 @@ const WAIT_MS = 1000;
 
 export const useLoadingState = () => {
   const { autoRefreshTick$, autoRefreshConfig$ } = useDatePickerContext();
-  const { services } = useKibanaContextForPlugin();
-  const {
-    data: { search },
-  } = services;
   const { updateReloadRequestTime } = useReloadRequestTimeContext();
 
   const isAutoRefreshRequestPending$ = useMemo(() => new BehaviorSubject<boolean>(false), []);
@@ -133,30 +126,11 @@ export const useLoadingState = () => {
 
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        withLatestFrom(
-          search.session.state$.pipe(startWith(SearchSessionState.None)),
-          isAutoRefreshRequestPending$
-        ),
-        switchMap(([_, state, isAutoRefreshRequestPending]) => {
-          // if the current state$ value is not Completed
-          if (state === SearchSessionState.Loading) {
-            // Wait until queries using data.search complete before processing the next tick
-            // This will only be called when Lens is used in the Asset Details page
-            return waitUntilNextSessionCompletes$(search.session).pipe(
-              tap(() => {
-                updateReloadRequestTime();
-              })
-            );
+        withLatestFrom(isAutoRefreshRequestPending$),
+        tap(([, isAutoRefreshRequestPending]) => {
+          if (!isAutoRefreshRequestPending) {
+            updateReloadRequestTime();
           }
-
-          // Else immediately emit true if session state is already completed
-          return of(null).pipe(
-            tap(() => {
-              if (!isAutoRefreshRequestPending) {
-                updateReloadRequestTime();
-              }
-            })
-          );
         })
       )
     ).subscribe();
@@ -172,7 +146,6 @@ export const useLoadingState = () => {
     isAutoRefreshRequestPending$,
     requestState$,
     requestsCount$,
-    search.session,
     updateReloadRequestTime,
     waitUntilRequestsCompletes$,
   ]);
