@@ -151,8 +151,8 @@ export function getSampleDocuments({
  * `SAMPLE p` returns a varying number of rows in storage order. To preserve the
  * old random-sampling behavior, this first counts the matching population,
  * oversamples with `SAMPLE`, then has Elasticsearch keep `sampleSize` rows in
- * random order. Views expose no `_id`, so their rows are ordered by a hash of
- * `@timestamp` and rows sharing a timestamp tie.
+ * random order. The order is a salted hash of `@timestamp`, the only row key
+ * views expose, so rows sharing a timestamp tie.
  *
  * `unmappedFields` emits `SET unmapped_fields="<mode>"` so ES|QL predicates
  * can evaluate source-only fields (`'LOAD'`, replaces the older fieldCaps +
@@ -213,12 +213,12 @@ export async function getSampleDocumentsEsql({
       query = query.sample(sampleProbability);
     }
     const orderColumn = esql.col(SAMPLE_ORDER_COLUMN);
-    const rowKey = hasView ? esql.exp`${esql.col(TIME_FIELD)}::string` : esql.col('_id');
+    const timeField = esql.col(TIME_FIELD);
     // Without the salt, the same documents would win the sort on every request.
     const salt = esql.str(randomUUID());
 
     return printQuery(
-      query.pipe`EVAL ${orderColumn} = HASH("md5", CONCAT(${salt}, ${rowKey}))`
+      query.pipe`EVAL ${orderColumn} = HASH("md5", CONCAT(${salt}, ${timeField}::string))`
         .sort(SAMPLE_ORDER_COLUMN)
         .limit(limit)
         .drop(SAMPLE_ORDER_COLUMN)
