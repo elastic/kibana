@@ -507,8 +507,25 @@ describe('Color Schema', () => {
       });
     });
 
-    describe('open-ended range keys', () => {
-      it('accepts a `null` range key bound', () => {
+    describe('validation errors', () => {
+      it('throws on invalid mode in color mapping', () => {
+        const input = {
+          palette: 'kibana_palette',
+          // @ts-expect-error
+          mode: 'invalid',
+          mapping: [
+            {
+              values: ['value1'],
+              color: { type: 'color_code', value: '#FF00FF' },
+            },
+          ],
+        } satisfies ColorMappingCategoricalType;
+
+        const result = allColoringTypeSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a `null` range key bound', () => {
         const input = {
           palette: 'kibana_palette',
           mode: 'categorical',
@@ -520,10 +537,11 @@ describe('Color Schema', () => {
           ],
         };
 
-        expect(colorMappingSchema.parse(input)).toEqual(input);
+        const result = colorMappingSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
-      it('accepts a `null` bound on a nested range', () => {
+      it('rejects a `null` bound on a nested range', () => {
         const input = {
           palette: 'kibana_palette',
           mode: 'categorical',
@@ -542,25 +560,7 @@ describe('Color Schema', () => {
           ],
         };
 
-        expect(colorMappingSchema.parse(input)).toEqual(input);
-      });
-    });
-
-    describe('validation errors', () => {
-      it('throws on invalid mode in color mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          // @ts-expect-error
-          mode: 'invalid',
-          mapping: [
-            {
-              values: ['value1'],
-              color: { type: 'color_code', value: '#FF00FF' },
-            },
-          ],
-        } satisfies ColorMappingCategoricalType;
-
-        const result = allColoringTypeSchema.safeParse(input);
+        const result = colorMappingSchema.safeParse(input);
         expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
