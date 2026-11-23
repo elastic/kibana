@@ -8,18 +8,19 @@
  */
 
 /**
- * Evaluates the a conditional argument and returns one of the two values based on that.
- * @param {(boolean)} cond a boolean value
- * @param {(any|any[])} a a value or an array of any values
- * @param {(any|any[])} b a value or an array of any values
- * @return {(any|any[])} if the value of cond is truthy, return `a`, otherwise return `b`.
- * @throws `'Condition clause is of the wrong type'` if the `cond` provided is not of boolean type
- * @throws `'Missing a value'` if `a` is not provided
- * @throws `'Missing b value'` if `b` is not provided
+ * Returns one of two values, depending on a condition.
+ * @param {(boolean)} cond a condition, such as `5 > 6` or the result of a comparison function
+ * @param {(any|any[])} a the value to return if `cond` is true
+ * @param {(any|any[])} b the value to return if `cond` is false
+ * @return {(any|any[])} `a` if `cond` is true, otherwise `b`. TinyMath evaluates both `a` and `b` first, so an error in either one stops the expression. For example, `ifelse(5 < 6, 1, 1 / 0)` throws `'Cannot divide by 0'`. Comparing arrays gives one boolean. `ifelse` therefore picks one value for the whole array, not one per element.
+ * @throws `'Condition clause is of the wrong type'` if `cond` is not a boolean
+ * @throws `'Missing a value'` if `a` is not provided or is null
+ * @throws `'Missing b value'` if `b` is not provided or is null
  * @example
  * ifelse(5 > 6, 1, 0) // returns 0
- * ifelse(1 == 1, [1, 2, 3], 5) // returns [1, 2, 3]
+ * ifelse(1 == 1, 7, 5) // returns 7
  * ifelse(1 < 2, [1, 2, 3], [2, 3, 4]) // returns [1, 2, 3]
+ * ifelse(gt([0, 3], 1), 10, 20) // returns 20
  */
 
 function ifelse(cond, a, b) {

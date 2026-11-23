@@ -12,8 +12,8 @@ import {
   compareLevels,
   lowestAllowed,
   maxLevel,
-  type AclLevel,
-  type GeneralAccessLevel,
+  type AclAccess,
+  type GeneralAccess,
 } from '../levels';
 import type { AccessPolicy } from '../policy';
 import { getPrincipalKind, matchesPrincipal, type Principal } from '../principals';
@@ -25,10 +25,10 @@ export interface AclDecision {
   /** The state of the object's stored ACL. */
   state: AclState;
   /**
-   * The highest level the caller gets from general access and entries. Ownership isn't a level,
+   * The highest access the caller gets from general access and entries. Ownership isn't access,
    * so it doesn't raise this value, and neither does recovery.
    */
-  level: AclLevel;
+  access: AclAccess;
   /** Whether the caller is the owner of a valid ACL. */
   isOwner: boolean;
   /**
@@ -93,7 +93,7 @@ const RECOVERY_OPERATIONS_WITHOUT_ACL = ['view'];
  *
  * @param params The type's policy, the object's stored ACL, the caller, and whether the caller has
  * recovery authority.
- * @returns The caller's level, ownership, and allowed operations.
+ * @returns The caller's access, ownership, and allowed operations.
  */
 export const evaluateAcl = ({
   policy,
@@ -103,16 +103,16 @@ export const evaluateAcl = ({
 }: EvaluateAclParams): AclDecision => {
   const state = getAclState(acl);
 
-  let level: AclLevel = 'none';
+  let level: AclAccess = 'none';
   let isOwner = false;
   if (state === 'absent') {
-    level = policy.defaultGeneralAccessLevel;
+    level = policy.defaultGeneralAccess;
   } else if (state === 'valid' && acl) {
     level = getGeneralAccess(policy, acl);
     if (principal) {
       isOwner = matchesPrincipal(acl.owner, principal);
       for (const entry of acl.entries) {
-        const grant = lowestAllowed(entry.access, policy.entryLevels);
+        const grant = lowestAllowed(entry.access, policy.entryAccess);
         if (grant && matchesPrincipal(entry, principal)) {
           level = maxLevel(level, grant);
         }
@@ -121,10 +121,10 @@ export const evaluateAcl = ({
   }
 
   // The owner can do everything an access manager can, and only the owner can transfer ownership.
-  const ordinaryLevel: AclLevel = isOwner ? 'manage' : level;
+  const ordinaryLevel: AclAccess = isOwner ? 'manage' : level;
   const operations = new Set(
     Object.entries(policy.operations)
-      .filter(([, operation]) => compareLevels(operation.level, ordinaryLevel) <= 0)
+      .filter(([, operation]) => compareLevels(operation.access, ordinaryLevel) <= 0)
       .map(([name]) => name)
   );
   if (ordinaryLevel === 'manage') {
@@ -148,7 +148,7 @@ export const evaluateAcl = ({
 
   return {
     state,
-    level,
+    access: level,
     isOwner,
     restricted: state === 'valid' && !!acl && isNarrowerThanDefault(policy, acl),
     operations,
@@ -163,15 +163,15 @@ export const evaluateAcl = ({
  * @param policy The access policy of the object's type.
  * @param acl The object's stored ACL, or `undefined` when it has none.
  * @param operation The name of an operation that the policy defines.
- * @returns `true` when general access reaches the operation's level. `false` for an operation the
- * policy doesn't define.
+ * @returns `true` when general access reaches the access the operation needs. `false` for an
+ * operation the policy doesn't define.
  */
 export const generalAccessPermits = (
   policy: AccessPolicy,
   acl: StoredAcl | undefined,
   operation: string
 ) => {
-  const operationLevel = policy.operations[operation]?.level;
+  const operationLevel = policy.operations[operation]?.access;
   if (!operationLevel) {
     return false;
   }
@@ -182,7 +182,7 @@ export const generalAccessPermits = (
   }
 
   const generalAccess =
-    state === 'valid' && acl ? getGeneralAccess(policy, acl) : policy.defaultGeneralAccessLevel;
+    state === 'valid' && acl ? getGeneralAccess(policy, acl) : policy.defaultGeneralAccess;
   return compareLevels(generalAccess, operationLevel) >= 0;
 };
 
@@ -219,8 +219,8 @@ export const toObjectDecision = (decision: AclDecision, operation: string): AclO
  * General access of a valid ACL: the lowest stored value the type allows, or `none` when the type
  * allows none of them.
  */
-const getGeneralAccess = (policy: AccessPolicy, acl: StoredAcl): GeneralAccessLevel =>
-  lowestAllowed(acl.general_access, policy.generalAccessLevels) ?? 'none';
+const getGeneralAccess = (policy: AccessPolicy, acl: StoredAcl): GeneralAccess =>
+  lowestAllowed(acl.general.access, policy.generalAccess) ?? 'none';
 
 /**
  * Whether a valid ACL is narrower than the type's default: lower general access, or at least one
@@ -231,5 +231,5 @@ const isNarrowerThanDefault = (policy: AccessPolicy, acl: StoredAcl) =>
     (entry) =>
       getPrincipalKind(entry.type) !== undefined &&
       entry.id.length > 0 &&
-      lowestAllowed(entry.access, policy.entryLevels) !== undefined
-  ) || compareLevels(getGeneralAccess(policy, acl), policy.defaultGeneralAccessLevel) < 0;
+      lowestAllowed(entry.access, policy.entryAccess) !== undefined
+  ) || compareLevels(getGeneralAccess(policy, acl), policy.defaultGeneralAccess) < 0;

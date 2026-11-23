@@ -55,6 +55,7 @@ import {
 } from '@kbn/unified-data-table';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import { AlertEpisodeDetailsFlyout } from '../details/details_flyout';
+import type { AlertEpisodeDetailsServices } from '../details/types';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import {
   EpisodeDurationCell,
@@ -199,6 +200,7 @@ const getTableCss = (euiTheme: EuiThemeComputed, height: CSSProperties['height']
 `;
 
 export interface EpisodesTableServices {
+  agentBuilder?: AlertEpisodeDetailsServices['agentBuilder'];
   application: ApplicationStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -509,6 +511,7 @@ export const EpisodesTable = ({
           getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
+            agentBuilder: services.agentBuilder,
             data: services.data,
             http: services.http,
             expressions: services.expressions,

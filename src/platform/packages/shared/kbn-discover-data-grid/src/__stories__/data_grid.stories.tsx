@@ -9,6 +9,7 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { EuiButton, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { createDataGridColumnHelper, DataGrid, type DataGridProps } from '../..';
 
@@ -107,6 +108,56 @@ const ConfigurableDataGrid = ({ rowCount, columnCount, height }: ConfigurableDat
   );
 };
 
+interface LinkRow {
+  id: string;
+  field: string;
+  url: string;
+}
+
+const linkColumnHelper = createDataGridColumnHelper<LinkRow>();
+const linkColumns = [
+  linkColumnHelper.accessor({
+    id: 'field',
+    header: 'Field',
+    getValue: (row) => row.field,
+    getTextValue: ({ value }) => value,
+    renderCell: ({ value }) => value,
+  }),
+  linkColumnHelper.accessor({
+    id: 'url',
+    header: 'Value',
+    getValue: (row) => row.url,
+    getTextValue: ({ value }) => value,
+    renderCell: ({ value }) => (
+      <EuiLink href={value} target="_blank">
+        {value}
+      </EuiLink>
+    ),
+  }),
+];
+const linkRows = Array.from({ length: 1_000 }, (_, index) => ({
+  id: `row-${index}`,
+  field: `url_${index}`,
+  url: `https://www.elastic.co/?row=${index}`,
+}));
+const getLinkRowId = (row: LinkRow) => row.id;
+
+const LinkDataGrid = ({ height }: { height: number }) => (
+  <>
+    <EuiButton size="s">Before grid</EuiButton>
+    <EuiSpacer size="s" />
+    <DataGrid
+      ariaLabel="Fields with links"
+      columns={linkColumns}
+      rows={linkRows}
+      getRowId={getLinkRowId}
+      height={height}
+    />
+    <EuiSpacer size="s" />
+    <EuiButton size="s">After grid</EuiButton>
+  </>
+);
+
 const meta = {
   title: 'Discover/Data grid/Foundation',
   component: ExampleDataGrid,
@@ -164,4 +215,28 @@ export const ConfigurableSize: StoryObj<typeof ConfigurableDataGrid> = {
     },
   },
   render: (args) => <ConfigurableDataGrid {...args} />,
+};
+
+export const InlineLinks: StoryObj<typeof LinkDataGrid> = {
+  args: {
+    height: 480,
+  },
+  argTypes: {
+    height: {
+      control: { type: 'range', min: 160, max: 800, step: 40 },
+      description: 'Height of the contained grid viewport.',
+    },
+  },
+  parameters: {
+    controls: {
+      include: ['height'],
+    },
+    docs: {
+      description: {
+        story:
+          'Every value cell renders a live link. Tab and Shift+Tab enter the grid on its active cell and leave it without stopping on any link. Press Enter on a value cell to focus its link and Enter again to open it; Escape returns to the cell.',
+      },
+    },
+  },
+  render: (args) => <LinkDataGrid {...args} />,
 };

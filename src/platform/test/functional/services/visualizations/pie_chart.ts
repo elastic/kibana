@@ -14,6 +14,8 @@ import { FtrService } from '../../ftr_provider_context';
 
 const partitionVisChartSelector = 'partitionVisChart';
 
+type PartitionSlices = NonNullable<DebugState['partition']>[number]['partitions'];
+
 export class PieChartService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -77,7 +79,7 @@ export class PieChartService extends FtrService {
     return await this.testSubjects.findAll(`pieSlice-${name.split(' ').join('-')}`);
   }
 
-  async getSelectedSlice(name: string) {
+  async getSelectedSlice(name: string): Promise<PartitionSlices> {
     const slices = this.getSlices(
       await this.visChart.getEsChartDebugState(partitionVisChartSelector)
     );
@@ -172,7 +174,7 @@ export class PieChartService extends FtrService {
     return pieSlices;
   }
 
-  getSlices(pieChartData: DebugState) {
+  getSlices(pieChartData: DebugState): PartitionSlices {
     return pieChartData?.partition?.[0]?.partitions ?? [];
   }
 

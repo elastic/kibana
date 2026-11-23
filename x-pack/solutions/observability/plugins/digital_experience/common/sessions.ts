@@ -30,6 +30,26 @@ export const SESSIONS_INDEX_TEMPLATE_NAME = BROWSER_SESSIONS_BASE_NAME;
 export const SESSIONS_TASK_TYPE = 'digital_experience:sessions-summaries';
 export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
 
+/** Bump when the mobile summary document or its mappings change, as `SESSIONS_VERSION`. */
+export const MOBILE_SESSIONS_VERSION = 1;
+const MOBILE_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}mobile`;
+/** The EDOT Android and EDOT iOS session summaries, React Native apps' included. */
+export const MOBILE_SESSIONS_INDEX = `${MOBILE_SESSIONS_BASE_NAME}-${MOBILE_SESSIONS_VERSION}`;
+export const MOBILE_SESSIONS_INDEX_PATTERN = `${MOBILE_SESSIONS_BASE_NAME}-*`;
+export const MOBILE_SESSIONS_INDEX_TEMPLATE_NAME = MOBILE_SESSIONS_BASE_NAME;
+
+export const MOBILE_SESSIONS_TASK_TYPE = 'digital_experience:mobile-sessions-summaries';
+export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summaries';
+
+/**
+ * How often the mobile summaries are rebuilt for the last `MOBILE_SESSIONS_RECONCILE_HOURS`: the
+ * SDKs buffer events on the device and send crashes on the next launch, so events can arrive long
+ * after the regular pass summarized their time.
+ */
+export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
+/** Events that arrive later than this after their time are not summarized. */
+export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
 /**
@@ -134,6 +154,11 @@ export interface SessionsStatus {
   retentionDays: number;
 }
 
+/** The browser sessions status, and that of the mobile sessions, which their own task builds. */
+export interface SessionsStatusResponse extends SessionsStatus {
+  mobile: SessionsStatus;
+}
+
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;
 const SECONDS_PER_UNIT: Record<string, number> = { s: 1, m: 60, h: 3600 };
 
@@ -221,24 +246,74 @@ export interface SessionListResponse {
   kpis: SessionListKpis;
 }
 
-export type SessionTimelineEventKind =
-  | 'page_view'
-  | 'click'
-  | 'error'
-  | 'web_vital'
-  | 'span'
-  | 'log';
+/** The events the journey lists; the API leaves out all others, which Discover shows. */
+export type SessionTimelineEventKind = 'page_view' | 'click' | 'error' | 'web_vital';
 
 export interface SessionTimelineEvent {
   kind: SessionTimelineEventKind;
   name: string;
   timestamp: string;
   offsetMs: number;
-  durationMs: number | null;
   page: string | null;
   detail: string | null;
+  /** The stack trace of an error, when the browser reported one. */
+  stacktrace: string | null;
   traceId: string | null;
   spanId: string | null;
+}
+
+/** How long each network phase of a request took, in milliseconds; 0 when it didn't happen. */
+export interface SessionRequestPhases {
+  /** Queued before the DNS lookup or the connection started. */
+  queued: number;
+  dns: number;
+  /** TCP connection, TLS included. */
+  connect: number;
+  tls: number;
+  /** From sending the request to the first byte of the response. */
+  waiting: number;
+  download: number;
+}
+
+/** A network request of the session: the page document, a resource, or a fetch/XHR call. */
+export interface SessionRequest {
+  url: string;
+  /** The W3C `initiatorType`, e.g. `script` or `fetch`; `navigation` for the page document. */
+  initiatorType: string;
+  method: string | null;
+  statusCode: number | null;
+  failed: boolean;
+  /** When the request started, placed from the timings relative to its page's time origin. */
+  startTime: string;
+  durationMs: number;
+  /**
+   * The phases, unless the browser withheld them: a cross-origin resource whose server doesn't
+   * send `Timing-Allow-Origin` only reports when it started and ended.
+   */
+  phases: SessionRequestPhases | null;
+  /** The browser withheld the phases and sizes: `Timing-Allow-Origin` is missing. */
+  timingWithheld: boolean;
+  /** Served from the browser cache, without network transfer. */
+  cached: boolean;
+  /** Bytes over the network, headers included. */
+  transferSize: number | null;
+  /** Bytes of the response body after decompression. */
+  decodedBodySize: number | null;
+  renderBlocking: boolean;
+  protocol: string | null;
+  traceId: string | null;
+  spanId: string | null;
+  /** The index of the page visit the request belongs to, in `pageVisits`. */
+  visitIndex: number;
+}
+
+/** The milestones of a full page load, in milliseconds from the start of its navigation. */
+export interface SessionPageLoad {
+  navigationStart: string;
+  /** Time to first byte. */
+  responseStartMs: number | null;
+  domContentLoadedMs: number | null;
+  loadMs: number | null;
 }
 
 export interface SessionPageVisit {
@@ -251,6 +326,8 @@ export interface SessionPageVisit {
   clickCount: number;
   errorCount: number;
   webVitals: SessionWebVitals;
+  /** Set on a visit that loaded the page document, rather than an in-app navigation. */
+  load: SessionPageLoad | null;
 }
 
 export interface SessionDetailResponse {
@@ -258,6 +335,8 @@ export interface SessionDetailResponse {
   timeline: SessionTimelineEvent[];
   timelineTruncated: boolean;
   pageVisits: SessionPageVisit[];
+  requests: SessionRequest[];
+  requestsTruncated: boolean;
 }
 
 export const emptyWebVitals = (): SessionWebVitals => ({
