@@ -1072,27 +1072,64 @@ describe('update_agent_tags', () => {
       it('should record the agents the update skipped, as they left the space after they were selected', async () => {
         // the update went through 1 of the 2 agents
         esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
-        esClient.search.mockResolvedValue({ hits: { hits: [{ _id: 'agent1' }] } } as any);
 
         await batch('myspace');
 
-        // the agents it did select are looked up with its own query
-        expect(esClient.search).toHaveBeenCalledWith(
-          expect.objectContaining({ query: queryOf(0), size: 2 })
-        );
         // so that every agent of the batch is accounted for in the action: 1 updated, 1 skipped
         const agentAction = (esClient.create.mock.calls[0][0] as any).document;
-        expect(agentAction.agents.length).toEqual(2);
-        expect(agentAction.agents).toContain('agent2');
-        expect(
-          getErrorResults(esClient).map((result: any) => [result.agent_id, result.error])
-        ).toEqual([['agent2', 'agent not found, or not in the space of the action anymore']]);
+        expect(agentAction.agents).toHaveLength(2);
+        const errorResults = getErrorResults(esClient) as any[];
+        expect(errorResults.map((result) => result.error)).toEqual([
+          'agent not found, or not in the space of the action anymore',
+        ]);
+        expect(errorResults[0].agent_id).toEqual(agentAction.agents[1]);
       });
 
-      it('should not look for skipped agents when the update went through all of them', async () => {
+      it('should not publish the id of an agent that left the space', async () => {
+        esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
+
+        await batch('myspace');
+
+        // the action status shows the hostname of an agent by its id, whatever space it is in now
+        const agentAction = (esClient.create.mock.calls[0][0] as any).document;
+        const published = [
+          ...agentAction.agents,
+          ...(getErrorResults(esClient) as any[]).map((result) => result.agent_id),
+          ...esClient.bulk.mock.calls.flatMap(([request]) =>
+            (request as any).operations.map((operation: any) => operation.agent_id)
+          ),
+        ];
+        expect(published).not.toContain('agent1');
+        expect(published).not.toContain('agent2');
+        expect(published.filter(Boolean).every((id) => /^[0-9a-f-]{36}$/.test(id))).toBe(true);
+      });
+
+      it('should not look for the agents that were skipped, only count them from the task', async () => {
+        esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
+
         await batch('myspace');
 
         expect(esClient.search).not.toHaveBeenCalled();
+      });
+
+      it('should count the agents of the batch once, however many times an id is given', async () => {
+        esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
+
+        await updateTagsBatch(
+          soClient,
+          esClient,
+          [{ id: 'agent1' } as Agent, { id: 'agent1' } as Agent],
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: [], total: 1, spaceId: 'myspace' }
+        );
+
+        // one agent, which the update went through
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should not record agents as skipped when the update went through all of them', async () => {
+        await batch('myspace');
+
         expect(getErrorResults(esClient)).toEqual([]);
       });
 

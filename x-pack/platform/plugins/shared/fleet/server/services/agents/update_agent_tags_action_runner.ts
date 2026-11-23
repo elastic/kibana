@@ -221,26 +221,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   }
 }
 
-/**
- * The agents of a batch that the update did not select: they are not found with its query, which
- * holds the ids of the batch and the space, so they were moved out of the space or deleted.
- */
-async function getSkippedAgentIds(
-  esClient: ElasticsearchClient,
-  agentIds: string[],
-  query: UpdateByQueryRequest['query']
-): Promise<string[]> {
-  const selected = await esClient.search({
-    index: AGENTS_INDEX,
-    query,
-    size: agentIds.length,
-    _source: false,
-    ignore_unavailable: true,
-  });
-  const selectedIds = new Set(selected.hits.hits.map((hit) => hit._id));
-  return agentIds.filter((id) => !selectedIds.has(id));
-}
-
 export async function updateTagsBatch(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -461,11 +441,14 @@ export async function updateTagsBatch(
 
   // The agents the update did not go through were moved out of the space, or deleted, after they
   // were selected. They are not updated or failed, but the action counts them in its total, so
-  // without a result of their own it would never reach it.
-  const skippedAgentIds =
-    res.total !== undefined && res.total < agentIds.length
-      ? await getSkippedAgentIds(esClient, agentIds, request.query)
-      : [];
+  // without a result of their own it would never reach it. There are as many as the update went
+  // through fewer agents than the batch has: what the task says, and not a later search, which
+  // reads another snapshot and could find an agent that came back, or miss one that left after it
+  // was updated. They are recorded under generated ids, like the agents that were updated, as an
+  // id of an agent that is in another space now would show its hostname in this one.
+  const skippedAgentIds = getUuidArray(
+    res.total !== undefined ? Math.max(0, new Set(agentIds).size - res.total) : 0
+  );
 
   const updatedCount = res.updated ?? 0;
   const updatedIds = getUuidArray(updatedCount);
