@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { loggerMock } from '@kbn/logging-mocks';
+import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
 import { createMockWorkflowDataClient } from '@kbn/workflows-execution-engine/server/mocks';
 import {
@@ -197,26 +198,42 @@ describe('searchWorkflowExecutions', () => {
       );
     });
 
-    it('should forward collapse to Elasticsearch search', async () => {
+    it('uses offsets and omits the cursor when results are collapsed', async () => {
       mockWorkflowDataClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
         hits: {
-          total: { value: 0 },
-          hits: [],
+          total: { value: 4, relation: 'eq' },
+          hits: [
+            {
+              _index: '.workflows-executions',
+              _id: 'exec-1',
+              _source: { spaceId: 'default', workflowId: 'workflow-1' } as EsWorkflowExecution,
+              sort: ['2026-11-23T12:00:00.000Z', 'exec-1'],
+            },
+          ],
         },
-      } as any);
+      });
 
-      await searchWorkflowExecutions({
+      const result = await searchWorkflowExecutions({
         workflowExecutionsDataClient: mockWorkflowDataClient,
         logger: mockLogger,
         query: { term: { workflowId: 'workflow-1' } },
         collapse: { field: 'concurrencyGroupKey' },
+        page: 2,
+        size: 1,
+        from: 1,
       });
 
       expect(mockWorkflowDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           collapse: { field: 'concurrencyGroupKey' },
+          from: 1,
         })
       );
+      expect(result.results).toHaveLength(1);
+      expect(result).not.toHaveProperty('searchAfter');
     });
   });
 

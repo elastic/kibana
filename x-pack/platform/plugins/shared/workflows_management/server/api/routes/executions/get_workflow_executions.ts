@@ -173,7 +173,8 @@ export function registerGetWorkflowExecutionsRoute({
                     ],
                     {
                       meta: {
-                        description: 'Field to collapse execution results by.',
+                        description:
+                          'Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor, and requests that combine collapse with searchAfter return HTTP 400.',
                         availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                       },
                     }
@@ -242,10 +243,15 @@ export function registerGetWorkflowExecutionsRoute({
                 ),
               },
               {
-                validate: (query) =>
-                  hasSearchAfterCursor(query.searchAfter)
+                validate: (query) => {
+                  if (query.collapse && query.searchAfter !== undefined) {
+                    return 'collapse cannot be combined with searchAfter. Use page and size to paginate collapsed results.';
+                  }
+
+                  return hasSearchAfterCursor(query.searchAfter)
                     ? undefined
-                    : validatePaginationWindow(MAX_PAGE_SIZE)(query),
+                    : validatePaginationWindow(MAX_PAGE_SIZE)(query);
+                },
               }
             ),
           },

@@ -445,7 +445,10 @@ export class WorkflowExecutionQueryService {
     const size = params.size ?? DEFAULT_PAGE_SIZE;
     const from = (page - 1) * size;
     const sort = params.sortField
-      ? [{ [params.sortField]: { order: params.sortOrder ?? 'desc' } }]
+      ? ([
+          { [params.sortField]: { order: params.sortOrder ?? 'desc' } },
+          { id: 'desc' },
+        ] as estypes.Sort)
       : undefined;
 
     return searchWorkflowExecutions({

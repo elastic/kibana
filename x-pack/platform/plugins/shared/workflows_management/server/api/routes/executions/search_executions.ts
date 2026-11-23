@@ -121,7 +121,12 @@ const querySchema = schema.object(
         WorkflowExecutionCollapseFields.map((f) => schema.literal(f)) as [
           Type<WorkflowExecutionCollapseField>
         ],
-        { meta: { description: 'Field to collapse execution results by.' } }
+        {
+          meta: {
+            description:
+              'Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor.',
+          },
+        }
       )
     ),
     sortField: schema.maybe(

@@ -129,7 +129,7 @@ describe('WorkflowExecutionQueryService', () => {
       expect(call.query.bool.must).toContainEqual({ terms: { workflowId: ['wf-1', 'wf-2'] } });
       expect(call.query.bool.must_not).toContainEqual({ exists: { field: 'stepId' } });
       expect(call.collapse).toEqual({ field: 'workflowId' });
-      expect(call.sort).toEqual([{ startedAt: { order: 'desc' } }]);
+      expect(call.sort).toEqual([{ startedAt: { order: 'desc' } }, { id: 'desc' }]);
       expect(call.size).toBe(2);
     });
 

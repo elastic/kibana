@@ -532,6 +532,21 @@ describe('Execution Routes', () => {
   describe('GET /api/workflows/workflow/{workflowId}/executions (get_workflow_executions)', () => {
     const path = '/api/workflows/workflow/{workflowId}/executions';
 
+    it('requires offset pagination for collapsed executions', () => {
+      const { querySchema } = routeHandlers[`GET:${path}`];
+      expect(() =>
+        querySchema?.validate({
+          collapse: 'workflowId',
+          searchAfter: '["2026-11-23T12:00:00.000Z","exec-1"]',
+        })
+      ).toThrow('collapse cannot be combined with searchAfter');
+      expect(querySchema?.validate({ collapse: 'workflowId', page: 2, size: 1 })).toMatchObject({
+        collapse: 'workflowId',
+        page: 2,
+        size: 1,
+      });
+    });
+
     it('should register the route handler', () => {
       expect(handler('GET', path)).toBeDefined();
     });
