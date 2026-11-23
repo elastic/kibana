@@ -97,6 +97,14 @@ export function CasesTableServiceProvider(
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForCaseToBeListed(caseId: string) {
+      await retry.waitFor(`case ${caseId} to appear in the cases table`, async () => {
+        return await find.existsByCssSelector(`[data-test-subj*="cases-table-row-${caseId}"]`);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
         await this.refreshTable();
@@ -267,6 +275,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -285,6 +294,7 @@ export function CasesTableServiceProvider(
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
+      await this.waitForTableToFinishLoading();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {

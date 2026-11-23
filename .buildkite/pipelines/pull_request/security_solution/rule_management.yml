@@ -4,6 +4,7 @@ steps:
     key: security-rule-management
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -22,6 +23,7 @@ steps:
     key: security-rule-management-prebuilt-customization
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -40,6 +42,7 @@ steps:
     key: security-rule-management-prebuilt-installation
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -58,6 +61,7 @@ steps:
     key: security-rule-management-prebuilt-management
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -76,6 +80,7 @@ steps:
     key: security-rule-management-prebuilt-upgrade
     agents:
       machineType: n2-standard-4
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -27,7 +27,7 @@ describe('useDisassociateExceptionList', () => {
     jest.clearAllMocks();
   });
 
-  test('initializes hook', async () => {
+  test('initializes hook', () => {
     const { result } = renderHook(() =>
       useDisassociateExceptionList({
         http: mockKibanaHttpService,
@@ -37,6 +37,6 @@ describe('useDisassociateExceptionList', () => {
       })
     );
 
-    await waitFor(() => expect(result.current).toEqual([false, null]));
+    expect(result.current).toEqual([false, null]);
   });
 });

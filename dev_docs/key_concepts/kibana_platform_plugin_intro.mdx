@@ -49,7 +49,7 @@ Downsides to packages:
 
 1. <b>It's not <DocLink id="kibDevPrinciples" text="organized by domain"/></b>. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
 
-2. <b>Development overhead</b>. Developers have to run `yarn kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
+2. <b>Development overhead</b>. Developers have to run `pnpm kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
 
 3. <b>Development performance</b>. Rebuild time is typically longer than it would be for the same code in a plugin. The reasons are captured in [this issue](https://github.com/elastic/kibana/issues/107648). The ops team is actively working to reduce this performance increase.
 

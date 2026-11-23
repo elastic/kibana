@@ -1,0 +1,666 @@
+{
+  "sha1": "e8ffb1b736584a6fbcf9668943c13383eeb94b49",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "169a08c9385e19c-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-6b8296211e38431",
+      "title": "Stream data retention - custom retention periods should set and reset retention policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-814b247f30e495c",
+      "title": "Stream data retention - custom retention periods should persist retention value across page refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 144,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-37ff27f069ce66d",
+      "title": "Stream data retention - custom retention periods should set retention on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 159,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-29694936ba9e48b",
+      "title": "Stream data retention - custom retention periods should open DSL lifecycle phase popup and display phase details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 176,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-0d15fda96bab415",
+      "title": "Stream data retention - custom retention periods should delete a downsampling step from a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 208,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ca4e0ff6933c12-8c94049dc36ed87",
+      "title": "Stream data retention - custom retention periods should edit a downsampling step in a DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/data_retention.spec.ts",
+        "line": 271,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-90187f54e2e3a3a",
+      "title": "Stream data retention - updating failure store should edit failure store successfully for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-e067c96dd606e40",
+      "title": "Stream data retention - updating failure store should disable failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-af8c6198fedd7c4",
+      "title": "Stream data retention - updating failure store should enable failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-70fb60c8301b17f",
+      "title": "Stream data retention - updating failure store should be able to disable lifecycle for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-eb9876f48853485",
+      "title": "Stream data retention - updating failure store should inherit failure store for classic streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-62f745668288e26",
+      "title": "Stream data retention - updating failure store should edit failure store successfully for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-88fc42e9ab1cf7f",
+      "title": "Stream data retention - updating failure store should disable failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-0a9a4ab8715dfb6",
+      "title": "Stream data retention - updating failure store should enable failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 106,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-13767b8d7cf5a21",
+      "title": "Stream data retention - updating failure store should be able to disable lifecycle for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-385a4f5d5583d54",
+      "title": "Stream data retention - updating failure store should inherit failure store for wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 147,
+        "column": 9
+      }
+    },
+    {
+      "id": "53fb651372c5eda-b153942a7c6716b",
+      "title": "Stream data retention - updating failure store should not inherit failure store for root wired streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 167,
+        "column": 7
+      }
+    },
+    {
+      "id": "53fb651372c5eda-47ea8018ad86f69",
+      "title": "Stream data retention - updating failure store should set failure store retention to different value than main retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 179,
+        "column": 7
+      }
+    },
+    {
+      "id": "53fb651372c5eda-4c350e9a6f29374",
+      "title": "Stream data retention - updating failure store should persist failure store retention across page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 201,
+        "column": 7
+      }
+    },
+    {
+      "id": "53fb651372c5eda-32738bf14fc677a",
+      "title": "Stream data retention - updating failure store should cancel failure store retention edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 217,
+        "column": 7
+      }
+    },
+    {
+      "id": "53fb651372c5eda-6a00929c70c16fe",
+      "title": "Stream data retention - updating failure store should show failure store disabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 240,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-8526805a8b3a237",
+      "title": "Stream data retention - ILM policy should show ILM policy button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-1ad0be072cb4802",
+      "title": "Stream data retention - ILM policy should select and save ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-4ea166585fe5924",
+      "title": "Stream data retention - ILM policy should display selected ILM policy name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 85,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-86cc39213ea2a61",
+      "title": "Stream data retention - ILM policy should persist ILM policy selection across page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 103,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-c7552f1e2810c15",
+      "title": "Stream data retention - ILM policy should open ILM lifecycle phase popup and display phase details",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-c330aabf85a2798",
+      "title": "Stream data retention - ILM policy downsampling tests should delete a downsampling step from an ILM policy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 210,
+        "column": 9
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-a40d09b0e25f037",
+      "title": "Stream data retention - ILM policy downsampling tests should create a new policy when deleting a downsampling step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 279,
+        "column": 9
+      }
+    },
+    {
+      "id": "affa8d46c45c7b1-3e569221432d192",
+      "title": "Stream data retention - ILM policy downsampling tests should edit a policy phase, add downsampling, and save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/ilm_policy_retention.spec.ts",
+        "line": 357,
+        "column": 9
+      }
+    },
+    {
+      "id": "43016032a3903b5-792ee8fdbf8c56d",
+      "title": "Stream data retention - display values should show custom period badge when custom retention is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_display_values.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "43016032a3903b5-bc04bd4267a6a8a",
+      "title": "Stream data retention - display values should display retention metric prominently",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_display_values.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-2e15a2858773682",
+      "title": "Stream data retention - inheritance should show inherit toggle and inherit by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-201847ff03b1cf2",
+      "title": "Stream data retention - inheritance should toggle inherit mode on and off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 73,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-ded761a5a78160c",
+      "title": "Stream data retention - inheritance should handle inherit for nested child streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 94,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-c171d6ecff0d273",
+      "title": "Stream data retention - inheritance should allow override on nested child stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-875b4d30ce1cdc6",
+      "title": "Stream data retention - inheritance should handle multiple child streams inheriting from same parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 143,
+        "column": 9
+      }
+    },
+    {
+      "id": "6b9c19c7bd74c25-ad9a9e20f2d1c27",
+      "title": "Stream data retention - inheritance should reflect parent retention changes in child when inheriting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
+        "line": 165,
+        "column": 9
+      }
+    },
+    {
+      "id": "46f19b8b1b972c4-4558427c86af828",
+      "title": "Stream data retention - modal interactions should open and close modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_modal_interactions.spec.ts",
+        "line": 65,
+        "column": 9
+      }
+    },
+    {
+      "id": "46f19b8b1b972c4-0ebc6e2fb77c302",
+      "title": "Stream data retention - modal interactions should preserve values on cancel and update on save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_modal_interactions.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "6dc60bf5344ca90-60ee9f9e1af5c8c",
+      "title": "Stream data retention - storage metrics integration should update retention without affecting storage display",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_storage_metrics.spec.ts",
+        "line": 63,
+        "column": 9
+      }
+    },
+    {
+      "id": "6dc60bf5344ca90-e3d1efa7ce953e7",
+      "title": "Stream data retention - storage metrics integration should maintain retention display after page navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_storage_metrics.spec.ts",
+        "line": 76,
+        "column": 9
+      }
+    },
+    {
+      "id": "a6fbdff837dd022-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    }
+  ]
+}

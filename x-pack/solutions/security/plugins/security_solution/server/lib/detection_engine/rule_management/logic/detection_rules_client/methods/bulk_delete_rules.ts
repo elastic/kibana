@@ -6,8 +6,9 @@
  */
 
 import { chunk } from 'lodash';
+import { RulesNotFoundError } from '@kbn/alerting-plugin/server';
 import type { RulesClient, BulkOperationError } from '@kbn/alerting-plugin/server';
-import type { RuleObjectId } from '../../../../../../../common/api/detection_engine';
+import type { BulkDeleteActionSkipResult } from '@kbn/alerting-plugin/common';
 import type { RuleAlertType } from '../../../../rule_schema';
 
 // The `rulesClient.bulkDeleteRules` method converts IDs into a KQL "OR" query,
@@ -17,22 +18,76 @@ const CHUNK_SIZE = 1000;
 
 interface BulkDeleteRulesParams {
   rulesClient: RulesClient;
-  ruleIds: RuleObjectId[];
+  rules: RuleAlertType[];
+}
+
+interface BulkDeleteRulesResult {
+  rules: RuleAlertType[];
+  errors: BulkOperationError[];
+  skipped: BulkDeleteActionSkipResult[];
 }
 
 export const bulkDeleteRules = async ({
   rulesClient,
-  ruleIds,
-}: BulkDeleteRulesParams): Promise<{ rules: RuleAlertType[]; errors: BulkOperationError[] }> => {
+  rules,
+}: BulkDeleteRulesParams): Promise<BulkDeleteRulesResult> => {
+  const ruleIds = rules.map((rule) => rule.id);
+  const rulesById = new Map(rules.map((rule) => [rule.id, rule]));
   const chunks = chunk(ruleIds, CHUNK_SIZE);
   const allRules: RuleAlertType[] = [];
   const allErrors: BulkOperationError[] = [];
+  const allSkipped: BulkDeleteActionSkipResult[] = [];
 
   for (const idsChunk of chunks) {
-    const { rules, errors } = await rulesClient.bulkDeleteRules({ ids: idsChunk });
-    allRules.push(...(rules as RuleAlertType[]));
-    allErrors.push(...errors);
+    try {
+      const result = await rulesClient.bulkDeleteRules({ ids: idsChunk });
+
+      allRules.push(...(result.rules as RuleAlertType[]));
+
+      for (const error of result.errors) {
+        if (error.status === 404 && rulesById.has(error.rule.id)) {
+          allSkipped.push({
+            id: error.rule.id,
+            name: error.rule.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        } else {
+          allErrors.push(error);
+        }
+      }
+
+      // Rules that silently drop out of alerting's PIT search (deleted between
+      // our fetch and the PIT query) appear in neither rules nor errors.
+      const returnedIds = new Set([
+        ...result.rules.map((r) => r.id),
+        ...result.errors.map((e) => e.rule.id),
+      ]);
+      for (const id of idsChunk) {
+        if (!returnedIds.has(id)) {
+          allSkipped.push({
+            id,
+            name: rulesById.get(id)?.name,
+            skip_reason: 'RULE_NOT_FOUND',
+          });
+        }
+      }
+    } catch (error) {
+      // RulesNotVisibleError (rules exist but hidden by auth) and all
+      // other errors are surfaced to the caller.
+      if (!(error instanceof RulesNotFoundError)) {
+        throw error;
+      }
+
+      // Every rule in the chunk is already gone — treat as skipped.
+      for (const id of idsChunk) {
+        allSkipped.push({
+          id,
+          name: rulesById.get(id)?.name,
+          skip_reason: 'RULE_NOT_FOUND',
+        });
+      }
+    }
   }
 
-  return { rules: allRules, errors: allErrors };
+  return { rules: allRules, errors: allErrors, skipped: allSkipped };
 };

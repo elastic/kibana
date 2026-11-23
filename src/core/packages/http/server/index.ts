@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './src/hapi_request_refs';
+
 export {
   OnPreRoutingResultType,
   AuthResultType,

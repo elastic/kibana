@@ -166,6 +166,7 @@ describe('When entering data into the Console input', () => {
         hasArgs: false,
         input: 'cmd1 ',
         name: 'cmd1',
+        params: [],
       },
       commandDefinition: cmd1Command,
       input: 'cmd1 ',
