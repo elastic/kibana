@@ -71,7 +71,8 @@ export const getNamedSubqueriesAvailableTo = (
 /**
  * Returns the index sources of a source command, replacing LET references with the sources of their
  * bodies. With `maxDepth`, only the sources of inline subqueries up to that depth are read; a LET
- * reference doesn't add a level, its body is read at the depth of the reference.
+ * reference doesn't add a level, its body is read at the depth of the reference. Sources with the same
+ * name are not deduplicated.
  */
 export const resolveNamedSubquerySources = (
   sourceCommand: ESQLAstCommand | undefined,

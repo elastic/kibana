@@ -131,7 +131,8 @@ const getOuterMetadataColumns = async (
     return [];
   }
 
-  const sources = resolveNamedSubquerySources(command, namedSubqueries);
+  // One entry per index keeps the request text, and so its fields cache key, stable.
+  const sources = uniqBy(resolveNamedSubquerySources(command, namedSubqueries), 'name');
 
   if (sources.length === 0) {
     return [];
