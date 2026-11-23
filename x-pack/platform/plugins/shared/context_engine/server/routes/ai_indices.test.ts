@@ -605,6 +605,24 @@ describe('ai indices routes', () => {
       });
     });
 
+    it('returns 400 without creating when an ES|QL source is circular', async () => {
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: {
+          ...postBody,
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support' }],
+        },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            "ES|QL source 'FROM ai-index-ds-customer_support' reads from the AI index's own dest 'ai-index-ds-customer_support'",
+        },
+      });
+    });
+
     it('does not consult the actions client when there are no connector sources', async () => {
       aiIndexService.create.mockResolvedValue(undefined);
 
@@ -766,6 +784,25 @@ describe('ai indices routes', () => {
       expect(response.badRequest).toHaveBeenCalledWith({
         body: {
           message: expect.stringMatching(/^ES\|QL source 'FROM logs \| WHERE' is invalid: /),
+        },
+      });
+    });
+
+    it('returns 400 without updating when an ES|QL source is circular', async () => {
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: {
+          ...putRequest.body,
+          dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+          sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support' }],
+        },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message:
+            "ES|QL source 'FROM ai-index-ds-customer_support' reads from the AI index's own dest 'ai-index-ds-customer_support'",
         },
       });
     });
