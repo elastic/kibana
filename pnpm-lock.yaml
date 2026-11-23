@@ -8135,7 +8135,7 @@ importers:
     dependencies:
       graphql:
         specifier: ^17.0.2
-        version: 17.1.0
+        version: 17.0.2
       mongodb:
         specifier: 7.9.1
         version: 7.9.1(@mongodb-js/zstd@7.0.0)(socks@2.8.11)
@@ -18999,10 +18999,6 @@ packages:
   graphql@17.0.2:
     resolution: {integrity: sha512-FRWbddMxfkjiB7z+aQDWIR+E34xo9I8c9mtK2RPv8PmMzKRvrdsreHL/Ui/TmwHJfhHChEtsFPyMHKI+xuarQQ==}
     engines: {node: ^22.0.0 || ^24.0.0 || ^25.0.0 || >=26.0.0}
-
-  graphql@17.1.0:
-    resolution: {integrity: sha512-JKCOa7rSQNrket/JFhuua86hljUO+IIpyUHfKxlKD6FEfbrLX8jc1FDrA0KPKI+s8OspBCF/5npYccAICHXPpQ==}
-    engines: {node: ^22.0.0 || ^24.0.0 || >=26.0.0}
 
   guarded-fetch@0.1.3:
     resolution: {integrity: sha512-PSaNyJk8VJlUVEhMHPXT/Z/WgNrLBh43WaYQJiu1qvyCuPQA+kgFMNmAOxI3GU3uXrCkO/xRW11XjcswrksYOA==}
@@ -35866,8 +35862,6 @@ snapshots:
   graphql@16.15.0: {}
 
   graphql@17.0.2: {}
-
-  graphql@17.1.0: {}
 
   guarded-fetch@0.1.3:
     dependencies:
