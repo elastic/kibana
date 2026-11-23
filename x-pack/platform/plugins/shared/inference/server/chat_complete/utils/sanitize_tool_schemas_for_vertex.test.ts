@@ -148,6 +148,71 @@ describe('sanitizeToolSchemasForVertex', () => {
     });
   });
 
+  it('adds a string type to `const` properties that have no type', () => {
+    // hand-written schemas (e.g. workflow YAML) often declare `const` without a `type`
+    const schema = {
+      type: 'object',
+      properties: {
+        mode: { const: 'fast' },
+        change: {
+          oneOf: [
+            {
+              type: 'object',
+              properties: {
+                change_type: { const: 'exception' },
+                value: { type: 'string' },
+              },
+              required: ['change_type', 'value'],
+            },
+            {
+              type: 'object',
+              properties: {
+                change_type: { const: 'threshold', description: 'threshold change' },
+              },
+              required: ['change_type'],
+            },
+          ],
+        },
+      },
+      required: ['mode', 'change'],
+    } as ToolSchema;
+
+    const sanitized = sanitizeToolSchemasForVertex({
+      myTool: { description: 'tool', schema },
+    });
+
+    expect(sanitized?.myTool.schema).toEqual({
+      type: 'object',
+      properties: {
+        mode: { type: 'string', enum: ['fast'] },
+        change: {
+          anyOf: [
+            {
+              type: 'object',
+              properties: {
+                change_type: { type: 'string', enum: ['exception'] },
+                value: { type: 'string' },
+              },
+              required: ['change_type', 'value'],
+            },
+            {
+              type: 'object',
+              properties: {
+                change_type: {
+                  type: 'string',
+                  enum: ['threshold'],
+                  description: 'threshold change',
+                },
+              },
+              required: ['change_type'],
+            },
+          ],
+        },
+      },
+      required: ['mode', 'change'],
+    });
+  });
+
   it('inlines a root $ref from zod meta id before sanitizing', () => {
     const rawSchema = z.toJSONSchema(
       z
