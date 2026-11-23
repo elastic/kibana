@@ -149,8 +149,9 @@ describe('sanitizeToolSchemasForVertex', () => {
   });
 
   it('adds a string type to `const` properties that have no type', () => {
-    // hand-written schemas (e.g. workflow YAML) often declare `const` without a `type`
-    const schema = {
+    // hand-written schemas (e.g. workflow YAML) often declare `const` without a `type`,
+    // which `ToolSchema` cannot express
+    const schema: z.core.JSONSchema.JSONSchema = {
       type: 'object',
       properties: {
         mode: { const: 'fast' },
@@ -175,10 +176,10 @@ describe('sanitizeToolSchemasForVertex', () => {
         },
       },
       required: ['mode', 'change'],
-    } as ToolSchema;
+    };
 
     const sanitized = sanitizeToolSchemasForVertex({
-      myTool: { description: 'tool', schema },
+      myTool: { description: 'tool', schema: schema as ToolSchema },
     });
 
     expect(sanitized?.myTool.schema).toEqual({
