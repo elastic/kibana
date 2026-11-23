@@ -344,8 +344,9 @@ describe('AiIndexDetailPage', () => {
       services.http.get.mockResolvedValue({ ...aiIndex, sources: [] });
 
       renderWithProviders(services);
+      // The KI list mock has memories, so Connect agent is done and Skip jumps to Add sources.
       fireEvent.click(await screen.findByTestId('contextSetupWizardSkip'));
-      expect(await screen.findByTestId('contextSetupWizardPanel-connect')).toBeInTheDocument();
+      expect(await screen.findByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-settings'));
       await waitFor(() =>
@@ -353,7 +354,7 @@ describe('AiIndexDetailPage', () => {
       );
       fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-overview'));
 
-      expect(await screen.findByTestId('contextSetupWizardPanel-connect')).toBeInTheDocument();
+      expect(await screen.findByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
     });
 
     it('never shows the setup wizard for a managed AI index', async () => {

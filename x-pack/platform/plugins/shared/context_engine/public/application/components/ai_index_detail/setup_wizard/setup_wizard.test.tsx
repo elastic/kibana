@@ -176,6 +176,32 @@ describe('SetupWizard', () => {
     expect(mockSaveDescription).not.toHaveBeenCalled();
   });
 
+  it('Skip jumps over steps that are already done', () => {
+    const { onStepChange } = renderWizard({ done: { ...noneDone, connect: true } });
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
+
+    expect(screen.getByTestId('contextSetupWizardPanel-sources')).toBeInTheDocument();
+    expect(onStepChange).toHaveBeenCalledWith('sources');
+  });
+
+  it('finishes setup when every later step is done', () => {
+    const { onClose } = renderWizard({
+      initialStep: 'connect',
+      done: { ...noneDone, sources: true, describe: true },
+    });
+
+    expect(screen.getByTestId('contextSetupWizardSkip')).toHaveTextContent('Skip and finish');
+    expect(screen.getByTestId('contextSetupWizardContinue')).toHaveTextContent('Finish setup');
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardSkip'));
+
+    expect(onClose).toHaveBeenCalled();
+    expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Setup finished. You can change any of it in Settings.'
+    );
+  });
+
   it('clicking a step opens it', () => {
     const { onStepChange } = renderWizard();
 

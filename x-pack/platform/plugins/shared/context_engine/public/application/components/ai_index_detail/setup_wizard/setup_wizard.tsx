@@ -137,7 +137,9 @@ export const SetupWizard = ({
   const [isFinishing, setIsFinishing] = useState(false);
 
   const currentIndex = steps.indexOf(currentStep);
-  const isLastStep = currentIndex === steps.length - 1;
+  // Skip and Continue jump over steps that are already done. With none left, they finish setup.
+  const nextOpenStep = steps.slice(currentIndex + 1).find((stepId) => !done[stepId]);
+  const isLastStep = nextOpenStep === undefined;
   const texts = SETUP_WIZARD_STEP_TEXTS[currentStep];
   const { overview, sources, memory, aiIndices } = docLinks.links.contextEngine;
   const docsLinks: Readonly<Record<SetupWizardStepId, string>> = {
@@ -175,24 +177,17 @@ export const SetupWizard = ({
     notifications.toasts.addSuccess(toast);
   };
 
-  const goToNextStep = () => {
-    const nextStep = steps[currentIndex + 1];
-    if (nextStep) {
-      goToStep(nextStep);
-    }
-  };
-
-  const skip = () => {
-    if (isLastStep) {
+  const goToNextOpenStep = () => {
+    if (nextOpenStep === undefined) {
       close(finishedToast);
       return;
     }
-    goToNextStep();
+    goToStep(nextOpenStep);
   };
 
   const continueOrFinish = async () => {
     if (currentStep !== 'describe') {
-      goToNextStep();
+      goToNextOpenStep();
       return;
     }
     setIsFinishing(true);
@@ -274,7 +269,7 @@ export const SetupWizard = ({
             <EuiFlexItem />
             <EuiFlexItem grow={false}>
               <EuiButton
-                onClick={skip}
+                onClick={goToNextOpenStep}
                 isDisabled={isBusy}
                 data-test-subj="contextSetupWizardSkip"
                 {...getEbtProps({ element: ebtElement, action: ebtAction.SKIP })}
