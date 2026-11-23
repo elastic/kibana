@@ -9,30 +9,12 @@ import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_JUDGE_TEXT_LENGTH } from '../../alert_outcome_shared';
 import { withIdentifierRule } from '../../with_identifier_rule';
-import { CAUSAL_STRATEGIES, CAUSAL_STRATEGY_IDS } from '../strategies';
+import { CAUSAL_STRATEGY_IDS } from '../strategies';
+import systemPromptText from './system_prompt.text';
 
 export const RECOVERY_CHECKLIST_TOOL_NAME = 'score_recovery_checklist';
 
 export const STRATEGY_STATUSES = ['ran', 'blocked', 'not_run'] as const;
-
-const strategyList = CAUSAL_STRATEGIES.map(
-  ({ id, description, reportOnly }) =>
-    `- ${id}${reportOnly ? ' (judge from the answer)' : ''}: ${description}`
-).join('\n');
-
-/** The system prompt; the strategies are the checklist the eval suite scores against too. */
-export const CAUSAL_CHECKLIST_SYSTEM_PROMPT = `You audit how thoroughly an AI agent analysed an alert recovery. You get the answers of the investigation's earlier rounds, then one round: the recovery request, each tool call the agent made with its arguments and result, and its final answer. Earlier rounds' tool calls are not shown, so only what this round did counts.
-
-For every strategy below, decide its status:
-- "ran": a tool call in this round executed it. Give the number of that tool call. An answer that says it did something, or says it will, does not count without a tool call that did it.
-- "blocked": a tool call tried it against a source it could not read or that returned nothing usable (denied access, empty indices, a query error that was never worked around).
-- "not_run": no tool call tried it.
-Two strategies are judged from the final answer alone: "ran" when the answer does it explicitly, otherwise "not_run".
-
-Be strict. A strategy that was only partly covered, such as one window instead of three, is "ran" only when what was done answers the strategy's question.
-
-Strategies:
-${strategyList}`;
 
 export interface RecoveryChecklistOutput {
   strategies: Array<{
@@ -62,11 +44,15 @@ export const recoveryChecklistPrompt = createPrompt({
   name: 'nightshift_recovery_causal_checklist',
   description: 'Audits which causal-analysis strategies a recovery round actually ran.',
   input: lazySchema(() =>
-    z.object({ earlier_answers: z.string().max(MAX_JUDGE_TEXT_LENGTH), transcript: z.string() })
+    z.object({
+      strategy_list: z.string(),
+      earlier_answers: z.string().max(MAX_JUDGE_TEXT_LENGTH),
+      transcript: z.string(),
+    })
   ),
 })
   .version({
-    system: { mustache: { template: withIdentifierRule(CAUSAL_CHECKLIST_SYSTEM_PROMPT) } },
+    system: { mustache: { template: withIdentifierRule(systemPromptText) } },
     template: {
       mustache: {
         template:

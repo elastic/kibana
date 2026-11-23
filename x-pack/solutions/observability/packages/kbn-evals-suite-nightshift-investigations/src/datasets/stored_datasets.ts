@@ -15,12 +15,13 @@ export type StoredDatasetEval =
 /**
  * A dataset stored on the evaluations cluster, by its exact `name`. `id` names it in
  * `NIGHTSHIFT_DATASETS` and in the Playwright describe title; scores are attributed to `name`.
- * `shard` is the CI shard in `evals.suites.json` that runs it.
+ * `shard`, when set, is the CI shard in `evals.suites.json` that runs it; without one the dataset is
+ * opt-in through `NIGHTSHIFT_DATASETS`.
  */
 export interface StoredDataset {
   id: string;
   eval: StoredDatasetEval;
-  shard: string;
+  shard?: string;
   name: string;
   /** Fails the run before any example runs when the loaded dataset lacks one of these tags. */
   requiredTags?: readonly string[];
@@ -46,8 +47,7 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
   {
     id: 'recovery',
     eval: 'recovery',
-    // Opt-in until a CI shard runs it: `NIGHTSHIFT_DATASETS=recovery`.
-    shard: 'customer0-recovery',
+    // No CI shard runs it yet: `NIGHTSHIFT_DATASETS=recovery`.
     // Its examples hold customer telemetry, so they are not in the repository: the run that scores
     // it registers them from NIGHTSHIFT_RECOVERY_EXAMPLES_FILE (see the README).
     name: 'ns-recovery-round-1811',
@@ -59,7 +59,6 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
     eval: 'recovery-production',
     // Replays what the production agent did on these recoveries; no investigation runs.
     // Opt-in: `NIGHTSHIFT_DATASETS=recovery-production`.
-    shard: 'customer0-recovery-production',
     name: 'ns-recovery-production-1811',
     requiredTags: ['customer0-recovery'],
   },
@@ -69,7 +68,10 @@ export const STORED_DATASETS: readonly StoredDataset[] = [
 export const storedDatasetIdsForShard = (
   shardId: string | undefined,
   datasets: readonly StoredDataset[] = STORED_DATASETS
-): string[] => datasets.filter(({ shard }) => shard === shardId).map(({ id }) => id);
+): string[] =>
+  shardId === undefined
+    ? []
+    : datasets.filter(({ shard }) => shard === shardId).map(({ id }) => id);
 
 /** The stored datasets with the given ids that the given eval scores, in config order. */
 export const selectStoredDatasets = (

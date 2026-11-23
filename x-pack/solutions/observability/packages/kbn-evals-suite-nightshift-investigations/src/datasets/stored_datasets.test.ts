@@ -49,10 +49,8 @@ describe('stored dataset config', () => {
   it('maps each CI shard to its stored datasets', () => {
     expect(storedDatasetIdsForShard('customer0-golden')).toEqual(['golden']);
     expect(storedDatasetIdsForShard('customer0-connector-probes')).toEqual(['connector-elastic']);
-    expect(storedDatasetIdsForShard('customer0-recovery')).toEqual(['recovery']);
-    expect(storedDatasetIdsForShard('customer0-recovery-production')).toEqual([
-      'recovery-production',
-    ]);
+    // The recovery datasets are opt-in: no CI shard runs them.
+    expect(storedDatasetIdsForShard('customer0-recovery')).toEqual([]);
     expect(storedDatasetIdsForShard('orcabench')).toEqual([]);
     expect(storedDatasetIdsForShard(undefined)).toEqual([]);
   });

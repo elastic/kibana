@@ -14,8 +14,8 @@ import {
   recoveryChecklistPrompt,
 } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/causal_checklist/prompt';
 import {
-  createEvidenceFamiliesPrompt,
   queriedFamilies,
+  recoveryEvidenceFamiliesPrompt,
   RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME,
   recoveryEvidenceFamiliesOutputSchema,
 } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/evidence_families/prompt';
@@ -24,7 +24,13 @@ import {
   recoveryRootCauseOutputSchema,
   recoveryRootCausePrompt,
 } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/root_cause_evidence/prompt';
+import {
+  renderEarlierAnswers,
+  renderEarlierRounds,
+  type EarlierRound,
+} from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/reference_data';
 import { evidenceLevel } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/root_cause_evidence';
+import { recoveryInputSchema } from './compose';
 import type { InvestigationExample, InvestigationTaskOutput } from '../investigation/types';
 import { getModelFactory, invokeJudge } from '../investigation/judges';
 import type { JudgeDeps } from '../investigation/judges';
@@ -34,6 +40,8 @@ import {
   CAUSAL_STRATEGY_IDS,
   checklistScore,
   EVIDENCE_FAMILIES,
+  familyListText,
+  strategyListText,
   type StrategyStatus,
 } from './strategies';
 
@@ -73,10 +81,30 @@ const toEvidence = (output: InvestigationTaskOutput): Evidence | undefined => {
   };
 };
 
-const earlierAnswers = (input: InvestigationExample['input']): string =>
+/** The earlier round of the example: its answer and, when the dataset has them, its tool calls. */
+const earlierRounds = (input: InvestigationExample['input']): EarlierRound[] =>
   typeof input.prior_response === 'string'
-    ? `Round 1:\n${input.prior_response}`
-    : '(not available)';
+    ? [
+        {
+          answer: input.prior_response,
+          tool_calls: (
+            recoveryInputSchema.shape.prior_steps.safeParse(input.prior_steps).data ?? []
+          ).map(({ tool_id: toolId, params, result }) => ({
+            tool_id: toolId,
+            arguments: params,
+            result,
+          })),
+        },
+      ]
+    : [];
+
+const failedJudge = (name: string, error: unknown) => ({
+  score: null,
+  label: 'n/a',
+  explanation: `The ${name} judge failed (${
+    error instanceof Error ? error.constructor.name : 'unknown error'
+  }), so this round is not scored by it.`,
+});
 
 export const createCausalChecklistEvaluator = (deps: JudgeDeps): RecoveryEvaluator => ({
   name: CAUSAL_CHECKLIST_EVALUATOR,
@@ -86,14 +114,23 @@ export const createCausalChecklistEvaluator = (deps: JudgeDeps): RecoveryEvaluat
   evaluate: async ({ input, output }) => {
     const evidence = toEvidence(output);
     if (!evidence) return { score: null, label: 'n/a', explanation: NO_REPORT_EXPLANATION };
-    const raw = await invokeJudge<unknown>(
-      deps,
-      CAUSAL_CHECKLIST_EVALUATOR,
-      recoveryChecklistPrompt,
-      { earlier_answers: earlierAnswers(input), transcript: renderRound(evidence) },
-      RECOVERY_CHECKLIST_TOOL_NAME
-    );
-    const result = recoveryChecklistOutputSchema.parse(raw);
+    let result: ReturnType<typeof recoveryChecklistOutputSchema.parse>;
+    try {
+      const raw = await invokeJudge<unknown>(
+        deps,
+        CAUSAL_CHECKLIST_EVALUATOR,
+        recoveryChecklistPrompt,
+        {
+          strategy_list: strategyListText(),
+          earlier_answers: renderEarlierAnswers(earlierRounds(input)),
+          transcript: renderRound(evidence),
+        },
+        RECOVERY_CHECKLIST_TOOL_NAME
+      );
+      result = recoveryChecklistOutputSchema.parse(raw);
+    } catch (error) {
+      return failedJudge(CAUSAL_CHECKLIST_EVALUATOR, error);
+    }
     const { statuses, uncited } = applyCitationRule(result.strategies, evidence.steps.length);
     const count = (wanted: StrategyStatus) =>
       Object.values(statuses).filter((status) => status === wanted).length;
@@ -119,18 +156,26 @@ export const createRootCauseEvidenceEvaluator = (deps: JudgeDeps): RecoveryEvalu
   kind: 'LLM',
   direction: 'maximize',
   getModel: getModelFactory(deps.evaluationConnector),
-  evaluate: async ({ output }) => {
+  evaluate: async ({ input, output }) => {
     const evidence = toEvidence(output);
     if (!evidence) return { score: null, label: 'n/a', explanation: NO_REPORT_EXPLANATION };
-    const raw = await invokeJudge<unknown>(
-      deps,
-      ROOT_CAUSE_EVIDENCE_EVALUATOR,
-      recoveryRootCausePrompt,
-      { transcript: renderRound(evidence) },
-      RECOVERY_ROOT_CAUSE_TOOL_NAME
-    );
-    // The schema snaps each evidence score to 0, 0.5 or 1.
-    const result = recoveryRootCauseOutputSchema.parse(raw);
+    let result: ReturnType<typeof recoveryRootCauseOutputSchema.parse>;
+    try {
+      const raw = await invokeJudge<unknown>(
+        deps,
+        ROOT_CAUSE_EVIDENCE_EVALUATOR,
+        recoveryRootCausePrompt,
+        {
+          earlier_context: renderEarlierRounds(earlierRounds(input)),
+          transcript: renderRound(evidence),
+        },
+        RECOVERY_ROOT_CAUSE_TOOL_NAME
+      );
+      // The schema snaps each evidence score to 0, 0.5 or 1.
+      result = recoveryRootCauseOutputSchema.parse(raw);
+    } catch (error) {
+      return failedJudge(ROOT_CAUSE_EVIDENCE_EVALUATOR, error);
+    }
     const mechanism = result.mechanism_evidenced;
     const closure = result.closure_evidenced;
     return {
@@ -147,8 +192,6 @@ export const createRootCauseEvidenceEvaluator = (deps: JudgeDeps): RecoveryEvalu
     };
   },
 });
-
-const familiesPrompt = createEvidenceFamiliesPrompt(OFFLINE_FAMILIES);
 
 export const createEvidenceFamiliesEvaluator = (deps: JudgeDeps): RecoveryEvaluator => ({
   name: EVIDENCE_FAMILIES_EVALUATOR,
@@ -167,18 +210,23 @@ export const createEvidenceFamiliesEvaluator = (deps: JudgeDeps): RecoveryEvalua
         metadata: { families: [] },
       };
     }
-    const raw = await invokeJudge<unknown>(
-      deps,
-      EVIDENCE_FAMILIES_EVALUATOR,
-      familiesPrompt,
-      { transcript: renderRound(evidence) },
-      RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME
-    );
-    const reached = queriedFamilies(
-      recoveryEvidenceFamiliesOutputSchema.parse(raw),
-      OFFLINE_FAMILIES,
-      evidence.steps.length
-    );
+    let reached: string[];
+    try {
+      const raw = await invokeJudge<unknown>(
+        deps,
+        EVIDENCE_FAMILIES_EVALUATOR,
+        recoveryEvidenceFamiliesPrompt,
+        { family_list: familyListText(OFFLINE_FAMILIES), transcript: renderRound(evidence) },
+        RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME
+      );
+      reached = queriedFamilies(
+        recoveryEvidenceFamiliesOutputSchema.parse(raw),
+        OFFLINE_FAMILIES,
+        evidence.steps.length
+      );
+    } catch (error) {
+      return failedJudge(EVIDENCE_FAMILIES_EVALUATOR, error);
+    }
     return {
       score: reached.length / total,
       label: `${reached.length}/${total} families`,

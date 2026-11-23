@@ -54,3 +54,7 @@ export const EVIDENCE_FAMILIES: readonly EvidenceFamily[] = [
 ];
 
 export const EVIDENCE_FAMILY_IDS: readonly string[] = EVIDENCE_FAMILIES.map(({ id }) => id);
+
+/** The families as the evidence-families prompt lists them. */
+export const familyListText = (families: readonly EvidenceFamily[] = EVIDENCE_FAMILIES): string =>
+  families.map(({ id, description }) => `- ${id}: ${description}`).join('\n');

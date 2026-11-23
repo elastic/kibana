@@ -139,6 +139,13 @@ export const CAUSAL_STRATEGIES: readonly CausalStrategy[] = [
 
 export const CAUSAL_STRATEGY_IDS: readonly string[] = CAUSAL_STRATEGIES.map(({ id }) => id);
 
+/** The strategies as the checklist prompt lists them. */
+export const strategyListText = (): string =>
+  CAUSAL_STRATEGIES.map(
+    ({ id, description, reportOnly }) =>
+      `- ${id}${reportOnly ? ' (judge from the answer)' : ''}: ${description}`
+  ).join('\n');
+
 export type StrategyStatus = 'ran' | 'blocked' | 'not_run';
 
 /**

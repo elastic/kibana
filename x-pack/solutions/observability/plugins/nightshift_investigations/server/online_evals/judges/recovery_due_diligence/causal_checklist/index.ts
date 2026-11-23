@@ -6,17 +6,21 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_JUDGE_INPUT_CHARS } from '../../alert_outcome_shared';
-import { renderRound, roundEvidenceSchema, truncate } from '../../render_round';
+import { renderRound, roundEvidenceSchema } from '../../render_round';
 import { capExplanation, runJudge } from '../../run_judge';
 import {
   CAUSAL_STRATEGIES,
   CAUSAL_STRATEGY_IDS,
   applyCitationRule,
   checklistScore,
+  strategyListText,
   type StrategyStatus,
 } from '../strategies';
+import {
+  recoveryReferenceDataSchema,
+  renderEarlierAnswers,
+  type RecoveryReferenceData,
+} from '../reference_data';
 import {
   RECOVERY_CHECKLIST_TOOL_NAME,
   recoveryChecklistOutputSchema,
@@ -25,22 +29,13 @@ import {
 
 export const RECOVERY_CHECKLIST_SCORE = 'recovery_checklist';
 
-/** The earlier rounds' answers the scored round is judged against, from the conversation. */
-// Defaults to an empty object: a recovery with no earlier round and no closing reasoning sends no
-// reference data, which must not make the evals service refuse the whole set.
-export const recoveryReferenceDataSchema = lazySchema(() =>
-  z.object({ earlier_rounds: z.array(z.string()).optional() }).default({})
-);
-
-type RecoveryReferenceData = z.infer<typeof recoveryReferenceDataSchema>;
-
 /** One tag per strategy, `strategy:<id>:<status>`, so a dashboard can count which checks ran. */
 export const strategyTags = (statuses: Record<string, StrategyStatus>): string[] =>
   CAUSAL_STRATEGIES.map(({ id }) => `strategy:${id}:${statuses[id]}`);
 
 const definition: RegisteredEvaluatorDefinition<RecoveryReferenceData> = {
   name: 'nightshift_recovery_causal_checklist',
-  version: '1.1.0',
+  version: '1.2.0',
   kind: 'llm',
   direction: 'maximize',
   description:
@@ -53,16 +48,12 @@ const definition: RegisteredEvaluatorDefinition<RecoveryReferenceData> = {
         'Inference client is required for the nightshift_recovery_causal_checklist judge'
       );
     }
-    const earlierAnswers = referenceData?.earlier_rounds ?? [];
     const output = await runJudge({
       inferenceClient,
       prompt: recoveryChecklistPrompt,
       input: {
-        earlier_answers: truncate(
-          earlierAnswers.map((answer, index) => `Round ${index + 1}:\n${answer}`).join('\n\n') ||
-            '(not available)',
-          MAX_JUDGE_INPUT_CHARS
-        ),
+        strategy_list: strategyListText(),
+        earlier_answers: renderEarlierAnswers(referenceData?.earlier_rounds),
         transcript: renderRound(round),
       },
       toolName: RECOVERY_CHECKLIST_TOOL_NAME,

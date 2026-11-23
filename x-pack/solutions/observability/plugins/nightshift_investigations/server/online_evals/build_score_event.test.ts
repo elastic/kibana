@@ -113,7 +113,7 @@ describe('buildOnlineEvalScoreEvent', () => {
     expect(event.scores[1]).not.toHaveProperty('explanation');
   });
 
-  it('sends tags from fixed vocabularies even when explanations are off, and drops anything else', () => {
+  it('sends tags with a known prefix even when explanations are off, and drops anything else, such as a well-shaped tag with an unknown prefix', () => {
     const event = buildOnlineEvalScoreEvent({
       metadata,
       results: [
@@ -123,7 +123,14 @@ describe('buildOnlineEvalScoreEvent', () => {
             score: 0.5,
             explanation: 'Free text the flag gates.',
             metadata: {
-              tags: ['strategy:alert_record:ran', 'Not A Keyword', 'a customer said this', 42],
+              tags: [
+                'strategy:alert_record:ran',
+                'Not A Keyword',
+                'a customer said this',
+                'service:checkout-prod',
+                'strategy',
+                42,
+              ],
             },
           },
           { name: 'plain', score: 1, metadata: { tags: 'strategy:alert_record:ran' } },

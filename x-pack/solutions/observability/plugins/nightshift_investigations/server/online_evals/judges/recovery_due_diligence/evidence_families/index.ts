@@ -8,7 +8,7 @@
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { renderRound, roundEvidenceSchema } from '../../render_round';
 import { runJudge } from '../../run_judge';
-import { EVIDENCE_FAMILIES } from '../families';
+import { EVIDENCE_FAMILIES, familyListText } from '../families';
 import {
   RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME,
   queriedFamilies,
@@ -20,7 +20,7 @@ export const RECOVERY_EVIDENCE_FAMILIES_SCORE = 'recovery_evidence_families';
 
 export const recoveryEvidenceFamiliesJudge: RegisteredEvaluatorDefinition = {
   name: 'nightshift_recovery_evidence_families',
-  version: '2.0.0',
+  version: '2.1.0',
   kind: 'llm',
   direction: 'maximize',
   description:
@@ -48,7 +48,7 @@ export const recoveryEvidenceFamiliesJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: recoveryEvidenceFamiliesPrompt,
-      input: { transcript: renderRound(round) },
+      input: { family_list: familyListText(), transcript: renderRound(round) },
       toolName: RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME,
       outputSchema: recoveryEvidenceFamiliesOutputSchema,
     });

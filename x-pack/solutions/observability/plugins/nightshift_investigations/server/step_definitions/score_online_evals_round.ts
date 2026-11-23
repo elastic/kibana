@@ -148,7 +148,7 @@ const readRound = async ({
   agentId: string;
   round: ConversationRound;
   gradedRound: ConversationRound;
-  earlierAnswers: string[];
+  earlierRounds: ConversationRound[];
 }> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
@@ -175,12 +175,10 @@ const readRound = async ({
     round,
     gradedRound: getGradedRound(input, conversation.rounds, round),
     // The conversation already holds the earlier rounds, so judges that revisit them get them here.
-    earlierAnswers: conversation.rounds
-      .slice(
-        0,
-        conversation.rounds.findIndex(({ id }) => id === round.id)
-      )
-      .map(({ response }) => response.message),
+    earlierRounds: conversation.rounds.slice(
+      0,
+      conversation.rounds.findIndex(({ id }) => id === round.id)
+    ),
   };
 };
 
@@ -294,7 +292,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round, gradedRound, earlierAnswers } = await readRound({
+        const { agentId, round, gradedRound, earlierRounds } = await readRound({
           input,
           getAgentBuilder,
           request,
@@ -333,9 +331,9 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
                     ? round.response.message
                     : undefined,
                 // A recovery round's own analysis is judged against what the rounds before it said.
-                earlierAnswers:
+                earlierRounds:
                   input.round_kind === 'alert_recovery' && input.graded_report === 'current'
-                    ? earlierAnswers
+                    ? earlierRounds
                     : undefined,
               }),
               judgeConnectorId,

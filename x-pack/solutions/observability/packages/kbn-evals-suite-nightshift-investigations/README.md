@@ -314,7 +314,7 @@ investigation starts.
    series, so compare runs within one cut, not across cuts.
 
 To run a different stored dataset in CI as well, add an entry naming its shard, and add that shard
-to `evals.suites.json` if it is new. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
+to `evals.suites.json` if it is new. An entry without a `shard` is opt-in only. Each entry's id is also a `NIGHTSHIFT_DATASETS` selector,
 opt-in like `connector-probe`.
 
 Both datasets query the Customer-0 cluster live, so they run with the `default`

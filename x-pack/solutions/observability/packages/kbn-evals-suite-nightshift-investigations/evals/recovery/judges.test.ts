@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AbortError } from 'p-retry';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { EvalConnector } from '@kbn/evals';
@@ -48,6 +49,17 @@ const createDeps = (judgeOutput: unknown) => {
     },
   };
 };
+
+const evaluateWithEarlier = (evaluator: ReturnType<typeof createCausalChecklistEvaluator>) =>
+  evaluator.evaluate({
+    input: {
+      ...input,
+      prior_steps: [{ tool_id: 'nightshift_sandbox_bash', params: {}, result: 'Rails log lines' }],
+    },
+    output,
+    expected: undefined,
+    metadata: undefined,
+  } as unknown as Parameters<typeof evaluator.evaluate>[0]);
 
 const run = (
   evaluator: ReturnType<typeof createCausalChecklistEvaluator>,
@@ -113,7 +125,45 @@ describe('recovery checklist judge', () => {
   });
 });
 
+describe('judge failures', () => {
+  it('returns n/a instead of failing the experiment when the judge call throws', async () => {
+    const { prompt, deps } = createDeps({});
+    // An abort skips the judge call's retry backoff.
+    prompt.mockRejectedValue(new AbortError('model unavailable'));
+
+    for (const create of [
+      createCausalChecklistEvaluator,
+      createRootCauseEvidenceEvaluator,
+      createEvidenceFamiliesEvaluator,
+    ]) {
+      const result = await run(create(deps));
+      expect(result).toMatchObject({ score: null, label: 'n/a' });
+    }
+  });
+
+  it('returns n/a when the judge output does not match its schema', async () => {
+    const { deps } = createDeps({ unexpected: true });
+
+    expect(await run(createCausalChecklistEvaluator(deps))).toMatchObject({ score: null });
+  });
+});
+
 describe('recovery root-cause evidence judge', () => {
+  it("gives the judge the earlier round's tool calls as well as its answer", async () => {
+    const { prompt, deps } = createDeps({
+      mechanism_claim: 'none',
+      mechanism_evidenced: 0,
+      closure_claim: 'none',
+      closure_evidenced: 0,
+      unsupported_claim: false,
+      reasoning: 'ok',
+    });
+
+    await evaluateWithEarlier(createRootCauseEvidenceEvaluator(deps));
+
+    expect(prompt.mock.calls[0][0].input.earlier_context).toContain('Rails log lines');
+  });
+
   it('snaps scores to the rubric and keeps the levels for monitoring', async () => {
     const { prompt, deps } = createDeps({
       mechanism_claim: 'a service account lacks read access',
@@ -147,9 +197,8 @@ describe('recovery evidence families judge', () => {
 
     const result = await run(createEvidenceFamiliesEvaluator(deps));
 
-    expect(JSON.stringify(prompt.mock.calls[0][0].prompt)).not.toContain(
-      'chat_or_incident_records'
-    );
+    expect(prompt.mock.calls[0][0].input.family_list).not.toContain('chat_or_incident_records');
+    expect(prompt.mock.calls[0][0].input.family_list).toContain('- alert_documents:');
     expect(result).toMatchObject({ score: 2 / 8, label: '2/8 families' });
     expect(result.metadata?.families).toEqual(['alert_documents', 'rule_event_log']);
   });

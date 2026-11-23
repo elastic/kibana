@@ -12,10 +12,14 @@ export {
   CAUSAL_STRATEGY_IDS,
   applyCitationRule,
   checklistScore,
+  strategyListText,
 } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/strategies';
 export type {
   CausalStrategy,
   ReportedStrategy,
   StrategyStatus,
 } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/strategies';
-export { EVIDENCE_FAMILIES } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/families';
+export {
+  EVIDENCE_FAMILIES,
+  familyListText,
+} from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/families';

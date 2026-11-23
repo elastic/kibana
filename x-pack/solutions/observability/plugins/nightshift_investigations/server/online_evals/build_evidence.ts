@@ -20,15 +20,36 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
  * The agent's notes after its last tool call, where it draws its conclusion before answering,
  * have no tool call to sit on, so they travel as `closing_reasoning` for the judges that read them.
  */
+/** An earlier round's tool calls with their results, the first and last ones when there are many. */
+const earlierToolCalls = (round: ConversationRound): ToolCallEvidence[] => {
+  const calls = round.steps.flatMap((step) =>
+    step.type === ConversationRoundStepType.toolCall
+      ? [
+          {
+            tool_call_id: step.tool_call_id,
+            tool_id: step.tool_id,
+            arguments: step.params,
+            result: step.results,
+          },
+        ]
+      : []
+  );
+  const { headEnd, tailStart } = keepHeadAndTail(
+    calls.map(() => 1),
+    MAX_EVIDENCE_TOOL_CALLS
+  );
+  return [...calls.slice(0, headEnd), ...calls.slice(tailStart)];
+};
+
 export const buildOnlineEvalsEvidence = ({
   round,
   alertOutcome,
-  earlierAnswers,
+  earlierRounds,
 }: {
   round: ConversationRound;
   alertOutcome?: string;
-  /** The final answers of the rounds before this one, for judges that grade a later round against them. */
-  earlierAnswers?: string[];
+  /** The rounds before this one, so judges can grade a later round against what they answered and found. */
+  earlierRounds?: ConversationRound[];
 }): EvaluateEvidence => {
   const boundNotes = new Map<string, string[]>();
   for (const step of round.steps) {
@@ -68,7 +89,14 @@ export const buildOnlineEvalsEvidence = ({
   const closingReasoning = pendingNotes.join('\n');
   const referenceData = {
     ...(alertOutcome === undefined ? {} : { alert_outcome: alertOutcome }),
-    ...(earlierAnswers && earlierAnswers.length > 0 ? { earlier_rounds: earlierAnswers } : {}),
+    ...(earlierRounds && earlierRounds.length > 0
+      ? {
+          earlier_rounds: earlierRounds.map((earlier) => ({
+            answer: earlier.response.message,
+            tool_calls: earlierToolCalls(earlier),
+          })),
+        }
+      : {}),
     ...(closingReasoning ? { closing_reasoning: closingReasoning } : {}),
   };
 

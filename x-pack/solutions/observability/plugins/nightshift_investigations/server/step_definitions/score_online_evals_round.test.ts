@@ -292,7 +292,14 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
               },
             },
             // The rounds before it, from the conversation: what the recovery's analysis revisits.
-            reference_data: { earlier_rounds: ['A bad deploy of the payments service.'] },
+            reference_data: {
+              earlier_rounds: [
+                {
+                  answer: 'A bad deploy of the payments service.',
+                  tool_calls: [expect.objectContaining({ tool_call_id: 'call-1' })],
+                },
+              ],
+            },
           },
         })
       );

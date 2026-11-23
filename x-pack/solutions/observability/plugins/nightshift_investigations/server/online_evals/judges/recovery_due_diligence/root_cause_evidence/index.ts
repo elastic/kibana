@@ -7,6 +7,11 @@
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { renderRound, roundEvidenceSchema } from '../../render_round';
+import {
+  recoveryReferenceDataSchema,
+  renderEarlierRounds,
+  type RecoveryReferenceData,
+} from '../reference_data';
 import { capExplanation, runJudge } from '../../run_judge';
 import {
   RECOVERY_ROOT_CAUSE_TOOL_NAME,
@@ -18,15 +23,16 @@ import {
 export const evidenceLevel = (value: number): 'evidenced' | 'partial' | 'none' =>
   value >= 1 ? 'evidenced' : value > 0 ? 'partial' : 'none';
 
-export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = {
+const definition: RegisteredEvaluatorDefinition<RecoveryReferenceData> = {
   name: 'nightshift_recovery_root_cause_evidence',
-  version: '1.1.0',
+  version: '1.2.0',
   kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free: whether an alert-recovery round backed the failure mechanism and the reason the alert closed with tool results, rather than asserting them, and whether it stated anything no result contains. Scores the recovery round itself, not the first round.',
+    'Reference-free: whether an alert-recovery round backed the failure mechanism and the reason the alert closed with tool results, rather than asserting them, and whether it stated anything no source contains. Facts from the recovery request and from the tool results of earlier rounds count as supported. Scores the recovery round itself, not the first round.',
   evidenceSchema: roundEvidenceSchema,
-  async evaluate({ round, inferenceClient }) {
+  referenceDataSchema: recoveryReferenceDataSchema,
+  async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error(
         'Inference client is required for the nightshift_recovery_root_cause_evidence judge'
@@ -35,7 +41,10 @@ export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: recoveryRootCausePrompt,
-      input: { transcript: renderRound(round) },
+      input: {
+        earlier_context: renderEarlierRounds(referenceData?.earlier_rounds),
+        transcript: renderRound(round),
+      },
       toolName: RECOVERY_ROOT_CAUSE_TOOL_NAME,
       outputSchema: recoveryRootCauseOutputSchema,
     });
@@ -69,3 +78,5 @@ export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = {
     };
   },
 };
+
+export const recoveryRootCauseEvidenceJudge: RegisteredEvaluatorDefinition = definition;

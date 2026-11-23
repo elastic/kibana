@@ -8,7 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
-import { recoveryCausalChecklistJudge, recoveryReferenceDataSchema } from './causal_checklist';
+import { recoveryCausalChecklistJudge } from './causal_checklist';
+import { recoveryReferenceDataSchema, renderEarlierRounds } from './reference_data';
 import { recoveryEvidenceFamiliesJudge } from './evidence_families';
 import { recoveryRootCauseEvidenceJudge } from './root_cause_evidence';
 import { CAUSAL_STRATEGY_IDS, applyCitationRule } from './strategies';
@@ -54,7 +55,10 @@ const evaluate = (
 describe('recoveryReferenceDataSchema', () => {
   it('accepts a recovery that sends no reference data, which has no earlier round to pass', () => {
     expect(recoveryReferenceDataSchema.safeParse(undefined).success).toBe(true);
-    expect(recoveryReferenceDataSchema.safeParse({ earlier_rounds: ['a'] }).success).toBe(true);
+    expect(
+      recoveryReferenceDataSchema.safeParse({ earlier_rounds: [{ answer: 'a', tool_calls: [] }] })
+        .success
+    ).toBe(true);
   });
 });
 
@@ -98,6 +102,7 @@ describe('nightshift_recovery_causal_checklist', () => {
 
     expect(prompt.mock.calls[0][0].toolChoice).toEqual({ function: 'score_recovery_checklist' });
     expect(prompt.mock.calls[0][0].input.transcript).toContain('## Tool call 2');
+    expect(prompt.mock.calls[0][0].input.strategy_list).toContain('- alert_record:');
     expect(scores).toHaveLength(1);
     expect(scores[0]).toMatchObject({
       name: 'recovery_checklist',
@@ -132,7 +137,7 @@ describe('nightshift_recovery_causal_checklist', () => {
     });
 
     const { scores } = await evaluate(recoveryCausalChecklistJudge, inferenceClient, round, {
-      earlier_rounds: ['Hypothesis A: a bad deploy.'],
+      earlier_rounds: [{ answer: 'Hypothesis A: a bad deploy.', tool_calls: [] }],
     });
 
     expect(prompt.mock.calls[0][0].input.earlier_answers).toContain('Hypothesis A: a bad deploy.');
@@ -207,6 +212,57 @@ describe('nightshift_recovery_root_cause_evidence', () => {
   });
 });
 
+describe('root-cause evidence judge with earlier rounds', () => {
+  it("shows the judge the earlier rounds' tool calls and answers, so what they found counts as supported", async () => {
+    const { prompt, inferenceClient } = createInferenceClient({
+      mechanism_claim: 'none',
+      mechanism_evidenced: 0,
+      closure_claim: 'none',
+      closure_evidenced: 0,
+      unsupported_claim: false,
+      reasoning: 'ok',
+    });
+
+    await evaluate(recoveryRootCauseEvidenceJudge, inferenceClient, round, {
+      earlier_rounds: [
+        {
+          answer: 'The earlier answer.',
+          tool_calls: [
+            {
+              tool_id: 'nightshift_sandbox_bash',
+              arguments: { command: 'curl rails' },
+              result: 'Rails log lines from 11-11 06:50Z',
+            },
+          ],
+        },
+      ],
+    });
+
+    const { earlier_context: earlierContext } = prompt.mock.calls[0][0].input;
+    expect(earlierContext).toContain('Rails log lines from 11-11 06:50Z');
+    expect(earlierContext).toContain('The earlier answer.');
+  });
+});
+
+describe('renderEarlierRounds', () => {
+  it('says so when there is no earlier round', () => {
+    expect(renderEarlierRounds(undefined)).toBe('(not available)');
+  });
+
+  it('cuts long results and drops the middle calls when they do not fit', () => {
+    const toolCalls = Array.from({ length: 200 }, (_, index) => ({
+      tool_id: 'tool',
+      arguments: {},
+      result: `${index}`.padEnd(3_000, 'x'),
+    }));
+
+    const rendered = renderEarlierRounds([{ answer: 'a', tool_calls: toolCalls }]);
+
+    expect(rendered).toContain('tool calls omitted here');
+    expect(rendered.length).toBeLessThan(80_000);
+  });
+});
+
 describe('nightshift_recovery_evidence_families', () => {
   it('scores the families the judge says were queried, each with a cited call, and tags them', async () => {
     const { prompt, inferenceClient } = createInferenceClient({
@@ -224,6 +280,7 @@ describe('nightshift_recovery_evidence_families', () => {
     expect(prompt.mock.calls[0][0].toolChoice).toEqual({
       function: 'score_recovery_evidence_families',
     });
+    expect(prompt.mock.calls[0][0].input.family_list).toContain('- alert_documents:');
     expect(scores).toEqual([
       expect.objectContaining({
         name: 'recovery_evidence_families',
