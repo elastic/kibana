@@ -18,7 +18,7 @@ import {
   storedDetectionSignalSchema,
   type DetectionSignal,
 } from '../../../common/detection_signal';
-import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../engine/tokens';
 import { getErrorMessage } from '../errors/get_error_message';
 import { getSeriesKey, type SeriesId } from '../strategies/series_key';
 import type { DetectionSignalReading } from '../strategies/types';

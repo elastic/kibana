@@ -10,9 +10,9 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import { DetectionEngineSystemClient } from '../engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../engine/tokens';
 import { getStrategyTag, MANAGED_RULE_TAG } from './rule_identity';
-import { DetectionRulesClient } from './rules_client_token';
+import { DetectionRulesClient } from './tokens';
 
 /** Rules read per page; Alerting v2 caps a find at 500 per page. */
 const FIND_PAGE_SIZE = 500;

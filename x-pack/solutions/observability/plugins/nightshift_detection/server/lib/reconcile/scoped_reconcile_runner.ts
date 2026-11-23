@@ -11,8 +11,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { Logger as CoreLogger, PluginSetup } from '@kbn/core-di';
 import type { CPSServerSetup } from '@kbn/cps/server';
 import { AccountScope } from '../engine/account_scope';
-import { DetectionEngineDataClient } from '../engine/es_client_tokens';
-import { KnowledgeIndicators, Sources } from '../engine/tokens';
+import { DetectionEngineDataClient, KnowledgeIndicators, Sources } from '../engine/tokens';
 import { getErrorMessage } from '../errors/get_error_message';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { ResourceContext } from '../strategies/types';
@@ -67,25 +66,26 @@ export class ScopedReconcileRunner {
     spaceId: string;
     abortSignal: AbortSignal;
   }): Promise<ReconcileRulesResponse> {
+    let attemptsLeft = LOCK_WAIT_ATTEMPTS;
+
     // An attempt at a time: each one waits for the previous holder to let go.
-    for (let attempt = 1; ; attempt++) {
-      if (abortSignal.aborted) {
-        return { status: 'busy' };
-      }
+    while (attemptsLeft > 0 && !abortSignal.aborted) {
       const outcome = await this.lock.run({
         spaceId,
         callback: () => this.reconcile({ accountRequest, spaceId, abortSignal }),
       });
-
       if (outcome.ran) {
         return { status: 'completed', ...outcome.result };
       }
-      if (attempt === LOCK_WAIT_ATTEMPTS) {
-        return { status: 'busy' };
+
+      attemptsLeft--;
+      if (attemptsLeft > 0) {
+        // Rejects once the call is aborted, which ends the wait.
+        await sleep(LOCK_WAIT_INTERVAL_MS, undefined, { signal: abortSignal }).catch(() => {});
       }
-      // Rejects once the call is aborted, which ends the wait.
-      await sleep(LOCK_WAIT_INTERVAL_MS, undefined, { signal: abortSignal }).catch(() => {});
     }
+
+    return { status: 'busy' };
   }
 
   private async reconcile({
