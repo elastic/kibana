@@ -23,13 +23,28 @@ export interface CreateEnqueueSourceReconciliationOptions {
   logger: Logger;
 }
 
-const waitForInstall = async (whenInstalled: () => Promise<void>): Promise<void> => {
+/**
+ * Resolves whether to run the workflow. Waiting for the install and checking availability share one
+ * deadline, because both can be slow. At the deadline it answers yes, so the workflow lookup
+ * reports whatever is wrong instead of the change being dropped silently.
+ */
+const isReadyToRun = async ({
+  whenInstalled,
+  isAvailable,
+}: Pick<
+  CreateEnqueueSourceReconciliationOptions,
+  'whenInstalled' | 'isAvailable'
+>): Promise<boolean> => {
   let timer: NodeJS.Timeout | undefined;
-  const timedOut = new Promise<void>((resolve) => {
-    timer = setTimeout(resolve, INSTALL_WAIT_TIMEOUT_MS);
+  const timedOut = new Promise<boolean>((resolve) => {
+    timer = setTimeout(() => resolve(true), INSTALL_WAIT_TIMEOUT_MS);
   });
+  const ready = (async () => {
+    await whenInstalled().catch(() => {});
+    return isAvailable();
+  })();
   try {
-    await Promise.race([whenInstalled().catch(() => {}), timedOut]);
+    return await Promise.race([ready, timedOut]);
   } finally {
     clearTimeout(timer);
   }
@@ -40,8 +55,9 @@ const waitForInstall = async (whenInstalled: () => Promise<void>): Promise<void>
  *
  * A source can change while the install kicked off at plugin start is still running, and the
  * reconciliation workflow does not exist until it finishes. Waiting for it keeps that change from
- * being dropped. The wait ends after 30 seconds. A failed install is not rethrown here:
- * the workflow lookup then reports the real problem. When the feature is unavailable nothing is installed, so there is nothing to run.
+ * being dropped. The wait ends after 30 seconds. A failed install is not rethrown here: the
+ * workflow lookup then reports the real problem. When the feature is unavailable nothing is
+ * installed, so there is nothing to run.
  */
 export const createEnqueueSourceReconciliation = ({
   whenInstalled,
@@ -52,8 +68,7 @@ export const createEnqueueSourceReconciliation = ({
   args: EnqueueSourceReconciliationArgs
 ) => Promise<void>) => {
   return async (args) => {
-    await waitForInstall(whenInstalled);
-    if (!(await isAvailable())) {
+    if (!(await isReadyToRun({ whenInstalled, isAvailable }))) {
       logger.debug(
         `significantEvents: unavailable, skipping reconciliation of source ${args.sourceId}`
       );

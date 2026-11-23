@@ -17,15 +17,19 @@ describe('createEnqueueSourceReconciliation', () => {
 
   const setup = ({
     install,
-    available = true,
+    available = Promise.resolve(true),
+    executeError,
   }: {
     install: Promise<void>;
-    available?: boolean;
+    available?: Promise<boolean>;
+    executeError?: Error;
   }) => {
-    const execute = jest.fn(async () => {});
+    const execute = jest.fn(async () => {
+      if (executeError) throw executeError;
+    });
     const enqueue = createEnqueueSourceReconciliation({
       whenInstalled: () => install,
-      isAvailable: async () => available,
+      isAvailable: () => available,
       execute,
       logger: loggingSystemMock.createLogger(),
     });
@@ -67,10 +71,40 @@ describe('createEnqueueSourceReconciliation', () => {
   });
 
   it('skips without an error when the feature is unavailable', async () => {
-    const { enqueue, execute } = setup({ install: Promise.resolve(), available: false });
+    const { enqueue, execute } = setup({
+      install: Promise.resolve(),
+      available: Promise.resolve(false),
+    });
 
     await expect(enqueue(args)).resolves.toBeUndefined();
 
     expect(execute).not.toHaveBeenCalled();
+  });
+
+  it('stops waiting on a slow availability check at the same deadline', async () => {
+    jest.useFakeTimers();
+    try {
+      const { enqueue, execute } = setup({
+        install: Promise.resolve(),
+        available: new Promise<boolean>(() => {}),
+      });
+
+      const pending = enqueue(args);
+      await jest.advanceTimersByTimeAsync(30_000);
+      await pending;
+
+      expect(execute).toHaveBeenCalledWith(args);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('still surfaces the error when the install failed and the workflow is missing', async () => {
+    const { enqueue } = setup({
+      install: Promise.reject(new Error('install failed')),
+      executeError: new Error('Workflow system-nightshift-source-reconciliation not found'),
+    });
+
+    await expect(enqueue(args)).rejects.toThrow('not found');
   });
 });
