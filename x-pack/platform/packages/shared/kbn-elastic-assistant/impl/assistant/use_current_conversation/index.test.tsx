@@ -287,6 +287,63 @@ describe('useCurrentConversation', () => {
     expect(defaultProps.refetchCurrentUserConversations).toHaveBeenCalled();
   });
 
+  it('should persist a connector and a system prompt selected before the first write completes', async () => {
+    const conversation = mockData.welcome_id;
+    mockUseConversation.getConversation.mockResolvedValue(conversation);
+    const connectorApiConfig = {
+      ...conversation.apiConfig,
+      connectorId: 'new-connector-id',
+      actionTypeId: '.bedrock',
+    };
+    const connectorAndPromptApiConfig = {
+      ...connectorApiConfig,
+      defaultSystemPromptId: 'something-crazy',
+    };
+    let resolveConnectorWrite: (updated: Conversation) => void = () => {};
+    mockUseConversation.setApiConfig
+      .mockImplementationOnce(
+        () =>
+          new Promise<Conversation>((resolve) => {
+            resolveConnectorWrite = resolve;
+          })
+      )
+      .mockResolvedValueOnce({ ...conversation, apiConfig: connectorAndPromptApiConfig });
+
+    const { result } = setupHook({
+      lastConversation: { id: conversation.id },
+      conversations: { [conversation.id]: conversation },
+    });
+    await waitFor(() => expect(result.current.currentConversation).toEqual(conversation));
+
+    act(() => {
+      result.current.setCurrentConnector({
+        connectorId: 'new-connector-id',
+        actionTypeId: '.bedrock',
+      });
+      result.current.setCurrentSystemPromptId('something-crazy');
+    });
+
+    await waitFor(() => expect(mockUseConversation.setApiConfig).toHaveBeenCalledTimes(1));
+    expect(mockUseConversation.setApiConfig).toHaveBeenCalledWith({
+      conversation,
+      apiConfig: connectorApiConfig,
+    });
+
+    await act(async () => {
+      resolveConnectorWrite({ ...conversation, apiConfig: connectorApiConfig });
+    });
+
+    await waitFor(() => expect(mockUseConversation.setApiConfig).toHaveBeenCalledTimes(2));
+    expect(mockUseConversation.setApiConfig).toHaveBeenLastCalledWith({
+      conversation,
+      apiConfig: connectorAndPromptApiConfig,
+    });
+    await waitFor(() =>
+      expect(result.current.currentConversation?.apiConfig).toEqual(connectorAndPromptApiConfig)
+    );
+    expect(result.current.currentSystemPrompt?.id).toBe('something-crazy');
+  });
+
   it('should handle conversation selection', async () => {
     const conversationId = 'test-id';
     const conversationTitle = 'Test Conversation';

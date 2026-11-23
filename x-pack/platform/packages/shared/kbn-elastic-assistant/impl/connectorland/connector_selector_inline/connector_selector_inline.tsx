@@ -15,6 +15,7 @@ import { ConnectorSelector } from '../connector_selector';
 import type { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
+import type { ConnectorApiConfig } from '../../assistant/use_current_conversation';
 import { getGenAiConfig } from '../helpers';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
@@ -26,6 +27,11 @@ interface Props {
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
+  /**
+   * Persists the selected connector on a saved `selectedConversation`. When omitted, the
+   * conversation is updated here and then passed to `onConnectorSelected`.
+   */
+  onConversationConnectorChange?: (connectorApiConfig: ConnectorApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
   loadConnectorFeatureId?: string;
 
@@ -83,6 +89,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     selectedConversation,
     onConnectorIdSelected,
     onConnectorSelected,
+    onConversationConnectorChange,
     stats = null,
     loadConnectorFeatureId,
     explicitConnectorSelection,
@@ -114,6 +121,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               provider: apiProvider,
               model,
             });
+          } else if (onConversationConnectorChange != null) {
+            onConversationConnectorChange({
+              actionTypeId: connector.actionTypeId,
+              connectorId,
+              provider: apiProvider,
+              model,
+            });
           } else {
             const conversation = await setApiConfig({
               conversation: selectedConversation,
@@ -137,7 +151,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
           onConnectorIdSelected(connectorId);
         }
       },
-      [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
+      [
+        selectedConversation,
+        setApiConfig,
+        onConnectorIdSelected,
+        onConnectorSelected,
+        onConversationConnectorChange,
+      ]
     );
 
     return (

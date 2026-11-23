@@ -6,7 +6,7 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   InfiniteData,
   QueryObserverResult,
@@ -63,9 +63,15 @@ interface UseCurrentConversation {
     cId?: string;
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
+  setCurrentConnector: (connectorApiConfig: ConnectorApiConfig) => Promise<void>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
 }
+
+export type ConnectorApiConfig = Pick<
+  ApiConfig,
+  'actionTypeId' | 'connectorId' | 'model' | 'provider'
+>;
 
 /**
  * Manages the current conversation state. Interacts with the conversation API and keeps local state up to date.
@@ -97,6 +103,68 @@ export const useCurrentConversation = ({
     [allSystemPrompts, currentConversation]
   );
 
+  const apiConfigWrites = useRef<{
+    latest?: { conversationId: string; apiConfig: ApiConfig };
+    pending: number;
+    queue: Promise<void>;
+  }>({ pending: 0, queue: Promise.resolve() });
+
+  /**
+   * The server stores the apiConfig it receives as a whole, so a change is merged on top of the
+   * changes still in flight rather than on the (possibly stale) `conversation`, and the writes are
+   * sent one at a time. Otherwise concurrent changes, e.g. picking a connector and then a system
+   * prompt, overwrite each other. Only the last write's response holds every change, so it is the
+   * only one applied to the current conversation.
+   */
+  const updateApiConfig = useCallback(
+    async (conversation: Conversation, apiConfigUpdate: Partial<ApiConfig>) => {
+      const writes = apiConfigWrites.current;
+      const mergedApiConfig = {
+        ...(writes.latest?.conversationId === conversation.id
+          ? writes.latest.apiConfig
+          : conversation.apiConfig),
+        ...apiConfigUpdate,
+      };
+      const { connectorId, actionTypeId } = mergedApiConfig;
+      if (connectorId == null || actionTypeId == null) {
+        return;
+      }
+      const apiConfig: ApiConfig = { ...mergedApiConfig, connectorId, actionTypeId };
+
+      writes.latest = { conversationId: conversation.id, apiConfig };
+      writes.pending++;
+      const write = writes.queue.then(() => setApiConfig({ conversation, apiConfig }));
+      writes.queue = write.then(
+        () => undefined,
+        () => undefined
+      );
+
+      try {
+        const updatedConversation = await write;
+        if (updatedConversation && writes.pending === 1) {
+          setCurrentConversation((prev) =>
+            prev?.id === updatedConversation.id ? updatedConversation : prev
+          );
+        }
+      } finally {
+        writes.pending--;
+        if (writes.pending === 0) {
+          writes.latest = undefined;
+        }
+      }
+    },
+    [setApiConfig]
+  );
+
+  const setCurrentConnector = useCallback(
+    async (connectorApiConfig: ConnectorApiConfig) => {
+      if (currentConversation) {
+        await updateApiConfig(currentConversation, connectorApiConfig);
+      }
+    },
+    [currentConversation, updateApiConfig]
+  );
+
   // Write the selected system prompt to the conversation config
   const setCurrentSystemPromptId = useCallback(
     async (promptId?: string) => {
@@ -112,21 +180,11 @@ export const useCurrentConversation = ({
         });
       }
       if (currentConversation && currentConversation.apiConfig) {
-        const updatedConversation = await setApiConfig({
-          conversation: currentConversation,
-          apiConfig: {
-            ...currentConversation.apiConfig,
-            defaultSystemPromptId: promptId,
-          },
-        });
-
-        if (updatedConversation) {
-          setCurrentConversation(updatedConversation);
-        }
+        await updateApiConfig(currentConversation, { defaultSystemPromptId: promptId });
         await refetchCurrentUserConversations();
       }
     },
-    [currentConversation, refetchCurrentUserConversations, setApiConfig]
+    [currentConversation, refetchCurrentUserConversations, updateApiConfig]
   );
 
   /**
@@ -332,6 +390,7 @@ export const useCurrentConversation = ({
     handleOnConversationSelected,
     isConversationOwner,
     refetchCurrentConversation,
+    setCurrentConnector,
     setCurrentConversation,
     setCurrentSystemPromptId,
   };
