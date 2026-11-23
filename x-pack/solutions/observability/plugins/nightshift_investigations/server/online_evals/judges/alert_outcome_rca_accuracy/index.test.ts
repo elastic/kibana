@@ -106,7 +106,7 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
           {
             name: 'alert_outcome_rca_accuracy',
             score: expectedScore === 3 ? 1 : 0,
-            label: `score=${expectedScore}/3`,
+            label: `score=${expectedScore}/3 pass=3/3`,
             explanation: fixture.description,
           },
           {
@@ -131,6 +131,12 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
       alert_outcome_rca_depth: 0.667,
       alert_outcome_rca_accuracy: 0,
     });
+    expect(scores.map(({ name, label }) => [name, label])).toEqual(
+      expect.arrayContaining([
+        ['alert_outcome_rca_depth', 'score=2/3'],
+        ['alert_outcome_rca_accuracy', 'score=2/3 pass=3/3'],
+      ])
+    );
   });
 
   it('flows the hallucination penalty into every score', async () => {

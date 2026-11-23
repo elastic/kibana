@@ -9,10 +9,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { NightshiftAppHeader } from '../../../components/app_header';
-import { useIntroBannerDismissal } from '../../../components/use_intro_banner_dismissal';
 import { useConnectorsByType } from '../../../data/sandbox_connectors/use_connectors_by_type';
 import { useOnboarding } from './use_onboarding';
 import { NightshiftOnboarding } from './onboarding';
@@ -104,40 +101,6 @@ const renderOnboarding = (latestInvestigation?: InvestigationSummary) =>
     </I18nProvider>
   );
 
-const OnboardingWithHeader = ({
-  latestInvestigation,
-}: {
-  latestInvestigation?: InvestigationSummary;
-}) => {
-  const dismissal = useIntroBannerDismissal();
-  const [visible, setVisible] = React.useState<boolean | undefined>();
-  const [finished, setFinished] = React.useState(false);
-  return (
-    <>
-      <NightshiftAppHeader showExploreLiveExample={!finished && visible === false} />
-      {!finished && (
-        <NightshiftOnboarding
-          latestInvestigation={latestInvestigation}
-          introBannerDismissal={dismissal}
-          onIntroBannerVisibilityChange={setVisible}
-          onFinish={() => setFinished(true)}
-        />
-      )}
-    </>
-  );
-};
-
-const renderOnboardingWithHeader = (latestInvestigation?: InvestigationSummary) =>
-  render(
-    <I18nProvider>
-      <MockAppHeaderProvider>
-        <MemoryRouter>
-          <OnboardingWithHeader latestInvestigation={latestInvestigation} />
-        </MemoryRouter>
-      </MockAppHeaderProvider>
-    </I18nProvider>
-  );
-
 const currentStep = () =>
   STEP_IDS.find(
     (id) =>
@@ -154,21 +117,16 @@ describe('NightshiftOnboarding', () => {
     mockStartSuggestions.mockReset();
   });
 
-  it('moves the live example to the header immediately on dismissal and keeps it there on reload', async () => {
+  it('keeps the intro banner dismissed on reload', () => {
     mockConnectors({ '.new_relic': 1 });
-    const { unmount } = renderOnboardingWithHeader();
-    expect(screen.queryByTestId('appHeaderExploreLiveExample')).not.toBeInTheDocument();
+    const { unmount } = renderOnboarding();
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingIntroBannerDismiss'));
     expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
-    const link = await screen.findByRole('link', { name: 'Explore live example' });
-    expect(link).toHaveAttribute('href', 'https://ela.st/nightshift-try-it');
-    expect(link).toHaveAttribute('target', '_blank');
 
     unmount();
-    renderOnboardingWithHeader();
+    renderOnboarding();
     expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
-    expect(await screen.findByTestId('appHeaderExploreLiveExample')).toBeInTheDocument();
   });
 
   describe('Add data step', () => {
@@ -326,28 +284,6 @@ describe('NightshiftOnboarding', () => {
       expect(linkedSteps()).toEqual(['addData', 'connectSources', 'investigate']);
       expect(screen.queryByRole('button', { name: 'Back' })).not.toBeInTheDocument();
       expect(screen.queryByText('Back to suggestions')).not.toBeInTheDocument();
-    });
-
-    it('moves the live example between the banner and header as steps change, then removes it on finish', () => {
-      renderOnboardingWithHeader(investigation);
-
-      expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
-      expect(screen.getByTestId('appHeaderExploreLiveExample')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
-      expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toBeInTheDocument();
-      expect(screen.queryByTestId('appHeaderExploreLiveExample')).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
-      expect(screen.getByTestId('nightshiftOnboardingIntroBanner')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-investigate'));
-      expect(screen.queryByTestId('nightshiftOnboardingIntroBanner')).not.toBeInTheDocument();
-      expect(screen.getByTestId('appHeaderExploreLiveExample')).toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingProceedToAutomationButton'));
-      fireEvent.click(screen.getByTestId('nightshiftOnboardingFinishButton'));
-      expect(screen.queryByRole('link', { name: 'Explore live example' })).not.toBeInTheDocument();
     });
 
     it('returns to a completed step and forward again through the card, not by rerunning', () => {

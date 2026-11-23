@@ -29,6 +29,7 @@ import { getMetricsExecutionContext } from './execution_context';
 export interface ExecuteEsqlParams {
   esqlQuery: string;
   search: ISearchGeneric;
+  sessionId?: string;
   signal?: AbortSignal;
   timeFieldName?: string;
   timeRange?: TimeRange;
@@ -70,6 +71,7 @@ export interface ExecuteEsqlResult<TDocument> {
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
   search,
+  sessionId,
   signal,
   timeFieldName,
   timeRange,
@@ -93,6 +95,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   const { response, params } = await fetchEsqlResponseOrThrow({
     esqlQuery,
     search,
+    sessionId,
     signal,
     filter,
     timeRange,

@@ -169,16 +169,15 @@ describe('RuleSummaryFlyout', () => {
     expect(screen.getByTestId('ruleSummaryAboutCard')).toBeInTheDocument();
     expect(screen.getByTestId('ruleDescription')).toHaveTextContent('A rule description');
     expect(screen.getByTestId('ruleSummaryInvestigation')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
     await waitFor(() => {
       expect(
         within(screen.getByTestId('ruleSummaryInvestigation')).getByRole('button')
       ).toHaveAttribute('aria-expanded', 'true');
+      expect(
+        within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')
+      ).toHaveAttribute('aria-expanded', 'true');
     });
-    expect(screen.getByTestId('ruleSummaryArtifacts')).toBeInTheDocument();
-    expect(within(screen.getByTestId('ruleSummaryArtifacts')).getByRole('button')).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    );
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockRuleConditions')).toHaveAttribute('data-variant', 'summary');
     expect(screen.getByTestId('mockDashboardArtifacts')).toBeInTheDocument();

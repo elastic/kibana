@@ -7,14 +7,13 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
+import { readCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import type { EditableTitleProps } from './editable_title';
 import { EditableTitle } from './editable_title';
-import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('EditableTitle', () => {
-  const mount = useMountAppended();
   const submitTitle = jest.fn();
   const defaultProps: EditableTitleProps = {
     title: 'Test title',
@@ -26,282 +25,178 @@ describe('EditableTitle', () => {
     jest.clearAllMocks();
   });
 
+  const startEditing = async () => {
+    await userEvent.click(screen.getByTestId('editable-title-header-value'));
+  };
+
+  const typeTitle = async (value: string) => {
+    const input = screen.getByTestId('editable-title-input-field');
+    await userEvent.clear(input);
+    if (value) {
+      await userEvent.paste(value);
+    }
+  };
+
   it('renders', () => {
     renderWithTestingProviders(<EditableTitle {...defaultProps} />);
     expect(screen.getByText('Test title')).toBeInTheDocument();
   });
 
   it('inline edit defaults to readOnly when the user does not have the edit permissions', () => {
-    const wrapper = mount(
-      <TestProviders permissions={readCasesPermissions()}>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />, {
+      wrapperProps: { permissions: readCasesPermissions() },
+    });
 
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').prop('disabled')
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-header-value')).toBeDisabled();
   });
 
-  it('shows the edit title input field', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+  it('shows the edit title input field', async () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
 
-    expect(wrapper.find('[data-test-subj="editable-title-input-field"]').first().exists()).toBe(
-      true
-    );
+    expect(screen.getByTestId('editable-title-input-field')).toBeInTheDocument();
   });
 
-  it('shows the submit button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+  it('shows the submit button', async () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
 
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-submit-btn"]').first().exists()
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-submit-btn')).toBeInTheDocument();
   });
 
-  it('shows the cancel button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+  it('shows the cancel button', async () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
 
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').first().exists()
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-cancel-btn')).toBeInTheDocument();
   });
 
-  it('switch to non edit mode when canceled', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+  it('switch to non edit mode when canceled', async () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
-    wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
+    await startEditing();
+    await userEvent.click(screen.getByTestId('editable-title-cancel-btn'));
 
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-header-value')).toBeInTheDocument();
   });
 
-  it('should change the title', () => {
+  it('should change the title', async () => {
     const newTitle = 'new test title';
 
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle(newTitle);
 
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-      .simulate('change', { target: { value: newTitle } });
-
-    wrapper.update();
-
-    expect(
-      wrapper.find('input[data-test-subj="editable-title-input-field"]').prop('value')
-    ).toEqual(newTitle);
+    expect(screen.getByTestId('editable-title-input-field')).toHaveValue(newTitle);
   });
 
-  it('should NOT change the title when cancel', () => {
+  it('should NOT change the title when cancel', async () => {
     const title = 'Test title';
     const newTitle = 'new test title';
 
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...{ ...defaultProps, title }} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...{ ...defaultProps, title }} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle(newTitle);
+    await userEvent.click(screen.getByTestId('editable-title-cancel-btn'));
 
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-
-      .simulate('change', { target: { value: newTitle } });
-    wrapper.update();
-
-    wrapper.find('button[data-test-subj="editable-title-cancel-btn"]').simulate('click');
-    wrapper.update();
-
-    expect(wrapper.find('button[data-test-subj="editable-title-header-value"]').text()).toEqual(
-      title
-    );
+    expect(screen.getByTestId('editable-title-header-value')).toHaveTextContent(title);
   });
 
-  it('submits the title', () => {
+  it('submits the title', async () => {
     const newTitle = 'new test title';
 
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
-
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-      .last()
-      .simulate('change', { target: { value: newTitle } });
-
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle(newTitle);
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle);
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-header-value')).toBeInTheDocument();
   });
 
-  it('trims the title before submit', () => {
+  it('trims the title before submit', async () => {
     const newTitle = 'new test title with spaces          ';
 
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
-
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-      .last()
-      .simulate('change', { target: { value: newTitle } });
-
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle(newTitle);
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
     expect(submitTitle).toHaveBeenCalled();
     expect(submitTitle.mock.calls[0][0]).toEqual(newTitle.trim());
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
-    ).toBe(true);
+    expect(screen.getByTestId('editable-title-header-value')).toBeInTheDocument();
   });
 
-  it('does not submit the title when the length is longer than 160 characters', () => {
+  it('does not submit the title when the length is longer than 160 characters', async () => {
     const longTitle = 'a'.repeat(161);
 
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle(longTitle);
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-      .simulate('change', { target: { value: longTitle } });
-
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
-    expect(wrapper.find('div.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160 characters.'
-    );
-
-    expect(submitTitle).not.toHaveBeenCalled();
     expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
-    ).toBe(false);
+      await screen.findByText(
+        'The length of the title is too long. The maximum length is 160 characters.'
+      )
+    ).toBeInTheDocument();
+    expect(submitTitle).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('editable-title-header-value')).not.toBeInTheDocument();
   });
 
-  it('does not submit the title is empty', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
+  it('does not submit the title is empty', async () => {
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
+    await typeTitle('');
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-
-      .simulate('change', { target: { value: '' } });
-
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
-    expect(wrapper.find('div.euiFormErrorText').text()).toBe('A name is required.');
-
+    expect(await screen.findByText('A name is required.')).toBeInTheDocument();
     expect(submitTitle).not.toHaveBeenCalled();
-    expect(
-      wrapper.find('button[data-test-subj="editable-title-header-value"]').first().exists()
-    ).toBe(false);
+    expect(screen.queryByTestId('editable-title-header-value')).not.toBeInTheDocument();
   });
 
-  it('does not show an error after a previous edit error was displayed', () => {
+  it('does not show an error after a previous edit error was displayed', async () => {
     const longTitle = 'a'.repeat(161);
-
     const shortTitle = 'My title';
-    const wrapper = mount(
-      <TestProviders>
-        <EditableTitle {...defaultProps} />
-      </TestProviders>
-    );
 
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-    // simualte a long title
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-      .simulate('change', { target: { value: longTitle } });
+    await startEditing();
 
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
-    expect(wrapper.find('div.euiFormErrorText').text()).toBe(
-      'The length of the title is too long. The maximum length is 160 characters.'
-    );
+    // simulate a long title
+    await typeTitle(longTitle);
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
+    expect(
+      await screen.findByText(
+        'The length of the title is too long. The maximum length is 160 characters.'
+      )
+    ).toBeInTheDocument();
 
     // write a shorter one
-    wrapper
-      .find('input[data-test-subj="editable-title-input-field"]')
-
-      .simulate('change', { target: { value: shortTitle } });
-    wrapper.update();
+    await typeTitle(shortTitle);
 
     // submit the form
-    wrapper.find('button[data-test-subj="editable-title-submit-btn"]').simulate('click');
-    wrapper.update();
+    await userEvent.click(screen.getByTestId('editable-title-submit-btn'));
 
     // edit again
-    wrapper.find('button[data-test-subj="editable-title-header-value"]').simulate('click');
-    wrapper.update();
+    await startEditing();
 
     // no error should appear
-    expect(wrapper.find('.euiFormErrorText').length).toBe(0);
+    expect(
+      screen.queryByText(
+        'The length of the title is too long. The maximum length is 160 characters.'
+      )
+    ).not.toBeInTheDocument();
   });
 
   describe('Badges', () => {

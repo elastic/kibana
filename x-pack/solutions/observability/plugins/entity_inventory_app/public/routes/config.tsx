@@ -11,7 +11,7 @@ import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
 import { EntityCategoryResults } from '../application/components/entity_category_results/entity_category_results';
-import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
+import { EntityInventoryPageFilterControls } from '../application/filters/components/page_filter_controls';
 import type { EntityInventoryEntityCategory } from '../types';
 
 // TODO: filter the `types` response by category once entity definitions carry one.

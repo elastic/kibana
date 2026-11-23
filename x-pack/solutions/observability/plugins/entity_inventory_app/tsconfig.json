@@ -28,6 +28,9 @@
     "@kbn/react-hooks",
     "@kbn/ui-callout",
     "@kbn/entity-inventory-plugin",
-    "@kbn/server-route-repository-client"
+    "@kbn/server-route-repository-client",
+    "@kbn/shared-ux-router",
+    "@kbn/rison",
+    "@kbn/kibana-utils-plugin"
   ]
 }
