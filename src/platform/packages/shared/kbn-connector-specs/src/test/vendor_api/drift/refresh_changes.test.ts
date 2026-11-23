@@ -573,6 +573,73 @@ describe('describeChanges', () => {
     ).toEqual(object('Request', '! (request body) (+ z)'));
   });
 
+  it('says how a bound moved, and keeps the rule of a field change it has no words for', () => {
+    expect(
+      describeChanges([
+        change(
+          'request-parameter-max-decreased',
+          'for the `query` request parameter `limit`, the max was decreased from `100.00` to `50.00`',
+          'integer'
+        ),
+        change(
+          'request-property-max-properties-increased',
+          'the `filter` request property max properties was increased',
+          'object'
+        ),
+      ])
+    ).toEqual(
+      object(
+        'Request',
+        '! filter: object (max properties increased)',
+        '! limit: integer (query parameter, max 100.00 → 50.00)'
+      )
+    );
+  });
+
+  it('keeps the value that changed when the types are cut short', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-enum-value-removed',
+          'removed the `a` enum value from the `mode` response property for the response status `200`',
+          'b | c | …',
+          'a | b | …'
+        ),
+      ])
+    ).toEqual(object('Response', '- mode: a | b | …', '+ mode: b | c | … (- a)'));
+  });
+
+  it('keeps parameters of the same name in different locations apart', () => {
+    const lines = describeChanges([
+      change(
+        'new-optional-request-parameter',
+        'added the new optional `query` request parameter `token`',
+        'string'
+      ),
+      change(
+        'new-optional-request-parameter',
+        'added the new optional `header` request parameter `token`',
+        'string'
+      ),
+    ]);
+
+    expect(lines).toEqual(
+      object('Request', '+ token: string (header parameter)', '+ token: string (query parameter)')
+    );
+  });
+
+  it('keeps a value with line breaks on one line of the diff', () => {
+    const lines = describeChanges([
+      change(
+        'response-optional-property-added',
+        'added the optional property `note` to the response with the `200` status',
+        'a\n```\nb'
+      ),
+    ]);
+
+    expect(lines).toEqual(object('Response', '+ note: a\\n```\\nb'));
+  });
+
   it('keeps the rule of a change it has no words for', () => {
     expect(
       describeChanges([

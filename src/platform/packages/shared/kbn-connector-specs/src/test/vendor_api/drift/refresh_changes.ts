@@ -262,8 +262,23 @@ const detailOf = (
     const [, which, verb] = limit;
     return `${camelCase(which)} ${verb}${verb === 'set' && rest[0] ? ` to ${rest[0]}` : ''}`;
   }
+  // "the max was decreased from `100.00` to `50.00`"
+  const moved = /-(min|max|min-length|max-length|min-items|max-items)-(increased|decreased)$/.exec(
+    id
+  );
+  if (moved && rest.length >= 2) {
+    const [from, to] = rest.slice(-2);
+    return `${camelCase(moved[1])} ${from} → ${to}`;
+  }
   return undefined;
 };
+
+/** A rule with no wording of its own, by what its id says changed: `max-properties increased`. */
+const ruleWords = (id: string): string =>
+  id
+    .replace(/^(new-)?(request|response)-/, '')
+    .replace(/^(required-|optional-)?(parameter|property|body|header)-/, '')
+    .replace(/-/g, ' ');
 
 /** `#/components/schemas/SlotContentId` as `SlotContentId`; an inline schema keeps its number. */
 const variantName = (variant: string): string =>
@@ -430,7 +445,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
   if (/-(removed|deleted)$/.test(id)) {
     return entry('-', []);
   }
-  return entry('!', [detailOf(id, rest, type)]);
+  return entry('!', [detailOf(id, rest, type) ?? ruleWords(id)]);
 };
 
 const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
@@ -523,7 +538,11 @@ const isTypeChange = (detail: string): boolean =>
 const linesOf = (sign: Sign, field: Field): string[] => {
   const { name, type, typeBefore } = field;
   if (sign === '!' && type !== undefined && typeBefore !== undefined && type !== typeBefore) {
-    const details = new Set([...field.details].filter((detail) => !isTypeChange(detail)));
+    // A type cut short may not show the value or variant that changed, so that is kept.
+    const cut = type.includes('…') || typeBefore.includes('…');
+    const details = new Set(
+      [...field.details].filter((detail) => !isTypeChange(detail) || (cut && /^[+-] /.test(detail)))
+    );
     return [`- ${name}: ${typeBefore}`, `+ ${lineOf({ name, type, details })}`];
   }
   return [`${sign} ${lineOf(field)}`];
@@ -533,14 +552,21 @@ const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart =
   // A field that several changes are about is one item, with all their details.
   const fields = new Map<string, Field>();
   for (const { name, type, typeBefore, details } of entries) {
-    // Fields of the same name and type, wherever they sit, are one item.
-    const key = `${name}\u0000${typeBefore ?? ''}\u0000${type ?? ''}`;
+    // Fields of the same name and type, wherever they sit, are one item; parameters of the same
+    // name in different locations are not.
+    const location = details.find((detail) => PARAMETER_LOCATION.test(detail)) ?? '';
+    const key = `${name}\u0000${location}\u0000${typeBefore ?? ''}\u0000${type ?? ''}`;
     const field: Field = fields.get(key) ?? { name, type, typeBefore, details: new Set<string>() };
     details.forEach((detail) => field.details.add(detail));
     fields.set(key, field);
   }
   const items = [...fields.values()]
-    .sort((a, b) => byText(a.name, b.name) || byText(a.type ?? '', b.type ?? ''))
+    .sort(
+      (a, b) =>
+        byText(a.name, b.name) ||
+        byText(a.type ?? '', b.type ?? '') ||
+        byText([...a.details].sort(byText).join(), [...b.details].sort(byText).join())
+    )
     .map((field) => linesOf(sign, field));
   return {
     kind: 'list',
@@ -552,13 +578,16 @@ const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart =
 };
 
 /** The lines of a part of a diff block. */
+// A line break in a vendor's value would end the diff line, and a line of backticks the block.
+const oneLine = (line: string): string => line.replace(/\r\n|\r|\n/g, '\\n');
+
 export const partLines = (part: ChangePart): string[] => {
   if (part.kind === 'fixed') {
-    return [...part.lines];
+    return part.lines.map(oneLine);
   }
   const more = part.items.length - part.shown;
   return [
-    ...part.items.slice(0, part.shown).flat(),
+    ...part.items.slice(0, part.shown).flat().map(oneLine),
     ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
   ];
 };
