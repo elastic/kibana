@@ -10,7 +10,10 @@ import type { Condition } from '@kbn/streamlang';
 import { MAX_DYNAMIC_IDENTITY_FIELDS, type DynamicBlock } from './dynamic_block_schema';
 import { isNotEmptyCondition } from '../common_fields';
 import {
+  BADGE_COLUMN_RULE,
+  DEFAULT_COLUMN_RULE,
   DISPLAY_LABEL_RULE,
+  NAME_FIELD_RULE,
   NO_IDENTITY_ATTRIBUTE_RULE,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
@@ -457,6 +460,65 @@ describe('dynamic definition rules', () => {
         withSuggestedFilters(hostIdentity, ['os_name', 'missing']),
         ['dynamic', 'suggestedFilters', 1],
         SUGGESTED_FILTER_RULE
+      );
+    });
+  });
+
+  describe.each([
+    ['nameFields', NAME_FIELD_RULE],
+    ['badgeColumns', BADGE_COLUMN_RULE],
+    ['defaultColumns', DEFAULT_COLUMN_RULE],
+  ] as const)('%s are attributes or identity fields', (key, rule) => {
+    const withColumns = (identityField: EntityIdentity, names: string[]) =>
+      definition(identityField, { dynamic: { ...dynamic, [key]: names } });
+
+    it('accepts an attribute of a source', () => {
+      expectAccepted(withColumns(hostIdentity, ['os_name']));
+    });
+
+    it('accepts the single identity field', () => {
+      expectAccepted(withColumns({ singleField: 'k8s.pod.uid' }, ['k8s.pod.uid']));
+    });
+
+    it('accepts fields of a ranking and an attribute together', () => {
+      expectAccepted(withColumns(hostIdentity, ['host.name', 'os_name', 'host.id']));
+    });
+
+    it('rejects the entity id, even when it is the identity field', () => {
+      expectRejected(
+        withColumns({ singleField: 'entity.id' }, ['entity.id']),
+        ['dynamic', key, 0],
+        rule
+      );
+    });
+
+    it('rejects a name that is neither an attribute nor an identity field', () => {
+      expectRejected(withColumns(hostIdentity, ['os_name', 'missing']), ['dynamic', key, 1], rule);
+    });
+  });
+
+  describe.each([
+    ['nameFields', NAME_FIELD_RULE],
+    ['badgeColumns', BADGE_COLUMN_RULE],
+  ] as const)('%s', (key, rule) => {
+    it('rejects the generated last_seen column', () => {
+      expectRejected(
+        definition(hostIdentity, { dynamic: { ...dynamic, [key]: [RESERVED_LAST_SEEN_FIELD] } }),
+        ['dynamic', key, 0],
+        rule
+      );
+    });
+  });
+
+  describe('defaultColumns', () => {
+    it('accepts the generated last_seen column beside identity fields and attributes', () => {
+      expectAccepted(
+        definition(hostIdentity, {
+          dynamic: {
+            ...dynamic,
+            defaultColumns: ['host.name', 'os_name', RESERVED_LAST_SEEN_FIELD],
+          },
+        })
       );
     });
   });

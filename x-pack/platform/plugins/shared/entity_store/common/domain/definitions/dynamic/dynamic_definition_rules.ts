@@ -23,6 +23,12 @@ export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
 export const DISPLAY_LABEL_RULE = 'display labels are identity fields or attributes';
 /** Name of the rule that a suggested filter is an attribute of a source or an identity field. */
 export const SUGGESTED_FILTER_RULE = 'suggested filters are attributes or identity fields';
+/** Name of the rule that a name field is an attribute of a source or an identity field. */
+export const NAME_FIELD_RULE = 'name fields are attributes or identity fields';
+/** Name of the rule that a default column is an attribute, an identity field or `last_seen`. */
+export const DEFAULT_COLUMN_RULE = 'default columns are attributes, identity fields or last_seen';
+/** Name of the rule that a badge column is an attribute of a source or an identity field. */
+export const BADGE_COLUMN_RULE = 'badge columns are attributes or identity fields';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
@@ -143,8 +149,9 @@ const checkCalculatedIdentity = (
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
  * ES|QL `BY` keys, no attribute may read an identity field, every display label is for an
- * attribute or an identity field, and every suggested filter is an attribute or an identity
- * field. A definition without `dynamic` is never checked.
+ * attribute or an identity field, and every column a presentation list names (suggested filters,
+ * name fields, default columns, badge columns) is one the output carries. A definition without
+ * `dynamic` is never checked.
  */
 export const assertDynamicDefinitionRules = (
   definition: DefinitionWithDynamic,
@@ -198,17 +205,33 @@ export const assertDynamicDefinitionRules = (
       );
     }
   });
-  (dynamic.suggestedFilters ?? []).forEach((name, index) => {
-    if (name === ENTITY_ID_FIELD) {
-      addIssue(
-        ['dynamic', 'suggestedFilters', index],
-        `${SUGGESTED_FILTER_RULE}: "${name}" is the entity id column and cannot be a suggested filter`
-      );
-    } else if (!attributeNames.has(name) && !identityFields.has(name)) {
-      addIssue(
-        ['dynamic', 'suggestedFilters', index],
-        `${SUGGESTED_FILTER_RULE}: "${name}" is neither an attribute of a source nor an identity field`
-      );
-    }
-  });
+
+  const checkColumnList = (
+    key: 'suggestedFilters' | 'nameFields' | 'defaultColumns' | 'badgeColumns',
+    rule: string,
+    noun: string,
+    allowsLastSeen: boolean
+  ): void => {
+    (dynamic[key] ?? []).forEach((name, index) => {
+      const path = ['dynamic', key, index];
+      if (name === ENTITY_ID_FIELD) {
+        addIssue(path, `${rule}: "${name}" is the entity id column and cannot be a ${noun}`);
+      } else if (
+        !attributeNames.has(name) &&
+        !identityFields.has(name) &&
+        !(allowsLastSeen && name === RESERVED_LAST_SEEN_FIELD)
+      ) {
+        addIssue(
+          path,
+          `${rule}: "${name}" is neither an attribute of a source nor an identity field${
+            allowsLastSeen ? ` nor "${RESERVED_LAST_SEEN_FIELD}"` : ''
+          }`
+        );
+      }
+    });
+  };
+  checkColumnList('suggestedFilters', SUGGESTED_FILTER_RULE, 'suggested filter', false);
+  checkColumnList('nameFields', NAME_FIELD_RULE, 'name field', false);
+  checkColumnList('defaultColumns', DEFAULT_COLUMN_RULE, 'default column', true);
+  checkColumnList('badgeColumns', BADGE_COLUMN_RULE, 'badge column', false);
 };
