@@ -83,6 +83,10 @@ export const NO_AUTH_LABEL = i18n.translate('connectorSpecs.authType.noAuth.labe
   defaultMessage: 'None',
 });
 
+export const RECEIVE_ONLY_AUTH_LABEL = i18n.translate('connectorSpecs.auth.receiveOnly.label', {
+  defaultMessage: 'No authentication (receive events only)',
+});
+
 export const OAUTH_LABEL = i18n.translate('connectorSpecs.oauth.label', {
   defaultMessage: 'OAuth Client Credentials',
 });

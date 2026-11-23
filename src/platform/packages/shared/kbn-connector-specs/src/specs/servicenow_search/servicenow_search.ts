@@ -125,16 +125,6 @@ export const ServicenowSearch: ConnectorSpec = {
           },
         },
       },
-      {
-        // For connectors that only receive events.
-        type: 'none',
-        defaults: {},
-        overrides: {
-          label: i18n.translate('connectorSpecs.servicenowSearch.auth.none.label', {
-            defaultMessage: 'No authentication (receive events only)',
-          }),
-        },
-      },
     ],
   },
 

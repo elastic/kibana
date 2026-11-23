@@ -194,16 +194,6 @@ export const Datadog: ConnectorSpec = {
           },
         },
       },
-      {
-        // For connectors that only receive events.
-        type: 'none',
-        defaults: {},
-        overrides: {
-          label: i18n.translate('connectorSpecs.datadog.auth.none.label', {
-            defaultMessage: 'No authentication (receive events only)',
-          }),
-        },
-      },
     ],
     headers: {
       Accept: 'application/json',

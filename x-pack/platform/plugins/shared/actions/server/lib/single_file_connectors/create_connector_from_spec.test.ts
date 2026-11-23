@@ -361,6 +361,28 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.validate.connector).toBeUndefined();
   });
 
+  it('appends the none auth type for a dual spec that does not list it', () => {
+    const connectorType = createConnectorTypeFromSpec(
+      createMockSpec({
+        events: inboundEvents,
+        auth: { types: ['basic'] },
+      }),
+      mockActionsPlugin
+    );
+
+    expect(connectorType.spec?.auth?.types).toEqual([
+      'basic',
+      expect.objectContaining({ type: 'none' }),
+    ]);
+    expect(() =>
+      validateSecrets(
+        connectorType,
+        { authType: 'none' },
+        { configurationUtilities: mockActionsConfigUtils }
+      )
+    ).not.toThrow();
+  });
+
   it('rejects no authentication with selected actions on a dual spec', () => {
     const connectorType = createConnectorTypeFromSpec(
       createMockSpec({ events: inboundEvents }),

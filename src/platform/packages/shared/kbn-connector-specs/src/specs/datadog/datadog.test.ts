@@ -8,7 +8,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { getConnectorSpec } from '../../..';
+import { getConnectorSpec, withReceiveOnlyAuth } from '../../..';
 import type { ActionContext } from '../../connector_spec';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
@@ -55,7 +55,8 @@ describe('Datadog', () => {
 
   it('should be discoverable via getConnectorSpec (all_specs wiring)', () => {
     const spec = getConnectorSpec('.datadog');
-    expect(spec).toBe(Datadog);
+    expect(spec?.metadata).toBe(Datadog.metadata);
+    expect(spec?.actions).toBe(Datadog.actions);
     expect(spec?.actions.listMonitors).toBeDefined();
     expect(spec?.actions.listMonitors.isTool).toBe(true);
   });
@@ -77,10 +78,13 @@ describe('Datadog', () => {
   });
 
   it('should support no authentication for connectors that only receive events', () => {
-    const types = (Datadog.auth?.types as Array<string | { type: string }>).map((t) =>
-      typeof t === 'string' ? t : t.type
+    const types = (withReceiveOnlyAuth(Datadog).auth?.types ?? []).map((authType) =>
+      typeof authType === 'string' ? authType : authType.type
     );
     expect(types).toContain('none');
+    expect((Datadog.auth?.types ?? []).map((authType) =>
+      typeof authType === 'string' ? authType : authType.type
+    )).not.toContain('none');
   });
 
   it('should keep test.enabled true', () => {

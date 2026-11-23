@@ -16,6 +16,7 @@ import { getSchemaForAuthType } from './lib';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
 import { getSandboxSupportedAuthTypeIds } from './get_sandbox_supported_auth_type_ids';
 import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
+import { withReceiveOnlyAuth } from './with_receive_only_auth';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
 const SANDBOX_HOST_PATTERN =
@@ -138,11 +139,12 @@ describe('connector spec contracts', () => {
   });
 
   // A connector that receives events must be able to do so without outbound credentials.
+  // Dual specs get `none` from withReceiveOnlyAuth. Inbound-only specs declare it themselves.
   it.each(allSpecs)('%s offers no authentication when it receives events', (_exportName, spec) => {
     if (spec.events === undefined) {
       return;
     }
-    expect((spec.auth?.types ?? []).map(getAuthTypeId)).toContain('none');
+    expect((withReceiveOnlyAuth(spec).auth?.types ?? []).map(getAuthTypeId)).toContain('none');
   });
 
   it.each(allSpecs)('%s forwards only lowercase non-credential headers', (_exportName, spec) => {

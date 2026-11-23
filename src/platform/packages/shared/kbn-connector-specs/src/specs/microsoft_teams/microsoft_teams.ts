@@ -175,16 +175,6 @@ export const MicrosoftTeams: ConnectorSpec = {
       // auth continue to pass schema validation. The runtime handler still supports
       // bearer as a delegated auth mode; it is no longer offered in the picker.
       { type: 'bearer', isLegacy: true, defaults: {} },
-      {
-        // For connectors that only receive events.
-        type: 'none',
-        defaults: {},
-        overrides: {
-          label: i18n.translate('connectorSpecs.microsoftTeams.auth.none.label', {
-            defaultMessage: 'No authentication (receive events only)',
-          }),
-        },
-      },
     ],
   },
 

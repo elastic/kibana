@@ -322,7 +322,7 @@ after migrating the handler to this contract. An inbound-only spec (events, no a
 
 ### Receive-only connectors
 
-A spec with inbound events and outbound actions is dual. The actions framework installs a connector validator for every dual spec. With `authType: 'none'`, `selectedActions` must be `[]`. Any other auth type skips that check. Specs do not declare the validator. List `type: 'none'` in `auth.types` when the picker should offer receive-only.
+A spec with inbound events and outbound actions is dual. The framework appends a `none` auth type to every dual spec and installs a connector validator. With `authType: 'none'`, `selectedActions` must be `[]`. Any other auth type skips that check. Specs do not declare the auth type or the validator.
 
 Inbound-only specs (events, no actions) and outbound specs that use `none` as "no credentials" do not get this check.
 

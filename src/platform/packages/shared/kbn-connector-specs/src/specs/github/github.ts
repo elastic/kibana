@@ -136,16 +136,6 @@ export const GithubConnector: ConnectorSpec = {
           }),
         },
       },
-      {
-        // For connectors that only receive events.
-        type: 'none',
-        defaults: {},
-        overrides: {
-          label: i18n.translate('connectorSpecs.github.auth.none.label', {
-            defaultMessage: 'No authentication (receive events only)',
-          }),
-        },
-      },
     ],
     headers: {
       Accept: 'application/vnd.github+json',

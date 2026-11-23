@@ -13,6 +13,7 @@ import {
   getSandboxHosts,
   getSandboxSupportedAuthTypeIds,
   isDualConnectorSpec,
+  withReceiveOnlyAuth,
 } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { lazyImmutableGCableObject, z as z4 } from '@kbn/zod/v4';
@@ -58,9 +59,10 @@ const buildExecutableActions = (spec: ConnectorSpec): ConnectorSpec['actions'] =
 };
 
 export const createConnectorTypeFromSpec = (
-  spec: ConnectorSpec,
+  input: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
+  const spec = withReceiveOnlyAuth(input);
   const configUtils = actions.getActionsConfigurationUtilities();
   const networkSettings = createConnectorNetworkSettings(configUtils);
   const platform = createPlatformServices(configUtils);
