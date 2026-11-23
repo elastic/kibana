@@ -29,6 +29,10 @@ import {
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import {
+  regenerateEntityStoreTaskApiKeys,
+  type RegenerateTaskApiKeysResult,
+} from '../../tasks/regenerate_task_api_keys';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import {
@@ -234,6 +238,16 @@ export class AssetManagerClient {
     }
   }
 
+  /** Re-grants the API key of every Entity Store task in this namespace as the requesting user. */
+  public async regenerateTaskApiKeys(request: KibanaRequest): Promise<RegenerateTaskApiKeysResult> {
+    return regenerateEntityStoreTaskApiKeys({
+      taskManager: this.taskManager,
+      logger: this.logger,
+      namespace: this.namespace,
+      request,
+    });
+  }
+
   public async stop(type: EntityType) {
     try {
       await stopExtractEntityTask({
@@ -378,6 +392,12 @@ export class AssetManagerClient {
   public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.find();
     return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+  }
+
+  /** Extra source index patterns the installed store is configured to extract from. */
+  public async getStoredAdditionalIndexPatterns(): Promise<string[]> {
+    const { additionalIndexPatterns } = await this.getLogExtractionConfig();
+    return additionalIndexPatterns;
   }
 
   private async initEntity(

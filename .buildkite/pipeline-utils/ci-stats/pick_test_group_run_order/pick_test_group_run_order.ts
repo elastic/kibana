@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import { getAffectedPackages, listChangedFiles } from '../../affected-packages/index.ts';
+import { getAffectedPackages } from '../../affected-packages/index.ts';
 import type { BuildkiteStep } from '../../buildkite/index.ts';
 import { BuildkiteClient } from '../../buildkite/index.ts';
 import { getTrackedBranch } from '../../utils.ts';
@@ -20,15 +20,26 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { getEnabledFtrConfigs } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import {
+  queryMoonJestUnitSelection,
+  queryMoonTestSelection,
+} from '../../affected-packages/moon_test_tasks.ts';
+import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { shouldSkipFtrTests } from './selective_ftr.ts';
 import { isScoutPathOnlyDiff } from './selective_scout.ts';
+import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
 } from './selective_testing.ts';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import {
+  buildFunctionalAggregateWaitStep,
+  buildFunctionalStepGroups,
+  buildJestStep,
+  registerCancelKeys,
+} from './steps.ts';
 import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
@@ -44,26 +55,20 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
-  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+  const selectiveChangedFiles = config.useSelectiveTesting
+    ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
+    : null;
 
-  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
-  // any Jest unit/integration or FTR config — skip emitting them entirely.
-  // The Scout pipeline still runs its own selective testing in parallel.
-  let selectiveChangedFiles: string[] | undefined;
-  if (selectiveTestingMergeBase) {
-    selectiveChangedFiles = listChangedFiles({
-      mergeBase: selectiveTestingMergeBase,
-      commit: 'HEAD',
-    });
-    if (isScoutPathOnlyDiff(selectiveChangedFiles)) {
-      console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
-      bk.setAnnotation(
-        'selective-testing-scout-tests-only',
-        'info',
-        'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
-      );
-      return;
-    }
+  // A diff containing only Scout test files cannot affect any Jest unit/integration
+  // or FTR config, so skip those steps.
+  if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
+    console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
+    bk.setAnnotation(
+      'selective-testing-scout-tests-only',
+      'info',
+      'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
+    );
+    return;
   }
 
   const unitIncluded = config.limitConfigType.includes('unit');
@@ -80,8 +85,9 @@ export async function pickTestGroupRunOrder() {
   );
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  if (selectiveTestingMergeBase && selectiveChangedFiles) {
-    const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
+  if (selectiveChangedFiles !== null) {
+    const directlyAffected = await getAffectedPackages(undefined, {
+      changedFiles: selectiveChangedFiles,
       strategy: 'git',
       includeDownstream: false,
       ignoreUncategorizedChanges: true,
@@ -104,13 +110,34 @@ export async function pickTestGroupRunOrder() {
       ftrConfigsByQueue.clear();
     }
 
-    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
-      jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
-      jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
-        jestIntegrationConfigs,
-        selectiveCtx
-      );
+      if (unitIncluded) {
+        try {
+          const moonSelection = queryMoonJestUnitSelection(selectiveChangedFiles);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(
+            jestUnitConfigs,
+            selectiveCtx,
+            moonSelection
+          );
+        } catch (error) {
+          console.error('Moon Jest unit comparison failed; using package selection', error);
+          jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+        }
+      }
+      if (integrationIncluded) {
+        let moonSelection: MoonTestSelection | undefined;
+        try {
+          moonSelection = queryMoonTestSelection(selectiveChangedFiles, 'jest-integration-tests');
+        } catch (error) {
+          console.error('Moon Jest integration comparison failed; using package selection', error);
+        }
+        jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
+          jestIntegrationConfigs,
+          selectiveCtx,
+          moonSelection
+        );
+      }
     }
   }
 
@@ -135,8 +162,7 @@ export async function pickTestGroupRunOrder() {
       ownBranch: config.ownBranch,
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
-      prMergeBase: config.prMergeBase,
-      mergeQueueMergeBase: config.mergeQueueMergeBase,
+      timingBase: config.timingBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,
@@ -189,8 +215,10 @@ export async function pickTestGroupRunOrder() {
         dependsOn: config.jestConfigsDeps,
         retryCount: config.jestConfigsRetryCount,
       }),
-    functionalGroups.length > 0 &&
-      buildFunctionalStepGroup({
+  ].filter((s): s is BuildkiteStep => Boolean(s));
+
+  const functionalStepGroups = functionalGroups.length
+    ? buildFunctionalStepGroups({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
         functionalGroups,
         defaultQueue,
@@ -198,8 +226,8 @@ export async function pickTestGroupRunOrder() {
         envFromLabels: config.envFromLabels,
         dependsOn: config.ftrConfigsDeps,
         retryCount: config.ftrConfigsRetryCount,
-      }),
-  ].filter((s): s is BuildkiteStep => Boolean(s));
+      })
+    : [];
 
   registerCancelKeys(bk, {
     unitCount: unit.count,
@@ -207,7 +235,10 @@ export async function pickTestGroupRunOrder() {
     functionalGroups,
   });
 
-  bk.uploadSteps(steps);
+  if (steps.length) bk.uploadSteps(steps);
+  for (const group of functionalStepGroups) bk.uploadSteps([group]);
+  const aggregateWaitStep = buildFunctionalAggregateWaitStep(functionalStepGroups);
+  if (aggregateWaitStep) bk.uploadSteps([aggregateWaitStep]);
 }
 
 /**

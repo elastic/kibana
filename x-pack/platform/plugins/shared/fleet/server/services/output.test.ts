@@ -24,6 +24,7 @@ import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
 import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
+import { extractAndUpdateOutputSecrets, isOutputSecretStorageEnabled } from './secrets';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -44,6 +45,13 @@ const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
+>;
+
+const mockedExtractAndUpdateOutputSecrets = extractAndUpdateOutputSecrets as jest.MockedFunction<
+  typeof extractAndUpdateOutputSecrets
+>;
+const mockedIsOutputSecretStorageEnabled = isOutputSecretStorageEnabled as jest.MockedFunction<
+  typeof isOutputSecretStorageEnabled
 >;
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
@@ -176,6 +184,26 @@ function getMockedSoClient(
               },
             },
           },
+        });
+      }
+
+      // outputs that keep a credential as a secret, to check that an update that does not touch it
+      // keeps it (see `withSavedSecrets`)
+      case outputIdToUuid('existing-kafka-output-with-password-secret'): {
+        return mockOutputSO('existing-kafka-output-with-password-secret', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'user_pass',
+          username: 'kafka',
+          secrets: { password: { id: 'kafka-password-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-remote-es-output-with-secret'): {
+        return mockOutputSO('existing-remote-es-output-with-secret', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          secrets: { service_token: { id: 'service-token-secret-id' } },
         });
       }
 
@@ -339,6 +367,26 @@ function getMockedEncryptedSoClient() {
               },
             },
           },
+        });
+      }
+
+      // outputs that keep a credential as a secret, to check that an update that does not touch it
+      // keeps it (see `withSavedSecrets`)
+      case outputIdToUuid('existing-kafka-output-with-password-secret'): {
+        return mockOutputSO('existing-kafka-output-with-password-secret', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'user_pass',
+          username: 'kafka',
+          secrets: { password: { id: 'kafka-password-secret-id' } },
+        });
+      }
+
+      case outputIdToUuid('existing-remote-es-output-with-secret'): {
+        return mockOutputSO('existing-remote-es-output-with-secret', {
+          type: 'remote_elasticsearch',
+          is_default: false,
+          secrets: { service_token: { id: 'service-token-secret-id' } },
         });
       }
       case outputIdToUuid('existing-kafka-output'): {
@@ -2605,6 +2653,308 @@ describe('Output Service', () => {
         type: 'logstash',
         hosts: ['0.0.0.0'],
         ssl: null,
+      });
+    });
+
+    describe('credentials kept as secrets', () => {
+      beforeEach(() => {
+        mockedExtractAndUpdateOutputSecrets.mockReset();
+        mockedIsOutputSecretStorageEnabled.mockResolvedValue(true);
+        mockedExtractAndUpdateOutputSecrets.mockImplementation(
+          async ({ outputUpdate }) =>
+            ({ outputUpdate, secretReferences: [], secretsToDelete: [] } as any)
+        );
+      });
+
+      const sentSecrets = () => mockedExtractAndUpdateOutputSecrets.mock.calls[0][0].outputUpdate;
+
+      describe('an update that does not touch the credential keeps it', () => {
+        it('keeps the ssl key of a Logstash output when renaming it', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            name: 'renamed',
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({
+              secrets: { ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } },
+            })
+          );
+        });
+
+        it('keeps the ssl key when the update sends ssl without a key', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: { certificate: 'NEW_CERT' },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+        });
+
+        it('keeps the password of a Kafka output using user_pass', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { name: 'renamed' }
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            password: { id: 'kafka-password-secret-id' },
+          });
+        });
+
+        it('keeps the service token of a remote Elasticsearch output', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-remote-es-output-with-secret',
+            {
+              name: 'renamed',
+            }
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            service_token: { id: 'service-token-secret-id' },
+          });
+        });
+
+        it('does not add secrets to an output that has none', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+            name: 'renamed',
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output'),
+            expect.not.objectContaining({ secrets: expect.anything() })
+          );
+        });
+
+        it('does not keep the credential when secret storage is not enabled', async () => {
+          mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            name: 'renamed',
+          });
+
+          expect(mockedExtractAndUpdateOutputSecrets).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('an update that sends a plain text value stores it as a secret', () => {
+        it('moves a plain text ssl key under secrets and does not store it in plain text', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: {
+              certificate: 'NEW_CERT',
+              certificate_authorities: ['NEW_CA'],
+              key: 'PLAIN_KEY',
+            },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: 'PLAIN_KEY' } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({
+              ssl: JSON.stringify({
+                certificate: 'NEW_CERT',
+                certificate_authorities: ['NEW_CA'],
+              }),
+            })
+          );
+        });
+
+        it('moves a plain text Kafka password under secrets', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { password: 'PLAIN PASSWORD' }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ password: 'PLAIN PASSWORD' });
+        });
+
+        it('moves a plain text service token under secrets', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-remote-es-output-with-secret',
+            {
+              service_token: 'PLAIN TOKEN',
+            }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ service_token: 'PLAIN TOKEN' });
+        });
+
+        it('leaves a plain text value alone when the output keeps no secret', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output', {
+            ssl: { key: 'PLAIN_KEY' },
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output'),
+            expect.objectContaining({ ssl: JSON.stringify({ key: 'PLAIN_KEY' }) })
+          );
+        });
+      });
+
+      describe('a preconfigured update declares every secret', () => {
+        it('removes a secret the Kibana config file no longer declares', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { certificate: 'CERT' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          // the saved secrets are not kept: the config file is authoritative
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('stores a plain text value as plain text, as the config file declares it', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            {
+              name: 'n',
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: { key: 'PLAIN_KEY' },
+              is_preconfigured: true,
+            } as any,
+            { fromPreconfiguration: true, declaresAllSecrets: true }
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ key: 'PLAIN_KEY' }) })
+          );
+        });
+
+        it('keeps the saved secrets for an internal partial update', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-logstash-output-with-ssl',
+            { is_preconfigured: false },
+            { fromPreconfiguration: true }
+          );
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: { id: 'wnES3pUBqsj3cVixODPG' } } });
+        });
+      });
+
+      describe('an update that clears the credential removes it', () => {
+        it('lets an explicit null ssl remove the stored key', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: null,
+          });
+
+          expect(sentSecrets().secrets).toBeUndefined();
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: null })
+          );
+        });
+
+        it('lets a new secret replace the stored one', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            secrets: { ssl: { key: 'NEW_KEY' } },
+          });
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: 'NEW_KEY' } });
+        });
+
+        it('lets an explicit null secret remove the stored key and keep the other ssl settings', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+            ssl: { certificate: 'NEW_CERT' },
+            secrets: { ssl: { key: null } },
+          } as any);
+
+          expect(sentSecrets().secrets).toEqual({ ssl: { key: null } });
+          expect(soClient.update).toHaveBeenCalledWith(
+            expect.anything(),
+            outputIdToUuid('existing-logstash-output-with-ssl'),
+            expect.objectContaining({ ssl: JSON.stringify({ certificate: 'NEW_CERT' }) })
+          );
+        });
+
+        it('removes the Kafka password when the authentication type changes', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'ssl' } as any
+          );
+
+          expect(sentSecrets().secrets).toBeUndefined();
+        });
+
+        it('keeps the Kafka password when the update names user_pass again', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(
+            soClient,
+            esClientMock,
+            'existing-kafka-output-with-password-secret',
+            { auth_type: 'user_pass', username: 'kafka' } as any
+          );
+
+          expect(sentSecrets().secrets).toEqual({
+            password: { id: 'kafka-password-secret-id' },
+          });
+        });
       });
     });
   });

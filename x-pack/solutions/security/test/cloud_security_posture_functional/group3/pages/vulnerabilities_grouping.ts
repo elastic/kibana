@@ -14,6 +14,7 @@ import { vulnerabilitiesLatestMock } from '../../mocks/vulnerabilities_latest_mo
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
+  const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
 
   const resourceName1 = 'name-ng-1-Node';
@@ -71,15 +72,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await asyncForEach(
           order,
           async ({ cloudAccountId, cloudProviderName, findingsCount }, index) => {
-            const groupRow = await grouping.getRowAtIndex(index);
-            expect(await groupRow.getVisibleText()).to.contain(cloudAccountId);
-            expect(await groupRow.getVisibleText()).to.contain(cloudProviderName);
+            await retry.try(async () => {
+              const groupRow = await grouping.getRowAtIndex(index);
+              expect(await groupRow.getVisibleText()).to.contain(cloudAccountId);
+              expect(await groupRow.getVisibleText()).to.contain(cloudProviderName);
 
-            expect(
-              await (
-                await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
-              ).getVisibleText()
-            ).to.be(findingsCount);
+              expect(
+                await (
+                  await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
+                ).getVisibleText()
+              ).to.be(findingsCount);
+            });
           }
         );
 
@@ -112,15 +115,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         ];
 
         await asyncForEach(order, async ({ name, description, findingsCount }, index) => {
-          const groupRow = await grouping.getRowAtIndex(index);
-          expect(await groupRow.getVisibleText()).to.contain(name);
-          expect(await groupRow.getVisibleText()).to.contain(description);
+          await retry.try(async () => {
+            const groupRow = await grouping.getRowAtIndex(index);
+            expect(await groupRow.getVisibleText()).to.contain(name);
+            expect(await groupRow.getVisibleText()).to.contain(description);
 
-          expect(
-            await (
-              await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
-            ).getVisibleText()
-          ).to.be(findingsCount);
+            expect(
+              await (
+                await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
+              ).getVisibleText()
+            ).to.be(findingsCount);
+          });
         });
 
         const groupCount = await grouping.getGroupCount();
@@ -153,14 +158,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await asyncForEach(
           resourceOrder,
           async ({ resourceName, resourceId, findingsCount }, index) => {
-            const groupRow = await grouping.getRowAtIndex(index);
-            expect(await groupRow.getVisibleText()).to.contain(resourceName);
-            expect(await groupRow.getVisibleText()).to.contain(resourceId);
-            expect(
-              await (
-                await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
-              ).getVisibleText()
-            ).to.be(findingsCount);
+            await retry.try(async () => {
+              const groupRow = await grouping.getRowAtIndex(index);
+              expect(await groupRow.getVisibleText()).to.contain(resourceName);
+              expect(await groupRow.getVisibleText()).to.contain(resourceId);
+              expect(
+                await (
+                  await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
+                ).getVisibleText()
+              ).to.be(findingsCount);
+            });
           }
         );
 
@@ -190,8 +197,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
 
-        const groupRow = await grouping.getRowAtIndex(0);
-        expect(await groupRow.getVisibleText()).to.contain(resourceName1);
+        await retry.try(async () => {
+          const groupRow = await grouping.getRowAtIndex(0);
+          expect(await groupRow.getVisibleText()).to.contain(resourceName1);
+        });
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('1 resource');
@@ -219,8 +228,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
 
-        const groupRow = await grouping.getRowAtIndex(0);
-        expect(await groupRow.getVisibleText()).to.contain(resourceName1);
+        await retry.try(async () => {
+          const groupRow = await grouping.getRowAtIndex(0);
+          expect(await groupRow.getVisibleText()).to.contain(resourceName1);
+        });
 
         const groupCount = await grouping.getGroupCount();
         expect(groupCount).to.be('1 resource');
@@ -239,13 +250,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('Group table', async () => {
       it('shows vulnerabilities table when expanding', async () => {
         const grouping = await findings.findingsGrouping();
-        const firstRow = await grouping.getRowAtIndex(0);
-        await (await firstRow.findByCssSelector('button')).click();
+        // Retry only the element lookup — clicking inside retry risks toggling
+        // the accordion closed on a second attempt if the DOM re-renders.
+        const expandButton = await retry.try(async () => {
+          const firstRow = await grouping.getRowAtIndex(0);
+          return firstRow.findByCssSelector('button');
+        });
+        await expandButton.click();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         const latestFindingsTable = findings.createDataTableObject('latest_vulnerabilities_table');
-        expect(await latestFindingsTable.getRowsCount()).to.be(1);
-        expect(await latestFindingsTable.hasColumnValue('resource.name', resourceName1)).to.be(
-          true
-        );
+        await retry.try(async () => {
+          expect(await latestFindingsTable.getRowsCount()).to.be(1);
+          expect(await latestFindingsTable.hasColumnValue('resource.name', resourceName1)).to.be(
+            true
+          );
+        });
       });
     });
   });

@@ -36,6 +36,7 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - encryption_keys/**/*
@@ -49,6 +50,4 @@ fileGroups:
     - '*.js'
     - '!target/**/*'
     - '!**/*.test.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

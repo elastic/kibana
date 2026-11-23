@@ -41,7 +41,6 @@
     {
       "groupName": "webpack",
       "matchDepNames": [
-        "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
         "mini-css-extract-plugin",
@@ -519,7 +518,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": ["@mswjs/http-middleware", "@types/byte-size", "byte-size", "msw", "@xterm/xterm"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "enabled": true,
@@ -972,7 +971,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1134,7 +1132,7 @@
     },
     {
       "groupName": "postcss",
-      "matchDepNames": ["postcss", "postcss-scss", "postcss-loader"],
+      "matchDepNames": ["postcss", "postcss-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1362,26 +1360,8 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "borc",
-      "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cssnano",
-      "matchDepNames": ["cssnano", "cssnano-preset-default"],
+      "groupName": "cbor2",
+      "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1798,7 +1778,7 @@
     {
       "groupName": "i18n-iso-countries",
       "matchDepNames": ["i18n-iso-countries"],
-      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps"],
+      "reviewers": ["team:security-entity-analytics", "team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Entity Analytics", "Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -1999,10 +1979,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": [
-        "gulp-brotli",
-        "terser-webpack-plugin"
-      ],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2072,6 +2049,7 @@
       "reviewers": [
         "team:response-ops",
         "team:contextual-security-apps",
+        "team:siem-beacon",
         "team:security-asset-management",
         "team:fleet",
         "team:awp-platform",
@@ -2473,15 +2451,6 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "oxlint",
       "matchDepNames": ["oxlint"],
       "reviewers": ["team:kibana-operations"],
@@ -2493,7 +2462,7 @@
     {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2502,7 +2471,7 @@
     {
       "groupName": "@dagrejs/dagre",
       "matchPackageNames": ["@dagrejs/dagre"],
-      "reviewers": ["team:contextual-security-apps"],
+      "reviewers": ["team:contextual-security-apps", "team:siem-beacon"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Cloud Security"],
       "minimumReleaseAge": "14 days",
@@ -2582,15 +2551,6 @@
     {
       "groupName": "lightningcss",
       "matchDepNames": ["lightningcss"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "tar-fs",
-      "matchDepNames": ["tar-fs"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

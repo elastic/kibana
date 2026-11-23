@@ -298,6 +298,7 @@ enabled:
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
   - x-pack/platform/test/functional/apps/security/config.ts
+  - x-pack/platform/test/functional/apps/security/cookie_login/config.ts
   - x-pack/platform/test/functional/apps/snapshot_restore/config.ts
   - x-pack/platform/test/functional/apps/spaces/config.ts
   - x-pack/platform/test/functional/apps/status_page/config.ts

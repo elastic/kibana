@@ -43,7 +43,7 @@ import {
  * User → user maintainers (e.g. `supervises`) resolve to namespace-suffixed
  * `user:<id>@<ns>` EUIDs — see `user_target_raw_identifiers_maintainer_suite.spec.ts`.
  */
-export interface HostTargetRawIdentifiersMaintainerSuiteConfig {
+interface HostTargetRawIdentifiersMaintainerSuiteConfig {
   /** Maintainer id used by the run route, e.g. 'administers'. */
   maintainerId: string;
   /** Relationship key written under entity.relationships.<key>, e.g. 'administers'. */
