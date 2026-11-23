@@ -12,6 +12,7 @@ import { alertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type { AlertEventDocument, AlertEventType } from '../../resources/datastreams/alert_events';
 import { alertEventType, buildRuleEventDocument } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
+import type { ReasonRenderer } from './reason_template';
 
 /**
  * Maps a `rule.kind` to the `AlertEventType` its events should be stamped
@@ -128,6 +129,11 @@ export interface BuildAlertEventsBaseOpts {
   scheduledTimestamp: string;
   maxGroupsPerExecution: number;
   activeGroupHashes?: ReadonlySet<string>;
+  /**
+   * Renders the rule's `reason` for each row. Events are written without a reason when it is
+   * omitted or returns `undefined`.
+   */
+  reasonRenderer?: ReasonRenderer;
 }
 
 export interface AlertEventsBatchBuilder {
@@ -144,6 +150,7 @@ export function createAlertEventsBatchBuilder({
   scheduledTimestamp,
   maxGroupsPerExecution,
   activeGroupHashes = new Set<string>(),
+  reasonRenderer,
 }: BuildAlertEventsBaseOpts): AlertEventsBatchBuilder {
   const source = RULE_EXECUTION_SOURCE;
   const groupingFields = ruleAttributes.grouping?.fields ?? [];
@@ -186,6 +193,7 @@ export function createAlertEventsBatchBuilder({
         type,
         space_id: spaceId,
         severity: extractSeverity(rowDoc),
+        reason: reasonRenderer?.render(rowDoc),
       });
 
       alertEventsBatch.push(doc);

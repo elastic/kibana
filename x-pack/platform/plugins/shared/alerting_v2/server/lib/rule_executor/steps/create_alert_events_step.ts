@@ -6,16 +6,20 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import {
   createAlertEventsBatchBuilder,
   resolveAlertEventType,
   type AlertEventsBatchBuilder,
 } from '../build_alert_events';
+import { alertEventType } from '../../../resources/datastreams/alert_events';
+import type { AlertEventType } from '../../../resources/datastreams/alert_events';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { createReasonRenderer, type ReasonRenderer } from '../reason_template';
 import { forwardThenFinalize, guardedExpandStep } from '../stream_utils';
 import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -32,6 +36,32 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
     @inject(ConfigService) configService: ConfigService
   ) {
     this.maxGroupsPerExecution = configService.get('rules.run.maxGroupsPerExecution');
+  }
+
+  /**
+   * Only alert rules carry a reason. The renderer parses the template once and is reused for every
+   * row of every batch of the run. A template that cannot be rendered is logged once, at debug level, since it can repeat on every run.
+   */
+  private buildReasonRenderer({
+    rule,
+    eventType,
+    ruleId,
+    spaceId,
+  }: {
+    rule: RuleResponse;
+    eventType: AlertEventType;
+    ruleId: string;
+    spaceId: string;
+  }): ReasonRenderer {
+    return createReasonRenderer({
+      template: eventType === alertEventType.alert ? rule.reason?.template : undefined,
+      rule,
+      onError: () =>
+        this.logger.debug({
+          message: 'Reason template could not be rendered; events are written without a reason',
+          labels: { rule_id: ruleId, space_id: spaceId, step: this.name },
+        }),
+    });
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
@@ -51,6 +81,12 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
           ruleVersion: state.rule.version,
           type: eventType,
           maxGroupsPerExecution: step.maxGroupsPerExecution,
+          reasonRenderer: step.buildReasonRenderer({
+            rule: state.rule,
+            eventType,
+            ruleId: state.input.ruleId,
+            spaceId: state.input.spaceId,
+          }),
           activeGroupHashes: new Set(
             (state.activeGroups ?? []).map(({ group_hash: groupHash }) => groupHash)
           ),

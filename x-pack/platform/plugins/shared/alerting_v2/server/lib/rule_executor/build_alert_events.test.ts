@@ -218,6 +218,103 @@ describe('createAlertEventsBatchBuilder', () => {
     });
   });
 
+  describe('reason', () => {
+    const createBuilder = (reasonRenderer?: {
+      render: (row: Record<string, unknown>) => string | undefined;
+    }) =>
+      createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: [] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 10000,
+        reasonRenderer,
+      });
+
+    it('sets the rendered reason on each breached event, rendering every row on its own', () => {
+      const render = jest.fn(
+        (row: Record<string, unknown>) => `CPU on ${String(row['host.name'])}`
+      );
+
+      const docs = createBuilder({ render }).buildBatch([
+        { 'host.name': 'host-a' },
+        { 'host.name': 'host-b' },
+      ]);
+
+      expect(docs.map((doc) => doc.reason)).toEqual(['CPU on host-a', 'CPU on host-b']);
+      expect(render).toHaveBeenCalledTimes(2);
+      expect(render).toHaveBeenNthCalledWith(1, { 'host.name': 'host-a' });
+    });
+
+    it('does not change the stored data of the event', () => {
+      const [doc] = createBuilder({ render: () => 'CPU high' }).buildBatch([
+        { 'host.name': 'host-a', cpu: 94 },
+      ]);
+
+      expect(doc.data).toEqual({ 'host.name': 'host-a', cpu: 94 });
+    });
+
+    it('writes no reason when there is no renderer', () => {
+      const [doc] = createBuilder().buildBatch([{ 'host.name': 'host-a' }]);
+
+      expect(doc).not.toHaveProperty('reason');
+    });
+
+    it('writes no reason for a row whose renderer returns undefined', () => {
+      const [doc] = createBuilder({ render: () => undefined }).buildBatch([
+        { 'host.name': 'host-a' },
+      ]);
+
+      expect(doc).not.toHaveProperty('reason');
+    });
+
+    it('does not render rows dropped by the group limit', () => {
+      const render = jest.fn(() => 'reason');
+      const builder = createAlertEventsBatchBuilder({
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        ruleAttributes: { grouping: { fields: ['host.name'] } },
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert',
+        maxGroupsPerExecution: 1,
+        reasonRenderer: { render },
+      });
+
+      const docs = builder.buildBatch([{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]);
+
+      expect(docs).toHaveLength(1);
+      expect(render).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('events without a query row', () => {
+    it('does not give a reason to continued-breach, recovered or no-data events', () => {
+      const base = {
+        ruleId: 'rule-123',
+        ruleVersion: 1,
+        spaceId: 'default',
+        scheduledTimestamp: '2024-12-31T23:59:00.000Z',
+        type: 'alert' as const,
+      };
+
+      const docs = [
+        ...buildContinuedBreachAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildNoDataAlertEvents({ ...base, groupHashes: ['g1'] }),
+        ...buildRecoveryAlertEvents({
+          ...base,
+          activeGroupHashes: [{ group_hash: 'g1' }] as never,
+          breachedGroupHashes: new Set<string>(),
+        }),
+      ];
+
+      expect(docs.length).toBeGreaterThan(0);
+      docs.forEach((doc) => expect(doc).not.toHaveProperty('reason'));
+    });
+  });
+
   describe('maxGroupsPerExecution', () => {
     const createBuilder = (maxGroupsPerExecution: number) =>
       createAlertEventsBatchBuilder({

@@ -101,6 +101,67 @@ describe('CreateAlertEventsStep', () => {
     expect(result.state.alertEventsBatch?.[0].rule).toEqual({ id: rule.id, version: 5 });
   });
 
+  describe('reason', () => {
+    const run = async (rule: ReturnType<typeof createRuleResponse>, esqlRowBatch: object[]) => {
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput(),
+        rule,
+        esqlRowBatch: esqlRowBatch as Array<Record<string, unknown>>,
+      });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
+      if (result.type !== 'continue') throw new Error('expected a continue result');
+      return result.state.alertEventsBatch ?? [];
+    };
+
+    it('renders the rule reason against each row of an alert rule', async () => {
+      const events = await run(
+        createRuleResponse({
+          kind: 'alert',
+          reason: {
+            template: 'CPU on {{ data.host.name }} is {{ data.cpu }}% (rule {{ rule.id }})',
+          },
+        }),
+        [
+          { 'host.name': 'host-a', cpu: 94 },
+          { 'host.name': 'host-b', cpu: 91 },
+        ]
+      );
+
+      expect(events.map((event) => event.reason)).toEqual([
+        expect.stringMatching(/^CPU on host-a is 94% \(rule .+\)$/),
+        expect.stringMatching(/^CPU on host-b is 91% \(rule .+\)$/),
+      ]);
+    });
+
+    it('writes no reason when the rule has none', async () => {
+      const [event] = await run(createRuleResponse({ kind: 'alert' }), [{ 'host.name': 'host-a' }]);
+
+      expect(event).not.toHaveProperty('reason');
+    });
+
+    it('writes no reason on signal events, even if the rule carries a template', async () => {
+      const [event] = await run(
+        createRuleResponse({ kind: 'signal', reason: { template: 'CPU on {{ data.host.name }}' } }),
+        [{ 'host.name': 'host-a' }]
+      );
+
+      expect(event.type).toBe('signal');
+      expect(event).not.toHaveProperty('reason');
+    });
+
+    it('writes events without a reason when the template cannot be rendered', async () => {
+      const events = await run(
+        createRuleResponse({ kind: 'alert', reason: { template: 'CPU on {{ data.host.name ' } }),
+        [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }]
+      );
+
+      expect(events).toHaveLength(2);
+      events.forEach((event) => expect(event).not.toHaveProperty('reason'));
+    });
+  });
+
   it('builds signal-typed events for a stateless kind: signal rule', async () => {
     const input = createRuleExecutionInput();
     const rule = createRuleResponse({ kind: 'signal' });
