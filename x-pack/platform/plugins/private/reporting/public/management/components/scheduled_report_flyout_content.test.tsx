@@ -19,15 +19,18 @@ import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content'
 import { scheduleReport } from '../apis/schedule_report';
 import { ScheduledReportApiJSON } from '../../../server/types';
 import * as useDefaultTimezoneModule from '../hooks/use_default_timezone';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 // Mock Kibana hooks and context
 jest.mock('@kbn/reporting-public', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useUiSetting: () => 'UTC',
-}));
+jest.mock('@kbn/kibana-react-plugin/public');
+const mockedUseUiSetting = jest.mocked(useUiSetting);
+const mockUiSettings = (settings: Record<string, string>) => {
+  mockedUseUiSetting.mockImplementation((key) => settings[key as string]);
+};
 
 jest.mock(
   '@kbn/response-ops-recurring-schedule-form/components/recurring_schedule_form_fields',
@@ -150,6 +153,10 @@ describe('ScheduledReportFlyoutContent', () => {
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: mockKibanaServices,
+    });
+    mockUiSettings({
+      'dateFormat:tz': 'UTC',
+      dateFormat: 'MM/DD/YYYY hh:mm A',
     });
     jest.clearAllMocks();
     testQueryClient.clear();

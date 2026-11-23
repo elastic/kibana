@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum TestSuiteType {
-  FTR = 'ftr-suite',
-  SCOUT = 'scout-suite',
-  CYPRESS = 'cypress-suite',
-}
+export const TestSuiteType = {
+  FTR: 'ftr-suite',
+  SCOUT: 'scout-suite',
+  CYPRESS: 'cypress-suite',
+} as const;
 
 export const TEST_SUITE_TYPES = Object.values(TestSuiteType);

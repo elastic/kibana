@@ -57,7 +57,10 @@ export const PostBlockkitSubActionParamsSchema = schema.object({
 });
 
 export const PostMessageParamsSchema = schema.object({
-  subAction: schema.literal('postMessage'),
+  // `schema.literal` takes no `defaultValue`; `as const` keeps `subAction` a narrowable literal.
+  subAction: schema.oneOf([schema.literal('postMessage')], {
+    defaultValue: 'postMessage' as const,
+  }),
   subActionParams: PostMessageSubActionParamsSchema,
 });
 

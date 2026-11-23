@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { useSearchParams } from 'react-router-dom-v5-compat';
-
 import {
   EuiCard,
   EuiCode,
@@ -23,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSearchParams } from '@kbn/shared-ux-router';
 
 import { SetAISearchChromeSearchDocsSection } from '../../../ai_search/components/ai_search_guide/ai_search_docs_section';
 import { docLinks } from '../../../shared/doc_links';

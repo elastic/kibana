@@ -34,6 +34,7 @@ export enum SYNTHETICS_API_URLS {
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
+  PRIVATE_LOCATION_OUTDATED_MW_AGENTS = `/internal/synthetics/private_locations/outdated_mw_agents`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
   GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,
   GET_CONNECTOR_TYPES = `/internal/synthetics/get_connector_types`,

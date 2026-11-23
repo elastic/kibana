@@ -8,7 +8,7 @@
 import { getPainlessScripts } from '.';
 
 describe('getPainlessScripts', () => {
-  // to update snapshot run `yarn test:jest x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/painless/index.test.ts -u`
+  // to update snapshot run `pnpm test:jest x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_score/painless/index.test.ts -u`
   test('Scripts should not have changed. If this change is intentional, ensure that Serverless scripted metric allowlists are updated', async () => {
     const scripts = await getPainlessScripts();
 

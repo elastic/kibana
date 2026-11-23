@@ -11,6 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const metadataPinTimeoutMs = 15000;
 
   return {
     async clickApmServicesLink() {
@@ -206,6 +207,18 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async metadataRemovePinExists() {
       return testSubjects.exists('infraAssetDetailsMetadataRemovePin');
+    },
+
+    async metadataRemovePinExistsOrFail() {
+      return testSubjects.existOrFail('infraAssetDetailsMetadataRemovePin', {
+        timeout: metadataPinTimeoutMs,
+      });
+    },
+
+    async metadataRemovePinMissing() {
+      return testSubjects.missingOrFail('infraAssetDetailsMetadataRemovePin', {
+        timeout: metadataPinTimeoutMs,
+      });
     },
 
     async getMetadataAppliedFilter() {

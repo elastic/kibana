@@ -7,7 +7,8 @@
 
 import Path from 'path';
 import Fs from 'fs/promises';
-import git, { SimpleGitProgressEvent } from 'simple-git';
+import type { SimpleGitProgressEvent } from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { SingleBar } from 'cli-progress';
 import { once } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -25,7 +26,7 @@ export const syncBuiltDocs = async ({
     log.info('Cloning built-docs repo. This will take a while.');
 
     const { progress, stop } = getProgressHandler();
-    await git(Path.join(builtDocsDir, '..'), {
+    await simpleGit(Path.join(builtDocsDir, '..'), {
       progress,
     }).clone(`https://github.com/elastic/built-docs`, builtDocsDir, ['--depth', '1']);
 
@@ -34,7 +35,7 @@ export const syncBuiltDocs = async ({
 
   const { progress, stop } = getProgressHandler();
 
-  const builtDocsGit = git(builtDocsDir, { progress });
+  const builtDocsGit = simpleGit(builtDocsDir, { progress });
 
   log.debug('Initializing simple-git');
   await builtDocsGit.init();

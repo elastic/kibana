@@ -1,8 +1,7 @@
 {
-  "sha1": "c2f30735b9d954761c587eba9934b20fdd12cbe8",
+  "sha1": "0b0a0bac5d081aee6373f555a01e4085dc021877",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -372,14 +371,14 @@
     {
       "id": "c4cfa77c0ba5f6a-ec9bfa8647930ac",
       "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/step_details.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     }

@@ -15,7 +15,7 @@ import { inspect } from 'util';
 import { cloneDeep } from 'lodash';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { COMMON_API_HEADERS } from './constants';
 
 const ignoreHttp409Error = (error: KbnClientRequesterError) => {
@@ -136,7 +136,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 
@@ -169,7 +169,7 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         return response;
       })
       .catch(ignoreHttp409Error)
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
       .catch(this.logPromiseError);
   }
 }

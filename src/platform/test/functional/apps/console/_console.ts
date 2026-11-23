@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
-      await PageObjects.console.clickClearOutput();
       const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.selectAllRequests();
       await PageObjects.console.clickPlay();

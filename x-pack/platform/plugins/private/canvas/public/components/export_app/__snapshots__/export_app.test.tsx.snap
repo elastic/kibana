@@ -55,7 +55,7 @@ exports[`<ExportApp /> renders as expected 1`] = `
             Object {
               "insert": [Function],
               "inserted": Object {
-                "17hzfsv-ExportApp": true,
+                "1lj4qx-pageElementCount": true,
               },
               "key": "css",
               "nonce": undefined,
@@ -84,14 +84,14 @@ exports[`<ExportApp /> renders as expected 1`] = `
           isStringTag={true}
           serialized={
             Object {
-              "name": "17hzfsv-ExportApp",
+              "name": "1lj4qx-pageElementCount",
               "next": undefined,
-              "styles": ";label:ExportApp;",
+              "styles": ";label:pageElementCount",
             }
           }
         />
         <div
-          className="canvasExport__stageContent css-17hzfsv-ExportApp"
+          className="canvasExport__stageContent css-1lj4qx-pageElementCount"
           data-shared-items-count={3}
         >
           <WorkpadPage
@@ -165,7 +165,7 @@ exports[`<ExportApp /> renders as expected 2`] = `
             Object {
               "insert": [Function],
               "inserted": Object {
-                "17hzfsv-ExportApp": true,
+                "1lj4qx-pageElementCount": true,
               },
               "key": "css",
               "nonce": undefined,
@@ -194,14 +194,14 @@ exports[`<ExportApp /> renders as expected 2`] = `
           isStringTag={true}
           serialized={
             Object {
-              "name": "17hzfsv-ExportApp",
+              "name": "1lj4qx-pageElementCount",
               "next": undefined,
-              "styles": ";label:ExportApp;",
+              "styles": ";label:pageElementCount",
             }
           }
         />
         <div
-          className="canvasExport__stageContent css-17hzfsv-ExportApp"
+          className="canvasExport__stageContent css-1lj4qx-pageElementCount"
           data-shared-items-count={4}
         >
           <WorkpadPage

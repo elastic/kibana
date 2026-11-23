@@ -95,7 +95,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 }
 
 <span
-    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row-DefaultFieldRendererComponent"
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
     data-test-subj="DefaultFieldRendererComponent"
   >
     <div

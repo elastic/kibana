@@ -44,6 +44,12 @@ export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
   state: Partial<SyncTaskState>;
 };
 
+// TM forbids `runAt` and `schedule` on the same result object.
+export type SyncTaskRunResult =
+  | { state: SyncTaskState; error?: Error; schedule: IntervalSchedule | RruleSchedule }
+  | { state: SyncTaskState; error?: Error; runAt: Date }
+  | { state: SyncTaskState; error?: Error };
+
 export class SyncPrivateLocationMonitorsTask {
   public deployPackagePolicies: DeployPrivateLocationMonitors;
   constructor(
@@ -75,11 +81,11 @@ export class SyncPrivateLocationMonitorsTask {
     });
   }
 
-  public async runTask({ taskInstance }: { taskInstance: CustomTaskInstance }): Promise<{
-    state: SyncTaskState;
-    error?: Error;
-    schedule?: IntervalSchedule | RruleSchedule;
-  }> {
+  public async runTask({
+    taskInstance,
+  }: {
+    taskInstance: CustomTaskInstance;
+  }): Promise<SyncTaskRunResult> {
     this.debugLog(
       `Syncing private location monitors, current task state is ${JSON.stringify(
         taskInstance.state
@@ -208,6 +214,15 @@ export class SyncPrivateLocationMonitorsTask {
           );
         }
       }
+
+      // Only `updatedAt` after this run's start — missing IDs persist after a
+      // sync and would schedule follow-ups forever.
+      if (await this.haveMWsUpdatedSince(taskState.lastStartedAt, monitorMwsIds)) {
+        this.debugLog(
+          `Maintenance windows changed during this run; scheduling an immediate follow-up`
+        );
+        return { state: taskState, runAt: new Date() };
+      }
     } catch (error) {
       logger.error(`Sync of private location monitors failed: ${error.message}`);
       return {
@@ -332,6 +347,19 @@ export class SyncPrivateLocationMonitorsTask {
       missingMWIds,
       maintenanceWindows: maintenanceWindows.filter((mw) => monitorMwsIds.includes(mw.id)),
     };
+  }
+
+  async haveMWsUpdatedSince(sinceIso: string, monitorMwsIds: string[]): Promise<boolean> {
+    const { syntheticsService } = this.syntheticsMonitorClient;
+    const maintenanceWindows = (await syntheticsService.getMaintenanceWindows(ALL_SPACES_ID)) ?? [];
+    const monitorMwIds = new Set(monitorMwsIds);
+    return maintenanceWindows.some((mw) => {
+      if (!monitorMwIds.has(mw.id)) {
+        return false;
+      }
+      const updatedAt = mw.updatedAt;
+      return Boolean(updatedAt) && moment(updatedAt).isAfter(moment(sinceIso));
+    });
   }
 
   async cleanUpDuplicatedPackagePolicies(

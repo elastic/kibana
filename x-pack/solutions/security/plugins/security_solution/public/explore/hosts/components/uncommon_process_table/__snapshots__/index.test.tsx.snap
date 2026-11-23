@@ -64,7 +64,7 @@ exports[`Uncommon Process Table Component rendering it renders the default Uncom
   data-test-subj="table-uncommonProcesses-loading-false"
 >
   <header
-    class="toggle-expand siemHeaderSection css-125xqyz-header"
+    class="toggle-expand siemHeaderSection css-qibzrl-header"
     data-test-subj="header-section"
   >
     <div

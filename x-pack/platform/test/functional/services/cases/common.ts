@@ -23,6 +23,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
 
   return {
     /**
+
      * Opens the create case page pressing the "create case" button.
      *
      * Doesn't do navigation. Only works if you are already inside a cases app page.

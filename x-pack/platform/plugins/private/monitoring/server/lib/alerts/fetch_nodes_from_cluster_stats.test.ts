@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchNodesFromClusterStats } from './fetch_nodes_from_cluster_stats';
 
@@ -413,5 +414,75 @@ describe('fetchNodesFromClusterStats', () => {
 
     const result = await fetchNodesFromClusterStats(esClient, clusters);
     expect(result).toEqual([]);
+  });
+
+  describe('when a document is missing node data', () => {
+    const nodesSource = {
+      elasticsearch: {
+        cluster: {
+          stats: {
+            state: {
+              nodes: {
+                'LjJ9FhDATIq9uh1kAa-XPA': {
+                  name: 'instance-0000000000',
+                  ephemeral_id: '3ryJEBWZS1e3x-_K_Yt-ww',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    // `undefined` stands for a hit whose `_source` is omitted entirely, which is
+    // what Elasticsearch returns when the source filter matches no field.
+    const mockSearchResponse = (sources: Array<Record<string, unknown> | undefined>) => {
+      esClient.search.mockResponse({
+        aggregations: {
+          clusters: {
+            buckets: [
+              {
+                key: 'NG2d5jHiSBGPE6HLlUN2Bg',
+                doc_count: sources.length,
+                top: {
+                  hits: {
+                    total: { value: sources.length, relation: 'eq' },
+                    max_score: null,
+                    hits: sources.map((_source, index) => ({
+                      _index: '.ds-.monitoring-es-8-mb-2023.03.27-000001',
+                      _id: `CUJ6I4cBwUW49K58n-b${index}`,
+                      _score: null,
+                      ...(_source ? { _source } : {}),
+                      sort: [1679927450602 - index],
+                    })),
+                  },
+                },
+              },
+            ],
+          },
+        },
+      } as unknown as estypes.SearchResponse);
+    };
+
+    it('ignores the cluster when no document has node data', async () => {
+      mockSearchResponse([undefined, {}]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
+
+    it('ignores the cluster when only the prior document has node data', async () => {
+      mockSearchResponse([undefined, nodesSource]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
+
+    it('ignores the cluster when only the recent document has node data', async () => {
+      mockSearchResponse([nodesSource, undefined]);
+
+      const result = await fetchNodesFromClusterStats(esClient, clusters);
+      expect(result).toEqual([]);
+    });
   });
 });

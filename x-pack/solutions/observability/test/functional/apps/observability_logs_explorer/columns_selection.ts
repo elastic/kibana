@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const actionSelector = 'dataTableCellAction_addToFilterAction_log.level';
           // Open popover if not already open
-          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+          if (!(await testSubjects.exists(actionSelector))) {
             await logLevelChip.click();
           }
 
@@ -196,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const actionSelector = 'dataTableCellAction_removeFromFilterAction_log.level';
           // Open popover if not already open
-          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+          if (!(await testSubjects.exists(actionSelector))) {
             await logLevelChip.click();
           }
 
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           const actionSelector = 'dataTableCellAction_addToFilterAction_service.name';
           // Open popover if not already open
-          if (!(await testSubjects.exists(actionSelector, { timeout: 0 }))) {
+          if (!(await testSubjects.exists(actionSelector))) {
             await serviceNameChip.click();
           }
 

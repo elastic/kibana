@@ -7,7 +7,11 @@
 
 jest.mock('../epm/packages');
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 import type { PackagePolicy, RegistryDataStream } from '../../types';
+
+import { appContextService } from '../app_context';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
@@ -15,6 +19,7 @@ import {
   storedPackagePoliciesToAgentPermissions,
   UNIVERSAL_PROFILING_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 const packageInfoCache = new Map();
 packageInfoCache.set('test_package-0.0.0', {
@@ -469,6 +474,113 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Filters out disallowed cluster privileges and logs a warning', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor', 'all'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        cluster: ['monitor'],
+      },
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('all'));
+  });
+
+  it('Omits cluster descriptor when all declared cluster privileges are disallowed', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['all', 'manage_security'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions?.['package-policy-uuid-test-123']).not.toHaveProperty('cluster');
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+  });
+
   it('Returns the dataset for osquery_manager package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
@@ -648,6 +760,101 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('role descriptor names', () => {
+    const buildPackagePolicy = (id: string, dataset = 'some-logs'): PackagePolicy => ({
+      id,
+      name: 'test-policy',
+      namespace: 'test',
+      enabled: true,
+      package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+      inputs: [
+        {
+          type: 'test-logs',
+          enabled: true,
+          streams: [
+            {
+              id: 'test-logs',
+              enabled: true,
+              data_stream: { type: 'logs', dataset },
+            },
+          ],
+        },
+      ],
+      created_at: '',
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      revision: 1,
+      policy_id: '',
+      policy_ids: [''],
+    });
+
+    it('keeps the package policy ID as the name when ES accepts it', () => {
+      const id = 'aws ec2 eu-west-3-synthetics-default-d9b5d343-0c46-4edf-9960-fef47b72a449';
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+
+      expect(Object.keys(permissions!)).toEqual([id]);
+    });
+
+    it('replaces a package policy ID that ES rejects with a valid, deterministic name', () => {
+      const id = 'モニター-synthetics-default-d9b5d343-0c46-4edf-9960-fef47b72a449';
+
+      const first = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+      const second = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+
+      const names = Object.keys(first!);
+      expect(names).toHaveLength(1);
+      expect(names[0]).not.toBe(id);
+      expect(names[0]).toMatch(/^[\x21-\x7e](?:[\x20-\x7e]*[\x21-\x7e])?$/);
+      expect(Object.keys(second!)).toEqual(names);
+      expect(first![names[0]]).toMatchObject({
+        indices: [{ names: ['logs-some-logs-test'] }],
+      });
+    });
+
+    it('keeps the permissions of both policies when a valid ID equals the name generated for a rejected ID', () => {
+      const rejectedId = 'monitor-é-loc';
+      const [generatedName] = getRoleDescriptorNames([rejectedId]);
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(rejectedId, 'rejected-id-logs'),
+        buildPackagePolicy(generatedName, 'valid-id-logs'),
+      ]);
+
+      expect(Object.keys(permissions!)).toHaveLength(2);
+      expect(permissions![generatedName]).toMatchObject({
+        indices: [{ names: ['logs-valid-id-logs-test'] }],
+      });
+      const [otherName] = Object.keys(permissions!).filter((name) => name !== generatedName);
+      expect(permissions![otherName]).toMatchObject({
+        indices: [{ names: ['logs-rejected-id-logs-test'] }],
+      });
+    });
+
+    it('keeps the permissions of every package policy when only some IDs are rejected', () => {
+      const validId = 'package-policy-uuid-test-123';
+      const invalidIds = ['monitor-é-loc', 'monitor-ü-loc'];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(validId),
+        ...invalidIds.map((id) => buildPackagePolicy(id)),
+      ]);
+
+      const names = Object.keys(permissions!);
+      expect(names).toHaveLength(3);
+      expect(names).toContain(validId);
+      expect(names).not.toContain(invalidIds[0]);
+      expect(names).not.toContain(invalidIds[1]);
     });
   });
 });

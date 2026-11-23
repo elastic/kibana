@@ -85,11 +85,9 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       }
     }
   >
-    <CompatRouter>
-      <MonitorCharts
-        monitorId="something"
-      />
-    </CompatRouter>
+    <MonitorCharts
+      monitorId="something"
+    />
   </ContextProvider>
 </ContextProvider>
 `;

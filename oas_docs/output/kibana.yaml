@@ -3,13 +3,13 @@ info:
   contact:
     name: Kibana Team
   description: |
-    The Kibana REST APIs enable you to manage resources such as connectors, data views, and saved objects.
+    The Kibana REST API enables you to manage resources such as connectors, data views, and saved objects.
     The API calls are stateless.
     Each request that you make happens in isolation from other calls and must include all of the necessary information for Kibana to fulfill the
     request.
     API requests return JSON output, which is a format that is machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - PATCH: Applies partial modifications to the existing information.
@@ -34,7 +34,7 @@ info:
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
-  title: Kibana APIs
+  title: Kibana API
   version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
@@ -335,7 +335,9 @@ paths:
       deprecated: true
       operationId: get-actions
       parameters: []
-      responses: {}
+      responses:
+        '200':
+          description: 'OK: A successful request.'
       summary: Get all connectors
       tags:
         - connectors
@@ -1247,7 +1249,9 @@ paths:
       deprecated: true
       operationId: get-actions-list-action-types
       parameters: []
-      responses: {}
+      responses:
+        '200':
+          description: 'OK: A successful request.'
       summary: Get connector types
       tags:
         - connectors
@@ -9605,7 +9609,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -9651,7 +9655,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -11894,7 +11898,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_Detections_API_UUID'
+                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
                   rule_id:
                     $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
               type: array
@@ -11956,7 +11960,7 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: '#/components/schemas/Security_Detections_API_UUID'
+                    $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
                   rule_id:
                     $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
               type: array
@@ -12526,7 +12530,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
+            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
       requestBody:
         content:
           application/json:
@@ -13445,19 +13449,19 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -13510,20 +13514,20 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
       responses:
         '200':
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
                 type: array
           description: Successful response
         '400':
@@ -13585,11 +13589,11 @@ paths:
                 entries:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray'
                 item_id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
                 meta:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
                 os_types:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray'
                   default: []
@@ -13610,7 +13614,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -13673,15 +13677,15 @@ paths:
                 entries:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemEntryArray'
                 id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
                   description: Either `id` or `item_id` must be specified
                 item_id:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
                   description: Either `id` or `item_id` must be specified
                 meta:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
                 os_types:
                   $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemOsTypeArray'
                   default: []
@@ -13701,7 +13705,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -13757,7 +13761,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
         - description: The page number to return
           in: query
           name: page
@@ -13796,7 +13800,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
                     type: array
                   page:
                     minimum: 0
@@ -15541,13 +15545,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         - description: Either `id` or `list_id` must be specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         - in: query
           name: namespace_type
           required: false
@@ -15612,13 +15616,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         - description: Either `id` or `list_id` must be specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         - in: query
           name: namespace_type
           required: false
@@ -15688,7 +15692,7 @@ paths:
                 description:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
                 name:
@@ -15775,9 +15779,9 @@ paths:
                 description:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
                 id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
                 name:
@@ -15859,7 +15863,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         - in: query
           name: namespace_type
           required: true
@@ -15934,13 +15938,13 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         - description: Exception list's human identifier
           in: query
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         - in: query
           name: namespace_type
           required: true
@@ -16253,13 +16257,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
         - in: query
           name: namespace_type
           required: false
@@ -16324,13 +16328,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
         - description: Either `id` or `item_id` must be specified
           in: query
           name: item_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
         - in: query
           name: namespace_type
           required: false
@@ -16408,13 +16412,13 @@ paths:
                   format: date-time
                   type: string
                 item_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
                 namespace_type:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
                   default: single
@@ -16505,17 +16509,17 @@ paths:
                   format: date-time
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
                   description: Either `id` or `item_id` must be specified
                 item_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
                   description: Either `id` or `item_id` must be specified
                 list_id:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
                 meta:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
                 name:
-                  $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
                 namespace_type:
                   $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
                   default: single
@@ -16593,7 +16597,7 @@ paths:
           required: true
           schema:
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
             type: array
         - description: |
             Filters the returned results according to the value of the specified field,
@@ -16604,7 +16608,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -16732,13 +16736,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         - description: Exception list's human readable identifier
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         - in: query
           name: namespace_type
           required: false
@@ -18223,9 +18227,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 policy_id:
@@ -18278,9 +18284,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 batchSize:
@@ -18328,9 +18336,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 force:
@@ -18387,9 +18397,11 @@ paths:
                 agents:
                   oneOf:
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                     - description: list of agent IDs
                       items:
+                        maxLength: 512
                         type: string
                       type: array
                 batchSize:
@@ -21149,7 +21161,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - in: query
           name: deleteReferences
           required: false
@@ -21220,7 +21232,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
       responses:
         '200':
           content:
@@ -21282,13 +21294,13 @@ paths:
                 _version:
                   type: string
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListName'
                 version:
                   minimum: 1
                   type: integer
@@ -21380,13 +21392,13 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListName'
                 type:
                   $ref: '#/components/schemas/Security_Lists_API_ListType'
                 version:
@@ -21523,13 +21535,13 @@ paths:
                 _version:
                   type: string
                 description:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListDescription'
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
                 name:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListName'
                 version:
                   minimum: 1
                   type: integer
@@ -21628,7 +21640,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_FindListsCursor'
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
@@ -21645,7 +21657,7 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Lists_API_FindListsCursor'
                   data:
                     items:
                       $ref: '#/components/schemas/Security_Lists_API_List'
@@ -21887,13 +21899,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
           in: query
           name: value
@@ -21973,13 +21985,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
           in: query
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: Required if `id` is not specified
           in: query
           name: value
@@ -22051,7 +22063,7 @@ paths:
                 _version:
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 refresh:
@@ -22062,7 +22074,7 @@ paths:
                     - wait_for
                   type: string
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
               required:
                 - id
         description: List item's properties
@@ -22130,9 +22142,9 @@ paths:
               type: object
               properties:
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
                 list_id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 refresh:
@@ -22143,7 +22155,7 @@ paths:
                     - wait_for
                   type: string
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
               required:
                 - list_id
                 - value
@@ -22212,11 +22224,11 @@ paths:
                 _version:
                   type: string
                 id:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemId'
                 meta:
                   $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
                 value:
-                  $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                  $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
               required:
                 - id
                 - value
@@ -22281,7 +22293,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
       responses:
         '200':
           content:
@@ -22343,7 +22355,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: The page number to return
           in: query
           name: page
@@ -22379,7 +22391,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_FindListItemsCursor'
         - description: |
             Filters the returned results according to the value of the specified field,
             using the <field name>:<field value> syntax.
@@ -22396,7 +22408,7 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+                    $ref: '#/components/schemas/Security_Lists_API_FindListItemsCursor'
                   data:
                     items:
                       $ref: '#/components/schemas/Security_Lists_API_ListItem'
@@ -22468,7 +22480,7 @@ paths:
           name: list_id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Lists_API_ListId'
         - description: |
             Type of the importing list.
 
@@ -26275,6 +26287,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
@@ -26346,6 +26359,7 @@ paths:
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -27339,6 +27353,7 @@ paths:
                           - '*'
                     required:
                       - base
+                  maxItems: 1000
                   type: array
                 metadata:
                   additionalProperties: {}
@@ -27544,6 +27559,7 @@ paths:
                                 - '*'
                           required:
                             - base
+                        maxItems: 1000
                         type: array
                       metadata:
                         additionalProperties: {}
@@ -27828,6 +27844,7 @@ paths:
                 $ref: '#/components/examples/copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -27884,7 +27901,9 @@ paths:
             examples:
               disableLegacyURLRequestExample1:
                 $ref: '#/components/examples/disable_legacy_url_request1'
-      responses: {}
+      responses:
+        '204':
+          description: Indicates a successful call.
       summary: Disable legacy URL aliases
       tags:
         - spaces
@@ -27922,7 +27941,9 @@ paths:
                   type: array
               required:
                 - objects
-      responses: {}
+      responses:
+        '200':
+          description: Indicates a successful call.
       summary: Get shareable references
       tags:
         - spaces
@@ -28007,6 +28028,7 @@ paths:
                 $ref: '#/components/examples/resolve_copy_saved_objects_request2'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -28069,6 +28091,7 @@ paths:
                 $ref: '#/components/examples/update_saved_objects_spaces_request1'
       responses:
         '200':
+          description: 'OK: A successful request.'
           content:
             application/json:
               examples:
@@ -28659,6 +28682,7 @@ paths:
                       description: The unique identifier of the deleted monitor.
                       type: string
                 type: array
+          description: A successful response.
       summary: Delete monitors
       tags:
         - synthetics
@@ -28761,6 +28785,7 @@ paths:
                     }
               schema:
                 type: object
+          description: A successful response.
         '404':
           description: If the monitor is not found, the API returns a 404 error.
       summary: Get a monitor
@@ -28914,7 +28939,7 @@ paths:
                     ]
               schema:
                 items:
-                  - $ref: '#/components/schemas/Synthetics_getParameterResponse'
+                  $ref: '#/components/schemas/Synthetics_getParameterResponse'
                 type: array
           description: A successful response.
       summary: Get parameters
@@ -29034,13 +29059,13 @@ paths:
                     "ids": ["param1-id", "param2-id"]
                   }
             schema:
-              property:
+              type: object
+              properties:
                 ids:
                   description: An array of parameter IDs to delete.
                   items:
                     type: string
                   type: array
-              type: object
         required: true
       responses:
         '200':
@@ -30542,7 +30567,7 @@ paths:
                     description: |
                       A list of errors that may have occurred preventing the reindex task from being created.
                     items:
-                      - type: object
+                      type: object
                     type: array
           description: Indicates a successful call.
       summary: Batch start or resume reindexing
@@ -30753,17 +30778,17 @@ paths:
                     bcc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     cc:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                     to:
                       default: []
                       items:
-                        - type: string
+                        type: string
                       type: array
                 heartbeatIndices:
                   default: heartbeat-*
@@ -36402,14 +36427,10 @@ components:
                 id: 49eae970-f401-11ed-9f8e-399c75a2deeb
                 params:
                   documents:
-                    - rule_id:
-                        '[object Object]': null
-                      rule_name:
-                        '[object Object]': null
-                      alert_id:
-                        '[object Object]': null
-                      context_message:
-                        '[object Object]': null
+                    - rule_id: '{{rule.id}}'
+                      rule_name: '{{rule.name}}'
+                      alert_id: '{{alert.id}}'
+                      context_message: '{{context.message}}'
                 connector_type_id: .index
                 frequency:
                   summary: true
@@ -40448,7 +40469,7 @@ components:
         namespace:
           type: string
         overrides:
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_policies:
@@ -40661,9 +40682,11 @@ components:
         agents:
           oneOf:
             - description: KQL query string, leave empty to action all agents
+              maxLength: 500000
               type: string
             - description: list of agent IDs
               items:
+                maxLength: 512
                 type: string
               type: array
         force:
@@ -44699,7 +44722,7 @@ components:
       $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
     Security_Detections_API_AlertTags:
       items:
-        $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
+        $ref: '#/components/schemas/Security_Detections_API_AlertTag'
       type: array
     Security_Detections_API_AlertVersion:
       type: object
@@ -45638,7 +45661,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -45742,7 +45765,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46110,7 +46133,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46239,7 +46262,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46721,7 +46744,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -46841,7 +46864,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47320,7 +47343,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47449,7 +47472,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -47948,7 +47971,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -48071,7 +48094,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -48262,7 +48285,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_UUID'
+          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -48760,6 +48783,40 @@ components:
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
       type: integer
+    Security_Detections_API_RuntimeFieldMapping:
+      description: A runtime field included in the status-update query so the query can match fields that are not in the alerts index mapping, for example scripted fields on a data view. Elasticsearch evaluates the field at query time.
+      type: object
+      properties:
+        format:
+          description: Format string for date runtime fields, for example `strict_date_optional_time`.
+          maxLength: 100
+          type: string
+        script:
+          additionalProperties: false
+          description: Inline Painless script that Elasticsearch evaluates for each alert. Only `source` is accepted. Stored scripts, parameterized scripts (`params`), and non-default `lang` values are not supported. Extra properties are rejected with a 400 so the script is not run with different semantics.
+          type: object
+          properties:
+            source:
+              description: Painless script source to execute.
+              maxLength: 10000
+              type: string
+          required:
+            - source
+        type:
+          $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+      required:
+        - type
+    Security_Detections_API_RuntimeFieldType:
+      description: The data type for the runtime field type. Determines how the field value is indexed and queried.
+      enum:
+        - keyword
+        - long
+        - double
+        - date
+        - ip
+        - boolean
+        - geo_point
+      type: string
     Security_Detections_API_SavedObjectResolveAliasPurpose:
       enum:
         - savedObjectConversion
@@ -49065,7 +49122,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49188,7 +49245,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49288,6 +49345,18 @@ components:
           type: string
         query:
           additionalProperties: true
+          type: object
+        runtime_fields:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldType'
+          description: Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the alerts index mapping, for example, custom fields added via data view runtime fields. The combined number of unique field names across `runtime_fields` and `runtime_mappings` must not exceed 100.
+          maxProperties: 100
+          type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/Security_Detections_API_RuntimeFieldMapping'
+          description: Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script. The combined number of unique field names across `runtime_fields` and `runtime_mappings` must not exceed 100.
+          maxProperties: 100
           type: object
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatus'
@@ -49737,7 +49806,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -49869,7 +49938,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50337,7 +50406,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50463,7 +50532,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -50611,11 +50680,11 @@ components:
         description:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListDescription'
         id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListId'
         immutable:
           type: boolean
         list_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListHumanId'
         meta:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListMeta'
         name:
@@ -50678,15 +50747,15 @@ components:
           format: date-time
           type: string
         id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemId'
         item_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemHumanId'
         list_id:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListHumanId'
         meta:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItemName'
         namespace_type:
           $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionNamespaceType'
         os_types:
@@ -50783,7 +50852,7 @@ components:
           type: object
           properties:
             id:
-              $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ListId'
             type:
               $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ListType'
           required:
@@ -52942,11 +53011,11 @@ components:
           format: date-time
           type: string
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
         namespace_type:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
           default: single
@@ -52976,11 +53045,11 @@ components:
         description:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListDescription'
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         immutable:
           type: boolean
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListMeta'
         name:
@@ -53043,15 +53112,15 @@ components:
           format: date-time
           type: string
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemId'
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
         meta:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemMeta'
         name:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemName'
         namespace_type:
           $ref: '#/components/schemas/Security_Exceptions_API_ExceptionNamespaceType'
         os_types:
@@ -53148,7 +53217,7 @@ components:
           type: object
           properties:
             id:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_ListId'
             type:
               $ref: '#/components/schemas/Security_Exceptions_API_ListType'
           required:
@@ -53300,11 +53369,11 @@ components:
             - status_code
             - message
         id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListId'
         item_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListItemHumanId'
         list_id:
-          $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Exceptions_API_ExceptionListHumanId'
       required:
         - error
     Security_Exceptions_API_ExceptionListsImportBulkErrorArray:
@@ -53440,15 +53509,15 @@ components:
         created_by:
           type: string
         description:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListDescription'
         id:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListId'
         immutable:
           type: boolean
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListMetadata'
         name:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListName'
         tie_breaker_id:
           type: string
         type:
@@ -53491,9 +53560,9 @@ components:
         created_by:
           type: string
         id:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListItemId'
         list_id:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListId'
         meta:
           $ref: '#/components/schemas/Security_Lists_API_ListItemMetadata'
         tie_breaker_id:
@@ -53506,7 +53575,7 @@ components:
         updated_by:
           type: string
         value:
-          $ref: '#/components/schemas/Security_Lists_API_NonEmptyString'
+          $ref: '#/components/schemas/Security_Lists_API_ListItemValue'
       required:
         - id
         - type
@@ -53646,19 +53715,19 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -53697,7 +53766,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -53708,13 +53777,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackId'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
     Security_Osquery_API_CreateLiveQueryResponse:
       example:
         data:
@@ -53772,13 +53841,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -53826,23 +53895,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateSavedQueryResponse:
       example:
         data: {}
@@ -54074,21 +54143,21 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -54199,13 +54268,13 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         shards:
@@ -54244,23 +54313,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_Interval'
+          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_UpdateSavedQueryResponse:
       example:
         data: {}
@@ -56650,7 +56719,6 @@ components:
           description: |
             The value associated with the parameter. It will be included in the response if the user has write permissions.  
           type: string
-      required: null
     Synthetics_getPrivateLocation:
       additionalProperties: true
       properties:
@@ -56693,7 +56761,7 @@ components:
           properties:
             check:
               description: The check request settings.
-              type: objects
+              type: object
               properties:
                 request:
                   description: An optional request to send to the remote host.
@@ -58086,9 +58154,12 @@ components:
       required:
         - message
         - subject
-        - anyOf:
+      anyOf:
+        - required:
             - to
+        - required:
             - cc
+        - required:
             - bcc
       properties:
         bcc:
