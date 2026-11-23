@@ -299,6 +299,26 @@ describe('nightshift.sendNotifications step', () => {
       });
     });
 
+    it('claims the thread of a receipt recorded before the workspace was stored', async () => {
+      const { definition, context, execute, claimSlackThread } = setup(
+        'default',
+        'elastic-apps-slack'
+      );
+      execute.mockResolvedValueOnce({
+        status: 'ok',
+        data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
+      } as never);
+      await definition.handler(context('started'));
+      expect(claimSlackThread).toHaveBeenCalledWith({
+        investigationId: 'inv-1',
+        externalConversationId: 'slack:T1:C123:1.2',
+        channel: 'C123',
+        threadTs: '1.2',
+        workspace: undefined,
+        summary: 'Latency',
+      });
+    });
+
     it('claims nothing when the post carries no thread key', async () => {
       const { definition, context, claimSlackThread } = setup('default', 'elastic-apps-slack');
       await definition.handler(context('started'));

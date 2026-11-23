@@ -202,7 +202,7 @@ const claimRootSlackThreads = async ({
         investigationId,
         externalConversationId: rootPost.external_conversation_id,
         channel: destination.thread.channel,
-        threadTs: destination.thread.thread_ts,
+        threadTs: rootPost.message_ts ?? destination.thread.thread_ts,
         workspace: rootPost.workspace,
         summary: title,
       });
