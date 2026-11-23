@@ -61,6 +61,10 @@ export const toReleases = (rows: ReleaseRow[]): string[] =>
     MAX_RELEASE_LENGTH
   );
 
+/** A release the KPI route accepts as a filter, or `null`. */
+export const toRelease = (release: string | null | undefined): string | null =>
+  accepted([release ?? null], MAX_RELEASE_LENGTH)[0] ?? null;
+
 /** "Not defined" as the KPI filter (`withEnvironment`) applies it: APM's sentinel, or neither field. */
 const isEnvironmentNotDefined = (row: EnvironmentRow): boolean =>
   row[MOBILE_FIELDS.environment] === ENVIRONMENT_NOT_DEFINED_VALUE ||

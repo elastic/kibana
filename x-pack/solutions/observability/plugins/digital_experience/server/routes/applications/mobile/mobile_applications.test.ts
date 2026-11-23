@@ -80,6 +80,10 @@ describe('toApplication', () => {
     });
   });
 
+  it('has no latest release longer than the KPI route accepts, so its link never fails', () => {
+    expect(toApplication(row, 'x'.repeat(1025)).latestRelease).toBeNull();
+  });
+
   it('reads a single platform, which VALUES returns as a value, not a list', () => {
     expect(toApplication({ ...row, platforms: 'android' }, null).platforms).toEqual(['android']);
     expect(toApplication({ ...row, platforms: null }, null).platforms).toEqual([]);

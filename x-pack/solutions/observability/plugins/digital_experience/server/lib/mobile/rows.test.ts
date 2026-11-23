@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toEnvironments, toOsNames, toReleases } from './rows';
+import { toEnvironments, toOsNames, toRelease, toReleases } from './rows';
 import type { EnvironmentRow, OsRow, ReleaseRow } from './rows';
 
 // A column every row has null for is dropped from the response, so rows can miss any value.
@@ -24,6 +24,20 @@ describe('toReleases', () => {
     expect(toReleases(releaseRows([{ release: 'x'.repeat(1025) }, { release: '1.0.0' }]))).toEqual([
       '1.0.0',
     ]);
+  });
+});
+
+describe('toRelease', () => {
+  it('keeps a release up to the length the KPI route accepts', () => {
+    expect(toRelease('2.10.0')).toBe('2.10.0');
+    expect(toRelease('x'.repeat(1024))).toBe('x'.repeat(1024));
+  });
+
+  it('has no release when it is missing, empty or longer than the KPI route accepts', () => {
+    expect(toRelease(undefined)).toBeNull();
+    expect(toRelease(null)).toBeNull();
+    expect(toRelease('')).toBeNull();
+    expect(toRelease('x'.repeat(1025))).toBeNull();
   });
 });
 

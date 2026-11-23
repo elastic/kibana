@@ -10,7 +10,7 @@ import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/applica
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import { toComparedValue } from '../../../../common/mobile/kpis';
 import type { MobileApplicationSummary } from '../../../../common/types/applications';
-import { toPlatforms } from '../../../lib/mobile/rows';
+import { toPlatforms, toRelease } from '../../../lib/mobile/rows';
 import { MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
 
 /** A `VALUES` column: a single value when there is one. */
@@ -56,7 +56,7 @@ export const toApplication = (
     applicationType: APPLICATION_TYPE.mobile,
     platforms: toPlatforms(platforms),
     environments: toApplicationEnvironments(environments, environmentNames),
-    latestRelease,
+    latestRelease: toRelease(latestRelease),
     sessions: { count: sessions },
     users: { count: users },
     // A crash isn't defined yet (#64) and session start doesn't reach the SDKs: not enough data.
