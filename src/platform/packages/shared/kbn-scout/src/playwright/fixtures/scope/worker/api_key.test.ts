@@ -275,7 +275,7 @@ describe('requestAuth worker fixture', () => {
       const harness = createHarness();
       const { samlAuth } = harness.dependencies;
       const existingRole: KibanaRole = {
-        elasticsearch: { cluster: [] },
+        elasticsearch: { cluster: [], indices: [] },
         kibana: [{ base: ['all'], feature: {}, spaces: ['existing-role-space'] }],
       };
       let persistedRole: RoleDescriptor = existingRole;
