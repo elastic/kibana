@@ -31,7 +31,7 @@ const KINDS = [
 const PATTERNS = [
   { regex: /(?<![\w$.])(expose|collect)\(\s*([A-Za-z_$][\w$]*)/g },
   {
-    regex: /\bsoftDependencies\s*\.\s*(?:get|getAll)\(\s*([A-Za-z_$][\w$]*)\s*\)/g,
+    regex: /\bsoftDependencies\s*\??\.\s*(?:get|getAll)\(\s*([A-Za-z_$][\w$]*)\s*\)/g,
     kind: 'lookup',
   },
 ];

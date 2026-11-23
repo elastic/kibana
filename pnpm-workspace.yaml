@@ -217,6 +217,7 @@ packages:
   - 'examples/data_view_field_editor_example'
   - 'examples/dependency_injection'
   - 'examples/developer_examples'
+  - 'examples/di_soft_dependencies/classic_consumer'
   - 'examples/di_soft_dependencies/lookup_a'
   - 'examples/di_soft_dependencies/lookup_b'
   - 'examples/di_soft_dependencies/registry_a'

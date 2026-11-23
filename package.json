@@ -684,6 +684,7 @@
     "@kbn/dependency-injection-example-plugin": "workspace:*",
     "@kbn/dev-tools-plugin": "workspace:*",
     "@kbn/developer-examples-plugin": "workspace:*",
+    "@kbn/di-soft-deps-classic-consumer-example-plugin": "workspace:*",
     "@kbn/di-soft-deps-lookup-a-example-plugin": "workspace:*",
     "@kbn/di-soft-deps-lookup-b-example-plugin": "workspace:*",
     "@kbn/di-soft-deps-registry-a-example-plugin": "workspace:*",

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Boots Kibana with --run-examples, checks the four DI soft-dependency example plugins on the
+# Boots Kibana with --run-examples, checks the five DI soft-dependency example plugins on the
 # server (HTTP routes) and in the browser (window.__diSoftDeps), then shuts Kibana down.
 # Usage: verify.sh <both|a_off|b_off> [outDir]
 set -uo pipefail
@@ -13,13 +13,13 @@ mkdir -p "$OUT_DIR"
 RAW="$OUT_DIR/$SCENARIO.raw.log"
 OUT="$OUT_DIR/$SCENARIO.txt"
 
-PLUGINS=(diSoftDepsLookupA diSoftDepsLookupB diSoftDepsRegistryA diSoftDepsRegistryB)
+PLUGINS=(diSoftDepsLookupA diSoftDepsLookupB diSoftDepsRegistryA diSoftDepsRegistryB diSoftDepsClassicConsumer)
 ARGS=()
-EXPECTED=4
+EXPECTED=5
 case "$SCENARIO" in
   both) ;;
-  a_off) ARGS+=(--di_soft_deps_lookup_a.enabled=false --di_soft_deps_registry_a.enabled=false); EXPECTED=2 ;;
-  b_off) ARGS+=(--di_soft_deps_lookup_b.enabled=false --di_soft_deps_registry_b.enabled=false); EXPECTED=2 ;;
+  a_off) ARGS+=(--di_soft_deps_lookup_a.enabled=false --di_soft_deps_registry_a.enabled=false); EXPECTED=3 ;;
+  b_off) ARGS+=(--di_soft_deps_lookup_b.enabled=false --di_soft_deps_registry_b.enabled=false); EXPECTED=3 ;;
   *) echo "unknown scenario $SCENARIO"; exit 2 ;;
 esac
 

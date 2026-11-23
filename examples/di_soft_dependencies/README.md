@@ -1,6 +1,6 @@
 # DI soft dependencies examples
 
-Four plugins that use each other through Kibana's dependency injection, with no `requiredPlugins` or `optionalPlugins` between them.
+Five plugins that use each other through Kibana's dependency injection, with no `requiredPlugins` or `optionalPlugins` between them.
 Each plugin works when its peer is disabled, and the pairs do not form a circular plugin dependency.
 Every plugin has a server and a browser half.
 
@@ -44,6 +44,32 @@ expose(RegistryAEntry).toConstantValue({ id: 'diSoftDepsRegistryB', label: '...'
 The registry stays empty until every plugin has started.
 A registry that something reads before that, such as saved objects migrations on the server, does not fit this pattern, and its contributors keep `requiredPlugins`.
 
+## Classic plugin: `classic_consumer`
+
+A plugin with a `setup`/`start` class and no `module` export uses soft dependencies too.
+It gets `SoftDependencies` and binds an `OnReady` hook through `core.injection.getContainer()`:
+
+```ts
+setup(core: CoreSetup) {
+  const container = core.injection.getContainer();
+  this.softDependencies = container.get(SoftDependencies);
+  container.bind(OnReady).toConstantValue(() => {
+    this.status.onReady = this.softDependencies?.get(LookupBGreeter)?.greet() ?? 'diSoftDepsLookupB is disabled';
+  });
+}
+```
+
+Its server route returns what the lookup of `LookupBGreeter` gave at each point of the lifecycle.
+Its browser half writes `{ id, fromLookupB }` to `window.__diSoftDeps.diSoftDepsClassicConsumer` in an `OnReady` hook, without logging.
+
+| Where the lookup runs | Result |
+| --- | --- |
+| `setup()` | throws |
+| `start()` | throws |
+| `OnReady` hook | the greeting, or `diSoftDepsLookupB is disabled` |
+| `initialize()` | the greeting, or `diSoftDepsLookupB is disabled` |
+| request handler | the greeting, or `diSoftDepsLookupB is disabled` |
+
 ## Find the hidden edges
 
 Soft dependencies add no manifest edge, so the plugin tooling cannot show that one plugin uses another.
@@ -70,9 +96,11 @@ Read the server status of each plugin:
 ```sh
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsLookupA
 curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsRegistryA
+curl -u elastic:changeme http://localhost:5601/api/di_soft_deps/diSoftDepsClassicConsumer
 ```
 
-In the browser, every plugin logs its status with `console.info` in an `OnReady` hook, once every plugin has started, and writes it to `window.__diSoftDeps[pluginId]`.
+In the browser, every plugin writes its status to `window.__diSoftDeps[pluginId]` in an `OnReady` hook, once every plugin has started.
+Every plugin but `classic_consumer` also logs it with `console.info`.
 
 Disable a plugin to see its peer fall back:
 

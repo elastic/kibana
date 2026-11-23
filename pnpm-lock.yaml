@@ -1981,6 +1981,9 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/di-soft-deps-classic-consumer-example-plugin':
+        specifier: workspace:*
+        version: link:examples/di_soft_dependencies/classic_consumer
       '@kbn/di-soft-deps-lookup-a-example-plugin':
         specifier: workspace:*
         version: link:examples/di_soft_dependencies/lookup_a
@@ -6974,6 +6977,8 @@ importers:
   examples/dependency_injection: {}
 
   examples/developer_examples: {}
+
+  examples/di_soft_dependencies/classic_consumer: {}
 
   examples/di_soft_dependencies/lookup_a: {}
 

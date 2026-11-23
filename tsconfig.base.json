@@ -1205,6 +1205,8 @@
       "@kbn/developer-toolbar-profilers-plugin/*": ["./src/platform/plugins/private/developer_toolbar_profilers/*"],
       "@kbn/di-soft-dependencies-example-tokens": ["./examples/di_soft_dependencies/tokens"],
       "@kbn/di-soft-dependencies-example-tokens/*": ["./examples/di_soft_dependencies/tokens/*"],
+      "@kbn/di-soft-deps-classic-consumer-example-plugin": ["./examples/di_soft_dependencies/classic_consumer"],
+      "@kbn/di-soft-deps-classic-consumer-example-plugin/*": ["./examples/di_soft_dependencies/classic_consumer/*"],
       "@kbn/di-soft-deps-lookup-a-example-plugin": ["./examples/di_soft_dependencies/lookup_a"],
       "@kbn/di-soft-deps-lookup-a-example-plugin/*": ["./examples/di_soft_dependencies/lookup_a/*"],
       "@kbn/di-soft-deps-lookup-b-example-plugin": ["./examples/di_soft_dependencies/lookup_b"],
