@@ -9,8 +9,6 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
-import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
-import type { KueryNode } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
 
@@ -22,7 +20,6 @@ import { agentsNamespaceQuery } from '../spaces/agent_namespaces';
 import { FleetError, FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
-import { removeSOAttributes } from './crud';
 
 import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
@@ -41,188 +38,6 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_CHUNK_SIZE = 1000;
 
-/** What stands for a `*` in the value of the wildcard of a kuery. */
-const WILDCARD_SYMBOL = nodeTypes.wildcard.buildNode('*').value;
-
-/**
- * Whether a tag matches the wildcard of a kuery, without a regular expression. The one of
- * `nodeTypes.wildcard.test` has a greedy repetition for every `*`, and on a tag that does not match
- * it tries the ways to share the tag out between them: a pattern with a few of them, and a tag of
- * a few hundred characters, both given by the caller, can take it a very long time, in the process
- * that serves every request. Here the pieces between the `*` are looked for in order, each as early
- * as it is found, which is enough for a pattern of nothing else, and takes time in proportion to
- * the size of the tag and the pattern.
- */
-const tagMatchesWildcard = (wildcard: KueryNode, tag: string): boolean => {
-  const parts = String(wildcard.value).split(WILDCARD_SYMBOL);
-  const first = parts[0];
-  if (parts.length === 1) {
-    return tag === first;
-  }
-  const last = parts[parts.length - 1];
-  if (first.length + last.length > tag.length || !tag.startsWith(first) || !tag.endsWith(last)) {
-    return false;
-  }
-  // what lies between the start and the end that are matched already
-  const end = tag.length - last.length;
-  let position = first.length;
-  for (const part of parts.slice(1, -1)) {
-    const found = tag.indexOf(part, position);
-    if (found === -1 || found + part.length > end) {
-      return false;
-    }
-    position = found + part.length;
-  }
-  return true;
-};
-
-/** The tag a clause of a kuery is about, when it is `tags:<tag>` for one whole tag. */
-const tagOfClause = (node: KueryNode): string | undefined => {
-  const [field, value] = node.arguments ?? [];
-  return node.function === 'is' &&
-    field?.type === 'literal' &&
-    field.value === 'tags' &&
-    value?.type === 'literal'
-    ? String(value.value)
-    : undefined;
-};
-
-const notClause = (clause: KueryNode): KueryNode => ({
-  type: 'function',
-  function: 'not',
-  arguments: [clause],
-});
-
-/**
- * A clause of a kuery, made of conditions on the tags only, that every agent the update has just
- * changed fails, or `undefined` if there is none. Such an agent has every tag the update adds, and
- * none that it removes (unless it also adds it), which settles a clause on the `tags` field for
- * those tags, and with `not`, `and` and `or` the clauses around it. Everything else, another
- * field, a wildcard, a tag the update does not touch, settles nothing.
- *
- * It is the smallest such clause, so that it can be run on its own: it holds nothing else of the
- * kuery, which can have conditions that only the search of the agents knows how to run.
- */
-const clauseUpdatedAgentsFail = (
-  node: KueryNode | undefined,
-  tagsToAdd: Set<string>,
-  tagsToRemove: Set<string>
-): KueryNode | undefined => {
-  if (node?.type !== 'function') {
-    return undefined;
-  }
-  const args: KueryNode[] = node.arguments ?? [];
-  const fail = (arg: KueryNode | undefined) =>
-    clauseUpdatedAgentsFail(arg, tagsToAdd, tagsToRemove);
-
-  switch (node.function) {
-    case 'is': {
-      const tag = tagOfClause(node);
-      return tag !== undefined && tagsToRemove.has(tag) && !tagsToAdd.has(tag) ? node : undefined;
-    }
-    case 'not': {
-      const meet = clauseUpdatedAgentsMeet(args[0], tagsToAdd, tagsToRemove);
-      return meet && notClause(meet);
-    }
-    case 'and':
-      return args.map(fail).find((clause) => clause !== undefined);
-    case 'or': {
-      const clauses = args.map(fail);
-      return clauses.length > 0 && clauses.every((clause) => clause !== undefined)
-        ? { type: 'function', function: 'or', arguments: clauses }
-        : undefined;
-    }
-    default:
-      return undefined;
-  }
-};
-
-/** The same for a clause that every agent the update has just changed meets. */
-const clauseUpdatedAgentsMeet = (
-  node: KueryNode | undefined,
-  tagsToAdd: Set<string>,
-  tagsToRemove: Set<string>
-): KueryNode | undefined => {
-  if (node?.type !== 'function') {
-    return undefined;
-  }
-  const args: KueryNode[] = node.arguments ?? [];
-  const meet = (arg: KueryNode | undefined) =>
-    clauseUpdatedAgentsMeet(arg, tagsToAdd, tagsToRemove);
-
-  switch (node.function) {
-    case 'is': {
-      const [field, value] = args;
-      if (field?.type !== 'literal' || field.value !== 'tags') {
-        return undefined;
-      }
-      if (value?.type === 'wildcard') {
-        // An updated agent has every tag the update adds, so a wildcard is met when one of them
-        // matches it: adding `prod*` makes the agent match `tags:prod*`, which is what a tag with
-        // a wildcard in it does to the clause `updateAgentTags` adds. For a tag the update removes
-        // it settles nothing, as the agent can have another tag that matches.
-        return [...tagsToAdd].some((tag) => tagMatchesWildcard(value, tag)) ? node : undefined;
-      }
-      const tag = tagOfClause(node);
-      return tag !== undefined && tagsToAdd.has(tag) ? node : undefined;
-    }
-    case 'not': {
-      const fail = clauseUpdatedAgentsFail(args[0], tagsToAdd, tagsToRemove);
-      return fail && notClause(fail);
-    }
-    case 'and': {
-      const clauses = args.map(meet);
-      return clauses.length > 0 && clauses.every((clause) => clause !== undefined)
-        ? { type: 'function', function: 'and', arguments: clauses }
-        : undefined;
-    }
-    case 'or':
-      return args.map(meet).find((clause) => clause !== undefined);
-    default:
-      return undefined;
-  }
-};
-
-/**
- * The clause of the kuery of an update tags action that the retry of the action leaves the agents
- * the update already changed out with, or `undefined` if it does not leave them out.
- *
- * The retry restarts behind the action's kuery, so it leaves them out when they can no longer match
- * it. That is what the kuery is read for, and not the number of tags the update adds or removes:
- * for an update of one tag `updateAgentTags` adds `(NOT (tags:x))` or `(tags:x)` to it, but a tag
- * with a wildcard in it, `prod*`, makes that a wildcard clause that an agent with another tag, like
- * `production`, still matches. The tag rename in the UI searches for the agents that have the old
- * tag, which the renamed agents no longer have. The kuery is read as the search of the agents reads
- * it, and there is a clause only when the tags it names, whole, and only in the places that decide
- * it, show that an updated agent does not match.
- *
- * With the clause, the agents of a batch that were updated are the ones that fail it, wherever the
- * update stopped: it is what the retry leaves out. It is only used for a batch that is cancelled
- * on every run, as nothing else would record them. Whatever the kuery does not settle (another
- * field, a wildcard, a tag the update does not touch) gives no clause, and nothing is recorded
- * then. For an `or` of a clause on the tags and one that does not settle, the retry leaves out
- * some of the agents that were updated and not others, and no count is right for that.
- */
-export const updatedAgentsClause = (
-  tagsToAdd: string[] = [],
-  tagsToRemove: string[] = [],
-  kuery: string = ''
-): KueryNode | undefined => {
-  if (kuery.trim() === '') {
-    return undefined;
-  }
-  try {
-    return clauseUpdatedAgentsFail(
-      fromKueryExpression(removeSOAttributes(kuery)),
-      new Set(tagsToAdd),
-      new Set(tagsToRemove)
-    );
-  } catch (error) {
-    // Not a kuery that can be read, so there is nothing in it to leave agents out.
-    return undefined;
-  }
-};
-
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
@@ -233,11 +48,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       {
         tagsToAdd: this.actionParams?.tagsToAdd,
         tagsToRemove: this.actionParams?.tagsToRemove,
-        updatedAgentsClause: updatedAgentsClause(
-          this.actionParams?.tagsToAdd,
-          this.actionParams?.tagsToRemove,
-          this.actionParams?.kuery
-        ),
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         spaceId: this.actionParams.spaceId,
@@ -267,8 +77,6 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
-    /** See {@link updatedAgentsClause}: only used for a batch that is cancelled on every run. */
-    updatedAgentsClause?: KueryNode;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.

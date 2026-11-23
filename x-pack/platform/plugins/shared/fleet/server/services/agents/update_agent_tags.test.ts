@@ -7,7 +7,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { agentPolicyService } from '../agent_policy';
@@ -17,11 +16,7 @@ import { UpdateByQueryCancelledError } from '../../errors';
 import { createClientMock } from './action.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
-import {
-  UpdateAgentTagsActionRunner,
-  updateTagsBatch,
-  updatedAgentsClause,
-} from './update_agent_tags_action_runner';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../spaces/helpers');
 jest.mock('../app_context', () => {
@@ -685,114 +680,6 @@ describe('update_agent_tags', () => {
       // two runs of the update, and no more from a retry of the request
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       expect(esClient.create).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('updatedAgentsClause', () => {
-    it.each([
-      // the kuery of an update of one tag, as `updateAgentTags` builds it
-      [['a'], [], '(NOT (tags:a))', true],
-      [[], ['a'], '(tags:a)', true],
-      [[], ['a'], '((namespaces:"default")) AND (status:online) AND (tags:a)', true],
-      // no kuery to read says nothing, whatever the update is
-      [['a'], [], '', false],
-      [[], ['a'], '', false],
-      [['a'], ['b'], '', false],
-      [[], [], '', false],
-      // a tag with a wildcard in it. Removed, an agent with another tag, like `production`, still
-      // matches the clause. Added, the agent has the tag, which matches the wildcard it makes
-      [[], ['prod*'], '(tags:prod*)', false],
-      [['prod*'], [], '(NOT (tags:prod*))', true],
-      [['prod*'], [], '((namespaces:"default")) AND (NOT (tags:prod*))', true],
-      [['prod*', 'web'], [], 'NOT tags:prod*', true],
-      // where the wildcard is, and how the pieces between the stars have to follow each other
-      [['web-prod'], [], 'NOT tags:*-prod', true],
-      [['production'], [], 'NOT tags:p*d*n', true],
-      [['acb'], [], 'NOT tags:a*b*c', false],
-      [['aba'], [], 'NOT tags:ab*ba', false],
-      [['abba'], [], 'NOT tags:ab*ba', true],
-      [['anything'], [], 'NOT tags:*', true],
-      // a wildcard that none of the tags the update adds matches settles nothing
-      [['staging'], [], 'NOT tags:prod*', false],
-      [['x'], ['prod*'], 'NOT tags:prod*', false],
-      // an unquoted value in a kuery can have a space in it, and is then the whole tag
-      [[], ['my tag'], '(tags:my tag)', true],
-      // a rename, or several tags, with a kuery that does not leave out the updated agents
-      [['a'], ['b'], 'status:online', false],
-      [['a', 'b'], [], 'status:online', false],
-      [[], ['a', 'b'], 'status:online', false],
-      // the tag rename in the UI: agents with the old tag, which the renamed agents no longer have
-      [['new'], ['old'], 'tags:"old"', true],
-      [['new'], ['old'], 'tags:old', true],
-      [['new'], ['old'], '(tags:"old") AND status:online', true],
-      [['new'], ['old'], 'tags:old OR NOT tags:new', true],
-      [['x'], ['a', 'b'], 'tags:(a or b)', true],
-      // a tag the update adds, in a clause that is negated
-      [['a', 'b'], [], 'NOT tags:a', true],
-      [['a', 'b'], [], 'not (tags:a or tags:b)', true],
-      // clauses that the updated agents still match, or that nothing is known about
-      [['a', 'b'], [], 'tags:a', false],
-      [['new'], ['old'], 'tags:"old" OR status:online', false],
-      [['new'], ['old'], 'tags:other', false],
-      [['new'], ['old'], 'tags:old*', false],
-      [['new'], ['old'], 'NOT tags:other', false],
-      [['a'], ['a'], 'tags:a', false],
-      // a tag only counts whole
-      [['linux', 'web'], [], 'tags:linux-prod', false],
-      [['', 'b'], [], 'status:online', false],
-      // the kuery is read as the search of the agents reads it
-      [['new'], ['old'], 'fleet-agents.tags:"old"', true],
-      [['new'], ['old'], 'fleet-agents.status:online', false],
-      // not a kuery that can be read
-      [['a', 'b'], [], 'tags:(', false],
-    ])(
-      'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
-      (tagsToAdd, tagsToRemove, kuery, expected) => {
-        expect(updatedAgentsClause(tagsToAdd, tagsToRemove, kuery) !== undefined).toBe(expected);
-      }
-    );
-  });
-
-  describe('a wildcard that would make a regular expression backtrack', () => {
-    it('should be settled quickly, for a pattern with many stars and a long tag that does not match', () => {
-      // `a*a*a*a*a*a*a*a*b` against a tag of 250 `a`: a regular expression with a greedy repetition for
-      // every star tries a number of ways to share the tag out that no process should wait for
-      const tag = 'a'.repeat(250);
-      const started = Date.now();
-
-      const clause = updatedAgentsClause([tag], [], 'NOT tags:a*a*a*a*a*a*a*a*b');
-
-      expect(clause).toBeUndefined();
-      expect(Date.now() - started).toBeLessThan(500);
-    });
-
-    it('should still match a tag that does match it', () => {
-      const tag = `${'a'.repeat(250)}b`;
-
-      expect(updatedAgentsClause([tag], [], 'NOT tags:a*a*a*a*a*a*a*a*b')).toBeDefined();
-    });
-  });
-
-  describe('the clause that updatedAgentsClause returns', () => {
-    const dslOf = (kuery: string) => toElasticsearchQuery(fromKueryExpression(kuery));
-    const clauseDsl = (tagsToAdd: string[], tagsToRemove: string[], kuery: string) =>
-      toElasticsearchQuery(updatedAgentsClause(tagsToAdd, tagsToRemove, kuery)!);
-
-    it('should hold only the condition on the tags, and not the rest of the kuery', () => {
-      // the rest can have conditions that only the search of the agents knows how to run
-      expect(
-        clauseDsl(['new'], ['old'], '((namespaces:"default")) AND (status:online) AND (tags:"old")')
-      ).toEqual(dslOf('tags:"old"'));
-    });
-
-    it('should hold the negation of what the updated agents have', () => {
-      expect(clauseDsl(['a', 'b'], [], 'status:online AND NOT tags:a')).toEqual(
-        dslOf('NOT tags:a')
-      );
-    });
-
-    it('should hold every part of an or, which the updated agents all fail', () => {
-      expect(clauseDsl(['x'], ['a', 'b'], 'tags:(a or b)')).toEqual(dslOf('tags:a or tags:b'));
     });
   });
 
