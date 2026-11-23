@@ -35,7 +35,7 @@ import { usePersistedChoice } from '../../hooks/use_persisted_choice';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { ANONYMOUS_USER, SESSIONS_LABEL } from '../../labels';
+import { ANONYMOUS_USER, OPEN_IN_DISCOVER_LABEL, SESSIONS_LABEL } from '../../labels';
 import { sessionSignals, shortSessionId, type SessionSignal } from '../../utils/describe_session';
 import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
@@ -81,11 +81,6 @@ const SESSIONS_LIST_LABEL = i18n.translate(
  */
 const FLYOUT_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
 const FLYOUT_CHOICES = ['flyout', 'hidden'] as const;
-
-const OPEN_IN_DISCOVER_LABEL = i18n.translate(
-  'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
-  { defaultMessage: 'Open in Discover' }
-);
 
 /** The signals of a session as the header writes them, which has room to spell them out. */
 const badgeLabel = (signal: SessionSignal): string => {

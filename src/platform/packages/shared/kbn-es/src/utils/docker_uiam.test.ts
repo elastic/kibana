@@ -81,6 +81,19 @@ describe('#getUiamContainers()', () => {
     ]);
   });
 
+  test('treats empty token lifetimes as unset', () => {
+    expect(
+      getUiamContainers({
+        includeOAuth: true,
+        ephemeralTokenExpiration: '',
+        accessTokenExpiration: '',
+      })
+    ).toEqual(getUiamContainers({ includeOAuth: true }));
+    expect(
+      getUiamContainers({ ephemeralTokenExpiration: '', accessTokenExpiration: 'PT1M' })[1].params
+    ).toEqual(getUiamContainers({ accessTokenExpiration: 'PT1M' })[1].params);
+  });
+
   test('sets the ephemeral token lifetime on the UIAM container only', () => {
     const containers = getUiamContainers({ includeOAuth: true, ephemeralTokenExpiration: 'PT1M' });
 
@@ -100,7 +113,7 @@ describe('#getUiamContainers()', () => {
     expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).not.toThrow();
   });
 
-  test.each(['', 'PT', 'PT0S', 'PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])(
+  test.each(['PT', 'PT0S', 'PT30S', 'PT5M1S', 'PT10M', 'P1D', '60', 'PT1H'])(
     'rejects %s',
     (expiration) => {
       expect(() => getUiamContainers({ ephemeralTokenExpiration: expiration })).toThrow(
@@ -132,7 +145,7 @@ describe('#getUiamContainers()', () => {
     }
   );
 
-  test.each(['', 'PT', 'PT10S', 'PT0M', 'PT0H0M59S', 'PT-1M', 'PT1.5M', 'P1D', 'bad', '1m'])(
+  test.each(['PT', 'PT10S', 'PT0M', 'PT0H0M59S', 'PT-1M', 'PT1.5M', 'P1D', 'bad', '1m'])(
     'rejects unsupported session token lifetime %s before starting containers',
     (accessTokenExpiration) => {
       expect(() => getUiamContainers({ accessTokenExpiration })).toThrow(

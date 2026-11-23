@@ -91,6 +91,25 @@ describe('DigitalExperienceLocatorDefinition', () => {
     expect(new URLSearchParams(search).get('kuery')).toBe('url.path : "/cart"');
   });
 
+  it("keeps the state of a mobile application's page: its OS, release and Compare", async () => {
+    const path = await pathOf({
+      serviceName: 'shop-mobile',
+      source: 'otel',
+      applicationType: 'mobile',
+      osName: 'iOS',
+      release: '2.0.0',
+      compare: 'true',
+    });
+
+    expect(Object.fromEntries(new URLSearchParams(path.split('?')[1]))).toEqual({
+      source: 'otel',
+      applicationType: 'mobile',
+      osName: 'iOS',
+      release: '2.0.0',
+      compare: 'true',
+    });
+  });
+
   it('keeps the state of the Sessions list, with its numbers and booleans', async () => {
     const path = await pathOf({
       serviceName: 'storefront-web',

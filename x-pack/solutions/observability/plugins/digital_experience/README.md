@@ -30,6 +30,108 @@ Serverless Logs Essentials hides the feature (`xpack.features.overrides`), as th
 
 `xpack.digital_experience.enabled` is deprecated and ignored; Kibana logs a warning when it is set.
 
+## Mobile applications
+
+EDOT Android and EDOT iOS applications (and React Native apps, which run on both) are listed with
+the others. They ship with the rest of Digital Experience, behind `digitalExperience.enabled` only,
+on serverless and stateful.
+
+- **Source and type:** `source` is the data model, `otel` or `classic`. Mobile applications
+  are OpenTelemetry only, so they are `otel`; what sets them apart is their `applicationType`,
+  `mobile` (`web` for EDOT Browser and Classic RUM), and their `platforms` (`android`, `ios`).
+- **Identity:** a mobile `telemetry.sdk.name` (`android`, `iOS`), or, once the SDKs send the
+  upstream values (elastic/rum-dev#106), the Elastic distribution
+  (`resource.attributes.telemetry.distro.name: elastic`) on a mobile resource `os.name`: `Android`,
+  `iOS` or `iPadOS`, over `traces-*.otel-*,logs-*.otel-*`. The same rule as the mobile session
+  summaries. Not `os.type`, which can't tell the platforms apart (Android sends `linux`, iOS
+  `darwin`), nor `telemetry.sdk.language`, which is `java` for EDOT Android and backend Java alike.
+  EDOT Browser is the Elastic distribution too and reports the device's OS, e.g. `iOS` on an
+  iPhone, so its documents (`telemetry.sdk.language: webjs`) are left out.
+- **Platform:** `android` for `os.name: Android` or `telemetry.sdk.name: android`, `ios` otherwise.
+- **Key:** one application per `service.name`, as obs-execution#645 has it: a React Native app is
+  one row, with the platforms it reported on (`VALUES(platform)`).
+- **Framework:** React Native will be marked by `elastic.app.framework.name`, pending the SDK team's
+  review of the names; nothing reads it yet.
+- **Row metrics** (ES|QL, `server/routes/applications/mobile/`): sessions (distinct `session.id`),
+  users (distinct `app.installation.id`), error rate (exceptions per session), last seen, and the
+  latest release. Rows are sorted by sessions and capped at 1,000. Crash-free sessions is `null`
+  ("Not enough data") until a crash is defined and session start reaches the SDKs. The latest
+  release query filters on the listed `service.name`s through the request's Query DSL `terms`
+  filter, so its ES|QL text is the same on every request.
+- **Queries:** built with the `@elastic/esql` composer (`common/mobile/`: the fields and computed
+  columns, the mobile documents, the filters, the KPIs and the Discover query; and
+  `server/lib/mobile/queries.ts`) and run through the plugin's traced Elasticsearch client, one APM
+  span per query, with typed rows (`transform: 'plain'`). Every query sets `unmapped_fields` to
+  `nullify`: a field no index maps, e.g. `exception.type` on a cluster whose apps never threw, reads
+  as `null` (and counts 0) instead of failing the query. Values from the request are named params;
+  the Discover query, which takes no params, has them inlined by `inlineParams()`. Results must be
+  complete (`allow_partial_results: false`), and periods are half-open, so a period and the one
+  before it never share a document.
+- **Releases:** the release is `service.version` as the SDKs send it: Android's `versionName` and
+  iOS's short version, with the build (`versionCode`, `CFBundleVersion`) in `app.build_id`. It isn't
+  rewritten at query time; a version that carries its build would need fixing in the SDK or at
+  ingest. The latest release is each application's highest release in the last 24 hours of the time
+  range, on any platform, whatever its session count, compared as versions so `2.10.0` is after
+  `2.9.0` and `1.10` after `1.9` (`server/lib/mobile/queries.ts`, one row per application, so no
+  row limit drops one). Only plain releases are compared (`RELEASE_VERSION_PATTERN`: dot-separated
+  numbers without leading zeros): the `version` type sorts any other string after all of them, so
+  a pre-release, a build suffix or a debug build (`3.0.0-beta`, `1.2.3+45`, `debug`, `v2.1.0`)
+  would otherwise override the rollout. Empty versions are ignored. An application without a plain
+  release falls back to the release that first showed up last, and among releases that first
+  showed up at the same time, the highest as text, so the same data always gives the same release.
+  The pattern is matched in ES|QL rather than with the `semver` package in Kibana: the release is
+  picked in the same query, one row per application, before ES|QL's row cap, and
+  `1.2`-style iOS versions, which strict SemVer rejects, still count.
+- **Applications list:** Web and Mobile tabs (`applicationType` in the URL), each with its count,
+  shown when both have data, when the mobile search failed, when no readable mobile data matched
+  with partial access, or when the URL picks the kind without data (e.g. the mobile setup docs on
+  web data alone, with a tab back); otherwise the list shows the only kind there is, so going back
+  from a mobile application never opens an empty Web tab. The Mobile tab has its own table (the
+  name with a badge per platform, from `@kbn/custom-icons`, latest release, sessions, users,
+  crash-free sessions, error rate with two decimals, last seen; Users and Error rate explain
+  themselves in a header tooltip), a Platform filter (`platformFilter`: Android or iOS) and,
+  without mobile data, links to the EDOT Android and iOS docs. Each tab's filter applies only on
+  its tab: picking a tab clears the other's, and one that arrives in a URL is ignored for the other
+  tab's rows, count and links. A failed or partial mobile search is reported in
+  `mobileAvailability`, apart from the sources. The summary, page loads chart, source filter and
+  column selector are the Web tab's. The environment picker lists both environment fields and
+  "Not defined", as the filters define it: APM's sentinel, or neither field indexed (an indexed
+  `""` is a value).
+- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms:
+  `ApplicationPage` stays the route's page and hands a mobile application to
+  `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
+  header, as the Session page does: the title, a badge per platform the application reported on,
+  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
+  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  mobile events with the URL's filters, newest first, built in the browser from the URL
+  (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
+  (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
+  none shows another's badges, options or KPIs while loading. Any other tab's URL is replaced by
+  the Overview's.
+- **Mobile Overview:** the toolbar of every application tab (`ApplicationTabToolbar`), with the
+  environment, OS (`osName`, the `os.name` values in the time range, e.g. `iPadOS`) and release
+  filters as `FacetFilter`s, each option with its sessions as the Sessions list's facets, and the
+  date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
+  never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
+  router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
+  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  (health summary, release health, stability, users, performance, views) join the page as those
+  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  value and a tooltip with the calculation and, with Compare on, its change against the previous
+  period of equal length and the previous value. A change's sign and color follow the rounded value
+  shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
+  can't read every OTel index, as the counts may then miss data. Without mobile data it links to
+  the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
+  nothing matched in the indices they can read and asks them to check their access, on this page
+  and on the list's Mobile tab. With a filter set (environment, OS or release) and full access, it
+  says no data matches the filters instead of linking to the setup docs. Both prompts then offer
+  **Clear filters**, which removes the three filters in one history entry, and the list keeps its
+  "Show all environments" action.
+- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with an
+  optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
+  and release filters) and releases (on the selected OS), each with its sessions, and the
+  platforms and environments.
+
 ## Pages
 
 ### Applications (`/`)
@@ -583,3 +685,5 @@ logged and answer 500 without Elasticsearch details:
 - `public/pages/`: one folder per page (`applications_list/`, `application_details/`, `sessions/`,
   `session_detail/`) with its own components, hooks and utils; what several pages share is in
   `public/components/`, `public/hooks/` and `public/utils/`. `public/application/` is the app shell.
+  The applications list keeps each tab's components in `web/` and `mobile/`, and what both use in
+  `components/`.

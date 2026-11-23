@@ -193,6 +193,26 @@ describe('fetchFieldExistence', () => {
       ],
     },
     {
+      scenario: 'a conflict field resolves to a single type in the filtered indices',
+      shouldRefresh: false,
+      expectedNewFields: [],
+      existingFields: [
+        {
+          name: 'conflict_field',
+          type: 'conflict',
+          isMapped: true,
+        },
+      ],
+      returnedFields: [
+        {
+          name: 'conflict_field',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+      ],
+    },
+    {
       scenario: 'new fields are detected',
       shouldRefresh: true,
       expectedNewFields: [{ name: 'new_field', type: 'long' }],

@@ -20,10 +20,10 @@ import {
   type OverviewFilterOptions,
   type OverviewFilters,
 } from '../../../common/overview_filters';
-import { EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
+import { ENVIRONMENT_FIELDS, EVENT_NAVIGATION_TIMING } from '../../../common/otel_data';
 import { SOURCE_URL_FIELD } from './source_fields';
 import { environmentFilter } from '../helpers/environment';
-import { ENVIRONMENT_FIELDS, eventCount } from './queries';
+import { eventCount } from './queries';
 
 /**
  * Whether the browser runs on a mobile device. EDOT Browser records it even where no device model

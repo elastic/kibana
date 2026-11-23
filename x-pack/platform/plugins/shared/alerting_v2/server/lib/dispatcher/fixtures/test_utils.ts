@@ -51,12 +51,16 @@ export function createStepLogger(): LoggerServiceContract {
 }
 
 export function createDispatcherTelemetryMock(): jest.Mocked<DispatcherTelemetryContract> {
-  return { recordAlertScanTruncated: jest.fn() };
+  return { recordAlertScanTruncated: jest.fn(), recordOversizedAlertDataSkipped: jest.fn() };
 }
 
 export interface DispatcherConfigOverrides {
   paused?: boolean;
-  run?: { timeout?: string; alerts?: { max?: number } };
+  run?: {
+    timeout?: string;
+    alerts?: { max?: number };
+    hydration?: { maxResponseSize?: string };
+  };
 }
 
 export function createDispatcherConfigService(

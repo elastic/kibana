@@ -38,6 +38,7 @@ export const DailyLimitField = ({
   savedLimit,
   onRaiseLimit,
   readOnly = false,
+  scheduledRunsPerDay,
 }: {
   value: string;
   helpText: string;
@@ -46,6 +47,7 @@ export const DailyLimitField = ({
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
   readOnly?: boolean;
+  scheduledRunsPerDay?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -171,6 +173,19 @@ export const DailyLimitField = ({
           )}
         </>
       )}
+      {!isUnlimited &&
+        isValidDailyLimit(value) &&
+        scheduledRunsPerDay !== undefined &&
+        limit < scheduledRunsPerDay && (
+          <KbnWarningCallout
+            announceOnMount={false}
+            size="s"
+            css={calloutCss}
+            title={triggerLabels.limitBelowScheduleTitle}
+            text={triggerLabels.getLimitBelowScheduleBody(scheduledRunsPerDay, limit)}
+            data-test-subj="automationDailyLimitBelowScheduleCallout"
+          />
+        )}
       {!isUnlimited && limit > SOFT_DAILY_LIMIT && (
         <KbnWarningCallout
           announceOnMount={false}

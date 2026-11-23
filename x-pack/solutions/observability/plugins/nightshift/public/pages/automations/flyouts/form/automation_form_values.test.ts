@@ -7,7 +7,11 @@
 
 import type { PresetSchedule } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../../../data/automations/use_automations';
-import { toAutomationFormValues, toPresetSchedule } from './automation_form_values';
+import {
+  getScheduledRunsPerDay,
+  toAutomationFormValues,
+  toPresetSchedule,
+} from './automation_form_values';
 
 describe('automation form values', () => {
   it.each(['invalid', '25:00'])('ignores invalid schedules when loading the form: %s', (time) => {
@@ -51,6 +55,27 @@ describe('automation form values', () => {
     const { trigger } = toAutomationFormValues(automation);
     if (trigger?.kind !== 'every') throw new Error('Expected a schedule preset');
     expect(toPresetSchedule(trigger)).toEqual(schedule);
+  });
+
+  it.each<[PresetSchedule, number]>([
+    [{ schedulePreset: 'hourly', timezone: 'UTC' }, 24],
+    [{ schedulePreset: 'hourly', hourWindow: { start: 9, end: 17 }, timezone: 'UTC' }, 9],
+    [{ schedulePreset: 'daily', time: '09:30', timezone: 'UTC' }, 1],
+  ])('counts the runs per day of a schedule: %j', (schedule, runs) => {
+    const { trigger } = toAutomationFormValues({
+      id: 'automation-1',
+      name: 'Scheduled',
+      automationType: 'custom',
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'schedule', ...schedule }] },
+      execution: {},
+      completions: [],
+      runtime: {},
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+      author: 'elastic',
+    });
+    expect(trigger && getScheduledRunsPerDay(trigger)).toBe(runs);
   });
 
   it('maps an automation back to its edit form values', () => {

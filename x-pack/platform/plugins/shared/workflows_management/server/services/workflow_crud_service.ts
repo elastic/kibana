@@ -108,6 +108,11 @@ import { getAuthenticatedUser } from '../lib/get_user';
 import { assertWorkflowChangeHistoryEnabled } from '../lib/get_workflow_change_history';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
+import {
+  SHARD_UNAVAILABLE_ERROR_TYPES,
+  UNAVAILABLE_ITEM_STATUS_CODES,
+  WorkflowIndexUnavailableError,
+} from '../lib/transient_es_errors';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import { applyWorkflowVersion } from '../lib/workflow_version';
@@ -158,16 +163,18 @@ export type {
 } from './workflow_occ_types';
 
 /**
- * Per-document read errors of a shard that is not ready yet, such as right after another Kibana
- * node or plugin created the workflow index. They clear on their own, so the read is retried.
+ * Waits between reads while the shard is unavailable, such as right after another Kibana node or
+ * plugin created the workflow index: about 3 seconds in all.
  */
-const SHARD_UNAVAILABLE_READ_ERROR_TYPES: ReadonlySet<string> = new Set([
-  'no_shard_available_action_exception',
-  'unavailable_shards_exception',
-]);
-/** Waits between reads while the shard is unavailable: about 3 seconds in all. */
 const SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600] as const;
 const TOO_MANY_REQUESTS_STATUS_CODE = 429;
+
+const toBulkItemError = (error: estypes.ErrorCause, status: number): Error => {
+  const message = extractBulkItemError(error);
+  return SHARD_UNAVAILABLE_ERROR_TYPES.has(error.type) || UNAVAILABLE_ITEM_STATUS_CODES.has(status)
+    ? new WorkflowIndexUnavailableError(message)
+    : new Error(message);
+};
 
 interface ApplyWorkflowUpdateResult {
   response: UpdatedWorkflowResponseDto;
@@ -292,7 +299,7 @@ export class WorkflowCrudService {
       }
       const message = `Could not read workflow ${unavailable.id}: ${unavailable.reason}`;
       if (attempt >= SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS.length) {
-        throw new Error(message);
+        throw new WorkflowIndexUnavailableError(message);
       }
       const retryDelayMs = SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS[attempt];
       this.deps.logger.debug(`${message}. Retrying in ${retryDelayMs} ms.`);
@@ -332,7 +339,7 @@ export class WorkflowCrudService {
     for (const doc of response.docs) {
       if ('error' in doc) {
         const { type } = doc.error;
-        if (SHARD_UNAVAILABLE_READ_ERROR_TYPES.has(type)) {
+        if (SHARD_UNAVAILABLE_ERROR_TYPES.has(type)) {
           unavailable ??= { id: doc._id, reason: extractBulkItemError(doc.error) };
         } else if (type !== 'index_not_found_exception') {
           // Elasticsearch answers 200 with index_not_found_exception on every document when the
@@ -465,7 +472,7 @@ export class WorkflowCrudService {
       } else {
         results[writeIndex] = {
           status: 'failed',
-          error: new Error(extractBulkItemError(operation.error)),
+          error: toBulkItemError(operation.error, operation.status),
         };
       }
     }
