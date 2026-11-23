@@ -20,21 +20,26 @@ import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { GetAgentOptions, WritableAgentProvider, AgentProviderFn } from '../agent_source';
 import type { ToolsServiceStart } from '../../tools';
 import { AgentAvailabilityCache } from '../builtin/availability_cache';
+import type { PrincipalKeyResolver } from '../../common/principal_key';
 import { createClient } from './client';
 import type { AgentClient } from './client';
 import type { InternalAgentDefinition } from '../agent_registry';
 import type { PersistedAgentDefinitionWithPermissions } from './types';
 import { getDefaultAgentCreateRequest } from '../default_agent_definition';
 
-export const createPersistedProviderFn = (opts: {
+export const createPersistedProviderFn = ({
+  getPrincipalKey,
+  ...opts
+}: {
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
   availabilityByAgentId: Map<string, AgentAvailabilityConfig>;
   hiddenByAgentId: Map<string, boolean>;
+  getPrincipalKey?: PrincipalKeyResolver;
 }): AgentProviderFn<false> => {
-  const availabilityCache = new AgentAvailabilityCache();
+  const availabilityCache = new AgentAvailabilityCache({ getPrincipalKey });
   return ({ request, space }) => {
     return createPersistedProvider({
       ...opts,

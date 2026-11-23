@@ -21,6 +21,7 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
 import { AvailabilityCache } from '../common/availability_cache';
+import type { PrincipalKeyResolver } from '../common/principal_key';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
 import { createBuiltinSkillProvider } from './builtin';
@@ -63,6 +64,8 @@ export interface SkillServiceStartDeps {
   getToolRegistry: (opts: { request: KibanaRequest }) => Promise<ToolRegistry>;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  /** Identifies the caller for availability results cached per principal. */
+  getPrincipalKey: PrincipalKeyResolver;
 }
 
 export const createSkillService = (): SkillService => {
@@ -72,7 +75,6 @@ export const createSkillService = (): SkillService => {
 class SkillServiceImpl implements SkillService {
   private readonly skills: Map<string, SkillDefinition> = new Map();
   private readonly skillFullPaths: Set<string> = new Set();
-  private readonly availabilityCache = new AvailabilityCache();
 
   /**
    * Promise chain used to serialize dynamic registration so that the async
@@ -112,7 +114,9 @@ class SkillServiceImpl implements SkillService {
     getToolRegistry,
     uiSettings,
     savedObjects,
+    getPrincipalKey,
   }: SkillServiceStartDeps): SkillServiceStart {
+    const availabilityCache = new AvailabilityCache({ getPrincipalKey });
     const validated = Promise.all(
       [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
     );
@@ -124,7 +128,7 @@ class SkillServiceImpl implements SkillService {
         const space = getCurrentSpaceId({ request, spaces });
         const builtinProvider = createBuiltinSkillProvider(
           [...this.skills.values()],
-          this.availabilityCache
+          availabilityCache
         );
         const persistedProvider = createPersistedSkillProvider({
           space,

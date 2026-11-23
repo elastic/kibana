@@ -31,6 +31,7 @@ import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 import { createToolHealthClient } from './health';
 import type { AgentBuilderConfig } from '../../config';
+import type { PrincipalKeyResolver } from '../common/principal_key';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
@@ -46,6 +47,8 @@ export interface ToolsServiceStartDeps {
   savedObjects: SavedObjectsServiceStart;
   actions: ActionsPluginStart;
   securityPlugin: SecurityPluginStart | undefined;
+  /** Identifies the caller for availability results cached per principal. */
+  getPrincipalKey: PrincipalKeyResolver;
 }
 
 export class ToolsService {
@@ -80,6 +83,7 @@ export class ToolsService {
     savedObjects,
     actions,
     securityPlugin,
+    getPrincipalKey,
   }: ToolsServiceStartDeps): ToolsServiceStart {
     const { logger, workflowsManagement, config } = this.setupDeps!;
 
@@ -108,6 +112,7 @@ export class ToolsService {
       toolTypes,
       uiSettings,
       savedObjects,
+      getPrincipalKey,
     });
     const persistedProviderFn = createPersistedProviderFn({
       logger,

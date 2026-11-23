@@ -12,13 +12,16 @@ import type { BuiltinAgentRegistry } from './registry';
 import type { AgentProviderFn, GetAgentOptions, ReadonlyAgentProvider } from '../agent_source';
 import type { InternalAgentDefinition } from '../agent_registry';
 import { AgentAvailabilityCache } from './availability_cache';
+import type { PrincipalKeyResolver } from '../../common/principal_key';
 
 export const createBuiltinProviderFn = ({
   registry,
+  getPrincipalKey,
 }: {
   registry: BuiltinAgentRegistry;
+  getPrincipalKey?: PrincipalKeyResolver;
 }): AgentProviderFn<true> => {
-  const availabilityCache = new AgentAvailabilityCache();
+  const availabilityCache = new AgentAvailabilityCache({ getPrincipalKey });
   return ({ request, space }) => {
     return registryToProvider({ registry, request, space, availabilityCache });
   };

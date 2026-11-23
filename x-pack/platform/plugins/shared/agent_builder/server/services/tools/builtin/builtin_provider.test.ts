@@ -84,6 +84,40 @@ describe('createBuiltinProviderFn', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it('caches per principal for the space-user cache mode', async () => {
+    const handler = jest
+      .fn<Promise<ToolAvailabilityResult>, [ToolAvailabilityContext]>()
+      .mockResolvedValue({ status: 'available' });
+    const registry = createBuiltinToolRegistry();
+    registry.register(createTool({ handler, cacheMode: 'space-user' }));
+    const providerFn = createBuiltinProviderFn({
+      registry,
+      toolTypes: [builtinDefinition],
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+      getPrincipalKey: (request) => String(request.headers['x-test-principal']),
+    });
+
+    const createPrincipalContext = (principal: string): ToolAvailabilityContext => ({
+      request: httpServerMock.createKibanaRequest({ headers: { 'x-test-principal': principal } }),
+      uiSettings: uiSettingsServiceMock.createClient(),
+      spaceId: 'default',
+    });
+
+    const provider = await providerFn({
+      request: httpServerMock.createKibanaRequest(),
+      space: 'default',
+    });
+    const tool = await provider.get(toolId);
+
+    await tool.isAvailable(createPrincipalContext('jane'));
+    await tool.isAvailable(createPrincipalContext('jane'));
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    await tool.isAvailable(createPrincipalContext('john'));
+    expect(handler).toHaveBeenCalledTimes(2);
+  });
+
   it('does not reuse a space-scoped result for another space', async () => {
     const handler = jest
       .fn<Promise<ToolAvailabilityResult>, [ToolAvailabilityContext]>()

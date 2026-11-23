@@ -25,20 +25,23 @@ import type {
 import { isDisabledDefinition } from '../tool_types/definitions';
 import { convertTool } from './converter';
 import { ToolAvailabilityCache } from './availability_cache';
+import type { PrincipalKeyResolver } from '../../common/principal_key';
 
 export const createBuiltinProviderFn = ({
   registry,
   toolTypes,
   uiSettings,
   savedObjects,
+  getPrincipalKey,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
+  getPrincipalKey?: PrincipalKeyResolver;
 }): ToolProviderFn<true> => {
   // Shared by every provider, so that availability results are reused across requests.
-  const availabilityCache = new ToolAvailabilityCache();
+  const availabilityCache = new ToolAvailabilityCache({ getPrincipalKey });
   return async ({ request, space }) => {
     return createBuiltinToolProvider({
       registry,
