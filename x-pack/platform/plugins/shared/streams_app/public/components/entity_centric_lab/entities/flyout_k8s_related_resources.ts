@@ -63,6 +63,35 @@ const clusterFromEntity = (entity: Entity): string | undefined => {
   return getK8sContextValue(entity, 'cluster') || undefined;
 };
 
+const nodeNameHash = (name: string): number => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 33 + name.charCodeAt(i)) % 997;
+  }
+  return hash;
+};
+
+/**
+ * Kubernetes node condition for the Overview metadata. Healthy nodes are
+ * Ready. Pressured nodes name the condition, and an unhealthy node can
+ * report more than one.
+ */
+const nodeConditionValue = (name: string, health: Entity['health']): string => {
+  if (name === 'node-prod-eu-04') return 'Memory pressure';
+  const hash = nodeNameHash(name);
+  if (health === 'healthy') return 'Ready';
+  if (health === 'atRisk') {
+    const single = ['Memory pressure', 'Disk pressure', 'PID pressure'] as const;
+    return single[hash % single.length];
+  }
+  const combined = [
+    'Memory pressure, Disk pressure',
+    'Memory pressure, PID pressure',
+    'Disk pressure, PID pressure',
+  ] as const;
+  return combined[hash % combined.length];
+};
+
 /** Skip pivots that would open the same inventory row as the flyout entity. */
 const isSameInventoryEntity = (openEntity: Entity, target: Entity): boolean =>
   target.name === openEntity.name && target.subType === openEntity.subType;
@@ -85,6 +114,18 @@ export const enrichK8sFlyoutOverviewDetails = (
     const next = patchById[row.id];
     return next ? { ...row, value: next } : row;
   });
+  if (entity.subType === 'Nodes') {
+    const conditionRow: EntityDetailRow = {
+      id: 'nodeCondition',
+      label: 'Node condition',
+      value: nodeConditionValue(entity.name, entity.health),
+    };
+    if (patched.some((row) => row.id === 'nodeCondition')) {
+      return patched.map((row) => (row.id === 'nodeCondition' ? conditionRow : row));
+    }
+    const insertAt = Math.min(1, patched.length);
+    return [...patched.slice(0, insertAt), conditionRow, ...patched.slice(insertAt)];
+  }
   if (entity.subType !== 'Pods') {
     return patched;
   }

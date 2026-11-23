@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.27';
+export const PROTOTYPE_VERSION = '1.28';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,12 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-23',
+    summary: 'Golden signal cards show a percent change, and Kubernetes nodes list their condition.',
+    details:
+      'Every overview card at the top of the flyout shows a signed percent above the value, labeled with the selected time window, such as +12% last 15 min. Kubernetes node details include Node condition: Ready, or one or more of Memory pressure, Disk pressure, and PID pressure. Bump to v1.28.',
+  },
   {
     date: '2026-11-20',
     summary: 'Larger type icons in tables, and at most three sparkline columns by default.',

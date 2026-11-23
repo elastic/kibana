@@ -1762,6 +1762,11 @@ const buildNodeTemplate = (
     ],
     details: [
       { id: 'nodeName', label: 'Node name', value: name },
+      {
+        id: 'nodeCondition',
+        label: 'Node condition',
+        value: pick(h, 'Ready', 'Memory pressure', 'Memory pressure, Disk pressure'),
+      },
       { id: 'kubeletVersion', label: 'Kubelet version', value: 'v1.29.4' },
       { id: 'containerRuntime', label: 'Container runtime', value: 'containerd://1.7.13' },
       { id: 'os', label: 'OS image', value: 'Ubuntu 22.04.4 LTS' },

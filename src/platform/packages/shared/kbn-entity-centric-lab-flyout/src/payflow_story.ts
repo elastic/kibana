@@ -1200,7 +1200,7 @@ const nodeOverview: EntityOverview = {
     { id: 'memory', label: 'Memory', value: '32 GB (3.1 GB allocatable)' },
     { id: 'cpu', label: 'CPU', value: '16 vCPU (71% in use)' },
     { id: 'pods', label: 'Pods running', value: '38 (1 critical, 1 degraded, 36 healthy)' },
-    { id: 'pressure', label: 'Memory pressure', value: 'true' },
+    { id: 'nodeCondition', label: 'Node condition', value: 'Memory pressure' },
   ],
   ownership: [
     { id: 'team', label: 'platform-team', value: 'slack #platform-eu' },

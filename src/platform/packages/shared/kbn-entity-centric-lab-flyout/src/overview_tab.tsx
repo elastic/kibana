@@ -29,6 +29,8 @@ import { i18n } from '@kbn/i18n';
 import type { MetricDatum } from '@elastic/charts';
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { useEntityFlyoutServices } from './services_context';
+import { useResolvedFlyoutTimeRange } from './time_range_context';
+import type { ResolvedTimeRange } from './time_domain';
 import { labThingLabel } from './lab_terminology';
 import type {
   EntityDetailRow,
@@ -461,13 +463,64 @@ type FlyoutDensity = 'compact' | 'normal' | 'expanded';
 const goldenSignalTileLayout = (density: FlyoutDensity | undefined) => {
   switch (density) {
     case 'expanded':
-      return { height: 76, minWidth: 148, titlePx: 12, valuePx: 20, extraPx: 10, padPx: 5 };
+      return { height: 100, minWidth: 148, titlePx: 12, valuePx: 20, extraPx: 12, padPx: 4 };
     case 'normal':
-      return { height: 68, minWidth: 136, titlePx: 11, valuePx: 18, extraPx: 9, padPx: 4 };
+      return { height: 92, minWidth: 136, titlePx: 11, valuePx: 18, extraPx: 12, padPx: 3 };
     case 'compact':
     default:
-      return { height: 60, minWidth: 120, titlePx: 11, valuePx: 16, extraPx: 9, padPx: 3 };
+      return { height: 84, minWidth: 120, titlePx: 11, valuePx: 16, extraPx: 11, padPx: 2 };
   }
+};
+
+/**
+ * Signed change from the first sample to the last, matching the area behind
+ * the value. Dividing by the larger magnitude keeps the card inside ±100%
+ * when a series starts near zero and then spikes.
+ */
+const goldenSignalPercentChange = (trend: readonly number[]): number => {
+  if (trend.length < 2) return 0;
+  const start = trend[0];
+  const end = trend[trend.length - 1];
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start === end) return 0;
+  const scale = Math.max(Math.abs(start), Math.abs(end));
+  if (scale === 0) return 0;
+  return ((end - start) / scale) * 100;
+};
+
+const formatTrendWindow = (range: ResolvedTimeRange | undefined): string => {
+  const minutes = range ? Math.max(1, Math.round((range.endMs - range.startMs) / 60_000)) : 15;
+  if (minutes < 60) {
+    return i18n.translate('entityCentricLabFlyout.flyout.overview.trendWindowMinutes', {
+      defaultMessage: 'last {minutes} min',
+      values: { minutes },
+    });
+  }
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) {
+    return i18n.translate('entityCentricLabFlyout.flyout.overview.trendWindowHours', {
+      defaultMessage: '{hours, plural, one {last # hour} other {last # hours}}',
+      values: { hours },
+    });
+  }
+  const days = Math.max(1, Math.round(hours / 24));
+  return i18n.translate('entityCentricLabFlyout.flyout.overview.trendWindowDays', {
+    defaultMessage: '{days, plural, one {last # day} other {last # days}}',
+    values: { days },
+  });
+};
+
+/** "+12% last 15 min" / "−4% last 15 min", for every top card. */
+const formatGoldenSignalTrend = (
+  trend: readonly number[],
+  range: ResolvedTimeRange | undefined
+): string => {
+  const rounded = Math.round(goldenSignalPercentChange(trend));
+  const change =
+    rounded > 0 ? `+${rounded}%` : rounded < 0 ? `\u2212${Math.abs(rounded)}%` : '0%';
+  return i18n.translate('entityCentricLabFlyout.flyout.overview.goldenSignalTrend', {
+    defaultMessage: '{change} {window}',
+    values: { change, window: formatTrendWindow(range) },
+  });
 };
 
 // Muted severity colours from the EUI primitive *40/*30 palette scale.
@@ -508,16 +561,21 @@ const GoldenSignalCard = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { charts } = useEntityFlyoutServices();
+  const timeRange = useResolvedFlyoutTimeRange();
   // Hosting plugin guarantees `charts` is wired through, so the base theme is
   // always available — we don't need to fall back to `@kbn/charts-theme`.
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const trendLabel = formatGoldenSignalTrend(signal.trend, timeRange);
 
   const datum: MetricDatum = {
     title: signal.label,
     // Pre-formatted string so elastic-charts doesn't split digits vs units
     // (numeric `value` + valueFormatter makes units render larger than digits).
     value: formatGoldenSignalValue(signal),
-    extra: <span>{signal.delta}</span>,
+    // Sits directly above the value (metric valuePosition is `bottom`).
+    extra: (
+      <span data-test-subj={`entityCentricLabGoldenSignalTrend-${signal.id}`}>{trendLabel}</span>
+    ),
     color: goldenSignalTileBackground(signal.color, euiTheme),
     trend: signal.trend.map((y, x) => ({ x, y })),
     trendShape: MetricTrendShape.Area,
@@ -551,7 +609,9 @@ const GoldenSignalCard = ({
         }
         .echMetricText__extra,
         .echMetricText__extraBlock .echMetricText__extra {
+          font-size: ${layout.extraPx}px !important;
           font-weight: ${euiTheme.font.weight.medium} !important;
+          white-space: nowrap;
         }
         .echMetricText__part {
           font-size: inherit !important;
@@ -565,7 +625,11 @@ const GoldenSignalCard = ({
       data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
     >
       <Chart>
-        <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
+        <Settings
+          baseTheme={chartBaseTheme}
+          locale={i18n.getLocale()}
+          theme={{ metric: { valueFontSize: layout.valuePx } }}
+        />
         <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
       </Chart>
       <span
