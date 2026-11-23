@@ -93,8 +93,9 @@ export function MapControl({ field, value, onChange, pointer, scope }: MapContro
           {rows.map((row, index) => {
             const entryPointer = joinPointer(pointer, row.key);
             const isDuplicate = isDuplicateKey(rows, index);
-            // The pointer of a row with a key that is taken is that of the row that took it.
-            const entryError = isDuplicate ? duplicateKeyLabel : context.errors[entryPointer];
+            // The pointer of a row with a key that is taken is that of the row that took it, so
+            // what is said there is not about this row.
+            const entryError = isDuplicate ? undefined : context.errors[entryPointer];
             return (
               <React.Fragment key={rowKeys.keys[index]}>
                 {index > 0 ? <EuiSpacer size="s" /> : null}
@@ -126,6 +127,7 @@ export function MapControl({ field, value, onChange, pointer, scope }: MapContro
                       }
                       data-test-subj="componentDefinitionFormMapKey"
                     />
+                    {isDuplicate ? <EuiFormErrorText>{duplicateKeyLabel}</EuiFormErrorText> : null}
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>
                     <FieldControl

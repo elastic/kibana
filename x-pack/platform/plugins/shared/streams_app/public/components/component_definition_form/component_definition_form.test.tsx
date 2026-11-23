@@ -473,6 +473,27 @@ describe('ComponentDefinitionForm', () => {
       expect(onUnparsedInputChange).toHaveBeenLastCalledWith(false);
     });
 
+    it('says a key is taken when the values are paths, which show their own errors', () => {
+      render(
+        <Harness
+          onValues={jest.fn()}
+          definition={{
+            ...definition,
+            fields: [{ ...labels, value_schema: { type: 'path', path_set: 'ottl.paths' } }],
+          }}
+          initialValues={{ labels: { team: 'attributes.team' } }}
+        />
+      );
+
+      addEntry();
+      const [, second] = screen.getAllByTestId('componentDefinitionFormMapKey');
+      fireEvent.change(second, { target: { value: 'team' } });
+
+      const [first, duplicate] = screen.getAllByTestId('componentDefinitionFormMapEntry');
+      expect(within(duplicate).getByText('This key is already used')).toBeTruthy();
+      expect(within(first).queryByText('This key is already used')).toBeNull();
+    });
+
     it('stops at the max_entries of the catalogue', () => {
       render(<Harness onValues={jest.fn()} definition={definition} />);
 
