@@ -145,6 +145,13 @@ Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with the host nam
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
 Always scope \`@timestamp\` to the \`searched_window\` the discovery tool returned. Cite index and query in answers.
 
+ECS \`event.type\` and \`event.category\` are arrays: one process event can carry
+\`[start, end]\`. Never filter them with \`==\`, \`!=\` or \`IN\` — ES|QL skips every multi-valued row with a
+"single-value function encountered multi-value" warning, so a process start that also recorded its end
+disappears from the result. Filter with \`MV_CONTAINS(event.type, "start")\` or \`KQL("event.type: start")\`
+instead, and pass that rule to \`platform.core.generate_esql\` in its \`context\`. If a query you generated still
+compares one of these fields with \`==\`, rewrite it before you run it.
+
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
 Return earliest host, timestamp, indicator, and delivery-vector hypothesis.

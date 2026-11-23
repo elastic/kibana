@@ -55,6 +55,13 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(endpointForensicAnalysisSkill.content).toContain('Do not also render the indicators');
   });
 
+  it('steers ES|QL away from single-value comparisons on multi-valued ECS arrays', () => {
+    const { content } = endpointForensicAnalysisSkill;
+    expect(content).toContain('Never filter them with `==`');
+    expect(content).toContain('MV_CONTAINS(event.type, "start")');
+    expect(content).toContain('KQL("event.type: start")');
+  });
+
   it.each([
     [false, 'elastic-defend-configuration-troubleshooting'],
     [true, 'security-elastic-defend-configuration-troubleshooting'],

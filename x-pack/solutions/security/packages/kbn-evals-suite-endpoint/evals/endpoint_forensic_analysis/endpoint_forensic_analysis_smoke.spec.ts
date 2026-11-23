@@ -144,6 +144,35 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
     });
   });
 
+  evaluate(
+    'process starts stored with multi-valued event.type',
+    async ({ evaluateForensicDataset }) => {
+      await evaluateForensicDataset({
+        dataset: {
+          name: 'security: endpoint-forensic-analysis-smoke-multivalue-process-starts',
+          description:
+            'Smoke: a process start stored as event.type [start, end] must not be dropped from the timeline.',
+          examples: [
+            {
+              input: {
+                question:
+                  'List every process that started on WKSTN-RECV01, oldest first, with timestamps and command lines.',
+              },
+              output: {
+                criteria: [
+                  'Lists the processes started on WKSTN-RECV01 in timestamp order, earliest first',
+                  'Includes whoami.exe /all, started by powershell.exe about a minute after the encoded PowerShell command and before rundll32.exe',
+                ],
+                tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
+              },
+              metadata: { golden_id: 'ef-014-multivalue-process-starts', row_type: 'happy' },
+            },
+          ],
+        },
+      });
+    }
+  );
+
   evaluate('distractor weather', async ({ evaluateForensicDataset }) => {
     await evaluateForensicDataset({
       dataset: {
