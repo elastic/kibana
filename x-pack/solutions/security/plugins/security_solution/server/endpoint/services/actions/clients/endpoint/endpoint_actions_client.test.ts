@@ -17,6 +17,7 @@ import {
 } from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { BaseDataGenerator } from '../../../../../../common/endpoint/data_generators/base_data_generator';
@@ -944,6 +945,47 @@ describe('EndpointActionsClient', () => {
             });
 
             await expect(getFileWithForceAndExport()).resolves.toBeDefined();
+          });
+        });
+
+        describe('and `paths` is set instead of `path`', () => {
+          const getFileWithPathsAndExport = () =>
+            endpointActionsClient.getFile(
+              createGetFileOptions({ paths: ['/one', '/two'], export: 'provider-1' })
+            );
+
+          const mockEndpointCapabilities = (capabilities: EndpointCapabilities[]) => {
+            const generator = new EndpointMetadataGenerator('seed');
+
+            applyEsClientSearchMock({
+              esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+              index: metadataCurrentIndexPattern,
+              response: generator.toEsSearchResponse([
+                generator.toEsSearchHit(
+                  // Endpoint 9.5/9.6 get multi-path through a backport but not export, so pin a
+                  // version whose generated capabilities include neither
+                  generator.generate({ agent: { version: '9.6.0' }, Endpoint: { capabilities } })
+                ),
+              ]),
+            });
+          };
+
+          it('should reject a host that reports `get_file_multi_path` but not `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path']);
+
+            const error = await getFileWithPathsAndExport().catch((e) => e);
+
+            expect(error).toMatchObject({ statusCode: 400 });
+            expect(error.message).toContain(
+              'The following agent IDs do not support exporting files to external storage'
+            );
+            expect(error.message).not.toContain('do not support the get-file `paths` parameter');
+          });
+
+          it('should succeed when the host reports both `get_file_multi_path` and `file_export`', async () => {
+            mockEndpointCapabilities(['get_file_multi_path', 'file_export']);
+
+            await expect(getFileWithPathsAndExport()).resolves.toBeDefined();
           });
         });
       });
