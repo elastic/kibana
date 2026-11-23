@@ -31,18 +31,17 @@ import type { DataSource, FilterableField, FilterableSource } from '@kbn/data-so
 import type { Filter } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
-import { appendStatsByToQuery, formatEsqlIdentifier, formatEsqlSources } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
-import { coreServices, dataService } from '../../services/kibana_services';
+import { coreServices } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
+import { getEsqlColumnName, haveSameVariableKeys } from './esql_column_name';
+import { getValuesSourceFetchPlan, isSameFetchPlan } from './values_source_fetch_plan';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
-import { getESQLSingleColumnValues } from '../../../common/options_list';
-import { getControlsTimezone } from '../utils';
 import type { ControlSourceDescriptor, ValuesSourceSelection } from '../utils/control_source';
 import {
   isSameControlSource,
@@ -84,6 +83,12 @@ export type DataControlStateManager = Omit<StateManager<DataControlState>, 'api'
     setOutputFilter: (filter: Filter | undefined) => void;
   };
 };
+
+interface ResolvedControlSource {
+  descriptor: ControlSourceDescriptor;
+  dataSource: DataSource;
+  filterableSource: FilterableSource;
+}
 
 export const initializeDataControlManager = async <EditorState extends object = object>({
   controlId,
@@ -194,7 +199,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
           ? combineLatest([
               dataControlStateManager.api.esqlQuery$,
               // Re-derive the column when the set of available variables changes
-              parentEsqlVariables$.pipe(distinctUntilChanged(haveSameKeys)),
+              parentEsqlVariables$.pipe(distinctUntilChanged(haveSameVariableKeys)),
             ]).pipe(switchMap(([query, esqlVariables]) => getEsqlColumnName(query, esqlVariables)))
           : dataControlStateManager.api.fieldName$.pipe(
               map((fieldName) => ({ fieldName: fieldName ?? '', error: undefined }))
@@ -394,77 +399,4 @@ export const initializeDataControlManager = async <EditorState extends object = 
       labelManager.reinitializeState(newState);
     },
   };
-};
-
-interface ResolvedControlSource {
-  descriptor: ControlSourceDescriptor;
-  dataSource: DataSource;
-  filterableSource: FilterableSource;
-}
-
-const haveSameKeys = (prev: ESQLControlVariable[], next: ESQLControlVariable[]) => {
-  if (prev.length !== next.length) return false;
-  const prevKeys = new Set(prev.map((v) => v.key));
-  return next.every((v) => prevKeys.has(v.key));
-};
-
-const getEsqlColumnName = async (
-  query: string | undefined,
-  esqlVariables: ESQLControlVariable[]
-): Promise<{ fieldName?: string; error?: Error }> => {
-  if (!query) return {};
-  try {
-    const result = await getESQLSingleColumnValues({
-      query,
-      search: dataService.search.search,
-      esqlVariables,
-      timeRange: dataService.query.timefilter.timefilter.getTime(),
-      timezone: getControlsTimezone(),
-    });
-    if (!getESQLSingleColumnValues.isSuccess(result)) {
-      return { error: result.errors[0] };
-    }
-    return { fieldName: result.column.name };
-  } catch (error) {
-    return { error };
-  }
-};
-
-const getValuesSourceFetchPlan = ({
-  valuesSource,
-  esqlQuery,
-  dataSource,
-  field,
-}: {
-  valuesSource: ControlValuesSource | undefined;
-  esqlQuery: string | undefined;
-  dataSource: DataSource | undefined;
-  field: FilterableField | undefined;
-}): ValuesSourceFetchPlan | undefined => {
-  // The plan is not known until the data source is loaded
-  if (!dataSource) return undefined;
-  // A `ControlValuesSource.ESQL` control already has its own user supplied query.
-  if (valuesSource === ControlValuesSource.ESQL) {
-    return { fetchMode: 'esql', query: esqlQuery };
-  }
-  if (dataSource.kind === 'index-pattern') {
-    return { fetchMode: 'dsl', dataView: dataSource.getDataView() };
-  }
-  // An ES|QL source has no data view to search, so a field control on it runs a generated query.
-  return {
-    fetchMode: 'esql',
-    // The field is not loaded yet when it is undefined
-    query: field
-      ? appendStatsByToQuery(
-          `FROM ${formatEsqlSources(dataSource.title)}`,
-          formatEsqlIdentifier(field.name)
-        )
-      : undefined,
-  };
-};
-
-const isSameFetchPlan = (a?: ValuesSourceFetchPlan, b?: ValuesSourceFetchPlan): boolean => {
-  if (!a || !b) return a === b;
-  if (a.fetchMode === 'dsl') return b.fetchMode === 'dsl' && a.dataView === b.dataView;
-  return b.fetchMode === 'esql' && a.query === b.query;
 };
