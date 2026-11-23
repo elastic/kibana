@@ -73,7 +73,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
 
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
     expect(callout).toBeInTheDocument();
-    expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK IDs');
+    expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
     expect(callout.textContent).toContain('currently supported version (v16.1)');
     expect(callout.textContent).toContain('Elastic prebuilt rule mappings were updated');
     expect(
@@ -105,7 +105,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
     });
 
     const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
-    expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK IDs');
+    expect(callout.textContent).toContain('You have 2 rules that reference MITRE ATT&CK® IDs');
   });
 
   it('renders the outdated-mappings warning title', () => {
@@ -116,7 +116,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       },
     });
 
-    expect(screen.getByText(/Some rules have outdated MITRE ATT&CK mappings/)).toBeInTheDocument();
+    expect(screen.getByText(/Some rules have outdated MITRE ATT&CK® mappings/)).toBeInTheDocument();
   });
 
   it('opens the modal with all invalid rules grouped by status', async () => {
@@ -210,7 +210,7 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       });
 
       const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
-      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK IDs');
+      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATT&CK® IDs');
     });
 
     it('counts a rule with IDs from both frameworks on atlas', () => {
@@ -220,8 +220,10 @@ describe('CoverageOverviewInvalidMitreRulesCallout', () => {
       });
 
       const callout = screen.getByTestId('coverageOverviewInvalidMitreRulesCallout');
-      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATLAS IDs');
-      expect(screen.getByText(/Some rules have outdated MITRE ATLAS mappings/)).toBeInTheDocument();
+      expect(callout.textContent).toContain('You have 1 rule that references MITRE ATLAS™ IDs');
+      expect(
+        screen.getByText(/Some rules have outdated MITRE ATLAS™ mappings/)
+      ).toBeInTheDocument();
     });
 
     it('shows an atlas-only rule on atlas', () => {

@@ -35,9 +35,10 @@ steps:
         label: 'FTR (on-prem)'
         key: dispatch-ftr-tests
         agents:
-          provider: k8s
-          image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-          imageUID: 1000
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
         timeout_in_minutes: 15
         env:
           FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
@@ -45,23 +46,6 @@ steps:
           FTR_TEST_CHANNELS: '${TEST_CHANNELS}'
           LIMIT_CONFIG_TYPE: functional
           ALLOW_ZERO_JEST_OR_FTR_CONFIGS: true
-        plugins:
-          - sparse-checkout#v1.6.0:
-              no_cone: true
-              paths:
-                - '/.buildkite/'
-                - '/.nvmrc'
-                - '/package.json'
-                - '/tsconfig.base.json'
-                - '/versions.json'
-                - '/kibana.jsonc'
-                - '**/kibana.jsonc'
-                - '**/tsconfig.json'
-                - '**/*.test.js'
-                - '**/*.test.mjs'
-                - '**/*.test.ts'
-                - '**/*.test.tsx'
-              cleanup_sparse_state: true
         retry:
           automatic:
             - exit_status: '*'

@@ -8,7 +8,7 @@
 import {
   findSLOTemplatesParamsSchema,
   getSLOTemplateParamsSchema,
-  sloTemplateSchemaZod,
+  sloTemplateSchema,
   type FindSLOTemplatesResponse,
   type FindSLOTemplateTagsResponse,
   type GetSLOTemplateResponse,
@@ -37,7 +37,7 @@ export const getSLOTemplateRoute = createSloServerRoute({
     const { templateRepository } = await getScopedClients({ request, logger });
 
     const template = await templateRepository.findById(params.path.templateId);
-    return sloTemplateSchemaZod.encode(template);
+    return sloTemplateSchema.encode(template);
   },
 });
 
@@ -78,7 +78,7 @@ export const findSLOTemplatesRoute = createSloServerRoute({
 
     return {
       ...templatesPaginated,
-      results: templatesPaginated.results.map((template) => sloTemplateSchemaZod.encode(template)),
+      results: templatesPaginated.results.map((template) => sloTemplateSchema.encode(template)),
     };
   },
 });

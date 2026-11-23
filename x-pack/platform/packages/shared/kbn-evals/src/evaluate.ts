@@ -25,6 +25,7 @@ import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
 import {
   createCachedTokensEvaluator,
+  createEstimatedCostEvaluator,
   createInputTokensEvaluator,
   createLatencyEvaluator,
   createOutputTokensEvaluator,
@@ -35,6 +36,7 @@ import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { getSpaceIdsFromEnv } from './utils/space_ids';
+import { reportExperimentLinks, resolveEvalsUiKibanaUrl } from './utils/report_experiment_links';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
@@ -196,7 +198,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
   reportDisplayOptions: [
     async ({ evaluators }, use) => {
-      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+      const { inputTokens, outputTokens, cachedTokens, estimatedCost, toolCalls, latency } =
         evaluators.traceBasedEvaluators;
 
       await use({
@@ -212,6 +214,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           [
             cachedTokens.name,
             { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            estimatedCost.name,
+            { decimalPlaces: 4, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
           ],
           [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
           [
@@ -283,6 +289,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
+        config,
         evalsClient,
         connector,
         evaluationConnector,
@@ -382,6 +389,20 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         }
       }
 
+      reportExperimentLinks({
+        log,
+        kibanaUrl: resolveEvalsUiKibanaUrl({
+          evaluationsKbnUrl: process.env.EVAL_KBN_URL,
+          scoutKibanaUrl: config.hosts.kibana,
+        }),
+        experimentIds: datasetRunResults.map(({ id }) => id),
+        executionId,
+        suiteId,
+        modelId: model.id,
+        shardId: process.env.EVAL_SHARD_ID,
+        spaceId: spaceIds?.[0],
+      });
+
       // Publish the full composite execution ID to Buildkite metadata so the
       // post-comparison step can retrieve it without querying the experiments API.
       // Per-connector key (kbn-evals:execution-id:<suite>:<connector>) is the primary
@@ -461,6 +482,10 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             log,
           }),
           cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          estimatedCost: createEstimatedCostEvaluator({
             traceEsClient,
             log,
           }),

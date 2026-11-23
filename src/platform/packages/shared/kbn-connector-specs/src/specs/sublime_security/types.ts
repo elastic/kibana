@@ -52,6 +52,9 @@ export const REPORT_LABELS = [
   'non-violation',
 ] as const;
 
+// The Sublime OpenAPI spec sets no maxItems on message_group_ids for bulk quarantine/trash/restore.
+const MAX_MESSAGE_GROUP_IDS = 10_000;
+
 const ISO_DATE_DESCRIPTION =
   'UTC datetime in ISO 8601 format, e.g. 2026-07-14T15:09:26Z. Relative dates are not supported.';
 
@@ -67,6 +70,12 @@ const idSchema = (description: string) =>
     .max(200)
     .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
     .describe(description);
+
+/** Message and task IDs, which the Sublime API types as UUIDs. */
+const uuidSchema = (description: string) => z.string().max(36).uuid().describe(description);
+
+const isoDateSchema = (description: string) =>
+  z.string().max(64).datetime({ offset: true }).optional().describe(description);
 
 // =============================================================================
 // Action input schemas & inferred types
@@ -130,18 +139,12 @@ export const SearchMessageGroupsInputSchema = lazySchema(() =>
         .enum(FLAGGED_RULE_SEVERITIES)
         .optional()
         .describe('Only return message groups flagged by a rule of this severity'),
-      createdAtGte: z
-        .string()
-        .max(64)
-        .optional()
-        .describe(
-          `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
-        ),
-      createdAtLt: z
-        .string()
-        .max(64)
-        .optional()
-        .describe(`Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`),
+      createdAtGte: isoDateSchema(
+        `Inclusive start of the creation-time window; defaults to 30 days ago when omitted (the API requires a start time). ${ISO_DATE_DESCRIPTION}`
+      ),
+      createdAtLt: isoDateSchema(
+        `Exclusive end of the creation-time window. ${ISO_DATE_DESCRIPTION}`
+      ),
       limit: z
         .number()
         .int()
@@ -178,7 +181,9 @@ export type GetMessageGroupInput = z.infer<typeof GetMessageGroupInputSchema>;
 
 export const GetMessageInputSchema = lazySchema(() =>
   z.object({
-    messageId: idSchema('ID of the message, as returned by searchMessageGroups or getMessageGroup'),
+    messageId: uuidSchema(
+      'ID of the message (a UUID), as returned by searchMessageGroups or getMessageGroup'
+    ),
   })
 );
 export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
@@ -217,8 +222,10 @@ export const MessageGroupActionInputSchema = lazySchema(() =>
           .regex(/^[A-Za-z0-9_-]+$/, 'IDs contain only letters, numbers, hyphens, and underscores')
       )
       .min(1)
-      .max(500)
-      .describe('Canonical IDs of the message groups to act on (1-500 per call)'),
+      .max(MAX_MESSAGE_GROUP_IDS)
+      .describe(
+        `Canonical IDs of the message groups to act on (1-${MAX_MESSAGE_GROUP_IDS} per call)`
+      ),
     classification: z
       .enum(CLASSIFICATIONS)
       .optional()
@@ -238,8 +245,8 @@ export type MessageGroupActionInput = z.infer<typeof MessageGroupActionInputSche
 
 export const GetTaskInputSchema = lazySchema(() =>
   z.object({
-    taskId: idSchema(
-      'Task ID returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
+    taskId: uuidSchema(
+      'Task ID (a UUID) returned by quarantineMessageGroups, trashMessageGroups, or restoreMessageGroups'
     ),
   })
 );

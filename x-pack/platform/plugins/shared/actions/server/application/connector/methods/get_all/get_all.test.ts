@@ -416,6 +416,7 @@ describe('getAll()', () => {
           return {
             sandboxSupportedAuthTypes: ['bearer', 'oauth_authorization_code'],
             isSystemActionType: false,
+            getSandboxHosts: () => ['api.github.com'],
           };
         }
         return { sandboxSupportedAuthTypes: [], isSystemActionType: false };
@@ -465,12 +466,63 @@ describe('getAll()', () => {
       actionTypeRegistry.get = jest.fn((id: string) => ({
         sandboxSupportedAuthTypes: id === '.github' ? ['bearer'] : [],
         isSystemActionType: false,
+        getSandboxHosts: () => ['api.github.com'],
       })) as unknown as ActionTypeRegistry['get'];
 
       const result = await actionsClient.getAll({ sandboxCapableOnly: true });
 
       expect(result.map(({ id }) => id)).toEqual(['pre-github']);
       expect(result[0]).not.toHaveProperty('config');
+    });
+
+    test('leaves out a sandbox-capable connector whose sandbox hosts are all invalid', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 2,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'http-valid',
+            type: 'action',
+            attributes: {
+              name: 'Valid host',
+              actionTypeId: '.http',
+              isMissingSecrets: false,
+              config: { url: 'https://api.example.com' },
+            },
+            score: 1,
+            references: [],
+          },
+          {
+            id: 'http-ipv6',
+            type: 'action',
+            attributes: {
+              name: 'IPv6 host',
+              actionTypeId: '.http',
+              isMissingSecrets: false,
+              config: { url: 'https://[::1]:9200' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        { aggregations: { 'http-valid': { doc_count: 0 }, 'http-ipv6': { doc_count: 0 } } }
+      );
+      actionTypeRegistry.has = jest.fn(() => true);
+      actionTypeRegistry.get = jest.fn(() => ({
+        isSandboxCapable: () => true,
+        isSystemActionType: false,
+        getSandboxHosts: ({ config }: { config: Record<string, unknown> }) => [
+          new URL(config.url as string).hostname,
+        ],
+      })) as unknown as ActionTypeRegistry['get'];
+
+      const result = await actionsClient.getAll({ sandboxCapableOnly: true });
+
+      expect(result.map(({ id }) => id)).toEqual(['http-valid']);
     });
 
     test('get system actions correctly', async () => {

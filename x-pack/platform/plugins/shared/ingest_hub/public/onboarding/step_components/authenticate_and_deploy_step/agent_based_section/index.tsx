@@ -264,6 +264,9 @@ export function AgentBasedSection({
 
   // ── New-policy mode: policy form state ───────────────────────────────────
   const isPolicyCreated = !!agentPolicyId;
+  // Mirrors the hydration rule in onboarding_app.tsx. A session that only tried managed integration
+  // also has ?deploymentId= but no agent policy to protect, so "new" must stay selectable there.
+  const hasAgentPolicies = isPolicyCreated || selectedAgentPolicyIds.length > 0;
 
   // Once a new policy is created, switch to 'existing' mode with the created policy selected.
   // This keeps the credential section visible and shows the policy in a consistent locked state,
@@ -550,6 +553,7 @@ export function AgentBasedSection({
           <AgentPolicyPanel
             agentHostsMode={agentHostsMode}
             isEditMode={isEditMode}
+            isNewPolicyDisabled={isEditMode && hasAgentPolicies}
             isPolicyCreated={isPolicyCreated}
             isCredentialReady={isCredentialReady}
             isPolicyNameLoading={isPolicyNameLoading}

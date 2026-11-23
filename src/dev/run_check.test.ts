@@ -317,6 +317,34 @@ describe('run_check', () => {
     expect(output).toContain('lint  ✓ 10 files (fixed 2 files)');
   });
 
+  it('prints lint warning details when there are no errors', async () => {
+    interface MockLog {
+      writers: Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>;
+    }
+    const warn = (log: MockLog, text: string) =>
+      log.writers.forEach((writer) => writer.write({ type: 'warning', args: [text] }));
+
+    mockExecuteOxlintValidation.mockImplementation(async ({ log }: { log: MockLog }) => {
+      warn(log, 'src/foo.ts:1:1  warning  Unexpected console  no-console');
+      return { fileCount: 3, failedFiles: [], warningCount: 1 };
+    });
+    mockExecuteEslintValidation.mockImplementation(async ({ log }: { log: MockLog }) => {
+      warn(log, 'src/bar.ts\n  2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any');
+      return { fileCount: 3, fixedFiles: [], failedFiles: [], warningCount: 1 };
+    });
+
+    await handler(createArgs());
+
+    expect(process.exitCode).toBeUndefined();
+    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+    expect(output).toContain('oxlint⚠ 3 files (1 warning)');
+    expect(output).toContain('    src/foo.ts:1:1  warning  Unexpected console  no-console');
+    expect(output).toContain('lint  ⚠ 3 files (1 warning)');
+    expect(output).toContain(
+      '    src/bar.ts\n      2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any'
+    );
+  });
+
   it('skips fast path for integration test files', async () => {
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
@@ -773,6 +801,47 @@ describe('run_check', () => {
       const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
       expect(output).toContain('moon  ✗ failed');
       expect(output).toContain('node scripts/regenerate_moon_projects.js --update');
+    });
+  });
+
+  describe('server import graph step', () => {
+    it('runs the whole-graph check regardless of changed files', async () => {
+      mockResolveValidationBaseContext.mockResolvedValue({
+        ...baseContext,
+        runContext: { ...baseContext.runContext, changedFiles: [] },
+      });
+
+      await handler(createArgs());
+
+      expect(mockExeca).toHaveBeenCalledWith(
+        process.execPath,
+        ['scripts/check_server_import_graph'],
+        expect.objectContaining({ reject: false })
+      );
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('graph ✓ no new browser imports on server');
+      expect(process.exitCode).toBeUndefined();
+    });
+
+    it('reports the check output and rerun command when it fails', async () => {
+      mockExeca.mockImplementation(async (_bin: string, args: string[]) =>
+        args.includes('scripts/check_server_import_graph')
+          ? {
+              exitCode: 1,
+              stdout: '',
+              stderr:
+                'x-pack/foo/common/palette.ts imports @elastic/eui and is loaded by the server',
+            }
+          : { exitCode: 0, stdout: '', stderr: '' }
+      );
+
+      await handler(createArgs());
+
+      expect(process.exitCode).toBe(1);
+      const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
+      expect(output).toContain('graph ✗ failed');
+      expect(output).toContain('x-pack/foo/common/palette.ts imports @elastic/eui');
+      expect(output).toContain('node scripts/check_server_import_graph');
     });
   });
 });

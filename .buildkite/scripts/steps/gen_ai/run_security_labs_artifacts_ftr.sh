@@ -2,21 +2,18 @@
 
 set -euo pipefail
 
-# The Security Labs builder fetches article markdown from the internal
-# elastic/security-labs-elastic-co repository, which requires a GitHub token.
-# Expect GITHUB_TOKEN from pre-command (setup_job_env.sh) so Buildkite's
-# *_TOKEN log redaction applies — do not vault_get mid-command.
-if [[ -z "${GITHUB_TOKEN:-}" || "${GITHUB_TOKEN}" == "null" ]]; then
-  echo "ERROR: GITHUB_TOKEN is not set; cannot fetch Security Labs content from GitHub." >&2
-  exit 1
-fi
-
-# Git ref of elastic/security-labs-elastic-co to build content from.
-# Prefer a commit SHA from the article-publish Buildkite trigger; defaults to main.
-export SECURITY_LABS_REPO_REF="${SECURITY_LABS_REPO_REF:-main}"
+# The Security Labs builder reads published articles from the Contentstack Content
+# Delivery API, which requires the stack API key and a read-only delivery token.
+source .buildkite/scripts/steps/gen_ai/security_labs_contentstack_credentials.sh
+for var in SECURITY_LABS_CONTENTSTACK_API_KEY SECURITY_LABS_CONTENTSTACK_DELIVERY_TOKEN; do
+  if [[ -z "${!var:-}" || "${!var}" == "null" ]]; then
+    echo "ERROR: $var is not set; cannot fetch Security Labs content from Contentstack." >&2
+    exit 1
+  fi
+done
 
 # Artifact version must be unique per publish so same-day updates are not skipped by
-# already-installed clusters. Prefer the trigger's UTC timestamp (YYYY.MM.DD-HHMMSS);
+# already-installed clusters. Prefer a caller-provided UTC timestamp (YYYY.MM.DD-HHMMSS);
 # when unset, the FTR/builder defaults to the current UTC timestamp.
 if [[ -n "${SECURITY_LABS_VERSION:-}" ]]; then
   export SECURITY_LABS_VERSION
@@ -31,3 +28,6 @@ export FTR_EIS_CCM="${FTR_EIS_CCM:-1}"
 
 echo "--- Upload Security Labs KB artifacts to GCS"
 .buildkite/scripts/steps/gen_ai/upload_kb_artifacts.sh
+
+# security_labs_content_gate.sh compares webhook builds against the newest build with this marker.
+buildkite-agent meta-data set security-labs-uploaded true

@@ -9,22 +9,27 @@
  * What the managed investigation and combined workflows reference must exist in the step registry of every install
  * that gets them, whatever the feature flags say.
  *
- * The combined materialize workflow installs with Cortex or Memory, and the combined optimize
- * workflow now also carries the reinforcement phase, so both reference `nightshift.*` steps on
- * installs where the corresponding feature is off. If one of those steps were only registered
+ * The combined materialize and optimize workflows install with Wiki, Memory, or decision trees,
+ * and the optimize workflow carries the reinforcement phase, so both reference `nightshift.*` steps
+ * on installs where the corresponding feature is off. If one of those steps were only registered
  * under its own flag, the install would resolve a step type the engine does not know. The check
  * runs against the YAML the definitions actually ship, and against the ids `plugin.ts` really
  * registers for each feature combination.
  */
 
 import { parse } from 'yaml';
-import { coreMock } from '@kbn/core/server/mocks';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getManagedWorkflowDefinition,
+  getNightshiftBoundHookWorkflowId,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-  NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
@@ -37,6 +42,7 @@ const MANAGED_WORKFLOW_IDS = [
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
 ];
 
 /** Step types the shipped YAMLs reference, minus the ones the engine implements itself. */
@@ -56,7 +62,7 @@ const referencedStepTypes = (workflowId: string): string[] => {
 };
 
 const registeredStepIds = (flags: {
-  cortexEnabled: boolean;
+  wikiEnabled: boolean;
   memoryEnabled: boolean;
   decisionTreesEnabled: boolean;
 }): string[] => {
@@ -65,7 +71,7 @@ const registeredStepIds = (flags: {
     coreMock.createPluginInitializerContext({
       enabled: true,
       sandbox: { isAvailable: true },
-      cortex: { enabled: flags.cortexEnabled },
+      wiki: { enabled: flags.wikiEnabled },
       decision_trees: { enabled: flags.decisionTreesEnabled },
       memory: { enabled: flags.memoryEnabled },
     })
@@ -86,18 +92,19 @@ const registeredStepIds = (flags: {
 };
 
 const FEATURE_MATRIX = [
-  { name: 'cortex only', cortexEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
-  { name: 'memory only', cortexEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
+  { name: 'wiki only', wikiEnabled: true, memoryEnabled: false, decisionTreesEnabled: false },
+  { name: 'memory only', wikiEnabled: false, memoryEnabled: true, decisionTreesEnabled: false },
+  { name: 'trees only', wikiEnabled: false, memoryEnabled: false, decisionTreesEnabled: true },
   {
-    name: 'cortex, memory and trees',
-    cortexEnabled: true,
+    name: 'wiki, memory and trees',
+    wikiEnabled: true,
     memoryEnabled: true,
     decisionTreesEnabled: true,
   },
 ];
 
 describe('combined workflows only reference registered step types', () => {
-  // The combined workflows install whenever Cortex or Memory is on, whatever the tree flag, so
+  // The combined workflows install whenever Wiki, Memory, or decision trees are on, so
   // these are exactly the installs that can resolve them.
   it.each(FEATURE_MATRIX)('with $name', ({ ...flags }) => {
     const registered = registeredStepIds(flags);
@@ -110,36 +117,51 @@ describe('combined workflows only reference registered step types', () => {
   });
 });
 
+/** The agents' hooks are the space's bound entry points, so their configuration resolves per space. */
+const baseFor = async (type: AgentTypeDefinition): Promise<AgentBaseConfiguration> => {
+  const { baseConfiguration } = type;
+  if (typeof baseConfiguration !== 'function') {
+    throw new Error('expected a per-space base configuration');
+  }
+  return baseConfiguration({ request: httpServerMock.createKibanaRequest(), spaceId: 'default' });
+};
+
 describe('agent hooks around the combined workflows', () => {
   // Two pre-hooks would hydrate the trees twice into two conversations; two post-hooks would
   // reinforce every round twice, at up to 900s each.
-  it('gives the investigator exactly one pre-hook and one post-hook', () => {
-    const base = getInvestigationAgentType({
-      sandboxEnabled: true,
-      cortexEnabled: true,
-      memoryEnabled: true,
-      decisionTreesEnabled: true,
-      investigationToolsEnabled: true,
-      proposalsEnabled: true,
-    }).baseConfiguration;
+  it('gives the investigator exactly one pre-hook and one post-hook', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+      })
+    );
 
-    expect(typeof base === 'function' ? [] : base.workflow_ids).toEqual([
-      NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+    expect(base.workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
+        'default'
+      ),
     ]);
-    expect(typeof base === 'function' ? [] : base.post_execution_workflow_ids).toEqual([
-      NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
+    expect(base.post_execution_workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID, 'default'),
     ]);
   });
 
   // The reinforcement agent runs in its own conversation, whose workspace is namespaced
   // separately, so it keeps the dedicated hydrate workflow. It must not run the investigator's
   // post-execution hook: that hook would launch another reinforcement agent.
-  it('gives the reinforcement agent its own hydrate hook and no post-hook', () => {
-    const base = getDecisionTreeReinforcementAgentType().baseConfiguration;
+  it('gives the reinforcement agent its own hydrate hook and no post-hook', async () => {
+    const base = await baseFor(getDecisionTreeReinforcementAgentType());
 
-    expect(typeof base === 'function' ? [] : base.workflow_ids).toEqual([
-      NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+    expect(base.workflow_ids).toEqual([
+      getNightshiftBoundHookWorkflowId(
+        NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+        'default'
+      ),
     ]);
-    expect(typeof base === 'function' ? [] : base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 });

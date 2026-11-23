@@ -12,13 +12,21 @@ import {
   ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+  ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { mostSevereFailure, resolveHuntModels } from './hunt_models';
-import { resolveScopedModel } from './scoped_model';
+import { resolveConfiguredScopedModel, resolveScopedModel } from './scoped_model';
 
-jest.mock('./scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn(),
+}));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
+const resolveConfiguredScopedModelMock = resolveConfiguredScopedModel as jest.MockedFunction<
+  typeof resolveConfiguredScopedModel
+>;
 
 const logger = loggingSystemMock.createLogger();
 const request = {} as KibanaRequest;
@@ -29,13 +37,21 @@ const modelFor = (featureId: string) =>
   ({ connector: { id: featureId } } as unknown as ScopedModel);
 
 const resolve = (tiers?: Array<'efficient' | 'balanced' | 'frontier'>) =>
-  resolveHuntModels({ inference, request, uiSettingsClient, logger, tiers });
+  resolveHuntModels({
+    inference,
+    telemetryPluginId: 'alertzero_hunt_sweep',
+    request,
+    uiSettingsClient,
+    logger,
+    tiers,
+  });
 
 describe('resolveHuntModels', () => {
   beforeEach(() => {
     resolveScopedModelMock
       .mockReset()
       .mockImplementation(async ({ featureId }) => ({ ok: true, model: modelFor(featureId) }));
+    resolveConfiguredScopedModelMock.mockReset().mockResolvedValue(undefined);
   });
 
   it('resolves the tiers hunts use, each on its own feature id, by default', async () => {
@@ -51,11 +67,61 @@ describe('resolveHuntModels', () => {
     );
   });
 
+  it('leaves the tiers on their own models when the cyber row is empty', async () => {
+    const { models } = await resolve();
+
+    expect(models.cyber).toBeUndefined();
+    expect(resolveConfiguredScopedModelMock).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID })
+    );
+  });
+
+  it('attaches a saved cyber-domain model without replacing the tier resolutions', async () => {
+    const cyber = modelFor(ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID);
+    resolveConfiguredScopedModelMock.mockResolvedValue(cyber);
+
+    const { models, failures } = await resolve();
+
+    expect(failures).toEqual([]);
+    expect(models.cyber).toBe(cyber);
+    expect(models.frontier).toEqual(modelFor(ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID));
+    expect(models.efficient).toEqual(modelFor(ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID));
+  });
+
   it('resolves only the tiers it is asked for', async () => {
     const { models } = await resolve(['frontier']);
 
     expect(Object.keys(models)).toEqual(['frontier']);
     expect(resolveScopedModelMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('attributes every resolved tier model to the caller-provided telemetry plugin id', async () => {
+    await resolve();
+
+    expect(resolveScopedModelMock).toHaveBeenCalledTimes(2);
+    for (const call of resolveScopedModelMock.mock.calls) {
+      expect(call[0].chatModelOptions).toEqual({
+        telemetryMetadata: {
+          pluginId: 'alertzero_hunt_sweep',
+          aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+        },
+      });
+    }
+  });
+
+  it('attributes the cyber-domain model to the same telemetry as the tiers', async () => {
+    await resolve();
+
+    expect(resolveConfiguredScopedModelMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chatModelOptions: {
+          telemetryMetadata: {
+            pluginId: 'alertzero_hunt_sweep',
+            aggregateBy: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+          },
+        },
+      })
+    );
   });
 
   it('leaves the other tiers intact when one has no usable connector', async () => {

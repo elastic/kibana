@@ -30,14 +30,14 @@ export const ESCALATIONS_PAGE_INFO = Object.freeze({
 
 export const ESCALATIONS_EMPTY_BANNER = Object.freeze({
   title: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.title', {
-    defaultMessage: 'Escalations are part of Alert Zero',
+    defaultMessage: 'No escalations yet',
   }),
   body: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.body', {
     defaultMessage:
-      'When an investigation needs a human decision, you can escalate it from the investigation and it will show up here.',
+      'Escalations bring together investigations that need a human decision. When you escalate an investigation, the escalation appears here.',
   }),
   docsLink: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.docsLink', {
-    defaultMessage: 'Read the documentation',
+    defaultMessage: 'Read more about escalations',
   }),
   exampleBadge: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.exampleBadge', {
     defaultMessage: 'Example',
@@ -47,5 +47,9 @@ export const ESCALATIONS_EMPTY_BANNER = Object.freeze({
 export const ESCALATIONS_OPEN_NOTE = Object.freeze({
   emptyTitle: i18n.translate('xpack.alertzero.escalationsPage.openNote.emptyTitle', {
     defaultMessage: 'No open escalations',
+  }),
+  body: i18n.translate('xpack.alertzero.escalationsPage.openNote.body', {
+    defaultMessage:
+      "When you escalate an investigation, the escalation appears here until it's closed.",
   }),
 });

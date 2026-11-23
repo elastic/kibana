@@ -41,7 +41,8 @@ import {
   getEntityId,
   getNumber,
 } from '../common';
-import type { Row, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { Row } from '../common';
 
 const MAX_GROUP_RECORDS = 100;
 
@@ -389,10 +390,10 @@ const EXPANDER_HEADER_LABEL = i18n.translate(
 const getExpandRowLabel = (isExpanded: boolean) =>
   isExpanded
     ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.collapseRowAriaLabel', {
-        defaultMessage: 'Collapse group',
+        defaultMessage: 'Collapse records resolved to this entity',
       })
     : i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.expandRowAriaLabel', {
-        defaultMessage: 'Expand group',
+        defaultMessage: 'Show records resolved to this entity',
       });
 
 const EntityGridExpanderHeader = () => (
@@ -413,6 +414,7 @@ const EntityGridExpanderCell = ({ rowIndex }: EuiDataGridCellValueElementProps) 
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
+        data-test-subj="eaGridExpandToggle"
         size="xs"
         color="text"
         aria-label={label}

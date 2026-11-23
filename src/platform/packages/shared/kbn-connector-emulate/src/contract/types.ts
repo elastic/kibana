@@ -21,6 +21,8 @@ export interface ContractRequest {
   readonly query: Readonly<Record<string, string | string[]>>;
   readonly headers: Readonly<Record<string, string>>;
   readonly body?: unknown;
+  /** Set once the request is routed to an OpenAPI operation, decoded. */
+  readonly pathParameters?: Readonly<Record<string, string>>;
 }
 
 export interface ContractResponse {
@@ -31,11 +33,26 @@ export interface ContractResponse {
 
 export type RouteResult = OperationMatch | OperationMismatch;
 
+export interface ResponderContext {
+  /**
+   * State kept for the emulator's run, until `reset()`. A responder keeps its entries under keys
+   * of its own, such as a symbol, so several responders can share it.
+   */
+  readonly state: Map<unknown, unknown>;
+  /**
+   * The default chain's answer: the operation's fixture, else its first conforming recording,
+   * else an example or a sample of its schema, paged for paginated operations. Each call gets
+   * its own copy, which the responder is free to change.
+   */
+  readonly next: () => Promise<ContractResponse>;
+}
+
 /** Produces the mock's answer to a valid request. */
 export type Responder = (
   operation: ContractOperation,
-  request: ContractRequest
-) => ContractResponse;
+  request: ContractRequest,
+  context: ResponderContext
+) => ContractResponse | Promise<ContractResponse>;
 
 /**
  * A vendor operation that has no method and path of its own, because a protocol sends every
@@ -49,12 +66,24 @@ export interface NamedOperationRef {
 /** An operation a protocol request called, and whether it only reads vendor state. */
 export interface NamedOperation extends NamedOperationRef {
   readonly readOnly: boolean;
+  /** The types a GraphQL request names, in fragments and variables, which it needs to validate. */
+  readonly namedTypes?: readonly string[];
+  /**
+   * The root fields a GraphQL request's document mentions, as in `query boards`, including those
+   * in other operations or behind `@skip`. Validation checks the whole document, so needs them all.
+   */
+  readonly namedRootFields?: readonly string[];
 }
 
 export interface ProtocolExchange {
   readonly response: ContractResponse;
   /** The operations the request called; GraphQL requests can call several root fields. */
   readonly operations: readonly NamedOperation[];
+  /**
+   * Set when the request is valid yet executes no operation, such as GraphQL root fields that all
+   * sit behind `@skip`: what the request would have called, for what it depends on and reads.
+   */
+  readonly skipped?: NamedOperation;
   /** Protocol messages that call no vendor operation, such as MCP's `initialize`. */
   readonly messages?: readonly string[];
   readonly requestViolations: readonly Violation[];
@@ -73,8 +102,10 @@ export interface ContractProtocolOptions {
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
-  /** The names of the operations the spec declares, such as `query boards`. */
-  readonly operations: ReadonlySet<string>;
+  /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
+  readonly operations: readonly NamedOperation[];
+  /** The operations a fixture or recording can answer, such as `query boards`, by name. */
+  readonly answerable: ReadonlySet<string>;
   /** Recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;

@@ -11,8 +11,13 @@ import type { BehaviorSubject } from 'rxjs';
 
 /**
  * A publishing subject is a RxJS subject that can be used to listen to value changes, but does not allow pushing values via the Next method.
+ * It leaves out `observers` too: that internal list makes a subject invariant in its value, and a read only view of a
+ * `DataView[]` is also a read only view of a `FilterableSource[]`.
  */
-export type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, 'next'>;
+export type PublishingSubject<T extends unknown = unknown> = Omit<
+  BehaviorSubject<T>,
+  'next' | 'observers'
+>;
 
 // Usage of any required here. We want to build functionalities that can work with a publishing subject of any type.
 type AnyValue = any;

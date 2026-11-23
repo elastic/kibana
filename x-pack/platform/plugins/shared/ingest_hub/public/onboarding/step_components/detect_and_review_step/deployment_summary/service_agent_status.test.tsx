@@ -108,12 +108,24 @@ describe('ServiceAgentStatus', () => {
       expect(screen.getByTestId('agentTooltip')).toHaveTextContent('See agent info');
     });
 
-    it('opens the component health flyout for a healthy agent', async () => {
+    it('opens the managed integration status for a healthy managed integration agent', async () => {
       renderStatus(info());
 
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
 
+      expect(await screen.findByTestId('enrollmentFlyout')).toHaveTextContent(
+        'Amazon S3|policy-1|aws@4.0.0'
+      );
+      expect(screen.queryByTestId('detailsFlyout')).not.toBeInTheDocument();
+    });
+
+    it('opens the component health flyout for a healthy agent-based agent', async () => {
+      renderStatus(info(), 'agent_based');
+
+      fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
+
       expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
+      expect(screen.queryByTestId('enrollmentFlyout')).not.toBeInTheDocument();
     });
 
     it('is not clickable until the package policy is known', () => {
@@ -143,30 +155,33 @@ describe('ServiceAgentStatus', () => {
       expect(screen.getByTestId('agentTooltip')).toHaveTextContent('See agent info');
     });
 
-    it('opens the component health flyout with the agent and its package policy', async () => {
+    it('opens the managed integration status, with its overall health, for a managed integration', async () => {
       renderStatus(unhealthy());
-      expect(screen.queryByTestId('detailsFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('enrollmentFlyout')).not.toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
 
-      expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
-      expect(screen.queryByTestId('enrollmentFlyout')).not.toBeInTheDocument();
+      expect(await screen.findByTestId('enrollmentFlyout')).toHaveTextContent(
+        'Amazon S3|policy-1|aws@4.0.0'
+      );
+      expect(screen.queryByTestId('detailsFlyout')).not.toBeInTheDocument();
     });
 
     it('closes the flyout', async () => {
       renderStatus(unhealthy());
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
-      fireEvent.click(await screen.findByText('close-details'));
+      fireEvent.click(await screen.findByText('close-enrollment'));
 
-      expect(screen.queryByTestId('detailsFlyout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('enrollmentFlyout')).not.toBeInTheDocument();
     });
 
-    it('does the same for agent-based deployments', async () => {
+    it('opens the component health flyout with the agent and its package policy for agent-based deployments', async () => {
       renderStatus(unhealthy(), 'agent_based');
 
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
 
-      expect(await screen.findByTestId('detailsFlyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
+      expect(screen.queryByTestId('enrollmentFlyout')).not.toBeInTheDocument();
     });
 
     it('is not clickable until the package policy is known, and promises no flyout', () => {
@@ -198,7 +213,7 @@ describe('ServiceAgentStatus', () => {
     });
 
     it('still opens the flyout with the real agent, not the relabelled one', async () => {
-      renderStatus(withIssue(INCOMPATIBLE));
+      renderStatus(withIssue(INCOMPATIBLE), 'agent_based');
 
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
 
@@ -274,7 +289,7 @@ describe('ServiceAgentStatus', () => {
 
       fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
 
-      expect(await screen.findByTestId('detailsFlyout')).toBeInTheDocument();
+      expect(await screen.findByTestId('enrollmentFlyout')).toBeInTheDocument();
     });
 
     it('can still be reached with the keyboard before the package policy is known', () => {

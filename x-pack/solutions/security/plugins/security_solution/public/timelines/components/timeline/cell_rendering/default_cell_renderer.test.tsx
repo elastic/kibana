@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
@@ -16,7 +16,7 @@ import { DroppableWrapper } from '../../../../common/components/drag_and_drop/dr
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
 import { DefaultCellRenderer } from './default_cell_renderer';
-import type { BrowserFields } from '@kbn/timelines-plugin/common/search_strategy';
+import type { BrowserFields } from '@kbn/securitysolution-timeline-common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 jest.mock('../../../../common/lib/kibana');
@@ -50,7 +50,7 @@ describe('DefaultCellRenderer', () => {
     const header = cloneDeep(defaultHeaders[0]);
     const isDetails = true;
 
-    mount(
+    render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
@@ -84,7 +84,7 @@ describe('DefaultCellRenderer', () => {
     const isDetails = true;
     const truncate = isDetails ? false : true;
 
-    mount(
+    render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
@@ -144,7 +144,7 @@ describe('host link rendering', () => {
     const id = 'host.name';
     const isTimeline = true;
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
@@ -170,14 +170,14 @@ describe('host link rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="host-details-button"]').first().text()).toEqual('apache');
+    expect(screen.getAllByTestId('host-details-button')[0]).toHaveTextContent('apache');
   });
 
   test('it does NOT render a link button for `host.name` when `isTimeline` is false', () => {
     const id = 'host.name';
     const isTimeline = false;
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
@@ -203,7 +203,7 @@ describe('host link rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toBe(false);
+    expect(screen.queryByTestId('host-details-button')).not.toBeInTheDocument();
   });
 
   test('it does NOT render a link button for non-host fields when `isTimeline` is true', () => {
@@ -211,7 +211,7 @@ describe('host link rendering', () => {
     const isTimeline = true;
     const timestampHeader = cloneDeep(defaultHeaders[0]);
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
           <DroppableWrapper droppableId="testing">
@@ -237,6 +237,6 @@ describe('host link rendering', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="host-details-button"]').exists()).toBe(false);
+    expect(screen.queryByTestId('host-details-button')).not.toBeInTheDocument();
   });
 });

@@ -56,7 +56,7 @@ describe('buildStatusRuntimeField', () => {
         "status": Object {
           "script": Object {
             "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && doc.containsKey('policy_id') && doc['policy_id'].size() > 0 && (['policy-1'].contains(doc['policy_id'].value) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
+            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
           },
           "type": "keyword",
         },
@@ -76,7 +76,7 @@ describe('buildStatusRuntimeField', () => {
         "status": Object {
           "script": Object {
             "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && doc.containsKey('policy_id') && doc['policy_id'].size() > 0 && (['policy-1','policy-2'].contains(doc['policy_id'].value) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
+            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1','policy-2'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
           },
           "type": "keyword",
         },
@@ -124,12 +124,51 @@ describe('buildStatusRuntimeField', () => {
         "status": Object {
           "script": Object {
             "lang": "painless",
-            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && doc.containsKey('policy_id') && doc['policy_id'].size() > 0 && (['policy-1','policy-2'].contains(doc['policy_id'].value) && lastCheckinMillis < 1234567590123L || ['policy-3'].contains(doc['policy_id'].value) && lastCheckinMillis < 1234567490123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
+            "source": " long lastCheckinMillis = doc.containsKey('last_checkin') && doc['last_checkin'].size() > 0 ? doc['last_checkin'].value.toInstant().toEpochMilli() : ( doc['enrolled_at'].size() > 0 ? doc['enrolled_at'].value.toInstant().toEpochMilli() : -1 ); String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' ); if (!doc.containsKey('active') || (doc['active'].size() > 0 && doc['active'].value == false)) { emit('unenrolled'); } else if (lastCheckinMillis > 0 && agentPolicyBaseId.length() > 0 && (['policy-1','policy-2'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567590123L || ['policy-3'].contains(agentPolicyBaseId) && lastCheckinMillis < 1234567490123L)) {emit('inactive');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'uninstall'){emit('uninstalled');} else if (doc.containsKey('audit_unenrolled_reason') && doc['audit_unenrolled_reason'].size() > 0 && doc['audit_unenrolled_reason'].value == 'orphaned'){emit('orphaned');} else if ( lastCheckinMillis > 0 && lastCheckinMillis < 1234567530123L ) { emit('offline'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'disconnected' ) { emit('offline'); } else if ( doc['policy_revision_idx'].size() == 0 || ( doc['upgrade_started_at'].size() > 0 && doc['upgraded_at'].size() == 0 ) ) { emit('updating'); } else if (doc['last_checkin'].size() == 0) { emit('enrolling'); } else if (doc['unenrollment_started_at'].size() > 0) { emit('unenrolling'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'error' ) { emit('error'); } else if ( doc['last_checkin_status'].size() > 0 && doc['last_checkin_status'].value.toLowerCase() == 'degraded' ) { emit('degraded'); } else { emit('online'); }",
           },
           "type": "keyword",
         },
       }
     `);
+  });
+  it('should match the inactivity timeout on the base policy id, with a policy_id fallback', () => {
+    const inactivityTimeouts: InactivityTimeouts = [
+      {
+        inactivityTimeout: 300,
+        policyIds: ['policy-1'],
+      },
+    ];
+
+    const { source } = _buildStatusRuntimeField({ inactivityTimeouts }).status.script;
+
+    // agents reassigned to a version-specific variant, e.g. 'policy-1#sentinel', carry the base id
+    // in policy_base_id; agents enrolled before that field existed only have the base policy_id
+    expect(source).toContain(
+      "String agentPolicyBaseId = doc.containsKey('policy_base_id') && doc['policy_base_id'].size() > 0 ? doc['policy_base_id'].value : ( doc.containsKey('policy_id') && doc['policy_id'].size() > 0 ? doc['policy_id'].value : '' );"
+    );
+    expect(source).toContain("['policy-1'].contains(agentPolicyBaseId)");
+  });
+  it('should prefix the base policy id fields with the path prefix', () => {
+    const inactivityTimeouts: InactivityTimeouts = [
+      {
+        inactivityTimeout: 300,
+        policyIds: ['policy-1'],
+      },
+    ];
+
+    const { source } = _buildStatusRuntimeField({
+      inactivityTimeouts,
+      pathPrefix: 'my.prefix.',
+    }).status.script;
+
+    expect(source).toContain(
+      "String agentPolicyBaseId = doc.containsKey('my.prefix.policy_base_id') && doc['my.prefix.policy_base_id'].size() > 0 ? doc['my.prefix.policy_base_id'].value : ( doc.containsKey('my.prefix.policy_id') && doc['my.prefix.policy_id'].size() > 0 ? doc['my.prefix.policy_id'].value : '' );"
+    );
+  });
+  it('should not declare the base policy id if there are no inactivity timeouts', () => {
+    const { source } = _buildStatusRuntimeField({ inactivityTimeouts: [] }).status.script;
+
+    expect(source).not.toContain('agentPolicyBaseId');
   });
   it('should build the same runtime field if path ends with. or not', () => {
     const inactivityTimeouts: InactivityTimeouts = [];

@@ -7,7 +7,7 @@
 
 import type { InvestigationFields } from '../../../../common/api/detection_engine';
 import type { Rule } from './types';
-import { transformRuleFromAlertHit } from './use_rule_with_fallback';
+import { retryUnlessNotFound, transformRuleFromAlertHit } from './use_rule_with_fallback';
 
 export const getMockAlertSearchResponse = (rule: Rule) => ({
   took: 1,
@@ -45,6 +45,24 @@ describe('use_rule_with_fallback', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+  describe('retryUnlessNotFound', () => {
+    it('does not retry a 404, so the alert fallback starts right away', () => {
+      expect(
+        retryUnlessNotFound(0, {
+          message: 'not found',
+          body: { message: 'not found', status_code: 404 },
+        })
+      ).toBe(false);
+    });
+
+    it('retries other errors up to three times', () => {
+      const error = { message: 'boom', body: { message: 'boom', status_code: 500 } };
+      expect(retryUnlessNotFound(0, error)).toBe(true);
+      expect(retryUnlessNotFound(2, error)).toBe(true);
+      expect(retryUnlessNotFound(3, error)).toBe(false);
+    });
+  });
+
   describe('transformRuleFromAlertHit', () => {
     // Testing edge case, where if hook does not find the rule and turns to the alert document,
     // the alert document could still have an unmigrated, legacy version of investigation_fields.

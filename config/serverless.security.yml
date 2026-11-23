@@ -8,6 +8,7 @@ xpack.securitySolutionEss.enabled: false
 
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false
+xpack.alerting_v2.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -258,7 +259,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled, disable:enableRiskScorePrivmonModifier, disable:kubernetesEnabled, trialCompanionEnabled, disable:linuxRansomwareProtection, disable:registryCredentialHardening, disable:endpointAiDataCollection]
+xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled, disable:enableRiskScorePrivmonModifier, trialCompanionEnabled, disable:linuxRansomwareProtection, disable:registryCredentialHardening, disable:endpointAiDataCollection]
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'

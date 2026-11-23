@@ -21,24 +21,25 @@ test.describe(
       await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
     });
 
-    test('should open settings flyout, verify buttons state, and close successfully', async ({
+    test('should open settings page, verify buttons state, and cancel successfully', async ({
       pageObjects,
     }) => {
-      // Open the settings flyout
-      await pageObjects.rulesPage.openSettingsFlyout();
-      await pageObjects.rulesPage.expectSettingsFlyoutVisible();
+      // Open the settings sub-page
+      await pageObjects.rulesPage.openSettingsPage();
+      await pageObjects.rulesPage.expectSettingsPageVisible();
 
-      // Verify buttons are visible and enabled
-      await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeVisible();
-      await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeEnabled();
-      await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeVisible();
-      await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeDisabled();
+      // Verify buttons are visible and in the expected state
+      await expect(pageObjects.rulesPage.settingsPageCancelButton).toBeVisible();
+      await expect(pageObjects.rulesPage.settingsPageCancelButton).toBeEnabled();
+      await expect(pageObjects.rulesPage.settingsPageSaveButton).toBeVisible();
+      await expect(pageObjects.rulesPage.settingsPageSaveButton).toBeDisabled();
 
-      // Close the flyout
-      await pageObjects.rulesPage.closeSettingsFlyout();
+      // Cancel leaves the settings page
+      await pageObjects.rulesPage.cancelSettingsPage();
 
-      // Verify the flyout is closed
-      await expect(pageObjects.rulesPage.settingsFlyout).toBeHidden();
+      // Verify we are back on the rules list
+      await expect(pageObjects.rulesPage.settingsPage).toBeHidden();
+      await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
     });
   }
 );
