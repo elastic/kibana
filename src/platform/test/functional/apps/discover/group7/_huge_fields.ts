@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(fieldExistsBeforeScrolling).to.be(false);
       // scrolling down a little, should render this field
       await testSubjects.scrollIntoView('fieldToggle-myvar1029');
-      const fieldExistsAfterScrolling = await testSubjects.exists('field-myvar1050');
+      const fieldExistsAfterScrolling = await testSubjects.waitForExists('field-myvar1050');
       expect(fieldExistsAfterScrolling).to.be(true);
     });
 

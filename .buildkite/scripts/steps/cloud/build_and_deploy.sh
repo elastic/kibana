@@ -4,6 +4,8 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+load_cloud_deploy_credentials
+
 ES_SNAPSHOTS_DAILY_BASE_URL="https://storage.googleapis.com/kibana-ci-es-snapshots-daily"
 ES_SHA_PATTERN="^[0-9a-f]{40}$"
 
@@ -62,7 +64,8 @@ if [[ ! "$ELASTICSEARCH_SHA" =~ $ES_SHA_PATTERN ]]; then
 fi
 ELASTICSEARCH_CLOUD_IMAGE="docker.elastic.co/kibana-ci/elasticsearch-cloud-ess:$VERSION-$ELASTICSEARCH_SHA"
 
-KIBANA_CLOUD_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$VERSION-$GIT_COMMIT"
+KIBANA_CLOUD_IMAGE="$(kibana_ci_image_repository kibana-cloud):$VERSION-$GIT_COMMIT"
 
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   PR_NUMBER="$GITHUB_PR_NUMBER"
@@ -88,13 +91,13 @@ else
     --tar-zstd \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
-    --docker-push \
     --skip-docker-ubi \
     --skip-docker-fips \
     --skip-docker-cloud-fips \
     --skip-docker-wolfi \
     --skip-docker-serverless \
     --skip-docker-contexts
+  retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$KIBANA_CLOUD_IMAGE"
 fi
 
 if is_pr_with_label "ci:cloud-redeploy" || is_pr_with_label "ci:entity-store-performance"; then

@@ -1155,6 +1155,8 @@
   ],
   "scheduled_report": [
     "createdBy",
+    "createdByApiKeyId",
+    "createdById",
     "title"
   ],
   "search": [

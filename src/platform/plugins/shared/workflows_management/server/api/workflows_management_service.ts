@@ -565,23 +565,38 @@ export class WorkflowsService {
       pending = toRetryEntries.map((entry, i) => ({ ...entry, id: reResolved[i] }));
     }
 
-    // Phase 3: Schedule triggers for successfully created workflows (in parallel)
-    const workflowsToSchedule = successfullyWritten.filter((vw) =>
-      vw.definition?.triggers?.some((t) => t.type === 'scheduled')
-    );
-
-    await Promise.allSettled(
-      workflowsToSchedule.map((vw) =>
-        this.scheduleWorkflowTriggers(
-          vw.id,
-          vw.definition,
-          vw.workflowData.enabled,
-          vw.workflowData.valid,
-          spaceId,
-          request
+    // Phase 3: Reconcile scheduled tasks for successfully written workflows (in parallel).
+    if (overwrite) {
+      // An overwrite can replace a workflow that already has a scheduled task, so mirror the
+      // single-update path: unschedule when the new definition is no longer an enabled, valid,
+      // scheduled workflow, and otherwise refresh the task's execution credentials to the
+      // caller. This keeps bulk overwrite consistent with single-workflow updates instead of
+      // leaving the previous schedule and credentials in place.
+      await Promise.allSettled(
+        successfullyWritten.map((vw) =>
+          this.updateSchedulerAfterWorkflowSave(vw.id, spaceId, request, vw.workflowData, true)
         )
-      )
-    );
+      );
+    } else {
+      // Brand-new documents have no pre-existing task; only schedule the ones whose definition
+      // declares a scheduled trigger.
+      const workflowsToSchedule = successfullyWritten.filter((vw) =>
+        vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+      );
+
+      await Promise.allSettled(
+        workflowsToSchedule.map((vw) =>
+          this.scheduleWorkflowTriggers(
+            vw.id,
+            vw.definition,
+            vw.workflowData.enabled,
+            vw.workflowData.valid,
+            spaceId,
+            request
+          )
+        )
+      );
+    }
 
     return { created, failed };
   }

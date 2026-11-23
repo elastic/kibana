@@ -3,7 +3,7 @@
 exports[`MarkdownOptions should match snapshot 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasShadow-MarkdownOptions"
+    class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-grow-m-s-plain-hasShadow-onMarkdownUpdate"
   >
     <div
       class="euiFlexGroup mkdEditor emotion-euiFlexGroup-m-flexStart-stretch-column"

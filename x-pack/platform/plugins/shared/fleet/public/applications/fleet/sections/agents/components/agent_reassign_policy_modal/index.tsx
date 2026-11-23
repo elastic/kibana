@@ -60,7 +60,9 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   const agentPolicies = useMemo(
     () =>
       agentPoliciesRequest.data
-        ? agentPoliciesRequest.data.items.filter((policy) => policy && !policy.is_managed)
+        ? agentPoliciesRequest.data.items
+            .filter((policy) => policy && !policy.is_managed)
+            .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
         : [],
     [agentPoliciesRequest.data]
   );
