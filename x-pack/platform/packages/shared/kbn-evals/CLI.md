@@ -218,7 +218,7 @@ node scripts/evals doctor --fix
 ### `compare` -- Compare eval runs
 
 ```bash
-node scripts/evals compare <run-id-a> <run-id-b>
+node scripts/evals compare <target-run-id> <baseline-run-id>
 ```
 
 | Flag                  | Description                                                                                   |
