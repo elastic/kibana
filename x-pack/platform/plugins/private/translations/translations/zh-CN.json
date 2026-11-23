@@ -16002,8 +16002,6 @@
     "xpack.agentBuilder.eventSteps.steps.compaction.completeTokens": "上下文已压缩：{before} → {after} 个令牌",
     "xpack.agentBuilder.eventSteps.steps.compaction.inProgress": "正在精简上下文",
     "xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel": "工具调用",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.ran": "运行了",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.running": "正在运行…",
     "xpack.agentBuilder.eventSteps.steps.toolCall.stopped": "已停止",
     "xpack.agentBuilder.eventSteps.steps.toolCall.toolBadgeToolLabel": "工具",
     "xpack.agentBuilder.eventSteps.subAgentExecutionFlyout.back": "返回",

@@ -16009,8 +16009,6 @@
     "xpack.agentBuilder.eventSteps.steps.compaction.completeTokens": "コンテキストを圧縮： {before} → {after}トークン",
     "xpack.agentBuilder.eventSteps.steps.compaction.inProgress": "コンテキストの圧縮",
     "xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel": "ツール呼び出し",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.ran": "実行しました",
-    "xpack.agentBuilder.eventSteps.steps.toolCall.running": "実行中...",
     "xpack.agentBuilder.eventSteps.steps.toolCall.stopped": "停止中",
     "xpack.agentBuilder.eventSteps.steps.toolCall.toolBadgeToolLabel": "ツール",
     "xpack.agentBuilder.eventSteps.subAgentExecutionFlyout.back": "戻る",

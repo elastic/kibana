@@ -9,7 +9,10 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import {
+  createToolCallStep,
+  createSubstitutionStep,
+} from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
 import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
@@ -114,6 +117,30 @@ describe('AgentTurn', () => {
   beforeEach(() => {
     mockOnResponseRender.mockClear();
   });
+
+  it.each([running, completedLive, failed, aborted])(
+    'does not leave an empty steps wrapper in a $status turn with only hidden steps',
+    (item) => {
+      renderTimeline({
+        ...item,
+        steps: [
+          createSubstitutionStep({
+            trigger: 'round_start',
+            threshold_tokens: 1000,
+            substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 'tc-1' }],
+          }),
+        ],
+      });
+      expect(screen.queryByTestId('agentBuilderThinkingPanel')).not.toBeInTheDocument();
+      const content =
+        item.status === 'failed'
+          ? screen.getByTestId('agentBuilderExecutionFailed')
+          : item.status === 'aborted'
+          ? screen.getByText('Response stopped by Jane Doe')
+          : screen.getByTestId('response');
+      expect(content.parentElement?.previousElementSibling).toBeNull();
+    }
+  );
 
   it('gives the response what it needs to render attachments', () => {
     const conversationAttachments = [{ id: 'att-1' } as VersionedAttachment];
