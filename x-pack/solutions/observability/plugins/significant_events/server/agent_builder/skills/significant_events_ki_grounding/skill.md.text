@@ -560,8 +560,9 @@ write anything that uses it: never conclude an absence (no edge, no entity) from
    `causal_features` or `blast_radius`. For each confirming signal:
    - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
      any value its predicate pins to a field that identifies an entity (e.g: a service, host, pod, database,
-     or queue), matched exactly and uniquely to a fetched feature's `feature.id`
-     or `properties.name`. Use its title and description only to disambiguate. Use the components
+     or queue), matched exactly and uniquely to a fetched feature's `feature.id` or `properties.name`.
+     Resolve a `query.features[]` ID only within the query KI's `source_id`; the same feature ID in
+     another batch source is unrelated. Use its title and description only to disambiguate. Use the components
      named in the found rows only when the KI identifies none, or to corroborate. The found rows are
      the sample rows, the `examples`, and every `breakdown` value whose share of its own lines is not
      near zero: each such value that names a service is a source, not only the sampled row's. A
