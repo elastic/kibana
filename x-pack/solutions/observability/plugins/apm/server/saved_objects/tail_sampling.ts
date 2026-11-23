@@ -29,7 +29,7 @@ const tailSamplingAttributes = {
    * The processor's config as JSON, for example {"policies":[...]} for 'tail_sampling'.
    * Stored as sent by the user. The control API normalizes policies and orders them by name before saving.   */
   configJson: schema.string(),
-  // Hash of the config, compared with the rollout status hashes.
+  // Opaque hash returned by the control API's _validate. Compared with the rollout status hashes.
   configHash: schema.string(),
   updatedBy: schema.maybe(schema.string()),
 };
