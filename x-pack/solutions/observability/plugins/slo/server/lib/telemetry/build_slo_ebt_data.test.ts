@@ -6,12 +6,22 @@
  */
 
 import { ALL_VALUE } from '@kbn/slo-schema';
+import type { CompositeSLODefinition } from '../../domain/models';
+import { createCompositeSlo } from '../../services/fixtures/composite_slo';
 import {
   createSLO,
   createSLOWithCalendarTimeWindow,
   createSLOWithTimeslicesBudgetingMethod,
 } from '../../services/fixtures/slo';
-import { getChangedFields, hashSloId, toSloDefinitionEbtData } from './build_slo_ebt_data';
+import { sevenDaysRolling } from '../../services/fixtures/time_window';
+import {
+  getChangedFields,
+  getCompositeChangedFields,
+  hashSloId,
+  toCompositeSloDefinitionEbtData,
+  toCompositeSloDeletedEbtData,
+  toSloDefinitionEbtData,
+} from './build_slo_ebt_data';
 
 describe('hashSloId', () => {
   it('returns a stable SHA-256 hex digest that does not contain the id', () => {
@@ -83,6 +93,131 @@ describe('getChangedFields', () => {
       getChangedFields(slo, {
         ...slo,
         revision: slo.revision + 1,
+        updatedAt: new Date(),
+        updatedBy: 'someone-else',
+      })
+    ).toEqual([]);
+  });
+});
+
+describe('toCompositeSloDeletedEbtData', () => {
+  it('reports only the hashed composite SLO id', () => {
+    const id = 'payments-composite-acme-prod';
+
+    const data = toCompositeSloDeletedEbtData(id);
+
+    expect(data).toEqual({ composite_slo_id: hashSloId(id) });
+    expect(data.composite_slo_id).toMatch(/^[0-9a-f]{64}$/);
+    expect(JSON.stringify(data)).not.toContain(id);
+  });
+});
+
+describe('toCompositeSloDefinitionEbtData', () => {
+  it('projects the composite SLO definition without raw ids, names or descriptions', () => {
+    const composite = createCompositeSlo({ id: 'composite-1' });
+
+    const data = toCompositeSloDefinitionEbtData(composite);
+
+    expect(data).toEqual({
+      composite_slo_id: hashSloId('composite-1'),
+      members_count: 2,
+      members_with_instance_id_count: 0,
+    });
+    expect(JSON.stringify(data)).not.toContain(composite.name);
+    expect(JSON.stringify(data)).not.toContain(composite.description);
+  });
+
+  it('counts the members targeting a specific instanceId', () => {
+    const composite = createCompositeSlo({
+      members: [
+        { sloId: 'a', weight: 1, instanceId: 'host-1' },
+        { sloId: 'a', weight: 1, instanceId: 'host-2' },
+        { sloId: 'b', weight: 1 },
+        { sloId: 'c', weight: 1, instanceId: '' },
+      ],
+    });
+
+    expect(toCompositeSloDefinitionEbtData(composite)).toEqual(
+      expect.objectContaining({ members_count: 4, members_with_instance_id_count: 2 })
+    );
+  });
+});
+
+describe('getCompositeChangedFields', () => {
+  it('returns no field for identical definitions', () => {
+    const composite = createCompositeSlo();
+
+    expect(getCompositeChangedFields(composite, { ...composite })).toEqual([]);
+  });
+
+  it('returns the changed fields', () => {
+    const composite = createCompositeSlo();
+
+    expect(
+      getCompositeChangedFields(composite, {
+        ...composite,
+        name: 'new name',
+        description: 'new description',
+        timeWindow: sevenDaysRolling(),
+        objective: { target: 0.95 },
+        tags: ['new'],
+        enabled: false,
+      })
+    ).toEqual(['name', 'description', 'timeWindow', 'objective', 'tags', 'enabled']);
+  });
+
+  it.each([
+    [
+      'a member is added',
+      (members: CompositeSLODefinition['members']) => [...members, { sloId: 'new', weight: 1 }],
+    ],
+    ['a member is removed', (members: CompositeSLODefinition['members']) => members.slice(1)],
+    [
+      'a member weight changes',
+      (members: CompositeSLODefinition['members']) => [
+        { ...members[0], weight: 99 },
+        ...members.slice(1),
+      ],
+    ],
+    [
+      'a member instanceId changes',
+      (members: CompositeSLODefinition['members']) => [
+        { ...members[0], instanceId: 'host-1' },
+        ...members.slice(1),
+      ],
+    ],
+  ])('reports members when %s', (_, change) => {
+    const composite = createCompositeSlo();
+
+    expect(
+      getCompositeChangedFields(composite, { ...composite, members: change(composite.members) })
+    ).toEqual(['members']);
+  });
+
+  it('ignores the order of the members', () => {
+    const composite = createCompositeSlo({
+      members: [
+        { sloId: 'a', weight: 1, instanceId: 'host-2' },
+        { sloId: 'a', weight: 1, instanceId: 'host-1' },
+        { sloId: 'b', weight: 3 },
+      ],
+    });
+
+    expect(
+      getCompositeChangedFields(composite, {
+        ...composite,
+        members: [...composite.members].reverse(),
+      })
+    ).toEqual([]);
+  });
+
+  it('ignores the fields managed by the system', () => {
+    const composite = createCompositeSlo();
+
+    expect(
+      getCompositeChangedFields(composite, {
+        ...composite,
+        version: composite.version + 1,
         updatedAt: new Date(),
         updatedBy: 'someone-else',
       })

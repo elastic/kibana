@@ -134,6 +134,44 @@ describe('discoverHuntDatasets', () => {
     expect(byDataset.get('okta.system')?.search_patterns).toEqual(['logs-okta.system-*']);
   });
 
+  it('never offers an unsearchable stream, yet keeps narrowing its readable sibling against it', async () => {
+    mockDataStreams(['logs-windows-default', 'logs-windows-defender-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-windows-defender-default']),
+    });
+
+    expect(datasets.map((d) => d.dataset)).toEqual(['windows']);
+    expect(datasets[0].data_streams).toEqual(['logs-windows-default']);
+    expect(datasets[0].search_patterns).toEqual(['logs-windows-default*']);
+  });
+
+  it('counts only searchable namespaces against the per-dataset cap', async () => {
+    const windows = Array.from({ length: 16 }, (_, i) => `logs-windows-ns${i}`);
+    mockDataStreams([...windows, 'logs-windows-unreadable', 'logs-windows-defender-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-windows-unreadable']),
+    });
+
+    expect(datasets.find((d) => d.dataset === 'windows')?.search_patterns).toEqual(
+      windows.map((stream) => `${stream}*`)
+    );
+  });
+
+  it('keeps a dataset pattern whose prefix equals a dropped name', async () => {
+    mockDataStreams(['logs-okta.system-default']);
+    const datasets = await discoverHuntDatasets({
+      esClient,
+      patterns: UNIVERSE,
+      unsearchableStreams: new Set(['logs-okta.system-']),
+    });
+
+    expect(datasets[0].search_patterns).toEqual(['logs-okta.system-*']);
+  });
+
   it('uses the whole dataset as vendor when it has no dot', async () => {
     mockDataStreams(['logs-cisco_asa-default']);
 
@@ -202,6 +240,7 @@ describe('discoverHuntDatasets', () => {
       name: ['logs-*'],
       allow_no_indices: true,
       expand_wildcards: ['open'],
+      ignore_unavailable: true,
     });
   });
 

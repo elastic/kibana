@@ -16,7 +16,6 @@
     "@kbn/zod-helpers",
     "@kbn/std",
     "@kbn/core-user-storage-server",
-    "@kbn/core-user-storage-server-mocks",
     "@kbn/core-user-storage-common",
     "@kbn/task-manager-plugin",
     "@kbn/core-logging-server-mocks",

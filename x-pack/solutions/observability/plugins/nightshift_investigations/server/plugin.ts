@@ -88,7 +88,18 @@ import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
 import { registerDecisionTreeAiIndex } from './decision_trees/register_decision_trees';
-import { setupNightshiftTelemetry, type NightshiftTelemetryClient } from './telemetry';
+import {
+  createDetectionSnapshotSources,
+  DETECTION_SNAPSHOT_SO_TYPES,
+  registerDetectionSnapshotTask,
+  removeDetectionSnapshotTask,
+  reportAlertsEnteredPipeline,
+  scheduleDetectionSnapshotTask,
+  setupNightshiftTelemetry,
+  type DetectionSnapshotContributor,
+  type NightshiftTelemetryClient,
+} from './telemetry';
+import { getBoundInvestigationWorkflowId } from './lib/service_account/constants';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
@@ -121,6 +132,8 @@ import {
   nightshiftSandboxAllowlistSavedObjectType,
   nightshiftAutomationSavedObjectType,
   nightshiftAutomationBudgetSavedObjectType,
+  nightshiftInvestigationQuotaLedgerSavedObjectType,
+  nightshiftInvestigationQuotaSettingsSavedObjectType,
   NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE,
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
@@ -132,6 +145,7 @@ import {
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createInvestigationQuotaClient } from './lib/investigation_quotas';
 import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
 import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
@@ -189,6 +203,8 @@ export class NightshiftInvestigationsPlugin
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private telemetry?: NightshiftTelemetryClient;
+  private taskManager?: NightshiftInvestigationsStartDeps['taskManager'];
+  private detectionSnapshotContributor?: DetectionSnapshotContributor;
   private decisionTreesEnabled = false;
   private assistantEnabled = false;
 
@@ -219,11 +235,17 @@ export class NightshiftInvestigationsPlugin
       })
     );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
+    const telemetry = setupNightshiftTelemetry({
+      analytics: core.analytics,
+      logger: this.logger.get('telemetry'),
+    });
+    this.telemetry = telemetry;
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
     plugins.alertingVTwo?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
+      onStatusChanges: async (payloads) => reportAlertsEnteredPipeline(payloads, telemetry),
     });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
@@ -233,11 +255,29 @@ export class NightshiftInvestigationsPlugin
       isNightshiftEnabled: isNightshiftEnabledSync,
       logger: this.logger.get('sandbox'),
     });
-    const telemetry = setupNightshiftTelemetry({
-      analytics: core.analytics,
-      logger: this.logger.get('telemetry'),
+    registerDetectionSnapshotTask({
+      taskManager: plugins.taskManager,
+      getDeps: async (request) => {
+        const [coreStart] = await core.getStartServices();
+        return {
+          analytics: coreStart.analytics,
+          sources: createDetectionSnapshotSources({
+            request,
+            esClient: coreStart.elasticsearch.client.asInternalUser,
+            soRepository: coreStart.savedObjects.createInternalRepository(
+              DETECTION_SNAPSHOT_SO_TYPES
+            ),
+            listSpaceIds: this.listNightshiftSpaceIds,
+            alertingVTwo: this.alertingVTwo,
+            actions: this.actionsStart,
+            isMemoryEnabled: this.memoryEnabled,
+            contributor: this.detectionSnapshotContributor,
+            logger: this.logger.get('telemetry'),
+          }),
+          logger: this.logger.get('telemetry'),
+        };
+      },
     });
-    this.telemetry = telemetry;
     for (const judge of [
       ...referenceFreeJudges,
       ...alertOutcomeJudges,
@@ -268,10 +308,18 @@ export class NightshiftInvestigationsPlugin
     core.savedObjects.registerType(nightshiftAutomationBudgetSavedObjectType);
     core.savedObjects.registerType(nightshiftCustomContextSavedObjectType);
     core.savedObjects.registerType(nightshiftSandboxAllowlistSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaSettingsSavedObjectType);
+    core.savedObjects.registerType(nightshiftInvestigationQuotaLedgerSavedObjectType);
 
     const sandboxAllowlistClient = createSandboxAllowlistClient({
       getDeps: () => ({ savedObjects: this.savedObjects, spaces: this.spaces }),
     });
+
+    const investigationQuotaClient = createInvestigationQuotaClient({
+      getDeps: () => ({ savedObjects: this.savedObjects, security: this.securityStart }),
+      logger: this.logger.get('investigation_quotas'),
+    });
+    this.investigationQuotaCallback = (trigger) => investigationQuotaClient.consume(trigger);
 
     const customContextClient = createCustomContextClient({
       getDeps: () => ({
@@ -365,6 +413,7 @@ export class NightshiftInvestigationsPlugin
       if (plugins.agenticInvestigations && config.findings_recorder.enabled) {
         const getRecorderOutputRedactor = createSandboxOutputRedactorProvider({
           getDeps: () => ({ actions: this.actionsStart }),
+          logger: this.logger.get('findings_recorder', 'output_redaction'),
         });
         // Records summary, severity, hypotheses and impact from outside the agent, so the
         // investigator needs no recording tools. Every dependency is read lazily: hooks are
@@ -377,6 +426,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             getAgenticInvestigations: () => this.agenticInvestigations,
+            telemetry,
             // The final pass proposes actions for a person to decide, as the investigator's
             // `proposals.create` tool did, and sees which ones the conversation already has.
             getProposals: () =>
@@ -424,11 +474,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      const sandboxToolAvailability = createSandboxToolAvailability({
+        getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+      });
       plugins.agentBuilder.tools.register({
         ...createSlackReadTool({ getActions: () => this.actionsStart }),
-        availability: createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        }),
+        availability: sandboxToolAvailability,
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -460,19 +511,17 @@ export class NightshiftInvestigationsPlugin
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart }),
+            logger: outputRedactionLogger,
           }),
           logger: outputRedactionLogger,
         };
-        const availability = createSandboxToolAvailability({
-          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
-        });
         const { agentBuilder } = plugins;
         const registerSandboxTool = <TSchema extends ZodObject>(
           tool: BuiltinToolDefinition<TSchema>
         ) =>
           agentBuilder.tools.register({
             ...withSandboxOutputRedaction(tool, redaction),
-            availability,
+            availability: sandboxToolAvailability,
           });
 
         registerSandboxTool(
@@ -569,6 +618,8 @@ export class NightshiftInvestigationsPlugin
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations,
             telemetry,
+            getSavedObjects: () => this.savedObjects,
+            getUiSettings: () => this.uiSettings,
           })
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -677,6 +728,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
+            telemetry,
             logger: this.logger.get('wiki'),
             isEnabled: () => this.wikiEnabled,
           })
@@ -703,6 +755,7 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -711,6 +764,7 @@ export class NightshiftInvestigationsPlugin
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             isEnabled: () => this.decisionTreesEnabled,
+            telemetry,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -749,6 +803,7 @@ export class NightshiftInvestigationsPlugin
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
           customContextClient,
+          investigationQuotaClient,
           onboardingClient,
           getWikiPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
@@ -817,11 +872,11 @@ export class NightshiftInvestigationsPlugin
     }
 
     return {
-      registerInvestigationQuota: (callback) => {
-        if (this.investigationQuotaCallback) {
-          throw new Error('Investigation quota callback is already registered');
+      registerDetectionSnapshotContributor: (contributor) => {
+        if (this.detectionSnapshotContributor) {
+          throw new Error('Detection snapshot contributor is already registered');
         }
-        this.investigationQuotaCallback = callback;
+        this.detectionSnapshotContributor = contributor;
       },
     };
   }
@@ -846,6 +901,7 @@ export class NightshiftInvestigationsPlugin
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.nightshiftSources = plugins.nightshiftSources;
+    this.taskManager = plugins.taskManager;
     this.isomerStart = plugins.isomer;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
@@ -908,6 +964,22 @@ export class NightshiftInvestigationsPlugin
       isAssistantEnabled: () => this.assistantEnabled,
     };
   }
+
+  private getTaskManager = () => {
+    if (!this.taskManager) {
+      throw new Error('taskManager is not available — plugin start() has not been called');
+    }
+    return this.taskManager;
+  };
+
+  /** Spaces whose investigation entry point is installed, which is what reads as set up. */
+  private listNightshiftSpaceIds = async (): Promise<string[]> => {
+    const client = await this.managedWorkflowsClient;
+    const states = client ? await client.listInstalledWorkflowStates() : [];
+    return states
+      .filter(({ workflowId, spaceId }) => workflowId === getBoundInvestigationWorkflowId(spaceId))
+      .map(({ spaceId }) => spaceId);
+  };
 
   private getNightshiftSources = () => {
     if (!this.nightshiftSources) {
@@ -1042,6 +1114,9 @@ export class NightshiftInvestigationsPlugin
       scheduleSourceVolumeTask: (request) =>
         this.getNightshiftSources().scheduleSourceVolumeTask(request),
       removeSourceVolumeTask: () => this.getNightshiftSources().removeSourceVolumeTask(),
+      scheduleDetectionSnapshotTask: (request) =>
+        scheduleDetectionSnapshotTask(this.getTaskManager(), request),
+      removeDetectionSnapshotTask: () => removeDetectionSnapshotTask(this.getTaskManager()),
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),

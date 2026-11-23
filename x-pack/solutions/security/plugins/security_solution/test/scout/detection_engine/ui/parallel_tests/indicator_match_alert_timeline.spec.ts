@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout-security';
+import { DATA_LOAD_TIMEOUT_MS, spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import {
   getIndicatorMatchRule,
@@ -50,7 +50,11 @@ spaceTest.describe(
 
         await spaceTest.step('open the alert in a timeline', async () => {
           await ruleDetailsPage.goto({ kbnUrl, spaceId: scoutSpace.id, ruleId, tab: 'alerts' });
-          await expect(ruleDetailsPage.investigateInTimelineButtons).toHaveCount(1);
+          // The alerts search and the trend chart share the cluster with other workers, so the
+          // table can take longer than the default timeout to show the row
+          await expect(ruleDetailsPage.investigateInTimelineButtons).toHaveCount(1, {
+            timeout: DATA_LOAD_TIMEOUT_MS,
+          });
           await ruleDetailsPage.investigateInTimelineButtons.dispatchEvent('click');
         });
 

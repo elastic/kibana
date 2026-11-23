@@ -55,7 +55,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/css-utils",
-    "@kbn/visualizations-common",
     "@kbn/es-types",
     "@kbn/esql-types",
     "@kbn/esql-utils",
@@ -72,8 +71,8 @@
     "@kbn/as-code-utils",
     "@kbn/as-code-filters-constants",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-feature-flags-server",
     "@kbn/core-http-server",
+    "@kbn/visualizations-components",
   ],
   "exclude": [
     "target/**/*",

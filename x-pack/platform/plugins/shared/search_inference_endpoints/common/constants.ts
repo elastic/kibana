@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+
 export const PLUGIN_ID = 'searchInferenceEndpoints';
 export const PLUGIN_NAME = 'Inference Endpoints';
 export const INFERENCE_ENDPOINTS_APP_ID = 'inference_endpoints';
@@ -31,6 +33,15 @@ export enum ROUTE_VERSIONS {
 export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';
 
 export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
+
+export const TESTABLE_TASK_TYPES = [
+  'chat_completion',
+  'completion',
+  'text_embedding',
+  'embedding',
+  'sparse_embedding',
+  'rerank',
+] as const satisfies readonly InferenceTaskType[];
 
 export const INFERENCE_UI_CAPABILITIES = {
   show: 'show',

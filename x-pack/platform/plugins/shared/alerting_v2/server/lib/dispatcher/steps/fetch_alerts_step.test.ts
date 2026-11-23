@@ -11,11 +11,13 @@ import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import { FetchAlertsStep, parseAlerts } from './fetch_alerts_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
   createAlert,
   createDispatcherConfigService,
   createDispatcherPipelineState,
+  createDispatcherTelemetryMock,
   createStepLogger,
   MOCK_KIBANA_BASE_URL,
 } from '../fixtures/test_utils';
@@ -33,13 +35,23 @@ const makeSubPlanError = () =>
   } as DiagnosticResult);
 
 const logger = createStepLogger();
+const telemetry = createDispatcherTelemetryMock();
 
 describe('FetchAlertsStep', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('is named fetch_alerts', () => {
     const { queryService } = createQueryService();
 
     expect(
-      new FetchAlertsStep(queryService, MOCK_KIBANA_BASE_URL, createDispatcherConfigService()).name
+      new FetchAlertsStep(
+        queryService,
+        MOCK_KIBANA_BASE_URL,
+        createDispatcherConfigService(),
+        telemetry
+      ).name
     ).toBe('fetch_alerts');
   });
 
@@ -48,7 +60,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     const alerts = [
@@ -71,7 +84,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
@@ -87,7 +101,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     mockEsClient.esql.query.mockResolvedValueOnce(
@@ -116,7 +131,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService({ run: { alerts: { max: 1000 } } })
+      createDispatcherConfigService({ run: { alerts: { max: 1000 } } }),
+      telemetry
     );
 
     const alerts = Array.from({ length: 1000 }, (_, i) =>
@@ -138,7 +154,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     const maxAlerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
@@ -159,7 +176,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     const alerts = Array.from({ length: ESQL_QUERY_ROW_LIMIT - 1 }, (_, i) =>
@@ -175,12 +193,97 @@ describe('FetchAlertsStep', () => {
     expect(result.data?.scan?.truncated).toBe(false);
   });
 
+  describe('truncation signal', () => {
+    const MAX = 1000;
+
+    const buildStep = () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const { loggerService, mockLogger } = createLoggerService();
+      const step = new FetchAlertsStep(
+        queryService,
+        MOCK_KIBANA_BASE_URL,
+        createDispatcherConfigService({ run: { alerts: { max: MAX } } }),
+        telemetry
+      );
+      return { step, mockEsClient, loggerService, mockLogger };
+    };
+
+    const buildAlerts = (count: number, lastTimestamp = '2026-01-22T07:33:00.000Z') =>
+      Array.from({ length: count }, (_, i) =>
+        createAlert({
+          alert_id: `ep-${i}`,
+          group_hash: `h-${i}`,
+          last_event_timestamp: i === count - 1 ? lastTimestamp : '2026-01-22T07:25:00.000Z',
+        })
+      );
+
+    it('warns with the limit, truncation edge and window bounds and records the metric', async () => {
+      const { step, mockEsClient, loggerService, mockLogger } = buildStep();
+      mockEsClient.esql.query.mockResolvedValueOnce(
+        createDispatchableAlertEventsResponse(buildAlerts(MAX))
+      );
+      const state = createDispatcherPipelineState();
+      const { windowStart, windowEnd } = state.input;
+
+      await step.execute(state, loggerService);
+
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
+        labels: { code: ALERTING_LOG_CODES.DISPATCHER_ALERT_SCAN_TRUNCATED },
+      });
+      const [messageFn] = mockLogger.warn.mock.calls[0] as [() => string];
+      const message = messageFn();
+      expect(message).toContain(`${MAX}`);
+      expect(message).toContain('2026-01-22T07:33:00.000Z');
+      expect(message).toContain(windowStart.toISOString());
+      expect(message).toContain(windowEnd.toISOString());
+      expect(telemetry.recordAlertScanTruncated).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw on a corrupt truncation edge timestamp', async () => {
+      const { step, mockEsClient, loggerService, mockLogger } = buildStep();
+      mockEsClient.esql.query.mockResolvedValueOnce(
+        createDispatchableAlertEventsResponse(buildAlerts(MAX, 'not-a-date'))
+      );
+
+      const result = await step.execute(createDispatcherPipelineState(), loggerService);
+
+      expect(result.type).toBe('continue');
+      const [messageFn] = mockLogger.warn.mock.calls[0] as [() => string];
+      expect(messageFn()).toContain('not-a-date');
+      expect(telemetry.recordAlertScanTruncated).toHaveBeenCalledTimes(1);
+    });
+
+    it('neither warns nor records when the scan stays under the limit', async () => {
+      const { step, mockEsClient, loggerService, mockLogger } = buildStep();
+      mockEsClient.esql.query.mockResolvedValueOnce(
+        createDispatchableAlertEventsResponse(buildAlerts(MAX - 1))
+      );
+
+      await step.execute(createDispatcherPipelineState(), loggerService);
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(telemetry.recordAlertScanTruncated).not.toHaveBeenCalled();
+    });
+
+    it('neither warns nor records when no alerts are found', async () => {
+      const { step, mockEsClient, loggerService, mockLogger } = buildStep();
+      mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
+
+      await step.execute(createDispatcherPipelineState(), loggerService);
+
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(telemetry.recordAlertScanTruncated).not.toHaveBeenCalled();
+    });
+  });
+
   it('propagates unclassified query errors', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(new Error('ES error'));
@@ -194,7 +297,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
@@ -211,7 +315,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     mockEsClient.esql.query.mockRejectedValueOnce(makeSubPlanError());
@@ -235,7 +340,8 @@ describe('FetchAlertsStep', () => {
     const step = new FetchAlertsStep(
       queryService,
       MOCK_KIBANA_BASE_URL,
-      createDispatcherConfigService()
+      createDispatcherConfigService(),
+      telemetry
     );
 
     const otherError = new errors.ResponseError({
