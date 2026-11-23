@@ -90,6 +90,9 @@ registerSessionMemoryRoutes({
   router: routerCapturingRoutes,
   getSpaces: jest.fn(),
   getSessionMemoryService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+  logger: loggerMock.create(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -128,7 +131,7 @@ const routePattern = (route: string) =>
 
 describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(9);
+    expect(routesWithExamples).toHaveLength(10);
   });
 
   describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {
