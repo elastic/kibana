@@ -12,7 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { waitFor } from '@testing-library/react';
 
-import { dataViewsService } from '../../../services/kibana_services';
+import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
@@ -273,8 +273,22 @@ describe('Options List Control Api', () => {
   });
 
   describe('required selections', () => {
+    let fetchSpy: jest.SpyInstance;
+
     beforeAll(() => {
       dataViewsService.get = jest.fn().mockImplementation(getDataView);
+    });
+
+    beforeEach(() => {
+      // a failed suggestions request is a blocking error, so make sure requests succeed
+      fetchSpy = jest.spyOn(coreServices.http, 'fetch').mockResolvedValue({
+        suggestions: [],
+        totalCardinality: 0,
+      });
+    });
+
+    afterEach(() => {
+      fetchSpy.mockRestore();
     });
 
     const buildWithState = (state: Partial<OptionsListDSLControlState>) =>
@@ -317,6 +331,13 @@ describe('Options List Control Api', () => {
 
       api.setSelectedOptions([]);
       await waitFor(() => expect(api.awaitingRequiredFilters$?.value).toBe(true));
+    });
+
+    test('awaitingRequiredFilters$ is false when the suggestions request fails', async () => {
+      fetchSpy.mockRejectedValue(new Error('suggestions failed'));
+      const { api } = await buildWithState({ required: true });
+      await waitFor(() => expect(api.blockingError$?.value?.message).toBe('suggestions failed'));
+      expect(api.awaitingRequiredFilters$?.value).toBe(false);
     });
   });
 

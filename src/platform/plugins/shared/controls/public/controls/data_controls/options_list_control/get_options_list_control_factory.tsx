@@ -159,7 +159,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         });
 
       /** Fetch the suggestions and perform validation */
-      const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
+      let suggestionLoadError: Error | undefined;
       const loadMoreSubject = new Subject<void>();
       const { suggestions$, cancelRequests } = fetchAndValidate$({
         api: {
@@ -179,11 +179,15 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       const fetchSubscription = suggestions$.subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          suggestionLoadError$.next((result as { error: Error }).error);
+          suggestionLoadError = (result as { error: Error }).error;
+          dataControlManager.api.setBlockingError(suggestionLoadError);
           return;
-        } else if (suggestionLoadError$.getValue()) {
-          // otherwise,  if there was a previous error, clear it
-          suggestionLoadError$.next(undefined);
+        } else if (suggestionLoadError) {
+          // otherwise, if there was a previous suggestion error, clear it (without clobbering other control errors)
+          if (dataControlManager.api.blockingError$.value === suggestionLoadError) {
+            dataControlManager.api.setBlockingError(undefined);
+          }
+          suggestionLoadError = undefined;
         }
 
         // fetch was successful so set all attributes from result
@@ -298,24 +302,11 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         ...panelIsRelatedByGlobalFilters(dataControlManager.api.useGlobalFilters$),
       });
 
-      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-      const errorsSubscription = combineLatest([
-        dataControlManager.api.blockingError$,
-        suggestionLoadError$,
-      ])
-        .pipe(
-          map(([controlError, suggestionError]) => {
-            return controlError ?? suggestionError;
-          })
-        )
-        .subscribe((error) => blockingError$.next(error));
-
       const api = finalizeApi({
         cancelRequests,
         ...stateApi,
         ...dataControlManager.api,
         ...relatedPanelsApi,
-        blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
@@ -365,7 +356,6 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
-              errorsSubscription.unsubscribe();
 
               dataControlManager.cleanup();
             };
