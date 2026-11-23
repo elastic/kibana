@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { estypes } from '@elastic/elasticsearch';
+import { chunk } from 'lodash';
 
-import { NOT_OPAMP_AGENT_KUERY } from '../../../common/constants';
+import { AGENT_TYPE_OPAMP, AGENTS_INDEX, NOT_OPAMP_AGENT_KUERY } from '../../../common/constants';
 import { AgentStatusKueryHelper, getAgentVersionBlockers } from '../../../common/services';
-import { buildPolicyIdOrVariantsKuery } from '../../../common/services/version_specific_policies_utils';
+import { buildPolicyBaseIdsWithFallbackEsFilter } from '../../../common/services/version_specific_policies_utils';
 import type { AgentVersionBlock, PackageInfo } from '../../../common/types';
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
-import { getAgentsByKuery } from '../agents';
 
 /**
  * The agents a package-level agent version condition applies to: active agents, including
@@ -24,6 +24,7 @@ import { getAgentsByKuery } from '../agents';
 export const AGENT_VERSION_CONDITION_AGENTS_KUERY = `${AgentStatusKueryHelper.buildKueryForActiveAgents()} and ${NOT_OPAMP_AGENT_KUERY}`;
 
 const MAX_AGENT_VERSIONS = 1000;
+const AGENT_POLICIES_PER_QUERY = 50;
 const MAX_VERSIONS_IN_MESSAGE = 10;
 
 export type AgentVersionGuardOperation = 'upgrade' | 'add';
@@ -42,9 +43,48 @@ interface AgentVersionAggregation {
 }
 
 /**
+ * The active agents of an agent policy and its version-specific variants, excluding OpAMP agents,
+ * as in {@link AGENT_VERSION_CONDITION_AGENTS_KUERY}. Uses term and range queries on stored fields
+ * instead of the agent status runtime field and a policy id wildcard, so that it works with
+ * `search.allow_expensive_queries: false`:
+ * - unenrolled: `active` is false
+ * - uninstalled: `audit_unenrolled_reason` is `uninstall`
+ * - unenrolling: `unenrollment_started_at` is set
+ * - inactive: the last check-in, or the enrollment without one, is older than the agent policy's
+ *   inactivity timeout
+ */
+export const buildActiveAgentsOfPolicyFilter = (
+  agentPolicyId: string,
+  inactivityTimeout?: number
+): estypes.QueryDslQueryContainer => {
+  const inactiveSince = `now-${inactivityTimeout}s`;
+  return {
+    bool: {
+      filter: [buildPolicyBaseIdsWithFallbackEsFilter([agentPolicyId]), { term: { active: true } }],
+      must_not: [
+        { term: { type: AGENT_TYPE_OPAMP } },
+        { term: { audit_unenrolled_reason: 'uninstall' } },
+        { exists: { field: 'unenrollment_started_at' } },
+        ...(inactivityTimeout
+          ? [
+              { range: { last_checkin: { lt: inactiveSince } } },
+              {
+                bool: {
+                  filter: [{ range: { enrolled_at: { lt: inactiveSince } } }],
+                  must_not: [{ exists: { field: 'last_checkin' } }],
+                },
+              },
+            ]
+          : []),
+      ],
+    },
+  };
+};
+
+/**
  * The package policies, among `items`, whose package-level `conditions.agent.version` some active
  * agents would not satisfy, so that version-specific policies would drop their inputs for those
- * agents. Uses a single agent query for all items.
+ * agents. Queries the agents of up to 50 agent policies at a time.
  */
 export async function getAgentVersionBlocks(
   items: readonly AgentVersionGuardItem[]
@@ -84,45 +124,33 @@ export async function getAgentVersionBlocks(
     return blocks;
   }
 
-  const policyKueryById = new Map(
-    guardedAgentPolicyIds.map((id) => [id, buildPolicyIdOrVariantsKuery(id)])
+  const inactivityTimeoutById = new Map(
+    agentPolicies.map(({ id, inactivity_timeout: inactivityTimeout }) => [id, inactivityTimeout])
   );
-  let aggregations: Awaited<ReturnType<typeof getAgentsByKuery>>['aggregations'];
-  try {
-    ({ aggregations } = await getAgentsByKuery(esClient, soClient, {
-      showInactive: false,
-      perPage: 0,
-      kuery: `(${[...policyKueryById.values()].join(
-        ' or '
-      )}) and ${AGENT_VERSION_CONDITION_AGENTS_KUERY}`,
-      aggregations: {
+  const buckets: AgentVersionAggregation['buckets'] = {};
+  // Bounded chunks keep each query within Elasticsearch's clause and bucket limits
+  for (const agentPolicyIdsChunk of chunk(guardedAgentPolicyIds, AGENT_POLICIES_PER_QUERY)) {
+    const filters = Object.fromEntries(
+      agentPolicyIdsChunk.map((id) => [
+        id,
+        buildActiveAgentsOfPolicyFilter(id, inactivityTimeoutById.get(id)),
+      ])
+    );
+    const { aggregations } = await esClient.search<unknown, { policies: AgentVersionAggregation }>({
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: { bool: { should: Object.values(filters), minimum_should_match: 1 } },
+      aggs: {
         policies: {
-          filters: {
-            filters: Object.fromEntries(
-              [...policyKueryById].map(([id, kuery]) => [
-                id,
-                toElasticsearchQuery(fromKueryExpression(kuery)),
-              ])
-            ),
-          },
+          filters: { filters },
           aggs: { versions: { terms: { field: 'agent.version', size: MAX_AGENT_VERSIONS } } },
         },
       },
-    }));
-  } catch (error) {
-    // The guard is a safety net: when agents can't be queried (e.g. with
-    // `search.allow_expensive_queries: false`, which rejects the agent status runtime field and the
-    // version-specific policy wildcard), don't fail writes that are otherwise valid.
-    appContextService
-      .getLogger()
-      .warn(
-        `Skipped the agent version check of ${itemsWithCondition
-          .map(({ pkgInfo }) => `${pkgInfo.name}@${pkgInfo.version}`)
-          .join(', ')}: failed to query agents: ${error.message}`
-      );
-    return blocks;
+    });
+    Object.assign(buckets, aggregations?.policies?.buckets);
   }
-  const buckets = (aggregations?.policies as AgentVersionAggregation | undefined)?.buckets ?? {};
 
   for (const {
     key,

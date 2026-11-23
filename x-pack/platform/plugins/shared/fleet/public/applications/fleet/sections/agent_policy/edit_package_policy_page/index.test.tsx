@@ -30,6 +30,7 @@ import {
 import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
+import { allowedExperimentalValues } from '../../../../../../common/experimental_features';
 
 import { UpgradePackagePolicyPage } from '../upgrade_package_policy_page';
 
@@ -782,6 +783,48 @@ describe('edit package policy page', () => {
           expect.anything()
         );
       });
+    });
+
+    it('does not require an acknowledgement without version-specific policies', async () => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        ...allowedExperimentalValues,
+        enableVersionSpecificPolicies: false,
+      });
+      (useUIExtension as MockFn)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        })
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit-tabs',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        });
+      (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+        data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+      });
+
+      try {
+        render();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('incompatibleAgentVersionCallout')).toBeInTheDocument();
+          expect(
+            renderResult.getByText(/Upgrade integration/).closest('button')!
+          ).not.toBeDisabled();
+        });
+        const callout = renderResult.getByTestId('incompatibleAgentVersionCallout');
+        // The agents keep the integration's inputs: there is no data loss to acknowledge
+        expect(callout).not.toHaveTextContent('would stop collecting');
+        expect(
+          renderResult.queryByTestId('acknowledgeAgentVersionIncompatibilityCheckbox')
+        ).toBeNull();
+        expect(renderResult.getByText('Ready to upgrade')).toBeInTheDocument();
+      } finally {
+        jest.mocked(ExperimentalFeaturesService.get).mockRestore();
+      }
     });
 
     it('does not require an acknowledgement for other edits', async () => {

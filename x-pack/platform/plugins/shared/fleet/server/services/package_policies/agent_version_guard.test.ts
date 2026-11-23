@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
-import { getAgentsByKuery } from '../agents';
 
 import {
   AGENT_VERSION_CONDITION_AGENTS_KUERY,
   assertAgentVersionCompatible,
+  buildActiveAgentsOfPolicyFilter,
   createAgentVersionIncompatibleError,
   getAgentVersionBlockMessage,
   getAgentVersionBlocks,
@@ -23,11 +25,10 @@ import {
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
-jest.mock('../agents');
 
 const mockedAppContextService = jest.mocked(appContextService);
 const mockedGetByIds = jest.mocked(agentPolicyService.getByIds);
-const mockedGetAgentsByKuery = jest.mocked(getAgentsByKuery);
+const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
 const pkgInfo = (versionCondition?: string) => ({
   name: 'aws_mq',
@@ -36,11 +37,7 @@ const pkgInfo = (versionCondition?: string) => ({
 });
 
 const mockAgentVersions = (versionsByPolicy: Record<string, Record<string, number>>) =>
-  mockedGetAgentsByKuery.mockResolvedValue({
-    agents: [],
-    total: 0,
-    page: 1,
-    perPage: 0,
+  esClient.search.mockResolvedValue({
     aggregations: {
       policies: {
         buckets: Object.fromEntries(
@@ -57,8 +54,8 @@ const mockAgentVersions = (versionsByPolicy: Record<string, Record<string, numbe
           ])
         ),
       },
-    } as never,
-  });
+    },
+  } as never);
 
 describe('agent_version_guard', () => {
   beforeEach(() => {
@@ -66,6 +63,7 @@ describe('agent_version_guard', () => {
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as ReturnType<typeof appContextService.getExperimentalFeatures>);
+    mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
     mockedGetByIds.mockImplementation(
       async (_soClient, ids) =>
         ids.map((id) => ({
@@ -91,13 +89,87 @@ describe('agent_version_guard', () => {
         observed_versions: ['9.3.1'],
         min_version: '9.4.0',
       });
-      expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
-      expect(mockedGetAgentsByKuery.mock.calls[0][2].kuery).toContain(
-        AGENT_VERSION_CONDITION_AGENTS_KUERY
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('queries the agents without expensive queries', async () => {
+      mockAgentVersions({});
+
+      await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+      ]);
+
+      // `search.allow_expensive_queries: false` rejects runtime fields and wildcard queries
+      const [request] = esClient.search.mock.calls[0];
+      expect(request).not.toHaveProperty('runtime_mappings');
+      expect(JSON.stringify(request)).not.toMatch(/wildcard|query_string|"status"|\*/);
+    });
+
+    it('queries the agents of at most 50 agent policies at a time', async () => {
+      mockAgentVersions({ 'policy-0': { '9.3.0': 1 }, 'policy-59': { '9.3.0': 2 } });
+      const agentPolicyIds = Array.from({ length: 60 }, (_, i) => `policy-${i}`);
+
+      const blocks = await getAgentVersionBlocks([
+        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds },
+      ]);
+
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(blocks.get('pp-1')).toEqual(expect.objectContaining({ blocked_count: 3 }));
+    });
+
+    it('propagates a failure to query the agents', async () => {
+      esClient.search.mockRejectedValue(new Error('boom'));
+
+      await expect(
+        getAgentVersionBlocks([
+          { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
+        ])
+      ).rejects.toThrow('boom');
+    });
+
+    it('only counts the active non-OpAMP agents of the agent policy and its variants', () => {
+      expect(buildActiveAgentsOfPolicyFilter('policy-1', 3600)).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { terms: { policy_base_id: ['policy-1'] } },
+                  {
+                    bool: {
+                      filter: [{ terms: { policy_id: ['policy-1'] } }],
+                      must_not: [{ exists: { field: 'policy_base_id' } }],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            { term: { active: true } },
+          ],
+          must_not: [
+            { term: { type: 'OPAMP' } },
+            { term: { audit_unenrolled_reason: 'uninstall' } },
+            { exists: { field: 'unenrollment_started_at' } },
+            { range: { last_checkin: { lt: 'now-3600s' } } },
+            {
+              bool: {
+                filter: [{ range: { enrolled_at: { lt: 'now-3600s' } } }],
+                must_not: [{ exists: { field: 'last_checkin' } }],
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('does not exclude inactive agents of an agent policy without inactivity timeout', () => {
+      expect(JSON.stringify(buildActiveAgentsOfPolicyFilter('policy-1'))).not.toContain(
+        'last_checkin'
       );
     });
 
-    it('excludes OpAMP and inactive agents through its agent query', () => {
+    it('describes the active agents counted in the UI', () => {
       expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('not type:OPAMP');
       expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:offline');
       expect(AGENT_VERSION_CONDITION_AGENTS_KUERY).toContain('status:orphaned');
@@ -154,7 +226,7 @@ describe('agent_version_guard', () => {
         expect.objectContaining({ blocked_count: 4, observed_versions: ['9.2.0', '9.3.0'] })
       );
       expect(blocks.get('pp-2')).toEqual(expect.objectContaining({ blocked_count: 1 }));
-      expect(mockedGetAgentsByKuery).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
     });
 
     it('ignores packages without an agent version condition', async () => {
@@ -163,7 +235,7 @@ describe('agent_version_guard', () => {
       ]);
 
       expect(blocks.size).toBe(0);
-      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('ignores agentless agent policies', async () => {
@@ -174,22 +246,7 @@ describe('agent_version_guard', () => {
       ]);
 
       expect(blocks.size).toBe(0);
-      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
-    });
-
-    it('does not block when the agents cannot be queried', async () => {
-      const warn = jest.fn();
-      mockedAppContextService.getLogger.mockReturnValue({ warn } as never);
-      mockedGetAgentsByKuery.mockRejectedValue(new Error('expensive queries are not allowed'));
-
-      const blocks = await getAgentVersionBlocks([
-        { key: 'pp-1', pkgInfo: pkgInfo('^9.4.0'), agentPolicyIds: ['policy-1'] },
-      ]);
-
-      expect(blocks.size).toBe(0);
-      expect(warn).toHaveBeenCalledWith(
-        'Skipped the agent version check of aws_mq@2.3.0: failed to query agents: expensive queries are not allowed'
-      );
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('does nothing when version-specific policies are disabled', async () => {
@@ -202,7 +259,7 @@ describe('agent_version_guard', () => {
       ]);
 
       expect(blocks.size).toBe(0);
-      expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
     });
 
     it('blocks every agent when the condition is not a valid range', async () => {

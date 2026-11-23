@@ -27,7 +27,8 @@ export type IncompatibleAgentVersionResult =
       agentPolicyCount: number;
       /**
        * Whether Fleet rejects the change until the incompatibility is acknowledged: only with
-       * version-specific policies, which drop the integration's inputs for those agents.
+       * version-specific policies, which drop the integration's inputs for those agents. When
+       * false, the agent counts are omitted, as those agents don't lose any data.
        */
       requiresAcknowledgement: boolean;
     };
@@ -88,9 +89,15 @@ export const getIncompatibleAgentVersionStatus = (
   return {
     status: blockedCount >= agentCount ? 'ALL' : 'SOME',
     versionCondition,
-    blockedCount,
-    observedVersions: blockingVersions,
-    ...(minVersion ? { minVersion } : {}),
+    // Without version-specific policies, the agents keep the integration's inputs: there is no
+    // data loss to describe, only the incompatibility.
+    ...(requiresAcknowledgement
+      ? {
+          blockedCount,
+          observedVersions: blockingVersions,
+          ...(minVersion ? { minVersion } : {}),
+        }
+      : {}),
     agentPolicyCount,
     requiresAcknowledgement,
   };

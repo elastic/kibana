@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 
 import type {
+  AgentVersionBlock,
   ExperimentalDataStreamFeature,
   PackagePolicyAssetsMap,
   PackagePolicyInput,
@@ -552,13 +553,21 @@ interface DryRunDiffWithGuardItem {
   guardItem?: AgentVersionGuardItem;
 }
 
-/** The dry runs of `entries`, with their agent version blocks fetched with one agent query. */
+/** The dry runs of `entries`, with their agent version blocks. */
 async function withAgentVersionBlocks(
   entries: DryRunDiffWithGuardItem[]
 ): Promise<UpgradePackagePolicyDryRunResponseItem[]> {
-  const blocks = await getAgentVersionBlocks(
-    entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
-  );
+  let blocks: Map<string, AgentVersionBlock>;
+  try {
+    blocks = await getAgentVersionBlocks(
+      entries.flatMap(({ guardItem }) => (guardItem ? [guardItem] : []))
+    );
+  } catch (error) {
+    // Without the agents, the upgrades the guard applies to can't be shown as eligible
+    return entries.map(({ result, guardItem }) =>
+      guardItem ? { hasErrors: true, ...fleetErrorToResponseOptions(error) } : result
+    );
+  }
   return entries.map(({ result, guardItem }) => {
     const agentVersionBlock = guardItem && blocks.get(guardItem.key);
     return agentVersionBlock ? { ...result, agent_version_block: agentVersionBlock } : result;

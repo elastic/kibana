@@ -384,6 +384,28 @@ describe('Upgrade', () => {
       ]);
     });
 
+    it('should not present the upgrade as eligible when the agents cannot be checked', async () => {
+      jest.mocked(getAgentVersionBlocks).mockRejectedValueOnce(new FleetError('boom'));
+
+      const res = await _packagePoliciesGetUpgradeDryRunDiff({
+        id: 'package-policy-id',
+        soClient: savedObjectsClient,
+        packagePolicyService,
+        packagePolicy: {
+          id: '123',
+          name: 'test-123',
+          package: { title: 'test', name: 'test', version: '1.0.1' },
+          namespace: 'default',
+          policy_ids: ['agent-policy-1'],
+          inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+        } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res.hasErrors).toBe(true);
+      expect(res.body?.message).toBe('boom');
+    });
+
     it('should return errors if there is a conflict to upgrade', async () => {
       jest
         .mocked(getAgentTemplateAssetsMap)

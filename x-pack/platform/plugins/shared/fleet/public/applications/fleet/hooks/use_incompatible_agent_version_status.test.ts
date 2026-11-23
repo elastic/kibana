@@ -217,7 +217,7 @@ describe('getIncompatibleAgentVersionStatus', () => {
       requiresAcknowledgement: true,
     });
   });
-  it('does not require an acknowledgement without version-specific policies', () => {
+  it('does not require an acknowledgement nor describe data loss without version-specific policies', () => {
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,
       enableVersionSpecificPolicies: false,
@@ -227,7 +227,13 @@ describe('getIncompatibleAgentVersionStatus', () => {
       createAgentPolicy([{ version: '8.19.0', count: 1 }]),
     ]);
 
-    expect(result).toMatchObject({ status: 'ALL', requiresAcknowledgement: false });
+    // Those agents keep the integration's inputs, so there is no data loss to describe
+    expect(result).toEqual({
+      status: 'ALL',
+      versionCondition: '>=9.0.0',
+      agentPolicyCount: 1,
+      requiresAcknowledgement: false,
+    });
   });
 
   describe('with the agent version block returned by Fleet', () => {

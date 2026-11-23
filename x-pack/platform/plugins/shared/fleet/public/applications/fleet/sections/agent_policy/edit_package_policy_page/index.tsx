@@ -787,7 +787,10 @@ export const EditPackagePolicyForm = memo<{
                 <UpgradeStatusCallout
                   dryRunData={upgradeDryRunData}
                   newSecrets={newSecrets}
-                  hasAgentVersionIncompatibility={incompatibleAgentVersion.status !== 'NONE'}
+                  hasAgentVersionIncompatibility={
+                    incompatibleAgentVersion.status !== 'NONE' &&
+                    incompatibleAgentVersion.requiresAcknowledgement
+                  }
                 />
                 <EuiSpacer size="xxl" />
               </>
