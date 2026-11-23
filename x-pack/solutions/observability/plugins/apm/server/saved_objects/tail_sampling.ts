@@ -27,8 +27,7 @@ const tailSamplingAttributes = {
   processor: schema.string({ maxLength: MAX_PROCESSOR_LENGTH }),
   /**
    * The processor's config as JSON, for example {"policies":[...]} for 'tail_sampling'.
-   * Stored in normalized form: object keys sorted, array order kept.
-   */
+   * Stored as sent by the user. The control API normalizes policies and orders them by name before saving.   */
   configJson: schema.string(),
   // Hash of the config, compared with the rollout status hashes.
   configHash: schema.string(),
