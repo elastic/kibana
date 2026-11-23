@@ -14,12 +14,29 @@ describe('getUsage', () => {
         { name: 'catalog-products', isHidden: false, storageSizeInBytes: 100 },
         { name: '.internal-alerts', isHidden: true, storageSizeInBytes: 20 },
         { name: 'orders', isHidden: false, storageSizeInBytes: 5, outrankedByRuleName: 'other' },
-        { name: 'customers', isHidden: false },
       ])
-    ).toEqual({ appliesTo: 3, storageSizeInBytes: 120 });
+    ).toEqual({ appliesTo: 2, storageSizeInBytes: 120 });
   });
 
   it('is empty without matches', () => {
     expect(getUsage([])).toEqual({ appliesTo: 0, storageSizeInBytes: 0 });
+  });
+
+  it('leaves the storage size out when any size could not be loaded', () => {
+    expect(
+      getUsage([
+        { name: 'catalog-products', isHidden: false, storageSizeInBytes: 100 },
+        { name: 'customers', isHidden: false },
+      ])
+    ).toEqual({ appliesTo: 2, storageSizeInBytes: undefined });
+  });
+
+  it('ignores the sizes of outranked matches', () => {
+    expect(
+      getUsage([
+        { name: 'catalog-products', isHidden: false, storageSizeInBytes: 100 },
+        { name: 'orders', isHidden: false, outrankedByRuleName: 'other' },
+      ])
+    ).toEqual({ appliesTo: 1, storageSizeInBytes: 100 });
   });
 });

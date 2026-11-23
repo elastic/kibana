@@ -32,7 +32,7 @@ const getTable = (props: Partial<MatchesTableProps> = {}) => (
 
 const getMatchNames = () =>
   within(screen.getByTestId('searchBoostMatchesTable'))
-    .queryAllByTestId('searchBoostMatchLink')
+    .queryAllByTestId('searchBoostMatchName')
     .map(({ textContent }) => textContent);
 
 const getColumnNames = () =>
@@ -130,6 +130,27 @@ describe('MatchesTable', () => {
 
     await waitFor(() => expect(getMatchNames()).toHaveLength(8));
     expect(getColumnNames()).not.toContain('Data retention');
+  });
+
+  it('shows "—" for missing sizes, sorting them last in both directions', async () => {
+    renderTable({
+      matches: [
+        { ...toMatch('a'), storageSizeInBytes: 2048 },
+        toMatch('b'),
+        { ...toMatch('c'), storageSizeInBytes: 1024 },
+      ],
+    });
+
+    await waitFor(() => expect(getMatchNames()).toEqual(['a', 'b', 'c']));
+    const rowB = screen.getByRole('link', { name: 'b' }).closest('tr')!;
+    expect(rowB).toHaveTextContent('—');
+    expect(rowB).not.toHaveTextContent('0 B');
+
+    await userEvent.click(screen.getByRole('button', { name: /Storage size/ }));
+    await waitFor(() => expect(getMatchNames()).toEqual(['c', 'a', 'b']));
+
+    await userEvent.click(screen.getByRole('button', { name: /Storage size/ }));
+    await waitFor(() => expect(getMatchNames()).toEqual(['a', 'c', 'b']));
   });
 
   it('disables "Show hidden" when nothing hidden matches', async () => {

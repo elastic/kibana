@@ -101,4 +101,16 @@ describe('getRuleListItems', () => {
       getRuleListItems([rule('orphan', 'missing')], PROFILES, [explanation('logs', [])])
     ).toEqual([]);
   });
+
+  it('adds the storage size and retention of each match', () => {
+    const details = new Map([
+      ['logs', { storageSizeInBytes: 2048, retention: { type: 'infinite' as const } }],
+    ]);
+
+    expect(
+      getRuleListItems([rule('all')], PROFILES, [explanation('logs', ['all'])], details)[0].matches
+    ).toEqual([
+      { name: 'logs', isHidden: false, storageSizeInBytes: 2048, retention: { type: 'infinite' } },
+    ]);
+  });
 });

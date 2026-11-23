@@ -39,7 +39,7 @@ const getSetting = (id: string) => screen.getByTestId(`searchBoostSetting-${id}`
 
 const getMatchNames = () =>
   within(screen.getByTestId('searchBoostMatchesTable'))
-    .queryAllByTestId('searchBoostMatchLink')
+    .queryAllByTestId('searchBoostMatchName')
     .map(({ textContent }) => textContent);
 
 describe('RuleDetailsPage', () => {

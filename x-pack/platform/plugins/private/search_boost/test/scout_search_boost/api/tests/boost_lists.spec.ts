@@ -29,6 +29,10 @@ type ExplainBoostResponse = Record<string, { matches: Array<{ name: string }> }>
 
 const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
 
+// `_metering/stats` can take a moment to list indices and data streams created for the test.
+// Leaves room in the test's 60 s for the requests before it.
+const METERING_TIMEOUT_MS = 30_000;
+
 apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] }, () => {
   let readHeaders: Record<string, string>;
 
@@ -112,6 +116,45 @@ apiTest.describe('Search boost list API', { tag: ['@local-serverless-vectordb'] 
       expect(allMatches.filter((name) => name.startsWith('.kibana_'))).toStrictEqual([]);
     }
   );
+
+  apiTest('adds the storage size and retention of each match', async ({ apiClient }) => {
+    const getRules = async () => {
+      const response = await apiClient.get(RULES_PATH, {
+        headers: readHeaders,
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      return (response.body as GetBoostRulesResponse).rules;
+    };
+    const findMatch = (rules: BoostRuleListItem[], ruleName: string, matchName: string) =>
+      rules.find(({ name }) => name === ruleName)?.matches.find(({ name }) => name === matchName);
+
+    const rules = await getRules();
+    expect(
+      findMatch(rules, testData.dataStreamsRule, testData.dataStream)?.retention
+    ).toStrictEqual({
+      type: 'value',
+      value: testData.dataStreamRetention,
+      inMilliseconds: 36 * 60 * 60 * 1000,
+    });
+    expect(findMatch(rules, testData.exactRule, testData.productsIndex)?.retention).toBeUndefined();
+
+    // Both sizes from one response per attempt, within one waiting time.
+    await expect
+      .poll(
+        async () => {
+          const latestRules = await getRules();
+          return [
+            typeof findMatch(latestRules, testData.exactRule, testData.productsIndex)
+              ?.storageSizeInBytes,
+            typeof findMatch(latestRules, testData.dataStreamsRule, testData.dataStream)
+              ?.storageSizeInBytes,
+          ];
+        },
+        { timeout: METERING_TIMEOUT_MS }
+      )
+      .toStrictEqual(['number', 'number']);
+  });
 
   apiTest('ranks the rules the same way as Elasticsearch', async ({ apiClient, esClient }) => {
     const response = await apiClient.get(RULES_PATH, {

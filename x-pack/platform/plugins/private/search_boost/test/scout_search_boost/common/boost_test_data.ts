@@ -28,6 +28,8 @@ export const getBoostTestData = (namespace: string) => {
   const dataStream = `${namespace}-stream-default`;
   // The project's `logs-*-*` template can't be used here, so the data stream has its own.
   const dataStreamTemplate = `${namespace}-stream`;
+  // In hours, since Elasticsearch returns a retention in the unit it was set in.
+  const dataStreamRetention = '36h';
 
   const profiles = {
     [indicesProfile]: {
@@ -112,6 +114,7 @@ export const getBoostTestData = (namespace: string) => {
       index_patterns: [`${namespace}-stream-*`],
       data_stream: {},
       priority: 500,
+      template: { lifecycle: { data_retention: dataStreamRetention } },
     });
     await esClient.indices.createDataStream({ name: dataStream });
   };
@@ -130,6 +133,7 @@ export const getBoostTestData = (namespace: string) => {
     hiddenIndex,
     priorityIndex,
     dataStream,
+    dataStreamRetention,
     /** Removes anything a previous run left, then creates the data. */
     setUp: async (esClient: EsClient) => {
       await remove(esClient);

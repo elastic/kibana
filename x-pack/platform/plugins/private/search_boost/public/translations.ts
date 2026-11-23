@@ -647,6 +647,18 @@ export const SKIPPED_LABEL = i18n.translate('xpack.searchBoost.profileSettings.s
   defaultMessage: 'Skipped',
 });
 
+export const BOOST_PERIOD_DESCRIPTIONS = {
+  recent: i18n.translate('xpack.searchBoost.profileSettings.recentInfo', {
+    defaultMessage: 'The newest data, up to the recent max age.',
+  }),
+  standard: i18n.translate('xpack.searchBoost.profileSettings.standardInfo', {
+    defaultMessage: 'Data past the recent phase, up to the standard max age.',
+  }),
+  background: i18n.translate('xpack.searchBoost.profileSettings.backgroundInfo', {
+    defaultMessage: 'Data older than the standard max age.',
+  }),
+};
+
 export const formatPeriodBoost = (range: string): string =>
   i18n.translate('xpack.searchBoost.periodBoost', {
     defaultMessage: '{range} boost',
