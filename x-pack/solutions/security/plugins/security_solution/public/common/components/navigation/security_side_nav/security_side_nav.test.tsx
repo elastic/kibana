@@ -60,6 +60,12 @@ const alertsNavLink: NavigationLink = {
   description: 'alerts description',
 };
 
+const alertZeroApp = (homeVisibleIn: string[]) =>
+  ({
+    visibleIn: [],
+    deepLinks: [{ id: 'home', visibleIn: homeVisibleIn }],
+  } as unknown as PublicAppInfo);
+
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
 jest.mock('@kbn/security-solution-side-nav', () => ({
   ...jest.requireActual('@kbn/security-solution-side-nav'),
@@ -155,9 +161,9 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should render the AlertZero external link when the AlertZero app is in the Classic nav', () => {
+  it("should render the AlertZero external link when AlertZero's deep links are in the Classic nav", () => {
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: ['classicSideNav'] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
@@ -174,9 +180,9 @@ describe('SecuritySideNav', () => {
     );
   });
 
-  it('should not render the AlertZero external link when the AlertZero app is not in the Classic nav', () => {
+  it("should not render the AlertZero external link when AlertZero's deep links are not in the Classic nav", () => {
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: [] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp([])]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
@@ -430,7 +436,7 @@ describe('SecuritySideNav', () => {
       new BehaviorSubject(AIChatExperience.Agent).asObservable()
     );
     useKibana().services.application.applications$ = new BehaviorSubject(
-      new Map([['alertzero', { visibleIn: ['classicSideNav'] } as unknown as PublicAppInfo]])
+      new Map([['alertzero', alertZeroApp(['classicSideNav'])]])
     );
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();

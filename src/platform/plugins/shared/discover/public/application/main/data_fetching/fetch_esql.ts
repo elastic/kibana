@@ -14,11 +14,13 @@ import {
   type Filter,
   type TimeRange,
   type ProjectRouting,
+  getTimeZoneFromSettings,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import { RequestAdapter, type Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { getDocId, type DataTableRecord } from '@kbn/discover-utils';
 import type { EsqlSource } from '@kbn/data-source';
@@ -39,6 +41,8 @@ export interface FetchEsqlParams {
   abortSignal?: AbortSignal;
   inspectorAdapters: Adapters;
   data: DataPublicPluginStart;
+  /** Source of the `dateFormat:tz` time zone sent with the request */
+  uiSettings: IUiSettingsClient;
   scopedProfilesManager: ScopedProfilesManager;
   esqlVariables?: ESQLControlVariable[];
   searchSessionId?: string;
@@ -59,6 +63,7 @@ export async function fetchEsql({
   abortSignal,
   inspectorAdapters,
   data,
+  uiSettings,
   scopedProfilesManager,
   esqlVariables,
   searchSessionId,
@@ -76,10 +81,14 @@ export async function fetchEsql({
     };
   }
 
+  const { dateFormatTZ } = getEsQueryConfig(uiSettings);
+
   try {
     const { datatable } = await data.search.esql(
       {
         query: query.esql,
+        timeZone: dateFormatTZ ? getTimeZoneFromSettings(dateFormatTZ) : 'UTC',
+        locale: i18n.getLocale(),
         kibanaQueryContext: {
           timeRange: timeRange ?? data.query.timefilter.timefilter.getAbsoluteTime(),
           timeField: esqlSource?.timeFieldName,
