@@ -20,3 +20,8 @@ export const NAV_ESCALATIONS = i18n.translate('xpack.alertzero.chrome.nav.escala
 export const NAV_WATCHES = i18n.translate('xpack.alertzero.chrome.nav.watches', {
   defaultMessage: 'Watches',
 });
+
+export const SECURITY_BREADCRUMB = i18n.translate(
+  'xpack.alertzero.chrome.breadcrumbs.securityLabel',
+  { defaultMessage: 'Security' }
+);

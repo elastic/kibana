@@ -7,7 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SESSIONS_INDEX } from '../../../common/sessions';
+import { MOBILE_SESSIONS_INDEX, SESSIONS_INDEX } from '../../../common/sessions';
+import { BROWSER_SESSIONS_PLATFORM, MOBILE_SESSIONS_PLATFORM } from './sessions_platforms';
 import {
   IDS_PER_QUERY,
   INITIAL_WINDOW_MS,
@@ -66,7 +67,7 @@ const setUp = ({
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query, params = [] }) => {
     const named = params as estypes.EsqlNamedValue[];
-    if (query.includes('COUNT_DISTINCT')) {
+    if (query.includes('sessions = COUNT_DISTINCT')) {
       return result(['sessions'], [[changed(named)]]);
     }
     if (query.includes('VALUES(session_id)')) {
@@ -91,6 +92,7 @@ const logger = loggingSystemMock.createLogger();
 
 const run = (esClient: ReturnType<typeof setUp>, overrides = {}) =>
   summarizeSessions({
+    platform: BROWSER_SESSIONS_PLATFORM,
     esClient,
     signal: new AbortController().signal,
     now: NOW,
@@ -173,7 +175,7 @@ describe('summarizeSessions', () => {
     expect(progress.caughtUp).toBe(true);
     const windows = esClient.esql.query.mock.calls
       .map(([{ query, params }]) => ({ query, params: params as estypes.EsqlNamedValue[] }))
-      .filter(({ query }) => query.includes('COUNT_DISTINCT'))
+      .filter(({ query }) => query.includes('sessions = COUNT_DISTINCT'))
       .map(({ params }) => [paramOf(params, 'changed_from'), paramOf(params, 'changed_to')]);
     expect(windows[0]).toEqual([
       new Date(UNTIL - HOUR).toISOString(),
@@ -205,7 +207,7 @@ describe('summarizeSessions', () => {
     expect(progress.caughtUp).toBe(true);
     const windows = esClient.esql.query.mock.calls
       .map(([{ query, params }]) => ({ query, params: params as estypes.EsqlNamedValue[] }))
-      .filter(({ query }) => query.includes('COUNT_DISTINCT'))
+      .filter(({ query }) => query.includes('sessions = COUNT_DISTINCT'))
       .map(({ params }) => paramOf(params, 'changed_to'));
     expect(windows.slice(0, 2)).toEqual([
       new Date(UNTIL).toISOString(),
@@ -492,6 +494,32 @@ describe('summarizeSessions', () => {
     );
   });
 
+  it('stops querying and writing once Task Manager aborts the run', async () => {
+    const controller = new AbortController();
+    const esClient = setUp({ beforeSummary: async () => controller.abort() });
+    const answer = esClient.esql.query.getMockImplementation();
+    // As the Elasticsearch client does, a request rejects once its signal is aborted.
+    esClient.esql.query.mockImplementation((async (request, options) => {
+      const response = await answer?.(request, options);
+      options?.signal?.throwIfAborted();
+      return response;
+    }) as typeof esClient.esql.query);
+
+    await expect(
+      run(esClient, {
+        signal: controller.signal,
+        checkpoint: new Date(UNTIL - 3 * HOUR).toISOString(),
+      })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+
+    expect(esClient.esql.query.mock.calls.map(([, options]) => options?.signal)).toEqual([
+      controller.signal,
+      controller.signal,
+      controller.signal,
+    ]);
+    expect(esClient.bulk).not.toHaveBeenCalled();
+  });
+
   it('keeps windows between a minute and a day', async () => {
     const esClient = setUp({ changed: () => 0 });
 
@@ -499,5 +527,70 @@ describe('summarizeSessions', () => {
 
     expect(progress.windowMs).toBeGreaterThanOrEqual(MIN_WINDOW_MS);
     expect(progress.windowMs).toBeLessThanOrEqual(MAX_WINDOW_MS);
+  });
+
+  it('stops at `until` when it is before the sync delay, and is caught up there', async () => {
+    const esClient = setUp({ changed: () => 0 });
+    const until = UNTIL - 10 * MINUTE;
+
+    const progress = await run(esClient, {
+      checkpoint: new Date(until - 30 * MINUTE).toISOString(),
+      until,
+    });
+
+    expect(progress).toMatchObject({ checkpoint: new Date(until).toISOString(), caughtUp: true });
+    const [{ params }] = esClient.esql.query.mock.calls[0];
+    expect(paramOf(params as estypes.EsqlNamedValue[], 'changed_to')).toBe(
+      new Date(until).toISOString()
+    );
+  });
+
+  it('finds the sessions up to `until`, and rebuilds them up to `rebuildUntil`', async () => {
+    const esClient = setUp();
+    const until = UNTIL - 30 * MINUTE;
+    const rebuildUntil = UNTIL - 10 * MINUTE;
+
+    await run(esClient, {
+      checkpoint: new Date(until - 30 * MINUTE).toISOString(),
+      until,
+      rebuildUntil,
+    });
+
+    const changedToOf = (match: string) =>
+      esClient.esql.query.mock.calls
+        .filter(([{ query }]) => query.includes(match))
+        .map(([{ params }]) => paramOf(params as estypes.EsqlNamedValue[], 'changed_to'));
+    expect(changedToOf('sessions = COUNT_DISTINCT')).toEqual([new Date(until).toISOString()]);
+    expect(changedToOf('VALUES(session_id)')).toEqual([new Date(until).toISOString()]);
+    expect(changedToOf('page_view_count = COUNT')).toEqual([new Date(rebuildUntil).toISOString()]);
+  });
+
+  it('reads and writes with the platform’s events, summary query and index', async () => {
+    const esClient = setUp();
+
+    await run(esClient, { platform: MOBILE_SESSIONS_PLATFORM });
+
+    const queries = esClient.esql.query.mock.calls.map(([{ query }]) => query);
+    expect(queries).toHaveLength(3);
+    queries.forEach((query) => expect(query).toContain('telemetry.sdk.name IN ("android", "iOS")'));
+    expect(queries[2]).toContain('crash_count = COUNT(*) WHERE is_crash');
+    const [{ operations }] = esClient.bulk.mock.calls[0];
+    expect(operations?.[0]).toEqual({
+      index: { _index: MOBILE_SESSIONS_INDEX, _id: expect.any(String) },
+    });
+    expect(operations?.[1]).toMatchObject({ session: { id: 'a' }, crash_count: 0 });
+  });
+
+  it('rebuilds mobile sessions from two days before the window, for crashes sent a day late', async () => {
+    const esClient = setUp();
+
+    await run(esClient, { platform: MOBILE_SESSIONS_PLATFORM });
+
+    const summaryCall = esClient.esql.query.mock.calls.find(([{ query }]) =>
+      query.includes('crash_count = COUNT')
+    );
+    expect(paramOf(summaryCall?.[0].params as estypes.EsqlNamedValue[], 'rebuild_from')).toBe(
+      new Date(UNTIL - 2 * MINUTE - 48 * HOUR).toISOString()
+    );
   });
 });
