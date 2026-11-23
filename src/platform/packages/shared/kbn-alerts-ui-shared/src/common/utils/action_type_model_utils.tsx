@@ -15,6 +15,7 @@ import type { IconType } from '@elastic/eui';
 import {
   getConnectorSpec,
   hasRunActionsSwitch,
+  hideNoAuthInPicker,
   isInboundOnlyConnectorSpec,
 } from '@kbn/connector-specs';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
@@ -124,21 +125,6 @@ export const isMissingSelectedActions = (
   runActionsOff: boolean
 ): boolean => !runActionsOff && Array.isArray(selectedActions) && selectedActions.length === 0;
 
-/** Hides one auth type option from the form's auth picker. */
-export const hideAuthTypeInPicker = (schema: ConnectorZodSchema, authTypeId: string): void => {
-  const { secrets } = schema.shape;
-  if (!('options' in secrets)) {
-    return;
-  }
-  for (const option of secrets.options) {
-    const authTypeField = (option as { shape?: Record<string, { value?: unknown }> }).shape
-      ?.authType;
-    if (authTypeField?.value === authTypeId) {
-      setMeta(option, { ...getMeta(option), hideInPicker: true });
-    }
-  }
-};
-
 /**
  * Transforms a ConnectorSpecResponse into an ActionTypeModel.
  *
@@ -175,9 +161,8 @@ export function transformSpecToActionTypeModel(
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       const specActions = spec.actions ?? [];
-      // Connectors with a Run actions switch hide auth type none in outbound options.
       if (showsRunActionsSwitch) {
-        hideAuthTypeInPicker(connectorZodSchema, NO_AUTH_TYPE_ID);
+        hideNoAuthInPicker(connectorZodSchema);
       }
 
       // Bridges UseField's FieldHook API to ConnectorActionSelector's value/onChange props.

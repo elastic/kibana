@@ -126,6 +126,7 @@ export type { BaseMetadata } from './src/connector_spec_ui';
 export { fromConnectorSpecSchema } from './src/lib/deserialize_connector_spec';
 export type { ConnectorZodSchema } from './src/lib/deserialize_connector_spec';
 export { narrowSecretsSchemaForAuthMode } from './src/lib/narrow_secrets_schema_for_auth_mode';
+export { hideNoAuthInPicker } from './src/lib/hide_no_auth_in_picker';
 export type {
   ClientTypeSpec,
   BuildContext,
