@@ -43,6 +43,7 @@ const missingStatusOf = ({ version }: SessionsPlatform): SessionsStatus => ({
   retentionDays: SESSIONS_LOOKBACK_DAYS,
   autoEnable: false,
   canManage: false,
+  setUpBlocker: null,
 });
 
 /** A platform's summaries task, or undefined before sessions are set up. */

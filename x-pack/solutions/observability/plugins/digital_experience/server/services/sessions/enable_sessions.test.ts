@@ -29,6 +29,7 @@ import {
   enableSessions,
   type SessionsEnableStep,
 } from './enable_sessions';
+import { MOBILE_SESSIONS_PLATFORM } from './sessions_platforms';
 import { checkSessionsPrivileges } from './sessions_privileges';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
@@ -149,6 +150,34 @@ describe('enableSessions', () => {
       { request, regenerateApiKey: true, includeRunningTasks: true }
     );
     expect(taskManager.runSoon).toHaveBeenCalledWith(MOBILE_SESSIONS_TASK_ID);
+  });
+
+  it('sets up only the given platforms', async () => {
+    await enableSessions({
+      esClient,
+      request,
+      taskManager,
+      canEncrypt: true,
+      settings,
+      isServerless: true,
+      logger,
+      platforms: [MOBILE_SESSIONS_PLATFORM],
+    });
+
+    expect(esClient.asInternalUser.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith(
+      { index: MOBILE_SESSIONS_INDEX },
+      expect.anything()
+    );
+    expect(taskManager.ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: MOBILE_SESSIONS_TASK_ID }),
+      expect.anything()
+    );
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith([MOBILE_SESSIONS_TASK_ID], true, {
+      request,
+    });
+    expect(taskManager.runSoon).toHaveBeenCalledTimes(1);
   });
 
   it('checks the privileges first, then runs the steps in order', async () => {

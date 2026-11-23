@@ -18,9 +18,9 @@ import {
 import type { Formatters } from '../../../hooks/use_formatters';
 import {
   EnableError,
-  SET_UP_BY_OTHERS_TEXT,
   SessionsRetentionCallout,
   SessionsStatusCallout,
+  setUpByOthersText,
   type EnableProps,
 } from '../../sessions/components/sessions_status_prompts';
 
@@ -77,7 +77,7 @@ export function SessionsSourceStatus({
                 defaultMessage:
                   'EDOT Browser applications are listed from sessions, which a background task builds from your EDOT Browser data with an API key granted on behalf of whoever sets them up.',
               })}{' '}
-              {canEnable ? null : SET_UP_BY_OTHERS_TEXT}
+              {canEnable ? null : setUpByOthersText(status.setUpBlocker)}
             </p>
           }
           actionProps={

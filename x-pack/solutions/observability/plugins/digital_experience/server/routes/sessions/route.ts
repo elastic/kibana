@@ -25,6 +25,7 @@ import {
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
   type SessionListResponse,
+  type SessionsStatus,
   type SessionsStatusResponse,
 } from '../../../common/sessions';
 import {
@@ -38,6 +39,12 @@ import { disableSessions } from '../../services/sessions/disable_sessions';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
+import {
+  BROWSER_SESSIONS_PLATFORM,
+  MOBILE_SESSIONS_PLATFORM,
+  SESSIONS_PLATFORMS,
+  type SessionsPlatform,
+} from '../../services/sessions/sessions_platforms';
 import { getSessionsStatusResponse } from '../../services/sessions/sessions_status';
 import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
@@ -159,6 +166,24 @@ const toEnableError = (error: unknown, logger: Logger) => {
   return internal(ENABLE_FAILED_MESSAGE);
 };
 
+const needsSetUp = ({ installed, apiKeyInvalid, disabled }: SessionsStatus): boolean =>
+  !installed || (apiKeyInvalid && !disabled);
+
+/**
+ * The platforms any reader may set up: those not set up yet, or whose key no longer works. None
+ * once sessions were turned off, which only managers turn back on.
+ */
+const platformsToSetUp = (status: SessionsStatusResponse): SessionsPlatform[] => {
+  if (status.disabled) {
+    return [];
+  }
+  const statuses: Record<string, SessionsStatus> = {
+    [BROWSER_SESSIONS_PLATFORM.name]: status,
+    [MOBILE_SESSIONS_PLATFORM.name]: status.mobile,
+  };
+  return SESSIONS_PLATFORMS.filter(({ name }) => needsSetUp(statuses[name]));
+};
+
 const statusRoute = createDigitalExperienceServerRoute({
   endpoint: SESSIONS_STATUS_ENDPOINT,
   options: { access: 'internal' },
@@ -190,9 +215,11 @@ const statusRoute = createDigitalExperienceServerRoute({
       logger.error(`Could not read the sessions status: ${describeError(error)}`);
       throw internal(LOAD_FAILED_MESSAGE);
     }
-    const needsSetUp = !status.installed || (status.apiKeyInvalid && !status.disabled);
-    if (!needsSetUp || !taskManager) {
+    if (platformsToSetUp(status).length === 0) {
       return status;
+    }
+    if (!taskManager || !canEncrypt) {
+      return { ...status, setUpBlocker: taskManager ? 'encryptionKey' : 'taskManager' };
     }
     const { elasticsearch } = await context.core;
     return {
@@ -268,8 +295,8 @@ const enableRoute = createDigitalExperienceServerRoute({
     // Anyone can set sessions up or give them a working key again. Turning them back on, or
     // changing whose access a working task runs with, is for managers.
     const current = await getStatus();
-    const needsSetUp = !current.installed || (current.apiKeyInvalid && !current.disabled);
-    if (!needsSetUp && !canManage) {
+    const platforms = canManage ? SESSIONS_PLATFORMS : platformsToSetUp(current);
+    if (platforms.length === 0) {
       if (current.disabled) {
         throw forbidden(TURNED_OFF_MESSAGE);
       }
@@ -287,6 +314,7 @@ const enableRoute = createDigitalExperienceServerRoute({
         settings: sessionsSettings,
         isServerless,
         logger,
+        platforms,
       });
     } catch (error) {
       audit.log('failure', error);

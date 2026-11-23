@@ -485,8 +485,11 @@ Sessions are set up with `POST /internal/digital_experience/sessions/enable`, wh
 list needs them, the app calls it by itself, once per visit, when status reports `autoEnable`:
 sessions aren't set up (or their API key no longer works) and weren't turned off, Task Manager is
 available, Kibana can store an API key, and the user passes the Elasticsearch checks below, which
-status runs so that users who would fail write no failed audit event. The **Set up sessions** button
-retries a failed setup. The first such user to open the app is the one whose access the summaries
+status runs so that users who would fail write no failed audit event. Each task is set up on its
+own, so a reader only sets up the ones that need it (like the mobile task added by an upgrade)
+without replacing the working key of the other. Without Task Manager or an encryption key, status
+reports why (`setUpBlocker`) and the app says so instead of waiting for someone else to set sessions
+up. The **Set up sessions** button retries a failed setup. The first such user to open the app is the one whose access the summaries
 hold (see the security note below).
 
 Once sessions work, changing that identity, or turning sessions off and back on, takes the
@@ -689,8 +692,9 @@ logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
-  whether the app should set them up for the current user (`autoEnable`), and whether the user
-  manages them in all spaces (`canManage`), with the same for the mobile task under `mobile`.
+  whether the app should set them up for the current user (`autoEnable`), what keeps anyone from
+  setting them up (`setUpBlocker`), and whether the user manages them in all spaces (`canManage`),
+  with the same for the mobile task under `mobile`.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions

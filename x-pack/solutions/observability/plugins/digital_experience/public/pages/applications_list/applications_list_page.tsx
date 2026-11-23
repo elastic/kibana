@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -450,10 +450,16 @@ export function ApplicationsListPage() {
 
   const {
     status: sessionsStatus,
+    refresh: refreshSessionsStatus,
     enable: enableSessions,
     enabling: enablingSessions,
     enableError: enableSessionsError,
   } = useSessionsStatus();
+  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again.
+  const refreshAll = useCallback(() => {
+    refresh();
+    refreshSessionsStatus();
+  }, [refresh, refreshSessionsStatus]);
   // Only the EDOT Browser applications are read from the sessions.
   const showsSessionsStatus = sessionsStatus && selectedSource !== APPLICATION_SOURCE.classic;
 
@@ -693,7 +699,7 @@ export function ApplicationsListPage() {
       <EuiPageSection paddingSize="m" restrictWidth={false}>
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <TimeRangePicker onRefresh={refresh} />
+            <TimeRangePicker onRefresh={refreshAll} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

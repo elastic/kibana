@@ -7,6 +7,7 @@
 
 import type { EsClient, KbnClient } from '@kbn/scout-oblt';
 import {
+  MOBILE_SESSIONS_INDEX,
   MOBILE_SESSIONS_INDEX_PATTERN,
   MOBILE_SESSIONS_INDEX_TEMPLATE_NAME,
   MOBILE_SESSIONS_TASK_ID,
@@ -306,7 +307,8 @@ const ownedSessionIds = ({ idPrefix, count }: OwnedSessions): string[] => {
 /** What `setUpOwnedSessions` created, so `deleteOwnedSessions` removes only that. */
 export interface OwnedSessionsSetup {
   createdTask: boolean;
-  createdIndex: boolean;
+  /** The indices that did not exist before, which it deletes by name. */
+  createdIndices: string[];
   createdTemplate: boolean;
 }
 
@@ -317,7 +319,13 @@ export const setUpOwnedSessions = async (
 ): Promise<OwnedSessionsSetup> => {
   const setup: OwnedSessionsSetup = {
     createdTask: !(await areSessionsInstalled(kbnClient)),
-    createdIndex: !(await esClient.indices.exists({ index: SESSIONS_INDEX })),
+    createdIndices: (
+      await Promise.all(
+        [SESSIONS_INDEX, MOBILE_SESSIONS_INDEX].map(async (index) =>
+          (await esClient.indices.exists({ index })) ? [] : [index]
+        )
+      )
+    ).flat(),
     createdTemplate: !(await esClient.indices.existsIndexTemplate({
       name: SESSIONS_INDEX_TEMPLATE_NAME,
     })),
@@ -401,8 +409,8 @@ export const deleteOwnedSessions = async (
   if (setup?.createdTask) {
     await removeSessionsTask(kbnClient);
   }
-  if (setup?.createdIndex) {
-    await deleteSessionsIndices(esClient);
+  if (setup && setup.createdIndices.length > 0) {
+    await esClient.indices.delete({ index: setup.createdIndices }, { ignore: [404] });
   }
   if (setup?.createdTemplate) {
     await deleteSessionsTemplate(esClient);

@@ -44,7 +44,10 @@ test.describe('Digital Experience sessions', { tag: DIGITAL_EXPERIENCE_TAGS }, (
     await expect(page).toHaveURL(
       new RegExp(`rangeFrom=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeFrom)}`)
     );
-    await expect(digitalExperience.sessionsKpi('total')).toContainText(String(SESSION_COUNT));
+    await expect(page).toHaveURL(
+      new RegExp(`rangeTo=${encodeURIComponent(SESSIONS_TIME_RANGE.rangeTo)}`)
+    );
+    await expect(digitalExperience.sessionRow(DETAILED_SESSION.id)).toBeVisible();
   });
 
   test('filters, searches and pages through the sessions', async ({

@@ -23,6 +23,11 @@ import {
 } from '../../services/sessions/enable_sessions';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
+import {
+  BROWSER_SESSIONS_PLATFORM,
+  MOBILE_SESSIONS_PLATFORM,
+  SESSIONS_PLATFORMS,
+} from '../../services/sessions/sessions_platforms';
 import { getSessionsStatusResponse } from '../../services/sessions/sessions_status';
 import { disableSessions } from '../../services/sessions/disable_sessions';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
@@ -70,13 +75,16 @@ const browserStatus: SessionsStatus = {
   retentionDays: SESSIONS_LOOKBACK_DAYS,
   autoEnable: false,
   canManage: true,
+  setUpBlocker: null,
 };
 const withMobile = (browser: SessionsStatus): SessionsStatusResponse => ({
   ...browser,
   mobile: { ...browserStatus, health: 'lagging' },
 });
+const missingStatus: SessionsStatus = { ...browserStatus, installed: false, health: 'missing' };
 const status = withMobile(browserStatus);
-const notSetUp = withMobile({ ...browserStatus, installed: false, health: 'missing' });
+const notSetUp: SessionsStatusResponse = { ...missingStatus, mobile: missingStatus };
+const mobileMissing: SessionsStatusResponse = { ...browserStatus, mobile: missingStatus };
 const turnedOff = withMobile({ ...browserStatus, disabled: true, health: 'disabled' });
 const keyInvalid = withMobile({ ...browserStatus, apiKeyInvalid: true, health: 'degraded' });
 const asManager = { manage_digital_experience_sessions: true };
@@ -252,7 +260,6 @@ describe('sessions routes', () => {
           { ...turnedOff, apiKeyInvalid: true },
           taskManagerMock.createStart(),
         ],
-        ['there is no Task Manager', notSetUp, undefined],
       ])('does not check the privileges when %s', async (_name, sessionsStatus, taskManager) => {
         jest.mocked(getSessionsStatusResponse).mockResolvedValue(sessionsStatus);
         const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
@@ -263,6 +270,46 @@ describe('sessions routes', () => {
         expect(await result).toEqual(sessionsStatus);
         expect(canEnableSessions).not.toHaveBeenCalled();
       });
+
+      it('offers to set up the mobile sessions alone when only they are missing', async () => {
+        jest.mocked(getSessionsStatusResponse).mockResolvedValue(mobileMissing);
+        jest.mocked(canEnableSessions).mockResolvedValue(true);
+        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT);
+
+        expect(await result).toEqual({ ...mobileMissing, autoEnable: true });
+      });
+
+      it('never offers to set up the mobile sessions once sessions were turned off', async () => {
+        jest
+          .mocked(getSessionsStatusResponse)
+          .mockResolvedValue({ ...turnedOff, mobile: missingStatus });
+        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT);
+
+        expect(await result).toMatchObject({ autoEnable: false });
+        expect(canEnableSessions).not.toHaveBeenCalled();
+      });
+
+      it.each<[string, SessionsServices, string]>([
+        [
+          'there is no Task Manager',
+          { taskManager: undefined, canEncrypt: true, authz: undefined },
+          'taskManager',
+        ],
+        [
+          'Kibana cannot store the API key',
+          { taskManager: taskManagerMock.createStart(), canEncrypt: false, authz: undefined },
+          'encryptionKey',
+        ],
+      ])(
+        'tells everyone why nobody can set sessions up when %s',
+        async (_name, services, blocker) => {
+          jest.mocked(getSessionsStatusResponse).mockResolvedValue(notSetUp);
+          const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, { services });
+
+          expect(await result).toEqual({ ...notSetUp, setUpBlocker: blocker });
+          expect(canEnableSessions).not.toHaveBeenCalled();
+        }
+      );
     });
 
     it('answers 500 without the details when the status read fails', async () => {
@@ -300,6 +347,7 @@ describe('sessions routes', () => {
         settings,
         isServerless: true,
         logger,
+        platforms: SESSIONS_PLATFORMS,
       });
       expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: services.taskManager,
@@ -339,7 +387,20 @@ describe('sessions routes', () => {
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect(await result).toEqual(status);
-      expect(enableSessions).toHaveBeenCalled();
+      expect(enableSessions).toHaveBeenCalledWith(
+        expect.objectContaining({ platforms: [BROWSER_SESSIONS_PLATFORM] })
+      );
+    });
+
+    it('sets up only the missing mobile sessions for any reader, keeping the browser key', async () => {
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValueOnce(mobileMissing);
+      jest.mocked(getSessionsStatusResponse).mockResolvedValue(status);
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT);
+
+      expect(await result).toEqual(status);
+      expect(enableSessions).toHaveBeenCalledWith(
+        expect.objectContaining({ platforms: [MOBILE_SESSIONS_PLATFORM] })
+      );
     });
 
     it('leaves working sessions as they are for a user who does not manage them', async () => {
@@ -358,7 +419,9 @@ describe('sessions routes', () => {
 
       await result;
 
-      expect(enableSessions).toHaveBeenCalled();
+      expect(enableSessions).toHaveBeenCalledWith(
+        expect.objectContaining({ platforms: SESSIONS_PLATFORMS })
+      );
     });
 
     it('answers 403 when a user who does not manage sessions in all spaces turns them back on', async () => {

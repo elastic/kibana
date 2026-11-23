@@ -21,8 +21,11 @@ import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index'
 import { SESSIONS_PLATFORMS, type SessionsPlatform } from './sessions_platforms';
 import { scheduleSessionsTask } from './sessions_task';
 
-const forEachPlatform = async (run: (platform: SessionsPlatform) => Promise<unknown>) => {
-  for (const platform of SESSIONS_PLATFORMS) {
+const forEachPlatform = async (
+  platforms: readonly SessionsPlatform[],
+  run: (platform: SessionsPlatform) => Promise<unknown>
+) => {
+  for (const platform of platforms) {
     await run(platform);
   }
 };
@@ -91,7 +94,8 @@ export const canEnableSessions = async ({
  * the summaries, puts each platform's index template and creates its index, then schedules each
  * platform's summaries task with an API key Task Manager grants on their behalf. Enabling again
  * replaces the keys, so the tasks then read what that user can read, and keep the summaries built
- * so far; it also turns tasks that were turned off back on.
+ * so far; it also turns tasks that were turned off back on. Only `platforms` are set up, every
+ * one by default.
  */
 export const enableSessions = async ({
   esClient,
@@ -101,6 +105,7 @@ export const enableSessions = async ({
   settings,
   isServerless,
   logger,
+  platforms = SESSIONS_PLATFORMS,
 }: {
   esClient: IScopedClusterClient;
   request: KibanaRequest;
@@ -109,6 +114,7 @@ export const enableSessions = async ({
   settings: SessionsSettings;
   isServerless: boolean;
   logger: Logger;
+  platforms?: readonly SessionsPlatform[];
 }): Promise<void> => {
   await checkSessionsPrivileges(esClient.asCurrentUser, { isServerless });
   await step('credentials', async () => {
@@ -117,20 +123,22 @@ export const enableSessions = async ({
     }
   });
   await step('template', () =>
-    forEachPlatform((platform) => putSessionsIndexTemplate(esClient.asInternalUser, platform))
+    forEachPlatform(platforms, (platform) =>
+      putSessionsIndexTemplate(esClient.asInternalUser, platform)
+    )
   );
   await step('index', () =>
-    forEachPlatform((platform) => createSessionsIndex(esClient.asCurrentUser, platform))
+    forEachPlatform(platforms, (platform) => createSessionsIndex(esClient.asCurrentUser, platform))
   );
   await step('task', async () => {
-    await forEachPlatform((platform) =>
+    await forEachPlatform(platforms, (platform) =>
       scheduleSessionsTask({ platform, taskManager, request, settings })
     );
     // A task that was turned off keeps its checkpoint, so it carries on from where it stopped.
     const {
       errors: [failure],
     } = await taskManager.bulkEnable(
-      SESSIONS_PLATFORMS.map(({ taskId }) => taskId),
+      platforms.map(({ taskId }) => taskId),
       true,
       { request }
     );
@@ -139,7 +147,7 @@ export const enableSessions = async ({
     }
   });
   // Start building now rather than at the next interval; the interval runs them anyway.
-  await forEachPlatform(async ({ name, taskId }) => {
+  await forEachPlatform(platforms, async ({ name, taskId }) => {
     try {
       await taskManager.runSoon(taskId);
     } catch (error) {

@@ -62,6 +62,7 @@ const MISSING: SessionsStatus = {
   retentionDays: SESSIONS_LOOKBACK_DAYS,
   autoEnable: false,
   canManage: false,
+  setUpBlocker: null,
 };
 
 describe('getSessionsStatus', () => {
@@ -176,6 +177,7 @@ describe('getSessionsStatus', () => {
       retentionDays: SESSIONS_LOOKBACK_DAYS,
       autoEnable: false,
       canManage: true,
+      setUpBlocker: null,
     });
   });
 

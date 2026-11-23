@@ -10,12 +10,16 @@ import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { SESSIONS_INDEX_PATTERN, type SessionsStatus } from '../../../../common/sessions';
+import {
+  SESSIONS_INDEX_PATTERN,
+  type SessionsSetUpBlocker,
+  type SessionsStatus,
+} from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 import type { Formatters } from '../../../hooks/use_formatters';
 import { httpErrorMessage } from '../../../utils/http_error_message';
 
-export const SET_UP_BY_OTHERS_TEXT = i18n.translate(
+const SET_UP_BY_OTHERS_TEXT = i18n.translate(
   'xpack.digitalExperience.sessions.status.setUpByOthersText',
   {
     defaultMessage:
@@ -23,6 +27,25 @@ export const SET_UP_BY_OTHERS_TEXT = i18n.translate(
     values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
   }
 );
+
+const SET_UP_BLOCKED_TEXT: Record<SessionsSetUpBlocker, string> = {
+  taskManager: i18n.translate('xpack.digitalExperience.sessions.status.setUpBlocked.taskManager', {
+    defaultMessage:
+      'They cannot be set up: Kibana needs the Task Manager plugin, which builds them in the background.',
+  }),
+  encryptionKey: i18n.translate(
+    'xpack.digitalExperience.sessions.status.setUpBlocked.encryptionKey',
+    {
+      defaultMessage:
+        'They cannot be set up until {setting} is set in kibana.yml, so Kibana can store the API key they are built with.',
+      values: { setting: 'xpack.encryptedSavedObjects.encryptionKey' },
+    }
+  ),
+};
+
+/** Who sets sessions up, for a user who can't: or why nobody can. */
+export const setUpByOthersText = (setUpBlocker: SessionsSetUpBlocker | null): string =>
+  setUpBlocker ? SET_UP_BLOCKED_TEXT[setUpBlocker] : SET_UP_BY_OTHERS_TEXT;
 
 const ASK_MANAGER_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askManagerText', {
   defaultMessage:
@@ -63,7 +86,8 @@ export function EnableSessionsPrompt({
   onEnable,
   enabling,
   enableError,
-}: Omit<EnableProps, 'canManage'>) {
+  setUpBlocker,
+}: Omit<EnableProps, 'canManage'> & { setUpBlocker: SessionsSetUpBlocker | null }) {
   return (
     <EuiEmptyPrompt
       data-test-subj="digitalExperienceSessionsNotEnabled"
@@ -83,7 +107,7 @@ export function EnableSessionsPrompt({
                 'Sessions group the page views, clicks and errors of each visit to your applications. A background task builds them from your EDOT Browser data every minute, with an API key granted on behalf of whoever sets them up, so they hold only what that user can read.',
             })}
           </p>
-          {!canEnable && <p>{SET_UP_BY_OTHERS_TEXT}</p>}
+          {!canEnable && <p>{setUpByOthersText(setUpBlocker)}</p>}
           {enableError && <EnableError error={enableError} />}
         </>
       }
@@ -179,7 +203,7 @@ export function SessionsStatusCallout({
                 defaultMessage:
                   'The API key sessions are built with was invalidated or has expired, so new sessions are missing until they are set up again.',
               })}{' '}
-              {canEnable ? null : SET_UP_BY_OTHERS_TEXT}
+              {canEnable ? null : setUpByOthersText(status.setUpBlocker)}
             </p>
           }
           actionProps={
@@ -290,8 +314,8 @@ export function SessionsFreshness({
 }
 
 /**
- * The time range starts before the oldest kept sessions, so that part is empty whatever happened
- * then.
+ * The time range starts before the sessions are built from, so that part may miss sessions: the
+ * task builds only the lookback, though it doesn't delete what it built before.
  */
 export function SessionsRetentionCallout({
   retentionDays,
@@ -313,7 +337,7 @@ export function SessionsRetentionCallout({
         size="s"
         title={i18n.translate('xpack.digitalExperience.sessions.status.retentionTitle', {
           defaultMessage:
-            'Sessions are kept for {days} days, so there are none before {earliest} in this time range.',
+            'Sessions are built from the last {days} days of data, so this time range may be missing sessions before {earliest}.',
           values: { days: retentionDays, earliest: formatDate(earliest) },
         })}
       />

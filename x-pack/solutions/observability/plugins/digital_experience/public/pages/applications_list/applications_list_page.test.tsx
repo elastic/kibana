@@ -81,6 +81,7 @@ const HEALTHY_SESSIONS: SessionsStatus = {
   retentionDays: 30,
   autoEnable: false,
   canManage: false,
+  setUpBlocker: null,
 };
 
 const NOT_SET_UP: SessionsStatus = {
@@ -795,7 +796,7 @@ describe('ApplicationsListPage', () => {
       renderPage();
 
       expect(await screen.findByTestId('digitalExperienceSessionsRetention')).toHaveTextContent(
-        /^Sessions are kept for 30 days, so there are none before .+ in this time range\.$/
+        /^Sessions are built from the last 30 days of data, so this time range may be missing sessions before .+\.$/
       );
     });
 

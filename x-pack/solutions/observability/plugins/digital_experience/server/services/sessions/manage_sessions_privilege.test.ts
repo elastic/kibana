@@ -42,6 +42,7 @@ describe('canManageSessionsInAllSpaces', () => {
     });
 
     expect(await canManageSessionsInAllSpaces(authz, spaceRequest)).toBe(false);
+    expect(await canManageSessionsInAllSpaces(undefined, spaceRequest)).toBe(false);
     expect(globally).not.toHaveBeenCalled();
   });
 

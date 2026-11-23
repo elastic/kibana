@@ -52,6 +52,9 @@ const FILTERED_READ_ROLE = roleWith({
   query: '{"term":{"service.name":"checkout-web"}}',
 });
 
+/** Manages sessions in all spaces. */
+const MANAGER_ROLE = roleWith({ feature: ['all'] });
+
 /** Manages sessions, but in one space only. */
 const SPACE_MANAGER_ROLE = roleWith({ feature: ['all'], spaces: ['default'] });
 
@@ -143,6 +146,15 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
         const response = await post(SESSIONS_ENABLE_PATH, adminHeaders);
         expect(response).toHaveStatusCode(200);
         expect(response.body).toMatchObject({ canManage: true });
+      });
+
+      await apiTest.step('tells a manager in all spaces they manage sessions', async () => {
+        const status = await apiClient.get(SESSIONS_STATUS_PATH, {
+          headers: await headersAs(MANAGER_ROLE),
+          responseType: 'json',
+        });
+        expect(status.body).toMatchObject({ canManage: true });
+        expect(typeof status.body.enabledBy).toBe('string');
       });
 
       await apiTest.step('refuses a user who manages sessions in one space only', async () => {

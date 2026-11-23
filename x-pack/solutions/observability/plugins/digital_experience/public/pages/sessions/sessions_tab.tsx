@@ -369,7 +369,7 @@ export function SessionsTab({
     return statusLoadingPrompt;
   }
   if (!status.installed) {
-    return <EnableSessionsPrompt {...enableProps} />;
+    return <EnableSessionsPrompt {...enableProps} setUpBlocker={status.setUpBlocker} />;
   }
   return (
     <>

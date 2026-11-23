@@ -168,7 +168,14 @@ export interface SessionsStatus {
    * on, and are told who enabled them and why a run failed.
    */
   canManage: boolean;
+  /**
+   * Why nobody can set sessions up, when they need setting up: Kibana has no Task Manager to run
+   * the summaries task, or no encryption key to store its API key.
+   */
+  setUpBlocker: SessionsSetUpBlocker | null;
 }
+
+export type SessionsSetUpBlocker = 'taskManager' | 'encryptionKey';
 
 /** The browser sessions status, and that of the mobile sessions, which their own task builds. */
 export interface SessionsStatusResponse extends SessionsStatus {

@@ -316,7 +316,7 @@ apiTest.describe(
               ttfb: { sampleCount: 0 },
             },
           });
-          expect(application?.webVitals.lcp.p75Ms).toBeGreaterThanOrEqual(2000);
+          expect(application?.webVitals.lcp.p75Ms).toBeGreaterThan(3500);
           expect(application?.webVitals.lcp.p75Ms).toBeLessThanOrEqual(5000);
           expect([...(application?.environments ?? [])].sort()).toStrictEqual([
             PRODUCTION,

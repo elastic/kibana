@@ -9,23 +9,26 @@ import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { SESSIONS_INDEX_PATTERN } from '../../../../common/sessions';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
+import { TIME_RANGE } from '../../common/fixtures/constants';
 import {
+  SESSIONS_APP,
   deleteOwnedSessions,
+  ingestOwnedSessions,
   setUpOwnedSessions,
   type OwnedSessions,
   type OwnedSessionsSetup,
 } from '../../common/fixtures/sessions_data';
-import { testData } from '../fixtures';
+import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
-const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, createRole } = testData;
+const { APPLICATIONS_IN_TIME_RANGE_PATH, APPLICATIONS_PATH, COMMON_HEADERS, createRole } = testData;
 
-// The sessions index only needs to exist: a user is partially denied the indices it can't read.
-const NO_SESSIONS: OwnedSessions = {
+// A session from a day ago, so the readable EDOT Browser source has an application to list.
+const SESSIONS: OwnedSessions = {
   idPrefix: 'dx-partial-access',
   environment: 'partial-access-test',
-  count: 0,
+  count: 1,
 };
 
 /** Reads the EDOT Browser indices only, so not the Classic RUM archive's `apm-*` indices. */
@@ -65,10 +68,11 @@ apiTest.describe(
     apiTest.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       await apiServices.core.settings(FLAG_ON_OVERRIDE);
       setup = await setUpOwnedSessions(esClient, kbnClient);
+      await ingestOwnedSessions(esClient, SESSIONS);
     });
 
     apiTest.afterAll(async ({ apiServices, esClient, kbnClient }) => {
-      await deleteOwnedSessions(esClient, kbnClient, NO_SESSIONS, setup);
+      await deleteOwnedSessions(esClient, kbnClient, SESSIONS, setup);
       await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
@@ -76,17 +80,20 @@ apiTest.describe(
       'reports Classic RUM as partially available when only the EDOT Browser indices are readable',
       async ({ apiClient, requestAuth }) => {
         const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(OTEL_ONLY_INDICES_ROLE);
+        // From the Classic RUM archive's time to now, to include the session.
+        const range = `start=${TIME_RANGE.rangeFrom}&end=${new Date().toISOString()}`;
 
-        const response = await apiClient.get(APPLICATIONS_IN_TIME_RANGE_PATH, {
+        const response = await apiClient.get(`${APPLICATIONS_PATH}?${range}`, {
           headers: { ...COMMON_HEADERS, ...apiKeyHeader },
           responseType: 'json',
         });
 
         expect(response).toHaveStatusCode(200);
-        const { unavailableSources, partiallyAvailableSources } =
+        const { applications, unavailableSources, partiallyAvailableSources } =
           response.body as ApplicationsResponse;
         expect(unavailableSources).toStrictEqual([]);
         expect(partiallyAvailableSources).toStrictEqual(['classic']);
+        expect(findApplication(applications, SESSIONS_APP, 'otel')).toBeDefined();
       }
     );
 

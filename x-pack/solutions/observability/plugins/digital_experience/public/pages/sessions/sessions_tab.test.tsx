@@ -59,6 +59,7 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   retentionDays: 30,
   autoEnable: false,
   canManage: true,
+  setUpBlocker: null,
   ...overrides,
 });
 
@@ -255,6 +256,16 @@ describe('SessionsTab', () => {
       expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
       expect(listRequests()).toHaveLength(0);
     });
+  });
+
+  it('tells users why nobody can set sessions up', async () => {
+    respondWith({ sessionsStatus: { ...notSetUp(), setUpBlocker: 'encryptionKey' } });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsNotEnabled')).toHaveTextContent(
+      'They cannot be set up until xpack.encryptedSavedObjects.encryptionKey is set in kibana.yml'
+    );
+    expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
   });
 
   describe('when the API key of sessions no longer works', () => {
@@ -797,7 +808,7 @@ describe('SessionsTab', () => {
     renderTab();
 
     expect(await screen.findByTestId('digitalExperienceSessionsRetention')).toHaveTextContent(
-      /^Sessions are kept for 7 days, so there are none before .+ in this time range\.$/
+      /^Sessions are built from the last 7 days of data, so this time range may be missing sessions before .+\.$/
     );
   });
 
@@ -809,7 +820,7 @@ describe('SessionsTab', () => {
     expect(await screen.findByTestId('digitalExperienceSessionsError')).toBeInTheDocument();
     // The status's retention, as the list didn't answer.
     expect(screen.getByTestId('digitalExperienceSessionsRetention')).toHaveTextContent(
-      'Sessions are kept for 30 days'
+      'Sessions are built from the last 30 days of data'
     );
   });
 
