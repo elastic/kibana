@@ -14,7 +14,7 @@ const MAIN_BRANCH = 'main';
  * Otherwise the baseline is the older run. Runs with the same time keep the given order.
  */
 export const pickBaselineAndTarget = <
-  T extends Pick<EvaluationExperimentSummary, 'git_branch' | 'timestamp'>
+  T extends Pick<EvaluationExperimentSummary, 'git_branch' | 'timestamp'>,
 >(
   a: T,
   b: T

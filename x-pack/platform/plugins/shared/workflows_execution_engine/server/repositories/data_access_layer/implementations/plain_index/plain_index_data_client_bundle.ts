@@ -91,7 +91,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
           throw error;
         }
         unknownResourceSince = isUnknownResourceError(error)
-          ? unknownResourceSince ?? Date.now()
+          ? (unknownResourceSince ?? Date.now())
           : undefined;
         if (
           unknownResourceSince !== undefined &&

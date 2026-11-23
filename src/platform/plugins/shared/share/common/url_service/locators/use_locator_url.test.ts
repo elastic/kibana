@@ -13,7 +13,7 @@ import type { LocatorPublic } from './types';
 import { useLocatorUrl } from './use_locator_url';
 
 const createLocator = (getUrl: LocatorPublic<SerializableRecord>['getUrl']) =>
-  ({ getUrl } as LocatorPublic<SerializableRecord>);
+  ({ getUrl }) as LocatorPublic<SerializableRecord>;
 
 describe('useLocatorUrl', () => {
   let consoleError: jest.SpyInstance;

@@ -101,7 +101,7 @@ describe('nav-tree dependency tracking', () => {
   const buildNavTree = (linkTargets: string[]) =>
     ({
       body: linkTargets.map((link, idx) => ({ id: `node-${idx}`, link })),
-    } as unknown as NavigationTreeDefinition);
+    }) as unknown as NavigationTreeDefinition;
 
   test('collects link targets per owner plugin when collection is enabled', () => {
     const { projectNavigation } = setup({ collectNavDependencies: true });

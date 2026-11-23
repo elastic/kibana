@@ -105,7 +105,7 @@ export class RetryingLogRecordExporter implements LogRecordExporter {
     const finish: ExportResultCallback = (result) => {
       // Like the SDK's delegate, a failure without an error is recorded as `export_failed`.
       finishExport(
-        result.code === EXPORT_RESULT_SUCCESS ? undefined : result.error ?? 'export_failed'
+        result.code === EXPORT_RESULT_SUCCESS ? undefined : (result.error ?? 'export_failed')
       );
       resultCallback(result);
     };

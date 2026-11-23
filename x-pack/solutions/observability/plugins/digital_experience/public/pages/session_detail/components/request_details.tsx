@@ -167,10 +167,10 @@ export function RequestDetails({
   const note = request.cached
     ? CACHED_NOTE
     : request.timingWithheld
-    ? RESTRICTED_NOTE
-    : request.phases === null
-    ? NOT_TIMED_NOTE
-    : null;
+      ? RESTRICTED_NOTE
+      : request.phases === null
+        ? NOT_TIMED_NOTE
+        : null;
 
   const items = [
     {

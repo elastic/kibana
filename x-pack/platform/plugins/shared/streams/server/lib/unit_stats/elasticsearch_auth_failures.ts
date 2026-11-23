@@ -115,11 +115,10 @@ export const getElasticsearchAuthFailures = async ({
   const incomingRateOf = (id: string): number | null =>
     Object.hasOwn(parentResults, id) ? parentResults[id].events.incoming.rate.value : null;
 
-  const withoutFailures = destinations.flatMap(
-    (destination): Array<[string, AuthFailures]> =>
-      failedRateOf(destination) === 0
-        ? [[destination.id, noFailuresFound(incomingRateOf(destination.id))]]
-        : []
+  const withoutFailures = destinations.flatMap((destination): Array<[string, AuthFailures]> =>
+    failedRateOf(destination) === 0
+      ? [[destination.id, noFailuresFound(incomingRateOf(destination.id))]]
+      : []
   );
   const failing = destinations.filter((destination) => (failedRateOf(destination) ?? 0) > 0);
 

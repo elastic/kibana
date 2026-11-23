@@ -413,12 +413,14 @@ export function NightshiftPage(): React.ReactElement | null {
         paddingSize: 'none',
         css: css`
           background: ${pageBackground};
-          ${isDetectionPage
-            ? `
+          ${
+            isDetectionPage
+              ? `
             min-height: 0;
             overflow: hidden;
           `
-            : ''}
+              : ''
+          }
         `,
         ...(isDetectionPage
           ? {

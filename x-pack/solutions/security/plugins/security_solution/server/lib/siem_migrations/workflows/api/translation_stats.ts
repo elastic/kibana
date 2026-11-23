@@ -49,9 +49,8 @@ export const registerSiemWorkflowMigrationsTranslationStatsRoute = (
               const workflowMigrationsClient =
                 ctx.securitySolution.siemMigrations.getWorkflowsClient();
 
-              const stats = await workflowMigrationsClient.data.items.getTranslationStats(
-                migrationId
-              );
+              const stats =
+                await workflowMigrationsClient.data.items.getTranslationStats(migrationId);
 
               if (stats.items.total === 0) {
                 return res.noContent();

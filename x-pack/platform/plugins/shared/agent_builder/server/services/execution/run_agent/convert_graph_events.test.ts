@@ -347,7 +347,7 @@ describe('convertGraphEvents', () => {
         tags,
         metadata: { graphName: GRAPH },
         data: { chunk },
-      } as unknown as LangchainStreamEvent);
+      }) as unknown as LangchainStreamEvent;
 
     it('streams reasoning chunks before the text chunk of the same model chunk', async () => {
       const events = await collect([

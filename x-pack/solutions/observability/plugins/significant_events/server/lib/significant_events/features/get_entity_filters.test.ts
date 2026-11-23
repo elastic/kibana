@@ -18,7 +18,7 @@ const createFeature = (filter: Condition, day: number): FeatureWithFilter =>
     id: `feature-${day}`,
     updated_at: new Date(Date.UTC(2026, 0, day)).toISOString(),
     filter,
-  } as FeatureWithFilter);
+  }) as FeatureWithFilter;
 
 const service = (name: string): Condition => ({ field: 'service.name', eq: name });
 

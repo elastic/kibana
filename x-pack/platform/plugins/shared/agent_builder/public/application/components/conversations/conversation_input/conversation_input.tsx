@@ -581,8 +581,8 @@ const ConversationInputComponent: React.FC<ConversationInputProps> = ({
       content.length > STEER_MESSAGE_MAX_LENGTH
         ? steerTooLongMessage
         : messageEditorController.getPlaceholderNames().length > 0
-        ? imageInSteerMessage
-        : undefined;
+          ? imageInSteerMessage
+          : undefined;
 
     // Retry uncertain sends through steering, also after the run ends.
     if (canSteer || isUnansweredSteer(content)) {

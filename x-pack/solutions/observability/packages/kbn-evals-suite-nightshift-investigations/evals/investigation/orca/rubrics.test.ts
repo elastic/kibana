@@ -26,7 +26,7 @@ const release: OrcaRubricsRelease = {
 const clientWith = (examples: Array<{ input: object; output: object }>, id = 'rubrics') =>
   ({
     getDatasetByName: jest.fn().mockResolvedValue({ id, name: release.name, examples }),
-  } as unknown as Pick<EvalsClient, 'getDatasetByName'>);
+  }) as unknown as Pick<EvalsClient, 'getDatasetByName'>;
 
 const examples = [...rubrics].map(([eventId, rubric]) => ({
   input: { event_id: eventId },

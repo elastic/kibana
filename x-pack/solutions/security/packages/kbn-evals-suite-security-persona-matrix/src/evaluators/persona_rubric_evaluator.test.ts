@@ -34,7 +34,7 @@ const executeUntilValidMock = executeUntilValid as jest.MockedFunction<typeof ex
 const inferenceClient = {} as BoundInferenceClient;
 
 const verdict = (args: unknown) =>
-  ({ toolCalls: [{ function: { name: 'grade', arguments: args } }] } as never);
+  ({ toolCalls: [{ function: { name: 'grade', arguments: args } }] }) as never;
 
 const withTools = buildOutput({ steps: [toolCall('security.alerts')], answer: 'Found it.' });
 const withoutTools = buildOutput({ steps: [], answer: 'From memory.' });

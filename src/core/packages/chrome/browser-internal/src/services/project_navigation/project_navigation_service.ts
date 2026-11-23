@@ -75,7 +75,10 @@ export class ProjectNavigationService {
    */
   private readonly navTreeDependencies = new Map<string, string[]>();
 
-  constructor(private isServerless: boolean, private collectNavDependencies: boolean = false) {}
+  constructor(
+    private isServerless: boolean,
+    private collectNavDependencies: boolean = false
+  ) {}
 
   public start(startDeps: StartDeps) {
     const {

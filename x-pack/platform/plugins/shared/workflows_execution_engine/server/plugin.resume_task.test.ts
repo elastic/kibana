@@ -682,7 +682,7 @@ describe('workflow:resume task runner event fields', () => {
         retryAt: null,
         status: TaskStatus.Running,
         ownerId: 'kibana-instance-id',
-      } as ConcreteTaskInstance);
+      }) as ConcreteTaskInstance;
 
     const createRunnerFor = (taskType: string, workflowRunId: string, id: string) =>
       taskDefinitions[taskType]!.createTaskRunner(

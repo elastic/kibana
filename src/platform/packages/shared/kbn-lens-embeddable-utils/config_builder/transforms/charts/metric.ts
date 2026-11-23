@@ -546,9 +546,9 @@ function enrichConfigurationWithVisualizationProperties(
       const hasInvalidRangeType = isPercentagePalette && isSingleValue;
 
       primaryMetric.color = hasInvalidRangeType
-        ? fromStaticColorLensStateToAPI(getSingleValuePercentColor(visualization.palette)) ??
-          AUTO_COLOR
-        : colorByValue ?? AUTO_COLOR;
+        ? (fromStaticColorLensStateToAPI(getSingleValuePercentColor(visualization.palette)) ??
+          AUTO_COLOR)
+        : (colorByValue ?? AUTO_COLOR);
     } else if (visualization.color) {
       primaryMetric.color = fromStaticColorLensStateToAPI(visualization.color);
     } else {

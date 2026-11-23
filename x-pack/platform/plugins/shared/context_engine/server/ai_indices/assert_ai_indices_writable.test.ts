@@ -14,7 +14,7 @@ const makeAiIndex = (id: string, destValue = `ai-index-ds-${id}`): AiIndexItem =
   ({
     id,
     dest: { type: 'data_stream', value: destValue },
-  } as AiIndexItem);
+  }) as AiIndexItem;
 
 describe('assertAiIndicesWritable', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

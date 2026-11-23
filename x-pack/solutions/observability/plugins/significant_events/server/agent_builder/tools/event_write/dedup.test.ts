@@ -614,7 +614,7 @@ describe('findRulesHeldByOtherEvents', () => {
       source_ids: ['logs.other'],
       signals,
       ...overrides,
-    } as SignificantEvent);
+    }) as SignificantEvent;
   const candidateFor = ({
     eventId = 'target',
     ruleUuids,

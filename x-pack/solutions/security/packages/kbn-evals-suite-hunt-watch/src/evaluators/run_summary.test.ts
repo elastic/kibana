@@ -117,7 +117,7 @@ describe('assertCodeScoresPass', () => {
     score: 0,
     explanation: 'scope gate did not short-circuit',
   };
-  const newLog = () => ({ warning: jest.fn() } as unknown as ToolingLog & { warning: jest.Mock });
+  const newLog = () => ({ warning: jest.fn() }) as unknown as ToolingLog & { warning: jest.Mock };
 
   it('reports and does not gate a capability miss for a non-reference model', () => {
     const log = newLog();

@@ -554,7 +554,7 @@ describe('CoreApp', () => {
     const pluginRoutes = internalCoreSetup.http.registerStaticDir.mock.calls.filter(([path]) =>
       path.includes('{pluginName}')
     );
-    const requestFor = (pluginName: string) => ({ params: { pluginName } } as unknown as Request);
+    const requestFor = (pluginName: string) => ({ params: { pluginName } }) as unknown as Request;
     for (const [, resolveDir] of pluginRoutes) {
       if (typeof resolveDir !== 'function') {
         throw new Error('Plugin asset route must resolve its directory from the request');

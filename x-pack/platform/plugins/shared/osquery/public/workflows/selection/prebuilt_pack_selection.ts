@@ -160,15 +160,15 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
               values: { name: escapeMarkdown(option.label ?? value) },
             })
           : lookupError
-          ? i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.lookupFailed', {
-              defaultMessage: 'Could not use prebuilt pack "{id}": {reason}',
-              values: { id: escapeMarkdown(value), reason: escapeMarkdown(lookupError) },
-            })
-          : i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.notLoaded', {
-              defaultMessage:
-                'Prebuilt pack "{id}" is not loaded in this space. Load Elastic prebuilt packs in this space.',
-              values: { id: escapeMarkdown(value) },
-            }),
+            ? i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.lookupFailed', {
+                defaultMessage: 'Could not use prebuilt pack "{id}": {reason}',
+                values: { id: escapeMarkdown(value), reason: escapeMarkdown(lookupError) },
+              })
+            : i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.notLoaded', {
+                defaultMessage:
+                  'Prebuilt pack "{id}" is not loaded in this space. Load Elastic prebuilt packs in this space.',
+                values: { id: escapeMarkdown(value) },
+              }),
         links: [
           {
             text: i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.manage', {

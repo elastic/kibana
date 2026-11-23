@@ -61,7 +61,7 @@ const sourceSteps = (metricsEntitiesHandled: boolean): WorkflowStep[] =>
     sourceType: 'metrics',
     metricsEntitiesHandled,
   })
-    ? sourceBranch?.steps ?? []
+    ? (sourceBranch?.steps ?? [])
     : [];
 
 const collectStepsByType = (steps: WorkflowStep[], type: string): WorkflowStep[] =>

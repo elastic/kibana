@@ -1173,7 +1173,7 @@ describe('RuleEventsClient', () => {
               { name: 'episode_id', type: 'keyword' },
             ],
             values: Array.from({ length: 10_000 }, (_, index) => [1, 'event-1', `ep-${index}`]),
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       await expect(client.findEventIdsByEpisodeIds(['id-1'])).rejects.toThrow(
@@ -1198,7 +1198,7 @@ describe('RuleEventsClient', () => {
               [1, 'episode-2', 'event-2'],
               [1, 'episode-2', 'event-3'],
             ],
-          } as unknown as ESQLSearchResponse)
+          }) as unknown as ESQLSearchResponse
       );
 
       const eventIdsByEpisode = await client.findEventIdsByEpisodeIds([

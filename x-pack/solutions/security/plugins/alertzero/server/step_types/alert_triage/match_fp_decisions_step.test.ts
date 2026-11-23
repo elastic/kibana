@@ -130,8 +130,8 @@ const setup = ({
         missingIndex
           ? { _id, error: { type: 'index_not_found_exception', reason: 'no such index' } }
           : unreadable.includes(_id)
-          ? { _id, error: { type: 'no_shard_available_action_exception', reason: 'shard down' } }
-          : { _id, found: decisions[_id] !== undefined, _source: decisions[_id] }
+            ? { _id, error: { type: 'no_shard_available_action_exception', reason: 'shard down' } }
+            : { _id, found: decisions[_id] !== undefined, _source: decisions[_id] }
       ),
     };
   });
@@ -720,12 +720,13 @@ describe('triage match decisions step in on mode', () => {
       ],
       [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
     ];
-    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
-      params.path.endsWith('/signals/search') &&
-      params.body?.size !== 0 &&
-      !params.body?.query?.bool?.filter?.[0]?.ids
-        ? { body: { hits: { hits: pages.shift() ?? [] } } }
-        : inner(params)
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) =>
+        params.path.endsWith('/signals/search') &&
+        params.body?.size !== 0 &&
+        !params.body?.query?.bool?.filter?.[0]?.ids
+          ? { body: { hits: { hits: pages.shift() ?? [] } } }
+          : inner(params)
     );
 
     const { output } = await run();
@@ -778,12 +779,13 @@ describe('triage match decisions step in on mode', () => {
       ],
       [{ _id: 'late', _source: source('C:\\x.exe'), sort: [1, 'z'] }],
     ];
-    callKibanaApi.mockImplementation(async (params: { path: string; body?: Record<string, any> }) =>
-      params.path.endsWith('/signals/search') &&
-      params.body?.size !== 0 &&
-      !params.body?.query?.bool?.filter?.[0]?.ids
-        ? { body: { hits: { hits: pages.shift() ?? [] } } }
-        : inner(params)
+    callKibanaApi.mockImplementation(
+      async (params: { path: string; body?: Record<string, any> }) =>
+        params.path.endsWith('/signals/search') &&
+        params.body?.size !== 0 &&
+        !params.body?.query?.bool?.filter?.[0]?.ids
+          ? { body: { hits: { hits: pages.shift() ?? [] } } }
+          : inner(params)
     );
 
     const { output } = await run();

@@ -56,8 +56,8 @@ const rootTypeOf = (schema: GraphQLSchema, operation: RootOperation) =>
   operation === 'query'
     ? schema.getQueryType()
     : operation === 'mutation'
-    ? schema.getMutationType()
-    : schema.getSubscriptionType();
+      ? schema.getMutationType()
+      : schema.getSubscriptionType();
 
 // Vendor schemas apply directives they don't always define; only `@deprecated` matters here.
 const normalizeSdl = (sdl: string): string =>
@@ -464,23 +464,19 @@ const diffGraphQL = (base: string, current: string): SpecChange[] => {
     const [, enumName] = ENUM_VALUE_ADDED.exec(description) ?? [];
     return enumName === undefined || outputEnums.has(enumName);
   };
-  const changes = findSchemaChanges(before, after).map(
-    (change): SpecChange => ({
-      kind: isBreaking(change) ? 'breaking' : 'non-breaking',
-      id: change.type,
-      text: change.description,
-    })
-  );
+  const changes = findSchemaChanges(before, after).map((change): SpecChange => ({
+    kind: isBreaking(change) ? 'breaking' : 'non-breaking',
+    id: change.type,
+    text: change.description,
+  }));
   const wasDeprecated = deprecationsOf(before);
   const deprecations = [...deprecationsOf(after)]
     .filter(([name]) => !wasDeprecated.has(name))
-    .map(
-      ([name, reason]): SpecChange => ({
-        kind: 'deprecation',
-        id: 'DEPRECATION_ADDED',
-        text: `${name} is deprecated: ${reason}`,
-      })
-    );
+    .map(([name, reason]): SpecChange => ({
+      kind: 'deprecation',
+      id: 'DEPRECATION_ADDED',
+      text: `${name} is deprecated: ${reason}`,
+    }));
   return [...changes, ...deprecations];
 };
 

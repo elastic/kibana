@@ -3150,7 +3150,7 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
         },
       ],
       vars: {},
-    } as unknown as NewPackagePolicy);
+    }) as unknown as NewPackagePolicy;
 
   const streamVarsOf = (result: ReturnType<typeof validatePackagePolicy>) =>
     result.inputs?.['aws-cloudwatch']?.streams?.['aws_mq.activemq_general_logs']?.vars;

@@ -154,8 +154,8 @@ export const summaryOf = (
       onlyCredentials
         ? CREDENTIALS_ADVICE
         : attention.actions.size > 0
-        ? 'Update the connector to ensure it will continue working.'
-        : "The actions don't need to change; fix what the tables below list.",
+          ? 'Update the connector to ensure it will continue working.'
+          : "The actions don't need to change; fix what the tables below list.",
     ].join('\n\n');
   };
 

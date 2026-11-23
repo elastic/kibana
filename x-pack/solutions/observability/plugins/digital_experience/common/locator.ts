@@ -57,8 +57,7 @@ type QueryValue = string | number | boolean;
  * `serviceName`, with the state of the page as its URL holds it.
  */
 export interface DigitalExperienceLocatorParams
-  extends SerializableRecord,
-    Partial<Record<DigitalExperienceLocatorQueryKey, QueryValue>> {
+  extends SerializableRecord, Partial<Record<DigitalExperienceLocatorQueryKey, QueryValue>> {
   serviceName?: string;
   /** The tab of the application; the Overview when unset or unknown. */
   tab?: ApplicationTabId;
@@ -93,9 +92,7 @@ const pathOf = ({ serviceName, tab }: DigitalExperienceLocatorParams): string =>
   return isTab(tab) && tab !== 'overview' ? `${application}/${tab}` : application;
 };
 
-export class DigitalExperienceLocatorDefinition
-  implements LocatorDefinition<DigitalExperienceLocatorParams>
-{
+export class DigitalExperienceLocatorDefinition implements LocatorDefinition<DigitalExperienceLocatorParams> {
   public readonly id = DIGITAL_EXPERIENCE_LOCATOR_ID;
 
   public readonly getLocation = async (params: DigitalExperienceLocatorParams) => {

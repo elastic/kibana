@@ -69,7 +69,7 @@ describe('session events routes', () => {
         userProfile: { getCurrentProfileId: getProfileId },
         elasticsearch: { client: { asCurrentUser: esClient } },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const validateBody = (body: unknown) => route.validate.request.body.validate(body);
 
@@ -125,7 +125,7 @@ describe('session events routes', () => {
     registerSessionEventsRoutes({
       router,
       getSpaces: async () =>
-        ({ spacesService: { getSpaceId: () => 'marketing' } } as unknown as SpacesPluginStart),
+        ({ spacesService: { getSpaceId: () => 'marketing' } }) as unknown as SpacesPluginStart,
       getSessionEventsService: async () => service,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       isMemoryEnabled: async () => memoryEnabled,

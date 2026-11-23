@@ -185,7 +185,7 @@ export const pageDefinition = (pageId?: string) =>
   ({
     triggers: [{ type: 'page', title: 'Report', ...(pageId ? { id: pageId } : {}) }],
     steps: [],
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 export const noPageDefinition = {
   triggers: [{ type: 'manual' }],

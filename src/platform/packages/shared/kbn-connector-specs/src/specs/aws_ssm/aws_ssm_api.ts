@@ -61,7 +61,7 @@ const parseAwsJsonError = (
     (parsed.success ? parsed.data.__type : undefined);
   return {
     code: type?.split(':')[0].split('#').pop(),
-    message: parsed.success ? parsed.data.message ?? parsed.data.Message : undefined,
+    message: parsed.success ? (parsed.data.message ?? parsed.data.Message) : undefined,
   };
 };
 

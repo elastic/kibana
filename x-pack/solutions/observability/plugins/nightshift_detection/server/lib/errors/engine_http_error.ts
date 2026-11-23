@@ -10,7 +10,10 @@
  * into a response at the edge; services throw it and never build responses.
  */
 export class EngineHttpError extends Error {
-  constructor(message: string, public readonly statusCode: number) {
+  constructor(
+    message: string,
+    public readonly statusCode: number
+  ) {
     super(message);
     this.name = 'EngineHttpError';
   }

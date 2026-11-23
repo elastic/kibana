@@ -37,7 +37,7 @@ export const getRuntimeInputDefaults = (
 
 const resolveProperty = (rawProperty: unknown, schema: JsonModelSchemaType): JSONSchema7 => {
   const declared = (isRecord(rawProperty) ? rawProperty : {}) as JSONSchema7;
-  return declared.$ref ? resolveRef(declared.$ref, schema) ?? declared : declared;
+  return declared.$ref ? (resolveRef(declared.$ref, schema) ?? declared) : declared;
 };
 
 const toFields = (

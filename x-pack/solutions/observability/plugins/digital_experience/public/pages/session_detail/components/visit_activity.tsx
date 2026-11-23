@@ -259,8 +259,8 @@ function Row({
     tone === 'error'
       ? euiTheme.colors.backgroundBaseDanger
       : tone === 'click'
-      ? euiTheme.colors.backgroundBasePrimary
-      : undefined;
+        ? euiTheme.colors.backgroundBasePrimary
+        : undefined;
   const rowCss = [
     GRID_COLUMNS(euiTheme.size.s),
     css({

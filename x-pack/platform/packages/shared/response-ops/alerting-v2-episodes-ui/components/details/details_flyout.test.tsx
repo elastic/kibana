@@ -183,7 +183,7 @@ describe('AlertEpisodeDetailsFlyout', () => {
         openChat: jest.fn(),
         addAttachment: jest.fn(),
         events: { ui: { activeConversation$: of(activeConversation) } },
-      } as unknown as NonNullable<typeof mockServices.agentBuilder>);
+      }) as unknown as NonNullable<typeof mockServices.agentBuilder>;
 
     const openTakeActionMenu = () =>
       fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));

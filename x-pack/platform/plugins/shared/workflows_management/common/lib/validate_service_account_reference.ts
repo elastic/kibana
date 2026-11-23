@@ -18,7 +18,7 @@ export interface ServiceAccountSummary {
 
 /** Lookup outcome; `unknown` (feature off, no `manage_security`, request failed) never reports. */
 export type ServiceAccountLookupResult<
-  TAccount extends ServiceAccountSummary = ServiceAccountSummary
+  TAccount extends ServiceAccountSummary = ServiceAccountSummary,
 > = { status: 'found'; account: TAccount } | { status: 'not_found' } | { status: 'unknown' };
 
 export type ServiceAccountLookup = (id: string) => Promise<ServiceAccountLookupResult>;

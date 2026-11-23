@@ -495,9 +495,10 @@ export interface ISearchMethods {
       options?: IDslPaginatedSearchOptions
     ): Promise<IDslPaginatedSearchResult>;
     /** Opts out of counting total hits, so `hasNextPage` needs the total from the caller */
-    (params: IDslUntrackedPaginatedSearchParams, options?: IDslPaginatedSearchOptions): Promise<
-      IDslPaginatedSearchResult<true>
-    >;
+    (
+      params: IDslUntrackedPaginatedSearchParams,
+      options?: IDslPaginatedSearchOptions
+    ): Promise<IDslPaginatedSearchResult<true>>;
   };
 
   /**

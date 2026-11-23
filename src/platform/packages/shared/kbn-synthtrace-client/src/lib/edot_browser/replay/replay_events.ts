@@ -325,12 +325,10 @@ export const buildSegmentEvents = ({
       )[0];
       return { time: inRange(between(random, start, end)), kind } as Slot;
     }),
-    ...clickTimes.map(
-      (time): Slot => ({
-        time: inRange(time),
-        kind: repeatedClickTimes.includes(time) ? 'repeatedClick' : 'click',
-      })
-    ),
+    ...clickTimes.map((time): Slot => ({
+      time: inRange(time),
+      kind: repeatedClickTimes.includes(time) ? 'repeatedClick' : 'click',
+    })),
     ...exceptionTimes.map((time): Slot => ({ time: inRange(time), kind: 'exception' })),
   ];
   for (let time = start + checkoutIntervalMs; time < end; time += checkoutIntervalMs) {

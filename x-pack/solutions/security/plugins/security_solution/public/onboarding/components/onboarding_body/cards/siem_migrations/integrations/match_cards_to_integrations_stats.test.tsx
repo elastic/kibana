@@ -11,7 +11,7 @@ import { matchCardsToIntegrationsStats } from './integrations_card';
 jest.mock('../../../../onboarding_context');
 
 const card = (id: string, extra: Partial<IntegrationCardItem> = {}) =>
-  ({ id, name: id, title: id, ...extra } as IntegrationCardItem);
+  ({ id, name: id, title: id, ...extra }) as IntegrationCardItem;
 
 describe('matchCardsToIntegrationsStats', () => {
   it('keeps only cards with stats, ordered by total rules descending', () => {

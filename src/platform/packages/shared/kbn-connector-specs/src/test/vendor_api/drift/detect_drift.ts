@@ -225,8 +225,8 @@ const stillInSpec = ({ id, text, operation, path: entryPath }: OasdiffEntry, spe
     id === 'api-schema-removed'
       ? 'schemas'
       : id === 'api-security-component-removed'
-      ? 'securitySchemes'
-      : undefined;
+        ? 'securitySchemes'
+        : undefined;
   if (!name || !section || !isRecord(components)) {
     return false;
   }
@@ -245,10 +245,10 @@ const verdictOf = (
   snapshotProblems.length > 0
     ? 'kibana-regression'
     : latestProblems === undefined
-    ? 'unknown'
-    : latestProblems.length > 0
-    ? 'vendor-drift'
-    : 'healthy';
+      ? 'unknown'
+      : latestProblems.length > 0
+        ? 'vendor-drift'
+        : 'healthy';
 
 const fieldUseComplete = (drift: Omit<ConnectorDrift, 'outcome'>): boolean =>
   drift.actions !== undefined &&

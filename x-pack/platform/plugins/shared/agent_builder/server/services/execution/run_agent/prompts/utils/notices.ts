@@ -252,8 +252,8 @@ export const formatDeliveredMessageNotice = (step: DeliveredMessageStep): string
   const arrival = step.after_answer
     ? `while you were writing the answer above, at cycle ${step.cycle}`
     : step.tool_call_group_id
-    ? `after the tool calls that just returned, at cycle ${step.cycle}`
-    : `before the first model call of this run`;
+      ? `after the tool calls that just returned, at cycle ${step.cycle}`
+      : `before the first model call of this run`;
   return generateXmlTree({
     tagName: 'system_notice',
     children: [

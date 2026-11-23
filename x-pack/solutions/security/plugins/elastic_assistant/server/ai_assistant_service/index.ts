@@ -594,9 +594,8 @@ export class AIAssistantService {
 
   /** @returns `false` when the install and its retry both failed. No license check. */
   public async ensureSpaceResources(spaceId: string): Promise<boolean> {
-    const { result: initialized, error } = await this.getSpaceResourcesInitializationPromise(
-      spaceId
-    );
+    const { result: initialized, error } =
+      await this.getSpaceResourcesInitializationPromise(spaceId);
 
     // If space level resources initialization failed, retry
     if (!initialized && error) {

@@ -61,8 +61,8 @@ export const getESQLControlFactory = <
     isDuplicate: (incomingState, existingState) =>
       Boolean(
         incomingState.variable_name &&
-          incomingState.variable_name === existingState.variable_name &&
-          incomingState.control_type === existingState.control_type
+        incomingState.variable_name === existingState.variable_name &&
+        incomingState.control_type === existingState.control_type
       ),
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;

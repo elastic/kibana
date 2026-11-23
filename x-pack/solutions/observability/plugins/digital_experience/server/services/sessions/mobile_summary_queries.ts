@@ -113,8 +113,8 @@ const MOBILE_SDK = `(${resourceAttributeField(TELEMETRY_SDK_NAME)} IN (${texts(M
     OR (${resourceAttributeField(TELEMETRY_DISTRO_NAME)} == ${escapeStringValue(ELASTIC_DISTRO)}
       AND ${resourceAttributeField(OS_NAME)} IN (${texts(Object.values(MOBILE_OS_NAMES).flat())})
       AND (${SDK_LANGUAGE} IS NULL OR ${SDK_LANGUAGE} != ${escapeStringValue(
-  BROWSER_SDK_LANGUAGE
-)})))`;
+        BROWSER_SDK_LANGUAGE
+      )})))`;
 
 /** The EDOT Android and EDOT iOS events with a session and an application, but late crashes. */
 export const mobileSessionEvents = sessionEventsOf(`${MOBILE_SDK}
@@ -129,9 +129,10 @@ const MOBILE_SESSION_STATS: Stat[] = [
   ['tap_count', `COUNT(*) WHERE event == ${escapeStringValue(EVENT_WIDGET_CLICK)}`],
   // EDOT Android and EDOT iOS export from a disk buffer at least once, so a retried export can
   // store the same span twice.
-  ...Object.entries(HTTP_REQUEST_CONDITIONS).map(
-    ([column, condition]): Stat => [column, `COUNT_DISTINCT(${OTEL_SPAN_ID}) WHERE ${condition}`]
-  ),
+  ...Object.entries(HTTP_REQUEST_CONDITIONS).map(([column, condition]): Stat => [
+    column,
+    `COUNT_DISTINCT(${OTEL_SPAN_ID}) WHERE ${condition}`,
+  ]),
   ...ATTRIBUTE_STATS,
 ];
 
@@ -151,8 +152,8 @@ ${mobileSessionEvents('rebuild_from', 'changed_to')}
 | EVAL event = COALESCE(${OTEL_EVENT_NAME}, "")
 | EVAL is_crash = event IN (${texts(CRASH_EVENTS)}),
        is_screen_view = COALESCE(${OTEL_SCOPE_NAME} == ${escapeStringValue(
-    VIEW_CONTROLLER_SCOPE
-  )}, false),
+         VIEW_CONTROLLER_SCOPE
+       )}, false),
        ${HTTP_REQUEST_EVALS},
        ${ATTRIBUTE_RANK},
        ${SEEN_EVALS.join(',\n       ')}

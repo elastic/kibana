@@ -106,10 +106,10 @@ const getStatusCode = (error: unknown): number | undefined => {
 
 const getReason = (error: unknown): string => {
   const reason = isResponseError(error)
-    ? error.body?.error?.reason ?? error.message
+    ? (error.body?.error?.reason ?? error.message)
     : error instanceof Error
-    ? error.message
-    : String(error);
+      ? error.message
+      : String(error);
   return truncate(reason, { length: MAX_REASON_LENGTH });
 };
 

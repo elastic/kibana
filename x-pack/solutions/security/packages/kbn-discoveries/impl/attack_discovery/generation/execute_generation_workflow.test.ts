@@ -1089,7 +1089,7 @@ describe('executeGenerationWorkflow', () => {
         authz: createAuthorizedAuthzMock(),
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
-        getEventLogger: async () => ({ logEvent: jest.fn() } as unknown as IEventLogger),
+        getEventLogger: async () => ({ logEvent: jest.fn() }) as unknown as IEventLogger,
         getStartServices: async () => ({
           coreStart: coreStartMock,
           pluginsStart: pluginsStart ?? { elasticAssistant: { ensureSpaceResources } },

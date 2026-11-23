@@ -143,7 +143,7 @@ export const judgeCoverage = (evaluationRuns: readonly EvaluationRun[]) => {
       tally && typeof tally.failed === 'number'
         ? (tally.win ?? 0) + (tally.loss ?? 0) + (tally.tie ?? 0) + tally.failed
         : 1;
-    const failed = e.result?.score == null ? votes : tally?.failed ?? 0;
+    const failed = e.result?.score == null ? votes : (tally?.failed ?? 0);
     applicable += votes;
     missing += failed;
     if (failed) names.push(e.name);

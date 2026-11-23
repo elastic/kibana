@@ -183,7 +183,7 @@ const buildMockFetch = (overrides: MockOverrides = {}): HttpHandler => {
       const resolved =
         key in tierResolutionOverrides
           ? tierResolutionOverrides[key]
-          : pinned ?? 'recommended-endpoint';
+          : (pinned ?? 'recommended-endpoint');
       return {
         connectors: resolved ? [{ connectorId: resolved }] : [],
         soEntryFound: pinned != null,

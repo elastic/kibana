@@ -1055,7 +1055,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
         // (or null when unset) so saving other fields does not turn "unset" into `false`
         otel_disable_beatsauth: otelDisableBeatsauthInput.hasChanged
           ? otelDisableBeatsauthInput.value
-          : otelOutput?.otel_disable_beatsauth ?? null,
+          : (otelOutput?.otel_disable_beatsauth ?? null),
       };
 
       // the client SSL key of the Elasticsearch, remote Elasticsearch and Logstash outputs

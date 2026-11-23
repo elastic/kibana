@@ -21,7 +21,7 @@ const endpoint = (inferenceId: string, id = inferenceId): EvalConnector =>
     inferenceId,
     provider: 'elastic',
     taskType: 'chat_completion',
-  } as EvalConnector);
+  }) as EvalConnector;
 
 describe('toModelKey', () => {
   it.each([

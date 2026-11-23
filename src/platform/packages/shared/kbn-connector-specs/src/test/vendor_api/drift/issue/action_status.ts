@@ -211,12 +211,14 @@ export const statusOf = (
       ...(responses.length === 0
         ? []
         : passedAlong.includes('')
-        ? [
-            'Vendor response has changed, and Connector is passing along the entire changed response',
-          ]
-        : passedAlong.length > 0
-        ? ['Vendor response has changed, and Connector is passing along parts of it as they are']
-        : ['Vendor response has changed, but Connector is not using changed fields']),
+          ? [
+              'Vendor response has changed, and Connector is passing along the entire changed response',
+            ]
+          : passedAlong.length > 0
+            ? [
+                'Vendor response has changed, and Connector is passing along parts of it as they are',
+              ]
+            : ['Vendor response has changed, but Connector is not using changed fields']),
     ];
     return passes(
       'passes',

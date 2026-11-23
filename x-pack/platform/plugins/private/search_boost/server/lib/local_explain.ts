@@ -70,13 +70,11 @@ export const getBoostTargets = async (client: IScopedClusterClient): Promise<Boo
       .filter(
         ({ data_stream: dataStream, attributes }) => !dataStream && !attributes.includes('system')
       )
-      .map(
-        ({ name, attributes }): BoostTarget => ({
-          name,
-          type: 'indices',
-          isHidden: attributes.includes('hidden'),
-        })
-      ),
+      .map(({ name, attributes }): BoostTarget => ({
+        name,
+        type: 'indices',
+        isHidden: attributes.includes('hidden'),
+      })),
     ...dataStreams
       .filter(({ system }) => !system)
       .map(({ name, hidden }): BoostTarget => ({ name, type: 'data_streams', isHidden: hidden })),

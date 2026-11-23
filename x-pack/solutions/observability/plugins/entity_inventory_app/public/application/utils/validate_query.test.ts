@@ -14,7 +14,7 @@ const createUiSettings = (allowLeadingWildcards: boolean) =>
     get: jest.fn((key: string) =>
       key === UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS ? allowLeadingWildcards : undefined
     ),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 const kuery = (query: string) => ({ language: 'kuery', query });
 

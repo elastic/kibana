@@ -45,7 +45,7 @@ export interface DecisionScoreAnswer {
 
 /** Fails to compile when a question's or answer's `type` doesn't match its key. */
 type WithMatchingTypes<
-  T extends { [K in keyof T]: { question: { type: K }; answer: { type: K } } }
+  T extends { [K in keyof T]: { question: { type: K }; answer: { type: K } } },
 > = T;
 
 type DecisionTypes = WithMatchingTypes<{
@@ -72,7 +72,7 @@ export type DecisionAnswersFor<Q extends readonly DecisionQuestion[]> = {
 };
 
 export interface DecideOptions<
-  Q extends readonly DecisionQuestion[] = readonly DecisionQuestion[]
+  Q extends readonly DecisionQuestion[] = readonly DecisionQuestion[],
 > {
   /** The text the decision model reads. */
   input: string;

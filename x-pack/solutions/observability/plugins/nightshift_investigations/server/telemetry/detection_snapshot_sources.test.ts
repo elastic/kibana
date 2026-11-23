@@ -97,7 +97,7 @@ describe('createDetectionSnapshotSources', () => {
     });
 
     const [{ index, query, aggs }] = esClient.search.mock.calls[0] as [
-      { index: string; query: unknown; aggs: Record<string, unknown> }
+      { index: string; query: unknown; aggs: Record<string, unknown> },
     ];
     expect(index).toBe('.rule-events');
     expect(esClient.search.mock.calls[0][0]).toMatchObject({ allow_partial_search_results: false });

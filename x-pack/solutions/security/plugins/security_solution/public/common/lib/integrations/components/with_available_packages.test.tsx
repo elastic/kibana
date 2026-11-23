@@ -13,7 +13,7 @@ import { withAvailablePackages } from './with_available_packages';
 
 jest.mock('@kbn/fleet-plugin/public');
 
-const card = (id: string, type: string) => ({ id, type } as IntegrationCardItem);
+const card = (id: string, type: string) => ({ id, type }) as IntegrationCardItem;
 
 const mockUseAvailablePackages = jest.fn();
 jest

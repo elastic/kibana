@@ -7,7 +7,10 @@
 
 /** The page does not exist, or the caller cannot see it. */
 export class WorkflowPageNotFoundError extends Error {
-  constructor(public readonly pageId: string, public readonly workflowId: string) {
+  constructor(
+    public readonly pageId: string,
+    public readonly workflowId: string
+  ) {
     super(`Page '${pageId}' of workflow '${workflowId}' not found`);
     this.name = 'WorkflowPageNotFoundError';
   }

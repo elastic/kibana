@@ -811,10 +811,10 @@ export abstract class RunReportTask<
             const isLastAttempt = isExportTypeUnavailable
               ? true
               : renderRetry
-              ? renderRetry.action === RenderRetryAction.FAIL
-              : attemptCount
-                ? attemptCount >= maxAttempts.maxTaskAttempts
-                : true;
+                ? renderRetry.action === RenderRetryAction.FAIL
+                : attemptCount
+                  ? attemptCount >= maxAttempts.maxTaskAttempts
+                  : true;
             eventLog.logError(failedToExecuteErr);
 
             // A prior attempt may have advanced the doc's seq_no before failing; refresh so the

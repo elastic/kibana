@@ -46,7 +46,7 @@ const buildConversation = (
     title: 'A chat',
     updated_at: `${thisYear}-06-03T10:00:00.000Z`,
     ...overrides,
-  } as ListConversationsResponseItem);
+  }) as ListConversationsResponseItem;
 
 const mockLists = ({
   cached = [],

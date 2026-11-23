@@ -369,7 +369,7 @@ describe('ExampleDrilldownFlyout', () => {
                 : [example('example-1', 0, [0, 2])],
           },
           isLoading: false,
-        } as ReturnType<typeof useExperimentDatasetExamples>)
+        }) as ReturnType<typeof useExperimentDatasetExamples>
     );
     renderFlyout();
 

@@ -126,7 +126,7 @@ function withReadingChecks<
   Schema extends z.ZodType<{
     status: string;
     data: { value?: number; bucket_start: number; bucket_end: number };
-  }>
+  }>,
 >(schema: Schema): Schema {
   return schema
     .refine((signal) => signal.status === 'no_data' || signal.data.value !== undefined, {
