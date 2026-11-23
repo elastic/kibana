@@ -12,6 +12,7 @@ export const CONTEXT_ENGINE_PATHS = {
   detailKnowledgeDocuments: '/ai_index/:id/knowledge_documents',
   /** A selected Knowledge document: backing index in the path, document id in `?doc=`. */
   detailKnowledgeDocument: '/ai_index/:id/knowledge_documents/:index',
+  detailGraph: '/ai_index/:id/graph',
   detailSettings: '/ai_index/:id/settings',
   dreamingTemplate: '/ai_index/:id/dreaming_template',
 } as const;
@@ -25,6 +26,8 @@ export const getAiIndexSourcesPath = (id: string): string => `/ai_index/${id}/so
 
 export const getAiIndexKnowledgeDocumentsPath = (id: string): string =>
   `/ai_index/${id}/knowledge_documents`;
+
+export const getAiIndexGraphPath = (id: string): string => `/ai_index/${id}/graph`;
 
 export const getAiIndexSettingsPath = (id: string): string => `/ai_index/${id}/settings`;
 

@@ -38,8 +38,29 @@ export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
 export const RELATIONSHIP_KI_TYPE = 'memory.relationship';
 /** The relationship type of a relationship KI, such as `member_of`. */
 export const RELATIONSHIP_RELATION_ATTRIBUTE = 'relationship.relation';
+/** Separates the three parts of {@link RELATIONSHIP_KEY_ATTRIBUTE}. */
+export const RELATIONSHIP_KEY_SEPARATOR = '|';
+
 /** `<from id>|<relationship type>|<to id>`, so queries can filter on either end. */
 export const RELATIONSHIP_KEY_ATTRIBUTE = 'memory.key';
+
+/** Parses a relationship key built by the server; undefined when the shape is wrong. */
+export const parseRelationshipKey = (
+  key: string
+): { from: string; relation: string; to: string } | undefined => {
+  const first = key.indexOf(RELATIONSHIP_KEY_SEPARATOR);
+  const last = key.lastIndexOf(RELATIONSHIP_KEY_SEPARATOR);
+  if (first === -1 || last === first) {
+    return undefined;
+  }
+  const from = key.slice(0, first);
+  const relation = key.slice(first + RELATIONSHIP_KEY_SEPARATOR.length, last);
+  const to = key.slice(last + RELATIONSHIP_KEY_SEPARATOR.length);
+  if (from.length === 0 || relation.length === 0 || to.length === 0) {
+    return undefined;
+  }
+  return { from, relation, to };
+};
 /** The built-in relationship type from a fact to an entity it is about. Configured types link two entities. */
 export const ABOUT_RELATIONSHIP_TYPE = 'about';
 

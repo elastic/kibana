@@ -40,6 +40,7 @@ const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
   CONTEXT_ENGINE_PATHS.detailSources,
   CONTEXT_ENGINE_PATHS.detailKnowledgeDocuments,
+  CONTEXT_ENGINE_PATHS.detailGraph,
   CONTEXT_ENGINE_PATHS.detailSettings,
 ] as const;
 

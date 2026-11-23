@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { RELATIONSHIP_KEY_SEPARATOR } from '../../common/dreaming';
 
 const MAX_SLUG_LENGTH = 96;
 const HASH_LENGTH = 16;
@@ -44,7 +45,7 @@ export const factId = (executionId: string, batchKey: string, ref: string): stri
 
 /** A relationship's `memory.key`: `<from id>|<relationship type>|<to id>`. */
 export const relationshipKey = (from: string, relation: string, to: string): string =>
-  `${from}|${relation}|${to}`;
+  `${from}${RELATIONSHIP_KEY_SEPARATOR}${relation}${RELATIONSHIP_KEY_SEPARATOR}${to}`;
 
 /** The KI id of a relationship, derived from its key. */
 export const relationshipId = (key: string): string => `relationship-${shortHash(key)}`;

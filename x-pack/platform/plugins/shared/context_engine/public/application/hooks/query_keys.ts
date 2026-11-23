@@ -37,6 +37,8 @@ export const contextEngineQueryKeys = {
         excludeTypes !== undefined ? [...excludeTypes].sort() : [],
       ] as const,
     // Under the `list_ki` prefix, so the KI edit / delete / restore invalidation refreshes it too.
+    kiGraph: (aiIndexId: string) =>
+      ['context_engine', 'ai_index', aiIndexId, 'list_ki', '_graph'] as const,
     listKiGroups: (
       aiIndexId: string,
       maxGroups: number,

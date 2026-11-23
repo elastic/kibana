@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { AppHeaderBadge, AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams, useRouteMatch } from 'react-router-dom';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import { KI_NOT_DELETED_STATUSES } from '../../../common/ki_lifecycle_status';
@@ -47,9 +47,16 @@ import {
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
   getAiIndexKnowledgeDocumentsPath,
+  getAiIndexGraphPath,
   getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
+
+const KiGraphPanel = React.lazy(() =>
+  import('../components/ki_graph/ki_graph_panel').then(({ KiGraphPanel: component }) => ({
+    default: component,
+  }))
+);
 
 const managedBadgeLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.managedBadge', {
   defaultMessage: 'Managed',
@@ -69,6 +76,10 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
     defaultMessage: 'Knowledge documents',
   }
 );
+
+const graphTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.graph', {
+  defaultMessage: 'Graph',
+});
 
 const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.settings', {
   defaultMessage: 'Settings',
@@ -103,6 +114,8 @@ export const AiIndexDetailPage = () => {
       ],
       exact: true,
     }) !== null;
+  const isGraphTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailGraph, exact: true }) !== null;
   const isSettingsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
@@ -214,7 +227,7 @@ export const AiIndexDetailPage = () => {
     const overviewTab: AppHeaderTab = {
       id: 'overview',
       label: overviewTabLabel,
-      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
+      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab && !isGraphTab && !isSettingsTab,
       onClick: () => navigateToContextEngine(getAiIndexDetailPath(resolvedAiIndexId)),
       'data-test-subj': 'contextAiIndexDetailTab-overview',
     };
@@ -242,6 +255,16 @@ export const AiIndexDetailPage = () => {
       });
     }
 
+    if (isMemoryEnabled) {
+      tabs.push({
+        id: 'graph',
+        label: graphTabLabel,
+        isSelected: isGraphTab,
+        onClick: () => navigateToContextEngine(getAiIndexGraphPath(resolvedAiIndexId)),
+        'data-test-subj': 'contextAiIndexDetailTab-graph',
+      });
+    }
+
     tabs.push({
       id: 'settings',
       label: settingsTabLabel,
@@ -254,7 +277,9 @@ export const AiIndexDetailPage = () => {
   }, [
     error,
     hasKnowledgeIndicators,
+    isGraphTab,
     isKnowledgeIndicatorsTab,
+    isMemoryEnabled,
     isSettingsTab,
     isSourcesTab,
     navigateToContextEngine,
@@ -348,6 +373,15 @@ export const AiIndexDetailPage = () => {
       >
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
       </Route>
+      {isMemoryEnabled && (
+        <Route path={CONTEXT_ENGINE_PATHS.detailGraph} exact>
+          {aiIndex ? (
+            <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+              <KiGraphPanel aiIndex={aiIndex} />
+            </Suspense>
+          ) : null}
+        </Route>
+      )}
       <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
         <SettingsTab
           isLoading={isLoading}
