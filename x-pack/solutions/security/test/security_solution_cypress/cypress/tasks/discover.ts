@@ -15,6 +15,7 @@ import {
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
   DISCOVER_FIELD_LIST_LOADING,
   DISCOVER_ESQL_EDITABLE_INPUT,
+  DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
   AVAILABLE_FIELD_COUNT,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
@@ -52,9 +53,27 @@ export const assertFieldsAreLoaded = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const fillEsqlQueryBar = (query: string) => {
+const ESQL_SELECT_ALL_KEYS = Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}';
+
+const typeInEsqlQueryBar = (keys: string) => {
   // eslint-disable-next-line cypress/no-force
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(keys, { force: true });
+};
+
+export const fillEsqlQueryBar = (query: string) => {
+  typeInEsqlQueryBar(`${ESQL_SELECT_ALL_KEYS}{del}`);
+  // Typing the query key by key races Monaco's suggest widget and auto-closing quotes, which can
+  // garble the text under load. A single paste inserts it in one edit.
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).then(($textarea) => {
+    const clipboardData = new DataTransfer();
+    clipboardData.setData('text/plain', query);
+    $textarea[0].dispatchEvent(
+      new ClipboardEvent('paste', { clipboardData, bubbles: true, cancelable: true })
+    );
+  });
+  cy.get(DISCOVER_ESQL_INPUT_TEXT_CONTAINER).should(($input) => {
+    expect(convertEditorNonBreakingSpaceToSpace($input.text())).to.eq(query);
+  });
 };
 
 export const selectCurrentDiscoverEsqlQuery = (
@@ -63,7 +82,7 @@ export const selectCurrentDiscoverEsqlQuery = (
   goToEsqlTab();
   // eslint-disable-next-line cypress/no-force
   cy.get(discoverEsqlInput).click({ force: true });
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
+  typeInEsqlQueryBar(ESQL_SELECT_ALL_KEYS);
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
