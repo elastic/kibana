@@ -144,6 +144,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
     search: searchValue || undefined,
     createdBy: selectedUsersParam,
     enabled: enabledFilter,
+    withEffectivePolicyIds: true,
   });
 
   const items = useMemo(() => data?.data ?? EMPTY_ARRAY, [data?.data]);

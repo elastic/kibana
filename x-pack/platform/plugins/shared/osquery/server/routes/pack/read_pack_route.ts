@@ -10,7 +10,10 @@ import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common'
 import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
-import type { ReadPacksRequestParamsSchema } from '../../../common/api';
+import type {
+  ReadPacksRequestParamsSchema,
+  ReadPacksRequestQuerySchema,
+} from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import { API_VERSIONS } from '../../../common/constants';
 import type { PackSavedObject } from '../../common/types';
@@ -26,7 +29,7 @@ import {
 import { getEffectivePolicyIdsForPacks } from './effective_policy_ids';
 import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
-import { readPacksRequestParamsSchema } from '../../../common/api';
+import { readPacksRequestParamsSchema, readPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { readPackResponseSchema } from './response_schemas';
 
@@ -50,6 +53,10 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof readPacksRequestParamsSchema,
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
+            query: buildRouteValidation<
+              typeof readPacksRequestQuerySchema,
+              ReadPacksRequestQuerySchema
+            >(readPacksRequestQuerySchema),
           },
           response: {
             200: {
@@ -89,12 +96,16 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
           .length;
 
-        const effectivePolicyIds = await getEffectivePolicyIdsForPacks({
-          osqueryContext,
-          request,
-          soClient: spaceScopedClient,
-          packNames: [attributes.name],
-        });
+        // Opt-in: this drains every Osquery integration.
+        const effectivePolicyIds =
+          request.query?.withEffectivePolicyIds === 'true'
+            ? await getEffectivePolicyIdsForPacks({
+                osqueryContext,
+                request,
+                soClient: spaceScopedClient,
+                packs: [{ id, name: attributes.name }],
+              })
+            : undefined;
 
         const isRruleFeatureEnabled = osqueryContext.experimentalFeatures.rruleScheduling;
 
@@ -126,7 +137,7 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           shards: convertShardsToObject(attributes.shards),
           policy_ids: policyIds,
           ...(effectivePolicyIds && {
-            effective_policy_ids: effectivePolicyIds.get(attributes.name),
+            effective_policy_ids: effectivePolicyIds.get(id),
           }),
           read_only: attributes.version !== undefined && osqueryPackAssetReference,
           // Discriminated read response — see buildScheduleResponseSlice.

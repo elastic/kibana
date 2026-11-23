@@ -168,7 +168,11 @@ describe('PackForm', () => {
   });
 
   it.each([
-    { label: 'expands a partial shared selection', shared: true, expected: ['A', 'B'] },
+    {
+      label: 'keeps a partial shared selection as saved (does not add co-tenants)',
+      shared: true,
+      expected: ['A'],
+    },
     { label: 'preserves unshared selections', shared: false, expected: ['A'] },
   ])('$label on submit', async ({ shared, expected }) => {
     mockUseAgentPolicies.mockReturnValue({

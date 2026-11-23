@@ -11,61 +11,63 @@ import { apiTest, testData } from '../fixtures';
 
 const AGENT_POLICIES_ROUTE = 'internal/osquery/fleet_wrapper/agent_policies';
 
+interface PackListItem {
+  name: string;
+  saved_object_id: string;
+  policy_ids: string[];
+  effective_policy_ids?: string[];
+}
+
 // Creating a package policy with several `policy_ids` needs an Enterprise (trial) license,
 // which the default stateful Scout config provides. Serverless tiers are not covered here.
+// Every test creates what it reads, so any test can run on its own (e.g. with --grep).
 apiTest.describe(
   'Osquery packs - shared integration targeting',
   { tag: ['@local-stateful-classic'] },
   () => {
     let adminCredentials: RoleSessionCredentials;
+    let packageVersion: string;
     let policyA: string;
     let policyB: string;
     let policyD: string;
     let sharedPackagePolicyId: string;
     let dedicatedPackagePolicyId: string;
-    let partialPackId: string;
-    const createdPackIds: string[] = [];
+    const createdPackagePolicyIds: string[] = [];
     const createdAgentPolicyIds: string[] = [];
     const suffix = Date.now();
 
     const headers = () => ({ ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader });
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, apiServices }) => {
       adminCredentials = await samlAuth.asInteractiveUser('admin');
-
-      const versionResponse = await kbnClient.request({
-        method: 'GET',
-        path: `${testData.API_PATHS.FLEET_EPM_PACKAGES}/osquery_manager`,
-      });
-      const version = (versionResponse.data as Record<string, any>)?.item?.version;
+      packageVersion = (await apiServices.fleet.integration.getPackage('osquery_manager')).data.item
+        .version;
 
       const createAgentPolicy = async (name: string) => {
-        const res = await kbnClient.request({
-          method: 'POST',
-          path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}?sys_monitoring=false`,
-          body: { name: `${name}-${suffix}`, namespace: 'default' },
+        const res = await apiServices.fleet.agent_policies.create({
+          policyName: `${name}-${suffix}`,
+          policyNamespace: 'default',
+          sysMonitoring: false,
         });
-        const id = (res.data as Record<string, any>).item.id as string;
+        const id = res.data.item.id as string;
         createdAgentPolicyIds.push(id);
 
         return id;
       };
 
       const createPackagePolicy = async (name: string, policyIds: string[]) => {
-        const res = await kbnClient.request({
-          method: 'POST',
-          path: testData.API_PATHS.FLEET_PACKAGE_POLICIES,
-          body: {
-            name: `${name}-${suffix}`,
-            description: '',
-            namespace: 'default',
-            policy_ids: policyIds,
-            package: { name: 'osquery_manager', version },
-            inputs: { 'osquery_manager-osquery': { enabled: true, streams: {} } },
-          },
+        const res = await apiServices.fleet.package_policies.create({
+          name: `${name}-${suffix}`,
+          description: '',
+          namespace: 'default',
+          policy_ids: policyIds,
+          package: { name: 'osquery_manager', version: packageVersion },
+          inputs: { 'osquery_manager-osquery': { enabled: true, streams: {} } },
         });
+        const id = res.data.item.id as string;
+        createdPackagePolicyIds.push(id);
 
-        return (res.data as Record<string, any>).item.id as string;
+        return id;
       };
 
       policyA = await createAgentPolicy('e2e-shared-a');
@@ -87,31 +89,26 @@ apiTest.describe(
         }
       };
 
-      for (const packId of createdPackIds) {
-        await attempt(() => apiServices.osquery.packs.delete(packId));
-      }
-
-      for (const id of [sharedPackagePolicyId, dedicatedPackagePolicyId]) {
-        if (id) {
-          await attempt(() =>
-            kbnClient.request({
-              method: 'DELETE',
-              path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${id}`,
-              ignoreErrors: [404],
-            })
-          );
+      // Find packs by the run suffix rather than by ids collected from responses, so a
+      // pack saved before a failed Fleet write (non-200 create) is cleaned up too.
+      await attempt(async () => {
+        const res = await kbnClient.request({
+          method: 'GET',
+          path: `/${testData.API_PATHS.OSQUERY_PACKS}`,
+          headers: { 'elastic-api-version': testData.COMMON_HEADERS['elastic-api-version'] },
+          query: { search: String(suffix), pageSize: 100 },
+        });
+        for (const { saved_object_id: packId } of (res.data as { data: PackListItem[] }).data) {
+          await attempt(() => apiServices.osquery.packs.delete(packId));
         }
+      });
+
+      for (const id of createdPackagePolicyIds) {
+        await attempt(() => apiServices.fleet.package_policies.delete(id));
       }
 
-      for (const agentPolicyId of createdAgentPolicyIds) {
-        await attempt(() =>
-          kbnClient.request({
-            method: 'POST',
-            path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}/delete`,
-            body: { agentPolicyId },
-            ignoreErrors: [404],
-          })
-        );
+      for (const id of createdAgentPolicyIds) {
+        await attempt(() => apiServices.fleet.agent_policies.delete(id));
       }
 
       if (failures.length) {
@@ -119,62 +116,97 @@ apiTest.describe(
       }
     });
 
-    apiTest('warns when a shared integration is only partially selected', async ({ apiClient }) => {
-      const response = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
-        headers: headers(),
-        body: testData.getMinimalPack({ name: `e2e-partial-${suffix}`, policy_ids: [policyA] }),
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      partialPackId = response.body.data.saved_object_id;
-      createdPackIds.push(partialPackId);
-
-      expect(response.body.data.policy_ids).toStrictEqual([policyA]);
-      expect(response.body.warnings).toHaveLength(1);
-      expect(response.body.warnings[0]).toMatchObject({
-        code: 'shared_integration_overdelivery',
-        package_policy_id: sharedPackagePolicyId,
-        additional_policy_ids: [policyB],
-      });
-    });
-
-    apiTest('reads effective agent policies from live package policies', async ({ apiClient }) => {
-      const response = await apiClient.get(`${testData.API_PATHS.OSQUERY_PACKS}/${partialPackId}`, {
-        headers: headers(),
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect([...response.body.data.effective_policy_ids].sort()).toStrictEqual(
-        [policyA, policyB].sort()
-      );
-    });
-
     apiTest(
-      'returns no warnings when the whole shared integration is selected',
+      'warns on a partial shared selection and reports effective targets on opt-in',
       async ({ apiClient }) => {
-        const response = await apiClient.put(
-          `${testData.API_PATHS.OSQUERY_PACKS}/${partialPackId}`,
-          {
+        const name = `e2e-partial-${suffix}`;
+        let packId = '';
+
+        await apiTest.step('create on A only: saved [A], warning names B', async () => {
+          const response = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
+            headers: headers(),
+            body: testData.getMinimalPack({ name, policy_ids: [policyA] }),
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          packId = response.body.data.saved_object_id;
+          expect(response.body.data.policy_ids).toStrictEqual([policyA]);
+          expect(response.body.warnings).toHaveLength(1);
+          expect(response.body.warnings[0]).toMatchObject({
+            code: 'shared_integration_overdelivery',
+            package_policy_id: sharedPackagePolicyId,
+            additional_policy_ids: [policyB],
+          });
+        });
+
+        await apiTest.step('read without opt-in omits effective_policy_ids', async () => {
+          const response = await apiClient.get(`${testData.API_PATHS.OSQUERY_PACKS}/${packId}`, {
+            headers: headers(),
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.data.effective_policy_ids).toBeUndefined();
+        });
+
+        await apiTest.step('read with opt-in reports A and B as effective', async () => {
+          const response = await apiClient.get(
+            `${testData.API_PATHS.OSQUERY_PACKS}/${packId}?withEffectivePolicyIds=true`,
+            { headers: headers(), responseType: 'json' }
+          );
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.data.policy_ids).toStrictEqual([policyA]);
+          expect([...response.body.data.effective_policy_ids].sort()).toStrictEqual(
+            [policyA, policyB].sort()
+          );
+        });
+
+        await apiTest.step('list with opt-in tells saved [A] from effective [A, B]', async () => {
+          const response = await apiClient.get(
+            `${testData.API_PATHS.OSQUERY_PACKS}?search=${suffix}&pageSize=100&withEffectivePolicyIds=true`,
+            { headers: headers(), responseType: 'json' }
+          );
+          expect(response).toHaveStatusCode(200);
+          const pack = (response.body.data as PackListItem[]).find((item) => item.name === name);
+          expect(pack?.policy_ids).toStrictEqual([policyA]);
+          expect([...(pack?.effective_policy_ids ?? [])].sort()).toStrictEqual(
+            [policyA, policyB].sort()
+          );
+        });
+
+        await apiTest.step('selecting the whole integration returns no warning', async () => {
+          const response = await apiClient.put(`${testData.API_PATHS.OSQUERY_PACKS}/${packId}`, {
             headers: headers(),
             body: { policy_ids: [policyA, policyB] },
             responseType: 'json',
-          }
-        );
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.warnings ?? []).toHaveLength(0);
+          });
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.warnings ?? []).toHaveLength(0);
+        });
       }
     );
 
-    apiTest('returns no warnings for a dedicated integration', async ({ apiClient }) => {
-      const response = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
-        headers: headers(),
-        body: testData.getMinimalPack({ name: `e2e-dedicated-${suffix}`, policy_ids: [policyD] }),
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      createdPackIds.push(response.body.data.saved_object_id);
-      expect(response.body.warnings ?? []).toHaveLength(0);
-    });
+    apiTest(
+      'returns no warnings and matching targets for a dedicated integration',
+      async ({ apiClient }) => {
+        const name = `e2e-dedicated-${suffix}`;
+        const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
+          headers: headers(),
+          body: testData.getMinimalPack({ name, policy_ids: [policyD] }),
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        expect(createResponse.body.warnings ?? []).toHaveLength(0);
+
+        const listResponse = await apiClient.get(
+          `${testData.API_PATHS.OSQUERY_PACKS}?search=${suffix}&pageSize=100&withEffectivePolicyIds=true`,
+          { headers: headers(), responseType: 'json' }
+        );
+        expect(listResponse).toHaveStatusCode(200);
+        const pack = (listResponse.body.data as PackListItem[]).find((item) => item.name === name);
+        expect(pack?.policy_ids).toStrictEqual([policyD]);
+        expect(pack?.effective_policy_ids).toStrictEqual([policyD]);
+      }
+    );
 
     apiTest('exposes the owning package policy on shared agent policies', async ({ apiClient }) => {
       const response = await apiClient.get(AGENT_POLICIES_ROUTE, {
@@ -210,7 +242,6 @@ apiTest.describe(
       });
       expect(createResponse).toHaveStatusCode(200);
       const packId = createResponse.body.data.saved_object_id;
-      createdPackIds.push(packId);
       expect(createResponse.body.warnings ?? []).toHaveLength(0);
 
       const enableResponse = await apiClient.put(`${testData.API_PATHS.OSQUERY_PACKS}/${packId}`, {
@@ -228,65 +259,62 @@ apiTest.describe(
       });
     });
 
-    apiTest('lists effective agent policies for each pack', async ({ apiClient }) => {
-      const response = await apiClient.get(
-        `${testData.API_PATHS.OSQUERY_PACKS}?search=${suffix}&pageSize=100`,
-        { headers: headers(), responseType: 'json' }
-      );
-      expect(response).toHaveStatusCode(200);
-
-      const items = response.body.data as Array<{
-        name: string;
-        saved_object_id: string;
-        policy_ids: string[];
-        effective_policy_ids?: string[];
-      }>;
-      // Saved on A only, so the list must report B as effective without saving it.
-      const partial = items.find((item) => item.name === `e2e-disabled-partial-${suffix}`);
-      expect(partial?.policy_ids).toStrictEqual([policyA]);
-      expect([...(partial?.effective_policy_ids ?? [])].sort()).toStrictEqual(
-        [policyA, policyB].sort()
-      );
-
-      const dedicated = items.find((item) => item.name === `e2e-dedicated-${suffix}`);
-      expect(dedicated?.policy_ids).toStrictEqual([policyD]);
-      expect(dedicated?.effective_policy_ids).toStrictEqual([policyD]);
-    });
-
-    // Runs last: it attaches another agent policy to the shared integration.
     apiTest(
-      'reports agent policies attached to the shared integration later as effective only',
-      async ({ apiClient, kbnClient }) => {
-        const policyRes = await kbnClient.request({
-          method: 'POST',
-          path: `${testData.API_PATHS.FLEET_AGENT_POLICIES}?sys_monitoring=false`,
-          body: { name: `e2e-shared-c-${suffix}`, namespace: 'default' },
-        });
-        const policyC = (policyRes.data as Record<string, any>).item.id as string;
-        createdAgentPolicyIds.push(policyC);
+      'reports agent policies attached to a shared integration later as effective only',
+      async ({ apiClient, apiServices, kbnClient }) => {
+        // Its own integration, so attaching another agent policy does not affect other tests.
+        const createAgentPolicy = async (policyName: string) => {
+          const res = await apiServices.fleet.agent_policies.create({
+            policyName: `${policyName}-${suffix}`,
+            policyNamespace: 'default',
+            sysMonitoring: false,
+          });
+          const id = res.data.item.id as string;
+          createdAgentPolicyIds.push(id);
 
-        const sharedRes = await kbnClient.request({
-          method: 'GET',
-          path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${sharedPackagePolicyId}`,
+          return id;
+        };
+
+        const policyE = await createAgentPolicy('e2e-later-e');
+        const policyF = await createAgentPolicy('e2e-later-f');
+        const policyG = await createAgentPolicy('e2e-later-g');
+        const integrationRes = await apiServices.fleet.package_policies.create({
+          name: `e2e-later-osquery-${suffix}`,
+          description: '',
+          namespace: 'default',
+          policy_ids: [policyE, policyF],
+          package: { name: 'osquery_manager', version: packageVersion },
+          inputs: { 'osquery_manager-osquery': { enabled: true, streams: {} } },
         });
-        const sharedPackage = (sharedRes.data as Record<string, any>).item.package;
+        const laterPackagePolicyId = integrationRes.data.item.id as string;
+        createdPackagePolicyIds.push(laterPackagePolicyId);
+
+        const createResponse = await apiClient.post(testData.API_PATHS.OSQUERY_PACKS, {
+          headers: headers(),
+          body: testData.getMinimalPack({ name: `e2e-later-${suffix}`, policy_ids: [policyE] }),
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const packId = createResponse.body.data.saved_object_id;
+
+        // Fleet's update API is the only way to attach an agent policy to an integration.
         await kbnClient.request({
           method: 'PUT',
-          path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${sharedPackagePolicyId}`,
+          path: `${testData.API_PATHS.FLEET_PACKAGE_POLICIES}/${laterPackagePolicyId}`,
           body: {
-            policy_ids: [policyA, policyB, policyC],
-            package: { name: sharedPackage.name, version: sharedPackage.version },
+            policy_ids: [policyE, policyF, policyG],
+            package: { name: 'osquery_manager', version: packageVersion },
           },
         });
 
         const response = await apiClient.get(
-          `${testData.API_PATHS.OSQUERY_PACKS}/${partialPackId}`,
+          `${testData.API_PATHS.OSQUERY_PACKS}/${packId}?withEffectivePolicyIds=true`,
           { headers: headers(), responseType: 'json' }
         );
         expect(response).toHaveStatusCode(200);
-        expect(response.body.data.policy_ids).toStrictEqual([policyA, policyB]);
+        expect(response.body.data.policy_ids).toStrictEqual([policyE]);
         expect([...response.body.data.effective_policy_ids].sort()).toStrictEqual(
-          [policyA, policyB, policyC].sort()
+          [policyE, policyF, policyG].sort()
         );
       }
     );

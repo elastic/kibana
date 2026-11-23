@@ -171,6 +171,7 @@ const PackShardsFieldComponent = ({ options, isDisabled = false }: PackShardsFie
           key,
           value: key,
           label: policyIds.map((id) => agentPoliciesById?.[id]?.name ?? id).join(', '),
+          memberIds: policyIds,
         })),
     ];
   }, [options, groupsByPackagePolicyId, agentPoliciesById]);

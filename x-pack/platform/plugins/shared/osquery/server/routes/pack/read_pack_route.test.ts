@@ -177,7 +177,10 @@ describe('readPackRoute', () => {
       const response = httpServerMock.createResponseFactory();
       await routeHandler(
         {} as Parameters<RequestHandler>[0],
-        httpServerMock.createKibanaRequest({ params: { id: 'pack-1' } }),
+        httpServerMock.createKibanaRequest({
+          params: { id: 'pack-1' },
+          query: { withEffectivePolicyIds: 'true' },
+        }),
         response
       );
       expect(response.ok).toHaveBeenCalledTimes(1);
@@ -195,9 +198,11 @@ describe('readPackRoute', () => {
       expect(fetchAllItems).toHaveBeenCalledTimes(1);
       expect(fetchAllItems).toHaveBeenCalledWith(mockSavedObjectsClient, {
         kuery: expect.any(String),
+        fields: ['name', 'enabled', 'policy_ids', 'inputs'],
       });
       expect(getByIds).toHaveBeenCalledWith(mockSavedObjectsClient, ['A', 'B', 'C'], {
         ignoreMissing: true,
+        fields: ['name'],
       });
     });
 
@@ -225,6 +230,23 @@ describe('readPackRoute', () => {
       getByIds.mockRejectedValueOnce(new Error('Fleet unavailable'));
       expect(await readEffective()).not.toHaveProperty('effective_policy_ids');
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('effective'));
+    });
+
+    it('skips the Fleet scan and omits the field unless the request opts in', async () => {
+      mockSavedObjectsClient.get.mockResolvedValue(makePack());
+      setupRoute();
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(
+        {} as Parameters<RequestHandler>[0],
+        httpServerMock.createKibanaRequest({ params: { id: 'pack-1' } }),
+        response
+      );
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(response.ok.mock.calls[0][0]?.body)).not.toContain(
+        'effective_policy_ids'
+      );
+      expect(fetchAllItems).not.toHaveBeenCalled();
+      expect(getByIds).not.toHaveBeenCalled();
     });
   });
 });

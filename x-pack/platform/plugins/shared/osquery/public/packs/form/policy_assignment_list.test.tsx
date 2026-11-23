@@ -144,7 +144,7 @@ describe('PolicyAssignmentList', () => {
         expect(marker.closest('li')).toHaveTextContent('Beta Policy');
         expect(marker.closest('li')).not.toHaveTextContent('Alpha Policy');
         expect(screen.getByTestId('policyAssignmentSharedIntegrationCallout')).toHaveTextContent(
-          'Saving adds them to this pack’s agent policies: Beta Policy.'
+          'share an integration with a selected agent policy: Beta Policy. Saving does not add them to this pack’s agent policies.'
         );
         expect(onFormChange).toHaveBeenLastCalledWith({ policy_ids: ['policy-1'], shards: {} });
 

@@ -12,3 +12,9 @@ export const readPacksRequestParamsSchema = t.type({
 });
 
 export type ReadPacksRequestParamsSchema = t.OutputOf<typeof readPacksRequestParamsSchema>;
+
+export const readPacksRequestQuerySchema = t.type({
+  withEffectivePolicyIds: t.union([t.union([t.literal('true'), t.literal('false')]), t.undefined]),
+});
+
+export type ReadPacksRequestQuerySchema = t.OutputOf<typeof readPacksRequestQuerySchema>;

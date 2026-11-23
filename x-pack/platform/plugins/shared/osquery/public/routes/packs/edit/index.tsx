@@ -39,7 +39,7 @@ const EditPackPageComponent = () => {
   const { packId } = useParams<{ packId: string }>();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { isLoading, data, error } = usePack({ packId });
+  const { isLoading, data, error } = usePack({ packId, withEffectivePolicyIds: true });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
   const copyPackMutation = useCopyPack({ packId });
   // Full lockdown: a readPacks-only user can view but not edit anything.

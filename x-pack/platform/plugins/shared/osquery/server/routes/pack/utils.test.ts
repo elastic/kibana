@@ -2402,6 +2402,18 @@ describe('resolveSharedIntegrationOverdelivery', () => {
     ).toEqual([]);
   });
 
+  test('also warns for integrations the request writes beyond the saved targets', () => {
+    const drifted = targetingPackagePolicy('drifted', ['C', 'D'], { 'space--pack': {} });
+    expect(
+      resolveSharedIntegrationOverdelivery(
+        ['A'],
+        [targetingPackagePolicy('dedicated', ['A']), drifted],
+        undefined,
+        [drifted]
+      ).map(({ package_policy_id: id, additional_policy_ids: ids }) => [id, ids])
+    ).toEqual([['drifted', ['C', 'D']]]);
+  });
+
   test('only warns for integrations the write-target map resolves in an overlapping group', () => {
     expect(
       resolveSharedIntegrationOverdelivery(
@@ -2411,6 +2423,8 @@ describe('resolveSharedIntegrationOverdelivery', () => {
     ).toEqual([['first', ['B']]]);
   });
 });
+
+const asPacks = (names: string[]) => names.map((name) => ({ id: name, name }));
 
 describe('computeEffectivePolicyIds', () => {
   const soClient = savedObjectsClientMock.create();
@@ -2435,7 +2449,7 @@ describe('computeEffectivePolicyIds', () => {
 
   test('unions sorted unique live owners for multiple packs and resolves owners once in scope', async () => {
     const result = await computeEffectivePolicyIds(
-      ['one', 'two', 'disabled'],
+      asPacks(['one', 'two', 'disabled']),
       'space',
       [
         targetingPackagePolicy('first', ['B', 'A', 'missing'], {
@@ -2460,6 +2474,7 @@ describe('computeEffectivePolicyIds', () => {
       expect.arrayContaining(['A', 'B', 'C', 'missing']),
       {
         ignoreMissing: true,
+        fields: ['name'],
       }
     );
     expect(getByIds.mock.calls[0][1]).toHaveLength(4);
@@ -2468,7 +2483,7 @@ describe('computeEffectivePolicyIds', () => {
   test('recognizes legacy bare keys and space-prefixed keys in the default space without double-counting owners', async () => {
     expect(
       await computeEffectivePolicyIds(
-        ['legacy'],
+        asPacks(['legacy']),
         'default',
         [
           targetingPackagePolicy('bare', ['B', 'A'], { legacy: {} }),
@@ -2482,7 +2497,7 @@ describe('computeEffectivePolicyIds', () => {
   test('does not credit a legacy bare key to a same-named pack in a non-default space', async () => {
     expect(
       await computeEffectivePolicyIds(
-        ['legacy'],
+        asPacks(['legacy']),
         'space',
         [
           targetingPackagePolicy('bare', ['B'], { legacy: {} }),
@@ -2496,7 +2511,7 @@ describe('computeEffectivePolicyIds', () => {
   test('returns an empty list for a disabled pack with no wire block', async () => {
     expect(
       await computeEffectivePolicyIds(
-        ['disabled'],
+        asPacks(['disabled']),
         'space',
         [targetingPackagePolicy('empty', ['A'])],
         lookup
@@ -2507,13 +2522,48 @@ describe('computeEffectivePolicyIds', () => {
 
   test('includes a drift owner attached after save', async () => {
     const integration = targetingPackagePolicy('shared', ['A'], { 'space--pack': {} });
-    expect(await computeEffectivePolicyIds(['pack'], 'space', [integration], lookup)).toEqual(
-      new Map([['pack', ['A']]])
-    );
+    expect(
+      await computeEffectivePolicyIds(asPacks(['pack']), 'space', [integration], lookup)
+    ).toEqual(new Map([['pack', ['A']]]));
     integration.policy_ids.push('E');
-    expect(await computeEffectivePolicyIds(['pack'], 'space', [integration], lookup)).toEqual(
-      new Map([['pack', ['A', 'E']]])
+    expect(
+      await computeEffectivePolicyIds(asPacks(['pack']), 'space', [integration], lookup)
+    ).toEqual(new Map([['pack', ['A', 'E']]]));
+  });
+
+  test('matches blocks by pack_id, so a pack named like another pack key gets no owners', async () => {
+    // Pack `foo` writes key `default--foo`; a pack literally named `default--foo` has
+    // that string as its legacy bare key in the default space.
+    const integration = targetingPackagePolicy('shared', ['A'], {
+      'default--foo': { pack_id: 'foo-id' },
+    });
+    expect(
+      await computeEffectivePolicyIds(
+        [
+          { id: 'foo-id', name: 'foo' },
+          { id: 'tricky-id', name: 'default--foo' },
+        ],
+        'default',
+        [integration],
+        lookup
+      )
+    ).toEqual(
+      new Map([
+        ['foo-id', ['A']],
+        ['tricky-id', []],
+      ])
     );
+  });
+
+  test('falls back to the key for legacy blocks without pack_id', async () => {
+    expect(
+      await computeEffectivePolicyIds(
+        [{ id: 'legacy-id', name: 'legacy' }],
+        'default',
+        [targetingPackagePolicy('shared', ['A'], { legacy: {} })],
+        lookup
+      )
+    ).toEqual(new Map([['legacy-id', ['A']]]));
   });
 
   test('ignores integrations and inputs that Fleet does not deliver', async () => {
@@ -2530,7 +2580,7 @@ describe('computeEffectivePolicyIds', () => {
 
     expect(
       await computeEffectivePolicyIds(
-        ['pack'],
+        asPacks(['pack']),
         'space',
         [disabledIntegration, disabledInput, live],
         lookup
@@ -2542,7 +2592,7 @@ describe('computeEffectivePolicyIds', () => {
     getByIds.mockRejectedValue(new Error('Fleet unavailable'));
     await expect(
       computeEffectivePolicyIds(
-        ['pack'],
+        asPacks(['pack']),
         'space',
         [targetingPackagePolicy('shared', ['A'], { 'space--pack': {} })],
         lookup

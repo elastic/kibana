@@ -11,23 +11,31 @@ import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { computeEffectivePolicyIds, fetchAllPackagePolicies } from './utils';
 
+export const EFFECTIVE_POLICY_IDS_PACKAGE_POLICY_FIELDS = [
+  'name',
+  'enabled',
+  'policy_ids',
+  'inputs',
+];
+
 /**
  * Best-effort lookup of the agent policies that actually receive each pack on the wire,
- * shared by the read and find routes. Returns `undefined` (and logs) on any failure so a
- * Fleet hiccup never breaks the packs read path.
+ * shared by the read and find routes (only when the request opts in with
+ * `withEffectivePolicyIds=true`). Returns a map keyed by pack saved-object id, or
+ * `undefined` (and logs) on any failure so a Fleet hiccup never breaks the packs read path.
  */
 export const getEffectivePolicyIdsForPacks = async ({
   osqueryContext,
   request,
   soClient,
-  packNames,
+  packs,
 }: {
   osqueryContext: OsqueryAppContext;
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
-  packNames: string[];
+  packs: Array<{ id: string; name: string }>;
 }): Promise<Map<string, string[]> | undefined> => {
-  if (packNames.length === 0) return new Map();
+  if (packs.length === 0) return new Map();
 
   try {
     const spaceId = osqueryContext?.service?.getActiveSpace
@@ -38,12 +46,16 @@ export const getEffectivePolicyIdsForPacks = async ({
       throw new Error('Agent policy service is unavailable');
     }
 
+    // Only what the scan reads: pack blocks live in `inputs`, owners in `policy_ids`.
     const packagePolicies = await fetchAllPackagePolicies(
       osqueryContext.service.getPackagePolicyService(),
-      soClient
+      soClient,
+      undefined,
+      undefined,
+      EFFECTIVE_POLICY_IDS_PACKAGE_POLICY_FIELDS
     );
 
-    return await computeEffectivePolicyIds(packNames, spaceId, packagePolicies, {
+    return await computeEffectivePolicyIds(packs, spaceId, packagePolicies, {
       soClient,
       agentPolicyService,
     });

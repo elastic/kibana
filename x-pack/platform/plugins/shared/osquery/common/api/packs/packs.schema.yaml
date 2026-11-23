@@ -35,6 +35,12 @@ paths:
           description: 'The sort order.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+        - name: withEffectivePolicyIds
+          in: query
+          required: false
+          description: 'Set to `true` to include `effective_policy_ids` for each pack. Reads Fleet integrations, so leave it unset when you do not need it.'
+          schema:
+            type: boolean
       responses:
         '200':
           description: Indicates a successful call.
@@ -141,6 +147,12 @@ paths:
           description: 'The pack ID.'
           schema:
             $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+        - name: withEffectivePolicyIds
+          in: query
+          required: false
+          description: 'Set to `true` to include `effective_policy_ids`. Reads Fleet integrations, so leave it unset when you do not need it.'
+          schema:
+            type: boolean
       responses:
         '200':
           description: Indicates a successful call.

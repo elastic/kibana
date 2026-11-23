@@ -482,8 +482,8 @@ describe('findPackRoute', () => {
             ...makePack(overrides),
             references: [{ type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id: 'A', name: 'A' }],
           },
-          makePack({ name: 'second' }),
-          makePack({ name: 'third' }),
+          { ...makePack({ name: 'second' }), id: 'pack-2' },
+          { ...makePack({ name: 'third' }), id: 'pack-3' },
         ],
         total: 3,
         page: 1,
@@ -493,7 +493,7 @@ describe('findPackRoute', () => {
       const response = httpServerMock.createResponseFactory();
       await routeHandler(
         {} as Parameters<RequestHandler>[0],
-        httpServerMock.createKibanaRequest({ query: {} }),
+        httpServerMock.createKibanaRequest({ query: { withEffectivePolicyIds: 'true' } }),
         response
       );
       expect(response.ok).toHaveBeenCalledTimes(1);
@@ -519,9 +519,11 @@ describe('findPackRoute', () => {
       expect(fetchAllItems).toHaveBeenCalledTimes(1);
       expect(fetchAllItems).toHaveBeenCalledWith(mockSavedObjectsClient, {
         kuery: expect.any(String),
+        fields: ['name', 'enabled', 'policy_ids', 'inputs'],
       });
       expect(getByIds).toHaveBeenCalledWith(mockSavedObjectsClient, ['A', 'B', 'C'], {
         ignoreMissing: true,
+        fields: ['name'],
       });
     });
 
@@ -549,6 +551,28 @@ describe('findPackRoute', () => {
       getByIds.mockRejectedValueOnce(new Error('Fleet unavailable'));
       expect(await readEffective()).not.toHaveProperty('effective_policy_ids');
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('effective'));
+    });
+
+    it('skips the Fleet scan and omits the field unless the request opts in', async () => {
+      mockSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [makePack()],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      });
+      setupRoute();
+      const response = httpServerMock.createResponseFactory();
+      await routeHandler(
+        {} as Parameters<RequestHandler>[0],
+        httpServerMock.createKibanaRequest({ query: {} }),
+        response
+      );
+      expect(response.ok).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(response.ok.mock.calls[0][0]?.body)).not.toContain(
+        'effective_policy_ids'
+      );
+      expect(fetchAllItems).not.toHaveBeenCalled();
+      expect(getByIds).not.toHaveBeenCalled();
     });
   });
 });

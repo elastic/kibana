@@ -922,7 +922,9 @@ export const fetchAllPackagePolicies = async (
   // With Fleet space awareness enabled, policies live in per-space namespaces
   // and the drain only sees the soClient's space unless told otherwise. Pass
   // `['*']` to enumerate every space (Fleet's documented wildcard).
-  spaceIds?: string[]
+  spaceIds?: string[],
+  // Saved-object attributes to load; omit for whole package policies.
+  fields?: string[]
 ): Promise<PackagePolicy[]> => {
   const packagePolicies: PackagePolicy[] = [];
   if (!packagePolicyService) {
@@ -932,6 +934,7 @@ export const fetchAllPackagePolicies = async (
   for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, {
     kuery,
     ...(spaceIds ? { spaceIds } : {}),
+    ...(fields ? { fields } : {}),
   })) {
     packagePolicies.push(...policyBatch);
   }
@@ -1030,18 +1033,38 @@ export const groupAgentPolicyIdsByPackagePolicy = (
   return writeTargetsByPackagePolicyId;
 };
 
-/** Reports additional owners of the supported integrations that will receive a policy pack. */
+/**
+ * Reports additional owners of the supported integrations that will receive a policy pack.
+ *
+ * @param alsoWrittenPackagePolicies integrations the request writes beyond those resolved
+ * from `policyIds`, e.g. the edit-only update path, which also rewrites every integration
+ * that already carries the pack (drift repair). Their owners count as additional too.
+ */
 export const resolveSharedIntegrationOverdelivery = (
   policyIds: string[],
   packagePolicies: PackagePolicy[],
-  shards?: Shard
+  shards?: Shard,
+  alsoWrittenPackagePolicies: PackagePolicy[] = []
 ): SharedIntegrationWarning[] => {
   if (shards?.['*']) return [];
 
   const selectedPolicyIds = new Set(policyIds);
   const warnings: SharedIntegrationWarning[] = [];
-  const writeTargets = groupAgentPolicyIdsByPackagePolicy(policyIds, packagePolicies);
-  for (const { packagePolicy } of writeTargets.values()) {
+  const writtenPackagePolicies = new Map<string, PackagePolicy>();
+  for (const { packagePolicy } of groupAgentPolicyIdsByPackagePolicy(
+    policyIds,
+    packagePolicies
+  ).values()) {
+    writtenPackagePolicies.set(packagePolicy.id, packagePolicy);
+  }
+
+  for (const packagePolicy of alsoWrittenPackagePolicies) {
+    if (!writtenPackagePolicies.has(packagePolicy.id)) {
+      writtenPackagePolicies.set(packagePolicy.id, packagePolicy);
+    }
+  }
+
+  for (const packagePolicy of writtenPackagePolicies.values()) {
     if (!satisfies(packagePolicy.package?.version ?? '', '>=0.6.0')) continue;
 
     const additionalPolicyIds = [...new Set(packagePolicy.policy_ids)]
@@ -1060,9 +1083,18 @@ export const resolveSharedIntegrationOverdelivery = (
   return warnings;
 };
 
-/** Computes live pack owners in one wire scan, filtering them through the caller's space-scoped client. */
+/**
+ * Computes live pack owners in one wire scan, filtering them through the caller's
+ * space-scoped client. Returns a map keyed by pack saved-object id.
+ *
+ * A block belongs to a pack only when its key is one this pack writes (`<space>--<name>`,
+ * or the bare name in the default space, the same rule `reconcileScheduleIdsToWire`
+ * applies) AND, when the block carries `pack_id`, that id is the pack's. Key equality
+ * alone is not identity: pack names may contain `--`, so pack `foo` in the default
+ * space and a pack named `default--foo` share the key `default--foo`.
+ */
 export const computeEffectivePolicyIds = async (
-  packNames: string[],
+  packs: Array<{ id: string; name: string }>,
   spaceId: string,
   packagePolicies: PackagePolicy[],
   {
@@ -1073,48 +1105,54 @@ export const computeEffectivePolicyIds = async (
     agentPolicyService: Pick<AgentPolicyServiceInterface, 'getByIds'>;
   }
 ): Promise<Map<string, string[]>> => {
-  // A legacy bare (unprefixed) wire key belongs to the default space — the same
-  // rule `reconcileScheduleIdsToWire` applies — so only match it there. Matching
-  // it in every space would credit another space's same-named pack with its owners.
   const matchesBareKey = spaceId === DEFAULT_SPACE_ID;
-  const policyIdsByPackKey = new Map<string, Set<string>>();
-  for (const packName of packNames) {
-    policyIdsByPackKey.set(makePackKey(packName, spaceId), new Set());
-    if (matchesBareKey) policyIdsByPackKey.set(packName, new Set());
+  const packIdsByKey = new Map<string, string[]>();
+  const addKey = (key: string, packId: string) =>
+    packIdsByKey.set(key, [...(packIdsByKey.get(key) ?? []), packId]);
+  const ownersByPackId = new Map<string, Set<string>>();
+  for (const { id, name } of packs) {
+    ownersByPackId.set(id, new Set());
+    addKey(makePackKey(name, spaceId), id);
+    if (matchesBareKey) addKey(name, id);
   }
 
   for (const packagePolicy of packagePolicies) {
     // Fleet leaves disabled integrations and inputs out of the agent policy, so their
     // pack blocks are never delivered.
-    const input = packagePolicy.inputs[0];
+    const input = packagePolicy.inputs?.[0];
     if (packagePolicy.enabled === false || input?.enabled === false) continue;
-    const packs = input?.config?.osquery?.value?.packs ?? {};
-    for (const packKey of Object.keys(packs)) {
-      const owners = policyIdsByPackKey.get(packKey);
-      if (!owners) continue;
-      for (const policyId of packagePolicy.policy_ids) owners.add(policyId);
+    const blocks: Record<string, { pack_id?: unknown }> =
+      input?.config?.osquery?.value?.packs ?? {};
+    for (const [packKey, block] of Object.entries(blocks)) {
+      const blockPackId = typeof block?.pack_id === 'string' ? block.pack_id : undefined;
+      for (const packId of packIdsByKey.get(packKey) ?? []) {
+        // Legacy blocks written before `pack_id` existed fall back to the key alone.
+        if (blockPackId && blockPackId !== packId) continue;
+        for (const policyId of packagePolicy.policy_ids ?? []) {
+          ownersByPackId.get(packId)?.add(policyId);
+        }
+      }
     }
   }
 
   const candidatePolicyIds = new Set<string>();
-  for (const owners of policyIdsByPackKey.values()) {
+  for (const owners of ownersByPackId.values()) {
     for (const policyId of owners) candidatePolicyIds.add(policyId);
   }
 
   const agentPolicies = candidatePolicyIds.size
-    ? await agentPolicyService.getByIds(soClient, [...candidatePolicyIds], { ignoreMissing: true })
+    ? await agentPolicyService.getByIds(soClient, [...candidatePolicyIds], {
+        ignoreMissing: true,
+        fields: ['name'],
+      })
     : [];
   const visiblePolicyIds = new Set(agentPolicies.map(({ id }) => id));
 
   return new Map(
-    packNames.map((packName) => {
-      const owners = new Set([
-        ...(policyIdsByPackKey.get(makePackKey(packName, spaceId)) ?? []),
-        ...((matchesBareKey && policyIdsByPackKey.get(packName)) || []),
-      ]);
-
-      return [packName, [...owners].filter((id) => visiblePolicyIds.has(id)).sort()];
-    })
+    [...ownersByPackId].map(([packId, owners]) => [
+      packId,
+      [...owners].filter((id) => visiblePolicyIds.has(id)).sort(),
+    ])
   );
 };
 

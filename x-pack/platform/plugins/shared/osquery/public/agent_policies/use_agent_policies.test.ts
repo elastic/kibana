@@ -72,26 +72,28 @@ describe('selectAgentPolicies', () => {
     });
   });
 
-  it('merges overlapping integrations into one component listing all integration names', () => {
+  it('does not merge overlapping integrations and leaves a multi-integration policy ungrouped', () => {
     const pp1 = { id: 'pp1', name: 'Integration one' };
     const pp2 = { id: 'pp2', name: 'Integration two' };
+    // Server shape: `package_policy_id` is only set with exactly one Osquery integration.
+    const single = (integration: typeof pp1) => ({
+      package_policy_id: integration.id,
+      package_policy_name: integration.name,
+      osquery_package_policies: [integration],
+    });
     const response = [
-      policy('C', { osquery_package_policies: [pp2] }),
-      policy('B', { osquery_package_policies: [pp1] }),
-      policy('A', {
-        package_policy_id: pp1.id,
-        package_policy_name: pp1.name,
-        osquery_package_policies: [pp2, pp1],
-      }),
-      policy('D', { osquery_package_policies: [{ id: 'pp3', name: 'Dedicated' }] }),
+      policy('C', single(pp2)),
+      policy('B', single(pp1)),
+      policy('E', single(pp1)),
+      policy('A', { osquery_package_policies: [pp2, pp1] }),
     ];
 
     const selection = selectAgentPolicies(response);
 
     expect(selection.groupsByPackagePolicyId).toEqual({
-      pp1: { id: 'pp1', name: 'Integration one, Integration two', policyIds: ['A', 'B', 'C'] },
+      pp1: { id: 'pp1', name: 'Integration one', policyIds: ['B', 'E'] },
     });
-    expect(selection.groupIdByPolicyId).toEqual({ A: 'pp1', B: 'pp1', C: 'pp1' });
+    expect(selection.groupIdByPolicyId).toEqual({ B: 'pp1', E: 'pp1' });
     expect(selectAgentPolicies([...response].reverse()).groupsByPackagePolicyId).toEqual(
       selection.groupsByPackagePolicyId
     );

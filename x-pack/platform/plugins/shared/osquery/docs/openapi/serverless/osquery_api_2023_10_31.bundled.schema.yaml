@@ -603,6 +603,13 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SortOrderOrUndefined'
+        - description: Set to `true` to include `effective_policy_ids` for each pack.
+            Reads Fleet integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -735,6 +742,13 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/PackId'
+        - description: Set to `true` to include `effective_policy_ids`. Reads Fleet
+            integrations, so leave it unset when you do not need it.
+          in: query
+          name: withEffectivePolicyIds
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           content:
@@ -2592,8 +2606,11 @@ components:
             description:
               $ref: '#/components/schemas/PackDescriptionOrUndefined'
             effective_policy_ids:
-              description: Live agent-policy owners of integrations carrying this pack. Absent
-                when Fleet state is unavailable.
+              description: Agent policies that receive this pack through Fleet, including
+                those that share an Osquery Manager integration with a selected
+                agent policy. Returned only when the request sets
+                `withEffectivePolicyIds=true`, and absent when Fleet state is
+                unavailable.
               items:
                 type: string
               type: array
@@ -2694,8 +2711,11 @@ components:
               description:
                 $ref: '#/components/schemas/PackDescriptionOrUndefined'
               effective_policy_ids:
-                description: Live agent-policy owners of integrations carrying this pack. Absent
-                  when Fleet state is unavailable.
+                description: Agent policies that receive this pack through Fleet, including
+                  those that share an Osquery Manager integration with a
+                  selected agent policy. Returned only when the request sets
+                  `withEffectivePolicyIds=true`, and absent when Fleet state is
+                  unavailable.
                 items:
                   type: string
                 type: array

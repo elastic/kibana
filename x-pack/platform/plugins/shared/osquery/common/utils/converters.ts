@@ -57,6 +57,12 @@ export type ShardsArray = Array<{
   policy: {
     key: string;
     label: string;
+    /**
+     * Agent policies a shared-integration row writes its shard for. Kept on the row so
+     * a group that disappears mid-edit (Fleet changed in another tab) never serializes
+     * the integration id as an agent policy id.
+     */
+    memberIds?: string[];
   };
   percentage: number;
 }>;
@@ -73,7 +79,8 @@ export const convertShardsToObject = (
     shards,
     (acc, value) => {
       if (value?.policy?.key) {
-        for (const policyId of groups[value.policy.key]?.policyIds ?? [value.policy.key]) {
+        for (const policyId of value.policy.memberIds ??
+          groups[value.policy.key]?.policyIds ?? [value.policy.key]) {
           acc[policyId] = value.percentage;
         }
       }
@@ -91,6 +98,10 @@ const FULL_SHARD = 100;
  * members, counting a targeted member without a shard as 100%, so the group
  * row has to start from that same value. Otherwise saving the form unchanged
  * would lower the live shard.
+ *
+ * A group row keeps only its explicitly targeted members (sharded or selected) in
+ * `memberIds`, so saving does not add the integration's other agent policies to the
+ * pack's targets.
  */
 export const convertShardsToArray = (
   shards: DefaultValues<Shard>,
@@ -117,14 +128,24 @@ export const convertShardsToArray = (
       continue;
     }
 
-    const memberIds = groups[key]?.policyIds ?? [policyId];
-    const hasTargetedMemberWithoutShard =
-      key !== policyId &&
-      memberIds.some((id) => targeted.has(id) && (shards as Shard | undefined)?.[id] == null);
+    if (key === policyId) {
+      rows.set(key, {
+        policy: { key, label: policiesById?.[policyId]?.name ?? '' },
+        percentage,
+      });
+      continue;
+    }
+
+    const groupMemberIds = groups[key].policyIds;
+    const isShardKey = (id: string) => (shards as Shard | undefined)?.[id] != null;
+    const hasTargetedMemberWithoutShard = groupMemberIds.some(
+      (id) => targeted.has(id) && !isShardKey(id)
+    );
     rows.set(key, {
       policy: {
         key,
-        label: memberIds.map((id) => policiesById?.[id]?.name ?? '').join(', '),
+        label: groupMemberIds.map((id) => policiesById?.[id]?.name ?? '').join(', '),
+        memberIds: groupMemberIds.filter((id) => isShardKey(id) || targeted.has(id)),
       },
       percentage: hasTargetedMemberWithoutShard ? FULL_SHARD : percentage,
     });

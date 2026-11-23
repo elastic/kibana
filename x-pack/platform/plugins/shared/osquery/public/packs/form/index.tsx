@@ -105,18 +105,29 @@ interface PackFormProps {
 }
 
 /**
- * The agent policies a save writes the pack to: the selected ones, the ones with a
- * shard, and every other agent policy of a shared integration that a selected one uses.
- * Submission and the deploy confirmation must use the same set.
+ * The agent policies a save stores as the pack's targets: the ones the user selected and
+ * the ones with a shard. Agent policies that only share an integration with them are not
+ * added: Fleet delivers to them anyway, and storing them would make the pack follow them
+ * to any integration they move to later. This matches the API, which keeps `policy_ids`
+ * as sent and returns a warning.
+ */
+export const getSubmittedPolicyIds = (
+  selectedPolicyIds: readonly string[],
+  shards: Record<string, number> | undefined
+): string[] => [...new Set([...selectedPolicyIds, ...Object.keys(shards ?? {}).filter(Boolean)])];
+
+/**
+ * The agent policies a save deploys to: the submitted targets plus every other agent
+ * policy of a shared integration they use. The deploy confirmation counts these.
  */
 export const getDeliveredPolicyIds = (
   selectedPolicyIds: readonly string[],
   shards: Record<string, number> | undefined,
   groupsByPackagePolicyId: Record<string, { policyIds: string[] }> | undefined
 ): string[] => {
-  const policies = new Set([...selectedPolicyIds, ...Object.keys(shards ?? {}).filter(Boolean)]);
+  const policies = new Set(getSubmittedPolicyIds(selectedPolicyIds, shards));
   for (const { policyIds: groupPolicyIds } of Object.values(groupsByPackagePolicyId ?? {})) {
-    if (groupPolicyIds.some((id) => selectedPolicyIds.includes(id))) {
+    if (groupPolicyIds.some((id) => policies.has(id))) {
       groupPolicyIds.forEach((id) => policies.add(id));
     }
   }
@@ -397,11 +408,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         platform: platformValue,
         ...restPayload
       }: PackFormData) => {
-        const policies = getDeliveredPolicyIds(
-          payloadAgentPolicyIds,
-          shards,
-          groupsByPackagePolicyId
-        );
+        const policies = getSubmittedPolicyIds(payloadAgentPolicyIds, shards);
 
         // Emit schedule fields only when the user touched the schedule or the pack
         // already has one — otherwise an untouched legacy pack triggers a spurious
@@ -467,7 +474,6 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       dirtyFields.schedule,
       editMode,
       getShards,
-      groupsByPackagePolicyId,
       isRruleSchedulingEnabled,
       originalStartDate,
       packHasExplicitSchedule,

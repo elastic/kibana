@@ -33,6 +33,7 @@ import type {
   OsqueryCreatePacksRequestBodyInput,
   OsqueryDeletePacksRequestParamsInput,
   OsqueryFindPacksRequestQueryInput,
+  OsqueryGetPacksDetailsRequestQueryInput,
   OsqueryGetPacksDetailsRequestParamsInput,
   OsqueryUpdatePacksRequestParamsInput,
   OsqueryUpdatePacksRequestBodyInput,
@@ -334,7 +335,8 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .get(getRouteUrlForSpace(replaceParams('/api/osquery/packs/{id}', props.params), kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
   },
   /**
    * Get the details of a saved query using the query ID.
@@ -550,6 +552,7 @@ export interface OsqueryGetLiveQueryResultsProps {
   params: OsqueryGetLiveQueryResultsRequestParamsInput;
 }
 export interface OsqueryGetPacksDetailsProps {
+  query: OsqueryGetPacksDetailsRequestQueryInput;
   params: OsqueryGetPacksDetailsRequestParamsInput;
 }
 export interface OsqueryGetSavedQueryDetailsProps {

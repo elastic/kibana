@@ -489,11 +489,17 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
         const buildResponseBody = () => {
           const data = buildResponseData();
+          // An edit-only update (no enable toggle, no targeting change) also rewrites
+          // every integration that already carries the pack, so warn about those too.
+          const isEditOnly =
+            !targetingChangeRequested &&
+            (enabled == null || enabled === currentPackSO.attributes.enabled);
           const warnings = data.enabled
             ? resolveSharedIntegrationOverdelivery(
                 data.policy_ids ?? [],
                 packagePolicies,
-                effectiveShards
+                effectiveShards,
+                isEditOnly ? currentPackagePolicies : []
               )
             : [];
 

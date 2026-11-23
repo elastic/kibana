@@ -887,7 +887,7 @@ const PolicyAssignmentListComponent: React.FC<PolicyAssignmentListProps> = ({
                 'xpack.osquery.pack.form.sharedIntegration.partialSelectionDescription',
                 {
                   defaultMessage:
-                    'These agent policies already receive this pack via a shared integration. Saving adds them to this pack’s agent policies: {policyNames}.',
+                    'These agent policies receive this pack because they share an integration with a selected agent policy: {policyNames}. Saving does not add them to this pack’s agent policies.',
                   values: { policyNames: implicitPolicyNames },
                 }
               )}
