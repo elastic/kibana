@@ -64,8 +64,8 @@ export const createInvestigationTool = <TSchema extends ZodObject>({
   tags: ['investigation'],
   excludeFromMcp: true,
   availability: {
-    // Per principal, so it cannot be cached per space.
-    cacheMode: 'none',
+    // Per principal: a hint only, the handler asserts the privilege again.
+    cacheMode: 'space-user',
     handler: async ({ request }) => {
       try {
         await assertPrivilege(request);

@@ -29,7 +29,7 @@ describe('Proposal management skill', () => {
     }
     const uiSettings = {} as Parameters<typeof handler>[0]['uiSettings'];
 
-    expect(skill.availability?.cacheMode).toBe('none');
+    expect(skill.availability?.cacheMode).toBe('space-user');
     await expect(
       handler({ request: allowedRequest, spaceId: 'default', uiSettings })
     ).resolves.toEqual({ status: 'available' });

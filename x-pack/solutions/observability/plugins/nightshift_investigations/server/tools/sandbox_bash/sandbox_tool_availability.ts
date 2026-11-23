@@ -62,8 +62,14 @@ export const checkSandboxAccess = async ({
     : unavailable('Nightshift tools require the nightshift manage privilege in this space.');
 };
 
-/** How long one request reuses its access result; bounds how late a privilege change applies. */
+/** Bounds how late a privilege change applies to the sandbox tools. */
 export const SANDBOX_ACCESS_CACHE_TTL_MS = 60_000;
+
+/**
+ * A request can reuse an access result, which Agent Builder can then cache for the principal:
+ * each of the two gets half of {@link SANDBOX_ACCESS_CACHE_TTL_MS}, so that together they stay within it.
+ */
+const SANDBOX_ACCESS_REUSE_TTL_MS = SANDBOX_ACCESS_CACHE_TTL_MS / 2;
 
 interface CachedAccess {
   result: Promise<ToolAvailabilityResult>;
@@ -72,9 +78,10 @@ interface CachedAccess {
 
 /**
  * Hides a sandbox tool from agents, and blocks running it, unless {@link checkSandboxAccess}
- * allows the request. Agent Builder checks each tool's availability separately and drops a tool
- * whose check takes over 2s, so tools sharing this config reuse one check per request and space
- * instead of each running its own privilege call on every tool listing.
+ * allows the request. Agent Builder caches each tool's result per space and principal. It still
+ * checks each tool's availability separately and drops a tool whose check takes over 2s, so tools
+ * sharing this config also reuse one check per request and space, instead of each running its own
+ * privilege call whenever their results are not cached.
  */
 export const createSandboxToolAvailability = ({
   getDeps,
@@ -85,7 +92,8 @@ export const createSandboxToolAvailability = ({
 }): ToolAvailabilityConfig => {
   const cache = new WeakMap<KibanaRequest, Map<string, CachedAccess>>();
   return {
-    cacheMode: 'none',
+    cacheMode: 'space-user',
+    cacheTtl: SANDBOX_ACCESS_REUSE_TTL_MS / 1000,
     handler: ({ request, spaceId }) => {
       const bySpace = cache.get(request) ?? new Map<string, CachedAccess>();
       cache.set(request, bySpace);
@@ -94,7 +102,7 @@ export const createSandboxToolAvailability = ({
         return cached.result;
       }
       const result = checkSandboxAccess({ request, spaceId, ...getDeps() });
-      bySpace.set(spaceId, { result, expiresAt: now() + SANDBOX_ACCESS_CACHE_TTL_MS });
+      bySpace.set(spaceId, { result, expiresAt: now() + SANDBOX_ACCESS_REUSE_TTL_MS });
       result.catch(() => bySpace.delete(spaceId));
       return result;
     },
