@@ -114,6 +114,7 @@ describe('test transform install with legacy schema', () => {
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -300,6 +301,7 @@ describe('test transform install with legacy schema', () => {
       Promise.resolve(installation)
     );
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -373,6 +375,7 @@ describe('test transform install with legacy schema', () => {
     );
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -493,6 +496,7 @@ describe('test transform install with legacy schema', () => {
     });
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',
@@ -608,6 +612,7 @@ describe('test transform install with legacy schema', () => {
     );
 
     await installTransforms({
+      installSource: 'registry',
       packageInstallContext: {
         packageInfo: {
           name: 'endpoint',

@@ -9,7 +9,7 @@ import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import type { Rule } from '../../../types';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
-import type { LoadRulesProps } from './rules_helpers';
+import type { LoadRulesError, LoadRulesProps } from './rules_helpers';
 import { rewriteRulesResponseRes } from './rules_helpers';
 
 export async function loadRulesWithKueryFilter({
@@ -33,6 +33,7 @@ export async function loadRulesWithKueryFilter({
   perPage: number;
   total: number;
   data: Rule[];
+  errors?: LoadRulesError[];
 }> {
   const filtersKueryNode = mapFiltersToKueryNode({
     typesFilter,
@@ -52,11 +53,13 @@ export async function loadRulesWithKueryFilter({
       perPage: number;
       total: number;
       data: Array<AsApiContract<Rule>>;
+      errors?: LoadRulesError[];
     }>
   >(`${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find`, {
     body: JSON.stringify({
       page: page.index + 1,
       per_page: page.size,
+      allow_partial_results: true,
       ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
       sort_field: sort.field,
       sort_order: sort.direction,
@@ -71,5 +74,6 @@ export async function loadRulesWithKueryFilter({
     perPage: res.per_page,
     total: res.total,
     data: rewriteRulesResponseRes(res.data),
+    ...(res.errors ? { errors: res.errors } : {}),
   };
 }
