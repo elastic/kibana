@@ -22,7 +22,11 @@ import {
 } from '../constants';
 
 import { appContextService } from './app_context';
-import { fleetServerHostService, migrateSettingsToFleetServerHost } from './fleet_server_host';
+import {
+  fleetServerHostService,
+  getFleetServerHostsForAgentPolicy,
+  migrateSettingsToFleetServerHost,
+} from './fleet_server_host';
 import { agentPolicyService } from './agent_policy';
 import { getAgentsByKuery } from './agents';
 import {
@@ -1014,5 +1018,73 @@ describe('update', () => {
         expect(sentUpdate(soClient).secrets).toEqual({ ssl: { key: { id: 'stored-key-id' } } });
       });
     });
+  });
+});
+
+describe('getFleetServerHostsForAgentPolicy', () => {
+  beforeEach(() => {
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  const decryptedDefaultHost = {
+    id: 'test123',
+    type: FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+    references: [],
+    attributes: {
+      name: 'fleetServerHost',
+      host_urls: ['https://fleet.example.com:8220'],
+      is_default: true,
+      ssl: JSON.stringify({ agent_certificate_authorities: ['/etc/ca.crt'] }),
+    },
+  };
+
+  it('returns the decrypted default host, with its ssl settings, when the policy has no host', async () => {
+    const soClient = getMockedSoClient({ findHosts: true });
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce(decryptedDefaultHost as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {});
+
+    expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+      'test123'
+    );
+    expect(host).toEqual(
+      expect.objectContaining({
+        id: 'test123',
+        is_default: true,
+        ssl: { agent_certificate_authorities: ['/etc/ca.crt'] },
+      })
+    );
+  });
+
+  it('returns the decrypted selected host when the policy has one', async () => {
+    const soClient = getMockedSoClient();
+    const esoClient = getMockedEncryptedSoClient();
+    esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      ...decryptedDefaultHost,
+      id: 'selected-host',
+    } as any);
+
+    const host = await getFleetServerHostsForAgentPolicy(soClient, {
+      fleet_server_host_id: 'selected-host',
+    });
+
+    expect(soClient.find).not.toHaveBeenCalled();
+    expect(host).toEqual(expect.objectContaining({ id: 'selected-host' }));
+  });
+
+  it('throws when there is no default host and the policy has none', async () => {
+    const soClient = getMockedSoClient();
+    getMockedEncryptedSoClient();
+
+    await expect(getFleetServerHostsForAgentPolicy(soClient, {})).rejects.toThrow(
+      'Default Fleet Server host is not setup'
+    );
   });
 });

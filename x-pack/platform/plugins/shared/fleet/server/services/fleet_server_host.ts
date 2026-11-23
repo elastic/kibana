@@ -594,7 +594,9 @@ export async function getFleetServerHostsForAgentPolicy(
     throw new FleetServerHostNotFoundError('Default Fleet Server host is not setup');
   }
 
-  return defaultFleetServerHost;
+  // getDefaultFleetServerHost() reads the host without decrypting it, so it has no `ssl`. Read it
+  // again decrypted, as for an explicitly selected host, so the policy gets its SSL settings.
+  return fleetServerHostService.get(defaultFleetServerHost.id);
 }
 
 /**
