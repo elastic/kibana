@@ -12,6 +12,7 @@ import {
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
 } from '@kbn/significant-events-schema';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { SLACK_MESSAGE_EVENT_ID, toSlackPlainText } from '@kbn/connector-specs';
 import { isBoom, serverUnavailable } from '@hapi/boom';
 import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -78,6 +79,20 @@ const resolveAlerts = async ({
 const nonEmptyString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.length > 0 ? value : undefined;
 
+/** A Slack-triggered thread is summarized by its message: stored workflows still pass the automation name as `summary`. */
+const toSubjectSummary = (
+  input: z.infer<typeof triggerInvestigationStepInputSchema>,
+  triggeredBy: string | undefined,
+  event: unknown
+): string | undefined => {
+  if (input.subject_type !== 'slack_thread' || triggeredBy !== SLACK_MESSAGE_EVENT_ID) {
+    return input.summary;
+  }
+  const text =
+    typeof event === 'object' && event !== null && 'text' in event ? event.text : undefined;
+  return nonEmptyString(toSlackPlainText(typeof text === 'string' ? text : undefined));
+};
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -117,7 +132,7 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution, event } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = triggerInvestigationStepInputSchema.parse(context.input);
       let automationBudget: AutomationBudget | undefined;
@@ -180,7 +195,7 @@ export const triggerInvestigationStepDefinition = (
             subject: {
               type: input.subject_type,
               id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
-              summary: input.summary,
+              summary: toSubjectSummary(input, execution.triggeredBy, event),
             },
             title,
             trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',

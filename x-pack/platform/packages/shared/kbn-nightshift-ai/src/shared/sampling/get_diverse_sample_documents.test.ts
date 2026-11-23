@@ -162,12 +162,14 @@ describe('getDiverseSampleDocuments', () => {
     expect(fetchFilter.bool.should).toBeUndefined();
   });
 
-  it('runs the schema probe on the plain client so drop_null_columns cannot prune the LIMIT 0 columns', async () => {
+  it('probes only the message field candidates, under the caller signal', async () => {
     const { esClient, esql, schemaQuery } = createEsClient();
     esql
       .mockResolvedValueOnce(countResponse(10))
       .mockResolvedValueOnce(categorizeResponse())
       .mockResolvedValueOnce(concreteFetchResponse());
+
+    const { signal } = new AbortController();
 
     await getDiverseSampleDocuments({
       esClient,
@@ -177,10 +179,14 @@ describe('getDiverseSampleDocuments', () => {
       size: 2,
       iteration: 1,
       logger,
+      signal,
     });
 
     expect(schemaQuery).toHaveBeenCalledTimes(1);
-    expect(schemaQuery.mock.calls[0][0].query).toBe('FROM logs-* | LIMIT 0');
+    expect(schemaQuery.mock.calls[0][0].query).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* | KEEP message, body.text | LIMIT 0'
+    );
+    expect(schemaQuery.mock.calls[0][1]).toEqual({ signal });
   });
 
   it('reconstructs sources for ES|QL views that drop _id/_source metadata', async () => {

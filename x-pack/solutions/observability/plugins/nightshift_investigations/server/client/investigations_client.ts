@@ -10,6 +10,7 @@ import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { toSlackPlainText } from '@kbn/connector-specs';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
@@ -111,6 +112,7 @@ import {
   buildFollowUpMessage,
   recoverSubjectsFromInputs,
   toSlackThreadKey,
+  toSlackThreadPermalink,
   toStartSubjects,
   toSubjectKeys,
   withoutRecordedSubjects,
@@ -153,6 +155,12 @@ const significantEventIdOf = (
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
+export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
+  ExecutionStatus.FAILED,
+  ExecutionStatus.TIMED_OUT,
+  ExecutionStatus.CANCELLED,
+];
+
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
@@ -234,6 +242,8 @@ interface SlackThreadActivity {
   event?: SlackThreadEvent;
   /** Gives `event` back instead of recording it, when this execution was the one that recorded it. */
   releaseEvent?: boolean;
+  /** Recorded once, so a thread recorded without a link gets one on its next call. */
+  permalink?: string;
 }
 
 /** Whether an execution other than the one delivering `event` already handled it. */
@@ -277,30 +287,25 @@ const toSeenEvents = (
 const toSlackThreadUpdate = (
   recorded: SlackThreadSubject | undefined,
   activity: SlackThreadActivity
-): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_events'> | undefined => {
-  const { statusMessageTs } = activity;
+): Pick<SlackThreadSubject, 'status_message_ts' | 'seen_events' | 'permalink'> | undefined => {
+  const { statusMessageTs, permalink } = activity;
   const seenEvents = toSeenEvents(recorded?.seen_events ?? [], activity);
   const recordStatusMessage =
     statusMessageTs !== undefined && statusMessageTs !== recorded?.status_message_ts;
-  if (!seenEvents && !recordStatusMessage) {
+  const recordPermalink = permalink !== undefined && recorded?.permalink === undefined;
+  if (!seenEvents && !recordStatusMessage && !recordPermalink) {
     return undefined;
   }
   return {
     ...(recordStatusMessage && { status_message_ts: statusMessageTs }),
     ...(seenEvents && { seen_events: seenEvents }),
+    ...(recordPermalink && { permalink }),
   };
 };
 
-/** The message text with Slack mentions and markup collapsed away. */
-const collapseSlackText = (text: string | undefined): string =>
-  (text ?? '')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
 /** A headline from the thread's question. */
 const toSlackThreadTitle = (text: string | undefined): string => {
-  const collapsed = collapseSlackText(text);
+  const collapsed = toSlackPlainText(text);
   if (!collapsed) {
     return DEFAULT_SLACK_THREAD_TITLE;
   }
@@ -326,7 +331,7 @@ export interface LifecycleCorrelation {
 
 /**
  * A lifecycle message's view of an investigation. Until Agent Builder titles it, the title is the
- * run's `title` input; the first pending proposal stands in for the top recommendation.
+ * run's `title` input; its recommendations are the pending proposals.
  */
 const toNotifiableInvestigation = (
   {
@@ -1031,7 +1036,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
+      (reopen || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -1186,10 +1191,7 @@ export class NightshiftInvestigationsClient {
   ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
-    if (
-      execution.isTestRun ||
-      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
-    ) {
+    if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
       throw new InvestigationNotFoundError(executionId);
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
@@ -1458,7 +1460,12 @@ export class NightshiftInvestigationsClient {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const threadKey = toSlackThreadKey({ workspace, channel, threadTs });
     const subjectKey = { type: 'slack_thread' as const, id: threadKey };
-    const activity: SlackThreadActivity = { statusMessageTs, event, releaseEvent };
+    const activity: SlackThreadActivity = {
+      statusMessageTs,
+      event,
+      releaseEvent,
+      permalink: toSlackThreadPermalink({ workspace, channel, threadTs }),
+    };
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
@@ -1532,7 +1539,7 @@ export class NightshiftInvestigationsClient {
     const recorded = threadSubject?.slack;
     const update = toSlackThreadUpdate(recorded, activity);
     if (!threadSubject || update) {
-      const summary = collapseSlackText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
+      const summary = toSlackPlainText(text).slice(0, MAX_SLACK_SUBJECT_SUMMARY_LENGTH);
       await subjectsClient.upsertSubjects(conversation.id, [
         {
           ...subjectKey,

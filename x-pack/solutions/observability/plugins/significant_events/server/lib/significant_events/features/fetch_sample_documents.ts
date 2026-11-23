@@ -8,15 +8,17 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { Builder, esql } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getEsqlColumnSchema, getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { conditionToESQLFilterAst } from '@kbn/nightshift-shared';
-import { type Condition, getConditionFields } from '@kbn/streamlang';
+import { getConditionFields } from '@kbn/streamlang';
 import { partition } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { timeoutSignal } from '@kbn/std';
-import { getEntityFilters } from './get_entity_filters';
+import { type EntityFilter, getEntityFilters, isEntityValuesFilter } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';
 import { createSignificantEventsTracedEsClient } from '../create_significant_events_traced_es_client';
 import { isIndexNotFoundError } from '../latest_source_query';
@@ -94,7 +96,7 @@ export async function fetchSampleDocuments({
     );
   }
 
-  const entityFilters = getEntityFilters(features, maxEntityFilters);
+  const { filters: entityFilters, omitted } = getEntityFilters(features, maxEntityFilters);
   const samplingSignal = timeoutSignal(samplingTimeoutMs);
   try {
     const tracedEsClient = createSignificantEventsTracedEsClient({
@@ -122,6 +124,7 @@ export async function fetchSampleDocuments({
                   size: diverseSize,
                   iteration,
                   logger,
+                  signal: samplingSignal,
                 })
             ).catch((err) => {
               logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -158,13 +161,19 @@ export async function fetchSampleDocuments({
 
       logger.debug(
         () =>
-          `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${bucketCounts.random} random). No entities available to filter by.`
+          `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${
+            bucketCounts.random
+          } random). ${
+            features.length === 0
+              ? 'No entities available to filter by.'
+              : `No entity filters could be applied (${omitted} features omitted).`
+          }`
       );
 
       return {
         documents,
-        totalFilters: 0,
-        filtersCapped: false,
+        totalFilters: features.length,
+        filtersCapped: omitted > 0,
         hasFilteredDocuments: false,
       };
     }
@@ -217,6 +226,7 @@ export async function fetchSampleDocuments({
                   size: diverseSize + entityFilteredSize,
                   iteration,
                   logger,
+                  signal: samplingSignal,
                 })
             ).catch((err) => {
               logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -261,15 +271,13 @@ export async function fetchSampleDocuments({
           bucketCounts.diverse - diverseSize
         )} backfilled unused entity-filtered slots, ${bucketCounts.random} random). ${
           entityFilters.length
-        } entity filters applied (${
-          features.length - entityFilters.length
-        } omitted):\n${JSON.stringify(entityFilters)}`
+        } entity filters applied (${omitted} features omitted):\n${JSON.stringify(entityFilters)}`
     );
 
     return {
       documents,
       totalFilters: features.length,
-      filtersCapped: features.length > maxEntityFilters,
+      filtersCapped: omitted > 0,
       hasFilteredDocuments: entityFilteredHits.length > 0,
     };
   } finally {
@@ -301,7 +309,7 @@ async function fetchEntityFilteredDocuments({
   start: number;
   end: number;
   sampleSize: number;
-  entityFilters: Condition[];
+  entityFilters: EntityFilter[];
   logger: Logger;
   abortSignal: AbortSignal;
 }): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
@@ -313,7 +321,7 @@ async function fetchEntityFilteredDocuments({
     columns.filter(({ type }) => type !== 'unsupported').map(({ name }) => name)
   );
   const [queryableFilters, skippedFilters] = partition(entityFilters, (filter) =>
-    getConditionFields(filter).every(({ name }) => queryableFields.has(name))
+    getFilterFields(filter).every((name) => queryableFields.has(name))
   );
 
   if (skippedFilters.length > 0) {
@@ -336,12 +344,38 @@ async function fetchEntityFilteredDocuments({
     start,
     end,
     sampleSize,
-    whereCondition: conditionToESQLFilterAst({
-      and: queryableFilters.map((filter) => ({ not: filter })),
-    }),
+    whereCondition: queryableFilters
+      .map(toExclusionAst)
+      .reduce((left, right) => Builder.expression.func.binary('and', [left, right])),
     abortSignal,
   });
 }
+
+const getFilterFields = (filter: EntityFilter): string[] =>
+  isEntityValuesFilter(filter)
+    ? [filter.field]
+    : getConditionFields(filter).map(({ name }) => name);
+
+const toLiteral = (value: string | number | boolean) => {
+  if (typeof value === 'string') {
+    return esql.str(value);
+  }
+  return typeof value === 'number' ? esql.num(value) : esql.bool(value);
+};
+
+const toExclusionAst = (filter: EntityFilter): ESQLSingleAstItem => {
+  if (!isEntityValuesFilter(filter)) {
+    return conditionToESQLFilterAst({ not: filter });
+  }
+
+  const notIn = esql.exp`${esql.col(filter.field)} NOT IN (${filter.values.map(toLiteral)})`;
+  const isNull = Builder.expression.func.postfix(
+    'IS NULL',
+    Builder.expression.column(filter.field)
+  );
+  // The composer re-parses spliced ASTs as text, so a bare OR would bind looser than the surrounding AND.
+  return Builder.expression.parens(Builder.expression.func.binary('or', [notIn, isNull]));
+};
 
 function mergeDocuments(
   prioritizedHits: Array<{

@@ -31,6 +31,8 @@ const DEFAULT_CLOSED_SINCE_DAYS = 365;
 const DEFAULT_MAX_NEW_ISSUES = 10;
 /** A daily report would otherwise comment on a suite failing every day each morning. */
 const DEFAULT_COMMENT_COOLDOWN_DAYS = 3;
+/** Covers builds running pre-fix code: in flight at the merge, Cloud images, pending backports. */
+const DEFAULT_REOPEN_GRACE_HOURS = 24;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** `owner/name`, as GitHub spells a repository. */
@@ -71,6 +73,10 @@ export function runReportFlakyTestIssuesCli() {
       if (!Number.isInteger(commentCooldownDays) || commentCooldownDays < 1) {
         throw createFlagError('--comment-cooldown-days must be a positive integer');
       }
+      const reopenGraceHours = flagsReader.requiredNumber('reopen-grace-hours');
+      if (!Number.isInteger(reopenGraceHours) || reopenGraceHours < 0) {
+        throw createFlagError('--reopen-grace-hours must be a non-negative integer');
+      }
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
       log.info(`Reading flaky test report from ${inputPath}`);
@@ -87,7 +93,8 @@ export function runReportFlakyTestIssuesCli() {
           : undefined;
       log.info(
         `${dryRun ? 'Dry run against' : 'Filing issues in'} ${githubRepo}: open failed-test ` +
-          `issues and those closed in the last ${closedSinceDays} days count as tracking a suite` +
+          `issues and those closed in the last ${closedSinceDays} days count as tracking a suite, ` +
+          `a closed one until the suite fails more than ${reopenGraceHours} hours after the close` +
           (tracking
             ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
             : '') +
@@ -113,6 +120,7 @@ export function runReportFlakyTestIssuesCli() {
         omitSkippedTests,
         updateIssues,
         commentCooldownDays,
+        reopenGraceHours,
         replacePerTestIssues,
         dryRun,
       });
@@ -146,7 +154,8 @@ export function runReportFlakyTestIssuesCli() {
         with an issue of its own in --github-repo has it refreshed: the body's metadata records
         this report, a comment with its numbers is posted when the suite failed since the issue
         was filed or last commented on, and that was --comment-cooldown-days ago at least, and
-        an issue closed before such a failure is reopened. The body's text stays as filed. With
+        an issue closed before such a failure is reopened, unless the failure came within
+        --reopen-grace-hours of the close. The body's text stays as filed. With
         --replace-per-test-issues, open per-test issues in --github-repo don't count, and those
         about a suite's flaky tests are closed as duplicates of its issue once it is filed or
         refreshed.
@@ -164,6 +173,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days',
           'max-new-issues',
           'comment-cooldown-days',
+          'reopen-grace-hours',
         ],
         boolean: ['dry-run', 'omit-skipped-tests', 'update-issues', 'replace-per-test-issues'],
         default: {
@@ -174,6 +184,7 @@ export function runReportFlakyTestIssuesCli() {
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
           'comment-cooldown-days': String(DEFAULT_COMMENT_COOLDOWN_DAYS),
+          'reopen-grace-hours': String(DEFAULT_REOPEN_GRACE_HOURS),
           'dry-run': false,
           'omit-skipped-tests': true,
           'update-issues': true,
@@ -189,6 +200,7 @@ export function runReportFlakyTestIssuesCli() {
           --no-omit-skipped-tests  Keep flaky tests that were skipped since
           --no-update-issues    Skip suites with an issue of their own instead of refreshing it
           --comment-cooldown-days  Days to wait after a comment before the issue can get another; reopens always comment [default: ${DEFAULT_COMMENT_COOLDOWN_DAYS}]
+          --reopen-grace-hours  Hours after a close whose failures neither reopen the issue nor end its tracking, as they can come from builds without the fix; 0 disables [default: ${DEFAULT_REOPEN_GRACE_HOURS}]
           --replace-per-test-issues  Close the open per-test issues of a suite's flaky tests as duplicates of its issue, rather than count them as tracking it
           --dry-run             Read issues and log what would be filed or updated without writing
         `,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MANIFEST } from './load_vendor_specs';
+import { MANIFEST } from './spec/load_vendor_specs';
 
 /**
  * A problem the check found that concerns no single action. The ones an issue says something

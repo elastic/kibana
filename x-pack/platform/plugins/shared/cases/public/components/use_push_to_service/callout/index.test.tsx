@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { TestProviders } from '../../../common/mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { createCalloutId } from './helpers';
 import type { CaseCallOutProps } from '.';
 import { CaseCallOut } from '.';
@@ -29,14 +30,10 @@ describe('CaseCallOut ', () => {
   };
 
   it('renders a callout correctly', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...defaultProps} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CaseCallOut {...defaultProps} />);
 
     const id = createCalloutId(['message-one', 'message-two']);
-    expect(wrapper.find(`[data-test-subj="callout-messages-${id}"]`).last().exists()).toBeTruthy();
+    expect(screen.getByTestId(`callout-messages-${id}`)).toBeInTheDocument();
   });
 
   it('groups the messages correctly', () => {
@@ -53,48 +50,32 @@ describe('CaseCallOut ', () => {
       ],
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...props} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CaseCallOut {...props} />);
 
     const idDanger = createCalloutId(['message-one']);
     const idPrimary = createCalloutId(['message-two']);
 
-    expect(
-      wrapper.find(`[data-test-subj="case-callout-${idPrimary}"]`).last().exists()
-    ).toBeTruthy();
-    expect(
-      wrapper.find(`[data-test-subj="case-callout-${idDanger}"]`).last().exists()
-    ).toBeTruthy();
+    expect(screen.getByTestId(`case-callout-${idPrimary}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`case-callout-${idDanger}`)).toBeInTheDocument();
   });
 
-  it('Opens edit connectors when hasConnectors=true', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...defaultProps} />
-      </TestProviders>
-    );
+  it('Opens edit connectors when hasConnectors=true', async () => {
+    renderWithTestingProviders(<CaseCallOut {...defaultProps} />);
 
     const id = createCalloutId(['message-one', 'message-two']);
-    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    await userEvent.click(screen.getByTestId(`callout-onclick-${id}`));
     expect(defaultProps.onEditClick).toHaveBeenCalled();
   });
 
-  it('Redirects to configure page when hasConnectors=false', () => {
+  it('Redirects to configure page when hasConnectors=false', async () => {
     const props = {
       ...defaultProps,
       hasConnectors: false,
     };
-    const wrapper = mount(
-      <TestProviders>
-        <CaseCallOut {...props} />
-      </TestProviders>
-    );
+    renderWithTestingProviders(<CaseCallOut {...props} />);
 
     const id = createCalloutId(['message-one', 'message-two']);
-    wrapper.find(`[data-test-subj="callout-onclick-${id}"]`).last().simulate('click');
+    await userEvent.click(screen.getByTestId(`callout-onclick-${id}`));
     expect(defaultProps.onEditClick).not.toHaveBeenCalled();
   });
 });

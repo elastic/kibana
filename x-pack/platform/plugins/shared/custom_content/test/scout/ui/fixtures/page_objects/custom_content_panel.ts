@@ -15,6 +15,7 @@ export class CustomContentPanelPage {
   readonly createFlyoutTitle: Locator;
   readonly editFlyoutTitle: Locator;
   readonly templateEditorContainer: Locator;
+  readonly templateAccordionButton: Locator;
   readonly esqlAccordionButton: Locator;
   readonly applyButton: Locator;
   readonly cancelButton: Locator;
@@ -24,14 +25,19 @@ export class CustomContentPanelPage {
   readonly chatInput: Locator;
   readonly chatSubmitButton: Locator;
 
+  private readonly page: ScoutPage;
   private readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly esqlEditor: EsqlEditor;
 
   constructor(page: ScoutPage) {
+    this.page = page;
     this.addCustomPanelAction = page.testSubj.locator('create-action-Custom');
     this.createFlyoutTitle = page.testSubj.locator('customContentCreateFlyoutTitle');
     this.editFlyoutTitle = page.testSubj.locator('customContentEditFlyoutTitle');
     this.templateEditorContainer = page.testSubj.locator(TEMPLATE_EDITOR_TEST_SUBJ);
+    this.templateAccordionButton = page.testSubj
+      .locator('customContentTemplateSection')
+      .getByRole('button', { name: /Template/ });
     this.esqlAccordionButton = page.testSubj
       .locator('customContentEsqlSection')
       .getByRole('button', { name: /Data source/ });
@@ -50,13 +56,24 @@ export class CustomContentPanelPage {
     await this.addCustomPanelAction.click();
   }
 
+  private async openAccordionIfClosed(button: Locator) {
+    if ((await button.getAttribute('aria-expanded')) === 'true') {
+      return;
+    }
+    await button.click();
+    await button
+      .and(this.page.getByRole('button', { expanded: true }))
+      .waitFor({ state: 'visible' });
+  }
+
   async setTemplate(template: string) {
+    await this.openAccordionIfClosed(this.templateAccordionButton);
     await this.codeEditor.waitCodeEditorReady(TEMPLATE_EDITOR_TEST_SUBJ);
     await this.codeEditor.setCodeEditorValue(template, 0);
   }
 
   async setEsqlQuery(query: string) {
-    await this.esqlAccordionButton.click();
+    await this.openAccordionIfClosed(this.esqlAccordionButton);
     await this.esqlEditor.setQuery(query);
   }
 

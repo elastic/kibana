@@ -28,6 +28,7 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import type { StreamOwner } from './types';
 
 /** Placeholder id of the answer until `execution_started` reveals the saved one. */
 const PENDING_PROMPT_RESPONSE_ID = 'pending::prompt_response';
@@ -43,7 +44,7 @@ export interface ResumeRoundVars {
 
 export interface ResumeRoundMutationBindings {
   conversationStreamService: ConversationStreamService;
-  clearActiveStream: (conversationId: string) => void;
+  clearActiveStream: (conversationId: string, streamId: string) => void;
   markStreamStarted: (conversationId: string) => void;
 }
 
@@ -72,7 +73,7 @@ export const useResumeRoundMutation = ({
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.resumeRound,
-    mutationFn: async (vars: ResumeRoundVars) => {
+    mutationFn: async (vars: ResumeRoundVars & StreamOwner) => {
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -177,7 +178,7 @@ export const useResumeRoundMutation = ({
         }
         throw err;
       } finally {
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }

@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import net from 'node:net';
 import type { estypes } from '@elastic/elasticsearch';
-import { isNonRoutableIpIoc } from '@kbn/alertzero-common';
+import { isNonRoutableIpIoc, isRejectedExtractionMethod } from '@kbn/alertzero-common';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
@@ -390,7 +390,7 @@ const ecsIndicatorPayload = (type: IocType, rawValue: string): Record<string, un
  */
 const isRejectedReport = (report: ReportHit): boolean =>
   report._source?.extracted?.gate?.is_intelligence === false ||
-  report._source?.lineage?.extraction_method === 'workflow_v4_rejected';
+  isRejectedExtractionMethod(report._source?.lineage?.extraction_method);
 
 const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
   const ops: IocIndicatorOp[] = [];

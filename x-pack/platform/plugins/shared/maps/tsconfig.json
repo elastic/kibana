@@ -109,7 +109,8 @@
     "@kbn/cps",
     "@kbn/kql",
     "@kbn/cps-utils",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": [
     "target/**/*"
