@@ -28,7 +28,7 @@ import type { AttachmentServiceStart } from '../../attachments';
 import type { ConversationService } from '../../conversation';
 import { SurfacesServiceImpl } from '../../surfaces';
 import type { CallbackDeliveryService } from './callback_delivery_service';
-import { deliverCallbackEvents } from './deliver_callback_events';
+import { deliverCallbackEvents, deliverFailureCallback } from './deliver_callback_events';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
 const getTypeDefinition = jest.fn();
@@ -306,6 +306,35 @@ describe('deliverCallbackEvents', () => {
     expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
       false
     );
+  });
+
+  it('filters out model_reasoning_chunk events but delivers the complete model_reasoning event', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const modelReasoningEvent = {
+      type: ChatEventType.modelReasoning,
+      data: { message_id: 'message-1', reasoning: 'Let me think.' },
+    } as ChatEvent;
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(
+        {
+          type: ChatEventType.modelReasoningChunk,
+          data: { message_id: 'message-1', text_chunk: 'Let me think.' },
+        } as ChatEvent,
+        modelReasoningEvent,
+        roundCompleteEvent
+      ),
+      callbackDeliveryService: service,
+      ...surfacesDeps,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+    expect(deliveredEvents).toEqual([modelReasoningEvent, roundCompleteEvent]);
   });
 
   it('retries only the terminal events; other events are delivered at-most-once', async () => {
@@ -872,6 +901,60 @@ describe('deliverCallbackEvents', () => {
         events$: throwError(() => new Error('agent boom')),
         callbackDeliveryService: service,
         ...surfacesDeps,
+        logger: loggerMock.create(),
+      })
+    ).resolves.toBeUndefined();
+  });
+});
+
+describe('deliverFailureCallback', () => {
+  it('delivers a retried failure payload with the execution id as idempotency key', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+
+    await deliverFailureCallback({
+      execution: createConversationExecution(),
+      error: createRequestAbortedError('request aborted'),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).toHaveBeenCalledWith({
+      payload: {
+        execution_id: 'execution-1',
+        error: {
+          code: AgentBuilderErrorCode.requestAborted,
+          message: 'request aborted',
+          meta: {},
+        },
+        idempotency_key: 'execution-1',
+      },
+      callbackUrl,
+      retry: true,
+    });
+  });
+
+  it('does nothing when the execution has no callback', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+
+    await deliverFailureCallback({
+      execution: createConversationExecution(null),
+      error: createRequestAbortedError('request aborted'),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    expect(service.makeCallbackRequest).not.toHaveBeenCalled();
+  });
+
+  it('resolves even when the delivery fails', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    service.makeCallbackRequest.mockRejectedValue(new Error('callback failed'));
+
+    await expect(
+      deliverFailureCallback({
+        execution: createConversationExecution(),
+        error: createRequestAbortedError('request aborted'),
+        callbackDeliveryService: service,
         logger: loggerMock.create(),
       })
     ).resolves.toBeUndefined();
