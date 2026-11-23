@@ -476,6 +476,21 @@ describe('ES|QL filters', () => {
       expect(convertEsqlFiltersToESQLExpression([esqlFilter])).toBe('`size` == "big"');
     });
 
+    it('writes an integer that is too big to be exact as a double, and the others as they are', () => {
+      const getPhraseOf = (value: number): Filter => ({
+        ...esqlFilter,
+        meta: { ...esqlFilter.meta, params: { query: value } },
+        query: { match_phrase: { size: value } },
+      });
+
+      // an integer literal that does not fit in a long is an unsigned_long, that a double column does not compare with
+      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(2 ** 63)])).toBe(
+        '`size` == 9223372036854776000.0'
+      );
+      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(5)])).toBe('`size` == 5');
+      expect(convertEsqlFiltersToESQLExpression([getPhraseOf(2.5)])).toBe('`size` == 2.5');
+    });
+
     describe('several values', () => {
       it('checks them with MV_INTERSECTS, as an operator like IN evaluates to null on a multivalued column', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
@@ -501,7 +516,17 @@ describe('ES|QL filters', () => {
 
       it('compares the numbers as doubles, as MV_INTERSECTS needs the same type and the one of the column is not known', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases([1, 2.5])])).toBe(
-          'MV_INTERSECTS(TO_DOUBLE(`size`), TO_DOUBLE([1, 2.5]))'
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [1.0, 2.5])'
+        );
+      });
+
+      it('writes every number as a double literal, as a big integer would make the array an unsigned_long one that does not accept a negative number', () => {
+        // 2 ** 63 does not fit in a long, so without a decimal point ES|QL takes it as an unsigned_long
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([-1, 2 ** 63])])).toBe(
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [-1.0, 9223372036854776000.0])'
+        );
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([1e21, 1.5e-7, 0])])).toBe(
+          'MV_INTERSECTS(TO_DOUBLE(`size`), [1e+21, 1.5e-7, 0.0])'
         );
       });
 
@@ -513,7 +538,7 @@ describe('ES|QL filters', () => {
 
       it('has a check for each type of value, as an array of ES|QL has one type', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 1, false, 'b'])])).toBe(
-          '(MV_INTERSECTS(TO_STRING(`size`), ["a", "b"]) OR MV_INTERSECTS(TO_DOUBLE(`size`), TO_DOUBLE([1])) OR MV_INTERSECTS(`size`, [false]))'
+          '(MV_INTERSECTS(TO_STRING(`size`), ["a", "b"]) OR MV_INTERSECTS(TO_DOUBLE(`size`), [1.0]) OR MV_INTERSECTS(`size`, [false]))'
         );
       });
     });
