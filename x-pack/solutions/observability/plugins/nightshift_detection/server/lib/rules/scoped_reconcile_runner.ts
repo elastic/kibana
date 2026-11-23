@@ -98,35 +98,32 @@ export class ScopedReconcileRunner {
     spaceId: string;
     abortSignal: AbortSignal;
   }): Promise<ReconcileRulesResult> {
-    const scope = await this.accountScope.fork({ accountRequest, spaceId });
-    // Both read the rules client bound in the fork, so they live and die with it.
-    scope.bind(ManagedRuleReader).toSelf();
-    scope.bind(AlertingRuleReconciler).toSelf();
+    return this.accountScope.run({
+      accountRequest,
+      spaceId,
+      fn: async (scope) => {
+        // Both read the rules client bound in the fork, so they live and die with it.
+        scope.bind(ManagedRuleReader).toSelf();
+        scope.bind(AlertingRuleReconciler).toSelf();
 
-    try {
-      const context: ResourceContext = {
-        spaceId,
-        // Disabled sources too: their rules are disabled, while a rule whose source is missing is
-        // deleted.
-        sources: await scope.get(Sources).list({ enabledOnly: false }),
-        esClient: scope.get(DetectionEngineDataClient),
-        abortSignal,
-        knowledge: scope.get(KnowledgeIndicators),
-        cpsEnabled: this.cps?.getCpsEnabled() ?? false,
-      };
-      const { desired, strategyErrors, skippedSources } = await this.collectDesiredRules(context);
+        const context: ResourceContext = {
+          spaceId,
+          // Disabled sources too: their rules are disabled, while a rule whose source is missing is
+          // deleted.
+          sources: await scope.get(Sources).list({ enabledOnly: false }),
+          esClient: scope.get(DetectionEngineDataClient),
+          abortSignal,
+          knowledge: scope.get(KnowledgeIndicators),
+          cpsEnabled: this.cps?.getCpsEnabled() ?? false,
+        };
+        const { desired, strategyErrors, skippedSources } = await this.collectDesiredRules(context);
 
-      // Never paused yet: nothing sets the space's maintenance state so far.
-      return await scope
-        .get(AlertingRuleReconciler)
-        .reconcile({ spaceId, desired, paused: false, strategyErrors, skippedSources });
-    } finally {
-      try {
-        await scope.unbindAllAsync();
-      } catch (error) {
-        this.logger.warn(`Could not release the reconcile scope: ${getErrorMessage(error)}`);
-      }
-    }
+        // Never paused yet: nothing sets the space's maintenance state so far.
+        return scope
+          .get(AlertingRuleReconciler)
+          .reconcile({ spaceId, desired, paused: false, strategyErrors, skippedSources });
+      },
+    });
   }
 
   /** Every strategy's alerting rules; a strategy that throws is reported and keeps what it owns. */
