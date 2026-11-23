@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -16,8 +16,8 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
+import { isUnsupportedFieldStatsEsqlQuery } from '../field_stats/field_stats_skips_data_fetch';
 import type {
   FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
@@ -42,9 +42,21 @@ function isFieldStatisticTableEmbeddableState(
 }
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
+  const { onRenderComplete } = props;
+  const esqlUnsupported =
+    isESQLFieldStatisticTableEmbeddableState(props) &&
+    isUnsupportedFieldStatsEsqlQuery(props.esqlQuery);
+
+  // The stats table is what reports render completion. This message replaces it, so finish
+  // the load here. Otherwise the dashboard keeps treating the panel as in progress.
+  useEffect(() => {
+    if (esqlUnsupported) {
+      onRenderComplete?.();
+    }
+  }, [esqlUnsupported, onRenderComplete]);
+
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    const isEsql = props.esqlQuery && isOfAggregateQueryType(props.esqlQuery);
-    return isEsql ? (
+    return esqlUnsupported ? (
       <FieldStatsUnavailableMessage id={props.id} />
     ) : (
       <EmbeddableESQLFieldStatsTableWrapper
@@ -68,6 +80,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         resetData$={props.resetData$}
         onRenderComplete={props.onRenderComplete}
         onFieldsCountChange={props.onFieldsCountChange}
+        requestCancellationManager={props.requestCancellationManager}
         isInteractive={props.isInteractive}
       />
     );
@@ -205,6 +218,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             timeRange={props.timeRange}
             onRenderComplete={props.onRenderComplete}
             onFieldsCountChange={props.onFieldsCountChange}
+            requestCancellationManager={props.requestCancellationManager}
             isInteractive={props.isInteractive}
           />
         </DatePickerContextProvider>

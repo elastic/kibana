@@ -11,6 +11,7 @@ import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { Logger } from '@kbn/core/server';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -27,8 +28,10 @@ import {
   resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
+import { reportToolFailure, toTelemetryErrorMessage } from '../tool_failure';
 import { startKiIdentificationToolHandler } from './handler';
 import type { GetScopedClients } from '../../../routes/types';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
@@ -52,12 +55,14 @@ const onboardingStartSchema = lazySchema(() =>
 
 export const createKiIdentificationStartTool = ({
   server,
+  logger,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
   getScopedClients,
 }: {
   server: Pick<SignificantEventsServer, 'security'>;
+  logger: Logger;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -81,7 +86,7 @@ export const createKiIdentificationStartTool = ({
     - On failure: an error result with \`message\`, \`slug\`, \`operation\`, and \`likely_cause\`
   `,
   schema: onboardingStartSchema,
-  handler: async ({ slug, steps, connectors }, { request }) => {
+  handler: async ({ slug, steps, connectors }, { request, runContext }) => {
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     let sourceId = '';
     try {
@@ -102,10 +107,18 @@ export const createKiIdentificationStartTool = ({
         request,
       });
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        workflow_execution_id: workflowExecutionId,
-        success: true,
-        source_id: source.id,
+      trackTelemetryBestEffort({
+        logger,
+        description: 'ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: true,
+              source_id: source.id,
+            },
+            request
+          ),
       });
 
       return {
@@ -118,12 +131,30 @@ export const createKiIdentificationStartTool = ({
       };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      const failure = reportToolFailure({
+        error: err,
+        toolId: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID,
+        errorLogMessage: `KI identification start failed: ${message}`,
+        errorLogLevel: 'warn',
+        logger,
+        telemetry,
+        request,
+        runContext,
+      });
 
-      telemetry.trackAgentToolKiIdentificationStarted({
-        workflow_execution_id: workflowExecutionId,
-        success: false,
-        source_id: sourceId,
-        error_message: message,
+      trackTelemetryBestEffort({
+        logger,
+        description: 'failed ki_identification_start telemetry',
+        track: () =>
+          telemetry.trackAgentToolKiIdentificationStarted(
+            {
+              workflow_execution_id: workflowExecutionId,
+              success: false,
+              source_id: sourceId,
+              error_message: toTelemetryErrorMessage(failure, message),
+            },
+            request
+          ),
       });
 
       return {

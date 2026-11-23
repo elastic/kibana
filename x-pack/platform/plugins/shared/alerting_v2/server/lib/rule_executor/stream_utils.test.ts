@@ -12,17 +12,53 @@ import {
   createRulePipelineState,
 } from '../test_utils';
 import type { PipelineStateStream, RulePipelineState, StepStreamResult } from './types';
-import { forwardThenFinalize, withAtLeastOne } from './stream_utils';
+import { forwardThenFinalize, tap, withAtLeastOne } from './stream_utils';
+
+const drain = async <T>(source: AsyncIterable<T>): Promise<T[]> => {
+  const items: T[] = [];
+  for await (const item of source) {
+    items.push(item);
+  }
+  return items;
+};
+
+describe('tap', () => {
+  it('forwards every element unchanged and invokes onEach for each one in order', async () => {
+    const source = (async function* () {
+      yield 1;
+      yield 2;
+      yield 3;
+    })();
+
+    const seen: number[] = [];
+    expect(await drain(tap(source, (item) => seen.push(item)))).toEqual([1, 2, 3]);
+    expect(seen).toEqual([1, 2, 3]);
+  });
+
+  it('never invokes onEach when the source is empty', async () => {
+    const source = (async function* () {})();
+
+    const onEach = jest.fn();
+    expect(await drain(tap(source, onEach))).toEqual([]);
+    expect(onEach).not.toHaveBeenCalled();
+  });
+
+  it('propagates errors from the source and only taps elements seen before the error', async () => {
+    const source = (async function* () {
+      yield 1;
+      throw new Error('boom');
+    })();
+
+    const seen: number[] = [];
+    const iterator = tap(source, (item) => seen.push(item))[Symbol.asyncIterator]();
+
+    await expect(iterator.next()).resolves.toEqual({ value: 1, done: false });
+    await expect(iterator.next()).rejects.toThrow('boom');
+    expect(seen).toEqual([1]);
+  });
+});
 
 describe('withAtLeastOne', () => {
-  const drain = async <T>(source: AsyncIterable<T>): Promise<T[]> => {
-    const items: T[] = [];
-    for await (const item of source) {
-      items.push(item);
-    }
-    return items;
-  };
-
   it('yields every element from a non-empty source and does not emit the fallback', async () => {
     const source = (async function* () {
       yield 1;

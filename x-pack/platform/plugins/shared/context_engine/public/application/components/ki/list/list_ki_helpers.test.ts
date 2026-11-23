@@ -6,11 +6,11 @@
  */
 
 import {
-  ALL_TYPE_FILTER,
   getDiscoverEsqlQuery,
   getIndexManagementLocatorParams,
   getKiDisplayTitle,
-  getListKiTypeFilterLabel,
+  getStatusesForFilter,
+  getListKiStatusFilterLabel,
 } from './list_ki_helpers';
 
 describe('getDiscoverEsqlQuery', () => {
@@ -41,24 +41,37 @@ describe('getIndexManagementLocatorParams', () => {
   });
 });
 
-describe('getListKiTypeFilterLabel', () => {
-  it('returns All for the all filter value', () => {
-    expect(getListKiTypeFilterLabel(ALL_TYPE_FILTER.value)).toBe('All');
-  });
-
-  it('formats type labels', () => {
-    expect(getListKiTypeFilterLabel('playbook')).toBe('playbook');
-    expect(getListKiTypeFilterLabel('custom.type')).toBe('custom type');
-  });
-});
-
 describe('getKiDisplayTitle', () => {
   it('returns the title when set', () => {
     expect(getKiDisplayTitle('Refund playbook')).toBe('Refund playbook');
   });
 
-  it('returns None when title is missing', () => {
-    expect(getKiDisplayTitle()).toBe('None');
-    expect(getKiDisplayTitle('')).toBe('None');
+  it('returns Untitled when title is missing', () => {
+    expect(getKiDisplayTitle()).toBe('Untitled');
+    expect(getKiDisplayTitle('')).toBe('Untitled');
+  });
+});
+
+describe('getStatusesForFilter', () => {
+  it('asks for one status', () => {
+    expect(getStatusesForFilter('deleted')).toEqual(['deleted']);
+  });
+
+  it('asks for every status for All statuses', () => {
+    expect(getStatusesForFilter('all')).toEqual([
+      'active',
+      'deleted',
+      'verification_failed',
+      'expired',
+    ]);
+  });
+});
+
+describe('getListKiStatusFilterLabel', () => {
+  it('labels the prototype status options', () => {
+    expect(getListKiStatusFilterLabel('active')).toBe('Active');
+    expect(getListKiStatusFilterLabel('expired')).toBe('Expired');
+    expect(getListKiStatusFilterLabel('verification_failed')).toBe('Failed');
+    expect(getListKiStatusFilterLabel('all')).toBe('All statuses');
   });
 });

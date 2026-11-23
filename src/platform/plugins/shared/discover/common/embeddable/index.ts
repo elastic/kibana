@@ -20,6 +20,7 @@ export {
   isSearchEmbeddableLegacyPanelState,
 } from './type_guards';
 export {
+  fromStoredEmbeddableTab,
   fromStoredSearchEmbeddable,
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
