@@ -238,5 +238,53 @@ test.describe(
       // Should stay in creating state due to error
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
     });
+
+    test('should only show the create button once AI connectors have loaded', async ({
+      apiServices,
+      page,
+      pageObjects,
+    }) => {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.existing', {
+        field: 'service.name',
+        eq: 'existing',
+      });
+
+      // Hold the connectors response so the AI features stay in their loading state
+      let releaseConnectors: () => void = () => {};
+      const connectorsReleased = new Promise<void>((resolve) => {
+        releaseConnectors = resolve;
+      });
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+        await connectorsReleased;
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            connectors: [
+              {
+                connectorId: 'test-connector',
+                name: 'Test Connector',
+                type: '.gen-ai',
+                config: {},
+                capabilities: {},
+                isPreconfigured: false,
+                isInferenceEndpoint: false,
+              },
+            ],
+            allConnectors: [],
+            soEntryFound: false,
+          }),
+        });
+      });
+
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.existing');
+      await expect(page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton')).toBeHidden();
+
+      releaseConnectors();
+      await expect(page.getByTestId('streamsAppGenerateSuggestionButton')).toBeVisible();
+      await pageObjects.streams.clickCreateRoutingRule();
+      await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
+    });
   }
 );

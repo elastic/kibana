@@ -8,8 +8,11 @@
  */
 
 import { parse as yamlLoad } from 'yaml';
-import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github.ts';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
+import { getKibanaDir } from '#pipeline-utils/utils';
+
+process.chdir(getKibanaDir());
 
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
@@ -36,11 +39,11 @@ jest.mock('#pipeline-utils', () => {
   };
 });
 
-jest.mock('./pre_build', () => ({
+jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
-jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
+jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalPipeline: mockGetEvalPipeline,
 }));
 
@@ -48,7 +51,7 @@ const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
-    await import('./pipeline');
+    await import('./pipeline.ts');
   });
 };
 

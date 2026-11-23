@@ -7,6 +7,8 @@
 
 import { coerce, satisfies } from 'semver';
 
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
 
@@ -17,7 +19,11 @@ import type { FleetServerPolicy, FullAgentPolicy, FullAgentPolicyInput } from '.
 import type { SecretReference } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
 import type { PackageInfo, PackagePolicyAssetsMap } from '../../../common/types';
-import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../../common/constants';
+import {
+  AGENT_POLICY_INDEX,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  AGENTS_INDEX,
+} from '../../../common/constants';
 import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 /** Field on `.fleet-agents` / `.fleet-policies` holding the canonical (suffix-stripped) policy id. */
@@ -30,14 +36,138 @@ const POLICY_BASE_ID_FIELD = 'policy_base_id';
  *
  * Mixed-version rollout note: an agent enrolled by a downlevel fleet-server after the last Kibana
  * startup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
- * field. Such agents are NOT matched by this kuery. The orphan sweep may therefore delete the
- * variant `.fleet-policies` document before that agent is reassigned, leaving it pointing to a
- * missing policy until the next Kibana restart re-runs the startup backfill and recovers it. The
- * window is bounded by the time between the mixed-version enrollment and the next restart.
+ * field. To still match such agents, pass the known `variantPolicyIds` (full ids, e.g.
+ * `policy1#9.4`): agents with one of those exact `policy_id`s and no `policy_base_id` are matched
+ * too. Exact terms only, so this stays compatible with `search.allow_expensive_queries: false`.
  */
-export function buildVariantAgentsKuery(parentPolicyId: string): string {
+export function buildVariantAgentsKuery(
+  parentPolicyId: string,
+  variantPolicyIds: string[] = []
+): string {
   const escapedId = escapeQuotes(parentPolicyId);
-  return `${POLICY_BASE_ID_FIELD}:"${escapedId}" and not policy_id:"${escapedId}"`;
+  const baseClause = `${POLICY_BASE_ID_FIELD}:"${escapedId}" and not policy_id:"${escapedId}"`;
+  if (variantPolicyIds.length === 0) {
+    return baseClause;
+  }
+  const idList = variantPolicyIds.map((id) => `"${escapeQuotes(id)}"`).join(' or ');
+  return `(${baseClause}) or (policy_id:(${idList}) and not ${POLICY_BASE_ID_FIELD}:*)`;
+}
+
+const MAX_VARIANT_POLICY_IDS_PER_PARENT = 1000;
+const POLICY_ID_DISCOVERY_PAGE_SIZE = 1000;
+
+/**
+ * Lists the full variant policy ids (e.g. `"<parentId>#9.4"`) present in `.fleet-policies` for a
+ * parent. Used to match agents that have a versioned `policy_id` but no `policy_base_id` yet.
+ */
+export async function getVariantPolicyIdsForParent(
+  esClient: ElasticsearchClient,
+  parentPolicyId: string
+): Promise<string[]> {
+  const response = await esClient.search<
+    unknown,
+    { variant_policy_ids: { buckets: Array<{ key: string }> } }
+  >({
+    index: AGENT_POLICY_INDEX,
+    ignore_unavailable: true,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ term: { [POLICY_BASE_ID_FIELD]: parentPolicyId } }],
+        must_not: [{ term: { policy_id: parentPolicyId } }],
+      },
+    },
+    aggs: {
+      variant_policy_ids: {
+        terms: { field: 'policy_id', size: MAX_VARIANT_POLICY_IDS_PER_PARENT },
+      },
+    },
+  });
+  return (response.aggregations?.variant_policy_ids?.buckets ?? []).map((b) => b.key);
+}
+
+/**
+ * Same as {@link buildVariantAgentsKuery}, with the variant ids looked up from `.fleet-policies`
+ * and merged with `extraVariantPolicyIds` (e.g. ids only known from agents whose variant document
+ * is already gone).
+ */
+export async function getVariantAgentsKuery(
+  esClient: ElasticsearchClient,
+  parentPolicyId: string,
+  extraVariantPolicyIds: string[] = []
+): Promise<string> {
+  const policyIds = await getVariantPolicyIdsForParent(esClient, parentPolicyId);
+  return buildVariantAgentsKuery(
+    parentPolicyId,
+    Array.from(new Set([...policyIds, ...extraVariantPolicyIds]))
+  );
+}
+
+/**
+ * Returns the versioned policy ids (e.g. `"<parentId>#9.4"`) referenced by agents that have no
+ * `policy_base_id`, grouped by parent (base) policy id. These agents were enrolled by a downlevel
+ * fleet-server after the last startup backfill and cannot be located via `policy_base_id`; the
+ * variant `.fleet-policies` document they reference may also already be gone.
+ */
+export async function getVariantPolicyIdsFromAgentsWithoutBaseId(
+  esClient: ElasticsearchClient,
+  signal?: AbortSignal
+): Promise<Map<string, string[]>> {
+  const byParent = new Map<string, string[]>();
+  let afterKey: Record<string, string> | undefined;
+
+  // Page through every distinct `policy_id` of agents lacking `policy_base_id` with a composite
+  // aggregation, so discovery is not capped to the top-N buckets. Versioned ids are picked out
+  // client-side (no `include` regex / wildcard query), keeping this compatible with
+  // `search.allow_expensive_queries: false`. After the startup backfill the set is tiny.
+  do {
+    signal?.throwIfAborted();
+    const response: SearchResponse<
+      unknown,
+      {
+        policy_ids: {
+          buckets: Array<{ key: { policy_id: string } }>;
+          after_key?: Record<string, string>;
+        };
+      }
+    > = await esClient.search(
+      {
+        index: AGENTS_INDEX,
+        ignore_unavailable: true,
+        size: 0,
+        // Unenrolled agents are excluded from reassignment, so they are not worth discovering.
+        query: {
+          bool: {
+            must_not: [
+              { exists: { field: POLICY_BASE_ID_FIELD } },
+              { exists: { field: 'unenrolled_at' } },
+            ],
+          },
+        },
+        aggs: {
+          policy_ids: {
+            composite: {
+              size: POLICY_ID_DISCOVERY_PAGE_SIZE,
+              sources: [{ policy_id: { terms: { field: 'policy_id' } } }],
+              ...(afterKey ? { after: afterKey } : {}),
+            },
+          },
+        },
+      },
+      { signal }
+    );
+
+    const agg = response.aggregations?.policy_ids;
+    for (const { key } of agg?.buckets ?? []) {
+      const policyId = key.policy_id;
+      const { baseId, version } = splitVersionSuffixFromPolicyId(policyId);
+      if (version === null) continue;
+      byParent.set(baseId, [...(byParent.get(baseId) ?? []), policyId]);
+    }
+    afterKey = (agg?.buckets.length ?? 0) > 0 ? agg?.after_key : undefined;
+  } while (afterKey);
+
+  return byParent;
 }
 
 export async function getAgentVersionsForVersionSpecificPolicies(): Promise<string[]> {
@@ -83,7 +213,8 @@ export async function getVersionSpecificPolicies(
   soClient: SavedObjectsClientContract,
   fleetServerPolicy: FleetServerPolicy,
   fullPolicy: FullAgentPolicy,
-  agentVersions?: string[]
+  agentVersions?: string[],
+  options?: { spaceId?: string }
 ): Promise<FleetServerPolicy[]> {
   const fleetServerPolicies: FleetServerPolicy[] = [];
 
@@ -95,6 +226,7 @@ export async function getVersionSpecificPolicies(
       // read compiled template for agent version from package policy SO
       updatedFullPolicy = await agentPolicyService.getFullAgentPolicy(soClient, fullPolicy.id, {
         agentVersion: version,
+        spaceId: options?.spaceId,
       });
     }
     const versionedPolicyId = `${fullPolicy.id}${AGENT_POLICY_VERSION_SEPARATOR}${version}`;
@@ -159,7 +291,7 @@ export async function reassignAgentsFromVersionSpecificPolicies(
   parentPolicyId: string
 ): Promise<void> {
   const logger = appContextService.getLogger();
-  const variantKuery = buildVariantAgentsKuery(parentPolicyId);
+  const variantKuery = await getVariantAgentsKuery(esClient, parentPolicyId);
 
   const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {
     kuery: variantKuery,

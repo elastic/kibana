@@ -186,6 +186,15 @@ describe('Security Telemetry filters', () => {
       });
     });
 
+    it('skips null entries in arrays of objects', () => {
+      const event = {
+        c: [null, { d: 'd1', e: 'e1' }, null],
+      };
+      expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
+        c: [{ d: 'd1' }],
+      });
+    });
+
     it("doesn't create empty objects", () => {
       const event = {
         a: 'a',

@@ -134,7 +134,7 @@ export interface PackagePolicyClient {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     ids: string[],
-    options?: { user?: AuthenticatedUser; force?: boolean },
+    options?: { user?: AuthenticatedUser; force?: boolean; batchSize?: number },
     pkgVersion?: string
   ): Promise<UpgradePackagePolicyResponse>;
 
@@ -261,6 +261,11 @@ export interface PackagePolicyClient {
     outputId: string,
     options?: { force?: boolean }
   ): Promise<void>;
+
+  getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
+    spaceIds: Set<string>;
+    truncated: boolean;
+  }>;
 
   /**
    * Returns an `AsyncIterable` for retrieving all integration policy IDs

@@ -44,6 +44,7 @@ test.describe('APM home page', { tag: tags.stateful.classic }, () => {
   });
 
   test.setTimeout(120000);
+
   test('includes services that only have metric documents', async ({
     page,
     pageObjects: { serviceInventoryPage },

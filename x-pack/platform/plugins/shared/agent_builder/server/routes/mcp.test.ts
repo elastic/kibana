@@ -8,6 +8,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -140,7 +141,14 @@ describe('filterToolsByNamespace', () => {
 
 describe('registerMCPRoutes', () => {
   const routeKey = `POST:${MCP_SERVER_PATH}`;
-  let routeHandlers: Record<string, { config: any; handler: Function }>;
+  let routeHandlers: Record<
+    string,
+    {
+      routeConfig: { path: string; options?: { timeout?: { idleSocket?: number } } };
+      config: any;
+      handler: Function;
+    }
+  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -157,12 +165,12 @@ describe('registerMCPRoutes', () => {
 
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => {
+        post: jest.fn().mockImplementation((routeConfig: { path: string }) => {
           const versionedRoute = { addVersion: jest.fn() };
           versionedRoute.addVersion = jest
             .fn()
             .mockImplementation((vConfig: any, handler: Function) => {
-              routeHandlers[`POST:${config.path}`] = { config: vConfig, handler };
+              routeHandlers[`POST:${routeConfig.path}`] = { routeConfig, config: vConfig, handler };
               return versionedRoute;
             });
           return versionedRoute;
@@ -184,5 +192,21 @@ describe('registerMCPRoutes', () => {
 
     const querySchema = routeConfig?.validate?.request?.query;
     expect(querySchema).toBeDefined();
+  });
+
+  describe('POST (socket timeout)', () => {
+    const DEFAULT_SERVER_SOCKET_TIMEOUT_MS = 120 * 1000;
+
+    it('overrides the idle socket timeout so long-running tool executions are not killed mid-request', () => {
+      const { routeConfig } = routeHandlers[routeKey];
+      expect(routeConfig.options?.timeout?.idleSocket).toBe(AGENT_SOCKET_TIMEOUT_MS);
+    });
+
+    it('sets an idle socket timeout greater than the server default', () => {
+      const { routeConfig } = routeHandlers[routeKey];
+      expect(routeConfig.options?.timeout?.idleSocket).toBeGreaterThan(
+        DEFAULT_SERVER_SOCKET_TIMEOUT_MS
+      );
+    });
   });
 });

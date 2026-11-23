@@ -47,7 +47,50 @@ Important: Do not post GitHub comments unless explicitly stated.
 - **Global teardown** (when `global.teardown.ts` is present): cleanup must use `esClient`/`kbnClient`/`apiServices`. `esArchiver` isn't on the teardown fixture surface — Scout intentionally never exposed archive-unloading (slow and unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). Flag teardowns that try to use `esArchiver` at all, that **load** new data (teardown is for state reset only), or that duplicate work belonging in `afterAll`/per-test cleanup.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
-### Migration parity analysis (required when migration is detected)
+- **[general]** → `docs/extend/testing/scout-best-practices.md` (applies to both UI and API tests)
+- **[ui]** → `docs/extend/testing/ui-best-practices.md`
+- **[api]** → `docs/extend/testing/api-best-practices.md`
+
+Open only the docs relevant to the test type(s) under review.
+
+- **[general]** **Reuse-first**: prefer existing `pageObjects`, fixtures, and `apiServices`; if adding helpers/page objects, place them per **Critical check 7** and `docs/extend/testing/page-objects.md#scout-page-objects-placement` (plugin vs solution vs `@kbn/scout`) and register via fixtures.
+- **[general]** **No unused constants**: flag constants that are unused or used in only one place — prefer inlining them.
+- **[general]** **Don't circumvent the linter**: CI gates lint *violations*, so don't re-flag those — but it can't see a **suppressed** rule, so read every `eslint-disable` the diff adds. A file-level `/* eslint-disable <rule> */` is a `blocker`; it silences code added later too. An undescribed `// eslint-disable-next-line` is a `major`. With a stated reason (`-- <why>`) it is acceptable only when the rule genuinely can't express the case; if a supported alternative exists, name it. Same bar for hiding a flagged pattern behind a hack, or a sanctioned escape hatch like `dispatchEvent('click')`: both need a documented justification.
+  - Most common offender: `playwright/no-nth-methods`. A suppressed `.first()` almost always means the locator matched more than one element — the selector is the bug; name the replacement from **Avoid selecting elements by index or position** in `docs/extend/testing/ui-best-practices.md`. Only a genuinely ordered collection, or elements that are truly indistinguishable in a component the author doesn't own, justify a described `.nth()` / `.last()`, and both need a preceding `toHaveCount` to bound the index.
+- **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
+- **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
+- **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Critical check 3 (right test type)**.
+- **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Use `readonly` constructor fields for static locators and named methods for parameterized locators; avoid repeatedly constructing static locators inside action methods.
+- **[general]** **Isolation**: parallel-safe data; resilient primary cleanup in `afterAll`/`afterEach`; use `cleanStandardList()` only when relevant and not redundant, normally in post-test cleanup; justify before-hook use; preserve shared fixtures and clean up resources and settings separately; id/name-based deletes for anything not scoped by a space, also in shared helpers; no reliance on file ordering or shared mutable state.
+- **[general]** **Shared environment**: for state the suite assumes absent or leaves behind on shared servers (fixed names/time windows, cluster-wide "no data" assertions, unreverted settings/templates, orphaned resources, or shared Kibana entities like data views, alerts, Fleet config, and default UI settings), see **Critical check 5 (doesn't assume a clean cluster)** and **Critical check 6 (leaves the cluster as it found it)**.
+- **[general]** **Suite size**: generally, smaller test suites, preferably following the role + one guideline per file. See **Critical check 8**.
+- **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
+- **[ui]** **Navigation readiness**: page object `goto()` should pass `readyWhen` (the app's own ready element) to `gotoApp`. Flag `page.goto` / `gotoApp` with `waitUntil: 'commit' | 'domcontentloaded'` plus a separate element wait (→ `readyWhen`), `'commit'` with no wait at all, `'networkidle'`, and a raised `readyTimeout` without a comment. The default `gotoApp()` is fine when the test asserts a redirect or URL. → `docs/extend/testing/ui-best-practices.md#gate-app-navigation-on-ready-element`
+- **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
+- **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
+- **[general]** **Global teardown** (when `global.teardown.ts` is present): cleanup must use `esClient`/`kbnClient`/`apiServices`. `esArchiver` isn't on the teardown fixture surface — Scout intentionally never exposed archive-unloading (slow and unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). Flag teardowns that try to use `esArchiver` at all, that **load** new data (teardown is for state reset only), or that duplicate work belonging in `afterAll`/per-test cleanup.
+- **[general]** **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
+
+### Files to skip
+
+Do not review or comment on:
+
+- **`.meta` manifest files** (e.g., `**/.meta/**/*.json`): these are auto-generated for CI test planning and lane distribution. No manual regeneration is needed.
+
+### Severity classification
+
+Use these definitions when assigning severity:
+
+- **Blocker**: Will cause test failures, breaks CI, missing required coverage (migration parity gaps), security or data leak risks
+- **Major**: Likely to cause flakiness, incorrect test coverage (including an oversized spec whose skip blast radius drops a large suite), permission/auth errors, violates core best practices in ways that affect correctness
+- **Minor**: Suboptimal patterns, missed reuse opportunities, efficiency improvements, style inconsistencies that don't affect correctness
+- **Nit**: Cosmetic issues, naming suggestions, optional improvements, "nice to have" changes
+
+When in doubt, prefer a lower severity. Optimization suggestions (efficiency improvements) should be `minor` or `nit`, not `major`.
+
+### Migration parity analysis (Critical check 4 depth)
+
+Flag **only major** changes or drops — coverage that genuinely weakens. Skip benign deltas.
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
 - **If migration is detected**:

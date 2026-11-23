@@ -224,8 +224,15 @@ export const useESQLOverallStatsData = (
   const previousExecutionTs = useRef<number | undefined>(undefined);
   const previousDocCountRequest = useRef('');
   const previousError = useRef<Error | undefined>();
+  const fetchGeneration = useRef(0);
 
   const { runRequest, cancelRequest } = useCancellableSearch(data);
+
+  // An aborted request resolves with `null` rather than throwing, so a superseded run resumes past its awaits and keeps writing state.
+  const cancelOverallStatsRequest = useCallback(() => {
+    fetchGeneration.current++;
+    cancelRequest();
+  }, [cancelRequest]);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
   const [queryHistoryStatus, setQueryHistoryStatus] = useState<boolean | undefined>(false);
@@ -266,7 +273,9 @@ export const useESQLOverallStatsData = (
         }
         previousExecutionTs.current = fieldStatsRequest.lastRefresh;
 
-        cancelRequest();
+        cancelOverallStatsRequest();
+        const generation = fetchGeneration.current;
+        const isStale = () => fetchGeneration.current !== generation;
 
         setOverallStatsProgress({
           ...getInitialProgress(),
@@ -312,6 +321,7 @@ export const useESQLOverallStatsData = (
           },
           { strategy: ESQL_ASYNC_SEARCH_STRATEGY }
         )) as ESQLResponse | undefined;
+        if (isStale()) return;
         setQueryHistoryStatus(false);
         const columnInfo = columnsResp?.rawResponse
           ? columnsResp.rawResponse.all_columns ?? columnsResp.rawResponse.columns
@@ -375,6 +385,7 @@ export const useESQLOverallStatsData = (
             timeRange
           );
 
+          if (isStale()) return;
           totalCount = results.totalCount;
           documentCountStats = results.documentCountStats;
           setTableData({ totalCount, documentCountStats });
@@ -458,7 +469,7 @@ export const useESQLOverallStatsData = (
             onError,
             timeRange,
           });
-          if (!stats) return;
+          if (!stats || isStale()) return;
           stats.aggregatableNotExistsFields = aggregatableNotExistsFields;
           stats.nonAggregatableNotExistsFields = nonAggregatableNotExistsFields;
 
@@ -516,9 +527,9 @@ export const useESQLOverallStatsData = (
     () => ({
       ...tableData,
       overallStatsProgress,
-      cancelOverallStatsRequest: cancelRequest,
+      cancelOverallStatsRequest,
       queryHistoryStatus,
     }),
-    [tableData, overallStatsProgress, cancelRequest, queryHistoryStatus]
+    [tableData, overallStatsProgress, cancelOverallStatsRequest, queryHistoryStatus]
   );
 };

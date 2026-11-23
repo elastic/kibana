@@ -234,6 +234,53 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result.length).toBeGreaterThan(0);
       });
 
+      describe('stackVersions filtering', () => {
+        const setupStackVersion = (stackVersion: string) => {
+          service.setup({
+            taskManager: { registerTaskDefinitions: jest.fn() } as never,
+            isServerless: false,
+            stackVersion,
+          });
+        };
+
+        test('should run a query when the cluster version satisfies stackVersions', async () => {
+          setupStackVersion('9.4.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should silently skip a query when the cluster version is outside stackVersions', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should coerce a -SNAPSHOT cluster version before evaluating the range', async () => {
+          setupStackVersion('9.4.0-SNAPSHOT');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should run a query with no stackVersions regardless of cluster version', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4 });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+      });
+
       describe('query attribute filtering', () => {
         test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({

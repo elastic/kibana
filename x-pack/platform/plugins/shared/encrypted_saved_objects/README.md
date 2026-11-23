@@ -5,7 +5,11 @@
 The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
 security and spaces filtering.
 
-[RFC #2: Encrypted Saved Objects Attributes](../../../../../rfcs/text/0002_encrypted_attributes.md).
+[RFC #2: Encrypted Saved Objects Attributes](../../../../../legacy_rfcs/text/0002_encrypted_attributes.md).
+
+For guidance on choosing which attributes to encrypt and which to include in AAD, migrating ESO types with `createModelVersion`, and
+Serverless constraints, see [Encrypted Saved Objects](../../../../../dev_docs/key_concepts/encrypted_saved_objects.mdx) in
+the developer documentation.
 
 ## Usage
 
@@ -48,6 +52,12 @@ public setup(core: CoreSetup, { encryptedSavedObjects }: PluginSetupDependencies
 }
 ...
 ```
+
+Both `attributesToEncrypt` and `attributesToIncludeInAAD` accept top-level attribute names only - names are matched against the keys of
+the object's `attributes` with an exact string comparison, and a dot is never interpreted as a path into a nested attribute. Registering
+a dotted key throws, apart from a small grandfathered allowlist. See
+[Nested attributes](../../../../../dev_docs/key_concepts/encrypted_saved_objects.mdx#nested-attributes) for why, and for what
+to do when you have nested data to protect.
 
 4. For any Saved Object operation that does not require retrieval of decrypted content, use standard REST or 
 programmatic Saved Object API, e.g.:
@@ -136,7 +146,7 @@ The `createMigration` function takes four arguments:
 encryptedSavedObjects.registerType({
   type: 'alert',
   attributesToEncrypt: new Set(['apiKey']),
-  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  attributesToIncludeInAAD: new Set(['alertTypeId', 'createdBy']),
 });
 
 const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
@@ -187,7 +197,7 @@ If your migration needs to change the type by, for example, removing an encrypte
 encryptedSavedObjects.registerType({
   type: 'alert',
   attributesToEncrypt: new Set(['apiKey']),
-  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  attributesToIncludeInAAD: new Set(['alertTypeId', 'createdBy']),
 });
 
 const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
@@ -208,7 +218,7 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
   inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
-    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+    attributesToIncludeInAAD: new Set(['alertTypeId', 'createdBy']),
   }
 });
 ```
@@ -222,7 +232,7 @@ If you need to migrate between two legacy types, you can specify both types at o
 encryptedSavedObjects.registerType({
   type: 'alert',
   attributesToEncrypt: new Set(['apiKey']),
-  attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+  attributesToIncludeInAAD: new Set(['alertTypeId', 'createdBy']),
 });
 
 const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
@@ -236,16 +246,20 @@ const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
   inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
-    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
+    attributesToIncludeInAAD: new Set(['alertTypeId']),
   },
   // legacy migration type
   migratedType: {
     type: 'alert',
-    attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
-    attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy', 'legacyEncryptedField']),
+    attributesToEncrypt: new Set(['apiKey']),
+    attributesToIncludeInAAD: new Set(['alertTypeId']),
   }
 });
 ```
+
+Specify both types when neither the input nor the output shape matches the currently registered type. Here this migration removes
+`legacyEncryptedField`, so the document is decrypted with it and re-encrypted without it, and a later migration adds `createdBy` to AAD -
+so the output of this migration is still not the registered type.
 
 ## Testing
 

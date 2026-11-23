@@ -65,6 +65,25 @@ describe('getSampleDocs', () => {
     );
   });
 
+  it('excludes frozen tier documents by default', async () => {
+    esClient.search.mockResponse(createResponse([]));
+
+    await getSampleDocs({ index: 'test-index', size: 10, esClient });
+
+    const boolQuery = esClient.search.mock.calls[0]?.[0]?.query?.bool;
+    expect(boolQuery?.must_not).toEqual([{ term: { _tier: 'data_frozen' } }]);
+  });
+
+  it('does not exclude frozen tier documents when they are included', async () => {
+    esClient.search.mockResponse(createResponse([]));
+
+    await getSampleDocs({ index: 'test-index', size: 10, includeFrozen: true, esClient });
+
+    const boolQuery = esClient.search.mock.calls[0]?.[0]?.query?.bool;
+    expect(boolQuery?.should).toBeDefined();
+    expect(boolQuery).not.toHaveProperty('must_not');
+  });
+
   it('processes the source of a document', async () => {
     esClient.search.mockResponse(
       createResponse(

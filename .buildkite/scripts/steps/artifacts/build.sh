@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# node scripts/build rebuilds the shared webpack bundles without the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh

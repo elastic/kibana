@@ -672,7 +672,7 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         mockSoClient,
         expect.anything(),
         ['unexpected-policy'],
-        { force: true, ignoreMissing: true, spaceIds: ['*'] }
+        { force: true, ignoreMissing: true, spaceIds: ['*'], bumpRevision: false }
       );
       expect(result.performCleanupSync).toBe(true);
     });
