@@ -189,7 +189,15 @@ describe('unisolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),
@@ -476,7 +484,15 @@ describe('unisolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),

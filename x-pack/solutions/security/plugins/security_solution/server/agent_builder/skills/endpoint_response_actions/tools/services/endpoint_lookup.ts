@@ -80,14 +80,12 @@ export interface ResolvedEndpoint {
    */
   policyBaseId?: string;
   /**
-   * Operating system the endpoint runs, from the OS *family/type* fields
-   * (`local_metadata.os.type`/`.family` on the Fleet agent, `host.os.type` in
-   * Defend metadata) — e.g. `linux`, `windows`, `darwin`. NOT the ECS
-   * `platform`, which on Linux is the distribution (`ubuntu`, `centos`), so
-   * `platform === 'linux'` is false for most Linux hosts. Used to interpret
-   * platform-specific endpoint policy settings (the Linux isolation gate).
-   * Undefined when neither field is reported: callers must not refuse on an
-   * unknown OS.
+   * Operating system the endpoint runs, normalised to `linux`, `windows` or
+   * `macos`. Defend's `host.os.type` wins where the metadata is read; Fleet's
+   * `local_metadata.os` (no `type` field: `family` is the distribution family,
+   * e.g. `debian`) is the fallback. Used to interpret platform-specific
+   * endpoint policy settings (the Linux isolation gate). Undefined when the
+   * OS is unknown or unrecognised: callers must not refuse on an unknown OS.
    */
   osType?: string;
 }
@@ -181,13 +179,68 @@ function totalCandidatesOf(...collections: Array<{ truncated: boolean; total?: n
 }
 
 /**
- * The OS family/type an OS block reports, lower-cased. Reads `type` first and
- * falls back to `family`; never `platform`, which is the distribution on Linux
- * (see {@link ResolvedEndpoint.osType}).
+ * Linux distribution families and ids as go-sysinfo (Elastic Agent's OS
+ * source) reports them. On Linux Fleet's `local_metadata.os.family` is the
+ * distribution family (`debian`) and `platform` the distribution id
+ * (`ubuntu`), while `name` is the distribution's pretty name (`Ubuntu`), so
+ * none of them is the literal `linux`.
  */
-const osTypeOf = (os: { type?: string; family?: string } | undefined): string | undefined => {
-  const value = os?.type || os?.family;
-  return typeof value === 'string' && value ? value.toLowerCase() : undefined;
+const LINUX_OS_IDS = new Set([
+  'linux',
+  'alpine',
+  'arch',
+  'antergos',
+  'manjaro',
+  'redhat',
+  'fedora',
+  'centos',
+  'scientific',
+  'oraclelinux',
+  'ol',
+  'amzn',
+  'rhel',
+  'almalinux',
+  'openeuler',
+  'rocky',
+  'debian',
+  'ubuntu',
+  'raspbian',
+  'linuxmint',
+  'suse',
+  'sles',
+  'opensuse',
+]);
+
+const classifyOsValue = (value: unknown): 'linux' | 'windows' | 'macos' | undefined => {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (LINUX_OS_IDS.has(normalized)) {
+    return 'linux';
+  }
+  if (normalized.startsWith('windows')) {
+    return 'windows';
+  }
+  if (normalized === 'darwin' || normalized === 'macos' || normalized.startsWith('mac os')) {
+    return 'macos';
+  }
+  return undefined;
+};
+
+/**
+ * Classifies an OS block as `linux`, `windows` or `macos`; anything else is
+ * `undefined` and must never cause a refusal. Reads Defend's `host.os.type`
+ * first, then the Fleet fields (`family`, `platform`, `name`) — Fleet has no
+ * `type`. See {@link ResolvedEndpoint.osType}.
+ */
+const osTypeOf = (
+  os: { type?: string; family?: string; platform?: string; name?: string } | undefined
+): ResolvedEndpoint['osType'] => {
+  if (!os) {
+    return undefined;
+  }
+  return [os.type, os.family, os.platform, os.name].map(classifyOsValue).find(Boolean);
 };
 
 /**
@@ -271,6 +324,11 @@ export function createEndpointLookupService(
       )
       .flatMap(([, packageNames]) => packageNames)
   );
+
+  interface DefendHostIdentity {
+    names: string[];
+    osType?: string;
+  }
 
   interface NormalizedCandidate {
     agentId: string;
@@ -440,7 +498,7 @@ export function createEndpointLookupService(
    * Fleet's hostname alone (the stricter, pre-existing behaviour) instead of
    * failing a dispatch that Fleet resolved fine.
    */
-  const listDefendHostNames = async (agentId: string): Promise<string[]> => {
+  const listDefendHostIdentity = async (agentId: string): Promise<DefendHostIdentity> => {
     try {
       // Fleet agent id first, endpoint's own id as the legacy fallback — the
       // same join `getAgentHostNamesWithIds` and the status read use.
@@ -462,10 +520,14 @@ export function createEndpointLookupService(
         entry.metadata?.host?.hostname,
         entry.metadata?.host?.name,
       ]);
+      const osType = (data ?? []).map((entry) => osTypeOf(entry.metadata?.host?.os)).find(Boolean);
 
-      return [...new Set(names.filter((name): name is string => Boolean(name)))];
+      return {
+        names: [...new Set(names.filter((name): name is string => Boolean(name)))],
+        ...(osType ? { osType } : {}),
+      };
     } catch {
-      return [];
+      return { names: [] };
     }
   };
 
@@ -684,7 +746,8 @@ export function createEndpointLookupService(
     const fleetAgent = await fleetServices.agent.getAgent(chosen.agentId).catch(() => undefined);
     const policyId = fleetAgent?.policy_id ?? chosen.policyId;
     const policyBaseId = fleetAgent?.policy_base_id ?? chosen.policyBaseId;
-    const osType = osTypeOf(fleetAgent?.local_metadata?.os) ?? chosen.osType;
+    // Defend's `host.os.type` (already on `chosen`) outranks Fleet's distro-shaped OS block.
+    const osType = chosen.osType ?? osTypeOf(fleetAgent?.local_metadata?.os);
 
     return {
       kind: 'found' as const,
@@ -736,14 +799,17 @@ export function createEndpointLookupService(
       }
 
       const fleetHostName = agent.local_metadata?.host?.name;
-      const agentOsType = osTypeOf(agent.local_metadata?.os);
       // Admitted on Defend's metadata alone: Fleet `packages` are stale or name
       // another vendor, and a vendor type would leave the Defend-only dispatch path.
       const agentType = hasSupportedPackage ? resolveAgentTypeFromPackages(packages) : 'endpoint';
       // Fleet's name for the agent is not the only identity a correct caller
-      // can supply — see `listDefendHostNames`. Only a Defend agent has
+      // can supply — see `listDefendHostIdentity`. Only a Defend agent has
       // documents in the metadata index, so only it needs that read.
-      const defendHostNames = agentType === 'endpoint' ? await listDefendHostNames(agent.id) : [];
+      const defendIdentity: DefendHostIdentity =
+        agentType === 'endpoint' ? await listDefendHostIdentity(agent.id) : { names: [] };
+      const defendHostNames = defendIdentity.names;
+      // Defend's own `host.os.type` outranks Fleet's distro-shaped OS block.
+      const agentOsType = defendIdentity.osType ?? osTypeOf(agent.local_metadata?.os);
 
       return {
         kind: 'found',
@@ -828,6 +894,12 @@ export function createEndpointLookupService(
       }
 
       const chosen = selection.candidate;
+      // Fleet wins the candidate merge, but Defend's `host.os.type` is the
+      // better OS signal when its metadata holds the same agent.
+      const defendOsType = resolutionMetadata.candidates.find(
+        (c) => c.agentId === chosen.agentId
+      )?.osType;
+      const osType = defendOsType ?? chosen.osType;
 
       return {
         kind: 'found',
@@ -838,7 +910,7 @@ export function createEndpointLookupService(
           status: chosen.status,
           ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
           ...(chosen.policyBaseId ? { policyBaseId: chosen.policyBaseId } : {}),
-          ...(chosen.osType ? { osType: chosen.osType } : {}),
+          ...(osType ? { osType } : {}),
         },
       };
     },

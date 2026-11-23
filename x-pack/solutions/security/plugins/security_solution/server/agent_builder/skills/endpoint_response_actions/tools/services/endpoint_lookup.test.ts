@@ -1381,7 +1381,15 @@ describe('createEndpointLookupService', () => {
         id: 'agent-ip',
         policy_id: 'agent-policy-new:3',
         policy_base_id: 'agent-policy-new',
-        local_metadata: { os: { family: 'debian', type: 'linux', platform: 'ubuntu' } },
+        local_metadata: {
+          os: {
+            family: 'debian',
+            platform: 'ubuntu',
+            name: 'Linux',
+            full: 'Ubuntu 22.04',
+            kernel: '5.15.0-91-generic',
+          },
+        },
       });
       const { lookup } = buildService({
         getAgent,
@@ -1406,6 +1414,67 @@ describe('createEndpointLookupService', () => {
         }),
       });
       expect(getAgent).toHaveBeenCalledWith('agent-ip');
+    });
+
+    it('prefers the OS type Defend reports over the distro-shaped Fleet OS block', async () => {
+      const { lookup } = buildService({
+        getAgent: jest.fn().mockResolvedValue({
+          id: 'agent-ip',
+          local_metadata: { os: { family: 'debian', platform: 'ubuntu', name: 'Ubuntu' } },
+        }),
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                elastic: { agent: { id: 'agent-ip' } },
+                host: { hostname: 'ip-host', os: { type: 'linux' } },
+              },
+              host_status: HostStatus.HEALTHY,
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      await expect(lookup.resolveByIp('10.0.0.7')).resolves.toEqual({
+        kind: 'found',
+        endpoint: expect.objectContaining({ osType: 'linux' }),
+      });
+    });
+
+    it('classifies a Fleet-only OS block by family and leaves unknown families unset', async () => {
+      const osFor = async (os: Record<string, string>) => {
+        const { lookup } = buildService({
+          getAgent: jest.fn().mockResolvedValue({ id: 'agent-ip', local_metadata: { os } }),
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: { elastic: { agent: { id: 'agent-ip' } } },
+                host_status: HostStatus.HEALTHY,
+              },
+            ],
+            total: 1,
+          }),
+        });
+        const result = await lookup.resolveByIp('10.0.0.7');
+        return result.kind === 'found' ? result.endpoint.osType : 'not-found';
+      };
+
+      await expect(
+        osFor({ family: 'redhat', platform: 'rhel', name: 'Red Hat Enterprise Linux' })
+      ).resolves.toBe('linux');
+      await expect(osFor({ family: 'debian', platform: 'ubuntu', name: 'Ubuntu' })).resolves.toBe(
+        'linux'
+      );
+      await expect(
+        osFor({ family: 'windows', platform: 'windows', name: 'Windows Server 2022' })
+      ).resolves.toBe('windows');
+      await expect(osFor({ family: 'darwin', platform: 'darwin', name: 'macOS' })).resolves.toBe(
+        'macos'
+      );
+      await expect(osFor({ family: 'plan9', platform: 'plan9', name: 'Plan 9' })).resolves.toBe(
+        undefined
+      );
     });
 
     it('flags the ambiguity list as truncated when holders exceed the candidate cap', async () => {
@@ -1614,7 +1683,15 @@ describe('createEndpointLookupService', () => {
         packages: ['endpoint'],
         policy_id: 'pol-1:7',
         policy_base_id: 'pol-1',
-        local_metadata: { os: { family: 'debian', type: 'Linux', platform: 'ubuntu' } },
+        local_metadata: {
+          os: {
+            family: 'debian',
+            platform: 'ubuntu',
+            name: 'Linux',
+            full: 'Ubuntu 22.04',
+            kernel: '5.15.0-91-generic',
+          },
+        },
       });
 
       await expect(lookup.resolveByAgentId('agent-os')).resolves.toEqual({

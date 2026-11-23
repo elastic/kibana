@@ -21,7 +21,6 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { getActionList } from '../../../../../endpoint/services/actions';
-import { ACTIONS_SEARCH_PAGE_SIZE } from '../../../../../endpoint/services/actions/constants';
 import {
   formatForConfirmationCard,
   formatHostForConfirmationCard,
@@ -251,8 +250,8 @@ const resolveTarget = async (
   // An agent id wins over the address, so without this check the two inputs can
   // name different hosts and the address the analyst asked about is dropped.
   const ipMismatch =
-    target.kind === 'found' && Boolean(ip) && Boolean(agentId)
-      ? !(await agentHoldsIp(lookup, ip as string, target.endpoint.agentId))
+    target.kind === 'found' && ip && agentId
+      ? !(await agentHoldsIp(lookup, ip, target.endpoint.agentId))
       : false;
 
   return { target, ipMismatch };
@@ -508,30 +507,46 @@ const getIsolationState = async (
   return data?.[0]?.metadata?.Endpoint?.state?.isolation;
 };
 
+const PENDING_ISOLATION_LOOKUP_SIZE = 10;
+
 /**
  * Whether an unexpired isolate or release is still waiting on this agent. The
  * metadata isolation state only reflects actions that already completed, so a
  * host with a queued isolate still reads as "not isolated" there — and the
  * queued action will change that when the host next checks in.
+ *
+ * Only the newest unexpired actions are read: an unexpired window holds a
+ * handful per agent. A failed read counts as pending — the caller then shows
+ * the normal confirmation card instead of failing the whole call, and the
+ * analyst still sees what is about to be sent.
  */
 const hasPendingIsolationAction = async (
   request: DispatchRequest,
   agentId: string
 ): Promise<boolean> => {
-  const { data } = await getActionList({
-    spaceId: request.context.spaceId,
-    endpointService: request.endpointAppContextService,
-    unExpiredOnly: true,
-    elasticAgentIds: [agentId],
-    commands: ['isolate', 'unisolate'],
-    pageSize: ACTIONS_SEARCH_PAGE_SIZE,
-  });
+  try {
+    const { data } = await getActionList({
+      spaceId: request.context.spaceId,
+      endpointService: request.endpointAppContextService,
+      unExpiredOnly: true,
+      elasticAgentIds: [agentId],
+      commands: ['isolate', 'unisolate'],
+      pageSize: PENDING_ISOLATION_LOOKUP_SIZE,
+    });
 
-  return data.some(
-    (action) =>
-      (action.command === 'isolate' || action.command === 'unisolate') &&
-      action.agentState?.[agentId]?.isCompleted !== true
-  );
+    return data.some(
+      (action) =>
+        (action.command === 'isolate' || action.command === 'unisolate') &&
+        action.agentState?.[agentId]?.isCompleted !== true
+    );
+  } catch (error) {
+    request.context.logger.warn(
+      `Could not read pending isolation actions for agent [${agentId}]: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return true;
+  }
 };
 
 /**

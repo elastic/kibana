@@ -228,7 +228,15 @@ describe('isolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),
@@ -287,7 +295,15 @@ describe('isolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),
@@ -465,7 +481,10 @@ describe('isolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-windows',
-                local_metadata: { host: { name: 'windows-host' }, os: { type: 'windows' } },
+                local_metadata: {
+                  host: { name: 'windows-host' },
+                  os: { family: 'windows', platform: 'windows', name: 'Windows Server 2022' },
+                },
               },
             ],
           }),
@@ -536,7 +555,15 @@ describe('isolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),
@@ -619,7 +646,15 @@ describe('isolateHostTool', () => {
         status: 'online',
         packages: ['endpoint'],
         policy_id: 'agent-policy-1',
-        local_metadata: { os: { type: 'linux', platform: 'ubuntu' } },
+        local_metadata: {
+          os: {
+            family: 'debian',
+            platform: 'ubuntu',
+            name: 'Linux',
+            full: 'Ubuntu 22.04',
+            kernel: '5.15.0-91-generic',
+          },
+        },
       });
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => ({ isolate } as never)
@@ -637,6 +672,125 @@ describe('isolateHostTool', () => {
       expect(isolate).not.toHaveBeenCalled();
     });
 
+    describe('Fleet OS block as Elastic Agent reports it (no `type`, distro family)', () => {
+      const ubuntuAgent = {
+        id: 'agent-123',
+        status: 'online',
+        packages: ['endpoint'],
+        policy_id: 'agent-policy-1',
+        local_metadata: {
+          host: { name: 'my-host' },
+          os: {
+            family: 'debian',
+            platform: 'ubuntu',
+            name: 'Ubuntu',
+            full: 'Ubuntu 22.04.3 LTS',
+            kernel: '5.15.0-91-generic',
+          },
+        },
+      };
+
+      const stubFleetAgentWithGet = (
+        agent: Record<string, unknown>,
+        listPackagePolicies: jest.Mock
+      ) => {
+        mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+          agent: {
+            listAgents: jest.fn().mockResolvedValue({ agents: [agent] }),
+            getAgent: jest.fn().mockResolvedValue(agent),
+          },
+          ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+          getSoClient: jest.fn().mockReturnValue({}),
+          packagePolicy: { list: listPackagePolicies },
+        })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      };
+
+      const expectRefusedBeforeCard = async (params: Record<string, unknown>) => {
+        const isolate = jest.fn();
+        mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+          () => ({ isolate } as never)
+        ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+        const { card, result } = await confirmThenHandle(
+          isolateHostTool(mockEndpointAppContextService),
+          params
+        );
+        const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+        expect(card).toBeUndefined();
+        expect(mockAskForConfirmation).not.toHaveBeenCalled();
+        expect(data).toMatchObject({ error: 'invalid_argument' });
+        expect(data.message).toContain('disabled by the endpoint policy');
+        expect(isolate).not.toHaveBeenCalled();
+      };
+
+      it('refuses an Ubuntu agent resolved by hostname before the card', async () => {
+        stubFleetAgentWithGet(ubuntuAgent, jest.fn().mockResolvedValue(policyWith(false)));
+
+        await expectRefusedBeforeCard({ hostName: 'my-host' });
+      });
+
+      it('refuses an Ubuntu agent resolved by agent id before the card', async () => {
+        stubFleetAgentWithGet(ubuntuAgent, jest.fn().mockResolvedValue(policyWith(false)));
+
+        await expectRefusedBeforeCard({ agentId: 'agent-123' });
+      });
+
+      it('refuses an Ubuntu agent resolved by IP before the card', async () => {
+        stubFleetAgentWithGet(ubuntuAgent, jest.fn().mockResolvedValue(policyWith(false)));
+        stubMetadata([
+          {
+            metadata: {
+              elastic: { agent: { id: 'agent-123' } },
+              host: { hostname: 'my-host', os: { name: 'Ubuntu', family: 'debian' } },
+            },
+            host_status: 'healthy',
+          },
+        ]);
+
+        await expectRefusedBeforeCard({ ip: '10.0.0.7' });
+      });
+
+      it('does not refuse a host whose OS family is unknown', async () => {
+        stubFleetAgentWithGet(
+          {
+            ...ubuntuAgent,
+            local_metadata: {
+              host: { name: 'my-host' },
+              os: { family: 'plan9', platform: 'plan9', name: 'Plan 9' },
+            },
+          },
+          jest.fn().mockResolvedValue(policyWith(false))
+        );
+
+        const { card } = await confirmThenHandle(isolateHostTool(mockEndpointAppContextService), {
+          hostName: 'my-host',
+        });
+
+        expect(card).toMatchObject({ color: 'danger' });
+      });
+    });
+
+    it('shows the normal card, without an error, when the pending-action lookup fails', async () => {
+      stubFleetAgent({ id: 'agent-123', status: 'online', packages: ['endpoint'] });
+      stubMetadata([metadataEntry('agent-123', true)]);
+      mockGetActionList.mockRejectedValue(new Error('search unavailable'));
+      const isolate = jest.fn().mockResolvedValue({ id: 'action-1' });
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { hostName: 'my-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'danger' });
+      expect(data.error).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('search unavailable'));
+    });
+
     it('looks the package policy up by the unversioned agent policy id', async () => {
       const listPackagePolicies = stubFleetAgent({
         id: 'agent-123',
@@ -644,7 +798,15 @@ describe('isolateHostTool', () => {
         packages: ['endpoint'],
         policy_id: 'agent-policy-1:3',
         policy_base_id: 'agent-policy-1',
-        local_metadata: { os: { type: 'linux' } },
+        local_metadata: {
+          os: {
+            family: 'debian',
+            platform: 'ubuntu',
+            name: 'Linux',
+            full: 'Ubuntu 22.04',
+            kernel: '5.15.0-91-generic',
+          },
+        },
       });
 
       await isolateHostTool(mockEndpointAppContextService).handler(
@@ -1121,7 +1283,15 @@ describe('isolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { os: { type: 'linux' } },
+                local_metadata: {
+                  os: {
+                    family: 'debian',
+                    platform: 'ubuntu',
+                    name: 'Linux',
+                    full: 'Ubuntu 22.04',
+                    kernel: '5.15.0-91-generic',
+                  },
+                },
               },
             ],
           }),
