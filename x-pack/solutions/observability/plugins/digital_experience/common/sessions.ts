@@ -30,6 +30,26 @@ export const SESSIONS_INDEX_TEMPLATE_NAME = BROWSER_SESSIONS_BASE_NAME;
 export const SESSIONS_TASK_TYPE = 'digital_experience:sessions-summaries';
 export const SESSIONS_TASK_ID = 'digital_experience:sessions-summaries';
 
+/** Bump when the mobile summary document or its mappings change, as `SESSIONS_VERSION`. */
+export const MOBILE_SESSIONS_VERSION = 1;
+const MOBILE_SESSIONS_BASE_NAME = `${SESSIONS_INDEX_PREFIX}mobile`;
+/** The EDOT Android and EDOT iOS session summaries, React Native apps' included. */
+export const MOBILE_SESSIONS_INDEX = `${MOBILE_SESSIONS_BASE_NAME}-${MOBILE_SESSIONS_VERSION}`;
+export const MOBILE_SESSIONS_INDEX_PATTERN = `${MOBILE_SESSIONS_BASE_NAME}-*`;
+export const MOBILE_SESSIONS_INDEX_TEMPLATE_NAME = MOBILE_SESSIONS_BASE_NAME;
+
+export const MOBILE_SESSIONS_TASK_TYPE = 'digital_experience:mobile-sessions-summaries';
+export const MOBILE_SESSIONS_TASK_ID = 'digital_experience:mobile-sessions-summaries';
+
+/**
+ * How often the mobile summaries are rebuilt for the last `MOBILE_SESSIONS_RECONCILE_HOURS`: the
+ * SDKs buffer events on the device and send crashes on the next launch, so events can arrive long
+ * after the regular pass summarized their time.
+ */
+export const MOBILE_SESSIONS_RECONCILE_INTERVAL_MINUTES = 60;
+/** Events that arrive later than this after their time are not summarized. */
+export const MOBILE_SESSIONS_RECONCILE_HOURS = 24;
+
 /** How often the summaries task runs by default. */
 export const SESSIONS_DEFAULT_FREQUENCY = '1m';
 /**
@@ -132,6 +152,11 @@ export interface SessionsStatus {
   enabledBy: string | null;
   /** Sessions are kept for this many days, so older time ranges have none. */
   retentionDays: number;
+}
+
+/** The browser sessions status, and that of the mobile sessions, which their own task builds. */
+export interface SessionsStatusResponse extends SessionsStatus {
+  mobile: SessionsStatus;
 }
 
 const TIME_VALUE = /^([1-9][0-9]*)(s|m|h)$/;

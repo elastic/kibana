@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import { PluginStart } from '@kbn/core-di';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { useAdditionalEpisodesDataSource } from '@kbn/alerting-v2-episodes-ui/context/episode_data_source_context';
 import {
@@ -64,7 +66,7 @@ jest.mock('./bind_locators_to_host', () => ({
   })),
 }));
 
-const container = { get: jest.fn(() => ({})) } as never;
+const container = { get: jest.fn(() => ({})), isBound: jest.fn(() => false) } as never;
 const coreStart = {
   notifications: { toasts: {} },
   http: { basePath: { prepend: (p: string) => p } },
@@ -94,6 +96,8 @@ const renderProvider = (props: Partial<React.ComponentProps<typeof AlertingV2Ale
   );
 
 describe('AlertingV2AlertsProvider', () => {
+  const agentBuilderToken = PluginStart('agentBuilder');
+
   beforeEach(() => {
     seen = {};
     composeMounts.length = 0;
@@ -127,6 +131,44 @@ describe('AlertingV2AlertsProvider', () => {
     renderProvider({});
 
     expect(seen.canWriteAlerts).toBe(true);
+  });
+
+  describe('Agent Builder service', () => {
+    let kibanaServices: { agentBuilder?: unknown } = {};
+    const ServicesProbe = () => {
+      kibanaServices = useKibana<{ agentBuilder?: unknown }>().services;
+      return null;
+    };
+
+    it('exposes Agent Builder to the alert components when it is bound', () => {
+      const agentBuilder = { openChat: jest.fn() };
+      const boundContainer = {
+        get: jest.fn((token: unknown) => (token === agentBuilderToken ? agentBuilder : {})),
+        isBound: jest.fn((token: unknown) => token === agentBuilderToken),
+      } as never;
+
+      render(
+        <AlertingV2AlertsProvider
+          coreStart={coreStart}
+          container={boundContainer}
+          hostApp={{} as never}
+        >
+          <ServicesProbe />
+        </AlertingV2AlertsProvider>
+      );
+
+      expect(kibanaServices.agentBuilder).toBe(agentBuilder);
+    });
+
+    it('leaves Agent Builder undefined when it is not bound', () => {
+      render(
+        <AlertingV2AlertsProvider coreStart={coreStart} container={container} hostApp={{} as never}>
+          <ServicesProbe />
+        </AlertingV2AlertsProvider>
+      );
+
+      expect(kibanaServices.agentBuilder).toBeUndefined();
+    });
   });
 
   describe('rule editing', () => {

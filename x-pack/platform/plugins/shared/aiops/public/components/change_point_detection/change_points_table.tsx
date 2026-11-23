@@ -69,7 +69,8 @@ function getFilterConfig(
   };
 }
 
-const pageSizeOptions = [5, 10, 15];
+const DEFAULT_PAGE_SIZE = 10;
+const pageSizeOptions = [5, DEFAULT_PAGE_SIZE, 15];
 
 export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   isLoading,
@@ -90,7 +91,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   } = useAiopsAppContext();
   const { dataView } = useDataSource();
 
-  const chartLoadingCount = useRef<number>(0);
+  const chartLoadingById = useRef<Record<string, boolean>>({});
 
   const { onTableChange, pagination, sorting } = useTableState<ChangePointAnnotation>(
     annotations ?? [],
@@ -98,7 +99,7 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
     'asc',
     {
       pageIndex: 0,
-      pageSize: 10,
+      pageSize: DEFAULT_PAGE_SIZE,
       pageSizeOptions,
     }
   );
@@ -106,25 +107,34 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
   const dateFormatter = useMemo(() => fieldFormats.deserialize({ id: 'date' }), [fieldFormats]);
 
   useEffect(() => {
-    // Reset loading counter on pagination or sort change
-    chartLoadingCount.current = 0;
-  }, [pagination.pageIndex, pagination.pageSize, sorting.sort]);
+    // Reset loading state on pagination or sort change
+    chartLoadingById.current = {};
+  }, [pagination.pageIndex, pagination.pageSize, sorting.sort.field, sorting.sort.direction]);
+
+  const pageSize = pagination.pageSize ?? DEFAULT_PAGE_SIZE;
+  const visibleRowCount = Math.min(
+    pageSize,
+    Math.max(0, annotations.length - pagination.pageIndex * pageSize)
+  );
 
   /**
    * Callback to track render of each chart component
    * to report when all charts on the current page are ready.
    */
   const onChartRenderCompleteCallback = useCallback(
-    (isLoadingChart: boolean) => {
+    (chartId: string, isLoadingChart: boolean) => {
       if (!onRenderComplete) return;
-      if (!isLoadingChart) {
-        chartLoadingCount.current++;
-      }
-      if (chartLoadingCount.current === pagination.pageSize) {
+      chartLoadingById.current[chartId] = isLoadingChart;
+      const loadingStates = Object.values(chartLoadingById.current);
+      if (
+        visibleRowCount > 0 &&
+        loadingStates.length === visibleRowCount &&
+        loadingStates.every((v) => !v)
+      ) {
         onRenderComplete();
       }
     },
-    [onRenderComplete, pagination.pageSize]
+    [onRenderComplete, visibleRowCount]
   );
 
   const isDashboardEmbedding = embeddingOrigin === 'dashboard';
@@ -181,7 +191,10 @@ export const ChangePointsTable: FC<ChangePointsTableProps> = ({
             annotation={annotation}
             fieldConfig={fieldConfig}
             interval={bucketInterval.expression}
-            onRenderComplete={onChartRenderCompleteCallback.bind(null, false)}
+            onLoading={(isLoadingChart) =>
+              onChartRenderCompleteCallback(annotation.id, isLoadingChart)
+            }
+            onRenderComplete={() => onChartRenderCompleteCallback(annotation.id, false)}
           />
         );
       },

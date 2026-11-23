@@ -107,6 +107,10 @@ engine:
 tools:
   github:
     toolsets: [default, actions, search]
+    # the default for a public repository; issues by authors with no repository role are hidden
+    # from the agent, so the daily flaky test report's bot has to be trusted for its suite issues
+    min-integrity: approved
+    trusted-users: ['elastic-vault-github-plugin-prod[bot]']
   web-fetch:
   bash: true
 

@@ -17,13 +17,11 @@ test.describe('UX Visitor Breakdown', { tag: tags.stateful.classic }, () => {
     await test.step('Navigate to UX Dashboard', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
-      await pageObjects.uxDashboard.waitForLoadingToFinish();
     });
 
     await test.step('Confirm visitor breakdown charts are visible', async () => {
       await pageObjects.uxDashboard.scrollToSection('Page load duration by region (avg.)');
       await pageObjects.uxDashboard.waitForChartData();
-      await pageObjects.uxDashboard.waitForLoadingToFinish();
 
       await expect(pageObjects.uxDashboard.lensEmbeddableLocator(OS_NAME_CHART_ID)).toBeVisible();
       await expect(pageObjects.uxDashboard.lensEmbeddableLocator(UA_NAME_CHART_ID)).toBeVisible();

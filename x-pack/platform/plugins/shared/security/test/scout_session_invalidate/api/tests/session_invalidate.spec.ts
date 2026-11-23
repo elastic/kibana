@@ -244,9 +244,6 @@ test.describe('Session Invalidate', { tag: [...LOCAL_STATEFUL_TAGS] }, () => {
     config,
     esClient,
   }) => {
-    const isFips = process.env.TEST_FIPS_MODE === '1';
-    test.skip(isFips, 'Skipped in FIPS mode');
-
     const { basicCookie, samlCookie } = await createTestSessions(apiClient, config, esClient);
 
     const testAuthHeaders = {

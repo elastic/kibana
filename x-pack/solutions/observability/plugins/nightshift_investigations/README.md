@@ -151,10 +151,13 @@ are absent when no alert triggered the run:
 - `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
   `external`. An external sender may also use `internal` as its source, so use this field to split
   rule alerts from external ones.
-- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
-  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
-  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
-  Any other event about the same alert series must derive it with the same function.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to `fingerprint` on
+  `nightshift-agent-tool-event-create`, `nightshift-agent-tool-event-write`, and
+  `nightshift-event-status-changed`. A create or write that failed before it had a persisted
+  caller-visible ID may omit it. Otherwise `sha256(space_id:source:rule_id:group_hash)` from
+  `toAlertFingerprint`, with an empty `rule_id` for external alerts, because a rule's `group_hash`
+  is only unique within the rule. Any other event about the same alert series must derive it with
+  the same function.
 
 `trigger_type` on the started event separates automatic from manual runs. No alert title, message,
 tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
@@ -189,6 +192,21 @@ These API privileges are not scoped to Nightshift: they cover every agentic inve
 Starting an investigation also needs Agent Builder `all` (the start route's own requirement), execute access to workflows (the start runs the investigation workflow as the caller), and read access to connectors (availability checks that an inference connector exists for the investigation agent). The Scout write-path tests run with exactly that role.
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
+
+### Proposals that run a workflow
+
+The findings recorder's final pass proposes up to three actions. By default each is a to-do: the analyst carries it out and marks it applied. A proposal can instead run a workflow the space's users wrote, once someone approves it. The recorder is shown every workflow in the space that:
+
+1. carries the `action` tag;
+2. declares `consts.actionMetadata` with at least `name` and `approvalPolicy: always-gate`. Workflows with any other policy are left out, so every run the recorder proposes waits for a person to approve it;
+3. takes one `actionInput` object on its manual trigger, whose properties are the workflow's parameters (describe each, the recorder fills them from the findings);
+4. ends in a `workflow.output` step.
+
+When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A proposal naming a workflow the catalog did not list, or with an input the workflow refuses, is not written; the failure is logged. See the proposals plugin README for the action workflow contract.
+
+The approve dialog shows what will run: a link to the workflow, and under **Input parameters** (collapsed) the exact `actionInput` the recorder filled in. Once the workflow has run, the dialog also links to that execution, so the analyst can see what it did and what it returned.
+
+**Use this for low-harm actions only for now**, such as opening a case or an issue, or paging someone. The input is written by the model from findings that come from logs, so it is only checked against the workflow's input schema. The workflow and input are not re-checked at approval time, and nothing stops two investigations from proposing (and two people from approving) the same action. Do not wire up rollbacks, restarts or other changes to production systems until those checks exist. Where an input names a target (a cluster, namespace or service), constrain it with `enum` or `pattern` instead of a free string.
 
 ## Service accounts
 
@@ -344,6 +362,8 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 `POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed by the Relay's thread key `slack:<T>:<C>:<ts>`. A Slack-trigger automation records the same subject for the message that started it, taking the key from the event's `externalConversationId`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
+
+The subject's summary is the message that started the thread, as plain text, not the automation's name. Its `slack.permalink` opens the thread in Slack's web client (`https://app.slack.com/client/<T>/<C>/thread/<C>-<ts>`), since Slack's documented message link needs the workspace domain, which events don't carry. A thread recorded without a link gets one on its next `_slack_thread` call.
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 

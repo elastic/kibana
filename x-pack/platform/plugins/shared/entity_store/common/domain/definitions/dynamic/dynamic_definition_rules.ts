@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import type { z } from '@kbn/zod/v4';
 import type { Condition } from '@kbn/streamlang';
 import { isLiteralFieldPath } from './dynamic_block_schema';
-import { isNotEmptyCondition } from '../common_fields';
+import { ENTITY_ID_FIELD, isNotEmptyCondition } from '../common_fields';
 import type {
   CalculatedEntityIdentity,
   EntityDefinitionWithoutId,
@@ -19,6 +19,8 @@ import type {
 
 /** Name of the rule that an attribute of a `dynamic` source may not read an identity field. */
 export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
+/** Name of the rule that a suggested filter is an attribute of a source or an identity field. */
+export const SUGGESTED_FILTER_RULE = 'suggested filters are attributes or identity fields';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
@@ -141,7 +143,8 @@ const checkCalculatedIdentity = (
 
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
- * ES|QL `BY` keys, and no attribute may read an identity field. A definition without `dynamic` is
+ * ES|QL `BY` keys, no attribute may read an identity field, and every suggested filter is an
+ * attribute or an identity field. A definition without `dynamic` is
  * never checked.
  */
 export const assertDynamicDefinitionRules = (
@@ -183,5 +186,22 @@ export const assertDynamicDefinitionRules = (
         );
       }
     });
+  });
+
+  const attributeNames = new Set(
+    dynamic.sources.flatMap(({ attributes = [] }) => attributes.map(({ name }) => name))
+  );
+  (dynamic.suggestedFilters ?? []).forEach((name, index) => {
+    if (name === ENTITY_ID_FIELD) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is the entity id column and cannot be a suggested filter`
+      );
+    } else if (!attributeNames.has(name) && !identityFields.has(name)) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is neither an attribute of a source nor an identity field`
+      );
+    }
   });
 };

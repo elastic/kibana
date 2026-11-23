@@ -111,6 +111,34 @@ describe('buildEpisodeMenuPanels', () => {
     ]);
   });
 
+  it('places add to chat right below view details and runs the callback on click', () => {
+    const onAddToChat = jest.fn();
+    const [panel] = buildEpisodeMenuPanels({
+      actions: [makeAction('ALERTING_V2_ACK_EPISODE')],
+      episodes,
+      viewDetailsHref: '/alerts/ep-1',
+      onAddToChat,
+    });
+    const items = panel.items as PlainItem[];
+
+    expect(describeItems(items)).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-addToChat',
+      '|',
+      'alertingV2EpisodeTakeAction-ALERTING_V2_ACK_EPISODE',
+    ]);
+
+    items[1].onClick?.();
+
+    expect(onAddToChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('omits add to chat when there is no callback', () => {
+    expect(describeItems(getItems([], '/alerts/ep-1'))).not.toContain(
+      'alertingV2EpisodeTakeAction-addToChat'
+    );
+  });
+
   it('links view details to the href and leaves it without an onClick', () => {
     const [viewDetails] = getItems([], '/alerts/ep-1') ?? [];
 
