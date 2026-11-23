@@ -188,7 +188,7 @@ describe('scoreMemoryOnlineEvalsStepDefinition', () => {
         },
         reference_data: {
           recalled_ids: ['memory_mem-1', 'memory_mem-2'],
-          opened_ids: ['wiki-1', 'memory_mem-1'],
+          opened_ids: ['memory_mem-1'],
           applied_writes: [
             {
               store: 'wiki',

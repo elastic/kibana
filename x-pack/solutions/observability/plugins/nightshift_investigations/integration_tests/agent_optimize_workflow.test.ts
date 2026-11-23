@@ -217,7 +217,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     const evaluate = jest.fn().mockResolvedValue([
       {
         status: 'ok',
-        evaluator: { name: 'nightshift_memory_read_judge', version: '1.0.0', kind: 'code' },
+        evaluator: { name: 'nightshift_memory_read_judge', version: '1.1.0', kind: 'code' },
         scores: [{ name: 'memory_read_utility', score: 0.5, label: 'RECALLED_OPENED' }],
       },
       {
@@ -265,7 +265,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
         evidence: expect.objectContaining({
           reference_data: {
             recalled_ids: ['mem-1', 'mem-2'],
-            opened_ids: ['wiki_service_checkout', 'mem-1'],
+            opened_ids: ['mem-1'],
             applied_writes: [
               expect.objectContaining({ store: 'wiki', item_id: 'wiki_service_checkout' }),
               expect.objectContaining({
