@@ -21,17 +21,19 @@ import { getTriageMatchFpDecisionsStepDefinition } from './match_fp_decisions_st
 
 const NOW = Date.parse('2026-10-27T12:00:00.000Z');
 
-const source = (executable: string, severity = 'low') => ({
+// A file alert: its key is the path and the process that wrote it, and carries the file hash. A
+// process key is only held in shadow, so the fixture that stands for "a match `on` acts on" is a file.
+const source = (path: string, severity = 'low') => ({
   'kibana.alert.rule.uuid': 'rule-1',
   'kibana.alert.rule.revision': 3,
   'kibana.alert.severity': severity,
   host: { os: { type: 'windows' } },
-  process: { executable, code_signature: { subject_name: 'Acme', trusted: true } },
+  file: { path, hash: { sha256: 'cd'.repeat(32) } },
+  process: { executable: 'C:\\writer.exe' },
 });
 
-const hashOf = (executable: string) =>
-  groupByStrictKey({ alerts: [{ id: 'x', doc: source(executable) }], spaceId: 'default' }).groups[0]
-    .hash;
+const hashOf = (path: string) =>
+  groupByStrictKey({ alerts: [{ id: 'x', doc: source(path) }], spaceId: 'default' }).groups[0].hash;
 
 const stored = (kind: 'false_positive' | 'do_not_propose', expiresAt = NOW + 86_400_000) => ({
   type: 'security.fp_decision',
@@ -932,22 +934,26 @@ describe('triage match decisions step in on mode', () => {
   });
 
   describe('a signer in `on`', () => {
-    // The key keeps the signer's name and drops the hash, so only a trusted signer is acted on.
-    const signed = (trusted?: boolean) => {
-      const doc = source('C:\\x.exe');
-      return {
-        ...doc,
-        process: {
-          ...doc.process,
-          code_signature: {
-            subject_name: 'Acme',
-            ...(trusted === undefined ? {} : { trusted }),
-          },
+    // A library key keeps the signer's name and drops the hash, so only a trusted signer is acted on.
+    // A process key is held whatever its signer or hash says: they name the binary, not what it did.
+    const base = () => ({
+      'kibana.alert.rule.uuid': 'rule-1',
+      'kibana.alert.rule.revision': 3,
+      'kibana.alert.severity': 'low',
+      host: { os: { type: 'windows' } },
+    });
+    const signed = (trusted?: boolean) => ({
+      ...base(),
+      process: {
+        executable: 'C:\\x.exe',
+        code_signature: {
+          subject_name: 'Acme',
+          ...(trusted === undefined ? {} : { trusted }),
         },
-      };
-    };
+      },
+    });
     const unsigned = () => ({
-      ...source('C:\\x.exe'),
+      ...base(),
       process: { executable: 'C:\\x.exe', hash: { sha256: 'ab'.repeat(32) } },
     });
     const idFor = (doc: Record<string, unknown>) =>
@@ -987,7 +993,7 @@ describe('triage match decisions step in on mode', () => {
       'reads the library signer trust from the dll: trusted %s closes %i and holds %i',
       async (trusted, closed, held) => {
         const doc = {
-          ...source('C:\\x.exe'),
+          ...base(),
           event: { category: ['library'] },
           dll: { path: 'C:\\lib\\a.dll', code_signature: { subject_name: 'Acme', trusted } },
         };
@@ -1004,22 +1010,34 @@ describe('triage match decisions step in on mode', () => {
       }
     );
 
-    it('closes a match on a trusted signer', async () => {
-      const doc = signed(true);
-      const { run, closes } = setup({
-        mode: 'on',
-        alerts: [['t', doc]],
-        decisions: { [idFor(doc)]: stored('false_positive') },
-      });
+    // The process key leaves out the command line, so an approval for benign runs of a binary would
+    // close alerts for other behavior of the same binary and parent.
+    it.each([
+      ['a trusted signer', () => signed(true)],
+      ['an unsigned binary whose key carries the file hash', unsigned],
+    ])(
+      'only tags a process match on %s, because the key cannot tell the behavior apart',
+      async (_label, build) => {
+        const doc = build();
+        const id = idFor(doc);
+        const { run, tags, closes } = setup({
+          mode: 'on',
+          alerts: [['t', doc]],
+          decisions: { [id]: stored('false_positive') },
+        });
 
-      const { output } = await run();
+        const { output } = await run();
 
-      expect(closes().map(({ signal_ids }) => signal_ids)).toEqual([['t']]);
-      expect(output).toEqual(expect.objectContaining({ closed: 1, held_in_shadow: 0 }));
-    });
+        expect(closes()).toEqual([]);
+        expect(tags()).toEqual([
+          { ids: ['t'], tags: { tags_to_add: [`az:would_close:${id}`], tags_to_remove: [] } },
+        ]);
+        expect(output).toEqual(expect.objectContaining({ closed: 0, held_in_shadow: 1 }));
+      }
+    );
 
-    it('closes a match on an unsigned binary, whose key carries the file hash instead', async () => {
-      const doc = unsigned();
+    it('still acts on a file match, whose key carries the file hash', async () => {
+      const doc = source('C:\\x.exe');
       const { run, closes } = setup({
         mode: 'on',
         alerts: [['h', doc]],
@@ -1047,7 +1065,7 @@ describe('triage match decisions step in on mode', () => {
         { event: { category: ['file'] }, file: { path: 'C:\\data\\a.txt' } },
       ],
     ])('only tags a match on %s, which has neither a signer nor a hash', async (_label, fields) => {
-      const doc = { ...source('C:\\x.exe'), process: { executable: 'C:\\x.exe' }, ...fields };
+      const doc = { ...base(), process: { executable: 'C:\\x.exe' }, ...fields };
       const id = idFor(doc);
       const { run, tags, closes } = setup({
         mode: 'on',

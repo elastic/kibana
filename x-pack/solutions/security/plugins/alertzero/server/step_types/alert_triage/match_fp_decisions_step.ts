@@ -57,6 +57,10 @@ const MAX_PAGES = 10;
  * - a cloud key. shortcut: it is the action plus the account, so one approval covers every actor of
  *   that action in the account; act on it once a guard limits the share of a rule one decision
  *   covers, sized from shadow data.
+ * - a process key. A trusted signature or hash names the binary, not what it did, and the key
+ *   leaves out the command line, so an approval for benign runs of a binary would close alerts for
+ *   other behavior of the same binary and parent. shortcut: act on it once a key can tell the
+ *   behavior the rule detected apart, for example with the command line.
  * - a key that names a signer the alert does not mark as trusted. The key leaves out the file hash
  *   when a signer is named, so without trust a forged certificate with the same subject would match.
  * - a key with neither a signer nor a hash, such as a registry key or an alert whose source sends no
@@ -73,7 +77,7 @@ const heldInShadowIds = (
         const { strict } = buildPatternKeys(doc);
         if (strict === undefined) return false;
         const { kind, values } = describePatternKey(strict);
-        if (kind === 'cloud') return true;
+        if (kind === 'cloud' || kind === 'process') return true;
         const namesSigner = values.some(([field]) =>
           field.endsWith('.code_signature.subject_name')
         );
@@ -111,7 +115,7 @@ const splitHeld = (byDecision: ReadonlyMap<string, string[]>, held: ReadonlySet<
  * false positive, up to the decision's daily cap; the rest wait for the normal path. A dismissed
  * match is tagged `az:inconclusive` and `az:skipped_by_decision:<decision>`, so it is neither
  * analysed nor proposed. Neither calls a model. A match on a `cloud` key, on a signer the alert
- * does not mark as trusted, or on a key with neither a signer nor a hash, is only tagged, as in
+ * does not mark as trusted, on a process key, or on a key with neither a signer nor a hash, is only tagged, as in
  * shadow, and counted in `held_in_shadow`.
  *
  * It fails open. A step that cannot read the setting, the decisions or the alerts reports `failed`
