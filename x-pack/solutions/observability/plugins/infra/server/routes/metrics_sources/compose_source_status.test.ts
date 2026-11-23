@@ -165,6 +165,27 @@ describe('composeSourceStatus', () => {
     expect(renderMessage(loggedError)).toBe(`ResponseError: ${expectedMessage}\n    at probe`);
   });
 
+  it('still logs and reports unknown when the error carries a non-string stack', async () => {
+    // Kibana's logging code supports Elasticsearch client errors whose `stack` is not a string.
+    // The failure branch must not throw a TypeError trying to manipulate it, otherwise the catch
+    // block crashes and the GET returns a 500 instead of `metricIndicesStatus: 'unknown'`.
+    const original = new Error('cluster unhealthy');
+    // Cast through unknown because the Error type declares `stack?: string`.
+    (original as unknown as { stack: unknown }).stack = { not: 'a string' };
+    const hasMetricIndices = jest.fn().mockRejectedValue(original);
+
+    await expect(compose(hasMetricIndices)).resolves.toEqual({
+      metricIndicesExist: false,
+      remoteClustersExist: true,
+      metricIndicesStatus: 'unknown',
+    });
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    const loggedError = logger.error.mock.calls[0][0] as Error;
+    expect(loggedError.message).toBe(
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
+    );
+  });
+
   it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
     const hasMetricIndices = jest
       .fn()

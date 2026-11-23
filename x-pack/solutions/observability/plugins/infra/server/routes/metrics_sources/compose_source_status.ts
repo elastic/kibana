@@ -110,7 +110,11 @@ export const composeSourceStatus = async ({
       // The header must be replaced as a whole: an Elasticsearch `ResponseError` message spans
       // several lines (`Caused by` / `Root causes`), so splitting on the first line break alone
       // would leave those lines in the frames and print the diagnostic detail twice.
-      if (original.stack) {
+      //
+      // Only rewrite a string stack: Kibana's logging supports Elasticsearch client errors whose
+      // `stack` is not a string, and manipulating a non-string stack here would throw and turn the
+      // probe failure into a 500 instead of the `unknown` status.
+      if (typeof original.stack === 'string') {
         const originalHeader = `${original.name}: ${original.message}`;
         error.stack = original.stack.startsWith(originalHeader)
           ? `${error.name}: ${message}${original.stack.slice(originalHeader.length)}`
