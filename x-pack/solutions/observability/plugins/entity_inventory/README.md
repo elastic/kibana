@@ -67,8 +67,9 @@ Response:
 | `rows` | At most `limit`, ordered by `last_seen` descending, ties by `entity.id`. Every row carries every column, null where no source produced a value. |
 | `provenance` | For each returned row's `entity.id`, the index pattern that supplied each attribute value. |
 | `truncated` | True only when the row limit left rows out: a plan was cut (returned `limit + 1` rows), or the merge holds more than `limit` rows. A failed or partial plan does not set it, since narrowing the request would not fix it; it is reported in `errors`. There is no `total`. |
-| `took` | Wall time of the request in milliseconds, probes included. |
-| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, and Elasticsearch's `took`, `documentsFound` and `rowCount`. A failed query has null `took` and `documentsFound` and `rowCount` 0. Probes are not listed. |
+| `queries` | One entry per plan query sent, in plan order: `indexPattern`, `engine` (`TS` or `FROM`), `esql`, `params`, `rowCount`, `isPartial`, and Elasticsearch's execution metadata: `took`, `documentsFound`, `valuesLoaded`, `rowsEmitted`, `cpuNanos`, `driverNanos`, `bytesRead`, `shards`. A failed query has null metadata and `rowCount` 0; why it failed is in `errors`. |
+| `probes` | One entry per distinct source pattern: `indexPattern`, `esql`, `params`, `outcome` (`time_series`, `no_time_series` or `failed`), `isPartial` and the same execution metadata as `queries`; a probe that threw has null metadata. |
+| `timings` | Server phases in fractional milliseconds: `definitionMs`, `planningMs` (probes and query generation), `probesMs` (part of `planningMs`), `queriesMs`, `processingMs` and `totalMs`, their sum. |
 | `errors` | `{ indexPattern, status, reason }` per source problem; never a stack. |
 | `unavailableColumns` | `{ column, indexPattern, field }` for an attribute no index behind that source's pattern maps; its value is null. |
 

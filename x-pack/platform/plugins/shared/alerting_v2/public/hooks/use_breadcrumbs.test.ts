@@ -182,4 +182,15 @@ describe('useBreadcrumbs', () => {
       expect(docTitle[2]).toBe('Universal Alerting');
     });
   });
+
+  describe('imports page', () => {
+    it('should set breadcrumbs for imports_list with root', () => {
+      renderHook(() => useBreadcrumbs('imports_list'));
+
+      const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
+      expect(breadcrumbs).toHaveLength(2);
+      expect(breadcrumbs[0]).toMatchObject({ text: 'Universal Alerting' });
+      expect(breadcrumbs[1]).toMatchObject({ text: 'Import alerts' });
+    });
+  });
 });

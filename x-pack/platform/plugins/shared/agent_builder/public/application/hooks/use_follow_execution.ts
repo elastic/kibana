@@ -6,11 +6,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import type {
-  ConversationRoundStep,
-  ToolCallStep,
-  AssistantResponse,
-} from '@kbn/agent-builder-common';
+import type { ConversationRoundStep, AssistantResponse } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStepType,
   isToolCallEvent,
@@ -21,6 +17,9 @@ import {
   isToolProgressEvent,
   isRoundCompleteEvent,
   isBackgroundAgentCompleteEvent,
+  isModelReasoningEvent,
+  isToolCallStep,
+  createModelReasoningStep,
   isInterimAnswerEvent,
   isMessageDeliveredEvent,
   createInterimAnswerStep,
@@ -83,16 +82,13 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                 results: [],
                 tool_call_group_id: event.data.tool_call_group_id,
                 intent: event.data.intent,
-              } as ToolCallStep,
+              },
             ]);
           } else if (isToolResultEvent(event)) {
             setSteps((prev) =>
               prev.map((step) => {
-                if (
-                  step.type === ConversationRoundStepType.toolCall &&
-                  (step as ToolCallStep).tool_call_id === event.data.tool_call_id
-                ) {
-                  return { ...step, results: event.data.results } as ToolCallStep;
+                if (isToolCallStep(step) && step.tool_call_id === event.data.tool_call_id) {
+                  return { ...step, results: event.data.results };
                 }
                 return step;
               })
@@ -100,11 +96,8 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
           } else if (isToolProgressEvent(event)) {
             setSteps((prev) =>
               prev.map((step) => {
-                if (
-                  step.type === ConversationRoundStepType.toolCall &&
-                  (step as ToolCallStep).tool_call_id === event.data.tool_call_id
-                ) {
-                  const toolStep = step as ToolCallStep;
+                if (isToolCallStep(step) && step.tool_call_id === event.data.tool_call_id) {
+                  const toolStep = step;
                   return {
                     ...toolStep,
                     progression: [
@@ -114,7 +107,7 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                         ...(event.data.metadata ? { metadata: event.data.metadata } : {}),
                       },
                     ],
-                  } as ToolCallStep;
+                  };
                 }
                 return step;
               })
@@ -139,6 +132,14 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
           } else if (isRoundCompleteEvent(event)) {
             setResponse(event.data.round.response);
             setIsLoading(false);
+          } else if (isModelReasoningEvent(event)) {
+            setSteps((prev) => [
+              ...prev,
+              createModelReasoningStep({
+                reasoning: event.data.reasoning,
+                tool_call_group_id: event.data.tool_call_group_id,
+              }),
+            ]);
           }
         },
         error: (err) => {
