@@ -14,38 +14,12 @@
 // first download since the other plugins/areas of your code can directly pull from the package in their async imports.
 // See: https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro#public-plugin-api
 
-import type { CoreStart } from '@kbn/core/public';
-
 import { TimelinesPlugin } from './plugin';
 
 export type { TimelinesUIStart } from './plugin';
-export type { OnColumnFocused } from '../common/utils/accessibility';
-
-export {
-  ARIA_COLINDEX_ATTRIBUTE,
-  ARIA_ROWINDEX_ATTRIBUTE,
-  DATA_COLINDEX_ATTRIBUTE,
-  DATA_ROWINDEX_ATTRIBUTE,
-  FIRST_ARIA_INDEX,
-  elementOrChildrenHasFocus,
-  isArrowDownOrArrowUp,
-  isArrowUp,
-  isEscape,
-  isTab,
-  focusColumn,
-  getFocusedAriaColindexCell,
-  getRowRendererClassName,
-  getTableSkipFocus,
-  handleSkipFocus,
-  stopPropagationAndPreventDefault,
-} from '../common/utils/accessibility';
 
 // This exports static code and TypeScript types,
 // as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new TimelinesPlugin();
 }
-
-export type { AddToTimelineButtonProps } from './components/hover_actions/actions/add_to_timeline';
-
-export type TimelinesStartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;

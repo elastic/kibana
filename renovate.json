@@ -2304,10 +2304,10 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
-        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
         "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",
         "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-logs-otlp-proto",
@@ -2322,8 +2322,12 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-grpc-exporter-base",
         "@opentelemetry/otlp-transformer",
+        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
+        "@opentelemetry/sdk-metrics",
+        "@opentelemetry/sdk-trace",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [

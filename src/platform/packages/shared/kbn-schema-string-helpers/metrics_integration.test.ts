@@ -8,10 +8,10 @@
  */
 
 import { metrics } from '@opentelemetry/api';
-import { metrics as sdkMetrics } from '@elastic/opentelemetry-node/sdk';
 import { reportStringLengthViolation } from './report_string_length_violation';
+import { MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics';
 
-class TestMetricReader extends sdkMetrics.MetricReader {
+class TestMetricReader extends MetricReader {
   protected async onForceFlush(): Promise<void> {}
   protected async onShutdown(): Promise<void> {}
 }
@@ -27,7 +27,7 @@ test('records after the global provider is initialized, even if reporting ran ea
   });
 
   const reader = new TestMetricReader();
-  const provider = new sdkMetrics.MeterProvider({ readers: [reader] });
+  const provider = new MeterProvider({ readers: [reader] });
   metrics.setGlobalMeterProvider(provider);
   try {
     reportStringLengthViolation({
