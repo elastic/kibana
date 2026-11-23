@@ -270,6 +270,7 @@ describe('Data control editor', () => {
   });
 
   describe('control on a query that reads an ES|QL source', () => {
+    // an ES|QL source is its own filterable source here
     const esqlSource = {
       kind: 'esql',
       id: 'esql-dataset-id',
@@ -277,6 +278,7 @@ describe('Data control editor', () => {
       fields: [],
       getFieldByName: (name: string) => ({ name, type: 'string', aggregatable: true }),
       isTimeBased: () => false,
+      toFilterableSource: () => Promise.resolve(esqlSource),
     };
 
     test('explains that a type needs another kind of field, since a field is selected', async () => {

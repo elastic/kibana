@@ -2126,7 +2126,6 @@
     "controls.createControlAction.tooltip": "Ajoutez un contrôle à votre tableau de bord.",
     "controls.dataControl.creationError": "Vous devez définir la data view et le champ pour créer un contrôle.",
     "controls.dataControl.creationErrorESQL": "Une requête de valeurs doit être définie pour créer un contrôle.",
-    "controls.dataControl.esqlDataViewDeriveFailed": "Impossible d'obtenir une data view à partir de la requête ES|QL",
     "controls.dataControl.esqlMissingQuery": "Le contrôle de variable ne contient pas de requête",
     "controls.dataControl.fieldNotFound": "Impossible de localiser le champ : {fieldName}",
     "controls.displaySettingsPopover.applyButton": "Appliquer",

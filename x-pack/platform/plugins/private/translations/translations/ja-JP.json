@@ -2128,7 +2128,6 @@
     "controls.createControlAction.tooltip": "ダッシュボードにコントロールを追加します。",
     "controls.dataControl.creationError": "コントロールを作成するには、Data viewとフィールドの両方を定義する必要があります。",
     "controls.dataControl.creationErrorESQL": "コントロールを作成するためには値クエリを定義する必要があります。",
-    "controls.dataControl.esqlDataViewDeriveFailed": "ES|QLクエリからData viewを取得できませんでした",
     "controls.dataControl.esqlMissingQuery": "変数制御にクエリが設定されていません",
     "controls.dataControl.fieldNotFound": "フィールド{fieldName}が見つかりませんでした",
     "controls.displaySettingsPopover.applyButton": "適用",

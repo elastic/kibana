@@ -81,9 +81,11 @@ describe('initializeDataControlManager', () => {
   };
 
   beforeEach(() => {
-    (getSourceFromESQLQuery as jest.Mock).mockImplementation(async () =>
-      dataViewsService.get('myDataViewId')
-    );
+    // the data source of a query that reads a data view
+    (getSourceFromESQLQuery as jest.Mock).mockImplementation(async () => {
+      const dataView = await dataViewsService.get('myDataViewId');
+      return { kind: 'index-pattern', toFilterableSource: () => Promise.resolve(dataView) };
+    });
   });
 
   describe('data_view_id subscription', () => {
@@ -389,6 +391,7 @@ describe('initializeDataControlManager', () => {
         fields: [],
         getFieldByName: (name: string) => ({ name, type: 'string' }),
         isTimeBased: () => false,
+        toFilterableSource: () => Promise.resolve(derivedSource),
       };
       (getSourceFromESQLQuery as jest.Mock).mockResolvedValue(derivedSource);
       mockGetESQLSingleColumnValues.mockResolvedValue({
@@ -433,14 +436,19 @@ describe('initializeDataControlManager', () => {
   });
 
   describe('source of an ES|QL values control', () => {
-    const esqlSourceOf = (id: string) => ({
-      kind: 'esql',
-      id,
-      title: 'logs-*',
-      fields: [],
-      getFieldByName: (name: string) => ({ name, type: 'string' }),
-      isTimeBased: () => false,
-    });
+    // an ES|QL source is its own filterable source here
+    const esqlSourceOf = (id: string) => {
+      const source = {
+        kind: 'esql',
+        id,
+        title: 'logs-*',
+        fields: [],
+        getFieldByName: (name: string) => ({ name, type: 'string' }),
+        isTimeBased: () => false,
+        toFilterableSource: () => Promise.resolve(source),
+      };
+      return source;
+    };
     const savedEsqlState = {
       ...dataControlState,
       values_source: ControlValuesSource.ESQL,

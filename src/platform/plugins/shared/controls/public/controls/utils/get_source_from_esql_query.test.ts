@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FilterableSource } from '@kbn/data-source';
+import type { DataSource, FilterableSource } from '@kbn/data-source';
 import { BehaviorSubject } from 'rxjs';
 import { EsqlSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -24,14 +24,19 @@ const esqlSource: FilterableSource = {
   isTimeBased: () => false,
 };
 
+const esqlDataSource = { kind: 'esql', id: 'esql-dataset-id' } as EsqlSource;
+
+const getDataViewOf = async (source: Promise<DataSource>) => {
+  const resolved = await source;
+  return resolved.kind === 'index-pattern' ? resolved.getDataView() : undefined;
+};
+
 describe('getSourceFromESQLQuery', () => {
   const mockForDataset = jest.spyOn(EsqlSource, 'forDataset');
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockForDataset.mockResolvedValue({
-      toFilterableSource: jest.fn().mockResolvedValue(esqlSource),
-    } as unknown as EsqlSource);
+    mockForDataset.mockResolvedValue(esqlDataSource);
   });
 
   it('returns a matching parent-published data view before checking saved data views', async () => {
@@ -44,7 +49,9 @@ describe('getSourceFromESQLQuery', () => {
       ] as DataView[]),
     };
 
-    await expect(getSourceFromESQLQuery(QUERY, { parentApi })).resolves.toBe(publishedDataView);
+    await expect(getDataViewOf(getSourceFromESQLQuery(QUERY, { parentApi }))).resolves.toBe(
+      publishedDataView
+    );
 
     expect(dataViewsService.get).toHaveBeenCalledWith('published-data-view', false);
     expect(dataViewsService.find).not.toHaveBeenCalled();
@@ -62,7 +69,9 @@ describe('getSourceFromESQLQuery', () => {
       dataSources$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
     };
 
-    await expect(getSourceFromESQLQuery(QUERY, { parentApi })).resolves.toBe(savedDataView);
+    await expect(getDataViewOf(getSourceFromESQLQuery(QUERY, { parentApi }))).resolves.toBe(
+      savedDataView
+    );
 
     expect(dataViewsService.get).toHaveBeenCalledWith('esql-dataset-id', false);
     expect(dataViewsService.find).toHaveBeenCalledWith('logs-*');
@@ -74,7 +83,7 @@ describe('getSourceFromESQLQuery', () => {
     dataViewsService.find = jest.fn().mockResolvedValue([{ id: 'saved-data-view' }]);
     dataViewsService.get = jest.fn().mockResolvedValue(savedDataView);
 
-    await expect(getSourceFromESQLQuery(QUERY)).resolves.toBe(savedDataView);
+    await expect(getDataViewOf(getSourceFromESQLQuery(QUERY))).resolves.toBe(savedDataView);
 
     expect(dataViewsService.find).toHaveBeenCalledWith('logs-*');
     expect(mockForDataset).not.toHaveBeenCalled();
@@ -83,7 +92,7 @@ describe('getSourceFromESQLQuery', () => {
   it('returns an ES|QL source, with no ad hoc data view, when no saved data view matches', async () => {
     dataViewsService.find = jest.fn().mockResolvedValue([]);
 
-    await expect(getSourceFromESQLQuery(QUERY)).resolves.toBe(esqlSource);
+    await expect(getSourceFromESQLQuery(QUERY)).resolves.toBe(esqlDataSource);
 
     expect(mockForDataset).toHaveBeenCalledWith({
       query: QUERY,

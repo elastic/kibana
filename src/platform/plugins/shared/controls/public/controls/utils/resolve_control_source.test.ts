@@ -8,7 +8,7 @@
  */
 
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { FilterableSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewsService } from '../../services/kibana_services';
 import { getSourceFromESQLQuery } from './get_source_from_esql_query';
@@ -20,11 +20,12 @@ describe('resolveControlSource', () => {
   const mockGetSourceFromESQLQuery = getSourceFromESQLQuery as jest.MockedFunction<
     typeof getSourceFromESQLQuery
   >;
-  const esqlSource = { kind: 'esql', id: 'esql-dataset-id' } as FilterableSource;
+  const dataView = { id: 'myDataViewId' } as DataView;
+  const esqlSource = { kind: 'esql', id: 'esql-dataset-id' } as DataSource;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    dataViewsService.get = jest.fn().mockResolvedValue({ id: 'myDataViewId' } as DataView);
+    dataViewsService.get = jest.fn().mockResolvedValue(dataView);
     mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
   });
 
@@ -34,7 +35,8 @@ describe('resolveControlSource', () => {
       dataViewId: 'myDataViewId',
     });
 
-    expect(source).toEqual({ id: 'myDataViewId' });
+    expect(source.kind).toBe('index-pattern');
+    expect(source.kind === 'index-pattern' && source.getDataView()).toBe(dataView);
     expect(dataViewsService.get).toHaveBeenCalledWith('myDataViewId');
     expect(mockGetSourceFromESQLQuery).not.toHaveBeenCalled();
   });
@@ -57,13 +59,5 @@ describe('resolveControlSource', () => {
     await expect(
       resolveControlSource({ valuesSource: ControlValuesSource.ESQL, esqlQuery: '' })
     ).rejects.toThrow('Variable control is missing a query');
-  });
-
-  it('fails when the source of the query has no id', async () => {
-    mockGetSourceFromESQLQuery.mockResolvedValue({ kind: 'esql' } as FilterableSource);
-
-    await expect(
-      resolveControlSource({ valuesSource: ControlValuesSource.ESQL, esqlQuery: 'FROM logs' })
-    ).rejects.toThrow('Could not derive a data view from the ES|QL query');
   });
 });

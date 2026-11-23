@@ -8,8 +8,8 @@
  */
 
 import { ControlValuesSource } from '@kbn/controls-constants';
-import type { FilterableSource } from '@kbn/data-source';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
+import type { DataSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import { dataViewsService } from '../../services/kibana_services';
 import { getSourceFromESQLQuery } from './get_source_from_esql_query';
@@ -25,25 +25,13 @@ export interface EsqlSourceKey {
 /** What identifies the source of a control: a data view for a field, the query for a "Write a query" control */
 export type ControlSourceKey = FieldSourceKey | EsqlSourceKey;
 
-interface Options {
-  parentApi?: unknown;
-}
-
-/** The source that a control reads its values from, whatever the kind of the source is. */
-export async function resolveControlSource(
-  key: FieldSourceKey,
-  options?: Options
-): Promise<DataView>;
-export async function resolveControlSource(
+/** The data source that a control reads its values from: a data view for a field, what the query reads for a query. */
+export const resolveControlSource = async (
   key: ControlSourceKey,
-  options?: Options
-): Promise<FilterableSource>;
-export async function resolveControlSource(
-  key: ControlSourceKey,
-  { parentApi }: Options = {}
-): Promise<FilterableSource> {
+  { parentApi }: { parentApi?: unknown } = {}
+): Promise<DataSource> => {
   if (key.valuesSource !== ControlValuesSource.ESQL) {
-    return dataViewsService.get(key.dataViewId ?? '');
+    return new DataViewSource(await dataViewsService.get(key.dataViewId ?? ''));
   }
 
   if (!key.esqlQuery) {
@@ -53,13 +41,5 @@ export async function resolveControlSource(
       })
     );
   }
-  const source = await getSourceFromESQLQuery(key.esqlQuery, { parentApi });
-  if (!source.id) {
-    throw new Error(
-      i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
-        defaultMessage: 'Could not derive a data view from the ES|QL query',
-      })
-    );
-  }
-  return source;
-}
+  return getSourceFromESQLQuery(key.esqlQuery, { parentApi });
+};

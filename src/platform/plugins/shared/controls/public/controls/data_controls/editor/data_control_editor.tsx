@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -264,24 +264,20 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   }, [isESQLValuesSource, esqlQueryValidation, editorState.esql_query, editorState.data_view_id]);
 
   const {
-    loading: dataViewLoading,
-    value: { selectedSource, selectedDataView } = {
-      selectedSource: undefined,
-      selectedDataView: undefined,
-    },
+    loading: dataSourceLoading,
+    value: dataSource,
     error: fieldListError,
-  } = useAsync(async (): Promise<{
-    selectedSource?: FilterableSource;
-    selectedDataView?: DataView;
-  }> => {
-    if (!sourceKey) return {};
-    if (sourceKey.valuesSource === ControlValuesSource.ESQL) {
-      return { selectedSource: await resolveControlSource(sourceKey, { parentApi }) };
-    }
-    // the pickers of a field need the data view itself
-    const dataView = await resolveControlSource(sourceKey, { parentApi });
-    return { selectedSource: dataView, selectedDataView: dataView };
-  }, [sourceKey]);
+  } = useAsync(
+    async () => (sourceKey ? resolveControlSource(sourceKey, { parentApi }) : undefined),
+    [sourceKey]
+  );
+  // the pickers of a field need the data view itself, a query on an ES|QL source has none
+  const selectedDataView =
+    dataSource?.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
+  const { value: selectedSource } = useAsync(
+    async () => dataSource?.toFilterableSource(coreServices.http),
+    [dataSource]
+  );
   const isEsqlSource = Boolean(
     isESQLValuesSource && selectedSource && isEsqlFilterableSource(selectedSource)
   );
@@ -484,7 +480,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                       onChangeField(field.name, field.displayName);
                       setControlOptionsValid(true); // reset options state
                     }}
-                    selectableProps={{ isLoading: dataViewListLoading || dataViewLoading }}
+                    selectableProps={{ isLoading: dataViewListLoading || dataSourceLoading }}
                   />
                 )}
               </EuiFormRow>

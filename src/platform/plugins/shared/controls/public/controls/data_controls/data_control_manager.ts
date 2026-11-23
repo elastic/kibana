@@ -37,7 +37,7 @@ import { apiPublishesProjectRouting, type StateComparators } from '@kbn/presenta
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
-import { dataService } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
@@ -240,7 +240,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
       switchMap(async (key) => {
         let source: FilterableSource | undefined;
         try {
-          source = await resolveControlSource(key, { parentApi });
+          const dataSource = await resolveControlSource(key, { parentApi });
+          source = await dataSource.toFilterableSource(coreServices?.http);
           if (key.valuesSource !== ControlValuesSource.ESQL) return { key, source };
 
           const result = await getESQLSingleColumnValues({
