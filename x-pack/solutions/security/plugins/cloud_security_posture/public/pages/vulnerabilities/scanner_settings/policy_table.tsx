@@ -61,6 +61,11 @@ const HiddenValue = ({ testSubj }: { testSubj: string }) => (
   </span>
 );
 
+// no value yet (e.g. no agents enrolled or no inventory reported) — not a permissions matter
+const EmptyValue = ({ testSubj }: { testSubj: string }) => (
+  <span data-test-subj={testSubj}>—</span>
+);
+
 const yesNo = (value: boolean) =>
   value
     ? i18n.translate('xpack.csp.nativeVulnScanner.policyTable.yes', { defaultMessage: 'Yes' })
@@ -92,7 +97,8 @@ export const PolicyTable = ({
       }),
       render: (agents: PolicyStatus['agents'], { id }: PolicyStatus) => {
         const testSubj = getPolicyRowTestSubject(id, 'agents');
-        if (!agentsVisible || !agents) return <HiddenValue testSubj={testSubj} />;
+        if (!agentsVisible) return <HiddenValue testSubj={testSubj} />;
+        if (!agents) return <EmptyValue testSubj={testSubj} />;
         return <span data-test-subj={testSubj}>{`${agents.online} / ${agents.total}`}</span>;
       },
     },
@@ -121,7 +127,8 @@ export const PolicyTable = ({
       }),
       render: (reporting: number | null, { id }: PolicyStatus) => {
         const testSubj = getPolicyRowTestSubject(id, 'reporting');
-        if (!agentsVisible || reporting === null) return <HiddenValue testSubj={testSubj} />;
+        if (!agentsVisible) return <HiddenValue testSubj={testSubj} />;
+        if (reporting === null) return <EmptyValue testSubj={testSubj} />;
         return <span data-test-subj={testSubj}>{reporting}</span>;
       },
     },

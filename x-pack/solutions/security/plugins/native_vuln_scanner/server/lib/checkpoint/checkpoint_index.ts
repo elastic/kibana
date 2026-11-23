@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0", and the "Server Side Public License v 1"; you may not use this file
- * except in compliance with, at your election, the "Elastic License 2.0",
- * the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1".
- */
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { CHECKPOINT_INDEX } from './constants';
 import type { CheckpointDoc } from './constants';
@@ -38,7 +29,7 @@ export const ensureCheckpointIndex = async (es: ElasticsearchClient): Promise<vo
   await es.indices.putMapping({ index: CHECKPOINT_INDEX, ...checkpointMappings });
 };
 
-/** Reads every release checkpoint in one request; a missing release has none. */
+/** Reads every release checkpoint, paging with search_after; a missing release has none. */
 export const readCheckpoints = async (
   es: ElasticsearchClient
 ): Promise<Map<string, CheckpointDoc>> => {
