@@ -13,9 +13,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = functionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../test_plugins/security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../security_api_integration/plugins/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../test_plugins/security_api_integration/plugins/saml_provider'
+  );
 
   return {
     ...functionalConfig.getAll(),

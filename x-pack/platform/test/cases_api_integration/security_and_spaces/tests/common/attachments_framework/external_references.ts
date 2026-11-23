@@ -40,7 +40,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   /**
    * Attachment types are being registered in
-   * x-pack/platform/test/cases_api_integration/common/plugins/cases/server/plugin.ts
+   * x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases/server/plugin.ts
    */
   describe('External references', () => {
     afterEach(async () => {

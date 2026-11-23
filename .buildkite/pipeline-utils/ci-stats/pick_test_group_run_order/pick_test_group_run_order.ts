@@ -33,7 +33,12 @@ import {
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
 } from './selective_testing.ts';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import {
+  buildFunctionalAggregateWaitStep,
+  buildFunctionalStepGroups,
+  buildJestStep,
+  registerCancelKeys,
+} from './steps.ts';
 import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
@@ -214,8 +219,10 @@ export async function pickTestGroupRunOrder() {
         dependsOn: config.jestConfigsDeps,
         retryCount: config.jestConfigsRetryCount,
       }),
-    functionalGroups.length > 0 &&
-      buildFunctionalStepGroup({
+  ].filter((s): s is BuildkiteStep => Boolean(s));
+
+  const functionalStepGroups = functionalGroups.length
+    ? buildFunctionalStepGroups({
         command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
         functionalGroups,
         defaultQueue,
@@ -223,8 +230,8 @@ export async function pickTestGroupRunOrder() {
         envFromLabels: config.envFromLabels,
         dependsOn: config.ftrConfigsDeps,
         retryCount: config.ftrConfigsRetryCount,
-      }),
-  ].filter((s): s is BuildkiteStep => Boolean(s));
+      })
+    : [];
 
   registerCancelKeys(bk, {
     unitCount: unit.count,
@@ -232,7 +239,10 @@ export async function pickTestGroupRunOrder() {
     functionalGroups,
   });
 
-  bk.uploadSteps(steps);
+  if (steps.length) bk.uploadSteps(steps);
+  for (const group of functionalStepGroups) bk.uploadSteps([group]);
+  const aggregateWaitStep = buildFunctionalAggregateWaitStep(functionalStepGroups);
+  if (aggregateWaitStep) bk.uploadSteps([aggregateWaitStep]);
 }
 
 /**

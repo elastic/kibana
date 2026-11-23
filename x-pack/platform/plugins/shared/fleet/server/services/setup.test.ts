@@ -18,6 +18,7 @@ import { appContextService } from './app_context';
 import { getInstallations } from './epm/packages';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
 import { _runSetupWithLock, setupFleet } from './setup';
+import { removeDeniedAgentPolicyOverrides } from './setup/remove_denied_agent_policy_overrides';
 
 jest.mock('./preconfiguration');
 jest.mock('./preconfiguration/outputs');
@@ -36,6 +37,7 @@ jest.mock('./epm/elasticsearch/template/install', () => {
   };
 });
 jest.mock('./backfill_agentless');
+jest.mock('./setup/remove_denied_agent_policy_overrides');
 
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
@@ -107,6 +109,20 @@ describe('setupFleet', () => {
       isInitialized: true,
       nonFatalErrors: [],
     });
+  });
+
+  it('should not fail setup when removing denied agent policy overrides fails', async () => {
+    (removeDeniedAgentPolicyOverrides as jest.Mock).mockRejectedValueOnce(
+      new Error('point in time failed')
+    );
+
+    const result = await setupFleet(soClient, esClient);
+
+    expect(result.isInitialized).toBe(true);
+    expect(result.nonFatalErrors).toHaveLength(1);
+    expect((result.nonFatalErrors[0] as { error: Error }).error.message).toBe(
+      'point in time failed'
+    );
   });
 
   it('should return non fatal errors when generateKeyPair result has errors', async () => {

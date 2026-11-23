@@ -45,7 +45,7 @@ export default function (ftrContext: FtrProviderContext) {
       const response = await supertest.get('/api/licensing/feature_usage').expect(200);
       const features = response.body.features.map(({ name }: FeatureUsage) => name);
 
-      // These were registered by the plugin in ../plugins/test_feature_usage
+      // These were registered by the test_feature_usage plugin.
       expect(features).to.contain('test-client-A');
       expect(features).to.contain('test-client-B');
     });
