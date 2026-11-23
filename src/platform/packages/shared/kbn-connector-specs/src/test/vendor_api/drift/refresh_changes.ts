@@ -262,12 +262,12 @@ const detailOf = (
     const [, which, verb] = limit;
     return `${camelCase(which)} ${verb}${verb === 'set' && rest[0] ? ` to ${rest[0]}` : ''}`;
   }
-  // "the max was decreased from `100.00` to `50.00`"
+  // "the max was decreased from `100.00` to `50.00`", which a response rule follows with its status.
   const moved = /-(min|max|min-length|max-length|min-items|max-items)-(increased|decreased)$/.exec(
     id
   );
   if (moved && rest.length >= 2) {
-    const [from, to] = rest.slice(-2);
+    const [from, to] = rest;
     return `${camelCase(moved[1])} ${from} → ${to}`;
   }
   return undefined;
@@ -343,8 +343,10 @@ const withSubtypeChanges = (entries: readonly Entry[]): Entry[] => {
   return [...others, ...merged];
 };
 
-// An MCP tool's change: `search: input.limit was added`, `search: output.items[] type changed`.
-const MCP_CHANGE = /^[^:]+: ((?:input|output)\S*) (.+)$/;
+// An MCP tool's change: `search: input.limit was added`, `search: output.items[] type changed`. A
+// property name may hold spaces, so the path runs up to the words that say what changed.
+const MCP_CHANGE =
+  /^[^:]+: ((?:input|output).*?) (was added|was removed|\w+ changed|changed|now only takes .+|is no longer limited to .+|no longer takes .+|can now return .+)$/;
 
 /** A change to an MCP tool's input or output, as a line of the request or the response. */
 const mcpEntriesOf = ({ id, text, type }: SpecChange): Entry[] | undefined => {

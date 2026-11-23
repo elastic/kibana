@@ -596,6 +596,32 @@ describe('describeChanges', () => {
     );
   });
 
+  it('reads how a bound of the response moved, not the status after it', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-max-increased',
+          "the `count` response property's max was increased from `1.00` to `2.00` for the response status `200`",
+          'integer'
+        ),
+      ])
+    ).toEqual(object('Response', '! count: integer (max 1.00 → 2.00)'));
+  });
+
+  it('keeps an MCP property name that holds a space', () => {
+    expect(
+      describeChanges([
+        change('mcp-input-property-added', 'search: input.display name was added', 'string'),
+        change('mcp-output-type-changed', 'search: output.display name type changed'),
+      ])
+    ).toEqual(
+      areas(
+        object('Response', '! display name (type changed)'),
+        object('Request', '+ display name: string')
+      )
+    );
+  });
+
   it('keeps the value that changed when the types are cut short', () => {
     expect(
       describeChanges([
