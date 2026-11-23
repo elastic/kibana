@@ -102,16 +102,34 @@ const createWrapper = () => {
   return Wrapper;
 };
 
-const renderSections = (query?: string) =>
-  renderHook((props: { query?: string }) => useInvestigationSections(props), {
-    initialProps: { query },
-    wrapper: createWrapper(),
-  });
+const renderSections = (
+  props: {
+    query?: string;
+    updatedAfter?: string;
+    updatedBefore?: string;
+  } = {}
+) =>
+  renderHook(
+    (hookProps: { query?: string; updatedAfter?: string; updatedBefore?: string }) =>
+      useInvestigationSections(hookProps),
+    {
+      initialProps: props,
+      wrapper: createWrapper(),
+    }
+  );
 
 describe('useInvestigationSections', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    httpGet.mockResolvedValue({ critical: 3, high: 1, medium: 0, low: 2 });
+    httpGet.mockImplementation((url: string) => {
+      if (String(url).includes('_severity_counts')) {
+        return Promise.resolve({ critical: 3, high: 1, medium: 0, low: 2 });
+      }
+      return Promise.resolve({
+        results: [],
+        pagination: { total: 2, page: 1, per_page: 1 },
+      });
+    });
     mockUseKibana.mockReturnValue({
       services: { http: { get: httpGet }, agenticInvestigations: {} },
     });
@@ -121,7 +139,7 @@ describe('useInvestigationSections', () => {
   });
 
   it('fetches in progress, then each severity tier, then the investigations without a severity', () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     expect(
       mockUseFetchInvestigations.mock.calls
@@ -172,7 +190,7 @@ describe('useInvestigationSections', () => {
   });
 
   it('maps the shared severity counts onto the tiers for the tiles', async () => {
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -192,7 +210,13 @@ describe('useInvestigationSections', () => {
   });
 
   it('fetches a no-search severity baseline while a query is active', async () => {
-    httpGet.mockImplementation((_url, options) => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 2, page: 1, per_page: 1 },
+        });
+      }
       const requestQuery = options?.query as { query?: string } | undefined;
       if (requestQuery?.query) {
         return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
@@ -200,7 +224,7 @@ describe('useInvestigationSections', () => {
       return Promise.resolve({ critical: 0, high: 4, medium: 2, low: 9 });
     });
 
-    const { result } = renderSections('tr');
+    const { result } = renderSections({ query: 'tr' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -229,7 +253,13 @@ describe('useInvestigationSections', () => {
   });
 
   it('falls back to filtered counts when the no-search baseline fails', async () => {
-    httpGet.mockImplementation((_url, options) => {
+    httpGet.mockImplementation((url, options) => {
+      if (!String(url).includes('_severity_counts')) {
+        return Promise.resolve({
+          results: [],
+          pagination: { total: 0, page: 1, per_page: 1 },
+        });
+      }
       const requestQuery = options?.query as { query?: string } | undefined;
       if (requestQuery?.query) {
         return Promise.resolve({ critical: 0, high: 1, medium: 0, low: 9 });
@@ -237,7 +267,7 @@ describe('useInvestigationSections', () => {
       return Promise.reject(new Error('baseline unavailable'));
     });
 
-    const { result } = renderSections('tr');
+    const { result } = renderSections({ query: 'tr' });
 
     await waitFor(() =>
       expect(result.current.severityCounts).toEqual({
@@ -275,7 +305,7 @@ describe('useInvestigationSections', () => {
       return params.severities?.[0] === 'none' ? sectionResult({ total: 4 }) : sectionResult();
     });
 
-    const { result } = renderSections('checkout');
+    const { result } = renderSections({ query: 'checkout' });
 
     // 1 running + 4 unrated: the tiers are empty because their sections are.
     await waitFor(() => expect(result.current.totalCount).toBe(5));
@@ -340,7 +370,7 @@ describe('useInvestigationSections', () => {
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a'], refetchCritical })
     );
-    const { rerender } = renderSections('checkout');
+    const { rerender } = renderSections({ query: 'checkout' });
 
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-a', 'running-b'], refetchCritical })

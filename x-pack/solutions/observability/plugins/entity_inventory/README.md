@@ -14,7 +14,7 @@ The routes exist only when the plugin is enabled. All are internal: send `x-elas
 
 ### `GET /internal/entity_inventory/types`
 
-No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. Example response for `k8s.deployment`:
+No body and no parameters. It returns one entry per registered definition that has a `dynamic` block, whoever registered it, so the entity store's built-in `host` is listed beside this plugin's own types. `suggestedFilters` lists the columns the definition offers as dropdown filters, in display order, and is empty when it suggests none. Example response for `k8s.deployment`:
 
 ```json
 {
@@ -36,6 +36,7 @@ No body and no parameters. It returns one entry per registered definition that h
         { "name": "k8s.deployment.uid", "kind": "attribute" },
         { "name": "last_seen", "kind": "last_seen" }
       ],
+      "suggestedFilters": ["k8s.cluster.name", "kubernetes.namespace"],
       "sources": [
         {
           "indexPattern": "metrics-kubernetes.state_deployment-*",
@@ -109,6 +110,42 @@ Response:
 
 Each `request` is the body to send to Elasticsearch's `POST /_query` unchanged: `query`, `params` (the named parameters, never interpolated) and `include_execution_metadata: true`. A probe that fails is reported in `errors` and never fails the request. The request errors and their statuses are those of `_list`.
 
+### `POST /internal/entity_inventory/filters/_values`
+
+Returns the distinct values a dropdown can offer for one attribute, merged across the sources of the types in scope, narrowed by the other dropdowns and by the time range.
+
+Body, strict (an unknown key such as `documentFilter` is a 400):
+
+| key | | |
+| --- | --- | --- |
+| `attribute` | required | The column to list: an attribute or identity field, 1 to 512 characters, that at least one type in `types` lists in its `suggestedFilters` |
+| `types` | required | 1 to 32 type ids. A type that does not suggest the attribute is left out |
+| `filters` | optional | The other dropdowns' selections: column name to the values selected, as the response shows them (value labels applied). At most 16 columns and 100 values each. A source reads each column from the field it declares for it, and a label is matched against every raw value that reads as it |
+| `selected` | optional | The values currently selected in this dropdown, at most 100 |
+| `from`, `to` | required | As in `_list` |
+| `limit` | optional | integer 1–9,999, default 9,999 |
+
+Response:
+
+| key | |
+| --- | --- |
+| `values` | The distinct values, sorted, with value labels applied, at most `limit`. A value that is empty or longer than 256 characters is not offered, because the route could not take it back as a selection |
+| `invalidSelections` | The `selected` values that are not in `values`: no longer offered, or cut by `limit` (then `truncated` is true). Every selected value is in one of the two lists |
+| `truncated` | True only when `limit` left values out |
+| `errors` | `{ indexPattern, status, reason }` per source problem, as in `_list`; never a stack. A source whose probe or query failed does not fail the request |
+
+How it runs: one values query per source plan that can contribute, run concurrently. A source that declares no field for the attribute is neither probed nor queried. The value labels, the selections and the length filter are part of the query, and the values go in as named parameters, never as text. The values come from the documents of the window, not from entities, so a value that only a hidden duplicate of an entity carries is still offered.
+
+Errors that fail the request:
+
+| request | status |
+| --- | --- |
+| No type in `types` suggests `attribute` | 400 |
+| A type has no entity definition, or has no `dynamic` block | 404 |
+| A body key is missing or invalid, `from >= to`, or `limit` is not an integer in 1–9,999 | 400 |
+| An unknown body key | 400 |
+| The definition cannot be turned into queries | 400 |
+
 ### Access control (interim)
 
 Kibana checks no privilege on the inventory routes: they declare `INTERIM_AUTHZ` (`server/routes/interim_authz.ts`), which is `AuthzDisabled.delegateToESClient`. Every probe and plan query runs with the request-scoped Elasticsearch client, so Elasticsearch enforces the user's index privileges: an index the user cannot read is left out like one that does not exist, and a source with none readable is reported in `errors`. This is acceptable for now because the routes are internal and the plugin is off by default. `types` reads definitions, not indices, so any authenticated user gets the same types. [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244) replaces this with the inventory's privilege model.
@@ -152,6 +189,8 @@ registers them.
 | `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
 | `list_query.ts` | One list query per plan. |
 | `probe_query.ts` | The probe deciding whether a source gets a `TS` plan. |
+| `attribute_filters.ts` | The other dropdowns' selections as one ES\|QL predicate per plan: each column read from the field the plan's source declares, each label matched against every raw value that reads as it, values as named parameters. A plan that cannot match the selections gets none. |
+| `attribute_values_query.ts` | One values query per plan: the distinct values of an attribute among the documents of the type in the window that pass the selections, with value labels applied before the sort and the limit, and empty or over-long values dropped. |
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 
