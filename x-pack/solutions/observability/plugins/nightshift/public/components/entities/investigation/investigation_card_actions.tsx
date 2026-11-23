@@ -15,7 +15,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPopover,
   EuiText,
   EuiToolTip,
@@ -150,7 +149,6 @@ export const InvestigationCardActions = ({
       </EuiContextMenuItem>,
       ...(canDelete
         ? [
-            <EuiHorizontalRule key="deleteSeparator" margin="none" />,
             <EuiContextMenuItem
               key="delete"
               icon="trash"

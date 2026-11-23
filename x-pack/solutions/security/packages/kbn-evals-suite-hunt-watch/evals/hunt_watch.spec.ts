@@ -7,6 +7,7 @@
 
 import { evaluate, tags } from '../src/evaluate';
 import { createCanaryEvaluators, createEvaluateDataset } from '../src/evaluators/dataset_evaluator';
+import { gatesCapabilityRows } from '../src/evaluators/reference_models';
 import { collectHuntArtifacts, getConversation } from '../src/collect';
 import { HUNT_A_SPACE_ID, HUNT_B_SPACE_ID, SPACE_REPORT_IDS } from '../src/constants';
 import { buildHuntInvestigationConversationId, resetHuntReport } from '../src/seed_hunt_data';
@@ -33,6 +34,7 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
         esClient,
         fetch,
         log,
+        connector,
         evaluationConnector,
         config,
       }) => {
@@ -50,6 +52,7 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
           fetch,
           log,
           kibanaUrl: config.hosts.kibana,
+          gatesCapability: gatesCapabilityRows(connector),
           judge: {
             judgeConnectorId: evaluationConnector.id,
             judgeConnectorName: evaluationConnector.name,

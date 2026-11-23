@@ -12,7 +12,7 @@ import { isManagedProfileName } from '../common/managed_profiles';
 
 export const SEARCH_BOOST_PAGE_DESCRIPTION = i18n.translate('xpack.searchBoost.page.description', {
   defaultMessage:
-    'Balance search performance and cost for the indices and data streams in this project.',
+    'Project-wide defaults determine the search resources allocated to your indices and data streams. Create boost rules to override those defaults with a different boost profile for specific indices or data streams.',
 });
 
 export const MATCHING_INDICES_TITLE = i18n.translate('xpack.searchBoost.matchingIndicesTitle', {
@@ -74,6 +74,17 @@ export const getHiddenDataStreams = (count: number) =>
     values: { count },
   });
 
+export const LOADING_LABEL = i18n.translate('xpack.searchBoost.page.loading', {
+  defaultMessage: 'Loading boost settings…',
+});
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.page.loadErrorTitle', {
+  defaultMessage: 'Unable to load boost settings',
+});
+
+export const TRY_AGAIN_LABEL = i18n.translate('xpack.searchBoost.page.tryAgain', {
+  defaultMessage: 'Try again',
+});
 export const PROJECT_DEFAULTS_TITLE = i18n.translate('xpack.searchBoost.projectDefaults.title', {
   defaultMessage: 'Project defaults',
 });
@@ -139,10 +150,10 @@ interface ManagedProfileMessage {
 
 const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
   default_indices: {
-    label: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.label', {
-      defaultMessage: 'Performant',
+    label: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.label', {
+      defaultMessage: 'Default',
     }),
-    description: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.description', {
+    description: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.description', {
       defaultMessage:
         'Consistently low average latency, scaling to high query throughput as load grows.',
     }),
@@ -261,6 +272,15 @@ export const DUPLICATE_LABEL = i18n.translate('xpack.searchBoost.actions.duplica
 export const DELETE_LABEL = i18n.translate('xpack.searchBoost.actions.delete', {
   defaultMessage: 'Delete',
 });
+
+export const CANCEL_BUTTON_LABEL = i18n.translate('xpack.searchBoost.flyout.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES_BUTTON_LABEL = i18n.translate(
+  'xpack.searchBoost.flyout.saveChangesButton',
+  { defaultMessage: 'Save changes' }
+);
 
 export const PROFILE_NAME_LABEL = i18n.translate('xpack.searchBoost.profileName', {
   defaultMessage: 'Profile name',

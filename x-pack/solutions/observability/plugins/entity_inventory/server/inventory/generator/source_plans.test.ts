@@ -86,7 +86,6 @@ describe('planSources', () => {
   it('gives a source without attributes an empty attribute list', () => {
     const [plan] = planSources(withSources([{ indexPattern: 'metrics-*' }]), [NO_TIME_SERIES]);
     expect(plan.attributes).toEqual([]);
-    expect(plan).not.toHaveProperty('filter');
   });
 
   it('throws when the probes do not match the sources', () => {

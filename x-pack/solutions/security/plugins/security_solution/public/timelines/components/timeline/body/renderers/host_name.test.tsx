@@ -5,8 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
@@ -45,25 +45,23 @@ describe('HostName', () => {
   };
 
   test('should render host name', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="host-details-button"]').last().text()).toEqual(
-      props.value
-    );
+    expect(screen.getByTestId('host-details-button')).toHaveTextContent(props.value);
   });
 
   test('should not open any flyout or panels if context in not defined', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <HostName {...props} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
@@ -77,7 +75,7 @@ describe('HostName', () => {
       tabType: TimelineTabs.query,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -85,7 +83,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
@@ -99,7 +97,7 @@ describe('HostName', () => {
       tabType: TimelineTabs.query,
     };
 
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -107,7 +105,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).not.toHaveBeenCalled();
     });
@@ -120,7 +118,7 @@ describe('HostName', () => {
       timelineID: TableId.alertsOnAlertsPage,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -128,7 +126,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).toHaveBeenCalledWith({
         hostName: props.value,
@@ -144,7 +142,7 @@ describe('HostName', () => {
       timelineID: TimelineId.active,
       tabType: TimelineTabs.query,
     };
-    const wrapper = mount(
+    render(
       <TestProviders>
         <StatefulEventContext.Provider value={context}>
           <HostName {...props} />
@@ -152,7 +150,7 @@ describe('HostName', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await userEvent.click(screen.getByTestId('host-details-button'));
     await waitFor(() => {
       expect(flyoutApi.openHostFlyout).toHaveBeenCalledTimes(1);
     });

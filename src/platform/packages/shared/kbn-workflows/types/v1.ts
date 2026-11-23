@@ -17,6 +17,7 @@ import {
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { lazySchema, z } from '@kbn/zod/v4';
 import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
+import { WORKFLOW_TEMPLATE_ORIGINS } from '../common/constants';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -157,6 +158,9 @@ export interface EsWorkflowExecution {
   billable?: boolean | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   /** Workflow document lifetime. Absent for a test run that has no saved workflow. */
   workflowUid?: string;
   isTestRun: boolean;
@@ -386,6 +390,9 @@ export interface WorkflowStepExecutionListDto {
 
 // TODO: convert to actual elastic document spec
 
+export const WorkflowTemplateOriginSchema = lazySchema(() => z.enum(WORKFLOW_TEMPLATE_ORIGINS));
+export type WorkflowTemplateOrigin = z.infer<typeof WorkflowTemplateOriginSchema>;
+
 export const EsWorkflowSchema = lazySchema(() =>
   z.object({
     id: z.string(),
@@ -397,6 +404,10 @@ export const EsWorkflowSchema = lazySchema(() =>
     billable: z.boolean().nullable().optional(),
     originManagedWorkflowId: z.string().nullable().optional(),
     managedVersion: z.number().nullable().optional(),
+    /** Workflow Template library slug, or `custom` for a template outside the catalog. */
+    templateSlug: z.string().nullable().optional(),
+    templateVersion: z.string().nullable().optional(),
+    templateOrigin: WorkflowTemplateOriginSchema.nullable().optional(),
     workflowUid: z.string().optional(),
     tags: z.array(z.string()),
     createdAt: z.date(),
@@ -517,6 +528,9 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   definitionHash?: string | null;
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   workflowUid?: string;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;
@@ -548,6 +562,9 @@ export interface WorkflowListItemDto extends WorkflowAccessSubject {
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
+  templateSlug?: string | null;
+  templateVersion?: string | null;
+  templateOrigin?: WorkflowTemplateOrigin | null;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];
@@ -574,6 +591,9 @@ export interface WorkflowExecutionEngineModel
     | 'billable'
     | 'originManagedWorkflowId'
     | 'managedVersion'
+    | 'templateSlug'
+    | 'templateVersion'
+    | 'templateOrigin'
     | 'version'
     | 'workflowUid'
   > {

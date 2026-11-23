@@ -66,7 +66,9 @@ const formatOptions = (
           <EuiText size="xs">{count}</EuiText>
         </Counter>
       );
-    const tooltipIcon = <EuiIconTip type="question" color="subdued" content={tooltip} />;
+    const tooltipIcon = (
+      <EuiIconTip type="question" color="subdued" content={tooltip} aria-label={tooltip} />
+    );
 
     let append: EuiSelectableOption['append'] = null;
     if (showCount && counter && tooltip) {
