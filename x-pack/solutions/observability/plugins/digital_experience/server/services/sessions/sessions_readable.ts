@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SessionsSettings, SessionsStatus } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
+import { BROWSER_SESSIONS_PLATFORM } from './sessions_platforms';
 import { getSessionsStatus } from './sessions_status';
 
 /** The status changes at most once a run, while the list is refreshed often. */
@@ -50,7 +51,11 @@ export const createSessionsReadableCache = (): SessionsReadableCache => {
       if (readable && readable.expiresAt > now) {
         return readable.result;
       }
-      const result: Promise<boolean> = getSessionsStatus({ taskManager, settings })
+      const result: Promise<boolean> = getSessionsStatus({
+        taskManager,
+        settings,
+        platform: BROWSER_SESSIONS_PLATFORM,
+      })
         .then(isReadable)
         .catch((error) => {
           logger.debug(`Could not read the sessions status: ${describeError(error)}`);

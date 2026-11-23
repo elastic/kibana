@@ -100,6 +100,7 @@ export const UnitDestinationFlyout = ({
   indices,
   indicesStatus,
   indicesError,
+  hasConnectedSource,
   destinationDetailRef,
   onShowDestinationDetail,
   onHideDestinationDetail,
@@ -113,6 +114,7 @@ export const UnitDestinationFlyout = ({
   indices: ResolvedDestinationIndex[];
   indicesStatus: ResolvedIndicesStatus;
   indicesError?: ResolvedIndicesError;
+  hasConnectedSource: boolean;
   destinationDetailRef?: DestinationDetailActorRef;
   onShowDestinationDetail: (destinationId: string, viewerId: string) => void;
   onHideDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -261,6 +263,7 @@ export const UnitDestinationFlyout = ({
               indices={indices}
               indicesStatus={indicesStatus}
               indicesError={indicesError}
+              hasConnectedSource={hasConnectedSource}
               destinationDetailRef={destinationDetailRef}
               onShowDestinationDetail={onShowDestinationDetail}
               onHideDestinationDetail={onHideDestinationDetail}
