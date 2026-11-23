@@ -49,8 +49,7 @@ export const lensFeatureFlags = {
   apiFormat: {
     id: 'lens.apiFormat',
     type: 'boolean',
-    // TEMPORARY (CI only): do not merge. Forces the flag on to run the full CI suite with it enabled.
-    fallback: true as boolean,
+    fallback: false as boolean,
     devFallback: true as boolean,
   },
   /**
