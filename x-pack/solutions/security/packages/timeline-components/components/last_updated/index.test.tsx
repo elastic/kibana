@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { LastUpdatedAt } from '.';
 
@@ -25,22 +25,22 @@ jest.mock('@kbn/i18n-react', () => {
 
 describe('LastUpdatedAt', () => {
   test('it renders correct relative time', () => {
-    const wrapper = mount(
+    const { container } = render(
       <I18nProvider>
         <LastUpdatedAt updatedAt={1603995240115} />
       </I18nProvider>
     );
 
-    expect(wrapper.text()).toEqual(' Updated 2 minutes ago');
+    expect(container.textContent).toEqual(' Updated 2 minutes ago');
   });
 
   test('it renders updating text if "showUpdating" is true', () => {
-    const wrapper = mount(
+    const { container } = render(
       <I18nProvider>
         <LastUpdatedAt updatedAt={1603995240115} showUpdating />
       </I18nProvider>
     );
 
-    expect(wrapper.text()).toEqual(' Updating...');
+    expect(container.textContent).toEqual(' Updating...');
   });
 });

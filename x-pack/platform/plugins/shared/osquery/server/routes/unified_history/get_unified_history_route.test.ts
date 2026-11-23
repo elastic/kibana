@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ObjectType } from '@kbn/config-schema';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { RequestHandler } from '@kbn/core/server';
 import {
@@ -80,7 +81,111 @@ describe('getUnifiedHistoryRoute', () => {
     }
 
     routeHandler = routeVersion.handler;
+
+    return routeVersion.config;
   };
+
+  describe('sourceFilters validation', () => {
+    const validateSourceFilters = (sourceFilters: string) => {
+      const { validate } = setupRoute();
+      if (
+        !validate ||
+        typeof validate === 'function' ||
+        !(validate.request?.query instanceof ObjectType)
+      ) {
+        throw new Error('Expected a query validation schema');
+      }
+
+      return validate.request.query.validate({ sourceFilters });
+    };
+
+    it.each(['workflow', 'live,rule,scheduled,workflow'])(
+      'accepts sourceFilters=%s',
+      (sourceFilters) => {
+        expect(validateSourceFilters(sourceFilters)).toEqual(
+          expect.objectContaining({ sourceFilters })
+        );
+      }
+    );
+
+    it.each(['unknown', 'workflow,unknown'])('rejects sourceFilters=%s', (sourceFilters) => {
+      expect(() => validateSourceFilters(sourceFilters)).toThrow(
+        'invalid sourceFilter values: unknown'
+      );
+    });
+  });
+
+  it('sourceFilters=workflow alone queries live actions and does not query scheduled rows', async () => {
+    mockEsClient.search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _source: {
+              action_id: 'workflow-action',
+              '@timestamp': '2026-11-18T12:00:00.000Z',
+              origin: { type: 'workflow', run_id: 'execution-1', verified: false },
+              alert_ids: ['alert-1'],
+              queries: [{ query: 'SELECT 1' }],
+            },
+          },
+        ],
+      },
+    });
+    setupRoute();
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      httpServerMock.createKibanaRequest({ query: { sourceFilters: 'workflow' } }),
+      response
+    );
+    expect(response.ok).toHaveBeenCalledWith({
+      body: {
+        data: [expect.objectContaining({ actionId: 'workflow-action', source: 'Workflow' })],
+        hasMore: false,
+        nextPage: undefined,
+      },
+    });
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0].index).toContain(ACTIONS_INDEX);
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
+      bool: { should: [{ term: { 'origin.type': 'workflow' } }], minimum_should_match: 1 },
+    });
+  });
+
+  it('sourceFilters=live,rule excludes workflow actions in both source clauses', async () => {
+    mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+    setupRoute();
+    const response = httpServerMock.createResponseFactory();
+    await routeHandler(
+      {} as never,
+      httpServerMock.createKibanaRequest({ query: { sourceFilters: 'live,rule' } }),
+      response
+    );
+
+    expect(response.ok).toHaveBeenCalled();
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.search.mock.calls[0][0].body.query.bool.filter).toContainEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              must_not: [
+                { exists: { field: 'alert_ids' } },
+                { term: { 'origin.type': 'workflow' } },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [{ exists: { field: 'alert_ids' } }],
+              must_not: [{ term: { 'origin.type': 'workflow' } }],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
 
   describe('when CPS is enabled', () => {
     beforeEach(() => {

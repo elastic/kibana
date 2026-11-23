@@ -104,7 +104,7 @@ describe('useTableHeaderComponents', () => {
     await waitFor(() => expect(mockCascadeGroupingChangeHandler).toHaveBeenCalledWith(['group2']));
   });
 
-  it('displays a technical preview tooltip on hover', async () => {
+  it('displays a tooltip describing the grouped results on hover', async () => {
     const user = userEvent.setup();
     const availableGroups = ['group1', 'group2'];
     const selectedGroups = ['group1'];
@@ -130,7 +130,7 @@ describe('useTableHeaderComponents', () => {
 
     await user.hover(groupSelectionButton);
 
-    expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
+    expect(screen.getByText('Grouped results')).toBeInTheDocument();
     expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
   });
 });

@@ -122,6 +122,14 @@ export const FlakyTestBranchStatsSchema = lazySchema(() =>
     latestRun: z.optional(FlakyTestBranchLatestRunSchema),
     /** Every setup (pipeline, config, target) that ran the test on this branch skipped it last. */
     skipped: z.optional(z.boolean()),
+    /**
+     * Days of the window with a failed execution on this branch, sorted, each as the number of
+     * whole days before the window's end: 0 is its last 24 hours. Absent in reports written
+     * before the field existed.
+     */
+    failedDaysAgo: z.optional(z.array(z.int())),
+    /** Days of the window with an execution on this branch, counted as `failedDaysAgo`. */
+    ranDaysAgo: z.optional(z.array(z.int())),
   })
 );
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;

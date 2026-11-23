@@ -7,6 +7,11 @@
 
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { ReportWorkerOutcomeStepId } from '../../common/step_types';
+import {
+  TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
+  TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+  TRIAGE_STORE_FP_DECISIONS_STEP_ID,
+} from '../../common/step_types/alert_triage';
 import { registerAlertZeroPublicStepDefinitions } from '.';
 
 type Loader = () => Promise<{ icon?: unknown; id: string } | undefined>;
@@ -24,18 +29,30 @@ describe('AlertZero public step definitions', () => {
   it('registers every step as a loader, so none reaches the page-load bundle', () => {
     const registered = register();
 
-    expect(registered.map((definition) => typeof definition)).toEqual(['function']);
+    expect(registered.map((definition) => typeof definition)).toEqual([
+      'function',
+      'function',
+      'function',
+      'function',
+    ]);
   });
 
-  it('resolves to the reportWorkerOutcome step id', async () => {
+  // The workflow editor rejects a step type that the server registers but the client does not.
+  it('resolves to every AlertZero step that a managed workflow uses in the editor', async () => {
     const resolved = await Promise.all(register().map((load) => load()));
 
-    expect(resolved.map((definition) => definition?.id)).toEqual([ReportWorkerOutcomeStepId]);
+    expect(resolved.map((definition) => definition?.id)).toEqual([
+      ReportWorkerOutcomeStepId,
+      TRIAGE_STORE_FP_DECISIONS_STEP_ID,
+      TRIAGE_MATCH_FP_DECISIONS_STEP_ID,
+      TRIAGE_REVOKE_FP_DECISION_STEP_ID,
+    ]);
   });
 
-  it('gives the step an icon', async () => {
-    const [definition] = await Promise.all(register().map((load) => load()));
+  it('gives every step an icon', async () => {
+    const resolved = await Promise.all(register().map((load) => load()));
 
-    expect(definition).toHaveProperty('icon');
+    expect(resolved).toHaveLength(4);
+    resolved.forEach((definition) => expect(definition).toHaveProperty('icon'));
   });
 });

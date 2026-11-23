@@ -29,6 +29,7 @@ import { createServerRoute } from '../../create_server_route';
 import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { listAllSources } from '../../utils/list_all_sources';
+import { trackTelemetryBestEffort } from '../../../lib/telemetry/track_telemetry_best_effort';
 
 interface AnalysisProfileGroup {
   config: AnalysisProfileConfig;
@@ -209,21 +210,29 @@ const changePointScanRoute = createServerRoute({
     const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
     const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
-    telemetry.trackSignificantEventsDetectionScan({
-      workflow_execution_id: workflowExecutionId,
-      took_ms: took,
-      duration_ms: durationMs,
-      rules_requested: queryLinks.length,
-      rules_scanned: buckets.length,
-      critical_rule_count: criticalRuleCount,
-      default_rule_count: defaultRuleCount,
-      alerting_engine: 'v2',
-      alerts_source_index: sigEventsContext.alertsReader.index,
-      lookback: criticalLookback,
-      bucket_interval: criticalBucketInterval,
-      default_lookback: defaultConfig.lookback,
-      default_bucket_interval: defaultConfig.bucketInterval,
-      space_id: spaceId,
+    trackTelemetryBestEffort({
+      logger,
+      description: 'detection scan telemetry',
+      track: () =>
+        telemetry.trackSignificantEventsDetectionScan(
+          {
+            workflow_execution_id: workflowExecutionId,
+            took_ms: took,
+            duration_ms: durationMs,
+            rules_requested: queryLinks.length,
+            rules_scanned: buckets.length,
+            critical_rule_count: criticalRuleCount,
+            default_rule_count: defaultRuleCount,
+            alerting_engine: 'v2',
+            alerts_source_index: sigEventsContext.alertsReader.index,
+            lookback: criticalLookback,
+            bucket_interval: criticalBucketInterval,
+            default_lookback: defaultConfig.lookback,
+            default_bucket_interval: defaultConfig.bucketInterval,
+            space_id: spaceId,
+          },
+          request
+        ),
     });
 
     return { alertIndex: sigEventsContext.alertsReader.index, aggregations };

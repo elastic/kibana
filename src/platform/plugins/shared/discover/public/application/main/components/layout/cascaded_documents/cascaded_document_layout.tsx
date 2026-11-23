@@ -109,7 +109,15 @@ const ESQLDataCascade = React.memo(
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
-      ({ data: cellData, cellId, virtualizerController, rowIndex, nodePath, nodePathMap }) => (
+      ({
+        data: cellData,
+        cellId,
+        virtualizerController,
+        rowIndex,
+        nodePath,
+        nodePathMap,
+        stickyHeaderExtensionPoint,
+      }) => (
         <ESQLDataCascadeLeafCell
           {...props}
           dataView={dataView}
@@ -119,6 +127,7 @@ const ESQLDataCascade = React.memo(
           rowIndex={rowIndex}
           nodePath={nodePath}
           nodePathMap={nodePathMap}
+          stickyHeaderExtensionPoint={stickyHeaderExtensionPoint}
         />
       ),
       [dataView, props]
@@ -161,7 +170,7 @@ const ESQLDataCascade = React.memo(
       <DataCascade<ESQLDataGroupNode>
         ref={setDataCascadeRef}
         size="s"
-        overscan={2}
+        overscan={5}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}

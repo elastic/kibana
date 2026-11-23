@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLColumn } from '@kbn/es-types';
+import type { InventoryRow, Provenance } from '../../../common';
 import type { QueryPlan } from '../generator';
-
-/** One ES|QL cell: a scalar, or an array when the column is multi-valued. */
-export type ESQLValue = estypes.FieldValue | estypes.FieldValue[];
-
-/** One row keyed by column name; a column the row does not carry is absent. */
-export type InventoryRow = Record<string, ESQLValue>;
 
 /** What one plan's list query returned. */
 export interface PlanResult {
@@ -21,9 +15,6 @@ export interface PlanResult {
   columns: ESQLColumn[];
   rows: InventoryRow[];
 }
-
-/** Entity id to attribute column to the index pattern of the source that supplied the value. */
-export type Provenance = Record<string, Record<string, string>>;
 
 /** The merged rows of every plan, keyed by `entity.id`. */
 export interface MergeResult {
