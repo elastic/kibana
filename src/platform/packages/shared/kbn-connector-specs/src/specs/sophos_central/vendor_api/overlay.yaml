@@ -1,0 +1,66 @@
+overlay: 1.0.0
+info:
+  title: Sophos Central API corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/common/v1/alerts'].get.parameters
+    description: >-
+      The Sophos Common API v1 alerts endpoint accepts repeated query parameters
+      for severity, product and category (e.g. ?severity=high&severity=medium).
+      The published spec models these as single strings; this overlay corrects
+      them to arrays.
+    update:
+      - name: severity
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+      - name: product
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+      - name: category
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+
+  - target: $.paths['/endpoint/v1/endpoints'].get.parameters
+    description: >-
+      The Sophos Endpoint API v1 endpoints listing accepts repeated query
+      parameters for healthStatus (e.g. ?healthStatus=bad&healthStatus=suspicious).
+      The published spec models it as a single string.
+    update:
+      - name: healthStatus
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+
+  - target: $.paths['/endpoint/v1/endpoints/isolation'].post.requestBody.content['application/json'].schema
+    description: >-
+      The isolation endpoint uses `enabled: true` for isolate and `enabled: false`
+      for de-isolate. The published spec does not document the `comment` field,
+      which is accepted and stored by the API.
+    update:
+      properties:
+        enabled:
+          type: boolean
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          minItems: 1
+          maxItems: 500
+        comment:
+          type: string
+          maxLength: 400
+      required:
+        - enabled
+        - ids

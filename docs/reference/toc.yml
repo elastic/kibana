@@ -149,6 +149,7 @@ toc:
           - file: connectors-kibana/shodan-action-type.md
           - file: connectors-kibana/slack-v2-action-type.md
           - file: connectors-kibana/snowflake-action-type.md
+          - file: connectors-kibana/sophos-central-action-type.md
           - file: connectors-kibana/solarwinds-platform-action-type.md
           - file: connectors-kibana/sublime-security-action-type.md
           - file: connectors-kibana/tavily-action-type.md

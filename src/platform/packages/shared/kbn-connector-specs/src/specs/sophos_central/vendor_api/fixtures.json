@@ -1,0 +1,221 @@
+{
+  "listAlerts": {
+    "input": {
+      "severity": ["high"],
+      "pageSize": 10
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/common/v1/alerts"
+      }
+    ]
+  },
+  "getAlert": {
+    "input": {
+      "alertId": "00000000-0000-0000-0000-000000000001"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/common/v1/alerts/{alertId}"
+      }
+    ]
+  },
+  "actOnAlert": {
+    "input": {
+      "alertId": "00000000-0000-0000-0000-000000000001",
+      "action": "acknowledge"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/common/v1/alerts/{alertId}/actions"
+      }
+    ]
+  },
+  "actOnAlertsBulk": {
+    "input": {
+      "ids": [
+        "00000000-0000-0000-0000-000000000001",
+        "00000000-0000-0000-0000-000000000002"
+      ],
+      "action": "acknowledge"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/common/v1/alerts/{alertId}/actions"
+      }
+    ]
+  },
+  "listEndpoints": {
+    "input": {
+      "pageSize": 10
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/endpoint/v1/endpoints"
+      }
+    ]
+  },
+  "getEndpoint": {
+    "input": {
+      "endpointId": "00000000-0000-0000-0000-000000000001"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/endpoint/v1/endpoints/{endpointId}"
+      }
+    ]
+  },
+  "isolateEndpoint": {
+    "input": {
+      "ids": ["00000000-0000-0000-0000-000000000001"],
+      "comment": "Isolating for investigation"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/endpoints/isolation"
+      }
+    ]
+  },
+  "deisolateEndpoint": {
+    "input": {
+      "ids": ["00000000-0000-0000-0000-000000000001"],
+      "comment": "Investigation complete"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/endpoints/isolation"
+      }
+    ]
+  },
+  "scanEndpoint": {
+    "input": {
+      "ids": ["00000000-0000-0000-0000-000000000001"]
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/endpoints/scans"
+      }
+    ]
+  },
+  "getTamperProtection": {
+    "input": {
+      "endpointId": "00000000-0000-0000-0000-000000000001"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection"
+      }
+    ]
+  },
+  "updateTamperProtection": {
+    "input": {
+      "endpointId": "00000000-0000-0000-0000-000000000001",
+      "enabled": true
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection"
+      }
+    ]
+  },
+  "listBlockedItems": {
+    "input": {
+      "page": 1,
+      "pageSize": 50
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/endpoint/v1/settings/blocked-items"
+      }
+    ]
+  },
+  "addBlockedItem": {
+    "input": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "comment": "Known malicious file"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/settings/blocked-items"
+      }
+    ]
+  },
+  "addAllowedItem": {
+    "input": {
+      "type": "path",
+      "properties": {
+        "path": "C:\\Program Files\\Example\\app.exe"
+      },
+      "comment": "Approved application"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/endpoint/v1/settings/allowed-items"
+      }
+    ]
+  },
+  "deleteBlockedItem": {
+    "input": {
+      "blockedItemId": "00000000-0000-0000-0000-000000000001"
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "DELETE",
+        "path": "/endpoint/v1/settings/blocked-items/{blockedItemId}"
+      }
+    ]
+  },
+  "listDetections": {
+    "input": {
+      "severity": ["high"],
+      "page": 1,
+      "pageSize": 50
+    },
+    "queries": [
+      {
+        "source": "default",
+        "method": "POST",
+        "path": "/detections/v1/queries/detections"
+      },
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/detections/v1/queries/detections/{runId}"
+      },
+      {
+        "source": "default",
+        "method": "GET",
+        "path": "/detections/v1/queries/detections/{runId}/results"
+      }
+    ]
+  }
+}

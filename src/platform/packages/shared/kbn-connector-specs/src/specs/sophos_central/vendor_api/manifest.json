@@ -1,0 +1,143 @@
+{
+  "operations": {
+    "listAlerts": [
+      {
+        "method": "get",
+        "path": "/common/v1/alerts",
+        "source": "default"
+      }
+    ],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/common/v1/alerts/{alertId}",
+        "source": "default"
+      }
+    ],
+    "actOnAlert": [
+      {
+        "method": "post",
+        "path": "/common/v1/alerts/{alertId}/actions",
+        "source": "default"
+      }
+    ],
+    "actOnAlertsBulk": [
+      {
+        "method": "post",
+        "path": "/common/v1/alerts/{alertId}/actions",
+        "source": "default"
+      }
+    ],
+    "listEndpoints": [
+      {
+        "method": "get",
+        "path": "/endpoint/v1/endpoints",
+        "source": "default"
+      }
+    ],
+    "getEndpoint": [
+      {
+        "method": "get",
+        "path": "/endpoint/v1/endpoints/{endpointId}",
+        "source": "default"
+      }
+    ],
+    "isolateEndpoint": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/endpoints/isolation",
+        "source": "default"
+      }
+    ],
+    "deisolateEndpoint": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/endpoints/isolation",
+        "source": "default"
+      }
+    ],
+    "scanEndpoint": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/endpoints/scans",
+        "source": "default"
+      }
+    ],
+    "getTamperProtection": [
+      {
+        "method": "get",
+        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
+        "source": "default"
+      }
+    ],
+    "updateTamperProtection": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/endpoints/{endpointId}/tamper-protection",
+        "source": "default"
+      }
+    ],
+    "listBlockedItems": [
+      {
+        "method": "get",
+        "path": "/endpoint/v1/settings/blocked-items",
+        "source": "default"
+      }
+    ],
+    "addBlockedItem": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/settings/blocked-items",
+        "source": "default"
+      }
+    ],
+    "addAllowedItem": [
+      {
+        "method": "post",
+        "path": "/endpoint/v1/settings/allowed-items",
+        "source": "default"
+      }
+    ],
+    "deleteBlockedItem": [
+      {
+        "method": "delete",
+        "path": "/endpoint/v1/settings/blocked-items/{blockedItemId}",
+        "source": "default"
+      }
+    ],
+    "listDetections": [
+      {
+        "method": "post",
+        "path": "/detections/v1/queries/detections",
+        "source": "default"
+      },
+      {
+        "method": "get",
+        "path": "/detections/v1/queries/detections/{runId}",
+        "source": "default"
+      },
+      {
+        "method": "get",
+        "path": "/detections/v1/queries/detections/{runId}/results",
+        "source": "default"
+      }
+    ]
+  },
+  "sources": {
+    "default": {
+      "apiVersion": "2024.12",
+      "fetchedAt": "2026-11-23T00:00:00.000Z",
+      "format": "openapi",
+      "url": "https://developer.sophos.com/intro"
+    }
+  },
+  "unmatched": {
+    "actOnAlertsBulk": [
+      {
+        "method": "post",
+        "path": "/common/v1/alerts/{alertId}/actions",
+        "reason": "actOnAlertsBulk iterates over individual alert IDs, calling the single-alert action endpoint for each. There is no dedicated bulk endpoint in the Sophos Common API."
+      }
+    ]
+  }
+}
