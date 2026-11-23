@@ -219,6 +219,31 @@ describe('RangeSliderControlApi', () => {
     });
   });
 
+  describe('isAwaitingFilters', () => {
+    const isAwaiting = (state: Partial<RangeSliderControlState>) =>
+      factory.isAwaitingFilters?.({
+        ...DEFAULT_RANGE_SLIDER_STATE,
+        ...state,
+      } as RangeSliderControlState);
+
+    test('is true when required with no value', () => {
+      expect(isAwaiting({ required: true })).toBe(true);
+    });
+
+    test('is true when required with an empty range', () => {
+      expect(isAwaiting({ required: true, value: ['', ''] })).toBe(true);
+    });
+
+    test('is false when required with at least one numeric bound', () => {
+      expect(isAwaiting({ required: true, value: ['5', ''] })).toBe(false);
+      expect(isAwaiting({ required: true, value: ['', '10'] })).toBe(false);
+    });
+
+    test('is false when not required', () => {
+      expect(isAwaiting({ required: false, value: ['', ''] })).toBe(false);
+    });
+  });
+
   describe('selected range has no results', () => {
     test('should display invalid state', async () => {
       totalResults = 0; // simulate no results by returning hits total of zero

@@ -158,4 +158,23 @@ describe('RangeSliderControl', () => {
     expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toBeDisabled();
     expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toBeDisabled();
   });
+
+  it('sets aria-required on both bound inputs when required', () => {
+    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} required />);
+    expect(rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')).toHaveAttribute(
+      'aria-required',
+      'true'
+    );
+    expect(rangeSliderControl.getByTestId('rangeSlider__upperBoundFieldNumber')).toHaveAttribute(
+      'aria-required',
+      'true'
+    );
+  });
+
+  it('does not set aria-required when not required', () => {
+    const rangeSliderControl = render(<RangeSliderControl {...defaultProps} />);
+    expect(
+      rangeSliderControl.getByTestId('rangeSlider__lowerBoundFieldNumber')
+    ).not.toHaveAttribute('aria-required');
+  });
 });

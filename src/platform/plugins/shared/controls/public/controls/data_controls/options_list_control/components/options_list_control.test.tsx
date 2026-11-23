@@ -9,6 +9,8 @@
 
 import React from 'react';
 
+import { BehaviorSubject } from 'rxjs';
+
 import type { OptionsListDisplaySettings } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
@@ -56,6 +58,29 @@ describe('Options list control', () => {
     const control = mountComponent(contextMock);
     const existsOption = control.getByTestId('optionsList-control-testDoesNotExist');
     expect(existsOption).toHaveTextContent('DOES NOT Exist');
+  });
+
+  describe('required state', () => {
+    test('exposes aria-required on the combobox when the control is required', () => {
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.uuid = 'testRequired';
+      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(true);
+      const control = mountComponent(contextMock);
+      expect(control.getByTestId('optionsList-control-testRequired')).toHaveAttribute(
+        'aria-required',
+        'true'
+      );
+    });
+
+    test('does not set aria-required when the control is not required', () => {
+      const contextMock = getOptionsListContextMock();
+      contextMock.componentApi.uuid = 'testNotRequired';
+      contextMock.componentApi.required$ = new BehaviorSubject<boolean | undefined>(false);
+      const control = mountComponent(contextMock);
+      expect(control.getByTestId('optionsList-control-testNotRequired')).not.toHaveAttribute(
+        'aria-required'
+      );
+    });
   });
 
   describe('renders proper delimiter', () => {

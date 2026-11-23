@@ -132,6 +132,21 @@ describe('DashboardViewport', () => {
       });
     });
 
+    test('advertises zero shared items while awaiting so screenshotting does not wait for panels', async () => {
+      const { component, awaitingRequiredFilters$ } = await renderDashboardViewport();
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+      const viewport = component.getByTestId('dshDashboardViewport');
+      expect(Number(viewport.getAttribute('data-shared-items-count'))).toBeGreaterThan(0);
+
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => expect(viewport).toHaveAttribute('data-shared-items-count', '0'));
+
+      act(() => awaitingRequiredFilters$.next(false));
+      await waitFor(() =>
+        expect(Number(viewport.getAttribute('data-shared-items-count'))).toBeGreaterThan(0)
+      );
+    });
+
     test('shows the grid again once the required filters are provided', async () => {
       const { component, awaitingRequiredFilters$ } = await renderDashboardViewport();
       act(() => awaitingRequiredFilters$.next(true));

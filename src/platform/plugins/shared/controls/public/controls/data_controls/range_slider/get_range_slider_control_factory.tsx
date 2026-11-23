@@ -40,7 +40,9 @@ import { editorComparators, initializeEditorStateManager } from './editor_state_
 import { buildFilter } from './utils/filter_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
-const hasInitialValue = (state: RangeSliderControlState): boolean => state.value !== undefined;
+// mirrors buildFilter: a range only produces a filter when at least one bound is numeric
+const hasInitialValue = ({ value }: RangeSliderControlState): boolean =>
+  value !== undefined && value.some((bound) => !isNaN(parseFloat(bound ?? '')));
 
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
@@ -248,6 +250,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             fieldName,
             viewMode,
             label,
+            required,
           ] = useBatchedPublishingSubjects(
             dataLoading$,
             dataControlManager.api.fieldFormatter,
@@ -258,7 +261,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
             selections.value$,
             dataControlManager.api.fieldName$,
             viewMode$,
-            dataControlManager.api.label$
+            dataControlManager.api.label$,
+            dataControlManager.api.required$
           );
 
           useEffect(() => {
@@ -290,6 +294,7 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
               compressed={isCompressed(api)}
               isPinned={isPinned}
               label={label}
+              required={required}
             />
           );
         },

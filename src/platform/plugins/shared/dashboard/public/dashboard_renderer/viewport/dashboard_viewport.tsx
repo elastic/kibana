@@ -98,7 +98,7 @@ export const DashboardViewport = ({
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={visiblePanelCount}
+        data-shared-items-count={awaitingRequired ? 0 : visiblePanelCount}
         data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >

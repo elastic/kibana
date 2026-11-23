@@ -35,6 +35,7 @@ export interface Props {
   isInteractive?: boolean;
   isPinned: boolean;
   label?: string;
+  required?: boolean;
 }
 
 export const RangeSliderControl: FC<Props> = ({
@@ -54,6 +55,7 @@ export const RangeSliderControl: FC<Props> = ({
   isInteractive = true,
   isPinned,
   label,
+  required,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -170,10 +172,11 @@ export const RangeSliderControl: FC<Props> = ({
         'data-test-subj': `rangeSlider__${testSubj}`,
         'aria-label': ariaLabel,
         'aria-labelledby': `control-title-${id}`,
+        'aria-required': required ? true : undefined,
         id: `controls-range-slider-${id}`,
       };
     },
-    [isInvalid, step, styles]
+    [isInvalid, step, styles, required]
   );
 
   const minInputProps = useMemo(() => {

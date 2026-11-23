@@ -103,7 +103,8 @@ export const OptionsListControl = ({
     PublishingSubject<boolean | undefined>,
     DSLOptionsListComponentApi['field$'] | PublishingSubject<undefined>,
     DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
-    ESQLOptionsListComponentApi['tooltipLabel$'] | PublishingSubject<undefined>
+    ESQLOptionsListComponentApi['tooltipLabel$'] | PublishingSubject<undefined>,
+    DSLOptionsListComponentApi['required$'] | PublishingSubject<undefined>
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [
@@ -112,6 +113,7 @@ export const OptionsListControl = ({
       isDSLControl ? componentApi.field$ : new BehaviorSubject(undefined),
       isDSLControl ? componentApi.fieldFormatter : new BehaviorSubject(undefined),
       !isDSLControl ? componentApi.tooltipLabel$ : new BehaviorSubject(undefined),
+      isDSLControl ? componentApi.required$ : new BehaviorSubject(undefined),
     ];
   }, [componentApi]);
 
@@ -125,6 +127,7 @@ export const OptionsListControl = ({
     field,
     fieldFormatter,
     tooltipLabel,
+    required,
   ] = useBatchedPublishingSubjects(
     componentApi.selectedOptions$,
     componentApi.invalidSelections$,
@@ -234,6 +237,7 @@ export const OptionsListControl = ({
       css={styles.filterButton}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
       aria-label={label}
+      aria-required={required ? true : undefined}
       aria-expanded={isPopoverOpen}
       aria-controls={popoverId}
       data-test-subj={`optionsList-control-${componentApi.uuid}`}
