@@ -44,6 +44,7 @@ import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
 import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 let savedObjectsService: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
@@ -920,6 +921,60 @@ describe('RulesClientFactory', () => {
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
     expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
+  });
+
+  test('cloneApiKeysOnCreate is derived from the clone API key header', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+    });
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
+  });
+
+  test('createWithSpaceId also derives cloneApiKeysOnCreate from the header', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+    });
+    await factory.createWithSpaceId(request, savedObjectsService, 'other-space');
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(true);
+  });
+
+  test('an explicit cloneApiKeysOnCreate option overrides the header', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: { [ALERTING_CLONE_API_KEY_HEADER]: 'true' },
+    });
+    await factory.create(request, savedObjectsService, { cloneApiKeysOnCreate: false });
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.cloneApiKeysOnCreate).toBe(false);
   });
 
   test('cloneAPIKey calls cloneAsInternalUser and returns the result', async () => {

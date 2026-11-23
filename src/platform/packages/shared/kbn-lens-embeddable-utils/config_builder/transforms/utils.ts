@@ -806,7 +806,8 @@ function extraQueryFromAPIState(state: LensApiConfig): { esql: string } | Query 
       return { esql: esqlLayer.data_source.query };
     }
   }
-  if ('query' in state && state.query) {
+  // An empty KQL or Lucene expression filters nothing, so neither it nor its language is stored.
+  if ('query' in state && state.query?.expression.length) {
     return queryToLensState(state.query satisfies LensApiFilterType);
   }
   return undefined;

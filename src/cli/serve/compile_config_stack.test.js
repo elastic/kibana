@@ -24,9 +24,9 @@ describe('compileConfigStack', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    statSync.mockImplementation(() => {
+    statSync.mockImplementation((filePath) => {
       return {
-        isFile: () => true,
+        isFile: () => !filePath.includes('config_defaults'),
       };
     });
 
@@ -39,6 +39,30 @@ describe('compileConfigStack', () => {
     const configList = compileConfigStack({}).map(toFileNames);
 
     expect(configList).toEqual(['kibana.yml']);
+  });
+
+  it('loads distribution defaults before a custom user configuration', () => {
+    statSync.mockReturnValue({ isFile: () => true });
+    expect(compileConfigStack({ configOverrides: ['/custom/kibana.yml'] })).toEqual([
+      '/some/imaginary/path/config_defaults/kibana.yml',
+      '/custom/kibana.yml',
+    ]);
+    expect(getConfigFromFiles).toHaveBeenCalledWith([
+      '/some/imaginary/path/config_defaults/kibana.yml',
+      '/custom/kibana.yml',
+    ]);
+  });
+
+  it('keeps distribution defaults below serverless and user configuration', () => {
+    statSync.mockReturnValue({ isFile: () => true });
+    expect(
+      compileConfigStack({ configOverrides: ['/custom/kibana.yml'], serverless: 'oblt' })
+    ).toEqual([
+      '/some/imaginary/path/config_defaults/kibana.yml',
+      '/some/imaginary/path/config/serverless.yml',
+      '/some/imaginary/path/config/serverless.oblt.yml',
+      '/custom/kibana.yml',
+    ]);
   });
 
   it('loads serverless configs when --serverless is set', async () => {

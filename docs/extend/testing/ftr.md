@@ -133,7 +133,7 @@ Services like the `testSubjects` or `find` service will usually do some amount o
 The intended usage/retry/timeout behavior of each method in all services is not well documented. Things in these common services have grown very stable now, so if you spend the time to analyze how a method works please help others by improving the method description. Thank you!
 :::
 
-- `testSubjects.exists()`: this method is intended to quickly answer the question about if something exists and has a default timeout of 2.5 seconds. This is ideal for determining, based on the current state of Kibana, if something should be done or not.
+- `testSubjects.exists()`: performs a single immediate DOM check with no polling. Returns `true` if the element is present and visible right now, `false` otherwise. This is ideal inside `retry.waitFor()` or `retry.try()` loops and for branching on current UI state when the UI is already settled.
 
 ```ts
 if (await testSubjects.exists('someModal')) {
@@ -141,11 +141,19 @@ if (await testSubjects.exists('someModal')) {
 }
 ```
 
-- `testSubjects.existsOrFail()`: this method is intended to be used as a success or fail point, where a specific element is expected to be visible and if it isn't an error will be thrown. This is ideal for when you click a button and want to make sure the success state is reached.
+- `testSubjects.waitForExists()`: waits up to a bounded timeout (default 2.5 s) for the element to appear and returns `true` as soon as it does, or `false` if the timeout elapses. Use this when the element may still be rendering and you want to branch without throwing.
+
+```ts
+if (await testSubjects.waitForExists('optionalBanner', { timeout: 3000 })) {
+  // dismiss the optional banner
+}
+```
+
+- `testSubjects.existOrFail()`: this method is intended to be used as a success or fail point, where a specific element is expected to be visible and if it isn't an error will be thrown. This is ideal for when you click a button and want to make sure the success state is reached.
 
 ```ts
 await testSubjects.click('mySubmitButton');
-await testSubjects.existsOrFail('mySuccessMessage');
+await testSubjects.existOrFail('mySuccessMessage');
 ```
 
 ### Use services for reusing functionality and implementing it correctly once [ftr-stable-tests-services]
@@ -181,7 +189,7 @@ Do this instead:
 
 ```ts
 await myService.clickSave();
-await testSubjects.existsOrFail('savedItemDetailPage');
+await testSubjects.existOrFail('savedItemDetailPage');
 ```
 
 ### Do as little work in the UI as possible to validate your test case [ftr-stable-tests-minimal-ui]

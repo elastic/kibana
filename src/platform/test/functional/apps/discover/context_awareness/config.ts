@@ -33,7 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
         `--plugin-path=${path.resolve(
           __dirname,
-          '../../../../analytics/plugins/analytics_ftr_helpers'
+          '../../../../../test_plugins/analytics/analytics_ftr_helpers'
         )}`,
       ],
     },

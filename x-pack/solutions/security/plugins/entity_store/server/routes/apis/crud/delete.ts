@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from '../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
@@ -15,9 +15,11 @@ import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { EntityNotFoundError } from '../../../domain/errors';
 
-const bodySchema = z.object({
-  entityId: z.string().describe('The identifier of the entity to delete.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityId: z.string().describe('The identifier of the entity to delete.'),
+  })
+);
 
 export function registerCRUDDelete(router: EntityStorePluginRouter) {
   router.versioned

@@ -25,10 +25,13 @@ import {
   useMultipleAgentPolicies,
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
+  useLink,
 } from '../../../hooks';
 import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
+
+import { UpgradePackagePolicyPage } from '../upgrade_package_policy_page';
 
 import { EditPackagePolicyPage } from '.';
 
@@ -313,6 +316,7 @@ describe('edit package policy page', () => {
     lastStepConfigureProps = undefined;
     lastLayoutProps = undefined;
     (useUIExtension as MockFn).mockReset();
+    (useLink as MockFn).mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') });
 
     (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
@@ -385,6 +389,56 @@ describe('edit package policy page', () => {
       renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((btn) => {
         expect(btn).toHaveAttribute('href', '/navigate/path');
       });
+    });
+  });
+
+  it('shows edit copy from Installed integrations', async () => {
+    testRenderer.history.push('?from=installed-integrations');
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Edit Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Modify integration settings and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows upgrade copy and returns to Installed integrations when upgrading from there', async () => {
+    (useLink as MockFn).mockReturnValue({
+      getHref: jest.fn((page: string) => `/${page}`),
+    });
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+      data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+    });
+    testRenderer.history.push('?from=installed-integrations');
+    renderResult = testRenderer.render(<UpgradePackagePolicyPage />, { legacyRoot: true });
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Upgrade Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Upgrade this integration and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+      expect(renderResult.getByText('Upgrade integration').closest('button')!).not.toBeDisabled();
+    });
+
+    renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '/integrations_installed');
+    });
+    fireEvent.click(renderResult.getByText('Upgrade integration').closest('button')!);
+
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith(
+        '/integrations_installed'
+      );
     });
   });
 

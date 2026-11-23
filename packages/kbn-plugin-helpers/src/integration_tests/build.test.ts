@@ -9,12 +9,13 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import Zlib from 'zlib';
 import { loadJsonFile } from '@kbn/utils';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
-import extract from 'extract-zip';
+import AdmZip from 'adm-zip';
 import del from 'del';
 import globby from 'globby';
 
@@ -89,7 +90,8 @@ describe('scripts/generate_plugin', () => {
      succ plugin archive created"
   `);
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    const zip = new AdmZip(PLUGIN_ARCHIVE);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
     files.sort((a, b) => a.localeCompare(b));
@@ -171,17 +173,20 @@ describe('scripts/generate_plugin', () => {
     expect(logs).toContain('browser bundle created');
     expect(logs).toContain('plugin archive created');
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    const zip = new AdmZip(PLUGIN_ARCHIVE);
+    await zip.extractAllToAsync(TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
 
     const publicFiles = files.filter((f) => f.includes('target/public/'));
     expect(publicFiles.length).toBeGreaterThanOrEqual(1);
 
-    const mainBundle = publicFiles.find(
-      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
-    );
+    const mainBundle = publicFiles.find((f) => f.endsWith('.plugin.js'));
     expect(mainBundle).toBeDefined();
+
+    const bundleContent = Fs.readFileSync(Path.resolve(TMP_DIR, mainBundle!), 'utf-8');
+    const compressedBundle = Fs.readFileSync(Path.resolve(TMP_DIR, `${mainBundle!}.br`));
+    expect(Zlib.brotliDecompressSync(compressedBundle).toString('utf-8')).toBe(bundleContent);
 
     const serverFiles = files.filter((f) => f.includes('server/'));
     expect(serverFiles.length).toBeGreaterThan(0);

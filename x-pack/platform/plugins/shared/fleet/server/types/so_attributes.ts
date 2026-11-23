@@ -98,6 +98,7 @@ export interface AgentSOAttributes {
   local_metadata: AgentMetadata;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;

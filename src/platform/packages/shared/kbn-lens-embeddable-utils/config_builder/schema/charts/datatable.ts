@@ -16,7 +16,6 @@ import {
   colorByValueSchema,
   colorMappingSchema,
   autoColorSchema,
-  AUTO_COLOR,
 } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
@@ -266,7 +265,10 @@ const datatableConfigRowsOptionsNoESQLSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorMappingSchema, autoColorSchema], {
-      defaultValue: AUTO_COLOR,
+      meta: {
+        description:
+          'Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.',
+      },
     })
   ),
   /**
@@ -293,10 +295,9 @@ const datatableConfigRowsOptionsESQLSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
-      defaultValue: AUTO_COLOR,
       meta: {
         description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+          'Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
       },
     })
   ),
@@ -309,10 +310,9 @@ const datatableConfigMetricsOptionsSchema = {
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, colorMappingSchema, autoColorSchema], {
-      defaultValue: AUTO_COLOR,
       meta: {
         description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
+          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.',
       },
     })
   ),
