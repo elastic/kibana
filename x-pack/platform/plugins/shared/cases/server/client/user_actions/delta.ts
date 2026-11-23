@@ -19,10 +19,13 @@ import { decodeOrThrowZod } from '../../common/runtime_types';
 import type { User } from '../../common/types/user';
 import type { CasesClientArgs } from '../types';
 import type { CasesClient } from '../client';
-import { countDelta } from './delta_utils';
+import { summarizeDelta } from './delta_utils';
 import type { UserActionGet, UserActionRecordView } from './types';
 
-const EMPTY_COUNTS = { alerts: 0, comments: 0, changes: 0, evidence: 0 } as const;
+const EMPTY_DELTA = {
+  counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 },
+  items: [],
+} as const;
 
 const getUserKey = ({ profile_uid: profileUid, username }: User): string | null =>
   profileUid ?? username ?? null;
@@ -84,7 +87,7 @@ export const getDelta = async (
         : await lastViewedService.getSeenAt({ userKey, key: getCaseKey(caseId) });
 
     if (since == null) {
-      return decodeOrThrowZod(CaseDeltaResponseSchema)({ since: null, counts: EMPTY_COUNTS });
+      return decodeOrThrowZod(CaseDeltaResponseSchema)({ since: null, ...EMPTY_DELTA });
     }
 
     const sinceFilter = fromKueryExpression(
@@ -104,8 +107,8 @@ export const getDelta = async (
 
     return decodeOrThrowZod(CaseDeltaResponseSchema)({
       since,
-      counts: countDelta(
-        userActions.map(({ attributes }) => attributes),
+      ...summarizeDelta(
+        userActions.map(({ id, attributes }) => ({ ...attributes, id })),
         user
       ),
     });

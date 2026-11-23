@@ -67,6 +67,9 @@ export const markNewActivity = (
   }));
 };
 
+export const hasNewActivityClass = (comment: EuiCommentProps): boolean =>
+  comment.className?.split(' ').includes(NEW_ACTIVITY_CLASS) ?? false;
+
 export const hasAfterLastVisitClass = (comment: EuiCommentProps): boolean =>
   comment.className?.split(' ').includes(AFTER_LAST_VISIT_CLASS) ?? false;
 

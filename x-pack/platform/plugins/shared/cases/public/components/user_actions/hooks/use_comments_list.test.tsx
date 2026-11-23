@@ -73,6 +73,73 @@ describe('useCommentsList', () => {
     expect(result.current[3]['data-test-subj']).toBe('add-comment');
   });
 
+  describe('last visit divider', () => {
+    const oldAction: EuiCommentProps = { ...infiniteAction, className: undefined };
+    const newAction: EuiCommentProps = {
+      ...lastPageAction,
+      className: 'userAction__afterLastVisit userAction__new',
+    };
+
+    const dividerArgs = {
+      ...defaultArgs,
+      builtInfiniteActions: [oldAction],
+      builtLastPageActions: [newAction],
+      showLastVisitDivider: true,
+      newActivityTotal: 1,
+    };
+
+    it('inserts the divider before the first new activity', () => {
+      const { result } = renderHook(() => useCommentsList(dividerArgs));
+
+      expect(result.current.map((comment) => comment['data-test-subj'])).toEqual([
+        undefined,
+        'user-actions-last-visit-divider',
+        undefined,
+      ]);
+    });
+
+    it('leaves the divider out when the sort order is newest first', () => {
+      const { result } = renderHook(() =>
+        useCommentsList({ ...dividerArgs, showLastVisitDivider: false })
+      );
+
+      expect(result.current).toHaveLength(2);
+    });
+
+    it('leaves the divider out when collapsed activities hide new activity', () => {
+      const { result } = renderHook(() =>
+        useCommentsList({
+          ...dividerArgs,
+          hasNextPage: true,
+          remainingActionCount: 22,
+          newActivityTotal: 5,
+        })
+      );
+
+      expect(
+        result.current.some(
+          (comment) => comment['data-test-subj'] === 'user-actions-last-visit-divider'
+        )
+      ).toBe(false);
+    });
+
+    it('keeps the divider when collapsed activities hide no new activity', () => {
+      const { result } = renderHook(() =>
+        useCommentsList({
+          ...dividerArgs,
+          hasNextPage: true,
+          remainingActionCount: 22,
+        })
+      );
+
+      expect(
+        result.current.some(
+          (comment) => comment['data-test-subj'] === 'user-actions-last-visit-divider'
+        )
+      ).toBe(true);
+    });
+  });
+
   it('returns empty list when no actions and no editor', () => {
     const { result } = renderHook(() =>
       useCommentsList({
