@@ -77,7 +77,7 @@ export class RegistryResponseError extends RegistryError {
 export class PackageInvalidDeploymentMode extends FleetError {}
 export class PackageFipsIncompatibleError extends FleetError {}
 export class PackageOutdatedError extends FleetError {}
-/** An update by query was cancelled for running too long, after it updated some documents. */
+/** An update by query was cancelled for running too long, or timed out, after it updated some documents. */
 export class UpdateByQueryCancelledError extends FleetError {}
 export class PackageBreakingChangesNotAcknowledgedError extends FleetError {
   constructor(message: string, breakingChanges: BreakingChangesLog) {

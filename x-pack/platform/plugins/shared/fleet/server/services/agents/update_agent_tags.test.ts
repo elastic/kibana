@@ -526,6 +526,58 @@ describe('update_agent_tags', () => {
       expect(esClient.create).not.toHaveBeenCalled();
     });
 
+    describe('an update by query that timed out', () => {
+      // its first search timed out before it counted any agent
+      const timedOutTask = {
+        completed: true,
+        task: {},
+        response: { failures: [], updated: 0, version_conflicts: 0, total: 0, timed_out: true },
+      };
+      const batch = () =>
+        updateTagsBatch(
+          soClient,
+          esClient,
+          agents,
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: ['old'], kuery: '', total: 5 }
+        );
+
+      it('should run the update again, and not take the agents it did not count for skipped ones', async () => {
+        mockRuns(timedOutTask, finishedTask({ updated: 5 }));
+
+        await batch();
+
+        expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
+        // every agent is recorded once, by the run that finished, and none as skipped
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(5);
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should give up, and record nothing, when it times out again', async () => {
+        mockRuns(timedOutTask, timedOutTask);
+
+        const error = await batch().catch((e) => e);
+
+        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(error.message).toMatch(/timed out after updating 0 agents, giving up/);
+        expect(esClient.create).not.toHaveBeenCalled();
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should still record every agent as skipped when a complete update found none of them', async () => {
+        // all of them left the space: a total of 0 that is a count, as the update did not time out
+        mockRuns(finishedTask({ updated: 0, total: 0 }), finishedTask({}));
+
+        await batch();
+
+        expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+        expect((getErrorResults(esClient) as any[]).map((result) => result.error)).toEqual([
+          'agent not found, or not in the space of the action anymore',
+          'agent not found, or not in the space of the action anymore',
+        ]);
+      });
+    });
+
     describe('when it stays cancelled', () => {
       const failures = [{ id: 'agent2', cause: { reason: 'error reason' } }];
       const cancelledWithFailures = {

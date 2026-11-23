@@ -381,13 +381,19 @@ export async function updateTagsBatch(
       throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
     }
 
-    if (!res.canceled) {
+    // An update that timed out got through some of the agents, as one that was cancelled did, and
+    // what it reports, its total included, is of what it got to: its first search can time out
+    // before it has counted any agent, with a total of 0. So it is not read as a complete result,
+    // from which the agents that were skipped are worked out, but is run again as a cancelled one.
+    if (!res.canceled && !res.timed_out) {
       break;
     }
 
-    const cancelled = `Update by query cancelled (${res.canceled}) after updating ${
-      res.updated ?? 0
-    } of ${res.total ?? 'an unknown number of'} agents`;
+    const cancelled = res.canceled
+      ? `Update by query cancelled (${res.canceled}) after updating ${res.updated ?? 0} of ${
+          res.total ?? 'an unknown number of'
+        } agents`
+      : `Update by query timed out after updating ${res.updated ?? 0} agents`;
     if (attempt >= UPDATE_BY_QUERY_MAX_ATTEMPTS) {
       // Nothing more is run for this batch here, and the retry of the action restarts behind its
       // kuery. What the cancelled run did is recorded now when that retry leaves it out, as it
