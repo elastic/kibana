@@ -16,7 +16,7 @@ import type { CustomOptionsComponentProps } from '../controls/data_controls/type
 export type CreateControlTypeContext<State extends DataControlState> = EmbeddableApiContext & {
   state: Partial<State>;
   controlId?: string;
-  /** The source of the control when it is not a data view that `data_view_id` can load */
+  /** The source of the field of the control, used to check which control types are compatible with it */
   source?: FilterableSource;
 };
 

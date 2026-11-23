@@ -12,7 +12,6 @@ import type { FilterableField } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 
 import { OptionsListEditorOptions } from '../controls/data_controls/options_list_control/components/options_list_editor_options';
-import { dataViewsService } from '../services/kibana_services';
 import { OPTIONS_LIST_ACTION } from './constants';
 import type { CreateControlTypeAction } from './control_panel_actions';
 import { createDataControlOfType } from './create_data_control_panel_action';
@@ -37,19 +36,14 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       i18n.translate('controls.optionsList.action.displayName', {
         defaultMessage: 'Options list',
       }),
-    isCompatible: async ({
-      state: { data_view_id: dataViewId, field_name: fieldName },
-      source,
-    }) => {
-      if (!fieldName) return false;
-      const dataView = source ?? (dataViewId ? await dataViewsService.get(dataViewId) : undefined);
-      if (!dataView) return false;
+    isCompatible: async ({ state: { field_name: fieldName }, source }) => {
+      if (!fieldName || !source) return false;
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =
-        dataView.getFieldByName(fieldName) ??
+        source.getFieldByName(fieldName) ??
         (!fieldName.endsWith('.keyword')
-          ? dataView.getFieldByName(`${fieldName}.keyword`)
+          ? source.getFieldByName(`${fieldName}.keyword`)
           : undefined);
       return Boolean(field && isFieldCompatible(field));
     },
