@@ -193,13 +193,12 @@ const ExperimentHeader: React.FC<{
   label: string;
   experimentId: string;
   executionId?: string;
-  isNewer?: boolean;
-}> = ({ label, experimentId, executionId, isNewer }) => {
+}> = ({ label, experimentId, executionId }) => {
   const history = useHistory();
   const { data: experimentData, isLoading } = useEvaluationExperiment(experimentId, executionId);
 
   const branch = experimentData?.git_branch;
-  const timestamp = experimentData?.timestamp;
+  const lastScoreAt = experimentData?.last_score_at;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModels = experimentData?.evaluator_models ?? [];
   const suiteId =
@@ -213,24 +212,9 @@ const ExperimentHeader: React.FC<{
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{label}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {isNewer !== undefined && (
-          <EuiFlexItem grow>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color={isNewer ? 'success' : 'default'}>
-                  {isNewer ? i18n.BADGE_NEWER : i18n.BADGE_OLDER}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{label}</h3>
+      </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
@@ -262,10 +246,10 @@ const ExperimentHeader: React.FC<{
             <EuiText size="s">{branch}</EuiText>
           </EuiFlexItem>
         )}
-        {timestamp && (
+        {lastScoreAt && (
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {new Date(timestamp).toLocaleString()}
+              {new Date(lastScoreAt).toLocaleString()}
             </EuiText>
           </EuiFlexItem>
         )}
@@ -643,17 +627,6 @@ export const CompareExperimentsPage: React.FC = () => {
   );
   const baselineExecutionId = isExecutionCompare ? baselineId : undefined;
   const targetExecutionId = isExecutionCompare ? targetId : undefined;
-  const { data: baselineExperimentData } = useEvaluationExperiment(baselineId, baselineExecutionId);
-  const { data: targetExperimentData } = useEvaluationExperiment(targetId, targetExecutionId);
-
-  const isBaselineNewer = useMemo(() => {
-    if (!baselineExperimentData?.timestamp || !targetExperimentData?.timestamp) return undefined;
-    const baselineTs = new Date(baselineExperimentData.timestamp).getTime();
-    const targetTs = new Date(targetExperimentData.timestamp).getTime();
-    if (baselineTs === targetTs) return undefined;
-    return baselineTs > targetTs;
-  }, [baselineExperimentData?.timestamp, targetExperimentData?.timestamp]);
-
   const [flyoutState, setFlyoutState] = useState<{
     datasetId: string;
     datasetName: string;
@@ -944,7 +917,6 @@ export const CompareExperimentsPage: React.FC = () => {
             label={i18n.BASELINE_LABEL}
             experimentId={baselineId}
             executionId={baselineExecutionId}
-            isNewer={isBaselineNewer}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -969,7 +941,6 @@ export const CompareExperimentsPage: React.FC = () => {
             label={i18n.TARGET_LABEL}
             experimentId={targetId}
             executionId={targetExecutionId}
-            isNewer={isBaselineNewer !== undefined ? !isBaselineNewer : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

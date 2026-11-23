@@ -27,13 +27,23 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
     capabilities === undefined || capabilities.agenticInvestigations?.showEscalations !== false;
 
   return [
+    {
+      // The Classic nav highlights a link only when its id is the current app id, so the app link
+      // would stay highlighted on every AlertZero page. Like Security's own entries, the Classic nav
+      // lists AlertZero's pages as deep links instead. The app link covers the other surfaces.
+      id: SecurityPageName.alertZeroHome,
+      title: i18n.BRAND_TITLE,
+      path: '/',
+      // Above every Security entry in the Classic nav (1–13), followed by Escalations and Watches.
+      order: -3,
+      visibleIn: ['classicSideNav'],
+    },
     ...(showEscalations
       ? [
           {
             id: SecurityPageName.alertZeroEscalations,
             title: i18n.NAV_ESCALATIONS,
             path: '/escalations',
-            // Right after the AlertZero app link (`order: -3`), above every Security entry in the Classic nav.
             order: -2,
             visibleIn: [
               'globalSearch',
