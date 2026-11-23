@@ -25,14 +25,20 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/core-di'
   - '@kbn/core-di-server'
-  - '@kbn/core-pricing-common'
-  - '@kbn/core-plugins-server'
+  - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-http-server'
+  - '@kbn/core-plugins-server'
+  - '@kbn/core-pricing-common'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/licensing-plugin'
   - '@kbn/lock-manager'
   - '@kbn/nightshift-shared'
+  - '@kbn/nightshift-sources-plugin'
+  - '@kbn/scout-oblt'
   - '@kbn/spaces-plugin'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
 tags:
   - plugin
@@ -41,9 +47,11 @@ tags:
   - private
   - jest-unit-tests
   - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
 tasks: {}

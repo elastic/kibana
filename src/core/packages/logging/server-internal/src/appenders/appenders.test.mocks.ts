@@ -26,20 +26,18 @@ jest.mock('@opentelemetry/sdk-logs', () => ({
 jest.mock('@opentelemetry/exporter-logs-otlp-http', () => ({
   OTLPLogExporter: jest.fn(),
 }));
-jest.mock('@elastic/opentelemetry-node/sdk', () => {
+jest.mock('@opentelemetry/resources', () => {
   interface MockResource {
     merge: jest.Mock<MockResource>;
   }
   const makeMergeableResource = (): MockResource => ({ merge: jest.fn(makeMergeableResource) });
   return {
-    resources: {
-      detectResources: jest.fn(makeMergeableResource),
-      resourceFromAttributes: jest.fn(makeMergeableResource),
-      envDetector: 'envDetector',
-      hostDetector: 'hostDetector',
-      osDetector: 'osDetector',
-      processDetector: 'processDetector',
-    },
+    detectResources: jest.fn(makeMergeableResource),
+    resourceFromAttributes: jest.fn(makeMergeableResource),
+    envDetector: 'envDetector',
+    hostDetector: 'hostDetector',
+    osDetector: 'osDetector',
+    processDetector: 'processDetector',
   };
 });
 jest.mock('@opentelemetry/api', () => {
@@ -54,6 +52,7 @@ jest.mock('@opentelemetry/api', () => {
 });
 jest.mock('@kbn/apm-config-loader', () => ({
   getConfiguration: jest.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+  getKibanaName: jest.fn(),
 }));
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are

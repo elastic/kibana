@@ -2589,11 +2589,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
   const THREAD_KEY = 'slack:T1:C1:1712345678.000100';
+  const PERMALINK = 'https://app.slack.com/client/T1/C1/thread/C1-1712345678.000100';
   const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
     makeStoredSubject({
       subjectType: 'slack_thread',
       subjectId: THREAD_KEY,
-      slack: { channel: 'C1', thread_ts: THREAD.threadTs, ...slack },
+      slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK, ...slack },
     });
   const handled = (eventId: string, executionId = 'exec-1') => ({
     event_id: eventId,
@@ -2827,8 +2828,26 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
         type: 'slack_thread',
         id: THREAD_KEY,
         triggerType: 'manual',
-        slack: { channel: 'C1', thread_ts: THREAD.threadTs },
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK },
         summary: 'why is checkout slow?',
+      },
+    ]);
+  });
+
+  it('links a thread recorded without a link on its next call', async () => {
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ permalink: undefined }),
+    ]);
+
+    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK },
       },
     ]);
   });
@@ -2854,6 +2873,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
           thread_ts: THREAD.threadTs,
           status_message_ts: '2.0',
           seen_events: [handled('Ev1')],
+          permalink: PERMALINK,
         },
       }),
     ]);

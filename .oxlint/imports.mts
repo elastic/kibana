@@ -183,7 +183,7 @@ const REDUX_TOOLKIT_V1_DIRS = [
   'src/platform/plugins/shared/data_view_management',
   'src/platform/plugins/shared/expressions',
   'src/platform/plugins/shared/unified_doc_viewer',
-  'src/platform/plugins/shared/workflows_management',
+  'x-pack/platform/plugins/shared/workflows_management',
   'x-pack/platform/plugins/private/canvas',
   'x-pack/platform/plugins/private/cross_cluster_replication',
   'x-pack/platform/plugins/private/monitoring',
