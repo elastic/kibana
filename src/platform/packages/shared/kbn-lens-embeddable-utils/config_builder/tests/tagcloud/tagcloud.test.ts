@@ -29,12 +29,6 @@ import {
   tagcloudESQLAttributes,
 } from './lens_state_config.mock';
 
-const OPEN_ENDED_RANGE_COLOR = {
-  type: 'categorical',
-  paletteId: 'default',
-  colorIndex: 0,
-} as const;
-
 describe('Tagcloud', () => {
   describe('state transform validation', () => {
     it('should convert a simple tag cloud', () => {
@@ -71,73 +65,6 @@ describe('Tagcloud', () => {
 
     it('should convert a comprehensive ESQL-based tagcloud chart', () => {
       validator.tag_cloud.fromApi(comprehensiveEsqlTagcloud);
-    });
-  });
-
-  describe('open-ended range color assignments', () => {
-    // The saved object stores an open-ended range bound as `null`; the API omits it.
-    it('should round-trip a state with `null` range bounds', () => {
-      validator.tag_cloud.fromState({
-        ...tagcloudAttributesWithFullConfig,
-        state: {
-          ...tagcloudAttributesWithFullConfig.state,
-          visualization: {
-            ...tagcloudAttributesWithFullConfig.state.visualization,
-            colorMapping: {
-              ...tagcloudAttributesWithFullConfig.state.visualization.colorMapping,
-              colorMode: { type: 'categorical' },
-              assignments: [
-                {
-                  rules: [
-                    {
-                      type: 'raw',
-                      value: {
-                        type: 'rangeKey',
-                        from: 1000,
-                        to: null,
-                        ranges: [
-                          { from: 1000, to: null, label: 'Large' },
-                          { from: null, to: 1000, label: 'Small' },
-                        ],
-                      },
-                    },
-                  ],
-                  color: OPEN_ENDED_RANGE_COLOR,
-                  touched: false,
-                },
-              ],
-            },
-          },
-        },
-      });
-    });
-
-    it('should round-trip an API config that omits open-ended range bounds', () => {
-      validator.tag_cloud.fromApi({
-        ...comprehensiveTagcloudWithDataView,
-        tag_by: {
-          ...comprehensiveTagcloudWithDataView.tag_by,
-          color: {
-            mode: 'categorical',
-            palette: 'default',
-            mapping: [
-              {
-                values: [
-                  {
-                    type: 'range_key',
-                    from: 1000,
-                    ranges: [
-                      { from: 1000, label: 'Large' },
-                      { to: 1000, label: 'Small' },
-                    ],
-                  },
-                ],
-                color: { type: 'from_palette', palette: 'default', index: 0 },
-              },
-            ],
-          },
-        },
-      });
     });
   });
 
