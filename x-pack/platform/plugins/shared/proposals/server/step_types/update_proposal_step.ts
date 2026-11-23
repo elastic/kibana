@@ -80,7 +80,9 @@ export const getUpdateProposalStepDefinition = ({
             executionError: input.executionError,
           },
           spaceId,
-          getWorkflowCaller(workflowContext)
+          getWorkflowCaller(workflowContext, request),
+          // This step runs in the gate's resolve run, whose direct child is the action.
+          { linkActionExecution: true }
         );
 
         return {

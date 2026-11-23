@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowContext } from '@kbn/workflows';
-import type { ProposalWorkflowCaller } from '../services/proposals_service';
+import type { ProposalUpdateCaller } from '../services/proposals_service';
 
 /**
  * The run a step writes from. `releasedAt` is read from the run's own inputs
  * rather than the step's, so a step cannot claim a mark its run was not started with.
  */
-export const getWorkflowCaller = ({
-  workflow,
-  execution,
-  inputs,
-}: WorkflowContext): ProposalWorkflowCaller => {
+export const getWorkflowCaller = (
+  { workflow, execution, inputs }: WorkflowContext,
+  request: KibanaRequest
+): ProposalUpdateCaller => {
   const releasedAt = inputs?.releasedAt;
   return {
     workflowId: workflow.id,
     executionId: execution.id,
+    request,
     releasedAt: typeof releasedAt === 'string' ? releasedAt : undefined,
   };
 };

@@ -30,6 +30,7 @@ jest.mock('./send_message', () => ({
 jest.mock('./sleep', () => ({ createSleepTool: () => ({ id: 'sleep' }) }));
 jest.mock('./read_file', () => ({ createReadFileTool: () => ({ id: 'read_file' }) }));
 jest.mock('./list_files', () => ({ createListFilesTool: () => ({ id: 'list_files' }) }));
+jest.mock('./bash', () => ({ createBashTool: () => ({ id: 'bash' }) }));
 jest.mock('./ask_user_question', () => ({
   createAskUserQuestionTool: () => ({ id: 'ask_user_question' }),
 }));
@@ -85,7 +86,11 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
   return { context, toolManager };
 };
 
-const defaultCapabilities: ResolvedCapabilities = { attachmentTools: true, apiTools: true };
+const defaultCapabilities: ResolvedCapabilities = {
+  attachmentTools: true,
+  apiTools: true,
+  bashTool: true,
+};
 
 const register = async (
   context: AgentHandlerContext,
@@ -250,6 +255,60 @@ describe('registerInternalTools - execute_dynamic_tool', () => {
 
     expect(addedToolIds(toolManager)).toContain('execute_dynamic_tool');
     expect(createExecuteDynamicTool).toHaveBeenCalledWith({ toolManager });
+  });
+});
+
+describe('registerInternalTools - bash', () => {
+  const bashContext = (bash: boolean, hasBashService = true) =>
+    createContext({
+      experimentalFeatures: {
+        skills: false,
+        aiIndices: false,
+        relevantSkills: false,
+        backgroundWake: false,
+        bash,
+        apiDiscovery: false,
+        dynamicTools: false,
+      },
+      bashService: hasBashService ? {} : undefined,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveAllowedSubagentsMock.mockResolvedValue([]);
+  });
+
+  it('registers bash when the flag, the capability and the service are all on', async () => {
+    const { context, toolManager } = bashContext(true);
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).toContain('bash');
+  });
+
+  it('does not register bash when the bash_tool capability is off', async () => {
+    const { context, toolManager } = bashContext(true);
+
+    await register(context, [], { capabilities: { ...defaultCapabilities, bashTool: false } });
+
+    expect(addedToolIds(toolManager)).not.toContain('bash');
+    expect(addedToolIds(toolManager)).toEqual(expect.arrayContaining(['read_file', 'list_files']));
+  });
+
+  it('does not register bash when the flag is off', async () => {
+    const { context, toolManager } = bashContext(false);
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).not.toContain('bash');
+  });
+
+  it('does not register bash without a bash service', async () => {
+    const { context, toolManager } = bashContext(true, false);
+
+    await register(context, []);
+
+    expect(addedToolIds(toolManager)).not.toContain('bash');
   });
 });
 

@@ -13,7 +13,6 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import type { JSONSchema7 } from 'json-schema';
 import {
   ACTION_WORKFLOW_INPUT,
-  actionMetadataSchema,
   convertJsonSchemaToZod,
   ExecutionStatus,
   isHitlWaitStepType,
@@ -21,7 +20,7 @@ import {
 } from '@kbn/workflows';
 import { RESOLVE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ActionMetadata, WorkflowExecutionDto } from '@kbn/workflows';
+import type { ActionMetadata, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
 import {
   DEFAULT_PROPOSAL_TITLE,
@@ -50,6 +49,7 @@ import type {
   ProposalWithMetadata,
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
+import { parseActionMetadata } from './action_catalog';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -112,12 +112,23 @@ export interface UpdateProposalParams {
   executionError?: string;
 }
 
-/** The workflow execution a write through `update` comes from. */
-export interface ProposalWorkflowCaller {
+/** The workflow run writing a gate update, as whoever it runs as. */
+export interface ProposalUpdateCaller {
   workflowId: string;
   executionId: string;
+  request: KibanaRequest;
   /** The release mark a gateless approval started this resolve run for, as its `releasedAt` input. */
   releasedAt?: string;
+}
+
+export interface ProposalUpdateOptions {
+  /**
+   * Look up the action's own execution among the caller's children and stamp it as
+   * `actionExecutionId` when this update settles the action (`succeeded`/`failed`). Only for the
+   * gate's resolve run, which executes the action as a direct child: any other caller could
+   * link an unrelated run of the same workflow.
+   */
+  linkActionExecution?: boolean;
 }
 
 export interface ProposalsServiceDeps {
@@ -215,7 +226,7 @@ const isReleasedGatelessAction = (
  */
 const isOwningResolveRun = (
   proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt' | 'resolveExecutionId'>,
-  { workflowId, executionId, releasedAt }: ProposalWorkflowCaller
+  { workflowId, executionId, releasedAt }: Omit<ProposalUpdateCaller, 'request'>
 ): boolean =>
   isReleasedGatelessAction(proposal) &&
   workflowId === RESOLVE_PROPOSAL_WORKFLOW_ID &&
@@ -314,9 +325,19 @@ export class ProposalsService {
     // grouping, the impact (intrinsic to the action rather than to the situation
     // that produced it), and rejecting an `actionInput` the action could not
     // accept — before an analyst is asked to approve something that cannot run.
-    const metadata = actionWorkflowId
-      ? await this.resolveAndValidateAction(actionWorkflowId, params.actionInput, spaceId, request)
-      : undefined;
+    // A gateless proposal is refused outright unless its action could run:
+    // approving it starts the action directly, with no gate that would fail first.
+    const metadata =
+      actionWorkflowId === undefined
+        ? undefined
+        : gate === 'none'
+        ? await this.assertActionProposable(actionWorkflowId, params.actionInput, spaceId, request)
+        : await this.resolveAndValidateAction(
+            actionWorkflowId,
+            params.actionInput,
+            spaceId,
+            request
+          );
 
     // Caller first in both: it knows the situation the proposal came out of,
     // which the action's own metadata cannot. A category can end up absent —
@@ -968,7 +989,8 @@ export class ProposalsService {
   async update(
     params: UpdateProposalParams,
     spaceId: string,
-    caller: ProposalWorkflowCaller
+    caller: ProposalUpdateCaller,
+    { linkActionExecution = false }: ProposalUpdateOptions = {}
   ): Promise<Proposal> {
     const stored = await this.load(params.id, spaceId);
 
@@ -984,8 +1006,12 @@ export class ProposalsService {
       );
     }
 
+    const actionExecutionId = linkActionExecution
+      ? await this.findActionExecutionId(stored.proposal, params.status, caller, spaceId)
+      : undefined;
+    const update = { ...params, actionExecutionId };
     try {
-      return await this.applyUpdate(stored, params);
+      return await this.applyUpdate(stored, update);
     } catch (error) {
       if (
         !(error instanceof ProposalWriteConflictError) ||
@@ -1005,14 +1031,50 @@ export class ProposalsService {
       ) {
         throw error;
       }
-      return this.applyUpdate(current, params);
+      return this.applyUpdate(current, update);
+    }
+  }
+
+  /**
+   * The action workflow run started by `caller`, if this update settles one. The resolve run
+   * executes the action as a direct child, so it is the newest child of that run whose workflow
+   * is the proposal's action. Best-effort: an unreadable run only costs the link, so it is logged
+   * rather than failing a settle the action has already earned.
+   */
+  private async findActionExecutionId(
+    proposal: Proposal,
+    status: ProposalStatus | undefined,
+    caller: ProposalUpdateCaller,
+    spaceId: string
+  ): Promise<string | undefined> {
+    const { actionWorkflowId, actionExecutionId } = proposal;
+    if (
+      !actionWorkflowId ||
+      actionExecutionId !== undefined ||
+      (status !== 'succeeded' && status !== 'failed')
+    ) {
+      return undefined;
+    }
+    try {
+      const children = await this.deps
+        .getWorkflowsApi()
+        .getChildWorkflowExecutions(caller.executionId, spaceId, caller.request);
+      return children.filter(({ workflowId }) => workflowId === actionWorkflowId).at(-1)
+        ?.executionId;
+    } catch (error) {
+      this.deps.logger.warn(
+        `Could not resolve the action execution for proposal [${proposal.id}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
     }
   }
 
   /** `update` against a record already loaded, written under that load's sequence number. */
   private async applyUpdate(
     { proposal, seqNo, primaryTerm }: StoredProposal,
-    params: UpdateProposalParams
+    params: UpdateProposalParams & { actionExecutionId?: string }
   ): Promise<Proposal> {
     const { id } = params;
 
@@ -1077,6 +1139,9 @@ export class ProposalsService {
       ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
       ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
       ...(params.executionError !== undefined ? { executionError: params.executionError } : {}),
+      ...(params.actionExecutionId !== undefined
+        ? { actionExecutionId: params.actionExecutionId }
+        : {}),
     };
     const { id: _id, ...document } = updated;
 
@@ -1155,6 +1220,8 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
+      // The retry has not run yet; the original keeps the link to the run that failed.
+      actionExecutionId: undefined,
       // The original was released to reach `failed`, and inheriting the mark
       // would refuse every revision of the retry for good.
       gateReleasedAt: undefined,
@@ -1665,6 +1732,41 @@ export class ProposalsService {
   }
 
   /**
+   * Refuses an action a proposal could never run: a workflow that cannot be read in the space,
+   * is disabled, is not an action workflow (no valid `consts.actionMetadata`), or does not
+   * accept `actionInput` on its manual trigger. For a caller that starts the gate workflow and
+   * would otherwise only see the gate fail after it answered, and for a gateless proposal, which
+   * has no gate to fail. Returns the action's metadata.
+   */
+  async assertActionProposable(
+    actionWorkflowId: string,
+    actionInput: Record<string, unknown> | undefined,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ActionMetadata> {
+    const workflow = await this.fetchActionWorkflow(actionWorkflowId, spaceId, request);
+    const definition = workflow?.definition as ActionWorkflowDefinition | null | undefined;
+    if (!workflow || !definition) {
+      throw new ProposalInvalidActionInputError(
+        `Action workflow [${actionWorkflowId}] does not exist in this space or cannot be read`
+      );
+    }
+    if (!workflow.enabled) {
+      throw new ProposalInvalidActionInputError(
+        `Action workflow [${actionWorkflowId}] is disabled`
+      );
+    }
+    const metadata = this.readActionMetadata(actionWorkflowId, definition);
+    if (!metadata) {
+      throw new ProposalInvalidActionInputError(
+        `Workflow [${actionWorkflowId}] is not an action workflow: it declares no valid consts.actionMetadata`
+      );
+    }
+    this.assertActionInputValid(actionWorkflowId, definition, actionInput);
+    return metadata;
+  }
+
+  /**
    * The creation path: one fetch, then both the metadata and the input check.
    * An invalid input throws, because a proposal whose action can never run has
    * no business sitting in a human's queue.
@@ -1719,11 +1821,20 @@ export class ProposalsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<ActionWorkflowDefinition | undefined> {
+    const workflow = await this.fetchActionWorkflow(actionWorkflowId, spaceId, request);
+    return (workflow?.definition ?? undefined) as ActionWorkflowDefinition | undefined;
+  }
+
+  private async fetchActionWorkflow(
+    actionWorkflowId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto | undefined> {
     try {
       const workflow = await this.deps
         .getWorkflowsApi()
         .getWorkflow(actionWorkflowId, spaceId, request);
-      return workflow?.definition as ActionWorkflowDefinition | undefined;
+      return workflow ?? undefined;
     } catch (error) {
       this.deps.logger.warn(
         `Failed to read action workflow [${actionWorkflowId}]: ${
@@ -1738,19 +1849,11 @@ export class ProposalsService {
     actionWorkflowId: string,
     definition: ActionWorkflowDefinition
   ): ActionMetadata | undefined {
-    const candidate = definition.consts?.actionMetadata;
-    if (!candidate) {
-      return undefined;
-    }
-
-    const parsed = actionMetadataSchema.safeParse(candidate);
-    if (!parsed.success) {
-      this.deps.logger.warn(
-        `Action workflow [${actionWorkflowId}] declares invalid consts.actionMetadata: ${parsed.error.message}`
-      );
-      return undefined;
-    }
-    return parsed.data;
+    return parseActionMetadata(
+      actionWorkflowId,
+      definition.consts?.actionMetadata,
+      this.deps.logger
+    );
   }
 
   private async load(id: string, spaceId: string): Promise<StoredProposal> {

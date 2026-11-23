@@ -22,6 +22,10 @@ import type {
 } from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
+import { ProposalInvalidActionInputError } from './errors';
+
+/** `triggeredBy` of every gate run this plugin starts on a caller's behalf. */
+export const PROPOSALS_TRIGGER_SOURCE = 'proposals';
 
 export const DEFAULT_PROPOSAL_WAIT = { timeoutMs: 5000, intervalMs: 500 } as const;
 
@@ -46,9 +50,14 @@ export interface NewProposal {
    * gateless and everything else is gated.
    */
   gate?: ProposalGate;
-  /** Managed action workflow to run once approved, as the approver. */
+  /**
+   * Action workflow to run once a person approves the proposal: approving runs the workflow as the
+   * approver, with `actionInput` as its single input. Checked before anything is created, so a
+   * workflow the space cannot run or an input it does not accept is refused here rather than once
+   * someone approves.
+   */
   actionWorkflowId?: string;
-  /** Passed to the action workflow as its single `actionInput` object. */
+  /** The action workflow's single `actionInput` object. Only meaningful with `actionWorkflowId`. */
   actionInput?: Record<string, unknown>;
   /**
    * The id to create the proposal under, for a caller that derives it from what it proposes. An
@@ -152,6 +161,13 @@ export const createProposalCreator = ({
     } = proposal;
     const gate = proposal.gate ?? (category === PROPOSAL_CATEGORY_TODO ? 'none' : 'workflow');
 
+    if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
+      throw new ProposalInvalidActionInputError(
+        `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
+          `run action workflow [${actionWorkflowId}]`
+      );
+    }
+
     if (gate === 'none') {
       // A proposal without an action never consults Workflows, so it needs only
       // `manage_proposals` — the privilege the gated branch checks as well. One
@@ -182,6 +198,14 @@ export const createProposalCreator = ({
     }
 
     await assertAvailable(request);
+    if (actionWorkflowId !== undefined) {
+      await getProposalsService().assertActionProposable(
+        actionWorkflowId,
+        actionInput,
+        spaceId,
+        request
+      );
+    }
     const { workflowExecutionId } = await getWorkflowsApi().executeWorkflow({
       workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
       spaceId,
@@ -198,6 +222,10 @@ export const createProposalCreator = ({
         ...(actionInput !== undefined && { actionInput }),
         ...(id !== undefined && { proposalId: id }),
       },
+      // Not `manual`: the engine evaluates a `${{ }}` input of a manual run as an expression, and
+      // these inputs are model-written. Our own source keeps them literal, so what was validated
+      // above is what the approver sees and what runs.
+      triggeredBy: PROPOSALS_TRIGGER_SOURCE,
       // The gate parks on the analyst's decision; only its start is awaited.
       waitForCompletion: false,
     });

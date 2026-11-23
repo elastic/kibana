@@ -80,6 +80,9 @@ describe('PresentationPanelHoverActionsWrapper', () => {
 
     expect(await screen.findByTestId('default-hover-actions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('overridden-hover-actions')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('overridden-hover-actions').closest('.embPanel__hoverActions')
+    ).toHaveClass('embPanel__hoverActions--overridden');
     expect(mountCount).toBe(1);
 
     act(() => {

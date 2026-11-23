@@ -37,16 +37,13 @@ export const getSettleIncompleteProposalStepDefinition = ({
         );
         const workflowContext = context.contextManager.getContext();
         const { spaceId } = workflowContext.workflow;
+        const request = context.contextManager.getFakeRequest();
         const service = getProposalsService();
 
         // Same adopt the loop does before every write: a revision appended
         // while the gate was parked would leave the carried id superseded.
         const latest = await service.getLatestRevision(input.proposalId, spaceId);
-        const proposal = await service.get(
-          latest.proposalId,
-          spaceId,
-          context.contextManager.getFakeRequest()
-        );
+        const proposal = await service.get(latest.proposalId, spaceId, request);
 
         const status = input.status ?? (proposal.decision !== undefined ? 'failed' : 'expired');
 
@@ -57,7 +54,7 @@ export const getSettleIncompleteProposalStepDefinition = ({
             executionError: input.executionError,
           },
           spaceId,
-          getWorkflowCaller(workflowContext)
+          getWorkflowCaller(workflowContext, request)
         );
 
         return {

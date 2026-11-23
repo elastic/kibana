@@ -40,7 +40,7 @@ export interface MatchesPopoverProps {
   isOpen: boolean;
   closePopover: () => void;
   type: BoostProfileType;
-  matches: ReadonlyArray<Pick<BoostRuleMatch, 'name' | 'isHidden' | 'outrankedByRuleName'>>;
+  matches: readonly BoostRuleMatch[];
 }
 
 const getHiddenLabel = (

@@ -21,9 +21,9 @@ import { getUpdateProposalStepDefinition } from './update_proposal_step';
 
 const EXECUTION_ID = 'exec-1';
 const SPACE_ID = 'space-a';
-const WORKFLOW_ID = 'system-resolve-proposal';
-const CALLER = { workflowId: WORKFLOW_ID, executionId: EXECUTION_ID };
+const WORKFLOW_ID = 'gate-workflow';
 const FAKE_REQUEST = { fake: true } as never;
+const CALLER = { workflowId: WORKFLOW_ID, executionId: EXECUTION_ID, request: FAKE_REQUEST };
 
 /** The step identifies the actor from the execution's own fake request. */
 const resolvedUser = {
@@ -623,12 +623,25 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-1', status: 'succeeded' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-1',
       status: 'succeeded',
       decision: undefined,
+    });
+  });
+
+  it('should name its own run, so the service can find the action execution it started', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'succeeded' });
+
+    await updateDefinition(update).handler(
+      createContext({ proposalId: 'proposal-1', status: 'succeeded' })
+    );
+
+    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      linkActionExecution: true,
     });
   });
 
@@ -642,10 +655,12 @@ describe('proposals.updateProposal step', () => {
       )
     );
 
-    expect(update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, {
-      ...CALLER,
-      releasedAt: '2026-09-01T00:02:00.000Z',
-    });
+    expect(update).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      { ...CALLER, releasedAt: '2026-09-01T00:02:00.000Z' },
+      { linkActionExecution: true }
+    );
   });
 
   it('should resolve the decider from the execution request, not the passed username', async () => {
@@ -667,7 +682,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: resolvedUser }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -696,7 +712,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: workerUser, decisionMode: 'auto' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -723,7 +740,8 @@ describe('proposals.updateProposal step', () => {
         decisionMode: 'manual',
       }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -747,7 +765,8 @@ describe('proposals.updateProposal step', () => {
         decidedBy: { username: 'analyst', fullName: null, email: null },
       }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 
@@ -761,7 +780,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ decidedBy: undefined, decisionMode: undefined }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
     expect(resolveUser).not.toHaveBeenCalled();
     expect(resolveWorkerUser).not.toHaveBeenCalled();
@@ -793,7 +813,8 @@ describe('proposals.updateProposal step', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ executionError: 'action exploded' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { linkActionExecution: true }
     );
   });
 

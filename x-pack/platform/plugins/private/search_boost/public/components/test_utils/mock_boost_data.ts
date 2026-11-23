@@ -15,7 +15,7 @@ import type {
 
 export const mockProfiles: BoostProfile[] = [
   {
-    name: '_performant_indices',
+    name: 'default_indices',
     is_builtin: true,
     type: 'indices',
     min_boost: 1,
@@ -25,12 +25,12 @@ export const mockProfiles: BoostProfile[] = [
     pinned: true,
   },
   {
-    name: '_performant_data_streams',
+    name: 'default_data_streams_7d',
     is_builtin: true,
     type: 'data_streams',
-    recent: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    standard: { min_boost: 1, max_boost: 1, max_age: '365d' },
-    background: { min_boost: 0, max_boost: 0.5 },
+    recent: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    standard: { min_boost: 1, max_boost: 1, max_age: '7d' },
+    background: { min_boost: 1, max_boost: 1 },
   },
   {
     name: 'catalog-fast',
@@ -71,9 +71,9 @@ const THIRTY_DAYS: DataRetention = {
 
 export const mockRules: BoostRuleListItem[] = [
   {
-    name: '_default_indices',
+    name: 'default_indices',
     index_pattern: '*',
-    boost_profile: '_performant_indices',
+    boost_profile: 'default_indices',
     priority: -100,
     is_builtin: true,
     type: 'indices',
@@ -97,9 +97,9 @@ export const mockRules: BoostRuleListItem[] = [
     ],
   },
   {
-    name: '_default_data_streams',
+    name: 'default_data_streams',
     index_pattern: '*',
-    boost_profile: '_performant_data_streams',
+    boost_profile: 'default_data_streams_7d',
     priority: -100,
     is_builtin: true,
     type: 'data_streams',

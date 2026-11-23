@@ -248,6 +248,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Supplies the action metadata `create` and `get` resolve. No `triggers`,
     // so the best-effort action-input validation is skipped.
     getWorkflow: jest.fn().mockResolvedValue({
+      enabled: true,
       definition: {
         consts: {
           actionMetadata: {
@@ -307,12 +308,12 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   });
 
   const update = service.update.bind(service);
-  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller) => {
+  jest.spyOn(service, 'update').mockImplementation(async (params, spaceId, caller, options) => {
     if (failingStatus !== undefined && params.status === failingStatus) {
       failingStatus = undefined;
       throw new Error(`Failed to write status ${params.status}`);
     }
-    return update(params, spaceId, caller);
+    return update(params, spaceId, caller, options);
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -564,7 +565,10 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
       failingStatus = status;
     },
     setActionMetadata: (actionMetadata) => {
-      workflowsApi.getWorkflow.mockResolvedValue({ definition: { consts: { actionMetadata } } });
+      workflowsApi.getWorkflow.mockResolvedValue({
+        enabled: true,
+        definition: { consts: { actionMetadata } },
+      });
     },
     failActionLookup: () => {
       workflowsApi.getWorkflow.mockRejectedValue(new Error('workflows API unavailable'));
