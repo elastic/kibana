@@ -18,9 +18,9 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
 };
 
-const pluginModule = new KibanaContainerModule(({ bind, collect, expose }) => {
+const pluginModule = new KibanaContainerModule(({ bind, collectAtSetup, expose }) => {
   bind(Registry).toSelf().inSingletonScope();
-  collect(RegistryAEntry, Registry, (_context, entry, registry) => registry.register(entry));
+  collectAtSetup(RegistryAEntry, Registry, (_context, entry, registry) => registry.register(entry));
   expose(RegistryAEntry).toConstantValue({ id: PLUGIN_ID, label: `built into ${PLUGIN_ID}` });
   expose(RegistryBEntry).toConstantValue({
     id: PLUGIN_ID,
