@@ -176,4 +176,11 @@ describe('retryableReasonsOf', () => {
       )
     ).toEqual(['search_partial']);
   });
+
+  it('treats index_not_searched as final, and lets a retryable gap beside it win', () => {
+    expect(huntCompletenessOf([gap('index_not_searched')])).toBe('incomplete_final');
+    expect(huntCompletenessOf([gap('index_not_searched'), gap('execute_failed')])).toBe(
+      'incomplete_retryable'
+    );
+  });
 });

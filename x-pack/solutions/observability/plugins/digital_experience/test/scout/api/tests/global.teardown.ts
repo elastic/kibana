@@ -6,7 +6,9 @@
  */
 
 import { globalTeardownHook } from '@kbn/scout-oblt';
+import { deleteMobileData } from '../../common/fixtures/mobile_data';
 import { deleteOtelRumData } from '../../common/fixtures/otel_rum_data';
+import { deleteTimeZoneData } from '../../common/fixtures/time_zone_data';
 import { FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_TAGS, DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
@@ -16,7 +18,18 @@ globalTeardownHook(
   'Delete the mock OTel RUM data',
   { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ esClient }) => {
-    await deleteOtelRumData(esClient);
+    // Every cleanup runs, whichever fails; the failures are reported together.
+    const results = await Promise.allSettled([
+      deleteOtelRumData(esClient),
+      deleteTimeZoneData(esClient),
+      deleteMobileData(esClient),
+    ]);
+    const failures = results.flatMap((result) =>
+      result.status === 'rejected' ? [result.reason] : []
+    );
+    if (failures.length > 0) {
+      throw new AggregateError(failures, 'Could not delete all of the test data');
+    }
   }
 );
 

@@ -9,22 +9,39 @@ import React from 'react';
 import * as t from 'io-ts';
 import type { RouteMap } from '@kbn/typed-react-router-config';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
-import { applicationSourceRt, DEFAULT_APPLICATION_SOURCE } from './utils/application_source';
+import {
+  applicationSourceRt,
+  applicationTypeRt,
+  DEFAULT_APPLICATION_SOURCE,
+  mobilePlatformRt,
+} from './utils/application_source';
 import { DigitalExperienceLayout } from './application/digital_experience_layout';
 import { useDigitalExperienceParams } from './hooks/use_digital_experience_params';
-import type { ApplicationTabId } from './pages/application_details/application_page';
+import type { ApplicationTabId } from '../common/types/applications';
 import { ApplicationPage } from './pages/application_details/application_page';
 import { ApplicationsListPage } from './pages/applications_list/applications_list_page';
 import { SessionDetailPage } from './pages/session_detail/session_detail_page';
 import { overviewQueryProps } from './utils/overview_filters_query';
-import { sessionsListQueryRt } from './utils/sessions_list_query';
+import { boundedParamRt, sessionsListQueryRt } from './utils/sessions_list_query';
+import {
+  MAX_ENVIRONMENT_LENGTH,
+  MAX_OS_NAME_LENGTH,
+  MAX_RELEASE_LENGTH,
+} from '../common/filter_lengths';
 
 function ApplicationRoute({ tab }: { tab: ApplicationTabId }) {
   const {
     path: { serviceName },
-    query: { source },
+    query: { source, applicationType },
   } = useDigitalExperienceParams('/{serviceName}');
-  return <ApplicationPage serviceName={serviceName} source={source} selectedTab={tab} />;
+  return (
+    <ApplicationPage
+      serviceName={serviceName}
+      source={source}
+      applicationType={applicationType}
+      selectedTab={tab}
+    />
+  );
 }
 
 function SessionDetailRoute() {
@@ -44,8 +61,12 @@ const digitalExperienceRoutes = {
       query: t.partial({
         rangeFrom: t.string,
         rangeTo: t.string,
-        environment: t.string,
+        // Bounded as the routes' validation, so the router drops a value they would reject.
+        environment: boundedParamRt(MAX_ENVIRONMENT_LENGTH),
         sourceFilter: applicationSourceRt,
+        platformFilter: mobilePlatformRt,
+        // The list's tab, and the page of the application a link opens: the mobile one or not.
+        applicationType: applicationTypeRt,
         // The Overview's filters, percentile and KQL.
         ...overviewQueryProps,
       }),
@@ -55,7 +76,16 @@ const digitalExperienceRoutes = {
         element: <Outlet />,
         params: t.type({
           path: t.type({ serviceName: t.string }),
-          query: t.type({ source: applicationSourceRt }),
+          query: t.intersection([
+            t.type({ source: applicationSourceRt }),
+            // The mobile page's OS and release filters, bounded as the KPI route's validation.
+            t.partial({
+              osName: boundedParamRt(MAX_OS_NAME_LENGTH),
+              release: boundedParamRt(MAX_RELEASE_LENGTH),
+              // Its Compare toggle: on when `true`, off when unset, so a reload or Share keeps it.
+              compare: t.literal('true'),
+            }),
+          ]),
         }),
         // Links without a source open the Classic Overview.
         defaults: { query: { source: DEFAULT_APPLICATION_SOURCE } },
@@ -75,6 +105,9 @@ const digitalExperienceRoutes = {
           },
           '/{serviceName}/network': {
             element: <ApplicationRoute tab="network" />,
+          },
+          '/{serviceName}/reports': {
+            element: <ApplicationRoute tab="reports" />,
           },
           '/{serviceName}': {
             element: <ApplicationRoute tab="overview" />,

@@ -18,6 +18,11 @@ import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { resolveScopedModel } from './lib/scoped_model';
+import {
+  resolveHuntScope,
+  type ResolvedHuntScope,
+} from '../../services/watches/hunt/common/resolve_index_scope';
+import { describeUnsearched } from '../../services/watches/hunt/common/unsearched_patterns';
 import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
 import { withLinkedProjectTwins } from '../../services/watches/hunt/common/cps_scope';
@@ -27,9 +32,26 @@ jest.mock('./lib/scoped_model', () => ({
   resolveConfiguredScopedModel: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('../../services/watches/hunt/tier2/hunt_behavior', () => ({ huntBehavior: jest.fn() }));
+jest.mock('../../services/watches/hunt/common/resolve_index_scope', () => {
+  const actual = jest.requireActual('../../services/watches/hunt/common/resolve_index_scope');
+  return { ...actual, resolveHuntScope: jest.fn() };
+});
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
 const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
+const resolveHuntScopeMock = resolveHuntScope as jest.MockedFunction<typeof resolveHuntScope>;
+
+const okScope: ResolvedHuntScope = {
+  status: 'ok',
+  resolution: 'universe',
+  index_patterns: [],
+  missing: [],
+  report_matches: [],
+  actionable_indices: [],
+  window: { from: 'now-7d', to: 'now' },
+  row_limit: 100,
+  discovered: [],
+};
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
 const mitreDataClient = {
@@ -45,7 +67,10 @@ const tier2Result: HuntBehaviorResult = {
   next_step: 'no behaviors to corroborate',
 };
 
-const makeDeps = ({ cpsEnabled = false }: { cpsEnabled?: boolean } = {}) => {
+const makeDeps = ({
+  cpsEnabled = false,
+  spaceId = 'default',
+}: { cpsEnabled?: boolean; spaceId?: string } = {}) => {
   const addVersion = jest.fn();
   const router = { versioned: { post: jest.fn().mockReturnValue({ addVersion }) } };
   const logger = loggingSystemMock.createLogger();
@@ -57,6 +82,7 @@ const makeDeps = ({ cpsEnabled = false }: { cpsEnabled?: boolean } = {}) => {
   registerHuntBehaviorRoute({
     router: router as unknown as RouteDependencies['router'],
     logger,
+    getSpaceId: () => spaceId,
     getClusterClient: () => clusterClient,
     isCpsEnabled: () => cpsEnabled,
     getHuntServices: () =>
@@ -102,6 +128,14 @@ describe('registerHuntBehaviorRoute', () => {
   beforeEach(() => {
     resolveScopedModelMock.mockReset().mockResolvedValue({ ok: true, model });
     huntBehaviorMock.mockReset().mockResolvedValue(tier2Result);
+    // Nothing dropped unless a test says so: the scope searches the universe it was handed.
+    resolveHuntScopeMock
+      .mockReset()
+      .mockImplementation(async ({ indexPatterns, policySkippedPatterns = [] }) => ({
+        ...okScope,
+        index_patterns: indexPatterns,
+        policy_skipped: policySkippedPatterns,
+      }));
   });
 
   it('requires write privilege, because it spends tokens and can execute generated ES|QL', () => {
@@ -353,6 +387,219 @@ describe('registerHuntBehaviorRoute', () => {
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: { message: expect.stringContaining('LLM extraction failed') },
+    });
+  });
+
+  describe('default data view names the scope dropped', () => {
+    const UNIVERSE = ['logs-*', 'custom-edr-1', '-logs-elastic_agent*'];
+    const SEARCHED = ['logs-*', '-logs-elastic_agent*'];
+    const withUniverse = (options: Parameters<typeof makeDeps>[0] = {}) => {
+      const deps = makeDeps(options);
+      const context = {
+        ...deps.context,
+        core: Promise.resolve({
+          uiSettings: {
+            client: { get: jest.fn().mockResolvedValue([...UNIVERSE, '.alerts-security']) },
+          },
+        }),
+      };
+      return { ...deps, context };
+    };
+    const droppedScope: ResolvedHuntScope = {
+      ...okScope,
+      index_patterns: SEARCHED,
+      missing: ['custom-edr-1'],
+    };
+
+    it('resolves the scope as the caller, in the request space, from the filtered universe', async () => {
+      const { handler, context, scoped } = withUniverse({ spaceId: 'soc', cpsEnabled: true });
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      expect(resolveHuntScopeMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: scoped.asCurrentUser,
+          spaceId: 'soc',
+          indexPatterns: UNIVERSE,
+          policySkippedPatterns: ['.alerts-security'],
+          crossProjectSearch: true,
+        })
+      );
+    });
+
+    it('allows only what the scope kept, so no generated query names a dropped index', async () => {
+      resolveHuntScopeMock.mockResolvedValue(droppedScope);
+      const { handler, context } = withUniverse();
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      expect(huntBehaviorMock.mock.calls[0][2].allowed_indices).toEqual(SEARCHED);
+    });
+
+    it('puts the unqualified exclusions on the query under cross-project search', async () => {
+      resolveHuntScopeMock.mockResolvedValue(droppedScope);
+      const { handler, context } = withUniverse({ cpsEnabled: true });
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      const params = huntBehaviorMock.mock.calls[0][2];
+      expect(params.allowed_indices).toEqual(withLinkedProjectTwins(SEARCHED));
+      expect(params.excluded_indices).toEqual(['logs-elastic_agent*']);
+    });
+
+    it('reports a dropped name as an index_not_searched gap, ahead of the hunt gaps', async () => {
+      const huntGap = {
+        reason: 'unknown_technique_id' as const,
+        technique_id: 'T9999',
+        detail: 'T9999 is not in the ATT&CK catalog',
+      };
+      resolveHuntScopeMock.mockResolvedValue(droppedScope);
+      huntBehaviorMock.mockResolvedValue({ ...tier2Result, incomplete: [huntGap] });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          ...tier2Result,
+          incomplete: [
+            { reason: 'index_not_searched', detail: describeUnsearched(['custom-edr-1']) },
+            huntGap,
+          ],
+        },
+      });
+    });
+
+    it('still hunts on a degraded scope', async () => {
+      resolveHuntScopeMock.mockResolvedValue({ ...droppedScope, status: 'degraded' });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(huntBehaviorMock).toHaveBeenCalledTimes(1);
+      expect(response.ok).toHaveBeenCalledTimes(1);
+    });
+
+    it('says the resolve failed when the scope is blocked on discovery_failed', async () => {
+      resolveHuntScopeMock.mockResolvedValue({
+        ...okScope,
+        status: 'blocked',
+        resolution: 'blocked:discovery_failed',
+      });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            'Hunt scope is blocked (blocked:discovery_failed): Hunt scope resolution failed, so no index was searched (checked: logs-*, custom-edr-1, -logs-elastic_agent*).',
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+    });
+
+    it('adds no gap when the scope dropped nothing', async () => {
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.ok).toHaveBeenCalledWith({ body: tier2Result });
+    });
+
+    it('refuses a blocked scope with 409 before resolving any model', async () => {
+      resolveHuntScopeMock.mockResolvedValue({
+        ...okScope,
+        status: 'blocked',
+        resolution: 'blocked:empty_universe',
+        missing: ['logs-*', 'custom-edr-1'],
+      });
+      const { handler, context } = withUniverse();
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            "Hunt scope is blocked (blocked:empty_universe): No index in the space's default data view is visible to this hunt (checked: logs-*, custom-edr-1, -logs-elastic_agent*).",
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+      expect(resolveScopedModelMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('policy-skipped default data view entries', () => {
+    const withSetting = (setting: string[]) => {
+      const deps = makeDeps();
+      const context = {
+        ...deps.context,
+        core: Promise.resolve({
+          uiSettings: { client: { get: jest.fn().mockResolvedValue(setting) } },
+        }),
+      };
+      return { ...deps, context };
+    };
+
+    it('leaves dot-prefixed entries out of the allowed indices', async () => {
+      const { handler, context } = withSetting(['logs-*', '.alerts-security.alerts-default']);
+
+      await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+      const allowed = huntBehaviorMock.mock.calls[0][2].allowed_indices ?? [];
+      expect(allowed).toContain('logs-*');
+      expect(allowed.join(',')).not.toContain('.alerts-security');
+    });
+
+    // A data view with no positive entry is blocked by the scope check itself, before any
+    // Elasticsearch call, so these two run the real one.
+    const useRealScopeCheck = () =>
+      resolveHuntScopeMock.mockImplementation(
+        jest.requireActual('../../services/watches/hunt/common/resolve_index_scope')
+          .resolveHuntScope
+      );
+
+    it('refuses with 409 before resolving any model when nothing searchable remains', async () => {
+      useRealScopeCheck();
+      const { handler, context, scoped } = withSetting(['.siem-signals-infosec-detections']);
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: hidden and alerts indices are never searched.',
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
+      expect(resolveScopedModelMock).not.toHaveBeenCalled();
+      expect(scoped.asCurrentUser.indices.resolveIndex).not.toHaveBeenCalled();
+    });
+
+    it('does not blame hidden indices when the data view holds only exclusions', async () => {
+      useRealScopeCheck();
+      const { handler, context } = withSetting(['-logs-elastic_agent*']);
+      const response = httpServerMock.createResponseFactory();
+
+      await handler(context, requestFor(), response);
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 409,
+        body: {
+          message:
+            'Hunt scope is blocked (blocked:empty_universe): The default data view has no pattern this hunt may search: it holds only exclusions.',
+        },
+      });
+      expect(huntBehaviorMock).not.toHaveBeenCalled();
     });
   });
 });

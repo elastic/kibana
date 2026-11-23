@@ -8,18 +8,26 @@
  */
 
 import {
+  Serializable,
   timerange,
   type EdotBrowserDocument,
   type EdotBrowserSpanDocument,
   type OtelLogDocument,
+  type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
 import {
   DIGITAL_EXPERIENCE_APPS,
   generateEdotBrowserSessions,
+  generateOngoingPerMinute,
   generatePerMinute,
   getDefaultSeed,
+  getTimestamp,
+  incidentOutagesBetween,
+  incidentWindowAt,
   parseDigitalExperienceScenarioOpts,
+  trafficShareAt,
+  type OngoingSessionStore,
 } from './digital_experience_apps';
 import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
@@ -45,9 +53,11 @@ const collect = (
     errorReplayRate: 0,
     replaySize: 'typical',
     sessionLength: 'typical',
+    ongoingSessions: false,
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
+    frustration: true,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
@@ -64,8 +74,10 @@ describe('digital experience apps', () => {
         errorReplayRate: 0,
         replaySize: 'typical',
         sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
+        frustration: true,
       });
     });
 
@@ -81,7 +93,9 @@ describe('digital experience apps', () => {
             errorReplayRate: 0,
             replaySize: 'typical',
             sessionLength: 'typical',
+            ongoingSessions: false,
             scale: 3,
+            frustration: false,
           },
           FROM
         )
@@ -94,8 +108,10 @@ describe('digital experience apps', () => {
         errorReplayRate: 0,
         replaySize: 'typical',
         sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 3,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -108,6 +124,7 @@ describe('digital experience apps', () => {
             environments: 'true',
             edgeCases: 'true',
             scale: '2.5',
+            frustration: 'false',
           },
           FROM
         )
@@ -120,8 +137,10 @@ describe('digital experience apps', () => {
         errorReplayRate: 0,
         replaySize: 'typical',
         sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -161,6 +180,17 @@ describe('digital experience apps', () => {
       );
       expect(() => parseDigitalExperienceScenarioOpts({ edgeCases: 'many' }, FROM)).toThrow(
         'edgeCases must be true or false'
+      );
+    });
+
+    it('keeps the share of signed-in sessions of each app unless set', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM).signedInRate).toBeUndefined();
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: '0.5' }, FROM).signedInRate).toBe(
+        0.5
+      );
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: 0 }, FROM).signedInRate).toBe(0);
+      expect(() => parseDigitalExperienceScenarioOpts({ signedInRate: 2 }, FROM)).toThrow(
+        'signedInRate must be a number from 0 to 1'
       );
     });
   });
@@ -216,6 +246,344 @@ describe('digital experience apps', () => {
       });
     });
 
+    describe('users', () => {
+      const generate = (
+        opts: { withSessionId?: boolean; signedInRate?: number } = {},
+        to = at(1800)
+      ) =>
+        generateEdotBrowserSessions(timerange(at(0), to), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'users', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const userOf = (doc: EdotBrowserDocument) => doc.attributes?.['user.id'];
+      const docs = generate();
+      // The users of each session, from its records that have one
+      const sessionUsers = (all: EdotBrowserDocument[], serviceName: string) => {
+        const users = new Map<unknown, Set<unknown>>();
+        all
+          .filter((doc) => doc.resource?.attributes?.['service.name'] === serviceName)
+          .forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            if (sessionId === undefined) {
+              return;
+            }
+            const sessionUserIds = users.get(sessionId) ?? new Set();
+            if (userOf(doc) !== undefined) {
+              sessionUserIds.add(userOf(doc));
+            }
+            users.set(sessionId, sessionUserIds);
+          });
+        return [...users.values()];
+      };
+
+      it('signs in about the share of sessions of each app, with a single user per session', () => {
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, signedInRate }) => {
+          const sessions = sessionUsers(docs, serviceName);
+          const signedIn = sessions.filter((users) => users.size > 0).length / sessions.length;
+
+          expect(Math.abs(signedIn - signedInRate)).toBeLessThan(0.2);
+          sessions.forEach((users) => expect(users.size).toBeLessThanOrEqual(1));
+        });
+      });
+
+      it('brings users back to several sessions', () => {
+        const sessions = sessionUsers(docs, 'checkout-web').filter((users) => users.size > 0);
+        const users = new Set(sessions.flatMap((sessionUserIds) => [...sessionUserIds]));
+
+        expect(users.size).toBeLessThan(sessions.length);
+      });
+
+      it('signs some users in during the session, after the first page load', () => {
+        const checkout = docs.filter(
+          (doc) => doc.resource?.attributes?.['service.name'] === 'checkout-web'
+        );
+        const signedInSessions = new Set(
+          checkout.filter(userOf).map((doc) => doc.attributes?.['session.id'])
+        );
+        const signingIn = new Set(
+          checkout
+            .filter((doc) => !userOf(doc) && signedInSessions.has(doc.attributes?.['session.id']))
+            .map((doc) => doc.attributes?.['session.id'])
+        );
+
+        expect(signingIn.size).toBeGreaterThan(0);
+        expect(signingIn.size).toBeLessThan(signedInSessions.size);
+      });
+
+      it('writes the account of the users of B2B apps only', () => {
+        const accountOf = (doc: EdotBrowserDocument) => doc.attributes?.['elastic.user.account'];
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, accounts }) => {
+          const signedIn = docs.filter(
+            (doc) => doc.resource?.attributes?.['service.name'] === serviceName && userOf(doc)
+          );
+
+          expect(signedIn.length).toBeGreaterThan(0);
+          signedIn.forEach((doc) =>
+            accounts
+              ? expect(accounts).toContain(accountOf(doc))
+              : expect(accountOf(doc)).toBeUndefined()
+          );
+        });
+      });
+
+      it('gives the same user the same details in every session', () => {
+        const details = new Map<unknown, string>();
+        docs.filter(userOf).forEach(({ resource, attributes = {} }) => {
+          const key = `${resource?.attributes?.['service.name']}:${attributes['user.id']}`;
+          const userDetails = JSON.stringify([
+            attributes['user.email'],
+            attributes['user.full_name'],
+            attributes['elastic.user.account'],
+          ]);
+          expect(details.get(key) ?? userDetails).toBe(userDetails);
+          details.set(key, userDetails);
+        });
+
+        const withName = docs.filter((doc) => doc.attributes?.['user.full_name']);
+        expect(withName.length).toBeGreaterThan(0);
+        expect(withName.length).toBeLessThan(docs.filter(userOf).length);
+      });
+
+      it('signs in the share of sessions of every app that signedInRate sets', () => {
+        expect(generate({ signedInRate: 0 }).some(userOf)).toBe(false);
+        // Long enough for the sessions that expired before a return to be in range too
+        const allSignedIn = generate({ signedInRate: 1 }, at(5400));
+        const sessionIds = new Set<unknown>(
+          allSignedIn.flatMap((doc) => doc.attributes?.['session.id'] ?? [])
+        );
+        const userBySession = new Map(
+          allSignedIn.filter(userOf).map((doc) => [doc.attributes?.['session.id'], userOf(doc)])
+        );
+        // Only an expiry points to a session that was generated: a follow-up's previous ID is random
+        const expiries = allSignedIn.flatMap(({ attributes = {} }) =>
+          sessionIds.has(attributes['session.previous_id'])
+            ? [[attributes['session.previous_id'], attributes['session.id']]]
+            : []
+        );
+        expect(expiries.length).toBeGreaterThan(0);
+        expiries.forEach(([expired, returning]) =>
+          expect(userBySession.get(expired)).toBe(userBySession.get(returning))
+        );
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName }) =>
+          sessionUsers(allSignedIn, serviceName).forEach((users) => expect(users.size).toBe(1))
+        );
+      });
+
+      it('keeps every session anonymous without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(userOf)).toBe(false);
+      });
+    });
+
+    describe('frustration', () => {
+      const generate = (opts: { withSessionId?: boolean; frustration?: boolean } = {}) =>
+        generateEdotBrowserSessions(timerange(at(0), at(1800)), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'frustration', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const eventNameOf = (doc: EdotBrowserDocument) =>
+        'event_name' in doc ? doc.event_name : undefined;
+      const isFrustration = (doc: EdotBrowserDocument) =>
+        String(eventNameOf(doc)).startsWith('browser.frustration.');
+      const docs = generate();
+      const signals = docs.filter(isFrustration);
+      const ofKind = (kind: string) =>
+        signals.filter((doc) => eventNameOf(doc) === `browser.frustration.${kind}`);
+
+      it('reports rage, dead and error clicks on the clicked element', () => {
+        ['rage_click', 'dead_click', 'error_click'].forEach((kind) =>
+          expect(ofKind(kind).length).toBeGreaterThan(0)
+        );
+        signals.forEach((doc) => {
+          expect(doc.attributes).toEqual(
+            expect.objectContaining({
+              'browser.tag_name': expect.any(String),
+              'browser.page.x': expect.any(Number),
+              'browser.page.y': expect.any(Number),
+              'url.full': expect.stringMatching(/^https:\/\//),
+              'session.id': expect.any(String),
+            })
+          );
+          const click = docs.find(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other['@timestamp'] === doc['@timestamp'] &&
+              other.attributes?.['session.id'] === doc.attributes?.['session.id']
+          );
+          expect(click?.attributes?.['browser.css_selector']).toBe(
+            doc.attributes?.['browser.css_selector']
+          );
+        });
+      });
+
+      it('repeats the click of a rage click, and counts the clicks', () => {
+        ofKind('rage_click').forEach(({ attributes = {}, ...doc }) => {
+          const count = attributes['browser.frustration.click_count'] as number;
+          const burst = docs.filter(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other.attributes?.['session.id'] === attributes['session.id'] &&
+              other.attributes?.['browser.page.x'] === attributes['browser.page.x'] &&
+              Number(other['@timestamp']) >= Number(doc['@timestamp']) &&
+              Number(other['@timestamp']) < Number(doc['@timestamp']) + count * 300
+          );
+          expect(count).toBeGreaterThanOrEqual(3);
+          // Each click at a time of its own, even right before the user navigates away
+          expect(new Set(burst.map((click) => click['@timestamp'])).size).toBeGreaterThanOrEqual(
+            count
+          );
+        });
+      });
+
+      it('carries the exception of an error click', () => {
+        ofKind('error_click').forEach(({ attributes = {} }) =>
+          expect(attributes['exception.message']).toEqual(expect.any(String))
+        );
+      });
+
+      it('keeps the same sessions, and those without frustration signals as they were', () => {
+        const bySession = (all: EdotBrowserDocument[]) => {
+          const sessions = new Map<unknown, EdotBrowserDocument[]>();
+          all.forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            sessions.set(sessionId, [...(sessions.get(sessionId) ?? []), doc]);
+          });
+          return sessions;
+        };
+        const withSignals = new Set(signals.map((doc) => doc.attributes?.['session.id']));
+        const without = bySession(generate({ frustration: false }));
+        const sessions = bySession(docs);
+        const withoutSignals = [...sessions].filter(
+          ([sessionId]) => sessionId !== undefined && !withSignals.has(sessionId)
+        );
+
+        expect([...sessions.keys()].sort()).toEqual([...without.keys()].sort());
+        expect(withoutSignals.length).toBeGreaterThan(0);
+        withoutSignals.forEach(([sessionId, sessionDocs]) =>
+          expect(sessionDocs).toEqual(without.get(sessionId))
+        );
+        expect([...without.values()].flat().some(isFrustration)).toBe(false);
+      });
+
+      it('reports none without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(isFrustration)).toBe(false);
+      });
+    });
+
+    describe('traffic and incidents', () => {
+      const HOUR_MS = 60 * 60 * 1000;
+      const DAY = new Date('2026-10-16T00:00:00.000Z').getTime();
+      const checkout = DIGITAL_EXPERIENCE_APPS.find(
+        ({ serviceName }) => serviceName === 'checkout-web'
+      );
+      const incident = checkout?.incident;
+      if (!incident) {
+        throw new Error('checkout-web is expected to have an incident');
+      }
+
+      it('has more traffic in the afternoon than at night, the same with the same seed', () => {
+        const dayAverage = (hour: number) =>
+          Array.from({ length: 6 }, (_, tenMinutes) =>
+            trafficShareAt('seed', 'storefront-web', DAY + hour * HOUR_MS + tenMinutes * 600_000)
+          ).reduce((sum, share) => sum + share, 0) / 6;
+
+        expect(dayAverage(16)).toBeGreaterThan(2 * dayAverage(4));
+        expect(trafficShareAt('seed', 'storefront-web', DAY + 1_000)).toBe(
+          trafficShareAt('seed', 'storefront-web', DAY + 1_000)
+        );
+        Array.from({ length: 48 }, (_, halfHours) =>
+          trafficShareAt('seed', 'storefront-web', DAY + halfHours * 1_800_000)
+        ).forEach((share) => {
+          expect(share).toBeGreaterThan(0);
+          expect(share).toBeLessThanOrEqual(1);
+        });
+      });
+
+      it('has one incident of the configured length in each period, at a seeded time', () => {
+        const period = incident.everyHours * HOUR_MS;
+        const windows = Array.from({ length: 8 }, (_, index) =>
+          incidentWindowAt('seed', 'checkout-web', incident, DAY + index * period + 1)
+        );
+
+        windows.forEach(({ start, end }, index) => {
+          expect(start).toBeGreaterThanOrEqual(DAY + index * period);
+          expect(end).toBeLessThanOrEqual(DAY + (index + 1) * period);
+          expect(end - start).toBeGreaterThanOrEqual(incident.minutes[0] * 60_000);
+          expect(end - start).toBeLessThanOrEqual(incident.minutes[1] * 60_000);
+          expect(incidentWindowAt('seed', 'checkout-web', incident, end - 1)).toEqual({
+            start,
+            end,
+          });
+        });
+        expect(new Set(windows.map(({ start }) => start % period)).size).toBeGreaterThan(1);
+      });
+
+      it('lists the incident of every period that overlaps the range, as outages', () => {
+        const period = incident.everyHours * HOUR_MS;
+        const outages = incidentOutagesBetween(
+          'seed',
+          'checkout-web',
+          incident,
+          DAY + period / 2,
+          DAY + 2 * period + 1
+        );
+
+        expect(outages).toEqual(
+          [0, 1, 2].map((index) => ({
+            ...incidentWindowAt('seed', 'checkout-web', incident, DAY + index * period),
+            failureRate: incident.failureRate,
+            failureStatusCodes: incident.failureStatusCodes,
+          }))
+        );
+      });
+
+      // Backfill sessions end at their rate tick, live ones start there: either way, only the
+      // requests sent during the incident get its failures.
+      it.each([
+        ['backfill', false],
+        ['live', true],
+      ])('fails the endpoint only during an incident, in %s', (_, ongoingSessions) => {
+        const seed = 'incident-test';
+        const { start, end } = incidentWindowAt(seed, 'checkout-web', incident, DAY);
+        const margin = 30 * 60_000;
+        const docs = generateEdotBrowserSessions(
+          timerange(new Date(start - margin), new Date(end + margin)),
+          {
+            ...parseDigitalExperienceScenarioOpts({ seed, ongoingSessions }, start - margin),
+            environment: 'test',
+            from: start - margin,
+          }
+        ).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+        const payments = docs.filter(
+          (doc): doc is EdotBrowserSpanDocument =>
+            'kind' in doc && doc.attributes['url.full'] === incident.url
+        );
+        const failureShare = (from: number, to: number) => {
+          const ofWindow = payments.filter(
+            (span) => Number(span['@timestamp']) >= from && Number(span['@timestamp']) < to
+          );
+          expect(ofWindow.length).toBeGreaterThan(5);
+          return (
+            ofWindow.filter((span) => Number(span.attributes['http.response.status_code']) >= 500)
+              .length / ofWindow.length
+          );
+        };
+
+        // The endpoint fails 15% of the time outside of incidents, and users retry failed payments
+        const edge = 10 * 60_000;
+        expect(failureShare(start, end)).toBeGreaterThan(0.75);
+        expect(failureShare(start - edge, start)).toBeLessThan(0.35);
+        expect(failureShare(end, end + edge)).toBeLessThan(0.35);
+      });
+    });
+
     describe('seed', () => {
       const generate = (
         seed?: string,
@@ -224,7 +592,14 @@ describe('digital experience apps', () => {
           from = timeRange.from.getTime(),
           withSessionId = true,
           scale = 1,
-        }: { timeRange?: Timerange; from?: number; withSessionId?: boolean; scale?: number } = {}
+          frustration = true,
+        }: {
+          timeRange?: Timerange;
+          from?: number;
+          withSessionId?: boolean;
+          scale?: number;
+          frustration?: boolean;
+        } = {}
       ) =>
         generateEdotBrowserSessions(timeRange, {
           environment: 'test',
@@ -237,9 +612,11 @@ describe('digital experience apps', () => {
           errorReplayRate: 0,
           replaySize: 'typical',
           sessionLength: 'typical',
+          ongoingSessions: false,
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
+          frustration,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -309,13 +686,25 @@ describe('digital experience apps', () => {
           },
           attributes: Object.fromEntries(
             Object.entries(attributes ?? {}).filter(
-              ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
+              ([key]) =>
+                ![
+                  'session.id',
+                  'session.previous_id',
+                  'browser.tab.id',
+                  'user.id',
+                  'user.email',
+                  'user.full_name',
+                  'elastic.user.account',
+                ].includes(key)
             )
           ),
         });
         // Without session IDs a session is a single visit. With them, some get more visits, an idle
-        // tab and a session.start log, and all get session attributes.
-        const withSessionIds = new Set(sorted(generate('seed-a').map(asWithoutSessions)));
+        // tab and a session.start log, all get session attributes and some get a user. Rage clicks,
+        // which need sessions, add clicks that INP can be reported for.
+        const withSessionIds = new Set(
+          sorted(generate('seed-a', { frustration: false }).map(asWithoutSessions))
+        );
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);
         sorted(withoutSessionIds).forEach((doc) => expect(withSessionIds.has(doc)).toBe(true));
@@ -542,8 +931,10 @@ describe('digital experience apps', () => {
         errorReplayRate: 0,
         replaySize: 'typical',
         sessionLength: 'typical',
+        ongoingSessions: false,
         scale: 2,
         seed: 'digital-experience-test',
+        frustration: true,
       }).flatMap((generator) =>
         Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
       );
@@ -778,8 +1169,10 @@ describe('digital experience apps', () => {
           errorReplayRate: 0,
           replaySize: 'typical',
           sessionLength: 'typical',
+          ongoingSessions: false,
           scale: 1,
           seed: 'digital-experience-test',
+          frustration: true,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -840,15 +1233,120 @@ describe('digital experience apps', () => {
       });
 
       it('draws the same sessions with edge cases as without', () => {
-        const sessionsOf = (all: EdotBrowserDocument[]) =>
+        // A session that ends soon after the run's start can have all its events before it with
+        // other pages, which take other dwell times before the session's end, so only the
+        // sessions with events well after the start are surely in the other run
+        const sessionsOf = (all: EdotBrowserDocument[], after = halfHour.from.getTime()) =>
           new Set(
             appDocs(all, 'docs-web')
+              .filter((doc) => Number(doc['@timestamp']) >= after)
               .map((doc) => attribute(doc, 'session.id'))
               .filter(Boolean)
           );
+        const laterSessionsOf = (all: EdotBrowserDocument[]) =>
+          sessionsOf(all, halfHour.from.getTime() + 10 * 60_000);
 
         // docs-web only brings a search index and browsers that aren't identified
-        expect(sessionsOf(withEdgeCases)).toEqual(sessionsOf(docs));
+        expect(laterSessionsOf(docs).size).toBeGreaterThan(20);
+        expect([...sessionsOf(withEdgeCases)]).toEqual(
+          expect.arrayContaining([...laterSessionsOf(docs)])
+        );
+        expect([...sessionsOf(docs)]).toEqual(
+          expect.arrayContaining([...laterSessionsOf(withEdgeCases)])
+        );
+      });
+    });
+
+    describe('frustration signals', () => {
+      const signals = docs.filter((doc) =>
+        String('event_name' in doc ? doc.event_name : '').startsWith('browser.frustration.')
+      );
+      const sessionIdOf = (doc: EdotBrowserDocument) => attribute(doc, 'session.id');
+      const signalsPerSession = (all: EdotBrowserDocument[], ofSignals = signals) => {
+        const sessions = new Set(all.map(sessionIdOf).filter(Boolean));
+        const signalCounts = count(ofSignals.map(sessionIdOf));
+        return [...sessions].map((sessionId) => signalCounts.get(sessionId) ?? 0);
+      };
+      const perSession = (all: EdotBrowserDocument[], ofSignals: EdotBrowserDocument[]) => {
+        const counts = signalsPerSession(all, ofSignals);
+        return counts.reduce((sum, value) => sum + value, 0) / counts.length;
+      };
+      const ofVersion = (all: EdotBrowserDocument[], version: string) =>
+        all.filter((doc) => doc.resource?.attributes?.['service.version'] === version);
+      const errorClicksOn = (all: EdotBrowserDocument[], selector: string) =>
+        eventsOf(all, 'browser.frustration.error_click').filter(
+          (doc) => attribute(doc, 'browser.css_selector') === selector
+        );
+
+      it('leaves most sessions without signals, and has a few with many', () => {
+        const counts = signalsPerSession(docs);
+        const share = (predicate: (value: number) => boolean) =>
+          counts.filter(predicate).length / counts.length;
+
+        expect(share((value) => value === 0)).toBeGreaterThan(0.5);
+        expect(share((value) => value >= 1 && value <= 2)).toBeGreaterThan(0.15);
+        expect(share((value) => value >= 5)).toBeGreaterThan(0.005);
+        expect(share((value) => value >= 5)).toBeLessThan(0.1);
+      });
+
+      it('has most signals on a few elements of a few pages', () => {
+        const byElement = [
+          ...count(signals.map((doc) => attribute(doc, 'browser.css_selector'))).values(),
+        ].sort((a, b) => b - a);
+        const pageViews = count(
+          eventsOf(docs, 'browser.navigation').map((doc) => attribute(doc, 'url.full'))
+        );
+        const signalShares = [...count(signals.map((doc) => attribute(doc, 'url.full')))].map(
+          ([url, signalCount]) => signalCount / (pageViews.get(url) ?? 1)
+        );
+        const topShare =
+          byElement.slice(0, 10).reduce((sum, value) => sum + value, 0) / signals.length;
+
+        expect(byElement.length).toBeGreaterThan(20);
+        expect(topShare).toBeGreaterThan(0.5);
+        expect(signalShares.filter((share) => share > 0.3).length).toBeGreaterThan(1);
+        expect(signalShares.filter((share) => share < 0.1).length).toBeGreaterThan(5);
+      });
+
+      it('has more error clicks in the versions with a regression', () => {
+        [
+          { app: 'storefront-web', old: '4.12.0', regressed: '4.13.0', selector: '#add-to-cart' },
+          {
+            app: 'checkout-web',
+            old: '2.3.1',
+            regressed: '2.4.0',
+            selector: '#continue-to-payment',
+          },
+        ].forEach(({ app, old, regressed, selector }) => {
+          const errorClicksPerSession = (version: string) => {
+            const versionDocs = ofVersion(appDocs(docs, app), version);
+            return perSession(versionDocs, errorClicksOn(versionDocs, selector));
+          };
+
+          expect(errorClicksPerSession(regressed)).toBeGreaterThan(2 * errorClicksPerSession(old));
+        });
+      });
+
+      it('has more signals on mobile devices than on desktop ones', () => {
+        const signalsPerDevice = (mobile: boolean) => {
+          const isOfDevice = (doc: EdotBrowserDocument) =>
+            doc.resource?.attributes?.['browser.mobile'] === mobile;
+          return perSession(docs.filter(isOfDevice), signals.filter(isOfDevice));
+        };
+
+        expect(signalsPerDevice(true)).toBeGreaterThan(signalsPerDevice(false));
+      });
+
+      it('carries the exception that an element throws on its error clicks', () => {
+        const messages = new Set(
+          errorClicksOn(ofVersion(docs, '2.4.0'), '#continue-to-payment').map((doc) =>
+            attribute(doc, 'exception.message')
+          )
+        );
+
+        expect([...messages]).toEqual(
+          expect.arrayContaining(["Cannot read properties of undefined (reading 'postalCode')"])
+        );
       });
     });
 
@@ -978,6 +1476,233 @@ describe('digital experience apps', () => {
 
     it('numbers events by absolute time', () => {
       expect(indices(timerange(at(0), at(60)), 3)).toEqual(indices(range, 3).slice(0, 3));
+    });
+  });
+});
+
+describe('digital experience ongoing sessions', () => {
+  const END = Date.parse('2026-10-16T12:00:00.000Z');
+  const MINUTE = 60_000;
+  const HOUR = 60 * MINUTE;
+
+  interface Batch {
+    from: number;
+    to: number;
+    docs: EdotBrowserDocument[];
+  }
+
+  // Generates `[from, to)` in batches of `batchMs`, one after the other, like live mode does
+  const runInBatches = (
+    from: number,
+    to: number,
+    batchMs: number,
+    generate: (timeRange: Timerange) => Array<SynthtraceGenerator<EdotBrowserDocument>>
+  ): Batch[] =>
+    Array.from({ length: Math.ceil((to - from) / batchMs) }, (_, index) => {
+      const batchFrom = from + index * batchMs;
+      const batchTo = Math.min(batchFrom + batchMs, to);
+      return {
+        from: batchFrom,
+        to: batchTo,
+        docs: generate(timerange(new Date(batchFrom), new Date(batchTo))).flatMap((generator) =>
+          Array.from(generator).flatMap((event) => event.serialize())
+        ),
+      };
+    });
+
+  const docsOf = (batches: Batch[]) => batches.flatMap(({ docs }) => docs);
+  const timeOf = (doc: EdotBrowserDocument) => Number(doc['@timestamp']);
+
+  const outsideTheirBatch = (batches: Batch[]) =>
+    batches.flatMap(({ from, to, docs }) =>
+      docs.filter((doc) => timeOf(doc) < from || timeOf(doc) >= to)
+    );
+
+  describe('generateOngoingPerMinute', () => {
+    const MAX_DURATION = 5 * MINUTE;
+    // The events of every session, after its start. The last one is past its maximum duration.
+    const OFFSETS = [0, 30_000, 150_000, 10 * MINUTE];
+    // At two sessions a minute, session `index` starts right before its rate tick
+    const startOf = (index: number) => (index + 1) * 30_000 - 1;
+    const from = END - 10 * MINUTE;
+
+    const store: OngoingSessionStore<EdotBrowserDocument> = new Map();
+    const generate =
+      (key: string, created: number[] = []) =>
+      (timeRange: Timerange) =>
+        [
+          generateOngoingPerMinute(timeRange, 2, {
+            store,
+            key,
+            maxDuration: MAX_DURATION,
+            create: ({ time, index }) => {
+              created.push(index);
+              return OFFSETS.map(
+                (offset) =>
+                  new Serializable<EdotBrowserDocument>({
+                    '@timestamp': time + offset,
+                    event_name: String(index),
+                  })
+              );
+            },
+          }),
+        ];
+    const describeDocs = (docs: EdotBrowserDocument[]) =>
+      docs.map((doc) => `${'event_name' in doc ? doc.event_name : ''}@${timeOf(doc)}`).sort();
+
+    it('writes the events of the sessions in progress in the window they happen in', () => {
+      const batches = runInBatches(from, END, 1000, generate('windows'));
+      // Sessions that started before the run count too, and events past the maximum duration don't
+      const firstIndex = Math.floor((2 * (from - MAX_DURATION)) / MINUTE) - 1;
+      const expected = Array.from({ length: 2 * 16 }, (_, i) => firstIndex + i).flatMap((index) =>
+        OFFSETS.filter((offset) => offset < MAX_DURATION)
+          .map((offset) => startOf(index) + offset)
+          .filter((time) => time >= from && time < END)
+          .map((time) => `${index}@${time}`)
+      );
+
+      expect(outsideTheirBatch(batches)).toEqual([]);
+      expect(describeDocs(docsOf(batches))).toEqual(expected.sort());
+    });
+
+    it('writes the same events however the run is split, and when it starts over', () => {
+      const whole = docsOf(runInBatches(from, END, END - from, generate('split')));
+      const live = docsOf(runInBatches(from, END, 1000, generate('split')));
+      // A batch that doesn't follow the last one written, like the first of a worker, starts over
+      const restartAt = from + 5 * MINUTE + 500;
+      const restarted = runInBatches(restartAt, END, 7_300, generate('split'));
+
+      expect(describeDocs(live)).toEqual(describeDocs(whole));
+      expect(outsideTheirBatch(restarted)).toEqual([]);
+      expect(describeDocs(docsOf(restarted))).toEqual(
+        describeDocs(whole.filter((doc) => timeOf(doc) >= restartAt))
+      );
+    });
+
+    it('writes every event in the window of its release time, when one is given', () => {
+      const releaseDelay = 45_000;
+      const batches = runInBatches(from, END, 1000, (timeRange) => [
+        generateOngoingPerMinute(timeRange, 2, {
+          store,
+          key: 'release',
+          maxDuration: MAX_DURATION,
+          create: ({ time, index }) =>
+            OFFSETS.map(
+              (offset) =>
+                new Serializable<EdotBrowserDocument>({
+                  '@timestamp': time + offset,
+                  event_name: String(index),
+                })
+            ),
+          releaseTime: (event) => getTimestamp(event) + releaseDelay,
+        }),
+      ]);
+
+      batches.forEach(({ from: batchFrom, to: batchTo, docs }) =>
+        docs.forEach((doc) => {
+          expect(timeOf(doc) + releaseDelay).toBeGreaterThanOrEqual(batchFrom);
+          expect(timeOf(doc) + releaseDelay).toBeLessThan(batchTo);
+        })
+      );
+      expect(docsOf(batches).length).toBeGreaterThan(0);
+    });
+
+    it('creates each session once while the batches follow each other', () => {
+      const created: number[] = [];
+      runInBatches(from, END, 1000, generate('once', created));
+
+      // The sessions started within the maximum duration before the run, one more, and the run's own
+      expect(created).toHaveLength(2 * 15 + 1);
+      expect(new Set(created).size).toBe(created.length);
+    });
+  });
+
+  describe('generateEdotBrowserSessions', () => {
+    const generate =
+      (scenarioOpts: Record<string, unknown>, from: number) => (timeRange: Timerange) =>
+        generateEdotBrowserSessions(timeRange, {
+          ...parseDigitalExperienceScenarioOpts(
+            { seed: 'ongoing-sessions', ...scenarioOpts },
+            from
+          ),
+          environment: 'test',
+          from,
+        });
+    const sessionIdOf = (doc: EdotBrowserDocument) => doc.attributes?.['session.id'];
+
+    it('is off unless asked', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, END).ongoingSessions).toBe(false);
+      expect(
+        parseDigitalExperienceScenarioOpts({ ongoingSessions: 'true' }, END).ongoingSessions
+      ).toBe(true);
+      expect(() =>
+        parseDigitalExperienceScenarioOpts({ ongoingSessions: 'sometimes' }, END)
+      ).toThrow('ongoingSessions must be true or false');
+    });
+
+    it('writes long sessions over many minutes of live mode, instead of whole when they end', () => {
+      const from = END - 30 * MINUTE;
+      const minutesWrittenIn = (ongoingSessions: boolean) => {
+        const batches = runInBatches(
+          from,
+          END,
+          MINUTE,
+          generate({ sessionLength: 'long', ongoingSessions, scale: 0.2 }, from)
+        );
+        const minutes = new Map<unknown, Set<number>>();
+        batches.forEach(({ docs }, minute) =>
+          docs.forEach((doc) => {
+            const sessionId = sessionIdOf(doc);
+            if (sessionId) {
+              minutes.set(sessionId, (minutes.get(sessionId) ?? new Set()).add(minute));
+            }
+          })
+        );
+        return {
+          batches,
+          counts: [...minutes.values()].map(({ size }) => size).sort((a, b) => a - b),
+        };
+      };
+      const ending = minutesWrittenIn(false);
+      const ongoing = minutesWrittenIn(true);
+
+      expect(ending.counts.length).toBeGreaterThan(0);
+      expect(Math.max(...ending.counts)).toBe(1);
+      expect(outsideTheirBatch(ongoing.batches)).toEqual([]);
+      expect(ongoing.counts[Math.floor(ongoing.counts.length / 2)]).toBeGreaterThan(5);
+      expect(Math.max(...ongoing.counts)).toBeGreaterThanOrEqual(20);
+    });
+
+    it('moves every session to start when it ended without the option, with all of its events', () => {
+      const from = END - 5 * HOUR;
+      const timesBySession = (ongoingSessions: boolean) => {
+        const docs = docsOf(
+          runInBatches(from, END, END - from, generate({ ongoingSessions, scale: 0.1 }, from))
+        );
+        const times = new Map<unknown, number[]>();
+        docs.forEach((doc) => {
+          const sessionId = sessionIdOf(doc);
+          if (sessionId) {
+            times.set(sessionId, [...(times.get(sessionId) ?? []), timeOf(doc)]);
+          }
+        });
+        times.forEach((sessionTimes) => sessionTimes.sort((a, b) => a - b));
+        return times;
+      };
+      const ending = timesBySession(false);
+      const starting = timesBySession(true);
+      // Typical sessions run for less than 2 hours: those of the middle hour are whole in both runs
+      const whole = [...ending].filter(
+        ([sessionId, times]) =>
+          times[times.length - 1] >= from + 2 * HOUR &&
+          (starting.get(sessionId)?.[0] ?? END) < END - 2 * HOUR
+      );
+
+      expect(whole.length).toBeGreaterThan(50);
+      whole.forEach(([sessionId, times]) => {
+        const moved = starting.get(sessionId) ?? [];
+        expect(moved).toEqual(times.map((time) => time + moved[0] - times[0]));
+      });
     });
   });
 });

@@ -27,6 +27,99 @@ export const ACTION_RESPONSES_INDEX_NAME = 'osquery_manager.action.responses';
 export const ACTION_RESPONSES_INDEX_DEFAULT_NS =
   '.logs-' + ACTION_RESPONSES_INDEX_NAME + '-default';
 
+let actionsIndexSetup: Promise<void> | undefined;
+
+/** The `origin` fields every document with an origin writes, and the type each must have. */
+const ORIGIN_FIELD_TYPES = {
+  'origin.type': 'keyword',
+  'origin.run_id': 'keyword',
+  'origin.verified': 'boolean',
+} as const;
+
+export class OriginMappingConflictError extends Error {
+  constructor(field: string, expectedType: string) {
+    super(`Expected ${field} to be mapped as ${expectedType}`);
+    this.name = 'OriginMappingConflictError';
+  }
+}
+
+const checkActionsOriginMappings = async (esClient: ElasticsearchClient): Promise<string[]> => {
+  const fields = Object.keys(ORIGIN_FIELD_TYPES) as Array<keyof typeof ORIGIN_FIELD_TYPES>;
+  const mappings = await esClient.indices.getFieldMapping({
+    index: ACTIONS_INDEX_DEFAULT_NS,
+    fields,
+  });
+  const indices = Object.values(mappings);
+
+  return fields.filter((field) => {
+    const leaf = field.slice('origin.'.length);
+    const expectedType = ORIGIN_FIELD_TYPES[field];
+    let missing = indices.length === 0;
+    for (const { mappings: fieldMappings } of indices) {
+      const property = fieldMappings[field]?.mapping[leaf];
+      if (!property) {
+        missing = true;
+      } else if (!('type' in property) || property.type !== expectedType) {
+        throw new OriginMappingConflictError(field, expectedType);
+      }
+    }
+
+    return missing;
+  });
+};
+
+const setUpActionsIndex = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+  await createIndexIfNotExists(
+    esClient,
+    ACTIONS_INDEX_NAME,
+    ACTIONS_INDEX_DEFAULT_NS,
+    actionsMapping,
+    logger
+  );
+
+  if ((await checkActionsOriginMappings(esClient)).length === 0) {
+    return;
+  }
+
+  const origin = actionsMapping.properties?.origin;
+  if (!origin) {
+    throw new Error('The actions mapping has no origin definition');
+  }
+
+  await esClient.indices.putMapping({
+    index: ACTIONS_INDEX_DEFAULT_NS,
+    properties: { origin },
+  });
+  const missingFields = await checkActionsOriginMappings(esClient);
+  if (missingFields.length > 0) {
+    throw new Error(`Missing origin mappings for ${missingFields.join(', ')}`);
+  }
+};
+
+/** Confirms live origin mappings, caching successes and permanent conflicts per process. */
+export const ensureActionsIndexMappings = (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  if (!actionsIndexSetup) {
+    actionsIndexSetup = setUpActionsIndex(esClient, logger).catch((error) => {
+      if (error instanceof OriginMappingConflictError) {
+        logger.error(
+          `${error.message}; origin will not be recorded until the actions index is reindexed or its mapping is fixed`
+        );
+      } else {
+        actionsIndexSetup = undefined;
+      }
+
+      throw error;
+    });
+    // A permanent conflict stays cached even if the caller has already timed out.
+    void actionsIndexSetup.catch(() => {});
+  }
+
+  return actionsIndexSetup;
+};
+
 export const initializeTransformsIndices = async (esClient: ElasticsearchClient, logger: Logger) =>
   Promise.all([
     createIndexIfNotExists(

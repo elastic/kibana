@@ -15,6 +15,7 @@ import {
   useAutomationRunsInRange,
   useAutomationRunActivity,
   useAutomationsRunsInRange,
+  useAutomationsRunCounts,
   useCreateAutomation,
   useCurrentUsername,
   useDeleteAutomation,
@@ -39,6 +40,7 @@ jest.mock('../../data/automations/use_automations', () => ({
   useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
   useAutomationRunActivity: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
+  useAutomationsRunCounts: jest.fn(),
   useCreateAutomation: jest.fn(),
   useCurrentUsername: jest.fn(),
   useDeleteAutomation: jest.fn(),
@@ -57,14 +59,10 @@ jest.mock('../../data/run_quotas/use_investigation_quotas', () => ({
   useInvestigationQuotas: jest.fn(),
 }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+let mockConnectedChannels: Record<string, unknown> = {};
 jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
-  useAllRelayAppBindings: () => ({
-    bindings: [],
-    isLoading: false,
-    isError: false,
-    isComplete: true,
-  }),
+  useAllRelayAppBindings: () => mockConnectedChannels,
 }));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
@@ -72,6 +70,7 @@ jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
 
 const mockUseAutomationRunsInRange = useAutomationRunsInRange as jest.Mock;
 const mockUseAutomationsRunsInRange = useAutomationsRunsInRange as jest.Mock;
+const mockUseAutomationsRunCounts = useAutomationsRunCounts as jest.Mock;
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 const mockUseCurrentUsername = useCurrentUsername as jest.Mock;
 const mockUseDeleteAutomation = useDeleteAutomation as jest.Mock;
@@ -94,6 +93,12 @@ describe('AutomationsPage', () => {
     (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
     (useRunAutomation as jest.Mock).mockReturnValue({ mutate: jest.fn(), isLoading: false });
 
+    mockConnectedChannels = {
+      bindings: [],
+      isLoading: false,
+      isError: false,
+      isComplete: true,
+    };
     mockServiceAccount = {
       data: { serviceAccountsEnabled: true, canModifyBoundWorkflows: true },
     };
@@ -113,11 +118,9 @@ describe('AutomationsPage', () => {
     });
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
+    mockUseAutomationsRunCounts.mockReturnValue(undefined);
     mockUseInvestigationQuotas.mockReturnValue({ data: undefined, refetch: jest.fn() });
-    mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0, usedToday: 0 },
-      isInitialLoading: false,
-    });
+    mockUseAutomationRunsInRange.mockReturnValue({ runs: [], isLoading: false });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
     mockUseCurrentUsername.mockReturnValue('Daniel Hughes');
     mockUseDeleteAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -142,6 +145,90 @@ describe('AutomationsPage', () => {
       ),
     };
   };
+
+  describe('Slack channel binding', () => {
+    const slackAutomation = (id: string, trigger: Record<string, unknown>) => ({
+      id,
+      name: `Automation ${id}`,
+      isEnabled: true,
+      tags: [],
+      trigger: { rows: [trigger] },
+      execution: { promptTemplate: 'Look into it.' },
+      completions: [],
+      runtime: {},
+      author: 'alice',
+    });
+    const connected = (bindings: Array<{ channel: string; displayName: string }>) => ({
+      bindings: bindings.map((binding) => ({ ...binding, status: 'bound_to_self' })),
+      isLoading: false,
+      isError: false,
+      isComplete: true,
+    });
+
+    beforeEach(() => {
+      mockUseFetchAutomations.mockReturnValue({
+        data: {
+          automations: [
+            slackAutomation('both', { kind: 'slack', event: 'message', channels: ['C1', 'C2'] }),
+            slackAutomation('kept', { kind: 'slack', event: 'message', channels: ['C2'] }),
+            slackAutomation('alert', { kind: 'alert' }),
+            slackAutomation('schedule', { kind: 'schedule', schedulePreset: 'hourly' }),
+          ],
+        },
+        isInitialLoading: false,
+      });
+    });
+
+    it('flags only automations on a channel that is no longer connected', async () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage();
+
+      const flags = screen.getAllByTestId('automationBrokenSlackChannel');
+      expect(flags).toHaveLength(1);
+      expect(screen.getByText('Automation both').closest('tr')).toContainElement(flags[0]);
+      fireEvent.mouseOver(flags[0]);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Slack channel not connected: C1. Messages there will not start this automation.'
+      );
+    });
+
+    it('flags Slack automations after the only binding was deleted', () => {
+      mockConnectedChannels = connected([]);
+      renderPage();
+
+      expect(screen.getAllByTestId('automationBrokenSlackChannel')).toHaveLength(2);
+    });
+
+    it.each([
+      ['fails to load', { isError: true }],
+      ['is still loading', { isLoading: true }],
+    ])('flags nothing when the connected list %s', (_state, state) => {
+      mockConnectedChannels = { ...connected([]), ...state };
+      renderPage();
+
+      expect(screen.queryByTestId('automationBrokenSlackChannel')).not.toBeInTheDocument();
+    });
+
+    it('shows a callout with a Settings link in the detail flyout', () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage('/automations/both');
+
+      expect(screen.getByTestId('automationBrokenSlackChannelCallout')).toHaveTextContent(
+        'Slack channel not connected: C1. Messages there will not start this automation.'
+      );
+      expect(screen.getByTestId('automationBrokenSlackChannelCalloutLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings/general'
+      );
+    });
+
+    it('shows no callout in the detail flyout when every channel is connected', () => {
+      mockConnectedChannels = connected([{ channel: 'C2', displayName: 'oncall' }]);
+      renderPage('/automations/kept');
+
+      expect(screen.queryByTestId('automationBrokenSlackChannelCallout')).not.toBeInTheDocument();
+    });
+  });
 
   it('runs an enabled scheduled automation immediately from the row menu', async () => {
     const automation = {
@@ -564,28 +651,15 @@ describe('AutomationsPage', () => {
       deleteMutate.mockClear();
       toggleMutate.mockClear();
       mockUseFetchAutomations.mockReturnValue({ data: { automations }, isInitialLoading: false });
-      mockUseAutomationsRunsInRange.mockImplementation((ids: string[], startedAfter: string) =>
-        ids.map((id) => ({
-          data: {
-            total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
-            usedToday: totals[id].today,
-            runs:
-              id === 'triage'
-                ? [
-                    ...Array(25).fill({ status: 'succeeded' }),
-                    ...Array(3).fill({ status: 'skipped' }),
-                  ]
-                : [],
-          },
-        }))
+      mockUseAutomationsRunsInRange.mockImplementation((ids: string[]) =>
+        ids.map((id) => ({ data: { usedToday: totals[id].today } }))
       );
-      mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
-        data: {
-          total: totals[id].range,
-          usedToday: totals[id].today,
-          runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
-        },
-        isInitialLoading: false,
+      mockUseAutomationsRunCounts.mockReturnValue({
+        triage: { succeeded: 25, running: 0, failed: 0, skipped: 3 },
+      });
+      mockUseAutomationRunsInRange.mockImplementation(() => ({
+        runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
+        isLoading: false,
       }));
       mockUseCreateAutomation.mockReturnValue({ mutate: createMutate, isLoading: false });
       mockUseDeleteAutomation.mockReturnValue({ mutate: deleteMutate, isLoading: false });

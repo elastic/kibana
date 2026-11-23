@@ -23,8 +23,9 @@ import {
   ChatEventType,
   AgentExecutionMode,
   EventActorType,
+  parseExecutionId,
   platformCoreTools,
-  timelineExecutionId,
+  unreadSettledSteerIds,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle, resolveAllowedConnectorIds } from '@kbn/agent-builder-server';
@@ -52,7 +53,10 @@ import type { PreviousRoundInfo } from './utils/context_management';
 import { createSummarizationTransformer } from './utils/tool_summarization';
 import { buildResumeAnchors, pausedItems, type PausedItem } from './utils/attachment_placement';
 import { sourceEvents } from '../../conversation/client/source_events';
-import { nextResumeIndex, userMessageActor } from '../../conversation/client/rounds_to_events';
+import {
+  runTimelineExecutionId,
+  userMessageActor,
+} from '../../conversation/client/rounds_to_events';
 import { createAgentGraph } from './graph';
 import {
   RunAttachmentEvents,
@@ -70,6 +74,8 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { createImageResolver } from './utils/image_resolver';
 import { BackgroundExecutionService } from './background_execution_service';
+import { createIncomingMessages } from './incoming_messages';
+import { currentUserActor } from '../../conversation/client/rounds_to_events';
 import { SubagentTracker } from './subagent_tracker';
 import type { StateUpdate } from './state';
 import {
@@ -161,15 +167,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     resumeAnchors.set(triggerEventId, pausedItems(pendingTurn.terminated));
   }
   const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
-  // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
-  // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
-  const roundExecutionIndex = pendingTurn
-    ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
-    : 0;
-  // The timeline id of this execution, which every event written for it carries. A resume mints
-  // its own round id but is persisted to the paused round. `executionId` names the execution
-  // record and is never persisted on conversation events.
-  const roundExecutionId = timelineExecutionId(pendingTurn?.id ?? roundId, roundExecutionIndex);
+  // The timeline id of this execution, which every event written for it carries, computed as the
+  // lock was. A resume mints its own round id but is persisted to the paused round. `executionId`
+  // names the execution record and is never persisted on conversation events.
+  const roundExecutionId = runTimelineExecutionId({
+    events: conversation?.events,
+    pausedRoundId: pendingTurn?.id,
+    roundId,
+  });
+  const roundExecutionIndex = parseExecutionId(roundExecutionId)?.index ?? 0;
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
@@ -184,27 +190,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
   // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
   // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
-  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds] = await Promise.all([
-    modelProvider.getDefaultModel(),
-    resolveConfiguration(agentConfiguration, {
-      aiIndicesEnabled: experimentalFeatures.aiIndices,
-      request,
-      resolver: context.aiIndexResolver,
-      logger,
-    }),
-    experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
-    context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
-  ]);
+  const [model, resolvedConfiguration, relevantSkillsEnabled, pluginSkillIds, connectorSkillIds] =
+    await Promise.all([
+      modelProvider.getDefaultModel(),
+      resolveConfiguration(agentConfiguration, {
+        aiIndicesEnabled: experimentalFeatures.aiIndices,
+        request,
+        resolver: context.aiIndexResolver,
+        logger,
+      }),
+      experimentalFeatures.relevantSkills ? modelProvider.hasFastModel() : false,
+      context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []),
+      context.connectorSkills.resolveSkillIds(agentConfiguration.connector_ids ?? []),
+    ]);
   const skillIdsOverride = configurationOverrides?.skill_ids;
-  const filteredPluginSkillIds =
-    skillIdsOverride !== undefined
-      ? pluginSkillIds.filter((id) => skillIdsOverride.includes(id))
-      : pluginSkillIds;
+  const filterBySkillIdsOverride = (ids: string[]) =>
+    skillIdsOverride !== undefined ? ids.filter((id) => skillIdsOverride.includes(id)) : ids;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: filteredPluginSkillIds,
+    additionalSkillIds: [
+      ...filterBySkillIdsOverride(pluginSkillIds),
+      ...filterBySkillIdsOverride(connectorSkillIds),
+    ],
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
@@ -232,6 +241,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
     resumeAnchors,
+    // Folding keeps the stamp but not the run's end, so settlement comes from the stored events.
+    unreadSteerIds: conversation?.events ? unreadSettledSteerIds(conversation.events) : undefined,
   });
   processedConversation.resumedRoundId = pendingTurn?.id;
   const pendingRound = pendingTurn?.compatRound;
@@ -432,6 +443,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       smlSearchSelected: staticTools.some(({ id }) => id === platformCoreTools.smlSearch),
     });
 
+    const incomingMessages =
+      storesConversation && conversationId && executionId
+        ? createIncomingMessages({
+            conversationClient,
+            conversationId,
+            executionId,
+            timelineExecutionId: roundExecutionId,
+            runOwnerId: currentUserActor(conversationClient.getUser()).id,
+            logger,
+          })
+        : undefined;
+
     const agentGraph = createAgentGraph({
       logger,
       events: { emit: eventEmitter },
@@ -462,6 +485,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         toolManager,
       },
       cycleHooks,
+      incomingMessages,
     });
 
     logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -598,7 +622,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
     }
 
-    // Fire post-round hooks (nonBlocking — round is already streamed, hooks run fire-and-forget).
+    // Run post-round hooks. Blocking hooks are awaited here, so the run returns only after they
+    // finish; nonBlocking hooks are started and left to run in the background.
     // The try/catch is defensive; nonBlocking hooks should never throw to the runner.
     try {
       await context.hooks.run(HookLifecycle.afterExecution, {

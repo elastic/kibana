@@ -36,6 +36,9 @@ export const kiRestorePath = (aiIndexId: string, kiId: string) =>
 /** The internal (not public) API that lists Knowledge Indicators for one AI Index. */
 export const AI_INDEX_INTERNAL_PATH = 'internal/context_engine/ai_index';
 
+export const aiIndexDreamingPath = (aiIndexId: string) =>
+  `${AI_INDEX_INTERNAL_PATH}/${aiIndexId}/dreaming`;
+
 /** Kibana grant for the Context Engine `read` privilege in every space. */
 export const CONTEXT_ENGINE_READ: KibanaRole['kibana'][number] = {
   base: [],

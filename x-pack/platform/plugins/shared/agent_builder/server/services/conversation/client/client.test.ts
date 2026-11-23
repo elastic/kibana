@@ -23,6 +23,11 @@ import {
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationWriteConflictError,
+  isNoActiveExecutionError,
+  STEERS_PER_RUN_MAX,
+  isConversationAwaitingPromptError,
+  isConversationNotSteerableError,
+  isTooManyPendingSteersError,
 } from '@kbn/agent-builder-common';
 import type { ConversationAccessControlEntry } from '@kbn/agent-builder-common/chat/access_control';
 import {
@@ -43,6 +48,7 @@ import type {
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { CONVERSATION_BULK_GET_MAX_IDS } from '../../../../common/constants';
 import { createRound } from '../../../test_utils';
+import { pausedRoundTimeline } from '../../../test_utils/timeline';
 import { buildPinnedFilter } from '../access_control/query';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
@@ -53,7 +59,7 @@ import type { ConversationEventsServiceStart } from '../../conversation_events';
 import { describeConversationWrite } from '../../../workflows/triggers/describe_conversation_write';
 
 jest.mock('../templates/registry', () => ({ getTemplate: jest.fn() }));
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @kbn/compat/typescript-no-var-requires
 const getTemplateMock: jest.Mock = require('../templates/registry').getTemplate;
 
 jest.mock('../../../workflows/triggers/describe_conversation_write', () => {
@@ -95,6 +101,11 @@ const mockRawEsClient: MockRawEsClient = {
 };
 
 const TEST_CONVERSATION_INDEX = '.kibana_agent_builder_conversations';
+const CONVERSATION_UPDATED_AT = '2025-08-04T06:44:19.123Z';
+const expectUpdatedAtBumped = (document: { updated_at: string }) =>
+  expect(new Date(document.updated_at).getTime()).toBeGreaterThan(
+    new Date(CONVERSATION_UPDATED_AT).getTime()
+  );
 
 const mockConversationEvents: ConversationEventsServiceStart = {
   getDefinition: jest.fn(),
@@ -170,7 +181,7 @@ describe('ConversationClient', () => {
         ...(hasSpace ? { space } : {}),
         title,
         created_at: '2024-09-04T06:44:17.944Z',
-        updated_at: '2025-08-04T06:44:19.123Z',
+        updated_at: CONVERSATION_UPDATED_AT,
         read,
         ...(hasReadBy ? { read_by: readBy } : {}),
         pinned_by: pinnedBy,
@@ -1541,6 +1552,42 @@ describe('ConversationClient', () => {
       expect(result.title).toBe('Renamed');
     });
 
+    it('bumps updated_at when the conversation content changes', async () => {
+      mockGetDocumentResponse(createConversationDocument());
+
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed' },
+        { access: 'rename', source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expectUpdatedAtBumped(document);
+      expect(new Date(document.updated_at).getTime()).toBeGreaterThan(
+        new Date(CONVERSATION_UPDATED_AT).getTime()
+      );
+    });
+
+    it('keeps updated_at when an update only changes per-user fields', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.update({ id: 'conversation-1', read: true }, { source: 'http_api' });
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.updated_at).toBe(CONVERSATION_UPDATED_AT);
+    });
+
+    it('bumps updated_at when a content field changes alongside a per-user field', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.update(
+        { id: 'conversation-1', title: 'Renamed', read: true },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expectUpdatedAtBumped(document);
+    });
+
     it('preserves legacy owner read state when renaming before read_by exists', async () => {
       mockGetDocumentResponse(createConversationDocument({ read: true, hasReadBy: false }));
 
@@ -1737,6 +1784,21 @@ describe('ConversationClient', () => {
       expect(result.read).toBe(true);
     });
 
+    it('keeps updated_at when marking read or unread', async () => {
+      mockGetDocumentResponse(createConversationDocument({ readBy: [] }));
+
+      await client.markRead('conversation-1', true);
+
+      mockGetDocumentResponse(createConversationDocument({ readBy: [{ userId: 'user-1' }] }));
+
+      await client.markRead('conversation-1', false);
+
+      const [{ document: markedRead }, { document: markedUnread }] =
+        mockEsClient.index.mock.calls.map(([params]) => params);
+      expect(markedRead.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(markedUnread.updated_at).toBe(CONVERSATION_UPDATED_AT);
+    });
+
     it('does not clobber read_by entries written by another user', async () => {
       mockGetDocumentResponseOnce(createConversationDocument());
       // another user marked it read concurrently
@@ -1814,6 +1876,22 @@ describe('ConversationClient', () => {
       expect(document.pinned_by).toEqual([{ userId: 'user-1' }]);
       expectNoReadBy(result);
       expect(result.pinned).toBe(true);
+    });
+
+    it('keeps updated_at when pinning or unpinning', async () => {
+      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [] }));
+
+      await client.setPinned('conversation-1', true);
+
+      mockGetDocumentResponse(createConversationDocument({ pinnedBy: [{ userId: 'user-1' }] }));
+
+      await client.setPinned('conversation-1', false);
+
+      const [{ document: pinned }, { document: unpinned }] = mockEsClient.index.mock.calls.map(
+        ([params]) => params
+      );
+      expect(pinned.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(unpinned.updated_at).toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('does not clobber pinned_by entries written by another user', async () => {
@@ -1929,6 +2007,44 @@ describe('ConversationClient', () => {
           }),
         })
       );
+    });
+
+    it('keeps updated_at when submitting or retracting feedback', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: [makeTerminalEvent()],
+        })
+      );
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: 'up' });
+
+      const base = createConversationDocument({
+        schemaVersion: CONVERSATION_SCHEMA_VERSION,
+        events: [makeTerminalEvent()],
+      });
+      mockGetDocumentResponse({
+        ...base,
+        _source: {
+          ...base._source!,
+          feedback: {
+            [executionId]: {
+              vote: 'up',
+              chips: [],
+              comment: '',
+              submitted_at: '2025-01-01T00:00:00.000Z',
+            },
+          },
+        },
+      } as Document);
+
+      await client.updateRoundFeedback('conversation-1', executionId, { vote: null });
+
+      const [{ document: submitted }, { document: retracted }] = mockEsClient.index.mock.calls.map(
+        ([params]) => params
+      );
+      expect(submitted.updated_at).toBe(CONVERSATION_UPDATED_AT);
+      expect(retracted.updated_at).toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('throws not found when no terminal event matches the executionId', async () => {
@@ -4264,7 +4380,11 @@ describe('ConversationClient', () => {
         {
           source: 'execution',
           access: 'converse',
-          activeExecution: { action: 'acquire', executionId: 'e1' },
+          activeExecution: {
+            action: 'acquire',
+            executionId: 'e1',
+            timelineExecutionId: 'e1::execution',
+          },
         }
       );
 
@@ -4280,7 +4400,11 @@ describe('ConversationClient', () => {
         {
           source: 'http_api',
           access: 'converse',
-          activeExecution: { action: 'acquire', executionId: 'e1' },
+          activeExecution: {
+            action: 'acquire',
+            executionId: 'e1',
+            timelineExecutionId: 'e1::execution',
+          },
         }
       );
 
@@ -5265,6 +5389,51 @@ describe('ConversationClient', () => {
       expect(result.events).toEqual(indexed.events);
     });
 
+    it('appendEvents bumps updated_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: completedTimelineEvents('round-1'),
+        })
+      );
+
+      await client.appendEvents(
+        {
+          id: 'conversation-1',
+          events: [
+            {
+              id: '9c2e0f11-0000-4000-8000-000000000001',
+              type: TimelineEventType.userMessage,
+              created_at: '2026-09-22T10:00:00.000Z',
+              actor: { type: EventActorType.user, id: 'user-1', username: 'test-user' },
+              data: { message: 'Pool limit is now 200' },
+            },
+          ],
+        },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expectUpdatedAtBumped(document);
+    });
+
+    it('replaceRoundEvents bumps updated_at', async () => {
+      mockGetDocumentResponse(
+        createConversationDocument({
+          schemaVersion: CONVERSATION_SCHEMA_VERSION,
+          events: startTimelineEvents('round-1'),
+        })
+      );
+
+      await client.replaceRoundEvents(
+        { id: 'conversation-1', roundId: 'round-1', events: completedTimelineEvents('round-1') },
+        { source: 'http_api' }
+      );
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expectUpdatedAtBumped(document);
+    });
+
     it('leaves legacy conversations rounds-only on an update that records no activity (no events / no schema_version written)', async () => {
       mockGetDocumentResponse(
         createConversationDocument({
@@ -6112,7 +6281,12 @@ describe('ConversationClient', () => {
       data: { message: 'hello' },
     } as ConversationEvent;
 
-    const activeExecution = (executionId: string) => ({ execution_id: executionId });
+    // The lock names the record and the timeline id its events carry; steers are stamped with the latter.
+    const timelineOf = (executionId: string) => `${executionId}::execution`;
+    const activeExecution = (executionId: string) => ({
+      execution_id: executionId,
+      timeline_execution_id: timelineOf(executionId),
+    });
 
     const documentWithHolder = (
       executionId?: string,
@@ -6138,6 +6312,7 @@ describe('ConversationClient', () => {
     const setActiveExecution = (executionId: string) => ({
       action: 'acquire' as const,
       executionId,
+      timelineExecutionId: timelineOf(executionId),
     });
 
     const indexedSource = (call = 0) =>
@@ -6166,9 +6341,7 @@ describe('ConversationClient', () => {
       mockGetDocumentResponse(documentWithHolder());
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({
-        execution_id: 'e2',
-      });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
     });
 
     it('appendEvents setting the active execution throws conversationBusy while a live one holds it', async () => {
@@ -6191,7 +6364,7 @@ describe('ConversationClient', () => {
 
       const result = await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
       expect(indexedSource()).not.toHaveProperty('execution');
       expect(result).not.toHaveProperty('execution');
     });
@@ -6202,7 +6375,7 @@ describe('ConversationClient', () => {
 
       await appendSettingActiveExecution(setActiveExecution('e2'));
 
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
     });
 
     const documentWithPendingChild = (childIds: string[]): Document => {
@@ -6241,7 +6414,7 @@ describe('ConversationClient', () => {
       expect(indexedSource().state?.background_executions).toEqual({
         'child-2': { execution_id: 'child-2', status: ExecutionStatus.running },
       });
-      expect(indexedSource().active_execution).toEqual({ execution_id: 'e2' });
+      expect(indexedSource().active_execution).toEqual(activeExecution('e2'));
 
       mockGetDocumentResponse(documentWithPendingChild(['child-2']));
       const gone = await appendConsuming('child-1').catch((caught: unknown) => caught);
@@ -6265,7 +6438,7 @@ describe('ConversationClient', () => {
       expect(isConversationBusyError(busyWithoutRun)).toBe(true);
       staleHolder();
       await appendConsuming('child-1', false);
-      expect(indexedSource(1).active_execution).toEqual({ execution_id: 'e1' });
+      expect(indexedSource(1).active_execution).toEqual(activeExecution('e1'));
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
     });
 
@@ -6334,9 +6507,7 @@ describe('ConversationClient', () => {
       );
 
       const indexed = indexedSource();
-      expect(indexed.active_execution).toEqual({
-        execution_id: 'e2',
-      });
+      expect(indexed.active_execution).toEqual(activeExecution('e2'));
       expect(indexed).not.toHaveProperty('activeExecution');
       expect(result.active_execution).toMatchObject({ execution_id: 'e2' });
     });
@@ -6359,6 +6530,21 @@ describe('ConversationClient', () => {
       expect(indexed.active_execution).toMatchObject({
         execution_id: 'e2',
       });
+    });
+
+    it('an update without fields that sets or releases the active execution keeps updated_at', async () => {
+      mockGetDocumentResponse(documentWithHolder(undefined, { readBy: [{ userId: 'user-1' }] }));
+
+      await updateWithoutFields(setActiveExecution('e2'));
+
+      expect(indexedSource().updated_at).toBe(CONVERSATION_UPDATED_AT);
+
+      mockEsClient.index.mockClear();
+      mockGetDocumentResponse(documentWithHolder('e1', { readBy: [{ userId: 'user-1' }] }));
+
+      await updateWithoutFields({ action: 'release', executionId: 'e1' });
+
+      expect(indexedSource().updated_at).toBe(CONVERSATION_UPDATED_AT);
     });
 
     it('an update without fields that releases the active execution clears only its own', async () => {
@@ -6456,6 +6642,151 @@ describe('ConversationClient', () => {
       const conversation = await client.get('conversation-1');
 
       expect(conversation.active_execution).toEqual(activeExecution('e1'));
+    });
+
+    describe('appendSteer', () => {
+      const actor = { type: EventActorType.user, id: 'user-1', username: 'test-user' } as const;
+      const steerId = '9c2e0f11-0000-4000-8000-0000000000bb';
+      const storedSteer = {
+        id: steerId,
+        type: TimelineEventType.userMessage,
+        created_at: '2026-10-26T10:00:05.000Z',
+        actor,
+        data: { message: 'use a table', steer: { execution_id: timelineOf('e1') } },
+      } as ConversationEvent;
+
+      const appendSteer = () =>
+        client.appendSteer(
+          { id: 'conversation-1', message: 'use a table', eventId: steerId, actor },
+          { source: 'http_api' }
+        );
+
+      it('stamps the message with the live holder and stores it', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        liveHolder();
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({
+          event: {
+            id: steerId,
+            type: TimelineEventType.userMessage,
+            created_at: expect.any(String),
+            actor,
+            data: { message: 'use a table', steer: { execution_id: timelineOf('e1') } },
+          },
+          alreadyStored: false,
+        });
+        const events = indexedSource().events as ConversationEvent[];
+        expect(events[events.length - 1]).toEqual(result.event);
+      });
+
+      it('answers a retry with the run the message was stamped with, also once that run has ended', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder(undefined, { events: [userMessage, storedSteer] })
+        );
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({ event: storedSteer, alreadyStored: true });
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('answers a retry as stored while the run it was stamped with waits on a prompt', async () => {
+        const pausedOnPrompt = {
+          id: 'e1_terminated',
+          type: TimelineEventType.executionTerminated,
+          created_at: '2026-10-26T10:00:06.000Z',
+          actor: { type: EventActorType.agent, id: 'agent-1' },
+          execution_id: 'e1',
+          data: { outcome: { type: 'prompt_requested', prompts: [] } },
+        } as unknown as ConversationEvent;
+        mockGetDocumentResponse(
+          documentWithHolder(undefined, { events: [userMessage, storedSteer, pausedOnPrompt] })
+        );
+
+        const result = await appendSteer();
+
+        expect(result).toEqual({ event: storedSteer, alreadyStored: true });
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses without a live holder', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        staleHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isNoActiveExecutionError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses a public conversation before looking at the run', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e1', { accessMode: ConversationAccessControlMode.Public })
+        );
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationNotSteerableError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses while the conversation waits on a prompt and no run holds it', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder(undefined, { events: pausedRoundTimeline('round-1', ['tc1']) })
+        );
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isConversationAwaitingPromptError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('admits a steer to the resume of a pause, whose answer is stored only when it ends', async () => {
+        mockGetDocumentResponse(
+          documentWithHolder('e2', { events: pausedRoundTimeline('round-1', ['tc1']) })
+        );
+        liveHolder();
+
+        const result = await appendSteer();
+
+        expect(result.alreadyStored).toBe(false);
+        expect(result.event.data).toEqual({
+          message: 'use a table',
+          steer: { execution_id: timelineOf('e2') },
+        });
+      });
+
+      it('refuses the sixth pending steer of a run', async () => {
+        const pending = Array.from({ length: STEERS_PER_RUN_MAX }, (_, index) => ({
+          ...storedSteer,
+          id: `pending-${index}`,
+        }));
+        mockGetDocumentResponse(documentWithHolder('e1', { events: [userMessage, ...pending] }));
+        liveHolder();
+
+        const error = await appendSteer().catch((caught: unknown) => caught);
+
+        expect(isTooManyPendingSteersError(error)).toBe(true);
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
+
+      it('refuses an event_id that names an event other than a steer of the same actor', async () => {
+        mockGetDocumentResponse(documentWithHolder('e1'));
+        liveHolder();
+
+        const error = await client
+          .appendSteer(
+            { id: 'conversation-1', message: 'use a table', eventId: userMessage.id, actor },
+            { source: 'http_api' }
+          )
+          .catch((caught: unknown) => caught);
+
+        expect(error).toMatchObject({ meta: { statusCode: 400 } });
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      });
     });
   });
 });

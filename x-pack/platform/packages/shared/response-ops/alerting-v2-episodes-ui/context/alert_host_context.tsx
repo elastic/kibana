@@ -6,11 +6,18 @@
  */
 
 import React, { createContext, useContext, type PropsWithChildren } from 'react';
+import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
+
+export type CachedRule = FindRulesResponse['items'][number];
 
 export interface AlertHostContextValue {
   getRuleDetailsHref?: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   getEpisodeDetailsHref?: (episodeId: string) => string;
-  openRuleFlyout?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
+  openRuleFlyout?: (
+    ruleId: string,
+    sourceRuleInfo?: { category?: string },
+    cachedRule?: CachedRule
+  ) => void;
   closeRuleFlyout?: () => void;
   canWriteAlerts?: boolean;
 }

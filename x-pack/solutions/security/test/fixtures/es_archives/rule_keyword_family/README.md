@@ -5,8 +5,8 @@ x -
   pack /
     solutions /
     security /
-    test /
-    security_solution_api_integration /
+    test_suites /
+    test-suites-security-solution-apis /
     test_suites /
     detections_response /
     detection_engine /
