@@ -198,31 +198,39 @@ const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
 
 const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
-/** The diff block of one section: its first names, then how many more there are. */
-const diffBlock = (area: Area, section: Section, sign: string, entries: readonly Entry[]) => {
+/** The lines of one section: its name, its first names, then how many more there are. */
+const sectionLines = (area: Area, section: Section, sign: string, entries: readonly Entry[]) => {
   const details = new Map<string, string[]>();
   for (const { line, detail } of entries) {
     const known = details.get(line) ?? [];
     details.set(line, detail !== undefined && !known.includes(detail) ? [...known, detail] : known);
   }
   const names = [...details.entries()]
-    .map(([line, found]) => `${line}${found.length > 0 ? ` (${found.join(', ')})` : ''}`)
+    .map(
+      ([line, found]) =>
+        `${line}${found.length > 0 ? ` (${[...found].sort(byText).join(', ')})` : ''}`
+    )
     .sort(byText);
   const shown = names.slice(0, MAX_NAMES_PER_SECTION);
   const more = names.length - shown.length;
   return [
-    `**${section}**`,
-    '```diff',
+    section,
     ...shown.map((line) => `${sign} ${line}`),
     ...(more > 0
       ? [`  … and ${more} more ${section === 'changed' ? 'changed' : area.toLowerCase()}`]
       : []),
-    '```',
-    '',
   ];
 };
 
-/** The markdown describing the changes to one endpoint: a heading per area, a diff per section. */
+// The diff block of an area: its sections, a blank line apart.
+const fenced = (...sections: ReadonlyArray<readonly string[]>): string[] => [
+  '```diff',
+  ...sections.flatMap((lines, index) => (index === 0 ? lines : ['', ...lines])),
+  '```',
+  '',
+];
+
+/** The markdown describing the changes to one endpoint: a bold heading per area, and one diff block under it. */
 export const describeChanges = (changes: readonly SpecChange[]): string[] => {
   const entries: Entry[] = [];
   const otherRules = new Map<string, number>();
@@ -240,47 +248,39 @@ export const describeChanges = (changes: readonly SpecChange[]): string[] => {
   const regrouped = securityChanges.length > 0 && scopes.length === 0;
 
   const blocks = AREAS.flatMap((area) => {
+    const heading = `**${area}**`;
     if (area === 'Other') {
       return otherRules.size === 0
         ? []
         : [
-            area,
-            '',
-            '**changed**',
-            '```diff',
-            ...[...otherRules.entries()].map(
-              ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
-            ),
-            '```',
-            '',
+            heading,
+            ...fenced([
+              'changed',
+              ...[...otherRules.entries()].map(
+                ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
+              ),
+            ]),
           ];
     }
     const ofArea = entries.filter((entry) => entry.area === area);
     if (area === 'Auth scopes' && regrouped) {
-      return [area, '', 'regrouped, same scopes', ''];
+      return [heading, ...fenced(['regrouped, same scopes'])];
     }
     if (ofArea.length === 0) {
       return [];
     }
     if (area === 'Schema variants') {
       const count = new Set(ofArea.map(({ line }) => line)).size;
-      return [
-        area,
-        '',
-        '**changed**',
-        '```diff',
-        `! ${count} ${count === 1 ? 'change' : 'changes'}`,
-        '```',
-        '',
-      ];
+      return [heading, ...fenced(['changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`])];
     }
     return [
-      area,
-      '',
-      ...SECTIONS.flatMap(({ section, sign }) => {
-        const inSection = ofArea.filter((entry) => entry.section === section);
-        return inSection.length === 0 ? [] : diffBlock(area, section, sign, inSection);
-      }),
+      heading,
+      ...fenced(
+        ...SECTIONS.flatMap(({ section, sign }) => {
+          const inSection = ofArea.filter((entry) => entry.section === section);
+          return inSection.length === 0 ? [] : [sectionLines(area, section, sign, inSection)];
+        })
+      ),
     ];
   });
   // A blank line closes the cell's content; the table adds its own around it.

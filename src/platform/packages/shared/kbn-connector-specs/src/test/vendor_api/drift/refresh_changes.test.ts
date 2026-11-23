@@ -19,7 +19,15 @@ const scheme = (id: string, scopes: string[]) =>
       .join(', ')}]\` was ${id.endsWith('-added') ? 'added to' : 'removed from'} the API`
   );
 
-const diff = (...lines: string[]): string[] => ['```diff', ...lines, '```', ''];
+// The diff block of an area: its sections, a blank line apart, and the cell without the blank
+// line that ends its last block.
+const block = (...sections: string[][]): string[] => [
+  '```diff',
+  ...sections.flatMap((lines, index) => (index === 0 ? lines : ['', ...lines])),
+  '```',
+  '',
+];
+const cellOf = (...parts: string[][]): string[] => parts.flat().slice(0, -1);
 
 describe('describeChanges', () => {
   it('groups the changes by where they are, then by removed, added and changed', () => {
@@ -49,26 +57,27 @@ describe('describeChanges', () => {
       scheme('api-security-added', ['container']),
     ]);
 
-    expect(lines).toEqual([
-      'Response fields',
-      '',
-      '**removed**',
-      ...diff('- custom_attributes/key'),
-      '**added**',
-      ...diff('+ clusters/addonsConfig/wizSensorConfig'),
-      '**changed**',
-      ...diff(
-        '! clusters/securityPostureConfig/vulnerabilityMode (deprecated)',
-        '! custom_attributes (object → string)'
-      ),
-      'Enum values',
-      '',
-      '**added**',
-      ...diff('+ MIGRATE_TO_ADVANCED_DATAPATH (clusters/networkConfig/datapathProvider)'),
-      'Auth scopes',
-      '',
-      'regrouped, same scopes',
-    ]);
+    expect(lines).toEqual(
+      cellOf(
+        ['**Response fields**'],
+        block(
+          ['removed', '- custom_attributes/key'],
+          ['added', '+ clusters/addonsConfig/wizSensorConfig'],
+          [
+            'changed',
+            '! clusters/securityPostureConfig/vulnerabilityMode (deprecated)',
+            '! custom_attributes (object → string)',
+          ]
+        ),
+        ['**Enum values**'],
+        block([
+          'added',
+          '+ MIGRATE_TO_ADVANCED_DATAPATH (clusters/networkConfig/datapathProvider)',
+        ]),
+        ['**Auth scopes**'],
+        block(['regrouped, same scopes'])
+      )
+    );
   });
 
   it('shows the first three names of a section and counts the rest', () => {
@@ -79,12 +88,10 @@ describe('describeChanges', () => {
     );
 
     expect(lines).toEqual(
-      [
-        'Response fields',
-        '',
-        '**added**',
-        ...diff('+ a', '+ b', '+ c', '  … and 2 more response fields'),
-      ].slice(0, -1)
+      cellOf(
+        ['**Response fields**'],
+        block(['added', '+ a', '+ b', '+ c', '  … and 2 more response fields'])
+      )
     );
   });
 
@@ -113,14 +120,12 @@ describe('describeChanges', () => {
       ),
     ]);
 
-    expect(lines).toEqual([
-      'Request parameters',
-      '',
-      '**changed**',
-      '```diff',
-      '! branch (minLength set to 1, no longer nullable)',
-      '```',
-    ]);
+    expect(lines).toEqual(
+      cellOf(
+        ['**Request parameters**'],
+        block(['changed', '! branch (minLength set to 1, no longer nullable)'])
+      )
+    );
   });
 
   it('names the scopes that were really added or removed', () => {
@@ -138,17 +143,12 @@ describe('describeChanges', () => {
           "the security scope `pipeline:write` was added to the endpoint's security scheme `oauth2`"
         ),
       ])
-    ).toEqual([
-      'Auth scopes',
-      '',
-      '**removed**',
-      ...diff('- container', '- pipeline'),
-      '**added**',
-      '```diff',
-      '+ bigquery',
-      '+ pipeline:write',
-      '```',
-    ]);
+    ).toEqual(
+      cellOf(
+        ['**Auth scopes**'],
+        block(['removed', '- container', '- pipeline'], ['added', '+ bigquery', '+ pipeline:write'])
+      )
+    );
   });
 
   it('names a field once, whatever media types the change was reported for', () => {
@@ -177,16 +177,18 @@ describe('describeChanges', () => {
       change('api-schema-removed', 'removed the schema `statusGroupFilter`'),
     ]);
 
-    expect(lines.filter((line) => !line.startsWith('`') && /^[A-Z-]/.test(line))).toEqual([
-      'Response fields',
-      '- count',
-      'Request fields',
-      '- query/limit',
-      'Request parameters',
-      '- alertId',
-      'Schemas',
-      '- statusGroupFilter',
-    ]);
+    expect(lines).toEqual(
+      cellOf(
+        ['**Response fields**'],
+        block(['removed', '- count']),
+        ['**Request fields**'],
+        block(['removed', '- query/limit']),
+        ['**Request parameters**'],
+        block(['removed', '- alertId']),
+        ['**Schemas**'],
+        block(['removed', '- statusGroupFilter'])
+      )
+    );
   });
 
   it('names a parameter, not its location', () => {
@@ -198,7 +200,7 @@ describe('describeChanges', () => {
         ),
       ])
     ).toEqual(
-      ['Request parameters', '', '**added**', ...diff('+ preferFieldAssociatedErrors')].slice(0, -1)
+      cellOf(['**Request parameters**'], block(['added', '+ preferFieldAssociatedErrors']))
     );
   });
 
@@ -218,7 +220,7 @@ describe('describeChanges', () => {
           'added `#microsoft.graph.x` discriminator mapping keys to the `y` response property'
         ),
       ])
-    ).toEqual(['Schema variants', '', '**changed**', '```diff', '! 2 changes', '```']);
+    ).toEqual(cellOf(['**Schema variants**'], block(['changed', '! 2 changes'])));
   });
 
   it('names new error responses', () => {
@@ -229,7 +231,7 @@ describe('describeChanges', () => {
           'added the non-success response with the status `422`'
         ),
       ])
-    ).toEqual(['Error responses', '', '**added**', '```diff', '+ 422', '```']);
+    ).toEqual(cellOf(['**Error responses**'], block(['added', '+ 422'])));
   });
 
   it.each([
@@ -279,7 +281,7 @@ describe('describeChanges', () => {
         change('something-new', 'y'),
         change('other-rule', 'z'),
       ])
-    ).toEqual(['Other', '', '**changed**', '```diff', '! something-new ×2', '! other-rule', '```']);
+    ).toEqual(cellOf(['**Other**'], block(['changed', '! something-new ×2', '! other-rule'])));
   });
 
   it('cuts a long path at its start, keeping the field', () => {
