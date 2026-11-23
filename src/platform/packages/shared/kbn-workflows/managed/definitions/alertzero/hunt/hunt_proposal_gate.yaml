@@ -26,7 +26,7 @@ settings:
   # expire first and lose a decision the child had already reached (the same reasoning
   # create_proposal.yaml gives for being strictly longer than `52w`). Hence the same
   # 176h as every other human-gated AlertZero parent — attack_discovery_review,
-  # coverage_review, coverage_rule_creation, tuning_review. The two requery/close steps
+  # coverage_review, rule_creation, rule_tuning_review. The two requery/close steps
   # after the wrap are near-instant, so the margin is all decision time.
   #
   # Not to be confused with the `53w` on system-create-alertzero-proposal, the bridge

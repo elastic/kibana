@@ -34,7 +34,7 @@ export const ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW = {
   id: ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 6,
+  version: 5,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'forensics_proposal_gate.yaml');
   },
