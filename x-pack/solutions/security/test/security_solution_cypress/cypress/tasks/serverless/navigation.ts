@@ -7,8 +7,9 @@
 
 import {
   ALERTS,
+  clickServerlessChromeNavControl,
   DISCOVER,
-  ONBOARDING,
+  FOOTER_LAUNCHPAD,
   openNavigationPanelFor,
 } from '../../screens/serverless_security_header';
 
@@ -17,8 +18,10 @@ const navigateTo = (page: string) => {
   cy.get(page).click();
 };
 
+// The Launchpad footer button links to its first item (Getting started), so clicking it navigates
+// there directly. Clicking the item inside its panel would be blocked by the app-leave prompt.
 export const navigateToOnboardingPageInServerless = () => {
-  navigateTo(ONBOARDING);
+  clickServerlessChromeNavControl(FOOTER_LAUNCHPAD);
 };
 
 export const navigateToAlertsPageInServerless = () => {
