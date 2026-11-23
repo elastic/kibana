@@ -21,6 +21,7 @@ tags:
   - package
   - dev
   - group-undefined
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.js'

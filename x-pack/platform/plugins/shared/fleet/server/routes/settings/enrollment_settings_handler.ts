@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { omit, pick } from 'lodash';
+import { pick } from 'lodash';
 
 import { FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
@@ -18,12 +18,12 @@ import type {
   AgentPolicy,
   EnrollmentSettingsFleetServerPolicy,
   FleetProxy,
-  Output,
   DownloadSource,
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
+import { sanitizeOutput } from '../utils/sanitize_settings_objects';
 import { getFleetProxy } from '../../services/fleet_proxies';
 import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
 import { getDataOutputForAgentPolicy } from '../../services/agent_policies';
@@ -129,7 +129,7 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
     if (settingsResponse.fleet_server.policies.length > 0) {
       const dataOutput = await getDataOutputForAgentPolicy(soClient, scopedAgentPolicy);
       if (dataOutput.type === 'elasticsearch' && dataOutput.hosts?.[0]) {
-        settingsResponse.fleet_server.es_output = sanitizeEnrollmentOutput(dataOutput);
+        settingsResponse.fleet_server.es_output = sanitizeOutput(dataOutput);
         if (dataOutput.proxy_id) {
           const proxy = await getFleetProxy(soClient, dataOutput.proxy_id);
           settingsResponse.fleet_server.es_output_proxy = sanitizeEnrollmentProxy(proxy);
@@ -216,23 +216,6 @@ function sanitizeEnrollmentProxy(
   proxy: FleetProxy
 ): NonNullable<GetEnrollmentSettingsResponse['download_source_proxy']> {
   return pick(proxy, ['id', 'name', 'url']);
-}
-
-function sanitizeEnrollmentOutput(output: Output): Output {
-  return {
-    ...omit(output, ['secrets']),
-    ssl: output.ssl ? omit(output.ssl, ['key']) : output.ssl,
-    ...(output.type === 'kafka'
-      ? {
-          password: undefined,
-        }
-      : {}),
-    ...(output.type === 'remote_elasticsearch'
-      ? {
-          service_token: undefined,
-        }
-      : {}),
-  };
 }
 
 function sanitizeEnrollmentDownloadSource(downloadSource: DownloadSource): DownloadSource {
