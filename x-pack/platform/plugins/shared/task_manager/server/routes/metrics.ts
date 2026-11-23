@@ -12,11 +12,14 @@ import type {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
+  IClusterClient,
 } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { Observable, Subject } from 'rxjs';
 import type { Metrics } from '../metrics';
+import { checkMonitoringPrivileges } from '../lib/check_monitoring_privileges';
+import { redactMetrics } from '../lib/redact_monitoring_stats';
 
 export interface NodeMetrics {
   process_uuid: string;
@@ -31,6 +34,9 @@ export interface MetricsRouteParams {
   metrics$: Observable<Metrics>;
   resetMetrics$: Subject<boolean>;
   taskManagerId: string;
+  kibanaIndexName: string;
+  getClusterClient: () => Promise<IClusterClient>;
+  getIsSecurityEnabled: () => boolean;
 }
 
 const QuerySchema = schema.object({
@@ -38,7 +44,16 @@ const QuerySchema = schema.object({
 });
 
 export function metricsRoute(params: MetricsRouteParams) {
-  const { router, metrics$, resetMetrics$, taskManagerId } = params;
+  const {
+    router,
+    logger,
+    metrics$,
+    resetMetrics$,
+    taskManagerId,
+    kibanaIndexName,
+    getClusterClient,
+    getIsSecurityEnabled,
+  } = params;
 
   let lastMetrics: NodeMetrics | null = null;
 
@@ -77,15 +92,25 @@ export function metricsRoute(params: MetricsRouteParams) {
       req: KibanaRequest<unknown, TypeOf<typeof QuerySchema>, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
-      if (req.query.reset) {
+      const { isPrivileged } = await checkMonitoringPrivileges({
+        request: req,
+        getClusterClient,
+        kibanaIndexName,
+        getIsSecurityEnabled,
+        logger,
+      });
+
+      if (req.query.reset && isPrivileged) {
         resetMetrics$.next(true);
       }
 
-      return res.ok({
-        body: lastMetrics
-          ? lastMetrics
-          : { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} },
-      });
+      if (!lastMetrics) {
+        return res.ok({
+          body: { process_uuid: taskManagerId, timestamp: new Date().toISOString(), metrics: {} },
+        });
+      }
+
+      return res.ok({ body: isPrivileged ? lastMetrics : redactMetrics(lastMetrics) });
     }
   );
 }

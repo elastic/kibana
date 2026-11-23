@@ -9,12 +9,20 @@ import { firstValueFrom, of, Subject, BehaviorSubject } from 'rxjs';
 import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/server/mocks';
+import type { HealthRouteParams } from './health';
 import { healthRoute } from './health';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { HealthStatus } from '../monitoring';
+import { redactHealth } from '../lib/redact_monitoring_stats';
+import {
+  createRawMonitoringStatsWithTaskTypes,
+  MOCK_PAUSED_TASK_TYPE,
+  MOCK_TASK_TYPE,
+} from '../lib/redact_monitoring_stats.mock';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { TaskManagerConfig } from '../config';
 import { configSchema } from '../config';
@@ -50,6 +58,28 @@ const createMockClusterClient = (response: any) => {
   return { mockClusterClient, mockScopedClusterClient };
 };
 
+const createPrivilegesResponse = ({
+  monitor = false,
+  manageTaskManager = false,
+  kibanaIndexName = '.kibana',
+}: {
+  monitor?: boolean;
+  manageTaskManager?: boolean;
+  kibanaIndexName?: string;
+}) => ({
+  has_all_requested: monitor && manageTaskManager,
+  cluster: { monitor },
+  application: {
+    [`kibana-${kibanaIndexName}`]: { '*': { 'api:manage_taskManager': manageTaskManager } },
+  },
+});
+
+const getPrivilegedClusterClient = () =>
+  Promise.resolve(
+    createMockClusterClient(createPrivilegesResponse({ monitor: true, manageTaskManager: true }))
+      .mockClusterClient
+  );
+
 const timestamp = new Date().toISOString();
 
 describe('healthRoute', () => {
@@ -83,9 +113,9 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -98,9 +128,9 @@ describe('healthRoute', () => {
   });
 
   it('checks user privileges and increments usage counter when API is accessed', async () => {
-    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
-      has_all_requested: false,
-    });
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      createPrivilegesResponse({})
+    );
     const router = httpServiceMock.createRouter();
     healthRoute({
       router,
@@ -108,7 +138,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -122,11 +152,12 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      cluster: ['monitor'],
       application: [
         {
           application: `kibana-foo`,
           resources: ['*'],
-          privileges: [`api:8.0:taskManager`],
+          privileges: [`api:manage_taskManager`],
         },
       ],
     });
@@ -138,10 +169,10 @@ describe('healthRoute', () => {
     });
   });
 
-  it('checks user privileges and increments admin usage counter when API is accessed when user has access to task manager feature', async () => {
-    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
-      has_all_requested: true,
-    });
+  it('does not increment admin usage counter when user only has the cluster monitor privilege', async () => {
+    const { mockClusterClient } = createMockClusterClient(
+      createPrivilegesResponse({ monitor: true, kibanaIndexName: 'foo' })
+    );
     const router = httpServiceMock.createRouter();
     healthRoute({
       router,
@@ -149,7 +180,39 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
+      kibanaIndexName: 'foo',
+      getClusterClient: () => Promise.resolve(mockClusterClient),
+      usageCounter: mockUsageCounter,
+      shouldRunTasks: true,
+      docLinks,
+      numOfKibanaInstances$: new BehaviorSubject(1),
+    });
+
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+    await handler(context, req, res);
+
+    expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
+      counterName: `taskManagerHealthApiAccess`,
+      counterType: 'taskManagerHealthApi',
+      incrementBy: 1,
+    });
+  });
+
+  it('checks user privileges and increments admin usage counter when API is accessed when user has access to task manager feature', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      createPrivilegesResponse({ manageTaskManager: true, kibanaIndexName: 'foo' })
+    );
+    const router = httpServiceMock.createRouter();
+    healthRoute({
+      router,
+      monitoringStats$: of(),
+      logger,
+      taskManagerId: uuidv4(),
+      config: getTaskManagerConfig(),
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       usageCounter: mockUsageCounter,
@@ -163,11 +226,12 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+      cluster: ['monitor'],
       application: [
         {
           application: `kibana-foo`,
           resources: ['*'],
-          privileges: [`api:8.0:taskManager`],
+          privileges: [`api:manage_taskManager`],
         },
       ],
     });
@@ -185,10 +249,10 @@ describe('healthRoute', () => {
     });
   });
 
-  it('skips checking user privileges if usage counter is undefined', async () => {
-    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient({
-      has_all_requested: false,
-    });
+  it('checks user privileges without incrementing usage counters if usage counter is undefined', async () => {
+    const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+      createPrivilegesResponse({ manageTaskManager: true, kibanaIndexName: 'foo' })
+    );
     const router = httpServiceMock.createRouter();
     healthRoute({
       router,
@@ -196,7 +260,7 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: uuidv4(),
       config: getTaskManagerConfig(),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: 'foo',
       getClusterClient: () => Promise.resolve(mockClusterClient),
       shouldRunTasks: true,
@@ -208,7 +272,8 @@ describe('healthRoute', () => {
     const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
     await handler(context, req, res);
 
-    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+    expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledTimes(1);
+    expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
 
   it('logs the Task Manager stats at a fixed interval', async () => {
@@ -238,9 +303,9 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -315,9 +380,9 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -407,9 +472,9 @@ describe('healthRoute', () => {
         },
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -486,9 +551,9 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -577,9 +642,9 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -643,9 +708,9 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 5000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -722,9 +787,9 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -819,9 +884,9 @@ describe('healthRoute', () => {
         monitored_stats_required_freshness: 1000,
         monitored_aggregated_stats_refresh_rate: 60000,
       }),
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: false,
       docLinks,
@@ -875,9 +940,9 @@ describe('healthRoute', () => {
       logger,
       taskManagerId: id,
       config,
-      kibanaVersion: '8.0',
+      getIsSecurityEnabled: () => true,
       kibanaIndexName: '.kibana',
-      getClusterClient: () => Promise.resolve(elasticsearchServiceMock.createClusterClient()),
+      getClusterClient: getPrivilegedClusterClient,
       usageCounter: mockUsageCounter,
       shouldRunTasks: true,
       docLinks,
@@ -901,6 +966,88 @@ describe('healthRoute', () => {
       expect.anything(),
       2
     );
+  });
+
+  describe('monitoring privileges', () => {
+    const callHandlerWithTaskTypeStats = async (
+      params: Pick<HealthRouteParams, 'getClusterClient' | 'getIsSecurityEnabled'>
+    ) => {
+      summarizeMonitoringStats.mockReturnValue(createRawMonitoringStatsWithTaskTypes());
+      const router = httpServiceMock.createRouter();
+      const stats$ = new Subject<MonitoringStats>();
+      healthRoute({
+        router,
+        monitoringStats$: stats$,
+        logger,
+        taskManagerId: uuidv4(),
+        config: getTaskManagerConfig(),
+        kibanaIndexName: '.kibana',
+        usageCounter: mockUsageCounter,
+        shouldRunTasks: true,
+        docLinks,
+        numOfKibanaInstances$: new BehaviorSubject(1),
+        ...params,
+      });
+      stats$.next(mockHealthStats());
+
+      const [, handler] = router.get.mock.calls[0];
+      const [context, req, res] = mockHandlerArguments({}, {}, ['ok']);
+      await handler(context, req, res);
+      return res;
+    };
+
+    it('returns redacted stats when user has neither the cluster monitor nor the manage_taskManager privilege', async () => {
+      const { mockClusterClient } = createMockClusterClient(createPrivilegesResponse({}));
+
+      const res = await callHandlerWithTaskTypeStats({
+        getClusterClient: () => Promise.resolve(mockClusterClient),
+        getIsSecurityEnabled: () => true,
+      });
+
+      const { stats: redactedStats } = redactHealth({
+        ...createRawMonitoringStatsWithTaskTypes(),
+        id: 'id',
+        timestamp,
+        status: HealthStatus.OK,
+      });
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ stats: redactedStats }),
+      });
+      const responseJson = JSON.stringify(jest.mocked(res.ok).mock.calls);
+      expect(responseJson).not.toContain(MOCK_TASK_TYPE);
+      expect(responseJson).not.toContain(MOCK_PAUSED_TASK_TYPE);
+    });
+
+    it('returns full stats when user only has the cluster monitor privilege', async () => {
+      const { mockClusterClient } = createMockClusterClient(
+        createPrivilegesResponse({ monitor: true })
+      );
+
+      const res = await callHandlerWithTaskTypeStats({
+        getClusterClient: () => Promise.resolve(mockClusterClient),
+        getIsSecurityEnabled: () => true,
+      });
+
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ stats: createRawMonitoringStatsWithTaskTypes().stats }),
+      });
+    });
+
+    it('returns full stats without checking privileges when security is disabled', async () => {
+      const { mockClusterClient, mockScopedClusterClient } = createMockClusterClient(
+        createPrivilegesResponse({})
+      );
+
+      const res = await callHandlerWithTaskTypeStats({
+        getClusterClient: () => Promise.resolve(mockClusterClient),
+        getIsSecurityEnabled: () => false,
+      });
+
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+      expect(res.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({ stats: createRawMonitoringStatsWithTaskTypes().stats }),
+      });
+    });
   });
 });
 

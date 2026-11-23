@@ -14,6 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./background_task_utilization_route'));
     loadTestFile(require.resolve('./metrics_route'));
     loadTestFile(require.resolve('./health_route'));
+    loadTestFile(require.resolve('./monitoring_routes_privileges'));
     loadTestFile(require.resolve('./task_management'));
     loadTestFile(require.resolve('./task_management_version_conflicts'));
     loadTestFile(require.resolve('./task_management_scheduled_at'));

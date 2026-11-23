@@ -26,6 +26,8 @@ import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
 import { createHealthStatusLogger } from '../lib/health_status_logger';
+import { checkMonitoringPrivileges } from '../lib/check_monitoring_privileges';
+import { redactHealth } from '../lib/redact_monitoring_stats';
 
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
@@ -55,10 +57,10 @@ export interface HealthRouteParams {
   logger: Logger;
   taskManagerId: string;
   config: TaskManagerConfig;
-  kibanaVersion: string;
   kibanaIndexName: string;
   shouldRunTasks: boolean;
   getClusterClient: () => Promise<IClusterClient>;
+  getIsSecurityEnabled: () => boolean;
   usageCounter?: UsageCounter;
   docLinks: DocLinksServiceSetup;
   numOfKibanaInstances$: Observable<number>;
@@ -74,9 +76,9 @@ export function healthRoute(params: HealthRouteParams): {
     logger,
     taskManagerId,
     config,
-    kibanaVersion,
     kibanaIndexName,
     getClusterClient,
+    getIsSecurityEnabled,
     usageCounter,
     shouldRunTasks,
     docLinks,
@@ -180,29 +182,22 @@ export function healthRoute(params: HealthRouteParams): {
       req: KibanaRequest<unknown, unknown, unknown>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
-      // If we are able to count usage, we want to check whether the user has access to
-      // the `taskManager` feature, which is only available as part of the Global All privilege.
-      if (usageCounter) {
-        const clusterClient = await getClusterClient();
-        const hasPrivilegesResponse = await clusterClient
-          .asScoped(req)
-          .asCurrentUser.security.hasPrivileges({
-            application: [
-              {
-                application: `kibana-${kibanaIndexName}`,
-                resources: ['*'],
-                privileges: [`api:${kibanaVersion}:taskManager`],
-              },
-            ],
-          });
+      const { isPrivileged, hasManageTaskManager } = await checkMonitoringPrivileges({
+        request: req,
+        getClusterClient,
+        kibanaIndexName,
+        getIsSecurityEnabled,
+        logger,
+      });
 
-        // Keep track of total access vs admin access
+      // Keep track of total access vs admin access
+      if (usageCounter) {
         usageCounter.incrementCounter({
           counterName: `taskManagerHealthApiAccess`,
           counterType: 'taskManagerHealthApi',
           incrementBy: 1,
         });
-        if (hasPrivilegesResponse.has_all_requested) {
+        if (hasManageTaskManager) {
           usageCounter.incrementCounter({
             counterName: `taskManagerHealthApiAdminAccess`,
             counterType: 'taskManagerHealthApi',
@@ -211,11 +206,18 @@ export function healthRoute(params: HealthRouteParams): {
         }
       }
 
-      return res.ok({
-        body: lastMonitoredStats
-          ? getHealthStatus(lastMonitoredStats)
-          : { id: taskManagerId, timestamp: new Date().toISOString(), status: HealthStatus.Error },
-      });
+      if (!lastMonitoredStats) {
+        return res.ok({
+          body: {
+            id: taskManagerId,
+            timestamp: new Date().toISOString(),
+            status: HealthStatus.Error,
+          },
+        });
+      }
+
+      const health = getHealthStatus(lastMonitoredStats);
+      return res.ok({ body: isPrivileged ? health : redactHealth(health) });
     }
   );
   return { serviceStatus$, monitoredHealth$ };
