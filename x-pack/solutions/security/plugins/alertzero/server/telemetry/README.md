@@ -261,6 +261,8 @@ Emitted by a Rule Tuning review for one rule, when it ends: after the manual ent
 | `backtest_ran` | boolean | yes | Whether both backtest previews (current and proposed rule) succeeded |
 | `backtest_reduced_alerts` | boolean | yes | Whether the proposed rule produced fewer preview alerts. False when the backtest did not run |
 | `rule_unavailable` | boolean | yes | Whether the rule could not be read or was disabled, so the review did nothing |
+| `decision_history_read` | keyword | yes | How the review read the rule's decision history before diagnosis: `found` a page, `empty` when the rule has none yet, `failed` when the read failed and the diagnosis went ahead without it, or `none` when no diagnosis ran |
+| `decision_history_saved` | keyword | yes | Whether the analyst's decision was added to the rule's decision history: `saved` (also when a replay found it there already), `failed` (after the alerts were tagged and the Investigation closed, which the failure does not undo) or `none` when nobody decided |
 | `rule_type` | keyword | no | The reviewed rule's type: `query`, `eql`, `esql`, `threshold`, `new_terms`, `ml`, `threat_match` or `other` (`ml` is machine learning; `query` includes saved query). The YAML passes the rule's own `type` and the step maps it, so the vocabulary lives in one place. Absent when the rule could not be read |
 | `rule_source` | keyword | no | `prebuilt` (an Elastic prebuilt rule) or `custom`. Absent when the rule could not be read |
 | `investigation_id` | keyword | no | The Investigation the review opened. It joins to the close. Absent only when `rule_unavailable` is true, because the review opens none for a rule it cannot read or that is disabled |

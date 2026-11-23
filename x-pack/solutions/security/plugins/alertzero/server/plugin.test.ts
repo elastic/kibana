@@ -84,6 +84,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features,
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: undefined,
           agentBuilder: { skills },
@@ -113,6 +114,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -135,6 +137,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: { registerManagedWorkflowOwner: jest.fn() },
           workflowsManagement: undefined,
           contextEngine,
@@ -152,6 +155,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -174,6 +178,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: undefined,
         } as never
@@ -208,6 +213,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         };
         const dependencies = {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: { management: {} },
           agentBuilder: {},
@@ -242,6 +248,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -272,6 +279,31 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       );
     });
 
+    it('registers the AlertZero wiki the Rule Tuning review reads and writes', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const agentKnowledge = { registerWiki: jest.fn() };
+
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge,
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+        } as never
+      );
+
+      expect(agentKnowledge.registerWiki).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'alertzero',
+          pageTypes: { detection_rule: expect.anything() },
+        })
+      );
+    });
+
     it('sets up without Context Engine installed', () => {
       const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
 
@@ -279,6 +311,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -306,6 +339,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features,
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: { management: {} },
           proposals: {},
@@ -358,6 +392,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -404,6 +439,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features,
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -429,6 +465,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -458,6 +495,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: { management: {} },
           proposals: {},
@@ -484,6 +522,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -515,6 +554,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),
@@ -560,6 +600,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreSetup as never,
         {
           features,
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions,
           workflowsManagement: { management: {} },
           proposals: {},
@@ -581,6 +622,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           coreSetup as never,
           {
             features: { registerKibanaFeature: jest.fn() },
+            agentKnowledge: { registerWiki: jest.fn() },
             workflowsExtensions: {
               registerManagedWorkflowOwner: jest.fn(),
               registerStepDefinition: jest.fn(),
@@ -686,6 +728,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         coreMock.createSetup() as never,
         {
           features: { registerKibanaFeature: jest.fn() },
+          agentKnowledge: { registerWiki: jest.fn() },
           workflowsExtensions: {
             registerManagedWorkflowOwner: jest.fn(),
             registerStepDefinition: jest.fn(),

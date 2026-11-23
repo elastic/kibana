@@ -23,4 +23,9 @@ export const registerAlertZeroPublicStepDefinitions = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./triage_decision_steps').then((m) => m.triageRevokeFpDecisionPublicStepDefinition)
   );
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./build_rule_tuning_wiki_entry_step').then(
+      (m) => m.buildRuleTuningWikiEntryPublicStepDefinition
+    )
+  );
 };

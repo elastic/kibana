@@ -478,6 +478,8 @@ describe('Rule Tuning outcome reports', () => {
                   output: { structured_output: { change_type: changeType, confidence } },
                 },
                 fetch_rule: { output: { ...rule, enabled: true, revision: 1 } },
+                recall_rule_history: { output: { found: true } },
+                ...(decision ? { save_decision: { output: { outcome: 'recorded' } } } : {}),
                 ...(applied
                   ? {
                       refetch_rule: {
@@ -515,11 +517,15 @@ describe('Rule Tuning outcome reports', () => {
             : {}),
         },
       };
-      // The review computes whether the change landed in its own step before it reports.
+      // The review computes whether the change landed and whether the decision was saved in
+      // their own steps before it reports.
       return {
         steps: {
           ...context.steps,
           resolve_applied: { output: renderReport(stepNamed(steps, 'resolve_applied'), context) },
+          resolve_decision_saved: {
+            output: renderReport(stepNamed(steps, 'resolve_decision_saved'), context),
+          },
         },
       };
     };
@@ -536,6 +542,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'query',
           confidence: 'high',
           decision: 'approved',
+          decision_history_read: 'found',
+          decision_history_saved: 'saved',
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
@@ -562,6 +570,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'exception',
           confidence: 'medium',
           decision: 'dismissed',
+          decision_history_read: 'found',
+          decision_history_saved: 'saved',
           entry_gate: 'approved',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
@@ -580,6 +590,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'manual',
           confidence: 'none',
           decision: 'approved',
+          decision_history_read: 'found',
+          decision_history_saved: 'saved',
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
@@ -604,6 +616,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'risk_score',
           confidence: 'high',
           decision: 'undecided',
+          decision_history_read: 'found',
+          decision_history_saved: 'none',
           entry_gate: 'approved',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
@@ -622,6 +636,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'none',
           confidence: 'none',
           decision: 'none',
+          decision_history_read: 'none',
+          decision_history_saved: 'none',
           entry_gate: 'skipped',
           investigation_id: '',
           rule_source: '',
@@ -640,6 +656,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'query',
           confidence: 'high',
           decision: 'approved',
+          decision_history_read: 'found',
+          decision_history_saved: 'saved',
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',
@@ -659,6 +677,8 @@ describe('Rule Tuning outcome reports', () => {
           change_type: 'exception',
           confidence: 'high',
           decision: 'approved',
+          decision_history_read: 'found',
+          decision_history_saved: 'saved',
           entry_gate: 'skipped',
           investigation_id: INVESTIGATION_ID,
           rule_source: 'custom',

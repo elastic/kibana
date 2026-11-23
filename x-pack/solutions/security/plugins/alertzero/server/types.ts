@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
+import type { AgentKnowledgePluginSetup } from '@kbn/agent-knowledge-plugin/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   AgenticInvestigationsPluginSetup,
@@ -88,6 +89,8 @@ export interface AlertZeroPluginStart {
 }
 
 export interface AlertZeroSetupDependencies {
+  /** Required, so the wiki steps a managed review uses exist wherever AlertZero runs. */
+  agentKnowledge: AgentKnowledgePluginSetup;
   features: FeaturesPluginSetup;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;

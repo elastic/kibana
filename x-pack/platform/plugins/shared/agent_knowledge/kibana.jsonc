@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-knowledge-plugin",
+  "owner": ["@elastic/alertzero-common-layer"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Wiki pages that workflows read before an agent step and add entries to after a decision, stored in an index the caller's own identity reads and writes.",
+  "plugin": {
+    "id": "agentKnowledge",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["workflowsExtensions"]
+  }
+}

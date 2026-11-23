@@ -27,6 +27,8 @@ import {
   RULE_COVERAGE_VERDICTS,
   RULE_REVIEW_ENTRY_GATES,
   RULE_TUNING_CHANGE_TYPES,
+  RULE_TUNING_DECISION_HISTORY_READS,
+  RULE_TUNING_DECISION_HISTORY_SAVES,
   WORKER_DEGRADED_REASONS,
   WORKER_RECOMMENDATION_CONFIDENCES,
   WORKER_REVIEW_DECISIONS,
@@ -264,6 +266,16 @@ const ruleTuningReviewCompletedInputSchema = lazySchema(() =>
       "The diagnosis's stated confidence"
     ),
     decision: oneOf(WORKER_REVIEW_DECISIONS, 'What the tuning proposal came to'),
+    decision_history_read: oneOfOrDefault(
+      RULE_TUNING_DECISION_HISTORY_READS,
+      'none',
+      "How the review read the rule's decision history before diagnosis"
+    ),
+    decision_history_saved: oneOfOrDefault(
+      RULE_TUNING_DECISION_HISTORY_SAVES,
+      'none',
+      "Whether the analyst's decision was added to the rule's decision history"
+    ),
     entry_gate: oneOf(RULE_REVIEW_ENTRY_GATES, 'How the manual-autonomy entry gate went'),
     investigation_id: optionalInvestigationId(
       'Investigation the review opened; absent only when rule_unavailable'
