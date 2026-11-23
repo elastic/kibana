@@ -114,16 +114,23 @@ export const createSkillRegistry = ({
     return check;
   };
 
+  // A skill whose tools cannot be resolved is hidden on its own rather than failing the listing.
+  const areAssociatedToolsAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
+    try {
+      const toolIds = await skill.getRegistryTools();
+      const available = await Promise.all(toolIds.map(isToolAvailable));
+      return available.every(Boolean);
+    } catch {
+      return false;
+    }
+  };
+
   const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
     if (!isVisible(skill)) {
       return false;
     }
-    if (skill.requiresAllAssociatedTools) {
-      const toolIds = await skill.getRegistryTools();
-      const available = await Promise.all(toolIds.map(isToolAvailable));
-      if (!available.every(Boolean)) {
-        return false;
-      }
+    if (skill.requiresAllAssociatedTools && !(await areAssociatedToolsAvailable(skill))) {
+      return false;
     }
     if (skill.isAvailable && availabilityContext) {
       const result = await skill.isAvailable(availabilityContext);

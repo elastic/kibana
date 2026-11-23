@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { InternalSkillDefinition, SkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { createSkillRegistry } from './skill_registry';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+import { createBuiltinSkillProvider } from './builtin/provider';
+import { AvailabilityCache } from '../common/availability_cache';
 
 const createMockInternalSkillDefinition = (
   overrides: Partial<InternalSkillDefinition> = {}
@@ -944,6 +946,58 @@ describe('createSkillRegistry', () => {
         'gated-1',
         'plain-skill',
       ]);
+    });
+
+    it('hides a skill whose registry tools cannot be resolved, and keeps the others', async () => {
+      const broken = createMockInternalSkillDefinition({
+        id: 'broken',
+        name: 'broken',
+        requiresAllAssociatedTools: true,
+        getRegistryTools: () => Promise.reject(new Error('cannot resolve tools')),
+      });
+      const registry = createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([broken, plain]),
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry([toolA]),
+        experimentalFeaturesEnabled: false,
+      });
+
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+      expect([...(await registry.bulkGet(['broken', 'plain-skill'])).keys()]).toEqual([
+        'plain-skill',
+      ]);
+      expect(await registry.has('broken')).toBe(false);
+    });
+
+    it('applies the flag from a public built-in skill definition through the built-in provider', async () => {
+      const definition = (id: string, requiresAllAssociatedTools: boolean): SkillDefinition =>
+        ({
+          id,
+          name: id,
+          basePath: 'skills/platform',
+          description: 'd',
+          content: 'c',
+          requiresAllAssociatedTools,
+          getRegistryTools: () => [toolA],
+        } as unknown as SkillDefinition);
+      const createWith = (availableToolIds: string[]) =>
+        createSkillRegistry({
+          builtinProvider: createBuiltinSkillProvider(
+            [definition('opted-in', true), definition('not-opted-in', false)],
+            new AvailabilityCache()
+          ),
+          persistedProvider: createMockPersistedProvider([]),
+          toolRegistry: createMockToolRegistry(availableToolIds),
+          experimentalFeaturesEnabled: false,
+        });
+
+      expect((await createWith([toolA]).list()).map(({ id }) => id).sort()).toEqual([
+        'not-opted-in',
+        'opted-in',
+      ]);
+      const withoutTool = createWith([]);
+      expect((await withoutTool.list()).map(({ id }) => id)).toEqual(['not-opted-in']);
+      expect(await withoutTool.get('opted-in')).toBeUndefined();
     });
 
     it('hides every gated skill when no registry tool is available', async () => {

@@ -73,6 +73,49 @@ describe('loadSkillTools', () => {
     );
   });
 
+  describe('requiresAllAssociatedTools', () => {
+    const load = (skillOverrides: Parameters<typeof createMockSkill>[0]) =>
+      loadSkillTools({
+        skill: createMockSkill({
+          requiresAllAssociatedTools: true,
+          getRegistryTools: jest.fn().mockReturnValue(['registry-1', 'registry-2']),
+          ...skillOverrides,
+        }),
+        skillsService: ctx.skills,
+        toolProvider: ctx.toolProvider,
+        request: ctx.request,
+        toolManager: ctx.toolManager,
+        logger: ctx.logger,
+        runContext: ctx.runContext,
+      });
+
+    it('throws when a required registry tool is not available at load time', async () => {
+      ctx.toolProvider.list.mockResolvedValue([{ id: 'registry-1' } as any]);
+
+      await expect(load({})).rejects.toThrow(/registry-2/);
+      expect(ctx.toolManager.addTools).not.toHaveBeenCalled();
+    });
+
+    it('loads the skill when every required registry tool is available', async () => {
+      ctx.toolProvider.list.mockResolvedValue([
+        { id: 'registry-1' } as any,
+        { id: 'registry-2' } as any,
+      ]);
+
+      await expect(load({})).resolves.toMatchObject({
+        loadedToolIds: ['registry-1', 'registry-2'],
+      });
+    });
+
+    it('does not require the tools of a skill that has not opted in', async () => {
+      ctx.toolProvider.list.mockResolvedValue([{ id: 'registry-1' } as any]);
+
+      await expect(load({ requiresAllAssociatedTools: false })).resolves.toMatchObject({
+        loadedToolIds: ['registry-1'],
+      });
+    });
+  });
+
   it(`throws when the skill exceeds the ${MAX_SKILL_REGISTRY_TOOLS}-tool registry limit`, async () => {
     const tooMany = Array.from({ length: MAX_SKILL_REGISTRY_TOOLS + 1 }, (_, i) => `t-${i}`);
     const skill = createMockSkill({
