@@ -220,6 +220,8 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
   const [esqlQueryValidation, setESQLQueryValidation] = useState<boolean>(
     isEdit && isESQLValuesSource ? true : false
   );
+  // a query has a source once it has run, even with no results, and not on every keystroke
+  const [ranEsqlQuery, setRanEsqlQuery] = useState<string | undefined>();
   const parentESQLVariables = useStateFromPublishingSubject(
     (parentApi as PublishesESQLVariables)?.esqlVariables$
   );
@@ -232,15 +234,14 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     return dataViewsService.getIdsWithTitle();
   });
 
-  // a query is resolved once it has run, not on every keystroke
   const {
     source: filterableSource,
     dataView: selectedDataView,
     loading: sourceLoading,
     error: fieldListError,
   } = useControlSource({
-    state: editorState,
-    enabled: isESQLValuesSource ? esqlQueryValidation : Boolean(editorState.data_view_id),
+    state: { ...editorState, esql_query: ranEsqlQuery },
+    enabled: isESQLValuesSource ? Boolean(ranEsqlQuery) : Boolean(editorState.data_view_id),
     parentApi,
   });
 
@@ -425,7 +426,10 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               // ConfigureValuesQuery only touches base DataControlEditorState fields
               updateEditorState={(state) => {
                 updateEditorState(state as Partial<State>);
-                if (state.field_name) onChangeField(state.field_name);
+                if (state.field_name) {
+                  setRanEsqlQuery(state.esql_query);
+                  onChangeField(state.field_name);
+                }
               }}
               setESQLQueryValidation={setESQLQueryValidation}
               isEdit={isEdit}

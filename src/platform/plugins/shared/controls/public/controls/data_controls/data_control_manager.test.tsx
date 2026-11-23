@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BehaviorSubject, filter, first, firstValueFrom, skip } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { dataViewsService } from '../../services/kibana_services';
+import { dataService, dataViewsService } from '../../services/kibana_services';
 import { initializeDataControlManager } from './data_control_manager';
 import { initializeStateManager } from '@kbn/presentation-publishing';
 import { ControlValuesSource, DEFAULT_DATA_CONTROL_STATE } from '@kbn/controls-constants';
@@ -149,10 +149,17 @@ describe('initializeDataControlManager', () => {
         });
       });
 
-      test('should go back to the default formatter when the control changes to such a source', (done) => {
+      test('should format by field type when the control changes to such a source', (done) => {
+        dataService.fieldFormats.getDefaultInstance = jest.fn().mockReturnValue({
+          convertToText: (value: unknown) => `default ${value}`,
+        });
         expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('formatted 5');
         dataControlManager!.api.fieldFormatter.pipe(skip(1), first()).subscribe(() => {
-          expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('5');
+          expect(dataControlManager!.api.fieldFormatter.value(5)).toBe('default 5');
+          expect(dataService.fieldFormats.getDefaultInstance).toHaveBeenCalledWith(
+            'string',
+            undefined
+          );
           done();
         });
         dataControlManager!.api.setDataViewId('noFormatterSourceId');
@@ -361,6 +368,31 @@ describe('initializeDataControlManager', () => {
       expect(dataControlManager.api.field$.value?.name).toBe('myFieldName');
       expect(dataControlManager.api.dataSources$.value?.[0].id).toBe('esqlDatasetId');
       expect(dataControlManager.api.dataViewId$.value).toBe('');
+    });
+
+    it('keeps the error of a query whose column cannot be derived, without looking up the previous column', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['US'],
+        column: { name: 'myFieldName', type: 'keyword' },
+      });
+      const { data_view_id: _dataViewId, field_name: _fieldName, ...savedState } = esqlState;
+      const dataControlManager = await initializeDataControlManager({
+        controlId: 'esqlControl',
+        controlType: 'esql',
+        state: savedState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'ES|QL Control',
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(dataControlManager.api.blockingError$.value).toBeUndefined();
+
+      mockGetESQLSingleColumnValues.mockResolvedValue({ errors: [new Error('Unknown column')] });
+      dataControlManager.api.setEsqlQuery('FROM logs | KEEP missingField');
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(dataControlManager.api.fieldName$.value).toBeUndefined();
+      expect(dataControlManager.api.blockingError$.value?.message).toBe('Unknown column');
     });
 
     it('does not report a change of the selection when the field is derived from the query', async () => {

@@ -14,8 +14,10 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
+  from,
   map,
   merge,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -29,6 +31,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 
 import type { DataSource, FilterableField, FilterableSource } from '@kbn/data-source';
 import type { Filter } from '@kbn/es-query';
+import type { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +39,7 @@ import { type StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
-import { coreServices } from '../../services/kibana_services';
+import { coreServices, dataService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { getEsqlColumnName, haveSameVariableKeys } from './esql_column_name';
@@ -200,22 +203,26 @@ export const initializeDataControlManager = async <EditorState extends object = 
               dataControlStateManager.api.esqlQuery$,
               // Re-derive the column when the set of available variables changes
               parentEsqlVariables$.pipe(distinctUntilChanged(haveSameVariableKeys)),
-            ]).pipe(switchMap(([query, esqlVariables]) => getEsqlColumnName(query, esqlVariables)))
+            ]).pipe(
+              // the column of the previous query is not looked up while the next one runs
+              switchMap(([query, esqlVariables]) =>
+                from(getEsqlColumnName(query, esqlVariables)).pipe(
+                  startWith({ fieldName: undefined, error: undefined })
+                )
+              )
+            )
           : dataControlStateManager.api.fieldName$.pipe(
               map((fieldName) => ({ fieldName: fieldName ?? '', error: undefined }))
             )
       )
     )
     .subscribe(({ fieldName, error }) => {
-      if (error) {
-        onSourceError(error);
-        return;
-      }
-      fieldName$.next(fieldName);
+      fieldName$.next(error ? undefined : fieldName);
+      if (error) onSourceError(error);
     });
 
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
-  const defaultFieldFormatter = (toFormat: any) => String(toFormat);
+  const defaultFieldFormatter = (toFormat: unknown) => String(toFormat);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(defaultFieldFormatter);
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldSubscription = combineLatest([resolvedSource$, fieldName$])
@@ -249,10 +256,14 @@ export const initializeDataControlManager = async <EditorState extends object = 
       field$.next(field);
       if (field) {
         defaultFieldLabel$.next(field.displayName ?? field.name);
-        const formatter = dataSource.getFormatterForField?.(field);
-        fieldFormatter.next(
-          formatter ? (value: unknown) => formatter.convertToText(value) : defaultFieldFormatter
-        );
+        // a source without formatters, like an ES|QL one, formats by field type as a data view does
+        const formatter =
+          dataSource.getFormatterForField?.(field) ??
+          dataService.fieldFormats.getDefaultInstance(
+            field.type as KBN_FIELD_TYPES,
+            field.esTypes as ES_FIELD_TYPES[]
+          );
+        fieldFormatter.next((value: unknown) => formatter.convertToText(value));
       }
     });
 

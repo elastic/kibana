@@ -16,12 +16,15 @@ import type { CreateControlTypeAction } from '../../../actions/control_panel_act
 
 interface ControlTypeContext {
   state: { field_name: string };
+  source?: unknown;
 }
 
 const mockIsCompatible = (
-  { state: { field_name } }: ControlTypeContext,
+  { state: { field_name }, source }: ControlTypeContext,
   isFieldCompatible: (field: FilterableField) => boolean
 ) => {
+  // like the real control types, a field is only checked against a source
+  if (!source) return Promise.resolve(false);
   const field =
     stubFields.find((f) => f.name === field_name) ??
     new DataViewField({

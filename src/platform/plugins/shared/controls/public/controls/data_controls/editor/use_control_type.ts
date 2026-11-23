@@ -31,7 +31,11 @@ export const useControlType = ({
   fieldName?: string;
   source?: FilterableSource;
   selectedControlType?: string;
-}) => {
+}): {
+  controlTypeContext: ControlTypeContext;
+  isCompatible: { [type: string]: boolean };
+  controlType?: string;
+} => {
   const controlTypeContext: ControlTypeContext = useMemo(
     () => ({
       trigger: triggers[CONTROL_MENU_TRIGGER],

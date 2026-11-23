@@ -35,7 +35,10 @@ export const getEsqlColumnName = async (
   }
 };
 
-export const haveSameVariableKeys = (prev: ESQLControlVariable[], next: ESQLControlVariable[]) => {
+export const haveSameVariableKeys = (
+  prev: ESQLControlVariable[],
+  next: ESQLControlVariable[]
+): boolean => {
   if (prev.length !== next.length) return false;
   const prevKeys = new Set(prev.map((v) => v.key));
   return next.every((v) => prevKeys.has(v.key));
