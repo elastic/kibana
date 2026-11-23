@@ -43,7 +43,7 @@ const SIGNIFICANT_EVENTS_KI_PER_SPACE_WORKFLOW_MANAGEMENT = {
 export const SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 6,
+  version: 7,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'features_identification.yaml');
@@ -65,7 +65,7 @@ export const SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 9,
+  version: 11,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'onboarding.yaml');
@@ -76,7 +76,7 @@ export const SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 4,
+  version: 5,
   billable: false,
   get yaml() {
     return readManagedWorkflowYaml(__dirname, 'continuous_onboarding.yaml');

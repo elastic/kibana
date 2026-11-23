@@ -514,12 +514,49 @@ export const setDefaultIndexInSpace = async ({
 const WORKFLOWS_API_HEADERS = { 'elastic-api-version': '2023-10-31' };
 const FINISHED_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
 
+/** One step execution of a finished sweep, as the executions route returns it. */
+export interface SweepStepExecution {
+  status: string;
+  error: unknown;
+  output: unknown;
+}
+
 export interface FinishedSweepGate {
   executionId: string;
+  /** The whole execution's status, so an aborted sweep is told from a finished one. */
+  executionStatus: string;
   stepStartedAt: string;
   stepFinishedAt: string | undefined;
   output: unknown;
+  /** `resolve_index_scope_gate`, or `undefined` when no step execution carries that id. */
+  resolveGate?: SweepStepExecution;
+  /** `select_candidate_reports`, or `undefined` when no step execution carries that id. */
+  selectCandidates?: SweepStepExecution;
 }
+
+interface RawStepExecution {
+  stepId: string;
+  startedAt: string;
+  finishedAt?: string;
+  status?: string;
+  error?: unknown;
+  output?: unknown;
+}
+
+/**
+ * The last record for a step id that has an output, else the last record for it. Enter and scope
+ * records for the same step carry a null output.
+ */
+const lastStepExecution = (
+  steps: RawStepExecution[],
+  stepId: string
+): SweepStepExecution | undefined => {
+  const records = steps.filter((step) => step.stepId === stepId);
+  const record = [...records].reverse().find((step) => step.output != null) ?? records.at(-1);
+  return record
+    ? { status: String(record.status), error: record.error, output: record.output }
+    : undefined;
+};
 
 /**
  * Waits for the newest finished execution of the Hunt workflow in a space (the same status set
@@ -558,22 +595,18 @@ export const waitForFinishedSweepGate = async ({
         spaceUrl(`api/workflows/executions/${executionId}?includeOutput=true`, spaceId),
         { headers: { ...headers, ...WORKFLOWS_API_HEADERS }, responseType: 'json' }
       );
-      const step = (
-        execution.body as {
-          stepExecutions?: Array<{
-            stepId: string;
-            startedAt: string;
-            finishedAt?: string;
-            output?: unknown;
-          }>;
-        }
-      ).stepExecutions?.find(({ stepId }) => stepId === 'check_index_scope');
+      const steps =
+        (execution.body as { stepExecutions?: RawStepExecution[] }).stepExecutions ?? [];
+      const step = steps.find(({ stepId }) => stepId === 'check_index_scope');
       return step
         ? {
             executionId,
+            executionStatus: String((execution.body as { status?: string }).status),
             stepStartedAt: step.startedAt,
             stepFinishedAt: step.finishedAt,
             output: step.output,
+            resolveGate: lastStepExecution(steps, 'resolve_index_scope_gate'),
+            selectCandidates: lastStepExecution(steps, 'select_candidate_reports'),
           }
         : undefined;
     }

@@ -10,7 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 import Os from 'os';
-import { findTargetEntry } from './create_single_compile_config';
+import { findTargetEntry, WATCH_CLEAN_KEEP } from './create_single_compile_config';
 import { filterStatsByFocus, type FocusPluginInfo } from '../plugins/emit_stats_plugin';
 
 const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-find-target-entry-'));
@@ -298,5 +298,25 @@ describe('filterStatsByFocus', () => {
     const result = filterStatsByFocus(webpackStats, [webpackFocus]);
     expect(result.modules).toHaveLength(1);
     expect(result.modules[0].name).toBe('./dashboard/index.ts');
+  });
+});
+
+describe('WATCH_CLEAN_KEEP', () => {
+  it.each([
+    'stats.json',
+    'kibana.abc123.hot-update.js',
+    'kibana.abc123.hot-update.json',
+    'kibana.abc123.hot-update.js.map',
+  ])('keeps %s', (file) => {
+    expect(WATCH_CLEAN_KEEP.test(file)).toBe(true);
+  });
+
+  it.each([
+    'chunks/foo.1a2b3c4d.js',
+    'chunks/foo.1a2b3c4d.js.map',
+    'kibana.bundle.js',
+    'metrics.json',
+  ])('does not keep %s', (file) => {
+    expect(WATCH_CLEAN_KEEP.test(file)).toBe(false);
   });
 });

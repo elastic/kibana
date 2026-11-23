@@ -23,6 +23,7 @@ export const SOURCE_KNOWLEDGE_STATE_TYPE = 'nightshift-source-knowledge-state';
 interface SourceKnowledgeState {
   revision?: string;
   onboardingScheduled?: boolean;
+  onboardingReservedAt?: number | null;
   lease: { owner: string; expiresAt: number } | null;
 }
 
@@ -35,6 +36,10 @@ const stateSchema = schema.object({
       expiresAt: schema.number(),
     })
   ),
+});
+
+const stateSchemaV2 = stateSchema.extends({
+  onboardingReservedAt: schema.maybe(schema.nullable(schema.number())),
 });
 
 /** Stores the applied query revision and serializes cleanup with final KI/rule writes. */
@@ -50,6 +55,13 @@ export const sourceKnowledgeStateSavedObjectType: SavedObjectsType = {
       schemas: {
         create: stateSchema,
         forwardCompatibility: stateSchema.extends({}, { unknowns: 'ignore' }),
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        create: stateSchemaV2,
+        forwardCompatibility: stateSchemaV2.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
@@ -274,7 +286,11 @@ export const createSourceKnowledgeStateClient = ({
           );
         }
         if (state.revision === undefined) {
-          await checkpoint({ revision: source.esql_updated_at, onboardingScheduled: false });
+          await checkpoint({
+            revision: source.esql_updated_at,
+            onboardingScheduled: false,
+            onboardingReservedAt: null,
+          });
         }
         return run();
       },

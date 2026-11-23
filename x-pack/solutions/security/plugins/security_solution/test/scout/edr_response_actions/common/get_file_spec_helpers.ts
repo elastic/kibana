@@ -9,6 +9,7 @@ import type { EsClient, ScoutTestConfig } from '@kbn/scout-security';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { SeededEndpointHosts } from './seed_endpoint_hosts';
 import { deleteGetFileUploads, deleteSubmittedHostActions } from './complete_host_action';
+import { runCleanups } from './run_cleanups';
 
 /** One host seed waits up to 4 minutes for the current index and 4 for the united index. */
 export const HOST_SEED_TIMEOUT_MS = 600_000;
@@ -43,28 +44,17 @@ export const cleanupGetFileSpec = async ({
   config: ScoutTestConfig;
   submittedActions: readonly ActionDetails[];
   seeded: SeededEndpointHosts | undefined;
-}): Promise<void> => {
-  const failures: unknown[] = [];
-  for (const cleanup of [
-    () => deleteGetFileUploads({ esClient, config, actions: submittedActions }),
-    () =>
-      deleteSubmittedHostActions({
-        esClient,
-        config,
-        actionIds: submittedActions.map((action) => action.id),
-      }),
-    () => seeded?.cleanup(),
-  ]) {
-    try {
-      await cleanup();
-    } catch (error) {
-      failures.push(error);
-    }
-  }
-  if (failures.length === 1) {
-    throw failures[0];
-  }
-  if (failures.length > 1) {
-    throw new AggregateError(failures, 'Failed to clean up the get-file host and its action');
-  }
-};
+}): Promise<void> =>
+  runCleanups(
+    [
+      () => deleteGetFileUploads({ esClient, config, actions: submittedActions }),
+      () =>
+        deleteSubmittedHostActions({
+          esClient,
+          config,
+          actionIds: submittedActions.map((action) => action.id),
+        }),
+      () => seeded?.cleanup(),
+    ],
+    'Failed to clean up the get-file host and its action'
+  );

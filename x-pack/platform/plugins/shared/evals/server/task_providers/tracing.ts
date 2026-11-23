@@ -13,7 +13,7 @@ import {
   trace,
   type Span,
 } from '@opentelemetry/api';
-import { withInferenceContext } from '@kbn/inference-tracing';
+import { withActiveInferenceSpan, withInferenceContext } from '@kbn/inference-tracing';
 
 /** OpenTelemetry's sentinel for "no valid trace" (a non-recording / no-op span). */
 const INVALID_TRACE_ID = '00000000000000000000000000000000';
@@ -113,4 +113,24 @@ export const withEvalsEvaluatorSpan = <T>(
     `${JUDGE_SPAN_NAME_PREFIX}${evaluatorName}`,
     { 'evaluator.name': evaluatorName },
     run
+  );
+
+/**
+ * Runs an LLM-as-a-judge evaluator inside a `judge · <evaluator>` span that is a child of the
+ * active span, so the model's `chat <model>` span nests under a named judge in whatever trace
+ * the caller is already building (for example the online-eval scoring span). Unlike
+ * {@link withEvalsEvaluatorSpan}, it does not start a new trace.
+ *
+ * The span is an inference span, so it is exported wherever the model call is, including the
+ * Agent Builder trace data; a span from the global `@kbn/evals` tracer is not. It also sets the
+ * inference beacon, so the model call keeps the judge as its parent.
+ */
+export const withEvalsJudgeChildSpan = <T>(
+  evaluatorName: string,
+  run: () => Promise<T>
+): Promise<T> =>
+  withActiveInferenceSpan(
+    `${JUDGE_SPAN_NAME_PREFIX}${evaluatorName}`,
+    { attributes: { 'evaluator.name': evaluatorName } },
+    () => run()
   );

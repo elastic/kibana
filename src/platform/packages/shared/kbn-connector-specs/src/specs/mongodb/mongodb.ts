@@ -11,7 +11,7 @@
  * MongoDB Connector
  *
  * Provides read-only access to MongoDB collections using the native MongoDB
- * driver. Supports any MongoDB deployment reachable via a connection URI,
+ * driver. Supports MongoDB Server 4.4+ deployments reachable via a connection URI,
  * using mongodb:// or mongodb+srv://: replica sets, sharded clusters, or
  * standalone instances.
  *
@@ -26,9 +26,16 @@
  */
 
 import { escapeRegExp } from 'lodash';
+import { timeoutSignal } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { CollectionInfo } from 'mongodb';
+import type {
+  Abortable,
+  CollectionInfo,
+  DeleteOptions,
+  InsertOneOptions,
+  UpdateOptions,
+} from 'mongodb';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { loadConnectionString } from '../../lib/clients/load_connection_string';
 import type {
@@ -56,6 +63,17 @@ import {
 // find/count filter ($where directly, $function/$accumulator via $expr) — block all of them,
 // everywhere, on every agent-facing read action.
 const DISALLOWED_OPERATORS = new Set(['$out', '$merge', '$function', '$accumulator', '$where']);
+
+// MongoDB v7 ignores client-level timeoutMS. This deadline covers pool checkout and every
+// cursor batch, and is cleared as soon as the operation settles.
+const withOperationTimeout = async <T>(run: (signal: AbortSignal) => Promise<T>): Promise<T> => {
+  const deadline = timeoutSignal(30_000);
+  try {
+    return await run(deadline);
+  } finally {
+    deadline.dispose();
+  }
+};
 
 /** Resolve the database name: action input → URI path → error. */
 const resolveDb = async (inputDatabase: string | undefined, uri: string): Promise<string> => {
@@ -220,7 +238,7 @@ export const MongoDBConnector: ConnectorSpec = {
           }),
           helpText: i18n.translate('connectorSpecs.mongodb.config.uri.helpText', {
             defaultMessage:
-              'Full MongoDB connection string. Supports mongodb:// and mongodb+srv:// schemes. ' +
+              'Full MongoDB connection string for MongoDB Server 4.4+. Supports mongodb:// and mongodb+srv:// schemes. ' +
               'Include the database name in the path (e.g. /mydb) to use it as the default for actions. ' +
               'Credentials are authenticated against the admin database by default; append ' +
               '?authSource=yourDbName to override.',
@@ -245,16 +263,19 @@ export const MongoDBConnector: ConnectorSpec = {
         assertReadOnly(input.projection);
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const cursor = client
-          .db(database)
-          .collection(input.collection)
-          .find(input.filter ?? {}, {
-            projection: input.projection,
-            sort: input.sort,
-            limit: input.limit ?? 100,
-            skip: input.skip,
-          });
-        const documents = await cursor.toArray();
+        const documents = await withOperationTimeout((signal) =>
+          client
+            .db(database)
+            .collection(input.collection)
+            .find(input.filter ?? {}, {
+              projection: input.projection,
+              sort: input.sort,
+              limit: input.limit ?? 100,
+              skip: input.skip,
+              signal,
+            })
+            .toArray()
+        );
         return { count: documents.length, documents };
       },
     },
@@ -279,11 +300,9 @@ export const MongoDBConnector: ConnectorSpec = {
 
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const results = await client
-          .db(database)
-          .collection(input.collection)
-          .aggregate(pipeline)
-          .toArray();
+        const results = await withOperationTimeout((signal) =>
+          client.db(database).collection(input.collection).aggregate(pipeline, { signal }).toArray()
+        );
         return { count: results.length, results };
       },
     },
@@ -301,10 +320,12 @@ export const MongoDBConnector: ConnectorSpec = {
         assertReadOnly(input.filter);
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const count = await client
-          .db(database)
-          .collection(input.collection)
-          .countDocuments(input.filter ?? {});
+        const count = await withOperationTimeout((signal) =>
+          client
+            .db(database)
+            .collection(input.collection)
+            .countDocuments(input.filter ?? {}, { signal })
+        );
         return { count };
       },
     },
@@ -325,10 +346,9 @@ export const MongoDBConnector: ConnectorSpec = {
         // "my.log" would also match "myXlog") and pathological patterns become a ReDoS vector on
         // the server, since this reaches $regex directly from an agent-facing (isTool: true) input.
         const filter = nameFilter ? { name: { $regex: escapeRegExp(nameFilter) } } : {};
-        const collections = await client
-          .db(database)
-          .listCollections<CollectionInfo>(filter)
-          .toArray();
+        const collections = await withOperationTimeout((signal) =>
+          client.db(database).listCollections<CollectionInfo>(filter, { signal }).toArray()
+        );
         return {
           database,
           count: collections.length,
@@ -351,10 +371,14 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: InsertOneInput) => {
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const result = await client
-          .db(database)
-          .collection(input.collection)
-          .insertOne(input.document);
+        const result = await withOperationTimeout((signal) => {
+          // The driver's write option types omit signal, but its operation runner uses it.
+          const options: InsertOneOptions & Abortable = { signal };
+          return client
+            .db(database)
+            .collection(input.collection)
+            .insertOne(input.document, options);
+        });
         return { insertedId: String(result.insertedId), acknowledged: result.acknowledged };
       },
     },
@@ -372,10 +396,13 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: UpdateOneInput) => {
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const result = await client
-          .db(database)
-          .collection(input.collection)
-          .updateOne(input.filter, input.update, { upsert: input.upsert ?? false });
+        const result = await withOperationTimeout((signal) => {
+          const options: UpdateOptions & Abortable = { upsert: input.upsert ?? false, signal };
+          return client
+            .db(database)
+            .collection(input.collection)
+            .updateOne(input.filter, input.update, options);
+        });
         return {
           matchedCount: result.matchedCount,
           modifiedCount: result.modifiedCount,
@@ -397,10 +424,10 @@ export const MongoDBConnector: ConnectorSpec = {
       handler: async (ctx, input: DeleteOneInput) => {
         const database = await getDatabase(ctx, input.database);
         const client = await ctx.getClient('mongodb');
-        const result = await client
-          .db(database)
-          .collection(input.collection)
-          .deleteOne(input.filter);
+        const result = await withOperationTimeout((signal) => {
+          const options: DeleteOptions & Abortable = { signal };
+          return client.db(database).collection(input.collection).deleteOne(input.filter, options);
+        });
         return { deletedCount: result.deletedCount, acknowledged: result.acknowledged };
       },
     },
@@ -417,7 +444,7 @@ export const MongoDBConnector: ConnectorSpec = {
       // configured URI to include a database path. A resolved value means
       // success; the executor treats a thrown error as failure.
       const client = await ctx.getClient('mongodb');
-      await client.db('admin').command({ ping: 1 });
+      await withOperationTimeout((signal) => client.db('admin').command({ ping: 1 }, { signal }));
       return {};
     },
   },
@@ -425,8 +452,8 @@ export const MongoDBConnector: ConnectorSpec = {
   skill: [
     '## MongoDB Connector',
     '',
-    'Provides access to MongoDB collections. Supports any deployment reachable',
-    'via a mongodb:// or mongodb+srv:// connection URI: replica sets, sharded',
+    'Provides access to MongoDB Server 4.4+ collections via a mongodb:// or',
+    'mongodb+srv:// connection URI: replica sets, sharded',
     'clusters, and standalone instances.',
     '',
     '### Discovery pattern',
