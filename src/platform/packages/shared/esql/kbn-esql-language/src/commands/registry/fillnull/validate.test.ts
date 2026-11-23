@@ -15,6 +15,50 @@ const check = (query: string, errors: string[] = []) =>
   expectErrors(query, errors, mockContext, 'fillnull', validate);
 
 describe('FILLNULL validation', () => {
+  describe('unmapped targets', () => {
+    it.each(['load', 'load_all', 'nullify'])(
+      'rejects an unmatched pattern under %s',
+      async (strategy) => {
+        const { validate: validateQuery } = await setup();
+        const { errors, warnings } = await validateQuery(
+          `SET unmapped_fields="${strategy}"; FROM index | FILLNULL DEFAULT ON missing_*`
+        );
+        expect(errors).toEqual([expect.objectContaining({ text: 'Unknown column "missing_*"' })]);
+        expect(warnings).toEqual([]);
+      }
+    );
+
+    it.each(['missing_name', '`missing_*`'])(
+      'keeps the warning for the literal name %s',
+      async (field) => {
+        const { validate: validateQuery } = await setup();
+        const { errors, warnings } = await validateQuery(
+          `SET unmapped_fields="load"; FROM index | FILLNULL DEFAULT ON ${field}`
+        );
+        expect(errors).toEqual([]);
+        expect(warnings).toEqual([
+          expect.objectContaining({ text: expect.stringContaining("isn't mapped") }),
+        ]);
+      }
+    );
+
+    it('accepts a pattern matching input columns', async () => {
+      const { expectErrors: expectQueryErrors } = await setup();
+      await expectQueryErrors(
+        'SET unmapped_fields="load"; FROM index | FILLNULL DEFAULT ON keyword*',
+        []
+      );
+    });
+
+    it('does not reject a pattern that can match a field loaded by a later reference', async () => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        'SET unmapped_fields="load"; FROM index | FILLNULL DEFAULT ON missing_* | WHERE missing_name IS NOT NULL'
+      );
+      expect(errors).toEqual([]);
+    });
+  });
+
   it.each(['DEFAULT', 'NULL', '0', '-1.5', 'true', '"unknown"', '?value', '?1'])(
     'accepts %s without treating the fill value as a column',
     (value) => {
@@ -54,7 +98,7 @@ describe('FILLNULL validation', () => {
     async (value) => {
       const { validate: validateQuery, callbacks } = await setup();
       const { errors, warnings } = await validateQuery(
-        `FROM index | FILLNULL ${value} ON client_ip`,
+        `FROM conflict_index | FILLNULL ${value} ON client_ip`,
         {
           ...callbacks,
           getColumnsFor: async () => [
