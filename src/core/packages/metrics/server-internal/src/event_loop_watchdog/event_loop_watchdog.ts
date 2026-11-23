@@ -182,6 +182,10 @@ export class EventLoopWatchdog {
     try {
       await Fs.access(dir, Fs.constants.W_OK);
     } catch (error) {
+      // Profiling can turn off while the check runs; the warning would then be out of date.
+      if (!this.profilingLoggedOn) {
+        return;
+      }
       // The error code, not the message: the message repeats the directory.
       logger.warn(
         `Event loop watchdog profiling is on, but the profile directory ${dir} can't be written (${

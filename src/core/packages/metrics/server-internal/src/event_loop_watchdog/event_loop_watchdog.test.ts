@@ -347,6 +347,18 @@ describe('EventLoopWatchdog', () => {
       ]);
     });
 
+    it("doesn't warn if profiling turns off before the check finishes", async () => {
+      let rejectAccess: (error: Error) => void = () => {};
+      access.mockReturnValue(new Promise((_, reject) => (rejectAccess = reject)));
+      const watchdog = create();
+      watchdog.start();
+      watchdog.setProfiling(true);
+      watchdog.setProfiling(false);
+      rejectAccess(fsError('EACCES', "EACCES: permission denied, access '/diag'"));
+      await settle();
+      expect(warnings()).toEqual([]);
+    });
+
     it('warns again each time profiling turns back on', async () => {
       const watchdog = create({});
       watchdog.start();
