@@ -105,6 +105,16 @@ describe('shouldIdentifyFeatures', () => {
     expect(result).toEqual({ shouldIdentify: true });
   });
 
+  it('always identifies at threshold 0, even with features stamped ahead of the clock', async () => {
+    const ahead = { '@timestamp': new Date(Date.now() + 60_000).toISOString() };
+    const kiClient = createMockKiClient({ inferred: ahead, computed: ahead });
+
+    const result = await shouldIdentifyFeatures({ kiClient, sourceId, thresholdHours: 0 });
+
+    expect(result).toEqual({ shouldIdentify: true });
+    expect(kiClient.getLatestRevisionTimestamp).not.toHaveBeenCalled();
+  });
+
   it('returns shouldIdentify: true for invalid computed timestamps', async () => {
     const kiClient = createMockKiClient({
       inferred: { '@timestamp': recent() },

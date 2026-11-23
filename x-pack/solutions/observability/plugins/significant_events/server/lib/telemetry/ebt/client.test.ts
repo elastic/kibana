@@ -10,10 +10,11 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { EbtTelemetryClient } from './client';
 import {
-  SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+  NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
+  NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
+  NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
+  NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
 } from './constants';
 import { CpsTelemetryContextProvider } from './cps_telemetry_context';
 
@@ -71,7 +72,7 @@ describe('EbtTelemetryClient', () => {
       );
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
+        NIGHTSHIFT_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
         expect.objectContaining({
           count: 5,
           connector_id: 'test-connector',
@@ -132,7 +133,7 @@ describe('EbtTelemetryClient', () => {
 
       expect(getLinkedProjectIds).not.toHaveBeenCalled();
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
+        NIGHTSHIFT_DETECTION_SCAN_EVENT_TYPE,
         expect.objectContaining({
           target_cluster_scope: 'origin',
           target_cluster_ids: ['origin-project'],
@@ -171,7 +172,7 @@ describe('EbtTelemetryClient', () => {
       await new Promise(setImmediate);
 
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_DISCOVERY_STARTED_EVENT_TYPE,
+        NIGHTSHIFT_DISCOVERY_STARTED_EVENT_TYPE,
         expect.objectContaining({
           ...discoveryStarted,
           target_cluster_scope: 'all',
@@ -216,7 +217,38 @@ describe('EbtTelemetryClient', () => {
 
       expect(getLinkedProjectIds).not.toHaveBeenCalled();
       expect(analyticsService.reportEvent).toHaveBeenCalledWith(
-        SIGNIFICANT_EVENTS_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+        NIGHTSHIFT_AGENT_BUILDER_KNOWLEDGE_INDICATOR_CREATED_EVENT_TYPE,
+        expect.objectContaining({
+          space_id: 'space-a',
+          target_cluster_scope: 'origin',
+          target_cluster_ids: ['origin-project'],
+          target_cluster_ids_complete: true,
+        })
+      );
+    });
+  });
+
+  describe('trackAgentToolFailed', () => {
+    it('reports origin scope without resolving linked projects', () => {
+      const getLinkedProjectIds = jest.fn().mockResolvedValue(['linked-project']);
+      client = new EbtTelemetryClient(
+        analyticsService,
+        new CpsTelemetryContextProvider({
+          cpsEnabled: true,
+          originProjectId: 'origin-project',
+          getLinkedProjectIds,
+        }),
+        loggerMock.create()
+      );
+
+      client.trackAgentToolFailed(
+        { tool_id: 'ki_query_create', error_code: 'internal_error', input_rejected: false },
+        request
+      );
+
+      expect(getLinkedProjectIds).not.toHaveBeenCalled();
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        NIGHTSHIFT_AGENT_TOOL_FAILED_EVENT_TYPE,
         expect.objectContaining({
           space_id: 'space-a',
           target_cluster_scope: 'origin',

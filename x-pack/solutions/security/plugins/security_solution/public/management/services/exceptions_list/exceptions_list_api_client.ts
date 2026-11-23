@@ -241,11 +241,11 @@ export class ExceptionsListApiClient {
   async create(exception: CreateExceptionListItemSchema): Promise<ExceptionListItemSchema> {
     await this.ensureListExists;
     this.checkIfIsUsingTheRightInstance(exception.list_id);
-    delete exception.meta;
+    const { meta, ...exceptionWithoutMeta } = exception;
 
-    let transformedException = exception;
+    let transformedException = exceptionWithoutMeta;
     if (this.writeTransform) {
-      transformedException = this.writeTransform(exception);
+      transformedException = this.writeTransform(exceptionWithoutMeta);
     }
 
     return this.http.post<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {

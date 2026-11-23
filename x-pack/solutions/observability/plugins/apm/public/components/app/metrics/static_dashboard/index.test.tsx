@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
@@ -42,10 +42,18 @@ import { JsonMetricsDashboard, getFilters } from '.';
 import * as helper from './helper';
 
 let capturedGetCreationOptions: (() => Promise<DashboardCreationOptions>) | undefined;
+let capturedOnApiAvailable: ((api: unknown) => void) | undefined;
+let capturedOnApiCleanup: (() => void) | undefined;
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: (props: { getCreationOptions: () => Promise<DashboardCreationOptions> }) => {
+  DashboardRenderer: (props: {
+    getCreationOptions: () => Promise<DashboardCreationOptions>;
+    onApiAvailable?: (api: unknown) => void;
+    onApiCleanup?: () => void;
+  }) => {
     capturedGetCreationOptions = props.getCreationOptions;
+    capturedOnApiAvailable = props.onApiAvailable;
+    capturedOnApiCleanup = props.onApiCleanup;
     return <div data-test-subj="dashboardRenderer" />;
   },
 }));
@@ -58,6 +66,7 @@ const mockDataView = {
   id: 'test-data-view-id',
   name: 'apm-data-view',
   getIndexPattern: () => 'metrics-*',
+  getFieldByName: (name: string) => ({ name, type: 'string' } as unknown as DataViewField),
 } as unknown as DataView;
 
 const mockPanels = [{ type: 'lens', grid: { x: 0, y: 0, w: 24, h: 12 }, uid: '1', config: {} }];
@@ -78,7 +87,7 @@ function renderDashboard() {
     search: fromQuery({ rangeFrom: 'now-15m', rangeTo: 'now' }),
   });
 
-  return render(
+  const result = render(
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper
         history={history}
@@ -88,16 +97,86 @@ function renderDashboard() {
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
+
+  return { ...result, history };
 }
 
 describe('JsonMetricsDashboard', () => {
   beforeEach(() => {
     capturedGetCreationOptions = undefined;
+    capturedOnApiAvailable = undefined;
+    capturedOnApiCleanup = undefined;
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  describe('dashboard lifecycle', () => {
+    it('stops pushing unified-search state onto the dashboard API after it is destroyed', async () => {
+      jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);
+
+      const dashboardApi = {
+        setFilters: jest.fn(),
+        setQuery: jest.fn(),
+        setTimeRange: jest.fn(),
+      };
+
+      const { history } = renderDashboard();
+
+      // Dashboard becomes available, so the effects push the initial state onto it.
+      await act(async () => {
+        capturedOnApiAvailable!(dashboardApi);
+      });
+
+      expect(dashboardApi.setFilters).toHaveBeenCalled();
+      dashboardApi.setFilters.mockClear();
+      dashboardApi.setQuery.mockClear();
+      dashboardApi.setTimeRange.mockClear();
+
+      // The DashboardRenderer tears the embeddable down (e.g. on unmount/recreate), which
+      // clears the stale reference so later effects cannot operate on a destroyed dashboard.
+      await act(async () => {
+        capturedOnApiCleanup!();
+      });
+
+      // Change the search inputs (kuery and time range) so the synchronization effects re-run.
+      // If the stale reference had not been cleared, the destroyed API would receive these
+      // setQuery/setTimeRange calls; the `!dashboard` guard must short-circuit instead. This is
+      // what distinguishes the fix from a no-op cleanup.
+      await act(async () => {
+        history.replace({
+          pathname: '/services/test-service/metrics',
+          search: fromQuery({
+            kuery: 'service.node.name: "node-1"',
+            rangeFrom: 'now-1h',
+            rangeTo: 'now',
+          }),
+        });
+      });
+
+      expect(dashboardApi.setFilters).not.toHaveBeenCalled();
+      expect(dashboardApi.setQuery).not.toHaveBeenCalled();
+      expect(dashboardApi.setTimeRange).not.toHaveBeenCalled();
+
+      // A recreated embeddable (e.g. savedObjectId/key change) delivers a fresh API, which must
+      // be picked up again so unified-search state is pushed onto the new dashboard.
+      const recreatedDashboardApi = {
+        setFilters: jest.fn(),
+        setQuery: jest.fn(),
+        setTimeRange: jest.fn(),
+      };
+
+      await act(async () => {
+        capturedOnApiAvailable!(recreatedDashboardApi);
+      });
+
+      expect(recreatedDashboardApi.setFilters).toHaveBeenCalled();
+      expect(recreatedDashboardApi.setQuery).toHaveBeenCalled();
+      expect(recreatedDashboardApi.setTimeRange).toHaveBeenCalled();
+    });
+  });
+
   describe('getCreationOptions', () => {
     it('returns useControlsIntegration: true', async () => {
       jest.spyOn(helper, 'convertSavedDashboardToPanels').mockResolvedValue(mockPanels as any);

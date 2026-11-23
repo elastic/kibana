@@ -231,6 +231,17 @@ describe('registerHuntCoordinatorRoute', () => {
     expect(paramsOf()).not.toHaveProperty('technology');
   });
 
+  it('hands the filtered universe and the skipped list to the coordinator', async () => {
+    const { handler, context } = makeDeps({
+      indexPatterns: ['logs-*', '.alerts-security.alerts-default'],
+    });
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(paramsOf().indexPatterns).toEqual(['logs-*']);
+    expect(paramsOf().policySkippedPatterns).toEqual(['.alerts-security.alerts-default']);
+  });
+
   it('runs against the request space, not the default one', async () => {
     const { handler, context } = makeDeps({ spaceId: 'hunt-space' });
 

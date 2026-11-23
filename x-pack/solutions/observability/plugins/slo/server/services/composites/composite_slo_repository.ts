@@ -38,7 +38,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       throw new SLOIdConflict(`Composite SLO [${compositeSlo.id}] already exists`);
     }
 
-    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    const toStore = storedCompositeSloDefinitionSchema.encode(compositeSlo);
     await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore);
 
     return compositeSlo;
@@ -56,7 +56,7 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     const existingSavedObjectId = findResponse.saved_objects[0].id;
-    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    const toStore = storedCompositeSloDefinitionSchema.encode(compositeSlo);
     await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {
       id: existingSavedObjectId,
       overwrite: true,

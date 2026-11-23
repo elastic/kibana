@@ -142,6 +142,10 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const tone = getProposalTone(proposal);
     const isTodo = isTodoProposal(proposal);
 
+    const readOnlyDisabledReason = readOnly
+      ? APPROVAL_MODAL_TRANSLATIONS.readOnlyDisabledReason
+      : undefined;
+
     const primaryAction: ApprovalAction | undefined = onApprove
       ? {
           label: isTodo
@@ -151,6 +155,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           onClick: onApprove,
           color: 'primary',
           isDisabled: isReplaced || isExpired || readOnly,
+          disabledReason: readOnlyDisabledReason,
           'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm` : undefined,
         }
       : undefined;
@@ -190,6 +195,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             iconType: 'cross',
             onClick: declineConfirmAction,
             isDisabled: isDeclineDisabled || primaryAction?.isDisabled,
+            disabledReason: readOnlyDisabledReason,
             'data-test-subj': dataTestSubj ? `${dataTestSubj}-confirm-decline` : undefined,
           }
         : primaryAction;
@@ -214,6 +220,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
                     iconType: 'cross' as const,
                     onClick: startDeclining,
                     isDisabled: isReplaced || primaryAction?.isDisabled,
+                    disabledReason: readOnlyDisabledReason,
                     'data-test-subj': dataTestSubj ? `${dataTestSubj}-dismiss` : undefined,
                   },
                 ]
@@ -271,6 +278,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
             color: 'primary',
             iconType: 'undo',
             isDisabled: readOnly,
+            disabledReason: readOnlyDisabledReason,
             isLoading: isReopening,
             onClick: async () => {
               setActionError(undefined);

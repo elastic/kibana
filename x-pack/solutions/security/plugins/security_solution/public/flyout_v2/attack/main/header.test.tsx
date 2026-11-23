@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Header } from './header';
 import { HEADER_SHARE_BUTTON_TEST_ID, HEADER_SUMMARY_PANEL_TEST_ID } from './constants/test_ids';
-import { useGetAttackFlyoutLink } from '../../../flyout/attack_details/hooks/use_get_attack_flyout_link';
+import { useGetAttackFlyoutLink } from './hooks/use_get_attack_flyout_link';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 
 jest.mock('./components/header_title', () => ({
@@ -77,7 +77,7 @@ jest.mock('../../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(),
 }));
 
-jest.mock('../../../flyout/attack_details/hooks/use_get_attack_flyout_link', () => ({
+jest.mock('./hooks/use_get_attack_flyout_link', () => ({
   useGetAttackFlyoutLink: jest.fn(),
 }));
 

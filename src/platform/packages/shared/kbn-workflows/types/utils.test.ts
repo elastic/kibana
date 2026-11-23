@@ -22,7 +22,6 @@ import {
   isInProgressStatus,
   isInternalConnector,
   isKibanaStep,
-  isMergeStep,
   isParallelStep,
   isSwitchStep,
   isTerminalStatus,
@@ -181,8 +180,7 @@ describe('types/utils', () => {
       ['isWhileStep', isWhileStep, 'while', 'foreach'],
       ['isIfStep', isIfStep, 'if', 'foreach'],
       ['isSwitchStep', isSwitchStep, 'switch', 'if'],
-      ['isParallelStep', isParallelStep, 'parallel', 'merge'],
-      ['isMergeStep', isMergeStep, 'merge', 'parallel'],
+      ['isParallelStep', isParallelStep, 'parallel', 'switch'],
     ] as const)(
       '%s returns true for "%s" and false for "%s"',
       (_name, guard, matchType, nonMatchType) => {
@@ -198,14 +196,14 @@ describe('types/utils', () => {
 
   describe('string type guards', () => {
     describe('isBuiltInStepType', () => {
-      it.each(['if', 'foreach', 'wait', 'while', 'parallel', 'switch', 'merge'])(
+      it.each(['if', 'foreach', 'wait', 'while', 'parallel', 'switch'])(
         'returns true for "%s"',
         (type) => {
           expect(isBuiltInStepType(type)).toBe(true);
         }
       );
 
-      it.each(['custom.step', '', 'IF'])('returns false for "%s"', (type) => {
+      it.each(['custom.step', '', 'IF', 'merge'])('returns false for "%s"', (type) => {
         expect(isBuiltInStepType(type)).toBe(false);
       });
     });

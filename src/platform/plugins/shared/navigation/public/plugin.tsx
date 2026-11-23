@@ -150,7 +150,11 @@ export class NavigationPublicPlugin implements Plugin<
         if (!this.isSolutionNavEnabled) return;
         this.addSolutionNavigation(solutionNavigation);
       },
-      initNavigation: (id, navigationTree$) => {
+      initNavigation: (id, navigationTree$, ownerPluginId) => {
+        if (ownerPluginId) {
+          // Bookkeeping for the nav-dependency test. Chrome no-ops unless collection is enabled.
+          chrome.project.registerNavTreeDependencies(ownerPluginId, navigationTree$);
+        }
         // Idempotent: same id is a no-op; a different id is a caller bug,
         // logged and ignored rather than re-running enableUi mid-session.
         if (this.activeSolutionId === id) return;
@@ -183,6 +187,11 @@ export class NavigationPublicPlugin implements Plugin<
 
   private addSolutionNavigation(def: AddSolutionNavigationArg) {
     this.solutionNavDefinitions.set(def.id, def);
+    if (def.ownerPluginId) {
+      // Dev-only bookkeeping (chrome no-ops in production): lets Core attribute this tree's
+      // cross-plugin links to the owning plugin for the nav-dependency enforcement test.
+      this.chrome?.project.registerNavTreeDependencies(def.ownerPluginId, def.navigationTree$);
+    }
     this.tryInitNavigation();
   }
 

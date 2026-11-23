@@ -197,6 +197,7 @@ export const DetectionPage = ({
       />
       <EuiPageTemplate.Section
         component="div"
+        color="transparent"
         restrictWidth={false}
         grow
         css={css`

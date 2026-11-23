@@ -9,6 +9,7 @@ import { forbidden } from '@hapi/boom';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SessionsStatus } from '../../../../common/sessions';
+import { BROWSER_SESSIONS_PLATFORM } from '../../../services/sessions/sessions_platforms';
 import { getSessionsStatus } from '../../../services/sessions/sessions_status';
 import type { SourceApplications } from '../types';
 import { getOtelApplications } from './get_otel_applications';
@@ -70,6 +71,7 @@ const setup = ({
     start,
     end: NOW,
     environment: 'production',
+    histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     signal,
   });
   return { result, esClient, taskManager, logger };
@@ -100,12 +102,17 @@ describe('getOtelApplicationsFromBestSource', () => {
     const { result, esClient, taskManager } = setup();
     await result;
 
-    expect(mockedStatus).toHaveBeenCalledWith({ taskManager, settings: SETTINGS });
+    expect(mockedStatus).toHaveBeenCalledWith({
+      taskManager,
+      settings: SETTINGS,
+      platform: BROWSER_SESSIONS_PLATFORM,
+    });
     expect(mockedSessions).toHaveBeenCalledWith({
       tracedEsClient: expect.objectContaining({ client: esClient }),
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
     });
   });
 
@@ -226,6 +233,7 @@ describe('getOtelApplicationsFromBestSource', () => {
       start: NOW - DAY_MS,
       end: NOW,
       environment: 'production',
+      histogram: { interval: { value: 1, unit: 's' }, timeZone: 'UTC' },
       signal: undefined,
     });
   });

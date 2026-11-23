@@ -17,6 +17,7 @@ import { expect } from '@kbn/scout/ui';
  */
 export class DataFrameAnalyticsPage {
   private readonly codeEditor: KibanaCodeEditorWrapper;
+  private histogramRequestSucceeded?: Promise<boolean>;
 
   constructor(
     private readonly page: ScoutPage,
@@ -34,6 +35,17 @@ export class DataFrameAnalyticsPage {
           response.request().postData()?.includes(requestBodyFragment) === true),
       { timeout: 30_000 }
     );
+  }
+
+  private async waitForHistogramRequest(): Promise<boolean> {
+    try {
+      const response = await this.page.waitForResponse((candidate) =>
+        candidate.url().includes('/data_visualizer/get_field_histograms/')
+      );
+      return response.ok();
+    } catch {
+      return false;
+    }
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -336,6 +348,7 @@ export class DataFrameAnalyticsPage {
     // Navigate directly rather than clicking the showOnHover table button; the button is
     // CSS-hidden until hover and its cross-app navigation is unreliable in Playwright.
     const rison = `(ml:(analysisType:${analysisType},jobId:${jobId}))`;
+    this.histogramRequestSucceeded = this.waitForHistogramRequest();
     await this.page.goto(this.kbnUrl.app(`ml/data_frame_analytics/exploration?_g=${rison}`));
     await this.page.testSubj
       .locator('mlPageDataFrameAnalyticsExploration')
@@ -501,7 +514,7 @@ export class DataFrameAnalyticsPage {
    * Hovers the first feature-importance cell and clicks its action button to open
    * the popover.
    *
-   * Two headless Playwright / EUI DataGrid quirks require special handling:
+   * Four headless Playwright / EUI DataGrid quirks require special handling:
    * 1. EUI DataGrid's VariableSizeGrid renders no cells when its container reports
    *    zero width. Scrolling the grid into view fixes this — but only when the scroll
    *    actually moves the page. After pagination the page may still be showing the
@@ -512,6 +525,15 @@ export class DataFrameAnalyticsPage {
    *    Page 3 (pageIndex=2, pageSize=25) starts at row 50, so hard-coding row 0 would
    *    never match after pagination. waitForFunction reads row and column ids from the
    *    first rendered FI cell for a unique data-* selector without .first()/.nth().
+   * 3. `mlExplorationDataGrid loaded` only means "not errored" — data_grid.tsx emits the
+   *    `loaded` suffix for every status but ERROR — and two renders still follow it: once
+   *    the row count arrives `chartsVisible` auto-resolves, which starts an async field
+   *    histogram fetch whose result injects a chart into every header cell. Both grow the
+   *    header row and re-mount the virtualized body cells, detaching the target mid-click.
+   * 4. Kibana's sticky appHeader overlays the top of the page, so aligning the grid with the
+   *    viewport top parks row 0 underneath it and every click attempt is intercepted.
+   *    Centring the cell is what frees it; scrollIntoViewIfNeeded is a no-op here because
+   *    the occluded cell already counts as inside the viewport.
    */
   async openFeatureImportancePopover(): Promise<void> {
     const dataGrid = this.page.testSubj.locator('mlExplorationDataGrid loaded');
@@ -521,6 +543,10 @@ export class DataFrameAnalyticsPage {
     // grid on-screen when the panel is short, making scrollIntoViewIfNeeded a no-op.
     await this.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await dataGrid.scrollIntoViewIfNeeded();
+
+    // The histogram toggle stays disabled until `chartsVisible` resolves from the row count.
+    const histogramButton = this.page.testSubj.locator('mlExplorationDataGridHistogramButton');
+    await expect(histogramButton).toBeEnabled();
 
     // Wait for any FI cell and capture exact row + column ids so the locator is unique
     // even when multiple feature_importance columns exist on the same row.
@@ -548,11 +574,22 @@ export class DataFrameAnalyticsPage {
       columnId: string;
     };
 
+    // Let histogram loading finish before interacting with cells, whether it succeeds
+    // or reports an error. The histogram test step verifies chart success separately.
+    if ((await histogramButton.getAttribute('aria-pressed')) === 'true') {
+      if (await this.histogramRequestSucceeded) {
+        const histogramChart = this.page.testSubj.locator(`mlDataGridChart-${columnId}`);
+        await histogramChart.waitFor({ state: 'visible' });
+      }
+    }
+
     const featureImportanceCell = dataGrid.locator(
       `[data-gridcell-row-index="${rowIndex}"][data-gridcell-column-id="${columnId}"][data-test-subj="dataGridRowCell"]`
     );
     await featureImportanceCell.waitFor({ state: 'visible' });
-    await featureImportanceCell.scrollIntoViewIfNeeded();
+    await featureImportanceCell.evaluate((element) => {
+      element.scrollIntoView({ block: 'center' });
+    });
     await featureImportanceCell.hover();
     const button = featureImportanceCell.locator('button');
     await button.waitFor({ state: 'visible' });

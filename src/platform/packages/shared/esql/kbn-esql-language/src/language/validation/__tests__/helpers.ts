@@ -57,6 +57,7 @@ const mustBeAwaited = <T>(promise: Promise<T>, fnName: string): Promise<T> => {
 interface ValidationTestSetup {
   callbacks: ESQLCallbacks;
   validate: (query: string, cb?: ESQLCallbacks) => Promise<ValidationResult>;
+  expectElasticsearchAccepts?: (query: string) => Promise<void>;
   expectErrors: (
     query: string,
     expectedErrors: string[],
@@ -68,6 +69,7 @@ interface ValidationTestSetup {
 export type Setup = () => Promise<ValidationTestSetup>;
 
 interface CreateValidationTestSetupOptions {
+  expectElasticsearchAccepts?: ValidationTestSetup['expectElasticsearchAccepts'];
   afterValidate?: (context: {
     query: string;
     result: ValidationResult;
@@ -81,7 +83,7 @@ interface CreateValidationTestSetupOptions {
  * @returns API for testing validation logic.
  */
 export const createValidationTestSetup =
-  ({ afterValidate }: CreateValidationTestSetupOptions = {}): Setup =>
+  ({ afterValidate, expectElasticsearchAccepts }: CreateValidationTestSetupOptions = {}): Setup =>
   async () => {
     const callbacks = getCallbackMocks();
     const defaultCallbacks = { ...callbacks };
@@ -155,6 +157,7 @@ export const createValidationTestSetup =
       callbacks,
       validate,
       expectErrors,
+      expectElasticsearchAccepts,
     };
   };
 

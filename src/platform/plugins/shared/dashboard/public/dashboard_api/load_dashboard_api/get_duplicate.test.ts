@@ -88,7 +88,7 @@ describe('getDuplicate', () => {
     jest.restoreAllMocks();
   });
 
-  test('returns the matching grid, section, or pinned panel', async () => {
+  test('returns the matching grid or pinned panel', async () => {
     const cache: PanelsCache = new Map();
 
     await expect(
@@ -110,21 +110,6 @@ describe('getDuplicate', () => {
       getDuplicate(
         {
           type: ESQL_CONTROL,
-          serializedState: createControlState('env_name', ['staging']),
-        },
-        initialState,
-        cache
-      )
-    ).resolves.toEqual({
-      id: 'sectionControl',
-      type: ESQL_CONTROL,
-      state: createControlState('env_name', ['prod']),
-    });
-
-    await expect(
-      getDuplicate(
-        {
-          type: ESQL_CONTROL,
           serializedState: createControlState('geo_dest', ['CN']),
         },
         initialState,
@@ -135,6 +120,19 @@ describe('getDuplicate', () => {
       type: ESQL_CONTROL,
       state: createControlState('geo_dest', ['US']),
     });
+  });
+
+  test('does not match a panel inside a section', async () => {
+    await expect(
+      getDuplicate(
+        {
+          type: ESQL_CONTROL,
+          serializedState: createControlState('env_name', ['staging']),
+        },
+        initialState,
+        new Map()
+      )
+    ).resolves.toBeUndefined();
   });
 
   test('returns undefined when isDuplicate returns false or the type has no isDuplicate', async () => {

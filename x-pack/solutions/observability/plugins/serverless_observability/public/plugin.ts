@@ -65,7 +65,7 @@ export class ServerlessObservabilityPlugin implements Plugin<
         });
       })
     );
-    navigation.initNavigation('oblt', navigationTree$);
+    navigation.initNavigation('oblt', navigationTree$, 'serverlessObservability');
 
     if (workflowsManagement && !core.pricing.isFeatureAvailable('observability:workflows')) {
       workflowsManagement.setUnavailableInServerlessTier({

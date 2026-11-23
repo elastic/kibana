@@ -14,7 +14,8 @@ import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
-import type { EntityFilters, TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
+import type { EntityFilters } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 

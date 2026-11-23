@@ -6,7 +6,6 @@
  */
 
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
 
 export const MAX_BULK_WRITE_ITEMS = 100;
 
@@ -18,18 +17,32 @@ export interface CompactBulkError {
 
 export type BulkWriteErrorCode = 'validation_error' | 'outcome_unknown' | 'bulk_error';
 
+/** Which check refused the write, for telemetry: the message names ids and cannot be counted. */
+export type BulkWriteValidationReason =
+  | 'detection_rule_mismatch'
+  | 'detection_not_stored'
+  | 'unresolved_feature_reference';
+
+export interface BulkWriteValidationDetails {
+  reason: BulkWriteValidationReason;
+  count?: number;
+}
+
 export class BulkWriteError extends Error {
   constructor(
     public readonly code: BulkWriteErrorCode,
-    message: string
+    message: string,
+    public readonly details?: BulkWriteValidationDetails
   ) {
     super(message);
     this.name = 'BulkWriteError';
   }
 }
 
-export const createBulkWriteValidationError = (message: string): BulkWriteError =>
-  new BulkWriteError('validation_error', message);
+export const createBulkWriteValidationError = (
+  message: string,
+  details?: BulkWriteValidationDetails
+): BulkWriteError => new BulkWriteError('validation_error', message, details);
 
 export const createBulkWriteOutcomeUnknownError = (message: string): BulkWriteError =>
   new BulkWriteError('outcome_unknown', message);
@@ -47,23 +60,6 @@ export const getBulkWriteToolErrorCode = (error: Error): BulkWriteToolErrorCode 
     return error.code;
   }
   return 'pre_write_error';
-};
-
-export const trackTelemetryBestEffort = ({
-  track,
-  logger,
-  description,
-}: {
-  track: () => void;
-  logger: Logger;
-  description: string;
-}): void => {
-  try {
-    track();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown telemetry error';
-    logger.warn(`Failed to track ${description}: ${message}`);
-  }
 };
 
 export const assertValidBulkWriteSize = (items: readonly object[]): void => {

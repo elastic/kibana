@@ -38,7 +38,7 @@ import {
 import { useApplyDreamingTemplate } from '../hooks/use_apply_dreaming_template';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
-import { useDreamingTemplate, useDreamingTemplates } from '../hooks/use_dreaming_templates';
+import { useDreamingTemplates } from '../hooks/use_dreaming_templates';
 import { useNavigation } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
@@ -150,7 +150,7 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
   const [edited, setEdited] = useState<{ id: string; draft: DreamingConfigDraft }>();
   const selectedId = pickedId ?? templates[0]?.id;
   const isCustom = selectedId === CUSTOM_TEMPLATE_ID;
-  const { template, error: templateError } = useDreamingTemplate(isCustom ? undefined : selectedId);
+  const selected = isCustom ? undefined : templates.find(({ id }) => id === selectedId);
   const { applyTemplate, isSaving } = useApplyDreamingTemplate();
   const detailPath = getAiIndexDetailPath(aiIndexId);
 
@@ -160,14 +160,13 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
     () =>
       isCustom
         ? EMPTY_DRAFT
-        : template
-          ? draftOf(template.dreaming, { entitiesEnabled: false })
+        : selected
+          ? draftOf(selected.dreaming, { entitiesEnabled: false })
           : undefined,
-    [isCustom, template]
+    [isCustom, selected]
   );
   const draft = edited !== undefined && edited.id === selectedId ? edited.draft : proposed;
-  const summary = editedSummary ?? (isCustom ? '' : (template?.summary ?? ''));
-  const selected = templates.find(({ id }) => id === selectedId);
+  const summary = editedSummary ?? (isCustom ? '' : (selected?.summary ?? ''));
 
   const select = (id: string) => {
     if (id !== selectedId) {
@@ -185,9 +184,7 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
     }
     const config = buildDreamingTemplateConfig(
       {
-        summary: '',
-        rationale: '',
-        dreaming: { ...(isCustom ? {} : template?.dreaming), ...typesOfDraft(draft) },
+        dreaming: { ...(isCustom ? {} : selected?.dreaming), ...typesOfDraft(draft) },
       },
       summary
     );
@@ -303,19 +300,11 @@ const DreamingTemplateSetup = ({ aiIndexId }: { aiIndexId: string }) => {
                   fullWidth
                   rows={3}
                   value={summary}
-                  isLoading={!isCustom && !template && !templateError}
+                  isLoading={isLoading}
                   onChange={(event) => setEditedSummary(event.target.value)}
                   data-test-subj="contextDreamingTemplateSummary"
                 />
               </EuiFormRow>
-              {templateError && (
-                <>
-                  <EuiSpacer size="l" />
-                  <KbnDangerCallout announceOnMount={false} title={loadErrorTitle} size="s">
-                    {templateError.message}
-                  </KbnDangerCallout>
-                </>
-              )}
               <EuiHorizontalRule margin="xl" />
               {draft && selectedId ? (
                 <DreamingConfigEditor

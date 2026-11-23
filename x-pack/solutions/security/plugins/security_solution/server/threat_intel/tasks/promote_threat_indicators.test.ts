@@ -497,6 +497,21 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       expect(ops).toHaveLength(0);
     });
+
+    it('produces no ops for a report marked rejected with the version-independent value', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-workflow-rejected-current',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            extractionMethod: 'enrich_workflow_rejected',
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
   });
 
   describe('space isolation', () => {

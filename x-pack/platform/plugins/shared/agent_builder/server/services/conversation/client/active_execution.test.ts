@@ -28,13 +28,13 @@ const heartbeatAgo = (seconds: number) => ({
 
 const free = {} as NormalizedConversation;
 
-const set = { action: 'acquire', executionId: 'e2' } as const;
+const set = { action: 'acquire', executionId: 'e2', timelineExecutionId: 'e2::execution' } as const;
 
 describe('applyActiveExecutionUpdate', () => {
   describe('setting', () => {
     it('sets the active execution on a free conversation', () => {
       expect(applyActiveExecutionUpdate(free, set)).toEqual({
-        active_execution: { execution_id: 'e2' },
+        active_execution: { execution_id: 'e2', timeline_execution_id: 'e2::execution' },
       });
     });
 
@@ -53,13 +53,13 @@ describe('applyActiveExecutionUpdate', () => {
 
     it('takes over a holder whose heartbeat went stale', () => {
       expect(applyActiveExecutionUpdate(heldBy('e1', heartbeatAgo(120)), set)).toEqual({
-        active_execution: { execution_id: 'e2' },
+        active_execution: { execution_id: 'e2', timeline_execution_id: 'e2::execution' },
       });
     });
 
     it('takes over a holder whose record is gone', () => {
       expect(applyActiveExecutionUpdate(heldBy('e1'), set)).toEqual({
-        active_execution: { execution_id: 'e2' },
+        active_execution: { execution_id: 'e2', timeline_execution_id: 'e2::execution' },
       });
     });
 

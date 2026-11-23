@@ -217,7 +217,7 @@ export const SearchExamplesApp = ({
     });
 
     // Fetch next page
-    if (result.pagination.hasNextPage) {
+    if (result.pagination.hasNextPage()) {
       const nextPage = await result.pagination.nextPage();
       void nextPage;
     }

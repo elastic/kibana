@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/server-route-repository'
   - '@kbn/server-route-repository-client'
   - '@kbn/spaces-plugin'
+  - '@kbn/task-manager-plugin'
   - '@kbn/std'
   - '@kbn/workflows'
   - '@kbn/workflows-execution-engine'
@@ -93,6 +94,7 @@ dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/repo-info'
   - '@kbn/setup-node-env'
+  - '@kbn/user-profile-components'
 tags:
   - plugin
   - prod

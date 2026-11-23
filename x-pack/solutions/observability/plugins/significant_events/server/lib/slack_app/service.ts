@@ -27,6 +27,7 @@ import {
   type RelayClientContract,
 } from '@kbn/actions-plugin/server';
 import { RELAY_AUTH_ID } from '@kbn/connector-specs';
+import { getUserDisplayName } from '@kbn/user-profile-components/server';
 import type { SignificantEventsServer } from '../../types';
 import type {
   SlackAppAvailableChannelsResponse,
@@ -525,7 +526,9 @@ export class SlackAppService {
     const existingConnection = await this.readConnection(soClient);
     const credential = await this.mintCredential(request, relayClient);
 
-    const username = this.server.security.authc.getCurrentUser(request)?.username;
+    const user = this.server.security.authc.getCurrentUser(request);
+    const username = user?.username;
+    const createdBy = user ? getUserDisplayName(user) : undefined;
 
     let installResponse;
     try {
@@ -540,6 +543,7 @@ export class SlackAppService {
         kibana_url: getKibanaUrl(this.server.core, this.server.cloud),
         kibana_version: this.server.kibanaVersion,
         license_info: license.type ?? 'basic',
+        // Do not send display name, only the username for security reasons, as it could be an email or other sensitive information.
         ...(username ? { created_by_user_key: username } : {}),
         ...(agentId ? { agent_id: agentId } : {}),
       });
@@ -560,7 +564,7 @@ export class SlackAppService {
       claimId: installResponse.claim_id,
       tenantKey: null,
       surface: 'slack',
-      createdBy: username,
+      createdBy,
       createdAt: now,
     });
 

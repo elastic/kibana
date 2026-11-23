@@ -30,6 +30,7 @@ export type SkillsDirectoryStructure = Directory<{
       'agent-builder': FileDirectory;
       alerting: FileDirectory;
       cases: FileDirectory;
+      connectors: FileDirectory;
       'context-engine': FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
@@ -81,6 +82,12 @@ export type DirectoryPath = FilePathsFromStructure<SkillsDirectoryStructure>;
  * and copied into Kibana by that repository's sync job.
  */
 export const ELASTIC_SKILLS_BASE_PATH = 'skills/elastic-skills' satisfies DirectoryPath;
+
+/**
+ * Base path shared by every skill generated from a connector spec (`skillFiles`). Skills registered
+ * here are resolved per agent from the agent's connectors rather than listed in the allow list.
+ */
+export const CONNECTORS_SKILLS_BASE_PATH = 'skills/platform/connectors' satisfies DirectoryPath;
 
 /**
  * Server-side definition of a skill type.

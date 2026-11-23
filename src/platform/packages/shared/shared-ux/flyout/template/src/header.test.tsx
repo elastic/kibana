@@ -39,7 +39,7 @@ describe('FlyoutTemplate header title icon and description', () => {
     jest.restoreAllMocks();
   });
 
-  it('renders the header title as an H3', () => {
+  it('renders the header title as an H2', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Alert details" />
@@ -49,8 +49,23 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(title).toBeInTheDocument();
+  });
+
+  it('renders the header title in the heading element set by titleElement', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" titleElement="h3" />
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    expect(title.id).toMatch(/^flyoutTemplateTitle/);
+    expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
   });
 
   it('assigns a generated id to the visible header title for flyout labeling', () => {
@@ -63,11 +78,11 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(title.id).toMatch(/^flyoutTemplateTitle/);
   });
 
-  it('renders a link title inside the H3 heading', () => {
+  it('renders a link title inside the H2 heading', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title={<a href="#details">Alert details</a>} />
@@ -77,7 +92,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const title = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const title = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(within(title).getByRole('link', { name: 'Alert details' })).toHaveAttribute(
       'href',
       '#details'
@@ -96,7 +111,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute('title', 'Alert details');
+    expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute('title', 'Alert details');
   });
 
   it('leaves a node title untitled when collapsed even with titleText, so its own tooltip is not covered', () => {
@@ -113,7 +128,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
+    expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('title');
   });
 
   it('leaves the collapsed heading untitled when a node title has no titleText', () => {
@@ -126,7 +141,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('heading', { level: 3 })).not.toHaveAttribute('title');
+    expect(screen.getByRole('heading', { level: 2 })).not.toHaveAttribute('title');
   });
 
   it('prefers titleText over a string title for the collapsed reveal', () => {
@@ -143,7 +158,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    expect(screen.getByRole('heading', { level: 3 })).toHaveAttribute(
+    expect(screen.getByRole('heading', { level: 2 })).toHaveAttribute(
       'title',
       'Full alert details'
     );
@@ -191,7 +206,7 @@ describe('FlyoutTemplate header title icon and description', () => {
       </FlyoutTemplate>
     );
 
-    const heading = screen.getByRole('heading', { level: 3, name: 'Alert details' });
+    const heading = screen.getByRole('heading', { level: 2, name: 'Alert details' });
     expect(heading.id).toMatch(/^flyoutTemplateTitle/);
   });
 
@@ -216,8 +231,22 @@ describe('FlyoutTemplate header title icon and description', () => {
 
     const spinner = screen.getByTestId('flyoutHeaderTitleLoading');
     expect(spinner).toHaveAttribute('aria-label', 'Loading');
-    expect(screen.getByRole('heading', { level: 3, name: 'Alert details' })).not.toContainElement(
+    expect(screen.getByRole('heading', { level: 2, name: 'Alert details' })).not.toContainElement(
       spinner
+    );
+  });
+
+  it('names the loading spinner with loadingLabel', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Alert details" isLoading loadingLabel="Syncing attachments" />
+        {body}
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('flyoutHeaderTitleLoading')).toHaveAttribute(
+      'aria-label',
+      'Syncing attachments'
     );
   });
 

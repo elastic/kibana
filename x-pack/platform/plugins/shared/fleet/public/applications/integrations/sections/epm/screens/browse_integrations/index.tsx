@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiFlexGroup, EuiSpacer, useEuiTheme } from '@elastic/eui'
 import { useLocation, useHistory } from 'react-router-dom';
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
-import { CardIcon } from '../../../../../../components/package_icon';
+import { buildCollectionVariants } from '../home/collection_variants';
 import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
@@ -162,28 +162,10 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
   }, [openCollectionGroupId, pathname, search]);
 
   const collectionVariants: CollectionVariant[] = useMemo(() => {
-    if (!openCollectionCard?.groupMembers || !collectionReturnPath) return [];
-    return openCollectionCard.groupMembers.map((member) => {
-      const returnParams = new URLSearchParams({
-        returnAppId: 'integrations',
-        returnPath: collectionReturnPath,
-      });
-      const separator = member.url.includes('?') ? '&' : '?';
-      return {
-        id: member.id,
-        title: member.title,
-        description: member.description,
-        icon: (
-          <CardIcon
-            icons={member.icons}
-            packageName={member.name}
-            version={member.version}
-            size="l"
-          />
-        ),
-        href: `${member.url}${separator}${returnParams.toString()}`,
-        'data-test-subj': `collectionVariantRow-${member.id}`,
-      };
+    if (!openCollectionCard || !collectionReturnPath) return [];
+    return buildCollectionVariants(openCollectionCard, {
+      returnAppId: 'integrations',
+      returnPath: collectionReturnPath,
     });
   }, [openCollectionCard, collectionReturnPath]);
 

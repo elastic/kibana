@@ -32,6 +32,8 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSessionEventsRoutes } from './routes/session_events';
+import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -48,6 +50,8 @@ import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { ImprovementsService } from './improvements/service';
 import { installImprovementsIndexTemplate } from './improvements/storage';
+import { createSessionMemoryService } from './session_memory/service';
+import { createSessionEventsService } from './session_events/service';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
@@ -347,6 +351,35 @@ export class ContextEnginePlugin implements Plugin<
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerSessionEventsRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionEventsService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionEventsService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+    });
+
+    registerSessionMemoryRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionMemoryService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionMemoryService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+      logger: this.logger.get('session_memory'),
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -416,6 +449,9 @@ export class ContextEnginePlugin implements Plugin<
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const sessionMemoryService = createSessionMemoryService(this.esClient);
+    const sessionEventsService = createSessionEventsService(this.esClient);
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -490,6 +526,8 @@ export class ContextEnginePlugin implements Plugin<
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getSessionMemoryService: () => sessionMemoryService,
+      getSessionEventsService: () => sessionEventsService,
     };
   }
 

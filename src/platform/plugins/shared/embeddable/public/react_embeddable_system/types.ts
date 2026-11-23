@@ -12,6 +12,7 @@ import type {
   HasSerializableState,
   HasType,
   PublishesPhaseEvents,
+  StateComparators,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -98,6 +99,11 @@ export interface EmbeddablePublicDefinition<
   buildEmbeddable: (
     props: BuildEmbeddableProps<SerializedState, Api>
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
+
+  /**
+   * Returns comparators used to determine whether two serialized states are equal.
+   */
+  getComparators?: (embeddableState: SerializedState) => StateComparators<SerializedState>;
 
   /**
    * Provide placement hints to customize initial placement

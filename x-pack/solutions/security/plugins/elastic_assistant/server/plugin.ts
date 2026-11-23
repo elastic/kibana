@@ -234,6 +234,8 @@ export class ElasticAssistantPlugin implements Plugin<
       registerCallback: (callbackId: CallbackIds, callback: Function) => {
         return appContextService.registerCallback(callbackId, callback);
       },
+      ensureSpaceResources: async (spaceId: string) =>
+        (await this.assistantService?.ensureSpaceResources(spaceId)) ?? false,
     };
   }
 

@@ -16,6 +16,7 @@ import type {
 import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { DIGITAL_EXPERIENCE_FEATURE_ID } from '../common/feature';
 import { DIGITAL_EXPERIENCE_ENABLED_FLAG } from '../common/feature_flags';
+import { DigitalExperienceLocatorDefinition } from '../common/locator';
 import { hasDigitalExperienceAccess } from './capabilities';
 import { APPLICATIONS_LABEL, DIGITAL_EXPERIENCE_LABEL } from './labels';
 import type { DigitalExperienceSetupDeps, DigitalExperienceStartDeps } from './types';
@@ -31,6 +32,9 @@ export class DigitalExperiencePlugin implements Plugin<
   private readonly isVisible$ = new ReplaySubject<boolean>(1);
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
+    // Also registered on the server, which creates the short URLs that name it.
+    plugins.share.url.locators.create(new DigitalExperienceLocatorDefinition());
+
     plugins.observabilityShared.navigation.registerSections(
       this.isVisible$.pipe(
         map((isVisible) =>

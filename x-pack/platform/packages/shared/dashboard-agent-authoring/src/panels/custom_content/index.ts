@@ -22,7 +22,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  * Custom content panel requests.
  *
  * Custom content is an HTML template generated server-side, so it is requested
- * like a Lens or Vega panel (`source: 'request'`, `renderer: 'custom_content'`).
+ * like a Lens or Vega panel (`type: 'custom_content'`).
  * The host provides the resolver that turns these requests into panel content.
  */
 
@@ -32,7 +32,7 @@ import { defineRequestPanelKind } from '../panel_kind';
  */
 export interface CustomContentPanelAddRequest
   extends PanelResolutionRequestBase, CustomContentQueryChanges {
-  renderer: 'custom_content';
+  type: 'custom_content';
   /** What to display. */
   nlQuery: string;
   existingPanel?: undefined;
@@ -41,7 +41,7 @@ export interface CustomContentPanelAddRequest
 /** Request to refine an existing custom content panel's template. */
 export interface CustomContentPanelEditRequest
   extends PanelResolutionRequestBase, CustomContentQueryChanges {
-  renderer: 'custom_content';
+  type: 'custom_content';
   existingPanel: AttachmentPanel;
   /** What to change. Omitted when the edit only changes the query. */
   nlQuery?: string;
@@ -56,11 +56,10 @@ export type CustomContentPanelResolutionRequest =
 const customContentPanelContentSchema = lazySchema(() =>
   z
     .looseObject({
-      source: z.literal('request'),
-      renderer: z
+      type: z
         .literal('custom_content')
         .describe(
-          'Render an HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express. Required to edit a custom content panel; it is not inferred from the panel.'
+          'An HTML/CSS layout generated server-side. A last resort for content Lens and Vega cannot express.'
         ),
       query: z
         .string()
@@ -89,7 +88,7 @@ const customContentGuidance = `A custom content panel with live data does not ne
 
 To create one, set \`query\` to a concise description of what to display; the HTML template is generated server-side from it.
 
-To edit one, list its id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current queries, so send no \`dataQueries\`. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`dataQueries\` with an entry at the position of the query to change: without it the stored query is kept and the new data can never appear. The server then regenerates that query from the \`description\`, keeping what the request does not change. \`removeAllQueries: true\` removes every query. The server refines the existing template.
+To edit one, list its id in \`panels\` with \`type: "custom_content"\`. Set \`query\` to the requested change; layout, copy and style edits (colors, sizes, wording) keep the current queries, so send no \`dataQueries\`. An edit that needs different data, such as "also show the average bytes", a new grouping or filter, or another time window, also needs \`dataQueries\` with an entry at the position of the query to change: without it the stored query is kept and the new data can never appear. The server then regenerates that query from the \`description\`, keeping what the request does not change. \`removeAllQueries: true\` removes every query. The server refines the existing template.
 
 ### Panels with several queries
 
@@ -98,7 +97,7 @@ When one panel needs data of more than one shape — headline numbers above a ra
 To edit a panel that has several queries, send \`dataQueries\` only for the ones you change, in position order: an entry with \`description\` regenerates that query, \`esql\` replaces it, \`{}\` keeps it, and an entry past the current queries adds one. Queries you do not list are kept. They cannot be removed one at a time with this tool, and the panel's editor only lets the user remove the last query. To drop an earlier one, replace it with a different query (a new \`description\` or \`esql\`), or use \`removeAllQueries: true\` to remove them all. For a layout or style edit omit \`dataQueries\`: every query is kept.`;
 
 export const customContentPanelKind = defineRequestPanelKind({
-  renderer: 'custom_content',
+  type: 'custom_content',
   embeddableType: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   label: 'custom content',
   selection: {

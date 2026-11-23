@@ -110,11 +110,13 @@ const optionalChartTypeField = z
     '(optional) A Lens chart type used only as a styling hint. Omit it when no Lens chart type represents the requested form.'
   );
 
-const lensTargetSchema = z.object({
-  type: z.literal('lens').describe('A new standard Lens chart (the common case).'),
-  chartType: requiredChartTypeField,
-  esql: optionalEsqlField,
-});
+const lensTargetSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('vis').describe('A new standard Lens chart (the common case).'),
+    chartType: requiredChartTypeField,
+    esql: optionalEsqlField,
+  })
+);
 
 const vegaTargetSchema = z.object({
   type: z
@@ -177,7 +179,7 @@ const targetSchema = lazySchema(() =>
       attachmentTargetSchema,
     ])
     .describe(
-      'What to build, discriminated by "type": a new "lens", "vega" or "custom_content" visualization, or an "attachment" update of an existing one. Each type accepts only the fields that apply to it.'
+      'What to build, discriminated by "type": a new "vis" (Lens), "vega" or "custom_content" visualization, or an "attachment" update of an existing one. Each type accepts only the fields that apply to it.'
     )
 );
 
@@ -252,9 +254,16 @@ type CreateVisualizationTarget = z.output<typeof targetSchema>;
  * Flattens the discriminated `target` into the handful of values the handler works with.
  * Leftover `esql: null` or `esql: ""` is treated as omitted (generate / keep), not as "no data".
  */
+const RENDERER_BY_TARGET_TYPE = {
+  vis: 'lens',
+  vega: 'vega',
+  custom_content: 'custom_content',
+} as const satisfies Record<string, VisualizationRenderer>;
+
 const readTarget = (target: CreateVisualizationTarget) => ({
   attachmentId: target.type === 'attachment' ? target.attachment_id : undefined,
-  requestedRenderer: target.type === 'attachment' ? undefined : target.type,
+  requestedRenderer:
+    target.type === 'attachment' ? undefined : RENDERER_BY_TARGET_TYPE[target.type],
   chartType: target.type === 'custom_content' ? undefined : target.chartType,
   esql: target.type === 'custom_content' ? undefined : target.esql || undefined,
   dataQueries:
@@ -276,7 +285,7 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
     description: `Create or update a visualization from a natural language description. Supports BOTH standard Lens charts AND custom Vega-Lite visualizations (the Vega-Lite grammar only — NOT full Vega). Prefer this tool over telling the user a chart cannot be built whenever the request fits Lens or Vega-Lite; you do not author Vega specs by hand or ask the user to paste anything. If a request genuinely needs full Vega (custom signals/interactivity, imperative transforms, or bespoke rendering), it is not supported yet — be honest with the user and offer alternatives instead of producing a broken chart.
 
 You say what to build via "target", discriminated by "target.type":
-- "lens" for a standard Lens chart; requires "chartType" (${Object.values(SupportedChartType).join(
+- "vis" for a standard Lens chart; requires "chartType" (${Object.values(SupportedChartType).join(
       ', '
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.

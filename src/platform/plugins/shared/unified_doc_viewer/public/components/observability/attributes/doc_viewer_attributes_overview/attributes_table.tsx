@@ -88,36 +88,39 @@ export const AttributesTable = ({
     [toasts, filter]
   );
 
-  const gridColumns: EuiDataGridProps['columns'] = [
-    {
-      id: 'name',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
-        defaultMessage: 'Field',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: getEuiCellActions({
-        definitions: fieldCellActionDefinitions,
-        rows,
-        getRowId: ({ name }) => name,
-        columnId: 'name',
-      }),
-    },
-    {
-      id: 'value',
-      displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
-        defaultMessage: 'Value',
-      }),
-      actions: false,
-      visibleCellActions: 3,
-      cellActions: getEuiCellActions({
-        definitions: fieldValueCellActionDefinitions,
-        rows,
-        getRowId: ({ name }) => name,
-        columnId: 'value',
-      }),
-    },
-  ];
+  const gridColumns = useMemo<EuiDataGridProps['columns']>(
+    () => [
+      {
+        id: 'name',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.nameColumn', {
+          defaultMessage: 'Field',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'name',
+        }),
+      },
+      {
+        id: 'value',
+        displayAsText: i18n.translate('unifiedDocViewer.docView.attributes.table.valueColumn', {
+          defaultMessage: 'Value',
+        }),
+        actions: false,
+        visibleCellActions: 3,
+        cellActions: getEuiCellActions({
+          definitions: fieldValueCellActionDefinitions,
+          rows,
+          getRowId: ({ name }) => name,
+          columnId: 'value',
+        }),
+      },
+    ],
+    [fieldCellActionDefinitions, fieldValueCellActionDefinitions, rows]
+  );
 
   return (
     <EuiDataGrid

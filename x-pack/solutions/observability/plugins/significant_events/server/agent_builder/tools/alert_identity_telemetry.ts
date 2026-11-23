@@ -6,24 +6,8 @@
  */
 
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
-import type {
-  AlertCreationAttemptIdentityProps,
-  ExistingAlertIdentityProps,
-} from '../../lib/telemetry/ebt';
+import type { AlertCreationAttemptIdentityProps } from '../../lib/telemetry/ebt';
 import type { EventsWriteBulkResult } from './event_write/types';
-
-/** Identity of the Significant Event addressed; `event_id` is its fingerprint even on failure. */
-export const existingAlertIdentity = ({
-  eventId,
-  spaceId,
-}: {
-  eventId: string;
-  spaceId: string;
-}): ExistingAlertIdentityProps => ({
-  alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-  fingerprint: eventId,
-  space_id: spaceId,
-});
 
 export const alertCreationAttemptIdentity = ({
   spaceId,
@@ -49,6 +33,10 @@ export const eventsWriteResultEventId = (
     return result.event_id;
   }
   if ('skipped' in result) {
+    // The holder of a rule is not the event the item addressed; the caller's own target is.
+    if (result.reason === 'rule_held_by_event') {
+      return callerEventId;
+    }
     if (result.reason !== 'unchanged_outcome') {
       return result.existing_event_id;
     }

@@ -237,9 +237,11 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 export const HeaderZone = ({
   title,
   titleText,
+  titleElement: TitleElement = 'h2',
   titleIcon,
   titleTooltip,
   isLoading = false,
+  loadingLabel,
   description,
   collapsed = false,
   children,
@@ -261,7 +263,7 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
-  const titleLoadingNode = renderTitleLoading(isLoading);
+  const titleLoadingNode = renderTitleLoading(isLoading, loadingLabel);
   // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
   // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
   const collapsedTitleText = typeof title === 'string' ? (titleText ?? title) : undefined;
@@ -321,13 +323,13 @@ export const HeaderZone = ({
               >
                 <EuiFlexItem grow={false} css={collapseStyles.collapsedTitleItem}>
                   <EuiTitle size="xs">
-                    <h3
+                    <TitleElement
                       id={flyoutTitleId}
                       css={[titleCss, collapseStyles.collapsedTitle]}
                       title={collapsedTitleText}
                     >
                       {title}
-                    </h3>
+                    </TitleElement>
                   </EuiTitle>
                 </EuiFlexItem>
                 {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
@@ -335,10 +337,10 @@ export const HeaderZone = ({
               </EuiFlexGroup>
             ) : (
               renderTitleWithAdornments(
-                <EuiTitle size="m">
-                  <h3 id={flyoutTitleId} css={titleCss}>
+                <EuiTitle size="s">
+                  <TitleElement id={flyoutTitleId} css={titleCss}>
                     {title}
-                  </h3>
+                  </TitleElement>
                 </EuiTitle>,
                 titleIconNode,
                 titleLoadingNode

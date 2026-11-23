@@ -13,10 +13,8 @@ import type {
   CoreSetup,
   CoreStart,
 } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SEARCH_PROJECT_SETTINGS } from '@kbn/serverless-search-settings';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { registerApiKeyRoutes } from './routes/api_key_routes';
 import { registerIndicesRoutes } from './routes/indices_routes';
 
 import type { ServerlessSearchConfig } from './config';
@@ -26,15 +24,12 @@ import type {
   SetupDependencies,
   StartDependencies,
 } from './types';
-import { registerConnectorsRoutes } from './routes/connectors_routes';
 import { registerMappingRoutes } from './routes/mapping_routes';
 import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
 
 export interface RouteDependencies {
-  http: CoreSetup<StartDependencies>['http'];
   logger: Logger;
   router: IRouter;
-  getSecurity: () => Promise<SecurityPluginStart>;
 }
 
 export class ServerlessSearchPlugin implements Plugin<
@@ -74,22 +69,15 @@ export class ServerlessSearchPlugin implements Plugin<
   }
 
   public setup(
-    { getStartServices, http }: CoreSetup<StartDependencies>,
+    { http }: CoreSetup<StartDependencies>,
     { features, serverless }: SetupDependencies
   ) {
     const router = http.createRouter();
     const dependencies = {
-      http,
       logger: this.logger,
       router,
-      getSecurity: async () => {
-        const [, { security }] = await getStartServices();
-        return security;
-      },
     };
 
-    registerApiKeyRoutes(dependencies);
-    registerConnectorsRoutes(dependencies);
     registerIndicesRoutes(dependencies);
     registerMappingRoutes(dependencies);
     registerIngestPipelineRoutes(dependencies);

@@ -198,7 +198,6 @@ export const MetricsExperienceGridContent = ({
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}
-          isComponentVisible={isComponentVisible}
           histogramBounds={histogramBounds}
           histogramBoundsLoading={histogramBoundsLoading}
         />

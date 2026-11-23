@@ -88,7 +88,7 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 5,
+  version: 6,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -172,7 +172,7 @@ export type ContextEngineRelationshipsWorkflowTemplateValues =
 export const CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW = {
   id: CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 1,
+  version: 3,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(RELATIONSHIPS_YAML, {

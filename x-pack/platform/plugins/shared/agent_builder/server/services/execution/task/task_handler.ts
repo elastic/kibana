@@ -28,7 +28,12 @@ import { reportToParent, wakeParent } from '../utils/wake_parent';
 import { AbortMonitor } from './abort_monitor';
 import { HeartbeatReporter } from './heartbeat_reporter';
 import type { SurfacesService } from '../../surfaces';
-import { deliverCallbackEvents, type CallbackDeliveryService } from '../callback';
+import {
+  deliverCallbackEvents,
+  deliverFailureCallback,
+  type CallbackDeliveryService,
+} from '../callback';
+import { createAbortedError } from '../utils/handle_cancellation';
 
 type TaskRunAsContext = NonNullable<RunContext['runAs']>;
 
@@ -114,6 +119,12 @@ class TaskHandlerImpl implements TaskHandler {
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
       await this.releaseAbortedExecution({ execution, fakeRequest, runAs });
+      await deliverFailureCallback({
+        execution,
+        error: createAbortedError(execution.abortReason),
+        callbackDeliveryService: this.deps.callbackDeliveryService,
+        logger: this.logger,
+      });
       await this.reportSettledToParent({ execution, executionClient, fakeRequest });
       return;
     }
@@ -177,6 +188,7 @@ class TaskHandlerImpl implements TaskHandler {
         events$,
         request,
         callbackDeliveryService: this.deps.callbackDeliveryService,
+        conversationService: this.deps.conversationService,
         surfacesService: this.deps.surfacesService,
         logger: this.logger,
       });

@@ -9,6 +9,16 @@
 
 import type { AllRequiredCondition, AnyRequiredCondition, Privileges } from '@kbn/core-http-server';
 
+import type { CoreUiamAuthorizationService } from './uiam';
+
+/**
+ * Core's authorization service contract.
+ */
+export interface CoreAuthorizationService {
+  /** Cloud privileges evaluated by UIAM, or `null` when Kibana isn't configured to use UIAM. */
+  uiam: CoreUiamAuthorizationService | null;
+}
+
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
   DelegateToSOClient = 'Route delegates authorization to the scoped SO client',

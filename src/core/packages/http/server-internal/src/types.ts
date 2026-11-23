@@ -74,7 +74,7 @@ export interface InternalHttpServiceSetup extends Omit<
     cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
   ): void;
   registerRouterAfterListening: (router: IRouter) => void;
-  registerStaticDir: (path: string, dirPath: string) => void;
+  registerStaticDir: HttpServerSetup['registerStaticDir'];
   authRequestHeaders: IAuthHeadersStorage;
   registerRouteHandlerContext: <
     Context extends RequestHandlerContextBase,

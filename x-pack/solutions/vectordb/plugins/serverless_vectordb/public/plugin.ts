@@ -99,7 +99,7 @@ export class ServerlessVectordbPlugin implements Plugin<
         });
       })
     );
-    navigation.initNavigation('vectordb', navigationTree$);
+    navigation.initNavigation('vectordb', navigationTree$, 'serverlessVectordb');
     return {};
   }
 

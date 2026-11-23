@@ -101,6 +101,11 @@ export class SearchInferenceEndpointsPlugin implements Plugin<
       return pluginsStart.inference.getConnectorById(id, request);
     };
 
+    const getInferenceClient = async (request: KibanaRequest) => {
+      const [, pluginsStart] = await core.getStartServices();
+      return pluginsStart.inference.getClient({ request });
+    };
+
     defineRoutes({
       logger: this.logger,
       router,
@@ -108,6 +113,7 @@ export class SearchInferenceEndpointsPlugin implements Plugin<
       getForFeature,
       getConnectorList,
       getConnectorById,
+      getInferenceClient,
     });
 
     plugins.inference.registerFeatureEndpointResolver(async (featureId, request) => {

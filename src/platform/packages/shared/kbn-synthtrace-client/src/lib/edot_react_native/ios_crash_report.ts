@@ -123,6 +123,17 @@ const IDLE_THREADS: readonly (readonly string[])[] = [
   WORK_QUEUE_THREAD,
 ];
 
+// The threads of an idle native app: the same, without the JavaScript engine's
+const NATIVE_IDLE_THREADS: readonly (readonly string[])[] = [
+  MAIN_THREAD,
+  WORK_QUEUE_THREAD,
+  WORK_QUEUE_THREAD,
+  WORK_QUEUE_THREAD,
+  [...EVENT_FETCH_THREAD, PTHREAD, PTHREAD],
+  WORK_QUEUE_THREAD,
+  WORK_QUEUE_THREAD,
+];
+
 interface CrashedThread {
   index: number;
   frames: readonly string[];
@@ -132,8 +143,18 @@ interface CrashedThread {
 
 const DISPATCH_TO_MAIN = ['libdispatch.dylib', 'libdispatch.dylib', 'libdispatch.dylib'];
 
-// Where each signal comes from in a React Native app
-const crashedThreadOf = (signal: string): CrashedThread => {
+// A Swift runtime trap, or a bad memory access, in native code of the app
+const NATIVE_CRASH: CrashedThread = {
+  index: 0,
+  frames: [APP, APP, APP, 'UIKitCore', 'UIKitCore', 'UIKitCore', ...MAIN_THREAD.slice(4)],
+};
+
+// Where each signal comes from in an app: React Native apps crash in their JS engine, native apps
+// in their own code
+const crashedThreadOf = (signal: string, native: boolean): CrashedThread => {
+  if (native && signal !== 'SIGABRT') {
+    return NATIVE_CRASH;
+  }
   switch (signal) {
     // RCTFatal throws an NSException for a fatal JS error, and the uncaught exception aborts
     case 'SIGABRT':
@@ -164,12 +185,8 @@ const crashedThreadOf = (signal: string): CrashedThread => {
           ...MAIN_THREAD.slice(4),
         ],
       };
-    // A Swift runtime trap in native code of the app
     case 'SIGTRAP':
-      return {
-        index: 0,
-        frames: [APP, APP, APP, 'UIKitCore', 'UIKitCore', 'UIKitCore', ...MAIN_THREAD.slice(4)],
-      };
+      return NATIVE_CRASH;
     // A bad memory access in the JS engine
     default:
       return {
@@ -185,12 +202,41 @@ const JS_ERRORS = [
   'Error: Rendered more hooks than during the previous render.',
 ];
 const JS_FUNCTIONS = ['onPress', 'renderItem', 'anonymous', 'commitHookEffectListMount'];
+// What an uncaught NSException of a native app says
+const NATIVE_EXCEPTIONS = [
+  {
+    name: 'NSInvalidArgumentException',
+    reason: '-[__NSArrayI objectAtIndex:]: index 5 beyond bounds [0 .. 2]',
+  },
+  {
+    name: 'NSInternalInconsistencyException',
+    reason: 'Invalid update: invalid number of rows in section 0',
+  },
+  {
+    name: 'NSRangeException',
+    reason: '*** -[__NSArrayM objectAtIndex:]: index 3 beyond bounds for empty array',
+  },
+];
 
 // A stable 128-bit hex digest, like the UUIDs of binary images
 const digest = (value: string): string =>
   createHash('sha256').update(value).digest('hex').slice(0, 32);
 
 const hex = (value: number): string => `0x${value.toString(16)}`;
+
+const reactNativeExceptionLine = (random: () => number): string => {
+  const jsError = pick(random, JS_ERRORS);
+  const jsStack = Array.from(
+    { length: 3 },
+    () => `${pick(random, JS_FUNCTIONS)}@1:${Math.floor(random() * 900_000)}`
+  ).join('\n');
+  return `*** Terminating app due to uncaught exception 'RCTFatalException: Unhandled JS Exception: ${jsError}', reason: 'Unhandled JS Exception: ${jsError}, stack:\n${jsStack}'`;
+};
+
+const nativeExceptionLine = (random: () => number): string => {
+  const { name, reason } = pick(random, NATIVE_EXCEPTIONS);
+  return `*** Terminating app due to uncaught exception '${name}', reason: '${reason}'`;
+};
 
 /** An address within an image, the same for the same frame of the same thread template. */
 const offsetIn = (image: BinaryImage, key: string): number => {
@@ -222,6 +268,8 @@ export interface IosCrashReportOptions {
   osVersion: string;
   osBuild: string;
   installationId: string;
+  /** Whether the app is built with EDOT iOS directly, so it has no JavaScript engine. */
+  native?: boolean;
   random: () => number;
 }
 
@@ -245,6 +293,7 @@ export const iosCrashReport = ({
   osVersion,
   osBuild,
   installationId,
+  native = false,
   random,
 }: IosCrashReportOptions): IosCrashReport => {
   // The app's container stays the same for an installation
@@ -303,13 +352,13 @@ export const iosCrashReport = ({
     });
   const imagesOf = (frames: readonly string[]) => frames.map((imageKey) => images[imageKey]);
 
-  const crashed = crashedThreadOf(signal);
+  const crashed = crashedThreadOf(signal, native);
   const crashPc = framePc(crashed.frames[0], `${signal}:0`).pc;
   const address =
     signal === 'SIGSEGV'
       ? Math.floor(random() * 0x200) * 8
       : signal === 'SIGBUS'
-        ? images[HERMES].base + Math.floor(random() * 0x100000) * 8
+        ? images[native ? APP : HERMES].base + Math.floor(random() * 0x100000) * 8
         : crashPc;
 
   const header = [
@@ -333,15 +382,10 @@ export const iosCrashReport = ({
 
   const sections = [header];
   if (crashed.exceptionFrames) {
-    const jsError = pick(random, JS_ERRORS);
-    const jsStack = Array.from(
-      { length: 3 },
-      () => `${pick(random, JS_FUNCTIONS)}@1:${Math.floor(random() * 900_000)}`
-    ).join('\n');
     sections.push(
       [
         'Application Specific Information:',
-        `*** Terminating app due to uncaught exception 'RCTFatalException: Unhandled JS Exception: ${jsError}', reason: 'Unhandled JS Exception: ${jsError}, stack:\n${jsStack}'`,
+        native ? nativeExceptionLine(random) : reactNativeExceptionLine(random),
       ].join('\n'),
       [
         'Last Exception Backtrace:',
@@ -371,7 +415,7 @@ export const iosCrashReport = ({
     `${[...parts, renderImages(used)].join('\n\n')}\n`;
 
   // The other threads in order, as long as they fit with the images they add
-  for (const [index, frames] of IDLE_THREADS.entries()) {
+  for (const [index, frames] of (native ? NATIVE_IDLE_THREADS : IDLE_THREADS).entries()) {
     if (index === crashed.index) {
       continue;
     }

@@ -31,7 +31,7 @@ import {
   getEntityGroupRecords,
   isEntityGroupView,
   mergeEntityGroupDetails,
-} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../../shared/utils/entity_store_group_utils';
 import { useObservedServiceDetails } from './observed_service_details';
 import { SERVICE_PANEL_OBSERVED_SERVICE_QUERY_ID } from '../constants';
 

@@ -6,12 +6,15 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../__fixtures__/inventory_client';
 import { createScenarioEntityInventoryApiClient } from '../../__fixtures__/inventory_scenarios';
 import { createAppServicesMock } from '../../mocks';
+import { DEFAULT_TIME_RANGE } from '../constants';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from '../context/search_context';
 import { INITIAL_LIST_RESPONSE, useEntityList } from './use_entity_list';
 
@@ -22,20 +25,24 @@ const createClientMock = (
   getEntities: jest.fn(client.getEntities),
 });
 
-const createWrapper =
-  (inventoryApi: EntityInventoryApiClient) =>
-  ({ children }: { children: React.ReactNode }) => (
-    <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-      <EntityInventorySearchProvider entityCategory="hosts">
-        {children}
-      </EntityInventorySearchProvider>
-    </KibanaContextProvider>
-  );
+const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
+  const history = createMemoryHistory();
 
-const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
-    wrapper: createWrapper(inventoryApi),
-  });
+  return renderHook(
+    () => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }),
+    {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+          <Router history={history}>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              {children}
+            </EntityInventorySearchProvider>
+          </Router>
+        </KibanaContextProvider>
+      ),
+    }
+  );
+};
 
 describe('useEntityList', () => {
   it('lists the entities of the type over the committed range resolved to absolute bounds', async () => {
@@ -76,6 +83,23 @@ describe('useEntityList', () => {
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
   });
 
+  it('lists again when the same search is submitted again', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const submission = { dateRange: { from: 'now-1h', to: 'now' } };
+
+    act(() => {
+      result.current.search.submit(submission);
+    });
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    act(() => {
+      result.current.search.submit(submission);
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(3));
+  });
+
   it('aborts the pending request when the time range changes', async () => {
     const inventoryApi = createClientMock();
     // The first request never settles, so only an abort can end it.
@@ -93,6 +117,19 @@ describe('useEntityList', () => {
     expect(firstSignal?.aborted).toBe(true);
     await waitFor(() => expect(result.current.result.loading).toBe(false));
     expect(result.current.result.data.rows.length).toBeGreaterThan(0);
+  });
+
+  it('does not list again when a submitted time range is invalid', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+
+    act(() => {
+      result.current.search.submit({ dateRange: { from: 'now-5x', to: 'now' } });
+    });
+
+    expect(result.current.search.dateRange).toEqual(DEFAULT_TIME_RANGE);
+    expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
   });
 
   it('lists again on refresh', async () => {
@@ -138,9 +175,11 @@ describe('useEntityList', () => {
       {
         wrapper: ({ children }) => (
           <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-            <EntityInventorySearchProvider entityCategory="hosts">
-              {children}
-            </EntityInventorySearchProvider>
+            <Router history={createMemoryHistory()}>
+              <EntityInventorySearchProvider entityCategory="hosts">
+                {children}
+              </EntityInventorySearchProvider>
+            </Router>
           </KibanaContextProvider>
         ),
       }
