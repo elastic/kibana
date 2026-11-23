@@ -521,6 +521,42 @@ describe('update_agent_tags', () => {
       expect(esClient.create).not.toHaveBeenCalled();
     });
 
+    describe('when it stays cancelled', () => {
+      const failures = [{ id: 'agent2', cause: { reason: 'error reason' } }];
+      const cancelledWithFailures = {
+        ...cancelledTask,
+        response: { ...cancelledTask.response, failures },
+      };
+      const batch = (retryCount?: number) =>
+        updateTagsBatch(
+          soClient,
+          esClient,
+          agents,
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: ['old'], kuery: '', total: 5, retryCount }
+        );
+
+      it('should record why agents failed when no retry of the action is left', async () => {
+        mockRuns(cancelledWithFailures, cancelledWithFailures);
+
+        await expect(batch(MAX_RETRY_COUNT)).rejects.toThrow(/giving up/);
+
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toEqual(['agent2']);
+        expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
+          'error reason',
+        ]);
+      });
+
+      it('should leave them to the retry of the action while there is one', async () => {
+        mockRuns(cancelledWithFailures, cancelledWithFailures);
+
+        await expect(batch(MAX_RETRY_COUNT - 1)).rejects.toThrow(/giving up/);
+
+        expect(esClient.create).not.toHaveBeenCalled();
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+    });
+
     it('should do the same when the agents are given by id', async () => {
       mockRuns(cancelledTask, finishedTask({ updated: 2, total: 2 }));
 

@@ -185,6 +185,41 @@ export async function updateTagsBatch(
       res.updated ?? 0
     } of ${res.total ?? 'an unknown number of'} agents`;
     if (attempt >= UPDATE_BY_QUERY_MAX_ATTEMPTS) {
+      // The agents that failed are the one thing in this outcome that a retry would not tell
+      // again, as far as the reason goes, so they are not lost with it. They are recorded when no
+      // retry of the action is left to run them again, and logged until then.
+      const failures = res.failures ?? [];
+      if (failures.length > 0) {
+        if (options.retryCount === MAX_RETRY_COUNT) {
+          await createAgentAction(esClient, soClient, {
+            id: actionId,
+            agents: failures.map((failure) => failure.id),
+            namespaces,
+            created_at: new Date().toISOString(),
+            type: 'UPDATE_TAGS',
+            total:
+              options.total ??
+              (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
+          });
+          await bulkCreateAgentActionResults(
+            esClient,
+            failures.map((failure) => ({
+              agentId: failure.id,
+              actionId,
+              namespace: spaceId,
+              error: failure.cause.reason ?? undefined,
+            }))
+          );
+        } else {
+          appContextService
+            .getLogger()
+            .warn(
+              `Update by query of action ${actionId} failed for ${
+                failures.length
+              } agents: ${JSON.stringify(failures).slice(0, 1000)}`
+            );
+        }
+      }
       throw new UpdateByQueryCancelledError(`${cancelled}, giving up after ${attempt} attempts`);
     }
     appContextService
