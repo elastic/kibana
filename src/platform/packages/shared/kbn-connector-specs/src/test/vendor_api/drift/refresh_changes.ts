@@ -28,6 +28,7 @@ export const DEFAULT_NAMES_SHOWN = 10;
 const MAX_VARIANTS_NAMED = 3;
 const COMBINATORS = new Set(['oneOf', 'anyOf', 'allOf']);
 const RESPONSE_BODY = '(response body)';
+const REQUEST_BODY = '(request body)';
 
 type Sign = '-' | '+' | '!';
 
@@ -312,10 +313,17 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
   if (isGrantChange(change)) {
     return []; // Netted out over every security change of the endpoint, in `scopeEntries`.
   }
-  if (id === 'response-non-success-status-added') {
+  if (id === 'response-non-success-status-added' || id === 'response-non-success-status-removed') {
     return names[0] === undefined
       ? undefined
-      : [{ area: 'Error responses', sign: '+', name: names[0], details: [] }];
+      : [
+          {
+            area: 'Error responses',
+            sign: id.endsWith('-added') ? '+' : '-',
+            name: names[0],
+            details: [],
+          },
+        ];
   }
   if (id === 'api-schema-removed') {
     return names[0] === undefined
@@ -327,12 +335,20 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const isEnum = /-enum-value-(added|removed)$/.test(id);
   const isVariant = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/.test(id);
   if (isEnum || isVariant) {
-    const [list, second] = names;
+    // A parameter is named after its location: the value, then `query`, then the parameter.
+    const parameter = isParameter(id) ? subjectOf(change) : undefined;
+    const [list] = names;
+    const second = parameter === undefined ? names[1] : parameter.name;
     if (list === undefined) return undefined;
     const body = second === undefined || COMBINATORS.has(second);
     const sign = /-added$/.test(id) ? '+' : '-';
     const entryArea = id.startsWith('request-') ? 'Request' : 'Response';
-    const fieldName = body ? RESPONSE_BODY : fieldOf(second);
+    const fieldName = body
+      ? entryArea === 'Request'
+        ? REQUEST_BODY
+        : RESPONSE_BODY
+      : fieldOf(second);
+    const location = parameter?.location === undefined ? [] : [parameter.location];
     if (/discriminator-mapping/.test(id)) {
       // The keys of a discriminator aren't a part of the type: they are more concrete types the
       // field can have, and are put with its type once all the changes of the field are known.
@@ -341,7 +357,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
           area: entryArea,
           sign: '!',
           name: fieldName,
-          details: [],
+          details: location,
           keys: {
             sign,
             names: variantNames(list),
@@ -360,7 +376,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
         name: fieldName,
         type,
         typeBefore: change.typeBefore,
-        details: visible ? [] : [`${sign} ${what}`],
+        details: visible ? location : [...location, `${sign} ${what}`],
       },
     ];
   }

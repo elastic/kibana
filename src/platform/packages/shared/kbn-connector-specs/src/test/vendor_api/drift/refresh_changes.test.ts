@@ -484,6 +484,44 @@ describe('describeChanges', () => {
     ).toEqual(object('Error responses', '+ 422'));
   });
 
+  it('names removed error responses', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-non-success-status-removed',
+          'removed the non-success response with the status `404`'
+        ),
+      ])
+    ).toEqual(object('Error responses', '- 404'));
+  });
+
+  it('names a parameter that got an enum value by its name and location', () => {
+    expect(
+      describeChanges([
+        change(
+          'request-parameter-enum-value-added',
+          'added the new enum value `archived` to the `query` request parameter `status`',
+          'open | closed | archived',
+          'open | closed'
+        ),
+      ])
+    ).toEqual(
+      object(
+        'Request',
+        '- status: open | closed',
+        '+ status: open | closed | archived (query parameter)'
+      )
+    );
+  });
+
+  it('says that an enum value of the request body is in the request body', () => {
+    expect(
+      describeChanges([
+        change('request-body-enum-value-added', 'request body enum value added `z`'),
+      ])
+    ).toEqual(object('Request', '! (request body) (+ z)'));
+  });
+
   it('keeps the rule of a change it has no words for', () => {
     expect(
       describeChanges([
