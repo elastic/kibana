@@ -14,17 +14,10 @@ import {
 } from '../../../common/step_types/alert_triage';
 import {
   DECISION_AUTO_CLOSE_SEVERITIES,
-  DECISION_CAP_WINDOW_MS,
-  DECISION_DAILY_CLOSE_CAP,
   DECISION_MATCH_TOTAL_BUDGET_MS,
   DECISION_MATCH_WORK_BUDGET_MS,
-  DECISION_NOTES_PER_SWEEP,
   DECISION_SIGNER_TRUST_FIELDS,
   NOTE_CONCURRENCY,
-  VERDICT_INCONCLUSIVE_TAG,
-  TAG_CHUNK_SIZE,
-  TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX,
-  TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX,
   TRIAGE_WOULD_CLOSE_TAG_PREFIX,
   TRIAGE_WOULD_SKIP_TAG_PREFIX,
   type DecisionAutoCloseMode,
@@ -38,19 +31,8 @@ import {
   type StoredDecision,
 } from '../../alert_triage/fp_decisions';
 import { buildPatternKeys, describePatternKey, getField } from '../../alert_triage/pattern_key';
-import { tagInChunks } from '../../alert_triage/plan_sweep';
-import {
-  closeStillOpenAlertsAsFalsePositive,
-  type DecisionCursor,
-  countClosedByDecision,
-  fetchDecisionCandidates,
-  findAlertIdsWithTag,
-  findAlertsNotClosedAsFalsePositive,
-  findOpenAlertIds,
-  statusCodeOf,
-  tagAlerts,
-  writeAlertNotes,
-} from './ports';
+import { createDecisionSweep, NOTHING } from './match_fp_decisions_sweep';
+import { type DecisionCursor, fetchDecisionCandidates, statusCodeOf } from './ports';
 
 export interface MatchFpDecisionsStepDependencies {
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
@@ -116,24 +98,6 @@ const splitHeld = (byDecision: ReadonlyMap<string, string[]>, held: ReadonlySet<
   return { act, held: kept };
 };
 
-const NOTHING = {
-  candidates: 0,
-  decisions_matched: 0,
-  would_close: 0,
-  would_skip: 0,
-  closed: 0,
-  skipped: 0,
-  capped: 0,
-  close_failures: 0,
-  excluded_by_severity: 0,
-  held_in_shadow: 0,
-  tag_failures: 0,
-  notes_missing: 0,
-  left_for_notes: 0,
-  deferred: 0,
-  out_of_time: false,
-};
-
 /**
  * Matches the open backlog against the stored decisions, before the sweep plans. It covers the
  * whole backlog the planner could see, not only the alerts it picks, so a match never uses the
@@ -183,244 +147,16 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           excludeBuildingBlocks: input.exclude_building_blocks,
           excludedRuleTags: input.excluded_rule_tags,
         };
-        const write = tagAlerts(contextManager);
-        const totals = { ...NOTHING };
         const decisionsSeen = new Set<string>();
-        // Alerts each decision may still close today. Read once per decision, then counted down.
-        const room = new Map<string, number>();
-        const decisionsById = new Map<string, StoredDecision>();
-        let notesLeft = DECISION_NOTES_PER_SWEEP;
-
-        const outOfTime = () => {
-          if (Date.now() <= workDeadline) return false;
-          totals.out_of_time = true;
-          return true;
-        };
-
-        /**
-         * Notes say on each alert why it was closed or kept out of analysis, so an analyst reading
-         * the alert does not have to look the decision up. They are queued here and written once
-         * for the whole step, in one pool: the notes route takes one note per call, so a pool per
-         * decision would leave most decisions waiting on one call each. A decision closes or skips
-         * only as many alerts as the sweep has notes left for: the rest stay untagged and take the
-         * normal path, so this sweep's planner may send them to analysis, and a later sweep matches
-         * those it did not. They are counted in `left_for_notes`. A note that cannot be
-         * written never undoes the close: it is counted in `notes_missing`.
-         */
-        const noteJobs: Array<{ alertId: string; note: string }> = [];
-        const queueNotes = (id: string, alertIds: string[], action: 'closed' | 'skipped') => {
-          const decision = decisionsById.get(id);
-          const allowed = decision === undefined ? [] : alertIds.slice(0, notesLeft);
-          notesLeft -= allowed.length;
-          if (decision !== undefined) {
-            const note = noteText(decision, action);
-            allowed.forEach((alertId) => noteJobs.push({ alertId, note }));
-          }
-          totals.notes_missing += alertIds.length - allowed.length;
-        };
-
-        const warn = (what: string, error: unknown) =>
-          logger.warn(`${what}: ${error instanceof Error ? error.message : error}`);
-
-        /**
-         * Whether the decision is still in force right now. The decisions were read before the
-         * candidates were matched, so a revoke that lands in between would otherwise be undone by
-         * the tags and closes that follow. A read that fails throws, so the caller acts on nothing.
-         */
-        const stillActive = async (id: string): Promise<boolean> => {
-          try {
-            const es = contextManager.getScopedEsClient();
-            const { _source } = await es.get<Record<string, unknown>>({
-              index: TRIAGE_DECISIONS_AI_INDEX_DEST.value,
-              id,
-            });
-            return readActiveDecision({ id, source: _source, now: Date.now() }) !== undefined;
-          } catch (error) {
-            if (statusCodeOf(error) === 404) return false;
-            throw error;
-          }
-        };
-
-        /** Tags the alerts of each decision. A decision that cannot be tagged is counted and skipped. */
-        const tag = async (prefix: string, byDecision: Map<string, string[]>) => {
-          for (const [id, alertIds] of byDecision) {
-            if (outOfTime()) {
-              totals.deferred++;
-              continue;
-            }
-            try {
-              await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
-            } catch (error) {
-              totals.tag_failures++;
-              warn(`Could not tag the alerts of decision ${id}`, error);
-            }
-          }
-        };
-
-        /**
-         * Takes the decision's tag off the alerts a failed close left open. Candidates leave out
-         * every alert with that tag, so a tag left on an open alert would stop the next sweep from
-         * trying again. Alerts the close did reach keep it, so revoke can find them. Best effort:
-         * when this fails too, the alerts stay with analysis.
-         */
-        const untagStillOpen = async (id: string, alertIds: string[]) => {
-          if (alertIds.length === 0) return;
-          try {
-            const open = await findOpenAlertIds(contextManager, alertIds);
-            if (open.length === 0) return;
-            await tagInChunks(write, {
-              alertIds: open,
-              add: [],
-              remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
-            });
-          } catch (error) {
-            warn(`Could not take the tag of decision ${id} off alerts that stayed open`, error);
-          }
-        };
-
-        /**
-         * Takes the decision's tag off the alerts the close left alone, because an analyst moved
-         * them on after the search (acknowledged, or closed for another reason), and returns them.
-         * Unlike `untagStillOpen`, a failure here throws, because the notes must not claim a close
-         * that did not happen.
-         */
-        const releaseMovedOn = async (id: string, alertIds: string[]): Promise<string[]> => {
-          const left = await findAlertsNotClosedAsFalsePositive(contextManager, alertIds);
-          if (left.length > 0) {
-            await tagInChunks(write, {
-              alertIds: left,
-              add: [],
-              remove: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
-            });
-          }
-          return left;
-        };
-
-        /**
-         * Closes what each decision may still close today. The decision's tag goes on first, so a
-         * close that lands is always findable by revoke. A failure takes the tag off the alerts that
-         * stayed open, so the next sweep tries them again. When the daily count cannot be read nothing is
-         * closed, because the cap could not be applied.
-         */
-        const close = async (byDecision: Map<string, string[]>) => {
-          for (const [id, alertIds] of byDecision) {
-            if (outOfTime()) {
-              totals.deferred++;
-              continue;
-            }
-            let tagged: string[] = [];
-            try {
-              if (!(await stillActive(id))) {
-                logger.info(
-                  `Decision ${id} was revoked or expired during the sweep: it closes nothing`
-                );
-                continue;
-              }
-              if (!room.has(id)) {
-                room.set(
-                  id,
-                  Math.max(
-                    0,
-                    DECISION_DAILY_CLOSE_CAP -
-                      (await countClosedByDecision(
-                        contextManager,
-                        id,
-                        now - DECISION_CAP_WINDOW_MS
-                      ))
-                  )
-                );
-              }
-              const withinCap = alertIds.slice(0, room.get(id));
-              totals.capped += alertIds.length - withinCap.length;
-              const allowed = withinCap.slice(0, notesLeft);
-              totals.left_for_notes += withinCap.length - allowed.length;
-              if (allowed.length === 0) continue;
-              tagged = allowed;
-              await tagInChunks(write, {
-                alertIds: allowed,
-                add: [`${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`],
-                remove: [],
-              });
-              let timedOut = false;
-              for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
-                const closing = allowed.slice(from, from + TAG_CHUNK_SIZE);
-                // The attempt counts against today's allowance before it is made: a close that
-                // fails half way may have closed alerts, and the next page must not close another
-                // full allowance of the same decision. A close that skipped alerts gives them back,
-                // unless it timed out, because then it may have written more than it reports.
-                room.set(id, (room.get(id) ?? 0) - closing.length);
-                const { updated, timedOut: chunkTimedOut } =
-                  await closeStillOpenAlertsAsFalsePositive(contextManager, closing);
-                totals.closed += updated;
-                if (chunkTimedOut) timedOut = true;
-                else room.set(id, (room.get(id) ?? 0) + closing.length - updated);
-                // The alerts a timed-out close did not reach are released like the ones an analyst
-                // moved on, so the next sweep tries them again and only closed alerts get a note.
-                const moved = updated < closing.length ? await releaseMovedOn(id, closing) : [];
-                queueNotes(
-                  id,
-                  closing.filter((alertId) => !moved.includes(alertId)),
-                  'closed'
-                );
-              }
-              if (timedOut) {
-                totals.close_failures++;
-                logger.warn(`Closing the alerts of decision ${id} timed out part way`);
-              }
-            } catch (error) {
-              totals.close_failures++;
-              warn(`Could not close the alerts of decision ${id}`, error);
-              await untagStillOpen(id, tagged);
-            }
-          }
-        };
-
-        const tagSkipped = async (byDecision: Map<string, string[]>) => {
-          for (const [id, alertIds] of byDecision) {
-            if (outOfTime()) {
-              totals.deferred++;
-              continue;
-            }
-            const allowed = alertIds.slice(0, notesLeft);
-            totals.left_for_notes += alertIds.length - allowed.length;
-            if (allowed.length === 0) continue;
-            const skipTag = `${TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX}${id}`;
-            const skipTags = [VERDICT_INCONCLUSIVE_TAG, skipTag];
-            let skipping: string[] = [];
-            try {
-              if (!(await stillActive(id))) {
-                logger.info(
-                  `Decision ${id} was revoked or expired during the sweep: it skips nothing`
-                );
-                continue;
-              }
-              // Counted and noted per chunk: a later chunk that fails must not leave the alerts of
-              // an earlier one out of analysis with no note and no charge on the note allowance.
-              for (let from = 0; from < allowed.length; from += TAG_CHUNK_SIZE) {
-                skipping = allowed.slice(from, from + TAG_CHUNK_SIZE);
-                await write({ alertIds: skipping, add: skipTags, remove: [] });
-                totals.skipped += skipping.length;
-                queueNotes(id, skipping, 'skipped');
-                skipping = [];
-              }
-            } catch (error) {
-              totals.tag_failures++;
-              warn(`Could not tag the alerts of decision ${id}`, error);
-              // The failed chunk may be tagged in part. Only alerts that carry this decision's skip
-              // tag lose the tags, so a verdict another writer gave in the meantime stays. They go
-              // back to analysis, and the next sweep tries them again.
-              if (skipping.length > 0) {
-                try {
-                  const tagged = await findAlertIdsWithTag(contextManager, skipping, skipTag);
-                  if (tagged.length > 0)
-                    await write({ alertIds: tagged, add: [], remove: skipTags });
-                } catch (untagError) {
-                  warn(`Could not take the tags of decision ${id} off a failed chunk`, untagError);
-                }
-              }
-            }
-          }
-        };
+        const { totals, decisionsById, outOfTime, tag, tagSkipped, close, flushNotes } =
+          createDecisionSweep({
+            contextManager,
+            logger,
+            now,
+            workDeadline,
+            totalDeadline,
+            noteConcurrency: NOTE_CONCURRENCY,
+          });
 
         const count = (byDecision: Map<string, string[]>) =>
           [...byDecision.values()].reduce((sum, ids) => sum + ids.length, 0);
@@ -489,13 +225,14 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           }
         } catch (error) {
           pageFailed = true;
-          warn('Could not read a page of candidates or decisions', error);
+          logger.warn(
+            `Could not read a page of candidates or decisions: ${
+              error instanceof Error ? error.message : error
+            }`
+          );
         }
 
-        totals.notes_missing += await writeAlertNotes(contextManager, noteJobs, {
-          concurrency: NOTE_CONCURRENCY,
-          deadline: totalDeadline,
-        });
+        await flushNotes();
 
         return result(pageFailed ? 'failed' : 'ok', {
           ...totals,
@@ -509,30 +246,6 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
       }
     },
   });
-
-const noteText = (decision: StoredDecision, action: 'closed' | 'skipped'): string => {
-  const by = (verb: string) =>
-    [
-      decision.approver ? `${verb} by ${decision.approver}` : verb,
-      decision.decidedAt ? `on ${decision.decidedAt.slice(0, 10)}` : '',
-      decision.proposalId ? `(proposal ${decision.proposalId})` : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
-  const what =
-    action === 'closed'
-      ? `**Closed by AlertZero** as a false positive, without analysis. It has exactly the pattern of decision \`${
-          decision.id
-        }\`, ${by('approved')}.`
-      : `**Kept out of analysis by AlertZero.** It has exactly the pattern of a dismissed proposal (\`${
-          decision.id
-        }\`, ${by('dismissed')}), so it is marked inconclusive and no closure is proposed.`;
-  return [
-    what,
-    '',
-    `To take the decision back, run the workflow \`system-security-floor-alert-triage-revoke-decision\` with \`decision_id: ${decision.id}\`.`,
-  ].join('\n');
-};
 
 interface MgetResponse {
   docs: Array<{
