@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 
 jest.mock('../../../../../../common/lib/kibana');
@@ -36,10 +36,8 @@ describe('DnsRequestEventDetailsLine', () => {
   beforeEach(() => {
     (CellActionsRenderer as unknown as jest.Mock).mockImplementation(MockedCellActionsRenderer);
   });
-  const mount = useMountAppended();
-
   test('it renders the expected text when all properties are provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -60,13 +58,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when dnsQuestionName is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -87,13 +85,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when dnsQuestionType is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -114,13 +112,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when dnsResolvedIp is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -141,13 +139,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when dnsResponseCode is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -168,13 +166,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp]via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when eventCode is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -195,13 +193,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[winlogEventId]'
     );
   });
 
   test('it renders the expected text when hostName is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -222,13 +220,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when processExecutable is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -249,13 +247,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when processName is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -276,13 +274,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processExecutable](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when processPid is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -303,13 +301,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName][eventCode]'
     );
   });
 
   test('it renders the expected text when userDomain is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -330,13 +328,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when userName is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -357,13 +355,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '\\[userDomain][hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when winlogEventId is NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -384,13 +382,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
     );
   });
 
   test('it renders the expected text when both eventCode and winlogEventId are NOT provided', () => {
-    const wrapper = mount(
+    const { container } = render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
@@ -411,13 +409,13 @@ describe('DnsRequestEventDetailsLine', () => {
         />
       </TestProviders>
     );
-    expect(wrapper.text()).toEqual(
+    expect(container.textContent).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)'
     );
   });
 
   test('should passing correct scopeId to cell actions', () => {
-    mount(
+    render(
       <TestProviders>
         <DnsRequestEventDetailsLine
           scopeId="some_scope"
