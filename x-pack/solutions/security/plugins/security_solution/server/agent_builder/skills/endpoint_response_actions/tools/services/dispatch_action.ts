@@ -408,7 +408,7 @@ const isolationNoOpResult = (
 
 /** Refusal for a Linux endpoint whose policy disallows host isolation. */
 const hostIsolationDisabledMessage = (hostLabel: string): string =>
-  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
+  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse to isolate or release it. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
 
 const isHostIsolationDisabled = async (
   request: DispatchRequest,
@@ -416,8 +416,11 @@ const isHostIsolationDisabled = async (
 ): Promise<boolean> => {
   // This setting exists only in the Linux policy schema. Unknown, Windows,
   // and macOS platforms must not be refused based on a sibling Linux block.
+  // It gates release too: per the policy docs an isolated host refuses to
+  // release while `linux.advanced.host_isolation.allowed` is off, so the
+  // analyst would otherwise approve a release the endpoint then rejects.
   if (
-    request.action !== 'isolate' ||
+    (request.action !== 'isolate' && request.action !== 'unisolate') ||
     target.endpoint.platform !== 'linux' ||
     !target.endpoint.policyId
   ) {
@@ -434,10 +437,41 @@ const isHostIsolationDisabled = async (
     spaceId: request.context.spaceId,
   });
   const policyValue = items[0]?.inputs?.[0]?.config?.policy?.value as
-    | { linux?: { advanced?: { host_isolation?: { allowed?: boolean } } } }
+    | {
+        linux?: { advanced?: { host_isolation?: { allowed?: boolean | 'false' | 'true' } } };
+      }
     | undefined;
 
-  return policyValue?.linux?.advanced?.host_isolation?.allowed === false;
+  // The advanced policy settings form edits YAML text (`advanced_section.tsx`),
+  // so a policy can persist the setting as the string `"false"` even though the
+  // Linux policy schema types it boolean. Both shapes mean isolation refused.
+  const allowed = policyValue?.linux?.advanced?.host_isolation?.allowed;
+  return allowed === false || allowed === 'false';
+};
+
+/**
+ * Whether this resumed call matches the recorded confirmation on agent id and
+ * displayed arguments. The no-op path defers to the confirmation checks so a
+ * declined card or a replay whose target/arguments diverged from the approved
+ * card is never reported as a successful no-op.
+ */
+const isConfirmedCall = (
+  request: DispatchRequest,
+  target: DispatchTarget,
+  context: ToolHandlerContext,
+  status: ConfirmationStatus
+): boolean => {
+  if (status !== ConfirmationStatus.accepted) {
+    return false;
+  }
+
+  const approved = context.stateManager.getState<DispatchConfirmationState>();
+  return (
+    approved?.kind === 'confirmed' &&
+    approved.action === request.action &&
+    approved.agentId === target.endpoint.agentId &&
+    stableArgsKey(approved.args) === stableArgsKey(request.args)
+  );
 };
 
 const getIsolationState = async (
@@ -541,7 +575,8 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
   // Both checks run before the card, so the analyst is never asked to approve
   // an isolation the endpoint will refuse or one that would change nothing.
   // A confirmed call re-enters here too, so the state is re-read at dispatch.
-  if (await isHostIsolationDisabled(request, target)) {
+  const isolationAction = request.action === 'isolate' || request.action === 'unisolate';
+  if (isolationAction && (await isHostIsolationDisabled(request, target))) {
     return {
       kind: 'result',
       result: responseActionErrorResult(
@@ -551,13 +586,28 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     };
   }
 
-  if (request.action === 'isolate' || request.action === 'unisolate') {
+  if (isolationAction) {
     const isolated = await getIsolationState(request, target.endpoint.agentId);
     if (
       (request.action === 'isolate' && isolated === true) ||
       (request.action === 'unisolate' && isolated === false)
     ) {
-      return { kind: 'result', result: isolationNoOpResult(request.action, target) };
+      const { status } = context.prompts.checkConfirmationStatus(
+        `${request.action}.confirm.${context.callContext?.toolCallId}`
+      );
+      // First pass (no confirmation flow yet, or the card not shown): no card
+      // for an action that would change nothing. A resumed, approved call that
+      // matches the card reports the same no-op. Anything else — a declined
+      // card, a replay whose target or arguments diverged from the approved
+      // card — falls through to the confirmation checks below, so it surfaces
+      // as the refusal it is instead of a successful no-op.
+      if (
+        !confirmation ||
+        status === ConfirmationStatus.unprompted ||
+        isConfirmedCall(request, target, context, status)
+      ) {
+        return { kind: 'result', result: isolationNoOpResult(request.action, target) };
+      }
     }
   }
 
@@ -580,7 +630,7 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
         id: promptId,
         title: confirmation.title,
         message: `${confirmation.describe(
-          `**${target.hostLabel} (agent ID ${target.endpoint.agentId})**`
+          `**${formatForConfirmationCard(target.hostLabel)} (agent ID ${target.endpoint.agentId})**`
         )}${analystCommentNote(confirmation.comment)}`,
         confirm_text: confirmation.confirmText,
         cancel_text: i18n.translate(

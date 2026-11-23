@@ -611,6 +611,16 @@ export function createEndpointLookupService(
       return { kind: 'not_found' } as const;
     }
 
+    // Dispatch resolves on origin only. When the origin project has no match,
+    // the candidates above are all linked-project hosts the response-actions
+    // client cannot dispatch to, so reporting them as `ambiguous` would ask the
+    // analyst to choose between undispatchable agents. Origin presence
+    // outranks ambiguity — same rule as the hostname walk in
+    // `selectEndpointHost`.
+    if (dispatchMode && !origin.candidates.length) {
+      return { kind: 'not_found' } as const;
+    }
+
     if (metadata.truncated || distinct.length > 1) {
       return {
         kind: 'ambiguous' as const,

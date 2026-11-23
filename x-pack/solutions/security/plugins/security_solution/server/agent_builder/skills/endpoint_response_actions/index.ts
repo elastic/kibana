@@ -80,7 +80,12 @@ from chat: say so and point the analyst to the Response Actions UI.
    report cancelled. \`get_running_processes\` shows no card: call it directly
    and report the result.
 
-3. **Report** — always include action ID, status, and output. For pending actions,
+3. **Report** — always include action ID, status, and output when the tool
+   returns one. Some results have no action ID because nothing was dispatched:
+   a declined confirmation (\`error: invalid_argument\`, "declined"), a no-op
+   result (\`noOp: true\` — the host was already isolated/released), and policy
+   or argument refusals. Report those as nothing-dispatched with their message,
+   never re-issue them unprompted. For pending actions,
    offer \`get_response_action_status\` follow-up. See \`./reference\` for error
    codes and best practices.
 
@@ -107,7 +112,11 @@ from chat: say so and point the analyst to the Response Actions UI.
   \`found: false\` with \`reason: endpoint_not_found\` / \`reason: action_not_found\`
   (and \`reason: ambiguous_hostname\` / \`reason: ambiguous_ip\` when several endpoints share the supplied identity);
   \`error: invalid_argument\` means the request itself was out of range (narrow
-  filters instead of paging further), while \`error: insufficient_privileges\`
+  filters instead of paging further) or was refused — a declined confirmation,
+  a hostname/agentId mismatch, changed arguments after confirmation, or host
+  isolation disabled by the endpoint policy; read the message to tell them
+  apart, and follow what it says instead of paging, while
+  \`error: insufficient_privileges\`
   and \`error: unknown_error\` mean the lookup itself could not run, and
   \`error: license_tier_required\` means the deployment's license tier does not
   include the capability — report the \`requiredLicenseTier\` it returns, do not
