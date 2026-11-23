@@ -8,8 +8,13 @@
 import type OpenAI from 'openai';
 import type { ChatCompletionReasoning } from '@kbn/inference-common';
 
-export type OpenAIRequest = Omit<OpenAI.ChatCompletionCreateParams, 'model'> & {
+export type OpenAIRequest = Omit<
+  OpenAI.ChatCompletionCreateParams,
+  'model' | 'reasoning_effort'
+> & {
   model?: string;
+  /** Widened with `none`, which the `openai` SDK types omit. */
+  reasoning_effort?: OpenAI.ChatCompletionCreateParams['reasoning_effort'] | 'none';
   /**
    * Elasticsearch unified chat completion reasoning config (not OpenAI's `reasoning_effort`).
    * Forwarded to `_inference/chat_completion` for provider translation.
