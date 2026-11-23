@@ -6,11 +6,13 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import { toKqlExpression, type KueryNode } from '@kbn/es-query';
 import { IMPORT_CONFIG_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { ImportConfigSavedObjectAttributes } from '../../../saved_objects';
 import { createImportConfigSavedObjectService } from './import_config_saved_object_service.mock';
 
 const attributes: ImportConfigSavedObjectAttributes = {
+  type: 'datadog',
   kind: 'alert',
   metadata: { name: 'Datadog production' },
   connector_id: 'connector-1',
@@ -204,6 +206,19 @@ describe('ImportConfigSavedObjectService', () => {
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({ hasReference: { type: 'action', id: 'connector-1' } })
+      );
+    });
+
+    it('filters the import configs by type', async () => {
+      const { importConfigSavedObjectService, mockSavedObjectsClient } =
+        createImportConfigSavedObjectService();
+      mockSavedObjectsClient.find.mockResolvedValue(emptyFindResult);
+
+      await importConfigSavedObjectService.find({ page: 1, perPage: 20, type: 'datadog' });
+
+      const [{ filter }] = mockSavedObjectsClient.find.mock.calls[0];
+      expect(toKqlExpression(filter as KueryNode)).toBe(
+        `${IMPORT_CONFIG_SAVED_OBJECT_TYPE}.attributes.type: "datadog"`
       );
     });
   });

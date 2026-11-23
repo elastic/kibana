@@ -11,6 +11,7 @@ import {
 } from './import_config_data_schema';
 
 const validCreateData = {
+  type: 'datadog',
   kind: 'alert',
   metadata: { name: 'Datadog production', routing_tags: ['team-a'] },
   connector_id: 'connector-1',
@@ -34,6 +35,8 @@ describe('createImportConfigDataSchema', () => {
   it.each([
     ['routing tags on a signal import', { ...validCreateData, kind: 'signal' }],
     ['an unknown kind', { ...validCreateData, kind: 'rule' }],
+    ['a missing type', { ...validCreateData, type: undefined }],
+    ['an unknown type', { ...validCreateData, type: 'pagerduty' }],
     ['a missing connector id', { kind: 'alert', metadata: { name: 'Import' } }],
     ['an empty name', { ...validCreateData, metadata: { name: '' } }],
     ['an empty tags array', { ...validCreateData, metadata: { name: 'Import', tags: [] } }],
@@ -57,5 +60,9 @@ describe('updateImportConfigDataSchema', () => {
     expect(updateImportConfigDataSchema.safeParse({ connector_id: 'connector-2' }).success).toBe(
       false
     );
+  });
+
+  it('does not accept a type', () => {
+    expect(updateImportConfigDataSchema.safeParse({ type: 'datadog' }).success).toBe(false);
   });
 });

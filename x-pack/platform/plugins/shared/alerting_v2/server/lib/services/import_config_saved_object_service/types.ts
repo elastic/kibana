@@ -28,6 +28,8 @@ export interface FindImportConfigSavedObjectsParams {
   sortOrder?: 'asc' | 'desc';
   /** Only returns import configs whose saved object references this connector. */
   connectorId?: string;
+  /** Only returns import configs with this `type` attribute. */
+  type?: string;
 }
 
 export interface FindImportConfigSavedObjectsResult {

@@ -7,6 +7,7 @@
 
 import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { inject, injectable } from 'inversify';
 import type { ImportConfigSavedObjectAttributes } from '../../../saved_objects';
 import {
@@ -106,6 +107,7 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
     sortField = DEFAULT_SORT_FIELD,
     sortOrder = 'asc',
     connectorId,
+    type,
   }: FindImportConfigSavedObjectsParams): Promise<FindImportConfigSavedObjectsResult> {
     const result = await this.client.find<ImportConfigSavedObjectAttributes>({
       type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
@@ -118,6 +120,14 @@ export class ImportConfigSavedObjectService implements ImportConfigSavedObjectSe
         : {}),
       ...(connectorId
         ? { hasReference: { type: CONNECTOR_SAVED_OBJECT_TYPE, id: connectorId } }
+        : {}),
+      ...(type
+        ? {
+            filter: nodeBuilder.is(
+              `${IMPORT_CONFIG_SAVED_OBJECT_TYPE}.attributes.type`,
+              nodeTypes.literal.buildNode(type, true)
+            ),
+          }
         : {}),
     });
 

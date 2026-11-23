@@ -7,7 +7,12 @@
 
 import { isoDateTime, lazySchema, z } from '@kbn/zod/v4';
 import { actorSchema, entityIdSchema, ENTITY_ID_NOTE, tagsSchema } from './common';
-import { ID_MAX_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_NAME_LENGTH } from './constants';
+import {
+  ID_MAX_LENGTH,
+  IMPORT_CONFIG_TYPES,
+  MAX_DESCRIPTION_LENGTH,
+  MAX_NAME_LENGTH,
+} from './constants';
 
 /** Kind */
 
@@ -29,6 +34,18 @@ export const importConfigKindSchema = lazySchema(() =>
 );
 
 export type ImportConfigKind = z.infer<typeof importConfigKindSchema>;
+
+/** Type */
+
+export const importConfigTypeSchema = lazySchema(() =>
+  z
+    .enum(IMPORT_CONFIG_TYPES)
+    .describe(
+      'The source the import receives events from. It cannot be changed after the import is created.'
+    )
+);
+
+export type ImportConfigType = z.infer<typeof importConfigTypeSchema>;
 
 /** Metadata */
 
@@ -98,6 +115,7 @@ const isRoutingTagsAllowedForKind = (data: {
 
 const importConfigDataBaseSchema = lazySchema(() =>
   z.object({
+    type: importConfigTypeSchema,
     kind: importConfigKindSchema,
     metadata: importConfigMetadataSchema,
     connector_id: connectorIdSchema,
@@ -129,8 +147,8 @@ export type CreateImportConfigData = z.infer<typeof createImportConfigDataSchema
 
 /**
  * Data accepted when updating an import config. Omitted fields are kept and `null` clears an
- * optional field. `connector_id` is not accepted: an import keeps the connector it was created
- * with.
+ * optional field. `type` and `connector_id` are not accepted: an import keeps the source and
+ * connector it was created with.
  */
 export const updateImportConfigDataSchema = lazySchema(() =>
   z
@@ -166,7 +184,7 @@ export type ImportConfigResponse = z.infer<typeof importConfigResponseSchema>;
 
 /** Sort field for listing import configs. */
 export const findImportConfigsSortFieldSchema = lazySchema(() =>
-  z.enum(['name', 'kind']).describe('The available fields to sort imports by.')
+  z.enum(['name', 'kind', 'type']).describe('The available fields to sort imports by.')
 );
 
 export type FindImportConfigsSortField = z.infer<typeof findImportConfigsSortFieldSchema>;

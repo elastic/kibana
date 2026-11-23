@@ -141,11 +141,12 @@ export class ImportConfigClient {
       patch
     );
     const {
+      type,
       kind,
       metadata,
       connector_id: mergedConnectorId,
     } = this.parseImportConfigData(createImportConfigDataSchema, merged, 'update');
-    const data = { kind, metadata, connector_id: mergedConnectorId };
+    const data = { type, kind, metadata, connector_id: mergedConnectorId };
 
     const attributes = buildUpdateImportConfigAttributes({
       existing: existing.attributes,
@@ -201,6 +202,7 @@ export class ImportConfigClient {
       sortField: mapImportConfigSortField(params.sortField),
       sortOrder: params.sortOrder,
       connectorId: params.connectorId,
+      type: params.type,
     });
 
     return {
