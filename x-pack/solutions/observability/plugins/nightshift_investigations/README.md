@@ -193,6 +193,21 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
+### Proposals that run a workflow
+
+The findings recorder's final pass proposes up to three actions. By default each is a to-do: the analyst carries it out and marks it applied. A proposal can instead run a workflow the space's users wrote, once someone approves it. The recorder is shown every workflow in the space that:
+
+1. carries the `action` tag;
+2. declares `consts.actionMetadata` with at least `name` and `approvalPolicy: always-gate`. Workflows with any other policy are left out, so every run the recorder proposes waits for a person to approve it;
+3. takes one `actionInput` object on its manual trigger, whose properties are the workflow's parameters (describe each, the recorder fills them from the findings);
+4. ends in a `workflow.output` step.
+
+When one fits a proposal, the recorder sets its id and input. Approving the proposal runs the workflow as the person who approved it. Managed action workflows (another solution's) are not shown. A proposal naming a workflow the catalog did not list, or with an input the workflow refuses, is not written; the failure is logged. See the proposals plugin README for the action workflow contract.
+
+The approve dialog shows what will run: a link to the workflow, and under **Input parameters** (collapsed) the exact `actionInput` the recorder filled in. Once the workflow has run, the dialog also links to that execution, so the analyst can see what it did and what it returned.
+
+**Use this for low-harm actions only for now**, such as opening a case or an issue, or paging someone. The input is written by the model from findings that come from logs, so it is only checked against the workflow's input schema. The workflow and input are not re-checked at approval time, and nothing stops two investigations from proposing (and two people from approving) the same action. Do not wire up rollbacks, restarts or other changes to production systems until those checks exist. Where an input names a target (a cluster, namespace or service), constrain it with `enum` or `pattern` instead of a free string.
+
 ## Service accounts
 
 Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` and the Nightshift Manage engines privilege get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.

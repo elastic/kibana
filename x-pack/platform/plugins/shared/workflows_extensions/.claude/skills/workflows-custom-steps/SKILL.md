@@ -37,7 +37,7 @@ A custom workflow step is owned and registered by a **plugin other than `workflo
 
 A step lives in three layers:
 
-- **Common** — `id`, `label`, `description`, `category`, `inputSchema`, `outputSchema`, optional `configSchema` / `documentation` / `stability` / `deprecation`. Imported by both server and public to keep them in sync.
+- **Common** — `id`, `label`, `description`, `category`, `inputSchema`, `outputSchema`, optional `configSchema` / `documentation` / `stability` / `deprecation` / `exposure`. Imported by both server and public to keep them in sync.
 - **Server** — wraps the common definition with a `handler` (and optional `onCancel`) via `createServerStepDefinition`.
 - **Public** — wraps the common definition with an `icon` and optional `editorHandlers` via `createPublicStepDefinition`.
 
@@ -47,7 +47,8 @@ Both sides register through the `workflowsExtensions` setup contract: `registerS
 
 - Extended code templates (full scaffold, selection handlers, dynamic schema): [reference.md](reference.md)
 - Worked example: `examples/workflows_extensions_example/`
-- Common base type: `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` (`BaseStepDefinition`, `StepCategory`, `StabilityLevel`, `StepDocumentation`)
+- Common definition type: `x-pack/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts` (`CommonStepDefinition`, `StepExposure`). Type the common definition as `CommonStepDefinition`, not `BaseStepDefinition`: only `CommonStepDefinition` has `exposure`
+- Base type that `CommonStepDefinition` extends: `src/platform/packages/shared/kbn-workflows/spec/step_definition_types.ts` (`BaseStepDefinition`, `StepCategory`, `StabilityLevel`, `StepDocumentation`)
 - Editor handler types: `src/platform/packages/shared/kbn-workflows/types/v1.ts` (`EditorHandlers`, `StepPropertyHandler`, `PropertySelectionHandler`, `ConnectorIdSelectionHandler`, `DynamicSchema`)
 - Reusable index selection handler: `src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts`
 - Server step types: `x-pack/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts` (`ServerStepDefinition`, `StepHandler`, `StepHandlerContext`, `ContextManager`, `CallKibanaApiParams`, `OnCancelHandler`)
@@ -129,6 +130,7 @@ These are easy to miss during implementation or review — they are not always s
 | Conditional registration | Loaders run once. Return `undefined` only for a decision that cannot change after startup. Feature flags must be subscribed to in `start()` and checked in the handler — do not snapshot them with `firstValueFrom` |
 | Server + client registration | Every step id registered on the server must also be registered on the client, and vice versa. A server-only step runs but the editor flags it as an unknown type; a client-only step shows in the editor but fails at run time. A server-only plugin must add a browser side (`"browser": true`) to register the public definition. Conditional loaders must apply the same condition on both sides. Enforced by the Scout UI test in `test/scout/ui/tests/step_definitions_client_registration.spec.ts`, for the steps registered with the default configuration only: for a step behind a flag that is off by default, run the check locally in the PR that turns the flag on |
 | Registration timing | All `registerStepDefinition` calls happen in `setup()`, never `start()`. Engine and UI both `await workflowsExtensions.isReady()` before reading the registry |
+| `exposure` | Optional field on the common definition, `open` by default. Restrict it for steps that only exist to support the owner's managed workflows. `internal`: not suggested, warning in workflows that aren't managed. `managed_only`: not suggested, error in workflows that aren't managed, and hidden from the AI authoring tools. Only the editor checks it: the server doesn't yet, so those workflows can still be saved and enabled outside the editor. Any managed workflow passes, whichever plugin installed it. Never change it on another team's step: the step owner decides. Restricting an existing step affects user workflows that already use it |
 | Loops over user data | A loop with no I/O never frees the event loop, and concurrent runs add up to one long block (health checks fail, the pod restarts). Use a `for` loop (not `.map` / `.forEach` / `.reduce`), `await yieldToEventLoop()` from `@kbn/workflows/server` at the top of each iteration, then check `context.abortSignal.aborted`. Make helpers with loops `async` and `return await` them inside `try` |
 
 For the YAML naming conventions (the single most common mistake — only the step type action is camelCase, config/input keys we own never are), follow [STEPS.md → Workflow YAML Naming Conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions).
@@ -153,6 +155,7 @@ For the YAML naming conventions (the single most common mistake — only the ste
 | `selection.dependsOnValues` | List every sibling field your handlers read | `{ config: {}, input: {} }` | Stale cache hits on sibling edits |
 | `selection.getDetails` | Avoid network calls when `option` is present | n/a | Slow hovers; redundant fetches |
 | Server + client registration | Register every step on both sides | n/a | Editor rejects server-only steps as unknown types; client-only steps fail at run time |
+| `exposure` | `internal` or `managed_only` on steps meant only for the owner's managed workflows | `open`, suggested everywhere | Users are nudged toward internal steps; or user workflows that already use the step start failing validation |
 | Public registration | Async loader to keep modules out of main bundle | sync inline | Step module + zod inflate plugin bundle |
 | Conditional registration | Loader returns `undefined` to skip | always registers | Cannot feature-flag |
 | Approval gate | Create/update `approved_step_definitions/<step.id>.txt` with the new `definitionHash` (one file per step) | test fails | CI blocks merge until updated |
@@ -174,6 +177,7 @@ When adding a new step:
    - [ ] `inputSchema` / `outputSchema` declared with `z` from `@kbn/zod/v4`
    - [ ] `configSchema` declared **only** for behavior-controlling step-level properties; no reserved keys (`if`, `foreach`, `on-failure`, `timeout`)
    - [ ] Workflow-owned config keys are kebab-case; workflow-owned input keys (under `with:`) are kebab-case or snake_case — **never camelCase**; inherited keys (OpenAPI/connector) keep their original shape (see [Workflow YAML Naming Conventions](../../dev_docs/STEPS.md#workflow-yaml-naming-conventions))
+   - [ ] If the step only supports the plugin's managed workflows, ask the user whether to set `exposure` to `internal` or `managed_only` (see [Step Exposure](../../dev_docs/STEPS.md#step-exposure))
 
 3. **Server file** (`server/step_types/<step>.ts`) — see [STEPS.md Step 2](../../dev_docs/STEPS.md#step-2-implement-server-side-handler)
    - [ ] Uses `createServerStepDefinition` (no explicit `ServerStepDefinition` annotation)
@@ -226,6 +230,7 @@ When reviewing a PR that adds or modifies a custom step:
 - [ ] `editorHandlers.selection.dependsOnValues` covers every sibling field referenced inside `search` / `resolve` / `getDetails`
 - [ ] `getDetails` does not call the network when `option` is present
 - [ ] Every new step id is registered on both the server and the public side — a server-only registration (or a plugin with no browser side) is a blocker
+- [ ] A change to an existing step's `exposure` is made by the step's owning team, and the PR says whether user workflows already use the step
 - [ ] Public registration uses an async loader unless the step module is trivially small
 - [ ] Conditional registration paths return `undefined`, not `null` or a rejected promise
 - [ ] No `registerStepDefinition` call moved into `start()`
