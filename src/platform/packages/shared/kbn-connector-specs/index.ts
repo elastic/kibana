@@ -45,7 +45,7 @@ export {
 export { isDualConnectorSpec, connectorTypeIsDual } from './src/is_dual_connector_spec';
 export { createReceiveOnlyConnectorValidator } from './src/receive_only_connector_validator';
 export { withReceiveOnlyAuth } from './src/with_receive_only_auth';
-export { getOutboundToggleDefaultAuthTypeId } from './src/get_outbound_toggle_default_auth_type_id';
+export { hasRunActionsSwitch } from './src/has_run_actions_switch';
 export { connectorTypePublishesKeys } from './src/connector_type_publishes_keys';
 export {
   INBOUND_WEBHOOK_CONNECTOR_TYPE_ID,

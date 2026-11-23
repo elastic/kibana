@@ -8,7 +8,7 @@
  */
 
 import type { AuthTypeDef, ConnectorSpec } from './connector_spec';
-import { getOutboundToggleDefaultAuthTypeId } from './get_outbound_toggle_default_auth_type_id';
+import { hasRunActionsSwitch } from './has_run_actions_switch';
 
 const createSpec = ({
   authTypes,
@@ -27,17 +27,17 @@ const createSpec = ({
     test: { enabled: false, handler: jest.fn() },
   } as unknown as ConnectorSpec);
 
-describe('getOutboundToggleDefaultAuthTypeId', () => {
-  it('returns the first credentialed auth type for a dual connector that offers none', () => {
+describe('hasRunActionsSwitch', () => {
+  it('is true for a dual connector with a credentialed auth type and none', () => {
     expect(
-      getOutboundToggleDefaultAuthTypeId(
+      hasRunActionsSwitch(
         createSpec({ authTypes: [{ type: 'basic', defaults: {} }, 'bearer', 'none'] })
       )
-    ).toBe('basic');
+    ).toBe(true);
   });
 
-  it('returns the first credentialed auth type for a dual connector that does not list none', () => {
-    expect(getOutboundToggleDefaultAuthTypeId(createSpec({ authTypes: ['basic'] }))).toBe('basic');
+  it('is true for a dual connector that does not list none', () => {
+    expect(hasRunActionsSwitch(createSpec({ authTypes: ['basic'] }))).toBe(true);
   });
 
   it.each([
@@ -45,7 +45,7 @@ describe('getOutboundToggleDefaultAuthTypeId', () => {
     ['only the none auth type', createSpec({ authTypes: ['none'] })],
     ['no events', createSpec({ authTypes: ['basic', 'none'], hasEvents: false })],
     ['no actions', createSpec({ authTypes: ['basic', 'none'], hasActions: false })],
-  ])('returns undefined with %s', (_label, spec) => {
-    expect(getOutboundToggleDefaultAuthTypeId(spec)).toBeUndefined();
+  ])('is false with %s', (_label, spec) => {
+    expect(hasRunActionsSwitch(spec)).toBe(false);
   });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import {
   EuiCallOut,
   EuiFormRow,
@@ -23,8 +23,7 @@ import {
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-
-const NO_AUTH_TYPE_ID = 'none';
+import { RUN_ACTIONS_FIELD_PATH } from '@kbn/alerts-ui-shared';
 
 const inboundTitle = (
   <FormattedMessage
@@ -77,61 +76,75 @@ export const OutboundSectionTitle: React.FC = () => (
 
 interface OutboundFormSectionProps {
   canSave: boolean;
-  /** Auth type to switch to when outbound is turned on, e.g. `basic` for Datadog keys. */
-  credentialedAuthTypeId: string;
   children: ReactNode;
 }
 
+const isOutboundFieldPath = (path: string): boolean =>
+  path.startsWith('secrets.') || path === 'config.selectedActions';
+
 /**
- * Outbound section with an on/off switch, for dual connectors that also offer no authentication.
- * Off means receive only: no authentication and no actions. The outbound fields stay mounted
- * while hidden so the form keeps their values.
+ * Outbound section with a Run actions switch, for dual connectors that also offer no
+ * authentication. The switch is a form-only flag: off means receive only, and the connector
+ * form serializer then saves no authentication and no actions. The outbound fields stay mounted
+ * while hidden so the form keeps the chosen auth type, credentials, and actions.
  */
 const OutboundFormSectionComponent: React.FC<OutboundFormSectionProps> = ({
   canSave,
-  credentialedAuthTypeId,
   children,
 }) => {
-  const [{ secrets }] = useFormData<{ secrets?: { authType?: string } }>({
-    watch: ['secrets.authType'],
-  });
-  const { setFieldValue } = useFormContext();
-  const isOutboundOn = secrets?.authType !== NO_AUTH_TYPE_ID;
+  const [{ __internal__: internalFields }] = useFormData<{
+    __internal__?: { runActions?: boolean };
+  }>({ watch: [RUN_ACTIONS_FIELD_PATH] });
+  const { getFields, validateFields } = useFormContext();
+  const isOutboundOn = internalFields?.runActions !== false;
+  const previousIsOutboundOn = useRef(isOutboundOn);
 
-  const onChange = (checked: boolean) => {
-    if (checked) {
-      setFieldValue('secrets.authType', credentialedAuthTypeId);
-      setFieldValue('config.selectedActions', null);
-    } else {
-      setFieldValue('secrets.authType', NO_AUTH_TYPE_ID);
-      setFieldValue('config.selectedActions', []);
+  // Hidden outbound fields skip validation. Recheck the ones already validated so errors from
+  // before the switch changed do not linger or go stale.
+  useEffect(() => {
+    if (previousIsOutboundOn.current === isOutboundOn) {
+      return;
     }
-  };
+    previousIsOutboundOn.current = isOutboundOn;
+    const validatedOutboundPaths = Object.entries(getFields())
+      .filter(([path, field]) => isOutboundFieldPath(path) && field.isValidated)
+      .map(([path]) => path);
+    if (validatedOutboundPaths.length > 0) {
+      validateFields(validatedOutboundPaths);
+    }
+  }, [isOutboundOn, getFields, validateFields]);
 
   return (
     <>
       <OutboundSectionTitle />
-      <EuiFormRow
-        fullWidth
-        helpText={i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsHelpDescription',
-          {
-            defaultMessage:
-              'Let workflows and agents call the service with this connector. Needs credentials.',
-          }
-        )}
+      <UseField<boolean>
+        path={RUN_ACTIONS_FIELD_PATH}
+        config={{ type: FIELD_TYPES.TOGGLE, defaultValue: true }}
       >
-        <EuiSwitch
-          label={i18n.translate(
-            'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsToggleSwitch',
-            { defaultMessage: 'Run actions' }
-          )}
-          checked={isOutboundOn}
-          disabled={!canSave}
-          onChange={(event) => onChange(event.target.checked)}
-          data-test-subj="outbound-actions-enabled-switch"
-        />
-      </EuiFormRow>
+        {(field) => (
+          <EuiFormRow
+            fullWidth
+            helpText={i18n.translate(
+              'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsHelpDescription',
+              {
+                defaultMessage:
+                  'Let workflows and agents call the service with this connector. Needs credentials.',
+              }
+            )}
+          >
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionConnectorForm.sendActionsToggleSwitch',
+                { defaultMessage: 'Run actions' }
+              )}
+              checked={field.value !== false}
+              disabled={!canSave}
+              onChange={(event) => field.setValue(event.target.checked)}
+              data-test-subj="outbound-actions-enabled-switch"
+            />
+          </EuiFormRow>
+        )}
+      </UseField>
       <div hidden={!isOutboundOn} data-test-subj="outbound-settings">
         <EuiSpacer size="s" />
         {children}

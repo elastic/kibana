@@ -107,6 +107,8 @@ export type ConnectorFormSchema<
 export type InternalConnectorForm = ConnectorFormSchema & {
   __internal__?: {
     headers?: Array<{ key: string; value: string; type: string }>;
+    /** Run actions switch on dual connectors that can run without credentials. */
+    runActions?: boolean;
   };
 };
 

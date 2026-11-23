@@ -15,27 +15,40 @@ import { OutboundFormSection } from './inbound_events_form_section';
 const OutboundFields = () => (
   <>
     <UseField path="secrets.authType">{() => null}</UseField>
+    <UseField<string> path="secrets.apiKey" config={{ defaultValue: '' }}>
+      {(field) => (
+        <input
+          data-test-subj="api-key-input"
+          value={field.value}
+          onChange={(event) => field.setValue(event.target.value)}
+        />
+      )}
+    </UseField>
     <UseField path="config.selectedActions">{() => null}</UseField>
     <div data-test-subj="outbound-fields">Datadog keys</div>
   </>
 );
 
 const renderSection = ({
-  authType,
-  selectedActions,
+  runActions,
+  selectedActions = null,
   canSave = true,
 }: {
-  authType: string;
-  selectedActions: string[] | null;
+  runActions?: boolean;
+  selectedActions?: string[] | null;
   canSave?: boolean;
-}) => {
+} = {}) => {
   const onSubmit = jest.fn();
   render(
     <FormTestProvider
       onSubmit={onSubmit}
-      defaultValue={{ secrets: { authType }, config: { selectedActions } }}
+      defaultValue={{
+        secrets: { authType: 'basic' },
+        config: { selectedActions },
+        ...(runActions === undefined ? {} : { __internal__: { runActions } }),
+      }}
     >
-      <OutboundFormSection canSave={canSave} credentialedAuthTypeId="basic">
+      <OutboundFormSection canSave={canSave}>
         <OutboundFields />
       </OutboundFormSection>
     </FormTestProvider>
@@ -46,12 +59,12 @@ const renderSection = ({
 const submitAndGetData = async (onSubmit: jest.Mock) => {
   await userEvent.click(screen.getByTestId('form-test-provide-submit'));
   await waitFor(() => expect(onSubmit).toHaveBeenCalled());
-  return onSubmit.mock.calls[0][0].data;
+  return onSubmit.mock.calls[onSubmit.mock.calls.length - 1][0].data;
 };
 
 describe('OutboundFormSection', () => {
-  it('shows the switch on and the outbound fields when the connector has credentials', () => {
-    renderSection({ authType: 'basic', selectedActions: null });
+  it('shows the switch on and the outbound fields by default', () => {
+    renderSection();
 
     expect(screen.getByTestId('connector-outbound-label')).toBeInTheDocument();
     expect(screen.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
@@ -59,37 +72,41 @@ describe('OutboundFormSection', () => {
   });
 
   it('shows the switch off and hides the outbound fields for a receive-only connector', () => {
-    renderSection({ authType: 'none', selectedActions: [] });
+    renderSection({ runActions: false });
 
     expect(screen.getByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
     expect(screen.getByTestId('outbound-settings')).not.toBeVisible();
   });
 
-  it('turning the switch off sets no authentication and no actions', async () => {
-    const { onSubmit } = renderSection({ authType: 'basic', selectedActions: ['listMonitors'] });
+  it('turning the switch off only sets the Run actions flag', async () => {
+    const { onSubmit } = renderSection({ selectedActions: ['listMonitors'] });
 
     await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
 
     expect(screen.getByTestId('outbound-actions-enabled-switch')).not.toBeChecked();
     const data = await submitAndGetData(onSubmit);
-    expect(data.secrets.authType).toBe('none');
-    expect(data.config.selectedActions).toEqual([]);
+    expect(data.__internal__.runActions).toBe(false);
+    expect(data.secrets.authType).toBe('basic');
+    expect(data.config.selectedActions).toEqual(['listMonitors']);
   });
 
-  it('turning the switch on sets the credentialed auth type and all actions', async () => {
-    const { onSubmit } = renderSection({ authType: 'none', selectedActions: [] });
+  it('keeps the auth type, credentials, and custom actions when turned off and back on', async () => {
+    const { onSubmit } = renderSection({ selectedActions: ['listMonitors'] });
 
+    await userEvent.type(screen.getByTestId('api-key-input'), 'my-key');
+    await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
     await userEvent.click(screen.getByTestId('outbound-actions-enabled-switch'));
 
     expect(screen.getByTestId('outbound-actions-enabled-switch')).toBeChecked();
     expect(screen.getByTestId('outbound-settings')).toBeVisible();
     const data = await submitAndGetData(onSubmit);
-    expect(data.secrets.authType).toBe('basic');
-    expect(data.config.selectedActions ?? null).toBeNull();
+    expect(data.__internal__.runActions).toBe(true);
+    expect(data.secrets).toEqual({ authType: 'basic', apiKey: 'my-key' });
+    expect(data.config.selectedActions).toEqual(['listMonitors']);
   });
 
   it('disables the switch when the user cannot save connectors', () => {
-    renderSection({ authType: 'basic', selectedActions: null, canSave: false });
+    renderSection({ canSave: false });
 
     expect(screen.getByTestId('outbound-actions-enabled-switch')).toBeDisabled();
   });

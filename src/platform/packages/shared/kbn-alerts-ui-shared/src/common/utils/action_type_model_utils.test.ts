@@ -326,6 +326,87 @@ describe('action_type_model_utils', () => {
       };
       expect(deserializer?.(noAuthInConfig)).toEqual(noAuthInConfig);
     });
+
+    describe('Run actions switch', () => {
+      const dualFormModel = () =>
+        transformSpecToActionTypeModel(
+          {
+            ...minimalConnectorSpecForForm(),
+            metadata: {
+              ...minimalConnectorSpecForForm().metadata,
+              id: connectorsSpecs.Datadog.metadata.id,
+            },
+          },
+          docLinks
+        );
+      const formData = {
+        actionTypeId: connectorsSpecs.Datadog.metadata.id,
+        isDeprecated: false,
+        name: 'Datadog',
+        config: { site: 'datadoghq.com', selectedActions: ['listMonitors'] },
+        secrets: { authType: 'basic', apiKey: 'key', appKey: 'app' },
+      };
+
+      it('serializer sends no auth and no actions when Run actions is off', () => {
+        const serialized = dualFormModel().connectorForm?.serializer?.({
+          ...formData,
+          __internal__: { runActions: false },
+        });
+
+        expect(serialized).toEqual({
+          actionTypeId: formData.actionTypeId,
+          isDeprecated: false,
+          name: 'Datadog',
+          config: { site: 'datadoghq.com', authType: 'none', selectedActions: [] },
+          secrets: { authType: 'none' },
+        });
+      });
+
+      it('serializer leaves the auth and actions when Run actions is on, and drops the flag', () => {
+        const serialized = dualFormModel().connectorForm?.serializer?.({
+          ...formData,
+          __internal__: { runActions: true },
+        });
+
+        expect(serialized).toEqual({
+          ...formData,
+          config: { ...formData.config, authType: 'basic' },
+        });
+      });
+
+      it('deserializer loads a saved receive-only dual connector with Run actions off', () => {
+        const deserialized = dualFormModel().connectorForm?.deserializer?.({
+          actionTypeId: formData.actionTypeId,
+          isDeprecated: false,
+          name: 'Datadog',
+          config: { site: 'datadoghq.com', authType: 'none', selectedActions: [] },
+          secrets: {},
+        });
+
+        expect(deserialized).toEqual({
+          actionTypeId: formData.actionTypeId,
+          isDeprecated: false,
+          name: 'Datadog',
+          config: { site: 'datadoghq.com', selectedActions: null },
+          secrets: {},
+          __internal__: { runActions: false },
+        });
+      });
+
+      it('deserializer keeps auth type none for connectors without the switch', () => {
+        const saved = {
+          actionTypeId: 'test-connector',
+          isDeprecated: false,
+          config: { authType: 'none' },
+          secrets: {},
+        };
+
+        expect(formModel().connectorForm?.deserializer?.(saved)).toEqual({
+          ...saved,
+          secrets: { authType: 'none' },
+        });
+      });
+    });
   });
 
   describe('hideAuthTypeInPicker', () => {
@@ -358,17 +439,17 @@ describe('action_type_model_utils', () => {
   });
 
   describe('isMissingSelectedActions', () => {
-    it('rejects an empty custom selection when the connector has credentials', () => {
-      expect(isMissingSelectedActions([], 'basic')).toBe(true);
+    it('rejects an empty custom selection when Run actions is on', () => {
+      expect(isMissingSelectedActions([], false)).toBe(true);
     });
 
-    it('allows an empty selection while auth is none', () => {
-      expect(isMissingSelectedActions([], 'none')).toBe(false);
+    it('allows an empty selection while Run actions is off', () => {
+      expect(isMissingSelectedActions([], true)).toBe(false);
     });
 
     it('allows All and non-empty selections', () => {
-      expect(isMissingSelectedActions(null, 'basic')).toBe(false);
-      expect(isMissingSelectedActions(['listMonitors'], 'basic')).toBe(false);
+      expect(isMissingSelectedActions(null, false)).toBe(false);
+      expect(isMissingSelectedActions(['listMonitors'], false)).toBe(false);
     });
   });
 

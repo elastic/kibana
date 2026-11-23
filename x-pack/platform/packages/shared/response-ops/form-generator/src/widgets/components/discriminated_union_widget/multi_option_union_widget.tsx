@@ -63,12 +63,16 @@ const getDefaultOption = (
       return defaultOption;
     }
   }
-  // Never default to a legacy option (backwards-compat only) or a Kibana-managed one (set
-  // programmatically, nothing for a user to fill in).
+  // Never default to a legacy option (backwards-compat only), a Kibana-managed one (set
+  // programmatically, nothing for a user to fill in), or one hidden from the picker.
   return (
     options.find((option) => {
       const optionMeta = getMeta(option) as Record<string, unknown>;
-      return !Boolean(optionMeta.isLegacy) && !Boolean(optionMeta.isKibanaManaged);
+      return (
+        !Boolean(optionMeta.isLegacy) &&
+        !Boolean(optionMeta.isKibanaManaged) &&
+        !Boolean(optionMeta.hideInPicker)
+      );
     }) ?? options[0]
   );
 };
@@ -107,36 +111,19 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
   const { setFieldValue } = useFormContext();
 
   const hasInitializedFromFormData = useRef(false);
-  // Last discriminator value this widget saw in, or wrote to, the form.
-  const lastSyncedFormValueRef = useRef<string | undefined>(undefined);
   const discriminatorValueFromForm = formData[rootPath]?.[discriminatorKey] as string | undefined;
   const discriminatorFieldPath = `${rootPath}.${discriminatorKey}`;
 
   useEffect(() => {
     if (discriminatorValueFromForm && !hasInitializedFromFormData.current) {
       setSelectedOption(discriminatorValueFromForm);
-      lastSyncedFormValueRef.current = discriminatorValueFromForm;
       hasInitializedFromFormData.current = true;
       return;
     }
 
-    if (!hasInitializedFromFormData.current) {
-      return;
-    }
-
-    // Another field set the discriminator, so show that option.
-    if (
-      discriminatorValueFromForm &&
-      discriminatorValueFromForm !== lastSyncedFormValueRef.current
-    ) {
-      lastSyncedFormValueRef.current = discriminatorValueFromForm;
-      setSelectedOption(discriminatorValueFromForm);
-      return;
-    }
-
-    // The user clicked a different option, so write it to the form.
-    if (discriminatorValueFromForm !== selectedOption) {
-      lastSyncedFormValueRef.current = selectedOption;
+    // After initialization: Sync selectedOption changes back to form data
+    // This happens when user clicks a different option
+    if (hasInitializedFromFormData.current && discriminatorValueFromForm !== selectedOption) {
       setFieldValue(discriminatorFieldPath, selectedOption);
     }
   }, [discriminatorFieldPath, discriminatorValueFromForm, selectedOption, setFieldValue]);

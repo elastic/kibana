@@ -13,16 +13,14 @@ import { isDualConnectorSpec } from './is_dual_connector_spec';
 const NO_AUTH_TYPE_ID = 'none';
 
 /**
- * Auth type the Outbound switch turns on for a dual connector, or undefined when the connector
- * gets no switch.
+ * Whether the connector form shows a Run actions switch: a dual connector with at least one auth
+ * type that takes credentials.
  */
-export const getOutboundToggleDefaultAuthTypeId = (
-  spec: ConnectorSpec | undefined
-): string | undefined => {
+export const hasRunActionsSwitch = (spec: ConnectorSpec | undefined): boolean => {
   if (spec === undefined || !isDualConnectorSpec(spec)) {
-    return undefined;
+    return false;
   }
-  return (spec.auth?.types ?? [])
-    .map((authType) => (typeof authType === 'string' ? authType : authType.type))
-    .find((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID);
+  return (spec.auth?.types ?? []).some(
+    (authType) => (typeof authType === 'string' ? authType : authType.type) !== NO_AUTH_TYPE_ID
+  );
 };

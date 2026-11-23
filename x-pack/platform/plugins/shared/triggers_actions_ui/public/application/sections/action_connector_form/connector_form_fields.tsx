@@ -10,11 +10,7 @@ import React, { memo, Suspense, useContext } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  connectorTypeIsDual,
-  getConnectorSpec,
-  getOutboundToggleDefaultAuthTypeId,
-} from '@kbn/connector-specs';
+import { connectorTypeIsDual, getConnectorSpec, hasRunActionsSwitch } from '@kbn/connector-specs';
 
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
@@ -65,11 +61,10 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const actionTypeId = actionTypeModel?.id;
   const isDual = actionTypeId != null && connectorTypeIsDual(actionTypeId);
   const showDualInbound = isDual && isClusterInboundEventsEnabled && showInboundEvents;
-  // Dual connectors that can run without credentials get an Outbound on/off switch.
-  const outboundToggleAuthTypeId =
-    actionTypeId != null && showInboundEvents
-      ? getOutboundToggleDefaultAuthTypeId(getConnectorSpec(actionTypeId))
-      : undefined;
+  const showRunActionsSwitch =
+    actionTypeId != null &&
+    showInboundEvents &&
+    hasRunActionsSwitch(getConnectorSpec(actionTypeId));
   const showSettingsSection =
     FieldsComponent !== null || settingsContent != null || showDualInbound;
   const showSettingsTitle =
@@ -112,9 +107,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
               settingsContent={settingsContent}
             />
           ) : null}
-          {isDual && showInboundEvents && !outboundToggleAuthTypeId ? (
-            <OutboundSectionTitle />
-          ) : null}
+          {isDual && showInboundEvents && !showRunActionsSwitch ? <OutboundSectionTitle /> : null}
           {showSettingsTitle ? (
             <>
               <EuiTitle size="xxs" data-test-subj="connector-settings-label">
@@ -129,13 +122,8 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
             </>
           ) : null}
           {!isDual ? settingsContent : null}
-          {outboundToggleAuthTypeId ? (
-            <OutboundFormSection
-              canSave={canSave}
-              credentialedAuthTypeId={outboundToggleAuthTypeId}
-            >
-              {fieldsComponent}
-            </OutboundFormSection>
+          {showRunActionsSwitch ? (
+            <OutboundFormSection canSave={canSave}>{fieldsComponent}</OutboundFormSection>
           ) : (
             fieldsComponent
           )}

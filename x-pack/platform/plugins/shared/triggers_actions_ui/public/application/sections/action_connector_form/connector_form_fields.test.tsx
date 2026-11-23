@@ -7,7 +7,7 @@
 
 import React, { lazy } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { getOutboundToggleDefaultAuthTypeId } from '@kbn/connector-specs';
+import { hasRunActionsSwitch } from '@kbn/connector-specs';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -22,11 +22,11 @@ jest.mock('@kbn/connector-specs', () => {
     ...actual,
     connectorTypeIsDual: jest.fn((id: string) => id === '.dual'),
     connectorTypeIsInboundOnly: jest.fn((id: string) => id === '.inboundWebhook'),
-    getOutboundToggleDefaultAuthTypeId: jest.fn(() => undefined),
+    hasRunActionsSwitch: jest.fn(() => false),
   };
 });
 
-const mockGetOutboundToggleDefaultAuthTypeId = getOutboundToggleDefaultAuthTypeId as jest.Mock;
+const mockHasRunActionsSwitch = hasRunActionsSwitch as jest.Mock;
 
 describe('ConnectorFormFields', () => {
   let appMockRenderer: AppMockRenderer;
@@ -279,7 +279,7 @@ describe('ConnectorFormFields', () => {
 
     describe('Run actions switch', () => {
       beforeEach(() => {
-        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue(undefined);
+        mockHasRunActionsSwitch.mockReturnValue(false);
       });
 
       const renderDual = (showInboundEvents = true) =>
@@ -298,7 +298,7 @@ describe('ConnectorFormFields', () => {
         );
 
       it('shows the switch with the outbound fields for a dual connector that offers no authentication', async () => {
-        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue('basic');
+        mockHasRunActionsSwitch.mockReturnValue(true);
 
         const result = renderDual();
 
@@ -320,7 +320,7 @@ describe('ConnectorFormFields', () => {
       });
 
       it('does not show the switch when inbound events are hidden', () => {
-        mockGetOutboundToggleDefaultAuthTypeId.mockReturnValue('basic');
+        mockHasRunActionsSwitch.mockReturnValue(true);
 
         const result = renderDual(false);
 
