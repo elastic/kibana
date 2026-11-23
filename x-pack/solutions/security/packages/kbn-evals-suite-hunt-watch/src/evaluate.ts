@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evaluate as base } from '@kbn/evals';
+import { evaluate as base, getInferenceEndpointId } from '@kbn/evals';
 import { EVAL_SPACE_IDS } from './constants';
 import { HuntWatchClient } from './hunt_watch_client';
 import { assertWorkflowInstalled } from './workflow_fixture';
@@ -26,15 +26,17 @@ export const evaluate = base.extend<
   // stack. Order matters: the preflight must run before `assertWorkflowInstalled` checks the
   // per-space Worker, since enabling it is part of the preflight.
   huntWatchPreflight: [
-    async ({ fetch, log, connector, evaluationConnector }, use) => {
+    async ({ config, fetch, log, connector, evaluationConnector }, use) => {
       const cleanup = await runPreflight({
         fetch,
         log,
         connectorId: connector.id,
+        subjectInferenceId: getInferenceEndpointId(connector),
         evaluationConnector,
+        isServerless: config.serverless,
       });
-      // The preflight has already swapped the default AI connector in every eval space by the
-      // time it returns, so a failed install check must still restore it.
+      // The preflight has already pinned every eval space to the subject connector by the time
+      // it returns, so a failed install check must still restore the previous settings.
       try {
         await assertWorkflowInstalled({ fetch, log, spaceIds: EVAL_SPACE_IDS });
         await use();

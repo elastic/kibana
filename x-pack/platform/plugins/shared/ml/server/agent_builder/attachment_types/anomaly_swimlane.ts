@@ -42,7 +42,7 @@ export const createAnomalySwimLaneAttachmentType = (): AttachmentTypeDefinition<
   isReadonly: false,
 
   getAgentDescription: () =>
-    'An ML anomaly swim lane attachment renders an interactive heatmap showing anomaly scores over time, split by entity when using viewBy mode. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with source: "config" and type: "ml_anomaly_swimlane".',
+    'An ML anomaly swim lane attachment renders an interactive heatmap showing anomaly scores over time, split by entity when using viewBy mode. Render it inline with <render_attachment id="{attachment_id}" version="{version}" />. The config can also be forwarded to the dashboard generation tool as a panel with type: "ml_anomaly_swimlane".',
 
   getTools: () => [],
 });

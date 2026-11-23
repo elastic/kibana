@@ -6,8 +6,20 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { EditTimelineActionsComponent } from '.';
+
+jest.mock('./export_timeline', () => ({
+  TimelineDownloader: (props: { 'data-test-subj'?: string }) => (
+    <div data-test-subj={props['data-test-subj']} />
+  ),
+}));
+
+jest.mock('../delete_timeline_modal', () => ({
+  DeleteTimelineModalOverlay: (props: { 'data-test-subj'?: string }) => (
+    <div data-test-subj={props['data-test-subj']} />
+  ),
+}));
 
 describe('EditTimelineActionsComponent', () => {
   describe('render', () => {
@@ -21,15 +33,15 @@ describe('EditTimelineActionsComponent', () => {
     };
 
     test('should render timelineDownloader', () => {
-      const wrapper = shallow(<EditTimelineActionsComponent {...props} />);
+      render(<EditTimelineActionsComponent {...props} />);
 
-      expect(wrapper.find('[data-test-subj="TimelineDownloader"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('TimelineDownloader')).toBeInTheDocument();
     });
 
     test('Should render DeleteTimelineModalOverlay if deleteTimelines is given', () => {
-      const wrapper = shallow(<EditTimelineActionsComponent {...props} />);
+      render(<EditTimelineActionsComponent {...props} />);
 
-      expect(wrapper.find('[data-test-subj="DeleteTimelineModalOverlay"]').exists()).toBeTruthy();
+      expect(screen.getByTestId('DeleteTimelineModalOverlay')).toBeInTheDocument();
     });
 
     test('Should not render DeleteTimelineModalOverlay if deleteTimelines is not given', () => {
@@ -37,10 +49,8 @@ describe('EditTimelineActionsComponent', () => {
         ...props,
         deleteTimelines: undefined,
       };
-      const wrapper = shallow(<EditTimelineActionsComponent {...newProps} />);
-      expect(
-        wrapper.find('[data-test-subj="DeleteTimelineModalOverlay"]').exists()
-      ).not.toBeTruthy();
+      render(<EditTimelineActionsComponent {...newProps} />);
+      expect(screen.queryByTestId('DeleteTimelineModalOverlay')).not.toBeInTheDocument();
     });
   });
 });

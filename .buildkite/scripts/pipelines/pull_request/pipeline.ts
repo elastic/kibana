@@ -130,6 +130,13 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       strategy: 'git',
       includeDownstream: true,
       ignoreUncategorizedChanges: true,
+      // limits.yml and docs inside @kbn/rspack-optimizer cannot affect Storybook builds.
+      ignorePatterns: [
+        '**/README*',
+        '**/*.md',
+        '**/CHANGELOG*',
+        'packages/kbn-rspack-optimizer/limits.yml',
+      ],
       changedFiles: prChanges.flatMap((change) =>
         change.previous_filename ? [change.filename, change.previous_filename] : [change.filename]
       ),

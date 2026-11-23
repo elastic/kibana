@@ -322,6 +322,7 @@ describe('conversations utils', () => {
     const activeExecution: AcquireActiveExecution = {
       action: 'acquire',
       executionId: 'exec-1',
+      timelineExecutionId: 'round-1::execution',
     };
 
     it('passes the active execution to create on CREATE', async () => {

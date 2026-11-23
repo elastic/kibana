@@ -124,6 +124,7 @@ export async function fetchSampleDocuments({
                   size: diverseSize,
                   iteration,
                   logger,
+                  signal: samplingSignal,
                 })
             ).catch((err) => {
               logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
@@ -225,6 +226,7 @@ export async function fetchSampleDocuments({
                   size: diverseSize + entityFilteredSize,
                   iteration,
                   logger,
+                  signal: samplingSignal,
                 })
             ).catch((err) => {
               logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);

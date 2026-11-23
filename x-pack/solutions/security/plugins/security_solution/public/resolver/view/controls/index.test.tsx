@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fireEvent } from '@testing-library/react';
 import { Simulator } from '../../test_utilities/simulator';
 import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildren } from '../../data_access_layer/mocks/no_ancestors_two_children';
@@ -46,10 +47,9 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
     originNodeStyle = () =>
       simulator.map(() => {
-        const wrapper = simulator.processNodeElements({ entityID: originEntityID });
-        // `getDOMNode` can only be called on a wrapper of a single node: https://enzymejs.github.io/enzyme/docs/api/ReactWrapper/getDOMNode.html
-        if (wrapper.length === 1) {
-          return wrapper.getDOMNode<HTMLElement>().style;
+        const elements = simulator.processNodeElements({ entityID: originEntityID });
+        if (elements.length === 1) {
+          return elements[0].style;
         }
         return null;
       });
@@ -91,14 +91,14 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
   });
 
   it('should open the analyzer details panel in a system flyout', async () => {
-    (await simulator.resolve('resolver:graph-controls:show-panel-button'))?.simulate('click');
+    fireEvent.click((await simulator.resolve('resolver:graph-controls:show-panel-button'))![0]);
 
     expect(simulator.coreStart.overlays.openSystemFlyout).toHaveBeenCalledTimes(1);
   });
 
   describe('when the user clicks the west panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:west-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:west-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -112,7 +112,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the south panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:south-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:south-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -126,7 +126,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the east panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:east-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:east-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -140,7 +140,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the north panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:north-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:north-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -154,9 +154,9 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the user clicks the center panning button', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:north-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:north-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
-      (await simulator.resolve('resolver:graph-controls:center-button'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:center-button'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -171,7 +171,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the zoom in button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:zoom-in'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:zoom-in'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -185,7 +185,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the zoom out button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:zoom-out'))?.simulate('click');
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:zoom-out'))![0]);
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
     });
 
@@ -201,7 +201,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     beforeEach(async () => {
       await expect(originNodeStyle()).toYieldObjectEqualTo(originalSizeStyle);
 
-      (await simulator.resolve('resolver:graph-controls:zoom-slider'))?.simulate('change', {
+      fireEvent.change((await simulator.resolve('resolver:graph-controls:zoom-slider'))![0], {
         target: { value: 0.8 },
       });
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
@@ -217,7 +217,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the slider is moved downwards', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:zoom-slider'))?.simulate('change', {
+      fireEvent.change((await simulator.resolve('resolver:graph-controls:zoom-slider'))![0], {
         target: { value: 0.2 },
       });
       simulator.runAnimationFramesTimeFromNow(nudgeAnimationDuration);
@@ -233,7 +233,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the schema information button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:schema-info-button'))?.simulate('click', {
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:schema-info-button'))![0], {
         button: 0,
       });
     });
@@ -243,7 +243,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
         'resolver:graph-controls:schema-info:description'
       );
 
-      expect(schemaInfoDescriptions?.map((description) => description.text())).toEqual([
+      expect(schemaInfoDescriptions?.map((description) => description.textContent)).toEqual([
         'endpoint',
         'process.entity_id',
         'process.parent.entity_id',
@@ -253,9 +253,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the node legend button is clicked', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:node-legend-button'))?.simulate('click', {
-        button: 0,
-      });
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:node-legend-button'))![0]);
     });
 
     it('should show the node legend table with the expected values', async () => {
@@ -263,7 +261,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
         'resolver:graph-controls:node-legend:description'
       );
 
-      expect(nodeLegendDescriptions?.map((description) => description.text())).toEqual([
+      expect(nodeLegendDescriptions?.map((description) => description.textContent)).toEqual([
         'Running Process',
         'Terminated Process',
         'Loading Process',
@@ -274,7 +272,7 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
 
   describe('when the node legend button is clicked while the schema info button is open', () => {
     beforeEach(async () => {
-      (await simulator.resolve('resolver:graph-controls:schema-info-button'))?.simulate('click', {
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:schema-info-button'))![0], {
         button: 0,
       });
     });
@@ -282,15 +280,13 @@ describe('graph controls: when relsover is loaded with an origin node', () => {
     it('should close the schema information table and open the node legend table', async () => {
       expect(await simulator.resolve('resolver:graph-controls:schema-info')).toBeDefined();
 
-      (await simulator.resolve('resolver:graph-controls:node-legend-button'))?.simulate('click', {
-        button: 0,
-      });
+      fireEvent.click((await simulator.resolve('resolver:graph-controls:node-legend-button'))![0]);
 
       expect(await simulator.resolve('resolver:graph-controls:node-legend')).toBeDefined();
       await expect(
         simulator.resolveWrapper(
           () => simulator.testSubject('resolver:graph-controls:schema-info'),
-          (wrapper) => wrapper.length === 0
+          (elements) => elements.length === 0
         )
       ).resolves.toBeDefined();
     });

@@ -75,3 +75,11 @@ export interface BoostRuleListItem extends BoostRule {
   type: BoostProfileType;
   matches: BoostRuleMatch[];
 }
+
+export interface GetBoostProfilesResponse {
+  profiles: BoostProfile[];
+}
+
+export interface GetBoostRulesResponse {
+  rules: BoostRuleListItem[];
+}

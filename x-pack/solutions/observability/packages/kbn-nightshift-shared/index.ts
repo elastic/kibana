@@ -168,6 +168,8 @@ export {
   NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
 } from './src/spaces';
 
+export type { NightshiftAutomationLocatorParams } from './src/automations';
+
 export {
   SETTINGS_TAB_IDS,
   type NightshiftSettingsLocatorParams,
