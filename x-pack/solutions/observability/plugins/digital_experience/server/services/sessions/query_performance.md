@@ -193,6 +193,31 @@ of events are web vitals. A third branch reads only those: −19% to −32% (see
 [Current numbers](#current-numbers)). A session without a vital has no row there, so its counts are
 `COALESCE`d to 0 after the merge.
 
+### Mobile summaries (November 19, 2026)
+
+Locally, with 24 hours of synthtrace data: `digital_experience_browser` (1.18M events, 28,000
+sessions) and `digital_experience_mobile` at scale 2 (806,000 events, 49,000 sessions), both
+sorted by service, session and time, medians of 7 alternating runs, identical rows:
+
+| Window | Browser | Mobile |
+| --- | --- | --- |
+| 1 h (1,032 and 2,070 sessions) | 94 ms, 129 ms CPU | 54 ms, 64 ms CPU |
+| 24 h (5,000 sessions) | 295 ms, 436 ms CPU | 99 ms, 282 ms CPU |
+| Rebuild of 24 h by the task | 3.06 s, 28,003 sessions | 2.65 s, 49,975 sessions |
+
+- **Failed requests without `COALESCE`.** `COALESCE(status >= 400, false)` in the failed request
+  filter made the mobile query 3x slower (307 against 96 ms, CPU 1,335 against 276 ms): the lazy
+  `COALESCE` filters every column of the page for each event without a status, and mobile has
+  many requests among short sessions. A filter counts null as false, so the browser rows are the
+  same, and its time didn't change.
+- **Data layout.** In `generic`, sorted by host and time, finding the ids of 24 hours took 129 ms
+  against 36 ms sorted by service, session and time. EDOT Android and EDOT iOS write to `generic`.
+- **Late crashes.** The filter on `observed_timestamp` is about 45% of the ids query's CPU (110
+  against 61 ms) and noise in the summary query. Without its `COALESCE`, it costs the same.
+- **`COUNT_DISTINCT(span_id)`** instead of `COUNT(*)` for the requests: about 11% CPU, no change
+  in time.
+- **Reconciling** rebuilds the last 24 hours every hour, about one 24 hour rebuild an hour.
+
 ## Tried and dropped
 
 On the 5 minute window of the Elastic Cloud node, against the `FORK` query, identical rows unless

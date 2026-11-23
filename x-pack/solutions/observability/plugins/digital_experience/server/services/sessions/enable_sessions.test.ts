@@ -13,6 +13,10 @@ import {
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
+  MOBILE_SESSIONS_INDEX,
+  MOBILE_SESSIONS_INDEX_TEMPLATE_NAME,
+  MOBILE_SESSIONS_TASK_ID,
+  MOBILE_SESSIONS_TASK_TYPE,
   SESSIONS_INDEX,
   SESSIONS_INDEX_TEMPLATE_NAME,
   SESSIONS_TASK_ID,
@@ -108,7 +112,11 @@ describe('enableSessions', () => {
       { request, regenerateApiKey: true, includeRunningTasks: true }
     );
     // A no-op unless sessions were turned off.
-    expect(taskManager.bulkEnable).toHaveBeenCalledWith([SESSIONS_TASK_ID], true, { request });
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith(
+      [SESSIONS_TASK_ID, MOBILE_SESSIONS_TASK_ID],
+      true,
+      { request }
+    );
     expect(taskManager.runSoon).toHaveBeenCalledWith(SESSIONS_TASK_ID);
   });
 
@@ -123,6 +131,24 @@ describe('enableSessions', () => {
     expect(error).toBeInstanceOf(SessionsEnableError);
     expect(error.step).toBe('task');
     expect(taskManager.runSoon).not.toHaveBeenCalled();
+  });
+
+  it('sets the mobile sessions up the same way', async () => {
+    await enable();
+
+    expect(esClient.asInternalUser.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: MOBILE_SESSIONS_INDEX_TEMPLATE_NAME }),
+      expect.anything()
+    );
+    expect(esClient.asCurrentUser.indices.create).toHaveBeenCalledWith(
+      { index: MOBILE_SESSIONS_INDEX },
+      expect.anything()
+    );
+    expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
+      expect.objectContaining({ id: MOBILE_SESSIONS_TASK_ID, taskType: MOBILE_SESSIONS_TASK_TYPE }),
+      { request, regenerateApiKey: true, includeRunningTasks: true }
+    );
+    expect(taskManager.runSoon).toHaveBeenCalledWith(MOBILE_SESSIONS_TASK_ID);
   });
 
   it('checks the privileges first, then runs the steps in order', async () => {

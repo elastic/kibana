@@ -13,9 +13,10 @@
  * state lives here so the sidebar can observe it.
  *
  * State:
- *   - `activeStreams`: `Map<conversationId, { type }>`. Each in-flight stream owns one
+ *   - `activeStreams`: `Map<conversationId, { type, streamId }>`. Each in-flight stream owns one
  *     entry. Set synchronously when each mutation kicks off; deleted in the mutation's
- *     `finally`. Multiple entries can coexist — concurrent streams.
+ *     `finally`, and only by the stream whose `streamId` it carries. Multiple entries can
+ *     coexist — concurrent streams.
  *   - `byConversationId`: per-conversation pending message, kept until its saved copy is
  *     fetched or the stream is stopped.
  */
@@ -30,6 +31,7 @@ import React, {
   useState,
 } from 'react';
 import produce from 'immer-v9';
+import { v4 as uuidv4 } from 'uuid';
 import type { ConversationStreamService } from '../../../services/events';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
@@ -73,9 +75,10 @@ export const StreamingProvider = ({
     setActiveStreams((prev) => new Map(prev).set(conversationId, value));
   }, []);
 
-  const clearActiveStream = useCallback((conversationId: string) => {
+  // Only the stream that registered the entry removes it, so one settling late cannot unregister its successor.
+  const clearActiveStream = useCallback((conversationId: string, streamId: string) => {
     setActiveStreams((prev) => {
-      if (!prev.has(conversationId)) return prev;
+      if (prev.get(conversationId)?.streamId !== streamId) return prev;
       const next = new Map(prev);
       next.delete(conversationId);
       return next;
@@ -181,19 +184,23 @@ export const StreamingProvider = ({
   // entry from inside it is too late.
   const mutateSendMessage = useCallback(
     (vars: SendMessageVars) => {
+      const streamId = uuidv4();
       setActiveStream(vars.conversationId, {
         type: 'send',
+        streamId,
       });
-      sendMutate(vars);
+      sendMutate({ ...vars, streamId });
     },
     [setActiveStream, sendMutate]
   );
   const mutateResumeRound = useCallback(
     (vars: ResumeRoundVars) => {
+      const streamId = uuidv4();
       setActiveStream(vars.conversationId, {
         type: 'resume',
+        streamId,
       });
-      resumeMutate(vars);
+      resumeMutate({ ...vars, streamId });
     },
     [setActiveStream, resumeMutate]
   );
@@ -203,10 +210,12 @@ export const StreamingProvider = ({
         return;
       }
       attemptedExecutionIds.current.add(vars.executionId);
+      const streamId = uuidv4();
       setActiveStream(vars.conversationId, {
         type: 'attach',
+        streamId,
       });
-      attachMutate(vars);
+      attachMutate({ ...vars, streamId });
     },
     [setActiveStream, attachMutate]
   );

@@ -12,13 +12,20 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { SESSIONS_TASK_ID, type SessionsSettings } from '../../../common/sessions';
+import type { SessionsSettings } from '../../../common/sessions';
 import { describeError } from '../../lib/helpers/errors';
 import { checkSessionsPrivileges } from './sessions_privileges';
 import { SessionsPrivilegesError } from './sessions_privileges_error';
 import { SessionsRestrictedReadError } from './sessions_restricted_read_error';
 import { createSessionsIndex, putSessionsIndexTemplate } from './sessions_index';
+import { SESSIONS_PLATFORMS, type SessionsPlatform } from './sessions_platforms';
 import { scheduleSessionsTask } from './sessions_task';
+
+const forEachPlatform = async (run: (platform: SessionsPlatform) => Promise<unknown>) => {
+  for (const platform of SESSIONS_PLATFORMS) {
+    await run(platform);
+  }
+};
 
 /** The steps of enabling sessions after the privilege checks, in order. */
 export const SESSIONS_ENABLE_STEPS = ['credentials', 'template', 'index', 'task'] as const;
@@ -81,10 +88,10 @@ export const canEnableSessions = async ({
 
 /**
  * Enables sessions for the requesting user: checks they can read every event in full and write
- * the summaries, puts the index template and creates the index, then schedules the summaries task
- * with an API key Task Manager grants on their behalf. Enabling again replaces the key, so the task
- * then reads what that user can read, and keeps the summaries built so far; it also turns a task
- * that was turned off back on.
+ * the summaries, puts each platform's index template and creates its index, then schedules each
+ * platform's summaries task with an API key Task Manager grants on their behalf. Enabling again
+ * replaces the keys, so the tasks then read what that user can read, and keep the summaries built
+ * so far; it also turns tasks that were turned off back on.
  */
 export const enableSessions = async ({
   esClient,
@@ -109,22 +116,34 @@ export const enableSessions = async ({
       throw new Error(NO_ENCRYPTION_KEY_MESSAGE);
     }
   });
-  await step('template', () => putSessionsIndexTemplate(esClient.asInternalUser));
-  await step('index', () => createSessionsIndex(esClient.asCurrentUser));
+  await step('template', () =>
+    forEachPlatform((platform) => putSessionsIndexTemplate(esClient.asInternalUser, platform))
+  );
+  await step('index', () =>
+    forEachPlatform((platform) => createSessionsIndex(esClient.asCurrentUser, platform))
+  );
   await step('task', async () => {
-    await scheduleSessionsTask({ taskManager, request, settings });
+    await forEachPlatform((platform) =>
+      scheduleSessionsTask({ platform, taskManager, request, settings })
+    );
     // A task that was turned off keeps its checkpoint, so it carries on from where it stopped.
     const {
       errors: [failure],
-    } = await taskManager.bulkEnable([SESSIONS_TASK_ID], true, { request });
+    } = await taskManager.bulkEnable(
+      SESSIONS_PLATFORMS.map(({ taskId }) => taskId),
+      true,
+      { request }
+    );
     if (failure) {
       throw new Error(`Could not turn the summaries task on: ${JSON.stringify(failure.error)}`);
     }
   });
-  // Start building now rather than at the next interval; the interval runs it anyway.
-  try {
-    await taskManager.runSoon(SESSIONS_TASK_ID);
-  } catch (error) {
-    logger.debug(`Could not run the sessions task right away: ${describeError(error)}`);
-  }
+  // Start building now rather than at the next interval; the interval runs them anyway.
+  await forEachPlatform(async ({ name, taskId }) => {
+    try {
+      await taskManager.runSoon(taskId);
+    } catch (error) {
+      logger.debug(`Could not run the ${name} sessions task right away: ${describeError(error)}`);
+    }
+  });
 };

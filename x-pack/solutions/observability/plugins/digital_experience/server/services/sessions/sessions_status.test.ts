@@ -9,18 +9,22 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
+  MOBILE_SESSIONS_TASK_ID,
+  MOBILE_SESSIONS_VERSION,
   SESSIONS_LOOKBACK_DAYS,
   SESSIONS_TASK_ID,
   SESSIONS_VERSION,
   type SessionsStatus,
 } from '../../../common/sessions';
-import { getSessionsStatus } from './sessions_status';
+import { BROWSER_SESSIONS_PLATFORM } from './sessions_platforms';
+import { getSessionsStatus, getSessionsStatusResponse } from './sessions_status';
 import type { SessionsTaskState } from './sessions_task';
 
 type TaskUserScope = NonNullable<ConcreteTaskInstance['userScope']>;
 
 const NOW = Date.parse('2026-11-10T12:00:00.000Z');
 const settings = { frequency: '1m' };
+const platform = BROWSER_SESSIONS_PLATFORM;
 const secondsAgo = (seconds: number) => new Date(NOW - seconds * 1000).toISOString();
 
 const userScope: TaskUserScope = {
@@ -75,6 +79,7 @@ describe('getSessionsStatus', () => {
   ) => {
     mockTask(state);
     return getSessionsStatus({
+      platform,
       taskManager,
       settings: { ...settings, ...(frequency ? { frequency } : {}) },
       canManage,
@@ -88,9 +93,9 @@ describe('getSessionsStatus', () => {
 
   describe('missing', () => {
     it('is missing without Task Manager, which builds the sessions', async () => {
-      expect(await getSessionsStatus({ taskManager: undefined, settings, now: NOW })).toEqual(
-        MISSING
-      );
+      expect(
+        await getSessionsStatus({ platform, taskManager: undefined, settings, now: NOW })
+      ).toEqual(MISSING);
     });
 
     it('is missing until the summaries task is scheduled', async () => {
@@ -98,22 +103,30 @@ describe('getSessionsStatus', () => {
         SavedObjectsErrorHelpers.createGenericNotFoundError('task', SESSIONS_TASK_ID)
       );
 
-      expect(await getSessionsStatus({ taskManager, settings, now: NOW })).toEqual(MISSING);
+      expect(await getSessionsStatus({ platform, taskManager, settings, now: NOW })).toEqual(
+        MISSING
+      );
       expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_TASK_ID);
     });
 
     it('tells a manager they manage sessions before they are set up', async () => {
       expect(
-        await getSessionsStatus({ taskManager: undefined, settings, canManage: true, now: NOW })
+        await getSessionsStatus({
+          platform,
+          taskManager: undefined,
+          settings,
+          canManage: true,
+          now: NOW,
+        })
       ).toEqual({ ...MISSING, canManage: true });
     });
 
     it('rethrows other errors reading the task', async () => {
       taskManager.get.mockRejectedValue(new Error('no shards available'));
 
-      await expect(getSessionsStatus({ taskManager, settings, now: NOW })).rejects.toThrow(
-        'no shards available'
-      );
+      await expect(
+        getSessionsStatus({ platform, taskManager, settings, now: NOW })
+      ).rejects.toThrow('no shards available');
     });
   });
 
@@ -128,7 +141,9 @@ describe('getSessionsStatus', () => {
       { enabled: false }
     );
 
-    expect(await getSessionsStatus({ taskManager, settings, canManage: true, now: NOW })).toEqual({
+    expect(
+      await getSessionsStatus({ platform, taskManager, settings, canManage: true, now: NOW })
+    ).toEqual({
       ...MISSING,
       installed: true,
       disabled: true,
@@ -270,6 +285,7 @@ describe('getSessionsStatus', () => {
       mockTask(healthyState, { userScope: undefined });
 
       const status = await getSessionsStatus({
+        platform,
         taskManager,
         settings,
         canManage: true,
@@ -341,5 +357,30 @@ describe('getSessionsStatus', () => {
       );
       expect(JSON.stringify(status)).not.toMatch(/\bana\b/);
     });
+  });
+});
+
+describe('getSessionsStatusResponse', () => {
+  it('reports the browser sessions as before, and the mobile ones from their own task', async () => {
+    const taskManager = taskManagerMock.createStart();
+    taskManager.get.mockImplementation(async (id) => {
+      if (id === MOBILE_SESSIONS_TASK_ID) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', id);
+      }
+      return taskManagerMock.createTask({ id, state: healthyState, userScope });
+    });
+
+    const response = await getSessionsStatusResponse({ taskManager, settings, now: NOW });
+
+    expect(response).toEqual(
+      expect.objectContaining({
+        installed: true,
+        health: 'healthy',
+        currentVersion: SESSIONS_VERSION,
+      })
+    );
+    expect(response.mobile).toEqual({ ...MISSING, currentVersion: MOBILE_SESSIONS_VERSION });
+    expect(taskManager.get).toHaveBeenCalledWith(SESSIONS_TASK_ID);
+    expect(taskManager.get).toHaveBeenCalledWith(MOBILE_SESSIONS_TASK_ID);
   });
 });

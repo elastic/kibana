@@ -7,8 +7,9 @@
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SESSIONS_TASK_ID } from '../../../common/sessions';
+import { MOBILE_SESSIONS_TASK_ID, SESSIONS_TASK_ID } from '../../../common/sessions';
 import { disableSessions } from './disable_sessions';
 
 describe('disableSessions', () => {
@@ -16,38 +17,64 @@ describe('disableSessions', () => {
   let taskManager: ReturnType<typeof taskManagerMock.createStart>;
   const disable = () => disableSessions({ taskManager, request });
 
+  /** The tasks by id, with the others not scheduled. */
+  const mockTasks = (tasks: Record<string, Partial<ConcreteTaskInstance>>) =>
+    taskManager.get.mockImplementation(async (id) => {
+      if (!tasks[id]) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError('task', id);
+      }
+      return taskManagerMock.createTask({ id, ...tasks[id] });
+    });
+
   beforeEach(() => {
     taskManager = taskManagerMock.createStart();
     taskManager.bulkDisable.mockResolvedValue({ tasks: [], errors: [] });
   });
 
-  it('disables the summaries task, keeping its state and API key', async () => {
-    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SESSIONS_TASK_ID }));
+  it('disables every summaries task, keeping their state and API keys', async () => {
+    mockTasks({ [SESSIONS_TASK_ID]: {}, [MOBILE_SESSIONS_TASK_ID]: {} });
+
+    expect(await disable()).toBe(true);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(
+      [SESSIONS_TASK_ID, MOBILE_SESSIONS_TASK_ID],
+      false,
+      { request }
+    );
+  });
+
+  it('disables only the tasks that are scheduled and still running', async () => {
+    mockTasks({ [SESSIONS_TASK_ID]: {}, [MOBILE_SESSIONS_TASK_ID]: { enabled: false } });
 
     expect(await disable()).toBe(true);
     expect(taskManager.bulkDisable).toHaveBeenCalledWith([SESSIONS_TASK_ID], false, { request });
   });
 
-  it('leaves a task that is already disabled as it is', async () => {
-    taskManager.get.mockResolvedValue(
-      taskManagerMock.createTask({ id: SESSIONS_TASK_ID, enabled: false })
-    );
+  it('disables the browser task when the mobile one was never scheduled', async () => {
+    mockTasks({ [SESSIONS_TASK_ID]: {} });
+
+    expect(await disable()).toBe(true);
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith([SESSIONS_TASK_ID], false, { request });
+  });
+
+  it('leaves tasks that are already disabled as they are', async () => {
+    mockTasks({
+      [SESSIONS_TASK_ID]: { enabled: false },
+      [MOBILE_SESSIONS_TASK_ID]: { enabled: false },
+    });
 
     expect(await disable()).toBe(true);
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
   });
 
   it('is false when sessions were never set up', async () => {
-    taskManager.get.mockRejectedValue(
-      SavedObjectsErrorHelpers.createGenericNotFoundError('task', SESSIONS_TASK_ID)
-    );
+    mockTasks({});
 
     expect(await disable()).toBe(false);
     expect(taskManager.bulkDisable).not.toHaveBeenCalled();
   });
 
-  it('throws when the task could not be disabled', async () => {
-    taskManager.get.mockResolvedValue(taskManagerMock.createTask({ id: SESSIONS_TASK_ID }));
+  it('throws when a task could not be disabled', async () => {
+    mockTasks({ [SESSIONS_TASK_ID]: {} });
     taskManager.bulkDisable.mockResolvedValue({
       tasks: [],
       errors: [{ type: 'task', id: SESSIONS_TASK_ID, error: { type: 'conflict', reason: 'x' } }],

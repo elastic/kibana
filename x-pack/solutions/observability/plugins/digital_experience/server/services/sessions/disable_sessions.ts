@@ -7,13 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { SESSIONS_TASK_ID } from '../../../common/sessions';
+import { SESSIONS_PLATFORMS } from './sessions_platforms';
 import { getSessionsTask } from './sessions_status';
 
 /**
- * Turns sessions off: the summaries task stops running, keeping its state, its API key and the
- * summaries built so far. Enabling again replaces the key and carries on from the checkpoint.
- * Resolves to false when sessions were never set up.
+ * Turns sessions off: every platform's summaries task stops running, keeping its state, its API
+ * key and the summaries built so far. Enabling again replaces the keys and carries on from the
+ * checkpoints. Resolves to false when sessions were never set up.
  */
 export const disableSessions = async ({
   taskManager,
@@ -22,17 +22,21 @@ export const disableSessions = async ({
   taskManager: TaskManagerStartContract;
   request: KibanaRequest;
 }): Promise<boolean> => {
-  const task = await getSessionsTask(taskManager);
-  if (!task) {
+  const tasks = await Promise.all(
+    SESSIONS_PLATFORMS.map((platform) => getSessionsTask(taskManager, platform))
+  );
+  const installed = tasks.filter((task) => task !== undefined);
+  if (installed.length === 0) {
     return false;
   }
-  if (task.enabled === false) {
+  const enabledIds = installed.filter(({ enabled }) => enabled !== false).map(({ id }) => id);
+  if (enabledIds.length === 0) {
     return true;
   }
   // Task Manager only updates a task with an API key given a request; it keeps the key.
   const {
     errors: [failure],
-  } = await taskManager.bulkDisable([SESSIONS_TASK_ID], false, { request });
+  } = await taskManager.bulkDisable(enabledIds, false, { request });
   if (failure) {
     throw new Error(`Could not turn the summaries task off: ${JSON.stringify(failure.error)}`);
   }

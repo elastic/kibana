@@ -9,7 +9,11 @@ import { isBoom } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
+import {
+  SESSIONS_LOOKBACK_DAYS,
+  type SessionsStatus,
+  type SessionsStatusResponse,
+} from '../../../common/sessions';
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
@@ -19,7 +23,7 @@ import {
 } from '../../services/sessions/enable_sessions';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
-import { getSessionsStatus } from '../../services/sessions/sessions_status';
+import { getSessionsStatusResponse } from '../../services/sessions/sessions_status';
 import { disableSessions } from '../../services/sessions/disable_sessions';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import type { SessionsServices } from '../create_digital_experience_server_route';
@@ -49,7 +53,7 @@ type Endpoint = keyof typeof sessionsRouteRepository;
 
 const settings = { frequency: '1m' };
 
-const status: SessionsStatus = {
+const browserStatus: SessionsStatus = {
   installed: true,
   disabled: false,
   health: 'healthy',
@@ -67,9 +71,14 @@ const status: SessionsStatus = {
   autoEnable: false,
   canManage: true,
 };
-const notSetUp: SessionsStatus = { ...status, installed: false, health: 'missing' };
-const turnedOff: SessionsStatus = { ...status, disabled: true, health: 'disabled' };
-const keyInvalid: SessionsStatus = { ...status, apiKeyInvalid: true, health: 'degraded' };
+const withMobile = (browser: SessionsStatus): SessionsStatusResponse => ({
+  ...browser,
+  mobile: { ...browserStatus, health: 'lagging' },
+});
+const status = withMobile(browserStatus);
+const notSetUp = withMobile({ ...browserStatus, installed: false, health: 'missing' });
+const turnedOff = withMobile({ ...browserStatus, disabled: true, health: 'disabled' });
+const keyInvalid = withMobile({ ...browserStatus, apiKeyInvalid: true, health: 'degraded' });
 const asManager = { manage_digital_experience_sessions: true };
 
 const LOAD_FAILED_MESSAGE =
@@ -148,7 +157,7 @@ const querySchemaOf = () =>
 
 describe('sessions routes', () => {
   beforeEach(() => {
-    jest.mocked(getSessionsStatus).mockResolvedValue(status);
+    jest.mocked(getSessionsStatusResponse).mockResolvedValue(status);
     jest.mocked(enableSessions).mockResolvedValue();
   });
 
@@ -187,7 +196,7 @@ describe('sessions routes', () => {
 
         expect(await result).toEqual(status);
         expect(canManageSessionsInAllSpaces).toHaveBeenCalledWith(services.authz, request);
-        expect(getSessionsStatus).toHaveBeenCalledWith({
+        expect(getSessionsStatusResponse).toHaveBeenCalledWith({
           taskManager: services.taskManager,
           settings,
           canManage,
@@ -207,7 +216,7 @@ describe('sessions routes', () => {
 
       await result;
 
-      expect(getSessionsStatus).toHaveBeenCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: undefined,
         settings,
         canManage: false,
@@ -215,14 +224,14 @@ describe('sessions routes', () => {
     });
 
     describe('autoEnable', () => {
-      it.each<[string, SessionsStatus, boolean]>([
+      it.each<[string, SessionsStatusResponse, boolean]>([
         ['sessions are not set up', notSetUp, true],
         ['sessions are not set up', notSetUp, false],
         ['the API key no longer works', keyInvalid, true],
       ])(
         'tells any reader whether the app can set sessions up for them when %s (can enable: %s)',
         async (_name, sessionsStatus, canEnable) => {
-          jest.mocked(getSessionsStatus).mockResolvedValue(sessionsStatus);
+          jest.mocked(getSessionsStatusResponse).mockResolvedValue(sessionsStatus);
           jest.mocked(canEnableSessions).mockResolvedValue(canEnable);
           const { result, coreContext, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
@@ -236,7 +245,7 @@ describe('sessions routes', () => {
         }
       );
 
-      it.each<[string, SessionsStatus, SessionsServices['taskManager']]>([
+      it.each<[string, SessionsStatusResponse, SessionsServices['taskManager']]>([
         ['sessions are set up', status, taskManagerMock.createStart()],
         [
           'sessions were turned off',
@@ -245,7 +254,7 @@ describe('sessions routes', () => {
         ],
         ['there is no Task Manager', notSetUp, undefined],
       ])('does not check the privileges when %s', async (_name, sessionsStatus, taskManager) => {
-        jest.mocked(getSessionsStatus).mockResolvedValue(sessionsStatus);
+        jest.mocked(getSessionsStatusResponse).mockResolvedValue(sessionsStatus);
         const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, {
           authzResult: asManager,
           services: { taskManager, canEncrypt: true, authz: undefined },
@@ -257,7 +266,7 @@ describe('sessions routes', () => {
     });
 
     it('answers 500 without the details when the status read fails', async () => {
-      jest.mocked(getSessionsStatus).mockRejectedValue(esError(500));
+      jest.mocked(getSessionsStatusResponse).mockRejectedValue(esError(500));
       const { result, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
       expect(await clientErrorOf(result)).toEqual(
@@ -272,7 +281,7 @@ describe('sessions routes', () => {
   describe('enable', () => {
     beforeEach(() => {
       // Read before enabling, to tell who may; then once enabled.
-      jest.mocked(getSessionsStatus).mockResolvedValueOnce(notSetUp);
+      jest.mocked(getSessionsStatusResponse).mockResolvedValueOnce(notSetUp);
       jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(false);
     });
 
@@ -292,7 +301,7 @@ describe('sessions routes', () => {
         isServerless: true,
         logger,
       });
-      expect(getSessionsStatus).toHaveBeenCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
         canManage: false,
@@ -317,7 +326,7 @@ describe('sessions routes', () => {
 
       await result;
 
-      expect(getSessionsStatus).toHaveBeenLastCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenLastCalledWith({
         taskManager: services.taskManager,
         settings,
         canManage: true,
@@ -325,8 +334,8 @@ describe('sessions routes', () => {
     });
 
     it('gives sessions a working API key again for any reader', async () => {
-      jest.mocked(getSessionsStatus).mockReset().mockResolvedValueOnce(keyInvalid);
-      jest.mocked(getSessionsStatus).mockResolvedValue(status);
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValueOnce(keyInvalid);
+      jest.mocked(getSessionsStatusResponse).mockResolvedValue(status);
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect(await result).toEqual(status);
@@ -334,7 +343,7 @@ describe('sessions routes', () => {
     });
 
     it('leaves working sessions as they are for a user who does not manage them', async () => {
-      jest.mocked(getSessionsStatus).mockReset().mockResolvedValue(status);
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValue(status);
       const { result, request, services } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect(await result).toEqual(status);
@@ -343,7 +352,7 @@ describe('sessions routes', () => {
     });
 
     it('lets a manager in all spaces replace the API key of working sessions', async () => {
-      jest.mocked(getSessionsStatus).mockReset().mockResolvedValue(status);
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValue(status);
       jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(true);
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { authzResult: asManager });
 
@@ -353,7 +362,7 @@ describe('sessions routes', () => {
     });
 
     it('answers 403 when a user who does not manage sessions in all spaces turns them back on', async () => {
-      jest.mocked(getSessionsStatus).mockReset().mockResolvedValue(turnedOff);
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValue(turnedOff);
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { authzResult: asManager });
 
       expect(await clientErrorOf(result)).toEqual(
@@ -366,8 +375,8 @@ describe('sessions routes', () => {
     });
 
     it('turns sessions back on for a manager in all spaces', async () => {
-      jest.mocked(getSessionsStatus).mockReset().mockResolvedValueOnce(turnedOff);
-      jest.mocked(getSessionsStatus).mockResolvedValue(status);
+      jest.mocked(getSessionsStatusResponse).mockReset().mockResolvedValueOnce(turnedOff);
+      jest.mocked(getSessionsStatusResponse).mockResolvedValue(status);
       jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(true);
       const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { authzResult: asManager });
 
@@ -482,7 +491,7 @@ describe('sessions routes', () => {
     });
 
     it('answers 403 when the user cannot read the status after enabling', async () => {
-      jest.mocked(getSessionsStatus).mockRejectedValueOnce(esError(403));
+      jest.mocked(getSessionsStatusResponse).mockRejectedValueOnce(esError(403));
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect((await clientErrorOf(result)).statusCode).toBe(403);
@@ -496,7 +505,7 @@ describe('sessions routes', () => {
     beforeEach(() => {
       jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(true);
       jest.mocked(disableSessions).mockResolvedValue(true);
-      jest.mocked(getSessionsStatus).mockResolvedValue(turnedOff);
+      jest.mocked(getSessionsStatusResponse).mockResolvedValue(turnedOff);
     });
 
     it('turns sessions off, audits it and returns the status with its details', async () => {
@@ -507,7 +516,7 @@ describe('sessions routes', () => {
       expect(await result).toEqual(turnedOff);
       expect(canManageSessionsInAllSpaces).toHaveBeenCalledWith(services.authz, request);
       expect(disableSessions).toHaveBeenCalledWith({ taskManager: services.taskManager, request });
-      expect(getSessionsStatus).toHaveBeenCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
         canManage: true,

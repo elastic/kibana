@@ -26,6 +26,7 @@ import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
 import { savedViewSavedObjectType } from './saved_objects/saved_view';
+import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
@@ -95,12 +96,15 @@ export class Plugin
     });
 
     if (taskManager) {
-      registerSessionsTask({
-        core,
-        logger: this.logger,
-        taskManager,
-        settings: this.config.sessions,
-      });
+      SESSIONS_PLATFORMS.forEach((platform) =>
+        registerSessionsTask({
+          platform,
+          core,
+          logger: this.logger,
+          taskManager,
+          settings: this.config.sessions,
+        })
+      );
     }
   }
 

@@ -25,7 +25,7 @@ import {
   SESSION_SORT_FIELDS,
   type SessionDetailResponse,
   type SessionListResponse,
-  type SessionsStatus,
+  type SessionsStatusResponse,
 } from '../../../common/sessions';
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
@@ -38,7 +38,7 @@ import { disableSessions } from '../../services/sessions/disable_sessions';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
-import { getSessionsStatus } from '../../services/sessions/sessions_status';
+import { getSessionsStatusResponse } from '../../services/sessions/sessions_status';
 import { MAX_ENVIRONMENT_LENGTH } from '../../lib/constants';
 import { describeError } from '../../lib/helpers/errors';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
@@ -176,12 +176,12 @@ const statusRoute = createDigitalExperienceServerRoute({
     getSessionsServices,
     isServerless,
     logger,
-  }): Promise<SessionsStatus> => {
+  }): Promise<SessionsStatusResponse> => {
     const { taskManager, canEncrypt, authz } = await getSessionsServices();
-    let status: SessionsStatus;
+    let status: SessionsStatusResponse;
     try {
-      // The task and its state only; no session data is read with the internal user.
-      status = await getSessionsStatus({
+      // The tasks and their state only; no session data is read with the internal user.
+      status = await getSessionsStatusResponse({
         taskManager,
         settings: sessionsSettings,
         canManage: await canManageSessionsInAllSpaces(authz, request),
@@ -246,7 +246,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     getSessionsServices,
     isServerless,
     logger,
-  }): Promise<SessionsStatus> => {
+  }): Promise<SessionsStatusResponse> => {
     const { elasticsearch, security } = await context.core;
     const { taskManager, canEncrypt, authz } = await getSessionsServices();
     if (!taskManager) {
@@ -255,7 +255,11 @@ const enableRoute = createDigitalExperienceServerRoute({
     const canManage = await canManageSessionsInAllSpaces(authz, request);
     const getStatus = async () => {
       try {
-        return await getSessionsStatus({ taskManager, settings: sessionsSettings, canManage });
+        return await getSessionsStatusResponse({
+          taskManager,
+          settings: sessionsSettings,
+          canManage,
+        });
       } catch (error) {
         throw toReadError(error, logger, 'the sessions status');
       }
@@ -306,7 +310,7 @@ const disableRoute = createDigitalExperienceServerRoute({
     sessionsSettings,
     getSessionsServices,
     logger,
-  }): Promise<SessionsStatus> => {
+  }): Promise<SessionsStatusResponse> => {
     const { security } = await context.core;
     const { taskManager, authz } = await getSessionsServices();
     if (!taskManager) {
@@ -331,7 +335,7 @@ const disableRoute = createDigitalExperienceServerRoute({
     audit.log('success');
     logger.info(`Sessions disabled by [${audit.username}]`);
     try {
-      return await getSessionsStatus({
+      return await getSessionsStatusResponse({
         taskManager,
         settings: sessionsSettings,
         canManage: true,

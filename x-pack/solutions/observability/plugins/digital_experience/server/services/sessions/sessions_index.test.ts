@@ -29,6 +29,8 @@ import { indexPatternCovers } from './sessions_privileges';
 
 type Client = ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
+const BROWSER_INDEX = { index: SESSIONS_INDEX, indexTemplate: sessionsIndexTemplate };
+
 interface MappingNode {
   type?: string;
   properties?: Record<string, MappingNode>;
@@ -168,7 +170,7 @@ describe('sessions index', () => {
     it('puts the template with the given client and signal', async () => {
       const { signal } = new AbortController();
 
-      await putSessionsIndexTemplate(client, signal);
+      await putSessionsIndexTemplate(client, BROWSER_INDEX, signal);
 
       expect(client.indices.putIndexTemplate).toHaveBeenCalledWith(sessionsIndexTemplate, {
         signal,
@@ -180,14 +182,14 @@ describe('sessions index', () => {
     it('creates the index of this version and says so', async () => {
       const { signal } = new AbortController();
 
-      expect(await createSessionsIndex(client, signal)).toBe(true);
+      expect(await createSessionsIndex(client, BROWSER_INDEX, signal)).toBe(true);
       expect(client.indices.create).toHaveBeenCalledWith({ index: SESSIONS_INDEX }, { signal });
     });
 
     it('keeps an existing index, without needing view_index_metadata to check for it', async () => {
       client.indices.create.mockRejectedValue(esError(400, 'resource_already_exists_exception'));
 
-      expect(await createSessionsIndex(client)).toBe(false);
+      expect(await createSessionsIndex(client, BROWSER_INDEX)).toBe(false);
       expect(client.indices.exists).not.toHaveBeenCalled();
     });
 
@@ -198,7 +200,7 @@ describe('sessions index', () => {
     ])('rethrows %s', async (_name, error) => {
       client.indices.create.mockRejectedValue(error);
 
-      await expect(createSessionsIndex(client)).rejects.toBe(error);
+      await expect(createSessionsIndex(client, BROWSER_INDEX)).rejects.toBe(error);
     });
   });
 });

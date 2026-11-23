@@ -444,6 +444,40 @@ tried and dropped are in
 with how to check a change: run the old and new query on the same session ids and compare every
 column of every row.
 
+### Mobile sessions
+
+A second task (`digital_experience:mobile-sessions-summaries`) summarizes EDOT Android and EDOT iOS
+sessions into `digital-experience-sessions-mobile-<version>`, with the same loop, settings and
+checkpoints as the browser one, and its own `MOBILE_SESSIONS_VERSION`, template and state. No page
+reads them yet. It reads events by `telemetry.sdk.name` (`android`, `iOS`) rather than the SDK
+language, as EDOT Android's is `java`, like any Java backend. Both SDKs are moving to the upstream
+`telemetry.sdk.*` values, so it also reads events with `telemetry.distro.name: elastic` and an
+`os.name` of `Android`, `iOS` or `iPadOS`, but EDOT Browser's (`webjs`). A summary has start/end time and duration, events,
+crashes (`app.crash`, or `crash` from older EDOT iOS), screen views (EDOT iOS `UIViewController`
+spans), taps (`app.widget.click`), HTTP requests (once per span id, as both SDKs may send a span
+twice) and failed requests, the platform (`android` or `ios`, from the OS name), and the
+environment, user, app version, build and installation id, device model identifier, OS,
+connection type and geo attributes of its latest events (`MOBILE_SESSION_ATTRIBUTE_FIELDS`). The
+installation id is a random id per install that both SDKs send, so it counts installs, a proxy for
+users that needs no opt-in user id.
+
+Mobile events arrive late more often than browser ones: both SDKs buffer them on disk while the
+device is offline, and send a crash on the next launch, with that launch's resource. A crash so
+ranks below every other event for the attributes. EDOT iOS gives it the send time as its
+`@timestamp` and the crash time as its `observed_timestamp`, so a crash counts at the earlier of
+the two. As events have no ingest time to query by, every
+hour, once the regular run has caught up, the task also rebuilds every session with an event in the
+24 hours before its checkpoint, with what is left of the run's time; a pass that doesn't finish
+carries on from where it stopped on the next runs, and one that fails keeps the regular run's
+progress. A pass rebuilds its sessions up to the regular run's checkpoint, not up to the end of
+its own window, so it never drops events the regular run has already summarized. A changed mobile
+session is rebuilt from 48 hours before its window rather than 24, the longest session and the
+latest crash, so a crash sent up to 24 hours late still sees all of its session; one sent later is
+left out, as its session's rebuild could miss its other events and replace the full summary with a
+partial one. The session ids decide what is read, so the range barely matters: 2 to 24 hours took
+the same time. Events
+that arrive more than 24 hours late are only summarized when another event of their session arrives.
+
 ### Enabling sessions
 
 Sessions are set up with `POST /internal/digital_experience/sessions/enable`, which requires only
@@ -487,10 +521,11 @@ After the checks, enabling runs these steps, and a failure answers 500 naming th
 (`attributes.data.step`) with its details in the server log:
 
 1. `credentials`: Kibana can store an API key, so `xpack.encryptedSavedObjects.encryptionKey` is set.
-2. `template`: puts the `digital-experience-sessions-browser` index template, as Kibana's internal user.
-3. `index`: creates the sessions index, as the user.
-4. `task`: schedules the summaries task with an API key that Task Manager grants on the user's behalf,
-   turns it back on if it was turned off, and runs it right away.
+2. `template`: puts the `digital-experience-sessions-browser` and `digital-experience-sessions-mobile`
+   index templates, as Kibana's internal user.
+3. `index`: creates the browser and mobile sessions indices, as the user.
+4. `task`: schedules the browser and mobile summaries tasks with API keys that Task Manager grants on
+   the user's behalf, turns them back on if they were turned off, and runs them right away.
 
 Every step is safe to repeat, and the steps before a failed one are harmless on their own, so
 enabling again retries from where it failed. Enabling again also gives the task a new key, granted
@@ -511,14 +546,15 @@ new key on their behalf; while that user lacks the Elasticsearch privileges, the
 
 `POST /internal/digital_experience/sessions/disable` turns sessions off for every space. It
 requires `manage_digital_experience_sessions` in all spaces, answers 404 when sessions aren't set
-up, and writes a `digital_experience_sessions_disable` audit event. It disables the summaries task,
-keeping its state, its key and the sessions index, so readers still see the summaries built so far,
+up, and writes a `digital_experience_sessions_disable` audit event. It disables the browser and
+mobile summaries tasks, keeping their state, their keys and the sessions indices, so readers still
+see the summaries built so far,
 marked as turned off (`disabled`, health `disabled`). The app never sets turned-off sessions up by
 itself, and enabling them answers 403 to anyone who doesn't manage sessions in all spaces. Turning
-them back on grants a new key, Task Manager invalidates the old one, and the task carries on from
-its checkpoint, rebuilding what it missed within the lookback. Removing the task
-(`digital_experience:sessions-summaries`) with the Task Manager API also stops it and invalidates
-its key, after which sessions are set up again like the first time.
+them back on grants new keys, Task Manager invalidates the old ones, and each task carries on from
+its checkpoint, rebuilding what it missed within the lookback. Removing a task
+(`digital_experience:sessions-summaries`, `digital_experience:mobile-sessions-summaries`) with the
+Task Manager API also stops it and invalidates its key.
 
 Turning sessions off leaves the task's key valid, unused, until they are turned back on. Revoking
 it then was considered:
@@ -652,8 +688,9 @@ session detail timeline). Without it they answer 403 naming those privileges; ot
 logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
-  task's health, lag and last error, whether it is still building, how many days sessions are kept, and whether the
-  app should set them up for the current user (`autoEnable`).
+  task's health, lag and last error, whether it is still building, how many days sessions are kept,
+  whether the app should set them up for the current user (`autoEnable`), and whether the user
+  manages them in all spaces (`canManage`), with the same for the mobile task under `mobile`.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,
   OS, country, entry page), the `environment`, `withJsErrors`, `withFailedRequests` and
   `minDurationMs` / `maxDurationMs` filters, sorting, pagination, KPIs, and how many days sessions
