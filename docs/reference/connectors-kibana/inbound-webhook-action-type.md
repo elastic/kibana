@@ -22,7 +22,7 @@ To receive requests with this connector, you need:
 
 - On {{serverless-full}}, a [project feature tier](docs-content://deploy-manage/deploy/elastic-cloud/project-settings.md) that includes Workflows. The Security Analytics Essentials and Observability Logs Essentials tiers don't include it.
 - On {{stack}}, an Enterprise license, which Workflows requires.
-- {applies_to}`stack: preview 9.6+` The `xpack.actions.inboundEvents.enabled` setting in `kibana.yml` set to `true`, which is the default. When it's `false`, the Inbound Webhook connector type isn't available.
+- On self-managed, {{ece}}, and {{eck}} deployments, the `xpack.actions.inboundEvents.enabled` setting in `kibana.yml` set to `true`, which is the default. When it's `false`, the Inbound Webhook connector type isn't available.
 - A {{kib}} URL that the external tool can reach.
 
 ## Create connectors in {{kib}} [define-inbound-webhook-ui]
@@ -76,11 +76,11 @@ triggers:
 
 ## Test with a sample request [inbound-webhook-test]
 
-To check the connection before you configure the external tool, send a sample request with `curl`:
+To check the connection before you configure the external tool, send a sample request with `curl`. Replace `<webhook-url>` and `<ingest-token>` with the **Webhook URL** and **Ingest token** that you copied when you created the connector:
 
 ```bash
 curl -X POST \
-  'https://<kibana-host>/api/actions/events/.inboundWebhook/<connector-id>' \
+  '<webhook-url>' \
   -H 'Authorization: Bearer <ingest-token>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -125,7 +125,7 @@ The ingest token is a secret that {{kib}} creates when you create the connector,
 - If the tool can't set headers, append `?token=<ingest-token>` to the URL. {{kib}} reads this parameter only when the request has no `Authorization` header.
 
 :::{warning}
-Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector. To run them as a different user, have that user open the connector, make a change such as editing its name, and save it. **Save** stays disabled until something changes.
+Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector. To run them as a different user, have that user open the connector, make a change such as editing its name, and save it. **Save** stays inactive until something changes.
 :::
 
 ### Verification requests [inbound-webhook-verification]
@@ -149,14 +149,14 @@ The response that the tool gets shows what happened to a request:
 
 | Status | What it means |
 | --- | --- |
-| No response | The tool couldn't connect to {{kib}}, such as a connection error or a timeout. Refer to [Requests don't reach {{kib}}](#inbound-webhook-unreachable). |
+| No response | The tool couldn't connect to {{kib}}, such as a connection error or a timeout. To fix it, refer to [Requests don't reach {{kib}}](#inbound-webhook-unreachable). |
 | 200 | The connector answered a [verification request](#inbound-webhook-verification) and didn't start any workflows. |
 | 202 | {{kib}} accepted the request. If no workflow runs, refer to [No workflow runs after a 202 response](#inbound-webhook-no-workflow). |
 | 400 | The request is invalid, such as a body that isn't valid JSON, a connector ID that's too long, or an empty `token` query parameter. The response message says which part to fix. |
 | 404 | {{kib}} rejected the URL or the token. For possible causes, refer to [Requests return 404](#inbound-webhook-404). |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. Configure the tool to send a smaller body. |
 | 415 | The connector doesn't accept the request's content type. Set the `Content-Type` header to one of the types in [Request body](#inbound-webhook-request-body). |
-| 429 | The tool sent too many requests. Refer to [Requests return 429](#inbound-webhook-429). |
+| 429 | The tool sent too many requests. To fix it, refer to [Requests return 429](#inbound-webhook-429). |
 | 500 | {{kib}} couldn't process the request. Send the request again. If it keeps failing, check the {{kib}} logs for an error that starts with `Inbound events outcome=` and includes the connector ID. The line's `detail` field shows the cause. |
 
 ### Requests don't reach {{kib}} [inbound-webhook-unreachable]
@@ -174,7 +174,7 @@ If {{kib}} accepts a request but no workflow runs, check that the workflow:
 - Has a trigger whose `connector-id` is the connector's ID or `"*"`.
 - Has no `on.condition`, or has one that matches the request body.
 
-If the workflow passes these checks, {{kib}} might not have a user to run it as. Open the connector, make a change such as editing its name, and save it. **Save** stays disabled until something changes.
+If the workflow passes these checks, {{kib}} might not have a user to run it as. Open the connector, make a change such as editing its name, and save it. **Save** stays inactive until something changes.
 
 ### Requests return 404 [inbound-webhook-404]
 
@@ -184,7 +184,7 @@ A 404 response has one of these causes:
 - The tool sends its own `Authorization` header, such as for basic authentication, and the token in a `?token=` query parameter. {{kib}} ignores the query parameter when the request has an `Authorization` header. Remove the tool's `Authorization` header, or send the token as `Authorization: Bearer <ingest-token>` instead.
 - The URL has the wrong connector ID or space. Copy the **Webhook URL** from the connector again.
 - The address that sends the requests made too many failed authentication attempts, which is 10 within 1 minute by default. {{kib}} returns 404 for that connector until the [failed-authentication window](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-ratelimit-remoteaddress-window) passes, even when the token is correct. Fix the token in the tool, then wait for the window to pass.
-- [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`. In this case, every webhook URL returns 404. Set it to `true` in `kibana.yml` and restart {{kib}}.
+- [`xpack.actions.inboundEvents.enabled`](/reference/configuration-reference/alerting-settings.md#xpack-actions-inboundevents-enabled) is `false`. In this case, every webhook URL returns 404. On self-managed, {{ece}}, and {{eck}} deployments, set it to `true` in `kibana.yml` and restart {{kib}}.
 
 ### Requests return 429 [inbound-webhook-429]
 

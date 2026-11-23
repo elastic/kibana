@@ -46,6 +46,7 @@ toc:
       - file: connectors-kibana/elastic-connectors.md
         children:
           - file: connectors-kibana/cases-action-type.md
+          - file: connectors-kibana/inbound-webhook-action-type.md
           - file: connectors-kibana/index-action-type.md
           - file: connectors-kibana/obs-ai-assistant-action-type.md
           - file: connectors-kibana/server-log-action-type.md
@@ -123,7 +124,6 @@ toc:
           - file: connectors-kibana/graphql-action-type.md
           - file: connectors-kibana/greynoise-action-type.md
           - file: connectors-kibana/hubspot-action-type.md
-          - file: connectors-kibana/inbound-webhook-action-type.md
           - file: connectors-kibana/jenkins-action-type.md
           - file: connectors-kibana/jina-action-type.md
           - file: connectors-kibana/jira-cloud-action-type.md
