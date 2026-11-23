@@ -85,10 +85,15 @@ apiTest.describe(
           sessions: { value: 4 },
           users: { value: 3 },
           errorRate: { value: 0.25 },
-          releases: ['1.0.0'],
+          releases: [{ key: '1.0.0', count: 4 }],
           platforms: ['android', 'ios'],
         });
-        expect([...all.osNames].sort()).toStrictEqual(['Android', 'iOS', 'iPadOS']);
+        // Each OS with its sessions, for the picker.
+        expect([...all.osNames].sort((a, b) => a.key.localeCompare(b.key))).toStrictEqual([
+          { key: 'Android', count: 2 },
+          { key: 'iOS', count: 1 },
+          { key: 'iPadOS', count: 1 },
+        ]);
         // The OS filter narrows the KPIs, not the OS names.
         const android = await getKpis({ osName: 'Android' });
         expect(android).toMatchObject({
@@ -97,6 +102,8 @@ apiTest.describe(
           errorRate: { value: 0.5 },
         });
         expect(android.osNames).toHaveLength(3);
+        // The releases, and their sessions, are those of the OS.
+        expect(android.releases).toStrictEqual([{ key: '1.0.0', count: 2 }]);
         expect((await getKpis({ osName: 'iPadOS' })).sessions.value).toBe(1);
         expect((await getKpis({ release: '1.0.0' })).sessions.value).toBe(4);
         expect((await getKpis({ release: '9.9.9' })).hasData).toBe(false);

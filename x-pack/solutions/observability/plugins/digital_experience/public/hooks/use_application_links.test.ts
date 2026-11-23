@@ -71,13 +71,28 @@ describe('useApplicationLinks', () => {
     );
   });
 
+  it("keeps a mobile application's Compare, so its breadcrumb and tab lead back to it", () => {
+    jest
+      .mocked(useListQuery)
+      .mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now', applicationType: 'mobile' });
+    mockSearch('?source=otel&applicationType=mobile&compare=true');
+    mockRouteQuery({ source: 'otel', applicationType: 'mobile', compare: 'true' });
+
+    const { result } = renderHook(() => useApplicationLinks('shop-mobile', 'otel'));
+
+    expect(
+      new URL(result.current.overviewHref, 'http://localhost').searchParams.get('compare')
+    ).toBe('true');
+  });
+
   it('leaves the OS and release out of the links of a web application', () => {
-    mockSearch('?source=otel&osName=iOS&release=2.0.0');
-    mockRouteQuery({ source: 'otel', osName: 'iOS', release: '2.0.0' });
+    mockSearch('?source=otel&osName=iOS&release=2.0.0&compare=true');
+    mockRouteQuery({ source: 'otel', osName: 'iOS', release: '2.0.0', compare: 'true' });
 
     const { result } = renderHook(() => useApplicationLinks('shop', 'otel'));
 
     expect(result.current.overviewHref).not.toContain('osName=');
     expect(result.current.overviewHref).not.toContain('release=');
+    expect(result.current.overviewHref).not.toContain('compare=');
   });
 });

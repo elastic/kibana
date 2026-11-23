@@ -14,17 +14,16 @@ import { EnvironmentFilter } from '../../../components/environment_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { useApiClient } from '../../../hooks/use_api_client';
 import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
-import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { createFormatters, useFormatters } from '../../../hooks/use_formatters';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { createUiSettingsMock } from '../../../test_utils/ui_settings_mock';
 import { MobileOverview } from './mobile_overview';
+import { useMobileKpis } from './use_mobile_kpis';
 
 jest.mock('../../../hooks/use_api_client');
 jest.mock('../../../hooks/use_digital_experience_params');
-jest.mock('../../../hooks/use_discover_href');
 jest.mock('../../../hooks/use_environment');
 jest.mock('../../../hooks/use_formatters', () => ({
   ...jest.requireActual('../../../hooks/use_formatters'),
@@ -46,11 +45,17 @@ const KPIS: MobileKpisResponse = {
   sessions: { value: 12, previous: 10, delta: 2 },
   users: { value: 4, previous: 4, delta: 0 },
   errorRate: { value: 0.5, previous: 0.25, delta: 0.25 },
-  releases: ['2.0.0', '1.9.0'],
-  osNames: ['iOS', 'iPadOS', 'Android'],
+  releases: [
+    { key: '2.0.0', count: 8 },
+    { key: '1.9.0', count: 4 },
+  ],
+  osNames: [
+    { key: 'iOS', count: 6 },
+    { key: 'iPadOS', count: 2 },
+    { key: 'Android', count: 4 },
+  ],
   platforms: ['android', 'ios'],
   environments: ['production'],
-  esql: 'FROM traces-*.otel-*,logs-*.otel-*',
 };
 
 const fetch = jest.fn();
@@ -75,7 +80,10 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
-const renderPage = () => render(<MobileOverview serviceName="shop-mobile" />, { wrapper: Wrapper });
+// The page fetches the KPIs and hands them to the Overview, as this does.
+const Overview = () => <MobileOverview kpisState={useMobileKpis('shop-mobile')} />;
+
+const renderPage = () => render(<Overview />, { wrapper: Wrapper });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -92,10 +100,6 @@ beforeEach(() => {
     .mocked(useEnvironment)
     .mockReturnValue({ environment: undefined, setEnvironment: jest.fn() });
   jest.mocked(useFormatters).mockReturnValue(createFormatters(createUiSettingsMock()));
-  // Like the hook, no link without a query.
-  jest
-    .mocked(useDiscoverHref)
-    .mockImplementation((esql, timeRange) => (esql && timeRange ? '/app/discover' : undefined));
   jest.mocked(useUpdateUrlQuery).mockReturnValue(updateUrlQuery);
   mockParams();
 });
@@ -135,31 +139,11 @@ describe('MobileOverview', () => {
     ).toBeNull();
   });
 
-  it('links the KPI row to Discover once', async () => {
+  it('leaves Open in Discover to the page header, out of the KPI row', async () => {
     renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
 
-    expect(await screen.findByTestId('digitalExperienceMobileKpisDiscover')).toHaveAttribute(
-      'href',
-      '/app/discover'
-    );
-    expect(screen.getAllByTestId('digitalExperienceMobileKpisDiscover')).toHaveLength(1);
-    expect(useDiscoverHref).toHaveBeenLastCalledWith(KPIS.esql, {
-      from: '2021-01-18T12:00:00.000Z',
-      to: '2021-01-18T13:00:00.000Z',
-    });
-  });
-
-  it('hides the Discover link while the KPIs of new filters load', async () => {
-    const { rerender } = renderPage();
-    await screen.findByTestId('digitalExperienceMobileKpisDiscover');
-
-    fetch.mockReturnValue(new Promise(() => {}));
-    mockParams({ osName: 'iPadOS' });
-    rerender(<MobileOverview serviceName="shop-mobile" />);
-
-    await waitFor(() =>
-      expect(screen.queryByTestId('digitalExperienceMobileKpisDiscover')).toBeNull()
-    );
+    expect(screen.queryByText('Open in Discover')).toBeNull();
   });
 
   it("warns that the values may be missing data when the user can't read every index", async () => {
@@ -205,7 +189,7 @@ describe('MobileOverview', () => {
 
     fetch.mockReturnValue(new Promise(() => {}));
     mockParams({ release: '2.0.0' });
-    rerender(<MobileOverview serviceName="shop-mobile" />);
+    rerender(<Overview />);
 
     await waitFor(() =>
       expect(screen.queryByTestId('digitalExperienceMobileUnreadableData')).toBeNull()
@@ -214,7 +198,7 @@ describe('MobileOverview', () => {
 
   it('shows no access warning when the user reads every index', async () => {
     renderPage();
-    await screen.findByTestId('digitalExperienceMobileKpisDiscover');
+    await screen.findByTestId('digitalExperienceMobileKpiSessionsValue');
 
     expect(screen.queryByTestId('digitalExperienceMobileKpisPartialAccess')).toBeNull();
   });
@@ -281,15 +265,26 @@ describe('MobileOverview', () => {
     expect(updateUrlQuery).toHaveBeenCalledWith({ osName: undefined });
   });
 
-  it('shows a badge per platform of the application', async () => {
+  it('lists each OS and release with its sessions, as the Sessions list does its facets', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
 
     expect(
-      screen
-        .getAllByTestId('digitalExperiencePlatformBadge')
-        .map((badge) => badge.getAttribute('data-platform'))
-    ).toEqual(['android', 'ios']);
+      filterProps('digitalExperienceMobileOsFilter')?.options.map(({ label }) => label)
+    ).toEqual(['Any', 'iOS (6)', 'iPadOS (2)', 'Android (4)']);
+    expect(
+      filterProps('digitalExperienceMobileReleaseFilter')?.options.map(({ label }) => label)
+    ).toEqual(['Any', '2.0.0 (8)', '1.9.0 (4)']);
+  });
+
+  it('caps the OS and release buttons, so picking a long value never moves the toolbar', async () => {
+    mockParams({ osName: 'iPadOS', release: 'a-very-long-release-name-from-a-nightly-build' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    ['digitalExperienceMobileOsFilter', 'digitalExperienceMobileReleaseFilter'].forEach((filter) =>
+      expect(filterProps(filter)).toMatchObject({ maxButtonInlineSize: '12em', isActive: true })
+    );
   });
 
   it('shows the environment filter loading only until its first options, not on every filter change', async () => {
@@ -302,9 +297,14 @@ describe('MobileOverview', () => {
     // A new OS loads: the picker keeps its options without a spinner.
     fetch.mockReturnValue(new Promise(() => {}));
     mockParams({ osName: 'iOS' });
-    rerender(<MobileOverview serviceName="shop-mobile" />);
+    rerender(<Overview />);
     await waitFor(() =>
-      expect(screen.queryByTestId('digitalExperienceMobileKpisDiscover')).toBeNull()
+      expect(fetch).toHaveBeenLastCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          params: expect.objectContaining({ query: expect.objectContaining({ osName: 'iOS' }) }),
+        })
+      )
     );
     expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
   });
@@ -313,7 +313,6 @@ describe('MobileOverview', () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
 
-    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).not.toBeChecked();
     ['Sessions', 'Users', 'ErrorRate'].forEach((kpi) => {
       expect(screen.queryByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeNull();
       expect(screen.queryByTestId(`digitalExperienceMobileKpi${kpi}Previous`)).toBeNull();
@@ -325,7 +324,6 @@ describe('MobileOverview', () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
 
-    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).toBeChecked();
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsChange')).toHaveTextContent(
       '+20%'
     );
@@ -338,20 +336,6 @@ describe('MobileOverview', () => {
     });
   });
 
-  it('keeps Compare in the URL, so a reload or Share keeps it, and removes it when off', async () => {
-    const { unmount } = renderPage();
-    await screen.findByTestId('digitalExperienceMobileKpis');
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-    expect(updateUrlQuery).toHaveBeenLastCalledWith({ compare: 'true' });
-    unmount();
-
-    mockParams({ compare: 'true' });
-    renderPage();
-    await screen.findByTestId('digitalExperienceMobileKpis');
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
-    expect(updateUrlQuery).toHaveBeenLastCalledWith({ compare: undefined });
-  });
-
   it("shows neither the previous filters' values nor their access warning while new ones load", async () => {
     mockParams({ compare: 'true' });
     fetch.mockResolvedValue({ ...KPIS, isPartial: true });
@@ -361,7 +345,7 @@ describe('MobileOverview', () => {
 
     fetch.mockReturnValue(new Promise(() => {}));
     mockParams({ release: '2.0.0', compare: 'true' });
-    rerender(<MobileOverview serviceName="shop-mobile" />);
+    rerender(<Overview />);
 
     await waitFor(() =>
       expect(screen.queryByTestId('digitalExperienceMobileKpiSessionsPrevious')).toBeNull()

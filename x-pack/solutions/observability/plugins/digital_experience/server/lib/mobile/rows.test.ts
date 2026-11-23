@@ -14,16 +14,34 @@ const releaseRows = (rows: Array<Partial<ReleaseRow>>) => rows as ReleaseRow[];
 const osRows = (rows: Array<Partial<OsRow>>) => rows as OsRow[];
 
 describe('toReleases', () => {
-  it('lists the releases of the rows in their order', () => {
+  it('lists the releases of the rows in their order, with their sessions, for the picker', () => {
     expect(
-      toReleases(releaseRows([{ release: '1.1.0' }, { release: '1.0.0' }, { release: null }]))
-    ).toEqual(['1.1.0', '1.0.0']);
+      toReleases(
+        releaseRows([
+          { release: '1.1.0', sessions: 7 },
+          { release: '1.0.0', sessions: 3 },
+          { release: null, sessions: 2 },
+        ])
+      )
+    ).toEqual([
+      { key: '1.1.0', count: 7 },
+      { key: '1.0.0', count: 3 },
+    ]);
+  });
+
+  it('counts 0 sessions for a release whose count is missing', () => {
+    expect(toReleases(releaseRows([{ release: '1.0.0' }]))).toEqual([{ key: '1.0.0', count: 0 }]);
   });
 
   it('leaves out a release longer than the KPI route accepts', () => {
-    expect(toReleases(releaseRows([{ release: 'x'.repeat(1025) }, { release: '1.0.0' }]))).toEqual([
-      '1.0.0',
-    ]);
+    expect(
+      toReleases(
+        releaseRows([
+          { release: 'x'.repeat(1025), sessions: 9 },
+          { release: '1.0.0', sessions: 1 },
+        ])
+      )
+    ).toEqual([{ key: '1.0.0', count: 1 }]);
   });
 });
 
@@ -42,23 +60,31 @@ describe('toRelease', () => {
 });
 
 describe('toOsNames', () => {
-  it('lists each OS name once, in the order of the rows', () => {
+  it('lists each OS name once, in the order of the rows, with the sessions of all its rows', () => {
     expect(
       toOsNames(
         osRows([
-          { os_name: 'Android', platform: 'android' },
-          { os_name: 'iOS', platform: 'ios' },
-          { os_name: 'Android', platform: 'android' },
-          { os_name: null, platform: 'android' },
+          { os_name: 'Android', platform: 'android', sessions: 5 },
+          { os_name: 'iOS', platform: 'ios', sessions: 3 },
+          { os_name: 'Android', platform: 'android', sessions: 2 },
+          { os_name: null, platform: 'android', sessions: 4 },
         ])
       )
-    ).toEqual(['Android', 'iOS']);
+    ).toEqual([
+      { key: 'Android', count: 7 },
+      { key: 'iOS', count: 3 },
+    ]);
   });
 
   it('leaves out an OS name longer than the KPI route accepts', () => {
-    expect(toOsNames(osRows([{ os_name: 'x'.repeat(65) }, { os_name: 'x'.repeat(64) }]))).toEqual([
-      'x'.repeat(64),
-    ]);
+    expect(
+      toOsNames(
+        osRows([
+          { os_name: 'x'.repeat(65), sessions: 1 },
+          { os_name: 'x'.repeat(64), sessions: 2 },
+        ])
+      )
+    ).toEqual([{ key: 'x'.repeat(64), count: 2 }]);
   });
 });
 

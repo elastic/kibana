@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { SESSIONS_LOOKBACK_DAYS } from '../common/sessions';
-import type { ApplicationSource, MobilePlatform } from '../common/types/applications';
+import type {
+  ApplicationSource,
+  ApplicationTabId,
+  MobilePlatform,
+} from '../common/types/applications';
 
 export const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.label', {
   defaultMessage: 'Digital experience',
@@ -94,6 +98,29 @@ export const PLATFORM_LABELS: Record<MobilePlatform, string> = {
   }),
   ios: i18n.translate('xpack.digitalExperience.mobile.platform.ios', { defaultMessage: 'iOS' }),
 };
+
+/** The tabs of an application's page, shared by its web and mobile pages. */
+export const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
+  overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
+    defaultMessage: 'Overview',
+  }),
+  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
+    defaultMessage: 'Errors',
+  }),
+  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
+    defaultMessage: 'Network',
+  }),
+  sessions: SESSIONS_LABEL,
+  reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
+    defaultMessage: 'Reports',
+  }),
+};
+
+/** The header action that opens a page's events in Discover. */
+export const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.openInDiscoverLabel',
+  { defaultMessage: 'Open in Discover' }
+);
 
 /** What a mobile error rate counts: a ratio, so it can exceed 1, unlike the crash-free share. */
 export const MOBILE_ERROR_RATE_DESCRIPTION = i18n.translate(

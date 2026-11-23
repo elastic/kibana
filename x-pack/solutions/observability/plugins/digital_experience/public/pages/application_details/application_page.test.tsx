@@ -62,13 +62,20 @@ jest.mock('../reports/reports_tab', () => {
     },
   };
 });
-jest.mock('./mobile_overview/mobile_overview', () => {
+// Its own test covers the mobile page; here the wrapper only has to pick it.
+jest.mock('./mobile_overview/mobile_application_page', () => {
   const { useState } = jest.requireActual<typeof import('react')>('react');
   return {
     // Shows the application it was mounted for, as its state would: a new mount reads the new one.
-    MobileOverview: ({ serviceName }: { serviceName: string }) => {
+    MobileApplicationPage: ({
+      serviceName,
+      selectedTab,
+    }: {
+      serviceName: string;
+      selectedTab: string;
+    }) => {
       const [mountedFor] = useState(serviceName);
-      return <div data-test-subj="mobileOverview">{mountedFor}</div>;
+      return <div data-test-subj="mobileApplicationPage">{`${mountedFor}:${selectedTab}`}</div>;
     },
   };
 });
@@ -330,32 +337,49 @@ describe('ApplicationPage', () => {
     }
   );
 
-  it.each(['sessions', 'errors', 'network'] as const)(
-    'replaces the %s route of a mobile application with its Overview, its only tab',
+  it.each(['overview', 'errors'] as const)(
+    'opens the mobile page, with the %s tab of the URL, for an EDOT mobile application',
     (tab) => {
       useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
-      jest.mocked(useApplicationLinks).mockReturnValue({
-        ...LINKS,
-        overviewPath: '/my-app?applicationType=mobile&source=otel',
-      });
+      jest.mocked(useApplicationLinks).mockClear();
 
       render(
         <ApplicationPage
-          serviceName="my-app"
+          serviceName="shop-mobile"
           source="otel"
           applicationType="mobile"
           selectedTab={tab}
         />
       );
 
-      expect(useApplicationLinks).toHaveBeenCalledWith('my-app', 'otel');
-      expect(historyReplace).toHaveBeenCalledWith('/my-app?applicationType=mobile&source=otel');
-      expect(screen.queryByTestId('digitalExperienceSessionsUnavailable')).not.toBeInTheDocument();
-      expect(screen.queryByTestId(`digitalExperienceTab-${tab}`)).not.toBeInTheDocument();
+      expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent(`shop-mobile:${tab}`);
+      // The mobile page owns its header and tabs: none of the web page renders.
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.title)).toBeNull();
+      expect(screen.queryByTestId('otelOverview')).toBeNull();
+      expect(useApplicationLinks).not.toHaveBeenCalled();
     }
   );
 
-  it("mounts a new mobile Overview per application, so none shows the previous one's state", () => {
+  it.each([
+    ['an EDOT Browser application', 'otel', undefined, 'otelOverview'],
+    ['a web application', 'otel', 'web', 'otelOverview'],
+  ] as const)('opens the web page for %s', (_, source, applicationType, overview) => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(
+      <ApplicationPage
+        serviceName="my-app"
+        source={source}
+        applicationType={applicationType}
+        selectedTab="overview"
+      />
+    );
+
+    expect(screen.getByTestId(overview)).toBeInTheDocument();
+    expect(screen.queryByTestId('mobileApplicationPage')).toBeNull();
+  });
+
+  it("mounts a new mobile page per application, so none shows the previous one's KPIs", () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
     const page = (serviceName: string) => (
       <ApplicationPage
@@ -367,10 +391,28 @@ describe('ApplicationPage', () => {
     );
 
     const { rerender } = render(page('shop-mobile'));
-    expect(screen.getByTestId('mobileOverview')).toHaveTextContent('shop-mobile');
+    expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent('shop-mobile:overview');
 
     rerender(page('trailmap-android'));
-    expect(screen.getByTestId('mobileOverview')).toHaveTextContent('trailmap-android');
+    expect(screen.getByTestId('mobileApplicationPage')).toHaveTextContent(
+      'trailmap-android:overview'
+    );
+  });
+
+  it('never opens the mobile page for Classic RUM data, whatever its type', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(
+      <ApplicationPage
+        serviceName="my-app"
+        source="classic"
+        applicationType="mobile"
+        selectedTab="overview"
+      />
+    );
+
+    expect(screen.queryByTestId('mobileApplicationPage')).toBeNull();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('my-app');
   });
 
   it('never redirects an EDOT Browser application', () => {

@@ -5,24 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFilterGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { useAbortableAsync } from '@kbn/react-hooks';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { SingleSelectFilter } from '../../../components/single_select_filter';
-import { EnvironmentFilter } from '../../../components/environment_filter';
-import { TimeRangePicker } from '../../../components/time_range_picker';
+import { ApplicationTabToolbar } from '../../../components/application_tab_toolbar';
+import { FacetFilter } from '../../../components/facet_filter';
 import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
   MOBILE_APPLICATION_EBT_ELEMENTS,
@@ -30,44 +19,21 @@ import {
 import { MobileOnboardingPrompt } from '../../../components/mobile_onboarding_prompt';
 import { MobileUnreadableDataPrompt } from '../../../components/mobile_unreadable_data_prompt';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
-import { useApiClient } from '../../../hooks/use_api_client';
-import { useDiscoverHref } from '../../../hooks/use_discover_href';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
-import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
 import { MOBILE_ERROR_RATE_DESCRIPTION, MOBILE_USERS_DESCRIPTION } from '../../../labels';
-import { toTimeRangeQuery } from '../../../utils/time_range_query';
-import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
 import type { MobilePanelProps } from './mobile_panel';
+import type { MobileKpisState } from './use_mobile_kpis';
 
-// Empty, which no OS or release reported in the data can be, so every reported value is selectable.
-const ALL = '';
-
-const ALL_RELEASES_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allReleases', {
-  defaultMessage: 'All releases',
+const OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.os', {
+  defaultMessage: 'OS',
 });
 
-const ALL_OS_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.allOs', {
-  defaultMessage: 'All operating systems',
-});
-
-/** The filter's options: all, then `values`, with the URL's value first when they lack it. */
-const toOptions = (
-  allLabel: string,
-  values: string[] | undefined,
-  selected: string | undefined
-) => [
-  { value: ALL, label: allLabel },
-  ...(selected && !values?.includes(selected) ? [selected] : [])
-    .concat(values ?? [])
-    .map((value) => ({ value, label: value })),
-];
-
-const DISCOVER_LABEL = i18n.translate('xpack.digitalExperience.mobile.kpis.openInDiscover', {
-  defaultMessage: 'Open in Discover',
+const RELEASE_LABEL = i18n.translate('xpack.digitalExperience.mobile.filter.release', {
+  defaultMessage: 'Release',
 });
 
 type MobileKpi = 'sessions' | 'users' | 'errorRate';
@@ -166,55 +132,24 @@ const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
 );
 
 /**
- * The mobile application page, all its platforms: filters and the KPI row. The sibling issues add
- * their sections below it as they fill them.
+ * The body of a mobile application's page, all its platforms: the toolbar its tabs share, with the
+ * OS and release filters, and the KPI row. The sibling issues add their sections below it as they
+ * fill them.
  */
-export function MobileOverview({ serviceName }: { serviceName: string }) {
-  const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment, setEnvironment } = useEnvironment();
-  const { formatNumber } = useFormatters();
-  // In the URL, so a reload or a shared link keeps them.
+export function MobileOverview({
+  kpisState: { kpis, currentKpis, isLoading, error, refresh },
+}: {
+  /** Fetched by the page, whose header shows its platforms. */
+  kpisState: MobileKpisState;
+}) {
+  const { environment } = useEnvironment();
+  const formatters = useFormatters();
+  const { formatNumber } = formatters;
+  // In the URL, so a reload or a shared link keeps them; the page's header sets Compare.
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');
-  const { value: compare, setValue: setCompare } = useQueryParam('compare');
+  const { value: compare } = useQueryParam('compare');
   const isComparing = compare === 'true';
-
-  const {
-    value: kpis,
-    loading,
-    error,
-    refresh,
-  } = useAbortableAsync(
-    async ({ signal }) =>
-      apiClient.fetch('GET /internal/digital_experience/mobile_applications/{serviceName}/kpis', {
-        signal,
-        params: {
-          path: { serviceName },
-          query: { ...toTimeRangeQuery(timeRange, environment), osName, release },
-        },
-      }),
-    [apiClient, serviceName, timeRange, environment, osName, release],
-    { unsetValueOnError: true }
-  );
-  const isLoading = loading || (!kpis && !error);
-  // While loading, `kpis` is still the previous filters' response: only the filter options use it,
-  // not what describes the current selection.
-  const currentKpis = isLoading ? undefined : kpis;
-  const discoverTimeRange = useMemo(
-    () => ({ from: timeRange.rangeFrom, to: timeRange.rangeTo }),
-    [timeRange.rangeFrom, timeRange.rangeTo]
-  );
-  const discoverHref = useDiscoverHref(currentKpis?.esql, discoverTimeRange);
-
-  const releaseOptions = useMemo(
-    () => toOptions(ALL_RELEASES_LABEL, kpis?.releases, release),
-    [kpis?.releases, release]
-  );
-  const osOptions = useMemo(
-    () => toOptions(ALL_OS_LABEL, kpis?.osNames, osName),
-    [kpis?.osNames, osName]
-  );
 
   const hasNoData = currentKpis !== undefined && !currentKpis.hasData;
   const isFiltered = environment !== undefined || osName !== undefined || release !== undefined;
@@ -223,78 +158,50 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
   const clearFilters = () =>
     updateUrlQuery({ environment: undefined, osName: undefined, release: undefined });
   const clearFiltersButton = isFiltered ? <ClearFiltersButton onClear={clearFilters} /> : undefined;
-  const errorPrompt =
-    error && !loading ? (
-      <LoadErrorPrompt
-        data-test-subj="digitalExperienceMobileKpisError"
-        retryDataTestSubj="digitalExperienceMobileKpisRetry"
-        retryEbtElement={MOBILE_APPLICATION_EBT_ELEMENTS.RETRY}
-        title={LOAD_ERROR_TITLE}
-        error={error}
-        onRetry={refresh}
-      />
-    ) : undefined;
+  const errorPrompt = error ? (
+    <LoadErrorPrompt
+      data-test-subj="digitalExperienceMobileKpisError"
+      retryDataTestSubj="digitalExperienceMobileKpisRetry"
+      retryEbtElement={MOBILE_APPLICATION_EBT_ELEMENTS.RETRY}
+      title={LOAD_ERROR_TITLE}
+      error={error}
+      onRetry={refresh}
+    />
+  ) : undefined;
 
   return (
     <>
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        {kpis?.platforms.length ? (
-          <EuiFlexItem grow={false}>
-            <PlatformBadges
-              data-test-subj="digitalExperienceMobilePagePlatforms"
-              platforms={kpis.platforms}
-            />
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiFilterGroup compressed>
-            <EnvironmentFilter
-              environments={kpis?.environments ?? []}
-              selected={environment}
-              onChange={setEnvironment}
-              // Only until the first options: they stay while new filters load, as the Overview's.
-              isLoading={isLoading && !kpis}
-            />
-            <SingleSelectFilter
+      {/* The toolbar of every application tab: the filters keep their width when one is picked,
+      and the date picker its place, so the page doesn't move. */}
+      <ApplicationTabToolbar
+        environments={kpis?.environments}
+        isLoading={isLoading}
+        onRefresh={refresh}
+        filters={
+          <>
+            <FacetFilter
               data-test-subj="digitalExperienceMobileOsFilter"
               ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.OS_FILTER}
-              label={i18n.translate('xpack.digitalExperience.mobile.filter.os', {
-                defaultMessage: 'OS',
-              })}
-              options={osOptions}
-              selected={osName ?? ALL}
-              isActive={osName !== undefined}
-              onChange={(value) => setOsName(value === ALL ? undefined : value)}
+              label={OS_LABEL}
+              buckets={kpis?.osNames ?? []}
+              selected={osName}
+              onChange={setOsName}
+              formatters={formatters}
+              isLoading={isLoading && !kpis}
             />
-            <SingleSelectFilter
+            <FacetFilter
               data-test-subj="digitalExperienceMobileReleaseFilter"
               ebtElement={MOBILE_APPLICATION_EBT_ELEMENTS.RELEASE_FILTER}
-              label={i18n.translate('xpack.digitalExperience.mobile.filter.release', {
-                defaultMessage: 'Release',
-              })}
-              options={releaseOptions}
-              selected={release ?? ALL}
-              isActive={release !== undefined}
-              searchable
-              onChange={(value) => setRelease(value === ALL ? undefined : value)}
+              label={RELEASE_LABEL}
+              buckets={kpis?.releases ?? []}
+              selected={release}
+              onChange={setRelease}
+              formatters={formatters}
+              isLoading={isLoading && !kpis}
             />
-          </EuiFilterGroup>
-        </EuiFlexItem>
-        <EuiFlexItem />
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            data-test-subj="digitalExperienceMobileCompareToggle"
-            label={i18n.translate('xpack.digitalExperience.mobile.compare', {
-              defaultMessage: 'Compare to the previous period',
-            })}
-            checked={isComparing}
-            onChange={({ target: { checked } }) => setCompare(checked ? 'true' : undefined)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <TimeRangePicker onRefresh={refresh} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </>
+        }
+      />
       <EuiSpacer size="m" />
       {!errorPrompt && !hasNoData && currentKpis?.isPartial && (
         <>
@@ -334,41 +241,18 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
             />
           )
         ) : (
-          <>
-            <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-              {MOBILE_KPIS.map(({ kpi, ...panel }) => (
-                <MobilePanel
-                  key={kpi}
-                  {...panel}
-                  value={currentKpis?.[kpi]}
-                  formatValue={formatNumber}
-                  isComparing={isComparing}
-                  isLoading={isLoading}
-                />
-              ))}
-            </EuiFlexGroup>
-            {discoverHref && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      href={discoverHref}
-                      target="_blank"
-                      external
-                      data-test-subj="digitalExperienceMobileKpisDiscover"
-                      {...getEbtProps({
-                        action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER,
-                        element: MOBILE_APPLICATION_EBT_ELEMENTS.KPIS_DISCOVER_LINK,
-                      })}
-                    >
-                      {DISCOVER_LABEL}
-                    </EuiLink>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            )}
-          </>
+          <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
+            {MOBILE_KPIS.map(({ kpi, ...panel }) => (
+              <MobilePanel
+                key={kpi}
+                {...panel}
+                value={currentKpis?.[kpi]}
+                formatValue={formatNumber}
+                isComparing={isComparing}
+                isLoading={isLoading}
+              />
+            ))}
+          </EuiFlexGroup>
         ))}
     </>
   );

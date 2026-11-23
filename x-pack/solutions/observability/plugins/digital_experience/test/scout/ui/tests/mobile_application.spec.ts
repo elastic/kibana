@@ -83,24 +83,28 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       expect(violations).toHaveLength(0);
     });
 
-    await test.step('narrows the KPIs to an OS, kept in the URL', async () => {
+    await test.step('narrows the KPIs to an OS, kept in the URL, without moving the page', async () => {
+      const kpisBefore = await digitalExperience.mobileKpis.boundingBox();
+
       await digitalExperience.selectMobileOs('iPadOS');
       await expect(page).toHaveURL(/osName=iPadOS/);
       await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('1');
+
+      // The picked OS lives in its capped button, so the toolbar keeps its height.
+      expect((await digitalExperience.mobileKpis.boundingBox())?.y).toBe(kpisBefore?.y);
     });
 
     await test.step('compares to the previous period only with Compare on, kept across a reload', async () => {
       await expect(digitalExperience.mobileKpiChange('Sessions')).toBeHidden();
 
-      await digitalExperience.mobileCompareToggle.click();
+      await digitalExperience.toggleMobileCompare();
       await expect(page).toHaveURL(/compare=true/);
       await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeVisible();
 
       await page.reload();
-      await expect(digitalExperience.mobileCompareToggle).toBeChecked();
       await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeVisible();
 
-      await digitalExperience.mobileCompareToggle.click();
+      await digitalExperience.toggleMobileCompare();
       await expect(page).not.toHaveURL(/compare=/);
       await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeHidden();
     });

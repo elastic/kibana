@@ -65,8 +65,15 @@ describe('getMobileKpis', () => {
         sessions: { value: 4, previous: 2, delta: 2 },
         users: { value: 2, previous: 2, delta: 0 },
         errorRate: { value: 0.5, previous: 0, delta: 0.5 },
-        releases: ['1.0.0', '1.1.0'],
-        osNames: ['iOS', 'iPadOS'],
+        // The picker options, with the sessions their queries count.
+        releases: [
+          { key: '1.0.0', count: 4 },
+          { key: '1.1.0', count: 3 },
+        ],
+        osNames: [
+          { key: 'iOS', count: 3 },
+          { key: 'iPadOS', count: 1 },
+        ],
         platforms: ['android', 'ios'],
         environments: ['production'],
       })
@@ -84,13 +91,12 @@ describe('getMobileKpis', () => {
         ],
       },
     });
-    // The routes send the values as params; Discover gets them in the query.
+    // The routes send the values as params.
     expect(currentRequest.params).toEqual([{ service_name: 'shop-mobile' }, { os_name: 'iOS' }]);
     // The releases are those of the OS; the OS names are all of them.
     expect(releasesRequest.params).toEqual([{ service_name: 'shop-mobile' }, { os_name: 'iOS' }]);
     expect(osRequest.params).toEqual([{ service_name: 'shop-mobile' }]);
-    expect(kpis.esql).toContain('`service.name` == "shop-mobile"');
-    expect(kpis.esql).toContain('`resource.attributes.os.name` == "iOS"');
-    expect(kpis.esql).toContain('`service.environment` == "production"');
+    // The page builds its Discover query from its URL, so the response has none.
+    expect(kpis).not.toHaveProperty('esql');
   });
 });

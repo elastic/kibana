@@ -23,11 +23,10 @@ const KPIS: Omit<MobileKpisResponse, 'isPartial'> = {
   sessions: { value: 7, previous: 5, delta: 2 },
   users: { value: 3, previous: 3, delta: 0 },
   errorRate: { value: 0.5, previous: null, delta: null },
-  releases: ['1.2.3'],
-  osNames: ['iOS'],
+  releases: [{ key: '1.2.3', count: 7 }],
+  osNames: [{ key: 'iOS', count: 7 }],
   platforms: ['ios'],
   environments: ['production'],
-  esql: 'FROM traces-*.otel-*,logs-*.otel-*',
 };
 
 const esClient = { esql: { query: jest.fn() } };

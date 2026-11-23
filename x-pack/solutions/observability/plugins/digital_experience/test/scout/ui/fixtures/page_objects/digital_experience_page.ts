@@ -96,7 +96,7 @@ export class DigitalExperiencePage {
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
   public readonly mobileCompareToggle: Locator;
-  public readonly mobileOsList: EuiSelectableObject;
+  public readonly mobileOpenInDiscover: Locator;
   public readonly platformFilter: Locator;
   public readonly platformList: EuiSelectableObject;
 
@@ -169,12 +169,11 @@ export class DigitalExperiencePage {
       'digitalExperienceMobileApplicationsTable'
     );
     this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
-    this.mobilePagePlatforms = page
-      .getByTestId('digitalExperienceMobilePagePlatforms')
-      .getByTestId('digitalExperiencePlatformBadge');
+    // The header's badges, one per platform the application reported on.
+    this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
     this.mobileCompareToggle = page.getByTestId('digitalExperienceMobileCompareToggle');
-    this.mobileOsList = page.components.selectable('digitalExperienceMobileOsFilterList');
+    this.mobileOpenInDiscover = page.getByTestId('digitalExperienceMobileOpenInDiscover');
     this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
     this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
   }
@@ -206,10 +205,24 @@ export class DigitalExperiencePage {
     return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`);
   }
 
-  /** Narrows the mobile page to one OS by its label, e.g. `iPadOS`. */
+  /**
+   * Narrows the mobile page to one OS, e.g. `iPadOS`, by its value: its option's label also has its
+   * sessions, as the Sessions list's facets.
+   */
   async selectMobileOs(osName: string): Promise<void> {
     await this.mobileOsFilter.click();
-    await this.mobileOsList.selectOption(osName);
+    await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
+  }
+
+  /**
+   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
+   * items into the overflow menu.
+   */
+  async toggleMobileCompare(): Promise<void> {
+    if (!(await this.mobileCompareToggle.isVisible())) {
+      await this.page.getByTestId('app-menu-overflow-button').click();
+    }
+    await this.mobileCompareToggle.click();
   }
 
   /** Narrows the Mobile tab to one platform by its label, `Android` or `iOS`. */

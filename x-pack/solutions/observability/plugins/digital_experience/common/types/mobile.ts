@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FacetBucket } from '../sessions';
 import type { ComparedValue, MobilePlatform } from './applications';
 
 /** The KPI row of a mobile application's page, each value against the previous period. */
@@ -18,13 +19,14 @@ export interface MobileKpisResponse {
   /** Exceptions per session. */
   errorRate: ComparedValue;
   /** Releases in the time range and OS, whatever the release filter, most sessions first. */
-  releases: string[];
-  /** The resource `os.name` values in the time range, whatever the OS and release filters. */
-  osNames: string[];
+  releases: FacetBucket[];
+  /**
+   * The resource `os.name` values in the time range with their sessions, whatever the OS and
+   * release filters.
+   */
+  osNames: FacetBucket[];
   /** The platforms in the time range, whatever the OS and release filters, sorted. */
   platforms: MobilePlatform[];
   /** Environments in the time range, whatever the environment filter. */
   environments: string[];
-  /** The ES|QL of the panels with every filter, for Discover. */
-  esql: string;
 }

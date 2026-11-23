@@ -10,6 +10,7 @@ import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import { isMobilePlatform } from '../../../common/application_source';
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../common/mobile/fields';
 import type { MobilePlatform } from '../../../common/types/applications';
+import type { FacetBucket } from '../../../common/sessions';
 import {
   MAX_ENVIRONMENTS,
   MAX_ENVIRONMENT_LENGTH,
@@ -45,20 +46,26 @@ export const toPlatforms = (values: string | string[] | null | undefined): Mobil
 const accepted = (values: Array<string | null>, maxLength: number): string[] =>
   compact(values).filter((value) => value.length <= maxLength);
 
-/** The OS names of rows, in their order. */
-export const toOsNames = (rows: OsRow[]): string[] =>
-  uniq(
-    accepted(
-      rows.map(({ [RESULT_COLUMNS.osName]: osName }) => osName),
-      MAX_OS_NAME_LENGTH
-    )
-  );
+/**
+ * The OS names of rows with their sessions, in their order, for the OS picker; an OS name on two
+ * platforms is one option with the sessions of both.
+ */
+export const toOsNames = (rows: OsRow[]): FacetBucket[] => {
+  const sessionsByName = new Map<string, number>();
+  rows.forEach(({ [RESULT_COLUMNS.osName]: osName, [RESULT_COLUMNS.sessions]: sessions }) => {
+    if (osName && accepted([osName], MAX_OS_NAME_LENGTH).length > 0) {
+      sessionsByName.set(osName, (sessionsByName.get(osName) ?? 0) + (sessions ?? 0));
+    }
+  });
+  return [...sessionsByName].map(([key, count]) => ({ key, count }));
+};
 
-/** The releases of rows, in their order. */
-export const toReleases = (rows: ReleaseRow[]): string[] =>
-  accepted(
-    rows.map(({ [RESULT_COLUMNS.release]: release }) => release),
-    MAX_RELEASE_LENGTH
+/** The releases of rows with their sessions, in their order, for the release picker. */
+export const toReleases = (rows: ReleaseRow[]): FacetBucket[] =>
+  rows.flatMap(({ [RESULT_COLUMNS.release]: release, [RESULT_COLUMNS.sessions]: sessions }) =>
+    release && accepted([release], MAX_RELEASE_LENGTH).length > 0
+      ? [{ key: release, count: sessions ?? 0 }]
+      : []
   );
 
 /** A release the KPI route accepts as a filter, or `null`. */

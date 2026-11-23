@@ -15,8 +15,8 @@ import { useAbortableAsync } from '@kbn/react-hooks';
 import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../common/application_source';
 import {
   APPLICATION_TAB_IDS,
-  type ApplicationType,
   type ApplicationSource,
+  type ApplicationType,
   type ApplicationTabId,
 } from '../../../common/types/applications';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
@@ -26,36 +26,20 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useShareAction } from '../../hooks/use_share_action';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
-import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { APPLICATIONS_LABEL, APPLICATION_TAB_LABELS } from '../../labels';
 import { ErrorsTab } from '../errors/errors_tab';
 import { NetworkTab } from '../network/network_tab';
 import { ReportsTab } from '../reports/reports_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
-import { MobileOverview } from './mobile_overview/mobile_overview';
+import { MobileApplicationPage } from './mobile_overview/mobile_application_page';
 import { OtelOverview } from './otel_overview/otel_overview';
-
-const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
-  overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
-    defaultMessage: 'Overview',
-  }),
-  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
-    defaultMessage: 'Errors',
-  }),
-  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
-    defaultMessage: 'Network',
-  }),
-  sessions: SESSIONS_LABEL,
-  reports: i18n.translate('xpack.digitalExperience.application.tabs.reports', {
-    defaultMessage: 'Reports',
-  }),
-};
 
 /**
  * Errors, network, sessions and reports are read from EDOT Browser data only; Classic RUM applications have
  * the ux plugin's dashboard as their Overview.
  */
-const tabsOf = (source: ApplicationSource, isMobile: boolean): readonly ApplicationTabId[] =>
-  source === APPLICATION_SOURCE.otel && !isMobile ? APPLICATION_TAB_IDS : ['overview'];
+const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
+  source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
 const sessionsUnavailablePrompt = (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsUnavailable"
@@ -146,6 +130,7 @@ function ClassicRumOverview({ serviceName }: { serviceName: string }) {
   return withPagePadding(error || !ux ? overviewUnavailablePrompt : overviewLoadingPrompt);
 }
 
+/** An application's page: a mobile application's, or a web one's (EDOT Browser or Classic RUM). */
 export function ApplicationPage({
   serviceName,
   source,
@@ -158,19 +143,39 @@ export function ApplicationPage({
   applicationType?: ApplicationType;
   selectedTab: ApplicationTabId;
 }) {
-  // Mobile applications are EDOT data: their type, not their source, gives them the mobile page.
-  const isMobile =
-    source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile;
+  // Mobile applications are EDOT data: their type, not their source, gives them their own page.
+  if (source === APPLICATION_SOURCE.otel && applicationType === APPLICATION_TYPE.mobile) {
+    // A new one per application, so its badges, filter options and KPIs never show the previous
+    // application's while the new one loads.
+    return (
+      <MobileApplicationPage
+        key={serviceName}
+        serviceName={serviceName}
+        selectedTab={selectedTab}
+      />
+    );
+  }
+  return <WebApplicationPage serviceName={serviceName} source={source} selectedTab={selectedTab} />;
+}
+
+/** A web application's page: the Overview of its source and, for EDOT Browser, its other tabs. */
+function WebApplicationPage({
+  serviceName,
+  source,
+  selectedTab,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  selectedTab: ApplicationTabId;
+}) {
   const applicationsHref = useApplicationsHref();
   const history = useHistory();
   const { overviewHref, overviewPath, errorsHref, networkHref, reportsHref, sessionsHref } =
     useApplicationLinks(serviceName, source);
   const shareAction = useShareAction({ serviceName, source, tab: selectedTab });
-  // Classic RUM only has the Overview (and Sessions' unavailable prompt), and mobile only its
-  // Overview; any other tab's URL is replaced by the Overview's.
-  const isUnsupportedTab = isMobile
-    ? selectedTab !== 'overview'
-    : selectedTab !== 'sessions' && !tabsOf(source, isMobile).includes(selectedTab);
+  // Classic RUM only has the Overview (and Sessions' unavailable prompt); any other tab's URL is
+  // replaced by the Overview's.
+  const isUnsupportedTab = selectedTab !== 'sessions' && !tabsOf(source).includes(selectedTab);
   useEffect(() => {
     if (isUnsupportedTab) {
       history.replace(overviewPath);
@@ -189,18 +194,12 @@ export function ApplicationPage({
     { text: APPLICATION_TAB_LABELS[selectedTab] },
   ]);
 
-  const renderOverview = () => {
-    if (isMobile) {
-      // A new one per application, so its badges, filter options and Compare state never show the
-      // previous application's while the new one loads.
-      return withPagePadding(<MobileOverview key={serviceName} serviceName={serviceName} />);
-    }
-    return source === APPLICATION_SOURCE.otel ? (
+  const renderOverview = () =>
+    source === APPLICATION_SOURCE.otel ? (
       withPagePadding(<OtelOverview serviceName={serviceName} />)
     ) : (
       <ClassicRumOverview serviceName={serviceName} />
     );
-  };
 
   const renderSessions = () =>
     withPagePadding(
@@ -235,7 +234,7 @@ export function ApplicationPage({
         title={serviceName}
         back={{ href: applicationsHref, label: APPLICATIONS_LABEL }}
         share={shareAction}
-        tabs={tabsOf(source, isMobile).map((id) => ({
+        tabs={tabsOf(source).map((id) => ({
           id,
           label: APPLICATION_TAB_LABELS[id],
           isSelected: id === selectedTab,

@@ -7,7 +7,6 @@
 
 import { compact } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { mobilePanelDiscoverEsql } from '../../../common/mobile/discover';
 import { RESULT_COLUMNS } from '../../../common/mobile/fields';
 import { mobilePanelQuery, type MobilePanelFilters } from '../../../common/mobile/filters';
 import {
@@ -104,6 +103,5 @@ export const getMobileKpis = async ({
       compact(osRows.map(({ [RESULT_COLUMNS.platform]: platform }) => platform))
     ),
     environments: toEnvironments(environmentRows),
-    esql: mobilePanelDiscoverEsql(filters, { environment }),
   };
 };

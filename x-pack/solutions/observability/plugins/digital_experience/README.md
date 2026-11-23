@@ -97,30 +97,40 @@ on serverless and stateful.
   column selector are the Web tab's. The environment picker lists both environment fields and
   "Not defined", as the filters define it: APM's sentinel, or neither field indexed (an indexed
   `""` is a value).
-- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms: a
-  badge per platform, environment, OS (`osName`, the `os.name` values in the time range, e.g.
-  `iPadOS`) and release filters (in the URL, so a reload or a shared link keeps them; the router
-  drops a value longer than the KPI route accepts, with the limits in `common/filter_lengths.ts`),
-  a Compare toggle (`compare=true` in the URL) and a KPI row (sessions, users, error rate). The
-  crash-free card and the sections of the sibling issues (health summary, release health,
-  stability, users, performance, views) join the page as those issues fill them, rather than
-  showing placeholders. Every KPI uses `MobilePanel`: the current value and a tooltip with the
-  calculation and, with Compare on, its change against the previous period of equal length and
-  the previous value. A change's sign and color follow the rounded value shown, so one that rounds
-  to 0 reads `0%` with a neutral badge. The page remounts per application (`key={serviceName}`),
-  so none shows another's options or state while loading. One "Open in Discover" link opens the
-  application's mobile events with the same filters, newest first, so crashes and stack traces can
-  be read one by one (`common/mobile/discover.ts`). A warning shows when the user can't read every
-  OTel index, as the counts may then miss data. Without mobile data it links to the EDOT Android
-  and iOS setup docs, unless the user can't read every OTel index: then it says nothing matched in
-  the indices they can read and asks them to check their access, on this page and on the list's
-  Mobile tab. With a filter set (environment, OS or release) and full access, it says no data
-  matches the filters instead of linking to the setup docs. Both prompts then offer **Clear
-  filters**, which removes the three filters in one history entry, and the list keeps its "Show
-  all environments" action.
-- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with a
-  optional `osName` and `release`. It also lists the OS names, platforms, releases (on the selected
-  OS) and environments for the pickers.
+- **Application page** (`/{serviceName}?source=otel&applicationType=mobile`), all platforms:
+  `ApplicationPage` stays the route's page and hands a mobile application to
+  `MobileApplicationPage` (web ones keep the EDOT Browser and Classic RUM page). That page owns its
+  header, as the Session page does: the title, a badge per platform the application reported on,
+  Share, the Overview tab, and two actions, **Compare to the previous period** (`compare=true` in
+  the URL, so a reload or Share keeps it) and **Open in Discover**, which opens the application's
+  mobile events with the URL's filters, newest first, built in the browser from the URL
+  (`use_mobile_discover_href.ts`, `common/mobile/discover.ts`). It fetches the KPIs
+  (`use_mobile_kpis.ts`) for the header's badges and the Overview, and remounts per application, so
+  none shows another's badges, options or KPIs while loading. Any other tab's URL is replaced by
+  the Overview's.
+- **Mobile Overview:** the toolbar of every application tab (`ApplicationTabToolbar`), with the
+  environment, OS (`osName`, the `os.name` values in the time range, e.g. `iPadOS`) and release
+  filters as `FacetFilter`s, each option with its sessions as the Sessions list's facets, and the
+  date picker pinned to the right. A picked value fits its capped button (`12em`), so picking one
+  never moves the page. The filters are in the URL, so a reload or a shared link keeps them; the
+  router drops a value longer than the KPI route accepts (`common/filter_lengths.ts`). Below, the
+  KPI row (sessions, users, error rate). The crash-free card and the sections of the sibling issues
+  (health summary, release health, stability, users, performance, views) join the page as those
+  issues fill them, rather than showing placeholders. Every KPI uses `MobilePanel`: the current
+  value and a tooltip with the calculation and, with Compare on, its change against the previous
+  period of equal length and the previous value. A change's sign and color follow the rounded value
+  shown, so one that rounds to 0 reads `0%` with a neutral badge. A warning shows when the user
+  can't read every OTel index, as the counts may then miss data. Without mobile data it links to
+  the EDOT Android and iOS setup docs, unless the user can't read every OTel index: then it says
+  nothing matched in the indices they can read and asks them to check their access, on this page
+  and on the list's Mobile tab. With a filter set (environment, OS or release) and full access, it
+  says no data matches the filters instead of linking to the setup docs. Both prompts then offer
+  **Clear filters**, which removes the three filters in one history entry, and the list keeps its
+  "Show all environments" action.
+- **Route:** `GET /internal/digital_experience/mobile_applications/{serviceName}/kpis`, with an
+  optional `osName` and `release`. It also lists, for the pickers, the OS names (whatever the OS
+  and release filters) and releases (on the selected OS), each with its sessions, and the
+  platforms and environments.
 
 ## Pages
 

@@ -69,7 +69,7 @@ export const useApplicationLinks = (
   const { query: urlQuery } = useDigitalExperienceParams('/');
   // Every page using these links is an application's, so the route has validated these already.
   const {
-    query: { osName, release },
+    query: { osName, release, compare },
   } = useDigitalExperienceParams('/{serviceName}');
   const { search } = useLocation();
 
@@ -84,9 +84,9 @@ export const useApplicationLinks = (
       ...listQuery,
       ...pick(urlQuery, OVERVIEW_QUERY_KEYS),
       ...(filters ? { filters } : {}),
-      // The mobile page's filters; the list's `applicationType` gives it the mobile page.
+      // The mobile page's filters and Compare; the list's `applicationType` gives it the mobile page.
       ...(listQuery.applicationType === APPLICATION_TYPE.mobile
-        ? { osName: osName || undefined, release: release || undefined }
+        ? { osName: osName || undefined, release: release || undefined, compare }
         : {}),
       source,
     };
@@ -133,5 +133,6 @@ export const useApplicationLinks = (
     source,
     osName,
     release,
+    compare,
   ]);
 };

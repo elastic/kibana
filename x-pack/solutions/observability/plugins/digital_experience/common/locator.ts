@@ -34,6 +34,7 @@ export const DIGITAL_EXPERIENCE_LOCATOR_QUERY_KEYS = [
   'applicationType',
   'osName',
   'release',
+  'compare',
   'filters',
   'kuery',
   'percentile',
