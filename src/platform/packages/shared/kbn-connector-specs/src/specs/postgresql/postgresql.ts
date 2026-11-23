@@ -20,7 +20,8 @@
  * from the Authorization header that the framework's credential accessor produces.
  *
  * Every read action runs inside a `BEGIN READ ONLY` transaction that is always rolled back, so the
- * server itself refuses writes. `query` adds two more layers: a best-effort client-side guard
+ * server itself refuses writes, and the session is reset (`DISCARD ALL`) before it returns to the
+ * pool. `query` adds two more layers: a best-effort client-side guard
  * (`assertReadOnly`) and a wrapper (`SELECT * FROM (<sql>) LIMIT $1`) that bounds the result and, because
  * it is sent with a bound parameter, makes the server reject multi-statement input. Least-privilege
  * database credentials remain the real control. A PostgreSQL connection is bound to one database, so
@@ -29,14 +30,16 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { QueryResult } from 'pg';
-import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { getResponseLimit } from '../../lib/clients/postgresql_response_limit';
+import type { ConnectorSpec } from '../../connector_spec';
+import { escapeLikePattern } from '../../lib/generic_db_connector';
 import {
-  assertReadOnly,
-  escapeLikePattern,
-  SELECT_OR_WITH_PREFIX,
-} from '../../lib/generic_db_connector';
+  DEFAULT_MAX_ROWS,
+  MAX_MAX_ROWS,
+  runReadOnly,
+  runUnrestricted,
+  withReadOnlySession,
+} from './sql_execution';
+import { toReadOnlyQuery } from './sql_guard';
 import {
   type DescribeTableInput,
   DescribeTableInputSchema,
@@ -53,149 +56,9 @@ import {
   SearchRowsInputSchema,
 } from './types';
 
-const DEFAULT_MAX_ROWS = 100;
-const MAX_MAX_ROWS = 1000;
 // getSchema returns one row per column, so it needs a larger cap.
 const MAX_SCHEMA_COLUMNS = 2000;
 const DEFAULT_SCHEMA = 'public';
-
-// Fallback for xpack.actions.maxResponseContentLength when the client did not record one.
-const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
-
-type Row = Record<string, unknown>;
-
-interface SqlResult<T extends Row = Row> {
-  rows: T[];
-  rowCount: number;
-  truncated: boolean;
-}
-
-const isIdentifierChar = (char: string | undefined): boolean =>
-  char !== undefined && /[A-Za-z0-9_$\u0080-￿]/.test(char);
-
-const DOLLAR_QUOTE_TAG = /^\$(?:[A-Za-z_\u0080-￿][A-Za-z0-9_\u0080-￿]*)?\$/;
-
-// Blanks comments, literals and quoted identifiers (keeping length) so the read-only scan sees only SQL tokens.
-const blankNonCode = (sql: string): string => {
-  const out: string[] = [];
-  const blank = (from: number, to: number) => {
-    const end = Math.min(to, sql.length);
-    for (let k = from; k < end; k++) {
-      out.push(sql[k] === '\n' ? '\n' : ' ');
-    }
-    return end;
-  };
-
-  let i = 0;
-  while (i < sql.length) {
-    const char = sql[i];
-    const next = sql[i + 1];
-
-    if (char === '-' && next === '-') {
-      const newline = sql.indexOf('\n', i);
-      i = blank(i, newline === -1 ? sql.length : newline);
-    } else if (char === '/' && next === '*') {
-      let depth = 1;
-      let j = i + 2;
-      while (j < sql.length && depth > 0) {
-        if (sql[j] === '/' && sql[j + 1] === '*') {
-          depth++;
-          j += 2;
-        } else if (sql[j] === '*' && sql[j + 1] === '/') {
-          depth--;
-          j += 2;
-        } else {
-          j++;
-        }
-      }
-      i = blank(i, j);
-    } else if (char === "'" || char === '"') {
-      // E'...' strings treat backslash as an escape; plain strings and quoted identifiers do not.
-      const backslashEscapes =
-        char === "'" && /[eE]/.test(sql[i - 1] ?? '') && !isIdentifierChar(sql[i - 2]);
-      let j = i + 1;
-      while (j < sql.length) {
-        if (backslashEscapes && sql[j] === '\\') {
-          j += 2;
-        } else if (sql[j] === char && sql[j + 1] === char) {
-          j += 2; // a doubled delimiter is an escaped delimiter ('' "")
-        } else if (sql[j] === char) {
-          j++;
-          break;
-        } else {
-          j++;
-        }
-      }
-      i = blank(i, j);
-    } else if (char === '$' && !isIdentifierChar(sql[i - 1])) {
-      const tag = DOLLAR_QUOTE_TAG.exec(sql.slice(i))?.[0];
-      if (tag) {
-        const close = sql.indexOf(tag, i + tag.length);
-        i = blank(i, close === -1 ? sql.length : close + tag.length);
-      } else {
-        out.push(char);
-        i++;
-      }
-    } else {
-      out.push(char);
-      i++;
-    }
-  }
-  return out.join('');
-};
-
-// Drops rows beyond maxRows or the maximum response size and flags the result as truncated.
-const capRows = <T extends Row>(
-  rows: T[],
-  maxRows: number,
-  maxBytes: number
-): { rows: T[]; truncated: boolean } => {
-  const kept: T[] = [];
-  let retainedBytes = 0;
-  let truncated = rows.length > maxRows;
-  for (const row of rows.slice(0, maxRows)) {
-    const rowBytes = Buffer.byteLength(JSON.stringify(row), 'utf8');
-    if (retainedBytes + rowBytes > maxBytes) {
-      truncated = true;
-      break;
-    }
-    kept.push(row);
-    retainedBytes += rowBytes;
-  }
-  return { rows: kept, truncated };
-};
-
-/** Runs one statement in a `BEGIN READ ONLY` transaction that is always rolled back. */
-const runReadOnly = async <T extends Row = Row>(
-  ctx: ActionContext,
-  text: string,
-  values: unknown[] = [],
-  maxRows: number = DEFAULT_MAX_ROWS
-): Promise<SqlResult<T>> => {
-  const pool = await ctx.getClient('postgresql');
-  const maxContentLength = getResponseLimit(pool) ?? DEFAULT_MAX_CONTENT_LENGTH;
-  const client = await pool.connect();
-  let discard = false;
-  // pg-pool drops its own error listener while a client is checked out; without one a connection error is thrown.
-  const onClientError = (err: Error) => {
-    discard = true;
-    ctx.log.warn(`[postgresql] Connection error during query: ${err.message}`);
-  };
-  client.on('error', onClientError);
-  try {
-    await client.query('BEGIN READ ONLY');
-    const result = await client.query<T>({ text, values });
-    const { rows, truncated } = capRows(result.rows, maxRows, maxContentLength);
-    return { rows, rowCount: rows.length, truncated };
-  } finally {
-    // A connection that cannot roll back is in an unknown state; destroy it rather than return it to the pool.
-    await client.query('ROLLBACK').catch(() => {
-      discard = true;
-    });
-    client.removeListener('error', onClientError);
-    client.release(discard);
-  }
-};
 
 // Quotes a PostgreSQL identifier as "name", doubling any embedded double quote.
 const quoteIdentifier = (identifier: string): string => `"${identifier.replace(/"/g, '""')}"`;
@@ -207,14 +70,6 @@ const QUERYABLE_RELKINDS = `('r', 'p', 'v', 'm', 'f')`;
 const RELKIND_LABEL = `CASE c.relkind
   WHEN 'r' THEN 'TABLE' WHEN 'p' THEN 'PARTITIONED TABLE' WHEN 'v' THEN 'VIEW'
   WHEN 'm' THEN 'MATERIALIZED VIEW' WHEN 'f' THEN 'FOREIGN TABLE' END`;
-
-// Wraps `query` so the row limit is a bound parameter, which makes the server reject multi-statement input.
-const wrapQuery = (sql: string, code: string): string => {
-  // assertReadOnly already guaranteed that only whitespace or comments follow the first semicolon.
-  const semicolon = code.indexOf(';');
-  const statement = semicolon === -1 ? sql : sql.slice(0, semicolon);
-  return `SELECT * FROM (\n${statement}\n) AS kibana_query LIMIT $1`;
-};
 
 export const PostgresqlConnector: ConnectorSpec = {
   metadata: {
@@ -241,6 +96,10 @@ export const PostgresqlConnector: ConnectorSpec = {
         .max(253)
         .refine((value) => !/^[a-z][a-z0-9+.-]*:\/\//i.test(value), {
           message: 'Host must be a hostname or IP address, without a protocol prefix',
+        })
+        // node-postgres treats a host that starts with "/" as a Unix socket directory.
+        .refine((value) => !value.startsWith('/'), {
+          message: 'Host must be a hostname or IP address, not a file path',
         })
         .describe(
           i18n.translate('connectorSpecs.postgresql.config.host.description', {
@@ -328,10 +187,9 @@ export const PostgresqlConnector: ConnectorSpec = {
         'Execute a read-only SQL SELECT query against the PostgreSQL database. Only SELECT and WITH statements are permitted; INSERT, UPDATE, DELETE, SELECT INTO, COPY, and DDL are blocked, and the query runs in a read-only transaction, which blocks data changes only, not functions with other side effects such as pg_sleep or advisory locks. Results are capped at maxRows (default 100, max 1000) and at the maximum response size, and flagged as truncated when more rows exist, so a LIMIT clause is optional. Do not include a trailing semicolon. Use listTables first to discover tables, and describeTable to inspect column names before writing queries. Quote mixed-case identifiers with double quotes (e.g. "Orders") and qualify tables outside the public schema (e.g. sales.orders).',
       input: QueryInputSchema,
       handler: async (ctx, input: QueryInput) => {
-        const code = blankNonCode(input.sql);
-        assertReadOnly(code, SELECT_OR_WITH_PREFIX);
+        const text = toReadOnlyQuery(input.sql);
         const maxRows = resolveMaxRows(input.maxRows);
-        return runReadOnly(ctx, wrapQuery(input.sql, code), [maxRows + 1], maxRows);
+        return runReadOnly(ctx, text, [maxRows + 1], maxRows);
       },
     },
 
@@ -373,7 +231,8 @@ export const PostgresqlConnector: ConnectorSpec = {
             AND NOT c.relispartition
             AND n.nspname NOT IN ('pg_catalog', 'information_schema')
             AND n.nspname !~ '^pg_(toast|temp)'
-            AND pg_catalog.has_table_privilege(c.oid, 'SELECT')
+            AND pg_catalog.has_schema_privilege(n.oid, 'USAGE')
+            AND pg_catalog.has_any_column_privilege(c.oid, 'SELECT')
             AND ($1::text IS NULL OR n.nspname = $1::text)
           ORDER BY n.nspname, c.relname
           LIMIT ${MAX_MAX_ROWS + 1}`,
@@ -389,28 +248,27 @@ export const PostgresqlConnector: ConnectorSpec = {
         'Describe a PostgreSQL table or view: returns columns (name, data type, nullability, default), constraints (primary key, unique, foreign key with the table and columns it references, check), and indexes. Use this before query or searchRows to discover available columns and build correct queries.',
       input: DescribeTableInputSchema,
       handler: async (ctx, input: DescribeTableInput) => {
-        const schema = input.schema ?? DEFAULT_SCHEMA;
-
-        const relation = await runReadOnly<{ oid: number; type: string; comment: string | null }>(
-          ctx,
-          `SELECT c.oid AS "oid", ${RELKIND_LABEL} AS "type",
+        // The four metadata queries share one read-only session and one response-size budget.
+        return withReadOnlySession(ctx, async (query) => {
+          const schema = input.schema ?? DEFAULT_SCHEMA;
+          const relation = await query<{ oid: number; type: string; comment: string | null }>(
+            `SELECT c.oid AS "oid", ${RELKIND_LABEL} AS "type",
             pg_catalog.obj_description(c.oid, 'pg_class') AS "comment"
           FROM pg_catalog.pg_class c
           JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
           WHERE n.nspname = $1 AND c.relname = $2 AND c.relkind IN ${QUERYABLE_RELKINDS}`,
-          [schema, input.table],
-          1
-        );
-        if (relation.rowCount === 0) {
-          throw new Error(
-            `Table or view ${schema}.${input.table} was not found. Use listTables to see available names.`
+            [schema, input.table],
+            1
           );
-        }
-        const [{ oid, type, comment }] = relation.rows;
+          if (relation.rowCount === 0) {
+            throw new Error(
+              `Table or view ${schema}.${input.table} was not found. Use listTables to see available names.`
+            );
+          }
+          const [{ oid, type, comment }] = relation.rows;
 
-        const columns = await runReadOnly(
-          ctx,
-          `SELECT a.attname AS "name", a.attnum AS "position",
+          const columns = await query(
+            `SELECT a.attname AS "name", a.attnum AS "position",
             pg_catalog.format_type(a.atttypid, a.atttypmod) AS "dataType",
             NOT a.attnotnull AS "isNullable",
             pg_catalog.pg_get_expr(d.adbin, d.adrelid) AS "defaultValue",
@@ -420,13 +278,12 @@ export const PostgresqlConnector: ConnectorSpec = {
           WHERE a.attrelid = $1::oid AND a.attnum > 0 AND NOT a.attisdropped
           ORDER BY a.attnum
           LIMIT ${MAX_MAX_ROWS + 1}`,
-          [oid],
-          MAX_MAX_ROWS
-        );
+            [oid],
+            MAX_MAX_ROWS
+          );
 
-        const constraints = await runReadOnly(
-          ctx,
-          `SELECT con.conname AS "name",
+          const constraints = await query(
+            `SELECT con.conname AS "name",
             CASE con.contype WHEN 'p' THEN 'PRIMARY KEY' WHEN 'u' THEN 'UNIQUE'
               WHEN 'f' THEN 'FOREIGN KEY' WHEN 'c' THEN 'CHECK' WHEN 'x' THEN 'EXCLUDE' END AS "type",
             pg_catalog.pg_get_constraintdef(con.oid) AS "definition"
@@ -434,32 +291,33 @@ export const PostgresqlConnector: ConnectorSpec = {
           WHERE con.conrelid = $1::oid AND con.contype IN ('p', 'u', 'f', 'c', 'x')
           ORDER BY CASE con.contype WHEN 'p' THEN 0 WHEN 'u' THEN 1 WHEN 'f' THEN 2 ELSE 3 END, con.conname
           LIMIT ${MAX_MAX_ROWS + 1}`,
-          [oid],
-          MAX_MAX_ROWS
-        );
+            [oid],
+            MAX_MAX_ROWS
+          );
 
-        const indexes = await runReadOnly(
-          ctx,
-          `SELECT ic.relname AS "name", i.indisunique AS "isUnique", i.indisprimary AS "isPrimary",
+          const indexes = await query(
+            `SELECT ic.relname AS "name", i.indisunique AS "isUnique", i.indisprimary AS "isPrimary",
             pg_catalog.pg_get_indexdef(i.indexrelid) AS "definition"
           FROM pg_catalog.pg_index i
           JOIN pg_catalog.pg_class ic ON ic.oid = i.indexrelid
           WHERE i.indrelid = $1::oid
           ORDER BY ic.relname
           LIMIT ${MAX_MAX_ROWS + 1}`,
-          [oid],
-          MAX_MAX_ROWS
-        );
+            [oid],
+            MAX_MAX_ROWS
+          );
 
-        return {
-          schema,
-          table: input.table,
-          type,
-          comment,
-          columns: columns.rows,
-          constraints: constraints.rows,
-          indexes: indexes.rows,
-        };
+          return {
+            schema,
+            table: input.table,
+            type,
+            comment,
+            columns: columns.rows,
+            constraints: constraints.rows,
+            indexes: indexes.rows,
+            truncated: columns.truncated || constraints.truncated || indexes.truncated,
+          };
+        });
       },
     },
 
@@ -493,7 +351,8 @@ export const PostgresqlConnector: ConnectorSpec = {
             ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
           WHERE n.nspname = $1 AND c.relkind IN ${QUERYABLE_RELKINDS}
             AND NOT c.relispartition
-            AND pg_catalog.has_table_privilege(c.oid, 'SELECT')
+            AND pg_catalog.has_schema_privilege(n.oid, 'USAGE')
+            AND pg_catalog.has_column_privilege(c.oid, a.attnum, 'SELECT')
           ORDER BY c.relname, a.attnum
           LIMIT ${MAX_SCHEMA_COLUMNS + 1}`,
           [schema],
@@ -560,18 +419,7 @@ export const PostgresqlConnector: ConnectorSpec = {
         'Execute any SQL against the PostgreSQL database. No restrictions — INSERT, UPDATE, DELETE, DROP, COPY, and DDL are all permitted, and several statements may be sent at once (they run in a single implicit transaction). Use only when the workflow explicitly requires a write or destructive operation. Prefer query for read-only access. Returns one result per statement with its command tag and affected row count; at most the first 1000 rows of each are returned (truncated is true when more were produced).',
       input: ExecuteSqlInputSchema,
       handler: async (ctx, input: ExecuteSqlInput) => {
-        const pool = await ctx.getClient('postgresql');
-        const maxContentLength = getResponseLimit(pool) ?? DEFAULT_MAX_CONTENT_LENGTH;
-        // A multi-statement string yields one result per statement at runtime, which the driver types as one.
-        const outcome: QueryResult | QueryResult[] = await pool.query(input.sql);
-        const results = Array.isArray(outcome) ? outcome : [outcome];
-        return {
-          results: results.map(({ command, rowCount, rows }) => ({
-            command,
-            rowCount,
-            ...capRows(rows, MAX_MAX_ROWS, maxContentLength),
-          })),
-        };
+        return { results: await runUnrestricted(ctx, input.sql) };
       },
     },
   },
@@ -597,20 +445,11 @@ export const PostgresqlConnector: ConnectorSpec = {
     '2. `getSchema` — see every table in a schema with its columns in one call, or `describeTable` for one table (columns, constraints, foreign keys, indexes). Pass `schema` if the table is not in `public`.',
     '3. `query` or `searchRows` — read the data.',
     '',
-    '### Choosing between `query`, `searchRows`, and `executeSql`',
-    '- Prefer `query` for structured filtering, joins, aggregation, or anything expressible as a SELECT.',
-    '- Prefer `searchRows` for broad text lookups across a known set of columns.',
-    '- Use `executeSql` only for writes or DDL that the workflow explicitly requires.',
-    '- Do not send `information_schema` or `pg_catalog` lookups to `query` when `listTables`, `getSchema`, or `describeTable` answers the question.',
-    '',
     '### Gotchas',
-    '- Unquoted identifiers are folded to lower case. A table created as `"Orders"` must be written `"Orders"` in `query` SQL; use the exact casing returned by `listTables`. Action inputs such as `table` and `columns` take the exact name without quotes.',
-    '- Tables outside the `public` schema must be schema-qualified in `query` SQL (for example `sales.orders`).',
-    '- `query` only allows SELECT and WITH — multi-statement SQL and write SQL are rejected; use `executeSql` for writes. Do not add a trailing semicolon.',
-    '- Results are capped at `maxRows` (default 100, max 1000) and at the maximum response size, so very wide rows can truncate earlier. When `truncated` is true, narrow the query with a WHERE clause or aggregate instead of raising `maxRows`.',
+    '- Use the exact casing `listTables` returns. Action inputs such as `table` and `columns` take the name without quotes; only `query` SQL needs `"Orders"` quoted.',
+    '- Do not send `information_schema` or `pg_catalog` lookups to `query` when `listTables`, `getSchema`, or `describeTable` answers the question.',
+    '- When `truncated` is true, narrow the query with a WHERE clause or aggregate instead of raising `maxRows`. Very wide rows can truncate earlier because of the maximum response size.',
     '- Give every output column a distinct name (`SELECT a.id AS a_id, b.id AS b_id`); duplicate names collapse into one key.',
     '- `bigint` and `numeric` values are returned as strings to avoid losing precision. Avoid selecting `bytea` columns.',
-    '- Cross-database queries are not supported. Each connector targets one database.',
-    '- TLS is required by default. Set TLS to disabled only when the server does not support TLS.',
   ].join('\n'),
 };

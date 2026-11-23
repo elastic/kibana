@@ -20,9 +20,15 @@ interface ScriptedResult {
   command?: string;
 }
 
-// Each statement sent through the checked-out client consumes the next scripted result for non-transaction
-// statements; BEGIN/ROLLBACK are recorded but always succeed unless `rollbackFails` is set.
-const makePool = (results: ScriptedResult[] = [{}], { rollbackFails = false } = {}) => {
+const SESSION_CONTROL = ['BEGIN READ ONLY', 'ROLLBACK', 'DISCARD ALL'];
+
+// Each statement sent through the checked-out client consumes the next scripted result for non-session-control
+// statements; BEGIN/ROLLBACK/DISCARD ALL are recorded but always succeed unless `rollbackFails` or
+// `discardFails` is set.
+const makePool = (
+  results: ScriptedResult[] = [{}],
+  { rollbackFails = false, discardFails = false } = {}
+) => {
   const queue = [...results];
   // Consumes the next scripted result; the last one repeats.
   const nextResult = (): ScriptedResult => (queue.length > 1 ? queue.shift() ?? {} : queue[0]);
@@ -36,27 +42,21 @@ const makePool = (results: ScriptedResult[] = [{}], { rollbackFails = false } = 
         if (rollbackFails) throw new Error('connection lost');
         return {};
       }
-      const next = nextResult();
-      if (next.error) throw next.error;
-      return { rows: next.rows ?? [], rowCount: next.rowCount ?? next.rows?.length ?? 0 };
-    }),
-    release: jest.fn(),
-  });
-  const pool = {
-    connect: jest.fn().mockResolvedValue(client),
-    // Used by executeSql, which does not go through a read-only transaction.
-    query: jest.fn(async (text: string) => {
-      statements.push({ text });
+      if (statement.text === 'DISCARD ALL') {
+        if (discardFails) throw new Error('connection lost');
+        return {};
+      }
       const next = nextResult();
       if (next.error) throw next.error;
       return Array.isArray(next.rows) && next.command === undefined
         ? { command: 'SELECT', rowCount: next.rows.length, rows: next.rows }
         : { command: next.command, rowCount: next.rowCount ?? null, rows: next.rows ?? [] };
     }),
-  };
-  /** Statements that were not transaction control, in order. */
-  const sent = () =>
-    statements.filter(({ text }) => text !== 'BEGIN READ ONLY' && text !== 'ROLLBACK');
+    release: jest.fn(),
+  });
+  const pool = { connect: jest.fn().mockResolvedValue(client) };
+  /** Statements that were not session control, in order. */
+  const sent = () => statements.filter(({ text }) => !SESSION_CONTROL.includes(text));
   return { pool, client, statements, sent };
 };
 
@@ -132,6 +132,17 @@ describe('PostgresqlConnector', () => {
       ).toBe(false);
     });
 
+    it.each(['/var/run/postgresql', '/tmp'])(
+      'rejects the Unix socket path %s that node-postgres would connect to',
+      (host) => {
+        expect(configSchema.safeParse(makeConfig({ host })).success).toBe(false);
+      }
+    );
+
+    it.each(['db.example.com', '10.0.0.5', '::1'])('accepts the host %s', (host) => {
+      expect(configSchema.safeParse(makeConfig({ host })).success).toBe(true);
+    });
+
     it('rejects an unknown ssl mode', () => {
       expect(configSchema.safeParse(makeConfig({ ssl: 'verify-full' })).success).toBe(false);
     });
@@ -185,6 +196,18 @@ describe('PostgresqlConnector', () => {
       expect(result?.success).toBe(false);
     });
 
+    it('rejects identifiers that fit in 63 characters but not in 63 bytes', () => {
+      // 40 two-byte characters: 80 bytes, which PostgreSQL would silently truncate.
+      const table = 'é'.repeat(40);
+      expect(PostgresqlConnector.actions.describeTable.input?.safeParse({ table }).success).toBe(
+        false
+      );
+      expect(
+        PostgresqlConnector.actions.describeTable.input?.safeParse({ table: 'é'.repeat(31) })
+          .success
+      ).toBe(true);
+    });
+
     it('rejects an empty searchRows column list', () => {
       const result = PostgresqlConnector.actions.searchRows.input?.safeParse({
         table: 'customers',
@@ -196,7 +219,7 @@ describe('PostgresqlConnector', () => {
   });
 
   describe('read-only execution', () => {
-    it('wraps every read in a read-only transaction that is rolled back and released', async () => {
+    it('wraps every read in a read-only transaction that is rolled back, reset and released', async () => {
       const { pool, client, statements } = makePool([{ rows: rowsOf(1) }]);
       const ctx = makeContext(pool);
 
@@ -207,6 +230,8 @@ describe('PostgresqlConnector', () => {
         'BEGIN READ ONLY',
         expect.stringContaining('SELECT id FROM t'),
         'ROLLBACK',
+        // Releases session-level state such as advisory locks, which ROLLBACK leaves in place.
+        'DISCARD ALL',
       ]);
       expect(client.release).toHaveBeenCalledWith(false);
     });
@@ -218,7 +243,7 @@ describe('PostgresqlConnector', () => {
         PostgresqlConnector.actions.query.handler(makeContext(pool), { sql: 'SELECT 1' })
       ).rejects.toThrow('boom');
 
-      expect(statements[statements.length - 1].text).toBe('ROLLBACK');
+      expect(statements.slice(-2).map(({ text }) => text)).toEqual(['ROLLBACK', 'DISCARD ALL']);
       expect(client.release).toHaveBeenCalledTimes(1);
     });
 
@@ -243,6 +268,14 @@ describe('PostgresqlConnector', () => {
 
     it('destroys the connection instead of pooling it when the rollback fails', async () => {
       const { pool, client } = makePool([{ rows: [] }], { rollbackFails: true });
+
+      await PostgresqlConnector.actions.query.handler(makeContext(pool), { sql: 'SELECT 1' });
+
+      expect(client.release).toHaveBeenCalledWith(true);
+    });
+
+    it('destroys the connection instead of pooling it when the session reset fails', async () => {
+      const { pool, client } = makePool([{ rows: [] }], { discardFails: true });
 
       await PostgresqlConnector.actions.query.handler(makeContext(pool), { sql: 'SELECT 1' });
 
@@ -355,6 +388,9 @@ describe('PostgresqlConnector', () => {
         ['a write hidden behind a nested comment', 'SELECT 1;/* a /* b */ c */DROP TABLE t'],
         ['a write after a dollar-quoted string', 'SELECT $$a$$; DROP TABLE t'],
         ['a COMMIT escape attempt', 'SELECT 1) AS t; COMMIT; DELETE FROM orders; --'],
+        // The wrapper binds its own row limit as $1, so caller placeholders would silently receive it.
+        ['a $1 placeholder', 'SELECT id FROM t WHERE id = $1'],
+        ['a $2 placeholder', 'SELECT id FROM t WHERE a = $2 OR b = $10'],
       ])('%s', async (_label, sql) => {
         const { pool } = makePool();
 
@@ -374,7 +410,9 @@ describe('PostgresqlConnector', () => {
         ['a quoted identifier', 'SELECT "delete me" FROM t'],
         ['a dollar-quoted string', 'SELECT $body$; DROP TABLE t; $body$ AS v'],
         ['a line comment', 'SELECT 1 -- drop table t\nFROM t'],
-        ['a bound-parameter-style token', 'SELECT $1'],
+        ['a placeholder-style token in a string', "SELECT '$1' AS v"],
+        ['a placeholder-style token in a dollar-quoted string', 'SELECT $q$ $1 $q$ AS v'],
+        ['a dollar sign inside an identifier', 'SELECT a$1 FROM t'],
       ])('%s', async (_label, sql) => {
         const { pool } = makePool([{ rows: [] }]);
 
@@ -405,6 +443,15 @@ describe('PostgresqlConnector', () => {
 
       expect(sent()[0].values).toEqual([null]);
       expect(sent()[0].text).toContain("n.nspname NOT IN ('pg_catalog', 'information_schema')");
+    });
+
+    it('requires schema USAGE and any readable column, not only table-level SELECT', async () => {
+      const { pool, sent } = makePool([{ rows: [] }]);
+
+      await PostgresqlConnector.actions.listTables.handler(makeContext(pool), {});
+
+      expect(sent()[0].text).toContain("has_schema_privilege(n.oid, 'USAGE')");
+      expect(sent()[0].text).toContain("has_any_column_privilege(c.oid, 'SELECT')");
     });
 
     it('binds the schema filter as a parameter, never inlining it', async () => {
@@ -447,7 +494,54 @@ describe('PostgresqlConnector', () => {
         columns: [{ name: 'id', dataType: 'integer' }],
         constraints: [{ name: 'orders_pkey', type: 'PRIMARY KEY', definition: 'PRIMARY KEY (id)' }],
         indexes: [{ name: 'orders_pkey', isUnique: true }],
+        truncated: false,
       });
+    });
+
+    it('runs its metadata queries in a single read-only session', async () => {
+      const { pool, client, statements } = makePool([
+        { rows: [{ oid: 1, type: 'TABLE', comment: null }] },
+        { rows: [] },
+      ]);
+
+      await PostgresqlConnector.actions.describeTable.handler(makeContext(pool), { table: 't' });
+
+      expect(pool.connect).toHaveBeenCalledTimes(1);
+      expect(client.release).toHaveBeenCalledTimes(1);
+      const texts = statements.map(({ text }) => text);
+      expect(texts.filter((text) => text === 'BEGIN READ ONLY')).toHaveLength(1);
+      expect(texts.slice(-2)).toEqual(['ROLLBACK', 'DISCARD ALL']);
+    });
+
+    it('rolls back and releases the session when the table does not exist', async () => {
+      const { pool, client, statements } = makePool([{ rows: [] }]);
+
+      await expect(
+        PostgresqlConnector.actions.describeTable.handler(makeContext(pool), { table: 'nope' })
+      ).rejects.toThrow('was not found');
+
+      expect(statements.slice(-2).map(({ text }) => text)).toEqual(['ROLLBACK', 'DISCARD ALL']);
+      expect(client.release).toHaveBeenCalledWith(false);
+    });
+
+    it('applies one response-size budget across all of its metadata queries', async () => {
+      // The relation row serializes to 39 bytes and each of the other rows to 106 bytes.
+      const { pool } = makePool([
+        { rows: [{ oid: 1, type: 'TABLE', comment: null }] },
+        { rows: [{ v: 'x'.repeat(98) }] },
+        { rows: [{ v: 'x'.repeat(98) }] },
+        { rows: [] },
+      ]);
+      setResponseLimit(pool, 39 + 106 + 10);
+
+      const result = (await PostgresqlConnector.actions.describeTable.handler(makeContext(pool), {
+        table: 't',
+      })) as { columns: Row[]; constraints: Row[]; truncated: boolean };
+
+      expect(result.columns).toHaveLength(1);
+      // The columns used the budget up, so this query's row no longer fits.
+      expect(result.constraints).toEqual([]);
+      expect(result.truncated).toBe(true);
     });
 
     it('uses the requested schema', async () => {
@@ -509,6 +603,8 @@ describe('PostgresqlConnector', () => {
       const result = await PostgresqlConnector.actions.getSchema.handler(makeContext(pool), {});
 
       expect(sent()[0].values).toEqual(['public']);
+      expect(sent()[0].text).toContain("has_schema_privilege(n.oid, 'USAGE')");
+      expect(sent()[0].text).toContain("has_column_privilege(c.oid, a.attnum, 'SELECT')");
       expect(result).toEqual({
         schema: 'public',
         truncated: false,
@@ -618,16 +714,40 @@ describe('PostgresqlConnector', () => {
         sql: 'INSERT INTO t SELECT 1',
       });
 
-      expect(pool.connect).not.toHaveBeenCalled();
       expect(statements).toEqual([{ text: 'INSERT INTO t SELECT 1' }]);
       expect(result).toEqual({
         results: [{ command: 'INSERT', rowCount: 3, rows: [], truncated: false }],
       });
     });
 
+    it('destroys the connection afterwards so session state cannot leak into the pool', async () => {
+      const { pool, client } = makePool([{ command: 'BEGIN', rowCount: null, rows: [] }]);
+
+      await PostgresqlConnector.actions.executeSql.handler(makeContext(pool), { sql: 'BEGIN' });
+
+      expect(client.release).toHaveBeenCalledWith(true);
+    });
+
+    it('destroys the connection and logs when the statement fails on a broken connection', async () => {
+      const { pool, client } = makePool();
+      const ctx = makeContext(pool);
+      client.query.mockImplementationOnce(async () => {
+        // An EventEmitter with no 'error' listener throws here, which would crash the process.
+        client.emit('error', new Error('connection terminated'));
+        throw new Error('connection terminated');
+      });
+
+      await expect(
+        PostgresqlConnector.actions.executeSql.handler(ctx, { sql: 'DELETE FROM t' })
+      ).rejects.toThrow('connection terminated');
+
+      expect(ctx.log.warn).toHaveBeenCalledWith(expect.stringContaining('connection terminated'));
+      expect(client.release).toHaveBeenCalledWith(true);
+    });
+
     it('returns one result per statement when several are sent', async () => {
-      const { pool } = makePool();
-      pool.query.mockResolvedValueOnce([
+      const { pool, client } = makePool();
+      client.query.mockResolvedValueOnce([
         { command: 'CREATE', rowCount: null, rows: [] },
         { command: 'SELECT', rowCount: 1, rows: [{ a: 1 }] },
       ] as never);
@@ -655,6 +775,24 @@ describe('PostgresqlConnector', () => {
       expect(result.results[0].rows).toHaveLength(1000);
       expect(result.results[0].rowCount).toBe(1500);
       expect(result.results[0].truncated).toBe(true);
+    });
+
+    it('applies one response-size budget across all statements', async () => {
+      const { pool, client } = makePool();
+      const statementRows = () => Array.from({ length: 10 }, () => ({ v: 'x'.repeat(98) }));
+      client.query.mockResolvedValueOnce([
+        { command: 'SELECT', rowCount: 10, rows: statementRows() },
+        { command: 'SELECT', rowCount: 10, rows: statementRows() },
+      ] as never);
+      // Each row serializes to 106 bytes, so 15 rows fit across the two statements.
+      setResponseLimit(pool, 106 * 15);
+
+      const result = (await PostgresqlConnector.actions.executeSql.handler(makeContext(pool), {
+        sql: 'SELECT v FROM a; SELECT v FROM b',
+      })) as { results: Array<{ rows: Row[]; truncated: boolean }> };
+
+      expect(result.results.map(({ rows }) => rows.length)).toEqual([10, 5]);
+      expect(result.results.map(({ truncated }) => truncated)).toEqual([false, true]);
     });
   });
 

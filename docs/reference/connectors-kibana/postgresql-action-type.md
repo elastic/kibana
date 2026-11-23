@@ -30,7 +30,7 @@ To use the connector, you need:
 
 ### TLS [postgresql-tls]
 
-TLS is **required** by default, and the server certificate is verified according to your {{kib}} `xpack.actions.ssl` settings and any matching `xpack.actions.customHostSettings` entry for the server. If your server uses a certificate that is not signed by a public certificate authority, add its CA certificate to `xpack.actions.ssl.certificateAuthorities` or to a `customHostSettings` entry for the host. Otherwise the connection fails with a certificate verification error.
+TLS is **required** by default, and the server certificate is verified according to your {{kib}} `xpack.actions.ssl` settings and any matching `xpack.actions.customHostSettings` entry for the server. If your server uses a certificate that is not signed by a public certificate authority, add its CA certificate to a `xpack.actions.customHostSettings` entry for the host, using `ssl.certificateAuthoritiesFiles` or `ssl.certificateAuthoritiesData`. Otherwise the connection fails with a certificate verification error.
 
 Set **TLS** to **Disabled** only for servers that do not support TLS.
 
@@ -122,7 +122,7 @@ GRANT SELECT ON ALL TABLES IN SCHEMA public TO kibana_reader;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO kibana_reader;
 ```
 
-The read actions run inside a read-only transaction, so PostgreSQL itself refuses statements that change data. The transaction doesn't stop functions with other side effects, such as `pg_sleep` or advisory locks, so those can still tie up connections until the statement times out. The **Query** action also accepts only `SELECT` and `WITH` statements and rejects multiple statements and common write forms before they reach the server. **List Tables** and **Get Schema** only show objects that the role can read.
+The read actions run inside a read-only transaction, so PostgreSQL itself refuses statements that change data. The transaction doesn't stop functions with side effects outside the transaction. For example, `pg_sleep` and advisory locks can tie up connections until the statement times out, `pg_terminate_backend` can end other sessions, and `dblink_exec` can run writes over a separate connection. Don't use a superuser role or a member of `pg_signal_backend`, and don't install the `dblink` extension in the database unless you need it. The **Query** action also accepts only `SELECT` and `WITH` statements and rejects multiple statements and common write forms before they reach the server. **List Tables** and **Get Schema** only show objects that the role can read.
 
 ::::{warning}
 These checks are not a security guarantee. Prompt injection and similar techniques can try to work around them, and a function that the role is allowed to call can have side effects of its own. The only reliable protection is granting the database role read-only permissions. Treat the checks as defense in depth, not a substitute for least-privilege credentials.

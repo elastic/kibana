@@ -9,8 +9,16 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-// PostgreSQL identifiers are limited to 63 bytes (NAMEDATALEN - 1).
-const identifier = () => z.string().min(1).max(63);
+// PostgreSQL identifiers are limited to 63 bytes (NAMEDATALEN - 1) and the server silently truncates longer ones,
+// so a long multibyte name could resolve to a different object. The character cap is a cheap first bound.
+const identifier = () =>
+  z
+    .string()
+    .min(1)
+    .max(63)
+    .refine((value) => Buffer.byteLength(value, 'utf8') <= 63, {
+      message: 'Identifier must be at most 63 bytes',
+    });
 
 export const QueryInputSchema = lazySchema(() =>
   z.object({
