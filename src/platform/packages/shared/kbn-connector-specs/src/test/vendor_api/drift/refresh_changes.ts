@@ -21,8 +21,9 @@
  */
 
 import type { SpecChange } from './detect_drift';
+import { byText } from '../values';
 import { ownerOfPart } from './field_type';
-import { requestParameterOf } from './oasdiff_text';
+import { quoted, requestParameterOf } from './oasdiff_text';
 
 const MAX_NAME_LENGTH = 80;
 /** How many names of a list a cell shows to begin with; the refresh PR may show more. */
@@ -66,8 +67,6 @@ interface Entry {
     readonly base: string;
   };
 }
-
-const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
 
 const isParameter = (id: string): boolean => /parameter/.test(id);
 
@@ -514,8 +513,6 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
   }
   return entry('!', [detailOf(id, rest, type) ?? ruleWords(id)]);
 };
-
-const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 // The location of a parameter comes before what changed about it.
 const byLocationFirst = (a: string, b: string): number =>

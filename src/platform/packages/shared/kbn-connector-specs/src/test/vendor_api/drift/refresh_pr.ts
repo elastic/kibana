@@ -14,6 +14,7 @@
  */
 
 import type { ConnectorDrift, SpecChange } from './detect_drift';
+import { byText } from '../values';
 import { code, listed, plural } from './issue/issue_markdown';
 import type { ChangeArea, ChangePart, ListPart } from './refresh_changes';
 import {
@@ -29,8 +30,6 @@ import {
 const MAX_DESCRIPTION_LENGTH = 63_000;
 const MAX_ENDPOINTS_PER_CONNECTOR = 20;
 const NO_ENDPOINT = '—';
-
-const byName = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 interface EndpointRow {
   readonly endpoint: string;
@@ -76,8 +75,8 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
   const endpoints = [...groups.values()].sort(
     (a, b) =>
       Number(a.endpoint === NO_ENDPOINT) - Number(b.endpoint === NO_ENDPOINT) ||
-      byName(a.endpoint, b.endpoint) ||
-      byName(a.source, b.source)
+      byText(a.endpoint, b.endpoint) ||
+      byText(a.source, b.source)
   );
   const actionsOf = (source: string, endpoint: string): string[] =>
     (drift.actions ?? [])
@@ -90,7 +89,7 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
         )
       )
       .map(({ action }) => action)
-      .sort(byName);
+      .sort(byText);
   const all = endpoints.map(({ endpoint, source, changes: group }) => ({
     endpoint,
     ...(endpoint !== NO_ENDPOINT && (sourcesOf.get(endpoint)?.size ?? 0) > 1 ? { source } : {}),
@@ -252,7 +251,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
     '',
   ].join('\n');
 
-  const sections = [...drifts].sort((a, b) => byName(a.connector, b.connector)).map(sectionOf);
+  const sections = [...drifts].sort((a, b) => byText(a.connector, b.connector)).map(sectionOf);
   const lists = listsOf(sections);
   const textOf = (section: ConnectorSection): string => sectionLines(section).join('\n');
   const lengthOf = (included: readonly ConnectorSection[]): number =>

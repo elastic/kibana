@@ -81,7 +81,10 @@ export const isRequestChange = (id: string): boolean => REQUEST_CHANGE.test(id);
 /** Whether the change is to what a response holds. */
 export const isResponseChange = (id: string): boolean => RESPONSE_CHANGE.test(id);
 
-// `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
+/** Every name between backticks in a message, in order. */
+export const quoted = (text: string): string[] =>
+  [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
+
 // "the `query` request parameter `status`": the location comes first, then the parameter's name.
 const REQUEST_PARAMETER = /`(query|header|path|cookie)` request parameter `([^`]+)`/;
 
@@ -93,6 +96,7 @@ export const requestParameterOf = (
   return match === null ? undefined : { location: match[1], name: match[2] };
 };
 
+// `allOf[#/components/schemas/Options]/waitFor`: oasdiff names the subschema a property is in.
 const COMPOSITION = /(?:allOf|anyOf|oneOf)\[[^\]]*\]\/?/g;
 
 /** A property path oasdiff names, as field use paths are: without the subschemas it is in. */
@@ -143,8 +147,10 @@ export const additionOf = (id: string, text: string): ParsedAddition | undefined
       return named && { kind: 'request-option', field: toFieldPath(named[1]) };
     }
     case 'new-optional-request-parameter': {
-      const named = match(/`query` request parameter `([^`]+)`/);
-      return named && { kind: 'query-parameter', field: named[1] };
+      const parameter = requestParameterOf(text);
+      return parameter?.location === 'query'
+        ? { kind: 'query-parameter', field: parameter.name }
+        : undefined;
     }
     case 'request-property-enum-value-added': {
       const named = match(/new `([^`]+)` enum value to the request property `([^`]+)`/);

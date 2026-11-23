@@ -499,4 +499,62 @@ describe('fieldTypeOf', () => {
     ).toBeUndefined();
     expect(fieldTypeOf(change('response-optional-property-added', text), {})).toBeUndefined();
   });
+
+  it("finds an operation under Azure's `x-ms-paths`, and through a path item that is a `$ref`", () => {
+    const responses = {
+      '200': {
+        content: { 'application/json': { schema: { properties: { size: { type: 'integer' } } } } },
+      },
+    };
+    const added = (operation: string) =>
+      change(
+        'response-optional-property-added',
+        'added the optional property `size` to the response with the `200` status',
+        operation
+      );
+    const document = {
+      paths: { '/shared': { $ref: '#/components/pathItems/Shared' } },
+      'x-ms-paths': { '/?comp=list': { get: { responses } } },
+      components: { pathItems: { Shared: { get: { responses } } } },
+    };
+
+    expect(fieldTypeOf(added('GET /?comp=list'), { current: document })).toBe('integer');
+    expect(fieldTypeOf(added('GET /shared'), { current: document })).toBe('integer');
+  });
+
+  it('leaves a selector that is part of a property name where it is', () => {
+    const document = {
+      paths: {
+        '/payloads': {
+          get: {
+            responses: {
+              '200': {
+                content: {
+                  'application/json': {
+                    schema: {
+                      properties: {
+                        payload: { type: 'string' },
+                        'payload-oneOf[subschema #1]': { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    expect(
+      fieldTypesOf(
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#Key` discriminator mapping keys to the `payload-oneOf[subschema #1]/allOf[subschema #1: Base]` response property for the response status `200`',
+          'GET /payloads'
+        ),
+        { current: document }
+      )
+    ).toMatchObject({ type: 'integer', owner: 'payload-oneOf[subschema #1]' });
+  });
 });

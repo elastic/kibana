@@ -7,25 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** How the changes `oasdiff` found are listed: as bullets for a PR, or as an issue's folded table. */
+/** How the changes `oasdiff` found are listed in an issue: as a folded table. */
 
 import type { ConnectorDrift, SpecChange } from '../detect_drift';
 import { cell, code, plural } from './issue_markdown';
 
-const MAX_CHANGES_PER_KIND = 30;
 const MAX_SPEC_CHANGE_ROWS = 60;
 const KIND_ORDER: readonly SpecChange['kind'][] = ['breaking', 'deprecation', 'non-breaking'];
-
-const changeLine = ({ operation, text, id }: SpecChange): string =>
-  `- ${operation ? `\`${operation}\`: ` : ''}${text} (\`${id}\`)`;
-
-/** Lines listing changes, up to a limit, with how many more there are. */
-export const changeList = (changes: readonly SpecChange[]): string[] => [
-  ...changes.slice(0, MAX_CHANGES_PER_KIND).map(changeLine),
-  ...(changes.length > MAX_CHANGES_PER_KIND
-    ? [`- …and ${changes.length - MAX_CHANGES_PER_KIND} more`]
-    : []),
-];
 
 /** Every spec change, as a folded table, after the sources that didn't load or weren't classified. */
 export const specChanges = (drift: ConnectorDrift): string[] => {

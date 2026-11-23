@@ -18,8 +18,10 @@
  */
 
 import type { SpecChange } from './detect_drift';
+import { getAtTokens, localRefToPointer, resolvePathItem, toTokens } from '../json_pointer';
 import { isRecord } from '../values';
-import { requestParameterOf } from './oasdiff_text';
+import { pathItemOf } from './locate_operation';
+import { quoted, requestParameterOf } from './oasdiff_text';
 
 type Json = Record<string, unknown>;
 
@@ -35,16 +37,10 @@ const MAX_TYPE_DEPTH = 4;
 const MAX_LISTED_TYPES = 6;
 const MAX_TYPE_LENGTH = 80;
 
-const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
-
-const pointer = (document: Json, ref: string): unknown =>
-  ref.startsWith('#/')
-    ? ref
-        .slice(2)
-        .split('/')
-        .map((part) => decodeURIComponent(part).replace(/~1/g, '/').replace(/~0/g, '~'))
-        .reduce<unknown>((node, part) => (isRecord(node) ? node[part] : undefined), document)
-    : undefined;
+const pointer = (document: Json, ref: string): unknown => {
+  const target = localRefToPointer(ref);
+  return target === undefined ? undefined : getAtTokens(document, toTokens(target));
+};
 
 const deref = (document: Json, node: unknown): unknown => {
   let current = node;
@@ -230,12 +226,12 @@ const responseOf = (responses: unknown, text: string): unknown => {
 
 const VARIANT_RULE = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/;
 
-/** The field the change names: for an enum value or a variant, the field they are of. */
-// A selector at the end of a path, `…/oneOf[subschema #1]`.
-const SELECTOR_TAIL = /\/?(?:allOf|oneOf|anyOf)\[[^\]]*\]$/;
+// A selector that is a whole segment at the end of a path, `…/oneOf[subschema #1]`; one stuck to a
+// property's name, `payload-oneOf[…]`, is part of that name.
+const SELECTOR_TAIL = /(?:^|\/)(?:allOf|oneOf|anyOf)\[[^\]]*\]$/;
 
 // A path that ends in the `allOf` part of a field, `value/items/allOf[subschema #1: entity]`.
-const PART_OF_FIELD = /(?:\/?allOf\[[^\]]*\])+$/;
+const PART_OF_FIELD = /(?:(?:^|\/)allOf\[[^\]]*\])+$/;
 
 /**
  * For a path that ends in an `allOf` part, such as the base type a chat extends, the path of what
@@ -244,6 +240,7 @@ const PART_OF_FIELD = /(?:\/?allOf\[[^\]]*\])+$/;
 export const ownerOfPart = (path: string): string | undefined =>
   PART_OF_FIELD.test(path) ? path.replace(PART_OF_FIELD, '') : undefined;
 
+/** The field the change names: for an enum value or a variant, the field they are of. */
 const fieldPathOf = (id: string, names: readonly string[]): string | undefined => {
   if (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id)) {
     const field = names[1];
@@ -274,11 +271,11 @@ interface Lookup {
 }
 
 const lookupIn = ({ id, text, operation }: SpecChange, document: unknown): Lookup => {
-  if (operation === undefined || !isRecord(document) || !isRecord(document.paths)) {
+  if (operation === undefined || !isRecord(document)) {
     return {};
   }
   const separator = operation.indexOf(' ');
-  const pathItem = document.paths[operation.slice(separator + 1)];
+  const pathItem = resolvePathItem(document, pathItemOf(document, operation.slice(separator + 1)));
   const spec = isRecord(pathItem) ? pathItem[operation.slice(0, separator).toLowerCase()] : null;
   if (!isRecord(spec)) {
     return {};

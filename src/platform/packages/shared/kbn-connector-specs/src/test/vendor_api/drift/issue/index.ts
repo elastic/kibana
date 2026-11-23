@@ -29,8 +29,6 @@ import { summaryOf } from './issue_summary';
 import { additionsSectionOf, correctionsSection } from './issue_vendor_sections';
 import { specChanges } from './spec_changes';
 
-export { changeList } from './spec_changes';
-
 const SKILLS = 'src/platform/packages/shared/kbn-connector-specs/.claude/skills';
 
 // GitHub rejects issue bodies longer than 65536 characters.
