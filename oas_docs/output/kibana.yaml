@@ -61714,7 +61714,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Upgrade a package policy to a newer package version. When only some of the package policies can be upgraded, the response is a 200 with a result per package policy: check each item's `success` field. When none can be upgraded, the response is the first error.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
+        Upgrade a package policy to a newer package version. When some package policies are upgraded and the others are only blocked because some active agents don't satisfy the package's agent version condition, the response is a 200 with a result per package policy: check each item's `success` field. When any other upgrade fails, or none succeeds, the response is the first error.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all AND integrations-all.
       operationId: post-fleet-package-policies-upgrade
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -164819,7 +164819,7 @@ components:
         acknowledge_agent_version_incompatibility:
           description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
           type: boolean
-          x-state: Generally available; added in 9.7.0
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -165045,7 +165045,7 @@ components:
         acknowledge_agent_version_incompatibility:
           description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
           type: boolean
-          x-state: Generally available; added in 9.7.0
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -185623,7 +185623,7 @@ components:
         acknowledge_agent_version_incompatibility:
           description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
           type: boolean
-          x-state: Generally available; added in 9.7.0
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -190880,7 +190880,7 @@ components:
         acknowledge_agent_version_incompatibility:
           description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
           type: boolean
-          x-state: Generally available; added in 9.7.0
+          x-state: Generally available; added in 9.5.0
         additional_datastreams_permissions:
           description: Additional data stream permissions that will be added to the agent policy.
           items:
@@ -191460,7 +191460,7 @@ components:
         acknowledge_agent_version_incompatibility:
           description: When true, create or upgrade the package policy even though some active agents on its agent policies don't satisfy the package's agent version condition. Without it, the request is rejected, because those agents would stop collecting the integration's data. The `force` flag does not bypass this check.
           type: boolean
-          x-state: Generally available; added in 9.7.0
+          x-state: Generally available; added in 9.5.0
         acknowledge_breaking_changes:
           default: false
           description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
