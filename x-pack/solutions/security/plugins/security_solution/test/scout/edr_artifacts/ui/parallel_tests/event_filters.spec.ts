@@ -15,4 +15,4 @@ const eventFilters = getArtifactTabCase('eventFilters');
 // list, so it owns the shared-list suites: they wipe the list and assert on
 // the empty states, which the item-scoped suites cannot.
 describeArtifactTabPolicyDetails(eventFilters);
-describeArtifactListPage(eventFilters, { writeWithoutGlobalArtifactManagement: true });
+describeArtifactListPage(eventFilters, { minimalWriteRole: true });

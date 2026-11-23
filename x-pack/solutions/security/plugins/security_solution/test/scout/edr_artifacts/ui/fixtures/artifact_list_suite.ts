@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '.';
 import type { ArtifactTabTestFixtures } from '.';
 import type { ArtifactTabCase } from './artifact_tabs_test_data';
-import { getArtifactRole, getArtifactWriteRoleWithoutGlobalManagement } from './roles';
+import { getArtifactMinimalWriteRole, getArtifactRole } from './roles';
 
 export const ARTIFACT_LIST_PAGE_TAGS = [
   ...tags.stateful.classic,
@@ -34,8 +34,8 @@ const STATEFUL_ONLY_REASON =
 // flake; the shorter policy-tab ALL path uses 90s.
 const WRITE_FLOW_TIMEOUT_MS = 120_000;
 
-const WRITE_WITHOUT_GLOBAL_STATEFUL_ONLY_REASON =
-  'No predefined serverless role has event_filters_all without global artifact management (Cypress on serverless used the predefined endpoint_policy_manager)';
+const MINIMAL_WRITE_STATEFUL_ONLY_REASON =
+  'No predefined serverless role has only Security read plus the artifact all privilege (Cypress on serverless used the predefined endpoint_policy_manager)';
 
 /**
  * Administration list-page RBAC for one artifact type. Call from the same
@@ -53,7 +53,7 @@ const WRITE_WITHOUT_GLOBAL_STATEFUL_ONLY_REASON =
  */
 export const describeArtifactListPage = (
   artifact: ArtifactTabCase,
-  options?: { tag?: string[]; writeWithoutGlobalArtifactManagement?: boolean }
+  options?: { tag?: string[]; minimalWriteRole?: boolean }
 ): void => {
   const { pagePrefix } = artifact;
   const editedName = `${artifact.artifactName} edited`;
@@ -202,16 +202,19 @@ export const describeArtifactListPage = (
         }
       );
 
-      if (options?.writeWithoutGlobalArtifactManagement) {
+      if (options?.minimalWriteRole) {
         spaceTest(
-          `WRITE user without global artifact management can create, update, and delete`,
+          `WRITE user with only Security read and artifact all can create, update, and delete`,
           async ({ browserAuth, pageObjects, config }) => {
-            spaceTest.skip(Boolean(config.serverless), WRITE_WITHOUT_GLOBAL_STATEFUL_ONLY_REASON);
+            spaceTest.skip(Boolean(config.serverless), MINIMAL_WRITE_STATEFUL_ONLY_REASON);
             spaceTest.setTimeout(WRITE_FLOW_TIMEOUT_MS);
 
             await assertWriteFlow(
               pageObjects,
-              () => browserAuth.loginWithCustomRole(getArtifactWriteRoleWithoutGlobalManagement()),
+              () =>
+                browserAuth.loginWithCustomRole(
+                  getArtifactMinimalWriteRole(artifact.privilegePrefix)
+                ),
               async () => {
                 // Without global artifact management the form defaults to per-policy.
                 await expect(pageObjects.artifactListPage.cardEffectScope(pagePrefix)).toHaveText(

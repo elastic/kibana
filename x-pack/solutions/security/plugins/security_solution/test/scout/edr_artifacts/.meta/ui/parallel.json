@@ -1,5 +1,5 @@
 {
-  "sha1": "92e9285f927ad9286d7a88e4bf945b97aaf8dbef",
+  "sha1": "b446df1fb36f42416ef20e52b1c9b0dbc954dac7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -558,8 +558,8 @@
       }
     },
     {
-      "id": "9667109acb83f7a-dbca8067f8d708a",
-      "title": "Artifact list page — Event Filters WRITE user without global artifact management can create, update, and delete",
+      "id": "9667109acb83f7a-753c8fb19850800",
+      "title": "Artifact list page — Event Filters WRITE user with only Security read and artifact all can create, update, and delete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

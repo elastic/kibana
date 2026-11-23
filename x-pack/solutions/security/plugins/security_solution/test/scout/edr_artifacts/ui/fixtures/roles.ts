@@ -8,8 +8,8 @@
 import type { KibanaRole } from '@kbn/scout-security';
 import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 import {
-  getEndpointSecurityPolicyManager,
   getEndpointSecurityPolicyManagerArtifactRole,
+  getT1Analyst,
 } from '../../../../../scripts/endpoint/common/roles_users';
 
 const toKibanaRole = (
@@ -34,25 +34,13 @@ const toKibanaRole = (
 export const getArtifactRole = (privilegePrefix: string, access: 'read' | 'none'): KibanaRole =>
   toKibanaRole(getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, access));
 
-/** Policy manager minus `global_artifact_management_all` (keeps write on every artifact type). */
-export const getArtifactWriteRoleWithoutGlobalManagement = (): KibanaRole => {
-  const role = toKibanaRole(getEndpointSecurityPolicyManager());
+/** Security `read` plus `<privilegePrefix>all` only, as the Cypress ESS WRITE role. */
+export const getArtifactMinimalWriteRole = (privilegePrefix: string): KibanaRole => {
+  const role = toKibanaRole(getT1Analyst());
   const [entry] = role.kibana;
-  const featureId =
-    Object.keys(entry.feature).find((feature) => feature.startsWith('siem')) ?? SECURITY_FEATURE_ID;
 
   return {
     ...role,
-    kibana: [
-      {
-        ...entry,
-        feature: {
-          ...entry.feature,
-          [featureId]: entry.feature[featureId].filter(
-            (privilege) => privilege !== 'global_artifact_management_all'
-          ),
-        },
-      },
-    ],
+    kibana: [{ ...entry, feature: { [SECURITY_FEATURE_ID]: ['read', `${privilegePrefix}all`] } }],
   };
 };
