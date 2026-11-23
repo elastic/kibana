@@ -81,6 +81,7 @@ export const fromDiscoverSessionTab = (
       panelSearchSource
     ),
     inlineDataViewId: getInlineDataView(panelSearchSource)?.id,
+    ...(!isEsqlTab && { filters: panelSearchSource.filter }),
   };
 };
 
@@ -101,7 +102,7 @@ export const toSearchEmbeddableAttributes = (
 
 /** Converts a session tab with a linked panel's overrides to the attributes the panel uses. */
 export const toSessionTabAttributes = (
-  { tab, inlineDataViewId }: SearchEmbeddableSessionTab,
+  { tab, inlineDataViewId, filters }: SearchEmbeddableSessionTab,
   overrides?: TableSettings
 ): SearchEmbeddableSerializedAttributes => {
   // Without a Data View, the panel shows a prompt instead of a table
@@ -109,7 +110,15 @@ export const toSessionTabAttributes = (
     return { serializedSearchSource: {} };
   }
 
-  return toSearchEmbeddableAttributes(applyTableSettingOverrides(tab, overrides), inlineDataViewId);
+  const { serializedSearchSource, ...attributes } = toSearchEmbeddableAttributes(
+    applyTableSettingOverrides(tab, overrides),
+    inlineDataViewId
+  );
+
+  return {
+    ...attributes,
+    serializedSearchSource: { ...serializedSearchSource, ...(filters && { filter: filters }) },
+  };
 };
 
 /** Converts a session tab to a by-value tab, dropping filter references to its inline Data View. */
