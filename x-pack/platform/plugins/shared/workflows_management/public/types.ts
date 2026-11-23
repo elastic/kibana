@@ -17,6 +17,7 @@ import type { KqlPluginStart } from '@kbn/kql/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
+import type { RecentlyAccessed } from '@kbn/recently-accessed';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -97,6 +98,7 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
     telemetry: TelemetryServiceClient;
     agentBuilder?: AgentBuilderPluginStart;
     availability: AvailabilityService;
+    recentlyViewed: RecentlyAccessed;
   };
 }
 
