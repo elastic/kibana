@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { esqlConversionFailureReasonMessages } from '@kbn/lens-common';
 import { EsqlOptionsPopover, type EsqlOptionsPopoverProps } from './esql_options_popover';
@@ -39,6 +39,46 @@ describe('EsqlOptionsPopover', () => {
     renderPopover();
     expect(screen.getByRole('button', { name: 'ES|QL options' })).toBeInTheDocument();
     expect(screen.queryByTestId('lnsEsqlOptionsUseEsqlSwitch')).not.toBeInTheDocument();
+  });
+
+  it('uses a neutral trigger when ES|QL is off or works', () => {
+    const { unmount } = render(
+      <EsqlOptionsPopover
+        useEsql={false}
+        availability={{ isAvailable: true }}
+        onUseEsqlChange={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('lnsEsqlOptionsButton').className).not.toMatch(/success|warning/);
+    unmount();
+
+    render(
+      <EsqlOptionsPopover
+        useEsql
+        availability={{ isAvailable: true }}
+        onUseEsqlChange={jest.fn()}
+      />
+    );
+    expect(screen.getByTestId('lnsEsqlOptionsButton').className).not.toMatch(/success|warning/);
+  });
+
+  it('shows a warning trigger when ES|QL is on but the chart falls back to DSL', () => {
+    renderPopover({
+      useEsql: true,
+      availability: { isAvailable: false, reason: 'formula_not_supported' },
+    });
+    const trigger = screen.getByRole('button', {
+      name: 'ES|QL options: this chart falls back to DSL',
+    });
+    expect(trigger.className).toMatch(/warning/);
+  });
+
+  it('keeps the trigger neutral when ES|QL is off and unavailable', () => {
+    renderPopover({
+      useEsql: false,
+      availability: { isAvailable: false, reason: 'formula_not_supported' },
+    });
+    expect(screen.getByTestId('lnsEsqlOptionsButton').className).not.toMatch(/success|warning/);
   });
 
   it('shows the switch and the convert button when opened', async () => {
@@ -90,11 +130,22 @@ describe('EsqlOptionsPopover', () => {
   });
 
   it('closes the popover and starts the conversion when the convert button is clicked', async () => {
-    const { convertToEsql } = renderPopover();
+    const onClick = jest.fn();
+    renderPopover({ convertToEsql: { isDisabled: false, tooltip: 'Convert', onClick } });
     await openPopover();
     await user.click(screen.getByTestId('lnsEsqlOptionsConvertButton'));
-    expect(convertToEsql.onClick).toHaveBeenCalledTimes(1);
-    expect(screen.queryByTestId('lnsEsqlOptionsUseEsqlSwitch')).not.toBeInTheDocument();
+    expect(onClick).toHaveBeenCalledTimes(1);
+    // The popover unmounts after its close animation.
+    await waitFor(() =>
+      expect(screen.queryByTestId('lnsEsqlOptionsUseEsqlSwitch')).not.toBeInTheDocument()
+    );
+  });
+
+  it('hides the convert action when it is not provided', async () => {
+    renderPopover({ convertToEsql: undefined });
+    await openPopover();
+    expect(screen.getByTestId('lnsEsqlOptionsUseEsqlSwitch')).toBeInTheDocument();
+    expect(screen.queryByTestId('lnsEsqlOptionsConvertButton')).not.toBeInTheDocument();
   });
 
   it('disables the convert button independently of the switch', async () => {

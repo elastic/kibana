@@ -12,6 +12,7 @@ import '@testing-library/jest-dom';
 
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 
 import { renderWithReduxStore } from '../../../mocks';
 import { mockVisualizationMap, mockDatasourceMap, mockDataPlugin } from '../../../mocks';
@@ -76,6 +77,7 @@ jest.mock('@kbn/esql-utils', () => {
         values: [],
       },
     }),
+    ENABLE_ESQL: 'enableESQL',
     getIndexPatternFromESQLQuery: jest.fn().mockReturnValue('index1'),
     formatESQLColumns: jest.fn().mockReturnValue([
       {
@@ -274,6 +276,81 @@ describe('LensEditConfigurationFlyout', () => {
     await renderConfigFlyout();
     expect(screen.getByText('Visualization parameters')).toBeInTheDocument();
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
+  });
+
+  describe('ES|QL options', () => {
+    const createCoreStart = ({ isEsqlEnabled }: { isEsqlEnabled: boolean }) => {
+      const coreStart = coreMock.createStart();
+      coreStart.rendering.addContext = createAddContextMock();
+      coreStart.uiSettings.get.mockImplementation((key: string) =>
+        key === ENABLE_ESQL ? isEsqlEnabled : undefined
+      );
+      return coreStart;
+    };
+
+    it('shows the options popover for a form-based chart when ES|QL is enabled', async () => {
+      await renderConfigFlyout({
+        displayFlyoutHeader: true,
+        coreStart: createCoreStart({ isEsqlEnabled: true }),
+      });
+      expect(screen.getByTestId('lnsEsqlOptionsButton')).toBeInTheDocument();
+    });
+
+    it('hides the options popover when ES|QL is disabled in advanced settings', async () => {
+      await renderConfigFlyout({
+        displayFlyoutHeader: true,
+        coreStart: createCoreStart({ isEsqlEnabled: false }),
+      });
+      expect(screen.queryByTestId('lnsEsqlOptionsButton')).not.toBeInTheDocument();
+    });
+
+    it('hides the options popover for a text-based chart', async () => {
+      await renderConfigFlyout(
+        {
+          displayFlyoutHeader: true,
+          attributes: esqlLensAttributes,
+          coreStart: createCoreStart({ isEsqlEnabled: true }),
+        },
+        { esql: 'from index1 | limit 10' },
+        { activeDatasourceId: 'textBased' }
+      );
+      expect(screen.queryByTestId('lnsEsqlOptionsButton')).not.toBeInTheDocument();
+    });
+
+    it('stores useEsql on the form-based state when the switch is toggled', async () => {
+      // An empty layer produces no query, so ES|QL counts as available for the chart.
+      const formBasedStateWithEmptyLayer = {
+        currentIndexPatternId: 'indexPattern1',
+        layers: { layer1: { indexPatternId: 'indexPattern1', columnOrder: [], columns: {} } },
+      };
+      const { store } = await renderConfigFlyout(
+        { displayFlyoutHeader: true, coreStart: createCoreStart({ isEsqlEnabled: true }) },
+        undefined,
+        {
+          datasourceStates: {
+            formBased: { isLoading: false, state: formBasedStateWithEmptyLayer },
+            textBased: { isLoading: false, state: mockTextBasedState },
+          },
+        }
+      );
+      await userEvent.click(screen.getByTestId('lnsEsqlOptionsButton'));
+      await userEvent.click(screen.getByTestId('lnsEsqlOptionsUseEsqlSwitch'));
+
+      expect(store.getState().lens.datasourceStates.formBased.state).toEqual({
+        ...formBasedStateWithEmptyLayer,
+        useEsql: true,
+      });
+    });
+
+    it('hides the convert action while the conversion feature flag is off', async () => {
+      await renderConfigFlyout({
+        displayFlyoutHeader: true,
+        coreStart: createCoreStart({ isEsqlEnabled: true }),
+      });
+      await userEvent.click(screen.getByTestId('lnsEsqlOptionsButton'));
+      expect(screen.getByTestId('lnsEsqlOptionsUseEsqlSwitch')).toBeInTheDocument();
+      expect(screen.queryByTestId('lnsEsqlOptionsConvertButton')).not.toBeInTheDocument();
+    });
   });
 
   it('should display the header and the link to editor if necessary props are given', async () => {

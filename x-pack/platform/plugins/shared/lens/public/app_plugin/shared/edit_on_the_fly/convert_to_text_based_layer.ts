@@ -263,7 +263,14 @@ export function convertFormBasedToTextBasedLayer({
       query: getChartScopedFilterQuery(attributes.state.query),
       datasourceStates: {
         ...(hasRemainingFormBasedLayers
-          ? { formBased: { ...formBasedState, layers: remainingFormBasedLayers } }
+          ? {
+              formBased: {
+                ...formBasedState,
+                // The chart no longer fetches form-based data layers, so the engine choice is moot.
+                useEsql: undefined,
+                layers: remainingFormBasedLayers,
+              },
+            }
           : {}),
         textBased: newDatasourceState,
       },

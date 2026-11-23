@@ -165,6 +165,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
     );
+    await lens.workspace.openEsqlOptions();
     await lens.workspace.convertToEsqlButton.click();
 
     const modal = lens.workspace.convertToEsqlModal;
@@ -173,7 +174,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await expect(modal.getByRole('checkbox')).toHaveCount(0);
     await lens.workspace.convertToEsqlModalConfirmButton.click();
     await expect(modal).toBeHidden();
-    await expect(lens.workspace.convertToEsqlButton).toBeHidden();
+    await expect(lens.workspace.esqlOptionsButton).toBeHidden();
 
     // Conversion recreates the inline editor store with the text-based datasource.
     // Wait for the remounted layer tabs instead of reading during the transient unmount.
@@ -219,6 +220,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.PARTIAL_MULTI_LAYER
     );
+    await pageObjects.lens.workspace.openEsqlOptions();
     await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
   });
 
@@ -242,6 +244,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
+    await lens.workspace.openEsqlOptions();
     await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
     await expect(esqlEditor.editor).toBeHidden();
   });
@@ -253,6 +256,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.SAVED_METRIC
     );
+    await pageObjects.lens.workspace.openEsqlOptions();
     await expect(pageObjects.lens.workspace.convertToEsqlButton).toBeDisabled();
   });
 
@@ -266,7 +270,9 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.MULTI_LAYER
     );
+    await lens.workspace.openEsqlOptions();
     await expect(lens.workspace.convertToEsqlButton).toBeEnabled();
+    await lens.workspace.closeEsqlOptions();
 
     // Turn the fixture's manual annotation into a query-based one; query annotations
     // are not yet supported on ES|QL charts, so this must gate the conversion.
@@ -276,6 +282,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     await lens.style.configureQueryAnnotation({ queryString: '*', timeField: 'utc_time' });
     await lens.closeDimensionEditor();
 
+    await lens.workspace.openEsqlOptions();
     await expect(lens.workspace.convertToEsqlButton).toBeDisabled();
 
     await cancelLensInlineEditorAndWaitClosed({ lens });

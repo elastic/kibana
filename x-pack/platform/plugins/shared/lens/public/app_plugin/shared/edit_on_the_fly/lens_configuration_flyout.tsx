@@ -18,8 +18,6 @@ import {
   euiScrollBarStyles,
   EuiWindowEvent,
   keys,
-  EuiButtonIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 import type {
   DatasourceStates,
@@ -60,6 +58,8 @@ import { LayerTabsWrapper } from './layer_tabs';
 import { useAddLayerButton } from './use_add_layer_button';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import { useEsqlConversionCheck } from './use_esql_conversion_check';
+import { useEsqlOptions } from './use_esql_options';
+import { EsqlOptionsPopover } from './esql_options_popover';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -452,6 +452,21 @@ export function LensEditConfigurationFlyout({
     { framePublicAPI, coreStart, startDependencies }
   );
 
+  const {
+    showEsqlOptions,
+    useEsql,
+    availability: esqlAvailability,
+    onUseEsqlChange,
+  } = useEsqlOptions({
+    isTextBasedMode: textBasedMode,
+    layerIds,
+    visualization,
+    activeVisualization,
+    framePublicAPI,
+    coreStart,
+    startDependencies,
+  });
+
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const closeModal = useCallback(() => setIsModalVisible(false), []);
@@ -481,23 +496,22 @@ export function LensEditConfigurationFlyout({
         <VisualizationToolbarWrapper framePublicAPI={framePublicAPI} isInlineEditing={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{addLayerButton}</EuiFlexItem>
-      {showConvertToEsqlButton ? (
+      {showEsqlOptions ? (
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={convertToEsqlButtonTooltip}>
-            <EuiButtonIcon
-              color="success"
-              display="base"
-              size="s"
-              iconType="code"
-              aria-label={i18n.translate('xpack.lens.config.convertToEsqlLabel', {
-                defaultMessage: 'Convert to ES|QL',
-              })}
-              isDisabled={isConvertToEsqlButtonDisabled}
-              onClick={() => {
-                showModal();
-              }}
-            />
-          </EuiToolTip>
+          <EsqlOptionsPopover
+            useEsql={useEsql}
+            availability={esqlAvailability}
+            onUseEsqlChange={onUseEsqlChange}
+            convertToEsql={
+              showConvertToEsqlButton
+                ? {
+                    isDisabled: isConvertToEsqlButtonDisabled,
+                    tooltip: convertToEsqlButtonTooltip,
+                    onClick: showModal,
+                  }
+                : undefined
+            }
+          />
         </EuiFlexItem>
       ) : null}
     </>

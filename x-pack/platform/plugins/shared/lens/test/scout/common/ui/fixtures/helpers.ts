@@ -537,7 +537,8 @@ export async function convertToEsqlViaModal({
 }) {
   const { lens, esqlEditor } = pageObjects;
 
-  // Click on the "Conver to ES|QL" button in the in-line editor
+  // Click on the "Convert to ES|QL" button in the ES|QL options popover of the in-line editor
+  await lens.workspace.openEsqlOptions();
   await lens.workspace.convertToEsqlButton.click();
 
   // Conversion is chart-level, so the modal summarizes the result without layer selection.
@@ -547,7 +548,7 @@ export async function convertToEsqlViaModal({
   await expect(modal).toBeHidden();
 
   // Confirm that the in-line editor has been updated
-  await expect(lens.workspace.convertToEsqlButton).toBeHidden();
+  await expect(lens.workspace.esqlOptionsButton).toBeHidden();
   await expect(esqlEditor.editor).toBeVisible();
   await expect(page.getByText('ES|QL Query Results')).toBeVisible();
 }

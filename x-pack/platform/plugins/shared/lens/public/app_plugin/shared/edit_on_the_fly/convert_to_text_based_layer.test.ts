@@ -297,6 +297,41 @@ describe('convertFormBasedToTextBasedLayer', () => {
     });
   });
 
+  it('drops useEsql from the form-based state that keeps helper layers', () => {
+    const annotationLayerId = 'annotation-layer';
+    const formBasedState = {
+      ...mockFormBasedState,
+      useEsql: true,
+      layers: {
+        [layerId]: mockFormBasedLayer,
+        [annotationLayerId]: { ...mockFormBasedLayer, columnOrder: [], columns: {} },
+      },
+    } as unknown as FormBasedPrivateState;
+    const annotationConversion: ConvertibleLayer = {
+      id: annotationLayerId,
+      icon: 'layers',
+      name: 'Annotation layer',
+      type: 'annotations',
+      query: '',
+      isConvertibleToEsql: false,
+      conversionData: { esAggsIdMap: {}, partialRows: false },
+    };
+
+    const result = convertFormBasedToTextBasedLayer({
+      layersToConvert: [...defaultConvertibleLayers, annotationConversion],
+      attributes: {
+        ...mockAttributes,
+        state: { ...mockAttributes.state, datasourceStates: { formBased: formBasedState } },
+      } as TypedLensSerializedState['attributes'],
+      visualizationState: mockVisualizationState,
+      datasourceStates: { formBased: { state: formBasedState, isLoading: false } },
+      framePublicAPI: createFrameAPI(),
+    });
+
+    expect(result?.state.datasourceStates.formBased).toHaveProperty('layers.annotation-layer');
+    expect(result?.state.datasourceStates.formBased?.useEsql).toBeUndefined();
+  });
+
   it('returns undefined instead of parsing an empty query for non-convertible layers', () => {
     const annotationConversion: ConvertibleLayer = {
       id: 'annotation-layer',

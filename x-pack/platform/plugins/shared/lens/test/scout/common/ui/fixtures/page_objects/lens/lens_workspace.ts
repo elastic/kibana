@@ -35,6 +35,10 @@ export class LensWorkspace {
   public readonly xyLegendItems;
   // Stable locators as readonly fields (Scout UI best practice); methods stay for parameterized
   // locators and multi-step actions. See docs/extend/testing/ui-best-practices.md.
+  /** Popover trigger in the inline editor toolbar; hidden for ES|QL (text-based) charts. */
+  readonly esqlOptionsButton;
+  readonly esqlOptionsUseEsqlSwitch;
+  /** Lives inside the ES|QL options popover, so open it first with `openEsqlOptions`. */
   readonly convertToEsqlButton;
   readonly convertToEsqlModal;
   readonly convertToEsqlModalConfirmButton;
@@ -69,7 +73,9 @@ export class LensWorkspace {
   constructor(private readonly page: ScoutPage, private readonly deps: LensWorkspaceDeps) {
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
     this.xyLegendItems = this.page.locator('.echLegendItem');
-    this.convertToEsqlButton = this.page.getByRole('button', { name: 'Convert to ES|QL' });
+    this.esqlOptionsButton = this.page.getByTestId('lnsEsqlOptionsButton');
+    this.esqlOptionsUseEsqlSwitch = this.page.getByTestId('lnsEsqlOptionsUseEsqlSwitch');
+    this.convertToEsqlButton = this.page.getByTestId('lnsEsqlOptionsConvertButton');
     this.convertToEsqlModal = this.page.getByTestId('lnsConvertToEsqlModal');
     this.convertToEsqlModalConfirmButton = this.page.getByTestId('confirmModalConfirmButton');
     this.secondaryFlyoutBackButton = this.deps.closeDimensionEditorButton;
@@ -117,6 +123,24 @@ export class LensWorkspace {
   async getEsqlQuery(): Promise<string> {
     await this.esqlCodeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
     return this.esqlCodeEditor.getCodeEditorValue();
+  }
+
+  /** Opens the ES|QL options popover; a no-op when it is already open. */
+  async openEsqlOptions() {
+    if (await this.esqlOptionsUseEsqlSwitch.isVisible()) {
+      return;
+    }
+    await this.esqlOptionsButton.click();
+    await this.esqlOptionsUseEsqlSwitch.waitFor({ state: 'visible' });
+  }
+
+  /** Closes the ES|QL options popover; a no-op when it is already closed. */
+  async closeEsqlOptions() {
+    if (!(await this.esqlOptionsUseEsqlSwitch.isVisible())) {
+      return;
+    }
+    await this.page.keyboard.press('Escape');
+    await this.esqlOptionsUseEsqlSwitch.waitFor({ state: 'hidden' });
   }
 
   async openFullEditor() {

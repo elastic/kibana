@@ -27,13 +27,18 @@ const optionsLabel = i18n.translate('xpack.lens.config.esqlOptions.label', {
   defaultMessage: 'ES|QL options',
 });
 
+const fallbackToDslLabel = i18n.translate('xpack.lens.config.esqlOptions.fallbackToDslLabel', {
+  defaultMessage: 'ES|QL options: this chart falls back to DSL',
+});
+
 export interface EsqlOptionsPopoverProps {
   /** Persisted per-chart setting. */
   useEsql: boolean;
   /** Whether every data layer of the chart can be fetched with ES|QL. */
   availability: FormBasedEsqlAvailability;
   onUseEsqlChange: (useEsql: boolean) => void;
-  convertToEsql: {
+  /** Omit to hide the conversion action, for example while the conversion feature flag is off. */
+  convertToEsql?: {
     isDisabled: boolean;
     tooltip: string;
     onClick: () => void;
@@ -68,14 +73,18 @@ export const EsqlOptionsPopover = ({
         values: { reason: unavailableMessage },
       });
 
+  // Neutral by default; a warning only when ES|QL is requested but the chart cannot use it.
+  const isFallingBackToDsl = useEsql && !availability.isAvailable;
+  const triggerLabel = isFallingBackToDsl ? fallbackToDslLabel : optionsLabel;
+
   const trigger = (
-    <EuiToolTip position="top" content={optionsLabel} disableScreenReaderOutput>
+    <EuiToolTip position="top" content={triggerLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        color="success"
-        display={useEsql ? 'fill' : 'base'}
+        color={isFallingBackToDsl ? 'warning' : 'text'}
+        display="base"
         size="s"
         iconType="code"
-        aria-label={optionsLabel}
+        aria-label={triggerLabel}
         data-test-subj="lnsEsqlOptionsButton"
         onClick={() => setIsOpen((wasOpen) => !wasOpen)}
       />
@@ -132,23 +141,27 @@ export const EsqlOptionsPopover = ({
             <p>{unavailableDescription}</p>
           </EuiText>
         ) : null}
-        <EuiHorizontalRule margin="m" />
-        <EuiToolTip position="bottom" content={convertToEsql.tooltip}>
-          <EuiButton
-            size="s"
-            iconType="code"
-            isDisabled={convertToEsql.isDisabled}
-            onClick={() => {
-              closePopover();
-              convertToEsql.onClick();
-            }}
-            data-test-subj="lnsEsqlOptionsConvertButton"
-          >
-            {i18n.translate('xpack.lens.config.esqlOptions.convertToEsqlButtonLabel', {
-              defaultMessage: 'Convert to ES|QL',
-            })}
-          </EuiButton>
-        </EuiToolTip>
+        {convertToEsql ? (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiToolTip position="bottom" content={convertToEsql.tooltip}>
+              <EuiButton
+                size="s"
+                iconType="code"
+                isDisabled={convertToEsql.isDisabled}
+                onClick={() => {
+                  closePopover();
+                  convertToEsql.onClick();
+                }}
+                data-test-subj="lnsEsqlOptionsConvertButton"
+              >
+                {i18n.translate('xpack.lens.config.esqlOptions.convertToEsqlButtonLabel', {
+                  defaultMessage: 'Convert to ES|QL',
+                })}
+              </EuiButton>
+            </EuiToolTip>
+          </>
+        ) : null}
       </div>
     </EuiPopover>
   );

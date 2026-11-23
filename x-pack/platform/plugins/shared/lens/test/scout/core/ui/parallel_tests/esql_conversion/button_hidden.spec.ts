@@ -35,7 +35,7 @@ spaceTest.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-class
   });
 
   spaceTest(
-    'should not display button for inline visualizations when feature flag is set to false',
+    'should not display the convert action for inline visualizations when feature flag is set to false',
     async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
 
@@ -49,6 +49,8 @@ spaceTest.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-class
         testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
       );
 
+      // The ES|QL options popover stays available; only the conversion action is flagged.
+      await lens.workspace.openEsqlOptions();
       await expect(lens.workspace.convertToEsqlButton).toBeHidden();
     }
   );
