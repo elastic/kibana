@@ -1,5 +1,5 @@
 ---
-navigation_title: "Microsoft Defender for Endpoint"
+navigation_title: "Microsoft Defender for Endpoint (v2)"
 type: reference
 description: "Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators."
 applies_to:
@@ -7,7 +7,7 @@ applies_to:
   serverless: preview
 ---
 
-# Microsoft Defender for Endpoint connector [microsoft-defender-for-endpoint-action-type]
+# Microsoft Defender for Endpoint (v2) connector [microsoft-defender-for-endpoint-action-type]
 
 Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
 
@@ -29,7 +29,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [microsoft-defender-for-endpoint-connector-configuration]
 
-Microsoft Defender for Endpoint connectors have the following configuration properties:
+Microsoft Defender for Endpoint (v2) connectors have the following configuration properties:
 
 Defender cloud
 :   The Microsoft Defender cloud and region, which sets the API host. The default is `commercial` (`api.security.microsoft.com`). The regional commercial clouds (`commercial-us`, `commercial-eu`, `commercial-uk`, `commercial-au`, `commercial-swa`, `commercial-ina`, `commercial-aea`) use their regional host, for example `eu.api.security.microsoft.com`. `gcc` uses `api-gcc.securitycenter.microsoft.us`, and `gcc-high` and `dod` use `api-gov.securitycenter.microsoft.us`. The token URL and the scope must belong to the same cloud.
@@ -65,7 +65,7 @@ You can test connectors when you create or edit the connector in {{kib}}. The te
 
 ## Connector actions [microsoft-defender-for-endpoint-connector-actions]
 
-The Microsoft Defender for Endpoint connector has the following actions. List actions return one page per call. Pass `top` (default 100, up to 500) and `skip` to page through results. The API sends no next-page link: when `hasMore` is `true`, call the action again with `skip` set to `nextSkip`. Many list actions also accept `filter`, an OData `$filter` expression of up to 2,000 characters. A filter that matches nothing returns an empty list, not an error.
+The Microsoft Defender for Endpoint (v2) connector has the following actions. List actions return one page per call. Pass `top` (default 100, up to 500) and `skip` to page through results. The API sends no next-page link: when `hasMore` is `true`, call the action again with `skip` set to `nextSkip`. Many list actions also accept `filter`, an OData `$filter` expression of up to 2,000 characters. A filter that matches nothing returns an empty list, not an error.
 
 ### Devices [microsoft-defender-for-endpoint-devices]
 

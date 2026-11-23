@@ -66,7 +66,7 @@ const definedFields = (fields: Record<string, unknown>) =>
 export const MicrosoftDefenderForEndpoint: ConnectorSpec = {
   metadata: {
     id: '.microsoft_defender_endpoint2',
-    displayName: 'Microsoft Defender for Endpoint',
+    displayName: 'Microsoft Defender for Endpoint (v2)',
     description: i18n.translate(
       'connectorSpecs.microsoftDefenderForEndpoint.metadata.description',
       {

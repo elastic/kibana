@@ -81,7 +81,7 @@
 
 **Endpoint security**
 
-- [Microsoft Defender for Endpoint](/reference/connectors-kibana/microsoft-defender-for-endpoint-action-type.md): Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
+- [Microsoft Defender for Endpoint (v2)](/reference/connectors-kibana/microsoft-defender-for-endpoint-action-type.md): Contain and investigate devices in Microsoft Defender for Endpoint — list, isolate, and release devices, run live response scripts and antivirus scans, and manage block and allow indicators.
 
 **Email security**
 
