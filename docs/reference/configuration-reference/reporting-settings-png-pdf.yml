@@ -11,6 +11,8 @@ note: |
 
   For the most reliable configuration of PDF/PNG {{report-features}}, consider installing {{kib}} using [Docker](docs-content://deploy-manage/deploy/self-managed/install-kibana-with-docker.md) or using [Elastic Cloud](docs-content://deploy-manage/deploy/elastic-cloud.md).
 
+  {applies_to}`serverless: unavailable` PNG and PDF reports are not available on {{serverless-full}}.
+
 groups:
   - group: PNG/PDF capture settings
     id: reporting-capture-settings

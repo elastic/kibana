@@ -21,4 +21,4 @@ echo '--- Update Scout Test Config Manifests'
 node scripts/scout.js update-test-config-manifests --concurrencyLimit 3
 
 echo '--- Resolve requested configs and plan Scout flaky steps'
-ts-node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts
+node .buildkite/pipelines/flaky_tests/pick_scout_flaky_run_order.ts

@@ -94,6 +94,7 @@ export const updateGlobalPacksCreateCallback = async (
             rrule_schedule: pack.rrule_schedule,
           },
           isRruleFeatureEnabled,
+          fallbackStartDate: pack.created_at,
         });
         set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
           shard: 100,

@@ -11,6 +11,7 @@ import type { StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type { DocLinksStart } from '@kbn/core/public';
 import { LatencyAggregationType } from '@kbn/apm-types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ServiceFlyoutTransactionsSection } from '.';
@@ -102,7 +103,17 @@ const mockNotifications = {
   toasts: { addDanger: () => {} },
 } as any;
 
+const mockDocLinks = {
+  links: {
+    apm: {
+      troubleshootingTooManyTransactions:
+        'https://www.elastic.co/docs/troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions',
+    },
+  },
+} as unknown as DocLinksStart;
+
 const BASE_PROPS = {
+  docLinks: mockDocLinks,
   serviceName: 'frontend-node',
   environment: 'production',
   start: START,

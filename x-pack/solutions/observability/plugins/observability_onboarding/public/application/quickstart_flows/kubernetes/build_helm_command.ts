@@ -13,7 +13,6 @@ interface Params {
   elasticsearchUrl: string;
   metricsEnabled: boolean;
   elasticAgentVersionInfo: ElasticAgentVersionInfo;
-  useWiredStreams?: boolean;
 }
 
 export function buildHelmCommand({
@@ -22,7 +21,6 @@ export function buildHelmCommand({
   elasticsearchUrl,
   metricsEnabled,
   elasticAgentVersionInfo,
-  useWiredStreams,
 }: Params) {
   const escapedElasticsearchUrl = elasticsearchUrl.replace(/\//g, '\\/');
 
@@ -34,14 +32,6 @@ export function buildHelmCommand({
     --set kubernetes.apiserver.enabled=false
   `;
 
-  const wiredStreamsConfig = useWiredStreams
-    ? `
-    --set 'outputs.default._write_to_logs_streams=true' \
-    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.target=@metadata' \
-    --set 'kubernetes.containers.logs.vars.processors[0].add_fields.fields.raw_index=logs.ecs'
-  `
-    : '';
-
   return `
     helm repo add elastic https://helm.elastic.co/ && \
     helm repo update elastic && \
@@ -52,7 +42,7 @@ export function buildHelmCommand({
       --set kubernetes.enabled=true \
       --set outputs.default.type=ESPlainAuthAPI \
       --set outputs.default.api_key=$(echo "${encodedApiKey}" | base64 -d)
-      ${metricsParameters}${wiredStreamsConfig}
+      ${metricsParameters}
   `
     .trim()
     .replace(/\n/g, ' ')

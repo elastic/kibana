@@ -15,7 +15,9 @@ export interface StartAccessControlSyncArgs {
 }
 
 export const startAccessControlSync = async ({ connectorId }: StartAccessControlSyncArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/start_access_control_sync`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/start_access_control_sync`;
   return await HttpLogic.values.http.post(route);
 };
 

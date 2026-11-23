@@ -148,6 +148,55 @@ describe('useOutputs', () => {
     // Should return empty array since all outputs are internal
     expect(result.current.allowedOutputs).toHaveLength(0);
   });
+
+  describe('inheritedOutputName', () => {
+    const renderUseOutputs = (agentPolicies?: Array<{ data_output_id?: string | null }>) => {
+      const testRenderer = createFleetTestRendererMock();
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: () => true,
+      } as unknown as LicenseService);
+      mockApiCallsWithOutputs(testRenderer.startServices.http);
+
+      return testRenderer.renderHook(() =>
+        useOutputs(packagePolicy, 'test-package', agentPolicies)
+      );
+    };
+
+    it('should resolve to the default output when no agent policy is known yet', async () => {
+      const { result } = renderUseOutputs();
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 1');
+    });
+
+    it('should resolve to the default output when the agent policy sets no data output', async () => {
+      const { result } = renderUseOutputs([{ data_output_id: null }]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 1');
+    });
+
+    it("should resolve to the agent policy's data output when it sets one", async () => {
+      const { result } = renderUseOutputs([{ data_output_id: 'output2' }]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toEqual('Output 2');
+    });
+
+    it('should be undefined when the parent agent policies use different outputs', async () => {
+      const { result } = renderUseOutputs([
+        { data_output_id: 'output2' },
+        { data_output_id: null },
+      ]);
+
+      await waitFor(() => expect(result.current.isLoading).toBeFalsy());
+
+      expect(result.current.inheritedOutputName).toBeUndefined();
+    });
+  });
 });
 
 const mockVarGroups: RegistryVarGroup[] = [
@@ -220,6 +269,67 @@ describe('useVarGroupSelections', () => {
       );
 
       expect(result.current.selections).toEqual({});
+    });
+
+    it('should infer selections from populated vars on the edit page when none are saved', () => {
+      // Policy predating var_groups: oauth vars are populated, so the derived
+      // selection must be oauth, not the first visible option (api_key)
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'oauth' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'oauth' },
+      });
+    });
+
+    it('should not infer from vars on the create page', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          isEditPage: false,
+        })
+      );
+
+      // Create flow keeps the first-visible-option default
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
+    });
+
+    it('should fall back to defaults on the edit page when no vars are populated', () => {
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: { vars: {} } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ auth_method: 'api_key' });
     });
   });
 

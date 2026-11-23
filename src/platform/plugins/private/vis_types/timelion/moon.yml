@@ -58,6 +58,4 @@ fileGroups:
     - server/timelion.json
     - '*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

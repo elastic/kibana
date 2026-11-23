@@ -119,4 +119,22 @@ describe('WorkflowPicker', () => {
     const combobox = screen.getByRole('combobox', { name: /workflow selection/i });
     expect(combobox).toBeDisabled();
   });
+
+  it('keeps a configured disabled workflow selected', () => {
+    mockUseListWorkflows.mockReturnValue({
+      data: [
+        { id: 'wf-1', name: 'Workflow One', enabled: true },
+        { id: 'wf-disabled', name: 'Disabled Workflow', enabled: false },
+      ],
+      isLoading: false,
+    });
+
+    render(
+      <TestWrapper defaultValues={{ configuration: { workflow_ids: ['wf-disabled'] } }}>
+        <WorkflowPicker name="configuration.workflow_ids" singleSelection={false} />
+      </TestWrapper>
+    );
+
+    expect(screen.getByText('Disabled Workflow (disabled)')).toBeInTheDocument();
+  });
 });

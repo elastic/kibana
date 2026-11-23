@@ -43,7 +43,7 @@ import {
  * User → user maintainers (e.g. `supervises`) resolve to namespace-suffixed
  * `user:<id>@<ns>` EUIDs — see `user_target_raw_identifiers_maintainer_suite.spec.ts`.
  */
-export interface HostTargetRawIdentifiersMaintainerSuiteConfig {
+interface HostTargetRawIdentifiersMaintainerSuiteConfig {
   /** Maintainer id used by the run route, e.g. 'administers'. */
   maintainerId: string;
   /** Relationship key written under entity.relationships.<key>, e.g. 'administers'. */
@@ -194,7 +194,14 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
           const primingActor = actorId('prime');
           const primingTargetFqdn = targetFqdn('prime');
           const primingTarget = targetId('prime');
-          const primingTs = new Date(Date.now() + 3_600_000).toISOString();
+
+          // Seed the priming actor with a FUTURE last_seen so it stays above any
+          // watermark a prior/concurrent auto-run may have persisted — the same
+          // mitigation every other resolvable actor in this suite already uses.
+          // Without it, the actor defaults to seed-time "now" and can fall below a
+          // run-start watermark, permanently skipping it (waitForRelationshipIds
+          // then times out).
+          const primingFutureTs = new Date(Date.now() + 3_600_000).toISOString();
 
           await seedHostEntity(esClient, { entityId: primingTarget, hostName: primingTargetFqdn });
           await seedHostEntity(esClient, {
@@ -202,8 +209,8 @@ const registerHostTargetRawIdentifiersMaintainerSuite = (
             hostName: `${entityPrefix}-prime.${domain}`,
             relationship: { key: relationshipKey, hostNames: [primingTargetFqdn] },
             entitySource: requiredEntitySource,
-            lastSeen: primingTs,
-            firstSeen: primingTs,
+            lastSeen: primingFutureTs,
+            firstSeen: primingFutureTs,
           });
 
           await triggerMaintainerRun(apiClient, internalHeaders, maintainerId, { sync: true });

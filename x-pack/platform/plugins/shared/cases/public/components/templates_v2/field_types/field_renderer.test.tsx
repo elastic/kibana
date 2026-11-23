@@ -479,3 +479,75 @@ describe('FieldsRenderer — case details view mode', () => {
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 });
+
+describe('FieldsRenderer — conditionContextFields', () => {
+  /**
+   * Simulates the CreateCaseTemplateFields layout: two FieldsRenderer instances sharing a form
+   * but rendering separate field groups. Without conditionContextFields, a show_when condition
+   * on a field in one section cannot see the controller field in the other section and defaults
+   * to always-show (the bug). With conditionContextFields, the condition evaluates correctly.
+   */
+  const controllerField: InlineField = {
+    name: 'mode',
+    label: 'Mode',
+    control: FieldType.INPUT_TEXT,
+    type: 'keyword',
+  };
+
+  const controlledField: InlineField = {
+    name: 'advanced_url',
+    label: 'Advanced URL',
+    control: FieldType.INPUT_TEXT,
+    type: 'keyword',
+    display: {
+      show_when: { field: 'mode', operator: 'eq', value: 'advanced' },
+    },
+  };
+
+  const TwoSectionForm: React.FC<{ passContextFields: boolean }> = ({ passContextFields }) => {
+    const form = useForm({ defaultValues: { [CASE_EXTENDED_FIELDS]: {} } });
+    return (
+      <FormProvider {...form}>
+        {/* Section A: renders the controller field */}
+        <FieldsRenderer
+          resolvedFields={[controllerField]}
+          conditionContextFields={passContextFields ? [controlledField] : undefined}
+        />
+        {/* Section B: renders the controlled field (show_when references section A's field) */}
+        <FieldsRenderer
+          resolvedFields={[controlledField]}
+          conditionContextFields={passContextFields ? [controllerField] : undefined}
+        />
+      </FormProvider>
+    );
+  };
+
+  it('always shows the controlled field when conditionContextFields is absent (bug baseline)', () => {
+    render(<TwoSectionForm passContextFields={false} />);
+    // controller is blank (not 'advanced'), so the condition should hide advanced_url —
+    // but without context fields the evaluator falls back to true and shows it anyway
+    expect(screen.getByTestId('template-field-advanced_url')).toBeInTheDocument();
+  });
+
+  it('hides the controlled field when condition is false and conditionContextFields is provided', () => {
+    render(<TwoSectionForm passContextFields={true} />);
+    // controller defaults to blank (not 'advanced') → advanced_url must be hidden
+    expect(screen.queryByTestId('template-field-advanced_url')).not.toBeInTheDocument();
+  });
+
+  it('shows the controlled field when the controller in the other section satisfies the condition', async () => {
+    render(<TwoSectionForm passContextFields={true} />);
+
+    // advanced_url is initially hidden because mode is blank
+    expect(screen.queryByTestId('template-field-advanced_url')).not.toBeInTheDocument();
+
+    // Type 'advanced' into the controller input
+    const modeInput = screen.getByLabelText('Mode');
+    await userEvent.type(modeInput, 'advanced');
+
+    // Now advanced_url should appear
+    await waitFor(() => {
+      expect(screen.getByTestId('template-field-advanced_url')).toBeInTheDocument();
+    });
+  });
+});

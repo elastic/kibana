@@ -515,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           /**
            * The test are using a test endpoint that calls the actions client.
-           * The route is defined here x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+           * The route is defined here x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/routes.ts.
            * The public execute API does not allows the execution of system actions. We use the
            * test route to test the execution of system actions
            */

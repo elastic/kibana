@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { within, waitFor, screen } from '@testing-library/react';
+import { within, waitFor, screen, fireEvent } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import {
@@ -129,10 +129,100 @@ describe('CreateCaseForm', () => {
 
   it('hides the sync alerts toggle', async () => {
     renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
-      wrapperProps: { features: { alerts: { sync: false } } },
+      wrapperProps: { owner: ['observability'] },
     });
 
     expect(screen.queryByText('Sync alert')).not.toBeInTheDocument();
+  });
+
+  it('shows Security settings when configuration lookup has no matching owner', async () => {
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      data: [],
+    }));
+    const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { owner: ['securitySolution'], license },
+    });
+
+    expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+    expect(await screen.findByTestId('caseObservablesToggle')).toBeInTheDocument();
+  });
+
+  describe('case settings for a host with no pinned owner (e.g. ML)', () => {
+    const observabilityConfiguration = {
+      ...useGetAllCaseConfigurationsResponse.data[0],
+      owner: 'observability',
+    };
+    const securityConfiguration = {
+      ...useGetAllCaseConfigurationsResponse.data[0],
+      owner: 'securitySolution',
+    };
+
+    beforeEach(() => {
+      useAvailableOwnersMock.mockReturnValue(['observability', 'securitySolution']);
+      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+        ...useGetAllCaseConfigurationsResponse,
+        data: [observabilityConfiguration, securityConfiguration],
+      }));
+    });
+
+    it('hides sync alerts and extract observables for the default non-Security owner', async () => {
+      const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { owner: [], license },
+      });
+
+      expect(await screen.findByTestId('caseOwnerSelector')).toBeInTheDocument();
+      expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('caseObservablesToggle')).not.toBeInTheDocument();
+    });
+
+    it('shows sync alerts and extract observables after switching to Security', async () => {
+      const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { owner: [], license },
+      });
+
+      fireEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+      fireEvent.click(await screen.findByTestId('securitySolutionOwnerOption'));
+
+      expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+      expect(await screen.findByTestId('caseObservablesToggle')).toBeInTheDocument();
+    });
+
+    it('hides settings again after switching away from Security', async () => {
+      const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { owner: [], license },
+      });
+
+      fireEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+      fireEvent.click(await screen.findByTestId('securitySolutionOwnerOption'));
+      expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+
+      fireEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+      fireEvent.click(await screen.findByTestId('observabilityOwnerOption'));
+
+      expect(screen.queryByTestId('caseSyncAlerts')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('caseObservablesToggle')).not.toBeInTheDocument();
+    });
+
+    it('still requires platinum license for extract observables when Security is selected', async () => {
+      renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+        wrapperProps: { owner: [] },
+      });
+
+      fireEvent.click(await screen.findByTestId('caseOwnerSuperSelect'));
+      fireEvent.click(await screen.findByTestId('securitySolutionOwnerOption'));
+
+      expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+      expect(screen.queryByTestId('caseObservablesToggle')).not.toBeInTheDocument();
+    });
   });
 
   it('should not render connectors on basic license', () => {

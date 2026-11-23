@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 
 interface LogsClientSearchRequest {
   query: QueryDslQueryContainer;
   fields: string[];
+  /**
+   * Maximum number of hits to return. Defaults to 1000.
+   * Use `size + 1` to detect truncation without requesting a count phase.
+   */
+  size?: number;
+  /**
+   * Sort order for returned hits. Defaults to unordered (index order).
+   * Pass `[{ '@timestamp': { order: 'desc' } }]` to get the most recent N docs
+   * when `size` is capped — otherwise truncation is arbitrary.
+   */
+  sort?: SortCombinations[];
 }
 
 export interface LogsClient {
@@ -41,10 +55,15 @@ export const createLogsClient = async (
   ): Promise<InferSearchResponseOf<T>> {
     const response = await esClient.search({
       index: logsIndexPattern,
-      size: 1000,
+      // ignore_unavailable: true prevents a 500 when getFlattenedLogSources resolves to
+      // concrete index names and one of them has since been deleted/rolled over.
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      size: props.size ?? 1000,
       track_total_hits: false,
       query: props.query,
       fields: props.fields,
+      ...(props.sort ? { sort: props.sort } : {}),
     });
     return response as InferSearchResponseOf<T>;
   }

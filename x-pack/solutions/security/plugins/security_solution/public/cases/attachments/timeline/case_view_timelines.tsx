@@ -10,7 +10,7 @@ import type { EuiBasicTable } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
-import type { CommonAttachmentTabViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 
 import type { SortFieldTimeline } from '../../../../common/api/timeline';
 import type {
@@ -27,7 +27,7 @@ const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD: SortFieldTimeline = 'updated';
 const DEFAULT_SORT_ORDER: 'asc' | 'desc' = 'desc';
 
-const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']): string[] => {
+const extractTimelineIds = (caseData: CommonAttachmentListViewProps['caseData']): string[] => {
   const ids: string[] = [];
   for (const comment of caseData.comments) {
     // `attachmentId` may be a string or array of strings on unified reference attachments,
@@ -43,7 +43,7 @@ const extractTimelineIds = (caseData: CommonAttachmentTabViewProps['caseData']):
   return ids;
 };
 
-export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ caseData }) => {
+export const CaseViewTimelines: React.FC<CommonAttachmentListViewProps> = ({ caseData }) => {
   const timelineIds = useMemo(() => extractTimelineIds(caseData), [caseData]);
 
   const [pageIndex, setPageIndex] = useState(1);

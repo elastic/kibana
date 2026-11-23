@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { diffSOSecretPaths } from './common';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
+
+import {
+  collectCompiledSecretRefIds,
+  diffSOSecretPaths,
+  withClearedSecretReferences,
+} from './common';
 
 describe('diffSOSecretPaths', () => {
   const paths1 = [
@@ -183,5 +190,95 @@ describe('diffSOSecretPaths', () => {
       toDelete: [],
       noChange: [paths1[0]],
     });
+  });
+});
+
+describe('collectCompiledSecretRefIds', () => {
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('returns an empty set when no placeholders are present', () => {
+    const result = collectCompiledSecretRefIds({ inputs: [{ type: 'logfile' }] });
+    expect(result).toEqual(new Set());
+  });
+
+  it('extracts a single id from a plain string value', () => {
+    const result = collectCompiledSecretRefIds('$co.elastic.secret{my-id}');
+    expect(result).toEqual(new Set(['my-id']));
+  });
+
+  it('extracts ids from an array of strings', () => {
+    const result = collectCompiledSecretRefIds([
+      '$co.elastic.secret{id-1}',
+      '$co.elastic.secret{id-2}',
+    ]);
+    expect(result).toEqual(new Set(['id-1', 'id-2']));
+  });
+
+  it('extracts ids from deeply nested objects', () => {
+    const result = collectCompiledSecretRefIds({
+      a: { b: { password: '$co.elastic.secret{nested-id}' } },
+    });
+    expect(result).toEqual(new Set(['nested-id']));
+  });
+
+  it('deduplicates ids that appear more than once', () => {
+    const result = collectCompiledSecretRefIds([
+      '$co.elastic.secret{dup-id}',
+      '$co.elastic.secret{dup-id}',
+    ]);
+    expect(result).toEqual(new Set(['dup-id']));
+  });
+
+  it('returns an empty set for undefined input', () => {
+    const result = collectCompiledSecretRefIds(undefined);
+    expect(result).toEqual(new Set());
+  });
+
+  it('returns undefined for an unserializable input (BigInt) and logs a warning', () => {
+    const result = collectCompiledSecretRefIds(BigInt(1));
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('withClearedSecretReferences', () => {
+  it('sets a null at the path of a deleted secret, so the reference is removed', () => {
+    expect(
+      withClearedSecretReferences({ name: 'renamed' }, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+      ])
+    ).toEqual({ name: 'renamed', secrets: { ssl: { key: null } } });
+  });
+
+  it('clears every deleted secret', () => {
+    expect(
+      withClearedSecretReferences({}, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+        { id: 'secret-2', path: 'secrets.service_token' },
+      ])
+    ).toEqual({ secrets: { ssl: { key: null }, service_token: null } });
+  });
+
+  it('keeps the new reference of a secret the update replaces', () => {
+    expect(
+      withClearedSecretReferences({ secrets: { ssl: { key: { id: 'secret-2' } } } }, [
+        { id: 'secret-1', path: 'secrets.ssl.key' },
+      ])
+    ).toEqual({ secrets: { ssl: { key: { id: 'secret-2' } } } });
+  });
+
+  it('returns the object as it is when nothing is deleted', () => {
+    const soObject = { name: 'renamed' };
+
+    expect(withClearedSecretReferences(soObject, [])).toBe(soObject);
+  });
+
+  it('does not modify the object it is given', () => {
+    const soObject = { name: 'renamed' };
+
+    withClearedSecretReferences(soObject, [{ id: 'secret-1', path: 'secrets.ssl.key' }]);
+
+    expect(soObject).toEqual({ name: 'renamed' });
   });
 });

@@ -18,5 +18,5 @@ node scripts/functional_test_runner.js --config src/platform/test/examples/confi
 In case you want to start Kibana with the example plugins, you can just run:
 
 ```
-yarn start --run-examples
+pnpm start --run-examples
 ```

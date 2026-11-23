@@ -85,6 +85,7 @@ describe('buildAgentTemplate', () => {
       expect(template).toContain('max_connections: {{max_connections}}');
       expect(template).toContain('timeout: {{timeout}}');
       expect(template).toContain('keep_null: {{keep_null}}');
+      expect(template).toContain('ssl: {{ssl}}');
     });
 
     it('wraps optional fields in #if blocks', () => {
@@ -92,6 +93,12 @@ describe('buildAgentTemplate', () => {
       expect(template).toContain('{{#if max_message_size}}');
       expect(template).toContain('{{#if framing}}');
       expect(template).toContain('{{#if timeout}}');
+      expect(template).toContain('{{#if ssl}}');
+    });
+
+    it('renders ssl as a conditional block', () => {
+      const template = buildAgentTemplate('tcp');
+      expect(template).toContain('{{#if ssl}}\nssl: {{ssl}}\n{{/if}}');
     });
 
     it('does NOT wrap host in an #if block (always rendered)', () => {
@@ -121,6 +128,7 @@ describe('buildAgentTemplate', () => {
       expect(template).not.toContain('framing:');
       expect(template).not.toContain('line_delimiter:');
       expect(template).not.toContain('max_connections:');
+      expect(template).not.toContain('ssl:');
     });
   });
 
@@ -420,6 +428,7 @@ describe('buildAgentTemplate', () => {
         '{{#if max_connections}}\nmax_connections: {{max_connections}}\n{{/if}}',
         '{{#if timeout}}\ntimeout: {{timeout}}\n{{/if}}',
         '{{#if keep_null}}\nkeep_null: {{keep_null}}\n{{/if}}',
+        '{{#if ssl}}\nssl: {{ssl}}\n{{/if}}',
       ];
       for (const pattern of expectedPatterns) {
         expect(template).toContain(pattern);

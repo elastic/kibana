@@ -25,6 +25,7 @@ export function getState({
   logger,
   stackTraceLog,
   originalState,
+  persistedAlertsState = null,
 }: {
   runRuleResult: Result<RunRuleResult, Error>;
   startedAt: Date | null;
@@ -34,6 +35,7 @@ export function getState({
   logger: Logger;
   stackTraceLog: RuleRunnerErrorStackTraceLog | null;
   originalState: RuleTaskState;
+  persistedAlertsState?: RuleTaskState | null;
 }) {
   return map<RunRuleResult, ElasticsearchError, RuleTaskState>(
     runRuleResult,
@@ -47,7 +49,7 @@ export function getState({
           err
         )}`;
         logger.debug(message, {
-          tags: [ruleTypeId, ruleId, 'rule-run-failed', errorSourceTag],
+          tags: ['rule-run-failed', errorSourceTag],
         });
       } else {
         const error = stackTraceLog ? stackTraceLog.message : err;
@@ -56,11 +58,11 @@ export function getState({
           error
         )} - ${stack ?? ''}`;
         logger.error(message, {
-          tags: [ruleTypeId, ruleId, 'rule-run-failed', errorSourceTag],
+          tags: ['rule-run-failed', errorSourceTag],
           error: { stack_trace: stack },
         });
       }
-      return originalState;
+      return persistedAlertsState ?? originalState;
     }
   );
 }

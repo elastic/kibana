@@ -6,7 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import { productDocumentationTool } from './product_documentation';
 import { integrationKnowledgeTool } from './integration_knowledge';
 import type {
@@ -25,20 +25,22 @@ import { searchTool } from './search';
 export const registerTools = ({
   coreSetup,
   setupDeps,
+  isServerless,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  isServerless: boolean;
 }) => {
   const { agentBuilder } = setupDeps;
 
-  const tools: Array<BuiltinToolDefinition<any>> = [
-    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
+  const tools: Array<StaticToolRegistration<any>> = [
+    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets, isServerless }),
     getDocumentByIdTool(),
-    executeEsqlTool(),
-    generateEsqlTool(),
-    getIndexMappingsTool(),
+    executeEsqlTool({ isServerless }),
+    generateEsqlTool({ isServerless }),
+    getIndexMappingsTool({ isServerless }),
     listIndicesTool(),
-    indexExplorerTool(),
+    indexExplorerTool({ isServerless }),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
   ];
