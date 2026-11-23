@@ -12,7 +12,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import {
   DATADOG_ALERT_EVENT_ID,
@@ -231,8 +230,6 @@ export const Datadog: ConnectorSpec = {
         }),
     })
   ),
-
-  validateConnector: createReceiveOnlyConnectorValidator('Datadog'),
 
   actions: {
     listMonitors: {

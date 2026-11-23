@@ -334,27 +334,45 @@ describe('createConnectorTypeFromSpec', () => {
     });
   });
 
-  it('omits the connector validator when the spec has no validateConnector', () => {
+  const inboundEvents: NonNullable<ConnectorSpec['events']> = {
+    definitions: {
+      received: {
+        eventId: 'test.received',
+        title: 'Received',
+        description: 'An inbound event',
+        eventSchema: z4.object({}),
+      },
+    },
+    handleEvents: async () => ({ type: 'emit', events: [] }),
+  };
+
+  it('omits the connector validator when the spec has no events', () => {
     const connectorType = createConnectorTypeFromSpec(createMockSpec(), mockActionsPlugin);
 
     expect(connectorType.validate.connector).toBeUndefined();
   });
 
-  it('uses the spec validateConnector as the connector validator', () => {
-    const validateConnectorFn = jest.fn(
-      (config: Record<string, unknown>, secrets: Record<string, unknown>) =>
-        secrets.authType === 'none' && config.selectedActions !== undefined
-          ? 'Actions are not available without authentication.'
-          : null
-    );
+  it('omits the connector validator for an inbound-only spec', () => {
     const connectorType = createConnectorTypeFromSpec(
-      createMockSpec({ validateConnector: validateConnectorFn }),
+      createMockSpec({ actions: {}, events: inboundEvents }),
       mockActionsPlugin
     );
 
-    expect(connectorType.validate.connector).toBe(validateConnectorFn);
+    expect(connectorType.validate.connector).toBeUndefined();
+  });
+
+  it('rejects no authentication with selected actions on a dual spec', () => {
+    const connectorType = createConnectorTypeFromSpec(
+      createMockSpec({ events: inboundEvents }),
+      mockActionsPlugin
+    );
+
+    expect(connectorType.validate.connector).toBeDefined();
     expect(() =>
-      validateConnector(connectorType, { config: {}, secrets: { authType: 'none' } })
+      validateConnector(connectorType, {
+        config: { selectedActions: [] },
+        secrets: { authType: 'none' },
+      })
     ).not.toThrow();
     expect(() =>
       validateConnector(connectorType, {
@@ -362,12 +380,14 @@ describe('createConnectorTypeFromSpec', () => {
         secrets: { authType: 'none' },
       })
     ).toThrow(
-      'error validating action type connector: Actions are not available without authentication.'
+      'error validating action type connector: A Test Connector connector with no authentication can only receive events. Set selectedActions to an empty list, or add credentials.'
     );
-    expect(validateConnectorFn).toHaveBeenCalledWith(
-      { selectedActions: ['testAction'] },
-      { authType: 'none' }
-    );
+    expect(() =>
+      validateConnector(connectorType, {
+        config: { selectedActions: ['testAction'] },
+        secrets: { authType: 'basic' },
+      })
+    ).not.toThrow();
   });
 
   it('includes globalAuthHeaders when provided in spec', () => {

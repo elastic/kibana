@@ -18,7 +18,6 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import { createReceiveOnlyConnectorValidator } from '../../receive_only_connector_validator';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
 import { githubSkillFile } from './skills/github_skill';
@@ -108,8 +107,6 @@ export const GithubConnector: ConnectorSpec = {
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
-
-  validateConnector: createReceiveOnlyConnectorValidator('GitHub'),
 
   auth: {
     types: [

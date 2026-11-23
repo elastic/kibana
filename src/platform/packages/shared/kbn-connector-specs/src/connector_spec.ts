@@ -25,7 +25,6 @@ import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/actions-utils';
 import type { LicenseType } from '@kbn/licensing-types';
-import type { ConnectorValidator } from '@kbn/actions-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
 import type { ClientRegistry, ClientTypeId } from './lib/clients/client_registry';
@@ -406,10 +405,6 @@ export interface ConnectorSpec {
   validateUrls?: {
     fields?: string[];
   };
-
-  // Cross-field check of the connector's config and secrets together. Runs on connector
-  // create, update, and every execution. Return an error message to reject, or null.
-  validateConnector?: ConnectorValidator;
 
   // Hosts a sandbox command may send this connector's auth headers to. Required when an
   // auth type sets supportsSandbox; a connector that resolves to no hosts cannot be used

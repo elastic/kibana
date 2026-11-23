@@ -9,8 +9,10 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
   TEST_CONNECTOR_SUB_ACTION,
   connectorSpecHasEvents,
+  createReceiveOnlyConnectorValidator,
   getSandboxHosts,
   getSandboxSupportedAuthTypeIds,
+  isDualConnectorSpec,
 } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { lazyImmutableGCableObject, z as z4 } from '@kbn/zod/v4';
@@ -107,6 +109,10 @@ export const createConnectorTypeFromSpec = (
   const paramsValidator = hasExecutableActions
     ? lazyImmutableGCableObject(() => generateParamsSchema(executableActions))
     : undefined;
+  // Dual specs can be saved with no credentials only when every outbound action is off.
+  const connectorValidator = isDualConnectorSpec(spec)
+    ? createReceiveOnlyConnectorValidator(spec.metadata.displayName)
+    : undefined;
 
   return {
     id: spec.metadata.id,
@@ -119,7 +125,7 @@ export const createConnectorTypeFromSpec = (
       ),
       secrets: lazyImmutableGCableObject(() => generateSecretsSchema(spec.auth, configUtils)),
       ...(paramsValidator ? { params: paramsValidator } : {}),
-      ...(spec.validateConnector ? { connector: spec.validateConnector } : {}),
+      ...(connectorValidator ? { connector: connectorValidator } : {}),
     },
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,

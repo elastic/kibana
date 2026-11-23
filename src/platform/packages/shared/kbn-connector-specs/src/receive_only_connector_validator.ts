@@ -12,8 +12,9 @@ import type { ConnectorValidator } from '@kbn/actions-types';
 const NO_AUTH_TYPE_ID = 'none';
 
 /**
- * Builds a `validateConnector` for dual connectors: with no authentication the connector can
- * only receive events, so every outbound action must be turned off (`selectedActions: []`).
+ * With no authentication a dual connector can only receive events, so every outbound action
+ * must be turned off (`selectedActions: []`). `createConnectorTypeFromSpec` installs this
+ * for dual specs.
  */
 export const createReceiveOnlyConnectorValidator =
   (connectorName: string): ConnectorValidator =>
