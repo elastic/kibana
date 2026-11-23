@@ -35,7 +35,7 @@ describe('KnownFailuresGenerator', () => {
       sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
-      knowledge: { listQueryLinks: async () => [watched, offRule] },
+      knowledge: { listQueries: async () => [watched, offRule] },
       rules: {
         listManaged: async () => [
           { id: getId(watched), enabled: true },

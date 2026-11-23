@@ -67,7 +67,7 @@ async function readWatchedKnowledgeIndicators({
 }: GeneratorContext): Promise<Map<string, QueryLink>> {
   const [managedRules, links] = await Promise.all([
     rules.listManaged({ strategy: KNOWN_FAILURES_STRATEGY_ID }),
-    knowledge.listQueryLinks({ sourceIds: sources.map(({ id }) => id) }),
+    knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) }),
   ]);
   const enabledRuleIds = new Set(managedRules.filter(({ enabled }) => enabled).map(({ id }) => id));
 
