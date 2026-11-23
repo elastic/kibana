@@ -89,9 +89,10 @@ export interface InternalSkillDefinition {
    */
   hidden?: boolean;
   /**
-   * When true, the skill is only available when the caller can use the `execute_workflow` tool.
+   * When true, the skill is unavailable when any tool returned by `getRegistryTools` is
+   * unavailable to the caller.
    */
-  requiresWorkflows?: boolean;
+  requiresAllAssociatedTools?: boolean;
   /**
    * When present, evaluates whether the skill is available for the current
    * request context. Skills that return `{ status: 'unavailable' }` are

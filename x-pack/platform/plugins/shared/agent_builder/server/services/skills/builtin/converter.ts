@@ -24,7 +24,7 @@ export const convertBuiltinSkill = ({
   uiSettingRequired: skill.uiSettingRequired,
   excludeFromElasticCapabilities: skill.excludeFromElasticCapabilities ?? false,
   hidden: skill.hidden ?? false,
-  requiresWorkflows: skill.requiresWorkflows ?? false,
+  requiresAllAssociatedTools: skill.requiresAllAssociatedTools ?? false,
   referencedContent: skill.referencedContent,
   referencedContentCount: skill.referencedContent?.length ?? 0,
   basePath: skill.basePath,

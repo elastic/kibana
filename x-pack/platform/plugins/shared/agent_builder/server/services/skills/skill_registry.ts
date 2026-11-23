@@ -7,7 +7,6 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -100,24 +99,31 @@ export const createSkillRegistry = ({
     return true;
   };
 
-  // `get` throws when the tool is not registered (Workflows disabled) or unavailable to the
-  // caller (no execute privilege). The registry serves one request, so the lookup is shared by
-  // every skill that needs it.
-  let workflowsCheck: Promise<boolean> | undefined;
-  const canExecuteWorkflows = (): Promise<boolean> => {
-    workflowsCheck ??= toolRegistry.get(platformCoreTools.executeWorkflow).then(
-      () => true,
-      () => false
-    );
-    return workflowsCheck;
+  // `get` throws when the tool is not registered or unavailable to the caller. The registry
+  // serves one request, so each tool is looked up once and shared by every skill that needs it.
+  const toolAvailability = new Map<string, Promise<boolean>>();
+  const isToolAvailable = (toolId: string): Promise<boolean> => {
+    let check = toolAvailability.get(toolId);
+    if (!check) {
+      check = toolRegistry.get(toolId).then(
+        () => true,
+        () => false
+      );
+      toolAvailability.set(toolId, check);
+    }
+    return check;
   };
 
   const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
     if (!isVisible(skill)) {
       return false;
     }
-    if (skill.requiresWorkflows && !(await canExecuteWorkflows())) {
-      return false;
+    if (skill.requiresAllAssociatedTools) {
+      const toolIds = await skill.getRegistryTools();
+      const available = await Promise.all(toolIds.map(isToolAvailable));
+      if (!available.every(Boolean)) {
+        return false;
+      }
     }
     if (skill.isAvailable && availabilityContext) {
       const result = await skill.isAvailable(availabilityContext);

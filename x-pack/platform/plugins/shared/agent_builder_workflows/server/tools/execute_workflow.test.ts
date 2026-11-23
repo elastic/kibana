@@ -124,16 +124,35 @@ describe('executeWorkflowTool', () => {
           checkPrivilegesWithRequest: () => ({ atSpace }),
         },
       } as any);
-    const getAvailability = (isWorkflowsAvailable: boolean, atSpace: jest.Mock) =>
+    const getAvailabilityWith = (
+      isWorkflowsAvailable: boolean,
+      securityGetter: Parameters<typeof executeWorkflowTool>[0]['getSecurity']
+    ) =>
       executeWorkflowTool({
         workflowsManagement: { management: { isWorkflowsAvailable } } as any,
-        getSecurity: securityWith(atSpace),
+        getSecurity: securityGetter,
       }).availability!.handler({ request: {} as any, uiSettings: {} as any, spaceId: 'default' });
+    const getAvailability = (isWorkflowsAvailable: boolean, atSpace: jest.Mock) =>
+      getAvailabilityWith(isWorkflowsAvailable, securityWith(atSpace));
 
     it('is available when Workflows is available and the caller can execute workflows', async () => {
       const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: true });
 
       await expect(getAvailability(true, atSpace)).resolves.toEqual({ status: 'available' });
+    });
+
+    it('is available when the Security plugin is disabled', async () => {
+      await expect(getAvailabilityWith(true, () => undefined)).resolves.toEqual({
+        status: 'available',
+      });
+    });
+
+    it('logs a warning when the privilege check fails', async () => {
+      const atSpace = jest.fn().mockRejectedValue(new Error('es down'));
+
+      await getAvailability(true, atSpace);
+
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('es down'));
     });
 
     it.each([

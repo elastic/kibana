@@ -7,7 +7,6 @@
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_TRACING_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -898,29 +897,63 @@ describe('createSkillRegistry', () => {
     });
   });
 
-  it('offers skills that require workflows only when execute_workflow is usable, checking it once', async () => {
-    const skills = ['workflow-skill-1', 'workflow-skill-2'].map((id) =>
-      createMockInternalSkillDefinition({ id, name: id, requiresWorkflows: true })
-    );
-    const createRegistry = (toolIds: string[]) => {
-      const toolRegistry = createMockToolRegistry(toolIds);
+  describe('requiresAllAssociatedTools', () => {
+    const toolA = 'tool.a';
+    const toolB = 'tool.b';
+    const gated = (id: string, tools: string[]) =>
+      createMockInternalSkillDefinition({
+        id,
+        name: id,
+        requiresAllAssociatedTools: true,
+        getRegistryTools: () => tools,
+      });
+    const plain = createMockInternalSkillDefinition({
+      id: 'plain-skill',
+      name: 'plain-skill',
+      getRegistryTools: () => [toolA],
+    });
+    const gatedSkills = [gated('gated-1', [toolA]), gated('gated-2', [toolA, toolB])];
+    const createRegistry = (availableToolIds: string[]) => {
+      const toolRegistry = createMockToolRegistry(availableToolIds);
       const registry = createSkillRegistry({
-        builtinProvider: createMockBuiltinProvider(skills),
+        builtinProvider: createMockBuiltinProvider([...gatedSkills, plain]),
         persistedProvider: createMockPersistedProvider([]),
         toolRegistry,
         experimentalFeaturesEnabled: false,
       });
       return { registry, toolRegistry };
     };
-    const ids = skills.map(({ id }) => id);
+    const ids = [...gatedSkills, plain].map(({ id }) => id);
 
-    const usable = createRegistry([platformCoreTools.executeWorkflow]);
-    expect((await usable.registry.bulkGet(ids)).size).toBe(2);
-    expect(usable.toolRegistry.get).toHaveBeenCalledTimes(1);
+    it('offers the skills when every registry tool is available, looking each tool up once', async () => {
+      const { registry, toolRegistry } = createRegistry([toolA, toolB]);
 
-    const unusable = createRegistry([]);
-    expect((await unusable.registry.bulkGet(ids)).size).toBe(0);
-    expect(await unusable.registry.list()).toEqual([]);
+      expect((await registry.bulkGet(ids)).size).toBe(3);
+      expect((await registry.list()).map(({ id }) => id).sort()).toEqual(ids.slice().sort());
+      expect(toolRegistry.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('hides the skills when a registry tool is unavailable, and keeps unrelated skills', async () => {
+      const { registry } = createRegistry([toolA]);
+
+      expect(await registry.has('gated-1')).toBe(true);
+      expect(await registry.has('gated-2')).toBe(false);
+      expect(await registry.get('gated-2')).toBeUndefined();
+      expect([...(await registry.bulkGet(ids)).keys()].sort()).toEqual(['gated-1', 'plain-skill']);
+      expect((await registry.list()).map(({ id }) => id).sort()).toEqual([
+        'gated-1',
+        'plain-skill',
+      ]);
+    });
+
+    it('hides every gated skill when no registry tool is available', async () => {
+      const { registry } = createRegistry([]);
+
+      expect(await registry.has('gated-1')).toBe(false);
+      expect(await registry.get('gated-1')).toBeUndefined();
+      expect([...(await registry.bulkGet(ids)).keys()]).toEqual(['plain-skill']);
+      expect((await registry.list()).map(({ id }) => id)).toEqual(['plain-skill']);
+    });
   });
 
   describe('availability filtering', () => {

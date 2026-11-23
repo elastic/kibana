@@ -152,12 +152,12 @@ export interface SkillDefinition<
    */
   hidden?: boolean;
   /**
-   * When true, the skill tells the model to run workflows, so it is only available when the
-   * `execute_workflow` tool is usable by the caller: Workflows is enabled and the caller holds the
-   * workflows execute privilege.
+   * When true, the skill cannot work without its registry tools, so it is unavailable when any
+   * tool returned by `getRegistryTools` is unavailable to the caller (not registered, or hidden by
+   * the tool's own availability). Adding a tool to `getRegistryTools` also makes it required.
    * Defaults to false.
    */
-  requiresWorkflows?: boolean;
+  requiresAllAssociatedTools?: boolean;
   /**
    * Optional dynamic availability configuration.
    * When provided, the framework evaluates the handler per-request to decide
