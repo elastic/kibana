@@ -16,7 +16,6 @@ import type {
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { computeWeightedSli, NO_DATA } from '../../domain/services';
 import type { CompositeSLODefinition, SLODefinition } from '../../domain/models';
-import { toRichRollingTimeWindow } from '../../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import { HistoricalSummaryClient } from '../historical_summary_client';
@@ -68,14 +67,12 @@ export class CompositeHistoricalSummaryClient {
     const activeMembers = composite.members.filter((m) => memberDefMap.has(m.sloId));
     if (activeMembers.length === 0) return [];
 
-    const richTimeWindow = toRichRollingTimeWindow(composite.timeWindow);
-
     const list = activeMembers.map((member) => {
       const slo = memberDefMap.get(member.sloId)!;
       return {
         sloId: slo.id,
         instanceId: member.instanceId ?? ALL_VALUE,
-        timeWindow: richTimeWindow,
+        timeWindow: composite.timeWindow,
         budgetingMethod: slo.budgetingMethod,
         groupBy: slo.groupBy,
         revision: slo.revision,

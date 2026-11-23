@@ -1,5 +1,5 @@
 {
-  "sha1": "189cdb94d3e277c2540ac132a575b729cc80bd54",
+  "sha1": "51ef6081d648e7109a10401f8dabd5dfba25a640",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -534,6 +534,48 @@
         "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/region_policy_crud.spec.ts",
         "line": 179,
         "column": 3
+      }
+    },
+    {
+      "id": "2f72a5cf556e426-a63aab0c16503f6",
+      "title": "Test endpoint authorization feature-privileged user reaches the route and gets 404 for a missing endpoint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/test_endpoint_authorization.spec.ts",
+        "line": 21,
+        "column": 91
+      }
+    },
+    {
+      "id": "2f72a5cf556e426-ce062b56c1b77f5",
+      "title": "Test endpoint authorization feature-read user with Elasticsearch inference access gets 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/test_endpoint_authorization.spec.ts",
+        "line": 27,
+        "column": 42
+      }
+    },
+    {
+      "id": "2f72a5cf556e426-1fbbc2613fb0b81",
+      "title": "Test endpoint authorization user with no inference privilege gets 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/api/tests/test_endpoint_authorization.spec.ts",
+        "line": 38,
+        "column": 15
       }
     }
   ]

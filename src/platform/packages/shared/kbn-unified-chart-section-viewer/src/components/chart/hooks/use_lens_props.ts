@@ -173,7 +173,7 @@ export const useLensProps = ({
       }
 
       return () => observer.disconnect();
-    }).pipe(distinctUntilChanged(), shareReplay(1));
+    }).pipe(distinctUntilChanged(), shareReplay({ bufferSize: 1, refCount: true }));
 
     // load lens props when any trigger emits;
     const triggers$ = merge(

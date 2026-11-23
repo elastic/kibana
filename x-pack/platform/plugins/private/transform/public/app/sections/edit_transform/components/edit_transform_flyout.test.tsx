@@ -44,14 +44,8 @@ jest.mock('./edit_transform_api_error_callout', () => ({
   EditTransformApiErrorCallout: () => null,
 }));
 
-jest.mock('./edit_transform_flyout_callout', () => ({
-  EditTransformFlyoutCallout: () => null,
-}));
-
 jest.mock('./edit_transform_update_button', () => ({
-  EditTransformUpdateButton: () => (
-    <button data-test-subj="editTransformUpdateButton">Update</button>
-  ),
+  EditTransformUpdateButton: () => <button data-test-subj="editTransformUpdateButton">Save</button>,
 }));
 
 jest.mock(
@@ -70,6 +64,10 @@ describe('EditTransformFlyout', () => {
     isFlyoutVisible: true,
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('opens on the main edit view after being closed from the project scope view', async () => {
     const { rerender } = renderWithI18n(<EditTransformFlyout {...defaultProps} />);
 
@@ -84,5 +82,13 @@ describe('EditTransformFlyout', () => {
       expect(screen.queryByTestId('transformEditProjectScopeFlyout')).not.toBeInTheDocument();
     });
     expect(screen.getByTestId('openProjectScopeButton')).toBeInTheDocument();
+  });
+
+  it('closes from the flyout close button', () => {
+    renderWithI18n(<EditTransformFlyout {...defaultProps} />);
+
+    fireEvent.click(screen.getByLabelText('Close this dialog'));
+
+    expect(defaultProps.closeFlyout).toHaveBeenCalled();
   });
 });
