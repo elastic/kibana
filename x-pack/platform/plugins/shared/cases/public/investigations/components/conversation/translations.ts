@@ -195,11 +195,6 @@ export const MESSAGE_LABEL = (index: number) =>
     defaultMessage: 'Message {index}',
     values: { index },
   });
-export const MESSAGE_BY_LABEL = (author: string) =>
-  i18n.translate(`${PREFIX}.messageByLabel`, {
-    defaultMessage: 'Message by {author}',
-    values: { author },
-  });
 export const SKIPPED_AGENT = i18n.translate(`${PREFIX}.skippedAgent`, {
   defaultMessage: 'No agent reply',
 });
@@ -297,9 +292,6 @@ export const THREAD_SUMMARY_WORKING = i18n.translate(`${PREFIX}.threadSummaryWor
 
 /* ------------------------------ Team discussion ------------------------------ */
 
-export const NO_AGENTS_ENABLED = i18n.translate(`${PREFIX}.noAgentsEnabled`, {
-  defaultMessage: 'Agents are not enabled for this investigation. Your team discusses it here.',
-});
 export const AGENT_BUILDER_UNAVAILABLE = (reason: string) =>
   i18n.translate(`${PREFIX}.agentBuilderUnavailable`, {
     defaultMessage: 'Agent Builder is not available to you: {reason}',
@@ -308,85 +300,14 @@ export const AGENT_BUILDER_UNAVAILABLE = (reason: string) =>
 export const REASON_NO_ACCESS = i18n.translate(`${PREFIX}.reasonNoAccess`, {
   defaultMessage: 'you need an Enterprise licence and access to Agent Builder.',
 });
-export const REASON_NO_CONVERSATION = i18n.translate(`${PREFIX}.reasonNoConversation`, {
-  defaultMessage: 'this investigation has no agent conversation yet.',
-});
-export const TEAM_DISCUSSION = i18n.translate(`${PREFIX}.teamDiscussion`, {
-  defaultMessage: 'Team discussion',
-});
-export const TEAM_DISCUSSION_LOADING = i18n.translate(`${PREFIX}.teamDiscussionLoading`, {
-  defaultMessage: 'Loading the team discussion',
-});
-export const TEAM_DISCUSSION_ERROR = i18n.translate(`${PREFIX}.teamDiscussionError`, {
-  defaultMessage: 'Could not load the team discussion',
-});
-export const TEAM_EMPTY_TITLE = i18n.translate(`${PREFIX}.teamEmptyTitle`, {
-  defaultMessage: 'No messages yet',
-});
-export const TEAM_EMPTY_BODY = i18n.translate(`${PREFIX}.teamEmptyBody`, {
-  defaultMessage: 'Start the discussion below. Mention a teammate with @.',
-});
-export const TEAM_MESSAGE_COUNT = (count: number) =>
-  i18n.translate(`${PREFIX}.teamMessageCount`, {
-    defaultMessage: '{count, plural, one {# message} other {# messages}}',
-    values: { count },
-  });
 export const REPLIES = (count: number) =>
   i18n.translate(`${PREFIX}.replies`, {
     defaultMessage: '{count, plural, one {# reply} other {# replies}}',
     values: { count },
   });
-export const REPLY = i18n.translate(`${PREFIX}.reply`, { defaultMessage: 'Reply' });
-export const REPLY_PLACEHOLDER = i18n.translate(`${PREFIX}.replyPlaceholder`, {
-  defaultMessage: 'Write a reply',
-});
-export const WRITE_MESSAGE = i18n.translate(`${PREFIX}.writeMessage`, {
-  defaultMessage: 'Write a message to your team',
-});
-export const SEND = i18n.translate(`${PREFIX}.send`, { defaultMessage: 'Send' });
-export const SEND_ARIA = i18n.translate(`${PREFIX}.sendAria`, { defaultMessage: 'Send message' });
-export const MENTION = i18n.translate(`${PREFIX}.mention`, {
-  defaultMessage: 'Mention a teammate',
-});
-export const MENTION_SEARCH = i18n.translate(`${PREFIX}.mentionSearch`, {
-  defaultMessage: 'Find a teammate',
-});
-export const MENTION_EMPTY = i18n.translate(`${PREFIX}.mentionEmpty`, {
-  defaultMessage: 'No teammates found.',
-});
-export const PIN_AS_CLAIM = i18n.translate(`${PREFIX}.pinAsClaim`, {
-  defaultMessage: 'Pin as claim',
-});
-export const PIN_AS_CLAIM_ARIA = i18n.translate(`${PREFIX}.pinAsClaimAria`, {
-  defaultMessage: 'Pin this message as a claim',
-});
-export const PINNED = (ref: string) =>
-  i18n.translate(`${PREFIX}.pinned`, {
-    defaultMessage: 'Pinned as {ref}',
-    values: { ref },
-  });
-export const COPY_MESSAGE = i18n.translate(`${PREFIX}.copyMessage`, {
-  defaultMessage: 'Copy message',
-});
 export const COPIED = i18n.translate(`${PREFIX}.copied`, { defaultMessage: 'Copied.' });
 export const SAVE = i18n.translate(`${PREFIX}.save`, { defaultMessage: 'Save' });
 export const DELETE = i18n.translate(`${PREFIX}.delete`, { defaultMessage: 'Delete' });
-export const EDITED = i18n.translate(`${PREFIX}.edited`, { defaultMessage: 'Edited' });
-export const UNKNOWN_AUTHOR = i18n.translate(`${PREFIX}.unknownAuthor`, {
-  defaultMessage: 'Unknown user',
-});
-export const REPLYING_TO = (author: string) =>
-  i18n.translate(`${PREFIX}.replyingTo`, {
-    defaultMessage: 'Replying to {author}',
-    values: { author },
-  });
-export const CANCEL_REPLY = i18n.translate(`${PREFIX}.cancelReply`, {
-  defaultMessage: 'Cancel reply',
-});
-export const QUOTE = i18n.translate(`${PREFIX}.quote`, { defaultMessage: 'Quote' });
-export const QUOTE_ARIA = i18n.translate(`${PREFIX}.quoteAria`, {
-  defaultMessage: 'Quote this comment in your reply',
-});
 export const EDIT_COMMENT = i18n.translate(`${PREFIX}.editComment`, {
   defaultMessage: 'Edit comment',
 });
@@ -406,18 +327,20 @@ export const COMMENT_UPDATED = i18n.translate(`${PREFIX}.commentUpdated`, {
 export const COMMENT_DELETED = i18n.translate(`${PREFIX}.commentDeleted`, {
   defaultMessage: 'Comment deleted.',
 });
-export const COMMENT_CONFLICT_TITLE = i18n.translate(`${PREFIX}.commentConflictTitle`, {
-  defaultMessage: 'This comment changed while you were editing it',
+
+export const CONVERSATION_STARTING = i18n.translate(`${PREFIX}.conversationStarting`, {
+  defaultMessage: 'Starting the conversation',
 });
-export const COMMENT_CONFLICT_BODY = i18n.translate(`${PREFIX}.commentConflictBody`, {
-  defaultMessage:
-    'Someone else edited it, so your change was not saved. Copy what you wrote if you need it, then discard your edit to see the latest version.',
+
+export const CONVERSATION_START_ERROR = i18n.translate(`${PREFIX}.conversationStartError`, {
+  defaultMessage: 'Could not start the conversation',
 });
-export const COMMENT_CONFLICT_DISCARD = i18n.translate(`${PREFIX}.commentConflictDiscard`, {
-  defaultMessage: 'Discard my edit',
+
+export const CONVERSATION_UNAVAILABLE_TITLE = i18n.translate(
+  `${PREFIX}.conversationUnavailableTitle`,
+  { defaultMessage: 'The conversation is not available' }
+);
+
+export const RETRY = i18n.translate(`${PREFIX}.retry`, {
+  defaultMessage: 'Try again',
 });
-export const LOAD_EARLIER = (remaining: number) =>
-  i18n.translate(`${PREFIX}.loadEarlier`, {
-    defaultMessage: 'Load earlier comments ({remaining} more)',
-    values: { remaining },
-  });

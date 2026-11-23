@@ -15,14 +15,14 @@ import type { TabId } from '../tabs/tab_props';
 import { EmbeddedChat } from '../conversation/embedded_chat';
 import { buildExpandSearch } from '../conversation/side_chat_url';
 import { SuggestionChips } from '../conversation/suggestion_chips';
-import { TeamDiscussion } from '../conversation/team_discussion';
+import { ConversationStarting, ConversationUnavailable } from '../conversation/conversation_status';
+import { LoadingState } from '../shared';
 import { ThreadBar } from '../conversation/thread_bar';
 import { ThreadsMenu } from '../conversation/threads_menu';
 import { useConversationMessages } from '../conversation/use_conversation';
 import { useConversationMode } from '../conversation/use_conversation_mode';
 import { useFillViewportHeight } from '../conversation/use_fill_viewport_height';
 import { useSelectedConversation } from '../conversation/use_selected_conversation';
-import { useTeamDiscussion } from '../conversation/use_team_discussion';
 import * as conversationI18n from '../conversation/translations';
 
 export interface SideChatProps {
@@ -190,36 +190,7 @@ const AgentSideChat: React.FC<{
 };
 AgentSideChat.displayName = 'AgentSideChat';
 
-const TeamSideChat: React.FC<{ record: InvestigationRecord; activeTab: TabId }> = ({
-  record,
-  activeTab,
-}) => {
-  const expand = useExpandToConversation(activeTab);
-  const { messageCount } = useTeamDiscussion(record);
-
-  return (
-    <Frame>
-      <ChatBar
-        countLabel={conversationI18n.TEAM_MESSAGE_COUNT(messageCount)}
-        onExpand={() => expand()}
-      />
-      <div
-        css={css`
-          flex: 1 1 auto;
-          min-block-size: 0;
-        `}
-      >
-        <TeamDiscussion record={record} compact />
-      </div>
-    </Frame>
-  );
-};
-TeamSideChat.displayName = 'TeamSideChat';
-
-/**
- * The compact chat of the side panel: the record's main Agent Builder conversation, or the team
- * discussion when no agent takes part. "Expand" opens the Conversation tab.
- */
+/** The compact chat of the side panel: the record's Agent Builder conversation. "Expand" opens the Conversation tab. */
 export const SideChat: React.FC<SideChatProps> = ({
   record,
   agentAvailable,
@@ -228,8 +199,14 @@ export const SideChat: React.FC<SideChatProps> = ({
 }) => {
   const conversationMode = useConversationMode(record, agentAvailable);
 
-  if (conversationMode.mode === 'team') {
-    return <TeamSideChat record={record} activeTab={activeTab} />;
+  if (conversationMode.mode === 'unavailable') {
+    return <ConversationUnavailable explanation={conversationMode.explanation} />;
+  }
+  if (conversationMode.mode === 'missing') {
+    return <ConversationStarting record={record} />;
+  }
+  if (conversationMode.mode === 'checking') {
+    return <LoadingState />;
   }
   return (
     <AgentSideChat

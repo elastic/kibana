@@ -23,7 +23,6 @@ import {
 } from '../../../common/investigations/constants';
 import type {
   ActivityEntry,
-  AddCommentRequest,
   BulkCreateItemsRequest,
   BulkCreateItemsResponse,
   BulkDeleteItemsRequest,
@@ -40,8 +39,6 @@ import type {
   ExternalTicketResponse,
   FindActivityRequest,
   FindActivityResponse,
-  FindCommentsRequest,
-  FindCommentsResponse,
   FindItemsRequest,
   FindItemsResponse,
   FindRecordsRequest,
@@ -57,7 +54,6 @@ import type {
   LinkRecordResponse,
   MergeRecordRequest,
   MergeRecordResponse,
-  RecordComment,
   RelatedRecord,
   RelatedRecordsResponse,
   ReorderTasksRequest,
@@ -69,7 +65,6 @@ import type {
   TaskList,
   TemplateTaskLists,
   ThreadRef,
-  UpdateCommentRequest,
   UpdateExternalTicketRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
@@ -215,6 +210,12 @@ export const getSinceLastHandoff = (http: HttpStart, recordId: string, since?: s
 export const getReport = (http: HttpStart, recordId: string) =>
   http.fetch<ReportResponse>(recordPath(recordId, '/_report'), { method: 'GET' });
 
+/** Creates the record's main Agent Builder conversation when it has none. */
+export const ensureConversation = (http: HttpStart, recordId: string) =>
+  http.fetch<{ record: InvestigationRecord }>(recordPath(recordId, '/_conversation'), {
+    method: 'POST',
+  });
+
 export const createThread = (http: HttpStart, recordId: string, body: CreateThreadRequest) =>
   http.fetch<{ record: InvestigationRecord; thread: ThreadRef }>(recordPath(recordId, '/threads'), {
     method: 'POST',
@@ -333,40 +334,6 @@ export const createActivity = (http: HttpStart, recordId: string, body: CreateAc
     method: 'POST',
     body: JSON.stringify(body),
   });
-
-/* ------------------------------------------------------------------ */
-/* Record discussion (Cases comments)                                  */
-/* ------------------------------------------------------------------ */
-
-const getRecordCommentsUrl = (recordId: string): string => recordPath(recordId, '/comments');
-const getRecordCommentUrl = (recordId: string, commentId: string): string =>
-  recordPath(recordId, `/comments/${encodeURIComponent(commentId)}`);
-
-export const findComments = (http: HttpStart, recordId: string, request: FindCommentsRequest) =>
-  http.fetch<FindCommentsResponse>(getRecordCommentsUrl(recordId), {
-    method: 'GET',
-    query: toQuery(request),
-  });
-
-export const addComment = (http: HttpStart, recordId: string, body: AddCommentRequest) =>
-  http.fetch<{ comment: RecordComment }>(getRecordCommentsUrl(recordId), {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-
-export const updateComment = (
-  http: HttpStart,
-  recordId: string,
-  commentId: string,
-  body: UpdateCommentRequest
-) =>
-  http.fetch<{ comment: RecordComment }>(getRecordCommentUrl(recordId, commentId), {
-    method: 'PATCH',
-    body: JSON.stringify(body),
-  });
-
-export const deleteComment = (http: HttpStart, recordId: string, commentId: string) =>
-  http.fetch<void>(getRecordCommentUrl(recordId, commentId), { method: 'DELETE' });
 
 /* ------------------------------------------------------------------ */
 /* Statuses                                                            */

@@ -25,7 +25,7 @@ export interface AtAGlanceCardProps {
  */
 export const useMessageCount = (record: InvestigationRecord): number => {
   const { count } = useConversationMessageCount(record);
-  return record.conversation_id ? count ?? 0 : record.counters.discussion_comments ?? 0;
+  return count ?? 0;
 };
 
 export const AtAGlanceCard: React.FC<AtAGlanceCardProps> = ({ record, onNavigateTab }) => {

@@ -905,7 +905,7 @@ export interface CreateRecordRequest {
   summary?: string | null;
   origin?: RecordOrigin;
   ai_enabled?: boolean;
-  /** Create the main Agent Builder conversation. Defaults to `ai_enabled`. */
+  /** Create the main Agent Builder conversation. Defaults to true (every record has one). */
   create_conversation?: boolean;
   /** Apply the task lists linked to the template. Default true. */
   apply_procedure?: boolean;

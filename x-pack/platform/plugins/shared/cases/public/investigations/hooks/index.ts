@@ -10,6 +10,7 @@ export {
   useCreateRecord,
   useCreateThread,
   useDuplicateCheck,
+  useEnsureConversation,
   useFindRecords,
   useMergeRecord,
   useRecord,
@@ -32,7 +33,6 @@ export {
 } from './use_items';
 export type { UpdateItemVariables } from './use_items';
 export { useLinkRecord, useUnlinkRecord } from './use_links';
-export { useAddComment, useComments, useDeleteComment, useUpdateComment } from './use_comments';
 export { useActivity, useCreateActivity, useLivePolling } from './use_activity';
 export {
   useCapabilities,

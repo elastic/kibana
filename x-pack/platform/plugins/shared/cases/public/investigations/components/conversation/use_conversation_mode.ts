@@ -11,38 +11,38 @@ import { useInvestigationsServices } from '../../services';
 import * as i18n from './translations';
 
 export type ConversationMode =
-  /** The embedded Agent Builder conversation. */
+  /** The embedded Agent Builder conversation (people can skip the agent per message). */
   | { mode: 'agent'; conversationId: string }
-  /** A discussion between people, with the reason the agent is not part of it. */
-  | { mode: 'team'; explanation: string };
+  /** Agent Builder is available but the record predates its conversation: create it. */
+  | { mode: 'missing' }
+  /** Agent Builder is not available to this user, so there is no conversation to show. */
+  | { mode: 'unavailable'; explanation: string }
+  /** Still finding out whether Agent Builder is available. */
+  | { mode: 'checking' };
 
-/**
- * Whether the record's conversation is the agent conversation or a team discussion. The agent
- * conversation needs an AI-enabled record, a licence and Agent Builder access, the Agent Builder
- * browser contract and a main conversation.
- */
+/** The Conversation tab and side chat are always the Agent Builder conversation. */
 export const useConversationMode = (
   record: InvestigationRecord,
   agentAvailable: boolean
 ): ConversationMode => {
   const { agentBuilder } = useInvestigationsServices();
-  const { data: capabilities } = useCapabilities();
+  const { data: capabilities, isLoading } = useCapabilities();
 
-  if (!record.ai_enabled) {
-    return { mode: 'team', explanation: i18n.NO_AGENTS_ENABLED };
+  // `agentAvailable` is false when the agent is off for this record, but people still talk in the
+  // conversation then, so only Agent Builder's own availability decides.
+  if (isLoading && !agentAvailable) {
+    return { mode: 'checking' };
   }
-  if (!agentAvailable || !agentBuilder) {
+  const builderAvailable = agentAvailable || capabilities?.agent_builder_available === true;
+  if (!builderAvailable || !agentBuilder) {
     const reason =
       capabilities?.reason && capabilities.reason.length > 0
         ? capabilities.reason
         : i18n.REASON_NO_ACCESS;
-    return { mode: 'team', explanation: i18n.AGENT_BUILDER_UNAVAILABLE(reason) };
+    return { mode: 'unavailable', explanation: i18n.AGENT_BUILDER_UNAVAILABLE(reason) };
   }
   if (!record.conversation_id) {
-    return {
-      mode: 'team',
-      explanation: i18n.AGENT_BUILDER_UNAVAILABLE(i18n.REASON_NO_CONVERSATION),
-    };
+    return { mode: 'missing' };
   }
   return { mode: 'agent', conversationId: record.conversation_id };
 };

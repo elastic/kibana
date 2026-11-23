@@ -465,6 +465,17 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
     }),
     route({
       method: 'post',
+      path: `${base}/{id}/_conversation`,
+      params: { params: recordIdParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: { record: await service.ensureConversation((request.params as { id: string }).id) },
+        });
+      },
+    }),
+    route({
+      method: 'post',
       path: `${base}/{id}/threads`,
       params: { params: recordIdParams, body: createThreadBody },
       handler: async ({ context, request, response }) => {

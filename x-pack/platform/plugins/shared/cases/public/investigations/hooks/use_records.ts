@@ -21,6 +21,7 @@ import {
   closeRecord,
   createRecord,
   createThread,
+  ensureConversation,
   findRecords,
   getRecord,
   getRelatedRecords,
@@ -205,4 +206,16 @@ export const useTimings = (recordId: string) => {
     () => getTimings(http, recordId),
     { enabled: recordId.length > 0, retry: false }
   );
+};
+
+/** Creates the record's main conversation (records made before every record had one). */
+export const useEnsureConversation = (recordId: string) => {
+  const { http } = useInvestigationsServices();
+  const queryClient = useQueryClient();
+
+  return useMutation(() => ensureConversation(http, recordId), {
+    onSuccess: () => {
+      void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
+    },
+  });
 };

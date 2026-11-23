@@ -698,7 +698,8 @@ export const createRecordStep = async (ctx, { createdProto, creator, description
     origin: { type: sc.originAgent ? 'agent' : 'user', label: sc.origin, actor: creator },
     access: { mode: 'default' },
     ai_enabled: sc.ai,
-    create_conversation: sc.ai,
+    // Every record has its conversation; with the agent off, people talk there and skip the agent.
+    create_conversation: true,
     apply_procedure: false,
     display_id: sc.invId,
     created_at: createdAt,

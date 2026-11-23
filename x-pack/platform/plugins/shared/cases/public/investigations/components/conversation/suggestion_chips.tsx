@@ -43,6 +43,11 @@ export const SuggestionChips: React.FC<SuggestionChipsProps> = ({
       .catch(() => undefined);
   };
 
+  // The chips ask the agent; with the agent off for this investigation, people only talk to each other.
+  if (!record.ai_enabled) {
+    return null;
+  }
+
   return (
     <EuiFlexGroup
       gutterSize="s"

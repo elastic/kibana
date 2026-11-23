@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { AgentConversation } from '../conversation/agent_conversation';
-import { TeamConversation } from '../conversation/team_conversation';
+import { ConversationStarting, ConversationUnavailable } from '../conversation/conversation_status';
+import { LoadingState } from '../shared';
 import { useConversationMode } from '../conversation/use_conversation_mode';
 import type { TabProps } from './tab_props';
 
@@ -18,8 +19,14 @@ import type { TabProps } from './tab_props';
 export const ConversationTab: React.FC<TabProps> = ({ record, agentAvailable, openItemId }) => {
   const conversationMode = useConversationMode(record, agentAvailable);
 
-  if (conversationMode.mode === 'team') {
-    return <TeamConversation record={record} explanation={conversationMode.explanation} />;
+  if (conversationMode.mode === 'unavailable') {
+    return <ConversationUnavailable explanation={conversationMode.explanation} />;
+  }
+  if (conversationMode.mode === 'missing') {
+    return <ConversationStarting record={record} />;
+  }
+  if (conversationMode.mode === 'checking') {
+    return <LoadingState />;
   }
   return (
     <AgentConversation

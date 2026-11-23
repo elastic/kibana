@@ -1,9 +1,10 @@
 // Scenario C: a team without AI works a phishing report by hand (INV-240). It shows the whole Cases path:
-// template fields (rules filled), case comments from several people including a reply, two assignees, task
-// priorities, due dates and a subtask, and the custom paused status "Waiting on the employee".
-// The team chat and its thread are case comments, each posted as the person who wrote it.
+// template fields (rules filled), a team conversation in Agent Builder with the agent skipped, two assignees,
+// task priorities, due dates and a subtask, and the custom paused status "Waiting on the employee".
+// The team chat and its thread are messages in the record's Agent Builder conversation, each posted as the
+// person who wrote it with trigger_mode "never" (the agent does not answer).
 import { kbn, log } from '../client.mjs';
-import { newCtx, runStandard, actorOf, summarize, postCaseComment, patchRecord, HOUR, DAY, MIN } from './common.mjs';
+import { newCtx, runStandard, actorOf, summarize, converseHuman, patchRecord, HOUR, DAY, MIN } from './common.mjs';
 
 export const id = 'C';
 
@@ -28,22 +29,27 @@ const pushToTicketing = async (recordId) => {
   }
 };
 
-/** Chat messages become case comments; thread replies quote their parent comment (`reply_to`). */
-const chatAsComments = async (ctx) => {
+/** Chat messages go to the record's conversation with the agent skipped; thread replies quote their parent. */
+const chatInConversation = async (ctx) => {
+  if (!ctx.convId) throw new Error(`${ctx.sc.invId} has no conversation (is Agent Builder available? run setup.mjs)`);
   const st = ctx.d.state;
-  const parentOf = {};
+  const textOf = {};
   let top = 0;
   for (const m of st.msgs) {
-    const comment = await postCaseComment(ctx.recordId, m.who, ctx.clock.text(m.t));
-    parentOf[m.k] = comment.id;
+    const text = ctx.clock.text(m.t);
+    await converseHuman(ctx.convId, m.who, text);
+    textOf[m.k] = text;
     top += 1;
   }
   const replies = [];
   for (const [key, th] of Object.entries(st.threads ?? {})) {
-    for (const m of th.msgs) replies.push({ ts: m.ts, who: m.who, parent: parentOf[key], text: ctx.clock.text(m.t) });
+    for (const m of th.msgs) replies.push({ ts: m.ts, who: m.who, parent: textOf[key], text: ctx.clock.text(m.t) });
   }
   replies.sort((a, b) => a.ts - b.ts);
-  for (const r of replies) await postCaseComment(ctx.recordId, r.who, r.text, r.parent);
+  for (const r of replies) {
+    const quote = r.parent ? `${r.parent.split('\n').map((line) => `> ${line}`).join('\n')}\n\n` : '';
+    await converseHuman(ctx.convId, r.who, `${quote}${r.text}`);
+  }
   return { top, replies: replies.length };
 };
 
@@ -87,7 +93,7 @@ export const run = async () => {
       patches: () => [{ tsMs: ctx.clock.ms(t(9, 58, 0)), body: { owner: pk, actor: pk } }],
       assignees: { codes: ['PK', 'BW'], actor: 'PK', tsMs: ctx.clock.ms(t(10, 0, 0)) },
       recordComments: async (c) => {
-        chat = await chatAsComments(c);
+        chat = await chatInConversation(c);
       },
       finalTouch: { actor: pk, tsMs: ctx.clock.ms(lastLogMs) },
       // Pushed once at the very end, after the status change, so the incident is up to date.
@@ -106,5 +112,5 @@ export const run = async () => {
     },
     { ensureAlerts: async () => [] }
   );
-  return { ctx, result, summary: await summarize(ctx, { related: result.related.length, chat: `${chat.top} comments + ${chat.replies} replies` }) };
+  return { ctx, result, summary: await summarize(ctx, { related: result.related.length, chat: `${chat.top} messages + ${chat.replies} replies (agent skipped)` }) };
 };

@@ -1152,7 +1152,8 @@ export class InvestigationsService {
       throw error;
     }
 
-    if (req.create_conversation ?? aiEnabled) {
+    // Every record gets its conversation: people talk there with or without the agent ("Skip agent").
+    if (req.create_conversation ?? true) {
       await this.attachMainConversation(record.id, `${displayId}: ${req.title}`);
     }
     await this.ingestCaseUserActions(record, {
@@ -1210,6 +1211,22 @@ export class InvestigationsService {
     }
     await this.refreshCounters(record.id, actor, { touch: false });
     return (await this.getRecord(record.id)).record;
+  }
+
+  /**
+   * Creates the record's main conversation when it has none (records created before every record got
+   * one, or while Agent Builder was unavailable). Returns the record either way.
+   */
+  public async ensureConversation(recordId: string): Promise<InvestigationRecord> {
+    const { record } = await this.loadForWrite(recordId);
+    if (!record.conversation_id) {
+      const { available, reason } = await this.deps.agent.isAvailable();
+      if (!available || !this.deps.agent.createConversation) {
+        throw Boom.badRequest(reason ?? 'Agent Builder is not available.');
+      }
+      await this.attachMainConversation(recordId, `${record.display_id}: ${record.title}`);
+    }
+    return (await this.getRecord(recordId)).record;
   }
 
   private async attachMainConversation(recordId: string, title: string): Promise<void> {
