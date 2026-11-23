@@ -19,7 +19,9 @@
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/react-query",
-    "@kbn/secrets"
+    "@kbn/secrets",
+    "@kbn/ui-callout"
   ]
 }

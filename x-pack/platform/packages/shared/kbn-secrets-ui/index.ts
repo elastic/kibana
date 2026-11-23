@@ -7,6 +7,8 @@
 
 export { createSecretsApi, getSecretsErrorMessage } from './src/api';
 export type { SecretsApi, SecretsApiRoutes, SecretsHttpError } from './src/api';
+export { SecretsManagement } from './src/secrets_management';
+export type { SecretsManagementProps } from './src/secrets_management';
 export {
   useCreateSecret,
   useDeleteSecret,

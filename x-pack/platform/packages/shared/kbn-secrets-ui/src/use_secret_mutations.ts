@@ -96,10 +96,38 @@ export const useDeleteSecret = ({
   });
 };
 
-/** Checks that a stored secret can be read. The value never reaches the browser. */
-export const useTestSecret = (
-  api: SecretsApi
-): UseMutationResult<SecretTestResult, SecretsHttpError, TestSecretParams> =>
+/** Checks that a stored secret can be read, and says so in a toast. The value never reaches the browser. */
+export const useTestSecret = ({
+  api,
+  notifications,
+}: SecretMutationDeps): UseMutationResult<SecretTestResult, SecretsHttpError, TestSecretParams> =>
   useMutation<SecretTestResult, SecretsHttpError, TestSecretParams>({
     mutationFn: api.testSecret,
+    onSuccess: (result, { name }) => {
+      if (result.resolved) {
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.secretsUi.testSuccessToast', {
+            defaultMessage: 'The value of "{name}" was read',
+            values: { name },
+          })
+        );
+        return;
+      }
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.secretsUi.testFailureToast', {
+          defaultMessage: 'The value of "{name}" could not be read',
+          values: { name },
+        }),
+        text: result.message,
+      });
+    },
+    onError: (error, { name }) => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.secretsUi.testErrorToast', {
+          defaultMessage: 'Failed to test "{name}"',
+          values: { name },
+        }),
+        text: getSecretsErrorMessage(error),
+      });
+    },
   });
