@@ -13,4 +13,4 @@ export {
   useReplaceSecret,
   useTestSecret,
 } from './src/use_secret_mutations';
-export { useSecrets } from './src/use_secrets';
+export { useSecretConnectors, useSecrets } from './src/use_secrets';

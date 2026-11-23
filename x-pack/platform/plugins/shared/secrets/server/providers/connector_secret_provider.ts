@@ -9,8 +9,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { SECRET_PROVIDER_TYPE, SecretValidationError } from '@kbn/secrets';
-import type { ConnectorSecretProvider } from '@kbn/secrets';
-import type { SecretManager } from './secret_managers';
+import type { ConnectorSecretProvider, SecretConnector } from '@kbn/secrets';
+import type { ConnectorSecretReader } from './connector_secret_readers';
 import {
   getSecretSavedObjectId,
   SECRET_SAVED_OBJECT_TYPE,
@@ -25,7 +25,7 @@ export interface CreateConnectorSecretProviderParams {
   request: KibanaRequest;
   spaceId: SpaceId;
   /** The connector types that can hold secrets, by connector type id. */
-  secretManagers: ReadonlyMap<string, SecretManager>;
+  secretReaders: ReadonlyMap<string, ConnectorSecretReader>;
 }
 
 /**
@@ -37,14 +37,14 @@ export const createConnectorSecretProvider = ({
   actions,
   request,
   spaceId,
-  secretManagers,
+  secretReaders,
 }: CreateConnectorSecretProviderParams): ConnectorSecretProvider => {
-  const getSecretManager = (connectorTypeId: string): SecretManager => {
-    const secretManager = secretManagers.get(connectorTypeId);
-    if (!secretManager) {
+  const getSecretReader = (connectorTypeId: string): ConnectorSecretReader => {
+    const reader = secretReaders.get(connectorTypeId);
+    if (!reader) {
       throw new SecretValidationError('The connector is not a supported secret manager');
     }
-    return secretManager;
+    return reader;
   };
 
   const getConnectorTypeId = async (connectorId: string): Promise<string> => {
@@ -68,12 +68,30 @@ export const createConnectorSecretProvider = ({
           'The connector does not exist in this space, or you do not have access to it'
         );
       }
-      getSecretManager(connector.actionTypeId).getReadParams(reference);
+      getSecretReader(connector.actionTypeId).getReadParams(reference);
+    },
+
+    listSecretConnectors: async () => {
+      // The client of the request only returns the connectors that its user may access.
+      const actionsClient = await actions.getActionsClientWithRequest(request);
+      const connectors: SecretConnector[] = [];
+      for (const { id, name, actionTypeId } of await actionsClient.getAll()) {
+        const reader = secretReaders.get(actionTypeId);
+        if (reader) {
+          const { displayName, referenceFormat } = reader;
+          connectors.push({
+            id,
+            name,
+            type: { connectorTypeId: actionTypeId, displayName, referenceFormat },
+          });
+        }
+      }
+      return connectors;
     },
 
     resolve: async ({ entry: { name, connectorId, reference } }) => {
-      const secretManager = getSecretManager(await getConnectorTypeId(connectorId));
-      const { subAction, subActionParams } = secretManager.getReadParams(reference);
+      const reader = getSecretReader(await getConnectorTypeId(connectorId));
+      const { subAction, subActionParams } = reader.getReadParams(reference);
       const result = await actions.getUnsecuredActionsClient().execute({
         requesterId: SECRETS_REQUESTER_ID,
         id: connectorId,
@@ -86,7 +104,7 @@ export const createConnectorSecretProvider = ({
       if (result.status !== 'ok') {
         throw new Error(result.serviceMessage ?? result.message ?? 'the connector call failed');
       }
-      const value = secretManager.getValue(result.data);
+      const value = reader.getValue(result.data);
       if (value === undefined) {
         throw new Error('the secret manager returned no value');
       }

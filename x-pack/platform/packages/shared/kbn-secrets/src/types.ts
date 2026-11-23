@@ -58,6 +58,27 @@ export interface SecretsListResponse {
   readonly secrets: SecretMetadata[];
 }
 
+/** A type of connector that can hold secrets. */
+export interface SecretConnectorType {
+  readonly connectorTypeId: string;
+  /** The name of the connector type, for the user. */
+  readonly displayName: string;
+  /** What a reference looks like for this connector type, as a sentence fragment for a hint. */
+  readonly referenceFormat: string;
+}
+
+/** A connector that can hold secrets, and that the requesting user may access. */
+export interface SecretConnector {
+  readonly id: string;
+  readonly name: string;
+  readonly type: SecretConnectorType;
+}
+
+/** What a consumer's route that lists the connectors that can hold secrets returns. */
+export interface SecretConnectorsResponse {
+  readonly connectors: SecretConnector[];
+}
+
 /**
  * What a caller supplies to create a secret, or to replace the source of an existing one.
  * On replace, an omitted description keeps the current one and an empty one clears it.
@@ -110,6 +131,8 @@ export interface ConnectorSecretProvider extends SecretProvider<ConnectorSecretE
    * connector is not a secret manager, or the reference is not valid for it.
    */
   validateSource(params: { source: ConnectorSecretSource }): Promise<void>;
+  /** Lists the connectors that can hold secrets and that the caller may access. */
+  listSecretConnectors(): Promise<SecretConnector[]>;
 }
 
 /** The providers a secrets client can use, by provider type. */
@@ -131,6 +154,11 @@ export interface SecretsClient {
    * when the secret does not exist.
    */
   test(params: TestSecretParams): Promise<SecretTestResult>;
+  /**
+   * Lists the connectors that can hold secrets and that the caller may access, to choose where
+   * a secret lives. Empty when secrets from a connector are not available.
+   */
+  listSecretConnectors(): Promise<SecretConnector[]>;
   /** The only operation that returns values. Server-side use only. */
   resolve(params: ResolveSecretsParams): Promise<ResolvedSecrets>;
 }

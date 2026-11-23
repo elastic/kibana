@@ -10,35 +10,41 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import { SecretValidationError } from '@kbn/secrets';
 
 /**
- * The connector types that can hold secrets. How a value is read comes from the
- * `secretManager` member of each spec: nothing here is specific to one connector.
+ * The connector types that can hold secrets. A "secret manager" is the external service that
+ * keeps the values (GCP Secret Manager, AWS Parameter Store), and a connector is how Kibana
+ * talks to it. How a value is read comes from the `secretManager` member of each spec: nothing
+ * here is specific to one connector.
  */
-const SECRET_MANAGER_SPECS: readonly ConnectorSpec[] = [
+const SECRET_CONNECTOR_SPECS: readonly ConnectorSpec[] = [
   connectorsSpecs.GcpSecretManager,
   connectorsSpecs.AwsSsmConnector,
 ];
 
-export interface SecretManagerReadParams {
+export interface ConnectorSecretReadParams {
   subAction: string;
   subActionParams: Record<string, unknown>;
 }
 
 /** Reads one value through one type of connector, the way its spec says to. */
-export interface SecretManager {
+export interface ConnectorSecretReader {
+  /** The name of the connector type, for the user. */
+  readonly displayName: string;
+  /** What a reference looks like for this connector type, as a hint for the user. */
+  readonly referenceFormat: string;
   /**
    * Turns the reference of a secret into the connector call that reads its value.
-   * Throws `SecretValidationError` when the reference is not valid for this manager.
+   * Throws `SecretValidationError` when the reference is not valid for this connector type.
    */
-  getReadParams(reference: string): SecretManagerReadParams;
+  getReadParams(reference: string): ConnectorSecretReadParams;
   /** Takes the value out of what the connector call returned. */
   getValue(data: unknown): string | undefined;
 }
 
-const createSecretManager = ({
+const createConnectorSecretReader = ({
   metadata: { displayName },
   actions,
   secretManager,
-}: ConnectorSpec): SecretManager => {
+}: ConnectorSpec): ConnectorSecretReader => {
   if (!secretManager) {
     throw new Error(`The ${displayName} connector does not say how to read a secret value.`);
   }
@@ -51,6 +57,8 @@ const createSecretManager = ({
   }
 
   return {
+    displayName,
+    referenceFormat,
     getReadParams: (reference) => {
       const input = toInput(reference);
       if (!input) {
@@ -73,7 +81,9 @@ const createSecretManager = ({
 
 /**
  * Creates the readers of the connector types that can hold secrets, by connector type id.
- * Throws when a listed connector type cannot be used as a secret manager.
+ * Throws when a listed connector type cannot be used to read secrets.
  */
-export const createSecretManagers = (): ReadonlyMap<string, SecretManager> =>
-  new Map(SECRET_MANAGER_SPECS.map((spec) => [spec.metadata.id, createSecretManager(spec)]));
+export const createConnectorSecretReaders = (): ReadonlyMap<string, ConnectorSecretReader> =>
+  new Map(
+    SECRET_CONNECTOR_SPECS.map((spec) => [spec.metadata.id, createConnectorSecretReader(spec)])
+  );

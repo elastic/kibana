@@ -149,6 +149,9 @@ export const createSecretsClient = ({
         : { resolved: true };
     },
 
+    listSecretConnectors: async () =>
+      providers.connector ? providers.connector.listSecretConnectors() : [],
+
     resolve,
   };
 };

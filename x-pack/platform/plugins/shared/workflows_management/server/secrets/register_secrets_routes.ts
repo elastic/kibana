@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecretsClient, SecretsListResponse } from '@kbn/secrets';
+import type { SecretConnectorsResponse, SecretsClient, SecretsListResponse } from '@kbn/secrets';
 import { handleSecretsRouteError } from './handle_secrets_route_error';
 import {
   createSecretBodySchema,
@@ -15,6 +15,7 @@ import {
 } from './route_schemas';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
 import {
+  WORKFLOW_SECRET_CONNECTORS_ROUTE,
   WORKFLOW_SECRET_ROUTE,
   WORKFLOW_SECRET_TEST_ROUTE,
   WORKFLOW_SECRETS_ROUTE,
@@ -120,6 +121,24 @@ export const registerSecretsRoutes = ({
       try {
         const client = await getSecretsClient(request);
         return response.ok({ body: await client.test(request.params) });
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: WORKFLOW_SECRET_CONNECTORS_ROUTE,
+      security: SECRETS_MANAGE_SECURITY,
+      options: { access: 'internal' },
+      validate: false,
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        const body: SecretConnectorsResponse = { connectors: await client.listSecretConnectors() };
+        return response.ok({ body });
       } catch (error) {
         return handleSecretsRouteError({ response, error });
       }

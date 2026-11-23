@@ -15,7 +15,7 @@ import {
 } from '@kbn/secrets';
 import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createConnectorSecretProvider } from './providers/connector_secret_provider';
-import { createSecretManagers } from './providers/secret_managers';
+import { createConnectorSecretReaders } from './providers/connector_secret_readers';
 import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
 import { createSavedObjectsSecretsStorage } from './storage/saved_objects_secrets_storage';
 import type {
@@ -68,8 +68,8 @@ export class SecretsPlugin
     });
     const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
     const kibanaSecretProvider = createKibanaSecretProvider();
-    // Throws, so that Kibana does not start, when a listed connector type is not a secret manager.
-    const secretManagers = createSecretManagers();
+    // Throws, so that Kibana does not start, when a listed connector type cannot read secrets.
+    const secretReaders = createConnectorSecretReaders();
 
     return {
       getClient: ({ request, consumer }) => {
@@ -94,7 +94,7 @@ export class SecretsPlugin
                   actions,
                   request,
                   spaceId: brandSpaceId(spaceId),
-                  secretManagers,
+                  secretReaders,
                 })
               : undefined,
           },

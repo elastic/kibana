@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { QueryKey, UseQueryResult } from '@kbn/react-query';
-import type { SecretsListResponse } from '@kbn/secrets';
+import type { SecretConnectorsResponse, SecretsListResponse } from '@kbn/secrets';
 import type { SecretsApi, SecretsHttpError } from './api';
 
 /**
@@ -25,4 +25,14 @@ export const useSecrets = (
     queryFn: api.listSecrets,
     retry: false,
     refetchOnWindowFocus: true,
+  });
+
+/** Loads the connectors that can hold secrets and that the user may access. */
+export const useSecretConnectors = (
+  api: SecretsApi
+): UseQueryResult<SecretConnectorsResponse, SecretsHttpError> =>
+  useQuery<SecretConnectorsResponse, SecretsHttpError>({
+    queryKey: ['secretConnectors', api.routes.secretConnectors],
+    queryFn: api.listSecretConnectors,
+    retry: false,
   });

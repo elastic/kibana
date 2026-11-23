@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { createSecretsApi } from '@kbn/secrets-ui';
 import type { SecretsApi, SecretsApiRoutes } from '@kbn/secrets-ui';
 import {
+  WORKFLOW_SECRET_CONNECTORS_ROUTE,
   WORKFLOW_SECRET_ROUTE,
   WORKFLOW_SECRET_TEST_ROUTE,
   WORKFLOW_SECRETS_ROUTE,
@@ -19,6 +20,7 @@ const WORKFLOW_SECRETS_API_ROUTES: SecretsApiRoutes = {
   secrets: WORKFLOW_SECRETS_ROUTE,
   secret: WORKFLOW_SECRET_ROUTE,
   secretTest: WORKFLOW_SECRET_TEST_ROUTE,
+  secretConnectors: WORKFLOW_SECRET_CONNECTORS_ROUTE,
 };
 
 /** Calls the secrets routes of Workflows. */

@@ -9,6 +9,7 @@ import { buildPath } from '@kbn/core-http-browser';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type {
   DeleteSecretParams,
+  SecretConnectorsResponse,
   SecretMetadata,
   SecretsListResponse,
   SecretTestResult,
@@ -26,6 +27,8 @@ export interface SecretsApiRoutes {
   readonly secret: string;
   /** `POST` checks that the secret named by its `{name}` parameter can be read. */
   readonly secretTest: string;
+  /** `GET` lists the connectors that can hold secrets and that the user may access. */
+  readonly secretConnectors: string;
 }
 
 /** Calls the routes of one consumer of secrets. No call ever returns the value of a secret. */
@@ -37,6 +40,7 @@ export interface SecretsApi {
   readonly replaceSecret: (params: WriteSecretParams) => Promise<SecretMetadata>;
   readonly deleteSecret: (params: DeleteSecretParams) => Promise<void>;
   readonly testSecret: (params: TestSecretParams) => Promise<SecretTestResult>;
+  readonly listSecretConnectors: () => Promise<SecretConnectorsResponse>;
 }
 
 export const createSecretsApi = ({
@@ -56,6 +60,7 @@ export const createSecretsApi = ({
     }),
   deleteSecret: ({ name }) => http.delete<void>(buildPath(routes.secret, { name })),
   testSecret: ({ name }) => http.post<SecretTestResult>(buildPath(routes.secretTest, { name })),
+  listSecretConnectors: () => http.get<SecretConnectorsResponse>(routes.secretConnectors),
 });
 
 /** The server explains what is wrong with a request (a bad reference, a taken name) in its body. */
