@@ -778,8 +778,6 @@ export class NightshiftInvestigationsPlugin
             telemetry,
             logger: this.logger.get('online_evals'),
             isEnabled: () => this.wikiEnabled || this.memoryEnabled || this.decisionTreesEnabled,
-            isWikiEnabled: () => this.wikiEnabled,
-            isDecisionTreesEnabled: () => this.decisionTreesEnabled,
           })
         );
       }

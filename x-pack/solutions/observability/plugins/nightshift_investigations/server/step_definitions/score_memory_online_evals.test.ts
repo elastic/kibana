@@ -326,137 +326,24 @@ describe('scoreMemoryOnlineEvalsStepDefinition', () => {
     });
   });
 
-  it('includes non-archived and archived-this-round Wiki and Decision Tree hydrated IDs (excluding newly created items) and gates stores by agent policy', async () => {
-    const esClient = {
-      search: jest
-        .fn()
-        // Wiki store list
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'ops:wiki_service_checkout',
-                _source: {
-                  type: 'service',
-                  title: 'Checkout',
-                  content: '# Checkout',
-                  attributes: { status: 'established', slug: 'checkout', space_id: 'ops' },
-                },
-              },
-              {
-                _id: 'ops:wiki_service_archived',
-                _source: {
-                  type: 'service',
-                  title: 'Archived',
-                  content: '# Archived',
-                  attributes: { status: 'archived', slug: 'archived', space_id: 'ops' },
-                },
-              },
-              {
-                _id: 'ops:wiki_service_archived_this_round',
-                _source: {
-                  type: 'service',
-                  title: 'Archived This Round',
-                  content: '# Archived This Round',
-                  attributes: {
-                    status: 'archived',
-                    slug: 'archived_this_round',
-                    space_id: 'ops',
-                  },
-                },
-              },
-              {
-                _id: 'ops:wiki_service_new',
-                _source: {
-                  type: 'service',
-                  title: 'New',
-                  content: '# New',
-                  attributes: { status: 'tentative', slug: 'new', space_id: 'ops' },
-                },
-              },
-              {
-                _id: 'ops:wiki_service_revived',
-                _source: {
-                  type: 'service',
-                  title: 'Revived',
-                  content: '# Revived',
-                  attributes: { status: 'tentative', slug: 'revived', space_id: 'ops' },
-                },
-              },
-            ],
-          },
-        })
-        // Decision tree store list
-        .mockResolvedValueOnce({
-          hits: {
-            hits: [
-              {
-                _id: 'ops:dtree_high-latency',
-                _source: {
-                  '@timestamp': '2026-10-30T10:00:00.000Z',
-                  type: 'decision_tree',
-                  title: 'High Latency',
-                  content: '# Tree',
-                  tags: ['nightshift', 'decision-tree'],
-                  learnings: [],
-                  attributes: {
-                    tree_id: 'symptom:high-latency',
-                    symptom: 'high-latency',
-                    status: 'tentative',
-                    version: 1,
-                    space_id: 'ops',
-                  },
-                },
-              },
-            ],
-          },
-        }),
-    };
+  it('scores only recalled Semantic Memories and ignores Wiki and Decision Tree stores and reads', async () => {
+    const esClient = { search: jest.fn() };
 
     const { run, evaluate } = setup({ esClient });
     await run({
       agent_id: 'nightshift.investigation',
-      recalled_ids: [],
-      wiki_opened_ids: ['wiki_service_checkout', 'wiki_service_archived_this_round'],
-      memory_opened_ids: [],
-      wiki_applied_writes: [
-        {
-          store: 'wiki',
-          item_id: 'wiki_service_new',
-          action: 'upsert',
-          version: '1',
-          after_content: '# New',
-        },
-        {
-          store: 'wiki',
-          item_id: 'wiki_service_revived',
-          action: 'upsert',
-          version: 3,
-          before_status: 'archived',
-          after_status: 'tentative',
-          before_content: '# Archived Old',
-          after_content: '# Revived',
-        },
-        {
-          store: 'wiki',
-          item_id: 'wiki_service_archived_this_round',
-          action: 'archive',
-          version: 2,
-          before_status: 'established',
-          after_status: 'archived',
-          before_content: '# Old',
-          after_content: '# Archived This Round',
-        },
-      ],
+      recalled_ids: ['memory_mem-1', 'memory_mem-2'],
+      hydrated_ids: ['wiki_service_checkout', 'symptom:high-latency'],
+      wiki_opened_ids: ['wiki_service_checkout'],
+      decision_tree_opened_ids: ['symptom:high-latency'],
+      memory_opened_ids: ['memory_mem-1'],
     });
 
+    expect(esClient.search).not.toHaveBeenCalled();
     expect(evaluate.mock.calls[0][0].evidence?.reference_data).toEqual(
       expect.objectContaining({
-        recalled_ids: [
-          'wiki_service_archived_this_round',
-          'wiki_service_checkout',
-          'symptom:high-latency',
-        ],
+        recalled_ids: ['memory_mem-1', 'memory_mem-2'],
+        opened_ids: ['memory_mem-1'],
       })
     );
   });
