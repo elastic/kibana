@@ -1,0 +1,17 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"]
+  },
+  "include": ["**/*"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    // Scout tests reach into plugin internals via relative imports. The plugin project has to be
+    // referenced by path since this directory belongs to the same package as the plugin itself.
+    { "path": "../tsconfig.json", "force": true },
+    "@kbn/scout-security",
+    "@kbn/rule-data-utils",
+    "@kbn/core-http-common"
+  ]
+}

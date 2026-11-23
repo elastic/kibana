@@ -20,12 +20,15 @@ source .buildkite/scripts/common/util.sh
     kibana-deploy-project-from-pr | \
     kibana-chromium-linux-build | \
     kibana-console-definitions-sync | \
+    kibana-emergency-release | \
     kibana-es-ql-grammar-sync | \
     kibana-opentelemetry-semantic-conventions-sync | \
     kibana-purge-cloud-deployments | \
     kibana-renovate-helper | \
     kibana-scout-update-metadata | \
-    kibana-serverless-release-readiness)
+    kibana-serverless-release-readiness | \
+    kibana-tests | \
+    kibana-tests-emergency)
       GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
       ;;
     *)
@@ -98,15 +101,6 @@ EOF
 
 # Set up misc keys
 {
-  EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
-  export EC_API_KEY
-
-  PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
-  export PROJECT_API_KEY
-
-  PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
-  export PROJECT_API_DOMAIN
-
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
@@ -134,21 +128,6 @@ EOF
     echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
     export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
   fi
-}
-
-# Set up GCS Service Account for CDN
-{
-  GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
-  export GCS_SA_CDN_KEY
-
-  GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
-  export GCS_SA_CDN_EMAIL
-
-  GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
-  export GCS_SA_CDN_BUCKET
-
-  GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
-  export GCS_SA_CDN_URL
 }
 
 # Setup Failed Test Reporter Elasticsearch credentials
@@ -179,14 +158,6 @@ EOF
   KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
   export KIBANA_WIF_CREDENTIALS_DIR
   export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
-}
-
-# Acquire credentials for legacy vault if needed
-{
-  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  export VAULT_ROLE_ID
-  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  export VAULT_SECRET_ID
 }
 
 # Moon remote cache is disabled (see .moon/workspace.yml)

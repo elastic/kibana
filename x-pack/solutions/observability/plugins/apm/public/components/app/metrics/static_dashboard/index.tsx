@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -23,7 +23,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { MetricsDashboardProps } from './helper';
-import { convertSavedDashboardToPanels } from './helper';
+import { convertSavedDashboardToPanels, getDashboardFileNameFromProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>(undefined);
@@ -50,10 +50,31 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
     dashboard.setFilters(dataView ? getFilters(serviceName, environment, dataView) : []);
   }, [dataView, serviceName, environment, dashboard]);
 
+  const dashboardFileName = getDashboardFileNameFromProps(dashboardProps);
+
+  // Tracks which dashboard the currently published API belongs to, so a late cleanup from a
+  // canceled load for a previous dashboard cannot clear the reference to the current one.
+  const publishedForRef = useRef<string | undefined>();
+
+  const onApiAvailable = useCallback(
+    (api: DashboardApi) => {
+      publishedForRef.current = dashboardFileName;
+      setDashboard(api);
+    },
+    [dashboardFileName]
+  );
+
+  const onApiCleanup = useCallback(() => {
+    if (publishedForRef.current === dashboardFileName) {
+      setDashboard(undefined);
+    }
+  }, [dashboardFileName]);
+
   return (
     <DashboardRenderer
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
-      onApiAvailable={setDashboard}
+      onApiAvailable={onApiAvailable}
+      onApiCleanup={onApiCleanup}
     />
   );
 }

@@ -132,6 +132,9 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 );
 
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
+  // `overrides` keeps the permissive base validation on purpose: this schema validates kibana.yml at
+  // startup, so rejecting the OpenTelemetry collector keys here would stop Kibana from starting
+  // after an upgrade. Those keys are stripped, with a warning, when the full agent policy is built.
   schema.object({
     ...AgentPolicyBaseSchema,
     space_id: schema.maybe(schema.string()),

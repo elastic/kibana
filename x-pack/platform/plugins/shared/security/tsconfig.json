@@ -8,10 +8,13 @@
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
+    "@kbn/content-sanitization",
     "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/task-manager-plugin",
