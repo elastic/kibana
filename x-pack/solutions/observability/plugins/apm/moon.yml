@@ -73,7 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/field-types'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-router'
@@ -174,12 +174,15 @@ dependsOn:
   - '@kbn/apm-common'
   - '@kbn/storybook'
   - '@kbn/lens-embeddable-utils'
+  - '@kbn/lens-common'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -192,6 +195,4 @@ fileGroups:
     - server/**/*.json
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

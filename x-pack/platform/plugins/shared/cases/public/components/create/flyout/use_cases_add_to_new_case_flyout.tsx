@@ -40,9 +40,11 @@ export const useCasesAddToNewCaseFlyout = ({
   const openFlyout = useCallback(
     ({
       attachments,
+      getAttachments,
       headerContent,
     }: {
       attachments?: CaseAttachmentsWithoutOwner;
+      getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
       headerContent?: React.ReactNode;
     } = {}) => {
       dispatch({
@@ -50,6 +52,7 @@ export const useCasesAddToNewCaseFlyout = ({
         payload: {
           initialValue,
           attachments,
+          getAttachments,
           headerContent,
           onClose: () => {
             closeFlyout();
@@ -59,9 +62,12 @@ export const useCasesAddToNewCaseFlyout = ({
           },
           onSuccess: async (theCase: CaseUI) => {
             if (theCase) {
+              const resolvedForToast = getAttachments
+                ? getAttachments(theCase.owner)
+                : attachments ?? [];
               casesToasts.showSuccessAttach({
                 theCase,
-                attachments: attachments ?? [],
+                attachments: resolvedForToast,
                 title: toastTitle,
                 content: toastContent,
               });

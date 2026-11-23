@@ -27,12 +27,14 @@ dependsOn:
   - '@kbn/safer-lodash-set'
   - '@kbn/serverless'
   - '@kbn/core-test-helpers-kbn-server'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - server/**/*
@@ -41,6 +43,4 @@ fileGroups:
     - generated/*.json
     - common/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

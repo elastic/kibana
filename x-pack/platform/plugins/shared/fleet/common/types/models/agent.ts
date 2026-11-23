@@ -110,6 +110,7 @@ interface AgentBase {
   enrolled_at: string;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   audit_unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
@@ -297,6 +298,10 @@ export interface FleetServerAgent {
    * Date/time the Elastic Agent unenrolled started
    */
   unenrollment_started_at?: string;
+  /**
+   * Reason set by Kibana when it unenrolls the agent, for example `agentless`
+   */
+  unenrolled_reason?: string;
   /**
    * Date/time the Elastic Agent was last upgraded
    */

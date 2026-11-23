@@ -8,6 +8,21 @@
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '../constants';
 
+/** Raw ES|QL row shape. `tags` may arrive as a string when ES|QL returns a single-value multivalue field. */
+export interface RawEpisodeActionHistoryEntry {
+  _id: string;
+  '@timestamp': string;
+  action_type: string;
+  actor: string | null;
+  episode_id: string | null;
+  group_hash: string | null;
+  tags?: string | string[] | null;
+  assignee_uid: string | null;
+  expiry: string | null;
+  reason: string | null;
+}
+
+/** Normalized entry with `tags` guaranteed to be a string array. */
 export interface EpisodeActionHistoryEntry {
   _id: string;
   '@timestamp': string;
@@ -15,7 +30,7 @@ export interface EpisodeActionHistoryEntry {
   actor: string | null;
   episode_id: string | null;
   group_hash: string | null;
-  tags: string[] | null;
+  tags: string[];
   assignee_uid: string | null;
   expiry: string | null;
   reason: string | null;

@@ -58,6 +58,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ context, errors }` (tree-shaped errors) |
 | `INVALID_STATE_TRANSITION`    | 400    | `state_transition` is incompatible with the rule's `kind`            | `{ rule_id, kind, transition }`            |
 | `INVALID_SIGNAL_RULE`               | 400    | An update would leave a signal rule in an invalid shape | `{ rule_id, rule_kind }`               |
+| `INVALID_RULE_QUERY_CONFIG`         | 400    | An update would desynchronize a `recovery_strategy`/`no_data_strategy` from its `query.recovery`/`query.no_data` block              | `{ rule_id }`                              |
 | `INVALID_BULK_PARAMS`         | 400    | Bulk operation combines `ids` with `filter` / `search` / `match_all` | `{ params }`                               |
 | `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
 | `INVALID_FILTER_FIELD`        | 400    | The `filter` references a field that is not in the allow-list        | `{ field, allowed_fields }`                |

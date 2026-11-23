@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
@@ -159,9 +160,15 @@ export function textToTimeRange(text: string, options?: TimeRangeTransformOption
   const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
-  const { presets = [], delimiter, dateFormat, roundRelativeTime, locale } = options ?? {};
+  const {
+    presets = [],
+    delimiter,
+    inputDateFormats = [],
+    roundRelativeTime,
+    locale,
+  } = options ?? {};
   const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
-  const formats = dateFormat ? [dateFormat, ...ABSOLUTE_FORMATS] : ABSOLUTE_FORMATS;
+  const formats = [...inputDateFormats, ...ABSOLUTE_FORMATS];
 
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
@@ -284,9 +291,25 @@ function applyRelativeRounding(
 }
 
 /**
+ * Parses chained Elasticsearch date math (e.g. `now/y+3M`, `-1y/y+3M`).
+ */
+function parseChainedDateMath(text: string): DateString | null {
+  const match = text.match(CHAINED_DATE_MATH_RE);
+  if (!match) return null;
+
+  const [, nowPrefix, ops] = match;
+  // A leading rounding with no `now` (`/d`) is not a valid standalone expression.
+  if (!nowPrefix && ops.startsWith('/')) return null;
+
+  const expression = `now${ops}`;
+  const parsed = dateMath.parse(expression);
+  return parsed?.isValid() ? expression : null;
+}
+
+/**
  * Converts a single text fragment into a {@link DateString}.
  * Tries (in order): "now", shorthand, natural instant, unix timestamp,
- * absolute formats, and finally dateMath/ISO fallback.
+ * chained/rounding-only date math, absolute formats, and dateMath/ISO fallback.
  */
 function instantToDateString(
   text: string,
@@ -319,9 +342,9 @@ function instantToDateString(
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
-  // These aren't caught by the shorthand regex which expects a count.
-  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+  // Before the vocabulary guard: unit letters in these expressions are also grammar words.
+  const chained = parseChainedDateMath(trimmed);
+  if (chained) return chained;
 
   // Natural-language vocabulary (a unit word, direction word, or instant
   // marker) that reached this point is a failed PHRASE, not an absolute

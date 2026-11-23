@@ -8,14 +8,17 @@
 import { PolicyNamespaceValidationError } from '../../../common/errors';
 import { FleetUnauthorizedError } from '../../errors';
 import { appContextService, licenseService } from '../../services';
-import { getInstallation } from '../../services/epm/packages/get';
+import { getInstallation, getPackages } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
+import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
 import {
   getAllowedNamespacePrefixesForSpace,
   isNamespaceAllowedByPrefixes,
 } from '../../services/spaces/policy_namespaces';
 
-import { rollbackPackageHandler, updatePackageHandler } from './handlers';
+import { getListHandler, rollbackPackageHandler, updatePackageHandler } from './handlers';
+
+const mockGlobalSoClient = { find: jest.fn() };
 
 jest.mock('../../services', () => {
   return {
@@ -24,9 +27,14 @@ jest.mock('../../services', () => {
     },
     appContextService: {
       getTaskManagerStart: jest.fn().mockReturnValue({}),
+      getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     },
   };
 });
+
+jest.mock('../../services/package_policies/package_policies_aggregation', () => ({
+  getPackagePoliciesCountByPackageName: jest.fn(),
+}));
 
 jest.mock('../../services/epm/packages/rollback', () => {
   return {
@@ -37,6 +45,7 @@ jest.mock('../../services/epm/packages/rollback', () => {
 jest.mock('../../services/epm/packages/get', () => {
   return {
     getInstallation: jest.fn(),
+    getPackages: jest.fn(),
   };
 });
 
@@ -200,5 +209,63 @@ describe('updatePackageHandler — ILM policy validation', () => {
     expect(hasPrivileges).not.toHaveBeenCalled();
     expect(getLifecycle).not.toHaveBeenCalled();
     expect(updatePackage).toHaveBeenCalled();
+  });
+});
+
+describe('getListHandler — withPackagePoliciesCount SO client', () => {
+  const mockGetPackages = getPackages as jest.Mock;
+  const mockGetCount = getPackagePoliciesCountByPackageName as jest.Mock;
+  const mockGetGlobalClient =
+    appContextService.getInternalUserSOClientWithoutSpaceExtension as jest.Mock;
+
+  const listContext = {
+    fleet: Promise.resolve({
+      internalSoClient: {},
+      spaceId: 'custom-space',
+    }),
+  } as any;
+
+  const listResponse = { ok: jest.fn() } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetGlobalClient.mockReturnValue(mockGlobalSoClient);
+    mockGetPackages.mockResolvedValue([
+      { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
+    ]);
+    mockGetCount.mockResolvedValue({ nginx: 3 });
+  });
+
+  it('uses the global (all-spaces) SO client for the package policy count', async () => {
+    await getListHandler(
+      listContext,
+      { query: { withPackagePoliciesCount: true } } as any,
+      listResponse
+    );
+
+    expect(mockGetGlobalClient).toHaveBeenCalled();
+    expect(mockGetCount).toHaveBeenCalledWith(mockGlobalSoClient);
+  });
+
+  it('sets packagePoliciesInfo.count on each item from the cross-space count', async () => {
+    await getListHandler(
+      listContext,
+      { query: { withPackagePoliciesCount: true } } as any,
+      listResponse
+    );
+
+    const body = listResponse.ok.mock.calls[0][0].body;
+    expect(body.items[0].packagePoliciesInfo).toEqual({ count: 3 });
+  });
+
+  it('skips the count query when withPackagePoliciesCount is false', async () => {
+    await getListHandler(
+      listContext,
+      { query: { withPackagePoliciesCount: false } } as any,
+      listResponse
+    );
+
+    expect(mockGetGlobalClient).not.toHaveBeenCalled();
+    expect(mockGetCount).not.toHaveBeenCalled();
   });
 });

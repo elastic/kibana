@@ -30,7 +30,6 @@
     "@kbn/data-plugin"
   ],
   "exclude": [
-    "target/**/*",
-    ".storybook/**/*"
+    "target/**/*"
   ]
 }

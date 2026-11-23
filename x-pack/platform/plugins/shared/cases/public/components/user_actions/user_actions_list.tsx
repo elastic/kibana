@@ -90,8 +90,7 @@ export const UserActionsList = React.memo(
     bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
-    const { unifiedAttachmentTypeRegistry } = useCasesContext();
-    const { owner } = useCasesContext();
+    const { unifiedAttachmentTypeRegistry, owner, permissions } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
     const { euiTheme } = useEuiTheme();
@@ -128,6 +127,7 @@ export const UserActionsList = React.memo(
           casesConfiguration,
           caseConnectors,
           unifiedAttachmentTypeRegistry,
+          permissions,
           userAction,
           userProfiles,
           currentUserProfile,
@@ -149,6 +149,7 @@ export const UserActionsList = React.memo(
       casesConfiguration,
       caseConnectors,
       unifiedAttachmentTypeRegistry,
+      permissions,
       userProfiles,
       currentUserProfile,
       attachments,

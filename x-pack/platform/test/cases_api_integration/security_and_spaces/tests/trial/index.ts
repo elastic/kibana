@@ -33,6 +33,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/find_cases'));
     loadTestFile(require.resolve('./cases/post_case'));
     loadTestFile(require.resolve('./cases/create_case_from_template'));
+    loadTestFile(require.resolve('./cases/patch_case_template_owner'));
     loadTestFile(require.resolve('./cases/patch_case'));
     // Public API — the fields a caller may apply to a case's `extended_fields`.
     loadTestFile(require.resolve('./cases/applicable_fields'));
@@ -57,6 +58,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
     loadTestFile(require.resolve('./internal/field_definitions'));
     loadTestFile(require.resolve('./internal/extended_fields_global'));
+    loadTestFile(require.resolve('./internal/field_pairing_errors'));
     loadTestFile(require.resolve('./internal/find_user_actions_extended_fields'));
     loadTestFile(require.resolve('./internal/required_on_close'));
     loadTestFile(require.resolve('./internal/search_cases_extended_fields'));
