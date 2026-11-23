@@ -153,7 +153,7 @@ From repo root:
 
 ```bash
 nvm use
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 ### 1) Set up local config (one-time)

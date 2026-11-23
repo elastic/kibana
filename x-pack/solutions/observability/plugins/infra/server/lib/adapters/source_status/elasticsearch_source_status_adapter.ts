@@ -14,6 +14,14 @@ import type { InfraSourceStatusAdapter, SourceIndexStatus } from '../../source_s
 import type { InfraDatabaseGetIndicesResponse } from '../framework';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';
 
+/**
+ * Transport-level ceiling for the source-status probe. Without a bound, this
+ * `size:0, terminate_after:1` search can hang indefinitely against an
+ * overloaded/unhealthy cluster or an unreachable remote-cluster pattern in a
+ * customized index alias. See https://github.com/elastic/kibana/issues/279610
+ */
+const SOURCE_STATUS_REQUEST_TIMEOUT = '30s';
+
 export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusAdapter {
   constructor(private readonly framework: KibanaFramework) {}
 
@@ -64,6 +72,7 @@ export class InfraElasticsearchSourceStatusAdapter implements InfraSourceStatusA
         terminate_after: 1,
         track_total_hits: 1,
         query: { bool: { filter } },
+        requestTimeout: SOURCE_STATUS_REQUEST_TIMEOUT,
       })
       .then(
         (response) => {

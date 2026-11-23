@@ -67,6 +67,7 @@ export type DynamicGroupingProps<T> = Pick<
  *  @interface GroupingArgs<T>
  */
 export interface GroupingArgs<T> {
+  allowedFieldTypes?: string[];
   componentProps: StaticGroupingProps<T>;
   defaultGroupingOptions: GroupOption[];
   fields: FieldSpec[];
@@ -112,6 +113,7 @@ export interface GroupingArgs<T> {
  * @returns {@link Grouping} the grouping constructor { getGrouping, groupSelector, pagination, selectedGroups }
  */
 export const useGrouping = <T,>({
+  allowedFieldTypes,
   componentProps,
   defaultGroupingOptions,
   initialGroupings,
@@ -147,6 +149,7 @@ export const useGrouping = <T,>({
   );
 
   const groupSelector = useGetGroupSelector({
+    allowedFieldTypes,
     defaultGroupingOptions,
     dispatch,
     fields,

@@ -195,6 +195,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
+        await waitForAlertsToBePresent(supertest, log, 10, [createdRule.id]);
         const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
         const alertsOpen2 = await getOpenAlerts(supertest, log, es, createdRule2);
         // Expect alerts here because all values are "Ubuntu"

@@ -19,6 +19,16 @@ import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertStatusExceptClosed } from '../../../model/alert.gen';
 
+/**
+ * The data type for the runtime field type. Determines how the field value is indexed and queried.
+ */
+export const RuntimeFieldType = lazySchema(() =>
+  z.enum(['keyword', 'long', 'double', 'date', 'ip', 'boolean', 'geo_point'])
+);
+export type RuntimeFieldType = z.infer<typeof RuntimeFieldType>;
+export type RuntimeFieldTypeEnum = typeof RuntimeFieldType.enum;
+export const RuntimeFieldTypeEnum = RuntimeFieldType.enum;
+
 export const ReasonEnum = lazySchema(() =>
   z.enum([
     'false_positive',
@@ -38,6 +48,32 @@ export const ReasonEnumEnum = ReasonEnum.enum;
  */
 export const Reason = lazySchema(() => z.union([ReasonEnum, z.string()]));
 export type Reason = z.infer<typeof Reason>;
+
+/**
+ * A runtime field included in the status-update query so the query can match fields that are not in the alerts index mapping, for example scripted fields on a data view. Elasticsearch evaluates the field at query time.
+ */
+export const RuntimeFieldMapping = lazySchema(() =>
+  z.object({
+    type: RuntimeFieldType,
+    /**
+     * Inline Painless script that Elasticsearch evaluates for each alert. Only `source` is accepted. Stored scripts, parameterized scripts (`params`), and non-default `lang` values are not supported. Extra properties are rejected with a 400 so the script is not run with different semantics.
+     */
+    script: z
+      .object({
+        /**
+         * Painless script source to execute.
+         */
+        source: z.string().max(10000),
+      })
+      .strict()
+      .optional(),
+    /**
+     * Format string for date runtime fields, for example `strict_date_optional_time`.
+     */
+    format: z.string().max(100).optional(),
+  })
+);
+export type RuntimeFieldMapping = z.infer<typeof RuntimeFieldMapping>;
 
 export const SetAlertsStatusByIdsBase = lazySchema(() =>
   z.object({
@@ -72,6 +108,17 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
     query: z.object({}).catchall(z.unknown()),
     status: AlertStatusExceptClosed,
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
+    /**
+     * Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created.
+     */
+    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
+    /**
+      * Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+Kibana sends `type`, `script.source`, and `format` to Elasticsearch as `runtime_mappings` on the status-update query. Unlike `runtime_fields`, Kibana keeps your script and runs it at query time. It does not replace the script with a `_source` reader.
+When a script is present, Kibana sets `on_script_error` to `continue`. If the script fails on one alert, that field has no value for the alert and the update continues.
+Unique field names across `runtime_fields` and `runtime_mappings` combined cannot exceed 100. Larger maps are rejected.
+      */
+    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -82,6 +129,17 @@ export const CloseAlertsByQuery = lazySchema(() =>
     status: z.literal('closed'),
     conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
     reason: Reason.optional(),
+    /**
+     * Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected.
+     */
+    runtime_fields: z.object({}).catchall(RuntimeFieldType).optional(),
+    /**
+      * Use this when the query references fields that are not in the alerts index mapping, for example data view runtime fields with a Painless script.
+Kibana sends `type`, `script.source`, and `format` to Elasticsearch as `runtime_mappings` on the status-update query. Unlike `runtime_fields`, Kibana keeps your script and runs it at query time. It does not replace the script with a `_source` reader.
+When a script is present, Kibana sets `on_script_error` to `continue`. If the script fails on one alert, that field has no value for the alert and the update continues.
+Unique field names across `runtime_fields` and `runtime_mappings` combined cannot exceed 100. Larger maps are rejected.
+      */
+    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;

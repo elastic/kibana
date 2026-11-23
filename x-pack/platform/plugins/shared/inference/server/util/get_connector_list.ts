@@ -17,6 +17,8 @@ import {
 import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
+const OCR_ONLY_PROPERTY = 'ocr-only';
+
 interface GetConnectorListWithRequestOptions {
   actions: ActionsClientProvider;
   request: KibanaRequest;
@@ -71,6 +73,9 @@ export const getConnectorList = async (
 
   const connectors = connectorsResult.status === 'fulfilled' ? connectorsResult.value : [];
   const endpoints = endpointsResult.status === 'fulfilled' ? endpointsResult.value : [];
+  const selectableEndpoints = endpoints.filter(
+    (ep) => !ep.metadata?.heuristics?.properties?.includes(OCR_ONLY_PROPERTY)
+  );
 
   const stackConnectorByInferenceId = new Map(
     connectors
@@ -78,7 +83,7 @@ export const getConnectorList = async (
       .map((c) => [c.config?.inferenceId as string, c])
   );
 
-  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
+  const inferenceEndpointConnectors: InferenceConnector[] = selectableEndpoints.map((ep) => ({
     type: InferenceConnectorType.Inference,
     name:
       ep.metadata.display?.name ??

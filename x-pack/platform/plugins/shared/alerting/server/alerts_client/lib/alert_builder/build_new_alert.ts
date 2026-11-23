@@ -33,6 +33,7 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
   ALERT_STATUS_ACTIVE,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -117,6 +118,7 @@ export const buildNewAlert = <
         [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,
+        [ALERT_TRACKED]: true,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
         ...(alertState.duration ? { [ALERT_DURATION]: nanosToMicros(alertState.duration) } : {}),
         ...(alertState.start

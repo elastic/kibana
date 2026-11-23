@@ -33,24 +33,16 @@ Install the version of Node.js listed in the `.node-version` file. This can be a
 nvm use
 ```
 
-Then, install the latest version of yarn using:
+Then enable pnpm via corepack (bundled with Node.js; the version is pinned in `package.json` `engines.pnpm`):
 
 ```sh
-npm install -g yarn
-```
-
-If you have Yarn installed, make sure you are using 1.22.22.
-
-. If you are using an unsupported Yarn version, run:
-+
-```sh
-yarn set version 1.22.22
+corepack enable
 ```
 
 Finally, bootstrap Kibana and install all of the remaining dependencies:
 
 ```sh
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ```
 
 Node.js native modules could be in use and node-gyp is the tool used to build them. There are tools you need to install per platform and python versions you need to be using. Please follow the [node-gyp installation steps](https://github.com/nodejs/node-gyp#installation) for your platform.
@@ -60,7 +52,7 @@ Node.js native modules could be in use and node-gyp is the tool used to build th
 In order to start Kibana you need to run a local version of Elasticsearch. You can startup and initialize the latest Elasticsearch snapshot of the correct version for Kibana by running the following in a new terminal tab/window:
 
 ```sh
-yarn es snapshot
+pnpm es snapshot
 ```
 
 You can pass `--license trial` to start Elasticsearch with a trial license, or use the Kibana UI to switch the local version to a trial version which includes all features.
@@ -72,7 +64,7 @@ Read about more options for [Running Elasticsearch during development](https://w
 In another terminal tab/window you can start Kibana.
 
 ```sh
-yarn start
+pnpm start
 ```
 
 Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. Read more about the advanced options for [Running Kibana](https://www.elastic.co/guide/en/kibana/current/running-kibana-advanced.html).
@@ -86,19 +78,19 @@ To develop against serverless projects, you need to start both Elasticsearch and
 
 ```sh
 # Pick the project type that matches your work
-yarn es serverless --projectType=oblt          
-yarn es serverless --projectType=security 
-yarn es serverless --projectType=es            
-yarn es serverless --projectType=workplaceai  
+pnpm es serverless --projectType=oblt          
+pnpm es serverless --projectType=security 
+pnpm es serverless --projectType=es            
+pnpm es serverless --projectType=workplaceai  
 ```
 
 **Step 2:** Start Kibana in the matching serverless mode:
 
 ```sh
-yarn serverless-oblt         
-yarn serverless-security     
-yarn serverless-es           
-yarn serverless-workplace-ai 
+pnpm serverless-oblt         
+pnpm serverless-security     
+pnpm serverless-es           
+pnpm serverless-workplace-ai 
 ```
 
 **Important:** The Kibana serverless mode must match the ES `--projectType` value. Mismatched modes will cause errors.
@@ -132,8 +124,8 @@ Kibana also supports using a [dev container](https://containers.dev/) which can 
     - **Docker Repo Volume**: Use the `Dev Containers: Clone Repository in Named Container Volume...` command from the Command Palette (`F1`). This clones the repo into a Docker volume, isolating it from your local filesystem. You will need to configure your git credentials manually in this isolated environment.
     - **Docker PR Volume**: Use the `Dev Containers: Clone GitHub Pull Request in Named Container Volume...` command from the Command Palette (`F1`). This is the same as the previous option, but can be useful for testing a PR in insolation of your local filesystem.
 1. VS Code will then build the container, this will take a few minutes the first time, but subsequent builds will utilize Docker caching and be much faster.
-1. Once the container is built and started, it will automatically run `yarn kbn bootstrap`.
-1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `yarn es` from inside the container.
+1. Once the container is built and started, it will automatically run `pnpm kbn bootstrap`.
+1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `pnpm es` from inside the container.
 
 ### Customizing the Dev Container
 

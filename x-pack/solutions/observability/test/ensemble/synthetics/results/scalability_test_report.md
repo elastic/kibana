@@ -24,8 +24,8 @@ From [Elastic Documentation](https://www.elastic.co/guide/en/observability/curre
 ## 2. Test Environment
 
 ### Local Setup
-- **Elasticsearch**: Local snapshot (yarn es snapshot)
-- **Kibana**: Local dev (yarn start)
+- **Elasticsearch**: Local snapshot (pnpm es snapshot)
+- **Kibana**: Local dev (pnpm start)
 - **Agent Image**: `elastic-agent-complete` (includes Chromium)
 - **Agent Version**: 9.4.0-SNAPSHOT
 

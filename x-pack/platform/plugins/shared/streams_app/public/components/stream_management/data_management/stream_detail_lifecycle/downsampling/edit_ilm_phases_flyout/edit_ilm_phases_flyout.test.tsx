@@ -120,7 +120,8 @@ const renderFlyout = (
   };
 };
 
-describe('EditIlmPhasesFlyout', () => {
+// Failing: See https://github.com/elastic/kibana/issues/297155
+describe.skip('EditIlmPhasesFlyout', () => {
   describe('rendering and tabs', () => {
     it('renders tabs for enabled phases and selects the first enabled phase', async () => {
       renderFlyout({

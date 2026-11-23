@@ -5,19 +5,32 @@
  * 2.0.
  */
 
-import { distinctUntilKeyChanged, map } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilKeyChanged,
+  map,
+  shareReplay,
+  startWith,
+  Subject,
+  take,
+} from 'rxjs';
 
 import type {
   HttpServiceSetup,
   KibanaRequest,
+  LogFileWriteError,
+  LogFileWriteErrorHandler,
   Logger,
   LoggerContextConfigInput,
   LoggingServiceSetup,
+  StatusServiceSetup,
 } from '@kbn/core/server';
 import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { httpRequestEvent } from './audit_events';
+import type { AuditLogWriteAccess } from './audit_write_access';
+import { getAuditLogPath, getAuditStatus$, probeAuditLogWriteAccess } from './audit_write_access';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
@@ -32,6 +45,8 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  // Used to report the plugin as degraded while the audit log cannot be written.
+  status: Pick<StatusServiceSetup, 'set' | 'derivedStatus$'>;
 
   getCurrentUser(
     request: KibanaRequest
@@ -59,16 +74,63 @@ export class AuditService {
     config,
     logging,
     http,
+    status,
     getCurrentUser,
     getSID,
     getSpaceId,
     recordAuditLoggingUsage,
   }: AuditServiceSetupParams): AuditServiceSetup {
-    // Configure logging during setup and when license changes
+    const auditLogPath = config.enabled ? getAuditLogPath(config.appender) : undefined;
+
+    const runtimeWriteAccess$ = new Subject<AuditLogWriteAccess>();
+    const onWriteError = auditLogPath
+      ? ({ path, code, reason }: LogFileWriteError) =>
+          runtimeWriteAccess$.next({
+            granted: false,
+            path,
+            code,
+            reason,
+            checkedAt: new Date().toISOString(),
+          })
+      : undefined;
+
+    const probed$ = license.features$.pipe(
+      distinctUntilKeyChanged('allowAuditLogging'),
+      map((features) => ({
+        features,
+        writeAccess:
+          auditLogPath && features.allowAuditLogging
+            ? probeAuditLogWriteAccess(auditLogPath)
+            : undefined,
+      })),
+      shareReplay(1)
+    );
+
+    const state$ = combineLatest([
+      probed$,
+      runtimeWriteAccess$.pipe(take(1), startWith(undefined)),
+    ]).pipe(
+      map(([{ features, writeAccess }, runtimeFailure]) => ({
+        features,
+        writeAccess: features.allowAuditLogging ? runtimeFailure ?? writeAccess : writeAccess,
+      })),
+      shareReplay(1)
+    );
+
+    const writeAccess$ = auditLogPath
+      ? state$.pipe(map(({ writeAccess }) => writeAccess))
+      : undefined;
+
+    // Report the plugin as degraded while the audit log cannot be written, so the lost audit
+    // trail shows up in /api/status rather than having to be inferred.
+    status.set(getAuditStatus$({ writeAccess$, derivedStatus$: status.derivedStatus$ }));
+
+    // Configure logging during setup and when the license changes
     logging.configure(
-      license.features$.pipe(
-        distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config)
+      state$.pipe(
+        map(({ features, writeAccess }) =>
+          createLoggingConfig(config, writeAccess, onWriteError)(features)
+        )
       )
     );
 
@@ -164,25 +226,51 @@ export class AuditService {
   }
 }
 
-export const createLoggingConfig = (config: ConfigType['audit']) =>
-  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
-    appenders: {
-      auditTrailAppender: config.appender ?? {
-        type: 'console',
-        layout: {
-          type: 'pattern',
-          highlight: true,
+export const createLoggingConfig =
+  (
+    config: ConfigType['audit'],
+    writeAccess?: AuditLogWriteAccess,
+    onWriteError?: LogFileWriteErrorHandler
+  ) =>
+  (features: Pick<SecurityLicenseFeatures, 'allowAuditLogging'>): LoggerContextConfigInput => {
+    if (writeAccess && !writeAccess.granted) {
+      // Audit events are dropped rather than redirected to stdout on purpose: they carry usernames,
+      // IPs and session ids that the audit sink is held to different access and retention rules for,
+      // and at one record per authenticated request they would flood the main log.
+      return {
+        appenders: {
+          // Core rejects a logger referencing an appender that is not in the map, so the key has to
+          // exist even though the logger is `off`. Console is the filler that writes nothing.
+          auditTrailAppender: { type: 'console' as const, layout: { type: 'json' as const } },
         },
+        loggers: [{ name: 'audit.ecs', level: 'off' as const, appenders: ['auditTrailAppender'] }],
+      };
+    }
+
+    const appender = config.appender ?? {
+      type: 'console' as const,
+      layout: {
+        type: 'pattern' as const,
+        highlight: true,
       },
-    },
-    loggers: [
-      {
-        name: 'audit.ecs',
-        level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
-        appenders: ['auditTrailAppender'],
-      },
-    ],
-  }));
+    };
+
+    const auditTrailAppender =
+      onWriteError && (appender.type === 'file' || appender.type === 'rolling-file')
+        ? { ...appender, onWriteError }
+        : appender;
+
+    return {
+      appenders: { auditTrailAppender },
+      loggers: [
+        {
+          name: 'audit.ecs',
+          level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
+          appenders: ['auditTrailAppender'],
+        },
+      ],
+    };
+  };
 
 /**
  * Evaluates the list of provided ignore rules, and filters out events only
