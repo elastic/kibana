@@ -66,9 +66,8 @@ generate_typescript() {
   echo "--- Running TypeScript generation"
   node scripts/generate_otel_semconv.js
 
-  # Run ESLint fix
-  echo "--- Running ESLint fix"
-  node scripts/eslint --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
+  echo "--- Formatting generated files with oxfmt"
+  node scripts/oxfmt "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
 
 create_pull_request() {
@@ -84,12 +83,12 @@ create_pull_request() {
 ### Changes Made
 - ✅ Updated `resolved-semconv.yaml` with latest conventions from OpenTelemetry repository
 - ✅ Regenerated `resolved-semconv.ts` with new field definitions and metadata
-- ✅ Applied ESLint formatting to generated files
+- ✅ Formatted generated files with oxfmt
 
 ### Validation
 - ✅ TypeScript compilation successful
 - ✅ Package tests passing
-- ✅ ESLint formatting applied
+- ✅ oxfmt formatting applied
 
 🤖 Generated automatically by Buildkite workflow'
 

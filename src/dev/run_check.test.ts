@@ -31,10 +31,6 @@ jest.mock('./type_check_validation_loader', () => ({
   executeTypeCheckValidation: jest.fn(),
 }));
 
-jest.mock('./eslint/run_eslint_contract', () => ({
-  executeEslintValidation: jest.fn(),
-}));
-
 jest.mock('./oxlint/run_oxlint_contract', () => ({
   executeOxlintValidation: jest.fn(),
 }));
@@ -86,8 +82,6 @@ const mockResolveValidationAffectedProjects = jest.requireMock('@kbn/dev-validat
   .resolveValidationAffectedProjects as jest.Mock;
 const mockExecuteTypeCheckValidation = jest.requireMock('./type_check_validation_loader')
   .executeTypeCheckValidation as jest.Mock;
-const mockExecuteEslintValidation = jest.requireMock('./eslint/run_eslint_contract')
-  .executeEslintValidation as jest.Mock;
 const mockExecuteOxlintValidation = jest.requireMock('./oxlint/run_oxlint_contract')
   .executeOxlintValidation as jest.Mock;
 const mockExistsSync = jest.requireMock('fs').existsSync as jest.Mock;
@@ -160,12 +154,6 @@ describe('run_check', () => {
         p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js'
     );
     mockReaddirSync.mockReturnValue([]);
-    mockExecuteEslintValidation.mockResolvedValue({
-      fileCount: 3,
-      fixedFiles: [],
-      failedFiles: [],
-      warningCount: 0,
-    });
     mockExecuteOxlintValidation.mockResolvedValue({
       fileCount: 3,
       failedFiles: [],
@@ -204,14 +192,13 @@ describe('run_check', () => {
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('check  scope=local');
-    expect(output).toContain('lint  ✓ 3 files');
     expect(output).toContain('oxlint✓ 3 files');
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
     expect(output).toContain('tsc   ✓ 2 projects');
   });
 
   it('prints skip lines when validators return null and no changed files', async () => {
-    mockExecuteEslintValidation.mockResolvedValue(null);
+    mockExecuteOxlintValidation.mockResolvedValue(null);
     mockExecuteTypeCheckValidation.mockResolvedValue(null);
     mockResolveValidationBaseContext.mockResolvedValue({
       ...baseContext,
@@ -224,7 +211,7 @@ describe('run_check', () => {
     await handler(createArgs());
 
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
-    expect(output).toContain('lint  — no files changed');
+    expect(output).toContain('oxlint— no files changed');
     expect(output).toContain('jest  — no changed files');
     expect(output).toContain('tsc   — no affected projects');
   });
@@ -241,7 +228,6 @@ describe('run_check', () => {
         },
       };
     });
-    mockExecuteEslintValidation.mockResolvedValue(null);
     mockExecuteTypeCheckValidation.mockResolvedValue(null);
 
     await handler(createArgs());
@@ -255,9 +241,8 @@ describe('run_check', () => {
   });
 
   it('continues running checks and reports all failures', async () => {
-    mockExecuteEslintValidation.mockResolvedValue({
+    mockExecuteOxlintValidation.mockResolvedValue({
       fileCount: 3,
-      fixedFiles: [],
       failedFiles: ['src/foo.ts'],
       warningCount: 0,
     });
@@ -267,8 +252,8 @@ describe('run_check', () => {
 
     expect(process.exitCode).toBe(1);
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
-    expect(output).toContain('lint  ✗ failed');
-    expect(output).toContain('node scripts/eslint src/foo.ts');
+    expect(output).toContain('oxlint✗ failed');
+    expect(output).toContain('node scripts/lint src/foo.ts');
     expect(output).toContain('jest  ✓ 1 config ran, 5 tests');
     expect(output).toContain('tsc   ✗ failed');
   });
@@ -286,7 +271,6 @@ describe('run_check', () => {
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('oxlint✗ failed');
     expect(output).toContain('node scripts/lint src/foo.ts');
-    expect(output).toContain('lint  ✓ 3 files');
   });
 
   it('prints oxlint tool failures instead of only marking the step failed', async () => {
@@ -303,20 +287,6 @@ describe('run_check', () => {
     expect(output).toContain('    Failed to parse configuration file');
   });
 
-  it('shows fixed file count when eslint auto-fixes', async () => {
-    mockExecuteEslintValidation.mockResolvedValue({
-      fileCount: 10,
-      fixedFiles: ['a.ts', 'b.ts'],
-      failedFiles: [],
-      warningCount: 0,
-    });
-
-    await handler(createArgs());
-
-    const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
-    expect(output).toContain('lint  ✓ 10 files (fixed 2 files)');
-  });
-
   it('prints lint warning details when there are no errors', async () => {
     interface MockLog {
       writers: Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>;
@@ -328,10 +298,6 @@ describe('run_check', () => {
       warn(log, 'src/foo.ts:1:1  warning  Unexpected console  no-console');
       return { fileCount: 3, failedFiles: [], warningCount: 1 };
     });
-    mockExecuteEslintValidation.mockImplementation(async ({ log }: { log: MockLog }) => {
-      warn(log, 'src/bar.ts\n  2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any');
-      return { fileCount: 3, fixedFiles: [], failedFiles: [], warningCount: 1 };
-    });
 
     await handler(createArgs());
 
@@ -339,10 +305,6 @@ describe('run_check', () => {
     const output = stdoutSpy.mock.calls.map(([text]: [string]) => text).join('');
     expect(output).toContain('oxlint⚠ 3 files (1 warning)');
     expect(output).toContain('    src/foo.ts:1:1  warning  Unexpected console  no-console');
-    expect(output).toContain('lint  ⚠ 3 files (1 warning)');
-    expect(output).toContain(
-      '    src/bar.ts\n      2:3  warning  Unexpected any  @typescript-eslint/no-explicit-any'
-    );
   });
 
   it('skips fast path for integration test files', async () => {

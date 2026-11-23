@@ -38,7 +38,6 @@ import {
 } from '@kbn/jest';
 import { executeTypeCheckValidation } from './type_check_validation_loader';
 
-import { executeEslintValidation } from './eslint/run_eslint_contract';
 import { executeOxlintValidation } from './oxlint/run_oxlint_contract';
 
 // ── Output helpers ──────────────────────────────────────────────────────────
@@ -468,51 +467,6 @@ run(
       }
     }
 
-    // ── lint ───────────────────────────────────────────────────────────
-
-    {
-      const { log, captured } = createSilentLog();
-      const progress = startProgress('lint');
-      try {
-        const result = await executeEslintValidation({ baseContext, log, fix });
-        if (!result) {
-          progress.writeResult(line('lint', '—', 'no files changed'));
-        } else if (result.failedFiles.length > 0) {
-          progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-          writeCaptured(captured);
-          writeln(`    $ node scripts/eslint ${result.failedFiles.join(' ')}`);
-          writeln('');
-          errors.push(new Error('eslint failed'));
-        } else {
-          const notes: string[] = [];
-          if (result.fixedFiles.length > 0) {
-            notes.push(`fixed ${pluralize(result.fixedFiles.length, 'file')}`);
-          }
-          if (result.warningCount > 0) {
-            notes.push(pluralize(result.warningCount, 'warning'));
-          }
-          const suffix = notes.length > 0 ? ` (${notes.join(', ')})` : '';
-          progress.writeResult(
-            line(
-              'lint',
-              result.warningCount > 0 ? '⚠' : '✓',
-              `${pluralize(result.fileCount, 'file')}${suffix}`,
-              progress.elapsed()
-            )
-          );
-          if (result.warningCount > 0) writeCaptured(captured);
-          if (verbose && result.fixedFiles.length > 0) {
-            for (const file of result.fixedFiles) {
-              writeln(`         fixed: ${file}`);
-            }
-          }
-        }
-      } catch (error) {
-        progress.writeResult(line('lint', '✗', 'failed', progress.elapsed()));
-        errors.push(error instanceof Error ? error : new Error(String(error)));
-      }
-    }
-
     // ── jest ───────────────────────────────────────────────────────────
 
     {
@@ -777,7 +731,7 @@ run(
   },
   {
     description: `
-      Run type_check, eslint, and jest with one shared validation contract.
+      Run type_check, oxlint, and jest with one shared validation contract.
 
       Defaults to --profile quick when no validation flags are provided.
 
