@@ -5,15 +5,9 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "names": [
-        ""
-      ],
-      "ids": [
-        ""
-      ],
-      "external_ids": [
-        ""
-      ],
+      "names": [],
+      "ids": [],
+      "external_ids": [],
       "master_timeout": [
         "30s",
         "-1",

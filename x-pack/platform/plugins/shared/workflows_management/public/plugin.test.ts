@@ -10,6 +10,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import {
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
@@ -70,6 +71,7 @@ describe('WorkflowsPlugin', () => {
   let startDeps: {
     workflowsExtensions: ReturnType<typeof workflowsExtensionsMock.createStart>;
     licensing: ReturnType<typeof licensingMock.createStart>;
+    navigation: ReturnType<typeof navigationPluginMock.createStartContract>;
   };
 
   beforeEach(() => {
@@ -86,6 +88,7 @@ describe('WorkflowsPlugin', () => {
     startDeps = {
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: licensingMock.createStart(),
+      navigation: navigationPluginMock.createStartContract(),
     };
   });
 
@@ -188,6 +191,16 @@ describe('WorkflowsPlugin', () => {
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions, {
         pagesEnabled: false,
+      });
+    });
+
+    it('registers the recently viewed workflows under the workflows side nav entry', () => {
+      plugin.start(coreStart, startDeps as any);
+
+      expect(startDeps.navigation.registerNavigationLinks).toHaveBeenCalledWith({
+        id: 'workflowsLinks',
+        target: PLUGIN_ID,
+        lists: [expect.objectContaining({ id: 'recent', title: 'Recent' })],
       });
     });
 

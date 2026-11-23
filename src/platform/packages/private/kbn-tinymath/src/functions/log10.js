@@ -10,7 +10,7 @@
 const { log } = require('./log');
 
 /**
- * Calculates the base 10 logarithm of a number. For arrays, the function will be applied index-wise to each element. Expressions don't accept the name `log10`, because function names can't contain digits. To calculate a base 10 logarithm, use `log` with a base of 10, as in the examples.
+ * Deprecated. Call `log(a, 10)` instead. Expressions can't call `log10`, because function names can't contain digits.
  * @param {(number|number[])} a a number or an array of numbers, `a` can't be negative
  * @return {(number|number[])} The logarithm of `a`. Returns an array with the logarithms base 10 of each element if `a` is an array. The result can differ from the exact value in the last digits, as in `log(1000, 10)`, which returns `2.9999999999999996`.
  * @throws `'Must be greater than 0'` if `a` < 0
