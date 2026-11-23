@@ -359,9 +359,14 @@ const createIsolationActionResponseDocument = ({
 
 /**
  * Writes one host as Endpoint and Fleet would: a metadata doc and an agent doc
- * sharing `agent.id`. Both carry `updated_at` because the `metadata_united`
- * transform syncs on that field; without it the lookups only see the host once
- * an unrelated change advances the transform, often merged from one side only.
+ * sharing `agent.id`.
+ *
+ * The agent doc carries `updated_at` because the `metadata_united` transform
+ * syncs on it; without it the host is merged from the Endpoint side only and
+ * the lookup tools (which require both) never see it. The metadata doc must
+ * not carry the key: `metrics-endpoint.metadata_current` maps it as an alias of
+ * `event.ingested`, and the `metadata_current` transform fails permanently
+ * ("Cannot write to a field alias") when it copies the key through.
  */
 export async function seedScenario(clients: SeedClients, scenario: EndpointScenario) {
   const now = new Date().toISOString();
@@ -404,7 +409,6 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       },
       elastic: { agent: { id: agentId } },
       labels: { manual_eval_host: hostName },
-      updated_at: now,
     },
   });
 

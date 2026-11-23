@@ -53,11 +53,11 @@ describe('waitForTransformPropagation', () => {
   });
 });
 
-// The `metadata_united` transform only processes changes to its sync field.
-// A seeded host without `updated_at` on either doc is merged when some other
-// change advances the transform, and often from one side only.
+// Both halves of the contract are asserted: omitting the field is the original
+// bug (hosts merged from one side), adding it to the metadata doc is the
+// regression that kills the `metadata_current` transform.
 describe('endpoint_data seeded documents', () => {
-  it('stamps `updated_at` on the metadata and agent docs the host is merged from', async () => {
+  it('stamps `updated_at` on the agent doc only', async () => {
     const create = jest.fn().mockResolvedValue({ result: 'created' });
     const index = jest.fn().mockResolvedValue({ result: 'created' });
     const clients = {
@@ -76,8 +76,8 @@ describe('endpoint_data seeded documents', () => {
 
     const metadataDoc = create.mock.calls[0][0].document;
     const agentDoc = index.mock.calls[0][0].document;
-    expect(metadataDoc.updated_at).toEqual(metadataDoc['@timestamp']);
     expect(agentDoc.updated_at).toEqual(agentDoc['@timestamp']);
+    expect(metadataDoc).not.toHaveProperty('updated_at');
   });
 });
 
