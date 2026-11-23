@@ -250,12 +250,12 @@ describe('esql query helpers', () => {
       ).toBe('event.ingested');
     });
 
-    it('should ignore the time field used inside a LET the query does not read', () => {
+    it('should return the time field used inside a LET read by an IN subquery', () => {
       expect(
         parseTimeFieldFromESQLQuery(
-          'LET unused = (FROM logs | WHERE event.ingested >= ?_tstart); FROM metrics'
+          'LET ids = (FROM logs | WHERE event.ingested >= ?_tstart | KEEP id); FROM metrics | WHERE id IN (FROM ids)'
         )
-      ).toBeUndefined();
+      ).toBe('event.ingested');
     });
   });
 
