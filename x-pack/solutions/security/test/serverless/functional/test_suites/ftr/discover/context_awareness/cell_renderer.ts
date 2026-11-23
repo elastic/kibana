@@ -52,9 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('DataView mode', () => {
       it('should render alert workflow status badge', async () => {
-        await PageObjects.common.navigateToActualUrl('discover', undefined, {
-          ensureCurrentUrl: false,
-        });
+        await PageObjects.discover.navigateToApp({ queryMode: 'classic' });
         await PageObjects.discover.selectIndexPattern(SECURITY_SOLUTION_DATA_VIEW);
         await queryBar.setQuery('host.name: "siem-kibana" AND event.kind: "signal"');
         await queryBar.clickQuerySubmitButton();
