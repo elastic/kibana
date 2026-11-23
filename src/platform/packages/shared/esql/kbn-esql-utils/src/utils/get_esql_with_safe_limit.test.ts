@@ -60,9 +60,9 @@ describe('getESQLWithSafeLimit()', () => {
     );
   });
 
-  it('preserves dollar sequences in LET string literals', () => {
-    expect(getESQLWithSafeLimit('LET selected = (ROW value = "$& $$"); FROM selected', LIMIT)).toBe(
-      'LET selected = (ROW value = "$& $$"); FROM selected \n| LIMIT 10000'
+  it('preserves dollar sequences in the source command', () => {
+    expect(getESQLWithSafeLimit('FROM (ROW value = "$& $$")', LIMIT)).toBe(
+      'FROM (ROW value = "$& $$") \n| LIMIT 10000'
     );
   });
 });
