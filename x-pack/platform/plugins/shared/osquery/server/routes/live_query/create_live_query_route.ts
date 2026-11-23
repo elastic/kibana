@@ -79,23 +79,32 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
               throw new Error('Alert client unavailable');
             }
 
-            alertData = (await client.get({ id: request.body.alert_ids[0] })) as
-              | (ParsedTechnicalFields & { _index: string })
-              | undefined;
+            // Every referenced alert must resolve; the first one drives the rest of the request.
+            // The alerts client reports both missing and unauthorized alerts as a Boom 404.
+            const alerts = await Promise.all(
+              request.body.alert_ids.map(async (id) => {
+                const alert = await client.get({ id });
+                if (!alert) {
+                  throw notFound();
+                }
 
-            if (!alertData) {
-              throw notFound();
-            }
+                return alert as ParsedTechnicalFields & { _index: string };
+              })
+            );
+
+            alertData = alerts[0];
           }
         } catch (error) {
-          const statusCode = isBoom(error)
+          const rawStatusCode = isBoom(error)
             ? error.output.statusCode
-            : error.statusCode ?? error.meta?.statusCode;
+            : error?.statusCode ?? error?.meta?.statusCode;
+          const statusCode = typeof rawStatusCode === 'number' ? rawStatusCode : undefined;
 
-          if (statusCode === 404) {
-            alertError = { statusCode, message: 'The requested alert was not found' };
-          } else if (statusCode === 403) {
-            alertError = { statusCode, message: 'Not authorized to read the requested alert' };
+          if (statusCode === 404 || statusCode === 403) {
+            alertError = {
+              statusCode: 404,
+              message: 'The requested alert was not found or is not accessible',
+            };
           } else {
             logger.error(
               `Failed to retrieve alert for osquery live query request: ${error.message}`,

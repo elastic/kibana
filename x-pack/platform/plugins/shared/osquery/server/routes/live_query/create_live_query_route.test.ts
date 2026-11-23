@@ -102,19 +102,21 @@ describe('createLiveQueryRoute', () => {
     coreStart,
     racGet,
     getActiveSpace,
+    racClientUnavailable,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
     getActiveSpace?: jest.Mock;
+    racClientUnavailable?: boolean;
   }): OsqueryAppContext =>
     ({
       getStartServices: jest.fn().mockResolvedValue([coreStart, { security: {} }]),
       service: {
         getActiveSpace: getActiveSpace ?? jest.fn().mockResolvedValue({ id: 'default' }),
         getRuleRegistryService: jest.fn().mockReturnValue({
-          getRacClientWithRequest: jest.fn().mockResolvedValue({
-            get: racGet ?? jest.fn(),
-          }),
+          getRacClientWithRequest: jest
+            .fn()
+            .mockResolvedValue(racClientUnavailable ? undefined : { get: racGet ?? jest.fn() }),
         }),
       },
       logFactory: { get: jest.fn().mockReturnValue({ debug: jest.fn(), error: jest.fn() }) },
@@ -136,17 +138,19 @@ describe('createLiveQueryRoute', () => {
       coreStart,
       racGet,
       getActiveSpace,
+      racClientUnavailable,
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
+      racClientUnavailable?: boolean;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
     const mockRouter = createMockRouter();
     createLiveQueryRoute(
       mockRouter,
-      createOsqueryContext({ coreStart: start, racGet, getActiveSpace })
+      createOsqueryContext({ coreStart: start, racGet, getActiveSpace, racClientUnavailable })
     );
 
     const mockRequest = httpServerMock.createKibanaRequest({ body });
@@ -310,13 +314,30 @@ describe('createLiveQueryRoute', () => {
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['missing', notFound(), 404, 'The requested alert was not found'],
-    ['unreadable', forbidden(), 403, 'Not authorized to read the requested alert'],
-    ['unavailable', new Error('ES unavailable'), 500, 'Error occurred while retrieving the alert'],
-  ])(
-    'returns a structured error for an %s alert when query access is allowed',
-    async (_description, error, statusCode, message) => {
+  describe('alert lookup failures when query access is allowed', () => {
+    const ALERT_NOT_ACCESSIBLE = 'The requested alert was not found or is not accessible';
+
+    // AlertsClient.get wraps every lookup failure (missing alert, alert-level authz, ES errors)
+    // in Boom.notFound with the original error embedded in the message.
+    const alertsClientError = (id: string, cause: string) =>
+      notFound(
+        `Unable to retrieve alert details for alert with id of "${id}" or with query "undefined" and operation get \nError: ${cause}`
+      );
+
+    const readableAlert = {
+      _index: '.alerts-security.alerts-default',
+      'kibana.alert.rule.uuid': 'rule-1',
+    };
+
+    it.each([
+      ['missing', alertsClientError('alert-1', 'Error: Not Found')],
+      [
+        'unreadable',
+        alertsClientError('alert-1', 'Error: Unauthorized by "siem" to get "siem.queryRule" alert'),
+      ],
+      ['an ES security exception for', alertsClientError('alert-1', 'security_exception')],
+      ['a raw forbidden error for', forbidden()],
+    ])('returns 404 without internal details for a %s alert', async (_description, error) => {
       const racGet = jest.fn().mockRejectedValue(error);
       const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
 
@@ -325,11 +346,89 @@ describe('createLiveQueryRoute', () => {
         { coreStart, racGet }
       );
 
-      expect(response.customError).toHaveBeenCalledWith({ statusCode, body: { message } });
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: ALERT_NOT_ACCESSIBLE },
+      });
       expect(response.ok).not.toHaveBeenCalled();
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
-    }
-  );
+    });
+
+    it('returns 404 when any of several alert_ids cannot be resolved', async () => {
+      const racGet = jest.fn(async ({ id }: { id: string }) => {
+        if (id === 'alert-2') {
+          throw alertsClientError(id, 'Error: Not Found');
+        }
+
+        return readableAlert;
+      });
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(racGet).toHaveBeenCalledWith({ id: 'alert-1' });
+      expect(racGet).toHaveBeenCalledWith({ id: 'alert-2' });
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: { message: ALERT_NOT_ACCESSIBLE },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('passes the first alert to the action handler when every alert resolves', async () => {
+      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1', 'alert-2'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ alertData: expect.objectContaining({ id: 'alert-1' }) })
+      );
+    });
+
+    it('returns a controlled 500 when the alerts client is unavailable', async () => {
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racClientUnavailable: true }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Error occurred while retrieving the alert' },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+  });
+
+  it('returns 403 and no alert details when the caller cannot run the query and the alert is missing', async () => {
+    const racGet = jest
+      .fn()
+      .mockRejectedValue(
+        notFound(
+          'Unable to retrieve alert details for alert with id of "missing-alert" or with query "undefined" and operation get \nError: Error: Not Found'
+        )
+      );
+
+    const response = await invokeRoute(
+      { query: 'select 42 as custom;', alert_ids: ['missing-alert'], agent_ids: ['agent-1'] },
+      { racGet }
+    );
+
+    expect(response.forbidden).toHaveBeenCalledWith();
+    expect(response.customError).not.toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
 
   it('looks the saved query up as the expected saved object type', async () => {
     const coreStart = createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
