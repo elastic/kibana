@@ -83,4 +83,21 @@ describe('findDecisionsWithConflictingVerdicts', () => {
 
     expect(api.callKibanaApi).not.toHaveBeenCalled();
   });
+
+  it('refuses an id that is not a decision id, instead of reading it as having no conflict', async () => {
+    const api = apiWith([]);
+
+    await expect(findDecisionsWithConflictingVerdicts(api, ['not-a-decision'])).rejects.toThrow(
+      'not a decision id'
+    );
+    expect(api.callKibanaApi).not.toHaveBeenCalled();
+  });
+
+  it('looks up the key of a dismissal id too, which is one character longer in its prefix', async () => {
+    const api = apiWith([strictKeyTag(HASH_A)]);
+
+    await expect(
+      findDecisionsWithConflictingVerdicts(api, [`fp-dismissal-${HASH_A}`])
+    ).resolves.toEqual(new Set([`fp-dismissal-${HASH_A}`]));
+  });
 });

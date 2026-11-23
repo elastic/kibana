@@ -8,7 +8,7 @@
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import {
   FP_DECISION_BLOCKING_VERDICT_TAGS,
-  FP_DECISION_ID_PREFIX,
+  hashOfDecisionId,
   strictKeyTag,
 } from '../../../alert_triage/fp_decisions';
 import { findKeyTagsWithVerdicts } from '../ports';
@@ -37,9 +37,12 @@ export const findDecisionsWithConflictingVerdicts = async (
   for (let from = 0; from < decisionIds.length; from += DECISIONS_PER_SEARCH) {
     if (shouldStop()) break;
     const idByKeyTag = new Map(
-      decisionIds
-        .slice(from, from + DECISIONS_PER_SEARCH)
-        .map((id) => [strictKeyTag(id.slice(FP_DECISION_ID_PREFIX.length)), id])
+      decisionIds.slice(from, from + DECISIONS_PER_SEARCH).map((id) => {
+        const hash = hashOfDecisionId(id);
+        // An id that is not a decision id has no key to look up: never read that as "no conflict".
+        if (hash === undefined) throw new Error(`${id} is not a decision id`);
+        return [strictKeyTag(hash), id];
+      })
     );
     const withVerdicts = await findKeyTagsWithVerdicts(
       api,

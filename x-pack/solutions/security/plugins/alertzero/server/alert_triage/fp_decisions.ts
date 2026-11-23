@@ -141,6 +141,14 @@ export const selectDecisionKeys = ({
 export const decisionId = (kind: FpDecisionKind, hash: string): string =>
   `${kind === 'false_positive' ? FP_DECISION_ID_PREFIX : FP_DO_NOT_PROPOSE_ID_PREFIX}${hash}`;
 
+/** The key hash a decision id was built from, or `undefined` for an id that is not a decision id. */
+export const hashOfDecisionId = (id: string): string | undefined => {
+  const prefix = [FP_DECISION_ID_PREFIX, FP_DO_NOT_PROPOSE_ID_PREFIX].find((candidate) =>
+    id.startsWith(candidate)
+  );
+  return prefix === undefined ? undefined : id.slice(prefix.length);
+};
+
 export interface DecisionProvenance {
   spaceId: string;
   proposalId: string;
@@ -235,6 +243,10 @@ export interface StoredDecision {
   proposalId?: string;
 }
 
+/** The lifecycle status of a stored decision document, if it has one. */
+export const readLifecycle = (source: Record<string, unknown> | undefined): string | undefined =>
+  (source?.governance as { lifecycle?: { status?: string } } | undefined)?.lifecycle?.status;
+
 /**
  * A stored decision, if it is still in force. The Context Engine enforces expiry and lifecycle only
  * on its query route, and the sweep reads the backing index directly, so both are checked here.
@@ -249,8 +261,7 @@ export const readActiveDecision = ({
   now: number;
 }): StoredDecision | undefined => {
   if (source === undefined || source.type !== FP_DECISION_KI_TYPE) return undefined;
-  const lifecycle = (source.governance as { lifecycle?: { status?: string } } | undefined)
-    ?.lifecycle?.status;
+  const lifecycle = readLifecycle(source);
   if (lifecycle !== undefined && lifecycle !== 'active') return undefined;
   const expiresAt = typeof source.expires_at === 'string' ? Date.parse(source.expires_at) : NaN;
   // An item with no expiry would never lapse. Decisions always set one, so one without it is not ours.

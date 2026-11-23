@@ -14,6 +14,7 @@ import {
   decisionId,
   groupByStrictKey,
   hashCandidates,
+  hashOfDecisionId,
   matchDecisions,
   readActiveDecision,
   selectDecisionKeys,
@@ -418,5 +419,18 @@ describe('matchDecisions', () => {
     });
 
     expect(wouldClose.size).toBe(0);
+  });
+});
+
+describe('hashOfDecisionId', () => {
+  it.each([['false_positive' as const], ['do_not_propose' as const]])(
+    'gives back the hash the %s id was built from',
+    (kind) => {
+      expect(hashOfDecisionId(decisionId(kind, '0123456789abcdef'))).toBe('0123456789abcdef');
+    }
+  );
+
+  it('answers undefined for an id that is not a decision id', () => {
+    expect(hashOfDecisionId('something-0123456789abcdef')).toBeUndefined();
   });
 });

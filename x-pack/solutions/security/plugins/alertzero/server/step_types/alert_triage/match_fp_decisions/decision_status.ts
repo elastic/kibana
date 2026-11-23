@@ -6,7 +6,7 @@
  */
 
 import { TRIAGE_DECISIONS_AI_INDEX_DEST } from '../../../../common/step_types/triage_decisions_index';
-import { readActiveDecision } from '../../../alert_triage/fp_decisions';
+import { readActiveDecision, readLifecycle } from '../../../alert_triage/fp_decisions';
 import { statusCodeOf } from '../ports';
 
 /**
@@ -39,8 +39,7 @@ export const readDecisionStatus = async ({
 }): Promise<DecisionStatus> => {
   try {
     const { _source } = await es.get({ index: TRIAGE_DECISIONS_AI_INDEX_DEST.value, id });
-    const lifecycle = (_source?.governance as { lifecycle?: { status?: string } } | undefined)
-      ?.lifecycle?.status;
+    const lifecycle = readLifecycle(_source);
     if (lifecycle !== undefined && lifecycle !== 'active') return 'gone';
     return readActiveDecision({ id, source: _source, now }) !== undefined ? 'active' : 'lapsed';
   } catch (error) {
