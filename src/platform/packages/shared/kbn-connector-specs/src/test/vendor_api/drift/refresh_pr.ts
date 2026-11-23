@@ -85,14 +85,14 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
 };
 
 const summaryOf = ({ changeCount, endpointCount, onlyRegrouped }: ConnectorSection): string => {
-  const calls = `${plural(endpointCount, 'endpoint')} the connector calls`;
-  let what = 'contained changes that `oasdiff` does not report';
+  const uses = `${plural(endpointCount, 'endpoint')} that the connector uses`;
+  let what = 'has changes that `oasdiff` does not report';
   if (onlyRegrouped) {
-    what = `only regrouped the auth scopes of ${calls}`;
+    what = `only regroups the auth scopes of ${uses}`;
   } else if (changeCount > 0) {
-    what = `changed ${plural(changeCount, 'thing')} on ${calls}`;
+    what = `has ${plural(changeCount, 'change')} on ${uses}`;
   }
-  return `New vendor spec captured. It ${what}.`;
+  return `New spec ${what}.`;
 };
 
 /** The cell of an endpoint's changes: its areas, a blank line apart. */
@@ -102,7 +102,7 @@ const cellLines = (areas: readonly ChangeArea[]): string[] => {
 };
 
 /**
- * The table of the endpoints that changed, folded away under a summary of how many. It is HTML
+ * The table of the endpoints that changed, folded away under "See changes". It is HTML
  * because a diff block can't sit in a markdown table's cell, and GitHub reads markdown inside an
  * HTML cell only when blank lines surround it.
  */
@@ -114,7 +114,7 @@ const changesTable = (section: ConnectorSection): string[] => {
   const hidden = endpointCount - rows.length;
   return [
     '<details>',
-    `<summary>${plural(endpointCount, 'changed endpoint')}</summary>`,
+    '<summary>See changes</summary>',
     '',
     '<table>',
     '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',

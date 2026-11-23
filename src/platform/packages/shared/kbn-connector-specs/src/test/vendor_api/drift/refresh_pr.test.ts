@@ -65,10 +65,10 @@ describe('renderRefreshPr', () => {
       [
         '### `.other`',
         '',
-        'New vendor spec captured. It changed 2 things on 2 endpoints the connector calls.',
+        'New spec has 2 changes on 2 endpoints that the connector uses.',
         '',
         '<details>',
-        '<summary>2 changed endpoints</summary>',
+        '<summary>See changes</summary>',
         '',
         '<table>',
         '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',
@@ -99,9 +99,9 @@ describe('renderRefreshPr', () => {
     expect(body).toMatch(/<\/table>\n\n<\/details>/);
   });
 
-  it('says "1 thing on 1 endpoint" for a single change', () => {
+  it('says "1 change on 1 endpoint" for a single change', () => {
     expect(renderRefreshPr([changed('.other', [field('GET /a', 'x')])])).toContain(
-      'It changed 1 thing on 1 endpoint the connector calls.\n'
+      'New spec has 1 change on 1 endpoint that the connector uses.\n'
     );
   });
 
@@ -118,7 +118,7 @@ describe('renderRefreshPr', () => {
       ),
     ]);
 
-    expect(body).toContain('It changed 1 thing on 1 endpoint the connector calls.');
+    expect(body).toContain('New spec has 1 change on 1 endpoint that the connector uses.');
   });
 
   it('counts the changes of every endpoint, also those the table leaves out', () => {
@@ -131,7 +131,7 @@ describe('renderRefreshPr', () => {
       ),
     ]);
 
-    expect(body).toContain('It changed 23 things on 23 endpoints the connector calls.');
+    expect(body).toContain('New spec has 23 changes on 23 endpoints that the connector uses.');
   });
 
   it('says so when the new spec only regrouped the auth scopes', () => {
@@ -148,7 +148,7 @@ describe('renderRefreshPr', () => {
     ]);
 
     expect(body).toContain(
-      'It only regrouped the auth scopes of 1 endpoint the connector calls.\n'
+      'New spec only regroups the auth scopes of 1 endpoint that the connector uses.\n'
     );
   });
 
@@ -159,9 +159,9 @@ describe('renderRefreshPr', () => {
     ]);
 
     expect(body).toContain(
-      '### `.moved`\n\nNew vendor spec captured. It contained changes that `oasdiff` does not report.\n\n- The actions call other operations.'
+      '### `.moved`\n\nNew spec has changes that `oasdiff` does not report.\n\n- The actions call other operations.'
     );
-    expect(body).toContain('### `.quiet`\n\nNew vendor spec captured. It contained changes');
+    expect(body).toContain('### `.quiet`\n\nNew spec has changes');
     expect(body).not.toContain('<details>');
   });
 
@@ -209,7 +209,7 @@ describe('renderRefreshPr', () => {
       ),
     ]);
 
-    expect(body).toContain('<summary>23 changed endpoints</summary>');
+    expect(body).toContain('<summary>See changes</summary>');
     expect(body).toContain('`GET /e19`');
     expect(body).not.toContain('`GET /e20`');
     expect(body).toContain('…and 3 more endpoints; the drift report lists them.\n\n</details>');
@@ -273,7 +273,7 @@ describe('renderRefreshPr', () => {
     changed(
       connector,
       Array.from({ length: 20 }, (_, endpoint) =>
-        field(`GET /${endpoint}`, `${'y'.repeat(53)}${endpoint}`)
+        field(`GET /${endpoint}`, `${'y'.repeat(56)}${endpoint}`)
       )
     );
 
