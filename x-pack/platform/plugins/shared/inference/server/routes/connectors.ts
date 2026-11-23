@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { boundedString, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
@@ -30,7 +30,9 @@ export function registerConnectorsRoute({
       },
       validate: {
         query: schema.object({
-          taskType: schema.maybe(boundedString({ maxLength: 64 })),
+          taskType: schema.maybe(
+            schema.oneOf([schema.literal('chat_completion'), schema.literal('decision')])
+          ),
         }),
       },
     },

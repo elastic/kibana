@@ -22,7 +22,9 @@ export const AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS = [
   '.openai-gpt-6-luna-chat_completion', // Luna-6 2026-09-28
 ];
 
-export const AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS = ['.typesafe-jev-1.13_decision'];
+export const AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS = [
+  '.typesafe-jev-1.13_decision', // TypeSafe Jev 1.13, preview 2026-09-17
+];
 
 /**
  * ID of the (fake) user assigned as owner / creator for assets created by our system.

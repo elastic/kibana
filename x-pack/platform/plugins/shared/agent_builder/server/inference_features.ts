@@ -56,7 +56,7 @@ export const registerInferenceFeatures = ({
     parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
     featureId: AGENT_BUILDER_DECISION_INFERENCE_FEATURE_ID,
     featureName: 'Decision models',
-    featureDescription: 'Models used for quick decisions, like whether the agent should respond',
+    featureDescription: 'Models used for quick decisions',
     taskType: 'decision',
     recommendedEndpoints: AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS,
     isTechPreview: true,
