@@ -24,6 +24,7 @@ const createImportConfigDocument = (overrides: Record<string, unknown> = {}): Sa
   id: 'import-1',
   type: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
   attributes: {
+    type: 'datadog',
     kind: 'alert',
     metadata: {
       name: 'Datadog production',
@@ -85,6 +86,8 @@ describe('importConfigModelVersions', () => {
     });
 
     it.each([
+      ['an unknown type', { type: 'splunk' }],
+      ['a missing type', { type: undefined }],
       ['an unknown kind', { kind: 'rule' }],
       ['a missing connector id', { connector_id: undefined }],
       ['an empty tags array', { metadata: { name: 'Import', tags: [] } }],

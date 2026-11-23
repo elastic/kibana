@@ -14,6 +14,7 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const importConfigMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
+    type: { type: 'keyword', ignore_above: 64 },
     kind: { type: 'keyword', ignore_above: 64 },
     metadata: {
       properties: {
