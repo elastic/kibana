@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ComponentProps } from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppDependencies } from '../../../..';
 import { ConfigurationForm } from '../../components/configuration_form';
@@ -133,6 +133,40 @@ describe('Mappings editor: configuration form', () => {
 
       await screen.findByTestId('storedSourceFieldOption');
       expect(screen.queryByTestId('syntheticSourceFieldOption')).not.toBeInTheDocument();
+    });
+
+    describe('synthetic _source default for logsdb index mode', () => {
+      it('applies the synthetic default once the status request resolves', async () => {
+        setup({ esNodesPlugins: [], indexMode: 'logsdb' }, getContext(true, true));
+
+        await waitFor(() =>
+          expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/synthetic/i)
+        );
+      });
+
+      it('keeps the option selected by the user while the status request is pending', async () => {
+        let resolveStatus: (value: { syntheticSourceFallbackToStoredSource: boolean }) => void;
+        loadSyntheticSourceStatusMock.mockReturnValue(
+          new Promise((resolve) => {
+            resolveStatus = resolve;
+          })
+        );
+
+        setup({ esNodesPlugins: [], indexMode: 'logsdb' }, getContext(true, true));
+
+        // The user picks "Disabled _source" before the status request resolves
+        fireEvent.click(screen.getByTestId('sourceValueField'));
+        fireEvent.click(await screen.findByTestId('disabledSourceFieldOption'));
+        expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/disabled/i);
+
+        await act(async () => {
+          resolveStatus({ syntheticSourceFallbackToStoredSource: false });
+        });
+
+        // The synthetic default must not override the user's selection
+        expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/disabled/i);
+        expect(screen.getByTestId('sourceValueField')).not.toHaveTextContent(/synthetic/i);
+      });
     });
   });
 });
