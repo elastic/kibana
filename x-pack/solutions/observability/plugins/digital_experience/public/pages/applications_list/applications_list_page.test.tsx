@@ -278,6 +278,42 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
   });
 
+  it.each([
+    ['not set up', NOT_SET_UP, 'digitalExperienceApplicationsSessionsNotEnabled'],
+    [
+      'still building',
+      { ...HEALTHY_SESSIONS, rebuilding: true },
+      'digitalExperienceApplicationsSessionsRebuilding',
+    ],
+  ])(
+    'keeps a Web tab, on the mobile one, while sessions are %s',
+    async (_name, status, callout) => {
+      mockSessionsStatus({ status });
+      respondWith([mobileApp()]);
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceMobileApplicationsTable')).toBeVisible();
+      expect(screen.queryByTestId(callout)).toBeNull();
+
+      fireEvent.click(screen.getByTestId('digitalExperienceApplicationTypeTab-web'));
+      expect(setApplicationType).toHaveBeenCalledWith('web');
+    }
+  );
+
+  it('says on the Web tab that sessions are not set up, beside mobile applications', async () => {
+    mockApplicationType('web');
+    mockSessionsStatus({ status: NOT_SET_UP });
+    respondWith([mobileApp()]);
+    renderPage();
+
+    expect(
+      await screen.findByTestId('digitalExperienceApplicationsSessionsNotEnabled')
+    ).toBeVisible();
+    expect(
+      screen.getByText('EDOT Browser applications show up here once sessions are set up.')
+    ).toBeVisible();
+  });
+
   it('lists one row per application with a badge per platform, linked to the mobile page', async () => {
     respondWith([mobileApp()]);
     renderPage();

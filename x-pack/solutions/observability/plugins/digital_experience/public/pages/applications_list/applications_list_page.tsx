@@ -274,6 +274,30 @@ export function ApplicationsListPage() {
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
 
+  const {
+    status: sessionsStatus,
+    refresh: refreshSessionsStatus,
+    enable: enableSessions,
+    enabling: enablingSessions,
+    enableError: enableSessionsError,
+  } = useSessionsStatus();
+  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again.
+  const refreshAll = useCallback(() => {
+    refresh();
+    refreshSessionsStatus();
+  }, [refresh, refreshSessionsStatus]);
+  // Once sessions are set up and built, the list has applications it was fetched without.
+  const sessionsReady = sessionsStatus
+    ? sessionsStatus.installed && !sessionsStatus.rebuilding
+    : undefined;
+  const wereSessionsReady = useRef(sessionsReady);
+  useEffect(() => {
+    if (wereSessionsReady.current === false && sessionsReady) {
+      refresh();
+    }
+    wereSessionsReady.current = sessionsReady;
+  }, [sessionsReady, refresh]);
+
   // Serverless has no ux plugin and no Classic RUM data; known on the first render, so the filter
   // row doesn't change once the data loads.
   const canFilterBySource = ux !== undefined;
@@ -290,14 +314,14 @@ export function ApplicationsListPage() {
     !hasWebApplications && !hasWebFailures && hasMobileApplications
       ? APPLICATION_TYPE.mobile
       : APPLICATION_TYPE.web;
-  // Web and mobile applications have their own tab when both have something to show (web rows or a
-  // web retry, and mobile rows), for the mobile retry or unreadable data prompt whatever the web, and
+  // Web and mobile applications have their own tab when both have something to show (web rows, a
+  // web retry or sessions still to set up or build, and mobile rows), for the mobile retry or unreadable data prompt whatever the web, and
   // when the URL picks the type without data, e.g. for the mobile setup docs, with a tab back. The
   // type that alone has data shows no empty tab, e.g. back from a mobile application.
   const showsTabs =
     mobileAvailability === 'unavailable' ||
     showsMobileUnreadableDataPrompt ||
-    ((hasWebApplications || hasWebFailures) && hasMobileApplications) ||
+    ((hasWebApplications || hasWebFailures || sessionsReady === false) && hasMobileApplications) ||
     (response !== undefined && applicationType !== undefined && applicationType !== typeWithData);
   const selectedType = applicationType ?? typeWithData;
   const isMobileTab = selectedType === APPLICATION_TYPE.mobile;
@@ -317,33 +341,9 @@ export function ApplicationsListPage() {
     [response, selectedPlatform, search]
   );
 
-  const {
-    status: sessionsStatus,
-    refresh: refreshSessionsStatus,
-    enable: enableSessions,
-    enabling: enablingSessions,
-    enableError: enableSessionsError,
-  } = useSessionsStatus();
-  // The status only refreshes by itself while sessions rebuild, so a refresh also checks it again.
-  const refreshAll = useCallback(() => {
-    refresh();
-    refreshSessionsStatus();
-  }, [refresh, refreshSessionsStatus]);
   // Only the EDOT Browser applications are read from the sessions.
   const showsSessionsStatus =
     sessionsStatus && !isMobileTab && selectedSource !== APPLICATION_SOURCE.classic;
-
-  // Once sessions are set up and built, the list has applications it was fetched without.
-  const sessionsReady = sessionsStatus
-    ? sessionsStatus.installed && !sessionsStatus.rebuilding
-    : undefined;
-  const wereSessionsReady = useRef(sessionsReady);
-  useEffect(() => {
-    if (wereSessionsReady.current === false && sessionsReady) {
-      refresh();
-    }
-    wereSessionsReady.current = sessionsReady;
-  }, [sessionsReady, refresh]);
 
   const items = useMemo(
     () =>
