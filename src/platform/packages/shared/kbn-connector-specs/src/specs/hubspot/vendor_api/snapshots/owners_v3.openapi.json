@@ -207,7 +207,9 @@
             "authorizationUrl": "https://app.hubspot.com/oauth/authorize",
             "scopes": {
               "automation": "",
-              "crm.objects.owners.read": ""
+              "crm.objects.owners.read": "",
+              "crm.pipelines.approval.read": "",
+              "crm.pipelines.governance.write": ""
             },
             "tokenUrl": "https://api.hubapi.com/oauth/v1/token"
           }
@@ -292,6 +294,16 @@
           {
             "oauth2": [
               "crm.objects.owners.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.pipelines.approval.read"
+            ]
+          },
+          {
+            "oauth2": [
+              "crm.pipelines.governance.write"
             ]
           }
         ]

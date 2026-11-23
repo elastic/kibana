@@ -1272,6 +1272,27 @@
             "nullable": true,
             "type": "string"
           },
+          "status": {
+            "nullable": true,
+            "properties": {
+              "category": {
+                "type": "string"
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "category"
+            ],
+            "type": "object"
+          },
           "sub_issues_summary": {
             "$ref": "#/components/schemas/sub-issues-summary"
           },
@@ -6489,6 +6510,9 @@
                   "parent_issue_id": {
                     "type": "integer"
                   },
+                  "status": {
+                    "type": "string"
+                  },
                   "title": {
                     "oneOf": [
                       {
@@ -6728,6 +6752,9 @@
                       "reopened"
                     ],
                     "nullable": true,
+                    "type": "string"
+                  },
+                  "status": {
                     "type": "string"
                   },
                   "title": {

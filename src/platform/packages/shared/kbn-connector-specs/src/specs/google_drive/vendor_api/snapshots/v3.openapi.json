@@ -884,6 +884,34 @@
           },
           {
             "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "oauth_token",
             "schema": {
               "type": "string"
@@ -899,20 +927,6 @@
                 "media",
                 "proto"
               ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
               "type": "string"
             }
           },
@@ -936,24 +950,10 @@
           },
           {
             "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "prettyPrint",
             "schema": {
               "default": "true",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -965,9 +965,17 @@
           },
           {
             "in": "query",
-            "name": "orderBy",
+            "name": "includePermissionsForView",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "supportsAllDrives",
+            "schema": {
+              "default": "false",
+              "type": "boolean"
             }
           },
           {
@@ -984,26 +992,22 @@
             }
           },
           {
-            "deprecated": true,
-            "in": "query",
-            "name": "supportsTeamDrives",
-            "schema": {
-              "default": "false",
-              "deprecated": true,
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "supportsAllDrives",
-            "schema": {
-              "default": "false",
-              "type": "boolean"
-            }
-          },
-          {
             "in": "query",
             "name": "includeLabels",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
             "schema": {
               "type": "string"
             }
@@ -1018,10 +1022,12 @@
             }
           },
           {
+            "deprecated": true,
             "in": "query",
-            "name": "includeItemsFromAllDrives",
+            "name": "includeTeamDriveItems",
             "schema": {
               "default": "false",
+              "deprecated": true,
               "type": "boolean"
             }
           },
@@ -1034,9 +1040,19 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "q",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "deprecated": true,
+            "in": "query",
+            "name": "supportsTeamDrives",
+            "schema": {
+              "default": "false",
+              "deprecated": true,
+              "type": "boolean"
             }
           },
           {
@@ -1052,32 +1068,16 @@
           },
           {
             "in": "query",
-            "name": "includePermissionsForView",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "q",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "corpora",
             "schema": {
               "type": "string"
             }
           },
           {
-            "deprecated": true,
             "in": "query",
-            "name": "includeTeamDriveItems",
+            "name": "includeItemsFromAllDrives",
             "schema": {
               "default": "false",
-              "deprecated": true,
               "type": "boolean"
             }
           },
@@ -1104,13 +1104,41 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/drive",
-              "https://www.googleapis.com/auth/drive.appdata",
-              "https://www.googleapis.com/auth/drive.file",
-              "https://www.googleapis.com/auth/drive.meet.readonly",
-              "https://www.googleapis.com/auth/drive.metadata",
-              "https://www.googleapis.com/auth/drive.metadata.readonly",
-              "https://www.googleapis.com/auth/drive.photos.readonly",
+              "https://www.googleapis.com/auth/drive"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.appdata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.file"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.meet.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.photos.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/drive.readonly"
             ]
           }
@@ -1138,6 +1166,34 @@
           },
           {
             "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "oauth_token",
             "schema": {
               "type": "string"
@@ -1153,20 +1209,6 @@
                 "media",
                 "proto"
               ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
               "type": "string"
             }
           },
@@ -1190,24 +1232,10 @@
           },
           {
             "in": "query",
-            "name": "key",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
             "name": "prettyPrint",
             "schema": {
               "default": "true",
               "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "uploadType",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -1219,14 +1247,14 @@
           },
           {
             "in": "query",
-            "name": "includePermissionsForView",
+            "name": "includeLabels",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "acknowledgeAbuse",
+            "name": "supportsAllDrives",
             "schema": {
               "default": "false",
               "type": "boolean"
@@ -1234,7 +1262,7 @@
           },
           {
             "in": "query",
-            "name": "supportsAllDrives",
+            "name": "acknowledgeAbuse",
             "schema": {
               "default": "false",
               "type": "boolean"
@@ -1252,7 +1280,7 @@
           },
           {
             "in": "query",
-            "name": "includeLabels",
+            "name": "includePermissionsForView",
             "schema": {
               "type": "string"
             }
@@ -1272,13 +1300,41 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/drive",
-              "https://www.googleapis.com/auth/drive.appdata",
-              "https://www.googleapis.com/auth/drive.file",
-              "https://www.googleapis.com/auth/drive.meet.readonly",
-              "https://www.googleapis.com/auth/drive.metadata",
-              "https://www.googleapis.com/auth/drive.metadata.readonly",
-              "https://www.googleapis.com/auth/drive.photos.readonly",
+              "https://www.googleapis.com/auth/drive"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.appdata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.file"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.meet.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.metadata.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/drive.photos.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/drive.readonly"
             ]
           }

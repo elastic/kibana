@@ -66,13 +66,13 @@
   "sources": {
     "serverless": {
       "apiVersion": "",
-      "fetchedAt": "2026-10-07T20:20:11.683Z",
+      "fetchedAt": "2026-11-23T11:13:49.549Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/openapi/elasticsearch-serverless-openapi.json"
     },
     "stack": {
       "apiVersion": "",
-      "fetchedAt": "2026-10-07T20:20:11.683Z",
+      "fetchedAt": "2026-11-23T11:13:49.833Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/openapi/elasticsearch-openapi.json"
     }

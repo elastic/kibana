@@ -18,7 +18,7 @@
     },
     "drive_v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:20:43.725Z",
+      "fetchedAt": "2026-11-23T11:10:29.114Z",
       "format": "discovery",
       "url": "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
     }

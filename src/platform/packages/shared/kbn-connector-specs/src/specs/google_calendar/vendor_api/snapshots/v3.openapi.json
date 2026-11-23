@@ -909,14 +909,21 @@
           },
           {
             "in": "query",
-            "name": "fields",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "userIp",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -927,6 +934,13 @@
             "schema": {
               "default": "true",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -942,31 +956,54 @@
           },
           {
             "in": "query",
-            "name": "oauth_token",
+            "name": "fields",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "quotaUser",
+            "name": "orderBy",
             "schema": {
+              "enum": [
+                "startTime",
+                "updated"
+              ],
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "key",
+            "name": "privateExtendedProperty",
             "schema": {
-              "type": "string"
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
             }
           },
           {
             "in": "query",
-            "name": "timeMin",
+            "name": "showDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "updatedMin",
             "schema": {
               "format": "date-time",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxAttendees",
+            "schema": {
+              "format": "int32",
+              "minimum": 1,
+              "type": "integer"
             }
           },
           {
@@ -981,7 +1018,45 @@
           },
           {
             "in": "query",
+            "name": "iCalUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "default": "250",
+              "format": "int32",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "showHiddenInvitations",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
             "name": "alwaysIncludeEmail",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "singleEvents",
             "schema": {
               "type": "boolean"
             }
@@ -995,36 +1070,9 @@
           },
           {
             "in": "query",
-            "name": "singleEvents",
+            "name": "timeMin",
             "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "syncToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "showDeleted",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "iCalUID",
-            "schema": {
+              "format": "date-time",
               "type": "string"
             }
           },
@@ -1048,71 +1096,23 @@
           },
           {
             "in": "query",
-            "name": "showHiddenInvitations",
+            "name": "timeMax",
             "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "privateExtendedProperty",
-            "schema": {
-              "items": {
-                "type": "string"
-              },
-              "type": "array"
-            }
-          },
-          {
-            "in": "query",
-            "name": "orderBy",
-            "schema": {
-              "enum": [
-                "startTime",
-                "updated"
-              ],
+              "format": "date-time",
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "maxResults",
+            "name": "syncToken",
             "schema": {
-              "default": "250",
-              "format": "int32",
-              "minimum": 1,
-              "type": "integer"
+              "type": "string"
             }
           },
           {
             "in": "query",
             "name": "timeZone",
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "maxAttendees",
-            "schema": {
-              "format": "int32",
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "updatedMin",
-            "schema": {
-              "format": "date-time",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "timeMax",
-            "schema": {
-              "format": "date-time",
               "type": "string"
             }
           }
@@ -1131,14 +1131,46 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/calendar",
-              "https://www.googleapis.com/auth/calendar.app.created",
-              "https://www.googleapis.com/auth/calendar.events",
-              "https://www.googleapis.com/auth/calendar.events.freebusy",
-              "https://www.googleapis.com/auth/calendar.events.owned",
-              "https://www.googleapis.com/auth/calendar.events.owned.readonly",
-              "https://www.googleapis.com/auth/calendar.events.public.readonly",
-              "https://www.googleapis.com/auth/calendar.events.readonly",
+              "https://www.googleapis.com/auth/calendar"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.app.created"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.freebusy"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.owned"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.owned.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.public.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/calendar.readonly"
             ]
           }
@@ -1167,14 +1199,21 @@
           },
           {
             "in": "query",
-            "name": "fields",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "userIp",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1185,6 +1224,13 @@
             "schema": {
               "default": "true",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -1200,21 +1246,7 @@
           },
           {
             "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
+            "name": "fields",
             "schema": {
               "type": "string"
             }
@@ -1257,14 +1289,46 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/calendar",
-              "https://www.googleapis.com/auth/calendar.app.created",
-              "https://www.googleapis.com/auth/calendar.events",
-              "https://www.googleapis.com/auth/calendar.events.freebusy",
-              "https://www.googleapis.com/auth/calendar.events.owned",
-              "https://www.googleapis.com/auth/calendar.events.owned.readonly",
-              "https://www.googleapis.com/auth/calendar.events.public.readonly",
-              "https://www.googleapis.com/auth/calendar.events.readonly",
+              "https://www.googleapis.com/auth/calendar"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.app.created"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.freebusy"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.owned"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.owned.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.public.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/calendar.readonly"
             ]
           }
@@ -1277,14 +1341,21 @@
         "parameters": [
           {
             "in": "query",
-            "name": "fields",
+            "name": "quotaUser",
             "schema": {
               "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "userIp",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
             "schema": {
               "type": "string"
             }
@@ -1295,6 +1366,13 @@
             "schema": {
               "default": "true",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -1310,21 +1388,7 @@
           },
           {
             "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "key",
+            "name": "fields",
             "schema": {
               "type": "string"
             }
@@ -1353,9 +1417,21 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/calendar",
-              "https://www.googleapis.com/auth/calendar.events.freebusy",
-              "https://www.googleapis.com/auth/calendar.freebusy",
+              "https://www.googleapis.com/auth/calendar"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.events.freebusy"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.freebusy"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/calendar.readonly"
             ]
           }
@@ -1366,46 +1442,6 @@
       "get": {
         "operationId": "calendar.calendarList.list",
         "parameters": [
-          {
-            "in": "query",
-            "name": "fields",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "userIp",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "alt",
-            "schema": {
-              "default": "json",
-              "enum": [
-                "json"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "in": "query",
             "name": "quotaUser",
@@ -1422,9 +1458,79 @@
           },
           {
             "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "userIp",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "syncToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "showDeleted",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "maxResults",
+            "schema": {
+              "format": "int32",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "showOwnOrganizationOnly",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -1443,37 +1549,7 @@
           },
           {
             "in": "query",
-            "name": "syncToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "maxResults",
-            "schema": {
-              "format": "int32",
-              "minimum": 1,
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
             "name": "showHidden",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "pageToken",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "showOwnOrganizationOnly",
             "schema": {
               "type": "boolean"
             }
@@ -1493,9 +1569,21 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/calendar",
-              "https://www.googleapis.com/auth/calendar.calendarlist",
-              "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+              "https://www.googleapis.com/auth/calendar"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.calendarlist"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/calendar.calendarlist.readonly"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/calendar.readonly"
             ]
           }

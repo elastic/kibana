@@ -198,8 +198,8 @@
   },
   "sources": {
     "v3": {
-      "apiVersion": "1001.0.0-SNAPSHOT-075425bbde28f069e4778bc256e773dd780217cf",
-      "fetchedAt": "2026-10-07T20:48:51.637Z",
+      "apiVersion": "1001.0.0-SNAPSHOT-6e27052da36f05e0a0b0bf27ca91a6601810e967",
+      "fetchedAt": "2026-11-23T11:09:56.398Z",
       "format": "openapi",
       "url": "https://developer.atlassian.com/cloud/jira/platform/swagger-v3.v3.json"
     }

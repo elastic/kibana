@@ -202,6 +202,9 @@
           "alertName": {
             "type": "string"
           },
+          "alertUID": {
+            "type": "string"
+          },
           "avatarUrl": {
             "type": "string"
           },
@@ -1001,14 +1004,6 @@
           },
           {
             "in": "query",
-            "name": "alertId",
-            "schema": {
-              "format": "int64",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
             "name": "alertUID",
             "schema": {
               "type": "string"
@@ -1046,6 +1041,7 @@
             }
           },
           {
+            "explode": true,
             "in": "query",
             "name": "tags",
             "schema": {
@@ -1053,7 +1049,8 @@
                 "type": "string"
               },
               "type": "array"
-            }
+            },
+            "style": "form"
           },
           {
             "in": "query",
@@ -1077,6 +1074,9 @@
         "responses": {
           "200": {
             "$ref": "#/components/responses/getAnnotationsResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/badRequestError"
           },
           "401": {
             "$ref": "#/components/responses/unauthorisedError"
@@ -1234,6 +1234,7 @@
             }
           },
           {
+            "explode": true,
             "in": "query",
             "name": "tag",
             "schema": {
@@ -1241,7 +1242,8 @@
                 "type": "string"
               },
               "type": "array"
-            }
+            },
+            "style": "form"
           },
           {
             "in": "query",
@@ -1527,6 +1529,9 @@
     }
   ],
   "servers": [
+    {
+      "url": "/api"
+    },
     {
       "url": "/api"
     }

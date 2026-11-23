@@ -329,6 +329,15 @@
             }
           },
           {
+            "in": "query",
+            "name": "operators_fallback",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "in": "header",
             "name": "x-loc-lat",
             "required": false,
@@ -4527,6 +4536,10 @@
                                 "nullable": true,
                                 "type": "array"
                               },
+                              "search_operators_fallback": {
+                                "nullable": true,
+                                "type": "boolean"
+                              },
                               "software": {
                                 "nullable": true,
                                 "properties": {
@@ -6079,6 +6092,10 @@
                               "page_fetched": {
                                 "nullable": true,
                                 "type": "string"
+                              },
+                              "search_operators_fallback": {
+                                "nullable": true,
+                                "type": "boolean"
                               },
                               "thumbnail": {
                                 "nullable": true,
@@ -9999,6 +10016,10 @@
                                 "items": {},
                                 "nullable": true,
                                 "type": "array"
+                              },
+                              "search_operators_fallback": {
+                                "nullable": true,
+                                "type": "boolean"
                               },
                               "software": {
                                 "nullable": true,

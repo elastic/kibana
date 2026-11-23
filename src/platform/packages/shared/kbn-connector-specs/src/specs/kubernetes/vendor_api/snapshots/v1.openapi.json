@@ -70,6 +70,26 @@
         ],
         "type": "object"
       },
+      "io.k8s.api.apps.v1.DeploymentSchedulingConfiguration": {
+        "properties": {
+          "disruptionMode": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupDisruptionMode"
+          },
+          "resourceClaims": {
+            "items": {
+              "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupResourceClaim"
+            },
+            "type": "array"
+          },
+          "schedulingConstraints": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupSchedulingConstraints"
+          },
+          "schedulingPolicy": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupSchedulingPolicy"
+          }
+        },
+        "type": "object"
+      },
       "io.k8s.api.apps.v1.DeploymentSpec": {
         "properties": {
           "minReadySeconds": {
@@ -90,6 +110,9 @@
           "revisionHistoryLimit": {
             "format": "int32",
             "type": "integer"
+          },
+          "scheduling": {
+            "$ref": "#/components/schemas/io.k8s.api.apps.v1.DeploymentSchedulingConfiguration"
           },
           "selector": {
             "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector"
@@ -382,6 +405,14 @@
         ],
         "type": "object"
       },
+      "io.k8s.api.core.v1.CgroupOptions": {
+        "properties": {
+          "mountMode": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "io.k8s.api.core.v1.CinderVolumeSource": {
         "properties": {
           "fsType": {
@@ -524,6 +555,9 @@
               "$ref": "#/components/schemas/io.k8s.api.core.v1.EnvFromSource"
             },
             "type": "array"
+          },
+          "hostCgroupNamespace": {
+            "type": "boolean"
           },
           "image": {
             "type": "string"
@@ -986,6 +1020,9 @@
             },
             "type": "array"
           },
+          "hostCgroupNamespace": {
+            "type": "boolean"
+          },
           "image": {
             "type": "string"
           },
@@ -1216,6 +1253,30 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "io.k8s.api.core.v1.ExtraNodeAllocatableResource": {
+        "properties": {
+          "containerName": {
+            "type": "string"
+          },
+          "limits": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.api.resource.Quantity"
+            },
+            "type": "object"
+          },
+          "requests": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.api.resource.Quantity"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "containerName",
+          "limits"
+        ],
         "type": "object"
       },
       "io.k8s.api.core.v1.FCVolumeSource": {
@@ -1740,67 +1801,6 @@
             "$ref": "#/components/schemas/io.k8s.api.core.v1.NodeSelector"
           }
         },
-        "type": "object"
-      },
-      "io.k8s.api.core.v1.NodeAllocatableMappedResources": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "quantity": {
-            "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.api.resource.Quantity"
-          }
-        },
-        "required": [
-          "name",
-          "quantity"
-        ],
-        "type": "object"
-      },
-      "io.k8s.api.core.v1.NodeAllocatableOverheadResources": {
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "perContainer": {
-            "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.api.resource.Quantity"
-          },
-          "perPod": {
-            "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.api.resource.Quantity"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "type": "object"
-      },
-      "io.k8s.api.core.v1.NodeAllocatableResourceClaimStatus": {
-        "properties": {
-          "containers": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "mapping": {
-            "items": {
-              "$ref": "#/components/schemas/io.k8s.api.core.v1.NodeAllocatableMappedResources"
-            },
-            "type": "array"
-          },
-          "overhead": {
-            "items": {
-              "$ref": "#/components/schemas/io.k8s.api.core.v1.NodeAllocatableOverheadResources"
-            },
-            "type": "array"
-          },
-          "resourceClaimName": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "resourceClaimName"
-        ],
         "type": "object"
       },
       "io.k8s.api.core.v1.NodeSelector": {
@@ -2435,6 +2435,9 @@
             },
             "type": "object"
           },
+          "podNetwork": {
+            "type": "string"
+          },
           "preemptionPolicy": {
             "type": "string"
           },
@@ -2553,6 +2556,12 @@
           "extendedResourceClaimStatus": {
             "$ref": "#/components/schemas/io.k8s.api.core.v1.PodExtendedResourceClaimStatus"
           },
+          "extraNodeAllocatableResources": {
+            "items": {
+              "$ref": "#/components/schemas/io.k8s.api.core.v1.ExtraNodeAllocatableResource"
+            },
+            "type": "array"
+          },
           "hostIP": {
             "type": "string"
           },
@@ -2570,12 +2579,6 @@
           },
           "message": {
             "type": "string"
-          },
-          "nodeAllocatableResourceClaimStatuses": {
-            "items": {
-              "$ref": "#/components/schemas/io.k8s.api.core.v1.NodeAllocatableResourceClaimStatus"
-            },
-            "type": "array"
           },
           "nominatedNodeName": {
             "type": "string"
@@ -2617,9 +2620,9 @@
           "startTime": {
             "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
           },
-          "volumeHealth": {
+          "volumeStatuses": {
             "items": {
-              "$ref": "#/components/schemas/io.k8s.api.core.v1.PodVolumeHealth"
+              "$ref": "#/components/schemas/io.k8s.api.core.v1.PodVolumeStatus"
             },
             "type": "array"
           }
@@ -2637,16 +2640,13 @@
         },
         "type": "object"
       },
-      "io.k8s.api.core.v1.PodVolumeHealth": {
+      "io.k8s.api.core.v1.PodVolumeStatus": {
         "properties": {
-          "healthConditions": {
-            "items": {
-              "$ref": "#/components/schemas/io.k8s.api.core.v1.VolumeHealthCondition"
-            },
-            "type": "array"
+          "healthStatus": {
+            "$ref": "#/components/schemas/io.k8s.api.core.v1.VolumeHealthStatus"
           },
-          "lastTransitionTime": {
-            "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+          "hostPhase": {
+            "type": "string"
           },
           "name": {
             "type": "string"
@@ -2963,6 +2963,9 @@
           "localhostProfile": {
             "type": "string"
           },
+          "oci": {
+            "$ref": "#/components/schemas/io.k8s.api.core.v1.SecurityProfileOCI"
+          },
           "type": {
             "type": "string"
           }
@@ -3053,6 +3056,9 @@
           "capabilities": {
             "$ref": "#/components/schemas/io.k8s.api.core.v1.Capabilities"
           },
+          "cgroupOptions": {
+            "$ref": "#/components/schemas/io.k8s.api.core.v1.CgroupOptions"
+          },
           "privileged": {
             "type": "boolean"
           },
@@ -3083,6 +3089,34 @@
             "$ref": "#/components/schemas/io.k8s.api.core.v1.WindowsSecurityContextOptions"
           }
         },
+        "type": "object"
+      },
+      "io.k8s.api.core.v1.SecurityProfileOCI": {
+        "properties": {
+          "baseProfile": {
+            "$ref": "#/components/schemas/io.k8s.api.core.v1.SecurityProfileOCIBase"
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref"
+        ],
+        "type": "object"
+      },
+      "io.k8s.api.core.v1.SecurityProfileOCIBase": {
+        "properties": {
+          "localhostProfile": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
         "type": "object"
       },
       "io.k8s.api.core.v1.ServiceAccountTokenProjection": {
@@ -3404,6 +3438,20 @@
         ],
         "type": "object"
       },
+      "io.k8s.api.core.v1.VolumeHealthStatus": {
+        "properties": {
+          "healthConditions": {
+            "items": {
+              "$ref": "#/components/schemas/io.k8s.api.core.v1.VolumeHealthCondition"
+            },
+            "type": "array"
+          },
+          "lastTransitionTime": {
+            "$ref": "#/components/schemas/io.k8s.apimachinery.pkg.apis.meta.v1.Time"
+          }
+        },
+        "type": "object"
+      },
       "io.k8s.api.core.v1.VolumeMount": {
         "properties": {
           "bindMountOptions": {
@@ -3563,6 +3611,85 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupAllDisruptionMode": {
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupBasicSchedulingPolicy": {
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupDisruptionMode": {
+        "properties": {
+          "all": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupAllDisruptionMode"
+          },
+          "single": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupSingleDisruptionMode"
+          }
+        },
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupGangSchedulingPolicy": {
+        "properties": {
+          "minCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupResourceClaim": {
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "resourceClaimName": {
+            "type": "string"
+          },
+          "resourceClaimTemplateName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupSchedulingConstraints": {
+        "properties": {
+          "topology": {
+            "items": {
+              "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadTopologyConstraint"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupSchedulingPolicy": {
+        "properties": {
+          "basic": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupBasicSchedulingPolicy"
+          },
+          "gang": {
+            "$ref": "#/components/schemas/io.k8s.api.scheduling.v1.WorkloadPodGroupGangSchedulingPolicy"
+          }
+        },
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadPodGroupSingleDisruptionMode": {
+        "type": "object"
+      },
+      "io.k8s.api.scheduling.v1.WorkloadTopologyConstraint": {
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ],
         "type": "object"
       },
       "io.k8s.apimachinery.pkg.api.resource.Quantity": {

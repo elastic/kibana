@@ -1,6 +1,21 @@
 {
   "components": {
     "schemas": {
+      "APIEntitiesApprovalRuleShort": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rule_type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "APIEntitiesApprovals": {
         "properties": {
           "approved_at": {
@@ -23,7 +38,10 @@
             "type": "string"
           },
           "custom_attributes": {
-            "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            },
+            "type": "array"
           },
           "default_branch": {
             "type": "string"
@@ -457,7 +475,10 @@
             "type": "integer"
           },
           "inputs": {
-            "$ref": "#/components/schemas/APIEntitiesCiInput"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesCiInput"
+            },
+            "type": "array"
           },
           "next_run_at": {
             "format": "date-time",
@@ -827,10 +848,10 @@
             "type": "string"
           },
           "enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "keep_n": {
-            "type": "string"
+            "type": "integer"
           },
           "name_regex": {
             "type": "string"
@@ -839,6 +860,7 @@
             "type": "string"
           },
           "next_run_at": {
+            "format": "date-time",
             "type": "string"
           },
           "older_than": {
@@ -1058,7 +1080,10 @@
             "type": "boolean"
           },
           "custom_attributes": {
-            "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            },
+            "type": "array"
           },
           "default_branch": {
             "type": "string"
@@ -1072,11 +1097,23 @@
           "description": {
             "type": "string"
           },
+          "duo_code_review_decisions_enabled": {
+            "type": "string"
+          },
+          "duo_code_review_default_level": {
+            "type": "string"
+          },
+          "duo_code_review_level_allowed": {
+            "type": "boolean"
+          },
+          "duo_code_suggestions_enabled": {
+            "type": "boolean"
+          },
           "duo_core_features_enabled": {
             "type": "boolean"
           },
           "duo_features_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "duo_namespace_access_rules": {
             "type": "string"
@@ -1107,7 +1144,10 @@
             "type": "string"
           },
           "ldap_group_links": {
-            "$ref": "#/components/schemas/APIEntitiesLdapGroupLink"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesLdapGroupLink"
+            },
+            "type": "array"
           },
           "lfs_enabled": {
             "type": "boolean"
@@ -1115,8 +1155,11 @@
           "lock_built_in_project_templates_enabled": {
             "type": "boolean"
           },
+          "lock_duo_code_suggestions_enabled": {
+            "type": "boolean"
+          },
           "lock_duo_features_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "lock_math_rendering_limits_enabled": {
             "type": "boolean"
@@ -1168,7 +1211,10 @@
             "$ref": "#/components/schemas/APIEntitiesNamespaceRootStorageStatistics"
           },
           "saml_group_links": {
-            "$ref": "#/components/schemas/APIEntitiesSamlGroupLink"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesSamlGroupLink"
+            },
+            "type": "array"
           },
           "share_with_group_lock": {
             "type": "boolean"
@@ -1252,7 +1298,7 @@
             "type": "string"
           },
           "saml_provider_id": {
-            "type": "string"
+            "type": "integer"
           }
         },
         "type": "object"
@@ -1314,7 +1360,10 @@
             "$ref": "#/components/schemas/APIEntitiesUserBasic"
           },
           "assignees": {
-            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
           },
           "author": {
             "$ref": "#/components/schemas/APIEntitiesUserBasic"
@@ -1571,7 +1620,10 @@
             "$ref": "#/components/schemas/APIEntitiesUserBasic"
           },
           "assignees": {
-            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
           },
           "author": {
             "$ref": "#/components/schemas/APIEntitiesMergeRequestAuthor"
@@ -1710,7 +1762,10 @@
             "$ref": "#/components/schemas/APIEntitiesIssuableReferences"
           },
           "reviewers": {
-            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
           },
           "sha": {
             "type": "string"
@@ -1788,11 +1843,93 @@
       },
       "APIEntitiesMergeRequestApprovals": {
         "properties": {
+          "approval_rules_left": {
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesApprovalRuleShort"
+            },
+            "type": "array"
+          },
+          "approvals_left": {
+            "type": "integer"
+          },
+          "approvals_required": {
+            "type": "integer"
+          },
           "approved": {
             "type": "boolean"
           },
           "approved_by": {
-            "$ref": "#/components/schemas/APIEntitiesApprovals"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesApprovals"
+            },
+            "type": "array"
+          },
+          "approver_groups": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "approvers": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "has_approval_rules": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "iid": {
+            "type": "integer"
+          },
+          "invalid_approvers_rules": {
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesApprovalRuleShort"
+            },
+            "type": "array"
+          },
+          "merge_request_approvers_available": {
+            "type": "boolean"
+          },
+          "merge_status": {
+            "type": "string"
+          },
+          "multiple_approval_rules_available": {
+            "type": "boolean"
+          },
+          "project_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "require_password_to_approve": {
+            "type": "boolean"
+          },
+          "state": {
+            "type": "string"
+          },
+          "suggested_approvers": {
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
           },
           "user_can_approve": {
             "type": "boolean"
@@ -1860,7 +1997,10 @@
             "$ref": "#/components/schemas/APIEntitiesUserBasic"
           },
           "assignees": {
-            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
           },
           "author": {
             "$ref": "#/components/schemas/APIEntitiesMergeRequestAuthor"
@@ -1963,7 +2103,10 @@
             "$ref": "#/components/schemas/APIEntitiesIssuableReferences"
           },
           "reviewers": {
-            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesUserBasic"
+            },
+            "type": "array"
           },
           "sha": {
             "type": "string"
@@ -2212,7 +2355,10 @@
             "$ref": "#/components/schemas/APIEntitiesUserBasic"
           },
           "suggestions": {
-            "$ref": "#/components/schemas/APIEntitiesSuggestion"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesSuggestion"
+            },
+            "type": "array"
           },
           "system": {
             "type": "boolean"
@@ -2349,7 +2495,7 @@
         },
         "type": "object"
       },
-      "APIEntitiesProjectsWithAccessAndCatalogSetting": {
+      "APIEntitiesProjectWithAccess": {
         "properties": {
           "_links": {
             "properties": {
@@ -2390,7 +2536,7 @@
             "type": "string"
           },
           "approvals_before_merge": {
-            "type": "string"
+            "type": "integer"
           },
           "archived": {
             "type": "boolean"
@@ -2473,11 +2619,11 @@
           "ci_skip_branch_pipelines_for_mrs": {
             "type": "boolean"
           },
-          "cicd_catalog_enabled": {
-            "type": "boolean"
-          },
           "compliance_frameworks": {
-            "type": "string"
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "container_expiration_policy": {
             "$ref": "#/components/schemas/APIEntitiesContainerExpirationPolicy"
@@ -2500,7 +2646,10 @@
             "type": "integer"
           },
           "custom_attributes": {
-            "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            },
+            "type": "array"
           },
           "default_branch": {
             "type": "string"
@@ -2511,20 +2660,32 @@
           "description_html": {
             "type": "string"
           },
+          "duo_code_review_decisions_enabled": {
+            "type": "string"
+          },
+          "duo_code_review_default_level": {
+            "type": "string"
+          },
+          "duo_code_review_level_allowed": {
+            "type": "boolean"
+          },
           "duo_dependency_bump_breaking_changes_enabled": {
             "type": "string"
           },
           "duo_foundational_flows_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "duo_remote_flows_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "duo_sast_fp_detection_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "duo_sast_vr_workflow_enabled": {
-            "type": "string"
+            "type": "boolean"
+          },
+          "duo_scheduled_automations_enabled": {
+            "type": "boolean"
           },
           "duo_secret_detection_fp_enabled": {
             "type": "string"
@@ -2627,7 +2788,7 @@
             "type": "integer"
           },
           "max_pipelines_per_merge_train": {
-            "type": "string"
+            "type": "integer"
           },
           "merge_commit_template": {
             "type": "string"
@@ -2636,7 +2797,7 @@
             "type": "string"
           },
           "merge_pipelines_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "merge_request_title_regex": {
             "type": "string"
@@ -2657,22 +2818,22 @@
             "type": "string"
           },
           "merge_trains_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "merge_trains_skip_train_allowed": {
-            "type": "string"
+            "type": "boolean"
           },
           "mirror": {
-            "type": "string"
+            "type": "boolean"
           },
           "mirror_overwrites_diverged_branches": {
-            "type": "string"
+            "type": "boolean"
           },
           "mirror_trigger_builds": {
-            "type": "string"
+            "type": "boolean"
           },
           "mirror_user_id": {
-            "type": "string"
+            "type": "integer"
           },
           "model_experiments_access_level": {
             "type": "string"
@@ -2702,13 +2863,13 @@
             "type": "boolean"
           },
           "only_allow_merge_if_all_status_checks_passed": {
-            "type": "string"
+            "type": "boolean"
           },
           "only_allow_merge_if_pipeline_succeeds": {
             "type": "boolean"
           },
           "only_mirror_protected_branches": {
-            "type": "string"
+            "type": "boolean"
           },
           "open_issues_count": {
             "type": "integer"
@@ -2746,7 +2907,7 @@
             "type": "boolean"
           },
           "prevent_merge_without_jira_issue": {
-            "type": "string"
+            "type": "boolean"
           },
           "printing_merge_request_link_enabled": {
             "type": "boolean"
@@ -2782,7 +2943,7 @@
             "type": "string"
           },
           "requirements_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "resolve_outdated_diff_discussions": {
             "type": "boolean"
@@ -2809,7 +2970,7 @@
             "type": "string"
           },
           "security_and_compliance_enabled": {
-            "type": "string"
+            "type": "boolean"
           },
           "security_policy_pipeline_must_succeed": {
             "type": "boolean"
@@ -2882,7 +3043,572 @@
             "type": "boolean"
           },
           "web_based_commit_signing_enabled": {
+            "type": "boolean"
+          },
+          "web_url": {
             "type": "string"
+          },
+          "wiki_access_level": {
+            "type": "string"
+          },
+          "wiki_enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "APIEntitiesProjectsWithAccessAndCatalogSetting": {
+        "properties": {
+          "_links": {
+            "properties": {
+              "cluster_agents": {
+                "type": "string"
+              },
+              "events": {
+                "type": "string"
+              },
+              "issues": {
+                "type": "string"
+              },
+              "labels": {
+                "type": "string"
+              },
+              "members": {
+                "type": "string"
+              },
+              "merge_requests": {
+                "type": "string"
+              },
+              "repo_branches": {
+                "type": "string"
+              },
+              "self": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "allow_merge_on_skipped_pipeline": {
+            "type": "boolean"
+          },
+          "allow_pipeline_trigger_approve_deployment": {
+            "type": "boolean"
+          },
+          "analytics_access_level": {
+            "type": "string"
+          },
+          "approvals_before_merge": {
+            "type": "integer"
+          },
+          "archived": {
+            "type": "boolean"
+          },
+          "auto_cancel_pending_pipelines": {
+            "type": "string"
+          },
+          "auto_devops_deploy_strategy": {
+            "type": "string"
+          },
+          "auto_devops_enabled": {
+            "type": "boolean"
+          },
+          "auto_duo_code_review_enabled": {
+            "type": "string"
+          },
+          "autoclose_referenced_issues": {
+            "type": "boolean"
+          },
+          "automatic_rebase_enabled": {
+            "type": "boolean"
+          },
+          "avatar_url": {
+            "type": "string"
+          },
+          "build_git_strategy": {
+            "type": "string"
+          },
+          "build_timeout": {
+            "type": "integer"
+          },
+          "builds_access_level": {
+            "type": "string"
+          },
+          "can_create_merge_request_in": {
+            "type": "boolean"
+          },
+          "ci_allow_fork_pipelines_to_run_in_parent_project": {
+            "type": "boolean"
+          },
+          "ci_config_path": {
+            "type": "string"
+          },
+          "ci_default_git_depth": {
+            "type": "integer"
+          },
+          "ci_delete_pipelines_in_seconds": {
+            "type": "integer"
+          },
+          "ci_display_pipeline_variables": {
+            "type": "boolean"
+          },
+          "ci_forward_deployment_enabled": {
+            "type": "boolean"
+          },
+          "ci_forward_deployment_rollback_allowed": {
+            "type": "boolean"
+          },
+          "ci_id_token_sub_claim_components": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ci_job_token_scope_enabled": {
+            "type": "boolean"
+          },
+          "ci_pipeline_variables_minimum_override_role": {
+            "type": "string"
+          },
+          "ci_push_repository_for_job_token_allowed": {
+            "type": "boolean"
+          },
+          "ci_restrict_pipeline_cancellation_role": {
+            "type": "string"
+          },
+          "ci_separated_caches": {
+            "type": "boolean"
+          },
+          "ci_skip_branch_pipelines_for_mrs": {
+            "type": "boolean"
+          },
+          "cicd_catalog_enabled": {
+            "type": "boolean"
+          },
+          "compliance_frameworks": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "container_expiration_policy": {
+            "$ref": "#/components/schemas/APIEntitiesContainerExpirationPolicy"
+          },
+          "container_registry_access_level": {
+            "type": "string"
+          },
+          "container_registry_enabled": {
+            "type": "boolean"
+          },
+          "container_registry_image_prefix": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "custom_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesCustomAttribute"
+            },
+            "type": "array"
+          },
+          "default_branch": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "description_html": {
+            "type": "string"
+          },
+          "duo_code_review_decisions_enabled": {
+            "type": "string"
+          },
+          "duo_code_review_default_level": {
+            "type": "string"
+          },
+          "duo_code_review_level_allowed": {
+            "type": "boolean"
+          },
+          "duo_dependency_bump_breaking_changes_enabled": {
+            "type": "string"
+          },
+          "duo_foundational_flows_enabled": {
+            "type": "boolean"
+          },
+          "duo_remote_flows_enabled": {
+            "type": "boolean"
+          },
+          "duo_sast_fp_detection_enabled": {
+            "type": "boolean"
+          },
+          "duo_sast_vr_workflow_enabled": {
+            "type": "boolean"
+          },
+          "duo_scheduled_automations_enabled": {
+            "type": "boolean"
+          },
+          "duo_secret_detection_fp_enabled": {
+            "type": "string"
+          },
+          "emails_disabled": {
+            "type": "boolean"
+          },
+          "emails_enabled": {
+            "type": "boolean"
+          },
+          "empty_repo": {
+            "type": "boolean"
+          },
+          "enforce_auth_checks_on_uploads": {
+            "type": "boolean"
+          },
+          "environments_access_level": {
+            "type": "string"
+          },
+          "external_authorization_classification_label": {
+            "type": "string"
+          },
+          "feature_flags_access_level": {
+            "type": "string"
+          },
+          "forked_from_project": {
+            "$ref": "#/components/schemas/APIEntitiesBasicProjectDetails"
+          },
+          "forking_access_level": {
+            "type": "string"
+          },
+          "forks_count": {
+            "type": "integer"
+          },
+          "group_runners_enabled": {
+            "type": "boolean"
+          },
+          "http_url_to_repo": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "import_error": {
+            "type": "string"
+          },
+          "import_status": {
+            "type": "string"
+          },
+          "import_type": {
+            "type": "string"
+          },
+          "import_url": {
+            "type": "string"
+          },
+          "infrastructure_access_level": {
+            "type": "string"
+          },
+          "issue_branch_template": {
+            "type": "string"
+          },
+          "issues_access_level": {
+            "type": "string"
+          },
+          "issues_enabled": {
+            "type": "boolean"
+          },
+          "issues_template": {
+            "type": "string"
+          },
+          "jobs_enabled": {
+            "type": "boolean"
+          },
+          "keep_latest_artifact": {
+            "type": "boolean"
+          },
+          "last_activity_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lfs_enabled": {
+            "type": "boolean"
+          },
+          "license": {
+            "$ref": "#/components/schemas/APIEntitiesLicenseBasic"
+          },
+          "license_url": {
+            "type": "string"
+          },
+          "marked_for_deletion_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "marked_for_deletion_on": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "max_artifacts_size": {
+            "type": "integer"
+          },
+          "max_pipelines_per_merge_train": {
+            "type": "integer"
+          },
+          "merge_commit_template": {
+            "type": "string"
+          },
+          "merge_method": {
+            "type": "string"
+          },
+          "merge_pipelines_enabled": {
+            "type": "boolean"
+          },
+          "merge_request_title_regex": {
+            "type": "string"
+          },
+          "merge_request_title_regex_description": {
+            "type": "string"
+          },
+          "merge_requests_access_level": {
+            "type": "string"
+          },
+          "merge_requests_enabled": {
+            "type": "boolean"
+          },
+          "merge_requests_template": {
+            "type": "string"
+          },
+          "merge_train_enforcement": {
+            "type": "string"
+          },
+          "merge_trains_enabled": {
+            "type": "boolean"
+          },
+          "merge_trains_skip_train_allowed": {
+            "type": "boolean"
+          },
+          "mirror": {
+            "type": "boolean"
+          },
+          "mirror_overwrites_diverged_branches": {
+            "type": "boolean"
+          },
+          "mirror_trigger_builds": {
+            "type": "boolean"
+          },
+          "mirror_user_id": {
+            "type": "integer"
+          },
+          "model_experiments_access_level": {
+            "type": "string"
+          },
+          "model_registry_access_level": {
+            "type": "string"
+          },
+          "monitor_access_level": {
+            "type": "string"
+          },
+          "mr_default_target_self": {
+            "type": "boolean"
+          },
+          "mr_default_title_template": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "name_with_namespace": {
+            "type": "string"
+          },
+          "namespace": {
+            "$ref": "#/components/schemas/APIEntitiesNamespaceBasic"
+          },
+          "only_allow_merge_if_all_discussions_are_resolved": {
+            "type": "boolean"
+          },
+          "only_allow_merge_if_all_status_checks_passed": {
+            "type": "boolean"
+          },
+          "only_allow_merge_if_pipeline_succeeds": {
+            "type": "boolean"
+          },
+          "only_mirror_protected_branches": {
+            "type": "boolean"
+          },
+          "open_issues_count": {
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/APIEntitiesUserBasic"
+          },
+          "package_registry_access_level": {
+            "type": "string"
+          },
+          "packages_enabled": {
+            "type": "boolean"
+          },
+          "pages_access_level": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "path_with_namespace": {
+            "type": "string"
+          },
+          "permissions": {
+            "properties": {
+              "group_access": {
+                "$ref": "#/components/schemas/APIEntitiesGroupAccess"
+              },
+              "project_access": {
+                "$ref": "#/components/schemas/APIEntitiesProjectAccess"
+              }
+            },
+            "type": "object"
+          },
+          "pre_receive_secret_detection_enabled": {
+            "type": "boolean"
+          },
+          "prevent_merge_without_jira_issue": {
+            "type": "boolean"
+          },
+          "printing_merge_request_link_enabled": {
+            "type": "boolean"
+          },
+          "protect_merge_request_pipelines": {
+            "type": "boolean"
+          },
+          "public_jobs": {
+            "type": "boolean"
+          },
+          "readme_url": {
+            "type": "string"
+          },
+          "releases_access_level": {
+            "type": "string"
+          },
+          "remove_source_branch_after_merge": {
+            "type": "boolean"
+          },
+          "repository_access_level": {
+            "type": "string"
+          },
+          "repository_object_format": {
+            "type": "string"
+          },
+          "repository_storage": {
+            "type": "string"
+          },
+          "request_access_enabled": {
+            "type": "boolean"
+          },
+          "requirements_access_level": {
+            "type": "string"
+          },
+          "requirements_enabled": {
+            "type": "boolean"
+          },
+          "resolve_outdated_diff_discussions": {
+            "type": "boolean"
+          },
+          "resource_group_default_process_mode": {
+            "type": "string"
+          },
+          "restrict_user_defined_variables": {
+            "type": "boolean"
+          },
+          "reviewer_assignment_strategy": {
+            "type": "string"
+          },
+          "runner_token_expiration_interval": {
+            "type": "integer"
+          },
+          "runners_token": {
+            "type": "string"
+          },
+          "secret_push_protection_enabled": {
+            "type": "boolean"
+          },
+          "security_and_compliance_access_level": {
+            "type": "string"
+          },
+          "security_and_compliance_enabled": {
+            "type": "boolean"
+          },
+          "security_policy_pipeline_must_succeed": {
+            "type": "boolean"
+          },
+          "service_desk_address": {
+            "type": "string"
+          },
+          "service_desk_enabled": {
+            "type": "boolean"
+          },
+          "shared_runners_enabled": {
+            "type": "boolean"
+          },
+          "shared_with_groups": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "show_diff_preview_in_email": {
+            "type": "boolean"
+          },
+          "snippets_access_level": {
+            "type": "string"
+          },
+          "snippets_enabled": {
+            "type": "boolean"
+          },
+          "spp_repository_pipeline_access": {
+            "type": "boolean"
+          },
+          "squash_commit_template": {
+            "type": "string"
+          },
+          "squash_option": {
+            "type": "string"
+          },
+          "ssh_url_to_repo": {
+            "type": "string"
+          },
+          "star_count": {
+            "type": "integer"
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/APIEntitiesProjectStatistics"
+          },
+          "suggestion_commit_message": {
+            "type": "string"
+          },
+          "tag_list": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string"
+          },
+          "warn_about_potentially_unwanted_characters": {
+            "type": "boolean"
+          },
+          "web_based_commit_signing_enabled": {
+            "type": "boolean"
           },
           "web_url": {
             "type": "string"
@@ -2917,13 +3643,13 @@
       "APIEntitiesScimIdentity": {
         "properties": {
           "active": {
-            "type": "string"
+            "type": "boolean"
           },
           "extern_uid": {
             "type": "string"
           },
           "group_id": {
-            "type": "string"
+            "type": "integer"
           }
         },
         "type": "object"
@@ -3019,6 +3745,7 @@
             "type": "boolean"
           },
           "created_at": {
+            "format": "date-time",
             "type": "string"
           },
           "custom_attributes": {
@@ -3164,6 +3891,7 @@
             "type": "string"
           },
           "created_at": {
+            "format": "date-time",
             "type": "string"
           },
           "current_sign_in_at": {
@@ -3186,7 +3914,7 @@
             "type": "boolean"
           },
           "extra_shared_runners_minutes_limit": {
-            "type": "string"
+            "type": "integer"
           },
           "followers": {
             "type": "string"
@@ -3202,7 +3930,10 @@
             "type": "integer"
           },
           "identities": {
-            "$ref": "#/components/schemas/APIEntitiesIdentity"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesIdentity"
+            },
+            "type": "array"
           },
           "is_followed": {
             "type": "string"
@@ -3252,10 +3983,13 @@
             "type": "string"
           },
           "scim_identities": {
-            "$ref": "#/components/schemas/APIEntitiesScimIdentity"
+            "items": {
+              "$ref": "#/components/schemas/APIEntitiesScimIdentity"
+            },
+            "type": "array"
           },
           "shared_runners_minutes_limit": {
-            "type": "string"
+            "type": "integer"
           },
           "state": {
             "type": "string"
@@ -3381,6 +4115,7 @@
           },
           "internal": {
             "default": false,
+            "nullable": true,
             "type": "boolean"
           },
           "merge_request_diff_head_sha": {
@@ -3414,7 +4149,6 @@
             "type": "array"
           },
           "confidential": {
-            "nullable": true,
             "type": "boolean"
           },
           "created_at": {
@@ -3551,6 +4285,7 @@
           },
           "internal": {
             "default": false,
+            "nullable": true,
             "type": "boolean"
           },
           "merge_request_diff_head_sha": {
@@ -3607,6 +4342,7 @@
             "type": "array"
           },
           "merge_after": {
+            "format": "date-time",
             "nullable": true,
             "type": "string"
           },
@@ -3692,6 +4428,7 @@
                     "env_var",
                     "file"
                   ],
+                  "nullable": true,
                   "type": "string"
                 }
               },
@@ -3709,11 +4446,11 @@
       "postApiV4ProjectsIdRepositoryBranchesRequest": {
         "properties": {
           "branch": {
-            "nullable": true,
+            "minLength": 1,
             "type": "string"
           },
           "ref": {
-            "nullable": true,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -3757,7 +4494,6 @@
             "type": "array"
           },
           "confidential": {
-            "nullable": true,
             "type": "boolean"
           },
           "created_at": {
@@ -3848,7 +4584,7 @@
           },
           "updated_at": {
             "format": "date-time",
-            "nullable": true,
+            "minLength": 1,
             "type": "string"
           },
           "weight": {
@@ -3943,6 +4679,7 @@
             "type": "array"
           },
           "merge_after": {
+            "format": "date-time",
             "nullable": true,
             "type": "string"
           },
@@ -3986,11 +4723,11 @@
             "type": "string"
           },
           "target_branch": {
-            "nullable": true,
+            "minLength": 1,
             "type": "string"
           },
           "title": {
-            "nullable": true,
+            "minLength": 1,
             "type": "string"
           }
         },
@@ -4058,6 +4795,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4122,6 +4860,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4137,6 +4876,7 @@
                 "id",
                 "similarity"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4150,6 +4890,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4214,6 +4955,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4223,6 +4965,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4232,6 +4975,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4286,6 +5030,7 @@
                 "wiki_size",
                 "packages_size"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4299,6 +5044,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4349,6 +5095,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4358,6 +5105,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4367,6 +5115,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4376,6 +5125,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4385,6 +5135,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4394,6 +5145,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4548,6 +5300,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4557,6 +5310,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4566,6 +5320,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4575,6 +5330,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4584,6 +5340,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4593,6 +5350,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4602,6 +5360,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4611,6 +5370,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4630,7 +5390,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/APIEntitiesBasicProjectDetails"
+                    "$ref": "#/components/schemas/APIEntitiesProjectWithAccess"
                   },
                   "type": "array"
                 }
@@ -4666,6 +5426,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4675,6 +5436,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4693,6 +5455,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           }
@@ -4737,6 +5500,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4746,6 +5510,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4762,6 +5527,7 @@
                 "updated_at",
                 "finished_at"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4775,6 +5541,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -4890,6 +5657,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4899,6 +5667,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -4979,6 +5748,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -4993,6 +5763,7 @@
                 "closed",
                 "all"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -5023,6 +5794,7 @@
                 "updated_at",
                 "weight"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -5036,6 +5808,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -5480,6 +6253,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -5489,6 +6263,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -5507,7 +6282,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/APIEntitiesIssue"
+                  "items": {
+                    "$ref": "#/components/schemas/APIEntitiesIssue"
+                  },
+                  "type": "array"
                 }
               }
             }
@@ -5845,6 +6623,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -5854,6 +6633,7 @@
             "required": false,
             "schema": {
               "default": true,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -5881,6 +6661,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -5890,6 +6671,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           }
@@ -5899,7 +6681,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/APIEntitiesProjectLabel"
+                  "items": {
+                    "$ref": "#/components/schemas/APIEntitiesProjectLabel"
+                  },
+                  "type": "array"
                 }
               }
             }
@@ -6046,6 +6831,7 @@
                 "merged",
                 "all"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -6065,6 +6851,7 @@
                 "updated_at",
                 "merged_at"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -6078,6 +6865,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -6087,6 +6875,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -6096,6 +6885,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -6463,6 +7253,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -6472,6 +7263,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -6809,6 +7601,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -6818,6 +7611,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -6827,6 +7621,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           }
@@ -6846,7 +7641,8 @@
           },
           "400": {},
           "403": {},
-          "404": {}
+          "404": {},
+          "429": {}
         }
       }
     },
@@ -7018,6 +7814,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7027,6 +7824,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7082,6 +7880,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7091,6 +7890,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7223,6 +8023,7 @@
                 "updated_at",
                 "user_id"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -7236,6 +8037,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -7278,6 +8080,34 @@
               "nullable": true,
               "type": "string"
             }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "iids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "integer"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "integer"
+              },
+              "nullable": true,
+              "type": "array"
+            },
+            "style": "form"
           }
         ],
         "responses": {
@@ -7403,6 +8233,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -7447,6 +8278,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7456,6 +8288,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           }
@@ -7545,6 +8378,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7554,6 +8388,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7613,7 +8448,8 @@
             }
           },
           "400": {},
-          "404": {}
+          "404": {},
+          "422": {}
         }
       },
       "post": {
@@ -7772,6 +8608,7 @@
                 "default",
                 "topo"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -7781,6 +8618,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -7790,6 +8628,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7799,6 +8638,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7812,6 +8652,7 @@
                 "legacy",
                 "keyset"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -7877,6 +8718,7 @@
             "required": false,
             "schema": {
               "default": true,
+              "nullable": true,
               "type": "boolean"
             }
           }
@@ -7929,6 +8771,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7938,6 +8781,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -7947,6 +8791,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           }
@@ -7994,7 +8839,7 @@
             "name": "branch",
             "required": true,
             "schema": {
-              "nullable": true,
+              "minLength": 1,
               "type": "string"
             }
           },
@@ -8003,7 +8848,7 @@
             "name": "commit_message",
             "required": true,
             "schema": {
-              "nullable": true,
+              "minLength": 1,
               "type": "string"
             }
           },
@@ -8074,7 +8919,7 @@
             "name": "ref",
             "required": true,
             "schema": {
-              "nullable": true,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -8187,6 +9032,7 @@
                 "asc",
                 "desc"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -8201,6 +9047,7 @@
                 "updated",
                 "version"
               ],
+              "nullable": true,
               "type": "string"
             }
           },
@@ -8228,6 +9075,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -8237,6 +9085,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           }
@@ -8342,6 +9191,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8474,6 +9324,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -8483,6 +9334,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           }
@@ -8566,6 +9418,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8575,6 +9428,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8584,6 +9438,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8593,6 +9448,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8622,6 +9478,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8631,6 +9488,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8640,6 +9498,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8658,6 +9517,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8667,6 +9527,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8676,6 +9537,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8685,6 +9547,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8723,6 +9586,7 @@
             "required": false,
             "schema": {
               "default": 1,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -8732,6 +9596,7 @@
             "required": false,
             "schema": {
               "default": 20,
+              "nullable": true,
               "type": "integer"
             }
           },
@@ -8741,6 +9606,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8759,6 +9625,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           },
@@ -8768,6 +9635,7 @@
             "required": false,
             "schema": {
               "default": false,
+              "nullable": true,
               "type": "boolean"
             }
           }

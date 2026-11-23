@@ -165,7 +165,7 @@
   "sources": {
     "v3": {
       "apiVersion": "v3",
-      "fetchedAt": "2026-10-07T20:19:44.077Z",
+      "fetchedAt": "2026-11-23T11:13:28.066Z",
       "format": "discovery",
       "url": "https://monitoring.googleapis.com/$discovery/rest?version=v3"
     }

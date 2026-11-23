@@ -1058,6 +1058,9 @@
               },
               {
                 "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/SlotContentId"
               }
             ]
           }
@@ -1077,6 +1080,9 @@
               },
               {
                 "type": "string"
+              },
+              {
+                "$ref": "#/components/schemas/SlotContentId"
               }
             ]
           },
@@ -1085,6 +1091,9 @@
               "$ref": "#/components/schemas/InstanceSwapPreferredValue"
             },
             "type": "array"
+          },
+          "slotSettings": {
+            "$ref": "#/components/schemas/SlotSettings"
           },
           "type": {
             "$ref": "#/components/schemas/ComponentPropertyType"
@@ -1107,7 +1116,8 @@
           "BOOLEAN",
           "INSTANCE_SWAP",
           "TEXT",
-          "VARIANT"
+          "VARIANT",
+          "SLOT"
         ],
         "type": "string"
       },
@@ -4087,6 +4097,57 @@
           }
         ]
       },
+      "SlotContentId": {
+        "properties": {
+          "guid": {
+            "properties": {
+              "localID": {
+                "type": "integer"
+              },
+              "sessionID": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "sessionID",
+              "localID"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "guid"
+        ],
+        "type": "object"
+      },
+      "SlotSettings": {
+        "properties": {
+          "allowPreferredValuesOnly": {
+            "type": "boolean"
+          },
+          "displayEmptyByDefault": {
+            "type": "boolean"
+          },
+          "maxChildren": {
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "minChildren": {
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "stretchChildOnInsert": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "SolidPaint": {
         "allOf": [
           {
@@ -4804,6 +4865,15 @@
                 },
                 "type": "object"
               },
+              "fontVariantPosition": {
+                "default": "NORMAL",
+                "enum": [
+                  "NORMAL",
+                  "SUPER",
+                  "SUB"
+                ],
+                "type": "string"
+              },
               "isOverrideOverTextStyle": {
                 "type": "boolean"
               },
@@ -5174,6 +5244,7 @@
               "file_content:read": "Read the contents of files, such as nodes and the editor type.",
               "file_dev_resources:read": "Read dev resources in files.",
               "file_dev_resources:write": "Write to dev resources in files.",
+              "file_duplicate:write": "Duplicate files into folders. Available only to private OAuth apps in an Enterprise plan.",
               "file_metadata:read": "Read metadata of files.",
               "file_variables:read": "Read variables in Figma file. Note: this is only available to members in Enterprise organizations.",
               "file_variables:write": "Write to variables in Figma file. Note: this is only available to members in Enterprise organizations.",
@@ -5181,12 +5252,16 @@
               "files:read": "Deprecated. Read files, projects, users, versions, comments, components & styles, and webhooks.",
               "folder_metadata:read": "Read metadata of folders.",
               "folders:read": "List folders and files in folders.",
+              "folders:write": "Create folders. Available only to private OAuth apps in an Enterprise plan.",
               "library_analytics:read": "Read library analytics data.",
               "library_assets:read": "Read data of individual published components and styles.",
               "library_content:read": "Read published components and styles of files.",
               "project_metadata:read": "Read metadata of projects.",
               "projects:read": "List projects and files in projects.",
               "team_library_content:read": "Read published components and styles of teams.",
+              "team_members:write": "Invite members to teams. Available only to private OAuth apps in an Enterprise plan.",
+              "teams:read": "Read team metadata. Available to private OAuth apps in Professional, Organization, and Enterprise plans, and to plan access tokens in Organization and Enterprise plans.",
+              "teams:write": "Create teams. Available only to private OAuth apps in an Enterprise plan.",
               "webhooks:read": "Read metadata of webhooks.",
               "webhooks:write": "Create and manage webhooks."
             },

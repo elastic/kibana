@@ -275,19 +275,19 @@
   "sources": {
     "cloudresourcemanager_v1": {
       "apiVersion": "v1",
-      "fetchedAt": "2026-10-07T20:20:15.436Z",
+      "fetchedAt": "2026-11-23T11:13:29.864Z",
       "format": "discovery",
       "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v1"
     },
     "cloudresourcemanager_v2": {
       "apiVersion": "v2",
-      "fetchedAt": "2026-10-07T20:20:15.436Z",
+      "fetchedAt": "2026-11-23T11:13:29.962Z",
       "format": "discovery",
       "url": "https://cloudresourcemanager.googleapis.com/$discovery/rest?version=v2"
     },
     "iam_v1": {
       "apiVersion": "v1",
-      "fetchedAt": "2026-10-07T20:20:15.435Z",
+      "fetchedAt": "2026-11-23T11:13:30.172Z",
       "format": "discovery",
       "url": "https://iam.googleapis.com/$discovery/rest?version=v1"
     }

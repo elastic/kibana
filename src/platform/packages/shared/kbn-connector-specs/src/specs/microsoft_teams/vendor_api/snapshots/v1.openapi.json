@@ -722,6 +722,16 @@
           }
         ]
       },
+      "microsoft.graph.applicationMode": {
+        "enum": [
+          "manual",
+          "automatic",
+          "recommended",
+          "unknownFutureValue"
+        ],
+        "title": "applicationMode",
+        "type": "string"
+      },
       "microsoft.graph.assignedLabel": {
         "properties": {
           "@odata.type": {
@@ -993,6 +1003,12 @@
               "emailAddress": {
                 "nullable": true,
                 "type": "string"
+              },
+              "engagements": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.meetingEngagement"
+                },
+                "type": "array"
               },
               "externalRegistrationInformation": {
                 "anyOf": [
@@ -1336,6 +1352,12 @@
                 },
                 "type": "array"
               },
+              "resourceAccountKeyAuthenticationMethods": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.resourceAccountKeyAuthenticationMethod"
+                },
+                "type": "array"
+              },
               "softwareOathMethods": {
                 "items": {
                   "$ref": "#/components/schemas/microsoft.graph.softwareOathAuthenticationMethod"
@@ -1378,6 +1400,7 @@
                 "#microsoft.graph.passwordAuthenticationMethod": "#/components/schemas/microsoft.graph.passwordAuthenticationMethod",
                 "#microsoft.graph.phoneAuthenticationMethod": "#/components/schemas/microsoft.graph.phoneAuthenticationMethod",
                 "#microsoft.graph.platformCredentialAuthenticationMethod": "#/components/schemas/microsoft.graph.platformCredentialAuthenticationMethod",
+                "#microsoft.graph.resourceAccountKeyAuthenticationMethod": "#/components/schemas/microsoft.graph.resourceAccountKeyAuthenticationMethod",
                 "#microsoft.graph.softwareOathAuthenticationMethod": "#/components/schemas/microsoft.graph.softwareOathAuthenticationMethod",
                 "#microsoft.graph.temporaryAccessPassAuthenticationMethod": "#/components/schemas/microsoft.graph.temporaryAccessPassAuthenticationMethod",
                 "#microsoft.graph.windowsHelloForBusinessAuthenticationMethod": "#/components/schemas/microsoft.graph.windowsHelloForBusinessAuthenticationMethod"
@@ -2069,6 +2092,10 @@
                 "type": "boolean"
               },
               "isRemovable": {
+                "nullable": true,
+                "type": "boolean"
+              },
+              "isSharedWithMe": {
                 "nullable": true,
                 "type": "boolean"
               },
@@ -5018,6 +5045,33 @@
         "title": "currencyColumn",
         "type": "object"
       },
+      "microsoft.graph.currentLabel": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "applicationMode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/microsoft.graph.applicationMode"
+              },
+              {
+                "nullable": true,
+                "type": "object"
+              }
+            ]
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "currentLabel",
+        "type": "object"
+      },
       "microsoft.graph.customSecurityAttributeValue": {
         "properties": {
           "@odata.type": {
@@ -6062,6 +6116,91 @@
         "title": "displayNameLocalization",
         "type": "object"
       },
+      "microsoft.graph.distributionList": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.outlookItem"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "default": "#microsoft.graph.distributionList",
+                "type": "string"
+              },
+              "displayName": {
+                "nullable": true,
+                "type": "string"
+              },
+              "members": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.distributionListMember"
+                },
+                "type": "array"
+              },
+              "notes": {
+                "nullable": true,
+                "type": "string"
+              },
+              "personId": {
+                "nullable": true,
+                "type": "string"
+              },
+              "singleValueExtendedProperties": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.singleValueLegacyExtendedProperty"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "distributionList",
+            "type": "object"
+          }
+        ]
+      },
+      "microsoft.graph.distributionListMember": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "contact": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.contact"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "displayName": {
+                "nullable": true,
+                "type": "string"
+              },
+              "memberId": {
+                "nullable": true,
+                "type": "string"
+              },
+              "type": {
+                "$ref": "#/components/schemas/microsoft.graph.recipientType"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "distributionListMember",
+            "type": "object"
+          }
+        ]
+      },
       "microsoft.graph.documentSet": {
         "properties": {
           "@odata.type": {
@@ -6907,6 +7046,8 @@
             "#microsoft.graph.deviceLogCollectionResponse": "#/components/schemas/microsoft.graph.deviceLogCollectionResponse",
             "#microsoft.graph.deviceManagementTroubleshootingEvent": "#/components/schemas/microsoft.graph.deviceManagementTroubleshootingEvent",
             "#microsoft.graph.directoryObject": "#/components/schemas/microsoft.graph.directoryObject",
+            "#microsoft.graph.distributionList": "#/components/schemas/microsoft.graph.distributionList",
+            "#microsoft.graph.distributionListMember": "#/components/schemas/microsoft.graph.distributionListMember",
             "#microsoft.graph.documentSetVersion": "#/components/schemas/microsoft.graph.documentSetVersion",
             "#microsoft.graph.drive": "#/components/schemas/microsoft.graph.drive",
             "#microsoft.graph.driveItem": "#/components/schemas/microsoft.graph.driveItem",
@@ -6998,6 +7139,7 @@
             "#microsoft.graph.printerBase": "#/components/schemas/microsoft.graph.printerBase",
             "#microsoft.graph.printerShare": "#/components/schemas/microsoft.graph.printerShare",
             "#microsoft.graph.profilePhoto": "#/components/schemas/microsoft.graph.profilePhoto",
+            "#microsoft.graph.resourceAccountKeyAuthenticationMethod": "#/components/schemas/microsoft.graph.resourceAccountKeyAuthenticationMethod",
             "#microsoft.graph.resourceSpecificPermissionGrant": "#/components/schemas/microsoft.graph.resourceSpecificPermissionGrant",
             "#microsoft.graph.richLongRunningOperation": "#/components/schemas/microsoft.graph.richLongRunningOperation",
             "#microsoft.graph.schedule": "#/components/schemas/microsoft.graph.schedule",
@@ -7011,6 +7153,7 @@
             "#microsoft.graph.sharedWithChannelTeamInfo": "#/components/schemas/microsoft.graph.sharedWithChannelTeamInfo",
             "#microsoft.graph.shift": "#/components/schemas/microsoft.graph.shift",
             "#microsoft.graph.shiftPreferences": "#/components/schemas/microsoft.graph.shiftPreferences",
+            "#microsoft.graph.singleValueExtendedProperty": "#/components/schemas/microsoft.graph.singleValueExtendedProperty",
             "#microsoft.graph.singleValueLegacyExtendedProperty": "#/components/schemas/microsoft.graph.singleValueLegacyExtendedProperty",
             "#microsoft.graph.site": "#/components/schemas/microsoft.graph.site",
             "#microsoft.graph.softwareOathAuthenticationMethod": "#/components/schemas/microsoft.graph.softwareOathAuthenticationMethod",
@@ -10906,6 +11049,50 @@
         "title": "meetingChatMode",
         "type": "string"
       },
+      "microsoft.graph.meetingEngagement": {
+        "properties": {
+          "@odata.type": {
+            "type": "string"
+          },
+          "dateTime": {
+            "format": "date-time",
+            "nullable": true,
+            "pattern": "^[0-9]{4,}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]([.][0-9]{1,12})?(Z|[+-][0-9][0-9]:[0-9][0-9])$",
+            "type": "string"
+          },
+          "engagementSubType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "engagementType": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/microsoft.graph.meetingEngagementType"
+              },
+              {
+                "nullable": true,
+                "type": "object"
+              }
+            ]
+          }
+        },
+        "required": [
+          "@odata.type"
+        ],
+        "title": "meetingEngagement",
+        "type": "object"
+      },
+      "microsoft.graph.meetingEngagementType": {
+        "enum": [
+          "reaction",
+          "hand",
+          "camera",
+          "microphone",
+          "unknownFutureValue"
+        ],
+        "title": "meetingEngagementType",
+        "type": "string"
+      },
       "microsoft.graph.meetingLiveShareOptions": {
         "enum": [
           "enabled",
@@ -13411,6 +13598,7 @@
             "discriminator": {
               "mapping": {
                 "#microsoft.graph.contact": "#/components/schemas/microsoft.graph.contact",
+                "#microsoft.graph.distributionList": "#/components/schemas/microsoft.graph.distributionList",
                 "#microsoft.graph.event": "#/components/schemas/microsoft.graph.event",
                 "#microsoft.graph.message": "#/components/schemas/microsoft.graph.message",
                 "#microsoft.graph.note": "#/components/schemas/microsoft.graph.note",
@@ -17632,6 +17820,12 @@
           "name": {
             "type": "string"
           },
+          "sensitivityLabels": {
+            "items": {
+              "$ref": "#/components/schemas/microsoft.graph.currentLabel"
+            },
+            "type": "array"
+          },
           "sequenceNumber": {
             "format": "int64",
             "nullable": true,
@@ -17973,6 +18167,17 @@
         "title": "recipient",
         "type": "object"
       },
+      "microsoft.graph.recipientType": {
+        "enum": [
+          "contact",
+          "oneOff",
+          "mailbox",
+          "privateDL",
+          "unknownFutureValue"
+        ],
+        "title": "recipientType",
+        "type": "string"
+      },
       "microsoft.graph.recurrencePattern": {
         "properties": {
           "@odata.type": {
@@ -18292,6 +18497,41 @@
         ],
         "title": "remoteItem",
         "type": "object"
+      },
+      "microsoft.graph.resourceAccountKeyAuthenticationMethod": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.authenticationMethod"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "default": "#microsoft.graph.resourceAccountKeyAuthenticationMethod",
+                "type": "string"
+              },
+              "device": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.device"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
+              "displayName": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "resourceAccountKeyAuthenticationMethod",
+            "type": "object"
+          }
+        ]
       },
       "microsoft.graph.resourceReference": {
         "properties": {
@@ -19583,6 +19823,17 @@
                   }
                 ]
               },
+              "applicationMode": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/microsoft.graph.applicationMode"
+                  },
+                  {
+                    "nullable": true,
+                    "type": "object"
+                  }
+                ]
+              },
               "autoTooltip": {
                 "nullable": true,
                 "type": "string"
@@ -20478,6 +20729,29 @@
         ],
         "title": "signInActivity",
         "type": "object"
+      },
+      "microsoft.graph.singleValueExtendedProperty": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/microsoft.graph.entity"
+          },
+          {
+            "properties": {
+              "@odata.type": {
+                "type": "string"
+              },
+              "value": {
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "@odata.type"
+            ],
+            "title": "singleValueExtendedProperty",
+            "type": "object"
+          }
+        ]
       },
       "microsoft.graph.singleValueLegacyExtendedProperty": {
         "allOf": [
@@ -23566,6 +23840,12 @@
                   }
                 ]
               },
+              "singleValueExtendedProperties": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.singleValueExtendedProperty"
+                },
+                "type": "array"
+              },
               "startDateTime": {
                 "anyOf": [
                   {
@@ -23618,6 +23898,12 @@
               },
               "isShared": {
                 "type": "boolean"
+              },
+              "singleValueExtendedProperties": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.singleValueExtendedProperty"
+                },
+                "type": "array"
               },
               "tasks": {
                 "items": {
@@ -24151,6 +24437,12 @@
               "displayName": {
                 "nullable": true,
                 "type": "string"
+              },
+              "distributionLists": {
+                "items": {
+                  "$ref": "#/components/schemas/microsoft.graph.distributionList"
+                },
+                "type": "array"
               },
               "drive": {
                 "anyOf": [

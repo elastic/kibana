@@ -5210,6 +5210,167 @@
         },
         "type": "object"
       },
+      "Gluster": {
+        "additionalProperties": false,
+        "properties": {
+          "peers": {
+            "items": {
+              "$ref": "#/components/schemas/Gluster_Peer"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "volume_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "volumes": {
+            "items": {
+              "$ref": "#/components/schemas/Gluster_Volume"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "Gluster_Brick": {
+        "additionalProperties": false,
+        "properties": {
+          "host_path": {
+            "type": "string"
+          },
+          "is_arbiter": {
+            "type": "boolean"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Gluster_Option": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Gluster_Peer": {
+        "additionalProperties": false,
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "hostname": {
+            "type": "string"
+          },
+          "hostnames": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "state": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Gluster_Volume": {
+        "additionalProperties": false,
+        "properties": {
+          "arbiter_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "brick_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bricks": {
+            "items": {
+              "$ref": "#/components/schemas/Gluster_Brick"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "disperse_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "dist_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/Gluster_Option"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "rebalance": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "redundancy_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "replica_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "snap_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "status": {
+            "type": "string"
+          },
+          "thin_arbiter_count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "transport": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "volume_id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Gopher": {
         "additionalProperties": false,
         "properties": {
@@ -5827,9 +5988,27 @@
             "format": "int32",
             "type": "integer"
           },
+          "copyrights": {
+            "items": {
+              "$ref": "#/components/schemas/Http_Copyright"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "favicons": {
             "items": {
               "$ref": "#/components/schemas/Http_Favicon"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "google_site_verification": {
+            "items": {
+              "type": "string"
             },
             "type": [
               "array",
@@ -5888,6 +6067,18 @@
             ]
           },
           "uri": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Http_Copyright": {
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "text": {
             "type": "string"
           }
         },
@@ -13961,6 +14152,9 @@
           "giop": {
             "$ref": "#/components/schemas/Giop"
           },
+          "gluster": {
+            "$ref": "#/components/schemas/Gluster"
+          },
           "gopher": {
             "$ref": "#/components/schemas/Gopher"
           },
@@ -14673,6 +14867,9 @@
           },
           "giop": {
             "$ref": "#/components/schemas/Giop"
+          },
+          "gluster": {
+            "$ref": "#/components/schemas/Gluster"
           },
           "gopher": {
             "$ref": "#/components/schemas/Gopher"
@@ -16869,6 +17066,18 @@
           "ja4s": {
             "type": "string"
           },
+          "key_exchange_group": {
+            "type": "string"
+          },
+          "pqc_groups": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "presented_chain": {
             "items": {
               "$ref": "#/components/schemas/Tls_Chain"
@@ -18235,6 +18444,24 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -18295,6 +18522,15 @@
               }
             }
           },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            }
+          },
           "500": {
             "content": {
               "application/problem+json": {
@@ -18340,6 +18576,24 @@
             "required": true,
             "schema": {
               "format": "ip",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "maxLength": 8192,
               "type": "string"
             }
           }
@@ -18418,6 +18672,15 @@
             }
           },
           "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            }
+          },
+          "422": {
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -18512,6 +18775,24 @@
               "format": "date-time",
               "type": "string"
             }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -18564,6 +18845,15 @@
             }
           },
           "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            }
+          },
+          "422": {
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -18749,6 +19039,24 @@
             "name": "at_time",
             "schema": {
               "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "maxLength": 8192,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "exclude_fields",
+            "schema": {
+              "maxLength": 8192,
               "type": "string"
             }
           }

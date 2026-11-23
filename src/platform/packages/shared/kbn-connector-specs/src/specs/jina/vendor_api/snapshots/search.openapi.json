@@ -29,7 +29,7 @@
         "title": "AbuseAlleviationError",
         "type": "object"
       },
-      "Array<FormattedPageDto@0x0b>@0x40": {
+      "Array<FormattedPageDto@0x0b>@0x41": {
         "items": {
           "allOf": [
             {
@@ -2997,7 +2997,7 @@
                     "data": {
                       "allOf": [
                         {
-                          "$ref": "#/components/schemas/Array<FormattedPageDto@0x0b>@0x40"
+                          "$ref": "#/components/schemas/Array<FormattedPageDto@0x0b>@0x41"
                         }
                       ]
                     },

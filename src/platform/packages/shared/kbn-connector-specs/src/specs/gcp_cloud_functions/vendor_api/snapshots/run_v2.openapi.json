@@ -1,6 +1,22 @@
 {
   "components": {
     "schemas": {
+      "GoogleCloudRunV2AmbientNetworking": {
+        "properties": {
+          "ambientScope": {
+            "enum": [
+              "AMBIENT_SCOPE_UNSPECIFIED",
+              "AMBIENT_SCOPE_REGIONAL",
+              "AMBIENT_SCOPE_GLOBAL"
+            ],
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
       "GoogleCloudRunV2BinaryAuthorization": {
         "properties": {
           "breakglassJustification": {
@@ -51,6 +67,60 @@
         },
         "type": "object"
       },
+      "GoogleCloudRunV2BuildConfiguration": {
+        "properties": {
+          "buildpacksBuild": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BuildConfigurationBuildpacksBuild"
+          },
+          "dockerBuild": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BuildConfigurationDockerBuild"
+          },
+          "environmentVariables": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2EnvVar"
+            },
+            "type": "array"
+          },
+          "imageRepositoryUri": {
+            "type": "string"
+          },
+          "serviceAccount": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "workerConfiguration": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2WorkerConfiguration"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2BuildConfigurationBuildpacksBuild": {
+        "properties": {
+          "buildBaseImageUri": {
+            "type": "string"
+          },
+          "cacheImageUri": {
+            "type": "string"
+          },
+          "environmentVariables": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "deprecated": true,
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2BuildConfigurationDockerBuild": {
+        "properties": {},
+        "type": "object"
+      },
       "GoogleCloudRunV2BuildInfo": {
         "properties": {
           "functionTarget": {
@@ -59,6 +129,17 @@
           },
           "sourceLocation": {
             "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2CloudBuildWorkerConfiguration": {
+        "properties": {
+          "machineType": {
+            "type": "string"
+          },
+          "workerPool": {
             "type": "string"
           }
         },
@@ -119,9 +200,11 @@
           },
           "lastTransitionTime": {
             "format": "google-datetime",
+            "readOnly": true,
             "type": "string"
           },
           "message": {
+            "readOnly": true,
             "type": "string"
           },
           "reason": {
@@ -172,6 +255,7 @@
               "WARNING",
               "INFO"
             ],
+            "readOnly": true,
             "type": "string"
           },
           "state": {
@@ -182,9 +266,11 @@
               "CONDITION_FAILED",
               "CONDITION_SUCCEEDED"
             ],
+            "readOnly": true,
             "type": "string"
           },
           "type": {
+            "readOnly": true,
             "type": "string"
           }
         },
@@ -200,6 +286,9 @@
           },
           "baseImageUri": {
             "type": "string"
+          },
+          "buildConfig": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2BuildConfiguration"
           },
           "buildInfo": {
             "$ref": "#/components/schemas/GoogleCloudRunV2BuildInfo"
@@ -527,6 +616,9 @@
       },
       "GoogleCloudRunV2RevisionTemplate": {
         "properties": {
+          "ambientNetworking": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2AmbientNetworking"
+          },
           "annotations": {
             "additionalProperties": {
               "type": "string"
@@ -590,6 +682,9 @@
           "revision": {
             "type": "string"
           },
+          "sandboxes": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2SandboxConfiguration"
+          },
           "scaling": {
             "$ref": "#/components/schemas/GoogleCloudRunV2RevisionScaling"
           },
@@ -617,6 +712,55 @@
           },
           "workloadIdentityConfig": {
             "$ref": "#/components/schemas/GoogleCloudRunV2WorkloadIdentityConfig"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SandboxConfiguration": {
+        "properties": {
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2SandboxTemplate"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleCloudRunV2SandboxTemplate": {
+        "properties": {
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "command": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "env": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2EnvVar"
+            },
+            "type": "array"
+          },
+          "image": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "volumeMounts": {
+            "items": {
+              "$ref": "#/components/schemas/GoogleCloudRunV2VolumeMount"
+            },
+            "type": "array"
+          },
+          "workingDir": {
+            "type": "string"
           }
         },
         "type": "object"
@@ -1029,6 +1173,14 @@
         },
         "type": "object"
       },
+      "GoogleCloudRunV2WorkerConfiguration": {
+        "properties": {
+          "cloudBuildWorkerConfiguration": {
+            "$ref": "#/components/schemas/GoogleCloudRunV2CloudBuildWorkerConfiguration"
+          }
+        },
+        "type": "object"
+      },
       "GoogleCloudRunV2WorkloadIdentityConfig": {
         "properties": {
           "identity": {
@@ -1093,7 +1245,7 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1107,18 +1259,7 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -1138,29 +1279,7 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1174,6 +1293,21 @@
           },
           {
             "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "access_token",
             "schema": {
               "type": "string"
@@ -1181,9 +1315,28 @@
           },
           {
             "in": "query",
-            "name": "pageToken",
+            "name": "upload_protocol",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
             }
           },
           {
@@ -1195,10 +1348,9 @@
           },
           {
             "in": "query",
-            "name": "pageSize",
+            "name": "pageToken",
             "schema": {
-              "format": "int32",
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
@@ -1216,8 +1368,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/run",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/run"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/run.readonly"
             ]
           }
@@ -1254,7 +1414,7 @@
           },
           {
             "in": "query",
-            "name": "uploadType",
+            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1268,18 +1428,7 @@
           },
           {
             "in": "query",
-            "name": "$.xgafv",
-            "schema": {
-              "enum": [
-                "1",
-                "2"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "upload_protocol",
+            "name": "uploadType",
             "schema": {
               "type": "string"
             }
@@ -1299,29 +1448,7 @@
           },
           {
             "in": "query",
-            "name": "prettyPrint",
-            "schema": {
-              "default": "true",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
             "name": "quotaUser",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "oauth_token",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "callback",
             "schema": {
               "type": "string"
             }
@@ -1335,8 +1462,41 @@
           },
           {
             "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "access_token",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
               "type": "string"
             }
           }
@@ -1355,8 +1515,16 @@
         "security": [
           {
             "Oauth2": [
-              "https://www.googleapis.com/auth/cloud-platform",
-              "https://www.googleapis.com/auth/run",
+              "https://www.googleapis.com/auth/cloud-platform"
+            ]
+          },
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/run"
+            ]
+          },
+          {
+            "Oauth2": [
               "https://www.googleapis.com/auth/run.readonly"
             ]
           }

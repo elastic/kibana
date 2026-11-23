@@ -12,6 +12,107 @@
         }
       }
     },
+    "responses": {
+      "error_api_400": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_400"
+            }
+          }
+        }
+      },
+      "error_api_401": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_401"
+            }
+          }
+        }
+      },
+      "error_api_403": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_403"
+            }
+          }
+        }
+      },
+      "error_api_404": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_404"
+            }
+          }
+        }
+      },
+      "error_api_406": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_406"
+            }
+          }
+        }
+      },
+      "error_api_409": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_409"
+            }
+          }
+        }
+      },
+      "error_api_429": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_429"
+            }
+          }
+        }
+      },
+      "error_api_500": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_500"
+            }
+          }
+        }
+      },
+      "error_api_503": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_503"
+            }
+          }
+        }
+      },
+      "error_api_504": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_504"
+            }
+          }
+        }
+      },
+      "error_api_529": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/error_api_529"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
       "agentIdParentForBlockBasedObjectResponse": {
         "additionalProperties": false,
@@ -618,6 +719,216 @@
               }
             ]
           },
+          "sync_metadata": {
+            "additionalProperties": false,
+            "properties": {
+              "external_collection_type": {
+                "enum": [
+                  "Jira",
+                  "Salesforce"
+                ],
+                "type": "string"
+              },
+              "external_database_sync": {
+                "additionalProperties": false,
+                "properties": {
+                  "provider": {
+                    "enum": [
+                      "github",
+                      "jira",
+                      "salesforce"
+                    ],
+                    "type": "string"
+                  },
+                  "sync_id": {
+                    "$ref": "#/components/schemas/idResponse"
+                  }
+                },
+                "required": [
+                  "sync_id",
+                  "provider"
+                ],
+                "type": "object"
+              },
+              "health": {
+                "anyOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "checks": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "delta_synced_through_at": {
+                            "type": "string"
+                          },
+                          "last_execution_succeeded_at": {
+                            "type": "string"
+                          },
+                          "sync_version_updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sync_version_updated_at"
+                        ],
+                        "type": "object"
+                      },
+                      "error": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "severity": {
+                            "enum": [
+                              "action_required",
+                              "degraded",
+                              "failing"
+                            ],
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "code",
+                          "severity"
+                        ],
+                        "type": "object"
+                      },
+                      "ok": {
+                        "const": false,
+                        "type": "boolean"
+                      },
+                      "paused": {
+                        "type": "boolean"
+                      },
+                      "stage": {
+                        "enum": [
+                          "backfilling",
+                          "initializing",
+                          "steady"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "checks",
+                      "error",
+                      "ok",
+                      "paused",
+                      "stage"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "checks": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "delta_synced_through_at": {
+                            "type": "string"
+                          },
+                          "last_execution_succeeded_at": {
+                            "type": "string"
+                          },
+                          "sync_version_updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sync_version_updated_at"
+                        ],
+                        "type": "object"
+                      },
+                      "ok": {
+                        "const": true,
+                        "type": "boolean"
+                      },
+                      "paused": {
+                        "type": "boolean"
+                      },
+                      "stage": {
+                        "enum": [
+                          "backfilling",
+                          "initializing",
+                          "steady"
+                        ],
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "checks",
+                      "ok",
+                      "paused",
+                      "stage"
+                    ],
+                    "type": "object"
+                  },
+                  {
+                    "additionalProperties": false,
+                    "properties": {
+                      "paused": {
+                        "const": true,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "paused"
+                    ],
+                    "type": "object"
+                  }
+                ]
+              },
+              "owner_user_id": {
+                "$ref": "#/components/schemas/idResponse"
+              },
+              "resource": {
+                "type": "string"
+              },
+              "sync_id": {
+                "$ref": "#/components/schemas/idResponse"
+              },
+              "sync_state": {
+                "additionalProperties": false,
+                "properties": {
+                  "last_sync_checkpoint_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "last_sync_heartbeat_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "last_synced_at": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "syncing": {
+                    "oneOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "row_limit_exceeded",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "syncing"
+                ],
+                "type": "object"
+              },
+              "synced_collection_key": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
           "title": {
             "items": {
               "$ref": "#/components/schemas/richTextItemResponse"
@@ -815,11 +1126,23 @@
           },
           "database_id": {
             "$ref": "#/components/schemas/idResponse"
+          },
+          "limit": {
+            "oneOf": [
+              {
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
           "database_id",
-          "data_source_id"
+          "data_source_id",
+          "limit"
         ],
         "type": "object"
       },
@@ -2854,6 +3177,88 @@
         ],
         "type": "object"
       },
+      "pageOrDataSourceListResponse": {
+        "properties": {
+          "has_more": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "const": "list",
+            "type": "string"
+          },
+          "page_or_data_source": {
+            "$ref": "#/components/schemas/emptyObject"
+          },
+          "request_status": {
+            "properties": {
+              "incomplete_reason": {
+                "enum": [
+                  "query_result_limit_reached"
+                ],
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "complete",
+                  "incomplete"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "type": "object"
+          },
+          "results": {
+            "items": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/pageObjectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/partialPageObjectResponse"
+                    }
+                  ]
+                },
+                {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/partialDataSourceObjectResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/dataSourceObjectResponse"
+                    }
+                  ]
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "type": {
+            "const": "page_or_data_source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "page_or_data_source",
+          "object",
+          "next_cursor",
+          "has_more",
+          "results"
+        ],
+        "title": "Page Or Data Source",
+        "type": "object"
+      },
       "pagePropertyValueWithIdResponse": {
         "allOf": [
           {
@@ -4478,6 +4883,16 @@
           "status": {
             "additionalProperties": false,
             "properties": {
+              "default_option": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "groups": {
                 "items": {
                   "additionalProperties": false,
@@ -4519,6 +4934,7 @@
               }
             },
             "required": [
+              "default_option",
               "options",
               "groups"
             ],
@@ -4535,32 +4951,6 @@
         ],
         "title": "Status",
         "type": "object"
-      },
-      "statusGroupFilter": {
-        "anyOf": [
-          {
-            "properties": {
-              "equals": {
-                "$ref": "#/components/schemas/statusGroupNames"
-              }
-            },
-            "required": [
-              "equals"
-            ],
-            "type": "object"
-          },
-          {
-            "properties": {
-              "does_not_equal": {
-                "$ref": "#/components/schemas/statusGroupNames"
-              }
-            },
-            "required": [
-              "does_not_equal"
-            ],
-            "type": "object"
-          }
-        ]
       },
       "statusGroupNames": {
         "anyOf": [
@@ -4580,41 +4970,7 @@
       "statusPropertyFilter": {
         "anyOf": [
           {
-            "anyOf": [
-              {
-                "properties": {
-                  "equals": {
-                    "$ref": "#/components/schemas/stringOrStringArray"
-                  }
-                },
-                "required": [
-                  "equals"
-                ],
-                "type": "object"
-              },
-              {
-                "properties": {
-                  "does_not_equal": {
-                    "$ref": "#/components/schemas/stringOrStringArray"
-                  }
-                },
-                "required": [
-                  "does_not_equal"
-                ],
-                "type": "object"
-              },
-              {
-                "properties": {
-                  "group": {
-                    "$ref": "#/components/schemas/statusGroupFilter"
-                  }
-                },
-                "required": [
-                  "group"
-                ],
-                "type": "object"
-              }
-            ]
+            "$ref": "#/components/schemas/statusValueFilter"
           },
           {
             "$ref": "#/components/schemas/existencePropertyFilter"
@@ -4676,6 +5032,54 @@
         ],
         "title": "Status",
         "type": "object"
+      },
+      "statusValueFilter": {
+        "anyOf": [
+          {
+            "properties": {
+              "equals": {
+                "$ref": "#/components/schemas/stringOrStringArray"
+              }
+            },
+            "required": [
+              "equals"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "does_not_equal": {
+                "$ref": "#/components/schemas/stringOrStringArray"
+              }
+            },
+            "required": [
+              "does_not_equal"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "group_equals": {
+                "$ref": "#/components/schemas/statusGroupNames"
+              }
+            },
+            "required": [
+              "group_equals"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "group_does_not_equal": {
+                "$ref": "#/components/schemas/statusGroupNames"
+              }
+            },
+            "required": [
+              "group_does_not_equal"
+            ],
+            "type": "object"
+          }
+        ]
       },
       "stringFormulaPropertyValueResponse": {
         "additionalProperties": false,
@@ -5169,6 +5573,9 @@
       "userObjectResponseCommon": {
         "additionalProperties": false,
         "properties": {
+          "agent_id": {
+            "$ref": "#/components/schemas/idResponse"
+          },
           "avatar_url": {
             "oneOf": [
               {
@@ -5345,6 +5752,88 @@
         "title": "Verification",
         "type": "object"
       },
+      "viewFilterRequest": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "properties": {
+                  "or": {
+                    "$ref": "#/components/schemas/groupFilterOperatorArray"
+                  }
+                },
+                "required": [
+                  "or"
+                ],
+                "type": "object"
+              },
+              {
+                "properties": {
+                  "and": {
+                    "$ref": "#/components/schemas/groupFilterOperatorArray"
+                  }
+                },
+                "required": [
+                  "and"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "$ref": "#/components/schemas/propertyFilter"
+          },
+          {
+            "$ref": "#/components/schemas/timestampFilter"
+          }
+        ]
+      },
+      "viewSortRequest": {
+        "anyOf": [
+          {
+            "properties": {
+              "direction": {
+                "enum": [
+                  "ascending",
+                  "descending"
+                ],
+                "type": "string"
+              },
+              "property": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "property",
+              "direction"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "direction": {
+                "enum": [
+                  "ascending",
+                  "descending"
+                ],
+                "type": "string"
+              },
+              "timestamp": {
+                "enum": [
+                  "created_time",
+                  "last_edited_time"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "timestamp",
+              "direction"
+            ],
+            "type": "object"
+          }
+        ]
+      },
       "workspaceParentForBlockBasedObjectResponse": {
         "additionalProperties": false,
         "properties": {
@@ -5410,103 +5899,37 @@
             }
           },
           "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_400"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_400"
           },
           "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_401"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_401"
           },
           "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_403"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_403"
           },
           "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_404"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_404"
           },
           "406": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_406"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_406"
           },
           "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_409"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_409"
           },
           "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_429"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_429"
           },
           "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_500"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_500"
           },
           "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_503"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_503"
           },
           "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_504"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_504"
           },
           "529": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_529"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_529"
           }
         }
       }
@@ -5543,47 +5966,24 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "archive_status": {
+                    "enum": [
+                      "active",
+                      "archived",
+                      "all"
+                    ],
+                    "type": "string"
+                  },
                   "filter": {
-                    "anyOf": [
-                      {
-                        "anyOf": [
-                          {
-                            "properties": {
-                              "or": {
-                                "$ref": "#/components/schemas/groupFilterOperatorArray"
-                              }
-                            },
-                            "required": [
-                              "or"
-                            ],
-                            "type": "object"
-                          },
-                          {
-                            "properties": {
-                              "and": {
-                                "$ref": "#/components/schemas/groupFilterOperatorArray"
-                              }
-                            },
-                            "required": [
-                              "and"
-                            ],
-                            "type": "object"
-                          }
-                        ]
-                      },
-                      {
-                        "$ref": "#/components/schemas/propertyFilter"
-                      },
-                      {
-                        "$ref": "#/components/schemas/timestampFilter"
-                      }
-                    ]
+                    "$ref": "#/components/schemas/viewFilterRequest"
                   },
                   "is_archived": {
+                    "deprecated": true,
                     "type": "boolean"
                   },
                   "page_size": {
-                    "type": "number"
+                    "minimum": 1,
+                    "type": "integer"
                   },
                   "result_type": {
                     "enum": [
@@ -5594,50 +5994,7 @@
                   },
                   "sorts": {
                     "items": {
-                      "anyOf": [
-                        {
-                          "properties": {
-                            "direction": {
-                              "enum": [
-                                "ascending",
-                                "descending"
-                              ],
-                              "type": "string"
-                            },
-                            "property": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "property",
-                            "direction"
-                          ],
-                          "type": "object"
-                        },
-                        {
-                          "properties": {
-                            "direction": {
-                              "enum": [
-                                "ascending",
-                                "descending"
-                              ],
-                              "type": "string"
-                            },
-                            "timestamp": {
-                              "enum": [
-                                "created_time",
-                                "last_edited_time"
-                              ],
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "timestamp",
-                            "direction"
-                          ],
-                          "type": "object"
-                        }
-                      ]
+                      "$ref": "#/components/schemas/viewSortRequest"
                     },
                     "type": "array"
                   },
@@ -5656,188 +6013,43 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "has_more": {
-                      "type": "boolean"
-                    },
-                    "next_cursor": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "object": {
-                      "const": "list",
-                      "type": "string"
-                    },
-                    "page_or_data_source": {
-                      "$ref": "#/components/schemas/emptyObject"
-                    },
-                    "request_status": {
-                      "properties": {
-                        "incomplete_reason": {
-                          "enum": [
-                            "query_result_limit_reached"
-                          ],
-                          "type": "string"
-                        },
-                        "type": {
-                          "enum": [
-                            "complete",
-                            "incomplete"
-                          ],
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type"
-                      ],
-                      "type": "object"
-                    },
-                    "results": {
-                      "items": {
-                        "anyOf": [
-                          {
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/pageObjectResponse"
-                              },
-                              {
-                                "$ref": "#/components/schemas/partialPageObjectResponse"
-                              }
-                            ]
-                          },
-                          {
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/partialDataSourceObjectResponse"
-                              },
-                              {
-                                "$ref": "#/components/schemas/dataSourceObjectResponse"
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      "type": "array"
-                    },
-                    "type": {
-                      "const": "page_or_data_source",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "page_or_data_source",
-                    "object",
-                    "next_cursor",
-                    "has_more",
-                    "results"
-                  ],
-                  "title": "Page Or Data Source",
-                  "type": "object"
+                  "$ref": "#/components/schemas/pageOrDataSourceListResponse"
                 }
               }
             }
           },
           "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_400"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_400"
           },
           "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_401"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_401"
           },
           "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_403"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_403"
           },
           "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_404"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_404"
           },
           "406": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_406"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_406"
           },
           "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_409"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_409"
           },
           "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_429"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_429"
           },
           "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_500"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_500"
           },
           "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_503"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_503"
           },
           "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_504"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_504"
           },
           "529": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_529"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_529"
           }
         }
       }
@@ -5887,103 +6099,37 @@
             }
           },
           "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_400"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_400"
           },
           "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_401"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_401"
           },
           "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_403"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_403"
           },
           "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_404"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_404"
           },
           "406": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_406"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_406"
           },
           "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_409"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_409"
           },
           "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_429"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_429"
           },
           "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_500"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_500"
           },
           "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_503"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_503"
           },
           "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_504"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_504"
           },
           "529": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_529"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_529"
           }
         }
       }
@@ -5992,6 +6138,16 @@
       "post": {
         "operationId": "post-search",
         "parameters": [
+          {
+            "in": "query",
+            "name": "filter_properties",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
           {
             "$ref": "#/components/parameters/notionVersion"
           }
@@ -6108,188 +6264,43 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "properties": {
-                    "has_more": {
-                      "type": "boolean"
-                    },
-                    "next_cursor": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "object": {
-                      "const": "list",
-                      "type": "string"
-                    },
-                    "page_or_data_source": {
-                      "$ref": "#/components/schemas/emptyObject"
-                    },
-                    "request_status": {
-                      "properties": {
-                        "incomplete_reason": {
-                          "enum": [
-                            "query_result_limit_reached"
-                          ],
-                          "type": "string"
-                        },
-                        "type": {
-                          "enum": [
-                            "complete",
-                            "incomplete"
-                          ],
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type"
-                      ],
-                      "type": "object"
-                    },
-                    "results": {
-                      "items": {
-                        "anyOf": [
-                          {
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/pageObjectResponse"
-                              },
-                              {
-                                "$ref": "#/components/schemas/partialPageObjectResponse"
-                              }
-                            ]
-                          },
-                          {
-                            "anyOf": [
-                              {
-                                "$ref": "#/components/schemas/partialDataSourceObjectResponse"
-                              },
-                              {
-                                "$ref": "#/components/schemas/dataSourceObjectResponse"
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      "type": "array"
-                    },
-                    "type": {
-                      "const": "page_or_data_source",
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "page_or_data_source",
-                    "object",
-                    "next_cursor",
-                    "has_more",
-                    "results"
-                  ],
-                  "title": "Page Or Data Source",
-                  "type": "object"
+                  "$ref": "#/components/schemas/pageOrDataSourceListResponse"
                 }
               }
             }
           },
           "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_400"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_400"
           },
           "401": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_401"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_401"
           },
           "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_403"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_403"
           },
           "404": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_404"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_404"
           },
           "406": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_406"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_406"
           },
           "409": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_409"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_409"
           },
           "429": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_429"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_429"
           },
           "500": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_500"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_500"
           },
           "503": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_503"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_503"
           },
           "504": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_504"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_504"
           },
           "529": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_api_529"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error_api_529"
           }
         }
       }

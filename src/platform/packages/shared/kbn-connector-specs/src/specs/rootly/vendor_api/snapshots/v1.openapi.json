@@ -722,6 +722,10 @@
             "nullable": true,
             "type": "string"
           },
+          "public_name": {
+            "nullable": true,
+            "type": "string"
+          },
           "slack_aliases": {
             "items": {
               "properties": {
@@ -958,6 +962,10 @@
             "nullable": true,
             "type": "string"
           },
+          "public_name": {
+            "nullable": true,
+            "type": "string"
+          },
           "service_ids": {
             "items": {
               "type": "string"
@@ -1147,6 +1155,18 @@
           "closed_by": {
             "nullable": true,
             "type": "object"
+          },
+          "coda_doc_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "coda_doc_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "coda_page_id": {
+            "nullable": true,
+            "type": "string"
           },
           "confluence_page_id": {
             "nullable": true,
@@ -1415,6 +1435,14 @@
             },
             "nullable": true,
             "type": "array"
+          },
+          "notion_page_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "notion_page_url": {
+            "nullable": true,
+            "type": "string"
           },
           "opsgenie_alert_id": {
             "nullable": true,
@@ -1761,6 +1789,18 @@
               "task",
               "follow_up"
             ],
+            "type": "string"
+          },
+          "linear_issue_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linear_issue_key": {
+            "nullable": true,
+            "type": "string"
+          },
+          "linear_issue_url": {
+            "nullable": true,
             "type": "string"
           },
           "priority": {
@@ -2117,6 +2157,10 @@
             "type": "array"
           },
           "public_description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "public_name": {
             "nullable": true,
             "type": "string"
           },
@@ -2730,6 +2774,10 @@
                     ],
                     "type": "string"
                   },
+                  "linear_issue_url": {
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "priority": {
                     "enum": [
                       "high",
@@ -3129,6 +3177,10 @@
             "type": "array"
           },
           "public_description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "public_name": {
             "nullable": true,
             "type": "string"
           },
@@ -3602,6 +3654,10 @@
             "type": "array"
           },
           "public_description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "public_name": {
             "nullable": true,
             "type": "string"
           },

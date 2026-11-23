@@ -130,7 +130,7 @@
   "sources": {
     "v1": {
       "apiVersion": "v1.0",
-      "fetchedAt": "2026-10-07T20:21:15.263Z",
+      "fetchedAt": "2026-11-23T11:12:32.616Z",
       "format": "openapi",
       "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
     }

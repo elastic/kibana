@@ -36,7 +36,7 @@
   "sources": {
     "run_v2": {
       "apiVersion": "v2",
-      "fetchedAt": "2026-10-07T20:20:12.745Z",
+      "fetchedAt": "2026-11-23T11:10:17.784Z",
       "format": "discovery",
       "url": "https://run.googleapis.com/$discovery/rest?version=v2"
     }
