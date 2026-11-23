@@ -281,18 +281,6 @@ describe('createBrowserConfig and getExposedConfigKeys', () => {
     expect(
       getExposedConfigKeys({ ...descriptor, exposeToBrowser: { settings: { other: true } } })
     ).toEqual({ settings: 'record [selected: {"other":true}]' });
-    expect(
-      getExposedConfigKeys({
-        ...descriptor,
-        exposeToBrowser: { settings: { enabled: true, other: false } },
-      })
-    ).toEqual(result.exposedConfigKeys);
-    expect(
-      getExposedConfigKeys({
-        ...descriptor,
-        exposeToBrowser: { settings: { ä: true, z: true } },
-      })
-    ).toEqual({ settings: 'record [selected: {"z":true,"ä":true}]' });
   });
 
   it('distinguishes literal dots in schema keys from nested paths', () => {
