@@ -17,6 +17,7 @@ import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
 import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
+import { getSetupWizardStorageKey, readSetupWizardStoredValue } from '../../utils/setup_wizard';
 import { CreateAiIndexModal } from './create_ai_index_modal';
 
 jest.mock('../../hooks/use_memory_enabled', () => ({
@@ -136,7 +137,7 @@ describe('CreateAiIndexModal', () => {
     });
   });
 
-  it('continues to the dreaming setup after creating an AI index while memory is on', async () => {
+  it('opens the detail page (setup wizard) also while memory is on', async () => {
     mockUseMemoryEnabled.mockReturnValue(true);
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
@@ -147,9 +148,24 @@ describe('CreateAiIndexModal', () => {
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
-        path: '/ai_index/support-ticket-triage/dreaming_template',
+        path: '/ai_index/support-ticket-triage',
+        state: AI_INDEX_CREATED_LOCATION_STATE,
       });
     });
+  });
+
+  it('forgets the setup wizard state of an older AI index with the same id', async () => {
+    const storageKey = { basePath: '', aiIndexId: VALID_ID };
+    window.localStorage.setItem(getSetupWizardStorageKey(storageKey), JSON.stringify('closed'));
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexModalConfirmButton'));
+
+    await waitFor(() => expect(services.application.navigateToApp).toHaveBeenCalled());
+    expect(readSetupWizardStoredValue(storageKey)).toBeUndefined();
   });
 
   it('does not navigate when the create request fails', async () => {

@@ -24,28 +24,31 @@ import { DEFAULT_AI_INDEX_TYPE } from '../../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../../ai_index_created_location_state';
 import { useCreateAiIndex } from '../../hooks/use_create_ai_index';
-import { useMemoryEnabled } from '../../hooks/use_memory_enabled';
+import { useKibana } from '../../hooks/use_kibana';
 import { useNavigation } from '../../hooks/use_navigation';
-import { getAiIndexDetailPath, getAiIndexDreamingTemplatePath } from '../../paths';
+import { getAiIndexDetailPath } from '../../paths';
 import { validateAiIndexId } from '../../utils/ai_index_dest';
+import { removeSetupWizardStoredValue } from '../../utils/setup_wizard';
 
 interface CreateAiIndexModalProps {
   onClose: () => void;
 }
 
 export const CreateAiIndexModal = ({ onClose }: CreateAiIndexModalProps) => {
+  const {
+    services: { http },
+  } = useKibana();
   const { navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
-  const isMemoryEnabled = useMemoryEnabled();
   const [id, setId] = useState('');
   const modalTitleId = useGeneratedHtmlId();
   const { dest, error: nameError } = validateAiIndexId(DEFAULT_AI_INDEX_TYPE, id);
 
   const createAndContinue = async () => {
     const created = await createAiIndex({ id, description: '', sources: [] });
-    if (created && isMemoryEnabled) {
-      navigateToContextEngine(getAiIndexDreamingTemplatePath(created.id));
-    } else if (created) {
+    if (created) {
+      // The Overview opens the setup wizard for a new AI index, also when an old one had this id.
+      removeSetupWizardStoredValue({ basePath: http.basePath.get(), aiIndexId: created.id });
       navigateToContextEngine(
         getAiIndexDetailPath(created.id),
         undefined,
