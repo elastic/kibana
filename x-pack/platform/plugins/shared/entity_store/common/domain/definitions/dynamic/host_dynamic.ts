@@ -66,4 +66,27 @@ export const hostDynamicBlock: DynamicBlock = {
     },
   ],
   suggestedFilters: ['os.type', 'cloud.provider'],
+  displayLabels: [
+    { name: 'host.id', label: 'Host ID' },
+    { name: 'host.name', label: 'Host name' },
+    { name: 'host.hostname', label: 'Hostname' },
+    { name: 'os.type', label: 'OS type' },
+    { name: 'os.name', label: 'OS name' },
+    { name: 'os.version', label: 'OS version' },
+    { name: 'host.os.kernel', label: 'Kernel' },
+    { name: 'host.arch', label: 'Architecture' },
+    { name: 'host.ip', label: 'IP addresses' },
+    { name: 'k8s.cluster.name', label: 'Kubernetes cluster' },
+    { name: 'cloud.provider', label: 'Cloud provider' },
+    { name: 'cloud.platform', label: 'Cloud platform' },
+    { name: 'cloud.region', label: 'Cloud region' },
+    { name: 'cloud.availability_zone', label: 'Availability zone' },
+    { name: 'cloud.account.id', label: 'Cloud account' },
+  ],
+  category: 'hosts',
+  icon: 'compute',
+  // The identity ranks host.id first, so its first field would name a host by a machine id.
+  nameFields: ['host.name', 'host.hostname', 'host.id'],
+  // Last seen stands in for up time until metric columns exist.
+  defaultColumns: ['cloud.account.id', 'last_seen'],
 };
