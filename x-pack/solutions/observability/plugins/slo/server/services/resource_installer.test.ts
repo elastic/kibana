@@ -326,6 +326,132 @@ describe('resourceInstaller', () => {
       expect(esClient.indices.get).not.toHaveBeenCalled();
     });
 
+    describe('without a configured rounding', () => {
+      const createAutoInstaller = (esClient: EsClientMock) =>
+        new DefaultResourceInstaller(esClient, loggerMock.create(), undefined, () => NOW);
+
+      const mockDatedIndices = (esClient: EsClientMock, docsPerIndex: number) => {
+        esClient.indices.get.mockResponse({
+          '.slo-observability.sli-v3.6': {},
+          '.slo-observability.sli-v3.6.2026-11-15': {},
+          '.slo-observability.sli-v3.6.2026-11-16': {},
+          '.slo-observability.sli-v3.6.2026-11-17': {},
+        });
+        esClient.indices.stats.mockResponse({
+          _shards: { total: 1, successful: 1, failed: 0 },
+          _all: {},
+          indices: {
+            '.slo-observability.sli-v3.6.2026-11-15': {
+              primaries: { docs: { count: 1, total_size_in_bytes: 1 } },
+            },
+            '.slo-observability.sli-v3.6.2026-11-16': {
+              primaries: { docs: { count: docsPerIndex, total_size_in_bytes: 1 } },
+            },
+          },
+        });
+      };
+
+      const installedRouting = (esClient: EsClientMock) =>
+        esClient.ingest.putPipeline.mock.calls[0][0]._meta?.routing;
+
+      it.each([
+        ['monthly below 6M documents per day', 1_000_000, DAILY_HISTORY_GUARD],
+        [
+          'weekly from 6M documents per day',
+          10_000_000,
+          {
+            segments: [
+              { from: null, rounding: 'd' },
+              { from: DEC_1, rounding: 'w' },
+            ],
+          },
+        ],
+        [
+          'daily from 27M documents per day',
+          158_000_000,
+          { segments: [{ from: null, rounding: 'd' }] },
+        ],
+      ])('chooses %s', async (_name, docsPerDay, expected) => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {});
+        mockDatedIndices(esClient, docsPerDay);
+
+        await createAutoInstaller(esClient).install();
+
+        expect(installedRouting(esClient)).toEqual(expected);
+      });
+
+      it("measures the latest complete dated indices, not today's", async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {});
+        mockDatedIndices(esClient, 1_000_000);
+
+        await createAutoInstaller(esClient).install();
+
+        expect(esClient.indices.stats).toHaveBeenCalledWith(
+          expect.objectContaining({
+            index: [
+              '.slo-observability.sli-v3.6.2026-11-15',
+              '.slo-observability.sli-v3.6.2026-11-16',
+            ],
+          })
+        );
+      });
+
+      it('uses the monthly rounding when the volume cannot be measured', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {});
+        mockDatedIndices(esClient, 158_000_000);
+        esClient.indices.stats.mockRejectedValue(new Error('security_exception'));
+
+        await createAutoInstaller(esClient).install();
+
+        expect(installedRouting(esClient)).toEqual(DAILY_HISTORY_GUARD);
+      });
+
+      it('uses the monthly rounding without dated indices to measure', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {});
+        esClient.indices.get.mockResponse({ '.slo-observability.sli-v3.6': {} });
+
+        await createAutoInstaller(esClient).install();
+
+        expect(installedRouting(esClient)).toEqual({ segments: [{ from: null, rounding: 'M' }] });
+        expect(esClient.indices.stats).not.toHaveBeenCalled();
+      });
+
+      it('keeps the routing state in place', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {
+          '.slo-observability.sli.routing-v3.6': routingPipeline(3.6, {
+            segments: [{ from: null, rounding: 'd' }],
+          }),
+        });
+
+        await createAutoInstaller(esClient).install();
+
+        expect(esClient.ingest.putPipeline).not.toHaveBeenCalled();
+        expect(esClient.indices.stats).not.toHaveBeenCalled();
+      });
+
+      it('does not measure the volume when a rounding is configured', async () => {
+        const esClient = elasticsearchServiceMock.createElasticsearchClient();
+        mockTemplatesUpToDate(esClient);
+        mockRoutingPipelines(esClient, {});
+        mockDatedIndices(esClient, 158_000_000);
+
+        await createInstaller(esClient).install();
+
+        expect(installedRouting(esClient)).toEqual(DAILY_HISTORY_GUARD);
+        expect(esClient.indices.stats).not.toHaveBeenCalled();
+      });
+    });
+
     it('stops at the first routing pipeline that fails', async () => {
       mockRoutedVersions = [3.6, 3.7];
       const esClient = elasticsearchServiceMock.createElasticsearchClient();

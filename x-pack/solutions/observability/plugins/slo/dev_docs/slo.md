@@ -163,13 +163,15 @@ The `slo:resources-reconcile-task` task also migrates the SLI pipelines created 
 
 ### Index rounding
 
-`xpack.slo.sliIndexRounding` (`M`, `w` or `d`, defaults to `M`) sets the rounding of the SLI indices. Clusters with a large SLI volume must use `d` or `w` (see [Choosing a rounding](#choosing-a-rounding)).
+`xpack.slo.sliIndexRounding` (`M`, `w` or `d`) sets the rounding of the SLI indices. When it is not set, the rounding is chosen once, when the routing pipeline of a version is first created, from the documents per day of the latest complete dated SLI indices (see [Choosing a rounding](#choosing-a-rounding)). It is monthly when there is no dated index to measure, or when the measure fails (a warning is logged). A routing pipeline that exists keeps its routing state until the setting changes.
 
 A rounding change applies from the start of the next UTC day: the next install (on Kibana startup, or the hourly `slo:resources-reconcile-task` run) appends a segment starting then to the routing pipeline of every version. Documents before that time keep their index when the transforms rewrite them, so no document is counted twice. A segment not in effect yet is updated in place by a further change, keeping its start, and dropped when the rounding goes back to the one in effect.
 
 Two roundings can share an index name, e.g. the daily and monthly indices of the first day of a month. Each document still goes to a single index, so this does not count any document twice.
 
 #### Choosing a rounding
+
+Without `xpack.slo.sliIndexRounding`, the installer measures the largest document count of the latest 7 complete dated indices (`indices.stats`) and picks `M` below 6M documents per day, `w` below 27M and `d` above. These thresholds are half of the limits in the table below, as the choice is made once. A cluster that grows later must set the rounding explicitly.
 
 An SLI index has a single primary shard. Size it by the **documents written per day**, not by the number of SLO instances: a rollup document only exists for a bucket that has data, so the documents per instance per day vary from a few hundred (short-lived groupings) to 1,440 (1 minute buckets, always active).
 
@@ -181,9 +183,13 @@ Measured on a production cluster, an SLI document takes **~130 bytes** on disk (
 | `w` (7 days) | ~55M | ~300M |
 | `d` | ~390M | not reachable |
 
-Read the documents per day from the `docs.count` of a recent complete daily index: `GET _cat/indices/.slo-observability.sli-v3*?v&expand_wildcards=all&h=index,docs.count,pri.store.size&s=index`. A cluster above ~12M documents per day (about 8,700 instances that are always active) must set `w` or `d`. At ~158M documents per day, a monthly index would hold ~4.9B documents and be full after ~13 days. **Set the rounding before upgrading to a version where `M` is the default**: nothing selects it automatically from existing indices.
+Read the documents per day from the `docs.count` of a recent complete daily index: `GET _cat/indices/.slo-observability.sli-v3*?v&expand_wildcards=all&h=index,docs.count,pri.store.size&s=index`. A cluster above ~12M documents per day (about 8,700 instances that are always active) must set `w` or `d`. At ~158M documents per day, a monthly index would hold ~4.9B documents and be full after ~13 days. Set `xpack.slo.sliIndexRounding` explicitly when the automatic choice does not fit. On a cluster with daily history the monthly segment only starts at the next UTC month start, and setting `d` before then replaces it.
 
-Rollup transforms that failed on a full index must be restarted after the switch: `POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`.
+Change the rounding **before** the index fills. A change only applies from the next UTC day, and buckets before that time keep their old destination: a transform whose checkpoint still has to write to a full index fails again after a restart, so restarting it does not recover a full index. Restarting (`POST _transform/<id>/_stop?force=true`, then `POST _transform/<id>/_start`) only helps when the failure had another cause.
+
+#### Routing state and recovery
+
+The routing state is stored only in `_meta.routing` of the routing pipeline. If the pipeline is deleted, or its `_meta` is malformed, the next install builds a new state from the clock and the existing index names instead of restoring the previous one. Existing daily indices make it a daily history with the new rounding starting at the next UTC month start, so buckets already written to a monthly index can be written again to a daily index and counted twice. Before deleting a routing pipeline, save its `_meta.routing`. To recover, `PUT` the pipeline again with the saved segments, or with `xpack.slo.sliIndexRounding` set, and review the dated indices of the affected period for duplicate buckets.
 
 Where the bytes go (measured on a ~18 GB daily index): `_source` 43%, `_id` 24%, `_seq_no` and `event.ingested` 6% each, `slo.groupings` with its `_keyed` copy 6%, `@timestamp` 3%, `slo.tags` 3%, `slo.instanceId` 3%. Use `POST <index>/_disk_usage?run_expensive_tasks=true` to measure another index.
 

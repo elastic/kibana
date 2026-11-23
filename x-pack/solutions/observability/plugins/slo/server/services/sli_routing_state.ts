@@ -21,6 +21,20 @@ export interface SliRoutingState {
 
 const ROUNDINGS: readonly Rounding[] = ['M', 'w', 'd'];
 
+// Documents per day from which a monthly index would outgrow its shard. A shard of ~50 GB holds ~390M documents
+// of ~130 bytes, so monthly fits ~12M documents per day and weekly ~55M. The thresholds keep a 2x headroom
+// because the rounding is chosen once.
+const MAX_DOCS_PER_DAY_MONTHLY = 6_000_000;
+const MAX_DOCS_PER_DAY_WEEKLY = 27_000_000;
+
+/** Returns the largest rounding whose index stays within a shard for the documents written per day. */
+export const chooseRoundingForDailyDocs = (docsPerDay: number): Rounding => {
+  if (docsPerDay < MAX_DOCS_PER_DAY_MONTHLY) {
+    return 'M';
+  }
+  return docsPerDay < MAX_DOCS_PER_DAY_WEEKLY ? 'w' : 'd';
+};
+
 /** Returns the epoch millis of the first day of the next UTC month. */
 export const startOfNextUtcMonth = (now: Date): number =>
   Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1);

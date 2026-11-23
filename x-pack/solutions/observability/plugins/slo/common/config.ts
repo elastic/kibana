@@ -14,9 +14,10 @@ export const configSchema = schema.object({
   healthScanTaskEnabled: schema.boolean({ defaultValue: true }),
   staleInstancesCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   compositeSloSummaryTaskEnabled: schema.boolean({ defaultValue: true }),
-  sliIndexRounding: schema.oneOf([schema.literal('M'), schema.literal('w'), schema.literal('d')], {
-    defaultValue: 'M',
-  }),
+  // Unset: chosen at the first install from the volume of the existing SLI indices (monthly when unknown).
+  sliIndexRounding: schema.maybe(
+    schema.oneOf([schema.literal('M'), schema.literal('w'), schema.literal('d')])
+  ),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({

@@ -11,7 +11,7 @@ import type {
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { escapeRegExp, isEqual } from 'lodash';
+import { escapeRegExp, isEqual, max } from 'lodash';
 import {
   COMPOSITE_SUMMARY_INDEX_NAME,
   getSLIIndexNamePrefix,
@@ -38,12 +38,16 @@ import {
 } from '../assets/ingest_templates/sli_routing_pipeline_template';
 import { SLOResourcesNotInstalled } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { Rounding } from './sli_routing_state';
+import type { Rounding, SliRoutingState } from './sli_routing_state';
 import {
+  chooseRoundingForDailyDocs,
   computeInitialRoutingState,
   parseRoutingStateFromMeta,
   reconcileRoutingState,
 } from './sli_routing_state';
+
+// Number of most recent complete dated indices whose document count estimates the documents per day.
+const VOLUME_SAMPLE_INDICES = 7;
 
 export interface ResourceInstaller {
   install(): Promise<void>;
@@ -75,7 +79,7 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(
     private esClient: ElasticsearchClient,
     private logger: Logger,
-    private configuredRounding: Rounding,
+    private configuredRounding: Rounding | undefined,
     private now: () => Date = () => new Date()
   ) {}
 
@@ -103,10 +107,10 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.createDataStream(HEALTH_DATA_STREAM_NAME)
     );
 
-    const hasDailyHistory = this.createDailyHistoryChecker();
+    const listDatedIndices = this.createDatedIndicesLister();
     for (const version of SLI_ROUTED_VERSIONS) {
       await this.installResource(getSLIRoutingPipelineName(version), () =>
-        this.ensureRoutingPipeline(version, hasDailyHistory)
+        this.ensureRoutingPipeline(version, listDatedIndices)
       );
     }
   }
@@ -123,20 +127,29 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
   private async ensureRoutingPipeline(
     version: number,
-    hasDailyHistory: (version: number) => Promise<boolean>
+    listDatedIndices: (version: number) => Promise<string[]>
   ): Promise<void> {
     const name = getSLIRoutingPipelineName(version);
     const current = await this.fetchRoutingPipeline(version);
     const existing = parseRoutingStateFromMeta(current?._meta);
 
     // A rounding change applies from the next UTC day, so every document already written keeps its index.
-    const routing = existing
-      ? reconcileRoutingState(existing, this.configuredRounding, this.now())
-      : computeInitialRoutingState({
-          configured: this.configuredRounding,
-          now: this.now(),
-          hasDailyHistory: await hasDailyHistory(version),
-        });
+    // Without a configured rounding, the routing state in place is kept.
+    let routing: SliRoutingState;
+    if (existing) {
+      routing = this.configuredRounding
+        ? reconcileRoutingState(existing, this.configuredRounding, this.now())
+        : existing;
+    } else {
+      const datedIndices = await listDatedIndices(version);
+      const hasDailyHistory = datedIndices.some((index) => !index.endsWith('-01'));
+      routing = computeInitialRoutingState({
+        configured:
+          this.configuredRounding ?? (await this.chooseRoundingFromIndices(datedIndices, name)),
+        now: this.now(),
+        hasDailyHistory,
+      });
+    }
 
     if (
       current &&
@@ -162,9 +175,8 @@ export class DefaultResourceInstaller implements ResourceInstaller {
     return response?.[id];
   }
 
-  // Lists the SLI indices at most once per install run. A version has daily history when one of
-  // its dated indices is not on the first day of a month.
-  private createDailyHistoryChecker(): (version: number) => Promise<boolean> {
+  // Lists the SLI indices at most once per install run and returns the dated indices of a version, oldest first.
+  private createDatedIndicesLister(): (version: number) => Promise<string[]> {
     let indexNames: Promise<string[]> | undefined;
 
     return async (version: number) => {
@@ -177,13 +189,52 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       ).then((response) => Object.keys(response));
 
       const datedIndexRegex = new RegExp(
-        `^${escapeRegExp(getSLIIndexNamePrefix(version))}\\d{4}-\\d{2}-(\\d{2})$`
+        `^${escapeRegExp(getSLIIndexNamePrefix(version))}\\d{4}-\\d{2}-\\d{2}$`
       );
-      return (await indexNames).some((name) => {
-        const day = datedIndexRegex.exec(name)?.[1];
-        return day !== undefined && day !== '01';
-      });
+      return (await indexNames).filter((name) => datedIndexRegex.test(name)).sort();
     };
+  }
+
+  // Picks the rounding from the documents per day of the latest complete dated indices. Returns the monthly
+  // rounding when there is nothing to measure or the measure fails: an operator can still set the rounding
+  // before the next UTC month start, when it takes effect on a cluster with daily history.
+  private async chooseRoundingFromIndices(
+    datedIndices: string[],
+    pipelineName: string
+  ): Promise<Rounding> {
+    const today = this.now().toISOString().slice(0, 10);
+    const sample = datedIndices
+      .filter((index) => index.slice(-10) < today)
+      .slice(-VOLUME_SAMPLE_INDICES);
+    if (sample.length === 0) {
+      return 'M';
+    }
+
+    try {
+      const { indices = {} } = await this.execute(() =>
+        this.esClient.indices.stats({
+          index: sample,
+          metric: 'docs',
+          level: 'indices',
+          expand_wildcards: 'all',
+        })
+      );
+      const docsPerDay = max(Object.values(indices).map((stats) => stats.primaries?.docs?.count));
+      if (docsPerDay === undefined) {
+        return 'M';
+      }
+
+      const rounding = chooseRoundingForDailyDocs(docsPerDay);
+      this.logger.info(
+        `Choosing the SLI index rounding [${rounding}] for [${pipelineName}]: ${docsPerDay} documents in the largest of the latest ${sample.length} dated indices`
+      );
+      return rounding;
+    } catch (err) {
+      this.logger.warn(
+        `Cannot measure the SLI indices volume, using the monthly rounding for [${pipelineName}]: ${err.message}`
+      );
+      return 'M';
+    }
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {

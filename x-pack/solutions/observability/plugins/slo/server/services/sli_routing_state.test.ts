@@ -7,6 +7,7 @@
 
 import type { SliRoutingState } from './sli_routing_state';
 import {
+  chooseRoundingForDailyDocs,
   computeInitialRoutingState,
   parseRoutingStateFromMeta,
   reconcileRoutingState,
@@ -169,5 +170,18 @@ describe('parseRoutingStateFromMeta', () => {
     ],
   ])('returns undefined on %s', (_, meta) => {
     expect(parseRoutingStateFromMeta(meta)).toBeUndefined();
+  });
+});
+
+describe('chooseRoundingForDailyDocs', () => {
+  it.each([
+    [0, 'M'],
+    [5_999_999, 'M'],
+    [6_000_000, 'w'],
+    [26_999_999, 'w'],
+    [27_000_000, 'd'],
+    [158_000_000, 'd'],
+  ])('chooses the rounding for %d documents per day', (docsPerDay, expected) => {
+    expect(chooseRoundingForDailyDocs(docsPerDay)).toBe(expected);
   });
 });

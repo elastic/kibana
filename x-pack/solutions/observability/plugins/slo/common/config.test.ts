@@ -8,10 +8,10 @@
 import { configSchema } from './config';
 
 describe('SLO config schema', () => {
-  it('defaults to monthly SLI indices', () => {
+  it('leaves the SLI index rounding unset to choose it from the existing indices', () => {
     const config = configSchema.validate({});
 
-    expect(config.sliIndexRounding).toBe('M');
+    expect(config.sliIndexRounding).toBeUndefined();
   });
 
   it.each(['M', 'w', 'd'])('accepts sliIndexRounding [%s]', (rounding) => {
