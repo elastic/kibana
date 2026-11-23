@@ -218,7 +218,10 @@ export async function updateTagsBatch(
   const updatedCount = res.updated ?? 0;
   const updatedIds = getUuidArray(updatedCount);
 
-  const failures = res.failures ?? [];
+  // The agents that failed were not changed, so the retry of a cancelled update goes through them
+  // again and records each with the result it has. Recording the failure now as well would report
+  // an agent that the retry updated as failed.
+  const failures = res.canceled ? [] : res.failures ?? [];
   const failureCount = failures.length;
 
   const isLastRetry = options.retryCount === MAX_RETRY_COUNT;

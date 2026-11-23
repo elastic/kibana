@@ -462,6 +462,37 @@ describe('update_agent_tags', () => {
       expect(agentAction?.document.agents.length).toEqual(3);
     });
 
+    it('should leave the agents that failed to the retry, which records each with its own result', async () => {
+      esClient.tasks.get.mockResolvedValue({
+        ...cancelledTask,
+        response: {
+          ...cancelledTask.response,
+          failures: [{ id: 'agent2', cause: { reason: 'error reason' } }],
+        },
+      } as any);
+
+      await expect(
+        updateTagsBatch(
+          soClient,
+          esClient,
+          [{ id: 'agent1' } as Agent],
+          {},
+          {
+            tagsToAdd: [],
+            tagsToRemove: ['old'],
+            kuery: '',
+            total: 5,
+            retrySkipsUpdated: true,
+          }
+        )
+      ).rejects.toThrow(/cancelled .* after updating 3 of 5 agents/);
+
+      // the three agents it updated, and not the one that failed
+      const agentAction = esClient.create.mock.calls[0][0] as any;
+      expect(agentAction?.document.agents.length).toEqual(3);
+      expect(getErrorResults(esClient)).toEqual([]);
+    });
+
     it('should record nothing, and throw to retry, when the retry goes through the same agents again', async () => {
       await expect(
         updateTagsBatch(
