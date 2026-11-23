@@ -68,6 +68,16 @@ export interface InventoryType {
   suggestedFilters: string[];
   /** The definition's `dynamic.sources`, in source order. */
   sources: InventoryTypeSource[];
+  /** Page category the type is listed under, such as `hosts`; absent lists it only under All resources. */
+  category?: string;
+  /** EUI icon token shown beside the entity name. */
+  icon?: string;
+  /** Columns tried in order for the entity name; the UI falls back to `identityFields`. */
+  nameFields?: string[];
+  /** Columns visible by default, in order; absent shows every column. */
+  defaultColumns?: string[];
+  /** Columns whose values render as badges. */
+  badgeColumns?: string[];
 }
 
 export interface GetTypesResponse {

@@ -403,7 +403,16 @@ export class InventoryService {
 
   private buildType = (definition: RegisteredEntityDefinition): InventoryType => {
     const { type, name, description } = definition;
-    const { sources, displayLabels, suggestedFilters = [] } = getDynamicBlock(definition);
+    const {
+      sources,
+      displayLabels,
+      suggestedFilters = [],
+      category,
+      icon,
+      nameFields,
+      defaultColumns,
+      badgeColumns,
+    } = getDynamicBlock(definition);
     const identityPlan = resolveIdentityPlan(definition);
     const columns = buildColumns(
       definition,
@@ -418,6 +427,12 @@ export class InventoryService {
       columns: toTypeColumns(columns, displayLabels),
       suggestedFilters,
       sources: sources.map(({ indexPattern, filter }) => ({ indexPattern, filter })),
+      // Returned as declared, so the app sees a type without metadata and applies its fallbacks.
+      category,
+      icon,
+      nameFields,
+      defaultColumns,
+      badgeColumns,
     };
   };
 }

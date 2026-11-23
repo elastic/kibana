@@ -51,6 +51,16 @@ No body and no parameters. It returns one entry per registered definition that h
 
 A column's optional `label` is its user-facing text. It comes from the definition's `dynamic.displayLabels` (a list of `{ name, label }`, where `name` is an identity field or an attribute), with built-in defaults for `entity.id` ("ID") and `last_seen` ("Last seen"). A column with no label is shown by its `name`. Only this route returns labels; the `_list` response columns stay `{ name, kind }`.
 
+The optional presentation fields come from the definition's `dynamic` block as declared. The route fills in no defaults and leaves a field out when the definition does, so the app can tell a type without metadata and apply its own fallbacks:
+
+| Field | Meaning |
+| --- | --- |
+| `category` | The inventory page the type is listed under, such as `hosts` or `kubernetes`. A type without one is listed only under All resources |
+| `icon` | The EUI icon token shown beside the entity name |
+| `nameFields` | The columns tried in order for the entity name: the first non-null value names the entity |
+| `defaultColumns` | The columns visible by default, in display order. They may include `last_seen` |
+| `badgeColumns` | The columns whose values render as badges |
+
 ### `POST /internal/entity_inventory/entities/{type}/_list`
 
 Returns one row per entity of `type` seen in the window, merged across the type's sources, newest `last_seen` first.
