@@ -377,11 +377,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
         const invocationResult = await runnable.invoke(modelInput, {
           signal: context.abortSignal,
         });
-        assertVisibleAnswerWithinTokenCap(
-          invocationResult.raw?.content,
-          reasoningLevel,
-          maxTokens
-        );
+        assertVisibleAnswerWithinTokenCap(invocationResult.raw?.content, reasoningLevel, maxTokens);
         return {
           // We modify the output to match the expected schema
           // For now, structured output flow does not output response_metadata,
