@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 
 import { mapLibraryError } from './error_mapper';
-import { LibraryDisabledError, type LibraryService } from '../../../library';
+import { LibraryDisabledError, type LibraryService, type LibraryTelemetry } from '../../../library';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
@@ -21,7 +21,8 @@ const paramsSchema = schema.object({
 
 export function registerGetTemplateRoute(
   { router }: RouteDependencies,
-  libraryService: LibraryService
+  libraryService: LibraryService,
+  telemetry: LibraryTelemetry
 ) {
   router.versioned
     .get({
@@ -47,6 +48,7 @@ export function registerGetTemplateRoute(
           const body = await libraryService.getTemplate(request.params.slug);
           return response.ok({ body });
         } catch (err) {
+          telemetry.reportTemplateLoadFailed(libraryService, request.params.slug, err);
           return mapLibraryError(response, err);
         }
       })

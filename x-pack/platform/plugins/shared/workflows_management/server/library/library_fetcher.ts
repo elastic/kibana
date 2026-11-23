@@ -24,7 +24,7 @@ import {
 import { ZodError } from '@kbn/zod/v4';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
-import { LibraryCache } from './library_cache';
+import { LibraryCache, type LibraryFailureListener } from './library_cache';
 import { LibrarySource } from './library_source';
 import { resolveVersionId } from './resolve_version_id';
 
@@ -35,7 +35,7 @@ import { resolveVersionId } from './resolve_version_id';
  * `registryUrl` / `bundlePath` mutual-exclusion validator can distinguish "user
  * set this" from "schema defaulted it".
  */
-const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/library/v1';
+export const DEFAULT_LIBRARY_REGISTRY_URL = 'https://workflows.elastic.co/library/v1';
 const DEFAULT_RETRY_OPTIONS = { retries: 3, factor: 2, minTimeout: 200 };
 /**
  * Per-request timeout (ms) applied to each individual attempt. Bounds a single
@@ -75,6 +75,8 @@ export interface LibraryFetcherDeps {
    */
   maxCatalogBytes?: number;
   maxBodyBytes?: number;
+  /** Hears when the catalog or a template body starts failing to load. */
+  onFailure?: LibraryFailureListener;
 }
 
 /**
@@ -103,7 +105,7 @@ export class LibraryFetcher extends LibrarySource {
   private refreshing?: Promise<void>;
 
   constructor(private readonly deps: LibraryFetcherDeps) {
-    super(new LibraryCache(deps.ttlMs, 'http'));
+    super(new LibraryCache(deps.ttlMs, 'http', deps.onFailure));
   }
 
   async listTemplates(): Promise<Template[]> {
@@ -141,6 +143,7 @@ export class LibraryFetcher extends LibrarySource {
     try {
       const body = await this.fetchTemplateBody(row);
       this.cache.setBody(slug, body);
+      this.cache.markTemplateLoadSuccess();
       return body;
     } catch (err) {
       if (
@@ -151,6 +154,7 @@ export class LibraryFetcher extends LibrarySource {
         await this.refresh();
         return this.loadTemplateBody(slug, false);
       }
+      this.cache.markTemplateLoadFailure(err);
       throw err;
     }
   }

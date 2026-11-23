@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 import type { SpacesServiceSetup } from '@kbn/spaces-plugin/server';
 import type { WorkflowManagementAuditLog } from './utils/workflow_audit_logging';
 import type { WorkflowsManagementConfig } from '../../config';
@@ -21,6 +21,7 @@ export interface RouteDependencies {
   logger: Logger;
   spaces: SpacesServiceSetup;
   audit: WorkflowManagementAuditLog;
+  analytics: AnalyticsServiceSetup;
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

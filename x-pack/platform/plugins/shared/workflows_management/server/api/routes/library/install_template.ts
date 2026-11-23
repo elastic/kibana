@@ -6,11 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
+import { type TemplateOriginFields, WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { renderInstall } from '@kbn/workflows-library';
 
 import { mapLibraryError } from './error_mapper';
-import { LibraryDisabledError, type LibraryService } from '../../../library';
+import {
+  LibraryDisabledError,
+  type LibraryService,
+  type LibraryTelemetry,
+  type TemplateInstallDetails,
+} from '../../../library';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
@@ -33,7 +38,8 @@ const bodySchema = schema.object({
 
 export function registerInstallTemplateRoute(
   { router, api, spaces, audit }: RouteDependencies,
-  libraryService: LibraryService
+  libraryService: LibraryService,
+  telemetry: LibraryTelemetry
 ) {
   router.versioned
     .post({
@@ -50,6 +56,9 @@ export function registerInstallTemplateRoute(
         validate: { request: { params: paramsSchema, body: bodySchema } },
       },
       withAvailabilityCheck(async (context, request, response) => {
+        // Filled in once the template is read from the catalog, so a failure
+        // before that never reports the slug from the URL.
+        const installDetails: TemplateInstallDetails = { source: 'catalog' };
         try {
           const { uiSettings } = await context.core;
           const enabled = await uiSettings.globalClient.get<boolean>(
@@ -58,8 +67,16 @@ export function registerInstallTemplateRoute(
           if (!enabled) throw new LibraryDisabledError();
 
           const template = await libraryService.getTemplate(request.params.slug);
+          const { slug, version, install } = template.metadata;
+          const templateOrigin: TemplateOriginFields = {
+            templateSlug: slug,
+            templateVersion: version,
+            templateOrigin: 'install',
+          };
+          installDetails.templateOrigin = templateOrigin;
+          installDetails.installForm = install?.form ?? [];
+
           const { yaml } = renderInstall({ template, values: request.body.values });
-          const { slug, version } = template.metadata;
 
           // The rendered YAML is indistinguishable from a hand-authored one:
           // reuse the same create path as POST /api/workflows/workflow so
@@ -70,20 +87,18 @@ export function registerInstallTemplateRoute(
           let createdWorkflow;
           try {
             createdWorkflow = await api.createWorkflow({ yaml }, spaceId, request, {
-              templateOrigin: {
-                templateSlug: slug,
-                templateVersion: version,
-                templateOrigin: 'install',
-              },
+              templateOrigin,
             });
           } catch (error) {
             audit.logWorkflowCreateFailed(request, error);
             throw error;
           }
           audit.logWorkflowCreated(request, { id: createdWorkflow.id });
+          telemetry.reportTemplateInstalled(libraryService, installDetails, createdWorkflow.id);
 
           return response.ok({ body: { workflowId: createdWorkflow.id } });
         } catch (error) {
+          telemetry.reportTemplateInstallFailed(libraryService, installDetails, error);
           return mapLibraryError(response, error);
         }
       })

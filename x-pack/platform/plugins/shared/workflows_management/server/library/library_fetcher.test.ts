@@ -10,6 +10,7 @@ import { createHash } from 'node:crypto';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
+import type { LibraryFailureListener } from './library_cache';
 import { LibraryFetcher } from './library_fetcher';
 
 jest.mock('node-fetch');
@@ -19,7 +20,11 @@ const BASE_URL = 'https://workflows.test/v1';
 const KIBANA_VERSION = '9.5.0';
 const TTL_MS = 60_000;
 
-const buildFetcher = (overrides?: { isServerless?: boolean; kibanaVersion?: string }) =>
+const buildFetcher = (overrides?: {
+  isServerless?: boolean;
+  kibanaVersion?: string;
+  onFailure?: LibraryFailureListener;
+}) =>
   new LibraryFetcher({
     registryUrl: BASE_URL,
     kibanaVersion: overrides?.kibanaVersion ?? KIBANA_VERSION,
@@ -27,6 +32,7 @@ const buildFetcher = (overrides?: { isServerless?: boolean; kibanaVersion?: stri
     ttlMs: TTL_MS,
     logger: loggerMock.create(),
     retryOptions: { retries: 3, minTimeout: 1, factor: 1 },
+    onFailure: overrides?.onFailure,
   });
 
 const jsonResponse = (body: unknown, init: { status?: number; etag?: string } = {}) =>
@@ -550,6 +556,77 @@ describe('LibraryFetcher.getTemplate', () => {
 
     // 2 refreshes (manifest+catalog each) + 2 body fetches.
     expect(mockedFetch).toHaveBeenCalledTimes(6);
+  });
+});
+
+describe('LibraryFetcher failure notifications', () => {
+  it('notifies once while the catalog keeps failing, and again after it recovers', async () => {
+    const onFailure = jest.fn();
+    const fetcher = buildFetcher({ onFailure });
+
+    // 4xx responses are not retried, so each read makes one request.
+    mockedFetch.mockResolvedValueOnce(jsonResponse('nope', { status: 404 }));
+    await expect(fetcher.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+    mockedFetch.mockResolvedValueOnce(jsonResponse('nope', { status: 404 }));
+    await expect(fetcher.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+    expect(onFailure).toHaveBeenCalledTimes(1);
+    expect(onFailure).toHaveBeenCalledWith({
+      operation: 'catalog',
+      reason: 'http-error',
+      sourceMode: 'http',
+    });
+
+    queueRefresh(sampleManifest, sampleCatalog());
+    await fetcher.listTemplates();
+    advanceClock(TTL_MS + 1);
+    mockedFetch.mockResolvedValueOnce(jsonResponse('nope', { status: 404 }));
+    // The stale catalog is still served, but the failed refresh is reported.
+    await expect(fetcher.listTemplates()).resolves.toHaveLength(1);
+    expect(onFailure).toHaveBeenCalledTimes(2);
+  });
+
+  it('notifies once while a template body keeps failing to load', async () => {
+    const onFailure = jest.fn();
+    const fetcher = buildFetcher({ onFailure });
+    queueRefresh(sampleManifest, sampleCatalog());
+    mockedFetch.mockResolvedValueOnce(jsonResponse('nope', { status: 404 }));
+    mockedFetch.mockResolvedValueOnce(jsonResponse('nope', { status: 404 }));
+
+    await expect(fetcher.getTemplate('demo')).rejects.toBeInstanceOf(LibraryFetchError);
+    await expect(fetcher.getTemplate('demo')).rejects.toBeInstanceOf(LibraryFetchError);
+
+    expect(onFailure).toHaveBeenCalledTimes(1);
+    expect(onFailure).toHaveBeenCalledWith({
+      operation: 'template',
+      reason: 'http-error',
+      sourceMode: 'http',
+    });
+  });
+
+  it('does not notify when a hash mismatch is fixed by the forced catalog refresh', async () => {
+    const onFailure = jest.fn();
+    const newBody = bodyYaml().replace('k: v', 'k: v2');
+    const freshCatalog = sampleCatalog();
+    freshCatalog.templates[0].contentHash = contentHash(newBody);
+    queueRefresh(sampleManifest, sampleCatalog());
+    mockedFetch.mockResolvedValueOnce(jsonResponse(newBody));
+    queueRefresh(sampleManifest, freshCatalog);
+    mockedFetch.mockResolvedValueOnce(jsonResponse(newBody));
+    const fetcher = buildFetcher({ onFailure });
+
+    await fetcher.getTemplate('demo');
+
+    expect(onFailure).not.toHaveBeenCalled();
+  });
+
+  it('does not notify when the slug is not in the catalog', async () => {
+    const onFailure = jest.fn();
+    queueRefresh(sampleManifest, sampleCatalog());
+    const fetcher = buildFetcher({ onFailure });
+
+    await expect(fetcher.getTemplate('missing')).rejects.toBeInstanceOf(LibraryNotFoundError);
+
+    expect(onFailure).not.toHaveBeenCalled();
   });
 });
 

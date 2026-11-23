@@ -23,7 +23,7 @@ import {
 import { ZodError } from '@kbn/zod/v4';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
-import { LibraryCache } from './library_cache';
+import { LibraryCache, type LibraryFailureListener } from './library_cache';
 import { LibrarySource } from './library_source';
 import { resolveVersionId } from './resolve_version_id';
 
@@ -51,6 +51,8 @@ export interface LibraryBundleReaderDeps {
    */
   maxCatalogBytes?: number;
   maxBodyBytes?: number;
+  /** Hears when the catalog or a template body starts failing to load. */
+  onFailure?: LibraryFailureListener;
 }
 
 /**
@@ -77,7 +79,7 @@ export class LibraryBundleReader extends LibrarySource {
   private loading?: Promise<void>;
 
   constructor(private readonly deps: LibraryBundleReaderDeps) {
-    super(new LibraryCache(Number.POSITIVE_INFINITY, 'bundle'));
+    super(new LibraryCache(Number.POSITIVE_INFINITY, 'bundle', deps.onFailure));
   }
 
   async listTemplates(): Promise<Template[]> {
@@ -93,8 +95,15 @@ export class LibraryBundleReader extends LibrarySource {
     }
     const cached = this.cache.getBody(slug);
     if (cached) return cached;
-    const body = await this.readTemplateBody(row);
+    let body: TemplateBody;
+    try {
+      body = await this.readTemplateBody(row);
+    } catch (err) {
+      this.cache.markTemplateLoadFailure(err);
+      throw err;
+    }
     this.cache.setBody(slug, body);
+    this.cache.markTemplateLoadSuccess();
     return body;
   }
 

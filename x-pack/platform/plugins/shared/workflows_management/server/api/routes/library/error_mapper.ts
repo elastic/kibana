@@ -6,17 +6,8 @@
  */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
-import {
-  InstallFormValidationError,
-  MissingInstallFormFieldError,
-  TemplateParseError,
-} from '@kbn/workflows-library';
 
-import {
-  LibraryDisabledError,
-  LibraryFetchError,
-  LibraryNotFoundError,
-} from '../../../library/errors';
+import { classifyLibraryError } from '../../../library';
 import { handleRouteError } from '../utils/route_error_handlers';
 
 /**
@@ -29,68 +20,68 @@ import { handleRouteError } from '../utils/route_error_handlers';
  * into the shared create-workflow path, whose errors keep their usual mapping).
  */
 export function mapLibraryError(response: KibanaResponseFactory, error: unknown) {
-  if (error instanceof LibraryDisabledError) {
-    return response.customError({
-      statusCode: error.statusCode,
-      body: { message: error.message },
-    });
-  }
+  const classified = classifyLibraryError(error);
+  switch (classified.type) {
+    case 'library_disabled':
+      return response.customError({
+        statusCode: classified.error.statusCode,
+        body: { message: classified.error.message },
+      });
 
-  if (error instanceof InstallFormValidationError) {
-    // Field-level details travel under `attributes` (the standard error body
-    // strips other top-level fields) so the install UI can highlight rows.
-    return response.badRequest({
-      body: {
-        message: error.message,
-        attributes: { errors: error.errors },
-      },
-    });
-  }
-
-  if (error instanceof MissingInstallFormFieldError) {
-    return response.badRequest({
-      body: {
-        message: error.message,
-        attributes: {
-          errors: error.fields.map((field) => ({
-            field,
-            reason: 'Referenced by the template body but not declared in `install.form`.',
-          })),
+    case 'form_validation':
+      // Field-level details travel under `attributes` (the standard error body
+      // strips other top-level fields) so the install UI can highlight rows.
+      return response.badRequest({
+        body: {
+          message: classified.error.message,
+          attributes: { errors: classified.error.errors },
         },
-      },
-    });
-  }
+      });
 
-  if (error instanceof TemplateParseError) {
-    // A client-supplied template YAML (e.g. an uploaded file) failed to parse
-    // or its metadata is malformed — a 400, not a catalog 404/503.
-    return response.badRequest({ body: { message: error.message } });
-  }
+    case 'missing_form_field':
+      return response.badRequest({
+        body: {
+          message: classified.error.message,
+          attributes: {
+            errors: classified.error.fields.map((field) => ({
+              field,
+              reason: 'Referenced by the template body but not declared in `install.form`.',
+            })),
+          },
+        },
+      });
 
-  if (error instanceof LibraryNotFoundError) {
-    return response.notFound({ body: { message: error.message } });
-  }
+    case 'template_parse':
+      // A client-supplied template YAML (e.g. an uploaded file) failed to parse
+      // or its metadata is malformed — a 400, not a catalog 404/503.
+      return response.badRequest({ body: { message: classified.error.message } });
 
-  if (error instanceof LibraryFetchError) {
-    // 'unavailable' and 'connection' both mean "upstream not reachable / not
-    // ready"; surface as 503 so callers can retry.
-    // 'http-error' and 'malformed' mean the upstream gave us something
-    // unusable — surface as 503 as well for tech preview (single retry-able
-    // status). Promote to 502 later if/when consumers care to distinguish.
-    return response.customError({
-      statusCode: 503,
-      body: { message: error.message },
-    });
-  }
+    case 'template_not_found':
+      return response.notFound({ body: { message: classified.error.message } });
 
-  if (error instanceof Error) {
-    return handleRouteError(response, error);
-  }
+    case 'catalog_unavailable':
+      // 'unavailable' and 'connection' both mean "upstream not reachable / not
+      // ready"; surface as 503 so callers can retry.
+      // 'http-error' and 'malformed' mean the upstream gave us something
+      // unusable — surface as 503 as well for tech preview (single retry-able
+      // status). Promote to 502 later if/when consumers care to distinguish.
+      return response.customError({
+        statusCode: 503,
+        body: { message: classified.error.message },
+      });
 
-  return response.customError({
-    statusCode: 500,
-    body: {
-      message: `Internal server error: ${String(error)}`,
-    },
-  });
+    case 'workflow_invalid':
+      return handleRouteError(response, classified.error);
+
+    case 'unknown':
+      if (classified.error instanceof Error) {
+        return handleRouteError(response, classified.error);
+      }
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: `Internal server error: ${String(classified.error)}`,
+        },
+      });
+  }
 }

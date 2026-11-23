@@ -10,7 +10,13 @@ import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { parseTemplateYaml, renderInstall } from '@kbn/workflows-library';
 
 import { mapLibraryError } from './error_mapper';
-import { LibraryDisabledError, type LibraryService, resolveTemplateOrigin } from '../../../library';
+import {
+  LibraryDisabledError,
+  type LibraryService,
+  type LibraryTelemetry,
+  resolveTemplateOrigin,
+  type TemplateInstallDetails,
+} from '../../../library';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_CREATE_SECURITY } from '../utils/route_security';
@@ -35,7 +41,8 @@ const bodySchema = schema.object({
 
 export function registerInstallFromYamlRoute(
   { router, api, spaces, audit, logger }: RouteDependencies,
-  libraryService: LibraryService
+  libraryService: LibraryService,
+  telemetry: LibraryTelemetry
 ) {
   router.versioned
     .post({
@@ -52,6 +59,8 @@ export function registerInstallFromYamlRoute(
         validate: { request: { body: bodySchema } },
       },
       withAvailabilityCheck(async (context, request, response) => {
+        // Filled in as the file is read, so a failure reports only what was known.
+        const installDetails: TemplateInstallDetails = { source: 'file' };
         try {
           const { uiSettings } = await context.core;
           const enabled = await uiSettings.globalClient.get<boolean>(
@@ -60,9 +69,9 @@ export function registerInstallFromYamlRoute(
           if (!enabled) throw new LibraryDisabledError();
 
           const template = parseTemplateYaml(request.body.yaml, { lenient: true });
-          const { yaml } = renderInstall({ template, values: request.body.values });
           // The uploaded file declares its own slug: keep it only when it
-          // names a catalog template, otherwise store it as `custom`.
+          // names a catalog template, otherwise store it as `custom`. Resolved
+          // before rendering, so a form error still reports the template.
           const templateOrigin = await resolveTemplateOrigin({
             libraryService,
             logger,
@@ -70,6 +79,10 @@ export function registerInstallFromYamlRoute(
             version: template.metadata.version,
             origin: 'import',
           });
+          installDetails.templateOrigin = templateOrigin;
+          installDetails.installForm = template.metadata.install?.form ?? [];
+
+          const { yaml } = renderInstall({ template, values: request.body.values });
 
           // The rendered YAML is indistinguishable from a hand-authored one:
           // reuse the same create path as POST /api/workflows/workflow so
@@ -85,9 +98,11 @@ export function registerInstallFromYamlRoute(
             throw error;
           }
           audit.logWorkflowCreated(request, { id: createdWorkflow.id });
+          telemetry.reportTemplateInstalled(libraryService, installDetails, createdWorkflow.id);
 
           return response.ok({ body: { workflowId: createdWorkflow.id } });
         } catch (error) {
+          telemetry.reportTemplateInstallFailed(libraryService, installDetails, error);
           return mapLibraryError(response, error);
         }
       })

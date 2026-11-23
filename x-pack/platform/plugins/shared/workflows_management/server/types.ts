@@ -35,6 +35,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { WorkflowsApiRequestHandlerContext } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type {
@@ -65,6 +66,7 @@ export interface WorkflowsServerPluginSetupDeps {
    * cross-cutting Inbox UI / MCP / API.
    */
   inbox?: InboxPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {

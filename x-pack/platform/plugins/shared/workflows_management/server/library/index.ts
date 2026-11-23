@@ -16,10 +16,26 @@ export type { LibraryBundleReaderDeps } from './library_bundle_reader';
 
 export type { LibrarySource } from './library_source';
 
-export type { LibraryHealth, LibrarySourceMode } from './library_cache';
+export type {
+  LibraryFailure,
+  LibraryFailureListener,
+  LibraryHealth,
+  LibraryOperation,
+  LibrarySourceMode,
+} from './library_cache';
 
 export { LibraryService } from './library_service';
 export type { TemplateFilters } from './library_service';
 
 export { resolveTemplateOrigin } from './resolve_template_origin';
 export type { ResolveTemplateOriginParams } from './resolve_template_origin';
+
+export { classifyLibraryError } from './classify_library_error';
+export type { ClassifiedLibraryError, LibraryErrorType } from './classify_library_error';
+
+export {
+  LibraryTelemetry,
+  registerLibraryEventTypes,
+  registerLibraryUsageCollector,
+} from './telemetry';
+export type { TemplateInstallDetails, TemplateInstallSource } from './telemetry';

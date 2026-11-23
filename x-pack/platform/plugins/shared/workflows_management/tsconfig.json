@@ -146,6 +146,7 @@
     "@kbn/core-spaces-common",
     "@kbn/recently-accessed",
     "@kbn/crypto-browser",
+    "@kbn/usage-collection-plugin",
   ],
   "exclude": ["target/**/*"]
 }

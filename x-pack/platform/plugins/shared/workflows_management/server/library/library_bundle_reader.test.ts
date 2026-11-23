@@ -15,6 +15,7 @@ import type { Template } from '@kbn/workflows-library';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';
 import { LibraryBundleReader } from './library_bundle_reader';
+import type { LibraryFailureListener } from './library_cache';
 
 const MANIFEST = {
   versions: [{ id: '9.5', kibana: '9.5.0', active: true }],
@@ -148,6 +149,7 @@ const buildReader = (
     isServerless?: boolean;
     maxCatalogBytes?: number;
     maxBodyBytes?: number;
+    onFailure?: LibraryFailureListener;
   } = {}
 ) =>
   new LibraryBundleReader({
@@ -157,6 +159,7 @@ const buildReader = (
     maxCatalogBytes: overrides.maxCatalogBytes,
     maxBodyBytes: overrides.maxBodyBytes,
     logger: loggerMock.create(),
+    onFailure: overrides.onFailure,
   });
 
 describe('LibraryBundleReader', () => {
@@ -393,6 +396,39 @@ describe('LibraryBundleReader', () => {
       await expect(reader.getTemplate('demo')).rejects.toMatchObject({
         name: 'LibraryFetchError',
         reason: 'malformed',
+      });
+    });
+  });
+
+  describe('failure notifications', () => {
+    it('notifies once while the bundle cannot be loaded', async () => {
+      const onFailure = jest.fn();
+      const reader = buildReader(tmpRoot, { onFailure });
+
+      await expect(reader.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+      await expect(reader.listTemplates()).rejects.toBeInstanceOf(LibraryFetchError);
+
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({
+        operation: 'catalog',
+        reason: 'unavailable',
+        sourceMode: 'bundle',
+      });
+    });
+
+    it('notifies once while a template body keeps failing to load', async () => {
+      await writeBundle(tmpRoot, { body: null });
+      const onFailure = jest.fn();
+      const reader = buildReader(tmpRoot, { onFailure });
+
+      await expect(reader.getTemplate('demo')).rejects.toBeInstanceOf(LibraryFetchError);
+      await expect(reader.getTemplate('demo')).rejects.toBeInstanceOf(LibraryFetchError);
+
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({
+        operation: 'template',
+        reason: 'unavailable',
+        sourceMode: 'bundle',
       });
     });
   });

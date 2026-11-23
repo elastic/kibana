@@ -11,21 +11,23 @@ import { registerLibraryHealthRoute } from './health';
 import { registerInstallFromYamlRoute } from './install_from_yaml';
 import { registerInstallTemplateRoute } from './install_template';
 import { registerRemixTemplateRoute } from './remix_template';
-import { LibraryService } from '../../../library';
+import { LibraryService, LibraryTelemetry } from '../../../library';
 import type { RouteDependencies } from '../types';
 
 export function registerLibraryRoutes(deps: RouteDependencies) {
+  const telemetry = new LibraryTelemetry(deps.analytics, deps.logger);
   const libraryService = new LibraryService({
     config: deps.config,
     logger: deps.logger,
     kibanaVersion: deps.workflowsService.kibanaVersion,
     isServerless: Boolean(deps.workflowsService.plugins.serverless),
+    onFailure: telemetry.reportCatalogFailed,
   });
 
   registerGetTemplatesRoute(deps, libraryService);
-  registerGetTemplateRoute(deps, libraryService);
-  registerInstallTemplateRoute(deps, libraryService);
-  registerInstallFromYamlRoute(deps, libraryService);
+  registerGetTemplateRoute(deps, libraryService, telemetry);
+  registerInstallTemplateRoute(deps, libraryService, telemetry);
+  registerInstallFromYamlRoute(deps, libraryService, telemetry);
   registerRemixTemplateRoute(deps, libraryService);
   registerLibraryHealthRoute(deps, libraryService);
 }

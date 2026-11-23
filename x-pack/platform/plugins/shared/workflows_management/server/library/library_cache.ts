@@ -7,6 +7,8 @@
 
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
+import { LibraryFetchError, type LibraryFetchErrorReason } from './errors';
+
 export type LibrarySourceMode = 'http' | 'bundle';
 
 export interface LibraryHealth {
@@ -14,6 +16,18 @@ export interface LibraryHealth {
   lastRefreshAt: string | null;
   lastError?: { message: string; at: string };
 }
+
+/** What failed to load: the catalog, or a template body listed in it. */
+export type LibraryOperation = 'catalog' | 'template';
+
+export interface LibraryFailure {
+  operation: LibraryOperation;
+  reason: LibraryFetchErrorReason | 'unknown';
+  sourceMode: LibrarySourceMode;
+}
+
+/** Called when an operation starts failing, not again until it has succeeded once. */
+export type LibraryFailureListener = (failure: LibraryFailure) => void;
 
 /**
  * Owned in-memory state for the Workflow Template library — the catalog,
@@ -28,6 +42,10 @@ export interface LibraryHealth {
  * `setCatalog` is the only mutation that does more than assign a field: it
  * also drops the slug-keyed body map, because a fresh catalog can re-point
  * a slug at a different `definitionUrl`.
+ *
+ * The optional failure listener hears only status changes: the first failure
+ * after a success (or after startup), so a failing upstream read again on every
+ * request reports once rather than per read.
  */
 export class LibraryCache {
   public catalog?: TemplatesCatalog;
@@ -35,10 +53,12 @@ export class LibraryCache {
   private readonly bodies = new Map<string, TemplateBody>();
   private lastRefreshAt?: Date;
   private lastError?: { message: string; at: Date };
+  private templateLoadFailing = false;
 
   constructor(
     private readonly ttlMs: number,
-    private readonly sourceMode: LibrarySourceMode = 'http'
+    private readonly sourceMode: LibrarySourceMode = 'http',
+    private readonly onFailure?: LibraryFailureListener
   ) {}
 
   isFresh(): boolean {
@@ -69,10 +89,32 @@ export class LibraryCache {
   }
 
   markRefreshFailure(err: unknown): void {
+    const wasFailing = this.lastError !== undefined;
     this.lastError = {
       message: err instanceof Error ? err.message : String(err),
       at: new Date(),
     };
+    if (!wasFailing) {
+      this.notifyFailure('catalog', err);
+    }
+  }
+
+  markTemplateLoadSuccess(): void {
+    this.templateLoadFailing = false;
+  }
+
+  markTemplateLoadFailure(err: unknown): void {
+    if (this.templateLoadFailing) return;
+    this.templateLoadFailing = true;
+    this.notifyFailure('template', err);
+  }
+
+  private notifyFailure(operation: LibraryOperation, err: unknown): void {
+    this.onFailure?.({
+      operation,
+      reason: err instanceof LibraryFetchError ? err.reason : 'unknown',
+      sourceMode: this.sourceMode,
+    });
   }
 
   getHealth(): LibraryHealth {

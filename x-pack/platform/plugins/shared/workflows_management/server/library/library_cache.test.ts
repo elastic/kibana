@@ -7,6 +7,7 @@
 
 import type { TemplateBody, TemplatesCatalog } from '@kbn/workflows-library';
 
+import { LibraryFetchError } from './errors';
 import { LibraryCache } from './library_cache';
 
 const TTL_MS = 60_000;
@@ -129,5 +130,67 @@ describe('LibraryCache', () => {
     const health = cache.getHealth();
     expect(health.lastRefreshAt).toBe('2026-06-01T12:00:00.000Z');
     expect(health.lastError?.at).toBe('2026-06-01T12:00:00.000Z');
+  });
+
+  describe('failure listener', () => {
+    const fetchError = () => new LibraryFetchError('upstream down', 'timeout', 'https://x');
+
+    it('hears only the first catalog failure until a refresh succeeds again', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'bundle', onFailure);
+
+      cache.markRefreshFailure(fetchError());
+      cache.markRefreshFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({
+        operation: 'catalog',
+        reason: 'timeout',
+        sourceMode: 'bundle',
+      });
+
+      cache.markRefreshSuccess();
+      cache.markRefreshFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('hears only the first template load failure until a template loads again', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+
+      cache.markTemplateLoadFailure(fetchError());
+      cache.markTemplateLoadFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(1);
+      expect(onFailure).toHaveBeenCalledWith({
+        operation: 'template',
+        reason: 'timeout',
+        sourceMode: 'http',
+      });
+
+      cache.markTemplateLoadSuccess();
+      cache.markTemplateLoadFailure(fetchError());
+      expect(onFailure).toHaveBeenCalledTimes(2);
+    });
+
+    it('tracks the catalog and template bodies separately', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+
+      cache.markRefreshFailure(fetchError());
+      cache.markTemplateLoadFailure(fetchError());
+
+      expect(onFailure.mock.calls.map(([failure]) => failure.operation)).toEqual([
+        'catalog',
+        'template',
+      ]);
+    });
+
+    it('reports an error that is not a fetch error as unknown', () => {
+      const onFailure = jest.fn();
+      const cache = new LibraryCache(TTL_MS, 'http', onFailure);
+
+      cache.markRefreshFailure(new Error('bug'));
+
+      expect(onFailure).toHaveBeenCalledWith(expect.objectContaining({ reason: 'unknown' }));
+    });
   });
 });

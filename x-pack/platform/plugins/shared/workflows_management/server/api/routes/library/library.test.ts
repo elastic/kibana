@@ -17,9 +17,15 @@ import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { WORKFLOWS_LIBRARY_ENABLED_SETTING_ID } from '@kbn/workflows';
 import { parseTemplateYaml } from '@kbn/workflows-library';
+import { WorkflowValidationError } from '@kbn/workflows-yaml';
 
 import { registerLibraryRoutes } from '.';
 import { LibraryFetchError, LibraryNotFoundError, LibraryService } from '../../../library';
+import {
+  LIBRARY_CATALOG_FAILED_EVENT_TYPE,
+  TEMPLATE_INSTALLED_EVENT_TYPE,
+  TEMPLATE_LOAD_FAILED_EVENT_TYPE,
+} from '../../../library/telemetry/events';
 import type { RouteDependencies } from '../types';
 
 const TEMPLATES_PATH = '/internal/workflows/library/templates';
@@ -68,6 +74,7 @@ describe('Library Routes', () => {
   let mockApi: { createWorkflow: jest.Mock };
   let mockSpaces: { getSpaceId: jest.Mock };
   let mockAudit: { logWorkflowCreated: jest.Mock; logWorkflowCreateFailed: jest.Mock };
+  let mockAnalytics: { reportEvent: jest.Mock };
 
   const setToggle = (value: boolean) => mockGlobalUiSettings.get.mockResolvedValue(value);
 
@@ -97,12 +104,13 @@ describe('Library Routes', () => {
       listTemplates: jest.fn(),
       getCachedTemplates: jest.fn(),
       getTemplate: jest.fn(),
-      getHealth: jest.fn(),
+      getHealth: jest.fn().mockReturnValue({ sourceMode: 'http', lastRefreshAt: null }),
     };
     mockGlobalUiSettings = { get: jest.fn().mockResolvedValue(true) };
     mockApi = { createWorkflow: jest.fn() };
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockAudit = { logWorkflowCreated: jest.fn(), logWorkflowCreateFailed: jest.fn() };
+    mockAnalytics = { reportEvent: jest.fn() };
 
     MockedLibraryService.mockImplementation(() => mockLibraryService as unknown as LibraryService);
 
@@ -149,6 +157,7 @@ describe('Library Routes', () => {
       api: mockApi,
       spaces: mockSpaces,
       audit: mockAudit,
+      analytics: mockAnalytics,
     } as unknown as RouteDependencies;
 
     registerLibraryRoutes(routeDependencies);
@@ -576,6 +585,172 @@ describe('Library Routes', () => {
         statusCode: 500,
         body: { message: expect.stringContaining('yaml creation boom') },
       });
+    });
+  });
+
+  describe('telemetry', () => {
+    const catalogDemo = { slug: 'demo', version: '1.0.0', solutions: ['security'] };
+    const connectorValues = { 'demo-connector': 'my-connector-id' };
+
+    const installFromCatalog = (values: Record<string, unknown> = {}) =>
+      routeHandlers[`POST:${INSTALL_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ params: { slug: 'demo' }, body: { values } }),
+        httpServerMock.createResponseFactory()
+      );
+
+    const installFromFile = (yaml: string, values: Record<string, unknown> = {}) =>
+      routeHandlers[`POST:${INSTALL_FROM_YAML_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ body: { yaml, values } }),
+        httpServerMock.createResponseFactory()
+      );
+
+    beforeEach(() => {
+      setToggle(true);
+      mockLibraryService.getCachedTemplates.mockReturnValue([catalogDemo]);
+      mockLibraryService.listTemplates.mockResolvedValue([catalogDemo]);
+    });
+
+    it('reports a catalog failure through the library service listener', () => {
+      const [[{ onFailure }]] = MockedLibraryService.mock.calls;
+      const failure = { operation: 'catalog', reason: 'timeout', sourceMode: 'http' } as const;
+
+      onFailure?.(failure);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        LIBRARY_CATALOG_FAILED_EVENT_TYPE,
+        failure
+      );
+    });
+
+    it('reports a successful install from the catalog', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-1' });
+
+      await installFromCatalog(connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        source: 'catalog',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        requiredConnectorTypes: ['.demo'],
+        workflowId: 'wf-1',
+      });
+    });
+
+    it('reports the form fields that failed validation on a catalog install', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+
+      await installFromCatalog();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({
+          success: false,
+          templateSlug: 'demo',
+          errorType: 'form_validation',
+          invalidFields: ['demo-connector'],
+        })
+      );
+    });
+
+    it('reports a slug that is not in the catalog without naming it', async () => {
+      mockLibraryService.getTemplate.mockRejectedValue(new LibraryNotFoundError('demo'));
+
+      await installFromCatalog();
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        source: 'catalog',
+        sourceMode: 'http',
+        errorType: 'template_not_found',
+      });
+    });
+
+    it('reports a rendered workflow that fails validation as workflow_invalid', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+      mockApi.createWorkflow.mockRejectedValue(new WorkflowValidationError('invalid', ['bad']));
+
+      await installFromCatalog(connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        TEMPLATE_INSTALLED_EVENT_TYPE,
+        expect.objectContaining({ success: false, errorType: 'workflow_invalid' })
+      );
+    });
+
+    it('reports a successful import with the slug and version stored on the workflow', async () => {
+      mockApi.createWorkflow.mockResolvedValue({ id: 'wf-2' });
+
+      await installFromFile(INSTALLABLE_TEMPLATE.raw, connectorValues);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: true,
+        source: 'file',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        workflowId: 'wf-2',
+      });
+    });
+
+    it('reports the template, but not its field names, when an imported form is invalid', async () => {
+      await installFromFile(INSTALLABLE_TEMPLATE.raw);
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        source: 'file',
+        sourceMode: 'http',
+        templateSlug: 'demo',
+        templateVersion: '1.0.0',
+        solutions: ['security'],
+        formFieldCount: 1,
+        errorType: 'form_validation',
+      });
+    });
+
+    it('reports an uploaded file that is not a template as template_parse', async () => {
+      await installFromFile('not: a template');
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_INSTALLED_EVENT_TYPE, {
+        success: false,
+        source: 'file',
+        sourceMode: 'http',
+        errorType: 'template_parse',
+      });
+    });
+
+    it('reports a template that cannot be shown', async () => {
+      mockLibraryService.getTemplate.mockRejectedValue(new LibraryNotFoundError('missing'));
+
+      await routeHandlers[`GET:${TEMPLATE_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ params: { slug: 'missing' } }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(TEMPLATE_LOAD_FAILED_EVENT_TYPE, {
+        reason: 'not_found',
+      });
+    });
+
+    it('reports nothing when a template is shown', async () => {
+      mockLibraryService.getTemplate.mockResolvedValue(INSTALLABLE_TEMPLATE);
+
+      await routeHandlers[`GET:${TEMPLATE_PATH}`].handler(
+        mockContext,
+        httpServerMock.createKibanaRequest({ params: { slug: 'demo' } }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
     });
   });
 

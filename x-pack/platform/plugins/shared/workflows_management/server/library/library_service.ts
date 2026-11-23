@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { Template, TemplateBody } from '@kbn/workflows-library';
 
 import { LibraryBundleReader } from './library_bundle_reader';
-import type { LibraryHealth } from './library_cache';
+import type { LibraryFailureListener, LibraryHealth } from './library_cache';
 import { LibraryFetcher } from './library_fetcher';
 import type { LibrarySource } from './library_source';
 import type { WorkflowsManagementConfig } from '../config';
@@ -19,6 +19,8 @@ interface LibraryServiceDeps {
   logger: Logger;
   kibanaVersion: string;
   isServerless: boolean;
+  /** Hears when the catalog or a template body starts failing to load. */
+  onFailure?: LibraryFailureListener;
 }
 
 export interface TemplateFilters {
@@ -49,6 +51,7 @@ export class LibraryService {
           kibanaVersion: deps.kibanaVersion,
           isServerless: deps.isServerless,
           logger,
+          onFailure: deps.onFailure,
         })
       : new LibraryFetcher({
           registryUrl,
@@ -56,6 +59,7 @@ export class LibraryService {
           isServerless: deps.isServerless,
           ttlMs,
           logger,
+          onFailure: deps.onFailure,
         });
   }
 
