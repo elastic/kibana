@@ -576,6 +576,7 @@ Useful files to grep for real-world patterns:
 | Need | File |
 |---|---|
 | Canonical example | `examples/workflows_extensions_example/{common,server,public}/step_types/` |
+| Common definition types (`CommonStepDefinition`, `StepExposure`) | `x-pack/platform/plugins/shared/workflows_extensions/common/step_registry/types.ts` |
 | Server contract types | `x-pack/platform/plugins/shared/workflows_extensions/server/step_registry/types.ts` |
 | Public contract types | `x-pack/platform/plugins/shared/workflows_extensions/public/step_registry/types.ts` |
 | `EditorHandlers` / `ConnectorIdSelectionHandler` types | `src/platform/packages/shared/kbn-workflows/types/v1.ts` (search `EditorHandlers`, `ConnectorIdSelectionHandler`) |
