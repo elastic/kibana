@@ -558,14 +558,27 @@ describe('update_agent_tags', () => {
       [['a', 'b'], [], 'status:online', false],
       [[], ['a', 'b'], '', false],
       [[], [], '', false],
-      // a kuery that names a tag of the update, like the tag rename in the UI
+      // the tag rename in the UI: agents with the old tag, which the renamed agents no longer have
       [['new'], ['old'], 'tags:"old"', true],
+      [['new'], ['old'], 'tags:old', true],
       [['new'], ['old'], '(tags:"old") AND status:online', true],
+      [['new'], ['old'], 'tags:old OR NOT tags:new', true],
+      [['x'], ['a', 'b'], 'tags:(a or b)', true],
+      // a tag the update adds, in a clause that is negated
       [['a', 'b'], [], 'NOT tags:a', true],
-      // a kuery that searches other tags, or names the tag in another field, says nothing
+      [['a', 'b'], [], 'not (tags:a or tags:b)', true],
+      // clauses that the updated agents still match, or that nothing is known about
+      [['a', 'b'], [], 'tags:a', false],
+      [['new'], ['old'], 'tags:"old" OR status:online', false],
       [['new'], ['old'], 'tags:other', false],
-      // an empty tag is in every kuery, so it says nothing about it
+      [['new'], ['old'], 'tags:old*', false],
+      [['new'], ['old'], 'NOT tags:other', false],
+      [['a'], ['a'], 'tags:a', false],
+      // a tag only counts whole
+      [['linux', 'web'], [], 'tags:linux-prod', false],
       [['', 'b'], [], 'status:online', false],
+      // not a kuery that can be read
+      [['a', 'b'], [], 'tags:(', false],
     ])(
       'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
       (tagsToAdd, tagsToRemove, kuery, expected) => {
