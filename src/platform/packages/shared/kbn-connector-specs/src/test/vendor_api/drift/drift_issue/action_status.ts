@@ -14,7 +14,7 @@
  */
 
 import type { ActionDrift, SpecChange } from '../detect_drift';
-import { isRequestChange, isResponseChange } from '../oasdiff_text';
+import { isRequestChange, isResponseChange, scopeName, securityGrantsOf } from '../oasdiff_text';
 import { capitalized, code, listed, plural } from './issue_markdown';
 import { firstProblem, issueLinksOf, problemText } from './problem_text';
 import type { ReviewItem } from './review_item';
@@ -63,6 +63,57 @@ export const ICONS: Record<Rank, string> = {
 export const MOVED_STATUS = 'Moved in the spec, same URL';
 
 const UNMATCHED_PROBLEM = / matches no operation of any source/;
+
+// Each scheme a set of security changes adds or removes, with the scopes it asks for.
+const schemesOf = (changes: readonly SpecChange[], suffix: string): Map<string, Set<string>> => {
+  const schemes = new Map<string, Set<string>>();
+  for (const { id, text } of changes) {
+    if (!id.endsWith(suffix)) continue;
+    for (const { scheme, scope } of securityGrantsOf(id, text) ?? []) {
+      const scopes = schemes.get(scheme) ?? new Set<string>();
+      if (scope !== undefined) scopes.add(scope);
+      schemes.set(scheme, scopes);
+    }
+  }
+  return schemes;
+};
+
+const schemeText = (scheme: string, scopes: ReadonlySet<string>): string =>
+  scopes.size === 0
+    ? code(scheme)
+    : `${code(scheme)} (${scopes.size === 1 ? 'scope' : 'scopes'} ${listed(
+        [...scopes].map((scope) => code(scopeName(scope)))
+      )})`;
+
+/**
+ * What the latest spec asks of a request the connector doesn't authenticate as it wants: the
+ * schemes it now requires, one of which will do, and those it no longer accepts.
+ */
+const credentialsDetails = (
+  authChanges: readonly SpecChange[],
+  expected: string,
+  endpoints: number
+): string => {
+  const added = schemesOf(authChanges, '-added');
+  const removed = schemesOf(authChanges, '-removed');
+  const required = [...added].map(([scheme, scopes]) => schemeText(scheme, scopes));
+  const dropped = [...removed.keys()].filter((scheme) => !added.has(scheme)).map(code);
+  const where = endpoints > 1 ? 'the endpoints it calls' : 'this endpoint';
+  const sends = `The connector doesn't send that: ${expected}.`;
+  if (required.length > 0) {
+    const alternatives =
+      required.length === 1
+        ? required[0]
+        : `${required.slice(0, -1).join(', ')} or ${required[required.length - 1]}`;
+    return `The latest spec now requires ${alternatives} for ${where}${
+      dropped.length > 0 ? ` and no longer accepts ${listed(dropped)}` : ''
+    }. ${sends}`;
+  }
+  if (dropped.length > 0) {
+    return `The latest spec no longer accepts ${listed(dropped)} for ${where}. ${sends}`;
+  }
+  return `The latest spec requires credentials the connector doesn't send: ${expected}.`;
+};
 
 // The one violation a request with credentials the operation doesn't accept has.
 const MISSING_CREDENTIALS =
@@ -129,9 +180,11 @@ export const statusOf = (
         rank: 'fails',
         reason: 'credentials',
         outcome: 'fails',
-        details: `The latest spec requires credentials the connector doesn't send: ${problemText(
-          `expected ${listed([...new Set(expected)])}`
-        )}.${authChanges.length > 0 ? ` Spec change: ${authChanges[0].text}.` : ''}`,
+        details: credentialsDetails(
+          authChanges,
+          problemText(`expected ${listed([...new Set(expected)])}`),
+          action.operations.length
+        ),
       };
     }
     const problem = firstProblem(latestProblems);

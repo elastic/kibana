@@ -593,9 +593,39 @@ describe('renderDriftIssue', () => {
       `> \`search\` fails because the latest spec requires credentials it doesn't send.\n>\n> ${advice}`
     );
     expect(body).toContain(
-      "| `search` | `GET /items` | ❌ Fails | The latest spec requires credentials the connector doesn't send: expected `Authorization: Bearer`. Spec change: the endpoint scheme security `basicAuth` was removed from the API. |"
+      "| `search` | `GET /items` | ❌ Fails | The latest spec no longer accepts `basicAuth` for this endpoint. The connector doesn't send that: expected `Authorization: Bearer`. |"
     );
     expect(body).not.toContain('Update the connector to ensure it will continue working.');
+
+    // What the spec requires instead, when it says so, as Zendesk's did with OAuth.
+    const withOAuth = withAuthChange(
+      drifted.actions?.map((action) =>
+        action.action === 'search' ? { ...action, latestProblems: [credentials] } : action
+      )
+    );
+    const { body: oauthBody } = renderDriftIssue(
+      {
+        ...withOAuth,
+        sources: {
+          main: {
+            status: 'changed',
+            changes: [
+              ...(withOAuth.sources.main.changes ?? []),
+              {
+                kind: 'non-breaking',
+                id: 'api-security-added',
+                text: 'the endpoint scheme security `oauth2: [tickets:read]` was added to the API',
+                operation: 'GET /items',
+              },
+            ],
+          },
+        },
+      },
+      { owners: [] }
+    );
+    expect(oauthBody).toContain(
+      "| `search` | `GET /items` | ❌ Fails | The latest spec now requires `oauth2` (scope `tickets:read`) for this endpoint and no longer accepts `basicAuth`. The connector doesn't send that: expected `Authorization: Bearer`. |"
+    );
 
     // With another failure, the advice follows the credentials sentence
     const { body: mixed } = renderDriftIssue(
