@@ -42,7 +42,6 @@ describe('canOpenSubjectFlyout', () => {
 describe('hasEpisodeFlyoutServices', () => {
   const present = {} as never;
   const all: SubjectServices = {
-    application: present,
     http: present,
     uiSettings: present,
     userProfile: present,

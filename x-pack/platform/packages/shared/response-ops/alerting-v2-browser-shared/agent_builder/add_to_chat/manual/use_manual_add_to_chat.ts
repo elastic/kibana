@@ -19,7 +19,7 @@ import {
 
 export interface ManualAddToChatServices {
   agentBuilder?: AgentBuilderPluginStart;
-  application: ApplicationStart;
+  application?: ApplicationStart;
 }
 
 export interface UseManualAddToChatResult {
@@ -33,7 +33,7 @@ export const useManualAddToChat = <FocusedItem>(
   services: ManualAddToChatServices
 ): UseManualAddToChatResult => {
   const { agentBuilder, application } = services;
-  const hasAgentBuilderShow = application.capabilities.agentBuilder?.show === true;
+  const hasAgentBuilderShow = application?.capabilities.agentBuilder?.show === true;
 
   const converterRef = useRef(converter);
   converterRef.current = converter;
@@ -84,7 +84,7 @@ export const useManualAddToChat = <FocusedItem>(
   const isAddToChatAvailable = Boolean(agentBuilder?.openChat && hasAgentBuilderShow && item);
 
   const addToChat = useCallback(() => {
-    if (!item || application.capabilities.agentBuilder?.show !== true) {
+    if (!item || application?.capabilities.agentBuilder?.show !== true) {
       return;
     }
 

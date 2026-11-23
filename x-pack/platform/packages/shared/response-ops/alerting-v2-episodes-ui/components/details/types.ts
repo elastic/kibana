@@ -18,7 +18,7 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 
 export interface AlertEpisodeDetailsServices {
   agentBuilder?: ManualAddToChatServices['agentBuilder'];
-  application: ApplicationStart;
+  application?: ApplicationStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
