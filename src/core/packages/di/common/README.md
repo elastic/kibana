@@ -130,7 +130,7 @@ In this case, the contract returned from the classic definition has precedence o
 It is possible to subscribe to the lifecycle events and run some initialization logic. This can be done via binding `OnSetup`, `OnStart`, or `OnReady` callbacks. It is allowed to bind multiple of the same kind.
 
 `OnSetup` and `OnStart` run when the plugin sets up and starts.
-`OnReady` runs once per plugin after every plugin has started, so it is the first hook where [soft dependencies](#soft-dependencies) resolve.
+`OnReady` runs once per plugin after every plugin has started and every plugin's `collect` handlers have run, so it is the first hook where [soft dependencies](#soft-dependencies) resolve.
 
 There is no dedicated teardown hook alike `stop` in the classic plugins.
 That's done in favor of the built-in [deactivation](https://inversify.io/docs/fundamentals/lifecycle/deactivation/) lifecycle hook.
@@ -188,6 +188,7 @@ class Welcome {
 ```
 
 A registry owner collects every contribution once all plugins started with `collect`, which has the same signature as `onStart`.
+`collect` calls the handler once for every binding that any enabled plugin exposed for the token, the owner's own bindings included.
 Contributors only `expose` the owner's token and never reference the owner plugin:
 ```ts
 import { KibanaContainerModule } from '@kbn/core-di';
@@ -201,6 +202,30 @@ const pluginModule = new KibanaContainerModule(({ bind, collect }) => {
 
 export { pluginModule as module };
 ```
+
+Kibana runs every plugin's `collect` handlers first, then every plugin's `OnReady` hooks.
+So a consumer that reads a registry in its `OnReady` hook sees every contribution, even when the consumer was set up before the owner.
+
+If a contribution fails to build, `collect` skips it and logs an error through the owner's `Logger`.
+The message names the token and the plugin that exposed the contribution.
+The other contributions still reach the handler.
+
+Some registries are read before any plugin starts. For example, saved objects migrations run when core starts the saved objects service, before plugins start.
+For those registries, use `collectAtSetup`, which has the same signature as `collect`.
+It runs right after every plugin has finished setup, before core services such as saved objects start:
+```ts
+const pluginModule = new KibanaContainerModule(({ bind, collectAtSetup }) => {
+  bind(MigrationRegistry).toSelf().inSingletonScope();
+  collectAtSetup(Migration, MigrationRegistry, (context, migration, registry) =>
+    registry.register(migration)
+  );
+});
+```
+
+Values collected at setup and the handler's dependencies can depend only on setup-time services.
+If a contribution fails to build at that point, for example because it injects `CoreStart('http')`, Kibana stops with an error.
+The error names the token and the plugin that exposed the contribution, and keeps the original error as its `cause`.
+`SoftDependencies` stays locked while `collectAtSetup` handlers run.
 
 Plugins are not ordered relative to each other without a manifest edge, and an exposed service can depend on start-only services such as `CoreStart('http')` of the plugin that exposes it.
 So `SoftDependencies` throws when it is used before every plugin has started.

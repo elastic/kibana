@@ -42,6 +42,38 @@ const Context = Symbol('Context') as ServiceIdentifier<Container>;
 export const Global = createToken<ServiceIdentifier>('Global');
 
 /**
+ * The plugin's `collectAtSetup` hooks, run once right after every plugin finished setup.
+ */
+export const CollectAtSetup = createToken<(container: Container) => void>('core.di.CollectAtSetup');
+
+/**
+ * The plugin's `collect` hooks, run once after every plugin started and before any `OnReady` hook.
+ */
+export const Collect = createToken<(container: Container) => void>('core.di.Collect');
+
+/**
+ * The bindings one plugin exposed for a token, or the error building them threw.
+ */
+export type Contribution<T> = { plugin: string } & (
+  | { status: 'fulfilled'; value: T[] }
+  | { status: 'rejected'; reason: unknown }
+);
+
+/**
+ * Resolves the bindings every plugin exposed for a token, one settled entry per plugin.
+ */
+export const Contributions =
+  createToken<<T>(serviceIdentifier: ServiceIdentifier<T>) => Array<Contribution<T>>>(
+    'core.di.Contributions'
+  );
+
+/**
+ * `setup`: plugins run setup. `collectingAtSetup`: `collectAtSetup` hooks run.
+ * `starting`: core services and plugins start. `ready`: every plugin started.
+ */
+type Phase = 'setup' | 'collectingAtSetup' | 'starting' | 'ready';
+
+/**
  * Current plugin scope identifier.
  *
  * This service is used to determine the current plugin scope identifier when resolving global services.
@@ -79,7 +111,7 @@ export class PluginModule extends ContainerModule {
   };
   private bound = new WeakSet<Container>();
   private scopes = new Set<Container>();
-  private isReady = false;
+  private phase: Phase = 'setup';
 
   constructor(
     private readonly root: Container,
@@ -87,6 +119,7 @@ export class PluginModule extends ContainerModule {
   ) {
     super(({ bind, onActivation }) => {
       bind(Container).toConstantValue(root);
+      bind(Contributions).toConstantValue(this.getContributions.bind(this));
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();
       bind(OnSetup).toConstantValue(this.registerGlobals.bind(this));
       bind(Plugin).toDynamicValue(this.getPluginFactory.bind(this)).inRequestScope();
@@ -105,27 +138,65 @@ export class PluginModule extends ContainerModule {
   }
 
   /**
-   * Marks every plugin as started, so `SoftDependencies` can resolve services exposed by any of them, and runs each plugin's `OnReady` hooks once.
+   * Runs each plugin's `collectAtSetup` hooks once, after every plugin finished setup.
+   */
+  public start(): void {
+    if (this.phase !== 'setup') {
+      return;
+    }
+
+    this.phase = 'collectingAtSetup';
+    try {
+      this.runHooks(CollectAtSetup);
+    } finally {
+      this.phase = 'starting';
+    }
+  }
+
+  /**
+   * Marks every plugin as started, so `SoftDependencies` can resolve services exposed by any of them,
+   * then runs each plugin's `collect` hooks once, then each plugin's `OnReady` hooks once.
    */
   public ready(): void {
-    this.isReady = true;
-    const scopes = [...this.scopes];
-    this.scopes.clear();
-
-    for (const scope of scopes) {
-      if (scope.isCurrentBound(OnReady)) {
-        scope.getAll(OnReady).forEach((callback) => callback(scope));
-      }
+    if (this.phase === 'ready') {
+      return;
     }
+
+    this.phase = 'ready';
+    this.runHooks(Collect);
+    this.runHooks(OnReady);
   }
 
   protected getDefaultContract() {
     return undefined;
   }
 
+  protected getContributions<T>(serviceIdentifier: ServiceIdentifier<T>): Array<Contribution<T>> {
+    if (this.phase !== 'collectingAtSetup' && this.phase !== 'ready') {
+      throw new Error(`Cannot collect "${String(serviceIdentifier)}" in the ${this.phase} phase.`);
+    }
+
+    return [...this.scopes].flatMap((scope): Array<Contribution<T>> => {
+      const count = this.getServicesCount(scope, serviceIdentifier);
+      if (!count) {
+        return [];
+      }
+
+      const id = scope.get(Id);
+      const plugin = id.description ?? String(id);
+      try {
+        const value = count > 1 ? scope.getAll(serviceIdentifier) : [scope.get(serviceIdentifier)];
+
+        return [{ plugin, status: 'fulfilled', value }];
+      } catch (reason) {
+        return [{ plugin, status: 'rejected', reason }];
+      }
+    });
+  }
+
   protected getSoftDependencies(origin: Container, context = origin): SoftDependencies {
     const assertReady = (serviceIdentifier: ServiceIdentifier) => {
-      if (!this.isReady) {
+      if (this.phase !== 'ready') {
         throw new Error(
           `Cannot resolve soft dependency "${String(
             serviceIdentifier
@@ -239,7 +310,13 @@ export class PluginModule extends ContainerModule {
         context
           .bind(id)
           .toConstantValue(scope)
-          .onDeactivation(once(() => scope.unbindAllAsync()));
+          .onDeactivation(
+            once(() => {
+              this.scopes.delete(scope);
+
+              return scope.unbindAllAsync();
+            })
+          );
 
         if (context === this.root) {
           this.scopes.add(scope);
@@ -277,6 +354,14 @@ export class PluginModule extends ContainerModule {
             [Context]
           )
           .inRequestScope();
+      }
+    }
+  }
+
+  private runHooks(hook: ServiceIdentifier<(container: Container) => void>) {
+    for (const scope of [...this.scopes]) {
+      if (scope.isCurrentBound(hook)) {
+        scope.getAll(hook).forEach((callback) => callback(scope));
       }
     }
   }

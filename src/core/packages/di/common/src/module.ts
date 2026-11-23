@@ -26,14 +26,25 @@ import {
   type ServiceIdentifier,
 } from 'inversify';
 import { once, wrap } from 'lodash';
-import { OnReady, OnSetup, OnStart } from './services/plugin';
-import { SoftDependencies } from './services/soft_dependencies';
+import { Logger } from './services/logging';
+import { OnSetup, OnStart } from './services/plugin';
 import { createToken } from './token';
 
-/**
- * Must stay the same symbol as the internal `Global` token in `@kbn/core-di-internal`.
+type Contribution<T> = { plugin: string } & (
+  | { status: 'fulfilled'; value: T[] }
+  | { status: 'rejected'; reason: unknown }
+);
+
+/*
+ * Must stay the same symbols and shapes as the internal tokens in `@kbn/core-di-internal`.
  */
 const Global = createToken<ServiceIdentifier>('Global');
+const CollectAtSetup = createToken<(container: Container) => void>('core.di.CollectAtSetup');
+const Collect = createToken<(container: Container) => void>('core.di.Collect');
+const Contributions =
+  createToken<<T>(serviceIdentifier: ServiceIdentifier<T>) => Array<Contribution<T>>>(
+    'core.di.Contributions'
+  );
 
 /**
  * Extended container module options providing Kibana-specific features.
@@ -91,6 +102,8 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
 
   /**
    * Registers a handler that will be called once after all plugins started against every binding of the service exposed by any enabled plugin, the current one included.
+   * Every plugin's `collect` handlers run before any plugin's `OnReady` hook.
+   * A contribution that fails to build is skipped and logged with the plugin that exposed it.
    * @example
    * ```ts
    * collect(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
@@ -100,6 +113,23 @@ export interface KibanaContainerModuleLoadOptions extends ContainerModuleLoadOpt
    * @param handler The handler to perform an action with every exposed service instance.
    */
   collect<T, A extends unknown[] = any[]>(
+    serviceIdentifier: ServiceIdentifier<T>,
+    ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
+  ): void;
+
+  /**
+   * Registers a handler that will be called once right after all plugins finished setup, before core services such as saved objects start, against every binding of the service exposed by any enabled plugin, the current one included.
+   * Collected values and the handler's dependencies may only depend on setup-time services.
+   * A contribution that fails to build stops Kibana with an error naming the token and the plugin that exposed it.
+   * @example
+   * ```ts
+   * collectAtSetup(Widget, WidgetRegistry, (context, widget, registry) => registry.register(widget));
+   * ```
+   * @param serviceIdentifier The exposed service identifier to collect.
+   * @param dependencies Dependencies to resolve before calling the handler.
+   * @param handler The handler to perform an action with every exposed service instance.
+   */
+  collectAtSetup<T, A extends unknown[] = any[]>(
     serviceIdentifier: ServiceIdentifier<T>,
     ...args: [...dependencies: MapToResolvedValueInjectOptions<A>, handler: KibanaHandler<T, A>]
   ): void;
@@ -271,6 +301,10 @@ function resolveAsync<A extends unknown[]>(
   ) as Promise<A>;
 }
 
+function getMessage(reason: unknown): string {
+  return reason instanceof Error ? reason.message : String(reason);
+}
+
 function pop<H extends unknown[], L>(tuple: [...head: H, last: L]): [H, L] {
   return [tuple.slice(0, -1) as H, tuple[tuple.length - 1] as L];
 }
@@ -354,13 +388,51 @@ function toKibanaContainerModuleLoadOptions(
   }
 
   function getExposed<T>(container: Container, serviceIdentifier: ServiceIdentifier<T>): T[] {
-    return container.get(SoftDependencies).getAll(serviceIdentifier);
+    return container
+      .get(Contributions)(serviceIdentifier)
+      .flatMap((contribution) => {
+        if (contribution.status === 'fulfilled') {
+          return contribution.value;
+        }
+
+        container
+          .get(Logger, { optional: true })
+          ?.error(
+            `Skipped the "${String(serviceIdentifier)}" contribution from plugin "${
+              contribution.plugin
+            }" because it failed to build: ${getMessage(contribution.reason)}`
+          );
+
+        return [];
+      });
+  }
+
+  function getExposedAtSetup<T>(
+    container: Container,
+    serviceIdentifier: ServiceIdentifier<T>
+  ): T[] {
+    return container
+      .get(Contributions)(serviceIdentifier)
+      .flatMap((contribution) => {
+        if (contribution.status === 'fulfilled') {
+          return contribution.value;
+        }
+
+        throw new Error(
+          `Cannot collect "${String(serviceIdentifier)}" from plugin "${
+            contribution.plugin
+          }" at setup. Values collected at setup may only depend on setup-time services: ${getMessage(
+            contribution.reason
+          )}`,
+          { cause: contribution.reason }
+        );
+      });
   }
 
   function createHook(
     hook: ServiceIdentifier<(container: Container) => void>,
     getInjectables: typeof getCurrentBound
-  ): KibanaContainerModuleLoadOptions['onSetup'] | KibanaContainerModuleLoadOptions['onStart'] {
+  ): KibanaContainerModuleLoadOptions['onSetup'] {
     return (serviceIdentifier, ...definition) => {
       const [dependencies, handler] = pop(definition);
 
@@ -385,7 +457,8 @@ function toKibanaContainerModuleLoadOptions(
   return {
     ...options,
     bind,
-    collect: createHook(OnReady, getExposed),
+    collect: createHook(Collect, getExposed),
+    collectAtSetup: createHook(CollectAtSetup, getExposedAtSetup),
     expose,
     inject,
     onActivation,

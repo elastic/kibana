@@ -9,14 +9,12 @@
 
 import { Container, LazyServiceIdentifier, type ServiceIdentifier } from 'inversify';
 import { OnReady, OnSetup, OnStart } from './services/plugin';
-import { SoftDependencies } from './services/soft_dependencies';
 import { KibanaContainerModule, type KibanaContainerModuleLoadOptions } from './module';
 
-function trigger(
-  hook: typeof OnSetup | typeof OnStart | typeof OnReady,
-  container: Container
-): void {
-  return container.getAll(hook, { chained: true }).forEach((fn) => fn(container));
+type Hook = ServiceIdentifier<(container: Container) => void>;
+
+function trigger(hook: Hook, container: Container): void {
+  return container.getAll(hook, { chained: true, optional: true }).forEach((fn) => fn(container));
 }
 
 describe('KibanaContainerModule', () => {
@@ -24,6 +22,15 @@ describe('KibanaContainerModule', () => {
   const dependencyToken = Symbol.for('dependency') as ServiceIdentifier<string>;
   const asyncDependencyToken = Symbol.for('async');
   const Global = Symbol.for('Global') as ServiceIdentifier<ServiceIdentifier>;
+  const Collect = Symbol.for('core.di.Collect') as Hook;
+  const CollectAtSetup = Symbol.for('core.di.CollectAtSetup') as Hook;
+  const Contributions = Symbol.for('core.di.Contributions') as ServiceIdentifier<
+    (serviceIdentifier: ServiceIdentifier) => Array<{
+      plugin: string;
+      status: 'fulfilled';
+      value: unknown[];
+    }>
+  >;
 
   let container: Container;
   let options: KibanaContainerModuleLoadOptions;
@@ -224,30 +231,35 @@ describe('KibanaContainerModule', () => {
     });
   });
 
-  describe('collect', () => {
+  describe.each([
+    { name: 'collect' as const, hook: Collect },
+    { name: 'collectAtSetup' as const, hook: CollectAtSetup },
+  ])('$name', ({ hook, name }) => {
     let exposed: string[];
 
     beforeEach(() => {
       exposed = [];
-      container.bind(SoftDependencies).toConstantValue({
-        get: jest.fn(),
-        getAll: jest.fn(<T>(serviceIdentifier: ServiceIdentifier<T>) =>
-          serviceIdentifier === token ? (exposed as T[]) : []
-        ),
-      });
+      container
+        .bind(Contributions)
+        .toConstantValue((serviceIdentifier) =>
+          serviceIdentifier === token && exposed.length
+            ? [{ plugin: 'contributor', status: 'fulfilled', value: exposed }]
+            : []
+        );
       container.bind(dependencyToken).toConstantValue('something');
     });
 
-    it('should call the handler with every exposed service once all plugins started', () => {
+    it('should call the handler with every exposed service only when its hook runs', () => {
       const handler = jest.fn();
-      options.collect(token, dependencyToken, handler);
+      options[name](token, dependencyToken, handler);
       exposed.push('value1', 'value2');
 
       trigger(OnSetup, container);
       trigger(OnStart, container);
+      trigger(OnReady, container);
       expect(handler).not.toHaveBeenCalled();
 
-      trigger(OnReady, container);
+      trigger(hook, container);
       expect(handler).toHaveBeenCalledTimes(2);
       expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1', 'something');
       expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2', 'something');
@@ -255,20 +267,20 @@ describe('KibanaContainerModule', () => {
 
     it('should collect the exposed services rather than the local bindings', () => {
       const handler = jest.fn();
-      options.collect(token, handler);
+      options[name](token, handler);
       exposed.push('value');
       container.bind(token).toConstantValue('local');
 
-      trigger(OnReady, container);
+      trigger(hook, container);
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(expect.anything(), 'value');
     });
 
     it('should not call the handler when nothing is exposed', () => {
       const handler = jest.fn();
-      options.collect(token, handler);
+      options[name](token, handler);
 
-      expect(() => trigger(OnReady, container)).not.toThrow();
+      expect(() => trigger(hook, container)).not.toThrow();
       expect(handler).not.toHaveBeenCalled();
     });
   });

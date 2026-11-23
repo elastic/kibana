@@ -47,18 +47,22 @@ export class CoreInjectionService {
     return contract;
   }
 
+  /**
+   * Runs once every plugin has finished setup, running the plugins' `collectAtSetup` hooks.
+   */
   public start(): InternalCoreDiServiceStart {
     const contract = {
       fork: this.fork,
       getContainer: this.getContainer,
       ready: this.ready,
     };
+    this.module.start();
 
     return contract;
   }
 
   /**
-   * Runs once every plugin has started, unlocking `SoftDependencies` and running the plugins' `OnReady` hooks.
+   * Runs once every plugin has started, unlocking `SoftDependencies` and running the plugins' `collect` hooks, then their `OnReady` hooks.
    */
   public ready(): void {
     this.module.ready();

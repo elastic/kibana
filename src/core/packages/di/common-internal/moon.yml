@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core-base-common'
   - '@kbn/core-di'
   - '@kbn/logging'
+  - '@kbn/logging-mocks'
 tags:
   - shared-common
   - package

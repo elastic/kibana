@@ -7,17 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container } from 'inversify';
+import type { Container, ServiceIdentifier } from 'inversify';
 import { OnReady, OnSetup, OnStart } from '@kbn/core-di';
+import { Collect, CollectAtSetup } from '@kbn/core-di-internal';
 
+function run(hook: ServiceIdentifier<(container: Container) => void>, container: Container): void {
+  return container.getAll(hook, { chained: true, optional: true }).forEach((fn) => fn(container));
+}
+
+/** Runs the container's setup hooks. */
 export function setup(container: Container): void {
-  return container.getAll(OnSetup, { chained: true }).forEach((fn) => fn(container));
+  run(OnSetup, container);
 }
 
+/** Runs the container's `collectAtSetup` handlers, then its start hooks. */
 export function start(container: Container): void {
-  return container.getAll(OnStart, { chained: true }).forEach((fn) => fn(container));
+  run(CollectAtSetup, container);
+  run(OnStart, container);
 }
 
+/** Runs the container's `collect` handlers, then its `OnReady` hooks. */
 export function ready(container: Container): void {
-  return container.getAll(OnReady, { chained: true }).forEach((fn) => fn(container));
+  run(Collect, container);
+  run(OnReady, container);
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const pluginModuleMock = { ready: jest.fn() };
+const pluginModuleMock = { ready: jest.fn(), start: jest.fn() };
 
 jest.mock('./modules/plugin', () => ({
   ...jest.requireActual('./modules/plugin'),
@@ -24,6 +24,7 @@ describe('CoreInjectionService', () => {
 
   beforeEach(() => {
     pluginModuleMock.ready.mockClear();
+    pluginModuleMock.start.mockClear();
     container = new Container();
     service = new CoreInjectionService();
   });
@@ -78,7 +79,8 @@ describe('CoreInjectionService', () => {
       });
     });
 
-    it('should not allow resolving soft dependencies yet', () => {
+    it('should collect at setup without allowing soft dependencies yet', () => {
+      expect(pluginModuleMock.start).toHaveBeenCalledTimes(1);
       expect(pluginModuleMock.ready).not.toHaveBeenCalled();
     });
 

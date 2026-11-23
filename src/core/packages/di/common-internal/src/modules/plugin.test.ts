@@ -9,9 +9,11 @@
 
 import { Container, ContainerModule, type ServiceIdentifier } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   KibanaContainerModule,
   type KibanaContainerModuleLoadOptions,
+  Logger,
   OnReady,
   OnSetup,
   OnStart,
@@ -234,6 +236,7 @@ describe('PluginModule', () => {
 
     function setupAndStart(...plugins: Container[]): void {
       plugins.forEach((plugin) => plugin.get(Setup));
+      pluginModule.start();
       plugins.forEach((plugin) => {
         plugin.load(
           new ContainerModule(({ bind }) => {
@@ -437,6 +440,117 @@ describe('PluginModule', () => {
         setupAndStart(owner, contributor);
 
         expect(handler).not.toHaveBeenCalled();
+      });
+
+      it('should run every collect handler before any OnReady hook', () => {
+        const Registry = Symbol.for('Registry') as ServiceIdentifier<string[]>;
+        const seen: string[][] = [];
+        const consumer = createPlugin(token1, ({ bind }) => {
+          bind(OnReady).toResolvedValue(
+            (softDependencies) => () => seen.push([...(softDependencies.get(Registry) ?? [])]),
+            [SoftDependencies]
+          );
+        });
+        const owner = createPlugin(token2, ({ collect, expose }) => {
+          expose(Registry).toConstantValue([]);
+          collect(Widget, Registry, (_context, widget, registry) => registry.push(widget));
+        });
+        const contributor = createPlugin(token3, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor');
+        });
+        setupStartAndReady(consumer, owner, contributor);
+
+        expect(seen).toEqual([['contributor']]);
+      });
+
+      it('should skip and log a contribution that fails to build', () => {
+        const handler = jest.fn();
+        const logger = loggerMock.create();
+        const owner = createPlugin(token1, ({ bind, collect }) => {
+          bind(Logger).toConstantValue(logger);
+          collect(Widget, handler);
+        });
+        const broken = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toDynamicValue(() => {
+            throw new Error('boom');
+          });
+        });
+        const healthy = createPlugin(token3, ({ expose }) => {
+          expose(Widget).toConstantValue('healthy');
+        });
+        setupStartAndReady(owner, broken, healthy);
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith(expect.anything(), 'healthy');
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringMatching(/"Symbol\(Widget\)".*"token2".*boom/)
+        );
+      });
+    });
+
+    describe('collectAtSetup', () => {
+      it('should collect contributions before any plugin starts', () => {
+        const handler = jest.fn();
+        const owner = createPlugin(token1, ({ collectAtSetup }) => {
+          collectAtSetup(Widget, handler);
+        });
+        const contributor = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toConstantValue('contributor');
+        });
+        [owner, contributor].forEach((plugin) => plugin.get(Setup));
+        pluginModule.start();
+
+        expect(handler).toHaveBeenCalledTimes(1);
+        expect(handler).toHaveBeenCalledWith(expect.anything(), 'contributor');
+      });
+
+      it('should fail naming the token and the plugin when a contribution needs start bindings', () => {
+        const owner = createPlugin(token1, ({ collectAtSetup }) => {
+          collectAtSetup(Widget, jest.fn());
+        });
+        const contributor = createPlugin(token2, ({ expose }) => {
+          expose(Widget).toResolvedValue((value) => `contributor ${value}`, [StartOnly]);
+        });
+        [owner, contributor].forEach((plugin) => plugin.get(Setup));
+
+        expect(() => pluginModule.start()).toThrow(
+          expect.objectContaining({
+            message: expect.stringMatching(
+              /"Symbol\(Widget\)".*"token2".*may only depend on setup-time services/
+            ),
+            cause: expect.any(Error),
+          })
+        );
+      });
+
+      it('should keep SoftDependencies locked while collecting at setup', () => {
+        const errors: unknown[] = [];
+        const owner = createPlugin(token1, ({ collectAtSetup, expose }) => {
+          collectAtSetup(Widget, SoftDependencies, (_context, _widget, softDependencies) => {
+            for (const lookup of [
+              () => softDependencies.get(Greeter),
+              () => softDependencies.getAll(Greeter),
+            ]) {
+              try {
+                lookup();
+              } catch (error) {
+                errors.push(error);
+              }
+            }
+          });
+          expose(Widget).toConstantValue('owner');
+        });
+        const provider = createPlugin(token2, ({ expose }) => {
+          expose(Greeter).toConstantValue('hello');
+        });
+        [owner, provider].forEach((plugin) => plugin.get(Setup));
+        pluginModule.start();
+
+        expect(errors).toEqual([
+          expect.objectContaining({ message: expect.stringMatching(/before all plugins started/) }),
+          expect.objectContaining({ message: expect.stringMatching(/before all plugins started/) }),
+        ]);
       });
     });
   });

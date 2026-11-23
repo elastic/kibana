@@ -17,6 +17,7 @@ import {
   SoftDependencies,
 } from '@kbn/core-di';
 import {
+  Contributions,
   type CoreInjectionService,
   type InternalCoreDiServiceSetup,
   type InternalCoreDiServiceStart,
@@ -39,6 +40,17 @@ function createContainer(options?: ContainerOptions) {
   container.bind(SoftDependencies).toConstantValue({
     get: (serviceIdentifier) => container.get(serviceIdentifier, { optional: true }),
     getAll: (serviceIdentifier) => container.getAll(serviceIdentifier, { optional: true }),
+  });
+  container.bind(Contributions).toConstantValue((serviceIdentifier) => {
+    if (!container.isBound(serviceIdentifier)) {
+      return [];
+    }
+
+    try {
+      return [{ plugin: 'mock', status: 'fulfilled', value: container.getAll(serviceIdentifier) }];
+    } catch (reason) {
+      return [{ plugin: 'mock', status: 'rejected', reason }];
+    }
   });
 
   for (const method of [
