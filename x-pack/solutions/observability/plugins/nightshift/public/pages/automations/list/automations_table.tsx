@@ -9,6 +9,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useState } from 'react';
 import {
   Comparators,
+  EuiFlexGroup,
   EuiIcon,
   EuiInMemoryTable,
   EuiLoadingSpinner,
@@ -141,11 +142,27 @@ export const AutomationsTable = ({
             return [label, icon] as const;
           })
         );
-        return Array.from(triggers, ([label, icon]) => (
-          <div key={label}>
-            <EuiIcon type={icon} size="s" aria-hidden /> {label}
-          </div>
-        ));
+        return (
+          <EuiFlexGroup
+            direction="column"
+            alignItems="flexStart"
+            gutterSize="xs"
+            responsive={false}
+          >
+            {Array.from(triggers, ([label, icon]) => (
+              <EuiFlexGroup
+                key={label}
+                alignItems="center"
+                gutterSize="xs"
+                responsive={false}
+                css={{ whiteSpace: 'nowrap' }}
+              >
+                <EuiIcon type={icon} size="s" aria-hidden css={{ flexShrink: 0 }} />
+                {label}
+              </EuiFlexGroup>
+            ))}
+          </EuiFlexGroup>
+        );
       },
     },
     {
