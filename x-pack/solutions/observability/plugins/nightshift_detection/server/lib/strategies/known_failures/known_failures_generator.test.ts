@@ -34,14 +34,10 @@ describe('KnownFailuresGenerator', () => {
       sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
-<<<<<<< HEAD
       knowledge: {
         listQueries: async () => [watched, offRule],
         listFeatures: async () => [],
       },
-=======
-      knowledge: { listQueries: async () => [watched, offRule] },
->>>>>>> tonyghiani/nightshift-2055-2069
       rules: {
         listManaged: async () => [
           { id: getId(watched), enabled: true },
