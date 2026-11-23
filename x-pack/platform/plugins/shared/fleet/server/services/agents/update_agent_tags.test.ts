@@ -585,12 +585,31 @@ describe('update_agent_tags', () => {
 
         const { index, query } = esClient.count.mock.calls[0][0] as any;
         expect(index).toEqual('.fleet-agents');
-        // the agents of the update: its ids, without the ones that are in another space
-        expect(query.bool.filter).toEqual([(esClient.updateByQuery.mock.calls[0][0] as any).query]);
+        // the agents of the update: its ids, without the ones that are in another space, and that
+        // it wrote, as the time it gave them shows
+        const update = esClient.updateByQuery.mock.calls[0][0] as any;
+        expect(update.script.params.updatedAt).toEqual(expect.any(String));
+        expect(query.bool.filter).toEqual([
+          update.query,
+          { term: { updated_at: update.script.params.updatedAt } },
+        ]);
         // that do not match what the retry selects by: they were updated, and it leaves them out
         expect(query.bool.must_not).toEqual([
           toElasticsearchQuery(fromKueryExpression('tags:old')),
         ]);
+      });
+
+      it('should give both runs the time that marks the agents it counts', async () => {
+        mockRuns(cancelledTask, cancelledTask);
+
+        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+
+        // the runs write the same time, so the agents of the first run are counted with the second's
+        const times = esClient.updateByQuery.mock.calls.map(
+          ([request]) => (request as any).script.params.updatedAt
+        );
+        expect(times).toHaveLength(2);
+        expect(times[1]).toEqual(times[0]);
       });
 
       it('should make the writes of the cancelled runs visible before the retry can select agents', async () => {

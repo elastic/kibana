@@ -314,6 +314,9 @@ export async function updateTagsBatch(
   // of it in the meantime is left alone, and recorded below as not updated.
   const namespaceQuery = await agentsNamespaceQuery(spaceId);
   const idsQuery = { terms: { _id: agentIds } };
+  // Every document the update writes gets this time as its `updated_at`, and the runs of the batch
+  // share it, so it marks the agents that this action wrote.
+  const updatedAt = new Date().toISOString();
 
   const request: UpdateByQueryRequest = {
     query: namespaceQuery ? { bool: { filter: [idsQuery, namespaceQuery] } } : idsQuery,
@@ -342,7 +345,7 @@ export async function updateTagsBatch(
       params: {
         tagsToAdd: uniq(options.tagsToAdd),
         tagsToRemove: uniq(options.tagsToRemove),
-        updatedAt: new Date().toISOString(),
+        updatedAt,
       },
     },
     conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
@@ -379,10 +382,13 @@ export async function updateTagsBatch(
       const failures = res.failures ?? [];
       let recordedUpdatedIds: string[] = [];
       if (options.updatedAgentsClause) {
-        // The agents that both runs updated between them are the ones that fail the clause, and
-        // those are the agents the retry leaves out. The runs do not tell: the second one does not
-        // go through the documents in the order of the first, as the ones that were updated are
-        // written again, so neither the larger of their counts nor their sum is the number.
+        // The agents that the runs updated between them are the ones that fail the clause and that
+        // this action wrote, and those are the agents the retry leaves out. The runs do not tell:
+        // the second one does not go through the documents in the order of the first, as the ones
+        // that were updated are written again, so neither the larger of their counts nor their sum
+        // is the number. Failing the clause is not evidence of a write by this action alone, as
+        // another update can take the tag off an agent that neither run reached, so the agents also
+        // have to carry the `updated_at` that the runs write.
         //
         // The retry leaves them out only if it sees what the updates wrote. A cancelled update by
         // query does not refresh, whatever its `refresh` is, so it is done here, before the count
@@ -393,7 +399,10 @@ export async function updateTagsBatch(
           index: AGENTS_INDEX,
           query: {
             bool: {
-              filter: [request.query as QueryDslQueryContainer],
+              filter: [
+                request.query as QueryDslQueryContainer,
+                { term: { updated_at: updatedAt } },
+              ],
               must_not: [toElasticsearchQuery(options.updatedAgentsClause)],
             },
           },
