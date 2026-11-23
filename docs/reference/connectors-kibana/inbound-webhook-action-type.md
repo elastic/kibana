@@ -14,7 +14,15 @@ The Inbound Webhook connector lets any tool that can send an HTTP `POST` request
 % TODO: After the docs-content page that this line links to is published, uncomment the following line.
 % To import alerts from a monitoring tool into {{kib}} Universal Alerting, refer to [Import alerts from other monitoring tools](docs-content://explore-analyze/alerting/esql/alerts/import-alerts-from-other-tools.md).
 
-You can use this connector in **Workflows** only, as a trigger rather than a step. To learn how workflows start from events, refer to [Event-driven triggers](docs-content://explore-analyze/workflows/triggers/event-driven-triggers.md).
+You can use this connector in **Workflows** only, as a trigger rather than a step. To start a workflow from the connector's requests, add an `inboundWebhook.received` trigger with the connector's ID:
+
+```yaml
+triggers:
+  - type: inboundWebhook.received
+    connector-id: "<connector-id>"
+```
+
+To learn how workflows start from events, refer to [Event-driven triggers](docs-content://explore-analyze/workflows/triggers/event-driven-triggers.md).
 
 ## Requirements [inbound-webhook-requirements]
 
