@@ -26,7 +26,7 @@ const event = (overrides: Partial<SignificantEvent>): Partial<SignificantEvent> 
 });
 
 const cycles = (...items: Array<Partial<SignificantEvent>>): ContinuationCycle[] =>
-  items.map((item) => ({ producedEventIds: ['event-1'], writeItems: [item] }));
+  items.map((item) => ({ producedEventIds: ['event-1'], narrativeEvents: [item] }));
 
 describe('scoreContinuationNarrativeEvolution', () => {
   it('abstains until an event is written twice', () => {
@@ -184,17 +184,62 @@ describe('scoreContinuationNarrativeEvolution', () => {
     expect(result.score).toBe(1);
   });
 
-  it('compares a first continuation against the event ID returned for a create', () => {
+  it('compares a continuation against a successfully created event', () => {
     const result = scoreContinuationNarrativeEvolution([
       {
         producedEventIds: ['event-1'],
-        writeItems: [event({ event_id: undefined })],
+        narrativeEvents: [event({})],
       },
       {
         producedEventIds: ['event-1'],
-        writeItems: [event({ summary: 'Storage times out. Exports fail. Retries follow.' })],
+        narrativeEvents: [event({ summary: 'Storage times out. Exports fail. Retries follow.' })],
       },
     ]);
+    expect(result.score).toBe(1);
+  });
+
+  it('does not use a rejected create request as the stored narrative baseline', () => {
+    const result = scoreContinuationNarrativeEvolution([
+      {
+        producedEventIds: ['event-1'],
+        writeItems: [event({ event_id: undefined, summary: 'Rejected request narrative.' })],
+        narrativeEvents: [],
+      },
+      {
+        producedEventIds: ['event-1'],
+        narrativeEvents: [event({ summary: 'Storage times out. Exports fail. Retries follow.' })],
+      },
+    ]);
+
+    expect(result.score).toBeNull();
+  });
+
+  it('uses the post-override seeded event as the first-cycle baseline', () => {
+    const result = scoreContinuationNarrativeEvolution([
+      {
+        producedEventIds: ['event-1'],
+        writeItems: [event({})],
+        narrativeEvents: [
+          event({
+            title: 'Batch exporter — HTTP 504',
+            summary: 'Export requests return HTTP 504.',
+            signals: [signal('rule-a', 'off_topic')],
+          }),
+        ],
+      },
+      {
+        producedEventIds: ['event-1'],
+        narrativeEvents: [
+          event({
+            title: 'Storage — connection refused',
+            summary: 'Storage connection failures block checkout.',
+            assessment_note: 'High: now confirmed. Confidence is 70.0%.',
+            signals: [signal('rule-a', 'confirms')],
+          }),
+        ],
+      },
+    ]);
+
     expect(result.score).toBe(1);
   });
 

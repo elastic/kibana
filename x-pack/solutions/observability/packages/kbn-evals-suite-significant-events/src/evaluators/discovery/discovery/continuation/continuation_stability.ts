@@ -34,6 +34,8 @@ export interface ContinuationCycle {
   requestedEventIds?: string[];
   /** Raw events_write request items — used to verify topology fields were sent. */
   writeItems?: Partial<SignificantEvent>[];
+  /** Event narratives actually seeded after successful writes and fixture overrides. */
+  narrativeEvents?: Partial<SignificantEvent>[];
 
   steps?: ConverseStep[];
 }

@@ -101,12 +101,8 @@ export const scoreContinuationNarrativeEvolution = (
   };
 
   cycles.forEach((cycle, cycleIndex) => {
-    const canUseProducedEventId =
-      cycle.writeItems?.length === 1 && cycle.producedEventIds.length === 1;
-    for (const [itemIndex, event] of (cycle.writeItems ?? []).entries()) {
-      const eventId =
-        event.event_id ??
-        (canUseProducedEventId && itemIndex === 0 ? cycle.producedEventIds[0] : undefined);
+    for (const event of cycle.narrativeEvents ?? []) {
+      const eventId = event.event_id;
       if (!eventId) continue;
       const previous = previousByEventId.get(eventId);
       const currentRuleVerdicts = ruleVerdictByUuid(event);
