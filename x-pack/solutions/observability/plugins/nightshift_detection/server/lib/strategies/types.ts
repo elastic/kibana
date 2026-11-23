@@ -139,7 +139,10 @@ export interface ResourceContext
    * disabled, instead of leaving them out and having them deleted.
    */
   sources: NightshiftSource[];
-  /** The space's knowledge indicators, read as the detection service account. */
+  /**
+   * The space's knowledge indicators, read as the internal user with no privilege check. Read only
+   * those of `sources`: the account's own read of the sources is what limits what it watches.
+   */
   knowledge: KnowledgeIndicatorReader;
   /** Whether cross-project search is on, so queries carry the project routing prefix. */
   cpsEnabled: boolean;
