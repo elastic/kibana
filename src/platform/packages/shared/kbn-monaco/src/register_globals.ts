@@ -44,6 +44,23 @@ declare module 'monaco-editor/editor/editor.api' {
             showMessage?: (message: string, position: monaco.Position | null) => void;
           })
         | undefined;
+      getContribution(id: 'editor.contrib.findController'):
+        | (editor.IEditorContribution & {
+            // add type augmentation for the hover service of the findController contribution,
+            // which is not documented in monaco but is available on the vscode upstream,
+            // see https://github.com/microsoft/vscode/blob/main/src/vs/editor/contrib/find/browser/findController.ts
+            readonly _hoverService?: {
+              // see https://github.com/microsoft/vscode/blob/main/src/vs/platform/hover/browser/hoverService.ts
+              _createHover?: (
+                options: {
+                  target: HTMLElement | { readonly targetElements: readonly HTMLElement[] };
+                  position?: { hoverPosition?: number | { x: number; y: number } };
+                },
+                skipLastFocusedUpdate?: boolean
+              ) => object | undefined;
+            };
+          })
+        | null;
       getContribution(id: 'editor.contrib.contentHover'):
         | (editor.IEditorContribution & {
             // add type augmentations for methods on the contentHover contribution,
