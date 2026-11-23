@@ -62,6 +62,20 @@ This skill only supports the **ES|QL** rule type. If the user asks to create a r
 
 Then stop. Do not create anything. Do not offer alternatives unless the user explicitly asks.
 
+## Hard Stops — check these before starting rule authoring
+
+Two requests must end in a refusal. Hard stop 1 is visible from the request itself, so refuse without any tool call. Hard stop 2 must be verified first: query the indices to confirm the telemetry is truly absent before refusing — never assume absence. Once a hard stop applies, your ENTIRE reply is 2-3 sentences: state what was asked, state the limit or the missing data, stop. No options, no next steps, no questions, no offers.
+
+**Hard stop 1 — unsupported rule type.** The user explicitly asks for a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match). Reply with exactly this one sentence and nothing else — no sentence before it, no sentence after it:
+> "I can only create ES|QL detection rules here, so I can't create a [type] rule."
+Do NOT say or imply that the same logic could be expressed in ES|QL. Saying "the same detection can be built as an ES|QL rule", "would you like it as ES|QL instead?", "if you'd like, I can build it as ES|QL — just confirm", or explaining how it would translate IS offering the alternative — it is forbidden unless the user asks in a later turn. An offer gated behind user confirmation is still an offer. Do not ask which data source to use, do not offer to check the data first.
+
+**Hard stop 2 — missing telemetry.** The requested detection needs a telemetry category that does not exist in this deployment (verified: query the indices). Reply in this shape:
+> "I can't build this rule: it needs [telemetry] data (e.g. [concrete index patterns]), and no such data exists in this deployment."
+Do NOT then build a rule for a *different* behavior that the available data does support. Surfacing a lookalike pattern from other data (e.g. an auth-cadence anomaly when the user asked for network beaconing) is a substitution — the user asked for one detection and will silently get another. Name the missing telemetry and stop; if the user explicitly asks for a proxy detection from the available data, build it then. Do not describe how the requested rule would be built once the telemetry exists (query logic, functions, fields, thresholds) — the refusal names the missing telemetry and contains nothing else.
+
+Everything else proceeds normally.
+
 ## When NOT to Create a Rule
 
 Before calling \`security.create_detection_rule\`, assess whether the requested detection is actually achievable with the available data sources. Do NOT call the tool if any of the following apply:
@@ -462,5 +476,5 @@ Pre-check: user wants to modify existing rule → edit path → proceed to Step 
 8. Use \`attachment_update\` only for non-query field edits (tags, severity, schedule, name, description, MITRE, enabled, etc.). NEVER use \`attachment_update\` to change \`query\`. NEVER use \`attachment_update\` to construct an entire rule from scratch — if \`security.create_detection_rule\` rejected, that rejection is final; do not circumvent it.
 9. NEVER invent attachment ids. The correct id for any edit-path call (\`security.create_detection_rule\` with \`attachment_id\`, or \`attachment_update\`) is the one that appears in the most recent \`<render_attachment id="...">\` tag — it looks like \`ai-rule-creation\` or \`air:xxxxxxxx-...\`. Using a name you derive from the rule content (e.g. \`"rule-failed-ssh-logins"\`) will create a new orphan attachment and lose the saved-rule link.
 10. NEVER include \`id\` or \`rule_id\` in a generated or draft rule — these are server-assigned identifiers. Including them pollutes the attachment and breaks save/update flows.
-11. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), do NOT create it and do NOT automatically offer or pivot to an ES|QL alternative. Simply explain the limitation and stop.
+11. **ES|QL only**: If the user explicitly requests a non-ES|QL rule type (KQL, EQL, threshold, new terms, machine learning, indicator match, etc.), that is Hard stop 1: the reply is the 2-3 sentence refusal and NOTHING else — no mention of an ES|QL translation, no offer, no data check.
 `;
