@@ -34,10 +34,14 @@ describe('KnownFailuresGenerator', () => {
       sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
+<<<<<<< HEAD
       knowledge: {
-        listQueryLinks: async () => [watched, offRule],
+        listQueries: async () => [watched, offRule],
         listFeatures: async () => [],
       },
+=======
+      knowledge: { listQueries: async () => [watched, offRule] },
+>>>>>>> tonyghiani/nightshift-2055-2069
       rules: {
         listManaged: async () => [
           { id: getId(watched), enabled: true },
@@ -88,7 +92,7 @@ describe('KnownFailuresGenerator', () => {
       sources: [{ id: 'source-1', enabled: true }],
       cpsEnabled: false,
       abortSignal: new AbortController().signal,
-      knowledge: { listQueryLinks: async () => [watched], listFeatures },
+      knowledge: { listQueries: async () => [watched], listFeatures },
       rules: {
         listManaged: async () => [{ id: ruleId, enabled: true }],
         // Newest first, as the reader sorts them.

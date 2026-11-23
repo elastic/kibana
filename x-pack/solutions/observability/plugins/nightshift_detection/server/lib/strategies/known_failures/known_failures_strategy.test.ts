@@ -39,7 +39,7 @@ const createContext = (
     sources,
     cpsEnabled: false,
     knowledge: {
-      listQueryLinks: async ({ sourceIds }) =>
+      listQueries: async ({ sourceIds }) =>
         links.filter(({ source_id: sourceId }) => sourceIds.includes(sourceId)),
     } as Partial<KnowledgeIndicatorReader>,
   } as unknown as ResourceContext);

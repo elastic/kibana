@@ -22,7 +22,10 @@ export const runEsqlQuery = async (
   query: string
 ): Promise<ESQLSearchResponse | undefined> => {
   try {
-    return (await esClient.esql.query({ query, allow_partial_results: false })) as ESQLSearchResponse;
+    return (await esClient.esql.query({
+      query,
+      allow_partial_results: false,
+    })) as ESQLSearchResponse;
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
       return undefined;

@@ -42,7 +42,7 @@ export class KnownFailuresStrategy implements DetectionStrategy {
     knowledge,
     cpsEnabled,
   }: ResourceContext): Promise<DesiredResources> {
-    const links = await knowledge.listQueryLinks({ sourceIds: sources.map(({ id }) => id) });
+    const links = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
     const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
     const result: DesiredResources = { resources: [], skipped: [] };
 

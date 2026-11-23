@@ -17,4 +17,13 @@ describe('runEsqlQuery', () => {
 
     expect(query).toHaveBeenCalledWith(expect.objectContaining({ allow_partial_results: false }));
   });
+
+  it('rethrows a shard failure, so a failed read never looks like an empty one', async () => {
+    const shardFailure = new Error('search_phase_execution_exception: all shards failed');
+    const esClient = {
+      esql: { query: jest.fn().mockRejectedValue(shardFailure) },
+    } as unknown as ElasticsearchClient;
+
+    await expect(runEsqlQuery(esClient, 'FROM x')).rejects.toBe(shardFailure);
+  });
 });

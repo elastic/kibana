@@ -64,8 +64,8 @@ function memoizeKnowledgeIndicators(knowledge: KnowledgeIndicatorReader): Knowle
   // Read once per tick and set of sources, at the first window that asks: every strategy asks for
   // the tick's enabled sources, so they share one read, and a tick with nothing due reads none.
   return {
-    listQueryLinks: memoize(
-      (params) => knowledge.listQueryLinks(params),
+    listQueries: memoize(
+      (params) => knowledge.listQueries(params),
       ({ sourceIds }) => JSON.stringify(sourceIds)
     ),
     listFeatures: (params) => knowledge.listFeatures(params),
