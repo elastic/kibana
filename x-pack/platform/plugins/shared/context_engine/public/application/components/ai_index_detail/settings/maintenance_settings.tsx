@@ -29,7 +29,12 @@ import {
 } from '../../../../../common/dreaming';
 import { validateDreamingInterval } from '../../../../../common/validation';
 
-type MaintenanceField = 'interval' | 'neighbors' | 'sweep_size';
+type MaintenanceField =
+  | 'interval'
+  | 'neighbors'
+  | 'sweep_size'
+  | 'max_stale_removals_percent'
+  | 'max_model_removals_percent';
 
 const wholeNumberError = (min: number, max: number) =>
   i18n.translate('xpack.contextEngine.aiIndexDetail.dreaming.maintenance.wholeNumberError', {
@@ -48,6 +53,8 @@ export const maintenanceErrorsOf = ({
   schedule,
   neighbors,
   sweep_size: sweepSize,
+  max_stale_removals_percent: maxStaleRemovalsPercent,
+  max_model_removals_percent: maxModelRemovalsPercent,
 }: ResolvedMaintenanceConfig): Partial<Record<MaintenanceField, string>> => {
   if (!enabled) {
     return {};
@@ -60,6 +67,12 @@ export const maintenanceErrorsOf = ({
     }),
     ...(!inRange(sweepSize, 1, MAX_MAINTENANCE_SWEEP_SIZE) && {
       sweep_size: wholeNumberError(1, MAX_MAINTENANCE_SWEEP_SIZE),
+    }),
+    ...(!inRange(maxStaleRemovalsPercent, 1, 100) && {
+      max_stale_removals_percent: wholeNumberError(1, 100),
+    }),
+    ...(!inRange(maxModelRemovalsPercent, 1, 100) && {
+      max_model_removals_percent: wholeNumberError(1, 100),
     }),
   };
 };
@@ -201,6 +214,62 @@ export const MaintenanceSettings = ({ maintenance, onChange }: MaintenanceSettin
                     isInvalid={errors.sweep_size !== undefined}
                     onChange={(event) => update({ sweep_size: event.target.valueAsNumber })}
                     data-test-subj="contextAiIndexMaintenanceSweepSize"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxStaleRemovalsLabel',
+                    { defaultMessage: 'Stale items one run may remove (%)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxStaleRemovalsHelp',
+                    {
+                      defaultMessage:
+                        'Of all facts and entities. Items whose memories are all gone; the rest wait for later runs.',
+                    }
+                  )}
+                  isInvalid={errors.max_stale_removals_percent !== undefined}
+                  error={errors.max_stale_removals_percent}
+                >
+                  <EuiFieldNumber
+                    min={1}
+                    max={100}
+                    value={fieldValue(maintenance.max_stale_removals_percent)}
+                    isInvalid={errors.max_stale_removals_percent !== undefined}
+                    onChange={(event) =>
+                      update({ max_stale_removals_percent: event.target.valueAsNumber })
+                    }
+                    data-test-subj="contextAiIndexMaintenanceMaxStaleRemovals"
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormRow
+                  label={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxModelRemovalsLabel',
+                    { defaultMessage: 'Duplicates and conflicts one run may remove (%)' }
+                  )}
+                  helpText={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.dreaming.maintenance.maxModelRemovalsHelp',
+                    {
+                      defaultMessage:
+                        'Of the items reviewed. Over it, the run makes none of the model’s changes.',
+                    }
+                  )}
+                  isInvalid={errors.max_model_removals_percent !== undefined}
+                  error={errors.max_model_removals_percent}
+                >
+                  <EuiFieldNumber
+                    min={1}
+                    max={100}
+                    value={fieldValue(maintenance.max_model_removals_percent)}
+                    isInvalid={errors.max_model_removals_percent !== undefined}
+                    onChange={(event) =>
+                      update({ max_model_removals_percent: event.target.valueAsNumber })
+                    }
+                    data-test-subj="contextAiIndexMaintenanceMaxModelRemovals"
                   />
                 </EuiFormRow>
               </EuiFlexItem>

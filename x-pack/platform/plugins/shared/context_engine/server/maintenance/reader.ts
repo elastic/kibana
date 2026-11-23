@@ -21,6 +21,7 @@ import {
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { MAINTENANCE_CHANGED_PAGE_SIZE } from '../../common/step_types/gather_maintenance';
+import { kiLifecyclePipeline } from '../ai_indices/ki_lifecycle';
 import { baseContent } from '../dreaming/access_patterns';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
 
@@ -81,6 +82,8 @@ export interface MaintenanceReader {
   sweep: (afterId: string | undefined, size: number) => Promise<DreamedKi[]>;
   /** The newest revisions of the items most similar to each, by id; may include deleted ones. */
   similar: (items: readonly DreamedKi[], size: number) => Promise<Map<string, DreamedKi[]>>;
+  /** How many facts and entities are live in this space. */
+  countLiveItems: () => Promise<number>;
 }
 
 const neighborText = ({ title, content }: DreamedKi): string =>
@@ -293,6 +296,23 @@ export const createMaintenanceReader = ({
           matches.flatMap((match) => newest.get(match.id) ?? []),
         ])
       );
+    },
+
+    countLiveItems: async () => {
+      const { values } = await esClient.esql.query(
+        {
+          query: [
+            `FROM ${dest.value} METADATA _id`,
+            `WHERE STARTS_WITH(type, "${FACT_TYPE_PREFIX}") OR STARTS_WITH(type, "${ENTITY_TYPE_PREFIX}")`,
+            ...kiLifecyclePipeline(dest.type),
+            'STATS items = COUNT(*)',
+          ].join('\n| '),
+          filter: spaceFilter,
+        },
+        { signal: abortSignal }
+      );
+      const [[items] = []] = values;
+      return typeof items === 'number' ? items : 0;
     },
   };
 };

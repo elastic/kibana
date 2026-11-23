@@ -8,6 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_MAINTENANCE_INTERVAL,
+  DEFAULT_MAINTENANCE_MAX_MODEL_REMOVALS_PERCENT,
+  DEFAULT_MAINTENANCE_MAX_STALE_REMOVALS_PERCENT,
   DEFAULT_MAINTENANCE_NEIGHBORS,
   DEFAULT_MAINTENANCE_SWEEP_SIZE,
   DREAMING_TYPE_PATTERN,
@@ -103,6 +105,26 @@ const maintenanceSchema = schema.object(
         validate: validateWholeNumber,
         meta: {
           description: `How many unchanged items each run also reviews, so every item is reviewed in time. Defaults to ${DEFAULT_MAINTENANCE_SWEEP_SIZE}.`,
+        },
+      })
+    ),
+    max_stale_removals_percent: schema.maybe(
+      schema.number({
+        min: 1,
+        max: 100,
+        validate: validateWholeNumber,
+        meta: {
+          description: `The percent of the facts and entities one run may remove because all their memories were deleted. The rest wait for later runs. Defaults to ${DEFAULT_MAINTENANCE_MAX_STALE_REMOVALS_PERCENT}.`,
+        },
+      })
+    ),
+    max_model_removals_percent: schema.maybe(
+      schema.number({
+        min: 1,
+        max: 100,
+        validate: validateWholeNumber,
+        meta: {
+          description: `The percent of the reviewed items the model may remove in one run, as duplicates or conflicts. Over it, the run makes none of the model's changes. Defaults to ${DEFAULT_MAINTENANCE_MAX_MODEL_REMOVALS_PERCENT}.`,
         },
       })
     ),

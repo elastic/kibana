@@ -218,10 +218,47 @@ describe('DreamingPanel', () => {
             schedule: { interval: '24h' },
             neighbors: 5,
             sweep_size: 200,
+            max_stale_removals_percent: 50,
+            max_model_removals_percent: 30,
           },
         }),
       })
     );
+  });
+
+  it('saves how much one maintenance run may remove', async () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxStaleRemovals'), {
+      target: { value: '20' },
+    });
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxModelRemovals'), {
+      target: { value: '10' },
+    });
+    fireEvent.click(screen.getByTestId('contextAiIndexDreamingSave'));
+
+    await waitFor(() =>
+      expect(saveConfig).toHaveBeenCalledWith({
+        aiIndexId: 'tickets',
+        config: expect.objectContaining({
+          maintenance: expect.objectContaining({
+            max_stale_removals_percent: 20,
+            max_model_removals_percent: 10,
+          }),
+        }),
+      })
+    );
+  });
+
+  it('does not save a removal share over 100%', () => {
+    renderPanel(aiIndexWith({ ...factsOnly, maintenance: { enabled: true } }));
+
+    fireEvent.change(screen.getByTestId('contextAiIndexMaintenanceMaxModelRemovals'), {
+      target: { value: '150' },
+    });
+
+    expect(screen.getByText('Must be a whole number from 1 to 100.')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDreamingSave')).toBeDisabled();
   });
 
   it('saves the maintenance mode and interval', async () => {

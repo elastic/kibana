@@ -145,4 +145,17 @@ describe('createMaintenanceReader', () => {
       'Could not look up similar items (429): busy'
     );
   });
+
+  it('counts the live facts and entities in this space', async () => {
+    const { esClient, reader } = setup();
+    esClient.esql.query.mockResolvedValue({ columns: [], values: [[42]] } as never);
+
+    expect(await reader.countLiveItems()).toBe(42);
+
+    const [request] = esClient.esql.query.mock.calls[0];
+    expect(request.query).toContain('STARTS_WITH(type, "fact.")');
+    expect(request.query).toContain('STARTS_WITH(type, "entity.")');
+    expect(request.query).toContain('STATS items = COUNT(*)');
+    expect(request.filter).toEqual(buildAiIndexSpaceFilter('team-a'));
+  });
 });

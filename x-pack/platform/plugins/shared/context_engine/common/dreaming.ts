@@ -96,6 +96,8 @@ export const DEFAULT_MAINTENANCE_NEIGHBORS = 5;
 export const MAX_MAINTENANCE_NEIGHBORS = 20;
 export const DEFAULT_MAINTENANCE_SWEEP_SIZE = 200;
 export const MAX_MAINTENANCE_SWEEP_SIZE = 1000;
+export const DEFAULT_MAINTENANCE_MAX_STALE_REMOVALS_PERCENT = 50;
+export const DEFAULT_MAINTENANCE_MAX_MODEL_REMOVALS_PERCENT = 30;
 
 export const MAINTENANCE_MODES = ['report', 'apply'] as const;
 /** `report` lists the changes maintenance would make; `apply` makes them. */
@@ -113,6 +115,10 @@ export interface DreamingMaintenanceConfig {
   neighbors?: number;
   /** How many unchanged items each run also reviews, so every item is reviewed in time. */
   sweep_size?: number;
+  /** The percent of the AI index's facts and entities one run may remove for losing all their memories. */
+  max_stale_removals_percent?: number;
+  /** The percent of the reviewed items the model may remove in one run. Over it, the run makes none of the model's changes. */
+  max_model_removals_percent?: number;
 }
 
 export type ResolvedMaintenanceConfig = Required<Omit<DreamingMaintenanceConfig, 'schedule'>> & {
@@ -128,6 +134,10 @@ export const maintenanceConfigOf = (
   schedule: { interval: maintenance?.schedule?.interval ?? DEFAULT_MAINTENANCE_INTERVAL },
   neighbors: maintenance?.neighbors ?? DEFAULT_MAINTENANCE_NEIGHBORS,
   sweep_size: maintenance?.sweep_size ?? DEFAULT_MAINTENANCE_SWEEP_SIZE,
+  max_stale_removals_percent:
+    maintenance?.max_stale_removals_percent ?? DEFAULT_MAINTENANCE_MAX_STALE_REMOVALS_PERCENT,
+  max_model_removals_percent:
+    maintenance?.max_model_removals_percent ?? DEFAULT_MAINTENANCE_MAX_MODEL_REMOVALS_PERCENT,
 });
 
 /**

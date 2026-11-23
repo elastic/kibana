@@ -64,11 +64,15 @@ export const getGatherMaintenanceStepDefinition = ({
         since,
         after_id: afterId,
         sweep_after_id: sweepAfterId,
+        retry_ids: retryIds,
       } = context.input;
       const aiIndex = await resolveDreamingAiIndex(getAiIndexService, aiIndexId, spaceId);
-      const { neighbors, sweep_size: sweepSize } = maintenanceConfigOf(
-        aiIndex.dreaming.maintenance
-      );
+      const {
+        neighbors,
+        sweep_size: sweepSize,
+        max_stale_removals_percent: maxStaleRemovalsPercent,
+        max_model_removals_percent: maxModelRemovalsPercent,
+      } = maintenanceConfigOf(aiIndex.dreaming.maintenance);
 
       const output = await gatherMaintenance(
         createMaintenanceReader({
@@ -82,14 +86,21 @@ export const getGatherMaintenanceStepDefinition = ({
           writerUri: kiWriterFromContext(stepContext).uri,
           neighbors,
           sweepSize,
+          maxStaleRemovalsPercent,
+          maxModelRemovalsPercent,
           since,
           ...(afterId && { afterId }),
           ...(sweepAfterId && { sweepAfterId }),
+          ...(retryIds && { retryIds }),
         }
       );
 
       logger.debug(
-        `Maintenance of AI index '${aiIndexId}' gathered ${output.reviewed} items in ${output.batches.length} batches, ${output.fixes.length} fixes and ${output.needs_review.length} items for review`
+        `Maintenance of AI index '${aiIndexId}' gathered ${output.reviewed} items in ${
+          output.batches.length
+        } batches, ${output.fixes.length} fixes and ${
+          output.needs_review.length
+        } items for review; held back ${output.held_back[0]?.changes.length ?? 0} fixes`
       );
       return { output };
     },

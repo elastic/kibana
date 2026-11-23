@@ -19,9 +19,12 @@ import {
   MAX_MAINTENANCE_BATCHES,
   MAX_MAINTENANCE_LISTED_CHANGES,
   MAX_MAINTENANCE_REMAINING_MEMORIES,
+  MIN_MAINTENANCE_BATCH_REMOVALS,
+  MIN_MAINTENANCE_STALE_REMOVALS,
   type GatherMaintenanceOutput,
   type MaintenanceBatch,
   type MaintenanceChange,
+  type MaintenanceHeldBack,
   type MaintenanceItem,
   type MaintenanceRelationship,
   type MaintenanceReviewItem,
@@ -37,6 +40,7 @@ import {
   isVisibleInSpace,
   samePermissions,
 } from '../dreaming/permissions';
+import { removalLimitOf } from './limits';
 import type { MaintenanceReader } from './reader';
 import { citedMemoryKiIds, sourceVerdictOf } from './sources';
 
@@ -48,9 +52,12 @@ export interface GatherOptions {
   writerUri: string;
   neighbors: number;
   sweepSize: number;
+  maxStaleRemovalsPercent: number;
+  maxModelRemovalsPercent: number;
   since: string;
   afterId?: string;
   sweepAfterId?: string;
+  retryIds?: readonly string[];
 }
 
 interface ParsedRelationship extends MaintenanceRelationship {
@@ -104,7 +111,18 @@ const newestFirst = (a: DreamedKi, b: DreamedKi): number =>
 /** Collects what memory maintenance reviews in one run, as batches for the model and fixes. */
 export const gatherMaintenance = async (
   reader: MaintenanceReader,
-  { spaceId, writerUri, neighbors, sweepSize, since, afterId, sweepAfterId }: GatherOptions
+  {
+    spaceId,
+    writerUri,
+    neighbors,
+    sweepSize,
+    maxStaleRemovalsPercent,
+    maxModelRemovalsPercent,
+    since,
+    afterId,
+    sweepAfterId,
+    retryIds = [],
+  }: GatherOptions
 ): Promise<GatherMaintenanceOutput> => {
   const isLiveItem = (ki: DreamedKi | undefined): ki is DreamedKi =>
     ki !== undefined &&
@@ -196,6 +214,11 @@ export const gatherMaintenance = async (
   const swept = await reader.sweep(sweepAfterId, sweepSize);
   swept.filter(isReviewable).forEach((ki) => add(ki, 'sweep'));
 
+  const retried = retryIds.length
+    ? await reader.latestByIds(retryIds)
+    : new Map<string, DreamedKi>();
+  [...retried.values()].filter(isReviewable).forEach((ki) => add(ki, 'retry'));
+
   const fixes: MaintenanceChange[] = [];
   const needsReview: MaintenanceChange[] = [];
   const memories = await reader.latestByIds(
@@ -260,6 +283,25 @@ export const gatherMaintenance = async (
     review.delete(ki.id);
   }
 
+  const staleIds = new Set(fixes.map(({ id }) => id));
+  const heldBack: MaintenanceHeldBack[] = [];
+  if (fixes.length > MIN_MAINTENANCE_STALE_REMOVALS) {
+    const liveItems = await reader.countLiveItems();
+    const limit = removalLimitOf(
+      liveItems,
+      maxStaleRemovalsPercent,
+      MIN_MAINTENANCE_STALE_REMOVALS
+    );
+    if (fixes.length > limit) {
+      const stale = fixes.length;
+      const held = fixes.splice(limit);
+      heldBack.push({
+        reason: `${stale} items lost all their memories, more than the ${limit} one run may remove (${maxStaleRemovalsPercent}% of ${liveItems} facts and entities). The others wait for the next runs.`,
+        changes: held.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),
+      });
+    }
+  }
+
   const chunksOf = new Map<string, DreamedKi[][]>();
   const dropped = new Set<string>();
   let batchCount = 0;
@@ -277,7 +319,6 @@ export const gatherMaintenance = async (
     }
   }
   const reviewed = [...chunksOf.values()].flat(2);
-  const fixedIds = new Set(fixes.map(({ id }) => id));
   const similar = reviewed.length
     ? await reader.similar(reviewed, neighbors)
     : new Map<string, DreamedKi[]>();
@@ -288,7 +329,7 @@ export const gatherMaintenance = async (
         .filter(
           (neighbor) =>
             neighbor.id !== ki.id &&
-            !fixedIds.has(neighbor.id) &&
+            !staleIds.has(neighbor.id) &&
             isReviewable(neighbor) &&
             kindOf(neighbor) === kindOf(ki) &&
             samePermissions(neighbor.permissions, ki.permissions)
@@ -349,7 +390,7 @@ export const gatherMaintenance = async (
   );
 
   const reviewedIds = new Set(reviewed.map(({ id }) => id));
-  const unsettledIds = new Set([...fixes.map(({ id }) => id), ...rewrites.keys()]);
+  const unsettledIds = new Set([...staleIds, ...fixes.map(({ id }) => id), ...rewrites.keys()]);
   const aboutFactIdsOf = new Map<string, string[]>();
   for (const link of liveLinks) {
     if (link.relation === ABOUT_RELATIONSHIP_TYPE && reviewedIds.has(link.to)) {
@@ -483,11 +524,19 @@ export const gatherMaintenance = async (
     batches,
     fixes: fixes.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),
     needs_review: needsReview.slice(0, MAX_MAINTENANCE_LISTED_CHANGES),
+    held_back: heldBack,
+    retried: [...retryIds],
+    max_model_removals: removalLimitOf(
+      batched.length,
+      maxModelRemovalsPercent,
+      MIN_MAINTENANCE_BATCH_REMOVALS
+    ),
     counts: {
       changed: countOf('changed'),
       lost_sources: countOf('lost_sources'),
       about_facts_changed: countOf('about_facts_changed'),
       sweep: countOf('sweep'),
+      retry: countOf('retry'),
     },
     resume_from: resume?.from ?? '',
     resume_after_id: resume?.afterId ?? '',

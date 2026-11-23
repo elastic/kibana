@@ -16,6 +16,7 @@ import {
   MAX_MAINTENANCE_LISTED_CHANGES,
   maintenanceBatchSchema,
   maintenanceChangeSchema,
+  maintenanceHeldBackSchema,
 } from './gather_maintenance';
 import {
   aiIndexIdSchema,
@@ -125,6 +126,13 @@ export const applyMaintenanceChangesOutputSchema = lazySchema(() =>
       .array(maintenanceChangeSchema)
       .describe('Changes not made because a person must decide, each with why'),
     rejected: z.array(rejectedItemSchema).describe('Changes that broke a rule, each with why'),
+    held_back: z
+      .array(maintenanceHeldBackSchema)
+      .max(1)
+      .describe('The changes of a batch held back because the model would remove too many items'),
+    removals: z
+      .number()
+      .describe('Items the model removed, or would: those absorbed by merges and conflict losers'),
     plans: z
       .array(z.object({ batch: maintenanceBatchSchema, changes: maintenanceChangeSetSchema }))
       .max(1)
@@ -167,6 +175,8 @@ export const applyMaintenanceChangesStepCommonDefinition: CommonStepDefinition<
           'one; two that conflict keep the one seen last, and the other is tombstoned. Items a ' +
           'person edited keep their text and are never tombstoned; a change that would need ' +
           'either is listed for review. Every item must belong to the batch and its audience. ' +
+          'A merge that would absorb more than 3 items is listed for review, and a batch whose ' +
+          'changes would remove more than half its items, and at least 4, is held back whole. ' +
           'With plan_only, nothing is written.',
       }
     ),

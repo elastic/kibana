@@ -42,6 +42,8 @@ outputs:
     type: number
   - name: rejected
     type: number
+  - name: held_back
+    type: number
   - name: reason
     type: string
   - name: resume_from
@@ -115,6 +117,7 @@ steps:
       since: '{% if inputs.since != blank %}{{ inputs.since }}{% elsif variables.restart == true %}1970-01-01T00:00:00.000Z{% else %}{{ steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}{% endif %}'
       after_id: '{% if inputs.since == blank and variables.restart != true %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
       sweep_after_id: '{% if variables.restart != true %}{{ steps.last_output.output.context.output.sweep_after_id }}{% endif %}'
+      retry_ids: '${{ steps.last_output.output.context.output.held_back_ids }}'
 
   - name: plan_fixes
     type: context-engine.applyMaintenanceChanges
@@ -131,6 +134,11 @@ steps:
       changes: '${{ steps.plan_fixes.output.changes }}'
       needs_review: '${{ steps.gather.output.needs_review }}'
       rejected: '${{ steps.plan_fixes.output.rejected }}'
+      held_back: '${{ steps.gather.output.held_back }}'
+      model_written: 0
+      model_changes: []
+      model_needs_review: []
+      model_removals: 0
 
   - name: review
     type: if
@@ -319,10 +327,12 @@ steps:
             type: data.set
             with:
               plans: '${{ variables.plans | concat: steps.plan_batch.output.plans }}'
-              written: '${{ variables.written | plus: steps.plan_batch.output.written }}'
-              changes: '${{ variables.changes | concat: steps.plan_batch.output.changes }}'
-              needs_review: '${{ variables.needs_review | concat: steps.plan_batch.output.needs_review }}'
+              model_written: '${{ variables.model_written | plus: steps.plan_batch.output.written }}'
+              model_changes: '${{ variables.model_changes | concat: steps.plan_batch.output.changes }}'
+              model_needs_review: '${{ variables.model_needs_review | concat: steps.plan_batch.output.needs_review }}'
+              model_removals: '${{ variables.model_removals | plus: steps.plan_batch.output.removals }}'
               rejected: '${{ variables.rejected | concat: steps.plan_batch.output.rejected }}'
+              held_back: '${{ variables.held_back | concat: steps.plan_batch.output.held_back }}'
 
   - name: dry_run_result
     type: if
@@ -338,6 +348,12 @@ steps:
           changes: '${{ variables.changes }}'
           needs_review: '${{ variables.needs_review }}'
           rejected: '${{ variables.rejected }}'
+          model_written: '${{ variables.model_written }}'
+          model_changes: '${{ variables.model_changes }}'
+          model_needs_review: '${{ variables.model_needs_review }}'
+          max_model_removals: '${{ steps.gather.output.max_model_removals }}'
+          held_back: '${{ variables.held_back }}'
+          retried: '${{ steps.gather.output.retried }}'
       - name: dry_run_output
         type: workflow.output
         status: cancelled
@@ -352,8 +368,10 @@ steps:
           tombstoned: '${{ steps.record_dry_run.output.tombstoned }}'
           needs_review: '${{ steps.record_dry_run.output.needs_review }}'
           rejected: '${{ steps.record_dry_run.output.rejected }}'
+          held_back: '${{ steps.record_dry_run.output.held_back }}'
           reason: 'Dry run: nothing was changed.'
-          changes: '${{ variables.changes | concat: variables.needs_review }}'
+          changes: '${{ steps.record_dry_run.output.changes }}'
+          held_back_changes: '${{ steps.record_dry_run.output.held_back_changes }}'
 
   - name: report_result
     type: if
@@ -369,6 +387,12 @@ steps:
           changes: '${{ variables.changes }}'
           needs_review: '${{ variables.needs_review }}'
           rejected: '${{ variables.rejected }}'
+          model_written: '${{ variables.model_written }}'
+          model_changes: '${{ variables.model_changes }}'
+          model_needs_review: '${{ variables.model_needs_review }}'
+          max_model_removals: '${{ steps.gather.output.max_model_removals }}'
+          held_back: '${{ variables.held_back }}'
+          retried: '${{ steps.gather.output.retried }}'
       - name: report_output
         type: workflow.output
         with:
@@ -382,8 +406,11 @@ steps:
           tombstoned: '${{ steps.record_report.output.tombstoned }}'
           needs_review: '${{ steps.record_report.output.needs_review }}'
           rejected: '${{ steps.record_report.output.rejected }}'
+          held_back: '${{ steps.record_report.output.held_back }}'
           reason: 'Report only: nothing was changed.'
-          changes: '${{ variables.changes | concat: variables.needs_review }}'
+          changes: '${{ steps.record_report.output.changes }}'
+          held_back_changes: '${{ steps.record_report.output.held_back_changes }}'
+          held_back_ids: '${{ steps.record_report.output.held_back_ids }}'
           resume_from: '{{ steps.gather.output.resume_from }}'
           resume_after_id: '{{ steps.gather.output.resume_after_id }}'
           sweep_after_id: '{{ steps.gather.output.sweep_after_id }}'
@@ -404,8 +431,14 @@ steps:
 
   - name: apply
     type: if
-    condition: '${{ variables.plans.size > 0 }}'
+    condition: '${{ variables.plans.size > 0 and variables.model_removals <= steps.gather.output.max_model_removals }}'
     steps:
+      - name: applying
+        type: data.set
+        with:
+          model_written: 0
+          model_changes: []
+          model_needs_review: []
       - name: plans
         type: foreach
         foreach: '${{ variables.plans }}'
@@ -420,10 +453,11 @@ steps:
           - name: tally_applied
             type: data.set
             with:
-              written: '${{ variables.written | plus: steps.apply_batch.output.written }}'
-              changes: '${{ variables.changes | concat: steps.apply_batch.output.changes }}'
-              needs_review: '${{ variables.needs_review | concat: steps.apply_batch.output.needs_review }}'
+              model_written: '${{ variables.model_written | plus: steps.apply_batch.output.written }}'
+              model_changes: '${{ variables.model_changes | concat: steps.apply_batch.output.changes }}'
+              model_needs_review: '${{ variables.model_needs_review | concat: steps.apply_batch.output.needs_review }}'
               rejected: '${{ variables.rejected | concat: steps.apply_batch.output.rejected }}'
+              held_back: '${{ variables.held_back | concat: steps.apply_batch.output.held_back }}'
 
   - name: record
     type: context-engine.recordMaintenanceRun
@@ -435,6 +469,12 @@ steps:
       changes: '${{ variables.changes }}'
       needs_review: '${{ variables.needs_review }}'
       rejected: '${{ variables.rejected }}'
+      model_written: '${{ variables.model_written }}'
+      model_changes: '${{ variables.model_changes }}'
+      model_needs_review: '${{ variables.model_needs_review }}'
+      max_model_removals: '${{ steps.gather.output.max_model_removals }}'
+      held_back: '${{ variables.held_back }}'
+      retried: '${{ steps.gather.output.retried }}'
 
   - name: output_result
     type: workflow.output
@@ -449,7 +489,10 @@ steps:
       tombstoned: '${{ steps.record.output.tombstoned }}'
       needs_review: '${{ steps.record.output.needs_review }}'
       rejected: '${{ steps.record.output.rejected }}'
-      changes: '${{ variables.changes | concat: variables.needs_review }}'
+      held_back: '${{ steps.record.output.held_back }}'
+      changes: '${{ steps.record.output.changes }}'
+      held_back_changes: '${{ steps.record.output.held_back_changes }}'
+      held_back_ids: '${{ steps.record.output.held_back_ids }}'
       resume_from: '{{ steps.gather.output.resume_from }}'
       resume_after_id: '{{ steps.gather.output.resume_after_id }}'
       sweep_after_id: '{{ steps.gather.output.sweep_after_id }}'
