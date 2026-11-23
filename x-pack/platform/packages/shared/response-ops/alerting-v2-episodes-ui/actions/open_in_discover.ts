@@ -10,7 +10,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { EpisodeAction } from './types';
-import type { EpisodeDiscoverExtension } from '../types/episode_data_source';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
 import {
   episodeSupportsActions,
   isSourceEpisode,
@@ -18,6 +18,7 @@ import {
 } from '../queries/episodes_query';
 import {
   getDiscoverTimeRangeAroundTimestamp,
+  type AlertDiscoverTarget,
   type DataViewDiscoverLocatorParams,
 } from '../utils/discover_href_for_alert';
 import { getErrorMessage } from './helpers';
@@ -41,7 +42,7 @@ export interface OpenInDiscoverActionDeps {
   /** Discover locator for data view links; undefined when the user cannot open Discover. */
   discoverLocator?: LocatorPublic<DataViewDiscoverLocatorParams>;
   /** Source extension that opens the source's own rows in Discover. */
-  extension?: EpisodeDiscoverExtension;
+  extension?: EpisodeActionExtension<void, AlertDiscoverTarget | undefined>;
 }
 
 export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): EpisodeAction => {
@@ -60,7 +61,7 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   const getSourceDiscoverHref = async (ep: AlertEpisode): Promise<string | undefined> => {
     if (!discoverLocator || !extension) return undefined;
 
-    const target = await extension.getDiscoverTarget(ep, { http });
+    const target = await extension.execute([ep], http);
     if (!target) return undefined;
     if ('url' in target) return target.url;
 
@@ -72,24 +73,10 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
     });
   };
 
-  const executeForSource = async (ep: AlertEpisode): Promise<void> => {
-    let href: string | undefined;
-    try {
-      href = await getSourceDiscoverHref(ep);
-    } catch (error) {
-      notifications.toasts.addDanger({
-        title: i18n.OPEN_IN_DISCOVER_ERROR,
-        text: getErrorMessage(error),
-      });
-      return;
-    }
+  const resolveHref = (ep: AlertEpisode): Promise<string | undefined> | string | undefined => {
+    if (isSourceEpisode(ep)) return getSourceDiscoverHref(ep);
 
-    if (!href) {
-      notifications.toasts.addWarning(i18n.OPEN_IN_DISCOVER_UNAVAILABLE);
-      return;
-    }
-
-    await application.navigateToUrl(href);
+    return deps.getDiscoverHref({ episodeIsoTimestamp: ep['@timestamp'], ruleId: ep['rule.id'] });
   };
 
   return {
@@ -106,16 +93,23 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
     },
     execute: async ({ episodes }) => {
       const [ep] = episodes;
-      if (isSourceEpisode(ep)) {
-        await executeForSource(ep);
+
+      let href: string | undefined;
+      try {
+        href = await resolveHref(ep);
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.OPEN_IN_DISCOVER_ERROR,
+          text: getErrorMessage(error),
+        });
         return;
       }
 
-      const href = await deps.getDiscoverHref({
-        episodeIsoTimestamp: ep['@timestamp'],
-        ruleId: ep['rule.id'],
-      });
-      if (!href) return;
+      if (!href) {
+        notifications.toasts.addWarning(i18n.OPEN_IN_DISCOVER_UNAVAILABLE);
+        return;
+      }
+
       await application.navigateToUrl(href);
     },
   };

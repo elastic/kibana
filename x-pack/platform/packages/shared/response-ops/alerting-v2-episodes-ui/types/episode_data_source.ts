@@ -20,7 +20,6 @@ import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils'
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 import type { CanWriteEpisode } from '../utils/episode_write_privilege';
-import type { AlertDiscoverTarget } from '../utils/discover_href_for_alert';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
@@ -106,33 +105,11 @@ export interface SourceActionResult {
 /**
  * Extension that a data source registers to participate in a common episode action.
  */
-export interface EpisodeActionExtension<TContext = void> {
+export interface EpisodeActionExtension<TContext = void, TResult = SourceActionResult> {
   actionId: string;
   isCompatible: (ep: AlertEpisode) => boolean;
-  execute: (
-    episodes: AlertEpisode[],
-    http: HttpStart,
-    context?: TContext
-  ) => Promise<SourceActionResult>;
+  execute: (episodes: AlertEpisode[], http: HttpStart, context?: TContext) => Promise<TResult>;
 }
-
-/**
- * Extension that a data source registers to open its rows in Discover through the platform
- * Open in Discover action.
- */
-export interface EpisodeDiscoverExtension {
-  actionId: string;
-  isCompatible: (ep: AlertEpisode) => boolean;
-  getDiscoverTarget: (
-    ep: AlertEpisode,
-    services: { http: HttpStart }
-  ) => Promise<AlertDiscoverTarget | undefined>;
-}
-
-/** Whether an action extension resolves a Discover target instead of executing a bulk write. */
-export const isDiscoverExtension = (
-  extension: EpisodeActionExtension<any> | EpisodeDiscoverExtension
-): extension is EpisodeDiscoverExtension => 'getDiscoverTarget' in extension;
 
 export interface SeverityExtension {
   value: string;
@@ -153,7 +130,7 @@ export interface EpisodeDataSource {
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
   fetchSearchFields?: (params: EpisodeDataSourceBaseParams) => Promise<EpisodeSearchField[]>;
-  actionExtensions?: Array<EpisodeActionExtension<any> | EpisodeDiscoverExtension>;
+  actionExtensions?: Array<EpisodeActionExtension<any, any>>;
   createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
   /**
    * Resolves which of this source's alerts the user may modify. Called as a React hook, so it can

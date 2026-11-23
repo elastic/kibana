@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_RULE_TYPE_ID, ES_QUERY_ID, STACK_MANAGEMENT_RULES_HOST } from '@kbn/rule-data-utils';
 import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '../actions/open_in_discover';
 import type { AlertEpisode } from '../queries/episodes_query';
-import { isDiscoverExtension, type EpisodeDataSource } from '../types/episode_data_source';
+import type { EpisodeDataSource } from '../types/episode_data_source';
 import { CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { createClassicEpisodeSource } from './create_classic_episode_source';
 import { useClassicWriteAccess } from './use_classic_write_access';
@@ -51,9 +51,7 @@ const makeClassicEpisode = (ruleTypeId: string): AlertEpisode => {
 };
 
 const getDiscoverExtension = (source: EpisodeDataSource) =>
-  source.actionExtensions
-    ?.filter(isDiscoverExtension)
-    .find(({ actionId }) => actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID);
+  source.actionExtensions?.find(({ actionId }) => actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID);
 
 describe('createClassicEpisodeSource', () => {
   it('resolves write access through the classic write access hook', () => {
@@ -97,9 +95,7 @@ describe('createClassicEpisodeSource', () => {
       );
 
       await expect(
-        extension?.getDiscoverTarget(makeClassicEpisode(ES_QUERY_ID), {
-          http: httpServiceMock.createStartContract(),
-        })
+        extension?.execute([makeClassicEpisode(ES_QUERY_ID)], httpServiceMock.createStartContract())
       ).resolves.toEqual(target);
       expect(hostResolver).toHaveBeenCalledWith(alert);
     });

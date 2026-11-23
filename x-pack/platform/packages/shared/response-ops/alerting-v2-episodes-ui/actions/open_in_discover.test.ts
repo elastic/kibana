@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { AlertEpisode } from '../queries/episodes_query';
-import type { EpisodeDiscoverExtension } from '../types/episode_data_source';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type {
   AlertDiscoverTarget,
   DataViewDiscoverLocatorParams,
@@ -90,10 +90,22 @@ describe('createOpenInDiscoverAction', () => {
     expect(deps.application.navigateToUrl).toHaveBeenCalledWith('/discover?query=...');
   });
 
-  it('execute: does not call navigateToUrl when getDiscoverHref returns undefined', async () => {
+  it('execute: shows a warning instead of navigating when getDiscoverHref returns undefined', async () => {
     const deps = makeDeps();
     deps.getDiscoverHref.mockReturnValue(undefined);
     await createOpenInDiscoverAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(deps.notifications.toasts.addWarning).toHaveBeenCalledWith(OPEN_IN_DISCOVER_UNAVAILABLE);
+    expect(deps.application.navigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('execute: shows the underlying error when getDiscoverHref rejects', async () => {
+    const deps = makeDeps();
+    deps.getDiscoverHref.mockRejectedValue(new Error('Rule query could not be parsed'));
+    await createOpenInDiscoverAction(deps).execute({ episodes: [makeEpisode()] });
+    expect(deps.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: OPEN_IN_DISCOVER_ERROR,
+      text: 'Rule query could not be parsed',
+    });
     expect(deps.application.navigateToUrl).not.toHaveBeenCalled();
   });
 
@@ -123,8 +135,8 @@ describe('createOpenInDiscoverAction for source rows', () => {
     const extension = {
       actionId: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
       isCompatible: jest.fn(() => true),
-      getDiscoverTarget: jest.fn<Promise<AlertDiscoverTarget | undefined>, []>(),
-    } satisfies EpisodeDiscoverExtension;
+      execute: jest.fn<Promise<AlertDiscoverTarget | undefined>, []>(),
+    } satisfies EpisodeActionExtension<void, AlertDiscoverTarget | undefined>;
 
     return {
       ...makeDeps(),
@@ -149,7 +161,7 @@ describe('createOpenInDiscoverAction for source rows', () => {
     });
     expect(deps.application.navigateToUrl).toHaveBeenCalledWith('/discover?query=...');
     expect(deps.extension.isCompatible).not.toHaveBeenCalled();
-    expect(deps.extension.getDiscoverTarget).not.toHaveBeenCalled();
+    expect(deps.extension.execute).not.toHaveBeenCalled();
   });
 
   describe('isCompatible', () => {
@@ -201,15 +213,13 @@ describe('createOpenInDiscoverAction for source rows', () => {
     it('opens a data view Discover view around the alert start', async () => {
       const deps = makeSourceDeps();
       const episode = makeSourceEpisode();
-      deps.extension.getDiscoverTarget.mockResolvedValue({
+      deps.extension.execute.mockResolvedValue({
         locatorParams: { dataViewSpec: DATA_VIEW_SPEC, filters: [] },
       });
 
       await createOpenInDiscoverAction(deps).execute({ episodes: [episode] });
 
-      expect(deps.extension.getDiscoverTarget).toHaveBeenCalledWith(episode, {
-        http: deps.http,
-      });
+      expect(deps.extension.execute).toHaveBeenCalledWith([episode], deps.http);
       expect(deps.discoverLocator.getRedirectUrl).toHaveBeenCalledWith({
         dataViewSpec: DATA_VIEW_SPEC,
         filters: [],
@@ -222,7 +232,7 @@ describe('createOpenInDiscoverAction for source rows', () => {
     it('keeps the time range the source target provides', async () => {
       const deps = makeSourceDeps();
       const timeRange = { from: '2026-11-20T09:00:00.000Z', to: '2026-11-20T10:05:00.000Z' };
-      deps.extension.getDiscoverTarget.mockResolvedValue({
+      deps.extension.execute.mockResolvedValue({
         locatorParams: { dataViewSpec: DATA_VIEW_SPEC, filters: [], timeRange },
       });
 
@@ -235,7 +245,7 @@ describe('createOpenInDiscoverAction for source rows', () => {
 
     it('opens a link stored on the alert without building a new one', async () => {
       const deps = makeSourceDeps();
-      deps.extension.getDiscoverTarget.mockResolvedValue({ url: '/s/default/app/r?l=STORED' });
+      deps.extension.execute.mockResolvedValue({ url: '/s/default/app/r?l=STORED' });
 
       await createOpenInDiscoverAction(deps).execute({ episodes: [makeSourceEpisode()] });
 
@@ -245,7 +255,7 @@ describe('createOpenInDiscoverAction for source rows', () => {
 
     it('shows a warning when the alert has no Discover target', async () => {
       const deps = makeSourceDeps();
-      deps.extension.getDiscoverTarget.mockResolvedValue(undefined);
+      deps.extension.execute.mockResolvedValue(undefined);
 
       await createOpenInDiscoverAction(deps).execute({ episodes: [makeSourceEpisode()] });
 
@@ -258,9 +268,7 @@ describe('createOpenInDiscoverAction for source rows', () => {
 
     it('shows the underlying error when the target cannot be resolved', async () => {
       const deps = makeSourceDeps();
-      deps.extension.getDiscoverTarget.mockRejectedValue(
-        new Error('Classic alert not found: alert-1')
-      );
+      deps.extension.execute.mockRejectedValue(new Error('Classic alert not found: alert-1'));
 
       await createOpenInDiscoverAction(deps).execute({ episodes: [makeSourceEpisode()] });
 

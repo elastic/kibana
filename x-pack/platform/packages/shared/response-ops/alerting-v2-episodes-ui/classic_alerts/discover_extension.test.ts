@@ -85,7 +85,7 @@ describe('createClassicDiscoverExtension', () => {
     });
   });
 
-  describe('getDiscoverTarget', () => {
+  describe('execute', () => {
     it('resolves the target from the alert document through the rule type resolver', async () => {
       const http = httpServiceMock.createStartContract();
       const alert = { [ALERT_RULE_TYPE_ID]: LOG_THRESHOLD_ALERT_TYPE_ID };
@@ -93,7 +93,7 @@ describe('createClassicDiscoverExtension', () => {
       fetchClassicAlertByIdMock.mockResolvedValue(alert);
       hostResolver.mockReturnValue(target);
 
-      await expect(extension.getDiscoverTarget(makeEpisode(), { http })).resolves.toEqual(target);
+      await expect(extension.execute([makeEpisode()], http)).resolves.toEqual(target);
       expect(fetchClassicAlertByIdMock).toHaveBeenCalledWith({
         ruleTypeIds: RULE_TYPE_IDS,
         id: 'alert-1',
@@ -106,9 +106,7 @@ describe('createClassicDiscoverExtension', () => {
       fetchClassicAlertByIdMock.mockRejectedValue(new Error('Classic alert not found: alert-1'));
 
       await expect(
-        extension.getDiscoverTarget(makeEpisode(), {
-          http: httpServiceMock.createStartContract(),
-        })
+        extension.execute([makeEpisode()], httpServiceMock.createStartContract())
       ).rejects.toThrow('Classic alert not found: alert-1');
     });
   });

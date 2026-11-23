@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { EpisodeDiscoverExtension } from '../types/episode_data_source';
-import type { AlertDiscoverLinkResolvers } from '../utils/discover_href_for_alert';
+import type { EpisodeActionExtension } from '../types/episode_data_source';
+import type {
+  AlertDiscoverLinkResolvers,
+  AlertDiscoverTarget,
+} from '../utils/discover_href_for_alert';
 import { OPEN_IN_DISCOVER_EPISODE_ACTION_ID } from '../actions/open_in_discover';
 import { getActionContext } from './action_extensions';
 import { fetchClassicAlertById } from './apis/fetch_classic_alert_by_id';
@@ -22,10 +25,10 @@ export const createClassicDiscoverExtension = ({
 }: {
   ruleTypeIds: string[];
   resolvers: AlertDiscoverLinkResolvers;
-}): EpisodeDiscoverExtension => ({
+}): EpisodeActionExtension<void, AlertDiscoverTarget | undefined> => ({
   actionId: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
   isCompatible: (ep) => hasDiscoverLinkResolver(resolvers, getActionContext(ep).ruleTypeId),
-  getDiscoverTarget: async (ep, { http }) => {
+  execute: async ([ep], http) => {
     const { alertUuid } = getActionContext(ep);
     const alert = await fetchClassicAlertById({ ruleTypeIds, id: alertUuid, services: { http } });
     return getClassicAlertDiscoverTarget(alert, resolvers);

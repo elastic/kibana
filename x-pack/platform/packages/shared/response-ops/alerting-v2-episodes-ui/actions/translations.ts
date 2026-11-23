@@ -77,7 +77,7 @@ export const OPEN_IN_DISCOVER = i18n.translate(
 export const OPEN_IN_DISCOVER_UNAVAILABLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.episodesUi.actions.openInDiscoverUnavailable',
   {
-    defaultMessage: "This alert doesn't have enough information to open in Discover",
+    defaultMessage: "This alert can't be opened in Discover",
   }
 );
 

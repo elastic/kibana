@@ -17,12 +17,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { DataViewDiscoverLocatorParams } from '../utils/discover_href_for_alert';
-import {
-  isDiscoverExtension,
-  type EpisodeActionExtension,
-  type EpisodeDataSource,
-  type EpisodeDiscoverExtension,
-} from '../types/episode_data_source';
+import { type EpisodeActionExtension, type EpisodeDataSource } from '../types/episode_data_source';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { isSourceEpisode } from '../queries/episodes_query';
 import { withEpisodeWritePrivilege, type CanWriteEpisode } from '../utils/episode_write_privilege';
@@ -82,14 +77,9 @@ export interface EpisodeActionsDeps {
 export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] => {
   const { additionalDataSource, canWriteNativeEpisodes = false, canWriteSourceEpisode } = deps;
   const extensions = additionalDataSource?.actionExtensions ?? [];
-  const ext = (id: string): EpisodeActionExtension<any> | undefined =>
-    extensions.find(
-      (e): e is EpisodeActionExtension<any> => !isDiscoverExtension(e) && e.actionId === id
-    );
-  const discoverExtension = extensions.find(
-    (e): e is EpisodeDiscoverExtension =>
-      isDiscoverExtension(e) && e.actionId === OPEN_IN_DISCOVER_EPISODE_ACTION_ID
-  );
+  const ext = (id: string): EpisodeActionExtension<any, any> | undefined =>
+    extensions.find((e) => e.actionId === id);
+
   const actionDeps = { http: deps.http, notifications: deps.notifications };
   const canWriteEpisode = (episode: AlertEpisode): boolean =>
     isSourceEpisode(episode) ? canWriteSourceEpisode?.(episode) ?? false : canWriteNativeEpisodes;
@@ -119,7 +109,10 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
       ext('ALERTING_V2_EDIT_EPISODE_TAGS') as EpisodeActionExtension<{ tags: string[] }> | undefined
     ),
     createEditAssigneeAction(deps),
-    createOpenInDiscoverAction({ ...deps, extension: discoverExtension }),
+    createOpenInDiscoverAction({
+      ...deps,
+      extension: ext(OPEN_IN_DISCOVER_EPISODE_ACTION_ID),
+    }),
     ...(deps.getAlertEventsHistoryHref
       ? [
           createOpenAlertEventsHistoryAction({
