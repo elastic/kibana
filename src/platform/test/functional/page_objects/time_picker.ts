@@ -52,9 +52,9 @@ export class TimePickerPageObject extends FtrService {
     await this.testSubjects.find('noDataPopoverDismissButton');
   }
 
-  async ensureHiddenNoDataPopover() {
-    const isVisible = await this.testSubjects.exists('noDataPopoverDismissButton', {
-      timeout: 100,
+  async ensureHiddenNoDataPopover(timeout = 100) {
+    const isVisible = await this.testSubjects.waitForExists('noDataPopoverDismissButton', {
+      timeout,
     });
     if (isVisible) {
       await this.testSubjects.click('noDataPopoverDismissButton');
@@ -94,9 +94,9 @@ export class TimePickerPageObject extends FtrService {
    * @param option 'Today' | 'This_week' | 'Last_15 minutes' | 'Last_24 hours' ...
    */
   async setCommonlyUsedTime(option: CommonlyUsed | string) {
-    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
+    await this.testSubjects.existOrFail('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
-    await this.testSubjects.exists(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
+    await this.testSubjects.existOrFail(`superDatePickerCommonlyUsed_${option}`, { timeout: 5000 });
     await this.testSubjects.click(`superDatePickerCommonlyUsed_${option}`);
   }
 
@@ -105,7 +105,7 @@ export class TimePickerPageObject extends FtrService {
    * @param option a custom recently used time range (example: "Sep 20, 2015 @ 00:00:00.000 to Sep 20, 2015 @ 23:50:13.253")
    */
   async setRecentlyUsedTime(option: string) {
-    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
+    await this.testSubjects.existOrFail('superDatePickerToggleQuickMenuButton', { timeout: 5000 });
     await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
     const panel = await this.testSubjects.find('superDatePickerQuickMenu');
     const buttonByOptionText = await panel.findByXpath(`.//button[text()='${option}']`);
@@ -126,11 +126,9 @@ export class TimePickerPageObject extends FtrService {
 
   private async showStartEndTimes() {
     // This first await makes sure the superDatePicker has loaded before we check for the ShowDatesButton
-    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
+    await this.testSubjects.existOrFail('superDatePickerToggleQuickMenuButton', { timeout: 20000 });
     await this.retry.tryForTime(5000, async () => {
-      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton', {
-        timeout: 50,
-      });
+      const isShowDatesButton = await this.testSubjects.exists('superDatePickerShowDatesButton');
       if (isShowDatesButton) {
         await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
@@ -194,12 +192,11 @@ export class TimePickerPageObject extends FtrService {
 
     await this.retry.waitFor('Timepicker popover to close', async () => {
       await this.browser.pressKeys(this.browser.keys.ESCAPE);
-      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput', { timeout: 50 }));
+      return !(await this.testSubjects.exists('superDatePickerAbsoluteDateInput'));
     });
 
     const superDatePickerApplyButtonExists = await this.testSubjects.exists(
-      'superDatePickerApplyTimeButton',
-      { timeout: 100 }
+      'superDatePickerApplyTimeButton'
     );
     if (superDatePickerApplyButtonExists) {
       // Timepicker is in top nav

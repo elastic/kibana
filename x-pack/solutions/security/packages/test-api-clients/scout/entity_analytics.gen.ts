@@ -20,7 +20,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { encodePathParams, replaceParams } from '@kbn/openapi-common/shared';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type { ApplyEntityEngineDataviewIndicesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import type { AssetCriticalityGetPrivilegesResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_privileges.gen';
@@ -592,7 +592,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -617,7 +617,7 @@ Delete the asset criticality record for a specific entity.
     )}`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEntityEngineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -639,7 +639,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/internal/entity_store/engines`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteEntityEnginesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -690,7 +690,7 @@ Delete the asset criticality record for a specific entity.
     const path = `${basePath}/api/entity_analytics/monitoring/engine/delete`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteMonitoringEngineResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -919,7 +919,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     const path = `${basePath}/api/asset_criticality/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindAssetCriticalityRecordsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -946,7 +946,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     const path = `${basePath}/api/asset_criticality`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetAssetCriticalityRecordResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1049,7 +1049,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
     const path = `${basePath}/internal/entity_store/status`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, GetEntityStoreStatusResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1308,7 +1308,7 @@ Each row will match up to 10,000 entities.
     const path = `${basePath}/internal/entity_store/entities/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListEntitiesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1355,7 +1355,7 @@ Each row will match up to 10,000 entities.
     const path = `${basePath}/api/entity_analytics/monitoring/entity_source/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1381,7 +1381,7 @@ Each row will match up to 10,000 entities.
     const path = `${basePath}/api/entity_analytics/monitoring/users/list`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListPrivMonUsersResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1408,7 +1408,7 @@ Each row will match up to 10,000 entities.
     )}`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ListWatchlistEntitySourcesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1652,7 +1652,7 @@ Check if the current user has all required permissions for Privilege Monitoring.
     const path = `${basePath}/api/entity_analytics/monitoring/privileges/indices`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, SearchPrivilegesIndicesResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -1974,7 +1974,7 @@ The creation is asynchronous. The time for a document to be present in the  fina
     const path = `${basePath}/internal/entity_store/entities/bulk`;
 
     return apiClient.put<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -2006,7 +2006,7 @@ If the specified entity already exists, it is updated with the provided values. 
     )}`;
 
     return apiClient.put<ScoutResponseBody<TResponseType, UpsertEntityResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

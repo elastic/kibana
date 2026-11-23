@@ -11,7 +11,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings, getDataStreamMappings } from '../mappings';
-import { processFieldCapsResponse } from '../field_caps';
+import { fetchFieldCaps, processFieldCapsResponse } from '../field_caps';
 import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 
 export interface ResolveResourceResponse {
@@ -32,9 +32,11 @@ export interface ResolveResourceResponse {
 export const resolveResource = async ({
   resourceName,
   esClient,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   if (resourceName.includes(',') || resourceName.includes('*')) {
     throw new Error(
@@ -62,7 +64,7 @@ export const resolveResource = async ({
     throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
   }
 
-  return resolveSingleResource({ resourceName, resolveRes, esClient });
+  return resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
 };
 
 /**
@@ -73,12 +75,18 @@ export const resolveResource = async ({
 export const resolveResourceForEsql = async ({
   resourceName,
   esClient,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   if (isCcsTarget(resourceName)) {
-    const fields = await getFieldsFromFieldCaps({ resource: resourceName, esClient });
+    const fields = await getFieldsFromFieldCaps({
+      resource: resourceName,
+      esClient,
+      includeFrozen,
+    });
     return {
       name: resourceName,
       type: EsResourceType.indexPattern,
@@ -108,13 +116,10 @@ export const resolveResourceForEsql = async ({
   }
 
   if (resourceCount === 1) {
-    return resolveSingleResource({ resourceName, resolveRes, esClient });
+    return resolveSingleResource({ resourceName, resolveRes, esClient, includeFrozen });
   }
 
-  const fieldCapRes = await esClient.fieldCaps({
-    index: resourceName,
-    fields: ['*'],
-  });
+  const fieldCapRes = await fetchFieldCaps({ index: resourceName, esClient, includeFrozen });
   const { fields } = processFieldCapsResponse(fieldCapRes);
 
   return {
@@ -128,10 +133,12 @@ const resolveSingleResource = async ({
   resourceName,
   resolveRes,
   esClient,
+  includeFrozen = false,
 }: {
   resourceName: string;
   resolveRes: IndicesResolveIndexResponse;
   esClient: ElasticsearchClient;
+  includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   // target is an index
   if (resolveRes.indices.length > 0) {
@@ -141,7 +148,7 @@ const resolveSingleResource = async ({
     // so we use the CCS-compatible _field_caps API instead.
     // Trade-off: _meta.description is not available via _field_caps.
     if (isCcsTarget(resourceName)) {
-      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient });
+      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient, includeFrozen });
       return {
         name: resourceName,
         type: EsResourceType.index,
@@ -167,7 +174,11 @@ const resolveSingleResource = async ({
     // so we use the CCS-compatible _field_caps API instead.
     // Trade-off: _meta.description is not available via _field_caps.
     if (isCcsTarget(resourceName)) {
-      const fields = await getFieldsFromFieldCaps({ resource: datastream, esClient });
+      const fields = await getFieldsFromFieldCaps({
+        resource: datastream,
+        esClient,
+        includeFrozen,
+      });
       return {
         name: resourceName,
         type: EsResourceType.dataStream,
@@ -193,10 +204,7 @@ const resolveSingleResource = async ({
   if (resolveRes.aliases.length > 0) {
     const alias = resolveRes.aliases[0].name;
 
-    const fieldCapRes = await esClient.fieldCaps({
-      index: alias,
-      fields: ['*'],
-    });
+    const fieldCapRes = await fetchFieldCaps({ index: alias, esClient, includeFrozen });
 
     const { fields } = processFieldCapsResponse(fieldCapRes);
 

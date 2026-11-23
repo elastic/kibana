@@ -33,15 +33,15 @@ experiments:
 unstable_daemon: false # explicitly unstable; can serve a stale graph; local-dev only
 
 # https://moonrepo.dev/docs/guides/remote-cache
-# Auth credentials will be missing on local environments, but that's OK.
-remote:
-  host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
-  api: http
-  cache:
-    localReadOnly: true
-  auth:
-    headers:
-      Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
+# Disabled: not effective on moon 2.4.6. Re-enable only with separate read and write credentials.
+# remote:
+#   host: "https://kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app"
+#   api: http
+#   cache:
+#     localReadOnly: true
+#   auth:
+#     headers:
+#       Authorization: "Basic ${MOON_REMOTE_CACHE_TOKEN}"
 
 
 telemetry: false

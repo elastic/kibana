@@ -12,7 +12,7 @@ import moment from 'moment';
 import type EventEmitter from 'events';
 import { i18n } from '@kbn/i18n';
 import type { EuiBetaBadgeProps } from '@elastic/eui';
-import { parse } from 'query-string';
+import qs from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -323,7 +323,7 @@ export const getTopNavConfig = (
   const showShareOptions = async (anchorElement: HTMLElement, asExport?: boolean) => {
     if (share) {
       const currentState = stateContainer.getState();
-      const searchParams = parse(history.location.search);
+      const searchParams = qs.parse(history.location.search);
       const params: VisualizeLocatorParams = {
         visId: savedVis?.id,
         filters: currentState.filters,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isMissingMergeBaseBaselineReport } from './on_complete';
+import { isMissingMergeBaseBaselineReport } from './on_complete.ts';
 
 describe('isMissingMergeBaseBaselineReport', () => {
   it('matches CI Stats reports with no merge base baseline build', () => {

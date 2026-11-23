@@ -43,8 +43,10 @@ interface UserPanelContentProps {
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode: boolean;
   entityRecord?: Entity;
-  /** When true (e.g. entity store v2 enabled but no entity found), hide risk score and asset criticality. */
-  skipRiskAndCriticality?: boolean;
+  /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
+  noEntityInStore?: boolean;
+  /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
+  entityStoreV2Enabled: boolean;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
@@ -62,7 +64,8 @@ export const UserPanelContent = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
-  skipRiskAndCriticality = false,
+  noEntityInStore = false,
+  entityStoreV2Enabled,
   entityStoreEntityId,
   prefetchedResolutionRisk,
 }: UserPanelContentProps) => {
@@ -75,13 +78,13 @@ export const UserPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && (
+      {!noEntityInStore && (
         <EntityHighlightsAccordion
           entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
           entityType={EntityType.user}
         />
       )}
-      {!skipRiskAndCriticality &&
+      {!noEntityInStore &&
         riskScoreState.hasEngineBeenInstalled &&
         riskScoreState.data?.length !== 0 && (
           <>
@@ -121,7 +124,7 @@ export const UserPanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
-      {!skipRiskAndCriticality && !entityRecord && (
+      {!entityStoreV2Enabled && (
         <AssetCriticalityAccordion
           entity={{ name: userName, type: EntityType.user }}
           onChange={onAssetCriticalityChange}

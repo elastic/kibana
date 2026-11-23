@@ -87,6 +87,10 @@ export interface GenerateEsqlOptions {
    * for time range filtering in generated queries.
    */
   disableNamedParams?: boolean;
+  /**
+   * If true, frozen tier indices are queried.
+   */
+  includeFrozen?: boolean;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -101,6 +105,7 @@ export const generateEsql = async ({
   rowLimit,
   timeRange: inputTimeRange,
   disableNamedParams,
+  includeFrozen = false,
   model,
   esClient,
   logger,
@@ -114,6 +119,7 @@ export const generateEsql = async ({
     esClient,
     docBase,
     esqlCallbacks,
+    includeFrozen,
   });
 
   return withActiveInferenceSpan(
@@ -135,6 +141,7 @@ export const generateEsql = async ({
             nlQuery,
             esClient,
             limit: 1,
+            includeFrozen,
             model,
             logger,
           });

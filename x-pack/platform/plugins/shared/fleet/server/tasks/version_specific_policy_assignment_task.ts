@@ -29,7 +29,8 @@ import { agentPolicyService, appContextService, packagePolicyService } from '../
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
 import {
-  buildVariantAgentsKuery,
+  getVariantAgentsKuery,
+  getVariantPolicyIdsFromAgentsWithoutBaseId,
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentCountsForVariantPolicyIds,
@@ -464,7 +465,8 @@ export class VersionSpecificPolicyAssignmentTask {
       // Compile version-specific inputs for package policies with agent version conditions
       const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
         soClient,
-        parentPolicyId
+        parentPolicyId,
+        { spaceIds: ['*'] }
       );
 
       for (const packagePolicy of packagePolicies) {
@@ -502,6 +504,7 @@ export class VersionSpecificPolicyAssignmentTask {
       // This will create the version-specific policies in .fleet-policies index
       await agentPolicyService.deployPolicies(soClient, [parentPolicyId], undefined, {
         agentVersions: versionsToCreate,
+        spaceId: '*',
       });
       // Record every variant deployed this run so Phase 2 does not delete them: Phase 1 skips
       // agents already on the correct variant, so a wrongly-deleted variant is never recreated
@@ -556,6 +559,8 @@ export class VersionSpecificPolicyAssignmentTask {
         {
           agentIds,
           showInactive: false,
+          spaceId: '*',
+          _internalCrossSpace: true,
         },
         targetPolicyId
       );
@@ -618,7 +623,14 @@ export class VersionSpecificPolicyAssignmentTask {
 
     const variantPoliciesAgg = policiesResponse.aggregations?.variant_policies;
     const buckets = variantPoliciesAgg?.buckets ?? [];
-    if (buckets.length === 0) {
+    // Agents on a versioned `policy_id` without `policy_base_id` (enrolled by a downlevel
+    // fleet-server after the last backfill). Their variant document may already be gone, in which
+    // case the parent would never be visited via `.fleet-policies` alone.
+    const agentOnlyVariantIdsByParent = await getVariantPolicyIdsFromAgentsWithoutBaseId(
+      esClient,
+      abortController.signal
+    );
+    if (buckets.length === 0 && agentOnlyVariantIdsByParent.size === 0) {
       return;
     }
     if (variantPoliciesAgg?.sum_other_doc_count) {
@@ -647,7 +659,10 @@ export class VersionSpecificPolicyAssignmentTask {
       });
       basePolicyIdSet.add(baseId);
     }
-    if (variantBuckets.length === 0) {
+    for (const baseId of agentOnlyVariantIdsByParent.keys()) {
+      basePolicyIdSet.add(baseId);
+    }
+    if (variantBuckets.length === 0 && basePolicyIdSet.size === 0) {
       return;
     }
 
@@ -683,7 +698,8 @@ export class VersionSpecificPolicyAssignmentTask {
           esClient,
           soClient,
           parentPolicyId,
-          abortController
+          abortController,
+          agentOnlyVariantIdsByParent.get(parentPolicyId)
         );
       }
     }
@@ -784,6 +800,7 @@ export class VersionSpecificPolicyAssignmentTask {
         try {
           await agentPolicyService.deployPolicies(soClient, [parentId], undefined, {
             agentVersions: versions,
+            spaceId: '*',
           });
         } catch (err) {
           this.logger.error(
@@ -802,10 +819,17 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     parentPolicyId: string,
-    abortController: AbortController
+    abortController: AbortController,
+    agentOnlyVariantPolicyIds: string[] = []
   ) {
     try {
-      const variantAgentsKuery = buildVariantAgentsKuery(parentPolicyId);
+      // Include agents on a versioned `policy_id` that lack `policy_base_id` (enrolled by a downlevel
+      // fleet-server after the last backfill) so they are reassigned before the variant docs are deleted.
+      const variantAgentsKuery = await getVariantAgentsKuery(
+        esClient,
+        parentPolicyId,
+        agentOnlyVariantPolicyIds
+      );
 
       const agentIds: string[] = [];
       // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
@@ -829,17 +853,31 @@ export class VersionSpecificPolicyAssignmentTask {
         );
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
-        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+        await reassignAgents(
+          soClient,
+          esClient,
+          { agentIds, showInactive: true, spaceId: '*', _internalCrossSpace: true },
+          parentPolicyId
+        );
 
         // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
         // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict
         // exhausted under heavy check-in churn). Re-check the count before deleting variant docs:
         // if any agents remain on the variant, skip deletion so the next sweep run can retry.
-        const { total: remaining } = await getAgentsByKuery(esClient, soClient, {
-          kuery: variantAgentsKuery,
+        // Re-check with the same fetcher used above. Unlike `getAgentsByKuery` it adds no
+        // `NOT status:unenrolled` filter on the runtime `status` field, which Elasticsearch rejects
+        // when `search.allow_expensive_queries` is false. Exclude unenrolled agents with the stored
+        // `active:true` field instead, so leftover unenrolled agents cannot block variant cleanup.
+        let remaining = 0;
+        const remainingFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+          kuery: `(${variantAgentsKuery}) and active:true`,
+          perPage: AGENTS_BATCHSIZE,
           showInactive: true,
-          perPage: 0,
         });
+        for await (const remainingBatch of remainingFetcher) {
+          throwIfAborted(abortController);
+          remaining += remainingBatch.length;
+        }
         if (remaining > 0) {
           this.logger.warn(
             `[VersionSpecificPolicyAssignmentTask] ${remaining} agent(s) still on variant policies of ${parentPolicyId} after reassignment (bulk update may have partially failed); skipping variant doc deletion so the next sweep run can retry`

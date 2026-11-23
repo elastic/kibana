@@ -172,15 +172,16 @@ describe('When on the package policy create page', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = (queryParamsPolicyId?: string) =>
+  const render = (queryParamsPolicyId?: string, integration?: string) =>
     (renderResult = testRenderer.render(
       <Route path={FLEET_ROUTING_PATHS.add_integration_to_policy}>
         <CreatePackagePolicySinglePage
           from="package"
           queryParamsPolicyId={queryParamsPolicyId}
           prerelease={false}
-          pkgName={'nginx'}
-          pkgVersion={'1.3.0'}
+          pkgName={integration ? 'aws' : 'nginx'}
+          pkgVersion={integration ? '8.12.0' : '1.3.0'}
+          integration={integration}
         />
       </Route>
     ));
@@ -852,6 +853,139 @@ describe('When on the package policy create page', () => {
         );
       });
     });
+
+    describe('With agentless as the default deployment mode of a package with a cloud provider input', () => {
+      // Mirrors the aws package: agentless is the default of the `billing` policy template and the
+      // input type is one of a cloud provider, which enables the cloud connector config of the policy
+      const getAwsLikePackageInfo = () => ({
+        data: {
+          item: {
+            name: 'aws',
+            title: 'AWS',
+            version: '8.12.0',
+            description: 'Collect logs and metrics from Amazon Web Services',
+            policy_templates: [
+              {
+                name: 'billing',
+                title: 'AWS Billing',
+                description: 'Collect billing metrics',
+                data_streams: ['billing'],
+                inputs: [{ type: 'aws/metrics', title: 'Collect billing metrics' }],
+                deployment_modes: {
+                  default: { enabled: true },
+                  agentless: {
+                    enabled: true,
+                    is_default: true,
+                    organization: 'org',
+                    division: 'division',
+                    team: 'team',
+                  },
+                },
+              },
+              {
+                name: 'cloudtrail',
+                title: 'AWS CloudTrail',
+                description: 'Collect CloudTrail logs',
+                data_streams: [],
+                inputs: [],
+                deployment_modes: { default: { enabled: true } },
+              },
+            ],
+            vars: [
+              { name: 'access_key_id', type: 'password', title: 'Access Key ID', secret: true },
+              {
+                name: 'secret_access_key',
+                type: 'password',
+                title: 'Secret Access Key',
+                secret: true,
+              },
+              { name: 'role_arn', type: 'text', title: 'Role ARN' },
+              { name: 'supports_identity_federation', type: 'bool', title: 'Identity Federation' },
+            ],
+            data_streams: [
+              {
+                type: 'metrics',
+                dataset: 'aws.billing',
+                title: 'AWS Billing Metrics',
+                release: 'ga',
+                package: 'aws',
+                path: 'billing',
+                ingest_pipeline: 'default',
+                streams: [
+                  {
+                    input: 'aws/metrics',
+                    title: 'AWS billing metrics',
+                    description: 'Collect billing metrics',
+                    template_path: 'stream.yml.hbs',
+                    enabled: true,
+                    vars: [
+                      {
+                        name: 'period',
+                        type: 'text',
+                        title: 'Collection Period',
+                        required: true,
+                        show_user: false,
+                        default: '24h',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+            latestVersion: '8.12.0',
+            keepPoliciesUpToDate: false,
+            status: 'not_installed',
+          },
+        },
+        isLoading: false,
+      });
+
+      beforeEach(() => {
+        (useConfig as jest.MockedFunction<any>).mockReturnValue({
+          agentless: { enabled: true, api: { url: 'http://agentless-api-url' } },
+          agents: { enabled: true },
+        });
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: true,
+            isCloudEnabled: true,
+          },
+        });
+        (sendCreateAgentlessPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          item: {
+            name: 'aws-1',
+            id: 'policy-1',
+            namespace: 'default',
+            inputs: {},
+            package: { name: 'aws', title: 'AWS', version: '8.12.0' },
+          },
+        });
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getAwsLikePackageInfo());
+      });
+
+      test('should create an agentless policy on save when the deployment mode was not changed', async () => {
+        await act(async () => {
+          render(undefined, 'billing');
+        });
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicyForRq).not.toHaveBeenCalled();
+        expect(sendCreateAgentlessPolicy).toHaveBeenCalledWith(
+          expect.objectContaining({ name: 'aws-1' }),
+          { format: 'legacy' }
+        );
+      });
+    });
   });
 });
 
@@ -871,6 +1005,15 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
     }
     if (path === '/api/fleet/agent_download_sources') {
       return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/space_settings') {
+      return Promise.resolve({ item: {} });
+    }
+    if (path === '/api/fleet/cloud_connectors') {
+      return Promise.resolve({ items: [] });
+    }
+    if (path === '/api/fleet/epm/data_streams') {
+      return Promise.resolve({ items: [] });
     }
     const err = new Error(`API [GET ${path}] is not MOCKED!`);
     // eslint-disable-next-line no-console

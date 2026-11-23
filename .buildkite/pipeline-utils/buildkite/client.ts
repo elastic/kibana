@@ -14,10 +14,10 @@ import { execFileSync, execSync } from 'child_process';
 
 import { stringify } from 'yaml';
 
-import { parseLinkHeader } from './parse_link_header';
-import type { Artifact } from './types/artifact';
-import type { Build, BuildStatus } from './types/build';
-import type { Job, JobState } from './types/job';
+import { parseLinkHeader } from './parse_link_header.ts';
+import type { Artifact } from './types/artifact.ts';
+import type { Build, BuildStatus } from './types/build.ts';
+import type { Job, JobState } from './types/job.ts';
 
 type ExecType =
   | ((command: string, execOpts: ExecSyncOptions) => Buffer | null)

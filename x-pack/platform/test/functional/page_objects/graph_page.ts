@@ -180,6 +180,24 @@ export class GraphPageObject extends FtrService {
     await this.testSubjects.click('graphCreateGraphPromptButton');
   }
 
+  async clickSettingsButton() {
+    await this.testSubjects.click('graphSettingsButton');
+    await this.testSubjects.existOrFail('graphSettingsFlyout');
+    // A tab click issued while the flyout still slides in misses the moving target silently.
+    let previousPosition = await (
+      await this.testSubjects.find('graphSettingsFlyout')
+    ).getPosition();
+    await this.retry.waitFor('graph settings flyout to stop animating', async () => {
+      const currentPosition = await (
+        await this.testSubjects.find('graphSettingsFlyout')
+      ).getPosition();
+      const settled =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y;
+      previousPosition = currentPosition;
+      return settled;
+    });
+  }
+
   async newGraph() {
     this.log.debug('Click New Workspace');
     await this.retry.try(async () => {
@@ -199,7 +217,7 @@ export class GraphPageObject extends FtrService {
     await this.testSubjects.click('confirmSaveSavedObjectButton');
 
     // Confirm that the Graph has been saved.
-    return await this.testSubjects.exists('saveGraphSuccess', { timeout: 10000 });
+    return await this.testSubjects.waitForExists('saveGraphSuccess', { timeout: 10000 });
   }
 
   async getSearchFilter() {

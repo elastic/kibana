@@ -23,6 +23,7 @@ import {
   FleetUnauthorizedError,
   HostedAgentPolicyRestrictionRelatedError,
   AgentPolicyInvalidError,
+  FleetError,
 } from '../errors';
 import type {
   AgentPolicy,
@@ -994,6 +995,10 @@ describe('Agent policy', () => {
           id: 'package-3',
         },
       ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [{ id: 'package-1' }] as any,
+        failedPolicies: [],
+      });
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
       expect(mockedPackagePolicyService.delete).toBeCalledWith(
         expect.anything(),
@@ -1012,6 +1017,70 @@ describe('Agent policy', () => {
           },
         ]
       );
+    });
+
+    it('should remove the agent policy from shared package policies before deleting the others', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      const callOrder: string[] = [];
+      mockedPackagePolicyService.bulkUpdate.mockImplementationOnce(async () => {
+        callOrder.push('bulkUpdate');
+        return { updatedPolicies: [{ id: 'package-1' }] as any, failedPolicies: [] };
+      });
+      mockedPackagePolicyService.delete.mockImplementationOnce(async () => {
+        callOrder.push('delete');
+        return [];
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'policy_1');
+
+      expect(callOrder).toEqual(['bulkUpdate', 'delete']);
+    });
+
+    it('should not delete the agent policy when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+        { id: 'package-2', policy_ids: ['policy_1'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          {
+            packagePolicy: { id: 'package-1' } as any,
+            error: new FleetError('Package system-2.20.0 not found'),
+          },
+        ],
+      });
+      mockedPackagePolicyService.delete.mockClear();
+      esClient.deleteByQuery.mockClear();
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'policy_1')).rejects.toThrow(
+        'Cannot delete agent policy [policy_1]: failed to remove it from shared package policies [package-1]: Package system-2.20.0 not found'
+      );
+
+      expect(mockedPackagePolicyService.delete).not.toHaveBeenCalled();
+      expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should not delete the agent policy with force when removing it from shared package policies fails', async () => {
+      mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
+        { id: 'package-1', policy_ids: ['policy_1', 'policy_2'] },
+      ] as any);
+      mockedPackagePolicyService.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          { packagePolicy: { id: 'package-1' } as any, error: new FleetError('failed') },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.delete(soClient, esClient, 'policy_1', { force: true })
+      ).rejects.toThrow(FleetError);
+
+      expect(soClient.delete).not.toHaveBeenCalled();
     });
 
     it('should force-revoke agents before deleting an agentless policy', async () => {
@@ -2797,6 +2866,77 @@ describe('Agent policy', () => {
       expect(mockedLogger.warn).not.toHaveBeenCalledWith(
         expect.stringContaining('has mismatched revisions after deploy')
       );
+    });
+  });
+
+  describe('deployPolicies', () => {
+    beforeEach(() => {
+      jest.restoreAllMocks();
+      mockedGetFullAgentPolicy.mockReset();
+    });
+
+    it('should pass spaceId to getByIds and getFullAgentPolicy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue(null);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'Policy 1', revision: 1 },
+            references: [],
+          },
+        ],
+      });
+
+      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+
+      await agentPolicyService.deployPolicies(soClient, ['policy-1'], undefined, {
+        spaceId: 'my-space',
+      });
+
+      expect(getByIdsSpy).toHaveBeenCalledWith(
+        soClient,
+        ['policy-1'],
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+      expect(getFullAgentPolicySpy).toHaveBeenCalledWith(
+        soClient,
+        'policy-1',
+        expect.objectContaining({ spaceId: 'my-space' })
+      );
+    });
+
+    it('should pass undefined spaceId to getByIds and getFullAgentPolicy when not provided', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
+      mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default-output');
+      mockedGetFullAgentPolicy.mockResolvedValue(null);
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+            attributes: { name: 'Policy 1', revision: 1 },
+            references: [],
+          },
+        ],
+      });
+
+      const getByIdsSpy = jest.spyOn(agentPolicyService, 'getByIds');
+      const getFullAgentPolicySpy = jest.spyOn(agentPolicyService, 'getFullAgentPolicy');
+
+      await agentPolicyService.deployPolicies(soClient, ['policy-1']);
+
+      expect(getByIdsSpy.mock.calls[0][2]?.spaceId).toBeUndefined();
+      expect(getFullAgentPolicySpy.mock.calls[0][2]?.spaceId).toBeUndefined();
     });
   });
 

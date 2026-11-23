@@ -1723,6 +1723,39 @@ class AgentPolicyService {
       const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
         this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
+      if (policiesWithMultipleAP.length > 0) {
+        const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdate(
+          soClient,
+          esClient,
+          policiesWithMultipleAP.map((policy) => {
+            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+            return {
+              ...policy,
+              policy_id: newPolicyIds[0],
+              policy_ids: newPolicyIds,
+            };
+          })
+        );
+
+        if (failedPolicies.length > 0) {
+          const failures = failedPolicies
+            .map(({ packagePolicy, error }) => `[${packagePolicy.id}]: ${error.message}`)
+            .join(', ');
+          logger.error(
+            `Failed to remove agent policy [${id}] from shared package policies ${failures}`
+          );
+          throw new FleetError(
+            `Cannot delete agent policy [${id}]: failed to remove it from shared package policies ${failures}`
+          );
+        }
+
+        logger.debug(
+          `Updated package policies with multiple agent policies with ids ${(updatedPolicies ?? [])
+            .map((policy) => policy.id)
+            .join(', ')}`
+        );
+      }
+
       if (packagePoliciesToDelete.length > 0) {
         await packagePolicyService.delete(
           soClient,
@@ -1735,26 +1768,6 @@ class AgentPolicyService {
         );
         logger.debug(
           `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
-            .map((policy) => policy.id)
-            .join(', ')}`
-        );
-      }
-
-      if (policiesWithMultipleAP.length > 0) {
-        await packagePolicyService.bulkUpdate(
-          soClient,
-          esClient,
-          policiesWithMultipleAP.map((policy) => {
-            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
-            return {
-              ...policy,
-              policy_id: newPolicyIds[0],
-              policy_ids: newPolicyIds,
-            };
-          })
-        );
-        logger.debug(
-          `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
             .map((policy) => policy.id)
             .join(', ')}`
         );
@@ -1817,6 +1830,7 @@ class AgentPolicyService {
       throwOnAgentlessError?: boolean;
       throwOnAnyError?: boolean;
       agentVersions?: string[];
+      spaceId?: string;
     }
   ) {
     return withActiveSpan(
@@ -1851,7 +1865,9 @@ class AgentPolicyService {
           });
         }
 
-        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds);
+        const policies = await agentPolicyService.getByIds(soClient, agentPolicyIds, {
+          ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
+        });
         const policiesMap = keyBy(policies, 'id');
 
         logger.debug(`Retrieving full agent policies`);
@@ -1865,6 +1881,7 @@ class AgentPolicyService {
             agentPolicyService
               .getFullAgentPolicy(soClient, agentPolicyId, {
                 agentPolicy: agentPolicies?.find((policy) => policy.id === agentPolicyId),
+                ...(options?.spaceId ? { spaceId: options.spaceId } : {}),
               })
               .then((response) => {
                 if (!response) {
@@ -1953,7 +1970,8 @@ class AgentPolicyService {
               soClient,
               fleetServerPolicy,
               fullPolicy,
-              agentVersionsToUse
+              agentVersionsToUse,
+              options?.spaceId ? { spaceId: options.spaceId } : {}
             );
             fleetServerPolicies.push(...versionSpecificPolicies);
           }
@@ -2299,6 +2317,7 @@ class AgentPolicyService {
       agentPolicy?: AgentPolicy;
       agentVersion?: string;
       redactProxySecrets?: boolean;
+      spaceId?: string;
     }
   ): Promise<FullAgentPolicy | null> {
     const span = apm.startSpan(
@@ -2353,6 +2372,60 @@ class AgentPolicyService {
         }
       );
     }
+  }
+
+  private async getSpacesForPoliciesMatching(
+    searchFields: string[],
+    searchValue: string
+  ): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        fields: ['space_ids'],
+        searchFields,
+        search: escapeSearchQueryPhrase(searchValue),
+        perPage: SO_SEARCH_LIMIT,
+        namespaces: ['*'],
+      });
+    const spaceIds = new Set<string>();
+    for (const so of result.saved_objects) {
+      for (const ns of so.namespaces ?? []) {
+        spaceIds.add(ns);
+      }
+    }
+    return { spaceIds, truncated: result.saved_objects.length < result.total };
+  }
+
+  public getSpacesForPoliciesUsingOutput(outputId: string) {
+    return this.getSpacesForPoliciesMatching(['data_output_id', 'monitoring_output_id'], outputId);
+  }
+
+  public getSpacesForPoliciesUsingFleetServerHost(fleetServerHostId: string) {
+    return this.getSpacesForPoliciesMatching(['fleet_server_host_id'], fleetServerHostId);
+  }
+
+  public getSpacesForPoliciesUsingDownloadSource(downloadSourceId: string) {
+    return this.getSpacesForPoliciesMatching(
+      ['download_source_id', 'download_source_ids'],
+      downloadSourceId
+    );
+  }
+
+  public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
+    const savedObjectType = await getAgentPolicySavedObjectType();
+    const escapedId = escapeSearchQueryPhrase(downloadSourceId);
+    const result = await appContextService
+      .getInternalUserSOClientWithoutSpaceExtension()
+      .find<AgentPolicySOAttributes>({
+        type: savedObjectType,
+        filter: `(${savedObjectType}.attributes.download_source_id:${escapedId}) OR (${savedObjectType}.attributes.download_source_ids:${escapedId})`,
+        fields: ['id'],
+        perPage: 1,
+        namespaces: ['*'],
+      });
+    return result.total > 0;
   }
 
   public async bumpAllAgentPoliciesForDownloadSource(

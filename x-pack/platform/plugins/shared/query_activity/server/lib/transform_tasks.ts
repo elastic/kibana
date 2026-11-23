@@ -129,9 +129,17 @@ export function parseEsqlDescription(description: string): { indices: number; qu
 
 /**
  * Returns true when a root query task should be shown in Query Activity.
+ *
+ * Child tasks are hidden only while their parent is still present in the current
+ * `_tasks` response. Once the parent finishes (e.g. an async search wrapper), the
+ * orphaned child remains visible so long-running queries keep showing in the UI.
  */
-export function isQueryTaskCandidate(task: TasksTaskInfo, thresholdNanos: number): boolean {
-  if (task.parent_task_id !== undefined && task.parent_task_id !== null) {
+export function isQueryTaskCandidate(
+  task: TasksTaskInfo,
+  thresholdNanos: number,
+  activeTaskIds: ReadonlySet<string> = new Set()
+): boolean {
+  if (task.parent_task_id != null && activeTaskIds.has(task.parent_task_id)) {
     return false;
   }
 
@@ -175,9 +183,10 @@ export function transformTaskSummaries(
   thresholdNanos: number
 ): RunningQuerySummary[] {
   const results: RunningQuerySummary[] = [];
+  const activeTaskIds = new Set(tasks.map((task) => `${task.node}:${task.id}`));
 
   for (const task of tasks) {
-    if (!isQueryTaskCandidate(task, thresholdNanos)) {
+    if (!isQueryTaskCandidate(task, thresholdNanos, activeTaskIds)) {
       continue;
     }
 
@@ -196,9 +205,10 @@ export function transformTaskSummaries(
  */
 export function transformTasks(tasks: TasksTaskInfo[], thresholdNanos: number): RunningQuery[] {
   const results: RunningQuery[] = [];
+  const activeTaskIds = new Set(tasks.map((task) => `${task.node}:${task.id}`));
 
   for (const task of tasks) {
-    if (!isQueryTaskCandidate(task, thresholdNanos)) {
+    if (!isQueryTaskCandidate(task, thresholdNanos, activeTaskIds)) {
       continue;
     }
 

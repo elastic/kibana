@@ -5,31 +5,39 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { entityMaintainersRegistry } from '../../../../tasks/entity_maintainers/entity_maintainers_registry';
 
 export const maintainerIdExists = (id: string) => entityMaintainersRegistry.hasId(id);
 
-export const maintainerIdParamsSchema = z.object({
-  id: z.string().min(1, 'id is required'),
-});
-
-export const maintainerIdsQuerySchema = z.object({
-  ids: z
-    .union([z.string().min(1), z.array(z.string().min(1))])
-    .transform((value) => (Array.isArray(value) ? value : [value]))
-    .optional(),
-});
-
-export const runMaintainerQuerySchema = z.object({
-  sync: z
-    .union([z.literal('true'), z.literal('false')])
-    .optional()
-    .transform((value) => value === 'true'),
-});
-
-export const initMaintainersBodySchema = z
-  .object({
-    autoStart: z.boolean().optional().default(true),
+export const maintainerIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1, 'id is required'),
   })
-  .optional();
+);
+
+export const maintainerIdsQuerySchema = lazySchema(() =>
+  z.object({
+    ids: z
+      .union([z.string().min(1), z.array(z.string().min(1))])
+      .transform((value) => (Array.isArray(value) ? value : [value]))
+      .optional(),
+  })
+);
+
+export const runMaintainerQuerySchema = lazySchema(() =>
+  z.object({
+    sync: z
+      .union([z.literal('true'), z.literal('false')])
+      .optional()
+      .transform((value) => value === 'true'),
+  })
+);
+
+export const initMaintainersBodySchema = lazySchema(() =>
+  z
+    .object({
+      autoStart: z.boolean().optional().default(true),
+    })
+    .optional()
+);

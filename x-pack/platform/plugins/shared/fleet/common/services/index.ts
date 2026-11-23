@@ -6,7 +6,12 @@
  */
 
 export * from './routes';
-export { validateFleetSavedObjectId } from './validate_fleet_id';
+export {
+  validateFleetSavedObjectId,
+  isPathTraversalId,
+  validateNoPathTraversalId,
+  validateNoPathTraversalIdSchema,
+} from './validate_fleet_id';
 export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
