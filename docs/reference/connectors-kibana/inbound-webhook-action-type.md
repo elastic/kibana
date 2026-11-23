@@ -78,7 +78,7 @@ Set the request's `Content-Type` header to one of the following types. {{kib}} p
 
 | Content type | `event.body` |
 | --- | --- |
-| `application/json` | The parsed JSON value |
+| `application/json`, or a type that ends in `+json`, such as `application/cloudevents+json` | The parsed JSON value |
 | `application/x-www-form-urlencoded` | An object of the form fields |
 | `text/plain` | The body as a string |
 
@@ -92,7 +92,7 @@ The ingest token is a secret that {{kib}} creates when you create the connector,
 - If the tool can't set headers, append `?token=<ingest-token>` to the URL. {{kib}} reads this parameter only when the request has no `Authorization` header.
 
 :::{warning}
-Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector. To run them as a different user, have that user save the connector.
+Protect the ingest token like a password. Anyone who has the token can start the connector's workflows, and those workflows run with the privileges of the last user who saved the connector. To run them as a different user, have that user open the connector, make a change such as editing its name, and save it. **Save** stays disabled until something changes.
 :::
 
 ### Verification requests [inbound-webhook-verification]
@@ -136,7 +136,8 @@ The HTTP status that {{kib}} returns shows what happened to a request:
 | --- | --- |
 | 200 | The connector answered a [verification request](#inbound-webhook-verification) and didn't start any workflows. |
 | 202 | {{kib}} accepted the request. If no workflow runs, refer to [No workflow runs after a 202 response](#inbound-webhook-no-workflow). |
-| 400 | {{kib}} couldn't parse the body as JSON. |
+| 400 | The request is invalid, such as a body that isn't valid JSON, a connector ID that's too long, or an empty `token` query parameter. The response message says which part to fix. |
+| 403 | This deployment doesn't accept webhook requests for any connector. Contact your administrator. |
 | 404 | {{kib}} rejected the URL or the token. For possible causes, refer to [Requests return 404](#inbound-webhook-404). |
 | 413 | The body is larger than the maximum size, which is 1 MB by default. |
 | 415 | The connector doesn't accept the request's content type. For the accepted types, refer to [Request body](#inbound-webhook-request-body). |
@@ -152,7 +153,7 @@ If {{kib}} accepts a request but no workflow runs, check that the workflow:
 - Has a trigger whose `connector-id` is the connector's ID or `"*"`.
 - Has no `on.condition`, or has one that matches the request body.
 
-If the workflow passes these checks, {{kib}} might not have a user to run it as. Save the connector again.
+If the workflow passes these checks, {{kib}} might not have a user to run it as. Open the connector, make a change such as editing its name, and save it. **Save** stays disabled until something changes.
 
 ### Requests return 404 [inbound-webhook-404]
 
