@@ -109,13 +109,18 @@ const valuesResponse = ({
 });
 
 // Answers each probe, and each values query by the index pattern it reads; a pattern without an
-// answer returns no values, and a `{ throws }` answer is thrown as the client would.
+// answer returns no values, and a `{ throws }` answer is thrown as the client would. The probe of
+// each pattern in `failingProbes` throws.
 const answerByPattern = (
   esClient: ReturnType<typeof createDependencies>['esClient'],
-  answers: Record<string, Answer>
+  answers: Record<string, Answer>,
+  failingProbes: string[] = []
 ) => {
   esClient.esql.query.mockImplementation(async ({ query }) => {
     if (isProbe(query)) {
+      if (failingProbes.some((pattern) => query.includes(pattern))) {
+        throw new Error('probe failure');
+      }
       return probeResponse();
     }
     const pattern = Object.keys(answers).find((candidate) => query.includes(candidate));
@@ -404,6 +409,25 @@ describe('listAttributeValues', () => {
       expect(response.errors).toEqual([
         expect.objectContaining({ indexPattern: STATE, reason: expect.stringContaining('shard') }),
       ]);
+    });
+
+    it('reports a source whose probe failed, sends it no values query and keeps the values of the others', async () => {
+      const { dependencies, esClient } = createDependencies([deployment(['cluster'])]);
+      answerByPattern(esClient, { [KUBELET]: { values: ['eu'] }, [STATE]: { values: ['us'] } }, [
+        KUBELET,
+      ]);
+
+      const response = await listAttributeValues(dependencies, request());
+
+      expect(response.values).toEqual(['us']);
+      expect(response.errors).toEqual([
+        expect.objectContaining({
+          indexPattern: KUBELET,
+          reason: expect.stringContaining('probe failure'),
+        }),
+      ]);
+      expect(valuesQueries(esClient)).toHaveLength(1);
+      expect(valuesQueries(esClient)[0].query).toContain(STATE);
     });
 
     it('reports a source with no readable index and keeps the values of the others', async () => {

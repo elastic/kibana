@@ -76,6 +76,13 @@ describe(ENDPOINT, () => {
       expect(parseRequest({ ...VALID, filters: filters(17) })?.success).toBe(false);
     });
 
+    it('accepts a filter key as long as a field path and rejects one more', () => {
+      const withKey = (key: string) => ({ ...VALID, filters: { [key]: ['a'] } });
+
+      expect(parseRequest(withKey('a'.repeat(512)))?.success).toBe(true);
+      expect(parseRequest(withKey('a'.repeat(513)))?.success).toBe(false);
+    });
+
     it('accepts 100 values per filter and rejects 101', () => {
       expect(parseRequest({ ...VALID, filters: { f: values(100) } })?.success).toBe(true);
       expect(parseRequest({ ...VALID, filters: { f: values(101) } })?.success).toBe(false);

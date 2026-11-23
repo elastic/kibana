@@ -128,6 +128,7 @@ apiTest.describe(
       expect(matching.body.values).toStrictEqual(['scout-cluster']);
       expect(nonMatching).toHaveStatusCode(200);
       expect(nonMatching.body.values).toStrictEqual([]);
+      expect(nonMatching.body.errors).toStrictEqual([]);
     });
 
     apiTest('reports a selected value that is no longer offered', async ({ apiClient }) => {
