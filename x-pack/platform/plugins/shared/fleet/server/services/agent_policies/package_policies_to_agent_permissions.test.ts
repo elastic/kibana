@@ -636,6 +636,13 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
   });
 
   describe('agentless permissions', () => {
+    let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+    beforeEach(() => {
+      mockLogger = loggingSystemMock.createLogger();
+      jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    });
+
     const buildAgentlessPackagePolicy = (
       pkgName: string,
       supportsAgentless: boolean,
@@ -797,13 +804,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
 
     describe('warning when agentless permissions are withheld', () => {
-      let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
-
-      beforeEach(() => {
-        mockLogger = loggingSystemMock.createLogger();
-        jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
-      });
-
       it('logs the package reason when the package is not agentless-eligible', () => {
         storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
           buildAgentlessPackagePolicy('non_agentless_pkg', true),
