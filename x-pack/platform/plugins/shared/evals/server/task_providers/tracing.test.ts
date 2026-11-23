@@ -6,7 +6,7 @@
  */
 
 import { context, propagation } from '@opentelemetry/api';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import {
   BAGGAGE_TRACKING_BEACON_KEY,
   BAGGAGE_TRACKING_BEACON_VALUE,
@@ -20,10 +20,10 @@ jest.mock('@kbn/inference-tracing', () => ({
 }));
 
 describe('withEvalsTaskSpan', () => {
-  let contextManager: AsyncHooksContextManager;
+  let contextManager: AsyncLocalStorageContextManager;
 
   beforeEach(() => {
-    contextManager = new AsyncHooksContextManager();
+    contextManager = new AsyncLocalStorageContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
   });
@@ -60,10 +60,10 @@ describe('withEvalsTaskSpan', () => {
 });
 
 describe('withEvalsEvaluatorSpan', () => {
-  let contextManager: AsyncHooksContextManager;
+  let contextManager: AsyncLocalStorageContextManager;
 
   beforeEach(() => {
-    contextManager = new AsyncHooksContextManager();
+    contextManager = new AsyncLocalStorageContextManager();
     contextManager.enable();
     context.setGlobalContextManager(contextManager);
   });
