@@ -76,6 +76,15 @@ export const patchConversationList = ({
   });
 };
 
+/** Mirrors the server sort order (`updated_at` desc, then `created_at` desc). */
+const isListedBefore = (
+  item: ListConversationsResponseItem,
+  other: ListConversationsResponseItem
+): boolean => {
+  if (item.updated_at !== other.updated_at) return item.updated_at > other.updated_at;
+  return item.created_at > other.created_at;
+};
+
 /**
  * Move a conversation between the pinned and unpinned list caches.
  * Called optimistically when the user pins or unpins a conversation.
@@ -124,20 +133,36 @@ export const movePinnedConversationBetweenLists = ({
   }
   const row = { ...movedRow, pinned };
 
-  // Prepend to the first page of the target list, if it's cached.
+  // Insert into the target list at the position the server sorts it to, if it's cached.
   queryClient.setQueryData<ConversationListCache>(targetKey, (prev) => {
     if (!prev) return prev;
-    const [firstPage, ...rest] = prev.pages;
+    const { pages } = prev;
+    const isAfterRow = (item: ListConversationsResponseItem) => !isListedBefore(item, row);
+
+    let insertPageIndex = pages.findIndex((page) => page.results.some(isAfterRow));
+    let insertIndex =
+      insertPageIndex === -1 ? -1 : pages[insertPageIndex].results.findIndex(isAfterRow);
+
+    // Older than every loaded row: it belongs after them, so only add it when nothing is left
+    // to load. Otherwise it appears when the later pages are fetched.
+    const loadedCount = pages.reduce((sum, page) => sum + page.results.length, 0);
+    const isFullyLoaded = loadedCount >= pages[0].pagination.total;
+    if (insertPageIndex === -1 && isFullyLoaded) {
+      insertPageIndex = pages.length - 1;
+      insertIndex = pages[insertPageIndex].results.length;
+    }
+
     return {
       ...prev,
-      pages: [
-        {
-          ...firstPage,
-          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
-          results: [row, ...firstPage.results],
-        },
-        ...rest,
-      ],
+      pages: pages.map((page, pageIndex) => {
+        const pagination = { ...page.pagination, total: page.pagination.total + 1 };
+        if (pageIndex !== insertPageIndex) return { ...page, pagination };
+        return {
+          ...page,
+          pagination,
+          results: [...page.results.slice(0, insertIndex), row, ...page.results.slice(insertIndex)],
+        };
+      }),
     };
   });
 };

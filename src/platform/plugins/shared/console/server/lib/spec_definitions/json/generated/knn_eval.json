@@ -1,0 +1,72 @@
+{
+  "knn_eval": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "ignore_unavailable": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "wait_for_completion": "__flag__"
+    },
+    "data_autocomplete_rules": {
+      "field": "",
+      "k": "",
+      "query_source": {},
+      "baseline": {
+        "visit_percentage": "",
+        "num_candidates": "",
+        "rescore_vector": {
+          "oversample": ""
+        },
+        "exact": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "knn_settings": [
+        {
+          "visit_percentage": "",
+          "num_candidates": "",
+          "rescore_vector": {
+            "oversample": ""
+          },
+          "exact": {
+            "__one_of": [
+              true,
+              false
+            ]
+          }
+        }
+      ],
+      "allow_exact_baseline": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "{index}/_knn_eval"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-knn-eval",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-knn-eval",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

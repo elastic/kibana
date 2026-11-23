@@ -33,13 +33,15 @@ export const getConnectorRoute = (
       },
       validate: () => {
         const includeInboundEventsField = actionsConfigUtils.isInboundEventsEnabled();
+        const includeSpecVersionField = actionsConfigUtils.isCatalogEnabled();
         return {
           request: {
             params: getConnectorParamsSchemaV1,
           },
           response: {
             200: {
-              body: () => getConnectorResponseSchemaV1(includeInboundEventsField),
+              body: () =>
+                getConnectorResponseSchemaV1(includeInboundEventsField, includeSpecVersionField),
               description: 'Indicates a successful call.',
             },
             403: {
@@ -57,6 +59,7 @@ export const getConnectorRoute = (
         return res.ok({
           body: transformConnectorResponseV1(connector, {
             includeInboundEventsField: actionsConfigUtils.isInboundEventsEnabled(),
+            includeSpecVersionField: actionsConfigUtils.isCatalogEnabled(),
           }),
         });
       })

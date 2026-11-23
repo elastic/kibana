@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/i18n'
   - '@kbn/config'
+  - '@kbn/core-elasticsearch-client-server-mocks'
 tags:
   - plugin
   - prod
