@@ -255,6 +255,74 @@ describe('executeDashboardUpsert', () => {
     expect(result.dashboardData.description).toBe('');
   });
 
+  describe('dashboard settings', () => {
+    const dashboardWithSettings: DashboardAttachmentData = {
+      title: 'Title',
+      panels: [],
+      options: { use_margins: false, sync_cursor: false },
+      refresh_interval: { pause: true, value: 60000 },
+      esql_approximation: true,
+    };
+
+    it('merges options over the existing options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { options: { hide_panel_borders: true, sync_cursor: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({
+        use_margins: false,
+        sync_cursor: true,
+        hide_panel_borders: true,
+      });
+    });
+
+    it('sets options on a dashboard without options', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { title: 'Title', panels: [] },
+        upsert: { options: { hide_panel_titles: true } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.options).toEqual({ hide_panel_titles: true });
+    });
+
+    it('replaces the refresh interval', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { refresh_interval: { pause: false, value: 30000 } },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.refresh_interval).toEqual({ pause: false, value: 30000 });
+    });
+
+    it.each([true, false])('sets esql_approximation to %s', async (esqlApproximation) => {
+      const result = await executeDashboardUpsert({
+        dashboardData: { ...dashboardWithSettings, esql_approximation: !esqlApproximation },
+        upsert: { esql_approximation: esqlApproximation },
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(result.dashboardData.esql_approximation).toBe(esqlApproximation);
+    });
+
+    it('keeps the settings a call leaves out', async () => {
+      const result = await executeDashboardUpsert({
+        dashboardData: dashboardWithSettings,
+        upsert: { title: 'Renamed' },
+        logger,
+      });
+
+      expect(result.dashboardData).toEqual({ ...dashboardWithSettings, title: 'Renamed' });
+    });
+  });
+
   it('starts from an empty dashboard when no dashboard data is given', async () => {
     const result = await executeDashboardUpsert({
       upsert: {
@@ -2603,6 +2671,37 @@ describe('executeDashboardUpsert', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it.each([999, 1500.5, 2_147_483_648])('rejects a refresh interval of %s ms', (value) => {
+      const result = upsertDashboardSchema.safeParse({ refresh_interval: { pause: false, value } });
+
+      expect(result.success).toBe(false);
+    });
+
+    it.each([1000, 30000, 172_800_000, 2_147_483_647])(
+      'accepts a refresh interval of %s ms',
+      (value) => {
+        const result = upsertDashboardSchema.safeParse({
+          refresh_interval: { pause: false, value },
+        });
+
+        expect(result.success).toBe(true);
+      }
+    );
+
+    it('requires pause in a refresh interval', () => {
+      const result = upsertDashboardSchema.safeParse({ refresh_interval: { value: 30000 } });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('keeps an unknown options key for the validator', () => {
+      const result = upsertDashboardSchema.parse({
+        options: { hide_borders: true, hide_panel_titles: true },
+      });
+
+      expect(result.options).toEqual({ hide_borders: true, hide_panel_titles: true });
     });
   });
 });

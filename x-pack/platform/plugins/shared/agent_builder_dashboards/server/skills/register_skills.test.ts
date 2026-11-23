@@ -64,6 +64,22 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
+  it('sets dashboard settings only when the user asks', () => {
+    expect(skill.content).toContain('## Dashboard Settings');
+    expect(skill.content).toContain(
+      'Set `options`, `refresh_interval` and `esql_approximation` only when the user asks for that setting.'
+    );
+    expect(skill.content).toContain(
+      'These options apply to every panel, including panels added later.'
+    );
+    expect(skill.content).toContain(
+      'call again with `time_range` set to the window the user named, or ask the user which window to use'
+    );
+    expect(enhanceGuidance()).toContain(
+      'Neither mode changes the dashboard settings (`options`, `refresh_interval`, `esql_approximation`) unless the user asks.'
+    );
+  });
+
   it('publishes a config reference per ML panel type and points the skill at each one', () => {
     const panelConfigs = skill.referencedContent?.filter(
       ({ relativePath }) => relativePath === './panel_configs'

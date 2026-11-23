@@ -22,6 +22,7 @@ import {
 } from '@kbn/dashboard-agent-authoring';
 import { generateDashboardTool } from './generate_dashboard_tool';
 import { createLayoutArranger } from './layout_arranger';
+import { applyDefaultDashboardTimeRange } from './time_range';
 
 jest.mock('./attachment_state', () => ({ retrieveLatestVersion: jest.fn() }));
 jest.mock('@kbn/dashboard-agent-authoring', () => ({
@@ -54,6 +55,9 @@ const mockExecuteDashboardUpsert = executeDashboardUpsert as jest.MockedFunction
 >;
 const mockHasValidNewDashboardMetadata = hasValidNewDashboardMetadata as jest.MockedFunction<
   typeof hasValidNewDashboardMetadata
+>;
+const mockApplyDefaultDashboardTimeRange = applyDefaultDashboardTimeRange as jest.MockedFunction<
+  typeof applyDefaultDashboardTimeRange
 >;
 
 const mockArrangeLayout = jest.fn<Promise<LayoutArrangement>, [LayoutRequest]>();
@@ -357,6 +361,110 @@ describe('generateDashboardTool handler', () => {
 
       expect(results[0]).toMatchObject({ data: { version: 2, failures } });
       expect(attachments.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('dashboard settings', () => {
+    const runningRefreshInterval = { pause: false, value: 30000 };
+
+    const mockUpsertResult = (dashboardData: DashboardAttachmentData) =>
+      mockExecuteDashboardUpsert.mockResolvedValue({
+        dashboardData,
+        created: [],
+        updated: [],
+        removed: [],
+        failures: [],
+        panelAuthoringNotes: [],
+        panelHeightHints: [],
+      });
+
+    const mockExistingDashboard = () =>
+      mockRetrieveLatestVersion.mockReturnValue({
+        version: 3,
+        data: generatedDashboard,
+      } as ReturnType<typeof retrieveLatestVersion>);
+
+    const withoutDefaultTimeRange = () =>
+      mockApplyDefaultDashboardTimeRange.mockImplementationOnce(
+        async ({ dashboardData }) => dashboardData
+      );
+
+    const refreshIntervalFailure = expect.objectContaining({
+      kind: 'dashboard',
+      identifier: 'refresh_interval',
+      error: expect.stringContaining('saved only together with a time range'),
+    });
+
+    it('returns the stored time range and settings in the summary', async () => {
+      const settings = {
+        time_range: { from: 'now-30d', to: 'now' },
+        options: { hide_panel_borders: true },
+        refresh_interval: runningRefreshInterval,
+        esql_approximation: true,
+      };
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockUpsertResult({ ...generatedDashboard, ...settings });
+
+      const { results } = await callHandler();
+
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: { dashboard: settings },
+      });
+    });
+
+    it('saves nothing when reverting a refresh interval set without a time range leaves the dashboard unchanged', async () => {
+      mockExistingDashboard();
+      mockUpsertResult({ ...generatedDashboard, refresh_interval: runningRefreshInterval });
+      withoutDefaultTimeRange();
+
+      const { results, sendUiEvent, attachments } = await callHandler('dashboard-attachment-id');
+
+      expect(attachments.update).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+      expect(results[0]).toMatchObject({
+        type: ToolResultType.dashboard,
+        data: { version: 3, failures: [refreshIntervalFailure] },
+      });
+      expect(results[0]).not.toMatchObject({
+        data: { dashboard: { refresh_interval: expect.anything() } },
+      });
+    });
+
+    it('saves the other changes of the call without a refresh interval set without a time range', async () => {
+      mockExistingDashboard();
+      mockUpsertResult({
+        ...generatedDashboard,
+        description: 'Updated',
+        refresh_interval: runningRefreshInterval,
+      });
+      withoutDefaultTimeRange();
+
+      const { results, attachments } = await callHandler('dashboard-attachment-id');
+
+      const [[, { data: savedData }]] = attachments.update.mock.calls as unknown as Array<
+        [string, { data: DashboardAttachmentData }]
+      >;
+      expect(savedData).toEqual({ ...generatedDashboard, description: 'Updated' });
+      expect(savedData).not.toHaveProperty('refresh_interval');
+      expect(results[0]).toMatchObject({ data: { failures: [refreshIntervalFailure] } });
+    });
+
+    it('keeps a refresh interval when the default time range gives the dashboard one', async () => {
+      mockExistingDashboard();
+      mockUpsertResult({ ...generatedDashboard, refresh_interval: runningRefreshInterval });
+
+      const { results, attachments } = await callHandler('dashboard-attachment-id');
+
+      expect(attachments.update).toHaveBeenCalledWith('dashboard-attachment-id', {
+        data: {
+          ...generatedDashboard,
+          time_range: { from: 'now-7d', to: 'now' },
+          refresh_interval: runningRefreshInterval,
+        },
+        description: expect.any(String),
+      });
+      expect(results[0]).not.toMatchObject({ data: { failures: expect.anything() } });
     });
   });
 
