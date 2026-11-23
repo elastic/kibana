@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { ACTION_POLICY_ATTACHMENT_TYPE, type ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -18,6 +18,12 @@ import { ActionPolicyDetailsFlyout } from './action_policy_details_flyout';
 const ELASTIC_UID = 'elastic_uid';
 const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 
+interface MockAgentBuilder {
+  openChat?: jest.Mock;
+  addAttachment?: jest.Mock;
+  events?: { ui: { activeConversation$: Observable<{ id: string } | null> } };
+}
+
 const mockBulkGet = jest.fn();
 let mockCanReadRules = true;
 
@@ -25,10 +31,10 @@ jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../../services/user_capabilities'
   );
-  let agentBuilder: unknown = {};
+  let agentBuilder: MockAgentBuilder = {};
   let agentBuilderShow = false;
   return {
-    useService: (token: unknown) => {
+    useService: (token: string | symbol) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({
           capabilities: { alerting_v2_rules: { read: mockCanReadRules } },
@@ -59,7 +65,7 @@ jest.mock('@kbn/core-di-browser', () => {
       return {};
     },
     CoreStart: (key: string) => key,
-    setMockAgentBuilder: (next: unknown) => {
+    setMockAgentBuilder: (next: MockAgentBuilder) => {
       agentBuilder = next;
     },
     setMockAgentBuilderShow: (show: boolean) => {
@@ -71,7 +77,7 @@ jest.mock('@kbn/core-di-browser', () => {
 const { setMockAgentBuilder, setMockAgentBuilderShow } = jest.requireMock(
   '@kbn/core-di-browser'
 ) as {
-  setMockAgentBuilder: (agentBuilder: unknown) => void;
+  setMockAgentBuilder: (agentBuilder: MockAgentBuilder) => void;
   setMockAgentBuilderShow: (show: boolean) => void;
 };
 
