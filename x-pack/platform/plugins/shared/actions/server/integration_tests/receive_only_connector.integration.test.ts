@@ -53,13 +53,11 @@ describe('Receive-only dual connector', () => {
       });
 
   it('creates a Datadog connector with no authentication when every action is off', async () => {
-    const createRes = await createDatadog([]).expect(
-      (res: { status: number; body: unknown }) => {
-        if (res.status !== 200) {
-          throw new Error(`create connector failed ${res.status}: ${JSON.stringify(res.body)}`);
-        }
+    const createRes = await createDatadog([]).expect((res: { status: number; body: unknown }) => {
+      if (res.status !== 200) {
+        throw new Error(`create connector failed ${res.status}: ${JSON.stringify(res.body)}`);
       }
-    );
+    });
 
     const created = createRes.body as ConnectorHttpBody;
     expect(created.id).toEqual(expect.any(String));
