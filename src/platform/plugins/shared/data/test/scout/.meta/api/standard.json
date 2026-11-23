@@ -1,9 +1,23 @@
 {
-  "sha1": "fc9fbd00fc82ca0f7355491d44f285f8d1007a12",
+  "sha1": "67899baf653bb9d44415ca8ed2384979edfa4a25",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "4a974bedd6571c4-5517d0ff8e63591",
+      "title": "eql search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/eql_long_poll.spec.ts",
+        "line": 32,
+        "column": 79
+      }
+    },
     {
       "id": "99d18e3579dd960-646aa7dac1121c1",
       "title": "ese search - delete async search (SNAPSHOT only) should delete an in-progress search",
@@ -22,8 +36,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -44,8 +58,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete_async.spec.ts",
-        "line": 75,
-        "column": 12
+        "line": 64,
+        "column": 55
       }
     },
     {
@@ -66,8 +80,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 21,
+        "column": 8
       }
     },
     {
@@ -88,8 +102,30 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_delete.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 26,
+        "column": 23
+      }
+    },
+    {
+      "id": "0faec1c28709e23-8d2bd49e9ed36c2",
+      "title": "ese search - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_long_poll.spec.ts",
+        "line": 38,
+        "column": 7
       }
     },
     {
@@ -110,8 +146,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -132,8 +168,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 54,
+        "column": 15
       }
     },
     {
@@ -154,8 +190,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_async.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 88,
+        "column": 62
       }
     },
     {
@@ -168,8 +204,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_cancel.spec.ts",
-        "line": 44,
-        "column": 12
+        "line": 37,
+        "column": 9
       }
     },
     {
@@ -182,8 +218,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_privileges.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 39,
+        "column": 46
       }
     },
     {
@@ -204,8 +240,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 38,
+        "column": 13
       }
     },
     {
@@ -226,8 +262,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 64,
-        "column": 12
+        "line": 52,
+        "column": 13
       }
     },
     {
@@ -248,8 +284,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 83,
-        "column": 12
+        "line": 74,
+        "column": 19
       }
     },
     {
@@ -270,8 +306,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 87,
+        "column": 19
       }
     },
     {
@@ -292,8 +328,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_post_sync.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 100,
+        "column": 56
       }
     },
     {
@@ -306,8 +342,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 19,
+        "column": 57
       }
     },
     {
@@ -320,8 +356,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 30,
+        "column": 42
       }
     },
     {
@@ -334,8 +370,36 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/ese_rollup.spec.ts",
-        "line": 63,
-        "column": 10
+        "line": 53,
+        "column": 28
+      }
+    },
+    {
+      "id": "3a19570ef837c26-88ab07c422e46cb",
+      "title": "esql_async search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/esql_async_long_poll.spec.ts",
+        "line": 33,
+        "column": 72
+      }
+    },
+    {
+      "id": "ee41a98c9010d40-5183a0735b023cb",
+      "title": "sql search strategy - long polling (SNAPSHOT only) holds a poll open until the search completes when pollLength is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout/api/tests/search/sql_long_poll.spec.ts",
+        "line": 33,
+        "column": 72
       }
     }
   ]

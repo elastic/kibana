@@ -1,5 +1,5 @@
 {
-  "sha1": "e5e80e189f91bec9d701ff0c85360fa2058fece1",
+  "sha1": "3195ed72a75b23a133d046a6c3959646129202c6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 19,
-        "column": 16
+        "line": 15,
+        "column": 19
       }
     },
     {
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/async_dashboard.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 38,
+        "column": 20
       }
     },
     {
@@ -72,8 +72,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 96,
-        "column": 14
+        "line": 110,
+        "column": 16
       }
     },
     {
@@ -98,8 +98,60 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_clone.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 33,
+        "column": 51
+      }
+    },
+    {
+      "id": "31ccac69c1e0eda-0a1bc65e6a03637",
+      "title": "Dashboard embed top menu does not show the edit button when show-top-menu is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 34,
+        "column": 51
+      }
+    },
+    {
+      "id": "31ccac69c1e0eda-593e7dddf068d59",
+      "title": "Dashboard embed top menu shows the edit button when show-top-menu is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_embed_top_menu.spec.ts",
+        "line": 41,
+        "column": 5
       }
     },
     {
@@ -124,8 +176,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_esql_no_data.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 25,
+        "column": 35
       }
     },
     {
@@ -150,8 +202,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 43,
+        "column": 31
       }
     },
     {
@@ -176,8 +228,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -202,8 +254,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 75,
+        "column": 25
       }
     },
     {
@@ -228,8 +280,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_lens_by_value.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 92,
+        "column": 13
       }
     },
     {
@@ -256,8 +308,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 35,
-        "column": 14
+        "line": 32,
+        "column": 15
       }
     },
     {
@@ -284,8 +336,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_listing_navigation.spec.ts",
-        "line": 56,
-        "column": 14
+        "line": 48,
+        "column": 19
       }
     },
     {
@@ -310,8 +362,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 63,
+        "column": 7
       }
     },
     {
@@ -336,8 +388,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 72,
+        "column": 21
       }
     },
     {
@@ -362,8 +414,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 86,
+        "column": 13
       }
     },
     {
@@ -388,8 +440,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_maps_by_value.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 98,
+        "column": 13
       }
     },
     {
@@ -416,8 +468,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
-        "line": 58,
-        "column": 14
+        "line": 48,
+        "column": 15
       }
     },
     {
@@ -444,8 +496,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_search_by_value.spec.ts",
-        "line": 72,
-        "column": 14
+        "line": 58,
+        "column": 89
       }
     },
     {
@@ -470,8 +522,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/empty_dashboard.spec.ts",
-        "line": 30,
-        "column": 12
+        "line": 21,
+        "column": 51
       }
     },
     {
@@ -484,8 +536,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/controls_migration_smoke.spec.ts",
-        "line": 74,
-        "column": 12
+        "line": 65,
+        "column": 51
       }
     },
     {
@@ -498,8 +550,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/lens_migration_smoke.spec.ts",
-        "line": 62,
-        "column": 12
+        "line": 53,
+        "column": 33
       }
     },
     {
@@ -512,8 +564,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_12_1.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 51,
+        "column": 51
       }
     },
     {
@@ -526,8 +578,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/tsvb_migration_smoke_7_13_3.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 37,
+        "column": 33
       }
     },
     {
@@ -540,8 +592,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/migration_smoke_tests/visualize_migration_smoke.spec.ts",
-        "line": 60,
-        "column": 12
+        "line": 51,
+        "column": 33
       }
     },
     {
@@ -566,8 +618,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_expand_toggle.spec.ts",
-        "line": 42,
-        "column": 12
+        "line": 33,
+        "column": 51
       }
     },
     {
@@ -592,8 +644,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 54,
+        "column": 51
       }
     },
     {
@@ -618,8 +670,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 67,
+        "column": 15
       }
     },
     {
@@ -644,8 +696,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 86,
+        "column": 15
       }
     },
     {
@@ -670,8 +722,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_time_range.spec.ts",
-        "line": 124,
-        "column": 12
+        "line": 105,
+        "column": 42
       }
     }
   ]
