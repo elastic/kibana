@@ -99,6 +99,9 @@ describe('StatusContextMenu', () => {
     );
     expect(await screen.findByText('Change status')).toBeInTheDocument();
     expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
+    Object.values(CaseStatuses).forEach((status) => {
+      expect(screen.queryByTestId(`case-view-status-dropdown-${status}`)).not.toBeInTheDocument();
+    });
 
     expect(onStatusChanged).not.toHaveBeenCalled();
   });
@@ -140,6 +143,9 @@ describe('StatusContextMenu', () => {
     );
     expect(await screen.findByText('Change status')).toBeInTheDocument();
     expect(screen.queryAllByRole('menuitem')).toHaveLength(0);
+    Object.values(CaseStatuses).forEach((status) => {
+      expect(screen.queryByTestId(`case-view-status-dropdown-${status}`)).not.toBeInTheDocument();
+    });
   });
 
   it('correctly evaluates each status option', async () => {

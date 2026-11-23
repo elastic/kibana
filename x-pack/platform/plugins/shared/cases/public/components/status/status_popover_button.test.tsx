@@ -12,6 +12,33 @@ import userEvent from '@testing-library/user-event';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusPopoverButton } from './status_popover_button';
 
+/**
+ * Collects the color related CSS declarations Emotion generated for the element's classes,
+ * so that colors can be compared without depending on the generated class names.
+ */
+const getColorDeclarations = (element: HTMLElement): string[] => {
+  // only Emotion's generated classes (`css-<hash>-<label>`) carry the badge's styles
+  const classNames = Array.from(element.classList).filter((c) => c.startsWith('css-'));
+  const declarations: string[] = [];
+
+  Array.from(document.styleSheets).forEach((sheet) => {
+    Array.from(sheet.cssRules).forEach((rule) => {
+      if (
+        rule instanceof CSSStyleRule &&
+        classNames.some((c) => rule.selectorText.includes(`.${c}`))
+      ) {
+        Array.from(rule.style).forEach((property) => {
+          if (/color/i.test(property)) {
+            declarations.push(`${property}: ${rule.style.getPropertyValue(property)}`);
+          }
+        });
+      }
+    });
+  });
+
+  return declarations.sort();
+};
+
 describe('StatusPopoverButton', () => {
   const onClick = jest.fn();
 
@@ -47,61 +74,49 @@ describe('StatusPopoverButton', () => {
 
   describe('Colors', () => {
     it.each([
-      [CaseStatuses.open, 'Open'],
-      [CaseStatuses['in-progress'], 'In progress'],
-      [CaseStatuses.closed, 'Closed'],
-    ])('renders the %s status badge with its label', async (status, label) => {
-      render(<StatusPopoverButton status={status} onClick={onClick} />);
-
-      expect(screen.getByTestId(`case-status-badge-popover-button-${status}`)).toHaveTextContent(
-        label
-      );
-    });
-
-    it.each([
       [CaseStatuses.open, 'success'],
       [CaseStatuses['in-progress'], 'primary'],
       [CaseStatuses.closed, 'default'],
     ] as const)('renders the %s status badge with the %s color', (status, color) => {
-      // Emotion derives the class name from the styles, so a badge rendered with the
-      // expected color shares its class with the same badge rendered with that color.
-      const getClassName = (element: React.ReactElement, testId: string) => {
-        const { unmount } = render(element);
-        const { className } = screen.getByTestId(testId);
-        unmount();
-        return className;
-      };
-
       const badgeProps = {
         iconType: 'chevronSingleDown',
         iconSide: 'right',
         iconOnClick: onClick,
         iconOnClickAriaLabel: 'aria-label',
+        'data-test-subj': 'badge',
       } as const;
 
-      const actual = getClassName(
+      const getColors = (element: React.ReactElement, testId = 'badge') => {
+        const { unmount } = render(element);
+        const colors = getColorDeclarations(screen.getByTestId(testId));
+        unmount();
+        return colors;
+      };
+
+      const actual = getColors(
         <StatusPopoverButton status={status} onClick={onClick} />,
         `case-status-badge-popover-button-${status}`
       );
-      const expected = getClassName(
-        <EuiBadge {...badgeProps} data-test-subj="reference" color={color}>
+      const expected = getColors(
+        <EuiBadge {...badgeProps} color={color}>
           {'label'}
-        </EuiBadge>,
-        'reference'
+        </EuiBadge>
       );
-      const otherColors = (['success', 'primary', 'default'] as const)
-        .filter((c) => c !== color)
-        .map((c) =>
-          getClassName(
-            <EuiBadge {...badgeProps} data-test-subj="reference" color={c}>
-              {'label'}
-            </EuiBadge>,
-            'reference'
-          )
-        );
 
-      expect(actual).toBe(expected);
-      otherColors.forEach((other) => expect(actual).not.toBe(other));
+      expect(actual).not.toHaveLength(0);
+      expect(actual).toEqual(expected);
+
+      (['success', 'primary', 'default'] as const)
+        .filter((c) => c !== color)
+        .forEach((other) => {
+          expect(
+            getColors(
+              <EuiBadge {...badgeProps} color={other}>
+                {'label'}
+              </EuiBadge>
+            )
+          ).not.toEqual(actual);
+        });
     });
   });
 });
