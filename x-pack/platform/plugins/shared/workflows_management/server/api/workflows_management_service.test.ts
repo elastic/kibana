@@ -15,19 +15,24 @@
  *   - api/lib/*.test.ts and task_defs/*.test.ts (library-function specs)
  *   - lib/wait_for_managed_workflow_install_readiness.test.ts
  *
- * The facade owns exactly three concerns:
+ * The facade owns exactly four concerns:
  *   1. initPromise sequencing — every public method awaits init before delegating.
  *   2. error propagation from sub-services.
  *   3. managed install readiness gate — skip install/ready/orphan cleanup when not ready.
+ *   4. managed install retries — run installs again after transient Elasticsearch errors.
  */
 
+import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { workflowsExecutionEngineMock } from '@kbn/workflows-execution-engine/server/mocks';
 
 import { WorkflowsService } from './workflows_management_service';
+import { MANAGED_INSTALL_MAX_RETRIES } from '../lib/managed_install_retry';
 import { waitForManagedWorkflowInstallReadiness } from '../lib/wait_for_managed_workflow_install_readiness';
+import { WorkflowsElasticsearchUnavailableError } from '../lib/workflows_elasticsearch_unavailable_error';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
 import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
@@ -535,6 +540,9 @@ describe('WorkflowsService (facade)', () => {
       mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({ ready: true });
       const service = await buildService();
       mockedWaitForManagedWorkflowInstallReadiness.mockClear();
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance).mockResolvedValueOnce({
+        failed: [],
+      });
       const items = [
         { id: 'wf.one' as any, spaceId: '*' },
         { id: 'wf.two' as any, spaceId: '*' },
@@ -544,6 +552,277 @@ describe('WorkflowsService (facade)', () => {
 
       expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalledTimes(1);
       expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledWith(items, 'owner');
+    });
+  });
+
+  describe('managed install transient Elasticsearch errors', () => {
+    const noLivingConnections = () =>
+      new errors.NoLivingConnectionsError(
+        'There are no living connections',
+        {} as DiagnosticResult
+      );
+    const serviceUnavailable = () =>
+      new errors.ResponseError({
+        statusCode: 503,
+        headers: {},
+        warnings: [],
+        meta: {} as TransportResult['meta'],
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            reason: 'Search rejected due to missing shards [[.workflows-workflows-000001][0]]',
+          },
+        },
+      } as TransportResult);
+    const settle = <T>(promise: Promise<T>) =>
+      promise.then(
+        (value) => ({ value }),
+        (error: Error) => ({ error })
+      );
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('retries a batch install whose first read lost the Elasticsearch connection', async () => {
+      const service = await buildService();
+      mockedWaitForManagedWorkflowInstallReadiness.mockClear();
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance)
+        .mockRejectedValueOnce(noLivingConnections())
+        .mockResolvedValueOnce({ failed: [] });
+      const items = [{ id: 'wf.one' as any, spaceId: '*' }];
+
+      const result = settle(service.bulkInstallManagedWorkflows(items, 'owner'));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: { failed: [] } });
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledTimes(2);
+      expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalledTimes(2);
+    });
+
+    it('installs the batch again when workflows failed on a transient Elasticsearch error', async () => {
+      const service = await buildService();
+      const items = [
+        { id: 'wf.one' as any, spaceId: '*' },
+        { id: 'wf.two' as any, spaceId: '*' },
+      ];
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance)
+        .mockResolvedValueOnce({
+          failed: [
+            { id: 'wf.two', workflowId: 'wf.two', spaceId: '*', error: serviceUnavailable() },
+          ],
+        })
+        .mockResolvedValueOnce({ failed: [] });
+
+      const result = settle(service.bulkInstallManagedWorkflows(items, 'owner'));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: { failed: [] } });
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledTimes(2);
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenLastCalledWith(items, 'owner');
+    });
+
+    it('retries a batch with a transient and a permanent failure, and keeps the permanent one', async () => {
+      const service = await buildService();
+      const items = [
+        { id: 'wf.one' as any, spaceId: '*' },
+        { id: 'wf.two' as any, spaceId: '*' },
+      ];
+      const permanent = {
+        id: 'wf.one',
+        workflowId: 'wf.one',
+        spaceId: '*',
+        error: new Error('duplicate'),
+      };
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance)
+        .mockResolvedValueOnce({
+          failed: [
+            permanent,
+            { id: 'wf.two', workflowId: 'wf.two', spaceId: '*', error: serviceUnavailable() },
+          ],
+        })
+        .mockResolvedValueOnce({ failed: [permanent] });
+
+      const result = settle(service.bulkInstallManagedWorkflows(items, 'owner'));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: { failed: [permanent] } });
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries a single install that got a 503 response', async () => {
+      const service = await buildService();
+      (managedSpies.installManagedWorkflow as jest.SpyInstance)
+        .mockRejectedValueOnce(serviceUnavailable())
+        .mockResolvedValueOnce(undefined);
+
+      const result = settle(
+        service.installManagedWorkflow('wf.managed' as any, { spaceId: '*' }, 'owner')
+      );
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry an install that failed for good', async () => {
+      const service = await buildService();
+      const ownerMismatch = new Error('Managed workflow is owned by another plugin');
+      (managedSpies.installManagedWorkflow as jest.SpyInstance).mockRejectedValueOnce(
+        ownerMismatch
+      );
+
+      await expect(
+        service.installManagedWorkflow('wf.managed' as any, { spaceId: '*' }, 'owner')
+      ).rejects.toBe(ownerMismatch);
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry a batch whose failures are all permanent', async () => {
+      const service = await buildService();
+      const failed = [
+        { id: 'wf.one', workflowId: 'wf.one', spaceId: '*', error: new Error('duplicate') },
+      ];
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance).mockResolvedValueOnce({
+        failed,
+      });
+
+      await expect(
+        service.bulkInstallManagedWorkflows([{ id: 'wf.one' as any, spaceId: '*' }], 'owner')
+      ).resolves.toEqual({ failed });
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledTimes(1);
+    });
+
+    it('gives up after the last retry with a typed error that keeps the Elasticsearch error', async () => {
+      const service = await buildService();
+      const esError = noLivingConnections();
+      (managedSpies.installManagedWorkflow as jest.SpyInstance).mockRejectedValue(esError);
+
+      const result = settle(
+        service.installManagedWorkflow('wf.managed' as any, { spaceId: '*' }, 'owner')
+      );
+      await jest.advanceTimersByTimeAsync(60_000);
+
+      const { error } = (await result) as { error: WorkflowsElasticsearchUnavailableError };
+      expect(error).toBeInstanceOf(WorkflowsElasticsearchUnavailableError);
+      expect(error.cause).toBe(esError);
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(
+        MANAGED_INSTALL_MAX_RETRIES + 1
+      );
+    });
+
+    it('does not retry a request-scoped install, and answers with a typed 503 error', async () => {
+      const service = await buildService();
+      const esError = noLivingConnections();
+      (managedSpies.installManagedWorkflow as jest.SpyInstance).mockRejectedValue(esError);
+
+      const result = settle(
+        service.installManagedWorkflow(
+          'wf.managed' as any,
+          { spaceId: 'default' },
+          'owner',
+          httpServerMock.createKibanaRequest()
+        )
+      );
+
+      const { error } = (await result) as { error: WorkflowsElasticsearchUnavailableError };
+      expect(error).toBeInstanceOf(WorkflowsElasticsearchUnavailableError);
+      expect(error.statusCode).toBe(503);
+      expect(error.cause).toBe(esError);
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry an install after the plugin called ready()', async () => {
+      const service = await buildService();
+      jest.spyOn(ManagedWorkflowsService.prototype, 'isPluginReady').mockReturnValue(true);
+      (managedSpies.bulkInstallManagedWorkflows as jest.SpyInstance).mockRejectedValue(
+        noLivingConnections()
+      );
+
+      const result = settle(
+        service.bulkInstallManagedWorkflows([{ id: 'wf.one' as any, spaceId: '*' }], 'owner')
+      );
+
+      expect(await result).toEqual({ error: expect.any(WorkflowsElasticsearchUnavailableError) });
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledTimes(1);
+    });
+
+    it('rethrows a permanent error of a request-scoped install untouched', async () => {
+      const service = await buildService();
+      const ownerMismatch = new Error('Managed workflow is owned by another plugin');
+      (managedSpies.installManagedWorkflow as jest.SpyInstance).mockRejectedValueOnce(
+        ownerMismatch
+      );
+
+      await expect(
+        service.installManagedWorkflow(
+          'wf.managed' as any,
+          { spaceId: 'default' },
+          'owner',
+          httpServerMock.createKibanaRequest()
+        )
+      ).rejects.toBe(ownerMismatch);
+    });
+
+    it('stops retrying when Kibana stops and marks the install pass incomplete', async () => {
+      const service = await buildService();
+      (managedSpies.installManagedWorkflow as jest.SpyInstance).mockRejectedValue(
+        noLivingConnections()
+      );
+
+      const result = settle(
+        service.installManagedWorkflow('wf.managed' as any, { spaceId: '*' }, 'owner')
+      );
+      await jest.advanceTimersByTimeAsync(0);
+      mockedWaitForManagedWorkflowInstallReadiness.mockResolvedValue({
+        ready: false,
+        reason: 'stopping',
+      });
+      service.setStopping(true);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.installManagedWorkflow).toHaveBeenCalledTimes(1);
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
+    });
+
+    it('runs ready() reconciliation again after a transient Elasticsearch error', async () => {
+      const service = await buildService();
+      (managedSpies.pluginReady as jest.SpyInstance)
+        .mockRejectedValueOnce(serviceUnavailable())
+        .mockResolvedValueOnce(undefined);
+
+      const result = settle(service.pluginReady('owner'));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.pluginReady).toHaveBeenCalledTimes(2);
+      expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
+    });
+
+    it('does not run ready() reconciliation again after a permanent error', async () => {
+      const service = await buildService();
+      const permanent = new Error('Managed workflow definition is invalid');
+      (managedSpies.pluginReady as jest.SpyInstance).mockRejectedValueOnce(permanent);
+
+      await expect(service.pluginReady('owner')).rejects.toBe(permanent);
+      expect(managedSpies.pluginReady).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs the global orphan cleanup again after a transient Elasticsearch error', async () => {
+      const service = await buildService();
+      (managedSpies.cleanupUnregisteredOrphans as jest.SpyInstance)
+        .mockRejectedValueOnce(noLivingConnections())
+        .mockResolvedValueOnce(undefined);
+
+      const result = settle(service.cleanupUnregisteredOrphans(['owner']));
+      await jest.advanceTimersByTimeAsync(5_000);
+
+      expect(await result).toEqual({ value: undefined });
+      expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledTimes(2);
     });
   });
 

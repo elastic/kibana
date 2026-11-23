@@ -18,9 +18,6 @@ xpack.fleet.internal.registry.spec.max: '3.7'
 
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
-  contextEngine:
-    ### Hide Manage memory in Serverless until the session memory routes land.
-    subFeatures.privileges.manage_memory.disabled: true
   dashboard:
     privileges:
       ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
@@ -267,6 +264,9 @@ xpack.alerting_v2.rules.maxScheduledPerMinute: 400
 # Alerting v2: cap ES|QL response size per rule execution. Each execution holds ~4x the
 # response in heap and the background-tasks pod runs up to 10 at once on ~819MB of heap.
 xpack.alerting_v2.rules.run.query.maxResponseSize: 10mb
+# Alerting v2 dispatcher: cap alert data hydration responses. A tick holds up to 2x this as raw
+# JSON, plus the parsed objects, on the same pod heap.
+xpack.alerting_v2.dispatcher.run.hydration.maxResponseSize: 10mb
 xpack.actions.run.maxAttempts: 10
 xpack.actions.queued.max: 10000
 

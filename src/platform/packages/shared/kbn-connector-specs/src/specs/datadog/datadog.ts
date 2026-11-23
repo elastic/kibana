@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { datadogAlert } from '@kbn/connector-topics';
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import {
-  DATADOG_ALERT_EVENT_ID,
-  DATADOG_ALERT_EVENT_KEY,
-  DATADOG_CONNECTOR_TYPE_ID,
-} from './constants';
+  toConnectorSpecEvent,
+  type ConnectorIngressContext,
+  type HandleEventsResult,
+} from '../../connector_spec_events';
+import { DATADOG_ALERT_EVENT_KEY, DATADOG_CONNECTOR_TYPE_ID } from './constants';
 import {
   CancelDowntimeInputSchema,
   CreateIncidentInputSchema,
   DATADOG_SITE_API_URLS,
   DATADOG_SITES,
-  DatadogReceivedEventSchema,
   GetAlertEventsInputSchema,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
@@ -140,7 +140,7 @@ const handleDatadogEvents = async (ctx: ConnectorIngressContext): Promise<Handle
     type: 'emit',
     events: [
       {
-        eventId: DATADOG_ALERT_EVENT_ID,
+        eventId: datadogAlert.name,
         correlationKey: uuidv4(),
         payload: {
           body: ctx.rawBody,
@@ -601,8 +601,7 @@ export const Datadog: ConnectorSpec = {
 
   events: {
     definitions: {
-      [DATADOG_ALERT_EVENT_KEY]: {
-        eventId: DATADOG_ALERT_EVENT_ID,
+      [DATADOG_ALERT_EVENT_KEY]: toConnectorSpecEvent(datadogAlert, {
         title: i18n.translate('connectorSpecs.datadog.events.alert.title', {
           defaultMessage: 'Alert',
         }),
@@ -610,8 +609,7 @@ export const Datadog: ConnectorSpec = {
           defaultMessage:
             'A Datadog alert webhook payload was accepted on the connector ingest URL.',
         }),
-        eventSchema: DatadogReceivedEventSchema,
-      },
+      }),
     },
     handleEvents: handleDatadogEvents,
   },

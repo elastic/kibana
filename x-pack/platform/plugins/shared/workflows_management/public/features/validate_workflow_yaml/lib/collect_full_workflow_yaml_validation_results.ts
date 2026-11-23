@@ -16,6 +16,7 @@ import { collectAllStepPropertyItems } from './collect_all_step_property_items';
 import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateGraphBuild } from './validate_graph_build';
+import { validateStepExposure } from './validate_step_exposure';
 import { validateStepProperties } from './validate_step_properties';
 import { validateWorkflowExecutionIdentity } from './validate_workflow_execution_identity';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
@@ -126,7 +127,8 @@ export async function collectFullWorkflowYamlValidationResults({
 
   if (workflowLookup && lineCounter) {
     results.push(
-      ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged)
+      ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged),
+      ...validateStepExposure(workflowLookup, lineCounter, context.isManaged)
     );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
 

@@ -34,7 +34,14 @@ describe('CreateAlertEventsStep', () => {
         ruleEvents: { enabled: false, dataRetention: '90d' },
         alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
       },
-      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
+      dispatcher: {
+        paused: false,
+        run: {
+          timeout: '1m',
+          alerts: { max: 10000 },
+          hydration: { maxResponseSize: ByteSizeValue.parse('50mb') },
+        },
+      },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
