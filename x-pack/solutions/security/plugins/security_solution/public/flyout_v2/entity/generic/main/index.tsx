@@ -31,12 +31,12 @@ import {
 import {
   useGetGenericEntity,
   type UseGetGenericEntityParams,
-} from '../../../../flyout/entity_details/generic_right/hooks/use_get_generic_entity';
-import { useGenericEntityCriticality } from '../../../../flyout/entity_details/generic_right/hooks/use_generic_entity_criticality';
-import { GenericEntityFlyoutHeader } from '../../../../flyout/entity_details/generic_right/header';
-import { GenericEntityFlyoutContent } from '../../../../flyout/entity_details/generic_right/content';
-import { GenericEntityFlyoutFooter } from '../../../../flyout/entity_details/generic_right/footer';
-import { GENERIC_FLYOUT_STORAGE_KEYS } from '../../../../flyout/entity_details/generic_right/constants';
+} from './hooks/use_get_generic_entity';
+import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
+import { GenericEntityFlyoutHeader } from './header';
+import { GenericEntityFlyoutContent } from './content';
+import { GenericEntityFlyoutFooter } from './footer';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import { useFlyoutApi } from '../../../use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 

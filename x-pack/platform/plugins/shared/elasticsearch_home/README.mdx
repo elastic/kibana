@@ -109,11 +109,48 @@ renders, without the button or the search skills.
 
 ## Public API
 
-`public/index.ts` is the whole browser-facing surface. `HomePage` reaches a host through the start
-contract, so nothing needs importing to render the page, and beyond the plugin initializer the barrel
+`public/index.ts` is the browser-facing surface. `HomePage` and the integrated onboarding flag
+helpers (see [Feature flags](#feature-flags)) reach a host through the start contract, so nothing
+needs importing to render the page or check the flag, and beyond the plugin initializer the barrel
 exports only types: `ElasticsearchHomePageProps`, `ElasticsearchHomePublicStart`,
 `HomeAddDataLink`, `HomeBannerConfig`, `HomeDocsLink` and `HomeIdeSetup`. Those are what let a host
 declare its props in a helper rather than inline.
+
+`common/index.ts` exports the values hosts share with this plugin, imported from
+`@kbn/elasticsearch-home/common`. Today that is only `INTEGRATED_ONBOARDING_FEATURE_FLAG`.
+
+## Feature flags
+
+`elasticsearchHome.integratedOnboarding.enabled` (`INTEGRATED_ONBOARDING_FEATURE_FLAG`) gates the
+home page with integrated onboarding, which is still in development. It defaults to `false`, and with
+it off both hosts keep their current home page and onboarding. The flag lives here rather than in a
+solution package so that hosts in any solution group can import it.
+
+Hosts read it through the start contract, so every caller uses the same flag and fallback:
+
+```tsx
+// In React
+const isIntegratedOnboardingEnabled = elasticsearchHome.useIntegratedOnboardingEnabled();
+
+// Outside React, e.g. to update an `AppUpdater` from `start`
+elasticsearchHome.getIntegratedOnboardingEnabled$().subscribe((enabled) => { ... });
+```
+
+Both follow the flag, so they update when it changes at runtime.
+
+To turn it on locally, add this to `kibana.yml`:
+
+```yaml
+feature_flags.overrides:
+  elasticsearchHome.integratedOnboarding.enabled: true
+```
+
+Or, as a superuser, from Dev Tools without a restart:
+
+```
+PUT kbn:/internal/feature-flags/overrides/elasticsearchHome.integratedOnboarding.enabled
+{ "value": true }
+```
 
 ## Server
 
