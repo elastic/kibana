@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Duration, DurationUnit } from '../../../models/duration';
 import { createCompositeSLOParamsSchema } from './composite_slo_create';
 
 const BASE_BODY = {
@@ -103,12 +104,33 @@ describe('CreateCompositeSLO schema validation', () => {
     });
 
     it('bounds timeWindow.duration', () => {
-      expect(parseBody({ timeWindow: { duration: '1'.repeat(16), type: 'rolling' } }).success).toBe(
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(15)}d`, type: 'rolling' } }).success
+      ).toBe(true);
+      expect(
+        parseBody({ timeWindow: { duration: `${'1'.repeat(16)}d`, type: 'rolling' } }).success
+      ).toBe(false);
+    });
+  });
+
+  describe('timeWindow', () => {
+    const members = buildMembers(2);
+
+    it('decodes the duration into a Duration', () => {
+      const result = createCompositeSLOParamsSchema.parse({ body: { ...BASE_BODY, members } });
+
+      expect(result.body.timeWindow.duration).toBeInstanceOf(Duration);
+      expect(result.body.timeWindow.duration.isEqual(new Duration(30, DurationUnit.Day))).toBe(
         true
       );
-      expect(parseBody({ timeWindow: { duration: '1'.repeat(17), type: 'rolling' } }).success).toBe(
-        false
-      );
+    });
+
+    it('rejects an invalid duration', () => {
+      const result = createCompositeSLOParamsSchema.safeParse({
+        body: { ...BASE_BODY, members, timeWindow: { duration: '30x', type: 'rolling' } },
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 

@@ -22,7 +22,7 @@
       ],
       "preference": "",
       "routing": [],
-      "_slice": ""
+      "_slice": []
     },
     "methods": [
       "GET",

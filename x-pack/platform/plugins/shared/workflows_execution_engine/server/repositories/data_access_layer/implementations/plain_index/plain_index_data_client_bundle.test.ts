@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { PlainIndexDataClientBundle } from './plain_index_data_client_bundle';
@@ -56,6 +58,88 @@ describe('PlainIndexDataClientBundle', () => {
     expect(esClient.search).toHaveBeenNthCalledWith(2, {
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: { match_all: {} },
+    });
+  });
+
+  describe('index initialization retries', () => {
+    const unknownResourceError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 404,
+        body: { ok: false, message: 'Unknown resource.' },
+      })
+    );
+    const serviceUnavailableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 503,
+        body: { error: { type: 'unavailable', reason: 'unavailable' } },
+      })
+    );
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const createBundle = () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.exists.mockResolvedValue(false as never);
+      const coreStart = coreMock.createStart();
+      Object.defineProperty(coreStart.elasticsearch.client, 'asInternalUser', {
+        configurable: true,
+        value: esClient,
+      });
+      const logger = loggerMock.create();
+      const bundle = new PlainIndexDataClientBundle({
+        source: 'plain_index',
+        dataRetention: '90d',
+        logger,
+      });
+
+      return { bundle, coreStart, esClient, logger };
+    };
+
+    it('retries an unknown resource response without logging an error', async () => {
+      const { bundle, coreStart, esClient, logger } = createBundle();
+      esClient.indices.create
+        .mockRejectedValueOnce(unknownResourceError)
+        .mockResolvedValue({ acknowledged: true } as never);
+
+      const initialization = bundle.initStart(coreStart);
+      await jest.advanceTimersByTimeAsync(2_000);
+
+      await expect(initialization).resolves.toBeUndefined();
+      expect(logger.warn).toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs one error when unknown resource responses continue for 20 minutes', async () => {
+      const { bundle, coreStart, esClient, logger } = createBundle();
+      esClient.indices.create.mockRejectedValue(unknownResourceError);
+
+      const initialization = expect(bundle.initStart(coreStart)).rejects.toBe(unknownResourceError);
+      await jest.advanceTimersByTimeAsync(21 * 60 * 1000);
+
+      await initialization;
+      expect(logger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps retrying other transient errors after 20 minutes', async () => {
+      const { bundle, coreStart, esClient, logger } = createBundle();
+      const recoversAt = Date.now() + 25 * 60 * 1000;
+      esClient.indices.create.mockImplementation(({ index }) =>
+        Date.now() < recoversAt
+          ? Promise.reject(serviceUnavailableError)
+          : Promise.resolve({ acknowledged: true, shards_acknowledged: true, index: String(index) })
+      );
+
+      const initialization = bundle.initStart(coreStart);
+      await jest.advanceTimersByTimeAsync(26 * 60 * 1000);
+
+      await expect(initialization).resolves.toBeUndefined();
+      expect(logger.error).not.toHaveBeenCalled();
     });
   });
 });

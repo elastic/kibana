@@ -6,9 +6,12 @@
  */
 
 import type { CoreSetup, CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { createOrUpdateIndex } from './helpers';
+import {
+  createOrUpdateIndex,
+  isRetryableIndexInitializationError,
+  isUnknownResourceError,
+} from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import { createRetryingEsClient } from '../../../../lib/create_retrying_es_client';
 import {
@@ -23,6 +26,8 @@ import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '../../types';
+
+const UNKNOWN_RESOURCE_TIMEOUT_MS = 20 * 60 * 1000;
 
 export class PlainIndexDataClientBundle implements DataClientBundle {
   private esClient!: ElasticsearchClient;
@@ -62,6 +67,7 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
 
   private async init(esClient: ElasticsearchClient, logger: Logger): Promise<ElasticsearchClient> {
     let attempt = 0;
+    let unknownResourceSince: number | undefined;
 
     while (!this.stopped) {
       try {
@@ -81,7 +87,17 @@ export class PlainIndexDataClientBundle implements DataClientBundle {
         ]);
         return esClient;
       } catch (error) {
-        if (!isRetryableEsClientError(error)) {
+        if (!isRetryableIndexInitializationError(error)) {
+          throw error;
+        }
+        unknownResourceSince = isUnknownResourceError(error)
+          ? unknownResourceSince ?? Date.now()
+          : undefined;
+        if (
+          unknownResourceSince !== undefined &&
+          Date.now() - unknownResourceSince >= UNKNOWN_RESOURCE_TIMEOUT_MS
+        ) {
+          logger.error('Failed to initialize workflow execution indices', { error });
           throw error;
         }
         attempt++;

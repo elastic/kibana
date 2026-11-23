@@ -13,6 +13,7 @@ import { InMemoryListProvider } from '../in_memory_list_provider';
 import { useItemActions } from '../item_actions';
 import { createItemLookup, toItemsById } from '../item_lookup';
 import { matchesIncludeExclude, matchesSearch } from '../list_matchers';
+import { getUsage } from '../usage';
 import { RowTypesProvider, TYPE_FIELD, TYPE_FIELD_DEFINITION } from '../type_filter';
 import {
   PROFILE_FIELD,
@@ -30,20 +31,13 @@ export const useRuleItem = useItemLookup;
 
 const escapeQueryValue = (value: string) => value.replace(/["\\]/g, '\\$&');
 
-const toItem = (rule: BoostRuleListItem): RuleItem => {
-  const applied = rule.matches.filter(({ outrankedByRuleName }) => !outrankedByRuleName);
-  return {
-    ...rule,
-    source: rule,
-    id: rule.name,
-    title: rule.name,
-    appliesTo: applied.length,
-    storageSizeInBytes: applied.reduce(
-      (total, { storageSizeInBytes = 0 }) => total + storageSizeInBytes,
-      0
-    ),
-  };
-};
+const toItem = (rule: BoostRuleListItem): RuleItem => ({
+  ...rule,
+  ...getUsage(rule.matches),
+  source: rule,
+  id: rule.name,
+  title: rule.name,
+});
 
 const createMatchers = (searchesProfileNames: boolean) => {
   const matchesOtherThanType = (rule: RuleItem, filters: ActiveFilters) =>

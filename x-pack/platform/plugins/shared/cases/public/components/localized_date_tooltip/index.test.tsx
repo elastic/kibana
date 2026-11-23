@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import moment from 'moment-timezone';
 import React from 'react';
 
 import { LocalizedDateTooltip } from '.';
-import { TestProviders } from '../../common/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('LocalizedDateTooltip', () => {
   beforeEach(() => {
@@ -29,26 +30,26 @@ describe('LocalizedDateTooltip', () => {
   const SampleContent = () => <span data-test-subj="sample-content">{sampleContentText}</span>;
 
   test('it renders the child content', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LocalizedDateTooltip date={date.toDate()}>
-          <SampleContent />
-        </LocalizedDateTooltip>
-      </TestProviders>
+    renderWithTestingProviders(
+      <LocalizedDateTooltip date={date.toDate()}>
+        <SampleContent />
+      </LocalizedDateTooltip>
     );
 
-    expect(wrapper.find('[data-test-subj="sample-content"]').exists()).toEqual(true);
+    expect(screen.getByTestId('sample-content')).toBeInTheDocument();
+    expect(screen.getByText(sampleContentText)).toBeInTheDocument();
   });
 
-  test('it renders', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <LocalizedDateTooltip date={date.toDate()}>
-          <SampleContent />
-        </LocalizedDateTooltip>
-      </TestProviders>
+  test('it renders the localized date in the tooltip on hover', async () => {
+    renderWithTestingProviders(
+      <LocalizedDateTooltip date={date.toDate()}>
+        <SampleContent />
+      </LocalizedDateTooltip>
     );
 
-    expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').exists()).toEqual(true);
+    await userEvent.hover(screen.getByTestId('sample-content'));
+
+    expect(await screen.findByTestId('dates-container')).toBeInTheDocument();
+    expect(await screen.findByTestId('with-day-of-week')).toHaveTextContent(/Tue, Feb 19, 2019/);
   });
 });
