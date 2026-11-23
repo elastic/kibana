@@ -527,6 +527,11 @@ export const discovery: DatasetConfig['discovery'] = [
           text: 'Title, symptom_hypothesis, and summary state the confirmed read timeouts and blocked balance lookups without hedging the event down to medium solely because detection metadata looks weak.',
           score: 2,
         },
+        {
+          id: 'failure-specific-profile-counts',
+          text: 'Treats the `Error getting balance` predicate as failure-specific, so its profile aggregates may be reported as failing lines rather than generic rule matches.',
+          score: 1,
+        },
       ],
     },
     metadata: {
