@@ -26,6 +26,8 @@ export interface CreateReasonRendererOptions {
   rule: ReasonTemplateRule;
   /** Called at most once per renderer, with the first parse or render error. */
   onError?: (error: unknown) => void;
+  /** Total time the renderer may spend rendering, across all rows. */
+  renderBudgetMs?: number;
 }
 
 const NO_REASON: ReasonRenderer = { render: () => undefined };
@@ -35,13 +37,25 @@ const NO_REASON: ReasonRenderer = { render: () => undefined };
 const HIGH_SURROGATE_MIN = 0xd800;
 const HIGH_SURROGATE_MAX = 0xdbff;
 
-// Keys that must never become part of the nested `data` object.
+// Keys that must never become part of the `data` object. Assigning `__proto__` would replace the
+// prototype of the object instead of creating a key.
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+// Rendering is synchronous and runs on the event loop, and templates are written by users, so every
+// render is bounded. A typical template renders in about 10 microseconds per row.
+const RENDER_LIMIT_MS = 50;
+const RENDER_MEMORY_LIMIT = 1_000_000;
+const DEFAULT_RENDER_BUDGET_MS = 1_000;
 
 let engine: LiquidEngine | undefined;
 
 const getEngine = (): LiquidEngine => {
-  engine ??= createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+  engine ??= createWorkflowLiquidEngine({
+    strictFilters: true,
+    strictVariables: false,
+    renderLimit: RENDER_LIMIT_MS,
+    memoryLimit: RENDER_MEMORY_LIMIT,
+  });
   return engine;
 };
 
@@ -84,7 +98,9 @@ export const buildDataContext = (row: QueryRow): Record<string, unknown> => {
   const created = new WeakSet<object>();
 
   for (const [key, value] of Object.entries(row)) {
-    data[key] = value;
+    if (!UNSAFE_KEYS.has(key)) {
+      data[key] = value;
+    }
   }
 
   for (const [key, value] of Object.entries(row)) {
@@ -121,12 +137,15 @@ const truncate = (text: string): string => {
  * `description`, `tags`, `version`). A missing, `null` or unknown variable renders as an empty string.
  *
  * It never throws: a template that fails to parse or render, or that renders to nothing, yields
- * `undefined`, so the event is written without a reason.
+ * `undefined`, so the event is written without a reason. Because rendering blocks the event loop,
+ * each render is time and memory limited, and the renderer stops (returning `undefined` for the
+ * remaining rows) after the first failure or once `renderBudgetMs` is spent.
  */
 export const createReasonRenderer = ({
   template,
   rule,
   onError,
+  renderBudgetMs = DEFAULT_RENDER_BUDGET_MS,
 }: CreateReasonRendererOptions): ReasonRenderer => {
   if (template === undefined) {
     return NO_REASON;
@@ -149,9 +168,16 @@ export const createReasonRenderer = ({
   }
 
   const ruleContext = buildRuleContext(rule);
+  let stopped = false;
+  let spentMs = 0;
 
   return {
     render: (row) => {
+      if (stopped) {
+        return undefined;
+      }
+
+      const startedAt = performance.now();
       try {
         const text = getEngine().renderSync(parsed, {
           data: buildDataContext(row),
@@ -160,8 +186,15 @@ export const createReasonRenderer = ({
         const reason = truncate(String(text));
         return reason.trim() === '' ? undefined : reason;
       } catch (error) {
+        stopped = true;
         report(error);
         return undefined;
+      } finally {
+        spentMs += performance.now() - startedAt;
+        if (!stopped && spentMs >= renderBudgetMs) {
+          stopped = true;
+          report(new Error('Reason rendering time budget exceeded'));
+        }
       }
     },
   };

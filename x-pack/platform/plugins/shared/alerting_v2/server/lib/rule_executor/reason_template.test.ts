@@ -166,6 +166,46 @@ describe('createReasonRenderer', () => {
 
       expect(({} as Record<string, unknown>).polluted).toBeUndefined();
     });
+
+    it('gives up on a template that renders for too long, without throwing', () => {
+      const onError = jest.fn();
+      const renderer = createReasonRenderer({
+        template: '{% for i in (1..5000000) %}x{% endfor %}',
+        rule,
+        onError,
+      });
+
+      expect(renderer.render({})).toBeUndefined();
+      expect(onError).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops rendering the remaining rows after a render fails', () => {
+      const onError = jest.fn();
+      const renderer = createReasonRenderer({
+        template: '{% for i in (1..data.n) %}x{% endfor %}',
+        rule,
+        onError,
+      });
+
+      expect(renderer.render({ n: 3 })).toBe('xxx');
+      expect(renderer.render({ n: 5000000 })).toBeUndefined();
+      expect(renderer.render({ n: 3 })).toBeUndefined();
+      expect(onError).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops rendering once the time budget is spent', () => {
+      const onError = jest.fn();
+      const renderer = createReasonRenderer({
+        template: 'ok',
+        rule,
+        onError,
+        renderBudgetMs: 0,
+      });
+
+      expect(renderer.render({})).toBe('ok');
+      expect(renderer.render({})).toBeUndefined();
+      expect(onError).toHaveBeenCalledTimes(1);
+    });
   });
 });
 
@@ -192,6 +232,21 @@ describe('buildDataContext', () => {
     expect(Object.keys(data).sort()).toEqual(['.a', '__proto__.x', 'a..b']);
     expect(Object.getPrototypeOf(data)).toBe(Object.prototype);
     expect(({} as Record<string, unknown>).x).toBeUndefined();
+  });
+
+  it('does not let a column named __proto__ replace the prototype of the data object', () => {
+    const row: Record<string, unknown> = { cpu: 1 };
+    Object.defineProperty(row, '__proto__', {
+      value: ['injected'],
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+
+    const data = buildDataContext(row);
+
+    expect(Object.getPrototypeOf(data)).toBe(Object.prototype);
+    expect(Object.keys(data)).toEqual(['cpu']);
   });
 
   it('keeps a column that is a nested object value untouched', () => {
