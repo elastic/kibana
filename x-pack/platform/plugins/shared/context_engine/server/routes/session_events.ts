@@ -8,6 +8,7 @@
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_API_VERSION,
@@ -24,12 +25,13 @@ import {
   SESSION_EVENTS_SAVE_PATH,
 } from '../../common/constants';
 import type { SaveSessionEventsResponse } from '../../common/http_api/session_events';
-import { validateAiIndexId, validateIsoDate, validateNonBlank } from '../../common/validation';
+import { validateAiIndexId, validateDate, validateNonBlank } from '../../common/validation';
 import { assertAiIndicesWritable } from '../ai_indices/assert_ai_indices_writable';
-import { AiIndexNotFoundError, AiIndexNotWritableError } from '../ai_indices/errors';
+import { AiIndexNotFoundError, AiIndexWriteForbiddenError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 import { sessionEventsSaveAuditEvent } from '../audit/audit_events';
 import type { SessionEventsService } from '../session_events/types';
+import { formatEsError } from '../utils/format_es_error';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { CONTEXT_ENGINE_DOCS_NOTE } from './constants';
 import { MEMORY_WRITE_SECURITY, resolveMemoryUser, toError } from './memory_user';
@@ -62,7 +64,7 @@ const baseEventProps = {
   turn_id: idSchema('The turn the event belongs to. Events are grouped into turns by this id.'),
   event_at: schema.string({
     maxLength: MAX_SESSION_EVENT_TIMESTAMP_LENGTH,
-    validate: validateIsoDate,
+    validate: validateDate,
     meta: {
       description:
         'When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.',
@@ -320,13 +322,22 @@ export const registerSessionEventsRoutes = ({
           audit({ error });
           return response[status]({ body: { message: error.message } });
         };
+        const fail = (error: unknown) => {
+          audit({ error: toError(error) });
+          if (isResponseError(error) && error.statusCode === 429) {
+            return response.customError({
+              statusCode: 429,
+              body: { message: formatEsError(error) },
+            });
+          }
+          throw error;
+        };
 
         let resolvedUser: Awaited<ReturnType<typeof resolveMemoryUser>>;
         try {
           resolvedUser = await resolveMemoryUser({ request, userProfile, requestedUserId });
         } catch (error) {
-          audit({ error: toError(error) });
-          throw error;
+          return fail(error);
         }
         targetUserId = resolvedUser.userId;
 
@@ -345,11 +356,10 @@ export const registerSessionEventsRoutes = ({
           if (error instanceof AiIndexNotFoundError) {
             return reject(error, 'notFound');
           }
-          if (error instanceof AiIndexNotWritableError) {
+          if (error instanceof AiIndexWriteForbiddenError) {
             return reject(error, 'forbidden');
           }
-          audit({ error: toError(error) });
-          throw error;
+          return fail(error);
         }
 
         let body: SaveSessionEventsResponse;
@@ -360,8 +370,7 @@ export const registerSessionEventsRoutes = ({
             { sessionId, aiIndexIds: uniqueAiIndexIds, events }
           );
         } catch (error) {
-          audit({ error: toError(error) });
-          throw error;
+          return fail(error);
         }
 
         const failed = body.results.filter(({ status }) => status === 'failed').length;

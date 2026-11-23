@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { registerSessionEventsRoutes } from './session_events';
 import {
@@ -453,6 +455,47 @@ describe('session events routes', () => {
           error: { code: 'Error', message: 'cluster unavailable' },
         }),
       ]);
+    });
+
+    it('propagates Elasticsearch 429 responses and audits them as failures', async () => {
+      const tooManyRequests = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 429,
+          body: {
+            error: { type: 'es_rejected_execution_exception', reason: 'too many requests' },
+          },
+        })
+      );
+      service.saveEvents.mockRejectedValueOnce(tooManyRequests);
+
+      await callRoute({ session_id: 's1', events: [userEvent] });
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 429,
+        body: { message: 'es_rejected_execution_exception: too many requests' },
+      });
+      expect(auditedEvents()).toEqual([
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'memory_save_event', outcome: 'failure' }),
+        }),
+      ]);
+    });
+
+    it('rethrows non-429 Elasticsearch response errors instead of forwarding their status', async () => {
+      const esBadRequest = new errors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: { type: 'illegal_argument_exception', reason: 'internal failure' },
+          },
+        })
+      );
+      service.saveEvents.mockRejectedValueOnce(esBadRequest);
+
+      await expect(callRoute({ session_id: 's1', events: [userEvent] })).rejects.toThrow(
+        esBadRequest
+      );
+      expect(response.customError).not.toHaveBeenCalled();
     });
 
     it('writes nothing while Context Engine or memory is turned off', async () => {

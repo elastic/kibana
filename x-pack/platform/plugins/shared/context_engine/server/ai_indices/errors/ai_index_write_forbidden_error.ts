@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export class AiIndexNotWritableError extends Error {
+export class AiIndexWriteForbiddenError extends Error {
   constructor(aiIndexId: string) {
     super(
       `AI index '${aiIndexId}' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index.`
     );
-    this.name = 'AiIndexNotWritableError';
+    this.name = 'AiIndexWriteForbiddenError';
   }
 }
