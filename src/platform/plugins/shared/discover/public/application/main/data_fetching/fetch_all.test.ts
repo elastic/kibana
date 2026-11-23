@@ -391,13 +391,14 @@ describe('test fetchAll', () => {
       ]);
     });
 
-    test('should handle exceptions', async () => {
+    test('should keep loaded rows and toast when loading more fails', async () => {
       const collectDocuments = subjectCollector(subjects.documents$);
       const collectMain = subjectCollector(subjects.main$);
+      const error = new Error('This query failed');
 
       const mockPagination = {
         hasNextPage: () => true,
-        nextPage: jest.fn().mockRejectedValue({ msg: 'This query failed' }),
+        nextPage: jest.fn().mockRejectedValue(error),
         getAllPages: jest.fn(),
       };
 
@@ -406,8 +407,7 @@ describe('test fetchAll', () => {
         result: initialRecords,
         pagination: mockPagination,
       });
-      fetchMoreDocuments(deps);
-      await waitForNextTick();
+      await fetchMoreDocuments(deps);
 
       expect(await collectDocuments()).toEqual([
         { fetchStatus: FetchStatus.UNINITIALIZED },
@@ -432,13 +432,9 @@ describe('test fetchAll', () => {
         {
           fetchStatus: FetchStatus.UNINITIALIZED,
         },
-        {
-          error: {
-            msg: 'This query failed',
-          },
-          fetchStatus: 'error',
-        },
       ]);
+      expect(deps.services.data.search.showError).toHaveBeenCalledTimes(1);
+      expect(deps.services.data.search.showError).toHaveBeenCalledWith(error);
     });
 
     test('should swallow abort errors', async () => {

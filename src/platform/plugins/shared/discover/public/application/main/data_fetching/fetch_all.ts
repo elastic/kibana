@@ -24,7 +24,6 @@ import {
   checkHitCount,
   sendCompleteMsg,
   sendErrorMsg,
-  sendErrorTo,
   sendLoadingMsg,
   sendLoadingMoreMsg,
   sendLoadingMoreFinishedMsg,
@@ -281,8 +280,14 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, searchSource, getCurrentTab, scopedProfilesManager, abortController } =
-    params;
+  const {
+    dataSubjects,
+    searchSource,
+    getCurrentTab,
+    scopedProfilesManager,
+    abortController,
+    services,
+  } = params;
 
   try {
     const { query } = getCurrentTab().appState;
@@ -349,7 +354,9 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
       interceptedWarnings: undefined,
       pagination: currentDocs.pagination,
     });
-    sendErrorTo(dataSubjects.main$)(error);
+    if (!abortController.signal.aborted) {
+      services.data.search.showError(error);
+    }
   }
 }
 
