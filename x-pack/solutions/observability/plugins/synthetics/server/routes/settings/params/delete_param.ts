@@ -7,23 +7,39 @@
 
 import path from 'path';
 import { z } from '@kbn/zod';
+import type { IKibanaResponse } from '@kbn/core/server';
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import { MAX_PARAM_BULK_SIZE, routeId } from '../../zod_query';
+import type { SyntheticsServerSetup } from '../../../types';
 import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import type { DeleteParamsResponse, SyntheticsParams } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { assertCanMutateParamInAllSpaces } from './param_space_authz';
 
-const deleteParams = async (
-  { savedObjectsClient, server }: RouteContext,
+/** Deletes parameters after verifying the caller has delete privileges in all spaces they span. */
+export const deleteParams = async (
+  routeContext: RouteContext<unknown, unknown, unknown>,
   idsToDelete: string[]
-): Promise<DeleteParamsResponse[]> => {
+): Promise<IKibanaResponse | DeleteParamsResponse[]> => {
+  const { savedObjectsClient, server, spaceId } = routeContext;
   const { spaces: existingParamsSpaces, keys: modifiedParamKeys } = await getExistingParamsInfo(
     savedObjectsClient,
-    idsToDelete
+    idsToDelete,
+    server,
+    spaceId
   );
+
+  const spaceAuth = await assertCanMutateParamInAllSpaces(
+    routeContext,
+    existingParamsSpaces,
+    'bulk_delete'
+  );
+  if (!spaceAuth.ok) {
+    return spaceAuth.errorResponse;
+  }
 
   const result = await savedObjectsClient.bulkDelete(
     idsToDelete.map((id) => ({ type: syntheticsParamType, id })),
@@ -85,11 +101,18 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
 
 export async function getExistingParamsInfo(
   savedObjectsClient: SavedObjectsClientContract,
-  paramIds: string[]
+  paramIds: string[],
+  server?: SyntheticsServerSetup,
+  spaceId?: string
 ) {
-  const existingParam = await savedObjectsClient.bulkGet<SyntheticsParams>(
-    paramIds.map((id) => ({ type: syntheticsParamType, id }))
-  );
+  const objects = paramIds.map((id) => ({ type: syntheticsParamType, id }));
+  const internalRepository = server?.coreStart?.savedObjects?.createInternalRepository();
+  const existingParam = internalRepository
+    ? await internalRepository.bulkGet<SyntheticsParams>(
+        objects,
+        spaceId ? { namespace: spaceId } : undefined
+      )
+    : await savedObjectsClient.bulkGet<SyntheticsParams>(objects);
 
   const spaces = Array.from(
     new Set(

@@ -16,6 +16,7 @@ export const SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE = {
 export const syntheticsParamSavedObjectType: SavedObjectsType = {
   name: syntheticsParamType,
   hidden: false,
+  hiddenFromHttpApis: true,
   namespaceType: 'multiple',
   mappings: {
     dynamic: false,

@@ -9,6 +9,7 @@ import {
   handleMultilineStringFormatter,
   inlineSourceFormatter,
   replaceStringWithParams,
+  resolveMonitorConfigParams,
 } from './formatting_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
@@ -246,6 +247,20 @@ describe('replaceStringWithParams', () => {
     expect(result).toEqual({});
   });
 
+  it('preserves quotes, backslashes, and newlines inside object and array fields without JSON parse errors', () => {
+    const payload = 'val"\nsource.inline.script: dGVzdA==\r\nbackslash: \\end';
+    const objResult = replaceStringWithParams(
+      { Authorization: 'Bearer ${TOKEN}', nested: ['${TOKEN}', 'plain'] },
+      { TOKEN: payload },
+      logger
+    );
+
+    expect(objResult).toEqual({
+      Authorization: `Bearer ${payload}`,
+      nested: [payload, 'plain'],
+    });
+  });
+
   it(`should replace $ {} with adding $ in start for template literal`, () => {
     const value = inlineSourceFormatter(
       {
@@ -307,5 +322,33 @@ describe('formatMWs', () => {
   it('always includes freq in the stringified output', () => {
     const [window] = JSON.parse(formatMWs(toMW({}), true) as string);
     expect(window.freq).toBe('yearly');
+  });
+});
+
+describe('resolveMonitorConfigParams', () => {
+  const logger = loggerMock.create();
+
+  it('resolves substitutable fields while skipping internal and source fields', () => {
+    const payload = 'inj"\nsource.inline.script: ZXY=';
+    const resolved = resolveMonitorConfigParams(
+      {
+        [ConfigKey.NAME]: 'Monitor ${P}',
+        [ConfigKey.SOURCE_INLINE]: 'const x = "${P}";',
+        [ConfigKey.SOURCE_PROJECT_CONTENT]: '${P}',
+        [ConfigKey.PARAMS]: '{"keep":"${P}"}',
+        [ConfigKey.PLAYWRIGHT_OPTIONS]: '{"baseURL":"https://example.com/${P}"}',
+      },
+      { P: payload },
+      logger
+    );
+
+    expect(resolved[ConfigKey.NAME]).toBe(`Monitor ${payload}`);
+    expect(resolved[ConfigKey.SOURCE_INLINE]).toBe('const x = "${P}";');
+    expect(resolved[ConfigKey.SOURCE_PROJECT_CONTENT]).toBe('${P}');
+    expect(resolved[ConfigKey.PARAMS]).toBe('{"keep":"${P}"}');
+    expect(JSON.parse(resolved[ConfigKey.PLAYWRIGHT_OPTIONS] as string)).toEqual({
+      baseURL: `https://example.com/${payload}`,
+    });
+    expect(resolved[ConfigKey.PLAYWRIGHT_OPTIONS]).not.toContain('\n');
   });
 });
