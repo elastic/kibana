@@ -34,6 +34,8 @@ import {
   MAX_OUTPUT_TOTAL_CHARS,
   MAX_PARAMETER_KEYS,
 } from './types';
+import remarkParse from 'remark-parse-no-trim';
+import unified from 'unified';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { RunContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
@@ -340,29 +342,99 @@ describe('formatForConfirmationCard', () => {
   });
 });
 
+interface MdastNode {
+  type: string;
+  value?: unknown;
+  url?: string;
+  children?: MdastNode[];
+}
+
 describe('formatHostForConfirmationCard', () => {
   it('shows an ordinary hostname unchanged', () => {
     expect(formatHostForConfirmationCard('web-01')).toBe('web-01');
-    expect(formatHostForConfirmationCard('db.example.internal')).toBe('db.example.internal');
+    expect(formatHostForConfirmationCard('db.example.internal')).toBe('db\\.example\\.internal');
   });
 
-  it('keeps hyphens and dots, and escapes underscores, in a hostname', () => {
+  it('keeps hyphens, and escapes dots and underscores, in a hostname', () => {
     // An underscore only opens emphasis around word boundaries in CommonMark,
     // but it is escaped rather than reasoned about: the label must not depend
     // on the renderer's emphasis rules.
     expect(formatHostForConfirmationCard('db_01')).toBe('db\\_01');
     expect(formatHostForConfirmationCard('host-7f3a')).toBe('host-7f3a');
-    expect(formatHostForConfirmationCard('10.0.0.1')).toBe('10.0.0.1');
+    expect(formatHostForConfirmationCard('10.0.0.1')).toBe('10\\.0\\.0\\.1');
   });
 
   it('shows Markdown emphasis, links, autolinks and strikethrough in a hostname as plain text', () => {
     expect(formatHostForConfirmationCard('web-01** [ok](https://evil.example)')).toBe(
-      'web-01\\*\\* \\[ok\\](https://evil.example)'
+      'web-01\\*\\* \\[ok\\](https://evil\\.example)'
     );
     expect(formatHostForConfirmationCard('~prod~')).toBe('\\~prod\\~');
     expect(formatHostForConfirmationCard('`prod`')).toBe('\\`prod\\`');
-    // Angle brackets would form an autolink or raw HTML; they are shown as text.
-    expect(formatHostForConfirmationCard('<b>prod</b>')).toBe('\\<b\\>prod\\</b\\>');
+    // Angle brackets would form an autolink or raw HTML. A backslash does not
+    // escape `<` in the renderer's parser, so it is written as an entity.
+    expect(formatHostForConfirmationCard('<b>prod</b>')).toBe('&lt;b\\>prod&lt;/b\\>');
+  });
+
+  it('escapes the dots a bare URL, www host or email address needs, keeping the name readable', () => {
+    expect(formatHostForConfirmationCard('https://evil.example/approved')).toBe(
+      'https://evil\\.example/approved'
+    );
+    expect(formatHostForConfirmationCard('www.evil.example')).toBe('www\\.evil\\.example');
+    expect(formatHostForConfirmationCard('ops@evil.example')).toBe('ops@evil\\.example');
+    expect(formatHostForConfirmationCard('web-01.corp.local')).toBe('web-01\\.corp\\.local');
+  });
+
+  describe('as rendered by the card parser (remark-parse-no-trim, gfm)', () => {
+    const parser = unified().use(remarkParse, {});
+
+    // Mirrors how the card places the label: inside a bold span.
+    const render = (name: string) => {
+      const links: string[] = [];
+      let text = '';
+      const walk = (node: MdastNode) => {
+        if (node.type === 'link') links.push(node.url ?? '');
+        if (node.type === 'html') links.push(`html:${node.value}`);
+        if (typeof node.value === 'string' && node.type === 'text') text += node.value;
+        (node.children ?? []).forEach(walk);
+      };
+      walk(parser.parse(`**${formatHostForConfirmationCard(name)}**`) as MdastNode);
+      return { links, text };
+    };
+
+    it.each([
+      'https://evil.example/approved',
+      'HTTP://evil.example',
+      'www.evil.example',
+      'ops@evil.example',
+      '<https://evil.example>',
+      '<b>prod</b>',
+      'web-01** [ok](https://evil.example)',
+      'web&#x202E;01',
+      'web-01.corp.local',
+      'db_01.corp.local',
+      '10.0.0.1',
+    ])('shows %p as exactly that text with no link or raw HTML', (name) => {
+      const { links, text } = render(name);
+
+      expect(links).toEqual([]);
+      expect(text).toBe(name);
+    });
+
+    it('would link these names if the dots were not escaped (the parser really autolinks them)', () => {
+      const unescaped = (name: string) => {
+        const links: string[] = [];
+        const walk = (node: MdastNode) => {
+          if (node.type === 'link') links.push(node.url ?? '');
+          (node.children ?? []).forEach(walk);
+        };
+        walk(parser.parse(`**${name}**`) as MdastNode);
+        return links;
+      };
+
+      expect(unescaped('https://evil.example/approved')).toHaveLength(1);
+      expect(unescaped('www.evil.example')).toHaveLength(1);
+      expect(unescaped('ops@evil.example')).toHaveLength(1);
+    });
   });
 
   it('neutralises a forged trailing bold so the label cannot be closed early', () => {
@@ -380,8 +452,8 @@ describe('formatHostForConfirmationCard', () => {
   it('escapes an ampersand so a character reference cannot be decoded', () => {
     // Decoded by the renderer, `&#x202E;` would display the RTLO character the
     // predicate above refuses — shown as literal text instead.
-    expect(formatHostForConfirmationCard('web&#x202E;01')).toBe('web\\&#x202E;01');
-    expect(formatHostForConfirmationCard('a&b')).toBe('a\\&b');
+    expect(formatHostForConfirmationCard('web&#x202E;01')).toBe('web&amp;#x202E;01');
+    expect(formatHostForConfirmationCard('a&b')).toBe('a&amp;b');
   });
 
   it('shows invisible and tag code points in a hostname as escapes', () => {
@@ -409,7 +481,7 @@ describe('formatHostForConfirmationCard', () => {
   });
 
   it('leaves a non-ASCII hostname exactly as typed', () => {
-    expect(formatHostForConfirmationCard('café.internal')).toBe('café.internal');
+    expect(formatHostForConfirmationCard('café.internal')).toBe('café\\.internal');
     expect(formatHostForConfirmationCard('主机')).toBe('主机');
   });
 });

@@ -133,24 +133,38 @@ export function formatForConfirmationCard(value: string): string {
   return `"${formatted}"`;
 }
 
-// Markdown characters that could change how the card renders when a value is
-// placed inside the bold span: emphasis, code, strikethrough, links,
-// autolinks, tables and `&` (a character reference such as `&#x202E;` would be
-// decoded by the renderer, visually reintroducing a code point the predicate
-// above refuses). The value is not inside a code span there, so each is
-// backslash-escaped and shown literally.
-const MARKDOWN_STRUCTURE = new Set<number>([
+// Markdown that could change how the card renders when a value is placed inside
+// the bold span. The renderer (EuiMarkdownFormat) parses with remark-parse 8 in
+// its default gfm, non-commonmark mode, where a backslash only escapes
+// \ ` * _ [ ] { } ( ) # + - . ! > ~ | — so `\&`, `\<`, `\:` and `\@` would
+// show the backslash and still be parsed. Each character below is therefore
+// escaped the way that parser honours (verified against remark-parse-no-trim
+// 8.0.4 in types.test.ts), and the label shows exactly the name.
+//
+// Covered: emphasis, code, strikethrough, links, tables, the backslash itself,
+// and GFM extended autolinks. A bare `https://…`, `www.…` or `user@host.tld`
+// only becomes a link when its domain contains a dot, so every `.` is escaped;
+// that is the one character all three locators depend on, and it keeps
+// `web-01.corp.local` readable. `<` and `&` cannot be backslash-escaped in this
+// mode, so they are written as the entities `&lt;` and `&amp;` (the latter also
+// stops a character reference such as `&#x202E;` being decoded into a code
+// point the predicate above refuses).
+const MARKDOWN_BACKSLASH_ESCAPED = new Set<number>([
   0x2a, // *
   0x5f, // _
   0x60, // `
   0x7e, // ~
   0x5b, // [
   0x5d, // ]
-  0x3c, // <
   0x3e, // >
   0x7c, // |
   0x5c, // backslash, so an escaped sequence cannot be forged
-  0x26, // &, so a character reference cannot be decoded into one
+  0x2e, // . — breaks the url, www and email autolink tokenizers
+]);
+
+const MARKDOWN_ENTITY_ESCAPED = new Map<number, string>([
+  [0x3c, '&lt;'],
+  [0x26, '&amp;'],
 ]);
 
 /**
@@ -159,8 +173,9 @@ const MARKDOWN_STRUCTURE = new Set<number>([
  * this is not a code span: a host is shown in bold so it reads as the heading
  * of the card, and the value itself comes from the endpoint (`host.name`,
  * `host.hostname`) rather than the model — a machine can legitimately be named
- * `web-01** [approved by CISO]`, and an unescaped name would restructure the
- * approval card. Markdown structure is escaped with a backslash and every
+ * `web-01** [approved by CISO]` or `https://evil.example/approved`, and an
+ * unescaped name would restructure the approval card or become a clickable
+ * link. Markdown structure and autolinks are escaped (see above) and every
  * misleading code point is shown as an escape, so the label the analyst reads
  * is the exact name that will be acted on.
  */
@@ -184,7 +199,12 @@ export function formatHostForConfirmationCard(value: string): string {
       escapes += escapeForCodeSpan(cp);
     } else {
       flushEscapes();
-      formatted += MARKDOWN_STRUCTURE.has(cp) ? `\\${ch}` : ch;
+      const entity = MARKDOWN_ENTITY_ESCAPED.get(cp);
+      if (entity) {
+        formatted += entity;
+      } else {
+        formatted += MARKDOWN_BACKSLASH_ESCAPED.has(cp) ? `\\${ch}` : ch;
+      }
     }
   }
   flushEscapes();
