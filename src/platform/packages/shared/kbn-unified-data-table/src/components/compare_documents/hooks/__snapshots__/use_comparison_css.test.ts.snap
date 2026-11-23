@@ -2,69 +2,69 @@
 
 exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
 Object {
-  "name": "q5zi8p-indicatorCss",
+  "name": "1tmmgmv-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}
-      .unifiedDataTable__comparisonMatchCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #09724D !important;
+        .unifiedDataTable__comparisonMatchCell {
+          .unifiedDataTable__cellValue {
+            &,
+            & * {
+              color: #09724D !important;
+            }
           }
         }
-      }
 
-      .unifiedDataTable__comparisonDiffCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #A71627 !important;
+        .unifiedDataTable__comparisonDiffCell {
+          .unifiedDataTable__cellValue {
+            &,
+            & * {
+              color: #A71627 !important;
+            }
           }
         }
-      }
-    ;    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} ;label:indicatorCss",
+      ;    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} ;label:indicatorCss",
 }
 `;
 
 exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
 Object {
-  "name": "q5zi8p-indicatorCss",
+  "name": "1tmmgmv-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}
-      .unifiedDataTable__comparisonMatchCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #09724D !important;
+        .unifiedDataTable__comparisonMatchCell {
+          .unifiedDataTable__cellValue {
+            &,
+            & * {
+              color: #09724D !important;
+            }
           }
         }
-      }
 
-      .unifiedDataTable__comparisonDiffCell {
-        .unifiedDataTable__cellValue {
-          &,
-          & * {
-            color: #A71627 !important;
+        .unifiedDataTable__comparisonDiffCell {
+          .unifiedDataTable__cellValue {
+            &,
+            & * {
+              color: #A71627 !important;
+            }
           }
         }
-      }
-    ;    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} ;label:indicatorCss",
+      ;    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} ;label:indicatorCss",
 }
 `;
 
 exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
 Object {
-  "name": "6qao0p-indicatorCss",
+  "name": "1auu2hi-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;}
-      .unifiedDataTable__comparisonAddedSegment {
-        text-decoration: underline;
-      }
+        .unifiedDataTable__comparisonAddedSegment {
+          text-decoration: underline;
+        }
 
-      .unifiedDataTable__comparisonRemovedSegment {
-        text-decoration: line-through;
-      }
-    ; ;label:indicatorCss",
+        .unifiedDataTable__comparisonRemovedSegment {
+          text-decoration: line-through;
+        }
+      ; ;label:indicatorCss",
 }
 `;
 
@@ -78,43 +78,43 @@ Object {
 
 exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
 Object {
-  "name": "1ko0e72-indicatorCss-indicatorCss-indicatorCss",
+  "name": "3gj10w-indicatorCss-indicatorCss-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} 
-      .unifiedDataTable__comparisonSegment {
-        padding-left: calc(4px / 2);
-      }
-
-      
-        .unifiedDataTable__comparisonAddedSegment:before {
-          content: '+';
-          position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;label:indicatorCss;
-          background-color: #008A5E;
-          color: #ECF1F9;
+        .unifiedDataTable__comparisonSegment {
+          padding-left: calc(4px / 2);
         }
 
-        .unifiedDataTable__comparisonRemovedSegment:before {
-          content: '-';
-          position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;label:indicatorCss;
-          background-color: #C61E25;
-          color: #ECF1F9;
-        }
-      ;
-    ;;label:indicatorCss",
+        
+            .unifiedDataTable__comparisonAddedSegment:before {
+              content: '+';
+              position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;label:indicatorCss;
+              background-color: #008A5E;
+              color: #ECF1F9;
+            }
+
+            .unifiedDataTable__comparisonRemovedSegment:before {
+              content: '-';
+              position:absolute;width:8px;height:100%;margin-left:calc(-8px - calc(4px / 2));text-align:center;line-height:1;font-weight:450;label:indicatorCss;
+              background-color: #C61E25;
+              color: #ECF1F9;
+            }
+          ;
+      ;;label:indicatorCss",
 }
 `;
 
 exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
 Object {
-  "name": "1y8ojq4-indicatorCss",
+  "name": "19wp2s9-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;} 
-      .unifiedDataTable__comparisonSegment {
-        padding-left: calc(4px / 2);
-      }
+        .unifiedDataTable__comparisonSegment {
+          padding-left: calc(4px / 2);
+        }
 
-      
-    ;;label:indicatorCss",
+        
+      ;;label:indicatorCss",
 }
 `;
 
@@ -128,17 +128,17 @@ Object {
 
 exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
 Object {
-  "name": "6qao0p-indicatorCss",
+  "name": "1auu2hi-indicatorCss",
   "next": undefined,
   "styles": ".unifiedDataTable__cellValue{white-space:pre-wrap;}.unifiedDataTable__comparisonFieldName{font-weight:500;}.unifiedDataTable__comparisonBaseDocCell{background-color:#F6F9FC;}    .unifiedDataTable__comparisonSegment{position:relative;}.unifiedDataTable__comparisonAddedSegment{background-color:#E9FFF7;color:#09724D;}.unifiedDataTable__comparisonRemovedSegment{background-color:#FFF3F1;color:#A71627;}
-      .unifiedDataTable__comparisonAddedSegment {
-        text-decoration: underline;
-      }
+        .unifiedDataTable__comparisonAddedSegment {
+          text-decoration: underline;
+        }
 
-      .unifiedDataTable__comparisonRemovedSegment {
-        text-decoration: line-through;
-      }
-    ; ;label:indicatorCss",
+        .unifiedDataTable__comparisonRemovedSegment {
+          text-decoration: line-through;
+        }
+      ; ;label:indicatorCss",
 }
 `;
 
