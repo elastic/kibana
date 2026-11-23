@@ -17,6 +17,24 @@ const INVENTORY_TYPES = ['host', 'k8s.deployment'];
 const K8S_DEPLOYMENT_IDENTITY_FIELDS = ['kubernetes.namespace', 'kubernetes.deployment.name'];
 const K8S_DEPLOYMENT_SUGGESTED_FILTERS = ['k8s.cluster.name', 'kubernetes.namespace'];
 const HOST_SUGGESTED_FILTERS = ['os.type', 'cloud.provider'];
+const K8S_DEPLOYMENT_PRESENTATION = {
+  category: 'kubernetes',
+  icon: 'logoKubernetes',
+  nameFields: ['kubernetes.deployment.name'],
+  defaultColumns: [
+    'kubernetes.namespace',
+    'k8s.cluster.name',
+    'k8s.deployment.available',
+    'last_seen',
+  ],
+  badgeColumns: ['k8s.cluster.name'],
+};
+const HOST_PRESENTATION = {
+  category: 'hosts',
+  icon: 'compute',
+  nameFields: ['host.name', 'host.hostname', 'host.id'],
+  defaultColumns: ['cloud.account.id', 'last_seen'],
+};
 
 interface InventoryTypeResponse {
   type: string;
@@ -25,7 +43,20 @@ interface InventoryTypeResponse {
   columns: Array<{ name: string; kind: string; label?: string }>;
   suggestedFilters: string[];
   sources: Array<{ indexPattern: string; filter?: string }>;
+  category?: string;
+  icon?: string;
+  nameFields?: string[];
+  defaultColumns?: string[];
+  badgeColumns?: string[];
 }
+
+const presentationOf = ({
+  category,
+  icon,
+  nameFields,
+  defaultColumns,
+  badgeColumns,
+}: InventoryTypeResponse) => ({ category, icon, nameFields, defaultColumns, badgeColumns });
 
 apiTest.describe(
   'GET /internal/entity_inventory/types',
@@ -75,7 +106,8 @@ apiTest.describe(
       expect(labels['entity.id']).toBe('ID');
       expect(labels['kubernetes.namespace']).toBe('Namespace');
       expect(labels['k8s.cluster.name']).toBe('Cluster');
-      expect(labels['kubernetes.deployment.name']).toBeUndefined();
+      expect(labels['kubernetes.deployment.name']).toBe('Deployment');
+      expect(labels['k8s.deployment.available']).toBe('Available replicas');
       expect(labels.last_seen).toBe('Last seen');
     });
 
@@ -91,6 +123,30 @@ apiTest.describe(
         HOST_SUGGESTED_FILTERS
       );
     });
+
+    apiTest(
+      'returns the presentation fields of k8s.deployment and the built-in host',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(TYPES_PATH, {
+          headers: { ...INTERNAL_HEADERS, ...adminCookieHeader },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const { types }: { types: InventoryTypeResponse[] } = response.body;
+        const k8sDeployment = types.find(({ type }) => type === 'k8s.deployment');
+        const host = types.find(({ type }) => type === 'host');
+
+        expect(k8sDeployment && presentationOf(k8sDeployment)).toStrictEqual(
+          K8S_DEPLOYMENT_PRESENTATION
+        );
+        // host declares no badge columns, so the response leaves the field out.
+        expect(host && presentationOf(host)).toStrictEqual({
+          ...HOST_PRESENTATION,
+          badgeColumns: undefined,
+        });
+      }
+    );
 
     apiTest('returns every type with a dynamic block', async ({ apiClient }) => {
       const response = await apiClient.get(TYPES_PATH, {
