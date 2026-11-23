@@ -17,7 +17,7 @@ import type { DetectionSignal } from '../../common/detection_signal';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../lib/engine/tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
 import { ScopedReconcileRunner } from '../lib/reconcile/scoped_reconcile_runner';

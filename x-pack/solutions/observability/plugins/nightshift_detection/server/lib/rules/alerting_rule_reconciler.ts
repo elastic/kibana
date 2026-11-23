@@ -22,7 +22,7 @@ import {
   getOwningStrategy,
   getWatchedSource,
 } from './rule_identity';
-import { DetectionRulesClient } from './rules_client_token';
+import { DetectionRulesClient } from './tokens';
 
 /** An `alerting_rule` resource and the strategy that wants it. */
 export interface StrategyAlertingRule {
