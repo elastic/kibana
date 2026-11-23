@@ -13,8 +13,12 @@ import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { selectYamlString } from '../../../entities/workflows/store/workflow_detail/selectors';
 import {
+  selectRemixTemplate,
+  selectYamlString,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  setRemixTemplate,
   setWorkflow,
   setYamlString,
 } from '../../../entities/workflows/store/workflow_detail/slice';
@@ -221,7 +225,7 @@ describe('WorkflowDetailPage', () => {
       }
     );
 
-    return { ...view, navigateToApp, historyRef, store };
+    return { ...view, navigateToApp, historyRef, store, services };
   };
 
   beforeEach(() => {
@@ -253,6 +257,26 @@ describe('WorkflowDetailPage', () => {
 
       expect(mockLoadConnectors).toHaveBeenCalled();
       expect(mockLoadWorkflow).toHaveBeenCalledWith({ id: 'test-workflow-123' });
+    });
+
+    it('records the loaded workflow as recently viewed', () => {
+      const { services } = renderWithProviders({ id: 'test-workflow-123' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(services.workflowsManagement.recentlyViewed.add).toHaveBeenCalledWith(
+        '/app/workflows/test-workflow-123',
+        'Test Workflow',
+        'test-workflow-123'
+      );
+    });
+
+    it('does not record the previous workflow while another one loads', () => {
+      const { services } = renderWithProviders({ id: 'other-workflow' }, (s) => {
+        s.dispatch(setWorkflow(mockWorkflow));
+      });
+
+      expect(services.workflowsManagement.recentlyViewed.add).not.toHaveBeenCalled();
     });
 
     it('stores the replay run mode before opening the modal', () => {
@@ -362,6 +386,39 @@ describe('WorkflowDetailPage', () => {
       renderWithProviders({ id: undefined }, () => store, ['/create']);
 
       expect(getSeededYaml(store)).toContain('name: New workflow');
+    });
+
+    describe('remix template', () => {
+      const template = { slug: 'triage-alerts', version: '1.2.0' };
+
+      it('stores the template a remix started from, so the save records its origin', () => {
+        const store = createMockStore();
+
+        renderWithProviders({ id: undefined }, () => store, [
+          { pathname: '/create', state: { initialYaml, template } },
+        ]);
+
+        expect(selectRemixTemplate(store.getState())).toEqual(template);
+      });
+
+      it('ignores a template without `initialYaml`', () => {
+        const store = createMockStore();
+
+        renderWithProviders({ id: undefined }, () => store, [
+          { pathname: '/create', state: { template } },
+        ]);
+
+        expect(selectRemixTemplate(store.getState())).toBeUndefined();
+      });
+
+      it('clears an earlier remix on a plain `/create`', () => {
+        const store = createMockStore();
+        store.dispatch(setRemixTemplate(template));
+
+        renderWithProviders({ id: undefined }, () => store, ['/create']);
+
+        expect(selectRemixTemplate(store.getState())).toBeUndefined();
+      });
     });
   });
 

@@ -12,6 +12,7 @@ import os from 'os';
 import path from 'path';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../../connector_spec';
+import { parseManifest, serializeManifest } from '../manifest';
 import type { UpdateVendorApiOptions } from './update_vendor_api';
 import { updateVendorApi } from './update_vendor_api';
 
@@ -55,6 +56,13 @@ Item:
   type: object
   properties: { name: { type: string } }
 `;
+
+// A captured document is loaded on its own, so it can't reference models.yaml.
+const selfContainedSpecYaml = (version: string) =>
+  specYaml(version).replace(
+    "{ $ref: 'models.yaml#/Item' }",
+    '{ type: object, properties: { name: { type: string } } }'
+  );
 
 const connector: ConnectorSpec = {
   metadata: {
@@ -470,6 +478,180 @@ actions:
       expect(warnings).toEqual([
         'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
       ]);
+    });
+  });
+
+  describe('with a captured source', () => {
+    const NOTE = 'The vendor only serves this spec to a request carrying credentials.';
+    const writeManifest = (manifest: unknown) =>
+      fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest(parseManifest(JSON.stringify(manifest)))
+      );
+
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main = { ...manifest.sources.main, captured: true, note: NOTE };
+      await writeManifest(manifest);
+      fetched = [];
+      warnings = [];
+    });
+
+    it('keeps the snapshot it was captured into on --refresh, without fetching it', async () => {
+      documents = {};
+
+      const { changed, problems } = await update({ refresh: true });
+
+      expect(problems).toEqual([]);
+      expect(changed).toEqual([]);
+      expect(fetched).toEqual([]);
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        captured: true,
+        note: NOTE,
+      });
+    });
+
+    it('refuses to point it somewhere else while its snapshot is the copy of the old URL', async () => {
+      await expect(
+        update({ sources: { main: 'https://specs.example.com/other.yaml' } })
+      ).rejects.toThrow('main is captured from https://specs.example.com/openapi.yaml');
+
+      expect((await readJson('manifest.json')).sources.main.url).toBe(SPEC_URL);
+      expect(fetched).toEqual([]);
+    });
+
+    it('accepts the URL it already has, and refuses to change how it is read', async () => {
+      await expect(update({ sources: { main: SPEC_URL } })).resolves.toMatchObject({ changed: [] });
+      await expect(update({ pages: { main: ['api/'] } })).rejects.toThrow('main is captured');
+    });
+
+    it('is captured again from the document passed with --capture, without fetching it', async () => {
+      const { changed } = await update({
+        sources: { main: 'https://specs.example.com/other.yaml' },
+        captures: { main: selfContainedSpecYaml('2.0') },
+      });
+
+      expect(fetched).toEqual([]);
+      // The capture inlines the item schema the old snapshot referenced.
+      expect(changed).toEqual(
+        expect.arrayContaining(['manifest.json', 'snapshots/main.openapi.json'])
+      );
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        url: 'https://specs.example.com/other.yaml',
+        captured: true,
+        apiVersion: '2.0',
+        note: NOTE,
+      });
+    });
+
+    it('is never fetched when its snapshot is missing, with or without --refresh', async () => {
+      await fs.rm(path.join(directory, 'snapshots/main.openapi.json'));
+
+      for (const refresh of [false, true]) {
+        await expect(update({ refresh })).rejects.toThrow(
+          'main is captured but has no snapshot; capture it again with --capture main=<file>'
+        );
+      }
+      expect(fetched).toEqual([]);
+    });
+
+    it('only loads the document it was captured from', async () => {
+      await expect(update({ captures: { main: specYaml('2.0') } })).rejects.toThrow(
+        `main is captured from one document, but loading it also needs ${MODELS_URL}`
+      );
+      expect(fetched).toEqual([]);
+    });
+    it('still judges the overlay of the OpenAPI sources it sits next to', async () => {
+      // A captured MCP source can't match an overlay action, so it can't hide that one is stale.
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main = { ...manifest.sources.main, captured: undefined, note: undefined };
+      manifest.sources.tools = {
+        format: 'mcp',
+        url: 'https://specs.example.com/tools.json',
+        endpoints: ['https://mcp.example.com/mcp'],
+        captured: true,
+        note: NOTE,
+        fetchedAt: '2026-10-07T12:00:00.000Z',
+      };
+      await writeManifest(manifest);
+      await fs.writeFile(
+        path.join(directory, 'snapshots/tools.mcp.json'),
+        JSON.stringify({ tools: [{ name: 'search', inputSchema: { type: 'object' } }] })
+      );
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
+  });
+
+  describe('capturing a source', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      fetched = [];
+    });
+
+    it('marks it captured, with the note passed alongside', async () => {
+      await update({
+        captures: { main: selfContainedSpecYaml('2.0') },
+        notes: { main: 'Fetched with an API token from a trial account.' },
+      });
+
+      expect(fetched).toEqual([]);
+      expect((await readJson('manifest.json')).sources.main).toMatchObject({
+        captured: true,
+        apiVersion: '2.0',
+        note: 'Fetched with an API token from a trial account.',
+      });
+    });
+
+    it('needs a note saying what capturing it took', async () => {
+      await expect(update({ captures: { main: selfContainedSpecYaml('2.0') } })).rejects.toThrow(
+        '--capture marks main captured, which needs a note saying what capturing it took; pass --note main="..."'
+      );
+    });
+
+    it('does not take the note of a source that was not captured', async () => {
+      const manifest = await readJson('manifest.json');
+      manifest.sources.main.note = 'Pinned to the 2026 release.';
+      await fs.writeFile(
+        path.join(directory, 'manifest.json'),
+        serializeManifest(parseManifest(JSON.stringify(manifest)))
+      );
+
+      await expect(update({ captures: { main: selfContainedSpecYaml('2.0') } })).rejects.toThrow(
+        '--capture marks main captured, which needs a note'
+      );
+    });
+
+    it('does not capture a Markdown reference, which is read page by page', async () => {
+      await expect(
+        update({
+          formats: { main: 'brave-markdown' },
+          captures: { main: '# Reference' },
+          notes: { main: 'Captured.' },
+        })
+      ).rejects.toThrow('main is a Markdown reference');
+      expect(fetched).toEqual([]);
+    });
+
+    it('only captures a source the manifest or --source names', async () => {
+      await expect(
+        update({ captures: { other: specYaml('2.0') }, notes: { other: 'Captured.' } })
+      ).rejects.toThrow('there is no source "other"');
     });
   });
 

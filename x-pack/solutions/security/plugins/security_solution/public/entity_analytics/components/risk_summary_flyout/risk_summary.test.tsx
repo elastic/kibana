@@ -11,7 +11,7 @@ import {
   mockHostEntityRiskScores,
   mockHostEntityRiskScoresWithResolution,
   mockUserEntityRiskScores,
-} from '../../../flyout/entity_details/mocks';
+} from '../../../flyout_v2/entity/shared/mocks';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';

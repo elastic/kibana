@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/server';
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
 import { buildOtelResources } from '@kbn/telemetry';
 import {
   ElasticsearchOtlpExporter,
@@ -21,6 +20,7 @@ import {
   EVALUATOR_NAME_BAGGAGE_KEY,
 } from '@kbn/inference-tracing';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import type { SpanExporter, SpanProcessor } from '@opentelemetry/sdk-trace';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { GlobalBridgeProcessor } from './global_bridge_processor';
@@ -34,7 +34,7 @@ export const registerTracingExporter = async ({
   core: CoreStart;
   tracingConfig: AgentBuilderConfig['tracing'];
 }): Promise<(() => Promise<void>) | undefined> => {
-  const allExporters: tracing.SpanExporter[] = [
+  const allExporters: SpanExporter[] = [
     new ElasticsearchOtlpExporter(core.elasticsearch.client.asInternalUser),
     ...tracingConfig.exporters.map(
       ({ url, headers }) =>
@@ -45,7 +45,7 @@ export const registerTracingExporter = async ({
     ),
   ];
 
-  const processors: tracing.SpanProcessor[] = [
+  const processors: SpanProcessor[] = [
     ...(tracingConfig.opik_distributed_tracing ? [new OpikDistributedTracingSpanProcessor()] : []),
     ...allExporters.map(
       (exporter) =>

@@ -18,8 +18,8 @@ export async function isCompositeSloEnabled(
     | Pick<FeatureFlagsRequestHandlerContext, 'getBooleanValue'>
 ): Promise<boolean> {
   if ('getBooleanValue$' in featureFlags) {
-    return firstValueFrom(featureFlags.getBooleanValue$(SLO_COMPOSITE_ENABLED, false));
+    return firstValueFrom(featureFlags.getBooleanValue$(SLO_COMPOSITE_ENABLED, true));
   }
 
-  return featureFlags.getBooleanValue(SLO_COMPOSITE_ENABLED, false);
+  return featureFlags.getBooleanValue(SLO_COMPOSITE_ENABLED, true);
 }
