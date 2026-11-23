@@ -419,6 +419,44 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('upgrading from a version with its own agent version condition', () => {
+      let alreadyWithoutInputsPackagePolicyId: string;
+      let losingInputsPackagePolicyId: string;
+
+      before(async () => {
+        await installPackage('1.1.0');
+        // Agents enrolled after the package policies were added: existing affected package policies
+        const createWithAgents = async (agents: TestAgent[]) => {
+          const agentPolicyId = await createAgentPolicy();
+          const { item } = await createPackagePolicy('1.1.0', [agentPolicyId]);
+          await addAgents(agentPolicyId, agents);
+          return item.id;
+        };
+        // 9.2.0 doesn't satisfy 1.1.0's `^9.3.0`, so it already lacks the inputs
+        alreadyWithoutInputsPackagePolicyId = await createWithAgents([
+          { status: 'online', version: '9.2.0' },
+        ]);
+        // 9.3.8 satisfies `^9.3.0`, but not 1.2.0's `>=9.3.5` once evaluated at 9.3.0
+        losingInputsPackagePolicyId = await createWithAgents([
+          { status: 'online', version: '9.3.8' },
+        ]);
+        await installPackage('1.2.0');
+      });
+
+      it('upgrades when the agents already lack the inputs', async () => {
+        await upgradePackagePolicies([alreadyWithoutInputsPackagePolicyId]);
+
+        expect(await getPackagePolicyVersion(alreadyWithoutInputsPackagePolicyId)).to.eql('1.2.0');
+      });
+
+      it('rejects the upgrade when agents would lose the inputs', async () => {
+        const body = await upgradePackagePolicies([losingInputsPackagePolicyId], { expected: 400 });
+
+        expect(body.message).to.contain('9.3.8');
+        expect(await getPackagePolicyVersion(losingInputsPackagePolicyId)).to.eql('1.1.0');
+      });
+    });
+
     describe('upgrading away from an agent version condition', () => {
       let packagePolicyId: string;
 

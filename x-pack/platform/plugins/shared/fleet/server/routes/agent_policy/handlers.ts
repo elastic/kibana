@@ -165,8 +165,10 @@ export async function populateAssignedAgentsCount(
           versions: { terms: { field: 'agent.version', size: 1000 } },
         },
       },
-      // The agents a package-level agent version condition applies to, counted with the same rules
-      // as Fleet's check, which depend on each policy's inactivity timeout
+      // The agents a package-level agent version condition applies to, filtered by status with the
+      // same rules as Fleet's check, which depend on each policy's inactivity timeout. Unlike that
+      // check, agents are matched to their policy with the same `policy_id` kuery as the counts
+      // above, so the counts can differ in edge cases: the UI then relies on Fleet's response.
       active_policies: {
         filters: {
           filters: Object.fromEntries(

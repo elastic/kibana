@@ -721,6 +721,35 @@ describe('edit package policy page', () => {
       });
     });
 
+    it('does not require an acknowledgement when the agents already lack the inputs', async () => {
+      // The current package version has the same condition
+      (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
+        data: { item: { ...mockPackagePolicy, package_agent_version_condition: '^9.4.0' } },
+      });
+      (useUIExtension as MockFn)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        })
+        .mockReturnValueOnce(undefined)
+        .mockReturnValueOnce({
+          view: 'package-policy-edit-tabs',
+          useLatestPackageVersion: true,
+          Component: TestComponent,
+        });
+      (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+        data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+      });
+
+      render();
+
+      await waitFor(() => {
+        expect(renderResult.getByText(/Upgrade integration/).closest('button')!).not.toBeDisabled();
+      });
+      expect(renderResult.queryByTestId('incompatibleAgentVersionCallout')).toBeNull();
+    });
+
     it('asks to acknowledge an incompatibility reported by Fleet that the agent counts do not show', async () => {
       // e.g. without the Agents Read privilege, the agent policies have no agent counts
       (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({

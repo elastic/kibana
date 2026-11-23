@@ -269,10 +269,11 @@ export const EditPackagePolicyForm = memo<{
         .map((policy) => policy.id),
     [agentPolicies, existingAgentPolicies]
   );
-  const { data: addedAgentPoliciesData } = useBulkGetAgentPoliciesQuery(addedAgentPolicyIds, {
-    ignoreMissing: true,
-    enabled: addedAgentPolicyIds.length > 0,
-  });
+  const { data: addedAgentPoliciesData, isInitialLoading: isLoadingAddedAgentPolicies } =
+    useBulkGetAgentPoliciesQuery(addedAgentPolicyIds, {
+      ignoreMissing: true,
+      enabled: addedAgentPolicyIds.length > 0,
+    });
   // Upgrading checks every agent policy, while adding agent policies only checks the added ones,
   // as Fleet does on save. Other edits are not checked, the callout is only informative then.
   const requiresAgentVersionAcknowledgement =
@@ -289,10 +290,22 @@ export const EditPackagePolicyForm = memo<{
   // Set when Fleet rejected the change because some agents don't satisfy the package's agent
   // version condition, so that it can be acknowledged even if the agent counts don't show it
   const [serverAgentVersionBlock, setServerAgentVersionBlock] = useState<AgentVersionBlock>();
+  const currentAgentVersionCondition = originalPackagePolicy?.package_agent_version_condition;
+  const currentCondition = useMemo(
+    () =>
+      isUpgrade && currentAgentVersionCondition
+        ? {
+            versionCondition: currentAgentVersionCondition,
+            agentPolicyIds: selectedExistingPolicies.map(({ id }) => id),
+          }
+        : undefined,
+    [isUpgrade, currentAgentVersionCondition, selectedExistingPolicies]
+  );
   const incompatibleAgentVersion = useIncompatibleAgentVersionStatus(
     packageInfo,
     agentPoliciesToCheck,
-    serverAgentVersionBlock
+    serverAgentVersionBlock,
+    currentCondition
   );
   const [acknowledgeAgentVersionIncompatibility, setAcknowledgeAgentVersionIncompatibility] =
     useState<boolean>(false);
@@ -300,8 +313,10 @@ export const EditPackagePolicyForm = memo<{
     requiresAgentVersionAcknowledgement &&
     incompatibleAgentVersion.status !== 'NONE' &&
     incompatibleAgentVersion.requiresAcknowledgement;
+  // Until the added agent policies are loaded, their agents can't be checked
   const isAgentVersionAcknowledgementMissing =
-    canAcknowledgeAgentVersionIncompatibility && !acknowledgeAgentVersionIncompatibility;
+    (requiresAgentVersionAcknowledgement && isLoadingAddedAgentPolicies) ||
+    (canAcknowledgeAgentVersionIncompatibility && !acknowledgeAgentVersionIncompatibility);
   // An acknowledgement only applies to the agent policies and package version it was given for
   const agentVersionGuardKey = `${packagePolicy.package?.version}|${addedAgentPolicyIds.join(',')}`;
   useEffect(() => {

@@ -17346,6 +17346,28 @@ describe('Package policy service agent version guard', () => {
       });
     });
 
+    it('passes the condition of the current package version on upgrade', async () => {
+      const packagePolicy = createPackagePolicyMock();
+      // Both package versions have an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        version: params.pkgVersion,
+        conditions: { agent: { version: params.pkgVersion === '1.0.0' ? '^9.4.0' : '^9.3.0' } },
+      }));
+
+      await update({ ...packagePolicy, package: { ...packagePolicy.package!, version: '1.0.0' } });
+
+      expect(mockedAssertAgentVersionCompatible).toHaveBeenCalledWith(
+        expect.objectContaining({
+          operation: 'upgrade',
+          currentCondition: {
+            versionCondition: '^9.3.0',
+            agentPolicyIds: packagePolicy.policy_ids,
+          },
+        })
+      );
+    });
+
     it('checks only the added agent policies when policy_ids grows', async () => {
       const packagePolicy = createPackagePolicyMock();
 
@@ -17404,6 +17426,35 @@ describe('Package policy service agent version guard', () => {
       expect(result.failedPolicies[0].packagePolicy.id).toBe(packagePolicy.id);
       expect(soClient.bulkUpdate.mock.calls[0][0].map(({ id }) => id)).toEqual([
         otherPackagePolicy.id,
+      ]);
+    });
+
+    it('passes the condition of the current package version on upgrade', async () => {
+      const soClient = createSavedObjectClientMock();
+      const packagePolicy = createPackagePolicyMock();
+      mockSavedPackagePolicies(soClient, [packagePolicy]);
+      // Both package versions have an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        version: params.pkgVersion,
+        conditions: { agent: { version: params.pkgVersion === '1.0.0' ? '^9.4.0' : '^9.3.0' } },
+      }));
+
+      // The rest of the update is not under test
+      await packagePolicyService
+        .bulkUpdate(soClient, esClient(), [
+          { ...packagePolicy, package: { ...packagePolicy.package!, version: '1.0.0' } },
+        ])
+        .catch(() => undefined);
+
+      expect(mockedGetAgentVersionBlocks).toHaveBeenCalledWith([
+        expect.objectContaining({
+          key: packagePolicy.id,
+          currentCondition: {
+            versionCondition: '^9.3.0',
+            agentPolicyIds: packagePolicy.policy_ids,
+          },
+        }),
       ]);
     });
 

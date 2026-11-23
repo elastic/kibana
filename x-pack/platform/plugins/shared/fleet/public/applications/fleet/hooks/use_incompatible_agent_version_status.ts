@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import { getAgentVersionBlockers } from '../../../../common/services';
+import { agentLosesPackageInputs, getAgentVersionBlockers } from '../../../../common/services';
 import type { AgentPolicy } from '../types';
 import type { AgentVersionBlock, PackageInfo } from '../../../../common/types';
 import { ExperimentalFeaturesService } from '../../../services';
@@ -33,14 +33,30 @@ export type IncompatibleAgentVersionResult =
       requiresAcknowledgement: boolean;
     };
 
+/**
+ * On an upgrade from a package version with its own package-level agent version condition: that
+ * condition, and the agent policies that already have the package policy. Their agents that don't
+ * satisfy it already lack the integration's inputs, so they aren't counted, as Fleet does on save.
+ */
+export interface CurrentAgentVersionCondition {
+  versionCondition: string;
+  agentPolicyIds: readonly string[];
+}
+
 export const useIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined,
-  serverAgentVersionBlock?: AgentVersionBlock
+  serverAgentVersionBlock?: AgentVersionBlock,
+  currentCondition?: CurrentAgentVersionCondition
 ): IncompatibleAgentVersionResult => {
   return useMemo(() => {
-    return getIncompatibleAgentVersionStatus(packageInfo, agentPolicies, serverAgentVersionBlock);
-  }, [packageInfo, agentPolicies, serverAgentVersionBlock]);
+    return getIncompatibleAgentVersionStatus(
+      packageInfo,
+      agentPolicies,
+      serverAgentVersionBlock,
+      currentCondition
+    );
+  }, [packageInfo, agentPolicies, serverAgentVersionBlock, currentCondition]);
 };
 
 /**
@@ -53,7 +69,8 @@ export const useIncompatibleAgentVersionStatus = (
 export const getIncompatibleAgentVersionStatus = (
   packageInfo: PackageInfo | undefined,
   agentPolicies: AgentPolicy[] | undefined,
-  serverAgentVersionBlock?: AgentVersionBlock
+  serverAgentVersionBlock?: AgentVersionBlock,
+  currentCondition?: CurrentAgentVersionCondition
 ): IncompatibleAgentVersionResult => {
   const versionCondition = packageInfo?.conditions?.agent?.version;
   if (!versionCondition) {
@@ -63,11 +80,17 @@ export const getIncompatibleAgentVersionStatus = (
   const requiresAcknowledgement = ExperimentalFeaturesService.get().enableVersionSpecificPolicies;
 
   const agentVersionCounts = (agentPolicies ?? []).flatMap(
-    ({ active_agents_per_version: activeAgentsPerVersion }) => activeAgentsPerVersion ?? []
+    ({ id, active_agents_per_version: activeAgentsPerVersion }) =>
+      (activeAgentsPerVersion ?? []).map((versionCount) => ({
+        ...versionCount,
+        lacksInputsAlready:
+          !!currentCondition?.agentPolicyIds.includes(id) &&
+          agentLosesPackageInputs(versionCount.version, currentCondition.versionCondition),
+      }))
   );
   const { blockedCount, blockingVersions, minVersion } = getAgentVersionBlockers({
     versionCondition,
-    agentVersionCounts,
+    agentVersionCounts: agentVersionCounts.filter(({ lacksInputsAlready }) => !lacksInputsAlready),
   });
   if (blockedCount === 0) {
     return serverAgentVersionBlock

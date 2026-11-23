@@ -13,9 +13,11 @@ import { ExperimentalFeaturesService } from '../../../services';
 import { getIncompatibleAgentVersionStatus } from './use_incompatible_agent_version_status';
 
 const createAgentPolicy = (
-  versions: Array<{ version: string; count: number }> | undefined
+  versions: Array<{ version: string; count: number }> | undefined,
+  id = 'policy-1'
 ): AgentPolicy =>
   ({
+    id,
     active_agents_per_version: versions,
   } as unknown as AgentPolicy);
 
@@ -217,6 +219,42 @@ describe('getIncompatibleAgentVersionStatus', () => {
       requiresAcknowledgement: true,
     });
   });
+  it('does not count the agents that already lack the inputs under the current condition', () => {
+    const result = getIncompatibleAgentVersionStatus(
+      createPackageInfo('^9.4.0'),
+      [
+        createAgentPolicy([
+          { version: '9.2.0', count: 1 },
+          { version: '9.3.1', count: 2 },
+          { version: '9.4.2', count: 5 },
+        ]),
+        // Added by the edit, so its agents never had the inputs
+        createAgentPolicy([{ version: '9.2.0', count: 3 }], 'policy-2'),
+      ],
+      undefined,
+      { versionCondition: '^9.3.0', agentPolicyIds: ['policy-1'] }
+    );
+    expect(result).toEqual({
+      status: 'SOME',
+      versionCondition: '^9.4.0',
+      blockedCount: 5,
+      observedVersions: ['9.2.0', '9.3.1'],
+      minVersion: '9.4.0',
+      agentPolicyCount: 2,
+      requiresAcknowledgement: true,
+    });
+  });
+
+  it('returns NONE when the current condition already excludes every blocked agent', () => {
+    const result = getIncompatibleAgentVersionStatus(
+      createPackageInfo('^9.4.0'),
+      [createAgentPolicy([{ version: '9.3.1', count: 2 }])],
+      undefined,
+      { versionCondition: '^9.4.0', agentPolicyIds: ['policy-1'] }
+    );
+    expect(result).toEqual({ status: 'NONE' });
+  });
+
   it('does not require an acknowledgement nor describe data loss without version-specific policies', () => {
     ExperimentalFeaturesService.init({
       ...allowedExperimentalValues,

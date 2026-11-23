@@ -5,6 +5,7 @@
  * 2.0.
  */
 import coerce from 'semver/functions/coerce';
+import compare from 'semver/functions/compare';
 import lt from 'semver/functions/lt';
 import satisfies from 'semver/functions/satisfies';
 import minVersion from 'semver/ranges/min-version';
@@ -38,6 +39,17 @@ export const agentSatisfiesPackageVersionCondition = (
   if (!runtimeVersion) return undefined;
   return satisfies(runtimeVersion, versionCondition);
 };
+
+/**
+ * Whether version-specific policies drop an integration's inputs for an agent on `agentVersion`
+ * under the package-level `versionCondition`. A range that cannot be parsed drops them for every
+ * agent, while agents whose version cannot be parsed are never moved to a version-specific policy
+ * and keep them.
+ */
+export const agentLosesPackageInputs = (agentVersion: string, versionCondition: string): boolean =>
+  getRuntimeAgentVersion(agentVersion) !== null &&
+  (!validRange(versionCondition) ||
+    agentSatisfiesPackageVersionCondition(agentVersion, versionCondition) === false);
 
 /**
  * The integrations of an agent policy that an agent on `agentVersion` is too old to run. Pass
@@ -74,6 +86,13 @@ export interface AgentVersionBlockers {
   minVersion?: string;
 }
 
+/** Compares agent versions in semver order, falling back to text order for invalid versions. */
+const compareAgentVersions = (a: string, b: string): number => {
+  const [coercedA, coercedB] = [coerce(a), coerce(b)];
+  if (!coercedA || !coercedB) return a.localeCompare(b);
+  return compare(coercedA, coercedB) || a.localeCompare(b);
+};
+
 // How many minor versions past the range's minimum version are tried to find an upgrade target
 const MAX_MINOR_VERSIONS_TO_TRY = 100;
 
@@ -107,12 +126,12 @@ export const getAgentVersionBlockers = ({
 }): AgentVersionBlockers => {
   const isValidRange = !!validRange(versionCondition);
   const blocking = agentVersionCounts.filter(
-    ({ version, count }) =>
-      count > 0 &&
-      getRuntimeAgentVersion(version) !== null &&
-      (!isValidRange || agentSatisfiesPackageVersionCondition(version, versionCondition) === false)
+    ({ version, count }) => count > 0 && agentLosesPackageInputs(version, versionCondition)
   );
-  const blockingVersions = [...new Set(blocking.map(({ version }) => version))].sort();
+  // Sorted by version, as the error message only lists the first ones
+  const blockingVersions = [...new Set(blocking.map(({ version }) => version))].sort(
+    compareAgentVersions
+  );
   const blockedCount = blocking.reduce((total, { count }) => total + count, 0);
 
   const lowestSatisfying = isValidRange

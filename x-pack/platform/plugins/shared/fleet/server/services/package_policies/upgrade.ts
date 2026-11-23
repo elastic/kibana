@@ -61,7 +61,11 @@ import {
 } from '../upgrade_sender';
 
 import type { AgentVersionGuardItem } from './agent_version_guard';
-import { getAgentVersionBlocksOrErrors, getAgentVersionGuardScope } from './agent_version_guard';
+import {
+  getAgentVersionBlocksOrErrors,
+  getAgentVersionGuardScope,
+  getCurrentAgentVersionCondition,
+} from './agent_version_guard';
 
 export async function _getUpgradePackagePolicyInfo({
   packagePolicyService,
@@ -625,11 +629,17 @@ async function getDryRunDiffWithGuardItem({
 
     const diff = await calculateDiff(packagePolicy, packageInfo, assetsMap);
 
+    // The current package version's condition is only needed when the new one has a condition
     const agentVersionGuardScope = getAgentVersionGuardScope({
       oldPackageVersion: packagePolicy.package?.version,
       newPackageVersion: packageInfo.version,
       oldPolicyIds: packagePolicy.policy_ids ?? [],
       newPolicyIds: packagePolicy.policy_ids ?? [],
+      oldVersionCondition:
+        packageInfo.conditions?.agent?.version &&
+        packagePolicy.package?.version !== packageInfo.version
+          ? await getCurrentAgentVersionCondition(soClient, packagePolicy.package)
+          : undefined,
     });
 
     return {
@@ -640,6 +650,7 @@ async function getDryRunDiffWithGuardItem({
               key: id,
               pkgInfo: packageInfo,
               agentPolicyIds: agentVersionGuardScope.agentPolicyIds,
+              currentCondition: agentVersionGuardScope.currentCondition,
             },
           }
         : {}),

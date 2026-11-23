@@ -300,6 +300,10 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
         // since the dry run.
         const failed = results.filter((result) => !result.success);
         if (failed.length > 0) {
+          const failedNames = i18n.formatList(
+            'conjunction',
+            failed.map((result) => result.name ?? result.id)
+          );
           notifications.toasts.addWarning({
             title: i18n.translate(
               'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.title',
@@ -309,19 +313,18 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
                 values: { failedCount: failed.length },
               }
             ),
-            text: i18n.translate(
-              'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.message',
-              {
-                defaultMessage: 'Upgrade {failedNames} manually.{errorMessage}',
-                values: {
-                  failedNames: i18n.formatList(
-                    'conjunction',
-                    failed.map((result) => result.name ?? result.id)
-                  ),
-                  errorMessage: failed[0].body?.message ? `\nError: ${failed[0].body.message}` : '',
-                },
-              }
-            ),
+            text: failed[0].body?.message
+              ? i18n.translate(
+                  'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.messageWithError',
+                  {
+                    defaultMessage: 'Upgrade {failedNames} manually. Error: {errorMessage}',
+                    values: { failedNames, errorMessage: failed[0].body.message },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.fleet.integrations.settings.partiallyUpdatedPoliciesToast.message',
+                  { defaultMessage: 'Upgrade {failedNames} manually.', values: { failedNames } }
+                ),
           });
         }
         if (failed.length > 0 && failed.length === results.length) {

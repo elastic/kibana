@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
+import { getPackageInfo } from '../epm/packages';
 import { getVariantPolicyIdsForParents } from '../utils/version_specific_policies';
 
 import {
@@ -21,12 +26,14 @@ import {
   getAgentVersionBlocks,
   getAgentVersionBlocksOrErrors,
   getAgentVersionGuardScope,
+  getCurrentAgentVersionCondition,
   redactAgentVersionBlock,
   redactAgentVersionIncompatibleError,
 } from './agent_version_guard';
 
 jest.mock('../app_context');
 jest.mock('../agent_policy');
+jest.mock('../epm/packages');
 jest.mock('../utils/version_specific_policies');
 
 const mockedAppContextService = jest.mocked(appContextService);
@@ -94,6 +101,42 @@ describe('agent_version_guard', () => {
         min_version: '9.4.0',
       });
       expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not count the agents that already lack the inputs under the current condition', async () => {
+      mockAgentVersions({
+        'policy-1': { '9.2.0': 1, '9.3.1': 2, '9.4.2': 5 },
+        'policy-2': { '9.2.0': 3 },
+      });
+
+      const blocks = await getAgentVersionBlocks([
+        {
+          key: 'pp-1',
+          pkgInfo: pkgInfo('^9.4.0'),
+          agentPolicyIds: ['policy-1', 'policy-2'],
+          // policy-2 is added by the update, so its agents never had the inputs to lose
+          currentCondition: { versionCondition: '^9.3.0', agentPolicyIds: ['policy-1'] },
+        },
+      ]);
+
+      expect(blocks.get('pp-1')).toEqual(
+        expect.objectContaining({ blocked_count: 5, observed_versions: ['9.2.0', '9.3.1'] })
+      );
+    });
+
+    it('does not block when the current condition already excludes every blocked agent', async () => {
+      mockAgentVersions({ 'policy-1': { '9.3.1': 2, '9.4.2': 5 } });
+
+      const blocks = await getAgentVersionBlocks([
+        {
+          key: 'pp-1',
+          pkgInfo: pkgInfo('^9.4.0'),
+          agentPolicyIds: ['policy-1'],
+          currentCondition: { versionCondition: '^9.4.0', agentPolicyIds: ['policy-1'] },
+        },
+      ]);
+
+      expect(blocks.size).toBe(0);
     });
 
     it('queries the agents without expensive queries', async () => {
@@ -373,6 +416,18 @@ describe('agent_version_guard', () => {
       ).toContain('Upgrade the agents to a version that satisfies it, such as 9.6.0.');
     });
 
+    it('says the agents would stop collecting the data on upgrade', () => {
+      expect(getAgentVersionBlockMessage(block, 'upgrade')).toContain(
+        "Those agents would stop collecting this integration's data."
+      );
+    });
+
+    it("says the agents won't collect the data on add", () => {
+      expect(getAgentVersionBlockMessage(block, 'add')).toContain(
+        "Those agents won't collect this integration's data."
+      );
+    });
+
     it('caps the number of listed versions', () => {
       const observedVersions = Array.from({ length: 12 }, (_, i) => `8.${i}.0`);
       expect(
@@ -453,6 +508,22 @@ describe('agent_version_guard', () => {
       ).toEqual({ agentPolicyIds: ['policy-2'], operation: 'add' });
     });
 
+    it('passes the current condition for the agent policies that already have the package policy', () => {
+      expect(
+        getAgentVersionGuardScope({
+          oldPackageVersion: '1.0.0',
+          newPackageVersion: '1.1.0',
+          oldPolicyIds: ['policy-1', 'policy-3'],
+          newPolicyIds: ['policy-1', 'policy-2'],
+          oldVersionCondition: '^9.3.0',
+        })
+      ).toEqual({
+        agentPolicyIds: ['policy-1', 'policy-2'],
+        operation: 'upgrade',
+        currentCondition: { versionCondition: '^9.3.0', agentPolicyIds: ['policy-1'] },
+      });
+    });
+
     it('does not check other edits', () => {
       expect(
         getAgentVersionGuardScope({
@@ -462,6 +533,32 @@ describe('agent_version_guard', () => {
           newPolicyIds: ['policy-1'],
         })
       ).toBeUndefined();
+    });
+  });
+
+  describe('getCurrentAgentVersionCondition', () => {
+    const soClient = savedObjectsClientMock.create();
+
+    it('returns the condition of the current package version', async () => {
+      jest.mocked(getPackageInfo).mockResolvedValue({
+        conditions: { agent: { version: '^9.3.0' } },
+      } as Awaited<ReturnType<typeof getPackageInfo>>);
+
+      await expect(
+        getCurrentAgentVersionCondition(soClient, { name: 'aws_mq', version: '2.0.1' })
+      ).resolves.toBe('^9.3.0');
+      expect(getPackageInfo).toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'aws_mq', pkgVersion: '2.0.1' })
+      );
+    });
+
+    it('returns undefined when the package cannot be read, so that every agent is checked', async () => {
+      mockedAppContextService.getLogger.mockReturnValue(loggingSystemMock.createLogger());
+      jest.mocked(getPackageInfo).mockRejectedValue(new Error('not found'));
+
+      await expect(
+        getCurrentAgentVersionCondition(soClient, { name: 'aws_mq', version: '2.0.1' })
+      ).resolves.toBeUndefined();
     });
   });
 });

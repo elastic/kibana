@@ -6,14 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { chunk } from 'lodash';
 
 import { AGENT_TYPE_OPAMP, AGENTS_INDEX } from '../../../common/constants';
-import { getAgentVersionBlockers } from '../../../common/services';
+import { agentLosesPackageInputs, getAgentVersionBlockers } from '../../../common/services';
 import type { AgentVersionBlock, PackageInfo } from '../../../common/types';
 import { PackagePolicyAgentVersionIncompatibleError } from '../../errors';
 import { appContextService } from '../app_context';
 import { agentPolicyService } from '../agent_policy';
+import { getPackageInfo } from '../epm/packages';
 import { getVariantPolicyIdsForParents } from '../utils/version_specific_policies';
 
 const MAX_AGENT_VERSIONS = 1000;
@@ -29,6 +31,15 @@ export interface AgentVersionGuardItem {
   pkgInfo: Pick<PackageInfo, 'name' | 'version' | 'conditions'>;
   /** The agent policies whose agents would receive the package policy. */
   agentPolicyIds: readonly string[];
+  /**
+   * For an upgrade from a package version with its own package-level agent version condition: that
+   * condition, and the agent policies that already receive the package policy. Their agents that
+   * don't satisfy it already lack the integration's inputs, so the upgrade takes nothing from them.
+   */
+  currentCondition?: {
+    versionCondition: string;
+    agentPolicyIds: readonly string[];
+  };
 }
 
 interface AgentVersionAggregation {
@@ -197,12 +208,18 @@ export async function getAgentVersionBlocks(
     pkgInfo,
     versionCondition,
     agentPolicyIds: itemAgentPolicyIds,
+    currentCondition,
   } of itemsWithCondition) {
     const countByVersion = new Map<string, number>();
     for (const agentPolicyId of new Set(itemAgentPolicyIds)) {
+      const lacksInputsAlready = (version: string) =>
+        !!currentCondition?.agentPolicyIds.includes(agentPolicyId) &&
+        agentLosesPackageInputs(version, currentCondition.versionCondition);
       for (const { key: version, doc_count: count } of buckets[agentPolicyId]?.versions?.buckets ??
         []) {
-        countByVersion.set(version, (countByVersion.get(version) ?? 0) + count);
+        if (!lacksInputsAlready(version)) {
+          countByVersion.set(version, (countByVersion.get(version) ?? 0) + count);
+        }
       }
     }
 
@@ -282,7 +299,9 @@ export function getAgentVersionBlockMessage(
 
   return [
     `Cannot ${target}: it requires agent version ${versionCondition}, and ${agents} satisfy it.`,
-    `Those agents would stop collecting this integration's data.`,
+    operation === 'upgrade'
+      ? `Those agents would stop collecting this integration's data.`
+      : `Those agents won't collect this integration's data.`,
     ...(minVersion
       ? [`Upgrade the agents to a version that satisfies it, such as ${minVersion}.`]
       : []),
@@ -338,44 +357,87 @@ export function redactAgentVersionIncompatibleError<T>(
  * `agentPolicyIds` don't satisfy the package-level agent version condition of `pkgInfo`.
  */
 export async function assertAgentVersionCompatible({
-  pkgInfo,
-  agentPolicyIds,
   operation,
-}: {
-  pkgInfo: AgentVersionGuardItem['pkgInfo'];
-  agentPolicyIds: readonly string[];
+  ...item
+}: Omit<AgentVersionGuardItem, 'key'> & {
   operation: AgentVersionGuardOperation;
 }): Promise<void> {
-  const block = (await getAgentVersionBlocks([{ key: 'item', pkgInfo, agentPolicyIds }])).get(
-    'item'
-  );
+  const block = (await getAgentVersionBlocks([{ key: 'item', ...item }])).get('item');
   if (block) {
     throw createAgentVersionIncompatibleError(block, operation);
   }
 }
 
+export type AgentVersionGuardScope = Pick<
+  AgentVersionGuardItem,
+  'agentPolicyIds' | 'currentCondition'
+> & { operation: AgentVersionGuardOperation };
+
 /**
  * Which agent policies an update of a package policy must be checked against, and how: all of
  * them when the package version changes, only the added ones when `policy_ids` grows, none
- * otherwise. Other edits stay unguarded.
+ * otherwise. Other edits stay unguarded. On an upgrade, agents on the agent policies that already
+ * have the package policy are only checked if they satisfy `oldVersionCondition`, the condition of
+ * the current package version, as the others already lack the inputs.
  */
 export function getAgentVersionGuardScope({
   oldPackageVersion,
   newPackageVersion,
   oldPolicyIds,
   newPolicyIds,
+  oldVersionCondition,
 }: {
   oldPackageVersion?: string;
   newPackageVersion?: string;
   oldPolicyIds: readonly string[];
   newPolicyIds: readonly string[];
-}): { agentPolicyIds: string[]; operation: AgentVersionGuardOperation } | undefined {
+  oldVersionCondition?: string;
+}): AgentVersionGuardScope | undefined {
   if (newPackageVersion && oldPackageVersion !== newPackageVersion) {
-    return { agentPolicyIds: [...newPolicyIds], operation: 'upgrade' };
+    return {
+      agentPolicyIds: [...newPolicyIds],
+      operation: 'upgrade',
+      ...(oldVersionCondition
+        ? {
+            currentCondition: {
+              versionCondition: oldVersionCondition,
+              agentPolicyIds: newPolicyIds.filter((id) => oldPolicyIds.includes(id)),
+            },
+          }
+        : {}),
+    };
   }
   const addedPolicyIds = newPolicyIds.filter((id) => !oldPolicyIds.includes(id));
   if (addedPolicyIds.length) {
     return { agentPolicyIds: addedPolicyIds, operation: 'add' };
   }
   return undefined;
+}
+
+/**
+ * The package-level agent version condition of `pkg`, the package version a package policy is
+ * currently on. Returns `undefined` when there is none or the package can't be read, in which case
+ * every agent is checked against the new version's condition.
+ */
+export async function getCurrentAgentVersionCondition(
+  soClient: SavedObjectsClientContract,
+  pkg?: { name: string; version: string }
+): Promise<string | undefined> {
+  if (!pkg) return undefined;
+  try {
+    const pkgInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: pkg.name,
+      pkgVersion: pkg.version,
+      prerelease: true,
+    });
+    return pkgInfo.conditions?.agent?.version;
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .debug(
+        `Could not read the agent version condition of ${pkg.name} ${pkg.version}: ${error.message}`
+      );
+    return undefined;
+  }
 }

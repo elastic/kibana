@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  agentLosesPackageInputs,
   agentSatisfiesPackageVersionCondition,
   getAgentVersionBlockers,
   getIncompatibleIntegrations,
@@ -180,6 +181,19 @@ describe('getAgentVersionBlockers', () => {
     ).toEqual({ blockedCount: 0, blockingVersions: [] });
   });
 
+  it('sorts the blocking versions in version order', () => {
+    expect(
+      getAgentVersionBlockers({
+        versionCondition: '>=11.0.0',
+        agentVersionCounts: [
+          { version: '10.0.0', count: 1 },
+          { version: '9.10.0', count: 1 },
+          { version: '9.2.0', count: 1 },
+        ],
+      }).blockingVersions
+    ).toEqual(['9.2.0', '9.10.0', '10.0.0']);
+  });
+
   it('treats prerelease agents as their release version', () => {
     expect(
       getAgentVersionBlockers({
@@ -187,5 +201,20 @@ describe('getAgentVersionBlockers', () => {
         agentVersionCounts: [{ version: '9.6.0-SNAPSHOT', count: 1 }],
       })
     ).toEqual({ blockedCount: 0, blockingVersions: [] });
+  });
+});
+
+describe('agentLosesPackageInputs', () => {
+  it('is true for agents that do not satisfy the condition at major.minor.0', () => {
+    expect(agentLosesPackageInputs('9.4.8', '^9.4.6')).toBe(true);
+    expect(agentLosesPackageInputs('9.5.0', '^9.4.6')).toBe(false);
+  });
+
+  it('is true for every agent when the condition is not a valid range', () => {
+    expect(agentLosesPackageInputs('9.6.0', 'not a range')).toBe(true);
+  });
+
+  it('is false for agents whose version cannot be parsed', () => {
+    expect(agentLosesPackageInputs('dev', '^9.4.0')).toBe(false);
   });
 });

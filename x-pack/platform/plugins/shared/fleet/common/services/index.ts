@@ -155,6 +155,7 @@ export {
 } from './check_fleet_server_versions';
 
 export {
+  agentLosesPackageInputs,
   agentSatisfiesPackageVersionCondition,
   getAgentVersionBlockers,
   getIncompatibleIntegrations,

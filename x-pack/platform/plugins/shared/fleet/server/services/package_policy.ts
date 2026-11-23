@@ -122,6 +122,7 @@ import {
   CloudConnectorInvalidVarsError,
   CloudConnectorCreateError,
   CloudConnectorUpdateError,
+  PackagePolicyAgentVersionIncompatibleError,
 } from '../errors';
 import { NewPackagePolicySchema, PackagePolicySchema, UpdatePackagePolicySchema } from '../types';
 import type {
@@ -244,11 +245,13 @@ import {
   _packagePoliciesBulkUpgrade,
   _packagePoliciesUpgrade,
 } from './package_policies/upgrade';
+import type { AgentVersionGuardScope } from './package_policies/agent_version_guard';
 import {
   assertAgentVersionCompatible,
   createAgentVersionIncompatibleError,
   getAgentVersionBlocksOrErrors,
   getAgentVersionGuardScope,
+  getCurrentAgentVersionCondition,
 } from './package_policies/agent_version_guard';
 
 import {
@@ -1961,11 +1964,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       prerelease: true,
     });
 
+    // The current package version's condition is only needed when the new one has a condition
+    const needsCurrentAgentVersionCondition =
+      !options?.acknowledgeAgentVersionIncompatibility &&
+      !!pkgInfo.conditions?.agent?.version &&
+      oldPackagePolicy.package?.version !== packagePolicy.package.version;
     const agentVersionGuardScope = getAgentVersionGuardScope({
       oldPackageVersion: oldPackagePolicy.package?.version,
       newPackageVersion: packagePolicy.package.version,
       oldPolicyIds: oldPackagePolicy.policy_ids,
       newPolicyIds: packagePolicy.policy_ids,
+      oldVersionCondition: needsCurrentAgentVersionCondition
+        ? await getCurrentAgentVersionCondition(soClient, oldPackagePolicy.package)
+        : undefined,
     });
     if (agentVersionGuardScope && !options?.acknowledgeAgentVersionIncompatibility) {
       await assertAgentVersionCompatible({ pkgInfo, ...agentVersionGuardScope });
@@ -2324,20 +2335,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       throw new PackagePolicyNotFoundError('Package policy not found');
     }
 
-    const agentVersionGuardScopes = new Map<
-      string,
-      NonNullable<ReturnType<typeof getAgentVersionGuardScope>>
-    >();
+    const oldPackageInfos = await getPackageInfoForPackagePolicies(
+      oldPackagePolicies,
+      soClient,
+      true
+    );
+
+    const agentVersionGuardScopes = new Map<string, AgentVersionGuardScope>();
     if (!options?.acknowledgeAgentVersionIncompatibility) {
       for (const { id, package: pkg, policy_ids: policyIds } of packagePolicyUpdates) {
         const oldPackagePolicy = oldPackagePolicies.find((p) => p.id === id);
+        const oldPkg = oldPackagePolicy?.package;
         const scope =
           oldPackagePolicy &&
           getAgentVersionGuardScope({
-            oldPackageVersion: oldPackagePolicy.package?.version,
+            oldPackageVersion: oldPkg?.version,
             newPackageVersion: pkg?.version,
             oldPolicyIds: oldPackagePolicy.policy_ids ?? [],
             newPolicyIds: policyIds ?? [],
+            // When the current package can't be read, every agent is checked
+            oldVersionCondition:
+              oldPkg &&
+              oldPackageInfos.get(`${oldPkg.name}-${oldPkg.version}`)?.conditions?.agent?.version,
           });
         if (scope) {
           agentVersionGuardScopes.set(id, scope);
@@ -2351,16 +2370,17 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           const scope = agentVersionGuardScopes.get(id);
           const pkgInfo = pkg && packageInfos.get(`${pkg.name}-${pkg.version}`);
           return scope && pkgInfo
-            ? [{ key: id, pkgInfo, agentPolicyIds: scope.agentPolicyIds }]
+            ? [
+                {
+                  key: id,
+                  pkgInfo,
+                  agentPolicyIds: scope.agentPolicyIds,
+                  currentCondition: scope.currentCondition,
+                },
+              ]
             : [];
         })
       );
-
-    const oldPackageInfos = await getPackageInfoForPackagePolicies(
-      oldPackagePolicies,
-      soClient,
-      true
-    );
 
     const allPackageInfos = [...packageInfos.entries(), ...oldPackageInfos.entries()].reduce(
       (acc, [pkgKey, pkgInfo]) => {
@@ -2664,9 +2684,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         logger.debug(`saved object update document for package policy [${id}] was built`);
       } catch (caughtError) {
         const error = caughtError instanceof Error ? caughtError : new Error(String(caughtError));
-        logger.warn(
-          `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`
-        );
+        const message = `Preparing update to package policy [${packagePolicyUpdate.id}] failed: [${error.name}] ${error.message}`;
+        // A package policy blocked by the agent version guard is expected and reported by the caller
+        if (error instanceof PackagePolicyAgentVersionIncompatibleError) {
+          logger.debug(message);
+        } else {
+          logger.warn(message);
+        }
 
         failedPolicies.push({
           packagePolicy: packagePolicyUpdate,

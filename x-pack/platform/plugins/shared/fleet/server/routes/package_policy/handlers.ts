@@ -774,12 +774,14 @@ export const upgradePackagePolicyHandler: FleetRequestHandler<
   const { authz } = await context.fleet;
   const body = authz.fleet.readAgents ? results : results.map(redactAgentVersionBlockOfResult);
 
-  // Mixed results are returned as a 200 with per-item results, so that one blocked package policy
-  // does not hide the ones that were upgraded. When every item failed, the first error is returned
-  // as before.
-  const firstFatalError = body.every((item) => !item.success)
-    ? body.find((item) => item.statusCode && item.statusCode !== 200)
-    : undefined;
+  // When some package policies were upgraded and the others were only blocked by the agent version
+  // guard, the per-item results are returned as a 200, so that the blocked package policies don't
+  // hide the upgraded ones. Any other failure returns the first error, as before.
+  const failures = body.filter((item) => item.statusCode && item.statusCode !== 200);
+  const isPartialAgentVersionBlock =
+    body.some((item) => item.success) &&
+    failures.every((item) => !!item.body?.attributes?.agent_version_block);
+  const firstFatalError = isPartialAgentVersionBlock ? undefined : failures[0];
 
   if (firstFatalError) {
     return response.customError({

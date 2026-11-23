@@ -1283,7 +1283,14 @@ describe('When calling package policy', () => {
         statusCode: 400,
         body: {
           message: 'Cannot upgrade test to 1.0.0',
-          attributes: { type: 'agent_version_incompatible' },
+          attributes: {
+            type: 'agent_version_incompatible',
+            agent_version_block: {
+              package_name: 'test',
+              package_version: '1.0.0',
+              version_condition: '^9.4.0',
+            },
+          },
         },
       };
 
@@ -1315,6 +1322,29 @@ describe('When calling package policy', () => {
         expect(response.ok).toHaveBeenCalledWith({ body });
         expect(response.customError).not.toHaveBeenCalled();
         expect(UpgradePackagePoliciesResponseBodySchema.validate(body)).toEqual(body);
+      });
+
+      it('returns the first error when another failure comes with an agent version block', async () => {
+        const conflictItem = {
+          id: '3',
+          success: false,
+          statusCode: 409,
+          body: { message: 'Conflict' },
+        };
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue([
+          ...responseBody,
+          blockedItem,
+          conflictItem,
+        ]);
+        const request = httpServerMock.createKibanaRequest({
+          body: { packagePolicyIds: ['1', '2', '3'], acknowledge_breaking_changes: true },
+        });
+        await upgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).not.toHaveBeenCalled();
+        expect(response.customError).toHaveBeenCalledWith({
+          statusCode: 400,
+          body: { message: 'Cannot upgrade test to 1.0.0' },
+        });
       });
 
       it('returns the first error when no package policy is upgraded', async () => {

@@ -540,7 +540,7 @@ export const CreatePackagePolicyRequestBodySchema = schema.object(
       schema.boolean({
         meta: {
           description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
-          availability: { since: '9.7.0', stability: 'stable' },
+          availability: { since: '9.5.0', stability: 'stable' },
         },
       })
     ),
@@ -793,7 +793,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
         schema.boolean({
           meta: {
             description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
-            availability: { since: '9.7.0', stability: 'stable' },
+            availability: { since: '9.5.0', stability: 'stable' },
           },
         })
       ),
@@ -849,7 +849,7 @@ export const UpdatePackagePolicyRequestBodySchema = schema.object(
       schema.boolean({
         meta: {
           description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
-          availability: { since: '9.7.0', stability: 'stable' },
+          availability: { since: '9.5.0', stability: 'stable' },
         },
       })
     ),

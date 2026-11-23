@@ -22,6 +22,7 @@ import { auditLoggingService } from '../audit_logging';
 import { agentPolicyService } from '../agent_policy';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { getAgentTemplateAssetsMap } from '../epm/packages/get';
+import { getPackageInfo } from '../epm/packages';
 
 import { getAgentVersionBlocks } from './agent_version_guard';
 import {
@@ -378,6 +379,39 @@ describe('Upgrade', () => {
           key: 'package-policy-id',
           pkgInfo: expect.objectContaining({ version: '1.0.2' }),
           agentPolicyIds: ['agent-policy-1'],
+        }),
+      ]);
+    });
+
+    it('should pass the condition of the current package version', async () => {
+      // Both package versions have an agent version condition
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => ({
+        ...(await mockedGetPackageInfo(params)),
+        conditions: { agent: { version: params.pkgVersion === '1.0.2' ? '^9.4.0' : '^9.3.0' } },
+      }));
+      try {
+        await _packagePoliciesGetUpgradeDryRunDiff({
+          id: 'package-policy-id',
+          soClient: savedObjectsClient,
+          packagePolicyService,
+          packagePolicy: {
+            id: '123',
+            name: 'test-123',
+            package: { title: 'test', name: 'test', version: '1.0.1' },
+            namespace: 'default',
+            policy_ids: ['agent-policy-1'],
+            inputs: [{ id: 'toto', enabled: true, streams: [], type: 'logs' }],
+          } as any,
+          pkgVersion: '1.0.2',
+        });
+      } finally {
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      }
+
+      expect(getAgentVersionBlocks).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          key: 'package-policy-id',
+          currentCondition: { versionCondition: '^9.3.0', agentPolicyIds: ['agent-policy-1'] },
         }),
       ]);
     });

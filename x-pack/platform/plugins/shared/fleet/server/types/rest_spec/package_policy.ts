@@ -249,7 +249,7 @@ export const UpgradePackagePoliciesRequestSchema = {
         schema.boolean({
           meta: {
             description: ACKNOWLEDGE_AGENT_VERSION_INCOMPATIBILITY_DESCRIPTION,
-            availability: { since: '9.7.0', stability: 'stable' },
+            availability: { since: '9.5.0', stability: 'stable' },
           },
         })
       ),
