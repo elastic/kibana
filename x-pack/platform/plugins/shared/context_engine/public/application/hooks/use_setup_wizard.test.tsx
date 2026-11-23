@@ -10,7 +10,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import { readSetupWizardStoredValue, writeSetupWizardStoredValue } from '../utils/setup_wizard';
+import {
+  getSetupWizardStorageKey,
+  readSetupWizardStoredValue,
+  writeSetupWizardStoredValue,
+} from '../utils/setup_wizard';
 import { useSetupWizard } from './use_setup_wizard';
 
 const aiIndex: GetAiIndexResponse = {
@@ -55,11 +59,11 @@ describe('useSetupWizard', () => {
   it('waits for the memory count before it decides', () => {
     const { result, rerender } = renderSetupWizard({ isMemoryCountReady: false });
 
-    expect(result.current.view).toBeUndefined();
+    expect(result.current.status).toBe('loading');
 
     rerender({ ...defaultParams, isMemoryCountReady: true });
 
-    expect(result.current.view).toMatchObject({ show: true, initialStep: 'dreaming' });
+    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
   });
 
   it('hides the wizard of a closed AI index without waiting for the memory count', () => {
@@ -67,7 +71,7 @@ describe('useSetupWizard', () => {
 
     const { result } = renderSetupWizard({ isMemoryCountReady: false });
 
-    expect(result.current.view).toEqual({ show: false });
+    expect(result.current.status).toBe('hidden');
   });
 
   it('hides the wizard of a managed AI index without waiting for the memory count', () => {
@@ -76,12 +80,12 @@ describe('useSetupWizard', () => {
       isMemoryCountReady: false,
     });
 
-    expect(result.current.view).toEqual({ show: false });
+    expect(result.current.status).toBe('hidden');
   });
 
   it('keeps its decision while the Overview stays open, and decides again on the next visit', () => {
     const { result, rerender } = renderSetupWizard();
-    expect(result.current.view).toMatchObject({ show: true });
+    expect(result.current.status).toBe('shown');
 
     const doneIndex: GetAiIndexResponse = {
       ...aiIndex,
@@ -90,21 +94,48 @@ describe('useSetupWizard', () => {
       description: 'Answers questions about checkouts.',
     };
     rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1 });
-    expect(result.current.view).toMatchObject({ show: true });
+    expect(result.current.status).toBe('shown');
 
     rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1, isActive: false });
     rerender({ ...defaultParams, aiIndex: doneIndex, memoryCount: 1, isActive: true });
-    expect(result.current.view).toEqual({ show: false });
+    expect(result.current.status).toBe('hidden');
   });
 
-  it('saves the step and closes for good', () => {
+  it('keeps the step only in local storage and reads it live', () => {
+    const { result } = renderSetupWizard();
+    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'dreaming' });
+
+    act(() => {
+      if (result.current.status === 'shown') {
+        result.current.goToStep('sources');
+      }
+    });
+
+    expect(readSetupWizardStoredValue(storageKey)).toBe('sources');
+    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'sources' });
+  });
+
+  it('follows a step change made in another browser tab', () => {
     const { result } = renderSetupWizard();
 
-    act(() => result.current.saveStep('sources'));
-    expect(readSetupWizardStoredValue(storageKey)).toBe('sources');
+    act(() => {
+      window.localStorage.setItem(getSetupWizardStorageKey(storageKey), JSON.stringify('describe'));
+      window.dispatchEvent(new StorageEvent('storage'));
+    });
 
-    act(() => result.current.close());
+    expect(result.current).toMatchObject({ status: 'shown', currentStep: 'describe' });
+  });
+
+  it('close hides the wizard for good', () => {
+    const { result } = renderSetupWizard();
+
+    act(() => {
+      if (result.current.status === 'shown') {
+        result.current.close();
+      }
+    });
+
     expect(readSetupWizardStoredValue(storageKey)).toBe('closed');
-    expect(result.current.view).toEqual({ show: false });
+    expect(result.current.status).toBe('hidden');
   });
 });

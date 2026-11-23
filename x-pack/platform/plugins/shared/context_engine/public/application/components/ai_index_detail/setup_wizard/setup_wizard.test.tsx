@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import React, { useState } from 'react';
 import type { GetAiIndexResponse } from '../../../../../common/http_api/ai_indices';
 import type { SetupWizardDoneSteps, SetupWizardStepId } from '../../../utils/setup_wizard';
 import { SetupWizard } from './setup_wizard';
@@ -44,7 +44,27 @@ const allSteps: readonly SetupWizardStepId[] = ['dreaming', 'connect', 'sources'
 const mockSaveDescription = jest.fn();
 let services: ReturnType<typeof coreMock.createStart>;
 
-const renderWizard = (props: Partial<React.ComponentProps<typeof SetupWizard>> = {}) => {
+type WizardProps = React.ComponentProps<typeof SetupWizard>;
+
+/** Holds the current step the way local storage does in the app: the wizard only reads it. */
+const ControlledWizard = ({ currentStep: startStep, onStepChange, ...props }: WizardProps) => {
+  const [currentStep, setCurrentStep] = useState(startStep);
+  return (
+    <SetupWizard
+      {...props}
+      currentStep={currentStep}
+      onStepChange={(stepId) => {
+        onStepChange(stepId);
+        setCurrentStep(stepId);
+      }}
+    />
+  );
+};
+
+const renderWizard = ({
+  initialStep = 'dreaming',
+  ...props
+}: Partial<Omit<WizardProps, 'currentStep'>> & { initialStep?: SetupWizardStepId } = {}) => {
   const onStepChange = jest.fn();
   const onClose = jest.fn();
   const onSaved = jest.fn().mockResolvedValue(undefined);
@@ -53,10 +73,10 @@ const renderWizard = (props: Partial<React.ComponentProps<typeof SetupWizard>> =
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <SetupWizard
+          <ControlledWizard
             aiIndex={aiIndex}
             steps={allSteps}
-            initialStep="dreaming"
+            currentStep={initialStep}
             done={noneDone}
             isMemoryEnabled={true}
             onStepChange={onStepChange}
@@ -140,15 +160,12 @@ describe('SetupWizard', () => {
     );
   });
 
-  it('going back keeps the steps after it marked as skipped', () => {
+  it('skipped marks follow the current step, so going back clears them', () => {
     renderWizard({ initialStep: 'sources' });
 
     fireEvent.click(screen.getByTestId('contextSetupWizardStep-dreaming'));
 
     expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
-      'Step 2: Connect agent, skipped'
-    );
-    expect(screen.getByTestId('contextSetupWizardStep-sources')).toHaveAccessibleName(
       expect.stringMatching(/incomplete/i)
     );
   });

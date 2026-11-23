@@ -75,24 +75,21 @@ const getStepStatus = ({
 };
 
 /**
- * A step the user already went past without finishing it is skipped. "Went past" means it comes
- * before the furthest step reached, so steps before a saved step are skipped after a refresh.
- * Skipping is fine, so a skipped step looks like any step that is not done (no warning icon); only
- * its label for screen readers says it was skipped.
+ * A step before the current one that is not done is skipped. It follows from the current step
+ * alone, so nothing else is stored. Skipping is fine, so a skipped step looks like any step that is
+ * not done (no warning icon); only its label for screen readers says it was skipped.
  */
 const isStepSkipped = ({
   stepId,
   stepIndex,
-  currentStep,
-  furthestIndex,
+  currentIndex,
   done,
 }: {
   stepId: SetupWizardStepId;
   stepIndex: number;
-  currentStep: SetupWizardStepId;
-  furthestIndex: number;
+  currentIndex: number;
   done: SetupWizardDoneSteps;
-}): boolean => stepId !== currentStep && !done[stepId] && stepIndex < furthestIndex;
+}): boolean => stepIndex < currentIndex && !done[stepId];
 
 const getSkippedStepLabel = (stepNumber: number, title: string): string =>
   i18n.translate('xpack.contextEngine.setupWizard.skippedStepAriaLabel', {
@@ -103,11 +100,12 @@ const getSkippedStepLabel = (stepNumber: number, title: string): string =>
 interface SetupWizardProps {
   aiIndex: GetAiIndexResponse;
   steps: readonly SetupWizardStepId[];
-  initialStep: SetupWizardStepId;
+  /** The step to show. The wizard keeps no step of its own: it lives in local storage. */
+  currentStep: SetupWizardStepId;
   done: SetupWizardDoneSteps;
   /** Without memory no agent can save a memory, so Connect agent can't wait for one. */
   isMemoryEnabled: boolean;
-  /** Called when the user moves to a step, so the step survives a page refresh. */
+  /** Called when the user moves to a step. */
   onStepChange: (stepId: SetupWizardStepId) => void;
   /** Called when the user finishes or exits setup. */
   onClose: () => void;
@@ -118,7 +116,7 @@ interface SetupWizardProps {
 export const SetupWizard = ({
   aiIndex,
   steps,
-  initialStep,
+  currentStep,
   done,
   isMemoryEnabled,
   onStepChange,
@@ -130,8 +128,6 @@ export const SetupWizard = ({
   } = useKibana();
   const { euiTheme } = useEuiTheme();
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
-  const [currentStep, setCurrentStep] = useState<SetupWizardStepId>(initialStep);
-  const [furthestIndex, setFurthestIndex] = useState(() => steps.indexOf(initialStep));
   const [description, setDescription] = useState(aiIndex.description ?? '');
   // Covers the save and the refetch after it, so Finish setup can't be clicked twice.
   const [isFinishing, setIsFinishing] = useState(false);
@@ -166,12 +162,6 @@ export const SetupWizard = ({
     return done[currentStep];
   };
 
-  const goToStep = (stepId: SetupWizardStepId) => {
-    setCurrentStep(stepId);
-    setFurthestIndex((current) => Math.max(current, steps.indexOf(stepId)));
-    onStepChange(stepId);
-  };
-
   const close = (toast: string) => {
     onClose();
     notifications.toasts.addSuccess(toast);
@@ -182,7 +172,7 @@ export const SetupWizard = ({
       close(finishedToast);
       return;
     }
-    goToStep(nextOpenStep);
+    onStepChange(nextOpenStep);
   };
 
   const continueOrFinish = async () => {
@@ -202,10 +192,10 @@ export const SetupWizard = ({
   const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId, stepIndex) => ({
     title: SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle,
     status: getStepStatus({ stepId, currentStep, done }),
-    ...(isStepSkipped({ stepId, stepIndex, currentStep, furthestIndex, done }) && {
+    ...(isStepSkipped({ stepId, stepIndex, currentIndex, done }) && {
       'aria-label': getSkippedStepLabel(stepIndex + 1, SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle),
     }),
-    onClick: () => goToStep(stepId),
+    onClick: () => onStepChange(stepId),
     disabled: isBusy,
     'data-test-subj': `contextSetupWizardStep-${stepId}`,
     ...getEbtProps({ element: ebtElement, action: ebtAction.GO_TO_STEP }),

@@ -196,6 +196,19 @@ describe('setup wizard storage', () => {
     expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'support' })).toBeUndefined();
   });
 
+  it('keeps the value in memory when local storage is blocked', () => {
+    const setItem = jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+
+    writeSetupWizardStoredValue({ basePath: '', aiIndexId: 'blocked' }, 'describe');
+
+    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'blocked' })).toBe('describe');
+    setItem.mockRestore();
+    removeSetupWizardStoredValue({ basePath: '', aiIndexId: 'blocked' });
+    expect(readSetupWizardStoredValue({ basePath: '', aiIndexId: 'blocked' })).toBeUndefined();
+  });
+
   it('ignores a value it cannot read', () => {
     window.localStorage.setItem(
       getSetupWizardStorageKey({ basePath: '', aiIndexId: 'support' }),

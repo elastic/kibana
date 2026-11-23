@@ -185,7 +185,7 @@ export const AiIndexDetailPage = () => {
     isActive: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
   });
   // The setup wizard replaces the "AI index created" callout.
-  const isSetupWizardShown = setupWizard.view?.show === true;
+  const isSetupWizardShown = setupWizard.status === 'shown';
   useEffect(() => {
     if (isSetupWizardShown) {
       setShowCreatedCallout(false);
@@ -380,7 +380,7 @@ export const AiIndexDetailPage = () => {
   );
 
   const overviewRouteContent = (() => {
-    if (aiIndex && setupWizard.view === undefined) {
+    if (aiIndex && setupWizard.status === 'loading') {
       // Wait for the wizard decision, so the normal Overview doesn't flash first.
       return (
         <EuiFlexGroup justifyContent="center" data-test-subj="contextAiIndexOverviewLoading">
@@ -390,16 +390,16 @@ export const AiIndexDetailPage = () => {
         </EuiFlexGroup>
       );
     }
-    if (aiIndex && setupWizard.view?.show && setupWizard.done) {
+    if (aiIndex && setupWizard.status === 'shown') {
       return (
         <SetupWizard
           key={aiIndex.id}
           aiIndex={aiIndex}
-          steps={setupWizard.view.steps}
-          initialStep={setupWizard.view.initialStep}
+          steps={setupWizard.steps}
+          currentStep={setupWizard.currentStep}
           done={setupWizard.done}
           isMemoryEnabled={isMemoryEnabled}
-          onStepChange={setupWizard.saveStep}
+          onStepChange={setupWizard.goToStep}
           onClose={setupWizard.close}
           onSaved={refetch}
         />
