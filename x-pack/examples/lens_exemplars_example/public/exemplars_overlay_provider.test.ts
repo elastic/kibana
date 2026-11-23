@@ -34,7 +34,9 @@ const DASHBOARD_CONTEXT = {
   child: LENS_CHILD_CONTEXT,
 };
 const DISCOVER_CONTEXT = {
-  type: 'discover',
+  type: 'application',
+  name: 'discover',
+  url: '/app/discover',
   description: 'fetch chart data and total hits',
   child: LENS_CHILD_CONTEXT,
 };
@@ -132,8 +134,17 @@ describe('exemplars overlay provider', () => {
       expect(provider.isApplicable(context, context.layers[0])).toBe(false);
     });
 
+    it('does not apply to other apps rendering the chart directly', () => {
+      const context = getContext(LOGS_QUERY, {
+        type: 'application',
+        name: 'lens',
+        child: LENS_CHILD_CONTEXT,
+      });
+      expect(provider.isApplicable(context, context.layers[0])).toBe(false);
+    });
+
     it('does not apply when the surface only sets a name', () => {
-      const context = getContext(LOGS_QUERY, { type: 'application', name: EXEMPLARS_APP_ID });
+      const context = getContext(LOGS_QUERY, { name: 'discover' });
       expect(provider.isApplicable(context, context.layers[0])).toBe(false);
     });
 

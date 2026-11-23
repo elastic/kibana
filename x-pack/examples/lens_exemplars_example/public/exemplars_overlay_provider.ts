@@ -6,6 +6,7 @@
  */
 
 import { BasicPrettyPrinter, Parser } from '@elastic/esql';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
@@ -17,12 +18,16 @@ export const EXEMPLARS_APP_ID = 'lens_exemplars_example';
 export const EXEMPLARS_OVERLAY_PROVIDER_ID = 'lensExemplarsExample.exemplars';
 export const EXEMPLARS_FEATURE_FLAG = 'lensExemplarsExample.enabled';
 
-/** `executionContext.type` of the surfaces drawing exemplars: this example app, Dashboard and Discover. */
-const SUPPORTED_SURFACE_TYPES: ReadonlySet<string> = new Set([
+/** Surfaces drawing exemplars: this example app, Dashboard and Discover. */
+const SUPPORTED_SURFACES: ReadonlySet<string> = new Set([
   EXEMPLARS_APP_ID,
   'dashboard',
   'discover',
 ]);
+
+/** Apps rendering the chart directly report `type: 'application'` and their app id as `name`. */
+const getSurface = ({ type, name }: KibanaExecutionContext): string | undefined =>
+  type === 'application' ? name : type;
 
 const EXEMPLARS_LIMIT = 200;
 const SIMULATED_EXEMPLARS_LIMIT = 30;
@@ -107,10 +112,11 @@ export const createExemplarsOverlayProvider = ({
   return {
     id: EXEMPLARS_OVERLAY_PROVIDER_ID,
     isApplicable: ({ executionContext }, { esql }) => {
+      const surface = executionContext && getSurface(executionContext);
       return (
         isEnabled() &&
-        executionContext?.type !== undefined &&
-        SUPPORTED_SURFACE_TYPES.has(executionContext.type) &&
+        surface !== undefined &&
+        SUPPORTED_SURFACES.has(surface) &&
         queryHasStatsCommand(esql) &&
         getExemplarsQuery(esql) !== undefined
       );

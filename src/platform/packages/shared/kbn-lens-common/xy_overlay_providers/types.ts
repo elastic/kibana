@@ -26,7 +26,10 @@ export interface LensXYOverlayLayer {
  */
 export interface LensXYOverlayMatchContext {
   readonly layers: readonly LensXYOverlayLayer[];
-  /** Identifies the surface rendering the chart (Discover, Dashboards, ...). */
+  /**
+   * Identifies the surface rendering the chart (Discover, Dashboards, ...). Merged with the app-level
+   * context, so a chart hosted directly by an app has `type: 'application'` and the app id as `name`.
+   */
   readonly executionContext?: KibanaExecutionContext;
 }
 

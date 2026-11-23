@@ -11,8 +11,9 @@ the chart data has loaded, and routes clicks on the points back to the provider.
 for the full contract.
 
 The provider applies to ES|QL layers with a `STATS` command rendered by this app, a dashboard
-or the Discover histogram. It matches on the `executionContext.type` each surface passes to Lens
-(`lens_exemplars_example`, `dashboard`, `discover`):
+or the Discover histogram. It matches on the `executionContext.type` of this app
+(`lens_exemplars_example`) and dashboards (`dashboard`), and on the app `name` of Discover
+(`discover`), which reports `type: 'application'`:
 
 - On `TS` metrics queries it fetches real exemplars with the ES|QL `SET exemplars` setting.
 - On any other query it simulates exemplars with the largest raw samples of the aggregated field.

@@ -929,6 +929,7 @@ describe('Data Loader', () => {
       };
       return {
         params,
+        services,
         xyOverlayProviders$,
         internalApi,
         overlayEmissions,
@@ -1013,6 +1014,25 @@ describe('Data Loader', () => {
 
       params.onData$({ type: 'datatable', rows: [], columns: [] });
       expect(loadXYOverlaysMock).toHaveBeenCalledTimes(1);
+
+      cleanup();
+    });
+
+    it('passes providers the chart execution context merged with the app-level one', async () => {
+      const { params, services, cleanup } = await setup();
+      const mergedContext = { type: 'application', name: 'discover', url: '/app/discover' };
+      jest
+        .mocked(services.coreStart.executionContext.withGlobalContext)
+        .mockReturnValue(mergedContext);
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+
+      expect(services.coreStart.executionContext.withGlobalContext).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'lens' })
+      );
+      expect(loadXYOverlaysMock).toHaveBeenCalledWith(
+        expect.objectContaining({ executionContext: mergedContext })
+      );
 
       cleanup();
     });

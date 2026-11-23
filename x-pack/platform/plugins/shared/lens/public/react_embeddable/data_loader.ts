@@ -242,7 +242,9 @@ export function loadEmbeddableData(
     const { overlays, failures, truncations } = await loadXYOverlays({
       registry: services.xyOverlayProviderRegistry,
       attributes: state.attributes,
-      executionContext: getExecutionContext(),
+      executionContext: services.coreStart.executionContext.withGlobalContext(
+        getExecutionContext() ?? {}
+      ),
       runtimeConfig: xyOverlayProviders$?.getValue(),
       searchContext,
       searchSessionId: api.searchSessionId$.getValue(),

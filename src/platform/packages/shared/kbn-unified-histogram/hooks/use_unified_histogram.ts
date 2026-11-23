@@ -48,10 +48,6 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   lensActionsOptions?: UnifiedHistogramChartProps['lensActionsOptions'];
   /**
-   * Identifies the host rendering the chart, e.g. `{ type: 'discover' }`; forwarded to Lens
-   */
-  executionContext?: UnifiedHistogramChartProps['executionContext'];
-  /**
    * Disabled action IDs for the Lens embeddable
    */
   disabledActions?: LensEmbeddableInput['disabledActions'];

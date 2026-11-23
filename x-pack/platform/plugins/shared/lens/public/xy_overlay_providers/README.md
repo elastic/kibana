@@ -74,13 +74,15 @@ the chart shows a warning badge that names the provider and the error.
 - `layer.layerId` is the id of the layer.
 - `layer.esql` is the ES|QL query of the layer.
 - `context.layers` lists every ES|QL layer of the chart.
-- `context.executionContext` identifies the surface rendering the chart. Match on its `type`:
+- `context.executionContext` identifies the surface rendering the chart. It is the chart's context
+  merged with the app-level one, the same context its requests report. Apps rendering the chart
+  without a context of their own report `type: 'application'` and their app id as `name`:
 
-| Surface | `executionContext.type` |
-|---|---|
-| Dashboard panel | `dashboard` |
-| Discover histogram | `discover` |
-| App embedding the Lens component | whatever the app passes in the `executionContext` prop, by convention its app id |
+| Surface | `executionContext.type` | `executionContext.name` |
+|---|---|---|
+| Dashboard panel | `dashboard` | |
+| Discover histogram | `application` | `discover` |
+| App embedding the Lens component | whatever the app passes in the `executionContext` prop, by convention its app id | |
 
 To use a feature flag or other plugin state in the rule, read it in your plugin and let the provider
 read the cached value, because `isApplicable` gets no services. Lens checks the rule on every chart
