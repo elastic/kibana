@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -67,7 +67,7 @@ const STATUSES = ['open', 'acknowledged', 'closed'] as const;
 const ALERT_COUNT_BY_RULE_BY_STATUS = 'alerts-by-status-by-rule';
 const LOCAL_STORAGE_KEY = 'alertCountByFieldNameWidgetSettings';
 
-const StyledEuiPanel = euiStyled(EuiPanel)`
+const StyledEuiPanel = styled(EuiPanel)`
   display: flex;
   flex-direction: column;
   position: relative;

@@ -1,5 +1,5 @@
 {
-  "sha1": "9fa0a80ddf6562c5120a2af7696852b7ad417952",
+  "sha1": "f4c182c3b7abf5e9ac76cc110094b136713e34e2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -743,7 +743,35 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
         "line": 898,
-        "column": 60
+        "column": 47
+      }
+    },
+    {
+      "id": "d00330aaa254910-e0e6d7dd88c159c",
+      "title": "context engine dreaming templates API serves the built-in dreaming templates to a reader session only while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "d00330aaa254910-682ad5b28f57304",
+      "title": "context engine dreaming templates API returns 403 to a session without Context Engine read access while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 139,
+        "column": 5
       }
     },
     {
@@ -789,6 +817,20 @@
       }
     },
     {
+      "id": "fcd35323787d13e-a72d6a0122b733f",
+      "title": "context engine KI groups groups \"Other\" by type with exclude_types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
+        "line": 220,
+        "column": 49
+      }
+    },
+    {
       "id": "fcd35323787d13e-fe33001726834b1",
       "title": "context engine KI groups total_other matches the \"Other\" list total with search",
       "expectedStatus": "passed",
@@ -798,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -812,7 +854,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -826,7 +868,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 233,
+        "line": 255,
         "column": 74
       }
     },
@@ -840,7 +882,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 252,
+        "line": 274,
         "column": 17
       }
     },
@@ -854,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 262,
+        "line": 284,
         "column": 77
       }
     },
@@ -868,7 +910,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_groups.spec.ts",
-        "line": 270,
+        "line": 292,
         "column": 6
       }
     },

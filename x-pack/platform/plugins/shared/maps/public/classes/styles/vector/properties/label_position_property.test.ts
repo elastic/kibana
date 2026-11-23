@@ -34,8 +34,8 @@ describe('syncLabelPositionWithMb', () => {
   } as unknown as StaticSizeProperty;
   const dynamicIconSize = new DynamicSizeProperty(
     {
-      maxSize: 32,
-      minSize: 7,
+      max_size: 32,
+      min_size: 7,
     } as unknown as SizeDynamicOptions,
     VECTOR_STYLES.ICON_SIZE,
     {

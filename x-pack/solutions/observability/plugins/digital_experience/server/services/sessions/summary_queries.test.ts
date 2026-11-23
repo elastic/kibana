@@ -10,6 +10,7 @@ import { FULL_HASH_RANGE, HASH_SPACE } from './hash_ranges';
 import {
   SESSION_ATTRIBUTE_GROUPS,
   attributeColumn,
+  browserSessionEvents,
   bucketDigitsOf,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
@@ -21,7 +22,7 @@ const REBUILD = { changedTo: WINDOW.changedTo, rebuildFrom: '2026-11-09T10:00:00
 
 describe('changedSessionsCountQuery', () => {
   it('counts the browser sessions with an event in the window', () => {
-    const { query, params } = changedSessionsCountQuery(WINDOW);
+    const { query, params } = changedSessionsCountQuery(WINDOW, browserSessionEvents);
 
     expect(query).toMatch(/^SET unmapped_fields = "NULLIFY";/);
     expect(query).toContain('telemetry.sdk.language == "webjs"');
@@ -35,7 +36,7 @@ describe('changedSessionsCountQuery', () => {
 
 describe('changedSessionIdsQuery', () => {
   it('lists the ids of the sessions with an event in the window, a row per hash bucket', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE);
+    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents);
 
     expect(query).toContain('@timestamp >= ?changed_from AND @timestamp < ?changed_to');
     expect(query).toContain('STATS BY session_id = attributes.session.id');
@@ -59,7 +60,7 @@ describe('changedSessionIdsQuery', () => {
     expect(bucketDigitsOf(255)).toBe(1);
     expect(bucketDigitsOf(15)).toBe(0);
 
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 1_000);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 1_000);
 
     expect(query).toContain(
       'STATS session_ids = VALUES(session_id) BY bucket = SUBSTRING(session_hash, 1, 2)'
@@ -68,17 +69,18 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('puts every id in one row when even 16 buckets would not fit', () => {
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 10);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 10);
 
     expect(query).toContain('STATS session_ids = VALUES(session_id)\n');
     expect(query).not.toContain('SUBSTRING');
   });
 
   it('keeps the sessions of a hash range only', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, {
-      from: HASH_SPACE / 4,
-      to: HASH_SPACE / 2,
-    });
+    const { query, params } = changedSessionIdsQuery(
+      WINDOW,
+      { from: HASH_SPACE / 4, to: HASH_SPACE / 2 },
+      browserSessionEvents
+    );
 
     expect(query).toContain('WHERE session_hash >= ?hash_from AND session_hash < ?hash_to');
     expect(params).toEqual(
@@ -87,11 +89,12 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('leaves out the bound of a range that starts or ends the hash space', () => {
-    expect(changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }).params).toContainEqual({
-      hash_to: '80000000',
-    });
     expect(
-      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }).query
+      changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }, browserSessionEvents).params
+    ).toContainEqual({ hash_to: '80000000' });
+    expect(
+      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }, browserSessionEvents)
+        .query
     ).not.toContain('?hash_to');
   });
 });
@@ -109,22 +112,32 @@ describe('sessionSummaryQuery', () => {
     ]);
   });
 
-  it('aggregates per session and page URL, then per session', () => {
+  it('aggregates per session in one branch and per page view in another, then merges them per session', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     expect(query).toContain(
-      'BY service = resource.attributes.service.name, session = attributes.session.id, page_url'
+      'BY service = resource.attributes.service.name, session = attributes.session.id)'
     );
-    expect(query).toContain('page_url = CASE(is_page_view, attributes.url.full, null)');
+    // On the source fields, so that Lucene applies the filter.
+    expect(query).toContain(
+      '(WHERE event_name IN ("documentLoad", "browser.navigation") OR name IN ("documentLoad", "browser.navigation")'
+    );
+    expect(query).toContain(
+      'BY service = resource.attributes.service.name, session = attributes.session.id, page_url = attributes.url.full)'
+    );
+    expect(query).toContain('start_time = MAX(start_time)');
+    expect(query).toContain('event_count = MAX(event_count)');
     expect(query).toContain(
       'pages = TOP(first_view, 30, "asc", page_url) WHERE page_url IS NOT NULL'
     );
     expect(query).toContain('exit = LAST(page_url, last_view) WHERE page_url IS NOT NULL');
     expect(query).not.toContain('CONCAT(');
-    expect(query).toMatch(/BY service, session\n\| EVAL [^|]+\n\| DROP raw_\*\n\| LIMIT 10000$/);
+    expect(query).toMatch(
+      /BY service, session\n\| EVAL [^|]+\n\| EVAL [^|]+\n\| DROP raw_\*\n\| LIMIT 10000$/
+    );
   });
 
-  it('reads every attribute field from its group’s latest event, in both stages', () => {
+  it('reads every attribute field from its group’s latest event', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
     Object.entries(SESSION_ATTRIBUTE_GROUPS).forEach(([group, attributes]) => {
@@ -133,9 +146,8 @@ describe('sessionSummaryQuery', () => {
         .forEach((field) => {
           const raw = `raw_${field.replace(/\./g, '_')}`;
           expect(query).toContain(`${raw} = LAST(TO_STRING(${field}), seen_${group})`);
-          expect(query).toContain(`${raw} = LAST(${raw}, seen_${group})`);
+          expect(query).toContain(`${raw} = MAX(${raw})`);
         });
-      expect(query.split(`seen_${group} = MAX(seen_${group})`)).toHaveLength(3);
     });
   });
 
@@ -151,16 +163,51 @@ describe('sessionSummaryQuery', () => {
     );
   });
 
-  it('rates the web vitals against the thresholds as floats store them, and adds up their counts', () => {
+  it('shows a signed-in user by name before their id, which EDOT Browser always writes', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const userEval = query.slice(query.indexOf(`${attributeColumn('user')} = COALESCE(`));
+
+    expect(userEval.indexOf('raw_attributes_user_full_name')).toBeLessThan(
+      userEval.indexOf('raw_attributes_user_id')
+    );
+  });
+
+  it('rates each web vital from its own column, against the thresholds as floats store them', () => {
     const { query } = sessionSummaryQuery(REBUILD, ['a']);
 
-    expect(query).toContain(
-      'cls_good = COUNT(*) WHERE vital == "cls" AND vital_value <= 0.10000000149011612'
-    );
-    expect(query).toContain(
-      'lcp_up_to_needs_improvement = COUNT(*) WHERE vital == "lcp" AND vital_value <= 4000'
-    );
+    expect(query).toContain('lcp = CASE(vital == "lcp", vital_value, null)');
+    expect(query).toContain('lcp_p75 = PERCENTILE(lcp, 75)');
+    expect(query).toContain('lcp_samples = COUNT(lcp)');
+    expect(query).toContain('cls_good = COUNT(*) WHERE cls <= 0.10000000149011612');
+    expect(query).toContain('lcp_up_to_needs_improvement = COUNT(*) WHERE lcp <= 4000');
     expect(query).toContain('lcp_p75 = MAX(lcp_p75)');
-    expect(query).toContain('lcp_samples = SUM(lcp_samples)');
+    expect(query).toContain('lcp_samples = MAX(lcp_samples)');
+  });
+
+  it('aggregates the web vitals in a branch of their own, which reads only web vital events', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const vitalsBranch = query.indexOf('(WHERE (event_name == "browser.web_vital"');
+
+    // On the source fields, so that Lucene applies the filter.
+    expect(query).toContain(
+      '(WHERE (event_name == "browser.web_vital" OR name == "browser.web_vital") AND attributes.browser.web_vital.value IS NOT NULL'
+    );
+    expect(query.slice(0, vitalsBranch)).not.toContain('PERCENTILE(');
+    expect(query.slice(0, vitalsBranch)).not.toContain('vital_value');
+    expect(query.slice(vitalsBranch)).toContain(
+      'EVAL vital = TO_LOWER(attributes.browser.web_vital.name), vital_value = attributes.browser.web_vital.value'
+    );
+  });
+
+  it('counts no web vitals, rather than none known, for a session without any', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const lastStage = query.lastIndexOf('BY service, session');
+
+    expect(query.slice(lastStage)).toContain('lcp_samples = COALESCE(lcp_samples, 0)');
+    expect(query.slice(lastStage)).toContain('lcp_good = COALESCE(lcp_good, 0)');
+    expect(query.slice(lastStage)).toContain(
+      'ttfb_up_to_needs_improvement = COALESCE(ttfb_up_to_needs_improvement, 0)'
+    );
+    expect(query.slice(lastStage)).not.toContain('lcp_p75 = COALESCE');
   });
 });

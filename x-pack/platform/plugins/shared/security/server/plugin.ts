@@ -349,7 +349,13 @@ export class SecurityPlugin
       getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({
+      usageCollection,
+      config,
+      license,
+      logger: this.logger.get('usage'),
+      getServiceAccounts: () => this.serviceAccountsStart,
+    });
 
     const getCurrentUser = (request: KibanaRequest) =>
       this.getAuthentication().getCurrentUser(request);
