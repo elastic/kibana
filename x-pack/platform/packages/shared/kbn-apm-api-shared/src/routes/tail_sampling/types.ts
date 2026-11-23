@@ -9,7 +9,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 export const MAX_TAIL_SAMPLING_POLICIES = 100;
 export const MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH = 256;
 export const MAX_TAIL_SAMPLING_POLICY_TYPE_LENGTH = 64;
-export const MAX_TAIL_SAMPLING_HASH_LENGTH = 128;
 // Saved object versions are short opaque strings, such as 'WzEsMV0='.
 export const MAX_TAIL_SAMPLING_VERSION_LENGTH = 128;
 
@@ -94,6 +93,6 @@ export interface ValidateTailSamplingResponse {
   // Non-blocking. A warning about one policy sets `policyIndex`, a set-level one does not.
   // Always empty for now: the warning rules and their codes arrive in a separate change.
   warnings: TailSamplingDiagnostic[];
-  // Hash of the config as validated. Send it back as `validatedHash` on save.
+  // Hash of the config as validated.
   hash: string;
 }

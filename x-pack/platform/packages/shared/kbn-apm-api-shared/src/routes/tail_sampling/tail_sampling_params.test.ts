@@ -7,11 +7,7 @@
 import { expectParseError, expectParseSuccess } from '@kbn/zod-helpers/v4';
 import { validateTailSamplingRoute } from './validate_tail_sampling';
 import { saveTailSamplingRoute } from './save_tail_sampling';
-import {
-  MAX_TAIL_SAMPLING_HASH_LENGTH,
-  MAX_TAIL_SAMPLING_POLICIES,
-  MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH,
-} from './types';
+import { MAX_TAIL_SAMPLING_POLICIES, MAX_TAIL_SAMPLING_POLICY_NAME_LENGTH } from './types';
 
 const keepErrors = {
   name: 'keep-errors',
@@ -22,7 +18,6 @@ const settings = (policies: unknown[]) => ({
   processor: 'tail_sampling',
   config: { policies },
 });
-const hash = 'a'.repeat(64);
 
 describe('validateTailSamplingRoute params', () => {
   it('accepts a policy and keeps its type block', () => {
@@ -94,28 +89,19 @@ describe('saveTailSamplingRoute params', () => {
         body: {
           processor: 'tail_sampling',
           config: { policies: [keepErrors], decision_wait: '10s' },
-          validatedHash: hash,
         },
       })
     );
   });
 
-  it('accepts a config with a validated hash', () => {
-    expectParseSuccess(
-      saveTailSamplingRoute.params!.safeParse({
-        body: { ...settings([keepErrors]), validatedHash: hash },
-      })
-    );
-  });
-
-  it('rejects a save without a validated hash', () => {
-    expectParseError(saveTailSamplingRoute.params!.safeParse({ body: settings([keepErrors]) }));
+  it('accepts a config without a version, for the first save', () => {
+    expectParseSuccess(saveTailSamplingRoute.params!.safeParse({ body: settings([keepErrors]) }));
   });
 
   it('accepts the version of the stored document', () => {
     expectParseSuccess(
       saveTailSamplingRoute.params!.safeParse({
-        body: { ...settings([keepErrors]), validatedHash: hash, version: 'WzEsMV0=' },
+        body: { ...settings([keepErrors]), version: 'WzEsMV0=' },
       })
     );
   });
@@ -123,23 +109,7 @@ describe('saveTailSamplingRoute params', () => {
   it('rejects a version over the length limit', () => {
     expectParseError(
       saveTailSamplingRoute.params!.safeParse({
-        body: { ...settings([keepErrors]), validatedHash: hash, version: 'v'.repeat(129) },
-      })
-    );
-  });
-
-  it('rejects an empty or oversized hash', () => {
-    expectParseError(
-      saveTailSamplingRoute.params!.safeParse({
-        body: { ...settings([keepErrors]), validatedHash: '' },
-      })
-    );
-    expectParseError(
-      saveTailSamplingRoute.params!.safeParse({
-        body: {
-          ...settings([keepErrors]),
-          validatedHash: 'h'.repeat(MAX_TAIL_SAMPLING_HASH_LENGTH + 1),
-        },
+        body: { ...settings([keepErrors]), version: 'v'.repeat(129) },
       })
     );
   });
