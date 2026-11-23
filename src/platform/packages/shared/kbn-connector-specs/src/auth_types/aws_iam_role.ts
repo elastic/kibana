@@ -9,11 +9,21 @@
 
 import axios from 'axios';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import type { AxiosInstance } from 'axios';
 import { Parser } from 'xml2js';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
-import { parseAwsHost, signRequest } from './aws_credential_helpers';
+import { signRequest } from './aws_credential_helpers';
+import { sha256Hash } from './aws_crypto_helpers';
+import { createAwsSigV4Interceptor } from './aws_sigv4_interceptor';
+
+const DEFAULT_ROLE_SESSION_NAME = 'kibana-connector';
+
+// IAM role ARN: partition, 12-digit account id, and a role name with an optional path.
+const ROLE_ARN_PATTERN = /^arn:aws[a-z-]*:iam::\d{12}:role\/[\w+=,.@/-]+$/;
+// STS limits: RoleArn up to 2048 characters, ExternalId up to 1224, RoleSessionName up to 64.
+const EXTERNAL_ID_PATTERN = /^[\w+=,.@:/-]*$/;
+const ROLE_SESSION_NAME_PATTERN = /^[\w+=,.@-]*$/;
 
 // ============================================================================
 // Temporary credential cache
@@ -27,15 +37,63 @@ interface TempCredentials {
   expiration: number;
 }
 
-/** Module-level cache keyed by "{accessKeyId}::{roleArn}" */
+/**
+ * Module-level cache keyed by a digest of everything that identifies the credentials. The key covers
+ * the secret access key too, so a connector that knows another connector's access key id and role ARN
+ * but not its secret cannot reuse that connector's temporary credentials.
+ */
 const credentialCache = new Map<string, TempCredentials>();
+
+/** Bounds memory when many connectors are created and deleted over the life of the process. */
+const MAX_CACHED_CREDENTIALS = 100;
 
 /** Refresh credentials this many ms before they expire to avoid races */
 const REFRESH_BUFFER_MS = 5 * 60 * 1000; // 5 minutes
 
-function getCacheKey(accessKeyId: string, roleArn: string): string {
-  return `${accessKeyId}::${roleArn}`;
-}
+const getCacheKey = (
+  accessKeyId: string,
+  secretAccessKey: string,
+  roleArn: string,
+  roleSessionName: string,
+  externalId?: string
+): Promise<string> =>
+  sha256Hash(
+    JSON.stringify([accessKeyId, secretAccessKey, roleArn, roleSessionName, externalId ?? null])
+  );
+
+/** Drops expired entries, then the oldest ones, so the cache stays under its cap. */
+const storeCredentials = (cacheKey: string, credentials: TempCredentials): void => {
+  const now = Date.now();
+  for (const [key, cached] of credentialCache) {
+    if (cached.expiration <= now) {
+      credentialCache.delete(key);
+    }
+  }
+  credentialCache.delete(cacheKey);
+  while (credentialCache.size >= MAX_CACHED_CREDENTIALS) {
+    const oldest = credentialCache.keys().next().value;
+    if (oldest === undefined) break;
+    credentialCache.delete(oldest);
+  }
+  credentialCache.set(cacheKey, credentials);
+};
+
+/** Turns an STS failure into a message that names AssumeRole, not the service the caller wanted. */
+const describeStsError = (error: unknown): string => {
+  const { response } = error as { response?: { status?: number; data?: unknown } };
+  const data = typeof response?.data === 'string' ? response.data : '';
+  const code = /<Code>([^<]{1,100})<\/Code>/.exec(data)?.[1];
+  const message = /<Message>([^<]{1,500})<\/Message>/.exec(data)?.[1];
+  if (code) {
+    return `AWS STS AssumeRole failed [${code}]: ${message ?? 'no message returned'}`;
+  }
+  const reason = response?.status
+    ? `HTTP ${response.status}`
+    : error instanceof Error
+    ? error.message
+    : 'unknown error';
+  return `AWS STS AssumeRole failed: ${reason}`;
+};
 
 // ============================================================================
 // STS AssumeRole helper
@@ -87,29 +145,37 @@ async function callAssumeRole(
     // no sessionToken — base credentials are long-lived
   );
 
-  const response = await httpClient.post(`https://${host}/`, body, {
-    headers: {
-      ...sigHeaders,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
+  let response;
+  try {
+    response = await httpClient.post(`https://${host}/`, body, {
+      headers: {
+        ...sigHeaders,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      // The signed request carries the long-lived access key; never follow it to another host.
+      maxRedirects: 0,
+    });
+  } catch (error: unknown) {
+    throw new Error(describeStsError(error));
+  }
 
   const parser = new Parser({ explicitArray: false, ignoreAttrs: true });
-  const parsed = await parser.parseStringPromise(response.data as string);
-  const credentials = (
-    parsed as {
-      AssumeRoleResponse: {
-        AssumeRoleResult: {
-          Credentials: {
-            AccessKeyId: string;
-            SecretAccessKey: string;
-            SessionToken: string;
-            Expiration: string;
-          };
+  const parsed = (await parser.parseStringPromise(response.data as string)) as {
+    AssumeRoleResponse?: {
+      AssumeRoleResult?: {
+        Credentials?: {
+          AccessKeyId: string;
+          SecretAccessKey: string;
+          SessionToken: string;
+          Expiration: string;
         };
       };
-    }
-  ).AssumeRoleResponse.AssumeRoleResult.Credentials;
+    };
+  } | null;
+  const credentials = parsed?.AssumeRoleResponse?.AssumeRoleResult?.Credentials;
+  if (!credentials) {
+    throw new Error('AWS STS AssumeRole returned an unexpected response');
+  }
 
   return {
     accessKeyId: credentials.AccessKeyId,
@@ -130,7 +196,13 @@ async function getTemporaryCredentials(
   roleSessionName: string,
   externalId?: string
 ): Promise<TempCredentials> {
-  const cacheKey = getCacheKey(accessKeyId, roleArn);
+  const cacheKey = await getCacheKey(
+    accessKeyId,
+    secretAccessKey,
+    roleArn,
+    roleSessionName,
+    externalId
+  );
   const cached = credentialCache.get(cacheKey);
 
   if (cached && cached.expiration - Date.now() > REFRESH_BUFFER_MS) {
@@ -145,7 +217,7 @@ async function getTemporaryCredentials(
     roleSessionName,
     externalId
   );
-  credentialCache.set(cacheKey, creds);
+  storeCredentials(cacheKey, creds);
   return creds;
 }
 
@@ -167,12 +239,16 @@ const authSchema = lazySchema(() =>
       roleArn: z
         .string()
         .min(1, { message: i18n.AWS_IAM_ROLE_ARN_REQUIRED_MESSAGE })
+        .max(2048)
+        .regex(ROLE_ARN_PATTERN, { message: i18n.AWS_IAM_ROLE_ARN_INVALID_MESSAGE })
         .describe(
           'The ARN of the IAM role to assume. Example: arn:aws:iam::123456789012:role/MyRole'
         )
         .meta({ label: i18n.AWS_IAM_ROLE_ARN_LABEL }),
       externalId: z
         .string()
+        .max(1224)
+        .regex(EXTERNAL_ID_PATTERN, { message: i18n.AWS_IAM_ROLE_EXTERNAL_ID_INVALID_MESSAGE })
         .optional()
         .describe(
           'Optional external ID for cross-account role assumption. Required when the role trust policy specifies a sts:ExternalId condition.'
@@ -180,8 +256,12 @@ const authSchema = lazySchema(() =>
         .meta({ label: i18n.AWS_IAM_ROLE_EXTERNAL_ID_LABEL }),
       roleSessionName: z
         .string()
+        .max(64)
+        .regex(ROLE_SESSION_NAME_PATTERN, {
+          message: i18n.AWS_IAM_ROLE_SESSION_NAME_INVALID_MESSAGE,
+        })
         .optional()
-        .default('kibana-connector')
+        .default(DEFAULT_ROLE_SESSION_NAME)
         .describe('A name for the assumed-role session. Appears in CloudTrail logs.')
         .meta({ label: i18n.AWS_IAM_ROLE_SESSION_NAME_LABEL }),
     })
@@ -209,7 +289,9 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    const { accessKeyId, secretAccessKey, roleArn, externalId, roleSessionName } = secret;
+    const { accessKeyId, secretAccessKey, roleArn, externalId } = secret;
+    // A blank session name from the form falls back to the default rather than failing in STS.
+    const roleSessionName = secret.roleSessionName || DEFAULT_ROLE_SESSION_NAME;
 
     // Create a separate client for STS AssumeRole calls, inheriting the platform's
     // configured defaults (timeouts, base headers, etc.) but without our signing
@@ -218,78 +300,16 @@ export const AwsIamRoleAuth: AuthTypeSpec<AuthSchemaType> = {
     const stsClient = axios.create(axiosInstance.defaults);
 
     axiosInstance.interceptors.request.use(
-      async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
-        const requestUrl = config.url;
-        if (!requestUrl) {
-          return config;
-        }
-
-        // Resolve full URL (handles relative URLs with baseURL)
-        const fullUrl =
-          config.baseURL && !requestUrl.startsWith('http')
-            ? new URL(requestUrl, config.baseURL)
-            : new URL(requestUrl);
-
-        const awsInfo = parseAwsHost(fullUrl.hostname);
-        if (!awsInfo) {
-          return config;
-        }
-
-        // Obtain (possibly cached) temporary credentials
-        const tempCreds = await getTemporaryCredentials(
+      createAwsSigV4Interceptor(() =>
+        getTemporaryCredentials(
           stsClient,
           accessKeyId,
           secretAccessKey,
           roleArn,
           roleSessionName,
           externalId
-        );
-
-        const method = (config.method || 'GET').toUpperCase();
-        const path = fullUrl.pathname;
-        const queryParams: Record<string, string> = {};
-        fullUrl.searchParams.forEach((value, key) => {
-          queryParams[key] = value;
-        });
-
-        const body =
-          typeof config.data === 'string'
-            ? config.data
-            : config.data != null
-            ? JSON.stringify(config.data)
-            : undefined;
-
-        // Collect existing headers for signing
-        const existingHeaders: Record<string, string> = {};
-        if (config.headers) {
-          for (const [key, value] of Object.entries(config.headers.toJSON())) {
-            if (typeof value === 'string') {
-              existingHeaders[key] = value;
-            }
-          }
-        }
-
-        const sigV4Headers = await signRequest(
-          method,
-          fullUrl.hostname,
-          path,
-          queryParams,
-          tempCreds.accessKeyId,
-          tempCreds.secretAccessKey,
-          awsInfo.region,
-          awsInfo.service,
-          existingHeaders,
-          body,
-          tempCreds.sessionToken
-        );
-
-        // Apply signed headers to the request
-        for (const [key, value] of Object.entries(sigV4Headers)) {
-          config.headers.set(key, value);
-        }
-
-        return config;
-      }
+        )
+      )
     );
 
     return axiosInstance;

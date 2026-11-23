@@ -1,16 +1,18 @@
 ---
 navigation_title: "Amazon DynamoDB"
-description: Use the Amazon DynamoDB connector to list tables, query, and scan with AI agents, or write and delete items through Kibana workflows.
+description: Use the Amazon DynamoDB connector to list tables, inspect table schemas, and read items with AI agents.
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.7
   serverless: preview
 ---
 
 # Amazon DynamoDB connector [amazon-dynamodb-action-type]
 
-The Amazon DynamoDB connector enables querying, scanning, and managing items in Amazon DynamoDB tables from Kibana workflows and AI agents.
+The Amazon DynamoDB connector lets AI agents list tables, inspect table schemas, and read items from Amazon DynamoDB by primary key, key condition, or full scan. The connector also provides actions that write and delete items.
 
-Writing and deleting items (`putItem`, `deleteItem`) are deliberately available as workflow steps only, not as autonomous agent tools, because an agent-driven write can silently overwrite or delete existing data. Read actions (`listTables`, `describeTable`, `getItem`, `query`, `scan`) are available to both.
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents, because an agent-driven write can silently overwrite or delete existing data. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
 
 ## Create connectors in {{kib}} [define-amazon-dynamodb-ui]
 
@@ -58,6 +60,8 @@ Session name
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by calling the DynamoDB `ListTables` API for the configured region.
 
+## Amazon DynamoDB connector actions [amazon-dynamodb-connector-actions]
+
 The Amazon DynamoDB connector has the following actions:
 
 List tables
@@ -101,7 +105,7 @@ Scan
     - **exclusiveStartKey** (optional): Key of the first item to evaluate for pagination.
     - **select** (optional): `ALL_ATTRIBUTES`, `ALL_PROJECTED_ATTRIBUTES`, `SPECIFIC_ATTRIBUTES`, or `COUNT`.
 
-Put item
+Put item _(not yet available)_
 :   Write a single item to a DynamoDB table. If an item with the same primary key already exists, it is fully replaced. Use `conditionExpression` to make this a conditional write.
     - **tableName** (required): The name of the table to write to.
     - **item** (required): The item as a map of attribute name to DynamoDB typed value. Must include all primary key attributes.
@@ -109,7 +113,7 @@ Put item
     - **expressionAttributeValues** (optional): Map of expression attribute value placeholders for the condition.
     - **expressionAttributeNames** (optional): Map of expression attribute name placeholders for the condition.
 
-Delete item
+Delete item _(not yet available)_
 :   Delete a single item from a DynamoDB table by its primary key. No error is raised if the item did not exist.
     - **tableName** (required): The name of the table to delete from.
     - **key** (required): The primary key as a map of attribute name to DynamoDB typed value.
@@ -125,17 +129,17 @@ The steps to obtain credentials depend on which authentication type you choose.
 
 1. Sign in to the [AWS Management Console](https://console.aws.amazon.com/).
 2. Navigate to **IAM > Users** and select or create an IAM user.
-3. Attach a policy that grants the required DynamoDB permissions. At minimum, the user needs:
+3. Attach a policy that grants the required DynamoDB permissions. The actions that agents can use need:
    - `dynamodb:ListTables`
    - `dynamodb:DescribeTable`
    - `dynamodb:GetItem`
    - `dynamodb:Query`
    - `dynamodb:Scan`
-   - `dynamodb:PutItem`
-   - `dynamodb:DeleteItem`
+
+   Add `dynamodb:PutItem` and `dynamodb:DeleteItem` only if you run the **Put item** and **Delete item** actions through the Run a connector API.
 
    :::{tip}
-   Follow the principle of least privilege — grant only the permissions required for your use case. Omit write permissions (`PutItem`, `DeleteItem`) if the connector will only read data.
+   Follow the principle of least privilege — grant only the permissions required for your use case.
    :::
 
 4. In the IAM user's **Security credentials** tab, select **Create access key** and select the **Application running outside AWS** use case.
@@ -177,13 +181,13 @@ This option uses AWS STS `AssumeRole` to obtain short-lived credentials. You nee
    - `dynamodb:GetItem`
    - `dynamodb:Query`
    - `dynamodb:Scan`
-   - `dynamodb:PutItem`
-   - `dynamodb:DeleteItem`
+
+   Add `dynamodb:PutItem` and `dynamodb:DeleteItem` only if you run the **Put item** and **Delete item** actions through the Run a connector API.
 
 3. Note the role's **ARN** — you will enter this as the **Role ARN** in the connector configuration.
 
 :::{tip}
-To restrict access to specific tables, scope the DynamoDB permissions to a table ARN (for example, `arn:aws:dynamodb:<region>:<account-id>:table/my-table`) instead of `*`. Note that `dynamodb:ListTables` always requires `*` as the resource.
+To restrict access to specific tables, scope the DynamoDB permissions to a table ARN (for example, `arn:aws:dynamodb:<region>:<account-id>:table/my-table`) instead of `*`. To query or scan a secondary index, also allow the index ARNs (for example, `arn:aws:dynamodb:<region>:<account-id>:table/my-table/index/*`). Note that `dynamodb:ListTables` always requires `*` as the resource.
 :::
 
 :::{note}

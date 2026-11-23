@@ -351,6 +351,30 @@ export const AWS_IAM_ROLE_ARN_REQUIRED_MESSAGE = i18n.translate(
   }
 );
 
+export const AWS_IAM_ROLE_ARN_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.roleArn.invalidMessage',
+  {
+    defaultMessage:
+      'Role ARN must look like arn:aws:iam::123456789012:role/RoleName (12-digit account ID)',
+  }
+);
+
+export const AWS_IAM_ROLE_EXTERNAL_ID_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.externalId.invalidMessage',
+  {
+    defaultMessage:
+      'External ID can contain letters, numbers, and the characters + = , . @ : / _ - (up to 1224 characters)',
+  }
+);
+
+export const AWS_IAM_ROLE_SESSION_NAME_INVALID_MESSAGE = i18n.translate(
+  'connectorSpecs.awsIamRole.sessionName.invalidMessage',
+  {
+    defaultMessage:
+      'Session name can contain letters, numbers, and the characters + = , . @ _ - (up to 64 characters)',
+  }
+);
+
 export const AWS_IAM_ROLE_EXTERNAL_ID_LABEL = i18n.translate(
   'connectorSpecs.awsIamRole.externalId.label',
   {

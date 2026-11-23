@@ -440,6 +440,186 @@ describe('AmazonDynamoDB', () => {
   });
 
   // ===========================================================================
+  // metadata
+  // ===========================================================================
+
+  describe('metadata', () => {
+    it('is available to Agent Builder only', () => {
+      expect(AmazonDynamoDB.metadata.supportedFeatureIds).toEqual(['agentBuilder']);
+    });
+
+    it('keeps the write actions out of the agent tool set', () => {
+      const tools = Object.entries(AmazonDynamoDB.actions)
+        .filter(([, action]) => action.isTool)
+        .map(([name]) => name);
+
+      expect(tools).toEqual(['listTables', 'describeTable', 'getItem', 'query', 'scan']);
+    });
+  });
+
+  // ===========================================================================
+  // input bounds
+  // ===========================================================================
+
+  describe('input bounds', () => {
+    const inputSchema = (action: keyof typeof AmazonDynamoDB.actions) => {
+      const { input } = AmazonDynamoDB.actions[action];
+      if (!input) throw new Error(`${action} has no input schema`);
+      return input;
+    };
+
+    const key = { userId: { S: 'user-123' } };
+    const values = { ':uid': { S: 'user-123' } };
+
+    it('accepts a normal query', () => {
+      const result = inputSchema('query').safeParse({
+        tableName: 'orders',
+        keyConditionExpression: 'userId = :uid',
+        expressionAttributeValues: values,
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it.each([
+      ['keyConditionExpression', 'query'],
+      ['filterExpression', 'query'],
+      ['projectionExpression', 'query'],
+      ['filterExpression', 'scan'],
+      ['projectionExpression', 'scan'],
+    ] as const)('limits %s on %s to 4096 characters', (field, action) => {
+      const base = {
+        tableName: 'orders',
+        keyConditionExpression: 'userId = :uid',
+        expressionAttributeValues: values,
+      };
+      const accepted = inputSchema(action).safeParse({ ...base, [field]: 'a'.repeat(4096) });
+      const rejected = inputSchema(action).safeParse({ ...base, [field]: 'a'.repeat(4097) });
+
+      expect(accepted.success).toBe(true);
+      expect(rejected.success).toBe(false);
+    });
+
+    it.each(['conditionExpression'] as const)('limits %s on putItem and deleteItem', (field) => {
+      const tooLong = 'a'.repeat(4097);
+
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: key, [field]: tooLong })
+          .success
+      ).toBe(false);
+      expect(
+        inputSchema('deleteItem').safeParse({ tableName: 'users', key, [field]: tooLong }).success
+      ).toBe(false);
+    });
+
+    it.each([
+      ['indexName', 'query'],
+      ['indexName', 'scan'],
+    ] as const)('limits %s on %s to 3-255 characters', (field, action) => {
+      const base = {
+        tableName: 'orders',
+        keyConditionExpression: 'userId = :uid',
+        expressionAttributeValues: values,
+      };
+
+      expect(inputSchema(action).safeParse({ ...base, [field]: 'ab' }).success).toBe(false);
+      expect(inputSchema(action).safeParse({ ...base, [field]: 'abc' }).success).toBe(true);
+      expect(inputSchema(action).safeParse({ ...base, [field]: 'a'.repeat(256) }).success).toBe(
+        false
+      );
+    });
+
+    it('limits the pagination table name like any other table name', () => {
+      expect(
+        inputSchema('listTables').safeParse({ exclusiveStartTableName: 'a'.repeat(256) }).success
+      ).toBe(false);
+    });
+
+    it('measures an item in bytes, so multi-byte text cannot slip past a character count', () => {
+      // 150,000 euro signs are 150,000 characters but about 450,000 bytes, over the 400 KB item limit.
+      const multiByteItem = { userId: { S: '€'.repeat(150_000) } };
+      // Plain ASCII of the same character count is well under the limit.
+      const asciiItem = { userId: { S: 'a'.repeat(150_000) } };
+
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: multiByteItem }).success
+      ).toBe(false);
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: asciiItem }).success
+      ).toBe(true);
+    });
+
+    it('accepts an item just under 400 KB and rejects one just over', () => {
+      const overhead = JSON.stringify({ userId: { S: '' } }).length;
+      const justUnder = { userId: { S: 'a'.repeat(400 * 1024 - overhead) } };
+      const justOver = { userId: { S: 'a'.repeat(400 * 1024 - overhead + 1) } };
+
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: justUnder }).success
+      ).toBe(true);
+      expect(inputSchema('putItem').safeParse({ tableName: 'users', item: justOver }).success).toBe(
+        false
+      );
+    });
+
+    it('rejects a value that cannot be serialized instead of failing inside the HTTP client', () => {
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+
+      expect(inputSchema('putItem').safeParse({ tableName: 'users', item: cyclic }).success).toBe(
+        false
+      );
+      expect(
+        inputSchema('putItem').safeParse({ tableName: 'users', item: { n: BigInt(1) } }).success
+      ).toBe(false);
+    });
+
+    it('limits a primary key far below the item size', () => {
+      const oversizedKey = { userId: { S: 'a'.repeat(9 * 1024) } };
+
+      expect(
+        inputSchema('getItem').safeParse({ tableName: 'users', key: oversizedKey }).success
+      ).toBe(false);
+      expect(inputSchema('getItem').safeParse({ tableName: 'users', key }).success).toBe(true);
+    });
+
+    it('limits how many entries a map can hold', () => {
+      const entries = (count: number) =>
+        Object.fromEntries(Array.from({ length: count }, (_, i) => [`:v${i}`, { N: '1' }]));
+
+      expect(
+        inputSchema('scan').safeParse({
+          tableName: 'orders',
+          expressionAttributeValues: entries(1000),
+        }).success
+      ).toBe(true);
+      expect(
+        inputSchema('scan').safeParse({
+          tableName: 'orders',
+          expressionAttributeValues: entries(1001),
+        }).success
+      ).toBe(false);
+    });
+
+    it('limits the length of attribute name placeholders and the names they stand for', () => {
+      const longName = 'a'.repeat(1025);
+
+      expect(
+        inputSchema('scan').safeParse({
+          tableName: 'orders',
+          expressionAttributeNames: { '#n': longName },
+        }).success
+      ).toBe(false);
+      expect(
+        inputSchema('scan').safeParse({
+          tableName: 'orders',
+          expressionAttributeNames: { [`#${longName}`]: 'name' },
+        }).success
+      ).toBe(false);
+    });
+  });
+
+  // ===========================================================================
   // error handling
   // ===========================================================================
 
@@ -458,6 +638,34 @@ describe('AmazonDynamoDB', () => {
       await expect(
         AmazonDynamoDB.actions.describeTable.handler(mockContext, { tableName: 'nonexistent' })
       ).rejects.toThrow('ResourceNotFoundException');
+    });
+
+    it('should report the short error code without the service namespace', async () => {
+      mockPost.mockRejectedValue({
+        response: {
+          status: 400,
+          data: {
+            __type: 'com.amazonaws.dynamodb.v20120810#ResourceNotFoundException',
+            message: 'Requested resource not found',
+          },
+        },
+      });
+
+      await expect(
+        AmazonDynamoDB.actions.describeTable.handler(mockContext, { tableName: 'nonexistent' })
+      ).rejects.toThrow(
+        'AWS DynamoDB Error [ResourceNotFoundException]: Requested resource not found'
+      );
+    });
+
+    it('should keep the message of a failure that has no response, such as a failed AssumeRole', async () => {
+      mockPost.mockRejectedValue(
+        new Error('AWS STS AssumeRole failed [AccessDenied]: not authorized')
+      );
+
+      await expect(AmazonDynamoDB.actions.listTables.handler(mockContext, {})).rejects.toThrow(
+        'AWS STS AssumeRole failed [AccessDenied]: not authorized'
+      );
     });
 
     it('should return a helpful error message for 403 responses', async () => {

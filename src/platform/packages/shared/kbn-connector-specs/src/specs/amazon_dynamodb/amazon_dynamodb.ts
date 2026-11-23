@@ -84,7 +84,10 @@ async function callDynamoDbApi(
       );
     } else if (err.response?.data && typeof err.response.data === 'object') {
       const data = err.response.data as Record<string, unknown>;
-      const code = (data.__type as string) || (data.code as string) || 'UnknownError';
+      // DynamoDB reports "com.amazonaws.dynamodb.v20120810#ResourceNotFoundException"; keep the short name.
+      const code =
+        ((data.__type as string) || (data.code as string) || 'UnknownError').split('#').pop() ??
+        'UnknownError';
       const message =
         (data.message as string) || (data.Message as string) || 'An unknown error occurred';
       throw new Error(`AWS DynamoDB Error [${code}]: ${message}`);
@@ -105,11 +108,11 @@ export const AmazonDynamoDB: ConnectorSpec = {
     id: '.amazon_dynamodb',
     displayName: 'Amazon DynamoDB',
     description: i18n.translate('connectorSpecs.amazonDynamoDB.metadata.description', {
-      defaultMessage: 'List tables, query, scan, and manage items in Amazon DynamoDB',
+      defaultMessage: 'List tables, describe schemas, and query or scan items in Amazon DynamoDB',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['agentBuilder'],
   },
 
   auth: {
@@ -408,10 +411,6 @@ export const AmazonDynamoDB: ConnectorSpec = {
     '2. Call `describeTable` to learn the primary key attributes, indexes, and attribute definitions.',
     '3. Use `query` (preferred) or `scan` to find items.',
     '4. Use `getItem` to fetch a specific item by its exact primary key.',
-    '',
-    '### query vs. scan',
-    'Prefer `query` whenever you have the partition key value — it reads only matching items.',
-    'Only fall back to `scan` when no key condition is possible (e.g. filtering by a non-key attribute with no relevant GSI).',
     '',
     '### Pagination',
     '`query` and `scan` return `lastEvaluatedKey`; pass it as `exclusiveStartKey` in the next call.',
