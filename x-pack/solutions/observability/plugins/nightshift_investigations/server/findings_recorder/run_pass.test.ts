@@ -1004,6 +1004,24 @@ describe('runFindingsPass with workspace files', () => {
     expect(live).not.toContain('45 words');
   });
 
+  it('asks for a chart on the impact and on each entity whenever the conversation holds a series', () => {
+    const final = buildRecorderSystemPrompt({ final: true });
+    const finalFiles = buildRecorderSystemPrompt({ final: true, files: true });
+
+    for (const prompt of [final, finalFiles]) {
+      expect(prompt).toContain('always include a chart for the impact and for each listed entity');
+      expect(prompt).toContain('a series of three or more points');
+      expect(prompt).toContain('one per listed entity');
+      expect(prompt).toContain('Check every listed entity against the conversation');
+      expect(prompt).toContain('an entity gets its own chart even when the same series is also');
+      expect(prompt).toContain('When no impact was found');
+      expect(prompt).toContain('a chart of one or two points is never drawn');
+      // Never fabricate points: a chart still comes only from numbers in the conversation.
+      expect(prompt).toContain('never estimate, extend or invent a point');
+    }
+    expect(buildRecorderSystemPrompt({ final: false })).not.toContain('chart');
+  });
+
   it('sends the prompt that matches the pass', async () => {
     const files = setupFiles([answerWith(output)]);
     await files.run();
