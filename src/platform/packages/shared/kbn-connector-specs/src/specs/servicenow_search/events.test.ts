@@ -7,21 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  servicenowSearchChangeApprovalStateChanged,
+  servicenowSearchCommentAdded,
+  servicenowSearchIncidentCreated,
+  servicenowSearchIncidentResolved,
+  servicenowSearchIncidentUpdated,
+  servicenowSearchWorkNoteAdded,
+} from '@kbn/connector-topics';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
 import { SPECS_ALLOWED_EVENTS } from '../../specs_allowed_events';
 import { validateEmittedEvents } from '../../validate_emitted_events';
 import {
-  SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
   SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY,
-  SERVICENOW_COMMENT_ADDED_EVENT_ID,
   SERVICENOW_COMMENT_ADDED_EVENT_KEY,
-  SERVICENOW_INCIDENT_CREATED_EVENT_ID,
   SERVICENOW_INCIDENT_CREATED_EVENT_KEY,
-  SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
   SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY,
-  SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
   SERVICENOW_INCIDENT_UPDATED_EVENT_KEY,
   SERVICENOW_OCCURRENCE_CHANGE_APPROVAL_STATE_CHANGED,
   SERVICENOW_OCCURRENCE_COMMENT_ADDED,
@@ -30,20 +33,19 @@ import {
   SERVICENOW_OCCURRENCE_INCIDENT_UPDATED,
   SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED,
   SERVICENOW_SEARCH_CONNECTOR_TYPE_ID,
-  SERVICENOW_WORK_NOTE_ADDED_EVENT_ID,
   SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY,
 } from './constants';
 import { ServicenowSearch } from './servicenow_search';
 
 const NAMED_SERVICENOW_EVENTS = [
-  [SERVICENOW_INCIDENT_CREATED_EVENT_KEY, SERVICENOW_INCIDENT_CREATED_EVENT_ID],
-  [SERVICENOW_INCIDENT_UPDATED_EVENT_KEY, SERVICENOW_INCIDENT_UPDATED_EVENT_ID],
-  [SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY, SERVICENOW_INCIDENT_RESOLVED_EVENT_ID],
-  [SERVICENOW_COMMENT_ADDED_EVENT_KEY, SERVICENOW_COMMENT_ADDED_EVENT_ID],
-  [SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY, SERVICENOW_WORK_NOTE_ADDED_EVENT_ID],
+  [SERVICENOW_INCIDENT_CREATED_EVENT_KEY, servicenowSearchIncidentCreated.name],
+  [SERVICENOW_INCIDENT_UPDATED_EVENT_KEY, servicenowSearchIncidentUpdated.name],
+  [SERVICENOW_INCIDENT_RESOLVED_EVENT_KEY, servicenowSearchIncidentResolved.name],
+  [SERVICENOW_COMMENT_ADDED_EVENT_KEY, servicenowSearchCommentAdded.name],
+  [SERVICENOW_WORK_NOTE_ADDED_EVENT_KEY, servicenowSearchWorkNoteAdded.name],
   [
     SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_KEY,
-    SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
+    servicenowSearchChangeApprovalStateChanged.name,
   ],
 ] as const;
 
@@ -84,7 +86,7 @@ describe('ServiceNow inbound events', () => {
       expect(events.definitions[eventKey]?.eventId).toBe(eventId);
       expect(eventId).toBe(buildEventId(SERVICENOW_SEARCH_CONNECTOR_TYPE_ID, eventKey));
     }
-    expect(SERVICENOW_INCIDENT_CREATED_EVENT_ID).toBe('servicenow_search.incident_created');
+    expect(servicenowSearchIncidentCreated.name).toBe('servicenow_search.incident_created');
   });
 
   it('emits an incident created event with optional fields', async () => {
@@ -107,7 +109,7 @@ describe('ServiceNow inbound events', () => {
 
     expect(result.events).toEqual([
       {
-        eventId: SERVICENOW_INCIDENT_CREATED_EVENT_ID,
+        eventId: servicenowSearchIncidentCreated.name,
         correlationKey: `${SYS_ID}:${SERVICENOW_OCCURRENCE_INCIDENT_CREATED}:${SYS_UPDATED_ON}`,
         payload: {
           table: 'incident',
@@ -167,7 +169,7 @@ describe('ServiceNow inbound events', () => {
 
     expect(result.events).toEqual([
       {
-        eventId: SERVICENOW_INCIDENT_UPDATED_EVENT_ID,
+        eventId: servicenowSearchIncidentUpdated.name,
         correlationKey: `${SYS_ID}:${SERVICENOW_OCCURRENCE_INCIDENT_UPDATED}:${SYS_UPDATED_ON}`,
         payload: {
           table: 'incident',
@@ -214,7 +216,7 @@ describe('ServiceNow inbound events', () => {
       )
     );
 
-    expect(result.events[0]?.eventId).toBe(SERVICENOW_INCIDENT_UPDATED_EVENT_ID);
+    expect(result.events[0]?.eventId).toBe(servicenowSearchIncidentUpdated.name);
     expect(result.events[0]?.payload).toEqual({
       table: 'incident',
       sys_id: SYS_ID,
@@ -287,7 +289,7 @@ describe('ServiceNow inbound events', () => {
 
     expect(result.events).toEqual([
       {
-        eventId: SERVICENOW_INCIDENT_RESOLVED_EVENT_ID,
+        eventId: servicenowSearchIncidentResolved.name,
         correlationKey: `${SYS_ID}:${SERVICENOW_OCCURRENCE_INCIDENT_RESOLVED}:${SYS_UPDATED_ON}`,
         payload: {
           table: 'incident',
@@ -319,13 +321,13 @@ describe('ServiceNow inbound events', () => {
     [
       'comment',
       SERVICENOW_OCCURRENCE_COMMENT_ADDED,
-      SERVICENOW_COMMENT_ADDED_EVENT_ID,
+      servicenowSearchCommentAdded.name,
       'Caller can see this.',
     ],
     [
       'work note',
       SERVICENOW_OCCURRENCE_WORK_NOTE_ADDED,
-      SERVICENOW_WORK_NOTE_ADDED_EVENT_ID,
+      servicenowSearchWorkNoteAdded.name,
       'Internal triage note.',
     ],
   ])(
@@ -361,7 +363,7 @@ describe('ServiceNow inbound events', () => {
           },
         },
       ]);
-      expect(result.events[0]?.eventId).not.toBe(SERVICENOW_INCIDENT_UPDATED_EVENT_ID);
+      expect(result.events[0]?.eventId).not.toBe(servicenowSearchIncidentUpdated.name);
       expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
     }
   );
@@ -382,7 +384,7 @@ describe('ServiceNow inbound events', () => {
 
     expect(result.events).toEqual([
       {
-        eventId: SERVICENOW_CHANGE_APPROVAL_STATE_CHANGED_EVENT_ID,
+        eventId: servicenowSearchChangeApprovalStateChanged.name,
         correlationKey: 'approval-1:approved',
         payload: {
           change_request_id: 'change-1',
@@ -393,7 +395,7 @@ describe('ServiceNow inbound events', () => {
         },
       },
     ]);
-    expect(result.events[0]?.eventId).not.toBe(SERVICENOW_INCIDENT_UPDATED_EVENT_ID);
+    expect(result.events[0]?.eventId).not.toBe(servicenowSearchIncidentUpdated.name);
     expect(validateEmittedEvents(events.definitions, result.events)).toEqual({ ok: true });
   });
 

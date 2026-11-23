@@ -1,0 +1,52 @@
+{
+  "describeInstanceInformation": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/DescribeInstanceInformation" }
+    ]
+  },
+  "findNodesByInventory": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetInventory" }
+    ]
+  },
+  "getAutomationExecution": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetAutomationExecution" }
+    ]
+  },
+  "getCommandInvocation": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetCommandInvocation" }
+    ]
+  },
+  "getDocument": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetDocument" }
+    ]
+  },
+  "getInventory": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListInventoryEntries" }
+    ]
+  },
+  "getParameter": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/GetParameter" }
+    ]
+  },
+  "listAutomationExecutions": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/DescribeAutomationExecutions" }
+    ]
+  },
+  "listCommands": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListCommands" }
+    ]
+  },
+  "listDocuments": {
+    "queries": [
+      { "source": "ssm", "method": "POST", "path": "/ListDocuments" }
+    ]
+  }
+}

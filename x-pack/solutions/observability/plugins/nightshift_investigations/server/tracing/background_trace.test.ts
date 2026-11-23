@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { resources } from '@elastic/opentelemetry-node/sdk';
 import { context as otelContext, propagation, trace } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import {
@@ -24,6 +22,8 @@ import {
   toDeterministicTraceId,
   withNightshiftBackgroundSpan,
 } from './background_trace';
+import type { SpanProcessor } from '@opentelemetry/sdk-trace';
+import { defaultResource } from '@opentelemetry/resources';
 
 const SPACE_ID_BAGGAGE_KEY = 'agent_builder.space_id';
 
@@ -41,7 +41,7 @@ describe('server/tracing/background_trace', () => {
     otelContext.setGlobalContextManager(contextManager);
     contextManager.enable();
 
-    const recordingProcessor: tracing.SpanProcessor = {
+    const recordingProcessor: SpanProcessor = {
       onStart: (span) => {
         startedSpans.push({
           name: span.name,
@@ -55,7 +55,7 @@ describe('server/tracing/background_trace', () => {
     };
     initInferenceTracerProvider({
       processors: [recordingProcessor],
-      resource: resources.defaultResource(),
+      resource: defaultResource(),
     });
   });
 

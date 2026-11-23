@@ -11,7 +11,10 @@ import Boom from '@hapi/boom';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { ServiceAccountWorkloadBinding } from '@kbn/core-security-server';
+import type {
+  ServiceAccountWorkloadBinder,
+  ServiceAccountWorkloadBinding,
+} from '@kbn/core-security-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 
@@ -27,6 +30,60 @@ const FIND_PAGE_SIZE = 100;
 
 const BOUND_AT_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundAt`;
 const BINDING_KEY_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.bindingKey`;
+const PLUGIN_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.pluginId`;
+const WORKLOAD_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.workloadType`;
+const BINDER_TYPE_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.boundBy.type`;
+const SERVICE_ACCOUNT_ID_FIELD = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
+
+/**
+ * How many buckets each terms aggregation in the summary returns. It is well above the number of
+ * plugins, workload types and binder types today, so no bucket is dropped.
+ */
+const SUMMARY_TERMS_SIZE = 100;
+
+/** The number of bindings for one workload type of one plugin. */
+export interface WorkloadTypeBindingCount {
+  pluginId: string;
+  workloadType: string;
+  count: number;
+}
+
+/** Every binding in every space, counted for usage telemetry. */
+export interface WorkloadBindingSummary {
+  /** Workloads bound to a service account, across every plugin and space. */
+  total: number;
+  /** Accounts with at least one binding. */
+  serviceAccounts: number;
+  /** Binding counts for each workload type of each plugin. */
+  byWorkload: WorkloadTypeBindingCount[];
+  /** Binding counts by who bound the workload: a user, an API key or a service account. */
+  byBinderType: { user: number; api_key: number; service_account: number };
+}
+
+type StringTermsAggregate<SubAggregations = {}> = estypes.AggregationsTermsAggregateBase<
+  estypes.AggregationsStringTermsBucketKeys & SubAggregations
+>;
+
+interface WorkloadBindingSummaryAggregations {
+  byPlugin: StringTermsAggregate<{ byWorkloadType: StringTermsAggregate }>;
+  byBinderType: StringTermsAggregate;
+  serviceAccounts: estypes.AggregationsCardinalityAggregate;
+}
+
+type BinderType = ServiceAccountWorkloadBinder['type'];
+const BINDER_TYPES: readonly string[] = [
+  'user',
+  'api_key',
+  'service_account',
+] as const satisfies readonly BinderType[];
+const isBinderType = (value: string): value is BinderType => BINDER_TYPES.includes(value);
+
+const toBuckets = <Bucket>(
+  aggregate: estypes.AggregationsTermsAggregateBase<Bucket> | undefined
+): Bucket[] => {
+  const buckets = aggregate?.buckets;
+  return Array.isArray(buckets) ? buckets : [];
+};
 
 /** One page of the stale binding sweep, unverified. */
 export interface WorkloadBindingSweepPage {
@@ -355,6 +412,68 @@ export class WorkloadBindingStore {
       ])
     );
   }
+
+  /**
+   * Summarizes every binding in every space, for usage telemetry. Not integrity-verified, so the
+   * counts can include bindings that would fail verification.
+   */
+  async summarize(): Promise<WorkloadBindingSummary> {
+    const { aggregations } = await this.client.find<
+      WorkloadBindingAttributes,
+      WorkloadBindingSummaryAggregations
+    >({
+      type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+      perPage: 0,
+      namespaces: [ALL_NAMESPACES_STRING],
+      aggs: {
+        byPlugin: {
+          terms: { field: PLUGIN_ID_FIELD, size: SUMMARY_TERMS_SIZE },
+          aggs: {
+            byWorkloadType: { terms: { field: WORKLOAD_TYPE_FIELD, size: SUMMARY_TERMS_SIZE } },
+          },
+        },
+        byBinderType: { terms: { field: BINDER_TYPE_FIELD, size: SUMMARY_TERMS_SIZE } },
+        // The highest threshold ES allows. Counts below it are close to exact.
+        serviceAccounts: {
+          cardinality: { field: SERVICE_ACCOUNT_ID_FIELD, precision_threshold: 40_000 },
+        },
+      },
+    });
+
+    const pluginBuckets = toBuckets(aggregations?.byPlugin);
+    const byWorkload = pluginBuckets.flatMap(({ key: pluginId, byWorkloadType }) =>
+      toBuckets(byWorkloadType).map(
+        ({ key: workloadType, doc_count: count }): WorkloadTypeBindingCount => ({
+          pluginId: String(pluginId),
+          workloadType: String(workloadType),
+          count,
+        })
+      )
+    );
+
+    const byBinderType: WorkloadBindingSummary['byBinderType'] = {
+      user: 0,
+      api_key: 0,
+      service_account: 0,
+    };
+    for (const { key, doc_count: count } of toBuckets(aggregations?.byBinderType)) {
+      const binderType = String(key);
+      if (isBinderType(binderType)) {
+        byBinderType[binderType] = count;
+      }
+    }
+
+    return {
+      // From the buckets, not the hit total, which stops at 10,000.
+      total:
+        pluginBuckets.reduce((sum, { doc_count: count }) => sum + count, 0) +
+        (aggregations?.byPlugin.sum_other_doc_count ?? 0),
+      serviceAccounts: aggregations?.serviceAccounts.value ?? 0,
+      byWorkload,
+      byBinderType,
+    };
+  }
+
   /**
    * Reads one page of the stale binding sweep: bindings made before `cutoff`, ordered by their
    * binding key and starting after `afterKey`. Not integrity-verified. Each page is its own query,

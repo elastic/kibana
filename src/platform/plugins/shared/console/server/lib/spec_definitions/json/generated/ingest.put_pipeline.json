@@ -1466,6 +1466,40 @@
               ]
             }
           },
+          "recover_failure_document": {
+            "description": "",
+            "if": {
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
+            },
+            "ignore_failure": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "on_failure": [
+              {}
+            ],
+            "tag": ""
+          },
           "redact": {
             "description": "",
             "if": {
@@ -1644,6 +1678,12 @@
             "tag": "",
             "field": "",
             "ignore_missing": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "override": {
               "__one_of": [
                 true,
                 false
@@ -3630,6 +3670,40 @@
               ]
             }
           },
+          "recover_failure_document": {
+            "description": "",
+            "if": {
+              "__one_of": [
+                {
+                  "source": "",
+                  "id": "",
+                  "params": {},
+                  "lang": {
+                    "__one_of": [
+                      "painless",
+                      "expression",
+                      "mustache",
+                      "java"
+                    ]
+                  },
+                  "options": {
+                    "*": ""
+                  }
+                },
+                ""
+              ]
+            },
+            "ignore_failure": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "on_failure": [
+              {}
+            ],
+            "tag": ""
+          },
           "redact": {
             "description": "",
             "if": {
@@ -3808,6 +3882,12 @@
             "tag": "",
             "field": "",
             "ignore_missing": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "override": {
               "__one_of": [
                 true,
                 false

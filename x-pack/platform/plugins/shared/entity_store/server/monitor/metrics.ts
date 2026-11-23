@@ -28,32 +28,66 @@ const m = (name: string) => `${SCOPE}.${name}`;
  * like [0, 1] gets spaced far too coarsely to be meaningful. Each histogram below is given
  * boundaries sized to what it actually measures instead.
  */
-const DURATION_MS_BOUNDARIES = [10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, 30000, 60000];
+const DURATION_MS_BOUNDARIES = [
+  5, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1250, 1500, 1750, 2000, 2500, 3000,
+  3500, 4000, 5000, 6000, 7500, 10000, 15000, 20000, 30000, 45000, 60000,
+];
 // A whole task run is structurally longer than one sub-operation query, so it gets its own
-// boundaries instead of collapsing into the last bucket or two of DURATION_MS_BOUNDARIES.
+// boundaries instead of collapsing into the last bucket or two of DURATION_MS_BOUNDARIES. Dense
+// between 10s and 60s: that is where a run goes from healthy to crossing its time limit, and
+// which side of 59s the tail sits on is the difference between a completed run and an abort.
 const TASK_DURATION_MS_BOUNDARIES = [
-  500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 60000, 90000,
-  120000,
+  250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 12500, 15000, 17500, 20000, 22500, 25000,
+  27500, 30000, 32500, 35000, 40000, 45000, 50000, 55000, 57500, 59000, 60000, 65000, 75000, 90000,
+  120000, 180000, 300000,
 ];
 // Wider range for operations that scan/rewrite the whole entities index rather than one bounded
 // extraction query, which can realistically run for minutes on a large store.
 const LONG_DURATION_MS_BOUNDARIES = [
-  100, 500, 1000, 5000, 15000, 30000, 60000, 300000, 600000, 1800000, 3600000,
+  100, 250, 500, 1000, 2500, 5000, 10000, 15000, 30000, 45000, 60000, 120000, 180000, 300000,
+  450000, 600000, 900000, 1800000, 2700000, 3600000, 7200000,
 ];
 // Finer resolution between one and five minutes, the range that distinguishes mild from
 // meaningful lag.
 const LAG_MS_BOUNDARIES = [
-  1000, 5000, 15000, 30000, 60000, 90000, 120000, 180000, 300000, 450000, 600000, 900000, 1800000,
-  3600000, 7200000, 21600000, 86400000,
+  1000, 5000, 10000, 15000, 20000, 30000, 45000, 60000, 75000, 90000, 105000, 120000, 150000,
+  180000, 210000, 240000, 270000, 300000, 360000, 450000, 600000, 900000, 1200000, 1800000, 2700000,
+  3600000, 7200000, 14400000, 21600000, 43200000, 86400000,
 ];
-// Finer resolution just above the sampling floor (0.1), where adaptive rates commonly land.
-const FRACTION_BOUNDARIES = [0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 0.9, 0.95, 0.99, 1];
-// Finer resolution around the default per-window volume cap (100,000), where most runs land.
+// Sampling rates and cap utilisation both live in [0, 1] and are read to two decimal places when
+// tuning. Coarse buckets here report a bucket centre rather than the configured value - a 0.2
+// override reading back as 0.175 - so the lower half, where adaptive rates and the 0.1 floor sit,
+// is spaced at 0.01 and the upper half at 0.05.
+const FRACTION_BOUNDARIES = [
+  0, 0.05, 0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.22, 0.24, 0.26, 0.28,
+  0.3, 0.32, 0.34, 0.36, 0.38, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95,
+  0.99, 1,
+];
+// Finer resolution around the default per-window volume cap (100,000), where most runs land, and
+// above it, where a run that overshoots the cap by part of a slice ends up.
 const LOGS_COUNT_BOUNDARIES = [
-  0, 100, 1000, 5000, 10000, 25000, 50000, 70000, 80000, 90000, 95000, 100000, 120000, 150000,
-  200000, 300000, 500000,
+  0, 100, 500, 1000, 2500, 5000, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000,
+  95000, 100000, 110000, 125000, 150000, 175000, 200000, 250000, 300000, 400000, 500000, 750000,
+  1000000,
 ];
-const ENTITY_COUNT_BOUNDARIES = [0, 100, 1000, 10000, 100000, 500000, 1000000, 5000000];
+const ENTITY_COUNT_BOUNDARIES = [
+  0, 100, 500, 1000, 5000, 10000, 50000, 100000, 250000, 500000, 1000000, 2500000, 5000000,
+  10000000,
+];
+// Resolution around the default entity page size (docsLimit, 10,000): the question this answers is
+// whether a slice's entities fit one page or spill into several, so the buckets cluster at the
+// page size and at each multiple of it rather than spreading evenly.
+const SLICE_ENTITY_COUNT_BOUNDARIES = [
+  0, 50, 100, 250, 500, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12500,
+  15000, 17500, 20000, 25000, 30000, 40000, 50000, 75000, 100000,
+];
+// Spans the default per-slice raw target (maxLogsPerPage, 50,000) through the much larger targets
+// a sampled slice can be scaled to. Each decade is subdivided so the scale factor a run actually
+// applied is readable from the histogram rather than inferred from the configured rate.
+const PAGE_TARGET_LOGS_BOUNDARIES = [
+  1000, 5000, 10000, 25000, 50000, 75000, 100000, 125000, 150000, 200000, 250000, 300000, 400000,
+  500000, 625000, 750000, 1000000, 1250000, 1500000, 2000000, 2500000, 5000000, 10000000,
+];
 
 /**
  * Attributes every extraction metric carries.
@@ -196,6 +230,29 @@ export const entityStoreMetrics = {
     unit: '1',
     valueType: ValueType.DOUBLE,
     advice: { explicitBucketBoundaries: FRACTION_BOUNDARIES },
+  }),
+
+  extractionSliceCount: counter<ExtractionAttributes>(m('extraction.slice.count'), {
+    description:
+      'Raw-log slices that ran an extraction, counted once per slice. Divided by extraction.task.success this gives slices per run, which the probe-query count can no longer stand in for once a slice may issue more than one probe. Stalled slices are excluded; they are counted by extraction.logs_per_page.dropped',
+    unit: '{slice}',
+    valueType: ValueType.INT,
+  }),
+
+  extractionSliceEntities: histogram<ExtractionAttributes>(m('extraction.slice.entities'), {
+    description:
+      'Entities produced by one raw-log slice, across all of its entity pages. Read against the configured docsLimit to tell whether a slice fills an entity page or leaves most of it empty',
+    unit: '{entity}',
+    valueType: ValueType.INT,
+    advice: { explicitBucketBoundaries: SLICE_ENTITY_COUNT_BOUNDARIES },
+  }),
+
+  extractionSliceRawTarget: histogram<ExtractionAttributes>(m('extraction.slice.raw_target'), {
+    description:
+      'Raw log documents the boundary probe aimed to place in one slice (the effective maxLogsPerPage). Recorded once per slice that ran an extraction, sharing a denominator with extraction.slice.count so the two divide into a per-slice scale factor. Resumed slices are not represented: they re-enter persisted bounds without probing, so they have no target',
+    unit: '{document}',
+    valueType: ValueType.INT,
+    advice: { explicitBucketBoundaries: PAGE_TARGET_LOGS_BOUNDARIES },
   }),
 
   extractionLogsPerPageDropped: counter<ExtractionAttributes>(

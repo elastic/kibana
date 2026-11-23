@@ -43,17 +43,41 @@ else
   DRY_RUN_ARGS=()
 fi
 
+# The agent image's oasdiff (1.11.10, also used by @kbn/api-contracts) reports a change once per
+# path through a recursive schema, which runs to over 50 MB for PostHog and SharePoint Online, and
+# it classifies some changes more leniently (a new response enum value is only a warning). The
+# check was built with 1.37.0, so the step installs that release. OASDIFF_BIN overrides it.
+OASDIFF_RELEASE="1.37.0"
+OASDIFF_SHA256="eac87307d31d08c36800c58a409c247f1c5db37fbb72e2544402f22a87cbca3c"
+if [[ -z "${OASDIFF_BIN:-}" ]]; then
+  echo "--- Install oasdiff $OASDIFF_RELEASE"
+  oasdiff_dir="$(mktemp -d)"
+  # The step runs on amd64 agents (n2-standard-4)
+  curl --retry 8 -fsSL -o "$oasdiff_dir/oasdiff.tar.gz" \
+    "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_RELEASE}/oasdiff_${OASDIFF_RELEASE}_linux_amd64.tar.gz"
+  echo "$OASDIFF_SHA256  $oasdiff_dir/oasdiff.tar.gz" | sha256sum -c -
+  tar -xzf "$oasdiff_dir/oasdiff.tar.gz" -C "$oasdiff_dir" oasdiff
+  OASDIFF_BIN="$oasdiff_dir/oasdiff"
+fi
+export OASDIFF_BIN
+
 # Without oasdiff every changed spec is unclassified, and gets an issue
-export OASDIFF_BIN="${OASDIFF_BIN:-oasdiff}"
 if ! command -v "$OASDIFF_BIN" > /dev/null; then
-  echo "oasdiff ($OASDIFF_BIN) is not installed on this agent"
+  echo "oasdiff ($OASDIFF_BIN) is not available"
   exit 1
 fi
+OASDIFF_VERSION="$("$OASDIFF_BIN" --version 2>&1 | head -n 1)"
+echo "Using $OASDIFF_VERSION"
 
 echo "--- Bootstrap Kibana"
 # The step only runs Node scripts; skip building the dev-mode shared webpack bundles
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
+
+# The check loads every source's full vendor spec, and one Microsoft Graph connector alone peaks
+# at about 5.5 GB, above the 4 GB CI sets for every job. The agent has 16 GB. The last
+# --max-old-space-size wins, so this overrides the CI default without dropping other options.
+export NODE_OPTIONS="${NODE_OPTIONS:-} --max-old-space-size=8192"
 
 echo "+++ Detect vendor API drift"
 drift_args=(--drift --report "$REPORT_PATH")
@@ -155,7 +179,7 @@ if [[ "$exit_code" != "0" ]]; then
   style="error"
 fi
 {
-  echo "Vendor API drift in \`${GITHUB_REPO}\` (${MODE}):"
+  echo "Vendor API drift in \`${GITHUB_REPO}\` (${MODE}, ${OASDIFF_VERSION}):"
   echo
   jq -r '.actions[]
     | "- `\(.connector)`: \(.action)"

@@ -40,6 +40,9 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
       schema: definition.getSchema?.(mockGetDrilldownsSchema),
     }))
   ),
+  getComparators: jest.fn().mockImplementation(async (type, embeddableState) => {
+    return mockEmbeddableServerDefinitionRegistry[type]?.getComparators?.(embeddableState);
+  }),
   getTransforms: jest.fn().mockImplementation((type) => {
     const registration = mockEmbeddableServerDefinitionRegistry[type];
     const transforms = registration?.getTransforms?.({

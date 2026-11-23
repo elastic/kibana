@@ -20,13 +20,15 @@ export const SESSION_ATTRIBUTE_FIELDS = {
     'resource.attributes.deployment.environment.name',
     'resource.attributes.deployment.environment',
   ],
+  // The fields of EDOT Browser's `setUser()`, which writes the name as `user.full_name`. It always
+  // writes `user.id`, so the id comes last or a name would never show.
   user: [
     'attributes.user.email',
     'resource.attributes.user.email',
+    'attributes.user.full_name',
+    'resource.attributes.user.full_name',
     'attributes.user.id',
     'resource.attributes.user.id',
-    'attributes.user.name',
-    'resource.attributes.user.name',
   ],
   browser: [
     'resource.attributes.browser.name',

@@ -7,6 +7,9 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import {
+  compositeSloCreatedEbtEvent,
+  compositeSloDeletedEbtEvent,
+  compositeSloUpdatedEbtEvent,
   sloCreatedEbtEvent,
   sloDeletedEbtEvent,
   sloResetEbtEvent,
@@ -21,4 +24,7 @@ export const registerSloEbtEvents = (
   analytics.registerEventType(sloUpdatedEbtEvent);
   analytics.registerEventType(sloDeletedEbtEvent);
   analytics.registerEventType(sloResetEbtEvent);
+  analytics.registerEventType(compositeSloCreatedEbtEvent);
+  analytics.registerEventType(compositeSloUpdatedEbtEvent);
+  analytics.registerEventType(compositeSloDeletedEbtEvent);
 };

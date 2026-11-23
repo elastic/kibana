@@ -7,49 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  slack2AppMention,
+  slack2ChannelCreated,
+  slack2FilePublic,
+  slack2FileShared,
+  slack2HitlAction,
+  slack2MemberJoinedChannel,
+  slack2Message,
+  slack2ReactionAdded,
+  slack2SlashCommand,
+  slack2TeamJoin,
+} from '@kbn/connector-topics';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
 import { validateEmittedEvents } from '../../validate_emitted_events';
 import {
-  SLACK_APP_MENTION_EVENT_ID,
   SLACK_APP_MENTION_EVENT_KEY,
-  SLACK_CHANNEL_CREATED_EVENT_ID,
   SLACK_CHANNEL_CREATED_EVENT_KEY,
   SLACK_CONNECTOR_TYPE_ID,
-  SLACK_FILE_PUBLIC_EVENT_ID,
   SLACK_FILE_PUBLIC_EVENT_KEY,
-  SLACK_FILE_SHARED_EVENT_ID,
   SLACK_FILE_SHARED_EVENT_KEY,
   SLACK_HITL_ACTION_APPROVE,
-  SLACK_HITL_ACTION_EVENT_ID,
   SLACK_HITL_ACTION_EVENT_KEY,
   SLACK_HITL_ACTION_REJECT,
   SLACK_HITL_ACTION_SUBMIT,
-  SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
   SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY,
-  SLACK_MESSAGE_EVENT_ID,
   SLACK_MESSAGE_EVENT_KEY,
-  SLACK_REACTION_ADDED_EVENT_ID,
   SLACK_REACTION_ADDED_EVENT_KEY,
-  SLACK_SLASH_COMMAND_EVENT_ID,
   SLACK_SLASH_COMMAND_EVENT_KEY,
-  SLACK_TEAM_JOIN_EVENT_ID,
   SLACK_TEAM_JOIN_EVENT_KEY,
 } from './constants';
 import { Slack } from './slack';
 
 const NAMED_SLACK_EVENTS = [
-  [SLACK_MESSAGE_EVENT_KEY, SLACK_MESSAGE_EVENT_ID],
-  [SLACK_APP_MENTION_EVENT_KEY, SLACK_APP_MENTION_EVENT_ID],
-  [SLACK_REACTION_ADDED_EVENT_KEY, SLACK_REACTION_ADDED_EVENT_ID],
-  [SLACK_FILE_SHARED_EVENT_KEY, SLACK_FILE_SHARED_EVENT_ID],
-  [SLACK_FILE_PUBLIC_EVENT_KEY, SLACK_FILE_PUBLIC_EVENT_ID],
-  [SLACK_CHANNEL_CREATED_EVENT_KEY, SLACK_CHANNEL_CREATED_EVENT_ID],
-  [SLACK_TEAM_JOIN_EVENT_KEY, SLACK_TEAM_JOIN_EVENT_ID],
-  [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY, SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID],
-  [SLACK_SLASH_COMMAND_EVENT_KEY, SLACK_SLASH_COMMAND_EVENT_ID],
-  [SLACK_HITL_ACTION_EVENT_KEY, SLACK_HITL_ACTION_EVENT_ID],
+  [SLACK_MESSAGE_EVENT_KEY, slack2Message.name],
+  [SLACK_APP_MENTION_EVENT_KEY, slack2AppMention.name],
+  [SLACK_REACTION_ADDED_EVENT_KEY, slack2ReactionAdded.name],
+  [SLACK_FILE_SHARED_EVENT_KEY, slack2FileShared.name],
+  [SLACK_FILE_PUBLIC_EVENT_KEY, slack2FilePublic.name],
+  [SLACK_CHANNEL_CREATED_EVENT_KEY, slack2ChannelCreated.name],
+  [SLACK_TEAM_JOIN_EVENT_KEY, slack2TeamJoin.name],
+  [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY, slack2MemberJoinedChannel.name],
+  [SLACK_SLASH_COMMAND_EVENT_KEY, slack2SlashCommand.name],
+  [SLACK_HITL_ACTION_EVENT_KEY, slack2HitlAction.name],
 ] as const;
 
 describe('Slack inbound events', () => {
@@ -93,8 +95,8 @@ describe('Slack inbound events', () => {
       expect(events.definitions[eventKey]?.eventId).toBe(eventId);
       expect(eventId).toBe(buildEventId(SLACK_CONNECTOR_TYPE_ID, eventKey));
     }
-    expect(SLACK_APP_MENTION_EVENT_ID).toBe('slack2.app_mention');
-    expect(SLACK_SLASH_COMMAND_EVENT_ID).toBe('slack2.slash_command');
+    expect(slack2AppMention.name).toBe('slack2.app_mention');
+    expect(slack2SlashCommand.name).toBe('slack2.slash_command');
   });
 
   it('emits a posted message with subtype and bot identity when present', async () => {
@@ -117,7 +119,7 @@ describe('Slack inbound events', () => {
 
     expect(result.events).toEqual([
       {
-        eventId: SLACK_MESSAGE_EVENT_ID,
+        eventId: slack2Message.name,
         correlationKey: 'Ev123',
         payload: {
           workspace: 'T123',
@@ -307,7 +309,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toMatchObject({
-      eventId: SLACK_MESSAGE_EVENT_ID,
+      eventId: slack2Message.name,
       payload: {
         workspace: 'T123',
         channel: 'C123',
@@ -336,7 +338,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toEqual({
-      eventId: SLACK_APP_MENTION_EVENT_ID,
+      eventId: slack2AppMention.name,
       correlationKey: 'Ev123',
       payload: {
         workspace: 'T123',
@@ -371,7 +373,7 @@ describe('Slack inbound events', () => {
       user: 'U123',
       reaction: 'thumbsup',
     });
-    expect(result.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
+    expect(result.events[0]?.eventId).toBe(slack2ReactionAdded.name);
   });
 
   it('emits a reaction against a file and a file comment', async () => {
@@ -413,8 +415,8 @@ describe('Slack inbound events', () => {
       user: 'U123',
       reaction: 'thumbsup',
     });
-    expect(fileResult.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
-    expect(commentResult.events[0]?.eventId).toBe(SLACK_REACTION_ADDED_EVENT_ID);
+    expect(fileResult.events[0]?.eventId).toBe(slack2ReactionAdded.name);
+    expect(commentResult.events[0]?.eventId).toBe(slack2ReactionAdded.name);
     expect(validateEmittedEvents(events.definitions, fileResult.events)).toEqual({ ok: true });
     expect(validateEmittedEvents(events.definitions, commentResult.events)).toEqual({ ok: true });
   });
@@ -436,7 +438,7 @@ describe('Slack inbound events', () => {
       fileId: 'F123',
       user: 'U123',
     });
-    expect(result.events[0]?.eventId).toBe(SLACK_FILE_SHARED_EVENT_ID);
+    expect(result.events[0]?.eventId).toBe(slack2FileShared.name);
   });
 
   it('emits a file made public with the actor when present', async () => {
@@ -453,7 +455,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toMatchObject({
-      eventId: SLACK_FILE_PUBLIC_EVENT_ID,
+      eventId: slack2FilePublic.name,
       payload: { fileId: 'F123', userId: 'U123' },
     });
   });
@@ -471,7 +473,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toMatchObject({
-      eventId: SLACK_CHANNEL_CREATED_EVENT_ID,
+      eventId: slack2ChannelCreated.name,
       payload: { channelId: 'C123', name: 'fun', creator: 'U123' },
     });
   });
@@ -497,7 +499,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toMatchObject({
-      eventId: SLACK_TEAM_JOIN_EVENT_ID,
+      eventId: slack2TeamJoin.name,
       payload: {
         userId: 'U123',
         name: 'bobby',
@@ -522,7 +524,7 @@ describe('Slack inbound events', () => {
     );
 
     expect(result.events[0]).toMatchObject({
-      eventId: SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
+      eventId: slack2MemberJoinedChannel.name,
       payload: { userId: 'U123', channelId: 'C123' },
     });
     expect(result.events[0]?.payload).not.toHaveProperty('inviter');
@@ -550,7 +552,7 @@ describe('Slack inbound events', () => {
     expect(result.httpResponse).toEqual({ status: 200 });
     expect(result.events).toEqual([
       {
-        eventId: SLACK_SLASH_COMMAND_EVENT_ID,
+        eventId: slack2SlashCommand.name,
         correlationKey: '13345224609.738474920.8088930838d88f008e0',
         payload: {
           workspace: 'T123',
@@ -686,7 +688,7 @@ describe('Slack inbound events', () => {
 
     expect(result.httpResponse).toEqual({ status: 200 });
     expect(result.events).toHaveLength(1);
-    expect(result.events[0]?.eventId).toBe(SLACK_HITL_ACTION_EVENT_ID);
+    expect(result.events[0]?.eventId).toBe(slack2HitlAction.name);
     expect(result.events[0]?.payload).toEqual({
       executionId: 'exec-1',
       stepId: 'step-1',

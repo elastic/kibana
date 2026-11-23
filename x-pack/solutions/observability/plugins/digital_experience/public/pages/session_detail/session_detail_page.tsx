@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
   EuiLoadingLogo,
   EuiPageSection,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiTitle,
   copyToClipboard,
@@ -22,24 +23,31 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import type { SessionDetailResponse } from '../../../common/sessions';
+import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
+import type { SessionDetailResponse, SessionSummary as Session } from '../../../common/sessions';
 import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../ebt_constants';
 import { useApiClient } from '../../hooks/use_api_client';
 import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useDiscoverHref } from '../../hooks/use_discover_href';
+import { usePersistedChoice } from '../../hooks/use_persisted_choice';
 import { useDigitalExperienceParams } from '../../hooks/use_digital_experience_params';
 import { useFormatters } from '../../hooks/use_formatters';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
-import { SESSIONS_LABEL } from '../../labels';
+import { ANONYMOUS_USER, OPEN_IN_DISCOVER_LABEL, SESSIONS_LABEL } from '../../labels';
+import { sessionSignals, shortSessionId, type SessionSignal } from '../../utils/describe_session';
+import { formatSessionDuration } from '../../utils/format_session_duration';
 import { pickSessionsListQuery } from '../../utils/sessions_list_query';
+import { JourneyFilters } from './components/journey_filters';
+import { SessionsFlyout } from './components/sessions_flyout';
+import { SessionsRail } from './components/sessions_rail';
 import { PageJourney } from './components/page_journey';
 import { SessionSummary } from './components/session_summary';
 import { SessionWaterfall, pageColors } from './components/session_waterfall';
+import { sessionEsqlQuery, sessionTimeRange } from './utils/session_discover';
 import { groupEventsByVisit, layoutWaterfall } from './utils/session_timeline';
-
-/** Characters of the session ID shown in the breadcrumb; the header has it in full. */
-const SHORT_ID_LENGTH = 8;
+import { ACTIVITY_KINDS, type ActivityFilters, type ActivityKind } from './utils/visit_activity';
 
 const BACK_TO_SESSIONS = i18n.translate(
   'xpack.digitalExperience.sessionDetail.backToSessionsButtonLabel',
@@ -53,6 +61,75 @@ const SESSION_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.s
 const COPY_ID_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.copyIdLabel', {
   defaultMessage: 'Copy ID',
 });
+
+const USER_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.userLabel', {
+  defaultMessage: 'User',
+});
+
+const STARTED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.startedLabel', {
+  defaultMessage: 'Started',
+});
+
+const SESSIONS_LIST_LABEL = i18n.translate(
+  'xpack.digitalExperience.sessionDetail.sessionsListLabel',
+  { defaultMessage: 'Sessions list' }
+);
+
+/**
+ * Whether the sessions list shows in a flyout beside a session, kept across visits. Anything else
+ * stored, e.g. from before the list was a flyout, shows it.
+ */
+const FLYOUT_STORAGE_KEY = 'digitalExperience.sessionDetail.rail';
+const FLYOUT_CHOICES = ['flyout', 'hidden'] as const;
+
+/** The signals of a session as the header writes them, which has room to spell them out. */
+const badgeLabel = (signal: SessionSignal): string => {
+  switch (signal.id) {
+    case 'jsErrors':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.jsErrors', {
+        defaultMessage: '{count, plural, one {# JS error} other {# JS errors}}',
+        values: { count: signal.count },
+      });
+    case 'failedRequests':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.failedRequests', {
+        defaultMessage: '{count, plural, one {# failed request} other {# failed requests}}',
+        values: { count: signal.count },
+      });
+    case 'bounced':
+      return i18n.translate('xpack.digitalExperience.sessionDetail.badges.bounced', {
+        defaultMessage: 'Bounced',
+      });
+  }
+};
+
+const BADGE_TOOLTIPS: Partial<Record<SessionSignal['id'], string>> = {
+  bounced: i18n.translate('xpack.digitalExperience.sessionDetail.badges.bouncedTooltip', {
+    defaultMessage: 'The user left after viewing one page.',
+  }),
+};
+
+/** What kind of session it is, at a glance: its errors, failed requests, bounce and environment. */
+const sessionBadges = (session: Session): AppHeaderBadge[] => [
+  ...sessionSignals(session).map((signal) => ({
+    label: badgeLabel(signal),
+    tooltip: BADGE_TOOLTIPS[signal.id],
+    color: signal.color,
+    'data-test-subj': `digitalExperienceSessionBadge-${signal.id}`,
+  })),
+  ...(session.environment
+    ? [
+        {
+          label: session.environment,
+          tooltip: i18n.translate(
+            'xpack.digitalExperience.sessionDetail.badges.environmentTooltip',
+            { defaultMessage: 'Environment' }
+          ),
+          color: 'hollow' as const,
+          'data-test-subj': 'digitalExperienceSessionBadge-environment',
+        },
+      ]
+    : []),
+];
 
 const ID_COPIED_LABEL = i18n.translate('xpack.digitalExperience.sessionDetail.idCopiedToast', {
   defaultMessage: 'Session ID copied',
@@ -81,14 +158,35 @@ function SessionDetail({
   detail: SessionDetailResponse;
   formatters: ReturnType<typeof useFormatters>;
 }) {
-  const { session, pageVisits, timeline, timelineTruncated } = detail;
+  const { session, pageVisits, timeline, timelineTruncated, requests, requestsTruncated } = detail;
+  const [filters, setFilters] = useState<ActivityFilters>(() => ({
+    kinds: new Set(ACTIVITY_KINDS),
+    search: '',
+  }));
   const visitElements = useRef(new Map<number, HTMLElement>());
   const colors = useMemo(() => pageColors(pageVisits), [pageVisits]);
   const layout = useMemo(
     () => layoutWaterfall(session, pageVisits, timeline),
     [session, pageVisits, timeline]
   );
-  const visits = useMemo(() => groupEventsByVisit(pageVisits, timeline), [pageVisits, timeline]);
+  const visits = useMemo(
+    () => groupEventsByVisit(pageVisits, timeline, requests),
+    [pageVisits, timeline, requests]
+  );
+  const counts = useMemo(() => {
+    const byKind: Record<ActivityKind, number> = {
+      request: requests.length,
+      click: 0,
+      error: 0,
+      web_vital: 0,
+    };
+    for (const { kind } of timeline) {
+      if (kind === 'click' || kind === 'error' || kind === 'web_vital') {
+        byKind[kind] += 1;
+      }
+    }
+    return byKind;
+  }, [requests, timeline]);
 
   const registerVisit = useCallback((index: number, element: HTMLElement | null) => {
     if (element) {
@@ -114,6 +212,19 @@ function SessionDetail({
             title={i18n.translate('xpack.digitalExperience.sessionDetail.timelineTruncatedTitle', {
               defaultMessage:
                 'This session has more events than can be shown, so the timeline and journey end early.',
+            })}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {requestsTruncated && (
+        <>
+          <KbnWarningCallout
+            data-test-subj="digitalExperienceSessionRequestsTruncated"
+            size="s"
+            title={i18n.translate('xpack.digitalExperience.sessionDetail.requestsTruncatedTitle', {
+              defaultMessage:
+                'This session made more requests than can be shown, so the last pages miss some of theirs. Their clicks and errors all show.',
             })}
           />
           <EuiSpacer size="m" />
@@ -167,11 +278,13 @@ function SessionDetail({
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <JourneyFilters filters={filters} counts={counts} onChange={setFilters} />
           <EuiSpacer size="m" />
           <PageJourney
             visits={visits}
             colors={colors}
-            sessionDurationMs={layout.totalMs}
+            filters={filters}
             formatters={formatters}
             registerVisit={registerVisit}
           />
@@ -195,11 +308,27 @@ export function SessionDetailPage({
   const { query } = useDigitalExperienceParams('/{serviceName}/sessions/{sessionId}');
   const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, query.source);
   const backHref = sessionsHref(pickSessionsListQuery(query));
+  const [flyoutChoice, setFlyoutChoice] = usePersistedChoice(
+    FLYOUT_STORAGE_KEY,
+    FLYOUT_CHOICES,
+    'flyout'
+  );
+  const flyoutOpen = flyoutChoice === 'flyout';
+
+  // Another session opens at its top.
+  const pageRef = useRef<HTMLDivElement>(null);
+  const shownSessionId = useRef(sessionId);
+  useEffect(() => {
+    if (shownSessionId.current !== sessionId) {
+      shownSessionId.current = sessionId;
+      pageRef.current?.scrollIntoView?.({ block: 'start' });
+    }
+  }, [sessionId]);
 
   useRouteBreadcrumb([
     { text: serviceName, href: overviewHref },
     { text: SESSIONS_LABEL, href: backHref },
-    { text: sessionId.slice(0, SHORT_ID_LENGTH) },
+    { text: shortSessionId(sessionId) },
   ]);
 
   const {
@@ -268,10 +397,12 @@ export function SessionDetailPage({
         />
       );
     }
-    if (loading || !detail) {
+    // While the next session loads, the previous one stays, under a progress bar.
+    if (!detail) {
       return loadingPrompt;
     }
-    return <SessionDetail detail={detail} formatters={formatters} />;
+    // Keyed, so that what the user expanded or filtered on one session doesn't carry to the next.
+    return <SessionDetail key={detail.session.sessionId} detail={detail} formatters={formatters} />;
   };
 
   const copySessionId = () => {
@@ -280,34 +411,117 @@ export function SessionDetailPage({
     }
   };
 
+  // While the next session loads, the previous one stays on screen, but its header must not
+  // describe a session other than the one in the breadcrumb.
+  const session = detail?.session.sessionId === sessionId ? detail.session : undefined;
+  const discoverTimeRange = useMemo(
+    () => (session ? sessionTimeRange(session) : undefined),
+    [session]
+  );
+  const discoverHref = useDiscoverHref(
+    session ? sessionEsqlQuery(session) : undefined,
+    discoverTimeRange
+  );
+  const copyIdItem = {
+    type: 'button' as const,
+    label: COPY_ID_LABEL,
+    onClick: copySessionId,
+    'data-test-subj': 'digitalExperienceSessionIdCopy',
+  };
+  // Who and when once the session loads; the header holds three items, so the ID moves to the summary.
+  const metadata: AppHeaderMetadataItems = session
+    ? [
+        {
+          type: 'text',
+          label: USER_LABEL,
+          value: session.user ?? ANONYMOUS_USER,
+          'data-test-subj': 'digitalExperienceSessionUser',
+        },
+        {
+          type: 'text',
+          label: STARTED_LABEL,
+          value: `${formatters.formatDate(session.startTime)} · ${formatSessionDuration(
+            session.durationMs
+          )}`,
+          'data-test-subj': 'digitalExperienceSessionStarted',
+        },
+        copyIdItem,
+      ]
+    : [
+        {
+          type: 'text',
+          label: SESSION_ID_LABEL,
+          value: sessionId,
+          'data-test-subj': 'digitalExperienceSessionId',
+        },
+        copyIdItem,
+      ];
+
   return (
-    <div data-test-subj="digitalExperienceSessionPage">
-      {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
+    <>
+      <div data-test-subj="digitalExperienceSessionPage" ref={pageRef}>
+        {/* The header's back is the way to the list, so there is no in-page back button, and Chrome
       Next shows a single back control. */}
-      <AppHeader
-        title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
-          defaultMessage: 'Session',
-        })}
-        back={{ href: backHref, label: SESSIONS_LABEL }}
-        metadata={[
-          {
-            type: 'text',
-            label: SESSION_ID_LABEL,
-            value: sessionId,
-            'data-test-subj': 'digitalExperienceSessionId',
-          },
-          {
-            type: 'button',
-            label: COPY_ID_LABEL,
-            onClick: copySessionId,
-            'data-test-subj': 'digitalExperienceSessionIdCopy',
-          },
-        ]}
-      />
-      {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
-      <EuiPageSection paddingSize="m" restrictWidth={false}>
-        {renderContent()}
-      </EuiPageSection>
-    </div>
+        <AppHeader
+          title={i18n.translate('xpack.digitalExperience.sessionDetail.title', {
+            defaultMessage: 'Session',
+          })}
+          back={{ href: backHref, label: SESSIONS_LABEL }}
+          badges={session ? sessionBadges(session) : undefined}
+          metadata={metadata}
+          menu={{
+            items: [
+              {
+                id: 'sessionsList',
+                order: 1,
+                label: SESSIONS_LIST_LABEL,
+                iconType: 'menuRight',
+                isSelected: flyoutOpen,
+                run: () => setFlyoutChoice(flyoutOpen ? 'hidden' : 'flyout'),
+                testId: 'digitalExperienceSessionsListToggle',
+                ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.TOGGLE_SESSIONS_LIST },
+              },
+              ...(discoverHref
+                ? [
+                    {
+                      id: 'openInDiscover',
+                      order: 2,
+                      label: OPEN_IN_DISCOVER_LABEL,
+                      iconType: 'discoverApp',
+                      href: discoverHref,
+                      testId: 'digitalExperienceSessionOpenInDiscover',
+                      ebt: { action: DIGITAL_EXPERIENCE_EBT_ACTIONS.OPEN_IN_DISCOVER },
+                    },
+                  ]
+                : []),
+            ],
+          }}
+        />
+        {/* The app shell is unpadded, so the header spans the page; the content pads itself. */}
+        <div css={{ position: 'relative' }}>
+          {loading && detail && (
+            <EuiProgress
+              size="xs"
+              color="accent"
+              position="absolute"
+              data-test-subj="digitalExperienceSessionLoadingNext"
+            />
+          )}
+        </div>
+        <EuiPageSection paddingSize="m" restrictWidth={false}>
+          {renderContent()}
+        </EuiPageSection>
+      </div>
+      {flyoutOpen && (
+        <SessionsFlyout onClose={() => setFlyoutChoice('hidden')}>
+          <SessionsRail
+            serviceName={serviceName}
+            sessionId={sessionId}
+            source={query.source}
+            onHide={() => setFlyoutChoice('hidden')}
+          />
+        </SessionsFlyout>
+      )}
+    </>
   );
 }

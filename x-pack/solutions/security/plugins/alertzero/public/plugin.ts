@@ -109,8 +109,8 @@ export class AlertZeroPublicPlugin
       // `deepLinks` for us, which is what removes the AlertZero nodes from the Security
       // navigation tree — those trees hold no check of their own.
       status: AppStatus.inaccessible,
+      // Not `classicSideNav`: the Classic nav lists AlertZero's pages as deep links (see `getAlertZeroDeepLinks`).
       visibleIn: ['projectSideNav', 'globalSearch'],
-      order: 101,
       // Initial deep links without capability filtering — capabilities are not available at
       // setup. `start()` emits an update via appUpdater$ once capabilities are known.
       deepLinks: getAlertZeroDeepLinks(),

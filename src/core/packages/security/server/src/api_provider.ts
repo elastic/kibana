@@ -21,6 +21,7 @@ import type {
 
 import type { CoreAuditService } from './audit';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreAuthorizationService } from './authz';
 import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
@@ -31,6 +32,7 @@ import type { CoreServiceAccountsService } from './service_accounts';
  */
 export interface CoreSecurityDelegateContract {
   authc: AuthenticationServiceContract;
+  authz: AuthorizationServiceContract;
   audit: AuditServiceContract;
   serviceAccounts: ServiceAccountsServiceContract;
   /**
@@ -53,6 +55,8 @@ export interface CoreSecurityDelegateContract {
  * @public
  */
 export type AuthenticationServiceContract = CoreAuthenticationService;
+
+export type AuthorizationServiceContract = CoreAuthorizationService;
 
 export type AuditServiceContract = CoreAuditService;
 

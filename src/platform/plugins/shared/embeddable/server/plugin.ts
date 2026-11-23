@@ -18,6 +18,7 @@ import type {
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
 import type { ZodObjectType } from '@kbn/zod';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -62,6 +63,15 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
    * Returns all embeddable schemas registered with registerEmbeddableServerDefinition.
    */
   getAllEmbeddableSchemas: () => { [key: string]: { schema: ZodObjectType; title: string } };
+
+  /**
+   * Returns comparators registered with registerEmbeddableServerDefinition for the embeddable type.
+   * Resolves to undefined when the type is not registered or does not provide comparators.
+   */
+  getComparators: (
+    type: string,
+    embeddableState: object
+  ) => Promise<StateComparators<object> | undefined>;
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
@@ -111,6 +121,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,
+      getComparators: this.transformsRegistry.getComparators,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

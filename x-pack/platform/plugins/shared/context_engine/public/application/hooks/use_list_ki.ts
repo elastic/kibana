@@ -22,8 +22,10 @@ interface UseListKiArgs {
   aiIndexId: string | undefined;
   size?: number;
   type?: string;
+  /** Leaves out these types (KIs without a type stay in). Used by the "Other" section. */
+  excludeTypes?: readonly string[];
   query?: string;
-  status?: KiStatus[];
+  status?: readonly KiStatus[];
   sort?: KiListSort;
   enabled?: boolean;
   notifyOnError?: boolean;
@@ -40,6 +42,8 @@ interface UseListKiResult {
   summary: KiListSummary;
   isLoading: boolean;
   isFetching: boolean;
+  /** The shown data belongs to the previous filters while the new request runs. */
+  isPreviousData: boolean;
   error: Error | undefined;
   refetch: () => void;
 }
@@ -48,6 +52,7 @@ export const useListKi = ({
   aiIndexId,
   size = DEFAULT_KI_PAGE_SIZE,
   type,
+  excludeTypes,
   query,
   status,
   sort,
@@ -58,14 +63,18 @@ export const useListKi = ({
     services: { http, notifications },
   } = useKibana();
 
-  const { data, isLoading, isFetching, error, refetch } = useQuery<ListKisResponse, Error>({
+  const { data, isLoading, isFetching, isPreviousData, error, refetch } = useQuery<
+    ListKisResponse,
+    Error
+  >({
     queryKey: contextEngineQueryKeys.aiIndex.listKi(
       aiIndexId ?? '',
       size,
       type,
       query,
       status,
-      sort
+      sort,
+      excludeTypes
     ),
     queryFn: ({ signal }) => {
       if (!aiIndexId) {
@@ -75,6 +84,7 @@ export const useListKi = ({
         aiIndexId,
         size,
         ...(type !== undefined ? { type } : {}),
+        ...(excludeTypes !== undefined ? { excludeTypes: [...excludeTypes] } : {}),
         ...(query !== undefined ? { query } : {}),
         ...(status !== undefined ? { status: [...status] } : {}),
         ...(sort !== undefined ? { sort } : {}),
@@ -108,6 +118,7 @@ export const useListKi = ({
     },
     isLoading,
     isFetching,
+    isPreviousData,
     error: error ?? undefined,
     refetch,
   };
