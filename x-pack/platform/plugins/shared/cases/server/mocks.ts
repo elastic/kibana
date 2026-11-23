@@ -812,6 +812,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     templates: {
       enabled: true,
     },
+    deltaView: {
+      enabled: true,
+    },
     runWorkflows: {
       enabled: true,
     },

@@ -22,6 +22,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     templates: {
       enabled: true,
     },
+    deltaView: {
+      enabled: true,
+    },
     runWorkflows: {
       enabled: true,
     },

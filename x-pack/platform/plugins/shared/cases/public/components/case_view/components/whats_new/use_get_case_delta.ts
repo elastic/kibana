@@ -9,6 +9,9 @@ import { useQuery } from '@kbn/react-query';
 import type { CaseDeltaResponse } from '../../../../../common/types/api';
 import { getCaseDelta, recordCaseView } from '../../../../containers/api';
 import { casesQueriesKeys } from '../../../../containers/constants';
+import { KibanaServices } from '../../../../common/lib/kibana';
+
+const isDeltaViewEnabled = (): boolean => KibanaServices.getConfig()?.deltaView?.enabled !== false;
 
 /**
  * Recording the view first lets the server start a new session before it reads the window.
@@ -18,10 +21,7 @@ const useRecordCaseView = (caseId: string) =>
   useQuery(
     casesQueriesKeys.caseViewRecord(caseId),
     ({ signal }) => recordCaseView(caseId, false, signal),
-    {
-      staleTime: Infinity,
-      retry: false,
-    }
+    { enabled: isDeltaViewEnabled(), staleTime: Infinity, retry: false }
   );
 
 export const useGetCaseDelta = (caseId: string) => {
@@ -30,6 +30,6 @@ export const useGetCaseDelta = (caseId: string) => {
   return useQuery<CaseDeltaResponse>(
     casesQueriesKeys.caseDelta(caseId),
     ({ signal }) => getCaseDelta(caseId, signal),
-    { enabled: isViewRecorded, staleTime: Infinity }
+    { enabled: isDeltaViewEnabled() && isViewRecorded, staleTime: Infinity }
   );
 };
