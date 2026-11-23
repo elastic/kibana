@@ -102,7 +102,7 @@ export class ServerlessVectordbPlugin
         });
       })
     );
-    navigation.initNavigation('vectordb', navigationTree$);
+    navigation.initNavigation('vectordb', navigationTree$, 'serverlessVectordb');
     return {};
   }
 

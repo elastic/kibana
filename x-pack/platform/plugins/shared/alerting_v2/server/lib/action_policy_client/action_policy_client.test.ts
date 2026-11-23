@@ -133,8 +133,8 @@ describe('ActionPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          id: 'policy-id-1',
         },
-        options: { id: 'policy-id-1' },
       });
 
       expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: my-policy');
@@ -186,8 +186,8 @@ describe('ActionPolicyClient', () => {
           name: 'disabled-policy',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           enabled: false,
+          id: 'policy-id-disabled',
         },
-        options: { id: 'policy-id-disabled' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -282,8 +282,8 @@ describe('ActionPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          id: 'policy-id-chosen',
         },
-        options: { id: 'policy-id-chosen' },
       });
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
@@ -308,8 +308,8 @@ describe('ActionPolicyClient', () => {
           name: 'my-policy',
           description: 'my-policy description',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          id: 'policy-id-default-enabled',
         },
-        options: { id: 'policy-id-default-enabled' },
       });
 
       expect(res).toEqual(
@@ -331,8 +331,8 @@ describe('ActionPolicyClient', () => {
           name: 'no-tags-policy',
           description: 'policy without tags',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          id: 'policy-no-tags',
         },
-        options: { id: 'policy-no-tags' },
       });
 
       const [, attributes] = mockSavedObjectsClient.create.mock.calls[0];
@@ -369,8 +369,8 @@ describe('ActionPolicyClient', () => {
             name: 'my-policy',
             description: 'my-policy description',
             destinations: [{ type: 'workflow', id: 'my-workflow' }],
+            id: 'policy-id-conflict',
           },
-          options: { id: 'policy-id-conflict' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -388,8 +388,8 @@ describe('ActionPolicyClient', () => {
             name: 'my-policy',
             description: 'my-policy description',
             destinations: [{ type: 'workflow', id: 'my-workflow' }],
+            id: 'policy-id-1',
           },
-          options: { id: 'policy-id-1' },
         })
       ).rejects.toThrow('storage error');
 
@@ -3240,8 +3240,8 @@ describe('ActionPolicyClient', () => {
             name: 'my-policy',
             description: 'my-policy description',
             destinations: [{ type: 'workflow', id: 'my-workflow' }],
+            id: 'policy-dup',
           },
-          options: { id: 'policy-dup' },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 409 },
@@ -3673,8 +3673,8 @@ describe('ActionPolicyClient', () => {
         data: {
           name: 'my-policy',
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          id: 'policy-created',
         },
-        options: { id: 'policy-created' },
       });
 
       expect(eventPublisher.emitActionPolicyCreated).toHaveBeenCalledTimes(1);
@@ -3694,8 +3694,11 @@ describe('ActionPolicyClient', () => {
 
       await expect(
         client.createActionPolicy({
-          data: { name: 'my-policy', destinations: [{ type: 'workflow', id: 'my-workflow' }] },
-          options: { id: 'dup' },
+          data: {
+            name: 'my-policy',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+            id: 'dup',
+          },
         })
       ).rejects.toMatchObject({ output: { statusCode: 409 } });
 
@@ -3704,7 +3707,7 @@ describe('ActionPolicyClient', () => {
 
     it('does not publish when the request is invalid', async () => {
       await expect(
-        client.createActionPolicy({ data: { name: '' } as any, options: { id: 'invalid' } })
+        client.createActionPolicy({ data: { name: '', id: 'invalid' } as any })
       ).rejects.toMatchObject({ output: { statusCode: 400 } });
 
       expect(eventBus.publish).not.toHaveBeenCalled();

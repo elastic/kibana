@@ -15,7 +15,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import type { QueryArgs, RowsMode, SortDir, TimeRange } from '../common';
+import type { TimeRange } from '../../queries/time_range';
+import type { QueryArgs, RowsMode, SortDir } from '../common';
 
 /** `page`: the grid rows. `children`: the records of expanded groups. */
 export type EntityGridKeyScope = 'page' | 'children';
