@@ -6,12 +6,13 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
+import type { Logger } from '@kbn/core/server';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import type { ExtractedDatasetFields } from '@kbn/fields-metadata-plugin/server';
 
 import { parse } from 'yaml';
 
-import type { RegistryDataStream } from '../../../../common';
+import type { RegistryDataStream, UpgradePackagePolicyResponse } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
 import { appContextService } from '../../app_context';
 
@@ -25,6 +26,30 @@ type InputField =
 
 export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
   withSpan({ name: stepName, type: 'package' }, func);
+
+/**
+ * `packagePolicyService.bulkUpgrade()` doesn't throw for a policy that fails to upgrade; it returns
+ * it as an item with `success: false`. Logs those items, so a failed upgrade is visible.
+ */
+export const logFailedPackagePolicyUpgrades = (
+  logger: Logger,
+  pkgName: string,
+  results: UpgradePackagePolicyResponse | undefined
+) => {
+  if (!Array.isArray(results)) {
+    return;
+  }
+  const failed = results.filter((result) => !result.success);
+  if (!failed.length) {
+    return;
+  }
+  const details = failed
+    .map((result) => `${result.id}: ${result.body?.message ?? 'unknown error'}`)
+    .join('; ');
+  logger.warn(
+    `Failed to upgrade ${failed.length} of ${results.length} package policies of package ${pkgName}: ${details}`
+  );
+};
 
 const normalizeFields = (fields: InputField[], prefix = ''): ExtractedDatasetFields => {
   return fields.reduce((normalizedFields, field) => {
