@@ -16,6 +16,46 @@ const check = (query: string, errors: string[] = []) =>
 
 describe('FILLNULL validation', () => {
   describe('unmapped targets', () => {
+    it.each([false, true])('handles CPS metadata with isServerless=%s', async (isServerless) => {
+      const { validate: validateQuery, callbacks } = await setup();
+      const { errors } = await validateQuery(
+        'SET unmapped_fields="load"; FROM index | FILLNULL "x" ON _project.*, _project._id',
+        { ...callbacks, isServerless }
+      );
+      expect(errors).toEqual(
+        isServerless
+          ? [
+              expect.objectContaining({ text: 'Unknown column "_project.*"' }),
+              expect.objectContaining({ text: 'Unknown column "_project._id"' }),
+            ]
+          : []
+      );
+    });
+
+    it('handles a nearly matching pattern with many wildcards', async () => {
+      const { expectErrors: expectQueryErrors } = await setup();
+      const pattern = `${'*a'.repeat(128)}b*`;
+      const name = 'a'.repeat(256);
+      await expectQueryErrors(`ROW ${name} = "x" | FILLNULL "x" ON ${pattern}`, [
+        `Unknown column "${pattern}"`,
+      ]);
+    });
+
+    it.each([
+      ['aa*aa', 'aaa', false],
+      ['aa*aa', 'aaaa', true],
+      ['a**b*c', 'abxxbc', true],
+      ['`a*`*b', 'a*xxb', true],
+      ['`a``b`*c', 'a`bxxc', true],
+    ])('matches %s against %s', async (pattern, name, matches) => {
+      const { expectErrors: expectQueryErrors } = await setup();
+      const quotedName = '`' + name.replace(/`/g, '``') + '`';
+      await expectQueryErrors(
+        `ROW ${quotedName} = "x" | FILLNULL "x" ON ${pattern}`,
+        matches ? [] : [`Unknown column "${pattern}"`]
+      );
+    });
+
     it.each(['load', 'load_all', 'nullify'])(
       'does not load missing metadata to satisfy a pattern under %s',
       async (strategy) => {
