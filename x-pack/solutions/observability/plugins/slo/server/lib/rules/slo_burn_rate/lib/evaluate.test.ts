@@ -8,11 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { range } from 'lodash';
 import { createKQLCustomIndicator, createSLO } from '../../../../services/fixtures/slo';
 import { createBurnRateRule } from '../fixtures/rule';
 import type { EvaluationAfterKey } from './build_query';
-import { buildCandidatesQuery, buildQuery, EVALUATION_PAGE_SIZE } from './build_query';
+import { buildCandidatesQuery, buildQuery } from './build_query';
 import type { EvaluationBucket } from './evaluate';
 import { evaluate } from './evaluate';
 
@@ -71,7 +70,7 @@ describe('evaluate', () => {
       .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b']))
       .mockResolvedValueOnce(evaluationResponse(['host-b']));
 
-    const results = await evaluate(esClient, slo, params, STARTED_AT);
+    const { results, hasReachedLimit } = await evaluate(esClient, slo, params, STARTED_AT);
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
     expect(esClient.search).toHaveBeenNthCalledWith(
@@ -92,69 +91,147 @@ describe('evaluate', () => {
         groupings: { host: 'host-b' },
       }),
     ]);
+    expect(hasReachedLimit).toBe(false);
   });
 
   it('does not evaluate when there is no candidate', async () => {
     esClient.search.mockResolvedValueOnce(candidatesResponse([]));
 
-    const results = await evaluate(esClient, slo, params, STARTED_AT);
+    const { results } = await evaluate(esClient, slo, params, STARTED_AT);
 
     expect(esClient.search).toHaveBeenCalledTimes(1);
     expect(results).toEqual([]);
   });
 
-  it('pages through the candidates until there is no after key, including empty pages', async () => {
+  it('reads a candidates response trimmed of its aggregations as the last empty page', async () => {
+    esClient.search.mockResolvedValueOnce({ ...candidatesResponse([]), aggregations: undefined });
+
+    const { results, hasReachedLimit } = await evaluate(esClient, slo, params, STARTED_AT);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(results).toEqual([]);
+    expect(hasReachedLimit).toBe(false);
+  });
+
+  it('keeps paging through a candidates response trimmed of its buckets', async () => {
     esClient.search
-      .mockResolvedValueOnce(candidatesResponse([], { instanceId: 'host-a' }))
-      .mockResolvedValueOnce(candidatesResponse(['host-b'], { instanceId: 'host-b' }))
-      .mockResolvedValueOnce(candidatesResponse([]))
+      .mockResolvedValueOnce({
+        ...candidatesResponse([]),
+        aggregations: { instances: { after_key: { instanceId: 'host-a' } } },
+      })
+      .mockResolvedValueOnce(candidatesResponse(['host-b']))
       .mockResolvedValueOnce(evaluationResponse(['host-b']));
 
-    const results = await evaluate(esClient, slo, params, STARTED_AT);
+    const { results } = await evaluate(esClient, slo, params, STARTED_AT);
 
     expect(esClient.search.mock.calls.map(([request]) => request)).toEqual([
       expect.objectContaining(buildCandidatesQuery(STARTED_AT, slo, params)),
       expect.objectContaining(
         buildCandidatesQuery(STARTED_AT, slo, params, { instanceId: 'host-a' })
       ),
-      expect.objectContaining(
-        buildCandidatesQuery(STARTED_AT, slo, params, { instanceId: 'host-b' })
-      ),
       expect.objectContaining(buildQuery(STARTED_AT, slo, params, undefined, ['host-b'])),
     ]);
     expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-b']);
   });
 
-  it('evaluates each chunk of candidates in a single query, ignoring its after key', async () => {
-    const candidateIds = range(EVALUATION_PAGE_SIZE + 1).map((index) => `host-${index}`);
-    const firstCandidateId = candidateIds[0];
-    const lastCandidateId = candidateIds[EVALUATION_PAGE_SIZE];
+  it('pages through the candidates until there is no after key, including empty pages', async () => {
     esClient.search
-      .mockResolvedValueOnce(candidatesResponse(candidateIds))
-      .mockResolvedValueOnce(
-        evaluationResponse([firstCandidateId], { instanceId: firstCandidateId })
-      )
-      .mockResolvedValueOnce(
-        evaluationResponse([lastCandidateId], { instanceId: lastCandidateId })
-      );
+      .mockResolvedValueOnce(candidatesResponse([], { instanceId: 'host-a' }))
+      .mockResolvedValueOnce(candidatesResponse(['host-b'], { instanceId: 'host-b' }))
+      .mockResolvedValueOnce(evaluationResponse(['host-b']))
+      .mockResolvedValueOnce(candidatesResponse([]));
 
-    const results = await evaluate(esClient, slo, params, STARTED_AT);
+    const { results } = await evaluate(esClient, slo, params, STARTED_AT);
+
+    expect(esClient.search.mock.calls.map(([request]) => request)).toEqual([
+      expect.objectContaining(buildCandidatesQuery(STARTED_AT, slo, params)),
+      expect.objectContaining(
+        buildCandidatesQuery(STARTED_AT, slo, params, { instanceId: 'host-a' })
+      ),
+      expect.objectContaining(buildQuery(STARTED_AT, slo, params, undefined, ['host-b'])),
+      expect.objectContaining(
+        buildCandidatesQuery(STARTED_AT, slo, params, { instanceId: 'host-b' })
+      ),
+    ]);
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-b']);
+  });
+
+  it('evaluates each candidates page in a single query, ignoring its after key', async () => {
+    esClient.search
+      .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b'], { instanceId: 'host-b' }))
+      .mockResolvedValueOnce(evaluationResponse(['host-a'], { instanceId: 'host-a' }))
+      .mockResolvedValueOnce(candidatesResponse(['host-c']))
+      .mockResolvedValueOnce(evaluationResponse(['host-c'], { instanceId: 'host-c' }));
+
+    const { results } = await evaluate(esClient, slo, params, STARTED_AT);
+
+    expect(esClient.search.mock.calls.map(([request]) => request)).toEqual([
+      expect.objectContaining(buildCandidatesQuery(STARTED_AT, slo, params)),
+      expect.objectContaining(buildQuery(STARTED_AT, slo, params, undefined, ['host-a', 'host-b'])),
+      expect.objectContaining(
+        buildCandidatesQuery(STARTED_AT, slo, params, { instanceId: 'host-b' })
+      ),
+      expect.objectContaining(buildQuery(STARTED_AT, slo, params, undefined, ['host-c'])),
+    ]);
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a', 'host-c']);
+  });
+
+  it('stops evaluating the candidates once more instances than the max results breach', async () => {
+    esClient.search
+      .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b'], { instanceId: 'host-b' }))
+      .mockResolvedValueOnce(evaluationResponse(['host-a', 'host-b']));
+
+    const { results, hasReachedLimit } = await evaluate(
+      esClient,
+      slo,
+      params,
+      STARTED_AT,
+      undefined,
+      1
+    );
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a']);
+    expect(hasReachedLimit).toBe(true);
+  });
+
+  it('does not reach the limit when exactly the max results breach', async () => {
+    esClient.search
+      .mockResolvedValueOnce(candidatesResponse(['host-a', 'host-b'], { instanceId: 'host-b' }))
+      .mockResolvedValueOnce(evaluationResponse(['host-a']))
+      .mockResolvedValueOnce(candidatesResponse([]));
+
+    const { results, hasReachedLimit } = await evaluate(
+      esClient,
+      slo,
+      params,
+      STARTED_AT,
+      undefined,
+      1
+    );
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
-    expect(esClient.search).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining(
-        buildQuery(STARTED_AT, slo, params, undefined, candidateIds.slice(0, EVALUATION_PAGE_SIZE))
-      )
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a']);
+    expect(hasReachedLimit).toBe(false);
+  });
+
+  it('stops paging through every instance once more instances than the max results breach', async () => {
+    esClient.search.mockResolvedValueOnce(
+      evaluationResponse(['host-a', 'host-b'], { instanceId: 'host-b' })
     );
-    expect(esClient.search).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining(buildQuery(STARTED_AT, slo, params, undefined, [lastCandidateId]))
+
+    const { results, hasReachedLimit } = await evaluate(
+      esClient,
+      slo,
+      paramsWithNonPositiveThreshold,
+      STARTED_AT,
+      undefined,
+      1
     );
-    expect(results.map(({ instanceId }) => instanceId)).toEqual([
-      firstCandidateId,
-      lastCandidateId,
-    ]);
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
+    expect(results.map(({ instanceId }) => instanceId)).toEqual(['host-a']);
+    expect(hasReachedLimit).toBe(true);
   });
 
   it.each([0, -1])(
@@ -169,7 +246,7 @@ describe('evaluate', () => {
         .mockResolvedValueOnce(evaluationResponse(['host-b'], { instanceId: 'host-b' }))
         .mockResolvedValueOnce(evaluationResponse([]));
 
-      const results = await evaluate(esClient, slo, paramsWithThreshold, STARTED_AT);
+      const { results } = await evaluate(esClient, slo, paramsWithThreshold, STARTED_AT);
 
       expect(esClient.search.mock.calls.map(([request]) => request)).toEqual([
         expect.objectContaining(buildQuery(STARTED_AT, slo, paramsWithThreshold)),
@@ -196,7 +273,7 @@ describe('evaluate', () => {
       .mockResolvedValueOnce(candidatesResponse(['host-a']))
       .mockResolvedValueOnce(searchResponse([bothWindowsBreachingBucket]));
 
-    const results = await evaluate(esClient, slo, params, STARTED_AT);
+    const { results } = await evaluate(esClient, slo, params, STARTED_AT);
 
     expect(results).toEqual([
       expect.objectContaining({ window: params.windows[0], shortWindowBurnRate: 20 }),
@@ -218,7 +295,6 @@ describe('evaluate', () => {
   });
 
   it.each([
-    ['candidates', params, []],
     ['candidates evaluation', params, [candidatesResponse(['host-a'])]],
     ['full scan', paramsWithNonPositiveThreshold, []],
   ])(
@@ -235,9 +311,15 @@ describe('evaluate', () => {
   );
 
   it('does not query when there are no windows', async () => {
-    const results = await evaluate(esClient, slo, { ...params, windows: [] }, STARTED_AT);
+    const { results, hasReachedLimit } = await evaluate(
+      esClient,
+      slo,
+      { ...params, windows: [] },
+      STARTED_AT
+    );
 
     expect(results).toEqual([]);
+    expect(hasReachedLimit).toBe(false);
     expect(esClient.search).not.toHaveBeenCalled();
   });
 

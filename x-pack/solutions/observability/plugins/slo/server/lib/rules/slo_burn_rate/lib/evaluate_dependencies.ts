@@ -44,7 +44,7 @@ export async function evaluateDependencies(
           dependency.actionGroupsToSuppressOn.includes(winDef.actionGroup)
         ),
       };
-      const results = await evaluate(
+      const { results } = await evaluate(
         esClient,
         slo,
         paramsWithSuppressOnWindows,

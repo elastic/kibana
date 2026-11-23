@@ -216,7 +216,7 @@ Object {
         },
       },
       "composite": Object {
-        "size": 10000,
+        "size": 1000,
         "sources": Array [
           Object {
             "instanceId": Object {
@@ -229,6 +229,10 @@ Object {
       },
     },
   },
+  "filter_path": Array [
+    "aggregations.instances.after_key",
+    "aggregations.instances.buckets.key",
+  ],
   "query": Object {
     "bool": Object {
       "filter": Array [
@@ -477,7 +481,7 @@ Object {
         },
       },
       "composite": Object {
-        "size": 10000,
+        "size": 1000,
         "sources": Array [
           Object {
             "instanceId": Object {
@@ -490,6 +494,10 @@ Object {
       },
     },
   },
+  "filter_path": Array [
+    "aggregations.instances.after_key",
+    "aggregations.instances.buckets.key",
+  ],
   "query": Object {
     "bool": Object {
       "filter": Array [

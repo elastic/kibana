@@ -147,8 +147,11 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
     // We only need the end timestamp to base all of queries on. The length of the time range
     // doesn't matter for our use case since we allow the user to customize the window sizes,
     const { dateEnd } = getTimeRange('1m');
-    const results = await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' }, () =>
-      evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting)
+    const alertLimit = alertsClient.getAlertLimitValue();
+    const { results, hasReachedLimit } = await withSpan(
+      { name: BURN_RATE_EXECUTOR_SPAN_NAMES.EVAL, type: 'rule' },
+      () =>
+        evaluate(esClient.asCurrentUser, slo, params, new Date(dateEnd), projectRouting, alertLimit)
     );
 
     const dependencies = params.dependencies;
@@ -174,9 +177,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
       { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' },
       async () => {
         if (results.length > 0) {
-          const alertLimit = alertsClient.getAlertLimitValue();
-          let hasReachedLimit = false;
-          let scheduledActionsCount = 0;
           for (const result of results) {
             const {
               instanceId,
@@ -200,12 +200,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
             );
             if (shouldAlert) {
               const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
-              if (scheduledActionsCount >= alertLimit) {
-                // need to set this so that warning is displayed in the UI and in the logs
-                hasReachedLimit = true;
-                break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-              }
-
               const sloSummary = await getSloSummary(
                 esClient.asCurrentUser,
                 slo,
@@ -278,7 +272,6 @@ export const getRuleExecutor = (basePath: IBasePath, isCpsEnabled: boolean = fal
               };
 
               alertsClient.setAlertData({ id: alertId, context });
-              scheduledActionsCount++;
             }
           }
 
