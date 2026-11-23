@@ -97,6 +97,7 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/test-jest-helpers'
   - '@kbn/es-errors'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/core-http-server-mocks'
   - '@kbn/connector-specs'
   - '@kbn/connector-topics'
@@ -147,6 +148,8 @@ dependsOn:
   - '@kbn/core-security-common'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-spaces-common'
+  - '@kbn/recently-accessed'
+  - '@kbn/crypto-browser'
 tags:
   - plugin
   - prod

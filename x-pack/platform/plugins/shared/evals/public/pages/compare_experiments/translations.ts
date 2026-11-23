@@ -348,14 +348,6 @@ export const VIEW_EXPERIMENT_DETAIL = i18n.translate(
   }
 );
 
-export const BADGE_NEWER = i18n.translate('xpack.evals.compareExperiments.badgeNewer', {
-  defaultMessage: 'Newer',
-});
-
-export const BADGE_OLDER = i18n.translate('xpack.evals.compareExperiments.badgeOlder', {
-  defaultMessage: 'Older',
-});
-
 export const FLYOUT_TRACE_BASELINE = i18n.translate(
   'xpack.evals.compareExperiments.flyoutTraceBaseline',
   {
