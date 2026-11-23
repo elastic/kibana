@@ -17,11 +17,11 @@ export const registerAiIndices = ({
   contextEngine: Pick<ContextEnginePluginSetup, 'registerAiIndex'>;
   aiIndices?: readonly AlertZeroAiIndex[];
 }): void => {
-  for (const { id, description } of aiIndices) {
+  for (const { id, description, dest } of aiIndices) {
     contextEngine.registerAiIndex(id, {
       description,
       memory_enabled: false,
-      dest: getAiIndexDest('index', id),
+      dest: dest ?? getAiIndexDest('index', id),
       automations: [],
       sources: [],
       traces: [],

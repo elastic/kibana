@@ -57,6 +57,7 @@ export const HOST_TYPE_FIXTURE: InventoryType = {
     'A physical or virtual machine that runs workloads. Identified by host.id, falling back to host.name, then host.hostname.',
   identityFields: ['host.id', 'host.name', 'host.hostname'],
   columns: HOST_LIST_COLUMNS,
+  suggestedFilters: ['os.type', 'cloud.provider'],
   sources: [
     { indexPattern: 'metrics-system.*-*' },
     { indexPattern: 'metrics-hostmetricsreceiver.otel-*' },
@@ -69,6 +70,7 @@ export const K8S_DEPLOYMENT_TYPE_FIXTURE: InventoryType = {
   description: 'A Kubernetes deployment, identified by namespace/name.',
   identityFields: ['kubernetes.namespace', 'kubernetes.deployment.name'],
   columns: K8S_DEPLOYMENT_LIST_COLUMNS,
+  suggestedFilters: ['k8s.cluster.name', 'kubernetes.namespace'],
   sources: [
     { indexPattern: 'metrics-kubernetes.state_deployment-*' },
     { indexPattern: 'metrics-k8sclusterreceiver.otel-*' },
@@ -187,8 +189,16 @@ export const buildListResponseFixture = (type: string): ListResponse | undefined
     rows,
     provenance: {},
     truncated: false,
-    took: 0,
     queries: [],
+    probes: [],
+    timings: {
+      definitionMs: 0,
+      planningMs: 0,
+      probesMs: 0,
+      queriesMs: 0,
+      processingMs: 0,
+      totalMs: 0,
+    },
     errors: [],
     unavailableColumns: [],
   };

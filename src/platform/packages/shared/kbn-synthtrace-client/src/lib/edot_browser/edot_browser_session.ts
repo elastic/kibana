@@ -37,6 +37,14 @@ export interface EdotBrowserResource {
   probability?: number;
 }
 
+export interface EdotBrowserOutage {
+  start: number;
+  end: number;
+  failureRate: number;
+  /** The endpoint's status codes when unset. */
+  failureStatusCodes?: readonly number[];
+}
+
 export interface EdotBrowserRequest {
   method: string;
   /**
@@ -51,6 +59,11 @@ export interface EdotBrowserRequest {
   failureRate?: number;
   /** Status codes to pick from when the request fails. */
   failureStatusCodes?: readonly number[];
+  /**
+   * Times when the endpoint is down, from `start` up to `end`. A request sent then fails at the
+   * outage's rate instead of the endpoint's.
+   */
+  outages?: readonly EdotBrowserOutage[];
   /** Multiplies the health profile's HTTP latency. */
   latencyFactor?: number;
   /**
@@ -73,6 +86,16 @@ export interface EdotBrowserClickTarget {
   otelAttributes?: Record<string, string>;
   /** Request fired by clicking the element. */
   request?: EdotBrowserRequest;
+  /** How often users click the element compared to the other ones of the page, 1 when unset. */
+  weight?: number;
+  /**
+   * Share of the clicks that get no reaction from the page, like a price label, an image or a
+   * disabled button. 0 for an element that fires a request or that reacts by itself (a link or a
+   * form field), the health profile's dead click rate otherwise, when unset.
+   */
+  deadClickRate?: number;
+  /** Uncaught exceptions that clicking the element throws. */
+  exceptions?: readonly EdotBrowserRatedException[];
 }
 
 /**
@@ -117,12 +140,27 @@ export interface EdotBrowserExceptionTemplate {
   rawStacktrace?: string | null;
 }
 
+/** An uncaught exception that happens on a share of the clicks of an element or views of a page. */
+export type EdotBrowserRatedException = EdotBrowserExceptionTemplate & {
+  /** Share of the clicks or page views that throw it, from 0 to 1. */
+  rate: number;
+  /**
+   * Throws on every click in the sessions it hits, a share `rate` of them, instead of on a share
+   * of the clicks: a bug that depends on the user's state, which retrying doesn't get past.
+   */
+  persistent?: boolean;
+};
+
 export interface EdotBrowserPage {
   path: string;
+  /** How often users visit the page compared to the other ones of the site, 1 when unset. */
+  weight?: number;
   resources?: readonly EdotBrowserResource[];
   /** Requests fired when the page is shown. */
   requests?: readonly EdotBrowserRequest[];
   clickTargets?: readonly EdotBrowserClickTarget[];
+  /** Uncaught exceptions of the page itself, on top of the site's, each on a share of its views. */
+  exceptions?: readonly EdotBrowserRatedException[];
 }
 
 export interface EdotBrowserSite {
@@ -186,6 +224,9 @@ const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 
 const ID_PLACEHOLDER = '{id}';
 const RELOAD_RATE = 0.1;
+// From a third of the rage clicks of the average user to three times as many, for a few of them
+const MIN_IMPATIENCE = 0.3;
+const IMPATIENCE_SPREAD = 2.8;
 // Many short bounces, most views in the tens of seconds and a long tail of minutes-long reads
 const DEFAULT_DWELL: Distribution = { median: 10_000, sigma: 1 };
 const MIN_DWELL_MS = 500;
@@ -232,32 +273,78 @@ const REQUEST_FAILURE_STACK: readonly EdotBrowserStackFrame[] = [
   { functionName: 'async loadData' },
 ];
 
+/**
+ * The TypeError of reading `property` of `variable` when it is `undefined` or `null`, once per
+ * engine as each words it, so that every browser reports the message it really shows.
+ */
+export const readPropertyErrors = <T extends Omit<EdotBrowserExceptionTemplate, 'message'>>(
+  {
+    variable,
+    property,
+    value = 'undefined',
+  }: { variable: string; property: string; value?: 'undefined' | 'null' },
+  template: T
+): Array<T & EdotBrowserExceptionTemplate> => [
+  {
+    ...template,
+    type: 'TypeError',
+    message: `Cannot read properties of ${value} (reading '${property}')`,
+    engines: ['chromium'],
+  },
+  {
+    ...template,
+    type: 'TypeError',
+    message: `can't access property "${property}", ${variable} is ${value}`,
+    engines: ['firefox'],
+  },
+  {
+    ...template,
+    type: 'TypeError',
+    message: `${value} is not an object (evaluating '${variable}.${property}')`,
+    engines: ['webkit'],
+  },
+];
+
+// What every app throws now and then, the harmless ResizeObserver loop the most often
 const COMMON_EXCEPTIONS: readonly EdotBrowserExceptionTemplate[] = [
   {
-    type: 'TypeError',
-    message: "Cannot read properties of undefined (reading 'map')",
-    stacks: [
-      // The same error from two call paths: two groups
-      [{ functionName: 'renderItems' }, { functionName: 'List' }, ...FRAMEWORK_FRAMES],
-      [{ functionName: 'renderRows' }, { functionName: 'DataTable' }, ...FRAMEWORK_FRAMES],
-    ],
+    type: 'Error',
+    message: 'ResizeObserver loop completed with undelivered notifications.',
+    weight: 4,
+    stacks: [[{ functionName: 'ResizeObserver.<anonymous>' }]],
   },
-  {
-    type: 'TypeError',
-    message: "Cannot read properties of null (reading 'addEventListener')",
-    stacks: [
-      [
-        { functionName: 'attachListeners' },
-        { functionName: 'useEffect' },
-        { functionName: 'commitHookEffectListMount', file: FRAMEWORK_SCRIPT },
+  ...readPropertyErrors(
+    { variable: 'items', property: 'map' },
+    {
+      weight: 3,
+      stacks: [
+        // The same error from two call paths: two groups
+        [{ functionName: 'renderItems' }, { functionName: 'List' }, ...FRAMEWORK_FRAMES],
+        [{ functionName: 'renderRows' }, { functionName: 'DataTable' }, ...FRAMEWORK_FRAMES],
       ],
-    ],
-  },
-  {
+    }
+  ),
+  ...readPropertyErrors(
+    { variable: 'element', property: 'addEventListener', value: 'null' },
+    {
+      stacks: [
+        [
+          { functionName: 'attachListeners' },
+          { functionName: 'useEffect' },
+          { functionName: 'commitHookEffectListMount', file: FRAMEWORK_SCRIPT },
+        ],
+      ],
+    }
+  ),
+  ...[
+    { message: 'gtag is not defined', engines: ['chromium', 'firefox'] as const },
+    { message: "Can't find variable: gtag", engines: ['webkit'] as const },
+  ].map(({ message, engines }) => ({
     type: 'ReferenceError',
-    message: 'gtag is not defined',
+    message,
+    engines,
     stacks: [[{ functionName: 'trackEvent' }, { functionName: 'HTMLButtonElement.onclick' }]],
-  },
+  })),
   {
     type: 'ChunkLoadError',
     message: 'Loading chunk 742 failed.',
@@ -269,6 +356,13 @@ const COMMON_EXCEPTIONS: readonly EdotBrowserExceptionTemplate[] = [
     ],
   },
 ];
+
+// How a fetch that gets no response rejects in each engine
+const FETCH_FAILURE_MESSAGES: Readonly<Record<BrowserEngine, string>> = {
+  chromium: 'Failed to fetch',
+  firefox: 'NetworkError when attempting to fetch resource.',
+  webkit: 'Load failed',
+};
 
 const DEFAULT_CLICK_TARGETS: readonly EdotBrowserClickTarget[] = [
   { tagName: 'A', cssSelector: 'nav.main-nav > a:nth-child(2)' },
@@ -302,9 +396,10 @@ const DEFAULT_CLICK_TARGETS: readonly EdotBrowserClickTarget[] = [
  * - `loadDocument` emits the page load (navigation, resource and navigation timing, TTFB, FCP
  *   and LCP) from the load plan, and derives the `DocumentState` the later steps share.
  * - `interactWithPage` emits what the user does on each page view: requests fired by the page,
- *   clicks, the requests they fire, uncaught exceptions and, with `frustrationRandom`, the rage,
- *   dead and error clicks among them. `routeChange` emits the soft navigation of each SPA route
- *   change.
+ *   clicks, the requests they fire, uncaught exceptions, retries of clicks that failed or did
+ *   nothing and, with `frustrationRandom`, the rage, dead and error clicks among them. Signals
+ *   follow their causes: slow responses get rage clicks, failures error clicks, and elements that
+ *   don't react dead clicks. `routeChange` emits the soft navigation of each SPA route change.
  * - `hideDocument` emits CLS and INP, which web-vitals reports once the document is hidden.
  *
  * Planning and simulation draw from the same `random` source, planning first. A seed therefore
@@ -321,6 +416,13 @@ interface SessionContext {
   reportExceptions: boolean;
   reportResourceTimings: boolean;
   frustrationRandom?: () => number;
+  /**
+   * Multiplies how often the user rage-clicks, drawn from `frustrationRandom` once per session:
+   * most users are patient, a few lose it quickly.
+   */
+  impatience: number;
+  /** Whether each persistent exception hits the session, drawn the first time it could. */
+  persistentHits: Map<EdotBrowserRatedException, boolean>;
 }
 
 /** One page shown during the session. Its events stay within `[start, end]`. */
@@ -513,6 +615,13 @@ const requestPath = ({ url, ids }: EdotBrowserRequest, random: () => number): st
   return hasIds ? url.split(ID_PLACEHOLDER).join(pick(random, ids)) : url;
 };
 
+interface SentRequest {
+  events: EdotBrowserEvent[];
+  duration: number;
+  /** No response, or an error status. */
+  failed: boolean;
+}
+
 /**
  * A fetch/XHR span, its resource timing entry, which the instrumentation links to the span, and,
  * for some failures, an uncaught exception.
@@ -525,19 +634,22 @@ const sendRequest = (
   latestEnd: number,
   /** Called with the uncaught exception that a failure throws, if it throws one. */
   onException?: (time: number, exception: EdotBrowserExceptionTemplate) => void
-): EdotBrowserEvent[] => {
+): SentRequest => {
   // The request, and with it its 1ms minimum duration, must end within the page view
   const time = Math.min(requestedTime, latestEnd - 1);
   const { client, site, health, random, slowdown, reportExceptions, reportResourceTimings } = ctx;
   const {
     method,
     instrumentation = 'fetch',
-    failureRate = health.httpFailureRate,
-    failureStatusCodes = DEFAULT_FAILURE_STATUS_CODES,
     latencyFactor = 1,
     slowTail,
     bodySizeBytes,
+    outages = [],
   } = request;
+  const outage = outages.find(({ start, end }) => time >= start && time < end);
+  const failureRate = outage?.failureRate ?? request.failureRate ?? health.httpFailureRate;
+  const failureStatusCodes =
+    outage?.failureStatusCodes ?? request.failureStatusCodes ?? DEFAULT_FAILURE_STATUS_CODES;
   const url = toUrl(site, requestPath(request, random));
   const tailFactor = slowTail && random() < slowTail.rate ? slowTail.factor : 1;
   const duration = Math.min(
@@ -598,7 +710,11 @@ const sendRequest = (
   const isFailure = statusCode === undefined ? instrumentation === 'fetch' : statusCode >= 400;
   if (isFailure && random() < 0.5 && reportExceptions) {
     const exception: EdotBrowserExceptionTemplate = isNetworkError
-      ? { type: 'TypeError', message: 'Failed to fetch', stacks: [FETCH_FAILURE_STACK] }
+      ? {
+          type: 'TypeError',
+          message: FETCH_FAILURE_MESSAGES[client.browserEngine],
+          stacks: [FETCH_FAILURE_STACK],
+        }
       : {
           type: 'Error',
           message: `Request failed with status code ${statusCode}`,
@@ -607,7 +723,7 @@ const sendRequest = (
     events.push(exceptionEvent(ctx, exception).timestamp(endTime));
     onException?.(endTime, exception);
   }
-  return events;
+  return { events, duration, failed: statusCode === undefined || statusCode >= 400 };
 };
 
 /** Samples the timings of a full page load. */
@@ -822,53 +938,114 @@ const interactWithPage = (
   const events: EdotBrowserEvent[] = [];
   const clickTimes: number[] = [];
   const repeatedClickTimes: number[] = [];
-  // Uncaught exceptions come from failed requests as well as from the page itself
+  // Uncaught exceptions come from failed requests and clicks as well as from the page itself
   const exceptions: PageException[] = [];
   const onException =
     (clickTime?: number) => (time: number, exception: EdotBrowserExceptionTemplate) =>
       exceptions.push({ time, exception, clickTime });
+  const throwException = (
+    exception: EdotBrowserExceptionTemplate,
+    time: number,
+    clickTime?: number
+  ) => {
+    if (reportExceptions) {
+      exceptions.push({ time, exception, clickTime });
+      events.push(exceptionEvent(ctx, exception).timestamp(time));
+    }
+  };
+  const inEngine = ({ engines }: EdotBrowserExceptionTemplate) =>
+    !engines || engines.includes(client.browserEngine);
 
   (page.requests ?? []).forEach((request) => {
     const time = Math.min(from + Math.floor(between(random, 5, 50)), slotEnd);
-    events.push(...sendRequest(ctx, document, request, time, slotEnd, onException()));
+    events.push(...sendRequest(ctx, document, request, time, slotEnd, onException()).events);
+  });
+
+  (page.exceptions ?? []).filter(inEngine).forEach((exception) => {
+    if (random() < exception.rate) {
+      throwException(exception, Math.floor(between(random, from, slotEnd)));
+    }
   });
 
   const clicks: PageClick[] = [];
-  const clickCount = Math.floor(between(random, 0, 4));
-  const clickTargets = page.clickTargets?.length ? page.clickTargets : DEFAULT_CLICK_TARGETS;
-  for (let c = 0; c < clickCount; c++) {
-    const clickTime = Math.floor(between(random, from, slotEnd));
-    const { request, ...target } = pick(random, clickTargets);
-    const pageX = between(random, 0, client.isMobile ? 390 : 1440);
-    const pageY = between(random, 0, 2400);
+  /** One click on the element, with what it fires, and whether the user got what they wanted. */
+  const clickOn = (
+    { request, exceptions: clickExceptions = [], deadClickRate, ...target }: EdotBrowserClickTarget,
+    clickTime: number,
+    pageX: number,
+    pageY: number
+  ): { settledAt: number; outcome: 'worked' | 'failed' | 'nothing' } => {
+    let settledAt = clickTime;
+    let failed = false;
+    let slow = false;
+    if (request) {
+      const time = Math.min(clickTime + Math.floor(between(random, 1, 20)), slotEnd);
+      const sent = sendRequest(ctx, document, request, time, slotEnd, onException(clickTime));
+      events.push(...sent.events);
+      ({ failed } = sent);
+      slow = sent.duration >= SLOW_RESPONSE_MS;
+      settledAt = time + sent.duration;
+    }
+    const thrown = clickExceptions
+      .filter(inEngine)
+      .find((exception) => throwsOnClick(ctx, exception));
+    if (thrown) {
+      throwException(
+        thrown,
+        Math.min(clickTime + Math.floor(between(random, 2, 40)), slotEnd),
+        clickTime
+      );
+    }
+    const reacts = request !== undefined || REACTIVE_TAGS.has(target.tagName);
+    const deadRate = deadClickRate ?? (reacts ? 0 : health.deadClickRate);
+    // A request is a reaction of the page. Small screens get more taps next to what reacts.
+    const dead = !request && random() < deadRate * (client.isMobile ? MOBILE_DEAD_CLICK_FACTOR : 1);
+
+    const rageRate = slow
+      ? SLOW_RESPONSE_RAGE_RATE
+      : failed || thrown
+      ? FAILURE_RAGE_RATE
+      : dead
+      ? DEAD_CLICK_RAGE_RATE
+      : health.rageClickRate;
     const burst = frustrationRandom
-      ? rageBurst(frustrationRandom, health, clickTime, slotEnd)
+      ? rageBurst(frustrationRandom, rageRate * ctx.impatience, clickTime, slotEnd)
       : [clickTime];
     clickTimes.push(...burst);
     repeatedClickTimes.push(...burst.slice(1));
     events.push(...burst.map((time) => client.click({ ...target, pageX, pageY }).timestamp(time)));
-    const deadDraw = frustrationRandom?.() ?? 1;
-    clicks.push({
-      time: clickTime,
-      target,
-      pageX,
-      pageY,
-      count: burst.length,
-      // A request is a reaction of the page
-      dead: !request && deadDraw < health.deadClickRate,
-    });
-    if (request) {
-      const time = Math.min(clickTime + Math.floor(between(random, 1, 20)), slotEnd);
-      events.push(...sendRequest(ctx, document, request, time, slotEnd, onException(clickTime)));
+    clicks.push({ time: clickTime, target, pageX, pageY, count: burst.length, dead });
+    return {
+      settledAt: Math.max(settledAt, burst[burst.length - 1]),
+      outcome: failed || thrown ? 'failed' : slow || dead ? 'nothing' : 'worked',
+    };
+  };
+
+  const clickCount = Math.floor(between(random, 0, 4));
+  const clickTargets = page.clickTargets?.length ? page.clickTargets : DEFAULT_CLICK_TARGETS;
+  for (let c = 0; c < clickCount; c++) {
+    let clickTime = Math.floor(between(random, from, slotEnd));
+    const target = pickWeighted(random, clickTargets, ({ weight = 1 }) => weight);
+    const pageX = between(random, 0, client.isMobile ? 390 : 1440);
+    const pageY = between(random, 0, 2400);
+    // A user who didn't get what they clicked for tries again a few times, until they give up
+    for (let attempt = 1; ; attempt++) {
+      const { settledAt, outcome } = clickOn(target, clickTime, pageX, pageY);
+      const retryRate = outcome === 'failed' ? RETRY_AFTER_FAILURE_RATE : RETRY_AFTER_NOTHING_RATE;
+      if (outcome === 'worked' || attempt >= MAX_CLICK_ATTEMPTS || random() >= retryRate) {
+        break;
+      }
+      clickTime = Math.floor(settledAt + between(random, 600, 2_500));
+      if (clickTime >= slotEnd) {
+        break;
+      }
     }
   }
 
   if (random() < health.jsErrorRate && reportExceptions) {
     const exception = pickWeighted(
       random,
-      [...COMMON_EXCEPTIONS, ...(site.exceptions ?? [])].filter(
-        ({ engines }) => !engines || engines.includes(client.browserEngine)
-      ),
+      [...COMMON_EXCEPTIONS, ...(site.exceptions ?? [])].filter(inEngine),
       ({ weight = 1 }) => weight
     );
     const exceptionTime = Math.floor(between(random, from, slotEnd));
@@ -890,7 +1067,7 @@ const interactWithPage = (
 
 interface PageClick {
   time: number;
-  target: Omit<EdotBrowserClickTarget, 'request'>;
+  target: Pick<EdotBrowserClickTarget, 'tagName' | 'cssSelector' | 'otelAttributes'>;
   pageX: number;
   pageY: number;
   /** Clicks in the burst, more than 1 for a rage click. */
@@ -911,15 +1088,41 @@ interface PageException {
 const FRUSTRATION_WINDOW_MS = 1_000;
 const MAX_ERROR_CLICK_WINDOW_MS = 10_000;
 
+// A response this slow leaves the user clicking again and again, the others less so
+const SLOW_RESPONSE_MS = 1_500;
+const SLOW_RESPONSE_RAGE_RATE = 0.45;
+const FAILURE_RAGE_RATE = 0.12;
+const DEAD_CLICK_RAGE_RATE = 0.1;
+const MOBILE_DEAD_CLICK_FACTOR = 1.5;
+// Elements that react to a click by themselves, without a request: navigation and focus
+const REACTIVE_TAGS: ReadonlySet<string> = new Set(['A', 'INPUT', 'TEXTAREA', 'SELECT']);
+// A user tries again after a click that didn't work, harder after an error than after nothing
+// happened, up to this many clicks in all
+const RETRY_AFTER_FAILURE_RATE = 0.7;
+const RETRY_AFTER_NOTHING_RATE = 0.4;
+const MAX_CLICK_ATTEMPTS = 8;
+
+const throwsOnClick = (
+  { random, persistentHits }: SessionContext,
+  exception: EdotBrowserRatedException
+): boolean => {
+  if (!exception.persistent) {
+    return random() < exception.rate;
+  }
+  const hit = persistentHits.get(exception) ?? random() < exception.rate;
+  persistentHits.set(exception, hit);
+  return hit;
+};
+
 /** The times of a click and, for a rage click, of the ones that the user repeats it with. */
 const rageBurst = (
   random: () => number,
-  health: HealthProfile,
+  rageRate: number,
   clickTime: number,
   slotEnd: number
 ): number[] => {
   const [rageDraw, countDraw] = [random(), random()];
-  if (rageDraw >= health.rageClickRate) {
+  if (rageDraw >= rageRate) {
     return [clickTime];
   }
   const times = [clickTime];
@@ -1005,7 +1208,7 @@ export const planDocuments = (
   };
 
   for (let i = 0; i < pageViews; i++) {
-    const page = pick(random, site.pages);
+    const page = pickWeighted(random, site.pages, ({ weight = 1 }) => weight);
     const current = documents[documents.length - 1];
     if (current && random() >= hardNavigationRate) {
       current.pageViews.push(pageView(page, time));
@@ -1125,6 +1328,10 @@ export const sessionWithDocuments = (
     reportExceptions,
     reportResourceTimings,
     frustrationRandom,
+    impatience: frustrationRandom
+      ? MIN_IMPATIENCE + IMPATIENCE_SPREAD * frustrationRandom() ** 3
+      : 1,
+    persistentHits: new Map(),
   };
   const documents = planDocuments(ctx, { pageViews, dwell, hardNavigationRate });
   const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
@@ -1196,9 +1403,12 @@ export const idleTab = ({
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
     reportExceptions,
     reportResourceTimings,
+    impatience: 1,
+    persistentHits: new Map(),
   };
   return Array.from({ length: requestCount }, (_, i) => {
     const time = start + i * intervalMs;
-    return sendRequest(ctx, { timeOrigin: start }, pick(random, requests), time, time + intervalMs);
+    return sendRequest(ctx, { timeOrigin: start }, pick(random, requests), time, time + intervalMs)
+      .events;
   }).flat();
 };

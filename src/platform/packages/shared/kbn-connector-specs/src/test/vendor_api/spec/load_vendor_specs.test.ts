@@ -112,6 +112,82 @@ describe('loadVendorSpecs', () => {
     });
   });
 
+  it('reads a captured source from its snapshot even with latest, as it has no latest', async () => {
+    const capturedManifest: VendorApiManifest = {
+      ...manifest,
+      sources: {
+        v1: {
+          ...manifest.sources.v1,
+          captured: true,
+          note: 'The vendor only serves this spec to a request carrying credentials.',
+        },
+      },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), serializeManifest(capturedManifest));
+    const fetchText = jest.fn(async () => JSON.stringify(snapshot('Latest')));
+
+    const { specs } = await loadVendorSpecs({ directory, latest: true, fetchText, log });
+
+    expect(fetchText).not.toHaveBeenCalled();
+    expect((specs.v1 as OpenApiDocument).info).toMatchObject({ title: 'Snapshot' });
+  });
+
+  it('fails on a captured source without a snapshot, instead of asking the vendor for it', async () => {
+    const capturedManifest: VendorApiManifest = {
+      ...manifest,
+      sources: {
+        v1: { ...manifest.sources.v1, captured: true, note: 'Captured with credentials.' },
+      },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), serializeManifest(capturedManifest));
+    await fs.rm(path.join(directory, 'snapshots', 'v1.openapi.json'));
+    const fetchText = jest.fn();
+
+    await expect(loadVendorSpecs({ directory, latest: true, fetchText, log })).rejects.toThrow(
+      'v1 is captured, but snapshots/v1.openapi.json is missing'
+    );
+    expect(fetchText).not.toHaveBeenCalled();
+  });
+
+  it('judges the overlay of the OpenAPI sources although a captured MCP source was not fetched', async () => {
+    const withMcp: VendorApiManifest = {
+      ...manifest,
+      sources: {
+        ...manifest.sources,
+        tools: {
+          format: 'mcp',
+          url: 'https://specs.example.com/tools.json',
+          endpoints: ['https://mcp.example.com/mcp'],
+          captured: true,
+          note: 'Captured with credentials.',
+          fetchedAt: '2026-10-07T00:00:00.000Z',
+        },
+      },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), serializeManifest(withMcp));
+    await fs.writeFile(
+      path.join(directory, 'snapshots', 'tools.mcp.json'),
+      JSON.stringify({ tools: [{ name: 'search', inputSchema: { type: 'object' } }] })
+    );
+    await fs.appendFile(
+      path.join(directory, 'overlay.yaml'),
+      [
+        '',
+        "  - target: $.paths['/gone']",
+        '    description: Fixes a route.',
+        '    remove: true',
+        '',
+      ].join('\n')
+    );
+    const fetchText = jest.fn(async () => JSON.stringify(snapshot('Latest')));
+
+    await loadVendorSpecs({ directory, latest: true, fetchText, log });
+
+    expect(log.warning).toHaveBeenCalledWith(
+      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it'
+    );
+  });
+
   it('fetches a Markdown reference with latest from its index and pages', async () => {
     const markdownManifest: VendorApiManifest = {
       sources: {
