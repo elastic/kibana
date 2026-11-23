@@ -7,12 +7,15 @@
 
 import { replaceParams } from '@kbn/openapi-common/shared';
 import type { LangSmithOptions } from '../../../../common/siem_migrations/model/common.gen';
+import type { SiemMigrationFilters } from '../../../../common/siem_migrations/types';
 import {
   SIEM_WORKFLOW_MIGRATION_PATH,
   SIEM_WORKFLOW_MIGRATION_START_PATH,
   SIEM_WORKFLOW_MIGRATION_STATS_PATH,
   SIEM_WORKFLOW_MIGRATION_STOP_PATH,
   SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+  SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH,
+  SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
   SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH,
   SIEM_WORKFLOW_MIGRATIONS_PATH,
 } from '../../../../common/siem_migrations/workflows/constants';
@@ -20,6 +23,8 @@ import type {
   CreateTinesWorkflowMigrationWorkflowsRequestBody,
   CreateWorkflowMigrationRequestBody,
   CreateWorkflowMigrationResponse,
+  GetWorkflowMigrationTranslationStatsResponse,
+  GetWorkflowMigrationWorkflowsResponse,
   StartWorkflowMigrationRequestBody,
   StartWorkflowMigrationResponse,
   StopWorkflowMigrationResponse,
@@ -159,6 +164,61 @@ export const getWorkflowMigrationAllStats = async ({
 }: GetWorkflowMigrationAllStatsParams): Promise<WorkflowMigrationStats[]> => {
   return KibanaServices.get().http.get<WorkflowMigrationStats[]>(
     SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH,
+    { version: VERSION, signal }
+  );
+};
+
+export interface GetWorkflowMigrationWorkflowsParams {
+  migrationId: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+  filters?: SiemMigrationFilters;
+  signal?: AbortSignal;
+}
+
+/** Retrieves the workflow documents of a migration, one page at a time */
+export const getWorkflowMigrationWorkflows = async ({
+  migrationId,
+  page,
+  perPage,
+  sortField,
+  sortDirection,
+  filters,
+  signal,
+}: GetWorkflowMigrationWorkflowsParams): Promise<GetWorkflowMigrationWorkflowsResponse> => {
+  return KibanaServices.get().http.get<GetWorkflowMigrationWorkflowsResponse>(
+    replaceParams(SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH, { migration_id: migrationId }),
+    {
+      version: VERSION,
+      query: {
+        page,
+        per_page: perPage,
+        sort_field: sortField,
+        sort_direction: sortDirection,
+        search_term: filters?.searchTerm,
+        ids: filters?.ids,
+        is_installed: filters?.installed,
+        is_fully_translated: filters?.fullyTranslated,
+        is_partially_translated: filters?.partiallyTranslated,
+        is_untranslatable: filters?.untranslatable,
+        is_failed: filters?.failed,
+      },
+      signal,
+    }
+  );
+};
+
+/** Retrieves the translation stats of a migration, the response is empty (204) while the migration has no workflows */
+export const getWorkflowMigrationTranslationStats = async ({
+  migrationId,
+  signal,
+}: WithSignal<WorkflowMigrationIdParams>): Promise<
+  GetWorkflowMigrationTranslationStatsResponse | undefined
+> => {
+  return KibanaServices.get().http.get<GetWorkflowMigrationTranslationStatsResponse | undefined>(
+    replaceParams(SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH, { migration_id: migrationId }),
     { version: VERSION, signal }
   );
 };
