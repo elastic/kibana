@@ -13,6 +13,7 @@ import { BehaviorSubject } from 'rxjs';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { TimeRange } from '@kbn/es-query';
+import { DataViewSource } from '@kbn/data-source';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
@@ -313,6 +314,43 @@ describe('Data control editor', () => {
         await controlEditor.findByText('Select a compatible control type.')
       ).toBeInTheDocument();
       expect(controlEditor.queryByText('Select a field first.')).not.toBeInTheDocument();
+    });
+
+    test('goes back to the data view that the query reads, with its field, in field mode', async () => {
+      mockGetSourceFromESQLQuery.mockResolvedValue(new DataViewSource(mockDataView));
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['linux'],
+        column: { name: 'machine.os.raw', type: 'keyword' },
+      });
+      const onSave = jest.fn();
+      const controlEditor = await mountComponent({
+        controlId: 'myControl',
+        controlType: 'optionsList',
+        initialState: {
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM logstash-* | STATS BY machine.os.raw',
+          field_name: 'machine.os.raw',
+          data_view_id: undefined,
+        } as Partial<DataControlState>,
+        onSave,
+        waitForDataView: false,
+      });
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
+      });
+
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-input-dsl'));
+      });
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
+      });
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-save'));
+      });
+
+      expect(dataViewsService.get).toHaveBeenCalledWith('logstash-*');
+      expect(onSave).toHaveBeenLastCalledWith('logstash-*');
     });
 
     test('does not use the id of the source as a data view, neither in field mode nor for the next control', async () => {

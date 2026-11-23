@@ -110,7 +110,6 @@ const useControlActionRegistry = (): ControlActionRegistry => {
 };
 
 const CompatibleControlTypesComponent = ({
-  data_view_id,
   field_name,
   source,
   selectedControlType: selectedAction,
@@ -127,10 +126,10 @@ const CompatibleControlTypesComponent = ({
     () => ({
       trigger: triggers[CONTROL_MENU_TRIGGER],
       embeddable: undefined, // parentApi isn't necessary for this
-      state: { data_view_id, field_name },
+      state: { field_name },
       source,
     }),
-    [data_view_id, field_name, source]
+    [field_name, source]
   );
 
   const sortedActionArray: CreateControlTypeAction[] = useMemo(() => {
@@ -185,7 +184,7 @@ const CompatibleControlTypesComponent = ({
               key={`disabled__${action.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
-                  fieldSelected: Boolean((data_view_id || source) && field_name),
+                  fieldSelected: Boolean(field_name),
                   controlType: action.type,
                 }
               )}
@@ -322,19 +321,22 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               editorState.field_name
             )
           : undefined;
+      // the field of a query goes with the data view that it reads, and with nothing when it reads an ES|QL source
+      const fieldOfQuery =
+        isESQLValuesSource && selectedSource
+          ? {
+              data_view_id: selectedDataView?.id,
+              field_name: selectedDataView ? editorState.field_name : undefined,
+            }
+          : {};
       setEditorState({
         ...editorState,
         values_source: nextSource as ControlValuesSource,
         ...(nextEsqlQuery ? { esql_query: nextEsqlQuery } : {}),
-        // the field of a query goes with its source, which is no data view when it is an ES|QL source
-        ...(nextSource === ControlValuesSource.FIELD && isESQLValuesSource && selectedSource
-          ? isEsqlSource
-            ? { data_view_id: undefined, field_name: undefined }
-            : { data_view_id: selectedSource.id }
-          : {}),
+        ...(nextSource === ControlValuesSource.FIELD ? fieldOfQuery : {}),
       });
     },
-    [editorState, selectedSource, isEsqlSource, isESQLValuesSource]
+    [editorState, selectedSource, selectedDataView, isESQLValuesSource]
   );
   const esqlQueryNeedsRunning = useMemo(
     () => !valuesSourceValid && isESQLValuesSource,
@@ -346,7 +348,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
       const controlContext = {
         trigger: triggers[CONTROL_MENU_TRIGGER],
         embeddable: undefined,
-        state: { field_name: nextFieldName, data_view_id: editorState.data_view_id },
+        state: { field_name: nextFieldName },
         source: selectedSource,
       };
 
@@ -377,13 +379,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         setPanelTitle(newDefaultTitle);
       }
     },
-    [
-      controlActionRegistry,
-      editorState.data_view_id,
-      editorState.title,
-      selectedControlType,
-      selectedSource,
-    ]
+    [controlActionRegistry, editorState.title, selectedControlType, selectedSource]
   );
 
   return (
@@ -517,7 +513,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
             {/* wrapping in `div` so that focus gets passed properly to the form row */}
             <div>
               <CompatibleControlTypesComponent
-                data_view_id={isESQLValuesSource ? undefined : editorState.data_view_id}
                 source={selectedSource}
                 field_name={editorState.field_name}
                 selectedControlType={selectedControlType}
