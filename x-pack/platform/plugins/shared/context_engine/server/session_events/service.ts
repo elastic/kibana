@@ -11,10 +11,20 @@ import { SESSION_EVENTS_DATA_STREAM } from './data_streams';
 import type {
   SaveEventResult,
   SessionEventInput,
+  SessionEventsScope,
   SessionEventsService,
   StoredSessionEvent,
   StoredSessionEventTypeFields,
 } from './types';
+
+const assertScope = ({ space, userId }: SessionEventsScope): void => {
+  if (space.trim() === '') {
+    throw new Error('Session events scope requires a non-empty space');
+  }
+  if (userId.trim() === '') {
+    throw new Error('Session events scope requires a non-empty userId');
+  }
+};
 
 const toTypeFields = (event: SessionEventInput): StoredSessionEventTypeFields => {
   switch (event.type) {
@@ -37,6 +47,10 @@ const toTypeFields = (event: SessionEventInput): StoredSessionEventTypeFields =>
     case 'reasoning':
     case 'meta':
       return { type: event.type };
+    default: {
+      const exhaustive: never = event;
+      throw new Error(`Unsupported session event type: ${JSON.stringify(exhaustive)}`);
+    }
   }
 };
 
@@ -54,10 +68,13 @@ const toResult = (id: string, item: BulkResponseItem | undefined): SaveEventResu
 export const createSessionEventsService = (
   esClient: ElasticsearchClient
 ): SessionEventsService => ({
-  saveEvents: async ({ space, userId }, { sessionId, aiIndexIds = [], events }) => {
+  saveEvents: async (scope, { sessionId, aiIndexIds = [], events }) => {
+    assertScope(scope);
     if (events.length === 0) {
       return { results: [] };
     }
+
+    const { space, userId } = scope;
 
     const timestamp = new Date().toISOString();
     const response = await esClient.bulk<StoredSessionEvent>({

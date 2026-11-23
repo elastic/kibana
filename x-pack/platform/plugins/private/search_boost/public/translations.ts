@@ -150,10 +150,10 @@ interface ManagedProfileMessage {
 
 const MANAGED_PROFILE_MESSAGES: Readonly<Record<ManagedProfileName, ManagedProfileMessage>> = {
   default_indices: {
-    label: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.label', {
-      defaultMessage: 'Performant',
+    label: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.label', {
+      defaultMessage: 'Default',
     }),
-    description: i18n.translate('xpack.searchBoost.managedProfile.performantIndices.description', {
+    description: i18n.translate('xpack.searchBoost.managedProfile.defaultIndices.description', {
       defaultMessage:
         'Consistently low average latency, scaling to high query throughput as load grows.',
     }),
@@ -272,6 +272,15 @@ export const DUPLICATE_LABEL = i18n.translate('xpack.searchBoost.actions.duplica
 export const DELETE_LABEL = i18n.translate('xpack.searchBoost.actions.delete', {
   defaultMessage: 'Delete',
 });
+
+export const CANCEL_BUTTON_LABEL = i18n.translate('xpack.searchBoost.flyout.cancelButton', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE_CHANGES_BUTTON_LABEL = i18n.translate(
+  'xpack.searchBoost.flyout.saveChangesButton',
+  { defaultMessage: 'Save changes' }
+);
 
 export const PROFILE_NAME_LABEL = i18n.translate('xpack.searchBoost.profileName', {
   defaultMessage: 'Profile name',

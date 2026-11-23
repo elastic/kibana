@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import moment from 'moment';
 import { TestProviders } from '../../../../../common/mock';
 import { EnrichmentRangePicker } from './threat_intelligence_view_enrichment_range_picker';
 import {
@@ -23,37 +25,65 @@ describe('EnrichmentRangePicker', () => {
     range: { to: 'now', from: 'now-30d' },
   };
 
-  it('renders a date picker and a button', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <EnrichmentRangePicker {...rangePickerProps} />
-      </TestProviders>
-    );
-
-    expect(
-      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID}"]`)
-    ).toEqual(true);
-    expect(
-      wrapper.exists(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
-    ).toEqual(true);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('invokes setRange', () => {
-    const wrapper = mount(
+  it('renders a date picker and a button', () => {
+    render(
       <TestProviders>
         <EnrichmentRangePicker {...rangePickerProps} />
       </TestProviders>
     );
 
-    wrapper
-      .find('input.start-picker')
-      .first()
-      .simulate('change', { target: { value: '08/10/2019 06:29 PM' } });
-    wrapper
-      .find(`[data-test-subj="${THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID}"]`)
-      .hostNodes()
-      .simulate('click');
+    expect(
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_RANGE_PICKER_TEST_ID)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)
+    ).toBeInTheDocument();
+  });
 
-    expect(setRangeSpy).toHaveBeenCalled();
+  it('invokes setRange with the default range when the dates are left unchanged', async () => {
+    render(
+      <TestProviders>
+        <EnrichmentRangePicker {...rangePickerProps} />
+      </TestProviders>
+    );
+
+    const refreshButton = screen.getByTestId(
+      THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID
+    );
+    expect(refreshButton).toBeEnabled();
+
+    await userEvent.click(refreshButton);
+
+    expect(setRangeSpy).toHaveBeenCalledTimes(1);
+    const { from, to } = setRangeSpy.mock.calls[0][0];
+    expect(moment(from).isBefore(moment(to))).toBe(true);
+    expect(moment(to).diff(moment(from), 'days')).toBe(30);
+  });
+
+  it('invokes setRange with the edited start date', async () => {
+    const { container } = render(
+      <TestProviders>
+        <EnrichmentRangePicker {...rangePickerProps} />
+      </TestProviders>
+    );
+
+    const startInput = container.querySelector('input.start-picker') as HTMLInputElement;
+    await userEvent.clear(startInput);
+    await userEvent.type(startInput, '08/10/2019 06:29 PM');
+
+    await userEvent.click(
+      screen.getByTestId(THREAT_INTELLIGENCE_ENRICHMENTS_REFRESH_BUTTON_TEST_ID)
+    );
+
+    expect(setRangeSpy).toHaveBeenCalledTimes(1);
+    expect(setRangeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: moment('08/10/2019 06:29 PM', 'MM/DD/YYYY hh:mm A').toISOString(),
+      })
+    );
   });
 });
