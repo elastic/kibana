@@ -292,6 +292,106 @@ describe('updateByQueryAndWait', () => {
     expect(res.canceled).toEqual('by user');
   });
 
+  it('should mark a cancelled task that came back with a failure as cancelled', async () => {
+    esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    esClient.tasks.get
+      .mockResolvedValueOnce({ completed: false, task: {} } as any)
+      .mockResolvedValueOnce({
+        completed: true,
+        task: {},
+        // 1 updated and 1 failed of 5: three agents were not looked at, whatever the failure was
+        response: {
+          total: 5,
+          updated: 1,
+          version_conflicts: 0,
+          failures: [{ id: 'agent2', cause: { reason: 'error reason' } }],
+        },
+      } as any);
+
+    const res = await updateByQueryAndWait(esClient, request, {
+      pollIntervalMs: 1,
+      maxDurationMs: 0,
+    });
+
+    expect(res.canceled).toEqual(expect.any(String));
+    expect(res.failures).toHaveLength(1);
+  });
+
+  describe('when the task cannot be cancelled', () => {
+    const finished = {
+      completed: true,
+      task: {},
+      response: { total: 5, updated: 5, version_conflicts: 0, failures: [] },
+    };
+
+    beforeEach(() => {
+      esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
+    });
+
+    it('should return the result of a task that finished while it was being cancelled', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce({ completed: false, task: {} } as any)
+        .mockResolvedValueOnce(finished as any);
+      esClient.tasks.cancel.mockRejectedValue(new Error('resource_not_found_exception'));
+
+      const res = await updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 0,
+      });
+
+      expect(res).toEqual(finished.response);
+      expect(esClient.tasks.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not wait for a task that the cancellation did not reach', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce({ completed: false, task: {} } as any)
+        .mockResolvedValueOnce(finished as any);
+      esClient.tasks.cancel.mockResolvedValue({
+        nodes: {},
+        node_failures: [{ type: 'failed_node_exception', reason: 'task already finished' }],
+      } as any);
+
+      const started = Date.now();
+      const res = await updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 0,
+        cancelWaitMs: 5000,
+      });
+
+      expect(res.updated).toEqual(5);
+      expect(res.canceled).toBeUndefined();
+      expect(Date.now() - started).toBeLessThan(1000);
+    });
+
+    it('should throw, with the status it saw, if the task is still running', async () => {
+      esClient.tasks.get.mockResolvedValue({
+        completed: false,
+        task: { status: { total: 5, updated: 2 } },
+      } as any);
+      esClient.tasks.cancel.mockRejectedValue(new Error('cancel failed'));
+
+      await expect(
+        updateByQueryAndWait(esClient, request, { pollIntervalMs: 1, maxDurationMs: 0 })
+      ).rejects.toThrow(/did not finish within 0ms, status: .*"updated":2/);
+    });
+
+    it('should throw the error of a task that finished with one', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce({ completed: false, task: {} } as any)
+        .mockResolvedValueOnce({
+          completed: true,
+          task: {},
+          error: { type: 'security_exception', reason: 'not allowed' },
+        } as any);
+      esClient.tasks.cancel.mockRejectedValue(new Error('cancel failed'));
+
+      await expect(
+        updateByQueryAndWait(esClient, request, { pollIntervalMs: 1, maxDurationMs: 0 })
+      ).rejects.toThrow(/Update by query task node1:42 failed: .*security_exception/);
+    });
+  });
+
   it('should throw if the cancelled task does not stop in time', async () => {
     esClient.updateByQuery.mockResolvedValue({ task: 'node1:42' } as any);
     esClient.tasks.get.mockResolvedValue({
