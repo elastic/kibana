@@ -7,6 +7,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { HardcodedIcons } from '@kbn/workflows-ui';
+import { decodeSvgDataUrl } from './decode_svg_data_url';
 import { STABILITY_BADGE_HEIGHT_PX } from '../lib/get_stability_note';
 
 const SUGGEST_ROW_PREFIX = '.monaco-editor .suggest-widget .monaco-list .monaco-list-row';
@@ -18,6 +19,14 @@ function escapeCssAttributeValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+// The flask has no fill of its own, so as a background image it is black in both color modes.
+function getTintedFlaskUrl(color: string): string {
+  const svg = decodeSvgDataUrl(HardcodedIcons.flask);
+  return svg
+    ? `data:image/svg+xml;base64,${btoa(svg.replace('<svg', `<svg fill="${color}"`))}`
+    : HardcodedIcons.flask;
+}
+
 /**
  * Appends a tech preview flask badge after the suggest label text.
  * Uses `.left::after` only — does not modify `.monaco-icon-label` or `.suggest-icon`.
@@ -27,7 +36,7 @@ export function buildSuggestTechPreviewBadgeRules(
   euiThemeContext: UseEuiTheme
 ): string {
   const { euiTheme } = euiThemeContext;
-  const flaskUrl = HardcodedIcons.flask;
+  const flaskUrl = getTintedFlaskUrl(euiTheme.colors.textParagraph);
 
   let css = '';
 

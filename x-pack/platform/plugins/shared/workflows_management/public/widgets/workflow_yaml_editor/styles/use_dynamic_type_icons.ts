@@ -11,6 +11,7 @@ import { useEffect, useRef } from 'react';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getTriggerName, type TriggerType, TriggerTypes } from '@kbn/workflows';
 import { HardcodedIconDataUrls } from '@kbn/workflows-ui';
+import { decodeSvgDataUrl } from './decode_svg_data_url';
 import { buildSuggestTechPreviewBadgeRules } from './get_suggest_tech_preview_badge_styles';
 import { getConnectorTypeIdForTriggerEventId } from '../../../../common/triggers/connector_event_triggers';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
@@ -369,20 +370,8 @@ const SVG_PAINT_COLOR =
 // A glyph with no paint color of its own (e.g. an EUI icon asset) renders black as a
 // background image, so it gets the same currentColor mask as the built-in glyphs.
 const isPlainSvgGlyph = (dataUrl: string): boolean => {
-  if (!dataUrl.startsWith('data:image/svg+xml')) {
-    return false;
-  }
-  const commaIndex = dataUrl.indexOf(',');
-  const data = dataUrl.slice(commaIndex + 1);
-  try {
-    const svg = dataUrl.slice(0, commaIndex).endsWith(';base64')
-      ? atob(data)
-      : decodeURIComponent(data);
-    return !SVG_PAINT_COLOR.test(svg);
-  } catch {
-    // Malformed data URLs (FALLBACK_BOLT_DATA_URL is one) must not stop the whole CSS injection.
-    return false;
-  }
+  const svg = decodeSvgDataUrl(dataUrl);
+  return svg !== undefined && !SVG_PAINT_COLOR.test(svg);
 };
 
 const isMonochromeIcon = (actionTypeId: string, iconDataUrl: string): boolean =>
