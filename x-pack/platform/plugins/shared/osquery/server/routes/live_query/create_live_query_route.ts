@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { isBoom, notFound } from '@hapi/boom';
 import unified from 'unified';
 import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
@@ -66,21 +67,41 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const logger = osqueryContext.logFactory.get('liveQuery');
 
-        const client = await osqueryContext.service
-          .getRuleRegistryService()
-          ?.getRacClientWithRequest(request);
-
-        // Unreadable/missing alert on the deny path is 403, not 500.
         let alertData: (ParsedTechnicalFields & { _index: string }) | undefined;
-        let alertError: unknown;
+        let alertError: { statusCode: number; message: string } | undefined;
         try {
-          alertData = request.body.alert_ids?.length
-            ? ((await client?.get({ id: request.body.alert_ids[0] })) as ParsedTechnicalFields & {
-                _index: string;
-              })
-            : undefined;
+          if (request.body.alert_ids?.length) {
+            const client = await osqueryContext.service
+              .getRuleRegistryService()
+              ?.getRacClientWithRequest(request);
+
+            if (!client) {
+              throw new Error('Alert client unavailable');
+            }
+
+            alertData = (await client.get({ id: request.body.alert_ids[0] })) as
+              | (ParsedTechnicalFields & { _index: string })
+              | undefined;
+
+            if (!alertData) {
+              throw notFound();
+            }
+          }
         } catch (error) {
-          alertError = error;
+          const statusCode = isBoom(error)
+            ? error.output.statusCode
+            : error.statusCode ?? error.meta?.statusCode;
+
+          if (statusCode === 404) {
+            alertError = { statusCode, message: 'The requested alert was not found' };
+          } else if (statusCode === 403) {
+            alertError = { statusCode, message: 'Not authorized to read the requested alert' };
+          } else {
+            logger.error(`Failed to retrieve alert for osquery live query request: ${error.message}`, {
+              error,
+            });
+            alertError = { statusCode: 500, message: 'Error occurred while retrieving the alert' };
+          }
         }
 
         // Space, capabilities, and reference resolution all read ES/SO. A transient failure
@@ -177,7 +198,10 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             return response.forbidden();
           }
         } else if (alertError) {
-          throw alertError;
+          return response.customError({
+            statusCode: alertError.statusCode,
+            body: { message: alertError.message },
+          });
         }
 
         try {

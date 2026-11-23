@@ -9,6 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
+import { forbidden, notFound } from '@hapi/boom';
 import { API_VERSIONS } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -306,6 +307,29 @@ describe('createLiveQueryRoute', () => {
 
     expect(response.forbidden).toHaveBeenCalled();
     expect(response.customError).not.toHaveBeenCalled();
+    expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['missing', notFound(), 404, 'The requested alert was not found'],
+    ['unreadable', forbidden(), 403, 'Not authorized to read the requested alert'],
+    ['unavailable', new Error('ES unavailable'), 500, 'Error occurred while retrieving the alert'],
+  ])('returns a structured error for an %s alert when query access is allowed', async (
+    _description,
+    error,
+    statusCode,
+    message
+  ) => {
+    const racGet = jest.fn().mockRejectedValue(error);
+    const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+    const response = await invokeRoute(
+      { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+      { coreStart, racGet }
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({ statusCode, body: { message } });
+    expect(response.ok).not.toHaveBeenCalled();
     expect(mockedCreateActionHandler).not.toHaveBeenCalled();
   });
 
