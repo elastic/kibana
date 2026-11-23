@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { z as z4 } from '@kbn/zod/v4';
+import { z as z4, savedObjectId, description } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import {
@@ -669,6 +669,25 @@ describe('zod', () => {
         expect(result.shared).toHaveProperty('AutoDiscPlain_Stream');
         expect(result.shared.AutoDiscPlain_Stream).not.toHaveProperty('discriminator');
       });
+    });
+  });
+
+  test('publishes the planned bounds of reporting-mode strings as vendor extensions', () => {
+    const schema = z4.object({
+      strict: savedObjectId(),
+      reporting: savedObjectId.warn({ label: 'dashboard.panelId' }),
+      reportingWithoutMinimum: description.warn(),
+    });
+    const result = convert(schema as any);
+
+    expect(result.schema.properties).toEqual({
+      strict: { type: 'string', minLength: 1, maxLength: 512 },
+      reporting: {
+        type: 'string',
+        'x-kibana-planned-min-length': 1,
+        'x-kibana-planned-max-length': 512,
+      },
+      reportingWithoutMinimum: { type: 'string', 'x-kibana-planned-max-length': 10000 },
     });
   });
 });
