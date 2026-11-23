@@ -10,7 +10,7 @@ import { bucketKeys } from '../../../lib/helpers/aggregations';
 import { withNotDefined } from '../../../lib/helpers/environment';
 import { toTimeSeries } from '../../../lib/helpers/time_series';
 import { SESSIONS_SEARCH_SPAN_NAME, SESSIONS_VITALS_SEARCH_SPAN_NAME } from '../constants';
-import type { SourceApplications } from '../types';
+import type { WebSourceApplications } from '../types';
 import {
   sessionsSearch,
   sessionsVitalsSearch,
@@ -35,7 +35,7 @@ export const getSessionsApplications = async ({
 }: SearchParams & {
   /** Searches as the current user and cancels with the HTTP request. */
   tracedEsClient: TracedElasticsearchClient;
-}): Promise<SourceApplications> => {
+}): Promise<WebSourceApplications> => {
   const [response, vitalsResponse] = await Promise.all([
     tracedEsClient.search(SESSIONS_SEARCH_SPAN_NAME, sessionsSearch(searchParams)),
     tracedEsClient.search(SESSIONS_VITALS_SEARCH_SPAN_NAME, sessionsVitalsSearch(searchParams)),

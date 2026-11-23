@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { APPLICATION_SOURCE } from '../../../../common/application_source';
+import { APPLICATION_SOURCE, APPLICATION_TYPE } from '../../../../common/application_source';
 import type { CoreWebVital } from '../../../../common/core_web_vitals';
-import type { ApplicationSummary, TimeSeriesPoint } from '../../../../common/types/applications';
+import type { TimeSeriesPoint, WebApplicationSummary } from '../../../../common/types/applications';
 import {
   bucketKeys,
   ratio,
@@ -56,9 +56,10 @@ export const toSessionsApplication = (
     lastSeen,
   }: SessionsBucket,
   p75s?: Partial<Record<CoreWebVital, PercentilesAggregation>>
-): ApplicationSummary => ({
+): WebApplicationSummary => ({
   serviceName: key,
   source: APPLICATION_SOURCE.otel,
+  applicationType: APPLICATION_TYPE.web,
   environments: bucketKeys(environments),
   pageLoads: { count: pageLoads.value },
   sessions: { count: startedSessions.doc_count },

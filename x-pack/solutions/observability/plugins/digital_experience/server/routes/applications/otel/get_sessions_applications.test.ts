@@ -7,6 +7,7 @@
 
 import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { WebApplicationSummary } from '../../../../common/types/applications';
 import { getSessionsApplications } from './get_sessions_applications';
 
 const sum = (value: number) => ({ value });
@@ -167,7 +168,10 @@ describe('getSessionsApplications', () => {
 
     const { applications } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
-    expect(applications[0].webVitals.lcp).toMatchObject({ p75Ms: null, sampleCount: 3 });
+    expect((applications[0] as WebApplicationSummary).webVitals.lcp).toMatchObject({
+      p75Ms: null,
+      sampleCount: 3,
+    });
   });
 
   it('has no ratio without page loads', async () => {
@@ -184,7 +188,10 @@ describe('getSessionsApplications', () => {
 
     const { applications } = await getSessionsApplications({ tracedEsClient, ...PARAMS });
 
-    expect(applications[0].jsErrors).toEqual({ count: 2, perPageLoad: null });
+    expect((applications[0] as WebApplicationSummary).jsErrors).toEqual({
+      count: 2,
+      perPageLoad: null,
+    });
   });
 
   it('lists every environment of the time range, and "Not defined" when sessions have none', async () => {

@@ -11,12 +11,14 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { hasPartialReadAccess } from './get_partial_access';
+import { getMobileApplications } from './mobile/get_mobile_applications';
 import { getSessionsApplications } from './otel/get_sessions_applications';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
 
 jest.mock('./classic/get_classic_applications');
 jest.mock('./otel/get_sessions_applications');
 jest.mock('./get_partial_access');
+jest.mock('./mobile/get_mobile_applications');
 jest.mock('./classic/create_apm_event_client');
 jest.mock('../../lib/create_digital_experience_traced_es_client');
 
@@ -59,6 +61,7 @@ const runHandler = ({
     applications: unknown[];
     environments: string[];
     partiallyAvailableSources: string[];
+    mobileAvailability: string;
   }>;
   const result = handler({
     params: { query },
@@ -89,6 +92,35 @@ describe('GET /internal/digital_experience/applications', () => {
       pageLoadsOverTime: [],
       sessionsOverTime: null,
     });
+    jest.mocked(getMobileApplications).mockResolvedValue({ applications: [], environments: [] });
+  });
+
+  it('queries the mobile source, on serverless too', async () => {
+    jest.mocked(getMobileApplications).mockResolvedValue({
+      applications: [
+        {
+          serviceName: 'shop-mobile',
+          source: 'otel',
+          applicationType: 'mobile',
+          platforms: ['android'],
+          environments: [],
+          latestRelease: '1.0.0',
+          sessions: { count: 3 },
+          users: { count: 2 },
+          crashFreeSessions: { value: null, previous: null, delta: null },
+          errorRate: 0.5,
+          lastSeen: null,
+        },
+      ],
+      environments: [],
+    });
+
+    const response = await runHandler({ isServerless: true }).result;
+
+    expect(jest.mocked(getMobileApplications)).toHaveBeenCalledWith(
+      expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
+    );
+    expect(response.applications).toHaveLength(1);
   });
 
   it('queries both sources on stateful', async () => {
@@ -173,14 +205,14 @@ describe('GET /internal/digital_experience/applications', () => {
     expect(getApmIndices).not.toHaveBeenCalled();
   });
 
-  it('reads the APM indices once and checks the access of both sources', async () => {
+  it('reads the APM indices once and checks the access of every source', async () => {
     mockedPartialAccess.mockResolvedValue(true);
 
     const { result, getApmIndices } = runHandler({ isServerless: false });
     const response = await result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
-    const [[otelCheck], [classicCheck]] = mockedPartialAccess.mock.calls;
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(3);
+    const [[otelCheck], [classicCheck], [mobileCheck]] = mockedPartialAccess.mock.calls;
     await expect(otelCheck.getIndices()).resolves.toEqual([
       'digital-experience-sessions-browser-*',
     ]);
@@ -191,16 +223,19 @@ describe('GET /internal/digital_experience/applications', () => {
       'traces-apm*',
     ]);
     expect(classicCheck.ignoredPatterns).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
+    await expect(mobileCheck.getIndices()).resolves.toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
     expect(getApmIndices).toHaveBeenCalledTimes(1);
     expect(response.partiallyAvailableSources).toEqual(['otel', 'classic']);
+    // Mobile applications read the raw OTel indices, but aren't a source.
+    expect(response.mobileAvailability).toBe('partial');
   });
 
-  it('only checks the OTel access on serverless', async () => {
+  it('checks only the sessions and mobile access on serverless', async () => {
     mockedPartialAccess.mockResolvedValue(false);
 
     const response = await runHandler({ isServerless: true }).result;
 
-    expect(mockedPartialAccess).toHaveBeenCalledTimes(1);
+    expect(mockedPartialAccess).toHaveBeenCalledTimes(2);
     expect(response.partiallyAvailableSources).toEqual([]);
   });
 

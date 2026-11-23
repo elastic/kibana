@@ -108,10 +108,12 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { unavailableSources, partiallyAvailableSources } =
+        const { unavailableSources, partiallyAvailableSources, mobileAvailability } =
           response.body as ApplicationsResponse;
         expect(unavailableSources).toStrictEqual([]);
         expect(partiallyAvailableSources).toStrictEqual(['otel']);
+        // Mobile reads the raw OTel indices, which this role reads in full.
+        expect(mobileAvailability).toBe('complete');
       }
     );
 

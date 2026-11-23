@@ -17,8 +17,9 @@ import type { ApmIndices } from './classic/create_apm_event_client';
 import { createApmEventClient } from './classic/create_apm_event_client';
 import { getClassicApplications } from './classic/get_classic_applications';
 import { getSessionsApplications } from './otel/get_sessions_applications';
-import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
+import { getMobileApplications } from './mobile/get_mobile_applications';
 import { getHistogramInterval } from '../../lib/helpers/time_series';
+import { createDigitalExperienceTracedEsClient } from '../../lib/create_digital_experience_traced_es_client';
 import { createDigitalExperienceServerRoute } from '../create_digital_experience_server_route';
 import { START_AFTER_END_ISSUE, isStartBeforeEnd, timeRangeShape, timeZoneShape } from '../params';
 
@@ -119,11 +120,30 @@ export const applicationsRouteRepository = createDigitalExperienceServerRoute({
           histogram,
         }),
       getClassicApplications: getClassic,
+      getMobileApplications: () =>
+        getMobileApplications({
+          esClient: createDigitalExperienceTracedEsClient({
+            client: esClient,
+            logger,
+            abortSignal: signal,
+          }),
+          start,
+          end,
+          environment,
+        }),
       hasPartialOtelAccess: () =>
         hasPartialReadAccess({
           esClient,
           internalEsClient,
           getIndices: async () => [SESSIONS_INDEX_PATTERN],
+          signal,
+          logger,
+        }),
+      hasPartialMobileAccess: () =>
+        hasPartialReadAccess({
+          esClient,
+          internalEsClient,
+          getIndices: async () => [OTEL_LOGS_INDEX, OTEL_TRACES_INDEX],
           signal,
           logger,
         }),
