@@ -24,10 +24,11 @@ interface CloseChunkParams {
   /** Alerts that already carry the decision's tag. */
   chunk: string[];
   /**
-   * Called with the number of alerts about to be closed, before the close is made: the attempt
-   * counts against the day's allowance even when it fails half way.
+   * Called with the alerts about to be closed, before the close is made: the attempt counts
+   * against the day's allowance even when it fails half way, and the caller knows which alerts a
+   * close that throws may have reached.
    */
-  chargeAttempt: (count: number) => void;
+  chargeAttempt: (alertIds: string[]) => void;
 }
 
 /**
@@ -53,7 +54,7 @@ export const closeChunk = async ({
     });
   }
   if (attempted.length === 0) return { attempted, updated: 0, timedOut: false };
-  chargeAttempt(attempted.length);
+  chargeAttempt(attempted);
   const { updated, timedOut } = await closeStillOpenAlertsAsFalsePositive(api, attempted);
   return { attempted, updated, timedOut };
 };

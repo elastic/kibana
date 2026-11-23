@@ -71,7 +71,7 @@ describe('closeChunk', () => {
 
     await closeChunk({ api, write, id: ID, chunk: ['a', 'b'], chargeAttempt });
 
-    expect(chargeAttempt).toHaveBeenCalledWith(2);
+    expect(chargeAttempt).toHaveBeenCalledWith(['a', 'b']);
     expect(order).toEqual(['charge', 'close']);
   });
 

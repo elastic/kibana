@@ -1101,6 +1101,39 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
     });
 
+    it('puts back the alerts a failed close may have closed when the decision was revoked, since nothing else can find them', async () => {
+      const { run, callKibanaApi, closes, tags, notes } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        revokedAfterWrite: [idOf('C:\\x.exe')],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          // The close is applied in part and then throws: the alert is closed, the sweep is not told.
+          if (params.path.endsWith('/signals/status') && params.body?.status === 'closed') {
+            throw new Error('close failed');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      const tag = `az:closed_by_decision:${idOf('C:\\x.exe')}`;
+      expect(closes().map(({ status, signal_ids: ids }) => [status, ids])).toEqual([
+        ['closed', ['a']],
+        ['open', ['a']],
+      ]);
+      expect(tags().at(-1)).toEqual({
+        ids: ['a'],
+        tags: { tags_to_add: [], tags_to_remove: [tag] },
+      });
+      expect(notes()).toEqual([]);
+      expect(output).toEqual(expect.objectContaining({ closed: 0, close_failures: 1 }));
+    });
+
     it('takes the dismissal tags off a revoked decision in chunks, however many alerts it tagged', async () => {
       const id = dismissed();
       const ids = Array.from({ length: TAG_CHUNK_SIZE + 1 }, (_unused, i) => `s${i}`);

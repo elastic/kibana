@@ -217,11 +217,17 @@ export const createDecisionSweep = ({
   };
 
   /**
-   * Closes the tagged alerts chunk by chunk, and adds the alerts that were closed to `closedIds`
-   * as it goes, so a chunk that fails does not lose the ones before it. Returns whether a close
-   * timed out part way.
+   * Closes the tagged alerts chunk by chunk. It adds the alerts that were closed to `closedIds`,
+   * and every alert a close was asked to close to `attemptedIds`, before the close is made. Both
+   * lists are filled as it goes, so a chunk that fails does not lose the ones before it, and the
+   * caller knows which alerts a close that threw may have reached. Returns whether a close timed
+   * out part way.
    */
-  const closeAlerts = async (id: string, allowed: string[], closedIds: string[]) => {
+  const closeAlerts = async (
+    id: string,
+    allowed: string[],
+    { closedIds, attemptedIds }: { closedIds: string[]; attemptedIds: string[] }
+  ) => {
     let timedOut = false;
     for (const chunk of chunked(allowed)) {
       // The attempt counts against today's allowance before it is made: a close that fails half
@@ -237,7 +243,10 @@ export const createDecisionSweep = ({
         write,
         id,
         chunk,
-        chargeAttempt: (count) => adjustRoom(id, -count),
+        chargeAttempt: (alertIds) => {
+          attemptedIds.push(...alertIds);
+          adjustRoom(id, -alertIds.length);
+        },
       });
       totals.closed += updated;
       if (chunkTimedOut) timedOut = true;
@@ -267,21 +276,30 @@ export const createDecisionSweep = ({
 
   /**
    * Called after the closes: reads the decision again. If a revoke landed meanwhile, the closes
-   * are undone. Otherwise the closed alerts get their notes.
+   * are undone. This covers every alert a close was asked to close, not only the ones it
+   * confirmed: a close that throws part way may have closed alerts it did not report, and when a
+   * revoke already took the tags off, nothing else can find them. Only alerts that are still
+   * closed as a false positive are reopened. Otherwise the closed alerts get their notes.
    */
-  const settleClosed = async (id: string, tagged: string[], closedIds: string[]) => {
+  const settleClosed = async (
+    id: string,
+    tagged: string[],
+    { closedIds, attemptedIds }: { closedIds: string[]; attemptedIds: string[] }
+  ) => {
     if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
-      queueNotes(id, closedIds, 'closed');
+      if (closedIds.length > 0) queueNotes(id, closedIds, 'closed');
       return;
     }
     try {
-      totals.closed -= await undoClosedAlerts({
+      const reopened = await undoClosedAlerts({
         api: contextManager,
         write,
         id,
         tagged,
-        closedIds,
+        closedIds: attemptedIds,
       });
+      // The count may include alerts a failed close did not report, so it cannot go below zero.
+      totals.closed = Math.max(0, totals.closed - reopened);
     } catch (error) {
       totals.close_failures++;
       warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
@@ -294,7 +312,7 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
-    const closedIds: string[] = [];
+    const closed = { closedIds: [] as string[], attemptedIds: [] as string[] };
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
@@ -306,7 +324,7 @@ export const createDecisionSweep = ({
       if (allowed.length === 0) return;
       tagged = allowed;
       await tagInChunks(write, { alertIds: allowed, add: [closedTag(id)], remove: [] });
-      if (await closeAlerts(id, allowed, closedIds)) {
+      if (await closeAlerts(id, allowed, closed)) {
         totals.close_failures++;
         logger.warn(`Closing the alerts of decision ${id} timed out part way`);
       }
@@ -316,7 +334,7 @@ export const createDecisionSweep = ({
       await untagAfterFailedClose(id, tagged);
     }
     // What a failed chunk had closed before it keeps its tag and gets its note.
-    if (closedIds.length > 0) await settleClosed(id, tagged, closedIds);
+    if (closed.attemptedIds.length > 0) await settleClosed(id, tagged, closed);
   };
 
   /** Closes the alerts of each approved decision. Without the verdicts nothing is closed. */
