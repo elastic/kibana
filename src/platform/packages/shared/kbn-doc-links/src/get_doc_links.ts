@@ -573,7 +573,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
-      kueryQuerySyntax: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/kql`,
+      kueryQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/kql`,
+      kueryQueryNestedFields: `${ELASTIC_DOCS}reference/query-languages/kql#_querying_nested_fields`,
       luceneQuery: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query`,
       luceneQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-syntax`,
       percolate: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-percolate-query`,
@@ -998,6 +999,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticAgentStandalone: `${ELASTIC_DOCS}reference/fleet/install-standalone-elastic-agent`,
       grantESAccessToStandaloneAgents: `${ELASTIC_DOCS}reference/fleet/grant-access-to-elasticsearch`,
       upgradeElasticAgent: `${ELASTIC_DOCS}reference/fleet/upgrade-elastic-agent`,
+      unenrollElasticAgent: `${ELASTIC_DOCS}reference/fleet/unenroll-elastic-agent`,
       learnMoreBlog: `https://www.elastic.co/blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
       apiKeysLearnMore: isServerless
         ? `${ELASTIC_DOCS}deploy-manage/api-keys/serverless-project-api-keys`
@@ -1187,6 +1189,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant`,
       aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
+      replaceKnowledgeBaseContent: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant#replace-knowledge-base-content`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,

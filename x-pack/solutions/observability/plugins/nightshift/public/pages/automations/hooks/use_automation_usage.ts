@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import datemath from '@elastic/datemath';
 import {
+  useAutomationsRunCounts,
   useAutomationsRunsInRange,
   type Automation,
 } from '../../../data/automations/use_automations';
@@ -40,21 +41,12 @@ const useTodayUsage = (ids: string[], { startedAfter, startedBefore }: RunRange)
   );
 };
 
-export type RunCountStatus = 'succeeded' | 'failed' | 'skipped';
+export type RunCountStatus = 'succeeded' | 'running' | 'failed' | 'skipped';
 export type RunCounts = Record<RunCountStatus, number>;
 
 const useRunCounts = (ids: string[], { startedAfter, startedBefore }: RunRange) => {
-  const queries = useAutomationsRunsInRange(ids, startedAfter, startedBefore);
-  return new Map(
-    ids.flatMap((id, index) => {
-      const runs = queries[index]?.data?.runs;
-      if (!runs) return [];
-      const count = (status: RunCountStatus) => runs.filter((run) => run.status === status).length;
-      return [
-        [id, { succeeded: count('succeeded'), failed: count('failed'), skipped: count('skipped') }],
-      ] as const;
-    })
-  );
+  const counts = useAutomationsRunCounts(ids, startedAfter, startedBefore);
+  return new Map(Object.entries(counts ?? {}));
 };
 
 export const useAutomationUsage = (

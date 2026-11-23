@@ -11,6 +11,8 @@ import { setTlsConfigMock } from './http_server.test.mocks';
 import type { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
+import type { Request } from '@hapi/hapi';
+import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { join } from 'path';
 import { ByteSizeValue, schema } from '@kbn/config-schema';
@@ -23,7 +25,12 @@ import type {
   RouteValidationFunction,
   RequestHandlerContextBase,
 } from '@kbn/core-http-server';
-import { Router, type RouterOptions } from '@kbn/core-http-router-server-internal';
+import {
+  CoreKibanaRequest,
+  ensureRawRequest,
+  Router,
+  type RouterOptions,
+} from '@kbn/core-http-router-server-internal';
 import { createServer } from '@kbn/server-http-tools';
 import type { HttpConfig } from './http_config';
 import { HttpServer } from './http_server';
@@ -1944,6 +1951,40 @@ describe('setup contract', () => {
       );
     });
 
+    test('serves only allowlisted plugin assets from shared routes', async () => {
+      const { registerStaticDir, server: innerServer } = await server.setup({ config$ });
+      const pluginAssets = new Map([
+        ['known', assetFolder],
+        ['other', tempDir],
+      ]);
+      const resolveDir = (request: Request) =>
+        pluginAssets.get(request.params.pluginName) ?? Boom.notFound();
+
+      registerStaticDir('/sha/plugins/{pluginName}/assets/{path*}', resolveDir);
+      registerStaticDir('/plugins/{pluginName}/assets/{path*}', resolveDir);
+      registerStaticDir('/plugins/known/assets/special/{path*}', assetFolder);
+
+      await server.start();
+
+      await supertest(innerServer.listener)
+        .get('/sha/plugins/known/assets/some_json.json')
+        .expect(200);
+      await supertest(innerServer.listener).get('/plugins/known/assets/some_json.json').expect(200);
+      await supertest(innerServer.listener)
+        .get('/plugins/known/assets/special/some_json.json')
+        .expect(200);
+      await supertest(innerServer.listener).get('/plugins/other/assets/some_json.json').expect(404);
+      await supertest(innerServer.listener)
+        .get('/plugins/unknown/assets/some_json.json')
+        .expect(404);
+      await supertest(innerServer.listener)
+        .get('/sha/plugins/unknown/assets/some_json.json')
+        .expect(404);
+      await supertest(innerServer.listener)
+        .get('/plugins/known/assets/%2e%2e/some_json.json')
+        .expect(404);
+    });
+
     test('does not throw if called after stop', async () => {
       const { registerStaticDir } = await server.setup({ config$ });
       await server.stop();
@@ -2099,6 +2140,55 @@ describe('setup contract', () => {
   });
 
   describe('#registerAuth', () => {
+    test('returns the effective auth headers storage only to the authentication registrant', async () => {
+      const {
+        registerAuth,
+        registerRouter,
+        authRequestHeaders,
+        server: innerServer,
+      } = await server.setup({ config$ });
+      const sharedProviderHeaders = { authorization: 'Bearer old' };
+      const snapshots: object[] = [];
+      const authHeadersStorage = registerAuth((_request, _response, toolkit) =>
+        toolkit.authenticated({ requestHeaders: sharedProviderHeaders })
+      );
+      const router = new Router('', logger, enhanceWithContext, routerOptions);
+      router.get(
+        {
+          path: '/credentials',
+          validate: false,
+          security: { authz: { enabled: false, reason: 'Test authentication header publication' } },
+        },
+        (_context, request, response) => {
+          expect(authHeadersStorage.get(request)).toEqual({ authorization: 'Bearer old' });
+          snapshots.push(authHeadersStorage.get(request) ?? {});
+          expect(authHeadersStorage.get(request)).not.toBe(sharedProviderHeaders);
+          const originalHeaders = request.headers;
+          authHeadersStorage.set(request, {
+            authorization: 'Bearer renewed',
+            'x-client-authentication': 'renewed-secret',
+          });
+          expect(authRequestHeaders.get(request)).toEqual({
+            authorization: 'Bearer renewed',
+            'x-client-authentication': 'renewed-secret',
+          });
+          const wrapper = CoreKibanaRequest.from(ensureRawRequest(request));
+          expect(authHeadersStorage.get(wrapper)).toEqual(authHeadersStorage.get(request));
+          expect(request.headers).toBe(originalHeaders);
+          expect(request.headers.authorization).toBe('Bearer old');
+          return response.ok();
+        }
+      );
+      registerRouter(router);
+      expect(() => registerAuth((_request, response) => response.unauthorized())).toThrow(
+        'Auth interceptor was already registered'
+      );
+      await server.start();
+      await supertest(innerServer.listener).get('/credentials').expect(200);
+      await supertest(innerServer.listener).get('/credentials').expect(200);
+      expect(snapshots[0]).not.toBe(snapshots[1]);
+    });
+
     test('does not throw if called after stop', async () => {
       const { registerAuth } = await server.setup({ config$ });
       await server.stop();

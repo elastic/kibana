@@ -6,11 +6,12 @@
  */
 
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import type { QueryEngine } from '../../../common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
 import { assertSafeIndexPattern } from './esql_syntax';
 import { canonicalizeEsqlFilter } from './filters';
-import type { QueryEngine, QueryPlan, SourceProbe } from './types';
+import type { QueryPlan, SourceProbe } from './types';
 import { MAX_QUERY_PLANS } from './types';
 
 /**

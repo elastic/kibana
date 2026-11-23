@@ -649,6 +649,91 @@ describe('groupTimelineEvents while a run streams', () => {
   });
 });
 
+describe('groupTimelineEvents placing steers', () => {
+  const trigger = createUserMessageEvent({ id: 'ask', created_at: '2026-01-01T00:00:00.000Z' });
+  const started = createExecutionStartedEvent({
+    id: 'started',
+    execution_id: 'exec-1',
+    trigger_event_id: 'ask',
+    created_at: '2026-01-01T00:00:01.000Z',
+  });
+  const steer = (id: string) =>
+    createUserMessageEvent({
+      id,
+      created_at: '2026-01-01T00:00:02.000Z',
+      data: { message: `steer ${id}`, steer: { execution_id: 'exec-1' } },
+    });
+  const readStep = (eventId: string) =>
+    createExecutionStepEvent({
+      id: `step-${eventId}`,
+      execution_id: 'exec-1',
+      trigger_event_id: 'ask',
+      created_at: '2026-01-01T00:00:03.000Z',
+      data: {
+        sequence: 0,
+        step: {
+          type: ConversationRoundStepType.deliveredMessage,
+          event_id: eventId,
+          author: { type: EventActorType.user, id: 'user-1' },
+          is_run_owner: true,
+          message: `steer ${eventId}`,
+          delivered_at: '2026-01-01T00:00:03.000Z',
+          cycle: 1,
+        },
+      },
+    });
+  const aborted = createExecutionAbortedEvent({
+    id: 'aborted',
+    execution_id: 'exec-1',
+    trigger_event_id: 'ask',
+    created_at: '2026-01-01T00:00:04.000Z',
+  });
+  const standaloneSteers = (events: TimelineDisplayEvent[]) =>
+    groupTimelineEvents(events, makeEventsById(events)).flatMap((item) =>
+      item.kind === 'userMessage' && item.event.id !== 'ask' ? [item] : []
+    );
+
+  it('shows an unread steer as waiting while its run is live', () => {
+    const [item] = standaloneSteers([trigger, started, steer('s1')]);
+
+    expect(item.steerState).toBe('waiting');
+  });
+
+  it('folds a steer the run read into its turn even after the run was stopped', () => {
+    expect(standaloneSteers([trigger, started, steer('s1'), readStep('s1'), aborted])).toEqual([]);
+  });
+
+  it('keeps a steer the stopped run never read standalone, with no status', () => {
+    const [item] = standaloneSteers([trigger, started, steer('s1'), aborted]);
+
+    expect(item.steerState).toBeUndefined();
+  });
+
+  it('gives a steer an earlier run never read no status while a later run is live', () => {
+    const nextTrigger = createUserMessageEvent({
+      id: 'ask-2',
+      created_at: '2026-01-01T00:00:05.000Z',
+    });
+    const nextStarted = createExecutionStartedEvent({
+      id: 'started-2',
+      execution_id: 'exec-2',
+      trigger_event_id: 'ask-2',
+      created_at: '2026-01-01T00:00:06.000Z',
+    });
+    const items = standaloneSteers([
+      trigger,
+      started,
+      steer('s1'),
+      aborted,
+      nextTrigger,
+      nextStarted,
+    ]);
+    const item = items.find(({ event }) => event.id === 's1');
+
+    expect(item?.steerState).toBeUndefined();
+  });
+});
+
 describe('buildItems', () => {
   it('resolves origin from the trigger event for execution items', () => {
     const origin = { type: ConversationOriginType.Slack };
