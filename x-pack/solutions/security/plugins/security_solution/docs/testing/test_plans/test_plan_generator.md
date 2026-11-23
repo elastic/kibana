@@ -325,11 +325,13 @@ The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_tes
 
 Every scenario ends with three checkboxes: `✅ Pass`, `❌ Fail` and `🚫 Blocked`. Once the plan is published, anyone with write access to the repository can tick one while running the plan. Tick only one per scenario. GitHub keeps who ticked each box and when in the comment's edit history, so the plan doubles as the execution record.
 
-`update` keeps the ticks of scenarios whose title and Gherkin did not change. When a scenario's steps change, its boxes are cleared and it gets a `_Scenario updated on YYYY-MM-DD, please re-execute_` line above them.
+`update` matches scenarios by title within the same feature area. A scenario whose title and steps did not change keeps its ticks; whitespace, capitalization and punctuation edits do not count as changes. If its steps change, or it moves to another feature area, its boxes are cleared and it gets a `_Scenario updated on YYYY-MM-DD, please re-execute_` line above them. A renamed scenario counts as new: its boxes start empty, with no note.
+
+`update` copies the ticks from the comment as it was when the draft was created, and `publish` replaces the whole comment. If someone ticks a box after you run `update` and before you publish, that tick is lost. Before publishing, check the published comment for newer ticks and copy them into the draft.
 
 ### Scenario priorities and your team's critical workflows
 
-The agent sets each scenario's priority (P0, P1 or P2) from the owning team's critical-workflows map when there is one. Today only Security Solution has a map ([`critical-workflows-security-solution.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md)). For other teams, priorities come from general impact rules, and the plan says so with a `⚠️` note in *Known Limitations*. To add a map for your team, follow *Adding a new team* in [`critical-workflows.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows.md#adding-a-new-team).
+When the owning team has a critical-workflows map, the agent uses it to set each scenario's default priority (P0, P1 or P2). The general impact rules still apply on top of the map. A narrow scenario inside a P0 workflow can end up as P1 or P2. A workflow the map does not list starts at P2, but can be raised to P1 or P0 when it risks data loss or a security issue, or blocks core functionality. Today only Security Solution has a map ([`critical-workflows-security-solution.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows-security-solution.md)). For other teams, priorities come from the general impact rules alone, and the plan says so with a `⚠️` note in *Known Limitations*. To add a map for your team, follow *Adding a new team* in [`critical-workflows.md`](../../../.agents/skills/test-plan-generator/references/critical-workflows.md#adding-a-new-team).
 
 ### Token usage and cost
 
