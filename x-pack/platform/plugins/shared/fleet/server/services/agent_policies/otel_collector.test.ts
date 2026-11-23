@@ -3884,6 +3884,52 @@ describe('generateOtelcolConfig', () => {
       },
     } as unknown as Output;
 
+    describe('authentication', () => {
+      const getOtlpExporter = (output: Partial<Output>) =>
+        generateOtelcolConfig({
+          inputs: [otelInput1],
+          dataOutput: { ...baseOtlpOutput, ...output } as Output,
+        }).exporters?.[`otlp/${otlpOutputId}`] as Record<string, any>;
+
+      it.each([
+        ['api_key', 'ApiKey $co.elastic.secret{cred-id}'],
+        ['bearer_token', 'Bearer $co.elastic.secret{cred-id}'],
+      ])('sets the Authorization header for the %s scheme', (scheme, expected) => {
+        const exporter = getOtlpExporter({
+          auth: { type: 'auth_header', scheme: scheme as 'api_key' },
+          secrets: { auth: { credential: { id: 'cred-id' } } },
+        } as Partial<Output>);
+
+        expect(exporter.headers).toEqual({ Authorization: expected });
+        expect(exporter).not.toHaveProperty('auth');
+      });
+
+      it('sets the custom header and keeps the other headers', () => {
+        const exporter = getOtlpExporter({
+          otlp_exporter: {
+            ...(baseOtlpOutput as any).otlp_exporter,
+            headers: { 'x-tenant': 'acme' },
+          },
+          auth: { type: 'custom_header', name: 'x-api-key' },
+          secrets: { auth: { credential: { id: 'cred-id' } } },
+        } as Partial<Output>);
+
+        expect(exporter.headers).toEqual({
+          'x-tenant': 'acme',
+          'x-api-key': '$co.elastic.secret{cred-id}',
+        });
+      });
+
+      it('does not set a header without a stored credential', () => {
+        const exporter = getOtlpExporter({
+          auth: { type: 'custom_header', name: 'x-api-key' },
+        } as Partial<Output>);
+
+        expect(exporter).not.toHaveProperty('headers');
+        expect(exporter).not.toHaveProperty('auth');
+      });
+    });
+
     it('generates otlp/<id> exporter for gRPC protocol', () => {
       const result = generateOtelcolConfig({ inputs: [otelInput1], dataOutput: baseOtlpOutput });
 

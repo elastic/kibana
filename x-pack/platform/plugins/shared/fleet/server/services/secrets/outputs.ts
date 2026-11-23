@@ -152,6 +152,9 @@ export function getOutputSecretReferences(output: Output): SecretReference[] {
   }
 
   if (isOtlpOutput(output)) {
+    if (typeof output.secrets?.auth?.credential === 'object') {
+      outputSecretPaths.push({ id: output.secrets.auth.credential.id });
+    }
     if (typeof output.secrets?.otlp_exporter?.tls?.key_pem === 'object') {
       outputSecretPaths.push({ id: output.secrets.otlp_exporter.tls.key_pem.id });
     }
@@ -186,6 +189,12 @@ function getOutputSecretPaths(
   }
 
   if (isOtlpOutput(typed)) {
+    if (typed.secrets?.auth?.credential) {
+      outputSecretPaths.push({
+        path: 'secrets.auth.credential',
+        value: typed.secrets.auth.credential,
+      });
+    }
     if (typed.secrets?.otlp_exporter?.tls?.key_pem) {
       outputSecretPaths.push({
         path: 'secrets.otlp_exporter.tls.key_pem',

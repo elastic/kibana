@@ -875,3 +875,38 @@ export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>
 
   return errors.length ? errors : undefined;
 }
+
+// RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
+const OTLP_HEADER_NAME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+
+export function validateOtlpAuthHeaderName(value: string) {
+  const name = value?.trim() ?? '';
+  if (!name) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameRequired', {
+        defaultMessage: 'Header name is required',
+      }),
+    ];
+  }
+  if (name.length > 256 || !OTLP_HEADER_NAME_REGEX.test(name)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameInvalid', {
+        defaultMessage:
+          'Header name must be at most 256 characters and only contain letters, digits and {chars}',
+        values: { chars: "!#$%&'*+-.^_`|~" },
+      }),
+    ];
+  }
+}
+
+export function validateOtlpAuthCredential(value: string) {
+  if (!value) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
+        defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+}
+
+export const validateOtlpAuthCredentialSecret = toSecretValidator(validateOtlpAuthCredential);

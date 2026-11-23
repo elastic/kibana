@@ -32,6 +32,7 @@ import {
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
+import { getOtlpAuthHeaders } from '../outputs/otlp_auth';
 import { hasDynamicSignalTypes } from '../../../common/services';
 
 import { buildOtelEsExporterConfig, parseYamlRecord } from './otel_output_settings';
@@ -846,11 +847,21 @@ function generateOtelcolExporter(
       const exporterID =
         protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
       const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
+      // the credential is a secret reference in the header value, Fleet Server replaces it
+      const authHeaders = getOtlpAuthHeaders(dataOutput.auth, dataOutput.secrets?.auth?.credential);
       return {
         extensions: {},
         exporters: {
           [exporterID]: {
             ...exporterConfig,
+            ...(authHeaders
+              ? {
+                  headers: {
+                    ...(exporterConfig.headers as Record<string, string> | undefined),
+                    ...authHeaders,
+                  },
+                }
+              : {}),
             ...(tlsSecrets ? { secrets: { tls: tlsSecrets } } : {}),
           },
         },

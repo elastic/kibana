@@ -2320,6 +2320,94 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    describe('authentication', () => {
+      const otlpOutputWithAuth: Output = {
+        ...otlpOutput,
+        auth: { type: 'auth_header', scheme: 'bearer_token' },
+        secrets: { auth: { credential: { id: 'credential-secret-id' } } },
+      } as Output;
+
+      it('should create an OTLP output with a custom header', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api-key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'my-key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalledWith(
+            expect.objectContaining({
+              auth: { type: 'custom_header', name: 'x-api-key' },
+              secrets: { auth: { credential: 'my-key' } },
+            })
+          );
+        });
+      });
+
+      it('should require a credential', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(utils.getByText('Credential is required')).toBeInTheDocument();
+        });
+        expect(mockSendPostOutput).not.toHaveBeenCalled();
+      });
+
+      it('should keep the stored credential when it is not edited', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'otlp output updated' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toEqual({ type: 'auth_header', scheme: 'bearer_token' });
+        expect(payload.secrets).toBeUndefined();
+      });
+
+      it('should remove the stored authentication when None is selected', async () => {
+        const { utils } = renderFlyout(otlpOutputWithAuth);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'none' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.auth).toBeNull();
+        expect(payload.secrets).toBeUndefined();
+      });
+    });
+
     it('should send null for the cleared settings so the stored values are unset', async () => {
       const { utils } = renderFlyout(otlpOutput);
       [

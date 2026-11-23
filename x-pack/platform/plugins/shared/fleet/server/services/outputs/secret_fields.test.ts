@@ -11,6 +11,41 @@ import { withSavedSecrets } from '../secrets/preserve';
 import { getOutputSecretFields } from './secret_fields';
 
 describe('getOutputSecretFields', () => {
+  describe('OTLP authentication credential', () => {
+    const original = {
+      otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },
+      auth: { type: 'auth_header', scheme: 'api_key' },
+      secrets: { auth: { credential: { id: 'credential-id' } } },
+    };
+    const fields = getOutputSecretFields(outputType.Otlp);
+
+    it('keeps the credential when the update does not touch it', () => {
+      const update = { name: 'renamed' };
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        name: 'renamed',
+        secrets: { auth: { credential: { id: 'credential-id' } } },
+      });
+    });
+
+    it('keeps the credential when the update changes the authentication type', () => {
+      const update = { auth: { type: 'custom_header', name: 'x-api-key' } };
+      expect(withSavedSecrets({ fields, original, update })).toEqual({
+        ...update,
+        secrets: { auth: { credential: { id: 'credential-id' } } },
+      });
+    });
+
+    it('uses the new credential the update sends', () => {
+      const update = { secrets: { auth: { credential: 'new-credential' } } };
+      expect(withSavedSecrets({ fields, original, update })).toEqual(update);
+    });
+
+    it('removes the credential when the authentication is removed', () => {
+      const update = { auth: null };
+      expect(withSavedSecrets({ fields, original, update })).toEqual(update);
+    });
+  });
+
   describe('OTLP TLS credentials', () => {
     const original = {
       otlp_exporter: { endpoint: 'https://otel.example.com:4317', protocol: 'grpc' },

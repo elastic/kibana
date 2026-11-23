@@ -10,12 +10,15 @@ import { EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { otlpCompressionType, otlpProtocol } from '../../../../../../../common/constants';
+import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { changeOtlpProtocol, isOtlpGrpc } from './use_otlp_inputs';
 import { OtlpDefaultHint, OtlpSpecLinks } from './otlp_spec';
 import { OtlpSelectSetting, OtlpTextSetting } from './otlp_setting_fields';
 import { OtlpHeaders } from './output_form_otlp_headers';
+import { OtlpAuthentication } from './output_form_otlp_auth';
+import { isOtlpAuthAvailable } from './use_otlp_auth_inputs';
 import { OtlpGrpcSettings } from './output_form_otlp_grpc';
 import { OtlpHttpSettings } from './output_form_otlp_http';
 
@@ -83,6 +86,8 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
   inputs,
 }) => {
   const isGrpc = isOtlpGrpc(inputs);
+  const { cloud } = useStartServices();
+  const showAuth = isOtlpAuthAvailable(inputs.otlpEndpointInput.value, cloud?.managedOtlp?.url);
 
   return (
     <>
@@ -139,6 +144,7 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
       />
       <OtlpHeaders inputs={inputs} />
       <EuiSpacer size="m" />
+      {showAuth && <OtlpAuthentication inputs={inputs} />}
       {isGrpc ? <OtlpGrpcSettings inputs={inputs} /> : <OtlpHttpSettings inputs={inputs} />}
       <EuiSpacer size="m" />
     </>

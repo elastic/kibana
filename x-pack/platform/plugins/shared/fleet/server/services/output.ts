@@ -48,6 +48,7 @@ import type {
 import type {
   KafkaOutput,
   NewBeatsOutput,
+  NewOtlpOutput,
   OtlpGrpcExporterConfig,
   OtlpHttpExporterConfig,
   UpdateOutput,
@@ -106,6 +107,11 @@ import {
 import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
 import { findAgentlessPolicies, checkOtlpOutputAllowed } from './outputs/helpers';
 import { getOutputSecretFields } from './outputs/secret_fields';
+import {
+  omitRemovedOtlpAuthSettings,
+  validateOtlpAuth,
+  withRemovedOtlpAuthSettings,
+} from './outputs/otlp_auth';
 import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
 import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
 import {
@@ -226,13 +232,15 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   }
 
   if (isOtlpSOOutput(soAttributes)) {
-    const { output_id: outputId, ...attributes } = soAttributes;
+    const { output_id: outputId, auth, ...attributes } = soAttributes;
+    const storedAuth = omitRemovedOtlpAuthSettings(auth);
     // canonical id placed last so attributes.id cannot shadow it
     return {
       ...attributes,
       ...(attributes.otlp_exporter && {
         otlp_exporter: omitRemovedOtlpHeaders(attributes.otlp_exporter),
       }),
+      ...(storedAuth && { auth: storedAuth }),
       id: outputId ?? so.id,
     };
   }
@@ -802,6 +810,15 @@ class OutputService {
       false;
     this._runOutputValidators(output, isPreconfigured);
 
+    if (isOtlpOutput(output)) {
+      validateOtlpAuth({
+        auth: output.auth,
+        hasCredential: !!output.secrets?.auth?.credential,
+        endpoint: output.otlp_exporter.endpoint,
+        headers: output.otlp_exporter.headers,
+      });
+    }
+
     const data: OutputSOAttributes = {
       ...omit(output, ['ssl', 'secrets']),
       ...(options?.id ? { output_id: options.id } : {}),
@@ -957,7 +974,13 @@ class OutputService {
     const id = options?.id ? outputIdToUuid(options.id) : SavedObjectsUtils.generateId();
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isOutputSecretStorageEnabled(esClient, soClient)) {
+    const secretStorageEnabled = await isOutputSecretStorageEnabled(esClient, soClient);
+    if (isOtlpOutput(output) && output.auth && !secretStorageEnabled) {
+      throw new OutputInvalidError(
+        'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret'
+      );
+    }
+    if (secretStorageEnabled) {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
@@ -1358,6 +1381,12 @@ class OutputService {
         : typedFullUpdateData;
     this._runOutputValidators(validatedData, isPreconfigured, keptAuthMethods);
 
+    if (mergedType === outputType.Otlp) {
+      this._validateOtlpAuthUpdate(data as Partial<NewOtlpOutput>, originalOutput, {
+        secretStorageEnabled,
+      });
+    }
+
     // type is always defined here after merging; ssl/secrets/id omitted at runtime but allowed on the type.
     // id is stripped to prevent poisoning the saved object's identity field.
     const updateData = {
@@ -1575,6 +1604,7 @@ class OutputService {
       if (isOtlpOutput(originalOutput)) {
         // clear OTLP-only fields when leaving OTLP; secrets cleaned up via getOutputSecretPaths
         (updateData as Nullable<OutputSoOtlpAttributes>).otlp_exporter = null;
+        (updateData as Nullable<OutputSoOtlpAttributes>).auth = null;
       }
 
       if (isOtlpOutput(updateData)) {
@@ -1622,6 +1652,11 @@ class OutputService {
 
     if (isOtlpOutput(updateData) && updateData.otlp_exporter) {
       updateData.otlp_exporter = applyManagedOtlpDefaults(updateData.otlp_exporter);
+    }
+
+    if (isOtlpOutput(updateData) && isOtlpOutput(originalOutput) && updateData.auth) {
+      // another authentication type: remove the settings of the stored one
+      updateData.auth = withRemovedOtlpAuthSettings(updateData.auth, originalOutput.auth);
     }
 
     if (isBeatsOutput(updateData) && isBeatsOutput(typedFullUpdateData)) {
@@ -1970,6 +2005,43 @@ class OutputService {
       message: latestHit.message ?? '',
       timestamp: latestHit['@timestamp'],
     };
+  }
+
+  /**
+   * Validates the authentication an OTLP output has once the update is saved: the update merged
+   * with the saved output.
+   */
+  private _validateOtlpAuthUpdate(
+    data: Partial<NewOtlpOutput>,
+    originalOutput: Output,
+    { secretStorageEnabled }: { secretStorageEnabled: boolean }
+  ): void {
+    const original = isOtlpOutput(originalOutput) ? originalOutput : undefined;
+    const auth = data.auth !== undefined ? data.auth : original?.auth;
+
+    if (auth && !secretStorageEnabled) {
+      throw new OutputInvalidError(
+        'auth of an OTLP output requires secret storage to be enabled, its credential is only stored as a secret'
+      );
+    }
+
+    // `auth: null` removes the credential with the authentication
+    const credential =
+      data.secrets?.auth && 'credential' in data.secrets.auth
+        ? data.secrets.auth.credential
+        : auth
+        ? original?.secrets?.auth?.credential
+        : undefined;
+
+    validateOtlpAuth({
+      auth,
+      hasCredential: !!credential,
+      endpoint: data.otlp_exporter?.endpoint ?? original?.otlp_exporter?.endpoint,
+      headers:
+        data.otlp_exporter?.headers !== undefined
+          ? data.otlp_exporter.headers
+          : original?.otlp_exporter?.headers,
+    });
   }
 
   private _runOutputValidators(

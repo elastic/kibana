@@ -1,0 +1,30 @@
+{
+  "10.13.0": [
+    {
+      "name": "otlp",
+      "type": "otlp",
+      "is_default": false,
+      "is_default_monitoring": false,
+      "otlp_exporter": {
+        "endpoint": "collector.example.com:4317",
+        "protocol": "grpc"
+      }
+    }
+  ],
+  "10.14.0": [
+    {
+      "name": "otlp",
+      "type": "otlp",
+      "is_default": false,
+      "is_default_monitoring": false,
+      "otlp_exporter": {
+        "endpoint": "collector.example.com:4317",
+        "protocol": "grpc"
+      },
+      "auth": {
+        "type": "auth_header",
+        "scheme": "api_key"
+      }
+    }
+  ]
+}

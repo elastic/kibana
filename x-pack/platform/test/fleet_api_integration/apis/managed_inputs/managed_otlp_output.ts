@@ -39,6 +39,11 @@ export default function (providerContext: FtrProviderContext) {
         id,
       });
 
+    const expectSecretDeleted = async (id: string) => {
+      const exists = await es.exists({ index: '.fleet-secrets', id });
+      expect(exists).to.be(false);
+    };
+
     const deleteAllSecrets = async () => {
       try {
         await es.deleteByQuery({
@@ -269,9 +274,107 @@ export default function (providerContext: FtrProviderContext) {
         const authSecret = await getSecretById(authSecretId);
         expect((authSecret._source as Record<string, string>).value).to.be('test-tpm-auth-value');
       });
+
+      it('stores the authentication credential as a secret and only returns its reference', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'api_key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          })
+          .expect(200);
+
+        expect(body.item.auth).to.eql({ type: 'auth_header', scheme: 'api_key' });
+        const credentialSecretId: string = body.item.secrets?.auth?.credential?.id;
+        expect(credentialSecretId).to.be.a('string');
+
+        const credentialSecret = await getSecretById(credentialSecretId);
+        expect((credentialSecret._source as Record<string, string>).value).to.be(
+          'test-credential-value'
+        );
+
+        const { body: getBody } = await supertest
+          .get(`/api/fleet/outputs/${body.item.id}`)
+          .expect(200);
+        expect(getBody.item.secrets.auth.credential).to.eql({ id: credentialSecretId });
+      });
+
+      it('returns 400 when auth is set without a credential', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'custom_header', name: 'x-api-key' },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('secrets.auth.credential is required when auth is set');
+      });
+
+      it('returns 400 when the custom header name is not a valid header name', async () => {
+        const { body } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'custom_header', name: 'x api key' },
+            secrets: { auth: { credential: 'test-credential-value' } },
+          })
+          .expect(400);
+
+        expect(body.message).to.contain('Invalid header name');
+      });
     });
 
     describe('PUT /api/fleet/outputs/{id}', () => {
+      it('replaces the authentication credential and removes the previous secret', async () => {
+        const { body: createBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-auth-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+            auth: { type: 'auth_header', scheme: 'bearer_token' },
+            secrets: { auth: { credential: 'first-credential' } },
+          })
+          .expect(200);
+        const { id } = createBody.item;
+        const firstSecretId: string = createBody.item.secrets.auth.credential.id;
+
+        const { body: updateBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ secrets: { auth: { credential: 'second-credential' } } })
+          .expect(200);
+        const secondSecretId: string = updateBody.item.secrets.auth.credential.id;
+        expect(secondSecretId).not.to.be(firstSecretId);
+        expect(updateBody.item.auth).to.eql({ type: 'auth_header', scheme: 'bearer_token' });
+
+        const secondSecret = await getSecretById(secondSecretId);
+        expect((secondSecret._source as Record<string, string>).value).to.be('second-credential');
+        await expectSecretDeleted(firstSecretId);
+
+        // removing the authentication removes its credential
+        const { body: clearedBody } = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ auth: null })
+          .expect(200);
+        expect(clearedBody.item.auth).to.be(undefined);
+        expect(clearedBody.item.secrets?.auth?.credential).to.be(undefined);
+        await expectSecretDeleted(secondSecretId);
+      });
+
       it('updates the otlp_exporter on an existing OTLP output', async () => {
         const { body: createBody } = await supertest
           .post('/api/fleet/outputs')

@@ -18,6 +18,8 @@ import {
   kafkaSaslMechanism,
   kafkaVerificationModes,
   MAX_HOSTS,
+  otlpAuthScheme,
+  otlpAuthType,
   otlpCompressionType,
   otlpProtocol,
   outputType,
@@ -764,8 +766,46 @@ const OtlpExporterResponseSchema = schema.discriminatedUnion('protocol', [
   OtlpHttpExporterResponseSchema,
 ]);
 
+// RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
+const OTLP_HEADER_NAME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
+
+export function validateOtlpHeaderName(name: string): string | undefined {
+  if (!OTLP_HEADER_NAME_REGEX.test(name)) {
+    return "Invalid header name. It can only contain letters, digits and !#$%&'*+-.^_`|~";
+  }
+}
+
+/**
+ * How the OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
+ * credential is in `secrets.auth.credential`, it is placed verbatim in the header.
+ */
+const OtlpAuthSchema = schema.oneOf([
+  schema.object({
+    type: schema.literal(otlpAuthType.AuthHeader),
+    scheme: schema.oneOf(
+      [schema.literal(otlpAuthScheme.ApiKey), schema.literal(otlpAuthScheme.BearerToken)],
+      {
+        meta: {
+          description:
+            'The scheme of the `Authorization` header: `api_key` sends `ApiKey <credential>`, `bearer_token` sends `Bearer <credential>`.',
+        },
+      }
+    ),
+  }),
+  schema.object({
+    type: schema.literal(otlpAuthType.CustomHeader),
+    name: schema.string({
+      minLength: 1,
+      maxLength: 256,
+      validate: validateOtlpHeaderName,
+      meta: { description: 'The name of the header that is sent with the credential as value.' },
+    }),
+  }),
+]);
+
 const OtlpSecretsSchema = schema.maybe(
   schema.object({
+    auth: schema.maybe(schema.object({ credential: schema.maybe(secretRefSchema) })),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(
@@ -786,6 +826,7 @@ const OtlpSecretsSchema = schema.maybe(
 
 const OtlpUpdateSecretsSchema = schema.maybe(
   schema.object({
+    auth: schema.maybe(schema.object({ credential: schema.maybe(nullableSecretRefSchema) })),
     otlp_exporter: schema.maybe(
       schema.object({
         tls: schema.maybe(
@@ -808,6 +849,7 @@ export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
   otlp_exporter: OtlpExporterSchema,
+  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthSchema])),
   secrets: OtlpSecretsSchema,
 };
 
@@ -820,6 +862,7 @@ export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
+  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthSchema])),
   secrets: OtlpUpdateSecretsSchema,
 };
 
