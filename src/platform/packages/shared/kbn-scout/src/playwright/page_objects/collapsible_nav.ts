@@ -8,6 +8,7 @@
  */
 
 import type { Locator } from 'playwright/test';
+import { expect } from 'playwright/test';
 import type { ScoutPage } from '..';
 import type { ScoutTestConfig } from '../../types';
 
@@ -51,8 +52,14 @@ export class CollapsibleNav {
   async getNavLinks() {
     const collapsibleNav = this.page.testSubj.locator('collapsibleNav');
     if (!(await collapsibleNav.isVisible())) {
-      await this.toggleNavButton.click();
-      await collapsibleNav.waitFor({ state: 'visible' });
+      // A click right after navigation can be swallowed while the header is still
+      // hydrating, so retry the toggle until the nav actually opens.
+      await expect(async () => {
+        if (!(await collapsibleNav.isVisible())) {
+          await this.toggleNavButton.click({ timeout: 5_000 });
+        }
+        await expect(collapsibleNav).toBeVisible({ timeout: 2_000 });
+      }).toPass({ timeout: 30_000 });
     }
     const navLinks = this.page.testSubj.locator('collapsibleNavAppLink');
     return navLinks.allInnerTexts();
