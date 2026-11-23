@@ -2338,6 +2338,297 @@ describe('EditOutputFlyout', () => {
       });
     });
 
+    describe('sending queue and retry', () => {
+      const QUEUE_TEXT_FIELDS = [
+        'otlpQueueNumConsumersInput',
+        'otlpQueueSizeInput',
+        'otlpBatchFlushTimeoutInput',
+        'otlpBatchMinSizeInput',
+        'otlpBatchMaxSizeInput',
+        'otlpBatchMetadataKeysInput',
+      ];
+      const RETRY_TEXT_FIELDS = [
+        'otlpRetryInitialIntervalInput',
+        'otlpRetryRandomizationFactorInput',
+        'otlpRetryMultiplierInput',
+        'otlpRetryMaxIntervalInput',
+        'otlpRetryMaxElapsedTimeInput',
+      ];
+
+      const isExpanded = (utils: ReturnType<typeof renderFlyout>['utils'], testSubj: string) =>
+        utils
+          .getByTestId(`settingsOutputsFlyout.${testSubj}`)
+          .querySelector('button[aria-expanded]')
+          ?.getAttribute('aria-expanded') === 'true';
+
+      const value = (utils: ReturnType<typeof renderFlyout>['utils'], testSubj: string) =>
+        (utils.getByTestId(`settingsOutputsFlyout.${testSubj}`) as HTMLInputElement).value;
+
+      const setValue = (
+        utils: ReturnType<typeof renderFlyout>['utils'],
+        testSubj: string,
+        newValue: string
+      ) =>
+        fireEvent.change(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`), {
+          target: { value: newValue },
+        });
+
+      const click = (utils: ReturnType<typeof renderFlyout>['utils'], testSubj: string) =>
+        fireEvent.click(utils.getByTestId(`settingsOutputsFlyout.${testSubj}`));
+
+      it('should render both sections collapsed for a new output', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(isExpanded(utils, 'otlpSendingQueueSettings')).toBe(false);
+        expect(isExpanded(utils, 'otlpRetrySettings')).toBe(false);
+      });
+
+      it('should expand the sections of an output that has stored settings', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        expect(isExpanded(utils, 'otlpSendingQueueSettings')).toBe(true);
+        expect(isExpanded(utils, 'otlpRetrySettings')).toBe(true);
+      });
+
+      it('should keep the sections collapsed for an output without queue and retry settings', () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+          },
+        } as Output);
+
+        expect(isExpanded(utils, 'otlpSendingQueueSettings')).toBe(false);
+        expect(isExpanded(utils, 'otlpRetrySettings')).toBe(false);
+        expect(value(utils, 'otlpQueueSizeInput')).toBe('');
+      });
+
+      it('should prefill the recommended queue settings for a new output, and no retry settings', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(value(utils, 'otlpQueueSizeInput')).toBe('50000000');
+        expect(value(utils, 'otlpQueueSizerInput')).toBe('bytes');
+        expect(value(utils, 'otlpBatchFlushTimeoutInput')).toBe('1s');
+        expect(value(utils, 'otlpBatchMinSizeInput')).toBe('1000000');
+        expect(value(utils, 'otlpBatchMaxSizeInput')).toBe('4000000');
+        expect(value(utils, 'otlpBatchSizerInput')).toBe('bytes');
+        expect(value(utils, 'otlpQueueNumConsumersInput')).toBe('');
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpQueueEnabledInput')).toBeChecked();
+        expect(
+          utils.getByTestId('settingsOutputsFlyout.otlpQueueBlockOnOverflowInput')
+        ).toBeChecked();
+        RETRY_TEXT_FIELDS.forEach((testSubj) => expect(value(utils, testSubj)).toBe(''));
+        expect(utils.getByTestId('settingsOutputsFlyout.otlpRetryEnabledInput')).toBeChecked();
+      });
+
+      it('should show the stored settings', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        expect(value(utils, 'otlpQueueNumConsumersInput')).toBe('4');
+        expect(value(utils, 'otlpQueueSizeInput')).toBe('500');
+        expect(value(utils, 'otlpQueueSizerInput')).toBe('items');
+        expect(value(utils, 'otlpBatchMetadataKeysInput')).toBe('tenant, env');
+        expect(value(utils, 'otlpRetryInitialIntervalInput')).toBe('2s');
+        expect(value(utils, 'otlpRetryRandomizationFactorInput')).toBe('0.3');
+        expect(value(utils, 'otlpRetryMaxElapsedTimeInput')).toBe('10m');
+      });
+
+      it('should show the settings for the HTTP protocol too', () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'http/protobuf',
+            endpoint: 'https://collector.example.com:4318',
+            sending_queue: storedQueue,
+            retry_on_failure: storedRetry,
+          },
+        } as Output);
+
+        expect(value(utils, 'otlpQueueSizeInput')).toBe('500');
+        expect(value(utils, 'otlpRetryMultiplierInput')).toBe('2');
+      });
+
+      it('should link the spec of the exporter helper once in each section', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        ['otlpSendingQueueSettings', 'otlpRetrySettings'].forEach((section) => {
+          const links = within(
+            utils.getByTestId(`settingsOutputsFlyout.${section}`)
+          ).getAllByTestId('settingsOutputsFlyout.otlpSpecLink.exporterHelper');
+          expect(links).toHaveLength(1);
+          expect(links[0]).toHaveAttribute(
+            'href',
+            expect.stringContaining('/v0.155.0/exporter/exporterhelper/README.md')
+          );
+        });
+      });
+
+      it('should show the spec defaults in the hints', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        ['10', '1000', '200ms', '8192', '5s', '0.5', '1.5', '30s', '5m'].forEach((spec) =>
+          expect(utils.getAllByText(spec).length).toBeGreaterThan(0)
+        );
+      });
+
+      it('should send null for both sections when everything is cleared', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        [...QUEUE_TEXT_FIELDS, ...RETRY_TEXT_FIELDS].forEach((testSubj) => clear(utils, testSubj));
+        setValue(utils, 'otlpQueueSizerInput', 'requests');
+        setValue(utils, 'otlpBatchSizerInput', 'items');
+        click(utils, 'otlpQueueWaitForResultInput');
+        click(utils, 'otlpQueueBlockOnOverflowInput');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: null,
+                retry_on_failure: null,
+              }),
+            })
+          );
+        });
+      });
+
+      it('should send the batch as null when its settings are cleared', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        [
+          'otlpBatchFlushTimeoutInput',
+          'otlpBatchMinSizeInput',
+          'otlpBatchMaxSizeInput',
+          'otlpBatchMetadataKeysInput',
+        ].forEach((testSubj) => clear(utils, testSubj));
+        setValue(utils, 'otlpBatchSizerInput', 'items');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: { ...storedQueue, batch: null },
+              }),
+            })
+          );
+        });
+      });
+
+      it('should send null for a cleared setting of a section that still has settings', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        clear(utils, 'otlpQueueNumConsumersInput');
+        clear(utils, 'otlpBatchMetadataKeysInput');
+        clear(utils, 'otlpRetryMaxElapsedTimeInput');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: {
+                  ...storedQueue,
+                  num_consumers: null,
+                  batch: { ...storedQueue.batch, partition: null },
+                },
+                retry_on_failure: { ...storedRetry, max_elapsed_time: null },
+              }),
+            })
+          );
+        });
+      });
+
+      it('should send the disabled queue and retry rather than null', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        [...QUEUE_TEXT_FIELDS, ...RETRY_TEXT_FIELDS].forEach((testSubj) => clear(utils, testSubj));
+        setValue(utils, 'otlpQueueSizerInput', 'requests');
+        setValue(utils, 'otlpBatchSizerInput', 'items');
+        click(utils, 'otlpQueueWaitForResultInput');
+        click(utils, 'otlpQueueBlockOnOverflowInput');
+        click(utils, 'otlpQueueEnabledInput');
+        click(utils, 'otlpRetryEnabledInput');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({ enabled: false }),
+                retry_on_failure: expect.objectContaining({ enabled: false }),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should send the metadata keys as a list', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchMetadataKeysInput', ' a , b,c ');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  batch: expect.objectContaining({
+                    partition: { metadata_keys: ['a', 'b', 'c'] },
+                  }),
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should validate the settings on blur', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchFlushTimeoutInput', 'soon');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchFlushTimeoutInput'));
+        setValue(utils, 'otlpQueueSizeInput', '-1');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
+        setValue(utils, 'otlpRetryMultiplierInput', 'fast');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpRetryMultiplierInput'));
+
+        expect(utils.getByText(/Specify a duration such as/)).toBeInTheDocument();
+        expect(utils.getByText('Specify a whole number, 0 or more')).toBeInTheDocument();
+        expect(utils.getByText('Specify a number, 0 or more')).toBeInTheDocument();
+      });
+
+      it('should not save when the maximum batch size is below the minimum', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchMinSizeInput', '1000');
+        setValue(utils, 'otlpBatchMaxSizeInput', '10');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText(
+              'The maximum size can not be less than the minimum size, unless it is 0'
+            )
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      });
+
+      it('should accept a maximum batch size of 0, which has no limit', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpBatchMaxSizeInput', '0');
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+      });
+    });
+
     describe('protocol', () => {
       const httpOutput: Output = {
         ...otlpOutput,
@@ -2517,6 +2808,8 @@ describe('EditOutputFlyout', () => {
               force_attempt_http2: false,
               compression_params: { level: -1 },
               cookies: { enabled: true },
+              sending_queue: recommendedQueuePayload,
+              retry_on_failure: null,
             },
           });
         });
@@ -2626,6 +2919,8 @@ describe('EditOutputFlyout', () => {
                 http2_ping_timeout: null,
                 compression_params: null,
                 cookies: null,
+                sending_queue: storedQueue,
+                retry_on_failure: storedRetry,
               }),
             })
           );
@@ -2792,6 +3087,8 @@ describe('EditOutputFlyout', () => {
                 force_attempt_http2: true,
                 compression_params: null,
                 cookies: null,
+                sending_queue: storedQueue,
+                retry_on_failure: storedRetry,
               },
             })
           );
@@ -2823,6 +3120,8 @@ describe('EditOutputFlyout', () => {
                 wait_for_ready: false,
                 user_agent: null,
                 authority: null,
+                sending_queue: storedQueue,
+                retry_on_failure: storedRetry,
               },
             })
           );

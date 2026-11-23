@@ -31,11 +31,13 @@ import {
   validateOtlpByteSize,
   validateOtlpCompressionLevel,
   validateOtlpCount,
+  validateOtlpDecimal,
   validateOtlpDuration,
   validateOtlpEndpoint,
   validateOtlpHeaders,
   validateOtlpHttpEndpoint,
   validateOtlpHttpUrl,
+  validateOtlpMetadataKeys,
   validateOtlpProxyUrl,
   validateOtlpShortString,
   validateSSLCertificate,
@@ -703,6 +705,36 @@ describe('OTLP validators', () => {
 
     it.each(['-1', '1.5', 'abc', '99999999999999999999'])('should reject %p', (value) => {
       expect(validateOtlpCount(value)).toEqual(['Specify a whole number, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpDecimal', () => {
+    it.each(['', '0', '1.5', '0.25', ' 2 '])('should accept %p', (value) => {
+      expect(validateOtlpDecimal(value)).toBeUndefined();
+    });
+
+    it.each(['-1', '.5', '1.', '1e3', 'abc'])('should reject %p', (value) => {
+      expect(validateOtlpDecimal(value)).toEqual(['Specify a number, 0 or more']);
+    });
+  });
+
+  describe('validateOtlpMetadataKeys', () => {
+    it.each(['', 'a', 'a, b', ' a ,b '])('should accept %p', (value) => {
+      expect(validateOtlpMetadataKeys(value)).toBeUndefined();
+    });
+
+    it('should reject an empty key', () => {
+      expect(validateOtlpMetadataKeys('a,,b')).toEqual([
+        'Specify up to 100 metadata keys, separated by commas',
+      ]);
+    });
+
+    it('should reject a key that is too long', () => {
+      expect(validateOtlpMetadataKeys('k'.repeat(257))).toBeDefined();
+    });
+
+    it('should reject more than 100 keys', () => {
+      expect(validateOtlpMetadataKeys(Array(101).fill('k').join(','))).toBeDefined();
     });
   });
 
