@@ -534,6 +534,11 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       .describe(
         'Alerts a decision closed or skipped that have no note: a failed write, or past the time limit.'
       ),
+    recheck_failures: z
+      .number()
+      .describe(
+        'Decisions whose state could not be read again after the sweep wrote to their alerts. The writes stay. If a decision was revoked in that time, run the revoke again.'
+      ),
     blocked_by_verdict: z
       .number()
       .describe(

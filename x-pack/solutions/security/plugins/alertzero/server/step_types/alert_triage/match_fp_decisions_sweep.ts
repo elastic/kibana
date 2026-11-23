@@ -45,6 +45,7 @@ export const NOTHING = {
   notes_missing: 0,
   left_for_notes: 0,
   blocked_by_verdict: 0,
+  recheck_failures: 0,
   deferred: 0,
   out_of_time: false,
 };
@@ -85,6 +86,8 @@ interface CloseProgress {
   unknownIds: string[];
   /** How many closes this decision added to the totals. */
   counted: number;
+  /** Whether the decision is already counted in `close_failures`: it counts once. */
+  failed: boolean;
 }
 
 const closedTag = (id: string) => `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`;
@@ -161,8 +164,8 @@ export const createDecisionSweep = ({
    * closes that gap: either the decision is still in force, and then the revoke has not deleted it
    * yet and will find these alerts, or it is gone, and the caller puts back what it wrote. A
    * decision that only lapsed (expired) keeps what it did while it was in force. A read that fails
-   * answers `unknown`: the tags stay, and the caller counts the failure, because nothing checks
-   * again and a revoke that already ran would not find these alerts.
+   * answers `unknown` and is counted in `recheck_failures`: the tags stay, and nothing checks
+   * again, so a revoke that already ran would not find these alerts.
    */
   const statusAfterWrite = async (
     id: string,
@@ -179,6 +182,7 @@ export const createDecisionSweep = ({
         `Could not read decision ${id} again after the sweep ${what}; if it was revoked, run the revoke again`,
         error
       );
+      totals.recheck_failures++;
       return 'unknown';
     }
   };
@@ -294,6 +298,13 @@ export const createDecisionSweep = ({
     }
   };
 
+  /** Counts the decision in `close_failures`, once, whatever number of its steps failed. */
+  const failClose = (progress: CloseProgress) => {
+    if (progress.failed) return;
+    progress.failed = true;
+    totals.close_failures++;
+  };
+
   /**
    * Called after the closes: reads the decision again. If a revoke landed meanwhile, the closes
    * are undone: the alerts the sweep confirmed as closed, and the ones whose close is unknown. A
@@ -304,10 +315,7 @@ export const createDecisionSweep = ({
    */
   const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
     const { closedIds, unknownIds, counted } = progress;
-    const status = await statusAfterWrite(id, 'closed its alerts');
-    if (status !== 'gone') {
-      // The closes stay, and so do their notes, but a check that could not be made is a failure.
-      if (status === 'unknown') totals.close_failures++;
+    if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
       if (closedIds.length > 0) queueNotes(id, closedIds, 'closed');
       return;
     }
@@ -323,7 +331,7 @@ export const createDecisionSweep = ({
       // a close that threw may have closed alerts that were never counted.
       totals.closed -= Math.min(reopened, counted);
     } catch (error) {
-      totals.close_failures++;
+      failClose(progress);
       warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
     }
   };
@@ -334,7 +342,7 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
-    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0 };
+    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0, failed: false };
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
@@ -347,11 +355,11 @@ export const createDecisionSweep = ({
       tagged = allowed;
       await tagInChunks(write, { alertIds: allowed, add: [closedTag(id)], remove: [] });
       if (await closeAlerts(id, allowed, progress)) {
-        totals.close_failures++;
+        failClose(progress);
         logger.warn(`Closing the alerts of decision ${id} timed out part way`);
       }
     } catch (error) {
-      totals.close_failures++;
+      failClose(progress);
       warn(`Could not close the alerts of decision ${id}`, error);
       await untagAfterFailedClose(id, tagged);
     }
@@ -380,9 +388,7 @@ export const createDecisionSweep = ({
    * meanwhile, the tags are taken off. Otherwise the alerts are counted and get their notes.
    */
   const settleSkipped = async (id: string, kept: string[], skipTags: string[]) => {
-    const status = await statusAfterWrite(id, 'tagged its alerts');
-    if (status !== 'gone') {
-      if (status === 'unknown') totals.tag_failures++;
+    if ((await statusAfterWrite(id, 'tagged its alerts')) !== 'gone') {
       totals.skipped += kept.length;
       queueNotes(id, kept, 'skipped');
       return;

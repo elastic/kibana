@@ -1072,10 +1072,12 @@ describe('triage match decisions step in on mode', () => {
       const { output } = await run();
 
       // The tag stays on the alert, so a revoke still finds it. The check that could not be made is
-      // a failure in the output, because nothing checks again.
+      // counted on its own, not as a failed close, because nothing checks again.
       expect(closes().map(({ status }) => status)).toEqual(['closed']);
       expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
-      expect(output).toEqual(expect.objectContaining({ closed: 1, close_failures: 1 }));
+      expect(output).toEqual(
+        expect.objectContaining({ closed: 1, close_failures: 0, recheck_failures: 1 })
+      );
     });
 
     it('counts a failure when the decision cannot be read again after the dismissal tags, and keeps them', async () => {
@@ -1091,7 +1093,51 @@ describe('triage match decisions step in on mode', () => {
 
       expect(tags()).toHaveLength(1);
       expect(notes().map(({ eventId }) => eventId)).toEqual(['a']);
-      expect(output).toEqual(expect.objectContaining({ skipped: 1, tag_failures: 1 }));
+      expect(output).toEqual(
+        expect.objectContaining({ skipped: 1, tag_failures: 0, recheck_failures: 1 })
+      );
+    });
+
+    it('counts a decision once in the failed closes when a close fails and the decision then cannot be read', async () => {
+      const { run, callKibanaApi } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        unreadableAfterWrite: [idOf('C:\\x.exe')],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/status') && params.body?.status === 'closed') {
+            throw new Error('close failed');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(output).toEqual(expect.objectContaining({ close_failures: 1, recheck_failures: 1 }));
+    });
+
+    it('counts a decision once in the failed closes when its close fails and the undo fails too', async () => {
+      const { run, callKibanaApi } = setup({
+        mode: 'on',
+        alerts: [['a', source('C:\\x.exe')]],
+        decisions: approved('C:\\x.exe'),
+        revokedAfterWrite: [idOf('C:\\x.exe')],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/status')) throw new Error('status failed');
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
     });
 
     it('counts a failure and writes no note when the undo of a revoked close fails', async () => {
