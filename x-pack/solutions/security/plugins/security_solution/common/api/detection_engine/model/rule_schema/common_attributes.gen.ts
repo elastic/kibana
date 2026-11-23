@@ -372,7 +372,7 @@ export type ThreatTactic = z.infer<typeof ThreatTactic>;
 
 /**
   * > info
-> Threats can be described using the MITRE ATT&CK&trade; (Enterprise), MITRE ATLAS&trade;, or MITRE ATT&CK&trade; for ICS frameworks.
+> Currently, only threats described using the MITRE ATT&CK&trade; framework are supported.
 
   */
 export const Threat = lazySchema(() =>
