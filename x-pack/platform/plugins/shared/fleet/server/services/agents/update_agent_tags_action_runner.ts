@@ -9,16 +9,19 @@ import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
 
 import { AGENTS_INDEX } from '../../constants';
 
 import { appContextService } from '../app_context';
+import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
 
 import { FleetError, FleetVersionConflictError, UpdateByQueryCancelledError } from '../../errors';
 
 import { ActionRunner } from './action_runner';
+import { removeSOAttributes } from './crud';
 
 import { BulkActionTaskType } from './bulk_action_types';
 import { filterHostedPolicies } from './filter_hosted_agents';
@@ -125,12 +128,23 @@ export async function updateTagsBatch(
       `Agents to update tags in batch: ${agentIds.length}, tagsToAdd: ${options.tagsToAdd}, tagsToRemove: ${options.tagsToRemove}`
     );
 
+  // The agents were in the caller's space when they were selected. The update can run for minutes,
+  // and again after being cancelled, so it checks the space itself too: an agent that has moved out
+  // of it in the meantime is left alone. The agents it leaves are not counted, as they are not updated.
+  const namespaceFilter = await agentsKueryNamespaceFilter(spaceId);
+  const idsQuery = { terms: { _id: agentIds } };
+
   const request: UpdateByQueryRequest = {
-    query: {
-      terms: {
-        _id: agentIds,
-      },
-    },
+    query: namespaceFilter
+      ? {
+          bool: {
+            filter: [
+              idsQuery,
+              toElasticsearchQuery(fromKueryExpression(removeSOAttributes(namespaceFilter))),
+            ],
+          },
+        }
+      : idsQuery,
     index: AGENTS_INDEX,
     refresh: true,
     script: {

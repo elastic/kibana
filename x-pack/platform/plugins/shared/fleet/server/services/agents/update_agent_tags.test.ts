@@ -752,6 +752,70 @@ describe('update_agent_tags', () => {
       jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
     });
 
+    describe('the update of a batch', () => {
+      const batch = (spaceId: string) =>
+        updateTagsBatch(
+          soClient,
+          esClient,
+          [{ id: 'agent1' } as Agent, { id: 'agent2' } as Agent],
+          {},
+          { tagsToAdd: ['new'], tagsToRemove: [], total: 2, spaceId }
+        );
+      const queryOf = (callIndex: number) =>
+        (esClient.updateByQuery.mock.calls[callIndex][0] as any).query;
+
+      beforeEach(() => {
+        esClient.updateByQuery.mockReset();
+        esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 2, total: 2 } as any);
+      });
+
+      it('should only update agents that are in the space of the caller', async () => {
+        await batch('myspace');
+
+        const filter = queryOf(0).bool.filter;
+        expect(filter[0]).toEqual({ terms: { _id: ['agent1', 'agent2'] } });
+        expect(JSON.stringify(filter[1])).toContain('myspace');
+        expect(JSON.stringify(filter[1])).toContain('namespaces');
+      });
+
+      it('should include the agents of all spaces and without one in the default space', async () => {
+        await batch('default');
+
+        const namespaceFilter = JSON.stringify(queryOf(0).bool.filter[1]);
+        expect(namespaceFilter).toContain('default');
+        expect(namespaceFilter).toContain('namespaces');
+      });
+
+      it('should check the space again when the update is run again after being cancelled', async () => {
+        esClient.updateByQuery
+          .mockResolvedValueOnce({ task: 'node1:42' } as any)
+          .mockResolvedValueOnce({ task: 'node1:43' } as any);
+        esClient.tasks.get.mockImplementation((async ({ task_id: taskId }: { task_id: string }) =>
+          taskId === 'node1:42'
+            ? {
+                completed: true,
+                task: {},
+                response: {
+                  failures: [],
+                  updated: 1,
+                  version_conflicts: 0,
+                  total: 2,
+                  canceled: 'by user request',
+                },
+              }
+            : {
+                completed: true,
+                task: {},
+                response: { failures: [], updated: 2, version_conflicts: 0, total: 2 },
+              }) as any);
+
+        await batch('myspace');
+
+        expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
+        expect(JSON.stringify(queryOf(1).bool.filter[1])).toContain('myspace');
+      });
+    });
+
     it('should add namespace filter to kuery in the default space', async () => {
       soClient.getCurrentNamespace.mockReturnValue('default');
 
