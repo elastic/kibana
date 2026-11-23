@@ -706,6 +706,7 @@ const huntCoordinatorCore = async (
     });
   } catch (err) {
     logger.warn(`hunt_coordinator: scope resolution failed — ${(err as Error).message}`);
+    narrativeContext.scopeResolutionFailed = true;
     // Return a degraded result rather than hard-failing.
     const emptyTier1: HuntCoordinatorTier1 = {
       tier: 1,

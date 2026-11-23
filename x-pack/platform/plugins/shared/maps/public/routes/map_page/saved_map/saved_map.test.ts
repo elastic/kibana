@@ -6,6 +6,7 @@
  */
 
 const mockDataViewCreate = jest.fn();
+const mockAddDanger = jest.fn();
 
 jest.mock('../../../kibana_services', () => ({
   getMapsCapabilities: () => ({ save: true }),
@@ -18,6 +19,7 @@ jest.mock('../../../kibana_services', () => ({
   }),
   getUsageCollection: () => null,
   getIndexPatternService: () => ({ create: (...args: any[]) => mockDataViewCreate(...args) }),
+  getToasts: () => ({ addDanger: mockAddDanger }),
 }));
 
 jest.mock('../../../licensed_features', () => ({
@@ -37,8 +39,13 @@ describe('SavedMap.whenReady adhoc data views', () => {
   });
 
   test('should call dataViewService.create for each adhoc data view spec', async () => {
-    const spec1 = { id: 'adhoc-1', title: 'logstash-*', timeFieldName: '@timestamp' };
-    const spec2 = { id: 'adhoc-2', title: 'metrics-*' };
+    const spec1 = {
+      id: 'adhoc-1',
+      type: 'data_view_spec' as const,
+      index_pattern: 'logstash-*',
+      time_field: '@timestamp',
+    };
+    const spec2 = { id: 'adhoc-2', type: 'data_view_spec' as const, index_pattern: 'metrics-*' };
 
     const mapEmbeddableState: MapByValueState = {
       attributes: {
@@ -51,8 +58,12 @@ describe('SavedMap.whenReady adhoc data views', () => {
     await savedMap.whenReady();
 
     expect(mockDataViewCreate).toHaveBeenCalledTimes(2);
-    expect(mockDataViewCreate).toHaveBeenCalledWith(spec1);
-    expect(mockDataViewCreate).toHaveBeenCalledWith(spec2);
+    expect(mockDataViewCreate).toHaveBeenCalledWith({
+      id: 'adhoc-1',
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+    });
+    expect(mockDataViewCreate).toHaveBeenCalledWith({ id: 'adhoc-2', title: 'metrics-*' });
   });
 
   test('should not call dataViewService.create when adHocDataViews is absent', async () => {
@@ -66,6 +77,35 @@ describe('SavedMap.whenReady adhoc data views', () => {
     await savedMap.whenReady();
 
     expect(mockDataViewCreate).not.toHaveBeenCalled();
+  });
+});
+
+describe('SavedMap.save', () => {
+  test('should show error toast and not throw when ad hoc data views can not be read', async () => {
+    mockAddDanger.mockReset();
+    const mapEmbeddableState: MapByValueState = {
+      attributes: { title: 'test map' } as MapByValueState['attributes'],
+    };
+    const savedMap = new SavedMap({ mapEmbeddableState });
+    await savedMap.whenReady();
+    jest
+      .spyOn(savedMap as any, '_serializeAdHocDataViews')
+      .mockRejectedValue(new Error('Cannot save ad hoc data view without `id`'));
+
+    await expect(
+      savedMap.save({
+        newTitle: 'new title',
+        newDescription: '',
+        newCopyOnSave: false,
+        saveByReference: true,
+        history: {} as any,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({ text: 'Cannot save ad hoc data view without `id`' })
+    );
+    expect(savedMap.getAttributes().title).toBe('test map');
   });
 });
 

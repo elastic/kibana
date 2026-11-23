@@ -12,21 +12,25 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import {
   SESSIONS_LOOKBACK_DAYS,
-  SESSIONS_TASK_ID,
-  SESSIONS_VERSION,
   sessionsLagThresholdSeconds,
   type SessionsHealth,
   type SessionsRunError,
   type SessionsSettings,
   type SessionsStatus,
+  type SessionsStatusResponse,
 } from '../../../common/sessions';
+import {
+  BROWSER_SESSIONS_PLATFORM,
+  MOBILE_SESSIONS_PLATFORM,
+  type SessionsPlatform,
+} from './sessions_platforms';
 import type { SessionsTaskState } from './sessions_task';
 
-const MISSING_STATUS: SessionsStatus = {
+const missingStatusOf = ({ version }: SessionsPlatform): SessionsStatus => ({
   installed: false,
   health: 'missing',
   installedVersion: null,
-  currentVersion: SESSIONS_VERSION,
+  currentVersion: version,
   rebuilding: false,
   apiKeyInvalid: false,
   lagSeconds: null,
@@ -36,13 +40,14 @@ const MISSING_STATUS: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
-};
+});
 
 const getTask = async (
-  taskManager: TaskManagerStartContract
+  taskManager: TaskManagerStartContract,
+  { taskId }: SessionsPlatform
 ): Promise<ConcreteTaskInstance | undefined> => {
   try {
-    return await taskManager.get(SESSIONS_TASK_ID);
+    return await taskManager.get(taskId);
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return undefined;
@@ -67,29 +72,33 @@ const healthOf = ({
   return lagging ? 'lagging' : 'healthy';
 };
 
-/**
- * The sessions status, from the summaries task and what its last run recorded. Without Task
- * Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the last
- * run failed are only told `withDetails`, to users who can set sessions up.
- */
-export const getSessionsStatus = async ({
-  taskManager,
-  settings,
-  withDetails = false,
-  now = Date.now(),
-}: {
+interface SessionsStatusParams {
   taskManager: TaskManagerStartContract | undefined;
   settings: SessionsSettings;
   withDetails?: boolean;
   now?: number;
-}): Promise<SessionsStatus> => {
-  const task = taskManager ? await getTask(taskManager) : undefined;
+}
+
+/**
+ * A platform's sessions status, from its summaries task and what its last run recorded. Without
+ * Task Manager, nothing can build sessions, so they're missing. Who enabled sessions and why the
+ * last run failed are only told `withDetails`, to users who can set sessions up.
+ */
+export const getSessionsStatus = async ({
+  platform,
+  taskManager,
+  settings,
+  withDetails = false,
+  now = Date.now(),
+}: SessionsStatusParams & { platform: SessionsPlatform }): Promise<SessionsStatus> => {
+  const missingStatus = missingStatusOf(platform);
+  const task = taskManager ? await getTask(taskManager, platform) : undefined;
   if (!task) {
-    return MISSING_STATUS;
+    return missingStatus;
   }
   const state: SessionsTaskState = task.state;
   const installedVersion = state.version ?? null;
-  const rebuilding = state.caughtUp !== true || installedVersion !== SESSIONS_VERSION;
+  const rebuilding = state.caughtUp !== true || installedVersion !== platform.version;
   const summarizedUntil = state.checkpoint ?? null;
   const lagSeconds =
     summarizedUntil === null
@@ -114,7 +123,7 @@ export const getSessionsStatus = async ({
     lagSeconds > sessionsLagThresholdSeconds(settings.frequency);
 
   return {
-    ...MISSING_STATUS,
+    ...missingStatus,
     installed: true,
     health: healthOf({ apiKeyInvalid, lastError, lagging }),
     installedVersion,
@@ -127,4 +136,15 @@ export const getSessionsStatus = async ({
     lastError,
     enabledBy: withDetails ? task.userScope?.userName ?? null : null,
   };
+};
+
+/** The browser sessions status, as the app reads it, with the mobile one under `mobile`. */
+export const getSessionsStatusResponse = async (
+  params: SessionsStatusParams
+): Promise<SessionsStatusResponse> => {
+  const [browser, mobile] = await Promise.all([
+    getSessionsStatus({ ...params, platform: BROWSER_SESSIONS_PLATFORM }),
+    getSessionsStatus({ ...params, platform: MOBILE_SESSIONS_PLATFORM }),
+  ]);
+  return { ...browser, mobile };
 };

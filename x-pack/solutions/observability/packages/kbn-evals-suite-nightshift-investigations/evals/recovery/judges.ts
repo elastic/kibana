@@ -32,8 +32,8 @@ import {
 import { evidenceLevel } from '@kbn/nightshift-investigations-plugin/server/online_evals/judges/recovery_due_diligence/root_cause_evidence';
 import { recoveryInputSchema } from './compose';
 import type { InvestigationExample, InvestigationTaskOutput } from '../investigation/types';
-import { getModelFactory, invokeJudge } from '../investigation/judges';
-import type { JudgeDeps } from '../investigation/judges';
+import { getModelFactory, invokeJudge } from '../investigation/judges/invoke_judge';
+import type { JudgeDeps } from '../investigation/judges/invoke_judge';
 import { composeAnswerText } from '../investigation/judges/scoring';
 import {
   applyCitationRule,

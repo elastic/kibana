@@ -7,6 +7,9 @@
 
 import type { EsClient, KbnClient } from '@kbn/scout-oblt';
 import {
+  MOBILE_SESSIONS_INDEX_PATTERN,
+  MOBILE_SESSIONS_INDEX_TEMPLATE_NAME,
+  MOBILE_SESSIONS_TASK_ID,
   SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_INDEX_TEMPLATE_NAME,
@@ -217,21 +220,26 @@ const areSessionsInstalled = async (kbnClient: KbnClient): Promise<boolean> => {
   return data.installed;
 };
 
-/** Removes the summaries task, which also invalidates its API key; a missing task is fine. */
+/**
+ * Removes the browser and mobile summaries tasks, which also invalidates their API keys; a missing
+ * task is fine.
+ */
 export const removeSessionsTask = async (kbnClient: KbnClient) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `/internal/task_manager/tasks/${encodeURIComponent(SESSIONS_TASK_ID)}`,
-    headers: { 'x-elastic-internal-origin': 'kibana' },
-    ignoreErrors: [404],
-  });
+  for (const taskId of [SESSIONS_TASK_ID, MOBILE_SESSIONS_TASK_ID]) {
+    await kbnClient.request({
+      method: 'DELETE',
+      path: `/internal/task_manager/tasks/${encodeURIComponent(taskId)}`,
+      headers: { 'x-elastic-internal-origin': 'kibana' },
+      ignoreErrors: [404],
+    });
+  }
 };
 
 const deleteSessionsIndices = async (esClient: EsClient) => {
   // Test clusters refuse wildcard deletes (`action.destructive_requires_name`), so by name.
   const indices = Object.keys(
     await esClient.indices.get({
-      index: SESSIONS_INDEX_PATTERN,
+      index: [SESSIONS_INDEX_PATTERN, MOBILE_SESSIONS_INDEX_PATTERN],
       ignore_unavailable: true,
       allow_no_indices: true,
     })
@@ -242,10 +250,9 @@ const deleteSessionsIndices = async (esClient: EsClient) => {
 };
 
 const deleteSessionsTemplate = async (esClient: EsClient) => {
-  await esClient.indices.deleteIndexTemplate(
-    { name: SESSIONS_INDEX_TEMPLATE_NAME },
-    { ignore: [404] }
-  );
+  for (const name of [SESSIONS_INDEX_TEMPLATE_NAME, MOBILE_SESSIONS_INDEX_TEMPLATE_NAME]) {
+    await esClient.indices.deleteIndexTemplate({ name }, { ignore: [404] });
+  }
 };
 
 /** Removes the sessions setup and the mock sessions, leaving the rest of the data streams. */

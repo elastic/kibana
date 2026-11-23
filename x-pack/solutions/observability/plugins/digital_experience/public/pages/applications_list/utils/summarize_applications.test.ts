@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApplicationSummary } from '../../../../common/types/applications';
+import type { WebApplicationSummary } from '../../../../common/types/applications';
 import {
   pageLoadsOfSources,
   sessionsOfSource,
@@ -16,7 +16,7 @@ const noVital = { sampleCount: 0, ratings: null };
 
 const app = ({
   serviceName = 'shop',
-  source = 'otel' as ApplicationSummary['source'],
+  source = 'otel' as WebApplicationSummary['source'],
   pageLoads = 10,
   jsErrors = 0,
   requests = 0,
@@ -25,9 +25,10 @@ const app = ({
   inp = null as number | null,
   cls = null as number | null,
   sessions = null as number | null,
-} = {}): ApplicationSummary => ({
+} = {}): WebApplicationSummary => ({
   serviceName,
   source,
+  applicationType: 'web',
   environments: [],
   pageLoads: { count: pageLoads },
   sessions: sessions === null ? null : { count: sessions },
