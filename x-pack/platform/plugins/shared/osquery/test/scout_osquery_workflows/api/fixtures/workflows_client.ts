@@ -50,6 +50,11 @@ const pendingDeletions = new Map<string, () => Promise<unknown>>();
 /** Action ids (parent and per-query) the steps dispatched, for removing their documents. */
 const dispatchedActionIds = new Set<string>();
 
+/** Registers action ids a test dispatched without a step, so `afterAll` removes them too. */
+export const trackDispatchedActionIds = (ids: string[]): void => {
+  ids.forEach((id) => dispatchedActionIds.add(id));
+};
+
 /** The action ids dispatched since the last call. */
 export const takeDispatchedActionIds = (): string[] => {
   const ids = [...dispatchedActionIds];

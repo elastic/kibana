@@ -37,4 +37,10 @@ export const apiTest = baseApiTest.extend<{}, { seedK8sDeployments: void }>({
   ],
 });
 
-export { INTERNAL_HEADERS, K8S_ARCHIVE, listPath, TYPES_PATH } from './constants';
+export {
+  FILTER_VALUES_PATH,
+  INTERNAL_HEADERS,
+  K8S_ARCHIVE,
+  listPath,
+  TYPES_PATH,
+} from './constants';
