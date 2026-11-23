@@ -13,10 +13,12 @@ import type {
 } from '@kbn/agent-builder-server';
 
 const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes default TTL
+// Entries are bounded by resources x spaces. Going over the cap only costs recomputation.
+const MAX_ENTRIES = 5000;
 
 export class AvailabilityCache {
   private cache = new LRUCache<string, AvailabilityResult>({
-    max: 1000,
+    max: MAX_ENTRIES,
     ttl: DEFAULT_TTL,
     allowStale: false,
     ttlAutopurge: false,
