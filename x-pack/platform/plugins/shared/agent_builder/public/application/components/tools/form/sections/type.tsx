@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
-import { ToolType } from '@kbn/agent-builder-common';
-import { i18n } from '@kbn/i18n';
+import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import type { ToolType } from '@kbn/agent-builder-common';
 import React, { useCallback, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
@@ -21,10 +20,6 @@ import {
   getToolTypeDefaultValues,
 } from '../registry/tools_form_registry';
 import { ToolFormMode } from '../tool_form';
-
-const TECH_PREVIEW_LABEL = i18n.translate('xpack.agentBuilder.tools.techPreviewBadgeLabel', {
-  defaultMessage: 'Tech preview',
-});
 
 export interface TypeProps {
   mode: ToolFormMode;
@@ -60,16 +55,6 @@ export const TypeSection = ({ mode }: TypeProps) => {
       value: t.value,
       inputDisplay: t.text,
       'data-test-subj': `agentBuilderToolTypeOption-${t.value}`,
-      dropdownDisplay: (
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>{t.text}</EuiFlexItem>
-          {t.value === ToolType.mcp && (
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge iconType="flask" label={TECH_PREVIEW_LABEL} size="s" />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      ),
     }));
   }, [serverToolTypes, toolTypesLoading]);
 

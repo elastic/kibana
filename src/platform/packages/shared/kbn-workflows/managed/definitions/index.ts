@@ -78,6 +78,7 @@ import {
   NATIVE_VULN_SCANNER_REFRESH_WORKFLOW,
   NATIVE_VULN_SCANNER_SCAN_WORKFLOW,
 } from './native_vuln_scanner';
+import { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW } from './nightshift_detection/continuous_detection';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
@@ -177,6 +178,7 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
+export { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from './nightshift_detection/continuous_detection';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';
@@ -323,6 +325,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
+  NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,

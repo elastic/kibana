@@ -43,7 +43,6 @@ interface UseDataGridFocusResult {
   readonly focusCell: DataGridApi['focusCell'];
   readonly registerCell: (address: DataGridCellAddress, element: HTMLDivElement | null) => void;
   readonly activateFocusedCell: (address: DataGridCellAddress) => void;
-  readonly releaseFocusOwnership: () => void;
 }
 
 const completedResult: DataGridCommandResult = { status: 'completed' };
@@ -121,9 +120,9 @@ export const useDataGridFocus = ({
   // Records which request still has permission to move browser focus.
   const focusOwnershipRef = useRef<number | null>(null);
 
-  // Remembers an active cell whose focused DOM element was removed by virtualization.
+  // Remembers an active cell whose focused DOM element was removed with its row or column. The grid
+  // keeps the active row rendered, so virtualization never removes it.
   const lostOwnedFocusRef = useRef<DataGridCellAddress | null>(null);
-  const lostOwnedFocusModelRef = useRef(currentModel);
 
   // Keeps stable callbacks connected to the latest virtualizer and announcement handlers.
   const scrollToRowRef = useRef(scrollToRow);
@@ -243,14 +242,13 @@ export const useDataGridFocus = ({
     [cancelPendingFocus, resolveAddress]
   );
 
-  // Tracks mounted cells and completes pending or restorable focus when elements appear.
+  // Tracks mounted cells and completes pending focus when elements appear.
   const registerCell = useCallback(
     (address: DataGridCellAddress, element: HTMLDivElement | null) => {
       const previousElement = setAddressedElement(cellElementsRef.current, address, element);
       if (!element) {
         if (elementOwnsFocus(previousElement)) {
           lostOwnedFocusRef.current = address;
-          lostOwnedFocusModelRef.current = modelRef.current;
         }
         return;
       }
@@ -274,19 +272,9 @@ export const useDataGridFocus = ({
         pendingFocusRef.current = null;
         commitFocusedCell(address, element);
         pendingFocus.resolve(completedResult);
-        return;
-      }
-
-      if (
-        areDataGridCellAddressesEqual(lostOwnedFocusRef.current, address) &&
-        areDataGridCellAddressesEqual(activeCellRef.current, address) &&
-        (document.activeElement === document.body || document.activeElement === gridRef.current)
-      ) {
-        lostOwnedFocusRef.current = null;
-        element.focus({ preventScroll: true });
       }
     },
-    [commitFocusedCell, failPendingFocus, gridRef, resolveAddress]
+    [commitFocusedCell, failPendingFocus, resolveAddress]
   );
 
   // Makes a directly focused cell active and cancels stale focus work.
@@ -328,10 +316,6 @@ export const useDataGridFocus = ({
       } else if (rowOrderChanged && !scrollToRowRef.current(resolution.rowIndex)) {
         failPendingFocus('scroll_failed');
       }
-    }
-
-    if (lostOwnedFocusModelRef.current !== currentModel) {
-      lostOwnedFocusRef.current = null;
     }
 
     if (areDataGridCellAddressesEqual(previousActiveCell, reconciledActiveCell)) {
@@ -388,8 +372,8 @@ export const useDataGridFocus = ({
       releaseFocusOwnership();
     };
 
-    document.addEventListener('focusin', onDocumentFocusIn);
-    return () => document.removeEventListener('focusin', onDocumentFocusIn);
+    document.addEventListener('focusin', onDocumentFocusIn, true);
+    return () => document.removeEventListener('focusin', onDocumentFocusIn, true);
   }, [gridRef, releaseFocusOwnership]);
 
   const api = useMemo<DataGridApi>(() => ({ focusCell, scrollToCell }), [focusCell, scrollToCell]);
@@ -400,6 +384,5 @@ export const useDataGridFocus = ({
     focusCell,
     registerCell,
     activateFocusedCell,
-    releaseFocusOwnership,
   };
 };

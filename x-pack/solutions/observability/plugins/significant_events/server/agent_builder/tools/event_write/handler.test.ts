@@ -23,6 +23,7 @@ import type { RuleEventsClient } from '../../../lib/significant_events/events/ru
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { EVENT_CREATED_TRIGGER_ID } from '../../../../common/workflows/triggers';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
+import { MAX_DEDUP_SCAN_LIMIT } from '../../../lib/significant_events/query_utils';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 
@@ -1639,6 +1640,38 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
     expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 
+  it('does not let a held reopen block a later continuation that adds the same rule', async () => {
+    const closed = closedSeries({ assessment_note: 'known noise' });
+    const liveId = 'live-continuation';
+    const stored = new Map([
+      [closedEventId, closed],
+      [liveId, makeStoredEvent(liveId, { signals: [] })],
+    ]);
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({
+          hits: [closed],
+          heads: [{ eventId: closedEventId, groupHash: 'group-1', episodeId: 'episode-1' }],
+        }),
+        findByEventId: jest
+          .fn()
+          .mockImplementation(async (eventId: string) => ({ hits: [stored.get(eventId)] })),
+      }),
+      inputs: [
+        breachFor('rule-a'),
+        {
+          ...baseInput,
+          status: 'active',
+          event_id: liveId,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-a', verdict: 'confirms' })],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ reason: 'held_by_deactivation' });
+    expect(results[1]).toMatchObject({ written: true, event_id: liveId });
+  });
+
   it('reuses the event_id of a closed series on an exact-identity breach, with the new narrative', async () => {
     const results = await eventsWriteBulkHandler({
       eventSearchClient: clientWithClosedSeries(),
@@ -1940,5 +1973,583 @@ describe('eventsWriteBulkHandler — reopening a closed series', () => {
       });
       expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('eventsWriteBulkHandler — a rule held by another live event', () => {
+  const targetId = 'target-live';
+  const target = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+    makeStoredEvent(targetId, {
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-own', verdict: 'confirms' })],
+      ...overrides,
+    });
+  /** A live event on another source that holds `ruleUuid` with the given verdict. */
+  const holder = (
+    eventId: string,
+    ruleUuid: string,
+    overrides: Partial<SignificantEvent> = {},
+    verdict: DetectionSignal['verdict'] = 'confirms'
+  ): SignificantEvent =>
+    makeStoredEvent(eventId, {
+      source_ids: ['logs.payments'],
+      signals: [makeDetectionSignal({ ruleUuid, verdict, sourceId: 'logs.payments' })],
+      ...overrides,
+    });
+  const continuationWith = (...ruleUuids: string[]): EventsWriteInput => ({
+    ...baseInput,
+    status: 'active',
+    event_id: targetId,
+    signals: ruleUuids.map((ruleUuid) => makeDetectionSignal({ ruleUuid, verdict: 'confirms' })),
+  });
+  const clientWith = ({
+    live,
+    stored = target(),
+    findLatestLive,
+  }: {
+    live: SignificantEvent[];
+    stored?: SignificantEvent;
+    findLatestLive?: jest.Mock;
+  }) =>
+    makeEventSearchClient({
+      findLatestLive: findLatestLive ?? jest.fn().mockResolvedValue({ hits: live }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+  it('skips a continuation that adds a rule a different live event confirms', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+      inputs: [continuationWith('rule-r')],
+    });
+
+    expect(results[0]).toEqual({
+      index: 0,
+      event_id: targetId,
+      status: 'active',
+      written: false,
+      skipped: true,
+      reason: 'rule_held_by_event',
+      existing_event_id: 'holder-a',
+      held_rules: [{ rule_uuid: 'rule-r', event_id: 'holder-a' }],
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it.each<SignificantEvent['status']>(['active', 'recovering'])(
+    'blocks on a %s holder',
+    async (status) => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r', { status })] }),
+        inputs: [continuationWith('rule-r')],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'rule_held_by_event' });
+    }
+  );
+
+  it('reports the status of the targeted event, and none for an item that would create one', async () => {
+    const eventSearchClient = makeEventSearchClient({
+      findLatestLive: jest.fn().mockResolvedValue({ hits: [holder('holder-a', 'rule-r')] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [target({ status: 'recovering' })] }),
+    });
+
+    const [continued, created] = await eventsWriteBulkHandler({
+      eventSearchClient,
+      inputs: [
+        continuationWith('rule-r'),
+        {
+          ...baseInput,
+          status: 'active',
+          event_id: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-r' })],
+        },
+      ],
+    });
+
+    expect(continued).toMatchObject({ reason: 'rule_held_by_event', status: 'recovering' });
+    expect(created).toMatchObject({ reason: 'rule_held_by_event' });
+    expect(created).not.toHaveProperty('status');
+  });
+
+  it('skips a new-event item with a held rule, even when the holder is on another source and the rest is free', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [holder('holder-a', 'rule-r')] }),
+      }),
+      inputs: [
+        {
+          ...baseInput,
+          status: 'active',
+          event_id: undefined,
+          signals: [
+            makeDetectionSignal({ ruleUuid: 'rule-r' }),
+            makeDetectionSignal({ ruleUuid: 'rule-free' }),
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'rule_held_by_event',
+      existing_event_id: 'holder-a',
+      held_rules: [{ rule_uuid: 'rule-r', event_id: 'holder-a' }],
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  describe('items of the same batch', () => {
+    const continuationOf = (
+      eventId: string,
+      ruleUuid: string,
+      verdict: DetectionSignal['verdict'] = 'confirms'
+    ): EventsWriteInput => ({
+      ...baseInput,
+      status: 'active',
+      event_id: eventId,
+      signals: [makeDetectionSignal({ ruleUuid, verdict })],
+    });
+    const clientForBatch = () =>
+      makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [target()] }),
+      });
+
+    it('holds the later of two continuations of different events that confirm the same rule', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [continuationOf(targetId, 'rule-r'), continuationOf('other-live', 'rule-r')],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(results[1]).toMatchObject({
+        written: false,
+        skipped: true,
+        reason: 'rule_held_by_event',
+        existing_event_id: targetId,
+        held_rules: [{ rule_uuid: 'rule-r', event_id: targetId }],
+      });
+    });
+
+    it('holds the later of two new-event items that confirm the same rule, naming the first one', async () => {
+      const newEvent = (): EventsWriteInput => ({
+        ...baseInput,
+        status: 'active',
+        event_id: undefined,
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r' })],
+      });
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [] }),
+        }),
+        inputs: [newEvent(), { ...newEvent(), source_ids: ['logs.other'] }],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(results[1]).toMatchObject({
+        written: false,
+        skipped: true,
+        reason: 'rule_held_by_event',
+        existing_event_id: results[0].event_id,
+      });
+    });
+
+    it('does not hold two items for the same event', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [continuationOf(targetId, 'rule-r'), continuationOf(targetId, 'rule-r')],
+      });
+
+      expect(results).not.toContainEqual(expect.objectContaining({ reason: 'rule_held_by_event' }));
+    });
+
+    it('does not let a refuting row claim a rule', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForBatch(),
+        inputs: [
+          continuationOf(targetId, 'rule-r', 'refutes'),
+          continuationOf('other-live', 'rule-r'),
+        ],
+      });
+
+      expect(results[1]).not.toMatchObject({ reason: 'rule_held_by_event' });
+    });
+
+    it('lists both a stored holder and an earlier item of the batch in held_rules', async () => {
+      const otherId = 'other-live';
+      const stored = new Map([
+        [targetId, target()],
+        [otherId, makeStoredEvent(otherId, { signals: [] })],
+      ]);
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [holder('holder-a', 'rule-r')] }),
+          findByEventId: jest
+            .fn()
+            .mockImplementation(async (eventId: string) => ({ hits: [stored.get(eventId)] })),
+        }),
+        inputs: [
+          continuationOf(targetId, 'rule-x'),
+          {
+            ...continuationOf(otherId, 'rule-r'),
+            signals: [
+              makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' }),
+              makeDetectionSignal({ ruleUuid: 'rule-x', verdict: 'confirms' }),
+            ],
+          },
+        ],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(results[1]).toMatchObject({
+        reason: 'rule_held_by_event',
+        existing_event_id: 'holder-a',
+        held_rules: [
+          { rule_uuid: 'rule-r', event_id: 'holder-a' },
+          { rule_uuid: 'rule-x', event_id: targetId },
+        ],
+      });
+    });
+
+    it('does not hold two live events that already confirm the same rule', async () => {
+      const first = makeStoredEvent('dup-a', {
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' })],
+      });
+      const second = makeStoredEvent('dup-b', {
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' })],
+      });
+      const stored = new Map([
+        ['dup-a', first],
+        ['dup-b', second],
+      ]);
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [first, second] }),
+          findByEventId: jest
+            .fn()
+            .mockImplementation(async (eventId: string) => ({ hits: [stored.get(eventId)] })),
+        }),
+        inputs: [continuationOf('dup-a', 'rule-r'), continuationOf('dup-b', 'rule-r')],
+      });
+
+      expect(results).not.toContainEqual(expect.objectContaining({ reason: 'rule_held_by_event' }));
+    });
+  });
+
+  describe('reopening a closed series', () => {
+    const closedId = 'closed-series';
+    const closed = (overrides: Partial<SignificantEvent> = {}): SignificantEvent =>
+      makeStoredEvent(closedId, {
+        status: 'inactive',
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' })],
+        ...overrides,
+      });
+    const clientForReopen = (closedSeries: SignificantEvent) =>
+      makeEventSearchClient({
+        findLatestLive: jest.fn().mockResolvedValue({ hits: [holder('holder-a', 'rule-r')] }),
+        findLatestInactiveByIdentity: jest.fn().mockResolvedValue({
+          hits: [closedSeries],
+          heads: [{ eventId: closedId, groupHash: 'group-1', episodeId: 'episode-1' }],
+        }),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [closedSeries] }),
+      });
+    const breach: EventsWriteInput = {
+      ...baseInput,
+      status: undefined,
+      event_id: undefined,
+      signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' })],
+    };
+
+    it('skips a reopen whose rule a live event confirms; the closed series is not an exemption', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForReopen(closed()),
+        inputs: [{ ...breach, reopen_deactivated: true }],
+      });
+
+      expect(results[0]).toMatchObject({
+        written: false,
+        reason: 'rule_held_by_event',
+        existing_event_id: 'holder-a',
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('answers rule_held_by_event before held_by_deactivation', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientForReopen(closed({ assessment_note: 'known noise' })),
+        inputs: [breach],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'rule_held_by_event' });
+    });
+  });
+
+  describe('when the other event does not block', () => {
+    // The verdict and status matrices of the predicate live in `dedup.test.ts`.
+    it('writes when the holder only has a refuting verdict for the rule', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({
+          live: [
+            makeStoredEvent('holder-a', {
+              signals: [
+                makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'refutes' }),
+                makeDetectionSignal({ ruleUuid: 'rule-x', verdict: 'confirms' }),
+              ],
+            }),
+          ],
+        }),
+        inputs: [continuationWith('rule-r')],
+      });
+
+      expect(results[0]).toMatchObject({ written: true, event_id: targetId });
+    });
+
+    it('writes an item that leaves the event closed, even with a rule another live event holds', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+        inputs: [{ ...continuationWith('rule-r'), status: 'inactive' }],
+      });
+
+      expect(results[0]).toMatchObject({ written: true, event_id: targetId, status: 'inactive' });
+    });
+
+    it('does not check a rule the live target already confirms, so an existing duplicate still writes', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({
+          live: [holder('holder-a', 'rule-r')],
+          stored: target({
+            signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'confirms' })],
+          }),
+        }),
+        inputs: [{ ...continuationWith('rule-r'), severity: 'critical' }],
+      });
+
+      expect(results[0]).toMatchObject({ written: true, event_id: targetId });
+      expect(writtenDocs()).toHaveLength(1);
+    });
+
+    it('holds a write that re-confirms a rule the live target holds as refutes while another event confirms it', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({
+          live: [holder('holder-a', 'rule-r')],
+          stored: target({
+            status: 'recovering',
+            signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'refutes' })],
+          }),
+        }),
+        inputs: [{ ...continuationWith('rule-r'), severity: 'critical' }],
+      });
+
+      expect(results[0]).toMatchObject({
+        written: false,
+        reason: 'rule_held_by_event',
+        existing_event_id: 'holder-a',
+      });
+      expect(writtenDocs()).toHaveLength(0);
+    });
+
+    it('writes an item with no rules without reading holders', async () => {
+      const findLatestLive = jest.fn().mockResolvedValue({ hits: [] });
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({ live: [], findLatestLive }),
+        inputs: [
+          { ...baseInput, status: 'active', severity: 'critical', event_id: targetId, signals: [] },
+        ],
+      });
+
+      expect(results[0]).toMatchObject({ written: true });
+      expect(findLatestLive).not.toHaveBeenCalled();
+    });
+  });
+
+  it('skips an item whose only signal for a held rule is an incoming refuting row', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+      inputs: [
+        {
+          ...baseInput,
+          status: 'active',
+          event_id: targetId,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'refutes' })],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ reason: 'rule_held_by_event' });
+  });
+
+  it('skips the whole item when its rules have several holders, naming the newest and listing every held rule', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({
+        live: [
+          holder('holder-old', 'rule-1', { '@timestamp': '2024-01-01T00:00:00.000Z' }),
+          holder('holder-new', 'rule-2', { '@timestamp': '2024-02-01T00:00:00.000Z' }),
+        ],
+      }),
+      inputs: [continuationWith('rule-1', 'rule-2', 'rule-free')],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      reason: 'rule_held_by_event',
+      existing_event_id: 'holder-new',
+    });
+    expect(results[0]).toHaveProperty('held_rules', [
+      { rule_uuid: 'rule-1', event_id: 'holder-old' },
+      { rule_uuid: 'rule-2', event_id: 'holder-new' },
+    ]);
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  describe('precedence over other results', () => {
+    it('keeps existing_active_event for an item one live event covers entirely', async () => {
+      const covering = makeStoredEvent('covering', {
+        '@timestamp': new Date().toISOString(),
+        signals: [makeDetectionSignal({ ruleUuid: 'rule-r' })],
+      });
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [covering] }),
+        }),
+        inputs: [
+          {
+            ...baseInput,
+            status: 'active',
+            event_id: undefined,
+            signals: [makeDetectionSignal({ ruleUuid: 'rule-r' })],
+          },
+        ],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'existing_active_event' });
+    });
+
+    it('keeps unknown_event_id for a continuation of an unknown event', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: makeEventSearchClient({
+          findLatestLive: jest.fn().mockResolvedValue({ hits: [holder('holder-a', 'rule-r')] }),
+        }),
+        rejectUnknownEventIds: true,
+        inputs: [{ ...continuationWith('rule-r'), event_id: 'no-such-event' }],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'unknown_event_id' });
+    });
+
+    it('keeps unchanged_outcome for an item with nothing to write, so it never reaches the check', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientWith({
+          live: [holder('holder-a', 'rule-r')],
+          stored: target({ status: 'inactive' }),
+        }),
+        inputs: [
+          {
+            ...baseInput,
+            status: undefined,
+            event_id: targetId,
+            signals: [makeDetectionSignal({ ruleUuid: 'rule-r', verdict: 'refutes' })],
+          },
+        ],
+      });
+
+      expect(results[0]).toMatchObject({ reason: 'unchanged_outcome' });
+    });
+  });
+
+  it('aligns results to input indexes and leaves the other items untouched', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+      inputs: [
+        {
+          ...baseInput,
+          status: 'active',
+          event_id: undefined,
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-new' })],
+        },
+        continuationWith('rule-r'),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[1]).toMatchObject({ index: 1, reason: 'rule_held_by_event' });
+    expect(writtenDocs()).toHaveLength(1);
+  });
+
+  it('logs the hold with the item and its holder', async () => {
+    const logger = makeLogger();
+    await eventsWriteBulkHandler({
+      eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+      inputs: [continuationWith('rule-r')],
+      logger,
+    });
+
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('rule_held_by_event'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('holder-a'));
+  });
+
+  it('returns unchanged_outcome for a re-send on a holder that already holds the rule', async () => {
+    const heldRule = holder('holder-a', 'rule-r', { severity: 'high' });
+    const eventSearchClient = makeEventSearchClient({
+      findLatestLive: jest.fn().mockResolvedValue({ hits: [heldRule] }),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [heldRule] }),
+    });
+
+    const [resent] = await eventsWriteBulkHandler({
+      eventSearchClient,
+      inputs: [
+        {
+          ...baseInput,
+          status: undefined,
+          severity: 'high',
+          event_id: 'holder-a',
+          source_ids: ['logs.payments'],
+          signals: [makeDetectionSignal({ ruleUuid: 'rule-r', sourceId: 'logs.payments' })],
+        },
+      ],
+    });
+
+    expect(resent).toMatchObject({ skipped: true, reason: 'unchanged_outcome' });
+  });
+
+  describe('when the holders cannot be read in full', () => {
+    it('fails the batch and writes nothing when the read throws', async () => {
+      await expect(
+        eventsWriteBulkHandler({
+          eventSearchClient: clientWith({
+            live: [],
+            findLatestLive: jest.fn().mockRejectedValue(new Error('es is down')),
+          }),
+          inputs: [continuationWith('rule-r')],
+        })
+      ).rejects.toThrow('es is down');
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+
+    it('fails the batch and writes nothing when the read returns exactly the scan limit', async () => {
+      const logger = makeLogger();
+      const live = Array.from({ length: MAX_DEDUP_SCAN_LIMIT }, (_, i) =>
+        holder(`other-${i}`, `rule-other-${i}`)
+      );
+
+      await expect(
+        eventsWriteBulkHandler({
+          eventSearchClient: clientWith({ live }),
+          inputs: [continuationWith('rule-r')],
+          logger,
+        })
+      ).rejects.toThrow(/holders/i);
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('holders'));
+    });
+  });
+
+  it('throws an item error that names the holder from the single-item adapter', async () => {
+    await expect(
+      eventsWriteHandler({
+        eventSearchClient: clientWith({ live: [holder('holder-a', 'rule-r')] }),
+        input: continuationWith('rule-r'),
+      })
+    ).rejects.toThrow(/another live event.*holder-a/);
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
   });
 });

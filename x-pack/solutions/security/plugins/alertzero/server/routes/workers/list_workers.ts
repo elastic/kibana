@@ -22,6 +22,7 @@ export const registerListWorkersRoute = ({
   logger,
   getSpaceId,
   getWorkersService,
+  isCpsEnabled,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -44,7 +45,7 @@ export const registerListWorkersRoute = ({
       withAlertZeroEnabled(async (context, request, response) => {
         try {
           const listed = await getWorkersService().list(request, getSpaceId(request), () =>
-            resolveHuntUniverse(context, logger)
+            resolveHuntUniverse(context, logger, isCpsEnabled()).then(({ patterns }) => patterns)
           );
           const body: ListWorkersResponse = {
             ...listed,

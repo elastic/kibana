@@ -102,9 +102,6 @@ mapped_pages:
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizationListing](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualization_listing/README.md) | This plugin contains the library listing page for visualizations. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
-| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
-| [workflowsExtensions](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
-| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This plugin contains the Workflows management application and APIs. |
 
 ## x-pack/plugins [_x_packplugins]
 
@@ -290,3 +287,6 @@ mapped_pages:
 | [usageApi](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/usage_api/README.md) | This plugin is used to report Usage metrics to our Cloud internal Usage API. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
+| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
+| [workflowsExtensions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/workflows_extensions/README.md) | Extension point registry for workflow extensions. This plugin provides a centralized location for registering custom workflow extensions, including step types. |
+| [workflowsManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/workflows_management/README.md) | This plugin contains the Workflows management application and APIs. |

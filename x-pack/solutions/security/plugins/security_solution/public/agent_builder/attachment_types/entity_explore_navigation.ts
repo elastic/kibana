@@ -30,7 +30,7 @@ import {
   HostPanelKey,
   ServicePanelKey,
   UserPanelKey,
-} from '../../flyout/entity_details/shared/constants';
+} from '../../flyout_v2/entity/shared/constants';
 import type { EntityDetailsPath } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { EntityAttachmentIdentifier } from './entity_attachment/types';
 import { isFlyoutCapableIdentifierType } from './entity_attachment/types';
