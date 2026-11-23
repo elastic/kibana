@@ -343,6 +343,26 @@ describe('updateByQueryAndWait', () => {
       expect(esClient.tasks.get).toHaveBeenCalledTimes(2);
     });
 
+    it('should mark the partial result of a task that stopped although its cancellation failed', async () => {
+      esClient.tasks.get
+        .mockResolvedValueOnce({ completed: false, task: {} } as any)
+        .mockResolvedValueOnce({
+          completed: true,
+          task: {},
+          // no `canceled` in it, and three of the five agents were not looked at
+          response: { total: 5, updated: 2, version_conflicts: 0, failures: [] },
+        } as any);
+      esClient.tasks.cancel.mockRejectedValue(new Error('cancel failed'));
+
+      const res = await updateByQueryAndWait(esClient, request, {
+        pollIntervalMs: 1,
+        maxDurationMs: 0,
+      });
+
+      expect(res.updated).toEqual(2);
+      expect(res.canceled).toEqual(expect.any(String));
+    });
+
     it('should not wait for a task that the cancellation did not reach', async () => {
       esClient.tasks.get
         .mockResolvedValueOnce({ completed: false, task: {} } as any)

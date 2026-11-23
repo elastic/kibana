@@ -206,9 +206,11 @@ export async function updateByQueryAndWait(
         cancelFailure = error.message;
       }
 
-      if (cancelFailure === undefined) {
-        cancelRequestedAt = Date.now();
-      } else {
+      // A cancellation that failed may still have taken effect, so what the task ends with is read
+      // as the outcome of a cancelled one: a partial result is marked as such, and retried.
+      cancelRequestedAt = Date.now();
+
+      if (cancelFailure !== undefined) {
         logger.warn(`Could not cancel update by query task ${taskId}: ${cancelFailure}`);
         // A cancellation that fails because the task just finished must not discard its result,
         // so the task is read once more before giving up on it.
