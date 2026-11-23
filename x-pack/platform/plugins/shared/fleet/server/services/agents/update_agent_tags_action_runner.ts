@@ -6,13 +6,10 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import type {
-  QueryDslQueryContainer,
-  UpdateByQueryRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
-import { fromKueryExpression, nodeTypes, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import type { KueryNode } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
@@ -35,13 +32,14 @@ import {
   createErrorActionResults,
 } from './actions';
 import { MAX_RETRY_COUNT } from './retry_helper';
+import type { UpdateByQueryTaskResponse } from './update_by_query_task';
 import { updateByQueryAndWait } from './update_by_query_task';
 
 /**
- * How many times the update of a batch is run when it keeps being cancelled for running too long.
- * It stops there, as a batch that is too slow twice is not going to get through on a third try.
+ * How many agents the update of a batch goes through at a time when the update of the whole batch
+ * was cancelled for running too long, or timed out. Each has the time limit of an update of its own.
  */
-const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
+const UPDATE_BY_QUERY_CHUNK_SIZE = 1000;
 
 /** What stands for a `*` in the value of the wildcard of a kuery. */
 const WILDCARD_SYMBOL = nodeTypes.wildcard.buildNode('*').value;
@@ -328,13 +326,13 @@ export async function updateTagsBatch(
   // and again after being cancelled, so it checks the space itself too: an agent that has moved out
   // of it in the meantime is left alone, and recorded below as not updated.
   const namespaceQuery = await agentsNamespaceQuery(spaceId);
-  const idsQuery = { terms: { _id: agentIds } };
-  // Every document the update writes gets this time as its `updated_at`, and the runs of the batch
-  // share it, so it marks the agents that this action wrote.
   const updatedAt = new Date().toISOString();
 
-  const request: UpdateByQueryRequest = {
-    query: namespaceQuery ? { bool: { filter: [idsQuery, namespaceQuery] } } : idsQuery,
+  // the update of some of the agents of the batch
+  const requestFor = (ids: string[]): UpdateByQueryRequest => ({
+    query: namespaceQuery
+      ? { bool: { filter: [{ terms: { _id: ids } }, namespaceQuery] } }
+      : { terms: { _id: ids } },
     index: AGENTS_INDEX,
     refresh: true,
     script: {
@@ -364,116 +362,86 @@ export async function updateTagsBatch(
       },
     },
     conflicts: 'proceed', // relying on the task to retry in case of conflicts - retry only conflicted agents
-  };
+  });
 
-  // The update is cancelled when it runs for too long, and then it has updated some of the agents.
-  // Which of them a retry selected by the action's kuery would leave out depends on that kuery,
-  // and for one that mixes the tags with other clauses it is only some of them. So the same agents
-  // are updated again, which updates all of them, and counts each of them once. What the
-  // cancelled run did is not recorded.
-  let res;
-  for (let attempt = 1; ; attempt++) {
+  const runUpdate = async (ids: string[]) => {
     try {
-      res = await updateByQueryAndWait(esClient, request);
+      return await updateByQueryAndWait(esClient, requestFor(ids));
     } catch (error) {
       // a FleetError has no enumerable fields, JSON.stringify would drop its message
       const details = error instanceof FleetError ? error.message : JSON.stringify(error);
       throw new FleetError('Caught error while batch updating tags: ' + details.slice(0, 1000));
     }
+  };
 
-    // An update that timed out got through some of the agents, as one that was cancelled did, and
-    // what it reports, its total included, is of what it got to: its first search can time out
-    // before it has counted any agent, with a total of 0. So it is not read as a complete result,
-    // from which the agents that were skipped are worked out, but is run again as a cancelled one.
-    if (!res.canceled && !res.timed_out) {
-      break;
-    }
+  // An update that was cancelled for running too long, or that timed out, got through some of the
+  // agents, and what it reports, its total included, is of those: its first search can time out
+  // before it has counted any agent, with a total of 0. So it is not a complete result, from which
+  // the agents that were skipped are worked out.
+  const isIncomplete = (outcome: UpdateByQueryTaskResponse) =>
+    Boolean(outcome.canceled || outcome.timed_out);
+  const describeIncomplete = (outcome: UpdateByQueryTaskResponse) =>
+    outcome.canceled
+      ? `Update by query cancelled (${outcome.canceled}) after updating ${
+          outcome.updated ?? 0
+        } of ${outcome.total ?? 'an unknown number of'} agents`
+      : `Update by query timed out after updating ${outcome.updated ?? 0} agents`;
 
-    const cancelled = res.canceled
-      ? `Update by query cancelled (${res.canceled}) after updating ${res.updated ?? 0} of ${
-          res.total ?? 'an unknown number of'
-        } agents`
-      : `Update by query timed out after updating ${res.updated ?? 0} agents`;
-    if (attempt >= UPDATE_BY_QUERY_MAX_ATTEMPTS) {
-      // Nothing more is run for this batch here, and the retry of the action restarts behind its
-      // kuery. What the cancelled run did is recorded now when that retry leaves it out, as it
-      // would not be recorded at all: the agents it updated. The agents that failed are not
-      // updated, so the retry runs them again, and they are recorded when there is no retry left
-      // to do that, and logged until then.
-      const failures = res.failures ?? [];
-      let recordedUpdatedIds: string[] = [];
-      if (options.updatedAgentsClause) {
-        // The agents that the runs updated between them are the ones that fail the clause and that
-        // this action wrote, and those are the agents the retry leaves out. The runs do not tell:
-        // the second one does not go through the documents in the order of the first, as the ones
-        // that were updated are written again, so neither the larger of their counts nor their sum
-        // is the number. Failing the clause is not evidence of a write by this action alone, as
-        // another update can take the tag off an agent that neither run reached, so the agents also
-        // have to carry the `updated_at` that the runs write.
-        //
-        // The retry leaves them out only if it sees what the updates wrote. A cancelled update by
-        // query does not refresh, whatever its `refresh` is, so it is done here, before the count
-        // and before the retry can be scheduled. Without it the retry could select agents that are
-        // recorded.
-        await esClient.indices.refresh({ index: AGENTS_INDEX });
-        const { count } = await esClient.count({
-          index: AGENTS_INDEX,
-          query: {
-            bool: {
-              filter: [
-                request.query as QueryDslQueryContainer,
-                { term: { updated_at: updatedAt } },
-              ],
-              must_not: [toElasticsearchQuery(options.updatedAgentsClause)],
-            },
-          },
-        });
-        recordedUpdatedIds = getUuidArray(count);
-      }
-      const recordedFailures = options.retryCount === MAX_RETRY_COUNT ? failures : [];
-      if (recordedUpdatedIds.length > 0 || recordedFailures.length > 0) {
-        await createAgentAction(esClient, soClient, {
-          id: actionId,
-          agents: recordedUpdatedIds.concat(recordedFailures.map((failure) => failure.id)),
-          namespaces,
-          created_at: new Date().toISOString(),
-          type: 'UPDATE_TAGS',
-          total:
-            options.total ??
-            (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
-        });
-        if (recordedUpdatedIds.length > 0) {
-          await bulkCreateAgentActionResults(
-            esClient,
-            recordedUpdatedIds.map((id) => ({ agentId: id, actionId, namespaces }))
-          );
-        }
-        if (recordedFailures.length > 0) {
-          await bulkCreateAgentActionResults(
-            esClient,
-            recordedFailures.map((failure) => ({
-              agentId: failure.id,
-              actionId,
-              namespace: spaceId,
-              error: failure.cause.reason ?? undefined,
-            }))
-          );
-        }
-      }
-      if (failures.length > recordedFailures.length) {
-        appContextService
-          .getLogger()
-          .warn(
-            `Update by query of action ${actionId} failed for ${
-              failures.length
-            } agents: ${JSON.stringify(failures).slice(0, 1000)}`
-          );
-      }
-      throw new UpdateByQueryCancelledError(`${cancelled}, giving up after ${attempt} attempts`);
-    }
+  let res = await runUpdate(agentIds);
+
+  if (isIncomplete(res)) {
+    // What the cancelled update did is not recorded, as which of the agents it updated is not
+    // known: it did not go through them in an order that can be told. The same agents are updated
+    // again, which updates all of them, and counts each of them once. It is done a chunk at a time,
+    // each with the time limit of an update of its own, as the whole batch was too slow for one.
+    const distinctAgentIds = [...new Set(agentIds)];
     appContextService
       .getLogger()
-      .warn(`${cancelled}, running it again for the same ${agentIds.length} agents`);
+      .warn(
+        `${describeIncomplete(res)}, running it again for the same ${
+          distinctAgentIds.length
+        } agents, ${UPDATE_BY_QUERY_CHUNK_SIZE} at a time`
+      );
+
+    const chunked: UpdateByQueryTaskResponse = {
+      took: 0,
+      timed_out: false,
+      total: 0,
+      updated: 0,
+      version_conflicts: 0,
+      failures: [],
+    };
+    for (let start = 0; start < distinctAgentIds.length; start += UPDATE_BY_QUERY_CHUNK_SIZE) {
+      const chunk = await runUpdate(
+        distinctAgentIds.slice(start, start + UPDATE_BY_QUERY_CHUNK_SIZE)
+      );
+      if (isIncomplete(chunk)) {
+        // Nothing is recorded for the batch: the agents of the chunks that went through are
+        // updated, and no more is known of the ones of this chunk than of the batch before it.
+        const failures = chunk.failures ?? [];
+        if (failures.length > 0) {
+          appContextService
+            .getLogger()
+            .warn(
+              `Update by query of action ${actionId} failed for ${
+                failures.length
+              } agents: ${JSON.stringify(failures).slice(0, 1000)}`
+            );
+        }
+        throw new UpdateByQueryCancelledError(
+          `${describeIncomplete(chunk)}, giving up after running it again in chunks`
+        );
+      }
+      chunked.took = (chunked.took ?? 0) + (chunk.took ?? 0);
+      chunked.total =
+        chunked.total === undefined || chunk.total === undefined
+          ? undefined
+          : chunked.total + chunk.total;
+      chunked.updated = (chunked.updated ?? 0) + (chunk.updated ?? 0);
+      chunked.version_conflicts = (chunked.version_conflicts ?? 0) + (chunk.version_conflicts ?? 0);
+      chunked.failures = (chunked.failures ?? []).concat(chunk.failures ?? []);
+    }
+    res = chunked;
   }
 
   if (appContextService.getLogger().isLevelEnabled('debug')) {

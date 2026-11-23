@@ -578,144 +578,88 @@ describe('update_agent_tags', () => {
       });
     });
 
-    describe('when it stays cancelled', () => {
-      const failures = [{ id: 'agent2', cause: { reason: 'error reason' } }];
-      const cancelledWithFailures = {
-        ...cancelledTask,
-        response: { ...cancelledTask.response, failures },
+    describe('when the update of the whole batch is too slow', () => {
+      const manyAgents = (count: number) =>
+        Array.from({ length: count }, (_, index) => ({ id: `agent${index}` } as Agent));
+      const sizesOfRuns = () =>
+        esClient.updateByQuery.mock.calls.map(
+          ([request]) => (request as any).query.terms._id.length
+        );
+
+      // the first run, of the whole batch, is cancelled, and so is the chunk after `cancelledChunk`
+      const mockChunks = (cancelledChunk?: number) => {
+        const sizes: Record<string, number> = {};
+        esClient.updateByQuery.mockImplementation((async (request: any) => {
+          const taskId = `node1:${Object.keys(sizes).length}`;
+          sizes[taskId] = request.query.terms._id.length;
+          return { task: taskId };
+        }) as any);
+        esClient.tasks.get.mockImplementation((async ({ task_id: taskId }: { task_id: string }) => {
+          const run = Number(taskId.split(':')[1]);
+          return run === 0 || run === cancelledChunk
+            ? cancelledTask
+            : finishedTask({ updated: sizes[taskId], total: sizes[taskId] });
+        }) as any);
       };
-      // the kuery of the action leaves out the agents that have the tag the update removes
-      const clause = updatedAgentsClause(['new'], ['old'], '(tags:old)');
-      const batch = (retryCount?: number, retrySkipsUpdated?: boolean) =>
+
+      const batch = (agentsOfBatch: Agent[]) =>
         updateTagsBatch(
           soClient,
           esClient,
-          agents,
+          agentsOfBatch,
           {},
-          {
-            tagsToAdd: ['new'],
-            tagsToRemove: ['old'],
-            kuery: '',
-            total: 5,
-            retryCount,
-            updatedAgentsClause: retrySkipsUpdated ? clause : undefined,
-          }
+          { tagsToAdd: ['new'], tagsToRemove: ['old'], total: agentsOfBatch.length }
         );
 
-      beforeEach(() => {
-        // the agents the runs updated between them: the second run did not go through the same ones
-        esClient.count.mockReset();
-        esClient.count.mockResolvedValue({ count: 4 } as any);
-      });
+      it('should update the agents a chunk at a time, and record each of them once', async () => {
+        mockChunks();
 
-      it('should record why agents failed when no retry of the action is left', async () => {
-        mockRuns(cancelledWithFailures, cancelledWithFailures);
+        const res = await batch(manyAgents(2500));
 
-        await expect(batch(MAX_RETRY_COUNT)).rejects.toThrow(/giving up/);
-
-        expect((esClient.create.mock.calls[0][0] as any).document.agents).toEqual(['agent2']);
-        expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
-          'error reason',
-        ]);
-      });
-
-      it('should record the agents it updated when the retry of the action leaves them out', async () => {
-        mockRuns(cancelledWithFailures, cancelledWithFailures);
-
-        await expect(batch(1, true)).rejects.toThrow(/giving up/);
-
-        // the 4 agents the runs updated between them, as Elasticsearch counts them, and not the 3
-        // of the last run or the one that failed, which the retry runs again
-        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(4);
+        // the whole batch, and then the chunks of it
+        expect(sizesOfRuns()).toEqual([2500, 1000, 1000, 500]);
+        expect(res).toEqual(expect.objectContaining({ updated: 2500 }));
+        expect((esClient.create.mock.calls[0][0] as any).document.agents).toHaveLength(2500);
         expect(getErrorResults(esClient)).toEqual([]);
       });
 
-      it('should count the agents of the batch that fail the clause of the kuery', async () => {
-        mockRuns(cancelledTask, cancelledTask);
+      it('should update every agent in the chunks, and none twice', async () => {
+        mockChunks();
 
-        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+        await batch(manyAgents(2500));
 
-        const { index, query } = esClient.count.mock.calls[0][0] as any;
-        expect(index).toEqual('.fleet-agents');
-        // the agents of the update: its ids, without the ones that are in another space, and that
-        // it wrote, as the time it gave them shows
-        const update = esClient.updateByQuery.mock.calls[0][0] as any;
-        expect(update.script.params.updatedAt).toEqual(expect.any(String));
-        expect(query.bool.filter).toEqual([
-          update.query,
-          { term: { updated_at: update.script.params.updatedAt } },
-        ]);
-        // that do not match what the retry selects by: they were updated, and it leaves them out
-        expect(query.bool.must_not).toEqual([
-          toElasticsearchQuery(fromKueryExpression('tags:old')),
-        ]);
+        const idsOfChunks = esClient.updateByQuery.mock.calls
+          .slice(1)
+          .flatMap(([request]) => (request as any).query.terms._id);
+        expect(idsOfChunks).toEqual(manyAgents(2500).map(({ id }) => id));
       });
 
-      it('should give both runs the time that marks the agents it counts', async () => {
-        mockRuns(cancelledTask, cancelledTask);
+      it('should give up, and record nothing, when a chunk is cancelled as well', async () => {
+        mockChunks(2);
 
-        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+        const error = await batch(manyAgents(2500)).catch((e) => e);
 
-        // the runs write the same time, so the agents of the first run are counted with the second's
-        const times = esClient.updateByQuery.mock.calls.map(
-          ([request]) => (request as any).script.params.updatedAt
+        expect(error).toBeInstanceOf(UpdateByQueryCancelledError);
+        expect(error.message).toMatch(
+          /cancelled .* after updating 3 of 5 agents, giving up after running it again in chunks/
         );
-        expect(times).toHaveLength(2);
-        expect(times[1]).toEqual(times[0]);
-      });
-
-      it('should make the writes of the cancelled runs visible before the retry can select agents', async () => {
-        mockRuns(cancelledTask, cancelledTask);
-
-        await expect(batch(1, true)).rejects.toThrow(/giving up/);
-
-        expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
-        expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: '.fleet-agents' });
-        // before the agents are counted, which needs them, and what the retry leaves out is recorded
-        expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
-          esClient.count.mock.invocationCallOrder[0]
-        );
-        expect(esClient.count.mock.invocationCallOrder[0]).toBeLessThan(
-          esClient.create.mock.invocationCallOrder[0]
-        );
-      });
-
-      it('should not refresh when there is nothing recorded for the retry to leave out', async () => {
-        mockRuns(cancelledTask, cancelledTask);
-
-        await expect(batch(1, false)).rejects.toThrow(/giving up/);
-
-        expect(esClient.indices.refresh).not.toHaveBeenCalled();
-        expect(esClient.count).not.toHaveBeenCalled();
-      });
-
-      it('should record both when no retry of the action is left', async () => {
-        mockRuns(cancelledWithFailures, cancelledWithFailures);
-
-        await expect(batch(MAX_RETRY_COUNT, true)).rejects.toThrow(/giving up/);
-
-        expect(esClient.create).toHaveBeenCalledTimes(1);
-        // the 4 agents updated and the one that failed
-        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(5);
-        expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
-          'error reason',
-        ]);
-      });
-
-      it('should not record the agents it updated when the retry of the action goes through them again', async () => {
-        mockRuns(cancelledTask, cancelledTask);
-
-        await expect(batch(1, false)).rejects.toThrow(/giving up/);
-
+        // the whole batch, and the first two chunks
+        expect(sizesOfRuns()).toEqual([2500, 1000, 1000]);
         expect(esClient.create).not.toHaveBeenCalled();
+        expect(getErrorResults(esClient)).toEqual([]);
       });
 
-      it('should leave them to the retry of the action while there is one', async () => {
-        mockRuns(cancelledWithFailures, cancelledWithFailures);
+      it('should go through an agent that is given more than once in one chunk', async () => {
+        mockChunks();
 
-        await expect(batch(MAX_RETRY_COUNT - 1)).rejects.toThrow(/giving up/);
+        await batch([
+          { id: 'agent1' } as Agent,
+          { id: 'agent1' } as Agent,
+          { id: 'agent2' } as Agent,
+        ]);
 
-        expect(esClient.create).not.toHaveBeenCalled();
+        expect(sizesOfRuns()).toEqual([3, 2]);
+        // 2 agents, which the chunk went through: none is taken for one the update skipped
         expect(getErrorResults(esClient)).toEqual([]);
       });
     });
@@ -736,7 +680,7 @@ describe('update_agent_tags', () => {
 
       await expect(
         updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], [])
-      ).rejects.toThrow(/cancelled .* giving up after 2 attempts/);
+      ).rejects.toThrow(/cancelled .* giving up after running it again in chunks/);
 
       // two runs of the update, and no more from a retry of the request
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
