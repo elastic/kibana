@@ -163,11 +163,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
           dataLoading$.next(isLoading);
         });
 
-      // Clear state when the field changes
-      const fieldChangedSubscription = combineLatest([
-        dataControlManager.api.fieldName$,
-        dataControlManager.api.dataViewId$,
-      ])
+      // Clear state when the source or the field changes
+      const fieldChangedSubscription = dataControlManager.internalApi.valuesSourceSelection$
         .pipe(skip(1))
         .subscribe(() => {
           editorStateManager.api.setStep(DEFAULT_RANGE_SLIDER_STATE.step);

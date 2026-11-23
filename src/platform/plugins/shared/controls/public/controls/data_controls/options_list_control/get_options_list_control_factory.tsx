@@ -21,11 +21,7 @@ import {
   skip,
 } from 'rxjs';
 
-import {
-  ControlValuesSource,
-  OPTIONS_LIST_CONTROL,
-  DEFAULT_DSL_OPTIONS_LIST_STATE,
-} from '@kbn/controls-constants';
+import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
@@ -69,6 +65,7 @@ import {
   selectAll,
 } from './utils/selection_utils';
 import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
+import { isSameValuesSourceSelection } from '../../utils/control_source';
 
 export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   OptionsListDSLControlState,
@@ -131,17 +128,10 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
       });
 
       /** Clear state when the field changes */
-      const fieldChangedSubscription = combineLatest([
-        dataControlManager.api.fieldName$,
-        dataControlManager.api.dataViewId$,
-        dataControlManager.api.valuesSource$,
-      ])
+      const fieldChangedSubscription = dataControlManager.internalApi.valuesSourceSelection$
         .pipe(
-          filter(([, , valuesSource]) => valuesSource === ControlValuesSource.FIELD),
-          distinctUntilChanged(
-            ([fieldNameA, dataViewIdA], [fieldNameB, dataViewIdB]) =>
-              fieldNameA === fieldNameB && dataViewIdA === dataViewIdB
-          ),
+          filter(({ source }) => source.kind === 'dataView'),
+          distinctUntilChanged(isSameValuesSourceSelection),
           skip(1) // skip first, since this represents initialization
         )
         .subscribe(() => {

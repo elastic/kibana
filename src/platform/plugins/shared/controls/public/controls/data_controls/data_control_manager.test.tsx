@@ -34,7 +34,21 @@ jest.mock('../utils/get_data_view_id_from_esql_query', () => ({
   getDataViewIdFromESQLQuery: jest.fn().mockResolvedValue('myDataViewId'),
 }));
 
+const mockResolveControlSource = jest.fn();
+jest.mock('../utils/control_source', () => {
+  const actual = jest.requireActual('../utils/control_source');
+  return {
+    ...actual,
+    resolveControlSource: (...args: unknown[]) =>
+      (mockResolveControlSource.getMockImplementation() ?? actual.resolveControlSource)(...args),
+  };
+});
+
 describe('initializeDataControlManager', () => {
+  afterEach(() => {
+    mockResolveControlSource.mockReset();
+  });
+
   const dataControlState: DataControlState = {
     ...DEFAULT_DATA_CONTROL_STATE,
     data_view_id: 'myDataViewId',
@@ -319,7 +333,7 @@ describe('initializeDataControlManager', () => {
       expect(mockGetESQLSingleColumnValues.mock.calls.length).toBe(initialCalls);
     });
 
-    it('keeps the derived field and data view when reinitialized with the same query', async () => {
+    it('derives the field from the column of the query, without storing it in the state', async () => {
       mockGetESQLSingleColumnValues.mockResolvedValue({
         values: ['US'],
         column: { name: 'myFieldName', type: 'keyword' },
@@ -344,7 +358,39 @@ describe('initializeDataControlManager', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
-      expect(dataControlManager.api.dataViewId$.value).toBe('myDataViewId');
+      expect(dataControlManager.api.field$.value?.name).toBe('myFieldName');
+      expect(dataControlManager.api.dataSources$.value?.[0].id).toBe('myDataViewId');
+      expect(dataControlManager.api.dataViewId$.value).toBe('');
+    });
+
+    it('does not report a change of the selection when the field is derived from the query', async () => {
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['US'],
+        column: { name: 'myFieldName', type: 'keyword' },
+      });
+      const { data_view_id: _dataViewId, field_name: _fieldName, ...savedState } = esqlState;
+      const dataControlManager = await initializeDataControlManager({
+        controlId: 'esqlControl',
+        controlType: 'esql',
+        state: savedState,
+        editorStateManager: initializeStateManager({}, {}),
+        parentApi: {},
+        typeDisplayName: 'ES|QL Control',
+      });
+      const selections: unknown[] = [];
+      dataControlManager.internalApi.valuesSourceSelection$.subscribe((selection) =>
+        selections.push(selection)
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(dataControlManager.api.fieldName$.value).toBe('myFieldName');
+      expect(selections).toHaveLength(1);
+
+      dataControlManager.api.setEsqlQuery('FROM logs | KEEP otherField');
+      expect(selections).toEqual([
+        { source: { kind: 'esql', query: esqlState.esql_query } },
+        { source: { kind: 'esql', query: 'FROM logs | KEEP otherField' } },
+      ]);
     });
   });
 
@@ -362,10 +408,25 @@ describe('initializeDataControlManager', () => {
       firstValueFrom(manager.api.valuesSourceFetchPlan$.pipe(filter(Boolean)));
 
     it('is a DSL request for a field of a data view', async () => {
-      expect(await planOf(await initializeManager({}))).toEqual({ fetchMode: 'dsl' });
+      expect(await planOf(await initializeManager({}))).toEqual({
+        fetchMode: 'dsl',
+        dataView: expect.objectContaining({ id: 'myDataViewId' }),
+      });
     });
 
     it('is a generated ES|QL query on the FROM target for a field of an ES|QL source', async () => {
+      const esqlSource = {
+        kind: 'esql',
+        id: 'esqlDatasetId',
+        title: 'logs-*,logs=archive',
+        fields: [],
+        getFieldByName: (name: string) => ({ name, type: 'string' }),
+        isTimeBased: () => false,
+      };
+      mockResolveControlSource.mockResolvedValue({
+        ...esqlSource,
+        toFilterableSource: async () => esqlSource,
+      });
       const manager = await initializeManager({ data_view_id: 'esqlDatasetId' });
 
       expect(await planOf(manager)).toEqual({

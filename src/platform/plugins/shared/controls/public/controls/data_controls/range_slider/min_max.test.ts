@@ -10,7 +10,8 @@
 import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import type { FilterableField, FilterableSource } from '@kbn/data-source';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { dataViewsService } from '../../../services/kibana_services';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { dataService, dataViewsService } from '../../../services/kibana_services';
 import type { ValuesSourceFetchPlan } from '../types';
 import { minMax$ } from './min_max';
 
@@ -90,5 +91,37 @@ describe('minMax$ with an ES|QL fetch plan', () => {
   it('has no bounds, and runs nothing, until the plan is known', async () => {
     expect(await run(undefined)).toEqual({ min: undefined, max: undefined });
     expect(mockGetESQLSingleColumnValues).not.toHaveBeenCalled();
+  });
+});
+
+describe('minMax$ with a DSL fetch plan', () => {
+  it('searches the data view of the plan, without loading one', async () => {
+    const field: FilterableField = { name: 'bytes', type: 'number', aggregatable: true };
+    const dataView = { id: 'myDataViewId', getFieldByName: () => field } as unknown as DataView;
+    const searchSource = {
+      setField: jest.fn(),
+      fetch$: () =>
+        of({ rawResponse: { aggregations: { minAgg: { value: 5 }, maxAgg: { value: 90 } } } }),
+    };
+    dataService.search.searchSource.create = jest.fn().mockResolvedValue(searchSource);
+    dataViewsService.get = jest.fn();
+
+    const result = await firstValueFrom(
+      minMax$({
+        controlFetch$: of({} as FetchContext),
+        dataSources$: new BehaviorSubject([dataView]),
+        fieldName$: new BehaviorSubject<string | undefined>('bytes'),
+        useGlobalFilters$: new BehaviorSubject<boolean | undefined>(true),
+        valuesSourceFetchPlan$: new BehaviorSubject<ValuesSourceFetchPlan | undefined>({
+          fetchMode: 'dsl',
+          dataView,
+        }),
+        setIsLoading: jest.fn(),
+      }).minMax$
+    );
+
+    expect(result).toEqual({ min: 5, max: 90 });
+    expect(searchSource.setField).toHaveBeenCalledWith('index', dataView);
+    expect(dataViewsService.get).not.toHaveBeenCalled();
   });
 });

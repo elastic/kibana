@@ -37,7 +37,6 @@ import { dataService } from '../../../services/kibana_services';
 import { getESQLSingleColumnValues } from '../../../../common/options_list';
 import { getControlsTimezone } from '../../utils';
 import type { DataControlEditorState } from './types';
-import { getDataViewIdFromESQLQuery } from '../../utils/get_data_view_id_from_esql_query';
 import { DataControlEditorStrings } from '../data_control_constants';
 
 interface ConfigureValuesQueryProps {
@@ -107,23 +106,13 @@ export const ConfigureValuesQuery = ({
         updatePreviewOptionsAndColumns(result.values, [result.column]);
         setESQLQueryValidation(!hasNoResults);
 
-        updateEditorState({
-          esql_query: query,
-          field_name: result.column.name,
-          data_view_id: await getDataViewIdFromESQLQuery(query, { parentApi }),
-        });
+        updateEditorState({ esql_query: query, field_name: result.column.name });
       } else {
         updatePreviewOptionsAndColumns([], result.columns);
         setESQLQueryValidation(false);
       }
     },
-    [
-      esqlVariables,
-      parentApi,
-      setESQLQueryValidation,
-      updatePreviewOptionsAndColumns,
-      updateEditorState,
-    ]
+    [esqlVariables, setESQLQueryValidation, updatePreviewOptionsAndColumns, updateEditorState]
   );
 
   // For edit mode, initialize the values preview
