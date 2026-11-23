@@ -124,7 +124,7 @@ export const createSlackReadTool = ({
   description: `Read Slack through a Slack connector assigned to this agent. It can only read: it cannot post, edit or react.
 
 Sub-actions:
-- listChannels: the channels the connector can see, with their ids. Params: types, excludeArchived, limit, cursor.
+- listChannels: the channels the connector can see, with their ids. Params: types, excludeArchived, limit, cursor. Outside the Elastic Slack app, types defaults to public channels only: pass ["private_channel"] to list private ones.
 - getConversationHistory: messages in a channel, newest first. Params: channel (required), oldest, latest, inclusive, limit, cursor.
 - getConversationReplies: a thread, parent message first. Params: channel and ts of the parent (both required), oldest, latest, inclusive, limit, cursor.
 

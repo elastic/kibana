@@ -605,7 +605,12 @@ describe('relayGetConversationHistory', () => {
   it.each([
     {
       error: relayError(403, { reason: 'not_readable' }),
-      expected: { ok: false, reason: 'not_readable', channel: 'C123' },
+      expected: {
+        ok: false,
+        reason: 'not_readable',
+        channel: 'C123',
+        message: expect.stringContaining('public channels'),
+      },
     },
     {
       error: relayError(429, { reason: 'throttled', retryAfterSeconds: 30 }),
