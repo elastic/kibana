@@ -22,6 +22,21 @@ import {
 } from './run_query';
 
 describe('run query helpers', () => {
+  it('passes the supplied session to the ES|QL search', async () => {
+    const search = jest
+      .fn()
+      .mockReturnValue(
+        of({ isRunning: false, isPartial: false, rawResponse: { columns: [], values: [] } })
+      );
+
+    await getESQLResults({ esqlQuery: 'FROM foo', search, sessionId: 'cached-session' });
+
+    expect(search).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ sessionId: 'cached-session', strategy: 'esql_async' })
+    );
+  });
+
   describe('formatESQLColumns', () => {
     it('carries the column _meta over as esMeta', () => {
       const columns = formatESQLColumns([

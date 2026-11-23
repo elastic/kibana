@@ -52,7 +52,11 @@ describe('resolveConfiguration', () => {
           { aiIndicesEnabled, request }
         );
 
-        expect(resolved.capabilities).toEqual({ attachmentTools: true });
+        expect(resolved.capabilities).toEqual({
+          attachmentTools: true,
+          apiTools: true,
+          bashTool: true,
+        });
       });
 
       it('is off only for enabled: false', async () => {
@@ -61,7 +65,40 @@ describe('resolveConfiguration', () => {
           { aiIndicesEnabled, request }
         );
 
-        expect(resolved.capabilities).toEqual({ attachmentTools: false });
+        expect(resolved.capabilities).toEqual({
+          attachmentTools: false,
+          apiTools: true,
+          bashTool: true,
+        });
+      });
+    });
+  });
+
+  describe('capabilities.bashTool', () => {
+    it.each([
+      ['no capabilities', {}],
+      ['empty capabilities', { capabilities: {} }],
+      ['an empty bash_tool key', { capabilities: { bash_tool: {} } }],
+      ['enabled: true', { capabilities: { bash_tool: { enabled: true } } }],
+    ])('is on for %s', async (_label, extra) => {
+      const resolved = await resolveConfiguration(
+        { ...configuration, ...extra },
+        { aiIndicesEnabled: false, request }
+      );
+
+      expect(resolved.capabilities.bashTool).toBe(true);
+    });
+
+    it('is off only for enabled: false, leaving the other capabilities on', async () => {
+      const resolved = await resolveConfiguration(
+        { ...configuration, capabilities: { bash_tool: { enabled: false } } },
+        { aiIndicesEnabled: false, request }
+      );
+
+      expect(resolved.capabilities).toEqual({
+        attachmentTools: true,
+        apiTools: true,
+        bashTool: false,
       });
     });
   });

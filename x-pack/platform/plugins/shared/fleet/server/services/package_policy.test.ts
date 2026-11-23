@@ -451,16 +451,22 @@ const createEndpointPackagePolicyWithInputId = (
 };
 
 describe('Package policy service', () => {
+  let clearStaleInputsSpy: jest.SpyInstance;
+
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
     jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableVersionSpecificPolicies: true,
     } as any);
+    clearStaleInputsSpy = jest
+      .spyOn(packagePolicyService as any, 'clearStaleInputsForVersions')
+      .mockResolvedValue(false);
   });
 
   afterEach(() => {
     appContextService.stop();
+    clearStaleInputsSpy.mockRestore();
 
     // `jest.resetAllMocks` breaks a ton of tests in this file 🤷‍♂️
     mockAgentPolicyService.get.mockReset();
@@ -2135,6 +2141,205 @@ describe('Package policy service', () => {
       mockCreateSuccess(soClient);
 
       await expect(createPackagePolicy(soClient)).resolves.toBeDefined();
+    });
+
+    describe('package listed as FIPS incompatible without fips_compatible flags', () => {
+      const connectorsPkgInfo = {
+        name: 'elastic_connectors',
+        version: '0.0.1',
+        policy_templates: [{ name: 'github', inputs: [] }],
+      };
+      const connectorsPolicy: NewPackagePolicy = {
+        ...newPackagePolicy,
+        inputs: [{ type: 'connectors-py', policy_template: 'github', enabled: true, streams: [] }],
+        package: { name: 'elastic_connectors', title: 'Elastic Connectors', version: '0.0.1' },
+      };
+
+      beforeEach(() => {
+        (getPackageInfo as jest.Mock).mockResolvedValue(connectorsPkgInfo);
+      });
+
+      it('create should reject the package when FIPS is enabled', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockAgentPolicyGet();
+
+        const promise = createPackagePolicy(soClient, {}, connectorsPolicy);
+
+        await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+        await expect(promise).rejects.toThrow(
+          'Cannot create a package policy for elastic_connectors: the integration is not FIPS compatible'
+        );
+        expect(soClient.create).not.toHaveBeenCalled();
+      });
+
+      it('create should allow the package when using the force flag', async () => {
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(
+          createPackagePolicy(soClient, { force: true }, connectorsPolicy)
+        ).resolves.toBeDefined();
+      });
+
+      it('create should allow the package when FIPS is not enabled', async () => {
+        jest.spyOn(appContextService, 'getIsFipsEnabled').mockReturnValue(false);
+        const soClient = createSavedObjectClientMock();
+        mockCreateSuccess(soClient);
+
+        await expect(createPackagePolicy(soClient, {}, connectorsPolicy)).resolves.toBeDefined();
+      });
+
+      describe('update', () => {
+        const connectorsPkgInfoWithTemplates = {
+          ...connectorsPkgInfo,
+          policy_templates: [
+            { name: 'github', inputs: [] },
+            { name: 'jira', inputs: [] },
+          ],
+        };
+        const connectorInput = (policyTemplate: string, enabled: boolean) => ({
+          type: 'connectors-py',
+          policy_template: policyTemplate,
+          enabled,
+          streams: [],
+        });
+        const buildPolicy = (inputs: NewPackagePolicy['inputs']) => ({
+          ...connectorsPolicy,
+          inputs,
+        });
+
+        beforeEach(() => {
+          (getPackageInfo as jest.Mock).mockResolvedValue(connectorsPkgInfoWithTemplates);
+        });
+
+        const runUpdate = (
+          oldInputs: NewPackagePolicy['inputs'],
+          newInputs: NewPackagePolicy['inputs'],
+          options: { force?: boolean } = {}
+        ) => {
+          const soClient = createSavedObjectClientMock();
+          mockAgentPolicyGet();
+          soClient.bulkGet.mockResolvedValue({
+            saved_objects: [
+              {
+                id: 'test-package-policy',
+                type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                references: [],
+                version: 'test',
+                attributes: buildPolicy(oldInputs) as any,
+              },
+            ],
+          });
+          soClient.get.mockResolvedValue({
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: buildPolicy(newInputs) as any,
+          });
+          soClient.update.mockImplementation((async (_type: string, _id: string, attrs: any) => ({
+            id: 'test-package-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            references: [],
+            attributes: attrs,
+          })) as any);
+          return packagePolicyService.update(
+            soClient,
+            elasticsearchServiceMock.createClusterClient().asInternalUser,
+            'test-package-policy',
+            buildPolicy(newInputs),
+            { skipUniqueNameVerification: true, ...options }
+          );
+        };
+
+        it('should allow editing an already enabled connector input without enabling new ones', async () => {
+          await expect(
+            runUpdate([connectorInput('github', true)], [connectorInput('github', true)])
+          ).resolves.toBeDefined();
+        });
+
+        it('should reject enabling a new connector input', async () => {
+          const promise = runUpdate(
+            [connectorInput('github', true), connectorInput('jira', false)],
+            [connectorInput('github', true), connectorInput('jira', true)]
+          );
+
+          await expect(promise).rejects.toBeInstanceOf(PackageFipsIncompatibleError);
+          await expect(promise).rejects.toThrow(
+            'Cannot update a package policy for elastic_connectors: the policy template jira is not FIPS compatible'
+          );
+        });
+
+        it('should allow enabling a new connector input when using the force flag', async () => {
+          await expect(
+            runUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)],
+              { force: true }
+            )
+          ).resolves.toBeDefined();
+        });
+
+        it('should allow enabling a new connector input when FIPS is not enabled', async () => {
+          jest.spyOn(appContextService, 'getIsFipsEnabled').mockReturnValue(false);
+
+          await expect(
+            runUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)]
+            )
+          ).resolves.toBeDefined();
+        });
+
+        describe('bulkUpdate', () => {
+          const runBulkUpdate = (
+            oldInputs: NewPackagePolicy['inputs'],
+            newInputs: NewPackagePolicy['inputs']
+          ) => {
+            const soClient = createSavedObjectClientMock();
+            mockAgentPolicyGet();
+            soClient.bulkGet.mockResolvedValue({
+              saved_objects: [
+                {
+                  id: 'test-package-policy',
+                  type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+                  references: [],
+                  version: 'test',
+                  attributes: buildPolicy(oldInputs) as any,
+                },
+              ],
+            });
+            soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+            return packagePolicyService.bulkUpdate(
+              soClient,
+              elasticsearchServiceMock.createClusterClient().asInternalUser,
+              [{ ...buildPolicy(newInputs), id: 'test-package-policy' } as any]
+            );
+          };
+
+          it('should put a policy enabling a new connector input in failedPolicies', async () => {
+            const res = await runBulkUpdate(
+              [connectorInput('github', true), connectorInput('jira', false)],
+              [connectorInput('github', true), connectorInput('jira', true)]
+            );
+
+            expect(res.updatedPolicies).toHaveLength(0);
+            expect(res.failedPolicies).toHaveLength(1);
+            expect(res.failedPolicies[0].error).toBeInstanceOf(PackageFipsIncompatibleError);
+            expect((res.failedPolicies[0].error as Error).message).toBe(
+              'Cannot update a package policy for elastic_connectors: the policy template jira is not FIPS compatible'
+            );
+          });
+
+          it('should not fail a policy that only keeps its already enabled connector input', async () => {
+            const res = await runBulkUpdate(
+              [connectorInput('github', true)],
+              [connectorInput('github', true)]
+            );
+
+            expect(res.failedPolicies).toHaveLength(0);
+          });
+        });
+      });
     });
 
     describe('package with a mix of FIPS compatible and non FIPS policy templates', () => {
@@ -7512,6 +7717,11 @@ describe('Package policy service', () => {
         {
           when: 'a stale stored condition is cleared on the same package version',
           old: { package_agent_version_condition: '>=9.3.0' },
+          expected: false,
+        },
+        {
+          when: 'a stale inputs_for_versions cache was cleared on the same package version',
+          setup: () => clearStaleInputsSpy.mockResolvedValue(true),
           expected: false,
         },
         {
@@ -16866,6 +17076,178 @@ describe('compilePackagePolicyForVersions()', () => {
       expect(mockRecompileInputsWithAgentVersion).not.toHaveBeenCalled();
       expect(soClient.update).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('clearStaleInputsForVersions()', () => {
+  const noConditionAssetsMap = new Map() as PackagePolicyAssetsMap;
+  const conditionPackageInfo = {
+    name: 'test',
+    version: '1.0.0',
+    conditions: { agent: { version: '^9.3.0' } },
+  } as PackageInfo;
+  const noConditionPackageInfo = { name: 'test', version: '1.0.1' } as PackageInfo;
+  const clear = (soClient: any, candidates: any[]) =>
+    (packagePolicyService as any).clearStaleInputsForVersions(soClient, candidates);
+
+  const makeSoClient = (caches: Record<string, Record<string, any>>) => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.bulkGet.mockImplementation(async (objs: any[]) => ({
+      saved_objects: objs.map(({ id }) => ({
+        id,
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: { inputs_for_versions: caches[id] },
+      })),
+    }));
+    soClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+    return soClient;
+  };
+
+  beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    jest.mocked(isSpaceAwarenessEnabled).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+    jest.clearAllMocks();
+  });
+
+  it('clears the stale caches of package policies without a condition in one read and one write', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] }, b: {}, c: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+      {
+        packagePolicyId: 'b',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+      { packagePolicyId: 'c', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
+    ]);
+
+    expect(result).toBe(true);
+    expect(soClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(soClient.bulkGet.mock.calls[0][0]!.map((o) => o.id)).toEqual(['a', 'b']);
+    expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+    expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: 'a',
+        attributes: { inputs_for_versions: {} },
+        version: 'WzEsMV0=',
+      }),
+    ]);
+  });
+
+  it('logs and keeps going when a clear loses a version conflict', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] }, b: { '9.5': [] } });
+    soClient.bulkUpdate.mockResolvedValue({
+      saved_objects: [
+        { id: 'a', type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, attributes: {}, references: [] },
+        {
+          id: 'b',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+        },
+      ],
+    } as any);
+
+    const result = await clear(
+      soClient,
+      ['a', 'b'].map((packagePolicyId) => ({
+        packagePolicyId,
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      }))
+    );
+
+    // `a` was cleared, so the agent policies are still recomputed.
+    expect(result).toBe(true);
+    expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+  });
+
+  it('logs and returns false instead of throwing when the read rejects', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkGet.mockRejectedValue(new Error('ES down'));
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+  });
+
+  it('logs and returns false instead of throwing when the write rejects', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+    soClient.bulkUpdate.mockRejectedValue(new Error('ES down'));
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+  });
+
+  it('does not write when no cache is stored', async () => {
+    const soClient = makeSoClient({ a: {} });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+  });
+
+  it('does no I/O when every package still has a condition', async () => {
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      { packagePolicyId: 'a', packageInfo: conditionPackageInfo, assetsMap: noConditionAssetsMap },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  it('does no I/O when the feature flag is disabled', async () => {
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableVersionSpecificPolicies: false,
+    } as any);
+    const soClient = makeSoClient({ a: { '9.5': [] } });
+
+    const result = await clear(soClient, [
+      {
+        packagePolicyId: 'a',
+        packageInfo: noConditionPackageInfo,
+        assetsMap: noConditionAssetsMap,
+      },
+    ]);
+
+    expect(result).toBe(false);
+    expect(soClient.bulkGet).not.toHaveBeenCalled();
   });
 });
 

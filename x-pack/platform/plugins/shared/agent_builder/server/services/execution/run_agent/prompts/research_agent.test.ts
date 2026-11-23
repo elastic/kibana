@@ -40,7 +40,11 @@ describe('getResearchAgentPrompt', () => {
             } as any),
         }),
       },
-      configuration: { instructions: '', aiIndices: [], capabilities: { attachmentTools: true } },
+      configuration: {
+        instructions: '',
+        aiIndices: [],
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
+      },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
@@ -53,6 +57,8 @@ describe('getResearchAgentPrompt', () => {
       },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
+      connectorsAssigned: false,
+      smlSearchSelected: false,
       toolManager: {} as any,
       resultTransformer: jest.fn(),
       renderers: [],
@@ -171,6 +177,45 @@ describe('getResearchAgentPrompt', () => {
     expect(system).not.toMatch(/- alpha \(.+SKILL\.md\)/);
   });
 
+  it.each([true, false])(
+    'omits the SKILLS section and every skill rule when the agent has no skills (relevant skills: %s)',
+    async (relevantSkillsEnabled) => {
+      const messages = await getResearchAgentPrompt(
+        makeParams({
+          experimentalFeatures: { bash: false, skills: true },
+          relevantSkillsEnabled,
+          skills: [],
+        })
+      );
+      const system = asText(messages[0]);
+
+      expect(system).not.toContain('## SKILLS');
+      expect(system).not.toContain('search_relevant_skills');
+      expect(system).not.toContain('Skill scope');
+      expect(system).not.toContain('Exception: always load applicable skills');
+      expect(system).not.toContain('Load applicable skills first');
+      expect(system).not.toContain('**Cross-scope**');
+      expect(system).toContain('1. Honor explicit user preference');
+    }
+  );
+
+  it('keeps every skill rule when the agent has a skill', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: false,
+        skills: [alphaSkill],
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain('5) Skill scope');
+    expect(system).toContain('Exception: always load applicable skills');
+    expect(system).toContain('1. Load applicable skills first');
+    expect(system).toContain('2. Honor explicit user preference');
+    expect(system).toContain('**Cross-scope**');
+  });
+
   it('injects the <relevant_skills> notice after previous rounds when the run has a relevant_skills step', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
@@ -232,7 +277,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -250,7 +295,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -312,6 +357,8 @@ describe('getResearchAgentPrompt', () => {
           bash: false,
           skills: false,
         },
+        connectorsAssigned: true,
+        smlSearchSelected: true,
       })
     );
     const system = asText(messages[0]);
@@ -329,7 +376,7 @@ describe('getResearchAgentPrompt', () => {
         configuration: {
           instructions: '',
           aiIndices: ['elastic'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
           ],
@@ -340,6 +387,8 @@ describe('getResearchAgentPrompt', () => {
           bash: false,
           skills: false,
         },
+        connectorsAssigned: true,
+        smlSearchSelected: true,
       })
     );
     const system = asText(messages[0]);
@@ -349,13 +398,82 @@ describe('getResearchAgentPrompt', () => {
     expect(discovery).not.toContain('`elastic` AI Index');
   });
 
+  describe('connector sections', () => {
+    const renderSystem = async ({
+      connectorsAssigned,
+      smlSearchSelected,
+      sml,
+    }: {
+      connectorsAssigned: boolean;
+      smlSearchSelected: boolean;
+      sml: boolean;
+    }) =>
+      asText(
+        (
+          await getResearchAgentPrompt(
+            makeParams({
+              experimentalFeatures: { aiIndices: false, sml, bash: false, skills: false },
+              connectorsAssigned,
+              smlSearchSelected,
+            })
+          )
+        )[0]
+      );
+
+    it('omits both sections but keeps the # references sml_attach line when no connectors are assigned', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: false,
+        smlSearchSelected: true,
+        sml: true,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).not.toContain('## CONNECTOR ACTION HINTS');
+      expect(system).toContain('call `sml_attach`');
+    });
+
+    it('renders both sections when connectors are assigned and sml_search is selected', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: true,
+        sml: true,
+      });
+
+      expect(system).toContain('## CONNECTOR DISCOVERY');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
+
+    it('renders only the action hints when sml_search is not selected', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: false,
+        sml: true,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
+
+    it('renders only the action hints when SML is off', async () => {
+      const system = await renderSystem({
+        connectorsAssigned: true,
+        smlSearchSelected: true,
+        sml: false,
+      });
+
+      expect(system).not.toContain('## CONNECTOR DISCOVERY');
+      expect(system).not.toContain('call `sml_attach`');
+      expect(system).toContain('## CONNECTOR ACTION HINTS');
+    });
+  });
+
   it('renders every catalog entry, including custom AI Indices', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         configuration: {
           instructions: '',
           aiIndices: ['elastic', 'my-custom'],
-          capabilities: { attachmentTools: true },
+          capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
           aiIndexCatalog: [
             { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
             { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets' },
@@ -392,7 +510,7 @@ describe('getResearchAgentPrompt', () => {
       configuration: {
         instructions: '',
         aiIndices: [],
-        capabilities: { attachmentTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       spaceId: 'default',
       deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
@@ -434,7 +552,11 @@ describe('getResearchAgentPrompt', () => {
     const systemPrompt = async (overrides: Record<string, any> = {}) =>
       asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
 
-    const off = { instructions: '', aiIndices: [], capabilities: { attachmentTools: false } };
+    const off = {
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: false, apiTools: true, bashTool: true },
+    };
 
     it('replaces the ATTACHMENTS section with the notice and drops inline rendering when off', async () => {
       const prompt = await systemPrompt({ configuration: off });
@@ -478,6 +600,74 @@ describe('getResearchAgentPrompt', () => {
       const offPrompt = await systemPrompt({ configuration: off });
 
       expect(on.length - offPrompt.length).toBeGreaterThanOrEqual(1000);
+    });
+  });
+
+  describe('bash_tool capability', () => {
+    const bashLine = 'run a bash command in a sandboxed shell';
+    const tableRenderer = {
+      type: 'table',
+      payloadSchema: z.object({ columns: z.array(z.string()) }),
+      getAgentDescription: () => 'Renders a dataset as an interactive table.',
+    };
+    const withCapability = (bashTool: boolean) => ({
+      instructions: '',
+      aiIndices: [],
+      capabilities: { attachmentTools: true, apiTools: true, bashTool },
+    });
+    const systemPrompt = async (overrides: Record<string, any>) =>
+      asText((await getResearchAgentPrompt(makeParams(overrides)))[0]);
+
+    it('lists bash in the FILESYSTEM section when the flag and the capability are on', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain(bashLine);
+    });
+
+    it('does not list bash when the capability is off, but keeps read_file and list_files', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(false),
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
+      expect(prompt).toContain('## FILESYSTEM (VFS)');
+      expect(prompt).toContain('read_file');
+      expect(prompt).toContain('list_files');
+    });
+
+    it('keeps the render-payload workflow when the flag and the capability are on', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).toContain('Use the bash tool to write the payload');
+    });
+
+    it('drops the render-payload workflow along with bash when the capability is off', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(false),
+        renderers: [tableRenderer],
+        experimentalFeatures: { aiIndices: false, bash: true, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
+      expect(prompt).not.toContain('Use the bash tool to write the payload');
+      expect(prompt).not.toContain('#### type: "table"');
+    });
+
+    it('does not list bash when the flag is off', async () => {
+      const prompt = await systemPrompt({
+        configuration: withCapability(true),
+        experimentalFeatures: { aiIndices: false, bash: false, skills: false },
+      });
+
+      expect(prompt).not.toContain(bashLine);
     });
   });
 });

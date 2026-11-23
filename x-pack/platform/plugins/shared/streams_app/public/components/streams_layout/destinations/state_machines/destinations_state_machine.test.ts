@@ -20,7 +20,6 @@ import {
   type DestinationCreationFormData,
   type ElasticsearchDestinationFormData,
 } from '../types';
-import { composeStaticIndexesForAll } from '../destination_models';
 import {
   createDestinationsMachineImplementations,
   destinationsStateMachine,
@@ -308,13 +307,21 @@ describe('destinationsStateMachine', () => {
       'Fixed shared name plus a docs index',
       {
         auto: false,
-        ...composeStaticIndexesForAll('billing-default'),
+        staticNames: {
+          logs: { dataset: 'billing', namespace: 'default' },
+          metrics: { dataset: 'billing', namespace: 'default' },
+          traces: { dataset: 'billing', namespace: 'default' },
+        },
+        logsIndex: 'logs-billing.otel-default',
+        metricsIndex: 'metrics-billing.otel-default',
+        tracesIndex: 'traces-billing.otel-default',
         docsIndex: 'accounting-2026',
       },
       [
-        'logs-billing-default',
-        'metrics-billing-default',
-        'traces-billing-default',
+        'logs-billing.otel-default',
+        'metrics-billing.otel-default',
+        'metrics-billing.prometheus-default',
+        'traces-billing.otel-default',
         'accounting-2026',
       ],
     ],

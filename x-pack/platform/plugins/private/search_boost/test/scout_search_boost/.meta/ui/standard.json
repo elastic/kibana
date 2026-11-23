@@ -1,9 +1,35 @@
 {
-  "sha1": "f9691f1e21f568910733ec576c79e900a40f441b",
+  "sha1": "8c7edf6915704d28f52f384465965340ca2a443d",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "79eba99270dbe05-38707c2a01cae22",
+      "title": "Search boost rules and profiles shows the boost rules and what each applies to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_lists.spec.ts",
+        "line": 21,
+        "column": 23
+      }
+    },
+    {
+      "id": "79eba99270dbe05-65ff81b065688ef",
+      "title": "Search boost rules and profiles shows the boost profiles and opens the rules using one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/boost_lists.spec.ts",
+        "line": 36,
+        "column": 13
+      }
+    },
     {
       "id": "9575e8fa09115fe-0b0b9a563df4b2b",
       "title": "Search boost landing a user with read access opens the landing from the nav link",
@@ -13,21 +39,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/search_boost_landing.spec.ts",
-        "line": 11,
+        "line": 16,
         "column": 86
       }
     },
     {
-      "id": "9575e8fa09115fe-3469afd8c092e04",
-      "title": "Search boost landing a user without the feature privilege does not see the nav link",
+      "id": "9575e8fa09115fe-7d8af93e158a613",
+      "title": "Search boost landing a user with only read_boost_profiles does not see the nav link",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-vectordb"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/search_boost_landing.spec.ts",
-        "line": 30,
-        "column": 13
+        "line": 45,
+        "column": 18
+      }
+    },
+    {
+      "id": "9575e8fa09115fe-e06ce10e1fc8181",
+      "title": "Search boost landing a user with only read_boost_rules does not see the nav link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/search_boost/test/scout_search_boost/ui/tests/search_boost_landing.spec.ts",
+        "line": 45,
+        "column": 18
       }
     }
   ]

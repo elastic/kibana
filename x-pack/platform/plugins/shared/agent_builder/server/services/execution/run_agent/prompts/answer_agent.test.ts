@@ -37,7 +37,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
-        capabilities: { attachmentTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       skills: [],
       run: {
@@ -80,7 +80,7 @@ describe('getStructuredAnswerPrompt', () => {
       },
       configuration: {
         instructions: '',
-        capabilities: { attachmentTools: true },
+        capabilities: { attachmentTools: true, apiTools: true, bashTool: true },
       },
       skills: [],
       run: {
@@ -122,7 +122,10 @@ describe('getStructuredAnswerPrompt', () => {
             getTypeDefinition: (type: string) => ({ id: type } as any),
           }),
         },
-        configuration: { instructions: '', capabilities: { attachmentTools } },
+        configuration: {
+          instructions: '',
+          capabilities: { attachmentTools, apiTools: true, bashTool: true },
+        },
         skills: [],
         run: {
           steps: [],

@@ -8,7 +8,7 @@ The `response_stream` plugin demonstrates API endpoints that can stream data chu
 
 - Streaming just a raw string.
 - Streaming NDJSON with "old-school" redux like actions and client side state managed with `useFetchStream()`. This uses React's own `useReducer()` under the hood.
-- Streaming NDJSON with actions created via Redux Toolkit's `createSlice()` to a client with a full Redux Toolkit setup.
+- Streaming NDJSON with plain action creators to a client with a full Redux Toolkit setup. The creators have no Redux Toolkit dependency, so the server can share them with the client's `createSlice()`, which handles them through `extraReducers`.
 
 Code in `@kbn/ml-response-stream` contains helpers to set up a stream on the server side (`streamFactory()`) and consume it on the client side via a custom hook (`useFetchStream()`) or slice (`streamSlice()`). The utilities make use of TS generics in a way that allows to have type safety for both request related options as well as the returned data.
 

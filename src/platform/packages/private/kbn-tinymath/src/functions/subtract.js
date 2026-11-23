@@ -17,7 +17,7 @@
  * subtract(6, 3) // returns 3
  * subtract([10, 20, 30, 40], 10) // returns [0, 10, 20, 30]
  * subtract(10, [1, 2, 5, 10]) // returns [9, 8, 5, 0]
- * subtract([14, 42, 65, 108], [2, 7, 5, 12]) // returns [12, 35, 52, 96]
+ * subtract([14, 42, 65, 108], [2, 7, 5, 12]) // returns [12, 35, 60, 96]
  */
 
 function subtract(a, b) {
