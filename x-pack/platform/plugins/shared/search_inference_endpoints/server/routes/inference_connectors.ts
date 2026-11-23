@@ -11,7 +11,7 @@ import { isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { APIRoutes } from '../../common/types';
 import { ROUTE_VERSIONS } from '../../common/constants';
-import type { ResolvedInferenceEndpoints } from '../types';
+import type { InferenceFeatureTaskType, ResolvedInferenceEndpoints } from '../types';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
 import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
@@ -29,11 +29,14 @@ export const defineInferenceConnectorsRoute = ({
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
-  getConnectorList: (request: KibanaRequest, taskType?: string) => Promise<InferenceConnector[]>;
+  getConnectorList: (
+    request: KibanaRequest,
+    taskType?: InferenceFeatureTaskType
+  ) => Promise<InferenceConnector[]>;
   getConnectorById: (
     id: string,
     request: KibanaRequest,
-    taskType?: string
+    taskType?: InferenceFeatureTaskType
   ) => Promise<InferenceConnector>;
 }) => {
   router.versioned

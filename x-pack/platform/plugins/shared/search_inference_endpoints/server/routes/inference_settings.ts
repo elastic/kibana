@@ -19,6 +19,7 @@ import {
 } from '../../common/constants';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 import { APIRoutes } from '../../common/types';
+import type { InferenceFeatureTaskType } from '../types';
 import { inferenceSettingsSchemaV2 } from '../saved_objects/schema/v2';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { resolveFeatureEndpoints } from '../inference_endpoints';
@@ -36,7 +37,7 @@ const EMPTY_SETTINGS: InferenceSettingsResponse = {
 
 interface ResolvedEndpointId {
   id: string;
-  taskType: string;
+  taskType: InferenceFeatureTaskType;
 }
 
 /** The endpoint ids every sub-feature resolves to, each with the task type it is looked up by. */
@@ -61,7 +62,7 @@ const resolveAllEndpointIds = (
 
 const findInvalidEndpoints = async (
   endpointIds: ResolvedEndpointId[],
-  checkConnector: (id: string, taskType: string) => Promise<InferenceConnector>
+  checkConnector: (id: string, taskType: InferenceFeatureTaskType) => Promise<InferenceConnector>
 ): Promise<string[]> => {
   const invalid: string[] = [];
   for (const { id, taskType } of endpointIds) {
@@ -86,7 +87,7 @@ export const defineInferenceSettingsRoutes = ({
   getConnectorById: (
     id: string,
     request: KibanaRequest,
-    taskType?: string
+    taskType?: InferenceFeatureTaskType
   ) => Promise<InferenceConnector>;
 }) => {
   router.versioned

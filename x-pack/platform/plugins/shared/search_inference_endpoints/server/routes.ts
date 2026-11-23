@@ -20,7 +20,7 @@ import {
   type GetInferenceClient,
 } from './routes/test_inference_endpoint';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
-import type { ResolvedInferenceEndpoints } from './types';
+import type { InferenceFeatureTaskType, ResolvedInferenceEndpoints } from './types';
 import { APIRoutes } from './types';
 import { errorHandler } from './utils/error_handler';
 import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
@@ -38,11 +38,14 @@ export function defineRoutes({
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
-  getConnectorList: (request: KibanaRequest, taskType?: string) => Promise<InferenceConnector[]>;
+  getConnectorList: (
+    request: KibanaRequest,
+    taskType?: InferenceFeatureTaskType
+  ) => Promise<InferenceConnector[]>;
   getConnectorById: (
     id: string,
     request: KibanaRequest,
-    taskType?: string
+    taskType?: InferenceFeatureTaskType
   ) => Promise<InferenceConnector>;
   getInferenceClient: GetInferenceClient;
 }) {

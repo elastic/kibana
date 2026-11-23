@@ -7,21 +7,18 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type {
-  ApiInferenceConnector,
-  DECISION_TASK_TYPE,
-  InferenceConnector,
-} from '@kbn/inference-common';
+  InferenceEndpointTaskType,
+  InferenceServerSetup,
+  InferenceServerStart,
+} from '@kbn/inference-plugin/server';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 
 export type { InferenceTaskType, InferenceConnector };
 
-/**
- * The task types a feature can use: Elasticsearch has `decision`, which its client's types lack.
- * Remove `DECISION_TASK_TYPE` here once `InferenceTaskType` from `@elastic/elasticsearch` includes it.
- */
-export type InferenceFeatureTaskType = InferenceTaskType | typeof DECISION_TASK_TYPE;
+/** The task types a feature can use. */
+export type InferenceFeatureTaskType = InferenceEndpointTaskType;
 
 export interface RecommendedEndpoint {
   id: string;

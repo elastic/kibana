@@ -16,7 +16,7 @@ import {
   COMPLETION_TASK_TYPE,
 } from '@kbn/inference-common';
 import type { ActionsClientProvider } from '../types';
-import { getInferenceEndpoints } from './get_inference_endpoints';
+import { getInferenceEndpoints, type InferenceEndpointTaskType } from './get_inference_endpoints';
 
 const OCR_ONLY_PROPERTY = 'ocr-only';
 
@@ -38,7 +38,7 @@ export interface ConnectorListFilter {
    * The task type of the inference endpoints to list, `chat_completion` by default. Any other task
    * type lists only inference endpoints: stack connectors are chat models.
    */
-  taskType?: string;
+  taskType?: InferenceEndpointTaskType;
 }
 
 type GetConnectorListOptions = (
