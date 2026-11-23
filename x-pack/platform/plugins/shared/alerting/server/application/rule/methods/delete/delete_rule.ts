@@ -15,7 +15,7 @@ import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
-import { untrackRuleAlerts, bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import { untrackRuleAlerts, deleteLegacyActionsForRules } from '../../../../rules_client/lib';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { DeleteRuleParams } from './types';
 import { deleteRuleParamsSchema } from './schemas';
@@ -104,13 +104,6 @@ async function deleteRuleWithOCC(
 
   await untrackRuleAlerts(context, id, attributes);
 
-  // migrate legacy actions only for SIEM rules
-  // TODO (http-versioning): Remove this cast, this enables us to move forward
-  // without fixing all of other solution types
-  if (attributes.consumer === AlertConsumers.SIEM) {
-    await bulkMigrateLegacyActions({ context, rules: [rule], skipActionsValidation: true });
-  }
-
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.DELETE,
@@ -138,6 +131,11 @@ async function deleteRuleWithOCC(
     id,
   });
   const deleteTime = Date.now();
+
+  // Legacy SIEM actions have nothing to migrate for a deleted rule, so they are removed along with it
+  if (attributes.consumer === AlertConsumers.SIEM) {
+    await deleteLegacyActionsForRules(context, [id]);
+  }
 
   await logRuleChanges({
     ruleSOs: [rule],

@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { registerDataStreamRoutes } from './data_stream_routes';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
+import { UPLOAD_SAMPLES_MAX_REQUEST_BYTES } from '../../common';
 
 describe('Data stream routes - upload samples', () => {
   const uploadPath =
@@ -23,6 +24,7 @@ describe('Data stream routes - upload samples', () => {
   let mockEsSearch: jest.Mock;
   let mockGetCurrentUser: jest.Mock;
   let mockResponse: { ok: jest.Mock; badRequest: jest.Mock };
+  let capturedUploadRouteConfig: { path: string; options?: { body?: { maxBytes?: number } } };
 
   const createMockContext = (): AutomaticImportPluginRequestHandlerContext =>
     ({
@@ -46,16 +48,26 @@ describe('Data stream routes - upload samples', () => {
     };
 
     const routeHandlers: Record<string, { handler: typeof routeHandler }> = {};
+
     const mockRouter = {
       versioned: {
-        post: jest.fn().mockImplementation((config: { path: string }) => ({
-          addVersion: jest
-            .fn()
-            .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
-              routeHandlers[`POST:${config.path}`] = { handler };
-              return { addVersion: jest.fn() };
-            }),
-        })),
+        post: jest
+          .fn()
+          .mockImplementation(
+            (config: { path: string; options?: { body?: { maxBytes?: number } } }) => {
+              if (config.path === uploadPath) {
+                capturedUploadRouteConfig = config;
+              }
+              return {
+                addVersion: jest
+                  .fn()
+                  .mockImplementation((_versionConfig: unknown, handler: typeof routeHandler) => {
+                    routeHandlers[`POST:${config.path}`] = { handler };
+                    return { addVersion: jest.fn() };
+                  }),
+              };
+            }
+          ),
         delete: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
         patch: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
         get: jest.fn().mockReturnValue({ addVersion: jest.fn() }),
@@ -69,6 +81,12 @@ describe('Data stream routes - upload samples', () => {
     );
     routeHandler = routeHandlers[`POST:${uploadPath}`]?.handler;
     expect(routeHandler).toBeDefined();
+  });
+
+  it('raises the upload route body limit above the default 1MB Kibana maxPayload', () => {
+    expect(capturedUploadRouteConfig.options?.body?.maxBytes).toBe(
+      UPLOAD_SAMPLES_MAX_REQUEST_BYTES
+    );
   });
 
   describe('when body has samples (file upload)', () => {

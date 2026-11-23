@@ -53,3 +53,14 @@ export const isLegacyEventAttachment = (
 export const isLegacyAlertAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is AlertAttachmentPayload => attachment.type === AttachmentType.alert;
+
+/**
+ * Narrows a legacy alert attachment down to its `alertId` field. `type === AttachmentType.alert`
+ * alone doesn't guarantee `alertId` exists: unified reference attachments (e.g. `security.alert`)
+ * use `attachmentId` instead and their `type` is a plain `string`, so it isn't excluded by the
+ * `type` check alone.
+ */
+export const hasLegacyAlertId = <T extends { type: string }>(
+  attachment: T
+): attachment is T & { alertId: string | string[] } =>
+  attachment.type === AttachmentType.alert && 'alertId' in attachment;

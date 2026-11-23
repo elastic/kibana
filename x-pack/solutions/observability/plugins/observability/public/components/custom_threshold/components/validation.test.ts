@@ -11,12 +11,17 @@ import type {
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { EQUATION_REGEX, validateCustomThreshold } from './validation';
 
 const errorReason = 'this should appear as error reason';
 
 jest.mock('@kbn/es-query', () => {
   return {
+    // Resolved on call, not while the mock is created: requiring the real module here runs in the
+    // middle of a circular import chain and gets a partially loaded module.
+    fromKueryExpression: (query: string) =>
+      jest.requireActual('@kbn/es-query').fromKueryExpression(query),
     buildEsQuery: jest.fn(() => {
       // eslint-disable-next-line no-throw-literal
       throw { shortMessage: errorReason };
@@ -88,6 +93,33 @@ describe('Metric Threshold Validation', () => {
       } as unknown as CustomMetricExpressionParams[],
     });
     expect(res.errors.filterQuery[0]).toBe(`Filter query is invalid. ${errorReason}`);
+  });
+
+  describe('metric KQL filter', () => {
+    const validate = (metric: Partial<CustomThresholdExpressionMetric>) =>
+      validateCustomThreshold({
+        uiSettings: { get: jest.fn() } as unknown as IUiSettingsClient,
+        searchConfiguration: { index: 'test*' },
+        criteria: [
+          { metrics: [{ name: 'A', ...metric }] },
+        ] as unknown as CustomMetricExpressionParams[],
+      }).errors[0].metrics.A;
+
+    it.each(Object.values(Aggregators))(
+      'reports a syntax error for an invalid filter on %s',
+      (aggType) => {
+        expect(validate({ aggType, field: 'metric', filter: 'status: (' }).filter).toEqual(
+          expect.any(String)
+        );
+      }
+    );
+
+    it.each([Aggregators.COUNT, Aggregators.AVERAGE, Aggregators.RATE, Aggregators.LAST_VALUE])(
+      'does not report an error for a valid filter on %s',
+      (aggType) => {
+        expect(validate({ aggType, field: 'metric', filter: 'status: 500' })).toBeUndefined();
+      }
+    );
   });
 
   describe('warning threshold', () => {

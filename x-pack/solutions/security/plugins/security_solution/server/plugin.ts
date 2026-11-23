@@ -529,7 +529,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
-    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -804,6 +804,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless: this.isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
 
       this.trialCompanionMilestoneService.setup({

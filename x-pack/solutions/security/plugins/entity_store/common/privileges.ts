@@ -11,7 +11,7 @@
  */
 
 export const ENTITY_STORE_SOURCE_INDICES_PRIVILEGES = ['read', 'view_index_metadata'];
-export const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage'];
+export const ENTITY_STORE_TARGET_INDICES_PRIVILEGES = ['read', 'manage', 'write'];
 // Install creates index templates + component templates (manage_index_templates) and the
 // latest/metadata ingest pipelines (manage_ingest_pipelines). Both are enforced as the
 // requesting user, so both must be part of the enable-store privilege check.

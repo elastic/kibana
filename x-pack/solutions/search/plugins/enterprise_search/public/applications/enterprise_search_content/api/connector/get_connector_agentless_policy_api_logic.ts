@@ -26,7 +26,7 @@ export interface GetConnectorAgentlessPolicyApiResponse {
 export const getConnectorAgentlessPolicy = async ({
   connectorId,
 }: GetConnectorAgentlessPolicyApiArgs): Promise<GetConnectorAgentlessPolicyApiResponse> => {
-  const route = `/internal/enterprise_search/${connectorId}/agentless_policy`;
+  const route = `/internal/enterprise_search/${encodeURIComponent(connectorId)}/agentless_policy`;
 
   return await HttpLogic.values.http.get<GetConnectorAgentlessPolicyApiResponse>(route);
 };

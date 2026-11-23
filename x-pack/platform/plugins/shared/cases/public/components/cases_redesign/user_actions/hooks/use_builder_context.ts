@@ -39,7 +39,7 @@ export const useBuilderContext = ({
   handleDeleteComment,
 }: UseBuilderContextArgs) => {
   const { euiTheme } = useEuiTheme();
-  const { unifiedAttachmentTypeRegistry, owner } = useCasesContext();
+  const { unifiedAttachmentTypeRegistry, owner, permissions } = useCasesContext();
 
   return useMemo(
     () => ({
@@ -50,6 +50,7 @@ export const useBuilderContext = ({
       userProfiles,
       currentUserProfile,
       unifiedAttachmentTypeRegistry,
+      permissions,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,
@@ -65,6 +66,7 @@ export const useBuilderContext = ({
       userProfiles,
       currentUserProfile,
       unifiedAttachmentTypeRegistry,
+      permissions,
       manageMarkdownEditIds,
       selectedOutlineCommentId,
       loadingCommentIds,

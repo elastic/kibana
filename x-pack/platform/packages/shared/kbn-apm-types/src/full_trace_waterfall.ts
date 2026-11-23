@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TraceErrorRowSource } from './errors';
+
 type FullTraceWaterfallScrollProps =
   | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
   | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean };
@@ -29,4 +31,5 @@ export type FullTraceWaterfallOnErrorClick = (params: {
   errorCount: number;
   errorDocId?: string;
   docIndex?: string;
+  errorSource?: TraceErrorRowSource;
 }) => void;

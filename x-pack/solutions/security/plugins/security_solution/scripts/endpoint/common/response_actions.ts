@@ -14,7 +14,7 @@ import { encode } from '@kbn/cbor';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { endpointActionResponseCodes } from '../../../public/management/components/endpoint_responder/lib/endpoint_action_response_codes';
 import { isCancelAction } from '../../../common/endpoint/service/response_actions/type_guards';
-import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../../../common/endpoint/format_http_error';
 import { FleetActionGenerator } from '../../../common/endpoint/data_generators/fleet_action_generator';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import type {
@@ -32,6 +32,7 @@ import type {
   ResponseActionScanOutputContent,
   ResponseActionRunScriptOutputContent,
   LogsEndpointAction,
+  ResponseActionMemoryDumpParameters,
 } from '../../../common/endpoint/types';
 import { getFileDownloadId } from '../../../common/endpoint/service/response_actions/get_file_download_id';
 import {
@@ -81,7 +82,7 @@ export const sendFleetActionResponse = async (
         },
         ES_INDEX_OPTIONS
       )
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
   }
 
   // @ts-expect-error
@@ -171,7 +172,7 @@ export const sendEndpointActionResponse = async (
         body: endpointResponse,
         refresh: 'wait_for',
       })
-      .catch(catchAxiosErrorFormatAndThrow);
+      .catch(catchHttpErrorFormatAndThrow);
 
     // ------------------------------------------
     // Post Action Response tasks
@@ -206,30 +207,20 @@ export const sendEndpointActionResponse = async (
         action.command === 'runscript') &&
       !endpointResponse.error
     ) {
-      const filePath =
-        action.command === 'execute'
-          ? '/execute/file/path'
-          : (
-              action as unknown as ActionDetails<
-                ResponseActionGetFileOutputContent,
-                ResponseActionGetFileParameters
-              >
-            )?.parameters?.path ?? '/execute/file/path';
+      const filePaths =
+        action.command === 'execute' ? ['/execute/file/path'] : getGetFileRequestedPaths(action);
 
-      const fileName = basename(filePath.replace(/\\/g, '/'));
       const fileMetaDoc: FileUploadMetadata = generateFileMetadataDocumentMock({
         action_id: action.id,
         agent_id: actionAgentId,
         upload_start: Date.now(),
-        contents: [
-          {
-            sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
-            file_name: fileName ?? 'bad_file.txt',
-            path: filePath,
-            size: 4,
-            type: 'file',
-          },
-        ],
+        contents: filePaths.map((filePath) => ({
+          sha256: '8d61673c9d782297b3c774ded4e3d88f31a8869a8f25cf5cdd402ba6822d1d28',
+          file_name: basename(filePath.replace(/\\/g, '/')) ?? 'bad_file.txt',
+          path: filePath,
+          size: 4,
+          type: 'file' as const,
+        })),
         file: {
           attributes: ['archive', 'compressed'],
           ChunkSize: 4194304,
@@ -256,7 +247,7 @@ export const sendEndpointActionResponse = async (
           refresh: 'wait_for',
           body: fileMetaDoc,
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       // Index the file content (just one chunk)
       // call to `.index()` copied from File plugin here:
@@ -285,7 +276,7 @@ export const sendEndpointActionResponse = async (
             },
           }
         )
-        .catch(catchAxiosErrorFormatAndThrow)
+        .catch(catchHttpErrorFormatAndThrow)
         .then(() => sleep(2000));
     }
 
@@ -305,7 +296,7 @@ export const sendEndpointActionResponse = async (
         .then(
           (response) => response.hits?.hits[0]?._source?.EndpointActions.data.command || 'runscript'
         )
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       const canceledActionResponse =
         endpointActionGenerator.generateResponse<EndpointActionResponseDataOutput>({
@@ -335,7 +326,7 @@ export const sendEndpointActionResponse = async (
           body: canceledActionResponse,
           refresh: 'wait_for',
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
     }
   }
 
@@ -346,6 +337,23 @@ export const sendEndpointActionResponse = async (
 type ResponseOutput<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions']['data'], 'output'>;
+
+/** Returns the file path(s) requested via `parameters.path` or `parameters.paths` of a get-file action */
+const getGetFileRequestedPaths = (action: ActionDetails): string[] => {
+  const parameters: ResponseActionGetFileParameters | undefined = (
+    action as unknown as ActionDetails<
+      ResponseActionGetFileOutputContent,
+      ResponseActionGetFileParameters
+    >
+  )?.parameters;
+  const { path, paths } = parameters ?? {};
+
+  if (paths && paths.length > 0) {
+    return paths;
+  }
+
+  return [path ?? '/execute/file/path'];
+};
 
 const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
   const commentUppercase = (action?.comment ?? '').toUpperCase();
@@ -368,20 +376,13 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           content: {
             code: 'ra_get-file_success_done',
             zip_size: 123,
-            contents: [
-              {
-                type: 'file',
-                path: (
-                  action as unknown as ActionDetails<
-                    ResponseActionGetFileOutputContent,
-                    ResponseActionGetFileParameters
-                  >
-                ).parameters?.path,
-                size: 1234,
-                file_name: 'bad_file.txt',
-                sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
-              },
-            ],
+            contents: getGetFileRequestedPaths(action).map((filePath) => ({
+              type: 'file',
+              path: filePath,
+              size: 1234,
+              file_name: 'bad_file.txt',
+              sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
+            })),
           },
         },
       } as unknown as ResponseOutput<ResponseActionGetFileOutputContent>;
@@ -430,9 +431,22 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           type: 'json',
           content: {
             code: 'ra_memory-dump_success_done',
-            file_size: 2322000,
+            file_size: 2_322_000,
             path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
-            disk_free_space: 123045678009,
+            disk_free_space: 123_045_678_009,
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'raw'
+              ? {
+                  total_memory_size: 4_000_000_000,
+                  total_bytes_captured: 3_999_900_000,
+                  success_ratio: 3_999_998_000 / 4_000_000_000,
+                }
+              : {}),
+            ...((action.parameters as ResponseActionMemoryDumpParameters)?.type === 'kernel'
+              ? {
+                  dump_executed_from_driver: endpointActionGenerator.randomChoice([true, false]),
+                  user_space_included: endpointActionGenerator.randomChoice([true, false]),
+                }
+              : {}),
           },
         },
       } as unknown as ResponseOutput;
@@ -462,7 +476,7 @@ export async function getLatestActionDoc(
         },
         size: 1,
       })
-      .catch(catchAxiosErrorFormatAndThrow)
+      .catch(catchHttpErrorFormatAndThrow)
   ).hits.hits.at(0);
 }
 
@@ -494,5 +508,5 @@ export function updateActionDoc<T = unknown>(esClient: Client, id: string, doc: 
       doc,
       refresh: 'wait_for',
     })
-    .catch(catchAxiosErrorFormatAndThrow);
+    .catch(catchHttpErrorFormatAndThrow);
 }

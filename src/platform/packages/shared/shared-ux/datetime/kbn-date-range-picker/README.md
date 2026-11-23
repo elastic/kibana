@@ -9,4 +9,4 @@ It's meant to replace `[EuiSuperDatePicker](https://eui.elastic.co/docs/componen
 
 ## Preview
 
-Run `yarn storybook shared_ux` to preview.
+Run `pnpm storybook shared_ux` to preview.

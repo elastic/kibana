@@ -141,7 +141,9 @@ describe('useAttachSavedObject', () => {
     });
     // Success toast still fires — degradation is silent.
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith(expect.objectContaining({ text: 'My title' }))
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Added dashboard My title to case',
+      })
     );
   });
 
@@ -159,7 +161,9 @@ describe('useAttachSavedObject', () => {
       metadata: { title: 'My title', soType: 'map' },
     });
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith(expect.objectContaining({ text: 'My title' }))
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Added map My title to case',
+      })
     );
   });
 
@@ -211,7 +215,9 @@ describe('useAttachSavedObject', () => {
       await result.current.attach(buildSO({ id: 'search-1', type: 'search' }));
     });
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith(expect.objectContaining({ text: 'My title' }))
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Added Discover session My title to case',
+      })
     );
     expect(refreshCaseViewPage).toHaveBeenCalled();
     expect(onAttached).toHaveBeenCalled();

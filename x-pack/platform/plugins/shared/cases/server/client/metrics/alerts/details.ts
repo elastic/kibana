@@ -14,6 +14,7 @@ import { CaseMetricsFeature } from '../../../../common/types/api';
 import { Operations } from '../../../authorization';
 import { getOwnersFilter } from '../../../authorization/utils';
 import { createCaseError } from '../../../common/error';
+import { filterOriginAlerts } from '../../../common/utils';
 import type { UnifiedAttachmentAttributes } from '../../../common/types/attachments_v2';
 
 import { SingleCaseAggregationHandler } from '../single_case_aggregation_handler';
@@ -64,10 +65,13 @@ export class AlertDetails extends SingleCaseAggregationHandler {
         this.formatResponse<SingleCaseMetricsResponse>(undefined);
       let knownAlertNames: KnownAlertNames = { userNames: new Set(), hostNames: new Set() };
 
-      if (alerts.length > 0) {
+      // Linked-project indices (`cluster:index`) fail origin-only ES routing.
+      const originAlerts = filterOriginAlerts(alerts);
+
+      if (originAlerts.length > 0) {
         const aggregationsResponse = await alertsService.executeAggregations({
           aggregationBuilders: this.aggregationBuilders,
-          alerts,
+          alerts: originAlerts,
         });
         metrics = this.formatResponse<SingleCaseMetricsResponse>(aggregationsResponse);
         knownAlertNames = {

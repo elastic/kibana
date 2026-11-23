@@ -20,6 +20,7 @@ import {
   getAttackDiscoveryApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
+  getThreatIntelligenceApiService,
   getAnalyzerApiService,
   getNetworkApiService,
   getHostApiService,
@@ -88,6 +89,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.prevalence = getPrevalenceApiService({
+        esClient,
+        log,
+      });
+      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
         esClient,
         log,
       });

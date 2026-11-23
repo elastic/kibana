@@ -22,6 +22,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -86,6 +87,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;

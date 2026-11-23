@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: [
     '<rootDir>/x-pack/platform/plugins/shared/ai_infra/product_doc_base/public',

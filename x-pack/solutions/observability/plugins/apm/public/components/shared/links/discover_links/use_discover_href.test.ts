@@ -208,4 +208,63 @@ describe('useDiscoverHref', () => {
 
     expect(result.current).toBeUndefined();
   });
+
+  // The log-sources pattern comes from logSourcesService, not apmIndexSettings. Gating this
+  // branch on the APM fetch status would leave log links dead on pages that never resolve
+  // APM index settings.
+  describe('logs index source', () => {
+    it('builds the query from the supplied pattern while APM index settings are still loading', () => {
+      mockUseApmIndexSettingsContext.mockReturnValue({
+        indexSettings: [],
+        indexSettingsStatus: FETCH_STATUS.LOADING,
+      } as any);
+
+      const { result } = renderHook(() =>
+        useDiscoverHref({
+          indexType: 'logs',
+          indexPattern: 'logs-*,logs-generic.otel-default',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          queryParams: { traceId: 'abc-123', exceptionsOnly: true },
+        })
+      );
+
+      expect(result.current).toBe('http://test-discover-url');
+
+      const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
+      expect(esqlArg).toContain('FROM logs-*');
+      expect(esqlArg).toContain('logs-generic.otel-default');
+    });
+
+    it('returns undefined when the log sources pattern has not resolved', () => {
+      const { result } = renderHook(() =>
+        useDiscoverHref({
+          indexType: 'logs',
+          indexPattern: undefined,
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          queryParams: { traceId: 'abc-123' },
+        })
+      );
+
+      expect(result.current).toBeUndefined();
+      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+    });
+
+    it('never falls back to an APM index pattern', () => {
+      renderHook(() =>
+        useDiscoverHref({
+          indexType: 'logs',
+          indexPattern: 'logs-*',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          queryParams: {},
+        })
+      );
+
+      const esqlArg = mockGetRedirectUrl.mock.calls[0][0].query.esql;
+      expect(esqlArg).not.toContain(MOCK_TRACES_INDEX);
+      expect(esqlArg).not.toContain(MOCK_ERROR_INDEX);
+    });
+  });
 });

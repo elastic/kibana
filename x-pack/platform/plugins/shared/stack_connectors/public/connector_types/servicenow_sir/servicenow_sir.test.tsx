@@ -72,6 +72,25 @@ describe('servicenow action params validation', () => {
     });
   });
 
+  test('params validation succeeds when additional_fields contains mustache templates', async () => {
+    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    const actionParams = {
+      subActionParams: {
+        incident: {
+          short_description: 'some title',
+          additional_fields: '{ "u_raw_json": {{#context}}{{.}}{{/context}} }',
+        },
+      },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        'subActionParams.incident.short_description': [],
+        'subActionParams.incident.additional_fields': [],
+      },
+    });
+  });
+
   test(`params validation succeeds when its valid json and additional_fields has ${
     MAX_ADDITIONAL_FIELDS_LENGTH + 1
   } fields`, async () => {
