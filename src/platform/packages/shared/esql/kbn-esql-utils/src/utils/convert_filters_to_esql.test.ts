@@ -476,13 +476,41 @@ describe('ES|QL filters', () => {
       expect(convertEsqlFiltersToESQLExpression([esqlFilter])).toBe('`size` == "big"');
     });
 
-    it('uses MV_CONTAINS for several values, as an operator like IN evaluates to null on a multivalued column', () => {
-      expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
-        'MV_CONTAINS(`size`, ["a", "b"])'
-      );
-      expect(convertEsqlFiltersToESQLExpression([getPhrases([1, 2.5, true])])).toBe(
-        'MV_CONTAINS(`size`, [1, 2.5, true])'
-      );
+    describe('several values', () => {
+      it('checks each value with MV_CONTAINS, as an operator like IN evaluates to null on a multivalued column', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
+          '(MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_STRING(`size`), "b"))'
+        );
+      });
+
+      it('matches any of the values, like the phrases filters of DSL, and not all of them', () => {
+        // MV_CONTAINS(col, [a, b]) needs both, so a column that has only one of them would not match
+        const expression = convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])]);
+
+        expect(expression).toContain(' OR ');
+        expect(expression).not.toContain('[');
+      });
+
+      it('does not need an OR for a single value', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a'])])).toBe(
+          'MV_CONTAINS(TO_STRING(`size`), "a")'
+        );
+      });
+
+      it('compares the numbers as doubles, as MV_CONTAINS needs the same type and the one of the column is not known', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([1, 2.5])])).toBe(
+          '(MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(1)) OR MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(2.5)))'
+        );
+      });
+
+      it('compares the booleans as they are, and handles values of different types', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([true])])).toBe(
+          'MV_CONTAINS(`size`, true)'
+        );
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 1, false])])).toBe(
+          '(MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(1)) OR MV_CONTAINS(`size`, false))'
+        );
+      });
     });
 
     it('keeps the rows without a value when negating, as a negated DSL filter keeps the documents without the field', () => {
@@ -492,7 +520,7 @@ describe('ES|QL filters', () => {
         ])
       ).toBe('(`size` IS NULL OR NOT (`size` == "big"))');
       expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'], { negate: true })])).toBe(
-        '(`size` IS NULL OR NOT (MV_CONTAINS(`size`, ["a", "b"])))'
+        '(`size` IS NULL OR NOT ((MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_STRING(`size`), "b"))))'
       );
     });
 

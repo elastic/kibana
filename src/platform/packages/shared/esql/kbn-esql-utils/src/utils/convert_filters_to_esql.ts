@@ -176,6 +176,21 @@ const wrapWithNot = (expression: string | null, negate: boolean): string | null 
 };
 
 /**
+ * Checks that a column, that can have several values, has the value. An operator like IN evaluates to null on a
+ * multivalued column, and MV_CONTAINS needs the same type on both sides. The type of the column is not known, so
+ * the numbers are compared as doubles and the other values as strings, which works for any type of column.
+ */
+const getMultiValueCheck = (escapedField: string, value: string | number | boolean): string => {
+  if (typeof value === 'number') {
+    return `MV_CONTAINS(TO_DOUBLE(${escapedField}), TO_DOUBLE(${formatESQLValue(value)}))`;
+  }
+  if (typeof value === 'boolean') {
+    return `MV_CONTAINS(${escapedField}, ${formatESQLValue(value)})`;
+  }
+  return `MV_CONTAINS(TO_STRING(${escapedField}), ${formatESQLValue(value)})`;
+};
+
+/**
  * `match` uses the match operator, that works on the fields of the index right after the source command.
  * `exact` is for the columns that a query creates, where the match operator can't be used.
  */
@@ -216,8 +231,9 @@ const translatePhrasesFilter = (
   const escapedField = escapeFieldName(field);
 
   if (mode === 'exact') {
-    // the values of a multivalued column: an operator like IN evaluates to null on it
-    return `MV_CONTAINS(${escapedField}, [${values.map(formatESQLValue).join(', ')}])`;
+    // Any of the values, like the phrases filters of DSL
+    const checks = values.map((value) => getMultiValueCheck(escapedField, value));
+    return checks.length === 1 ? checks[0] : `(${checks.join(' OR ')})`;
   }
 
   if (values.length === 1) {
