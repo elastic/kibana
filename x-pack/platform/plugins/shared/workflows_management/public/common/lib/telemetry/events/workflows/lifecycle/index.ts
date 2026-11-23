@@ -6,6 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
+import type { TemplateOriginFields } from '@kbn/workflows';
 import type {
   ReportWorkflowClonedActionParams,
   ReportWorkflowCreatedActionParams,
@@ -92,12 +93,40 @@ const aiAssistedSchema: RootSchema<{ aiAssisted?: boolean }> = {
   },
 };
 
+const templateOriginSchema: RootSchema<TemplateOriginFields> = {
+  templateSlug: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Workflow Template library slug the workflow was created from, or `custom` for a template outside the catalog. Absent for workflows not created from a template.',
+      optional: true,
+    },
+  },
+  templateVersion: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'Version (semver) of the template the workflow was created from. Absent for `custom` templates.',
+      optional: true,
+    },
+  },
+  templateOrigin: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'How the workflow was created from the template: install (setup form), import (template file upload), or remix (Remix with AI)',
+      optional: true,
+    },
+  },
+};
+
 const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
   ...baseResultActionSchema,
   ...eventNameSchema,
   ...workflowIdSchema,
   ...editorTypeSchema,
   ...aiAssistedSchema,
+  ...templateOriginSchema,
   enabled: {
     type: 'boolean',
     _meta: {
@@ -227,6 +256,7 @@ const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
   ...eventNameSchema,
   ...editorTypeSchema,
   ...aiAssistedSchema,
+  ...templateOriginSchema,
   workflowId: {
     type: 'keyword',
     _meta: {
@@ -313,6 +343,7 @@ const workflowEnabledStateChangedSchema: RootSchema<ReportWorkflowEnabledStateCh
     ...baseResultActionSchema,
     ...eventNameSchema,
     ...editorTypeSchema,
+    ...templateOriginSchema,
     workflowId: {
       type: 'keyword',
       _meta: {

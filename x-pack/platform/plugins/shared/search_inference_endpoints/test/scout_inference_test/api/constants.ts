@@ -10,6 +10,8 @@ import type { KibanaRole } from '@kbn/scout';
 export const INFERENCE_SETTINGS_API_PATH = 'internal/search_inference_endpoints/settings';
 export const INFERENCE_FEATURES_API_PATH = 'internal/search_inference_endpoints/features';
 export const REGION_POLICY_API_PATH = 'internal/search_inference_endpoints/region_policy';
+export const getTestEndpointApiPath = (inferenceId: string) =>
+  `internal/search_inference_endpoints/endpoints/${encodeURIComponent(inferenceId)}/_test`;
 export const API_VERSION = '1';
 
 export const COMMON_HEADERS = {
@@ -32,6 +34,17 @@ export const FEATURE_PRIVILEGED_ROLE: KibanaRole = {
 
 export const FEATURE_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
+  kibana: [
+    {
+      base: [],
+      feature: { searchInferenceEndpoints: ['read'] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const FEATURE_READ_WITH_ES_INFERENCE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: ['manage_inference'], indices: [] },
   kibana: [
     {
       base: [],

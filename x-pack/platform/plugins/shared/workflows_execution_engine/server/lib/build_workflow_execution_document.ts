@@ -11,6 +11,7 @@ import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/wor
 import {
   ExecutionStatus,
   pickManagedWorkflowFields,
+  pickTemplateOriginFields,
   pickWorkflowDocumentVersion,
 } from '@kbn/workflows';
 import {
@@ -96,6 +97,7 @@ export const buildWorkflowExecutionDocument = (
     workflowId: workflow.id,
     ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
     ...pickManagedWorkflowFields(workflow),
+    ...pickTemplateOriginFields(workflow),
     isTestRun: workflow.isTestRun,
     isEphemeral: workflow.isEphemeral,
     workflowDefinition: workflow.definition,
