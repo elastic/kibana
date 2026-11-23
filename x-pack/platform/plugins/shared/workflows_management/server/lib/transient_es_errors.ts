@@ -15,11 +15,14 @@ export const SHARD_UNAVAILABLE_ERROR_TYPES: ReadonlySet<string> = new Set([
   'unavailable_shards_exception',
 ]);
 
-/** A workflow read or write failed because the workflow index's shard was not available. */
-export class WorkflowShardUnavailableError extends Error {
+/** Bulk item statuses of a node or shard that could not serve the write yet. */
+export const UNAVAILABLE_ITEM_STATUS_CODES: ReadonlySet<number> = new Set([502, 503, 504]);
+
+/** A workflow read or write failed because the workflow index could not serve it yet. */
+export class WorkflowIndexUnavailableError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'WorkflowShardUnavailableError';
+    this.name = 'WorkflowIndexUnavailableError';
   }
 }
 
@@ -29,7 +32,7 @@ export class WorkflowShardUnavailableError extends Error {
  * unavailable shards. Errors that would fail the same way again return false.
  */
 export const isTransientEsError = (error: unknown): boolean => {
-  if (error instanceof WorkflowShardUnavailableError) {
+  if (error instanceof WorkflowIndexUnavailableError) {
     return true;
   }
   if (!(error instanceof EsErrors.ElasticsearchClientError)) {

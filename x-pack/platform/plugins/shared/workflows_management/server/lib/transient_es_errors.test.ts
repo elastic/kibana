@@ -7,7 +7,7 @@
 
 import type { DiagnosticResult, TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
-import { isTransientEsError, WorkflowShardUnavailableError } from './transient_es_errors';
+import { isTransientEsError, WorkflowIndexUnavailableError } from './transient_es_errors';
 
 const responseError = (statusCode: number, type: string) =>
   new errors.ResponseError({
@@ -29,7 +29,7 @@ describe('isTransientEsError', () => {
       'an unavailable shard with another status',
       responseError(500, 'no_shard_available_action_exception'),
     ],
-    ['a workflow shard that is not available', new WorkflowShardUnavailableError('not ready')],
+    ['a workflow shard that is not available', new WorkflowIndexUnavailableError('not ready')],
   ])('returns true for %s', (_, error) => {
     expect(isTransientEsError(error)).toBe(true);
   });

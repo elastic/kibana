@@ -110,7 +110,8 @@ import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import {
   SHARD_UNAVAILABLE_ERROR_TYPES,
-  WorkflowShardUnavailableError,
+  UNAVAILABLE_ITEM_STATUS_CODES,
+  WorkflowIndexUnavailableError,
 } from '../lib/transient_es_errors';
 import { WorkflowHistoryEventNotFoundError } from '../lib/workflow_history_event_not_found_error';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
@@ -168,10 +169,10 @@ export type {
 const SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS = [100, 200, 400, 800, 1600] as const;
 const TOO_MANY_REQUESTS_STATUS_CODE = 429;
 
-const toBulkItemError = (error: estypes.ErrorCause): Error => {
+const toBulkItemError = (error: estypes.ErrorCause, status: number): Error => {
   const message = extractBulkItemError(error);
-  return SHARD_UNAVAILABLE_ERROR_TYPES.has(error.type)
-    ? new WorkflowShardUnavailableError(message)
+  return SHARD_UNAVAILABLE_ERROR_TYPES.has(error.type) || UNAVAILABLE_ITEM_STATUS_CODES.has(status)
+    ? new WorkflowIndexUnavailableError(message)
     : new Error(message);
 };
 
@@ -298,7 +299,7 @@ export class WorkflowCrudService {
       }
       const message = `Could not read workflow ${unavailable.id}: ${unavailable.reason}`;
       if (attempt >= SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS.length) {
-        throw new WorkflowShardUnavailableError(message);
+        throw new WorkflowIndexUnavailableError(message);
       }
       const retryDelayMs = SHARD_UNAVAILABLE_READ_RETRY_DELAYS_MS[attempt];
       this.deps.logger.debug(`${message}. Retrying in ${retryDelayMs} ms.`);
@@ -469,7 +470,10 @@ export class WorkflowCrudService {
           error: new Error(extractBulkItemError(operation.error)),
         };
       } else {
-        results[writeIndex] = { status: 'failed', error: toBulkItemError(operation.error) };
+        results[writeIndex] = {
+          status: 'failed',
+          error: toBulkItemError(operation.error, operation.status),
+        };
       }
     }
     return results;
