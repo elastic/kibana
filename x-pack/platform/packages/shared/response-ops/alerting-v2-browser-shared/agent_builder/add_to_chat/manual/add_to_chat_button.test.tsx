@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AddToChatButton } from './add_to_chat_button';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
@@ -31,7 +32,15 @@ const converter: AttachmentConverter<TestItem> = {
   getOrigin: (item) => item.id,
 };
 
-const services: ManualAddToChatServices = { agentBuilder: undefined };
+const { application } = coreMock.createStart();
+
+const services: ManualAddToChatServices = {
+  agentBuilder: undefined,
+  application: {
+    ...application,
+    capabilities: { ...application.capabilities, agentBuilder: { show: true } },
+  },
+};
 
 describe('AddToChatButton', () => {
   const addToChat = jest.fn();
