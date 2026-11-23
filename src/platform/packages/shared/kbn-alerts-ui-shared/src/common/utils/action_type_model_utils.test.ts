@@ -393,6 +393,20 @@ describe('action_type_model_utils', () => {
         });
       });
 
+      it('serializer keeps other internal fields when Run actions is not set', () => {
+        const headers = [{ key: 'X-Test', value: 'one', type: 'config' }];
+        const serialized = formModel().connectorForm?.serializer?.({
+          ...formData,
+          __internal__: { headers },
+        });
+
+        expect(serialized).toEqual({
+          ...formData,
+          config: { ...formData.config, authType: 'basic' },
+          __internal__: { headers },
+        });
+      });
+
       it('deserializer keeps auth type none for connectors without the switch', () => {
         const saved = {
           actionTypeId: 'test-connector',
