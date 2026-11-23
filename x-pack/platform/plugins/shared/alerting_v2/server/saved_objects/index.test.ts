@@ -16,6 +16,8 @@ import {
   registerSavedObjects,
   RULE_SAVED_OBJECT_TYPE,
 } from '.';
+import { importConfigMappings } from './import_config_mappings';
+import { importConfigModelVersions } from './model_versions';
 
 describe('registerSavedObjects', () => {
   const createDeps = () => {
@@ -55,6 +57,23 @@ describe('registerSavedObjects', () => {
     );
     expect(encryptedSavedObjects.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ type: ACTION_POLICY_SAVED_OBJECT_TYPE })
+    );
+  });
+
+  it('registers import configs as hidden, space-isolated and not importable', () => {
+    const { logger, savedObjects, encryptedSavedObjects } = createDeps();
+
+    registerSavedObjects({ savedObjects, encryptedSavedObjects, logger });
+
+    expect(savedObjects.registerType).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: IMPORT_CONFIG_SAVED_OBJECT_TYPE,
+        hidden: true,
+        namespaceType: 'multiple-isolated',
+        mappings: importConfigMappings,
+        modelVersions: importConfigModelVersions,
+        management: expect.objectContaining({ importableAndExportable: false }),
+      })
     );
   });
 
