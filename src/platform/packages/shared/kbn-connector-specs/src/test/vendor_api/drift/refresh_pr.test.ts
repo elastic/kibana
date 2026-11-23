@@ -93,6 +93,23 @@ describe('renderRefreshPr', () => {
     expect(body).toContain('New spec has 1 change to the spec as a whole.');
   });
 
+  it('counts the changes to endpoints and to the spec as a whole apart', () => {
+    const body = renderRefreshPr([
+      changed('.mixed', [
+        field('GET /a', 'title'),
+        added(
+          undefined,
+          'the component security scheme `apiKey` was added',
+          'api-security-component-added'
+        ),
+      ]),
+    ]);
+
+    expect(body).toContain(
+      'New spec has 1 change on 1 endpoint that the connector uses, and 1 change to the spec as a whole.'
+    );
+  });
+
   it('finds the actions that call an MCP tool, which the manifest names `tools/call <tool>`', () => {
     const body = renderRefreshPr([
       changed(

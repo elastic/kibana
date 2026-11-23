@@ -51,6 +51,8 @@ interface ConnectorSection {
   readonly endpointCount: number;
   /** The endpoints that changed, without the changes to the spec as a whole. */
   readonly locatedCount: number;
+  /** Of `changeCount`, the changes to the spec as a whole rather than to an endpoint. */
+  readonly specChangeCount: number;
   readonly rows: readonly EndpointRow[];
 }
 
@@ -95,10 +97,13 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
     actions: endpoint === NO_ENDPOINT ? [] : actionsOf(source, endpoint),
     areas: changeAreas(group),
   }));
-  const changeCount = all.reduce(
-    (total, { areas }) => total + areas.reduce((sum, area) => sum + countChanges(area), 0),
-    0
-  );
+  const countOf = (rows: typeof all): number =>
+    rows.reduce(
+      (total, { areas }) => total + areas.reduce((sum, area) => sum + countChanges(area), 0),
+      0
+    );
+  const changeCount = countOf(all);
+  const specChangeCount = countOf(all.filter(({ endpoint }) => endpoint === NO_ENDPOINT));
   return {
     connector: drift.connector,
     changeCount,
@@ -106,21 +111,30 @@ const sectionOf = (drift: ConnectorDrift): ConnectorSection => {
     operationsChanged: drift.operationsChanged,
     endpointCount: endpoints.length,
     locatedCount: endpoints.filter(({ endpoint }) => endpoint !== NO_ENDPOINT).length,
+    specChangeCount,
     rows: all.slice(0, MAX_ENDPOINTS_PER_CONNECTOR),
   };
 };
 
-const summaryOf = ({ changeCount, locatedCount, onlyRegrouped }: ConnectorSection): string => {
-  // Changes to no endpoint, such as a removed schema or a new security scheme.
-  const uses =
-    locatedCount > 0
-      ? `${plural(locatedCount, 'endpoint')} that the connector uses`
-      : 'the spec as a whole';
+const summaryOf = ({
+  changeCount,
+  locatedCount,
+  specChangeCount,
+  onlyRegrouped,
+}: ConnectorSection): string => {
+  const uses = `${plural(locatedCount, 'endpoint')} that the connector uses`;
+  // Changes to no endpoint, such as a removed schema or a new security scheme, are counted apart.
+  const whole = `${plural(specChangeCount, 'change')} to the spec as a whole`;
+  const onEndpoints = changeCount - specChangeCount;
   let what = 'has changes that `oasdiff` does not report';
   if (onlyRegrouped) {
-    what = `only regroups the auth scopes of ${uses}`;
-  } else if (changeCount > 0) {
-    what = `has ${plural(changeCount, 'change')} ${locatedCount > 0 ? 'on' : 'to'} ${uses}`;
+    what = `only regroups the auth scopes of ${locatedCount > 0 ? uses : 'the spec as a whole'}`;
+  } else if (onEndpoints > 0) {
+    what = `has ${plural(onEndpoints, 'change')} on ${uses}${
+      specChangeCount > 0 ? `, and ${whole}` : ''
+    }`;
+  } else if (specChangeCount > 0) {
+    what = `has ${whole}`;
   }
   return `New spec ${what}.`;
 };
