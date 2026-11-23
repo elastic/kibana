@@ -216188,6 +216188,25 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request. Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -216931,6 +216950,9 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
