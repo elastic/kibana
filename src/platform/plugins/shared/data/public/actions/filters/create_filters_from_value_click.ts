@@ -10,8 +10,8 @@
 import _ from 'lodash';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
-import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
-import type { Filter } from '@kbn/es-query';
+import { EsqlSource, getOrRegisterEsqlDataView, type FilterableSource } from '@kbn/data-source';
+import type { DataViewBase, Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
@@ -149,7 +149,7 @@ const buildRawColumnFilter = (
   filterFieldName: string,
   value: RawColumnValue,
   column: DatatableColumn,
-  dataView: DataView
+  dataView: DataViewBase
 ) => {
   // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
   // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
@@ -177,6 +177,17 @@ const getEsqlDataView = async (indexPattern: string): Promise<DataView> => {
   return getOrRegisterEsqlDataView(getIndexPatterns() as DataViewsPublicPluginStart, source, http);
 };
 
+/**
+ * The source of the dataset of the index pattern. Its id is the one that the filters carry in `meta.index`.
+ * It is not a data view, so there is nothing to register, which is all that a filter on a column that
+ * the query creates needs.
+ */
+const getEsqlFilterableSource = async (indexPattern: string): Promise<FilterableSource> => {
+  const http = getHttp();
+  const source = await EsqlSource.forDataset({ query: 'FROM ' + indexPattern, http });
+  return source.toFilterableSource(http);
+};
+
 const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: RawColumnValue) => {
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
 
@@ -193,22 +204,19 @@ const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: Ra
   // filterable field, so the field check isn't enough: fieldName would resolve to that
   // unrelated field, but the value shown is the computed one, not the raw field's value.
   // It can't be a DSL filter, so it is an ES|QL one that is applied to the queries that have the column.
-  const isComputedColumn = isUnfilterableComputedColumn(column);
-
-  // the date columns can't be filtered with a value, brushing updates the time range instead
-  if (isComputedColumn && column.meta?.type === 'date') {
-    return [];
-  }
-
-  const dataView = await getEsqlDataView(indexPattern);
-
-  if (isComputedColumn) {
-    return buildRawColumnFilter(fieldName, value, column, dataView).map((filter) => ({
+  if (isUnfilterableComputedColumn(column)) {
+    // the date columns can't be filtered with a value, brushing updates the time range instead
+    if (column.meta?.type === 'date') {
+      return [];
+    }
+    const source = await getEsqlFilterableSource(indexPattern);
+    return buildRawColumnFilter(fieldName, value, column, source).map((filter) => ({
       ...filter,
       meta: { ...filter.meta, kind: 'esql' as const },
     }));
   }
 
+  const dataView = await getEsqlDataView(indexPattern);
   const field = dataView.getFieldByName(fieldName);
 
   // The field should be present in the data view and filterable.
