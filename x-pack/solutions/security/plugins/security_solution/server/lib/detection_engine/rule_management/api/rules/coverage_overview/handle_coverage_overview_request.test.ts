@@ -114,6 +114,42 @@ describe('handleCoverageOverviewRequest', () => {
     });
   });
 
+  it('does not fail on ids that match inherited object properties', async () => {
+    const ruleWithPrototypeIds: Rule = {
+      id: 'rule-prototype-ids',
+      name: 'Rule with prototype-like MITRE IDs',
+      enabled: true,
+      params: {
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: { id: 'constructor', name: 'Fake Tactic', reference: 'https://example.com' },
+            technique: [
+              { id: '__proto__', name: 'Fake Technique', reference: 'https://example.com' },
+            ],
+          },
+        ],
+      },
+    } as unknown as Rule;
+
+    (findRules as jest.Mock).mockResolvedValueOnce({
+      total: 1,
+      page: 1,
+      perPage: 10000,
+      data: [ruleWithPrototypeIds],
+    });
+
+    const result = await handleCoverageOverviewRequest({
+      params: {},
+      deps: { rulesClient: rulesClientMock.create() },
+    });
+
+    expect(result.coverage.constructor).toEqual(['rule-prototype-ids']);
+    expect(result.invalid_mitre_ids['rule-prototype-ids']).toEqual({
+      enterprise: expect.arrayContaining(['constructor', '__proto__']),
+    });
+  });
+
   it('does not add rules with valid MITRE IDs to invalid_mitre_ids', async () => {
     const ruleWithValidIds: Rule = {
       id: 'rule-valid-id',

@@ -97,7 +97,8 @@ export async function handleCoverageOverviewRequest({
   }
 
   return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIdsByFramework), {
-    coverage: {},
+    // No prototype, so ids like `constructor` or `__proto__` on a rule are plain keys.
+    coverage: Object.create(null),
     unmapped_rule_ids: [],
     rules_data: {},
     invalid_mitre_ids: {},
