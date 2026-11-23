@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import type { LinkProps } from '../../types';
 import { NOT_FOUND_BODY } from '../../translations';
-
-export const DetailsLoading = () => (
-  <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} data-test-subj="searchBoostLoading" />
-);
 
 interface DetailsNotFoundProps {
   title: string;

@@ -13,7 +13,8 @@ import { BoostTimeline } from '../../boost_timeline';
 import { MatchesTable } from '../../matches/matches_table';
 import { DetailsColumns } from '../details_columns';
 import { DetailsSection } from '../details_section';
-import { DetailsLoading, DetailsNotFound } from '../details_states';
+import { LoadingState } from '../../page_states';
+import { DetailsNotFound } from '../details_states';
 import { RuleSettings } from './rule_settings';
 import { RuleUsage } from './rule_usage';
 import {
@@ -50,7 +51,7 @@ export const RuleDetailsPage = ({
   getMatchLinkProps,
   isOutrankingComputed = false,
 }: RuleDetailsPageProps) => {
-  if (isLoading) return <DetailsLoading />;
+  if (isLoading) return <LoadingState />;
   if (!rule) {
     return (
       <DetailsNotFound

@@ -532,14 +532,6 @@ export const BOOST_TIMELINE_TITLE = i18n.translate('xpack.searchBoost.details.ti
   defaultMessage: 'Boost phase timeline',
 });
 
-export const LOAD_ERROR_TITLE = i18n.translate('xpack.searchBoost.loadError.title', {
-  defaultMessage: 'Unable to load boost settings',
-});
-
-export const RETRY_LABEL = i18n.translate('xpack.searchBoost.loadError.retryButton', {
-  defaultMessage: 'Try again',
-});
-
 export const NOT_FOUND_BODY = i18n.translate('xpack.searchBoost.details.notFoundBody', {
   defaultMessage: 'It may have been deleted, or the link may be wrong.',
 });

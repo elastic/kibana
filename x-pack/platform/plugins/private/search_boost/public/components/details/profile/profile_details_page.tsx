@@ -12,7 +12,8 @@ import type { LinkProps } from '../../../types';
 import { BoostTimeline } from '../../boost_timeline';
 import { DetailsColumns } from '../details_columns';
 import { DetailsSection } from '../details_section';
-import { DetailsLoading, DetailsNotFound } from '../details_states';
+import { LoadingState } from '../../page_states';
+import { DetailsNotFound } from '../details_states';
 import { ProfileRules } from './profile_rules';
 import { ProfileSettings } from './profile_settings';
 import { ProfileUsage } from './profile_usage';
@@ -57,7 +58,7 @@ export const ProfileDetailsPage = ({
   onDuplicateRule,
   onDeleteRule,
 }: ProfileDetailsPageProps) => {
-  if (isLoading) return <DetailsLoading />;
+  if (isLoading) return <LoadingState />;
   if (!profile) {
     return (
       <DetailsNotFound
