@@ -167,22 +167,16 @@ const applyBudget = (fixture: WorkflowRunFixture): void => {
   };
 };
 
-/** Capture the StepIoService for the next run via its write path. */
+/** Capture the StepIoService for the next run via its write path (`mock.contexts`). */
 const captureStepIoService = (): {
   getResident: () => { stepsRetained: number; cacheBytes: number };
   restore: () => void;
 } => {
-  let latest: StepIoService | undefined;
-  const originalWrite = StepIoService.prototype.write;
-  const writeSpy = jest
-    .spyOn(StepIoService.prototype, 'write')
-    .mockImplementation(function (this: StepIoService, ...args) {
-      latest = this;
-      return originalWrite.apply(this, args);
-    });
+  const writeSpy = jest.spyOn(StepIoService.prototype, 'write');
 
   return {
     getResident: () => {
+      const latest = writeSpy.mock.contexts.at(-1) as StepIoService | undefined;
       if (!latest) {
         return { stepsRetained: 0, cacheBytes: 0 };
       }
