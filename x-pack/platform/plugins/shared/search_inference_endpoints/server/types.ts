@@ -13,6 +13,9 @@ import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-c
 
 export type { InferenceTaskType, InferenceConnector };
 
+/** The task types a feature can use: Elasticsearch has `decision`, which its client's types lack. */
+export type InferenceFeatureTaskType = InferenceTaskType | 'decision';
+
 export interface RecommendedEndpoint {
   id: string;
   parameters?: ApiInferenceConnector['parameters'];
@@ -25,7 +28,7 @@ export interface InferenceFeatureConfig {
   parentFeatureId?: string;
   featureName: string;
   featureDescription: string;
-  taskType: InferenceTaskType;
+  taskType: InferenceFeatureTaskType;
   maxNumberOfEndpoints?: number;
   recommendedEndpoints: RecommendedEndpointInput[];
   isTechPreview?: boolean;

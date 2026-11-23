@@ -24,6 +24,11 @@ import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
 import { NO_DEFAULT_CONNECTOR, resolveModelsForFeature } from './lib/resolve_models_for_feature';
+import {
+  getConnectorByIdAndTaskType,
+  getConnectorListByTaskType,
+  isChatCompletionFeature,
+} from './lib/connectors_by_task_type';
 import { createInferenceSettingsSavedObjectType } from './saved_objects/inference_settings';
 import type {
   GetForFeatureOptions,
@@ -90,18 +95,20 @@ export class SearchInferenceEndpointsPlugin
     const getForFeature = async (featureId: string, request: KibanaRequest) => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const soClient = getInferenceSettingsClient(coreStart.savedObjects, request);
-      const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
+      const taskType = featureRegistry.get(featureId)?.taskType;
+      const getConnectorById = (id: string) =>
+        getConnectorByIdAndTaskType(pluginsStart.inference, id, request, taskType);
       return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
     };
 
-    const getConnectorList = async (request: KibanaRequest) => {
+    const getConnectorList = async (request: KibanaRequest, taskType?: string) => {
       const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.inference.getConnectorList(request);
+      return getConnectorListByTaskType(pluginsStart.inference, request, taskType);
     };
 
-    const getConnectorById = async (id: string, request: KibanaRequest) => {
+    const getConnectorById = async (id: string, request: KibanaRequest, taskType?: string) => {
       const [, pluginsStart] = await core.getStartServices();
-      return pluginsStart.inference.getConnectorById(id, request);
+      return getConnectorByIdAndTaskType(pluginsStart.inference, id, request, taskType);
     };
 
     const getInferenceClient = async (request: KibanaRequest) => {
@@ -239,7 +246,9 @@ export class SearchInferenceEndpointsPlugin
           opts?: GetForFeatureOptions
         ) => {
           const soClient = getInferenceSettingsClient(core.savedObjects, request);
-          const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
+          const feature = featureRegistry.get(featureId);
+          const getConnectorById = (id: string) =>
+            getConnectorByIdAndTaskType(plugins.inference, id, request, feature?.taskType);
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
           );
@@ -249,8 +258,8 @@ export class SearchInferenceEndpointsPlugin
           // platform default, and a caller cannot tell that nothing was configured.
           const resolveFeatureEndpoints = (fId: string) =>
             getForFeatureFn(featureRegistry, soClient, getConnectorById, fId, this.logger, opts);
-          const getConnectorList = () => plugins.inference.getConnectorList(request);
-          const feature = featureRegistry.get(featureId);
+          const getConnectorList = () =>
+            getConnectorListByTaskType(plugins.inference, request, feature?.taskType);
 
           const result = await resolveModelsForFeature({
             getForFeature: resolveFeatureEndpoints,
@@ -259,6 +268,7 @@ export class SearchInferenceEndpointsPlugin
             uiSettingsClient,
             featureId,
             ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
+            isChatCompletion: isChatCompletionFeature(feature),
             opts,
             logger: this.logger,
           });

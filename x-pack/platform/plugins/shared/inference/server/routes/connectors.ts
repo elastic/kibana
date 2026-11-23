@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { boundedString, schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
@@ -27,13 +28,18 @@ export function registerConnectorsRoute({
           reason: 'This route is opted out from authorization',
         },
       },
-      validate: {},
+      validate: {
+        query: schema.object({
+          taskType: schema.maybe(boundedString({ maxLength: 64 })),
+        }),
+      },
     },
     async (_context, request, response) => {
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const actions = pluginsStart.actions;
       const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
-      const connectors = await getConnectorList({ actions, request, esClient, logger });
+      const { taskType } = request.query;
+      const connectors = await getConnectorList({ actions, request, esClient, logger, taskType });
       return response.ok({ body: { connectors } });
     }
   );

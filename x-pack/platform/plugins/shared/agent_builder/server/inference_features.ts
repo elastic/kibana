@@ -6,12 +6,15 @@
  */
 
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import {
   AGENT_BUILDER_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
+  AGENT_BUILDER_DECISION_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
   AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS,
+  AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS,
 } from '@kbn/agent-builder-common/constants';
 
 export const registerInferenceFeatures = ({
@@ -46,5 +49,18 @@ export const registerInferenceFeatures = ({
     featureDescription: 'Models used for fast and low effort tasks',
     taskType: 'chat_completion',
     recommendedEndpoints: AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS,
+  });
+
+  // decision model selection, only listed when experimental features are on
+  searchInferenceEndpoints.features.register({
+    parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
+    featureId: AGENT_BUILDER_DECISION_INFERENCE_FEATURE_ID,
+    featureName: 'Decision models',
+    featureDescription: 'Models used for quick decisions, like whether the agent should respond',
+    taskType: 'decision',
+    recommendedEndpoints: AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS,
+    isTechPreview: true,
+    ignoreGlobalDefault: true,
+    visibilityCondition: { key: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID, value: true },
   });
 };

@@ -103,6 +103,47 @@ describe('Inference Settings API', () => {
       });
     });
 
+    it('checks each endpoint against the models of its feature task type', async () => {
+      mockFeatureRegistry.getAll.mockReturnValueOnce([
+        { featureId: 'chat_child', parentFeatureId: 'parent', taskType: 'chat_completion' },
+        { featureId: 'decision_child', parentFeatureId: 'parent', taskType: 'decision' },
+      ]);
+      mockFeatureRegistry.get.mockImplementation((featureId: string) => ({
+        featureId,
+        taskType: featureId === 'decision_child' ? 'decision' : 'chat_completion',
+        recommendedEndpoints: [],
+      }));
+      mockSOClient.get.mockResolvedValue({
+        id: INFERENCE_SETTINGS_ID,
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        attributes: {
+          features: [
+            { feature_id: 'chat_child', endpoints: [{ id: 'chat-1' }] },
+            { feature_id: 'decision_child', endpoints: [{ id: 'decision-1' }] },
+          ],
+        },
+        references: [],
+      });
+      getConnectorById.mockImplementation(
+        async (id: string, _request: unknown, taskType: string) => {
+          if (taskType !== 'decision') {
+            throw new Error('Not found');
+          }
+          return { connectorId: id };
+        }
+      );
+
+      await mockRouter.callRoute({});
+
+      expect(getConnectorById).toHaveBeenCalledWith('chat-1', expect.anything(), 'chat_completion');
+      expect(getConnectorById).toHaveBeenCalledWith('decision-1', expect.anything(), 'decision');
+      expect(mockRouter.response.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ invalidEndpoints: ['chat-1'] }),
+        })
+      );
+    });
+
     it('should return empty defaults when settings do not exist', async () => {
       mockSOClient.get.mockRejectedValue(
         SavedObjectsErrorHelpers.createGenericNotFoundError(

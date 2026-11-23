@@ -18,6 +18,7 @@ import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
 const OCR_ONLY_PROPERTY = 'ocr-only';
+const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 
 interface GetConnectorListWithRequestOptions {
   actions: ActionsClientProvider;
@@ -32,9 +33,19 @@ interface GetConnectorListWithActionsClientOptions {
   logger: Logger;
 }
 
-type GetConnectorListOptions =
+export interface ConnectorListFilter {
+  /**
+   * The task type of the inference endpoints to list, `chat_completion` by default. Any other task
+   * type lists only inference endpoints: stack connectors are chat models.
+   */
+  taskType?: string;
+}
+
+type GetConnectorListOptions = (
   | GetConnectorListWithRequestOptions
-  | GetConnectorListWithActionsClientOptions;
+  | GetConnectorListWithActionsClientOptions
+) &
+  ConnectorListFilter;
 
 const getActionsClient = async (
   options: GetConnectorListOptions
@@ -48,11 +59,11 @@ const getActionsClient = async (
 export const getConnectorList = async (
   options: GetConnectorListOptions
 ): Promise<InferenceConnector[]> => {
-  const { esClient, logger } = options;
+  const { esClient, logger, taskType = CHAT_COMPLETION_TASK_TYPE } = options;
 
   const [connectorsResult, endpointsResult] = await Promise.allSettled([
-    getStackConnectors(options),
-    getInferenceEndpoints({ esClient, taskType: 'chat_completion' }),
+    taskType === CHAT_COMPLETION_TASK_TYPE ? getStackConnectors(options) : [],
+    getInferenceEndpoints({ esClient, taskType }),
   ]);
 
   if (connectorsResult.status === 'rejected' && endpointsResult.status === 'rejected') {

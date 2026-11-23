@@ -19,15 +19,15 @@ export interface InferenceEndpoint {
 }
 
 /**
- * Retrieves all available inference endpoints, optionally filtered to
- * only `chat_completion` task type endpoints.
+ * Retrieves all available inference endpoints, optionally filtered to one task type.
+ * `taskType` is a string because Elasticsearch has task types its client's types lack (`decision`).
  */
 export const getInferenceEndpoints = async ({
   esClient,
   taskType,
 }: {
   esClient: ElasticsearchClient;
-  taskType?: InferenceTaskType;
+  taskType?: string;
 }): Promise<InferenceEndpoint[]> => {
   const response = await esClient.inference.get();
 

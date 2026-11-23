@@ -67,7 +67,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   canManage = true,
   discardVersion = 0,
 }) => {
-  const { data: connectors = [] } = useConnectors();
+  const { data: connectors = [] } = useConnectors(feature.taskType);
   const { features: registeredFeatures } = useRegisteredFeatures();
   const supportedEffortLevels = useSupportedEffortLevels();
   const [isExpanded, setIsExpanded] = useState(false);

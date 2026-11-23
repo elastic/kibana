@@ -225,6 +225,45 @@ describe('getConnectorList', () => {
     expect(endpoint?.name).toBe('Display Name Takes Priority');
   });
 
+  it('lists chat completion endpoints by default', async () => {
+    await getConnectorList({ actions, request, esClient, logger });
+
+    expect(getInferenceEndpointsMock).toHaveBeenCalledWith({
+      esClient,
+      taskType: 'chat_completion',
+    });
+  });
+
+  it('lists only the inference endpoints of another task type, without stack connectors', async () => {
+    getInferenceEndpointsMock.mockResolvedValue([
+      {
+        inferenceId: '.jev-decision',
+        taskType: 'decision',
+        service: 'elastic',
+        metadata: { display: { name: 'Jev' } },
+      },
+    ] as any);
+
+    const result = await getConnectorList({
+      actions,
+      request,
+      esClient,
+      logger,
+      taskType: 'decision',
+    });
+
+    expect(getInferenceEndpointsMock).toHaveBeenCalledWith({ esClient, taskType: 'decision' });
+    expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+    expect(result).toEqual([
+      expect.objectContaining({
+        connectorId: '.jev-decision',
+        name: 'Jev',
+        isInferenceEndpoint: true,
+        config: expect.objectContaining({ taskType: 'decision' }),
+      }),
+    ]);
+  });
+
   it('omits ocr-only inference endpoints from the connector list', async () => {
     getInferenceEndpointsMock.mockResolvedValue([
       {

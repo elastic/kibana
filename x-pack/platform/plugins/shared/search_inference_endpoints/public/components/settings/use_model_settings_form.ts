@@ -15,6 +15,7 @@ import type {
   InferenceFeatureResponse,
   ReasoningEffortLevel,
 } from '../../../common/types';
+import { CHAT_COMPLETION_TASK_TYPE } from '../../../common/constants';
 import type { EndpointEfforts } from '../../types';
 
 type Assignments = Record<string, string[]>;
@@ -43,26 +44,29 @@ export interface ModelSettingsForm {
   reset: () => void;
 }
 
+type FeatureDefaults = Pick<
+  InferenceFeatureResponse,
+  'recommendedEndpoints' | 'parentFeatureId' | 'ignoreGlobalDefault' | 'taskType'
+>;
+
 const getEffectiveEndpoints = (
-  feature: {
-    recommendedEndpoints: string[];
-    parentFeatureId?: string;
-    ignoreGlobalDefault?: boolean;
-  },
-  recommendedEndpointsById: Map<string, string[]>
+  feature: FeatureDefaults,
+  featureDefaultsById: Map<string, FeatureDefaults>
 ): string[] => {
   if (feature.recommendedEndpoints.length > 0) {
     return feature.recommendedEndpoints;
   }
-  if (feature.parentFeatureId) {
-    const parentEndpoints = recommendedEndpointsById.get(feature.parentFeatureId) ?? [];
-    if (parentEndpoints.length > 0) {
-      return parentEndpoints;
-    }
+  // A row only inherits from a parent of its own task type: a decision row can't use chat models.
+  const parent = feature.parentFeatureId
+    ? featureDefaultsById.get(feature.parentFeatureId)
+    : undefined;
+  if (parent && parent.taskType === feature.taskType && parent.recommendedEndpoints.length > 0) {
+    return parent.recommendedEndpoints;
   }
   // A row that opts out of the global default, and has nothing of its own to recommend,
   // stays empty. Substituting the Kibana default would show a model the workers do not use.
-  if (feature.ignoreGlobalDefault) {
+  // The same goes for a row of another task type: the Kibana default is a chat model.
+  if (feature.ignoreGlobalDefault || feature.taskType !== CHAT_COMPLETION_TASK_TYPE) {
     return [];
   }
   return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
@@ -113,7 +117,7 @@ const getChangedAssignments = (
   assignments: Assignments,
   efforts: FeatureEfforts,
   registeredFeatures: InferenceFeatureResponse[],
-  recommendedEndpointsById: Map<string, string[]>,
+  featureDefaultsById: Map<string, FeatureDefaults>,
   effectiveRecommendedEfforts: FeatureEfforts
 ): Assignments => {
   const featureById = new Map(registeredFeatures.map((f) => [f.featureId, f]));
@@ -121,7 +125,7 @@ const getChangedAssignments = (
     Object.entries(assignments).filter(([featureId, ids]) => {
       const feature = featureById.get(featureId);
       if (!feature) return true;
-      const defaults = getEffectiveEndpoints(feature, recommendedEndpointsById);
+      const defaults = getEffectiveEndpoints(feature, featureDefaultsById);
       if (!arraysEqual(ids, defaults)) return true;
       return !isEqual(efforts[featureId] ?? {}, effectiveRecommendedEfforts[featureId] ?? {});
     })
@@ -160,8 +164,8 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     return Array.from(sectionMap.values());
   }, [registeredFeatures]);
 
-  const recommendedEndpointsById = useMemo(
-    () => new Map(registeredFeatures.map((f) => [f.featureId, f.recommendedEndpoints])),
+  const featureDefaultsById = useMemo(
+    () => new Map<string, FeatureDefaults>(registeredFeatures.map((f) => [f.featureId, f])),
     [registeredFeatures]
   );
 
@@ -171,11 +175,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
         sections.flatMap(({ children }) =>
           children.map((f): [string, string[]] => [
             f.featureId,
-            [...getEffectiveEndpoints(f, recommendedEndpointsById)],
+            [...getEffectiveEndpoints(f, featureDefaultsById)],
           ])
         )
       ),
-    [sections, recommendedEndpointsById]
+    [sections, featureDefaultsById]
   );
 
   const effectiveRecommendedEfforts = useMemo<FeatureEfforts>(() => {
@@ -229,11 +233,11 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
       sections.flatMap(({ children }) =>
         children.map((f): [string, string[]] => [
           f.featureId,
-          savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, recommendedEndpointsById)],
+          savedMap.get(f.featureId) ?? [...getEffectiveEndpoints(f, featureDefaultsById)],
         ])
       )
     );
-  }, [savedMap, sections, recommendedEndpointsById]);
+  }, [savedMap, sections, featureDefaultsById]);
 
   const [assignments, setAssignments] = useState<Assignments>(defaultAssignments);
 
@@ -301,7 +305,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
       assignments,
       efforts,
       registeredFeatures,
-      recommendedEndpointsById,
+      featureDefaultsById,
       effectiveRecommendedEfforts
     );
     await saveSettings({ features: toApiFormat(changed, efforts) });
@@ -310,7 +314,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     assignments,
     efforts,
     registeredFeatures,
-    recommendedEndpointsById,
+    featureDefaultsById,
     effectiveRecommendedEfforts,
   ]);
 

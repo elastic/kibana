@@ -23,7 +23,7 @@ const parentFeature: InferenceFeatureConfig = {
   featureId: 'search',
   featureName: 'Search',
   featureDescription: 'Search features',
-  taskType: '',
+  taskType: 'chat_completion',
   recommendedEndpoints: [],
 };
 
@@ -41,7 +41,7 @@ const childFeature2: InferenceFeatureConfig = {
   parentFeatureId: 'search',
   featureName: 'Child 2',
   featureDescription: 'Second child',
-  taskType: 'text_embedding',
+  taskType: 'chat_completion',
   recommendedEndpoints: ['endpoint-c'],
 };
 
@@ -490,6 +490,27 @@ describe('useModelSettingsForm', () => {
     expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual([
       defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
     ]);
+  });
+
+  it('leaves a row of another task type empty instead of using chat models', () => {
+    const parentWithEndpoints: InferenceFeatureConfig = {
+      ...parentFeature,
+      recommendedEndpoints: ['parent-chat-ep'],
+    };
+    const decisionChild: InferenceFeatureConfig = {
+      ...childFeature2,
+      taskType: 'decision',
+      recommendedEndpoints: [],
+    };
+    mockUseRegisteredFeatures.mockReturnValue({
+      features: [parentWithEndpoints, childFeature1, decisionChild],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useModelSettingsForm());
+
+    expect(result.current.assignments.child_2).toEqual([]);
+    expect(result.current.effectiveRecommendedEndpoints.child_2).toEqual([]);
   });
 
   it('leaves a row empty when it ignores the global default and nothing is recommended', () => {

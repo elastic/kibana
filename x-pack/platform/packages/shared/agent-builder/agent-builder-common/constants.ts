@@ -8,6 +8,7 @@
 export const AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID = 'agent_builder_parent';
 export const AGENT_BUILDER_INFERENCE_FEATURE_ID = 'agent_builder';
 export const AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID = 'agent_builder_fast';
+export const AGENT_BUILDER_DECISION_INFERENCE_FEATURE_ID = 'agent_builder_decision';
 
 export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5.5-opus-chat_completion', // Claude Opus 5.5, GA 2026-09-22
@@ -20,6 +21,8 @@ export const AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
   '.openai-gpt-6-luna-chat_completion', // Luna-6 2026-09-28
 ];
+
+export const AGENT_BUILDER_DECISION_RECOMMENDED_ENDPOINTS = ['.typesafe-jev-1.13_decision'];
 
 /**
  * ID of the (fake) user assigned as owner / creator for assets created by our system.

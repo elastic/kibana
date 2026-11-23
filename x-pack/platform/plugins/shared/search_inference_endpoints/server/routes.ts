@@ -38,8 +38,12 @@ export function defineRoutes({
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
-  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
-  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getConnectorList: (request: KibanaRequest, taskType?: string) => Promise<InferenceConnector[]>;
+  getConnectorById: (
+    id: string,
+    request: KibanaRequest,
+    taskType?: string
+  ) => Promise<InferenceConnector>;
   getInferenceClient: GetInferenceClient;
 }) {
   defineInferenceSettingsRoutes({ logger, router, featureRegistry, getConnectorById });

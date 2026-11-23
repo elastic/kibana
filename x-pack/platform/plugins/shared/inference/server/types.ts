@@ -39,6 +39,7 @@ import type {
   AnonymizationPluginSetup,
 } from '@kbn/anonymization-plugin/server';
 import type { AiAnonymizationSettingsPluginSetup } from '@kbn/ai-anonymization-settings-plugin/server';
+import type { ConnectorListFilter } from './util/get_connector_list';
 import type { InferenceEndpoint } from './util/get_inference_endpoints';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -246,9 +247,13 @@ export interface InferenceServerStart {
    * Returns a list of all available inference connectors.
    *
    * @param request - The Kibana request to scope the operation to
+   * @param filter - Lists the inference endpoints of another task type instead of chat models
    * @returns A promise that resolves to an array of inference connectors
    */
-  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+  getConnectorList: (
+    request: KibanaRequest,
+    filter?: ConnectorListFilter
+  ) => Promise<InferenceConnector[]>;
 
   /**
    * Retrieves the default inference connector configured for the system.

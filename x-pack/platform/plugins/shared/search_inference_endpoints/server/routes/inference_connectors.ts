@@ -15,6 +15,7 @@ import type { ResolvedInferenceEndpoints } from '../types';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
 import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
+import { isChatCompletionFeature } from '../lib/connectors_by_task_type';
 
 export const defineInferenceConnectorsRoute = ({
   logger,
@@ -28,8 +29,12 @@ export const defineInferenceConnectorsRoute = ({
   router: IRouter;
   featureRegistry: InferenceFeatureRegistry;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
-  getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
-  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
+  getConnectorList: (request: KibanaRequest, taskType?: string) => Promise<InferenceConnector[]>;
+  getConnectorById: (
+    id: string,
+    request: KibanaRequest,
+    taskType?: string
+  ) => Promise<InferenceConnector>;
 }) => {
   router.versioned
     .get({
@@ -68,11 +73,12 @@ export const defineInferenceConnectorsRoute = ({
 
         const result = await resolveModelsForFeature({
           getForFeature: (fId) => getForFeature(fId, request),
-          getConnectorList: () => getConnectorList(request),
-          getConnectorById: (id) => getConnectorById(id, request),
+          getConnectorList: () => getConnectorList(request, feature?.taskType),
+          getConnectorById: (id) => getConnectorById(id, request, feature?.taskType),
           uiSettingsClient,
           featureId,
           ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,
+          isChatCompletion: isChatCompletionFeature(feature),
           logger,
         });
 

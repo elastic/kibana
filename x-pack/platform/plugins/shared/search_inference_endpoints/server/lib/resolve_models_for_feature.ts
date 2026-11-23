@@ -26,6 +26,8 @@ export interface ResolvedConnectorsForFeature {
  * Resolves the full, ordered model list for a feature.
  *
  * The priority resolution is:
+ *   - If `isChatCompletion` is false, the global default never applies: neither the default only
+ *     setting nor the default connector, which are chat models.
  *   - If the default only setting is enabled, return just the default connector without feature-declared parameters (or nothing if not set).
  *   - If `opts.onlyReturnConfigured` is true, return only the explicitly configured endpoints
  *     (SO override or recommendedEndpoints) without prepending the global default or the full
@@ -54,6 +56,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient,
   featureId,
   ignoreGlobalDefault = false,
+  isChatCompletion = true,
   opts,
   logger,
 }: {
@@ -63,6 +66,7 @@ export const resolveModelsForFeature = async ({
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;
+  isChatCompletion?: boolean;
   opts?: GetForFeatureOptions;
   logger: Logger;
 }): Promise<ResolvedConnectorsForFeature> => {
@@ -86,7 +90,7 @@ export const resolveModelsForFeature = async ({
       return { endpoints: [], warnings: [], soEntryFound: false };
     });
 
-  if (defaultConnectorOnly) {
+  if (defaultConnectorOnly && isChatCompletion) {
     if (!defaultConnectorId || defaultConnectorId === NO_DEFAULT_CONNECTOR) {
       return { connectors: [], warnings: [], soEntryFound: false };
     }
@@ -125,6 +129,7 @@ export const resolveModelsForFeature = async ({
   if (
     !soEntryFound &&
     !ignoreGlobalDefault &&
+    isChatCompletion &&
     defaultConnectorId &&
     defaultConnectorId !== NO_DEFAULT_CONNECTOR
   ) {

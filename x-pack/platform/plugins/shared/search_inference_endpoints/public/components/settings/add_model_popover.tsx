@@ -56,7 +56,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   panelWidth,
   allowTemplateRequiredModels = false,
 }) => {
-  const { data: connectors = [] } = useConnectors();
+  const { data: connectors = [] } = useConnectors(taskType);
   const [isOpen, setIsOpen] = useState(false);
 
   const options: EuiSelectableOption[] = useMemo(() => {
