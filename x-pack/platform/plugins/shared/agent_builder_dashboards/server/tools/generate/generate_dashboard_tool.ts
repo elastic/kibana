@@ -88,7 +88,8 @@ const getConfigTitle = (config: unknown): string | undefined =>
  * The full dashboard payload lives in the dashboard attachment (referenced by
  * id); the LLM only ever sees this slim summary, so it never has to re-emit the
  * heavy payload into a follow-up tool call. Panel titles let it tell panels apart when their ids
- * do not describe them, and grids let it report where the layout step put panels.
+ * do not describe them, and grids let it report where the layout step put panels. The time range
+ * and settings are the stored values under their input names; unset ones are left out.
  *
  * `authoringNotesByPanelId` holds the one-sentence note describing every chart
  * authored in this run, keyed by panel id. Panels that were not authored now
@@ -100,6 +101,10 @@ const summarizeDashboard = (
 ) => ({
   title: dashboardData.title,
   description: dashboardData.description,
+  time_range: dashboardData.time_range,
+  options: dashboardData.options,
+  refresh_interval: dashboardData.refresh_interval,
+  esql_approximation: dashboardData.esql_approximation,
   panels: dashboardData.panels.map((widget) => {
     if (isSection(widget)) {
       return {
