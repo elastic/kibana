@@ -494,8 +494,9 @@ describe('GenAiSettingsApp', () => {
       renderComponent();
 
       await waitFor(() => {
-        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
       });
+      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
     });
 
     describe('when the setting definitions fail to load', () => {
@@ -571,8 +572,11 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
+      await waitFor(() => {
+        expect(screen.queryByTestId('genAiSettingsLoading')).not.toBeInTheDocument();
+      });
       // Documentation section should be visible in Agent mode
-      expect(await screen.findByTestId('documentationSection')).toBeInTheDocument();
+      expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
     });
   });
 
