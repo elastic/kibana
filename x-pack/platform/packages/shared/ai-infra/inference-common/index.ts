@@ -157,6 +157,8 @@ export {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
+  COMPLETION_TASK_TYPE,
+  DECISION_TASK_TYPE,
   getConnectorDefaultModel,
   getConnectorModel,
   getConnectorFamily,

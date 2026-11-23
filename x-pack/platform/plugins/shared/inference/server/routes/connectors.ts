@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { COMPLETION_TASK_TYPE, DECISION_TASK_TYPE } from '@kbn/inference-common';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { getConnectorList } from '../util/get_connector_list';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
@@ -31,7 +32,7 @@ export function registerConnectorsRoute({
       validate: {
         query: schema.object({
           taskType: schema.maybe(
-            schema.oneOf([schema.literal('chat_completion'), schema.literal('decision')])
+            schema.oneOf([schema.literal(COMPLETION_TASK_TYPE), schema.literal(DECISION_TASK_TYPE)])
           ),
         }),
       },

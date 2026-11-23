@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { isSupportedConnectorType, isSupportedConnector } from './is_supported_connector';
+export {
+  isSupportedConnectorType,
+  isSupportedConnector,
+  COMPLETION_TASK_TYPE,
+  DECISION_TASK_TYPE,
+} from './is_supported_connector';
 export { connectorToInference } from './connector_to_inference';
 export {
   getConnectorDefaultModel,

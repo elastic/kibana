@@ -13,12 +13,12 @@ import {
   isSupportedConnector,
   connectorToInference,
   InferenceConnectorType,
+  COMPLETION_TASK_TYPE,
 } from '@kbn/inference-common';
 import type { ActionsClientProvider } from '../types';
 import { getInferenceEndpoints } from './get_inference_endpoints';
 
 const OCR_ONLY_PROPERTY = 'ocr-only';
-const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 
 interface GetConnectorListWithRequestOptions {
   actions: ActionsClientProvider;
@@ -59,10 +59,10 @@ const getActionsClient = async (
 export const getConnectorList = async (
   options: GetConnectorListOptions
 ): Promise<InferenceConnector[]> => {
-  const { esClient, logger, taskType = CHAT_COMPLETION_TASK_TYPE } = options;
+  const { esClient, logger, taskType = COMPLETION_TASK_TYPE } = options;
 
   const [connectorsResult, endpointsResult] = await Promise.allSettled([
-    taskType === CHAT_COMPLETION_TASK_TYPE ? getStackConnectors(options) : [],
+    taskType === COMPLETION_TASK_TYPE ? getStackConnectors(options) : [],
     getInferenceEndpoints({ esClient, taskType }),
   ]);
 
