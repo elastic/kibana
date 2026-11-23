@@ -151772,7 +151772,7 @@ paths:
             maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
-        - description: Field to collapse execution results by.
+        - description: Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor, and requests that combine collapse with searchAfter return HTTP 400.
           in: query
           name: collapse
           required: false
@@ -152176,7 +152176,7 @@ paths:
           schema:
             maxLength: 64
             type: string
-        - description: Field to collapse execution results by.
+        - description: Field to collapse execution results by. Use page and size to paginate collapsed results. Collapsed responses omit the searchAfter cursor.
           in: query
           name: collapse
           required: false
