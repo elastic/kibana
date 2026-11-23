@@ -233,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               'invoke_bound_agents',
             ],
             agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
-            contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
+            contextEngine: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_memory'],
             automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
             slo: ['all', 'read', 'minimal_all', 'minimal_read'],
             searchSynonyms: ['all', 'read', 'minimal_all', 'minimal_read'],

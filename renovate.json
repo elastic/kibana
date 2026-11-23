@@ -653,7 +653,8 @@
         "diff",
         "fastest-levenshtein",
         "usng.js",
-        "react-reverse-portal"
+        "react-reverse-portal",
+        "tabbable"
       ],
       "reviewers": ["team:kibana-discover"],
       "matchBaseBranches": ["main"],
@@ -2123,14 +2124,6 @@
       "enabled": true
     },
     {
-      "groupName": "hdr-histogram-js",
-      "matchDepNames": ["hdr-histogram-js"],
-      "reviewers": ["team:obs-signals-metrics-team"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "@appland/sql-parser",
       "matchDepNames": ["@appland/sql-parser"],
       "reviewers": ["team:security-defend-workflows"],
@@ -2311,10 +2304,9 @@
       "groupName": "OpenTelemetry modules",
       "matchDepNames": [
         "@grpc/grpc-js",
-        "@elastic/opentelemetry-node",
         "@opentelemetry/api",
-        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
+        "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",
         "@opentelemetry/exporter-logs-otlp-http",
         "@opentelemetry/exporter-logs-otlp-proto",
@@ -2329,8 +2321,12 @@
         "@opentelemetry/instrumentation-http",
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
+        "@opentelemetry/otlp-grpc-exporter-base",
         "@opentelemetry/otlp-transformer",
+        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
+        "@opentelemetry/sdk-metrics",
+        "@opentelemetry/sdk-trace",
         "@opentelemetry/semantic-conventions"
       ],
       "reviewers": [

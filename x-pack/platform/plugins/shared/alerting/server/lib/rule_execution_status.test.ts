@@ -264,6 +264,19 @@ describe('RuleExecutionStatus', () => {
       `);
       expect(metrics).toBeNull();
     });
+
+    test('error from a revoked cloud API key gets remediation guidance prepended', () => {
+      const { status } = executionStatusFromError(
+        new ErrorWithReason(
+          RuleExecutionStatusErrorReasons.Execute,
+          new Error('security_exception: failed to authenticate cloud API key: [0xD38358]')
+        )
+      );
+      expect(status.status).toBe('error');
+      expect(status.error?.message).toBe(
+        'The API key of this rule is no longer valid; it may have been revoked, deleted, or expired. Update the API key of the rule to restore executions. security_exception: failed to authenticate cloud API key: [0xD38358]'
+      );
+    });
   });
 
   describe('ruleExecutionStatusToRaw()', () => {
@@ -441,6 +454,18 @@ describe('RuleExecutionStatus', () => {
           "status": "active",
         }
       `);
+    });
+
+    test('error reason written by a newer Kibana is reported as unknown', () => {
+      const result = ruleExecutionStatusFromRaw(MockLogger, 'rule-id', {
+        status,
+        lastExecutionDate: date,
+        error: { reason: 'reason-from-a-newer-kibana', message: 'wops' },
+      });
+      expect(result?.error).toEqual({
+        reason: RuleExecutionStatusErrorReasons.Unknown,
+        message: 'wops',
+      });
     });
   });
 });

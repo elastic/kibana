@@ -1,0 +1,4650 @@
+{
+  "components": {
+    "schemas": {
+      "Alarm": {
+        "properties": {
+          "Name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^(?!\\s*$).+$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "AlarmConfiguration": {
+        "properties": {
+          "Alarms": {
+            "items": {
+              "$ref": "#/components/schemas/Alarm"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "IgnorePollAlarmFailure": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Alarms"
+        ],
+        "type": "object"
+      },
+      "AlarmStateInformation": {
+        "properties": {
+          "Name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^(?!\\s*$).+$",
+            "type": "string"
+          },
+          "State": {
+            "$ref": "#/components/schemas/ExternalAlarmState"
+          }
+        },
+        "required": [
+          "Name",
+          "State"
+        ],
+        "type": "object"
+      },
+      "AttachmentContent": {
+        "properties": {
+          "Hash": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "HashType": {
+            "$ref": "#/components/schemas/AttachmentHashType"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "Size": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "Url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AttachmentHashType": {
+        "enum": [
+          "Sha256"
+        ],
+        "type": "string"
+      },
+      "AutomationDefinitionNotFoundExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationDefinitionVersionNotFoundExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecution": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "AssociationId": {
+            "type": "string"
+          },
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "AutomationExecutionStatus": {
+            "$ref": "#/components/schemas/AutomationExecutionStatus"
+          },
+          "AutomationSubtype": {
+            "$ref": "#/components/schemas/AutomationSubtype"
+          },
+          "ChangeRequestName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "CurrentAction": {
+            "type": "string"
+          },
+          "CurrentStepName": {
+            "type": "string"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "ExecutedBy": {
+            "type": "string"
+          },
+          "ExecutionEndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ExecutionStartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "FailureMessage": {
+            "type": "string"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "OpsItemId": {
+            "type": "string"
+          },
+          "Outputs": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "Parameters": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "ParentAutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "ProgressCounters": {
+            "$ref": "#/components/schemas/ProgressCounters"
+          },
+          "ResolvedTargets": {
+            "$ref": "#/components/schemas/ResolvedTargets"
+          },
+          "Runbooks": {
+            "items": {
+              "$ref": "#/components/schemas/Runbook"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ScheduledTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "StepExecutions": {
+            "items": {
+              "$ref": "#/components/schemas/StepExecution"
+            },
+            "type": "array"
+          },
+          "StepExecutionsTruncated": {
+            "default": false,
+            "type": "boolean"
+          },
+          "Target": {
+            "type": "string"
+          },
+          "TargetLocations": {
+            "items": {
+              "$ref": "#/components/schemas/TargetLocation"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          },
+          "TargetLocationsURL": {
+            "pattern": "^https:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,253}\\.s3(\\.[a-z\\d-]{9,16})?\\.amazonaws\\.com\\/.{1,2000}$",
+            "type": "string"
+          },
+          "TargetMaps": {
+            "items": {
+              "additionalProperties": {
+                "items": {
+                  "maxLength": 50,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 0,
+                "type": "array"
+              },
+              "maxProperties": 20,
+              "minProperties": 1,
+              "type": "object"
+            },
+            "maxItems": 300,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetParameterName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetsSummary": {
+            "$ref": "#/components/schemas/TargetsSummary"
+          },
+          "TriggeredAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmStateInformation"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "Variables": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "WarningMessage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecutionFilter": {
+        "properties": {
+          "Key": {
+            "$ref": "#/components/schemas/AutomationExecutionFilterKey"
+          },
+          "Values": {
+            "items": {
+              "maxLength": 150,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Key",
+          "Values"
+        ],
+        "type": "object"
+      },
+      "AutomationExecutionFilterKey": {
+        "enum": [
+          "DocumentNamePrefix",
+          "ExecutionStatus",
+          "ExecutionId",
+          "ParentExecutionId",
+          "CurrentAction",
+          "StartTimeBefore",
+          "StartTimeAfter",
+          "AutomationType",
+          "TagKey",
+          "TargetResourceGroup",
+          "AutomationSubtype",
+          "OpsItemId"
+        ],
+        "type": "string"
+      },
+      "AutomationExecutionLimitExceededExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecutionMetadata": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "AssociationId": {
+            "type": "string"
+          },
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "AutomationExecutionStatus": {
+            "$ref": "#/components/schemas/AutomationExecutionStatus"
+          },
+          "AutomationSubtype": {
+            "$ref": "#/components/schemas/AutomationSubtype"
+          },
+          "AutomationType": {
+            "$ref": "#/components/schemas/AutomationType"
+          },
+          "ChangeRequestName": {
+            "maxLength": 1024,
+            "minLength": 1,
+            "type": "string"
+          },
+          "CurrentAction": {
+            "type": "string"
+          },
+          "CurrentStepName": {
+            "type": "string"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "ExecutedBy": {
+            "type": "string"
+          },
+          "ExecutionEndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ExecutionStartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "FailureMessage": {
+            "type": "string"
+          },
+          "LogFile": {
+            "type": "string"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "OpsItemId": {
+            "type": "string"
+          },
+          "Outputs": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "ParentAutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "ResolvedTargets": {
+            "$ref": "#/components/schemas/ResolvedTargets"
+          },
+          "Runbooks": {
+            "items": {
+              "$ref": "#/components/schemas/Runbook"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ScheduledTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "Target": {
+            "type": "string"
+          },
+          "TargetLocationsURL": {
+            "pattern": "^https:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,253}\\.s3(\\.[a-z\\d-]{9,16})?\\.amazonaws\\.com\\/.{1,2000}$",
+            "type": "string"
+          },
+          "TargetMaps": {
+            "items": {
+              "additionalProperties": {
+                "items": {
+                  "maxLength": 50,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 0,
+                "type": "array"
+              },
+              "maxProperties": 20,
+              "minProperties": 1,
+              "type": "object"
+            },
+            "maxItems": 300,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetParameterName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TriggeredAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmStateInformation"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "WarningMessage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecutionNotFoundExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AutomationExecutionStatus": {
+        "enum": [
+          "Pending",
+          "InProgress",
+          "Waiting",
+          "Success",
+          "TimedOut",
+          "Cancelling",
+          "Cancelled",
+          "Failed",
+          "PendingApproval",
+          "Approved",
+          "Rejected",
+          "Scheduled",
+          "RunbookInProgress",
+          "PendingChangeCalendarOverride",
+          "ChangeCalendarOverrideApproved",
+          "ChangeCalendarOverrideRejected",
+          "CompletedWithSuccess",
+          "CompletedWithFailure",
+          "Exited"
+        ],
+        "type": "string"
+      },
+      "AutomationSubtype": {
+        "enum": [
+          "ChangeRequest",
+          "AccessRequest"
+        ],
+        "type": "string"
+      },
+      "AutomationType": {
+        "enum": [
+          "CrossAccount",
+          "Local"
+        ],
+        "type": "string"
+      },
+      "CancelCommandRequestContent": {
+        "properties": {
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "InstanceIds": {
+            "items": {
+              "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "CommandId"
+        ],
+        "type": "object"
+      },
+      "CancelCommandResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "CloudWatchOutputConfig": {
+        "properties": {
+          "CloudWatchLogGroupName": {
+            "maxLength": 512,
+            "minLength": 1,
+            "type": "string"
+          },
+          "CloudWatchOutputEnabled": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Command": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "CloudWatchOutputConfig": {
+            "$ref": "#/components/schemas/CloudWatchOutputConfig"
+          },
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "Comment": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "CompletedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "DeliveryTimedOutCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "ErrorCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "ExpiresAfter": {
+            "format": "double",
+            "type": "number"
+          },
+          "InstanceIds": {
+            "items": {
+              "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "NotificationConfig": {
+            "$ref": "#/components/schemas/NotificationConfig"
+          },
+          "OutputS3BucketName": {
+            "maxLength": 63,
+            "minLength": 3,
+            "type": "string"
+          },
+          "OutputS3KeyPrefix": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "OutputS3Region": {
+            "maxLength": 20,
+            "minLength": 3,
+            "type": "string"
+          },
+          "Parameters": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "RequestedDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ServiceRole": {
+            "type": "string"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/CommandStatus"
+          },
+          "StatusDetails": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "TargetCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TimeoutSeconds": {
+            "format": "int32",
+            "maximum": 2592000,
+            "minimum": 30,
+            "type": "integer"
+          },
+          "TriggeredAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmStateInformation"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "CommandFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/CommandFilterKey"
+          },
+          "value": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "CommandFilterKey": {
+        "enum": [
+          "InvokedAfter",
+          "InvokedBefore",
+          "Status",
+          "ExecutionStage",
+          "DocumentName"
+        ],
+        "type": "string"
+      },
+      "CommandInvocationStatus": {
+        "enum": [
+          "Pending",
+          "InProgress",
+          "Delayed",
+          "Success",
+          "Cancelled",
+          "TimedOut",
+          "Failed",
+          "Cancelling"
+        ],
+        "type": "string"
+      },
+      "CommandStatus": {
+        "enum": [
+          "Pending",
+          "InProgress",
+          "Success",
+          "Cancelled",
+          "Failed",
+          "TimedOut",
+          "Cancelling"
+        ],
+        "type": "string"
+      },
+      "DescribeAutomationExecutionsRequestContent": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecutionFilter"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeAutomationExecutionsResponseContent": {
+        "properties": {
+          "AutomationExecutionMetadataList": {
+            "items": {
+              "$ref": "#/components/schemas/AutomationExecutionMetadata"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeInstanceInformationRequestContent": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformationStringFilter"
+            },
+            "minItems": 0,
+            "type": "array"
+          },
+          "InstanceInformationFilterList": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformationFilter"
+            },
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DescribeInstanceInformationResponseContent": {
+        "properties": {
+          "InstanceInformationList": {
+            "items": {
+              "$ref": "#/components/schemas/InstanceInformation"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DocumentFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/DocumentFilterKey"
+          },
+          "value": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "type": "object"
+      },
+      "DocumentFilterKey": {
+        "enum": [
+          "Name",
+          "Owner",
+          "PlatformTypes",
+          "DocumentType"
+        ],
+        "type": "string"
+      },
+      "DocumentFormat": {
+        "enum": [
+          "YAML",
+          "JSON",
+          "TEXT"
+        ],
+        "type": "string"
+      },
+      "DocumentHashType": {
+        "enum": [
+          "Sha256",
+          "Sha1"
+        ],
+        "type": "string"
+      },
+      "DocumentIdentifier": {
+        "properties": {
+          "Author": {
+            "type": "string"
+          },
+          "CreatedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "DisplayName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "pattern": "^[\\w\\.\\-\\:\\/ ]*$",
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "Owner": {
+            "type": "string"
+          },
+          "PlatformTypes": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformType"
+            },
+            "type": "array"
+          },
+          "Requires": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentRequires"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ReviewStatus": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "SchemaVersion": {
+            "pattern": "^([0-9]+)\\.([0-9]+)$",
+            "type": "string"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetType": {
+            "maxLength": 200,
+            "minLength": 0,
+            "pattern": "^\\/[\\w\\.\\-\\:\\/]*$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DocumentKeyValuesFilter": {
+        "properties": {
+          "Key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Values": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "DocumentRequires": {
+        "properties": {
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "RequireType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          },
+          "Version": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "DocumentStatus": {
+        "enum": [
+          "Creating",
+          "Active",
+          "Updating",
+          "Deleting",
+          "Failed"
+        ],
+        "type": "string"
+      },
+      "DocumentType": {
+        "enum": [
+          "Command",
+          "Policy",
+          "Automation",
+          "Session",
+          "Package",
+          "ApplicationConfiguration",
+          "ApplicationConfigurationSchema",
+          "DeploymentStrategy",
+          "ChangeCalendar",
+          "Automation.ChangeTemplate",
+          "ProblemAnalysis",
+          "ProblemAnalysisTemplate",
+          "CloudFormation",
+          "ConformancePackTemplate",
+          "QuickSetup",
+          "ManualApprovalPolicy",
+          "AutoApprovalPolicy"
+        ],
+        "type": "string"
+      },
+      "DuplicateInstanceIdResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ExecutionMode": {
+        "enum": [
+          "Auto",
+          "Interactive"
+        ],
+        "type": "string"
+      },
+      "ExternalAlarmState": {
+        "enum": [
+          "UNKNOWN",
+          "ALARM"
+        ],
+        "type": "string"
+      },
+      "FailureDetails": {
+        "properties": {
+          "Details": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "FailureStage": {
+            "type": "string"
+          },
+          "FailureType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetAutomationExecutionRequestContent": {
+        "properties": {
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          }
+        },
+        "required": [
+          "AutomationExecutionId"
+        ],
+        "type": "object"
+      },
+      "GetAutomationExecutionResponseContent": {
+        "properties": {
+          "AutomationExecution": {
+            "$ref": "#/components/schemas/AutomationExecution"
+          }
+        },
+        "type": "object"
+      },
+      "GetCommandInvocationRequestContent": {
+        "properties": {
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "PluginName": {
+            "minLength": 4,
+            "type": "string"
+          }
+        },
+        "required": [
+          "CommandId",
+          "InstanceId"
+        ],
+        "type": "object"
+      },
+      "GetCommandInvocationResponseContent": {
+        "properties": {
+          "CloudWatchOutputConfig": {
+            "$ref": "#/components/schemas/CloudWatchOutputConfig"
+          },
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "Comment": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "ExecutionElapsedTime": {
+            "pattern": "^([\\-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d(?!:))?)?(\\17[0-5]\\d([\\.,]\\d)?)?([zZ]|([\\-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+            "type": "string"
+          },
+          "ExecutionEndDateTime": {
+            "pattern": "^([\\-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d(?!:))?)?(\\17[0-5]\\d([\\.,]\\d)?)?([zZ]|([\\-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+            "type": "string"
+          },
+          "ExecutionStartDateTime": {
+            "pattern": "^([\\-]?\\d{4}(?!\\d{2}\\b))((-?)((0[1-9]|1[0-2])(\\3([12]\\d|0[1-9]|3[01]))?|W([0-4]\\d|5[0-2])(-?[1-7])?|(00[1-9]|0[1-9]\\d|[12]\\d{2}|3([0-5]\\d|6[1-6])))([T\\s]((([01]\\d|2[0-3])((:?)[0-5]\\d)?|24\\:?00)([\\.,]\\d(?!:))?)?(\\17[0-5]\\d([\\.,]\\d)?)?([zZ]|([\\-])([01]\\d|2[0-3]):?([0-5]\\d)?)?)?)?$",
+            "type": "string"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "PluginName": {
+            "minLength": 4,
+            "type": "string"
+          },
+          "ResponseCode": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "StandardErrorContent": {
+            "maxLength": 8000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StandardErrorUrl": {
+            "type": "string"
+          },
+          "StandardOutputContent": {
+            "maxLength": 24000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "StandardOutputUrl": {
+            "type": "string"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/CommandInvocationStatus"
+          },
+          "StatusDetails": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetDocumentRequestContent": {
+        "properties": {
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "GetDocumentResponseContent": {
+        "properties": {
+          "AttachmentsContent": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentContent"
+            },
+            "type": "array"
+          },
+          "Content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "CreatedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "DisplayName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "pattern": "^[\\w\\.\\-\\:\\/ ]*$",
+            "type": "string"
+          },
+          "DocumentFormat": {
+            "$ref": "#/components/schemas/DocumentFormat"
+          },
+          "DocumentType": {
+            "$ref": "#/components/schemas/DocumentType"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "Name": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "Requires": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentRequires"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "ReviewStatus": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/DocumentStatus"
+          },
+          "StatusInformation": {
+            "type": "string"
+          },
+          "VersionName": {
+            "pattern": "^[a-zA-Z0-9_\\-.]{1,128}$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetInventoryRequestContent": {
+        "properties": {
+          "Aggregators": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAggregator"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          },
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryFilter"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "ResultAttributes": {
+            "items": {
+              "$ref": "#/components/schemas/ResultAttribute"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "GetInventoryResponseContent": {
+        "properties": {
+          "Entities": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryResultEntity"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetParameterRequestContent": {
+        "properties": {
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "WithDecryption": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name"
+        ],
+        "type": "object"
+      },
+      "GetParameterResponseContent": {
+        "properties": {
+          "Parameter": {
+            "$ref": "#/components/schemas/Parameter"
+          }
+        },
+        "type": "object"
+      },
+      "HierarchyLevelLimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HierarchyTypeMismatchExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IdempotentParameterMismatchResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IncompatiblePolicyExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceAggregatedAssociationOverview": {
+        "properties": {
+          "DetailedStatus": {
+            "type": "string"
+          },
+          "InstanceAssociationStatusAggregatedCount": {
+            "additionalProperties": {
+              "default": 0,
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceInformation": {
+        "properties": {
+          "ActivationId": {
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+            "type": "string"
+          },
+          "AgentVersion": {
+            "pattern": "^[0-9]{1,6}(\\.[0-9]{1,6}){2,3}$",
+            "type": "string"
+          },
+          "AssociationOverview": {
+            "$ref": "#/components/schemas/InstanceAggregatedAssociationOverview"
+          },
+          "AssociationStatus": {
+            "type": "string"
+          },
+          "ComputerName": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          },
+          "IPAddress": {
+            "format": "password",
+            "maxLength": 46,
+            "minLength": 1,
+            "type": "string"
+          },
+          "IamRole": {
+            "maxLength": 64,
+            "minLength": 0,
+            "type": "string"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "IsLatestVersion": {
+            "type": "boolean"
+          },
+          "LastAssociationExecutionDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "LastPingDateTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "LastSuccessfulAssociationExecutionDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "PingStatus": {
+            "$ref": "#/components/schemas/PingStatus"
+          },
+          "PlatformName": {
+            "type": "string"
+          },
+          "PlatformType": {
+            "$ref": "#/components/schemas/PlatformType"
+          },
+          "PlatformVersion": {
+            "type": "string"
+          },
+          "RegistrationDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "ResourceType": {
+            "$ref": "#/components/schemas/ResourceType"
+          },
+          "SourceId": {
+            "maxLength": 128,
+            "minLength": 0,
+            "pattern": "^[a-zA-Z0-9:_-]*$",
+            "type": "string"
+          },
+          "SourceLocation": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^.{1,128}$",
+            "type": "string"
+          },
+          "SourceType": {
+            "$ref": "#/components/schemas/SourceType"
+          }
+        },
+        "type": "object"
+      },
+      "InstanceInformationFilter": {
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/InstanceInformationFilterKey"
+          },
+          "valueSet": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "valueSet"
+        ],
+        "type": "object"
+      },
+      "InstanceInformationFilterKey": {
+        "enum": [
+          "InstanceIds",
+          "AgentVersion",
+          "PingStatus",
+          "PlatformTypes",
+          "ActivationIds",
+          "IamRole",
+          "ResourceType",
+          "AssociationStatus"
+        ],
+        "type": "string"
+      },
+      "InstanceInformationStringFilter": {
+        "properties": {
+          "Key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "Values": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Key",
+          "Values"
+        ],
+        "type": "object"
+      },
+      "InternalServerErrorResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidAggregatorExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidAllowedPatternExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidAutomationExecutionParametersExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidAutomationStatusUpdateExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidCommandIdResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidDocumentResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidDocumentVersionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFilterKeyResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFilterResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidFilterValueResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidInstanceIdResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidInstanceInformationFilterValueResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidInventoryGroupExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidKeyIdResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidNextTokenResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidNotificationConfigResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidOutputFolderResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidParametersResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidPluginNameResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidPolicyAttributeExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidPolicyTypeExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidResultAttributeExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidRoleResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidTargetResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InvalidTypeNameExceptionResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryAggregator": {
+        "properties": {
+          "Aggregators": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryAggregator"
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array"
+          },
+          "Expression": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Groups": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryGroup"
+            },
+            "maxItems": 15,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryFilter": {
+        "properties": {
+          "Key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/InventoryQueryOperatorType"
+          },
+          "Values": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "Key",
+          "Values"
+        ],
+        "type": "object"
+      },
+      "InventoryGroup": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryFilter"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "Name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Filters"
+        ],
+        "type": "object"
+      },
+      "InventoryQueryOperatorType": {
+        "enum": [
+          "Equal",
+          "NotEqual",
+          "BeginWith",
+          "LessThan",
+          "GreaterThan",
+          "Exists"
+        ],
+        "type": "string"
+      },
+      "InventoryResultEntity": {
+        "properties": {
+          "Data": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/InventoryResultItem"
+            },
+            "type": "object"
+          },
+          "Id": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "InventoryResultItem": {
+        "properties": {
+          "CaptureTime": {
+            "pattern": "^(20)[0-9][0-9]-(0[1-9]|1[012])-([12][0-9]|3[01]|0[1-9])(T)(2[0-3]|[0-1][0-9])(:[0-5][0-9])(:[0-5][0-9])(Z)$",
+            "type": "string"
+          },
+          "Content": {
+            "items": {
+              "additionalProperties": {
+                "maxLength": 4096,
+                "minLength": 0,
+                "type": "string"
+              },
+              "maxProperties": 50,
+              "minProperties": 0,
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "ContentHash": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "SchemaVersion": {
+            "pattern": "^([0-9]{1,6})(\\.[0-9]{1,6})$",
+            "type": "string"
+          },
+          "TypeName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^(AWS|Custom):.*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "TypeName",
+          "SchemaVersion",
+          "Content"
+        ],
+        "type": "object"
+      },
+      "InvocationDoesNotExistResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListCommandsRequestContent": {
+        "properties": {
+          "CommandId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/CommandFilter"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListCommandsResponseContent": {
+        "properties": {
+          "Commands": {
+            "items": {
+              "$ref": "#/components/schemas/Command"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentsRequestContent": {
+        "properties": {
+          "DocumentFilterList": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentFilter"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentKeyValuesFilter"
+            },
+            "maxItems": 6,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListDocumentsResponseContent": {
+        "properties": {
+          "DocumentIdentifiers": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentIdentifier"
+            },
+            "type": "array"
+          },
+          "NextToken": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListInventoryEntriesRequestContent": {
+        "properties": {
+          "Filters": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryFilter"
+            },
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "MaxResults": {
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "TypeName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^(AWS|Custom):.*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "InstanceId",
+          "TypeName"
+        ],
+        "type": "object"
+      },
+      "ListInventoryEntriesResponseContent": {
+        "properties": {
+          "CaptureTime": {
+            "pattern": "^(20)[0-9][0-9]-(0[1-9]|1[012])-([12][0-9]|3[01]|0[1-9])(T)(2[0-3]|[0-1][0-9])(:[0-5][0-9])(:[0-5][0-9])(Z)$",
+            "type": "string"
+          },
+          "Entries": {
+            "items": {
+              "additionalProperties": {
+                "maxLength": 4096,
+                "minLength": 0,
+                "type": "string"
+              },
+              "maxProperties": 50,
+              "minProperties": 0,
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "InstanceId": {
+            "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+            "type": "string"
+          },
+          "NextToken": {
+            "type": "string"
+          },
+          "SchemaVersion": {
+            "pattern": "^([0-9]{1,6})(\\.[0-9]{1,6})$",
+            "type": "string"
+          },
+          "TypeName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^(AWS|Custom):.*$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MaxDocumentSizeExceededResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationConfig": {
+        "properties": {
+          "NotificationArn": {
+            "type": "string"
+          },
+          "NotificationEvents": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationEvent"
+            },
+            "type": "array"
+          },
+          "NotificationType": {
+            "$ref": "#/components/schemas/NotificationType"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationEvent": {
+        "enum": [
+          "All",
+          "InProgress",
+          "Success",
+          "TimedOut",
+          "Cancelled",
+          "Failed"
+        ],
+        "type": "string"
+      },
+      "NotificationType": {
+        "enum": [
+          "Command",
+          "Invocation"
+        ],
+        "type": "string"
+      },
+      "Parameter": {
+        "properties": {
+          "ARN": {
+            "type": "string"
+          },
+          "DataType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "LastModifiedDate": {
+            "format": "double",
+            "type": "number"
+          },
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Selector": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "SourceResult": {
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/ParameterType"
+          },
+          "Value": {
+            "format": "password",
+            "type": "string"
+          },
+          "Version": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterAlreadyExistsResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterLimitExceededResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterMaxVersionLimitExceededResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterNotFoundResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterPatternMismatchExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParameterTier": {
+        "enum": [
+          "Standard",
+          "Advanced",
+          "Intelligent-Tiering"
+        ],
+        "type": "string"
+      },
+      "ParameterType": {
+        "enum": [
+          "String",
+          "StringList",
+          "SecureString"
+        ],
+        "type": "string"
+      },
+      "ParameterVersionNotFoundResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ParentStepDetails": {
+        "properties": {
+          "Action": {
+            "pattern": "^aws:[a-zA-Z]{3,40}$",
+            "type": "string"
+          },
+          "Iteration": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "IteratorValue": {
+            "type": "string"
+          },
+          "StepExecutionId": {
+            "type": "string"
+          },
+          "StepName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PingStatus": {
+        "enum": [
+          "Online",
+          "ConnectionLost",
+          "Inactive"
+        ],
+        "type": "string"
+      },
+      "PlatformType": {
+        "enum": [
+          "Windows",
+          "Linux",
+          "MacOS"
+        ],
+        "type": "string"
+      },
+      "PoliciesLimitExceededExceptionResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ProgressCounters": {
+        "properties": {
+          "CancelledSteps": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "FailedSteps": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "SuccessSteps": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "TimedOutSteps": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "TotalSteps": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "PutParameterRequestContent": {
+        "properties": {
+          "AllowedPattern": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "DataType": {
+            "maxLength": 128,
+            "minLength": 0,
+            "type": "string"
+          },
+          "Description": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "KeyId": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^([a-zA-Z0-9:/_-]+)$",
+            "type": "string"
+          },
+          "Name": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Overwrite": {
+            "type": "boolean"
+          },
+          "Policies": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "Tier": {
+            "$ref": "#/components/schemas/ParameterTier"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/ParameterType"
+          },
+          "Value": {
+            "format": "password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Name",
+          "Value"
+        ],
+        "type": "object"
+      },
+      "PutParameterResponseContent": {
+        "properties": {
+          "Tier": {
+            "$ref": "#/components/schemas/ParameterTier"
+          },
+          "Version": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ResolvedTargets": {
+        "properties": {
+          "ParameterValues": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "Truncated": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceType": {
+        "enum": [
+          "ManagedInstance",
+          "EC2Instance"
+        ],
+        "type": "string"
+      },
+      "ResultAttribute": {
+        "properties": {
+          "TypeName": {
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "^(AWS|Custom):.*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "TypeName"
+        ],
+        "type": "object"
+      },
+      "ReviewStatus": {
+        "enum": [
+          "APPROVED",
+          "NOT_REVIEWED",
+          "PENDING",
+          "REJECTED"
+        ],
+        "type": "string"
+      },
+      "Runbook": {
+        "properties": {
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Parameters": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "TargetLocations": {
+            "items": {
+              "$ref": "#/components/schemas/TargetLocation"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          },
+          "TargetMaps": {
+            "items": {
+              "additionalProperties": {
+                "items": {
+                  "maxLength": 50,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 0,
+                "type": "array"
+              },
+              "maxProperties": 20,
+              "minProperties": 1,
+              "type": "object"
+            },
+            "maxItems": 300,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetParameterName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "DocumentName"
+        ],
+        "type": "object"
+      },
+      "SendCommandRequestContent": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "CloudWatchOutputConfig": {
+            "$ref": "#/components/schemas/CloudWatchOutputConfig"
+          },
+          "Comment": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": "string"
+          },
+          "DocumentHash": {
+            "maxLength": 256,
+            "minLength": 0,
+            "type": "string"
+          },
+          "DocumentHashType": {
+            "$ref": "#/components/schemas/DocumentHashType"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "InstanceIds": {
+            "items": {
+              "pattern": "^(^i-(\\w{8}|\\w{17})$)|(^mi-\\w{17}$)$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "NotificationConfig": {
+            "$ref": "#/components/schemas/NotificationConfig"
+          },
+          "OutputS3BucketName": {
+            "maxLength": 63,
+            "minLength": 3,
+            "type": "string"
+          },
+          "OutputS3KeyPrefix": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "OutputS3Region": {
+            "maxLength": 20,
+            "minLength": 3,
+            "type": "string"
+          },
+          "Parameters": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "ServiceRoleArn": {
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TimeoutSeconds": {
+            "format": "int32",
+            "maximum": 2592000,
+            "minimum": 30,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "DocumentName"
+        ],
+        "type": "object"
+      },
+      "SendCommandResponseContent": {
+        "properties": {
+          "Command": {
+            "$ref": "#/components/schemas/Command"
+          }
+        },
+        "type": "object"
+      },
+      "SourceType": {
+        "enum": [
+          "AWS::EC2::Instance",
+          "AWS::IoT::Thing",
+          "AWS::SSM::ManagedInstance",
+          "Microsoft.Compute/virtualMachines",
+          "compute.googleapis.com/Instance"
+        ],
+        "type": "string"
+      },
+      "StartAutomationExecutionRequestContent": {
+        "properties": {
+          "AlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "ClientToken": {
+            "maxLength": 36,
+            "minLength": 36,
+            "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+            "type": "string"
+          },
+          "DocumentName": {
+            "pattern": "^[a-zA-Z0-9_\\-.:/]{3,128}$",
+            "type": "string"
+          },
+          "DocumentVersion": {
+            "pattern": "^([$]LATEST|[$]DEFAULT|^[1-9][0-9]*$)$",
+            "type": "string"
+          },
+          "MaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "MaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Mode": {
+            "$ref": "#/components/schemas/ExecutionMode"
+          },
+          "Parameters": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "Tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "maxItems": 1000,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetLocations": {
+            "items": {
+              "$ref": "#/components/schemas/TargetLocation"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array"
+          },
+          "TargetLocationsURL": {
+            "pattern": "^https:\\/\\/[-a-zA-Z0-9@:%._\\+~#=]{1,253}\\.s3(\\.[a-z\\d-]{9,16})?\\.amazonaws\\.com\\/.{1,2000}$",
+            "type": "string"
+          },
+          "TargetMaps": {
+            "items": {
+              "additionalProperties": {
+                "items": {
+                  "maxLength": 50,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 25,
+                "minItems": 0,
+                "type": "array"
+              },
+              "maxProperties": 20,
+              "minProperties": 1,
+              "type": "object"
+            },
+            "maxItems": 300,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetParameterName": {
+            "maxLength": 50,
+            "minLength": 1,
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 1,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "required": [
+          "DocumentName"
+        ],
+        "type": "object"
+      },
+      "StartAutomationExecutionResponseContent": {
+        "properties": {
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StepExecution": {
+        "properties": {
+          "Action": {
+            "pattern": "^aws:[a-zA-Z]{3,40}$",
+            "type": "string"
+          },
+          "ExecutionEndTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "ExecutionStartTime": {
+            "format": "double",
+            "type": "number"
+          },
+          "FailureDetails": {
+            "$ref": "#/components/schemas/FailureDetails"
+          },
+          "FailureMessage": {
+            "type": "string"
+          },
+          "Inputs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "IsCritical": {
+            "type": "boolean"
+          },
+          "IsEnd": {
+            "type": "boolean"
+          },
+          "MaxAttempts": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "NextStep": {
+            "type": "string"
+          },
+          "OnFailure": {
+            "type": "string"
+          },
+          "Outputs": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "OverriddenParameters": {
+            "additionalProperties": {
+              "items": {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 50,
+              "minItems": 0,
+              "type": "array"
+            },
+            "maxProperties": 200,
+            "minProperties": 1,
+            "type": "object"
+          },
+          "ParentStepDetails": {
+            "$ref": "#/components/schemas/ParentStepDetails"
+          },
+          "Response": {
+            "type": "string"
+          },
+          "ResponseCode": {
+            "type": "string"
+          },
+          "StepExecutionId": {
+            "type": "string"
+          },
+          "StepName": {
+            "type": "string"
+          },
+          "StepStatus": {
+            "$ref": "#/components/schemas/AutomationExecutionStatus"
+          },
+          "TargetLocation": {
+            "$ref": "#/components/schemas/TargetLocation"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 5,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TimeoutSeconds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "TriggeredAlarms": {
+            "items": {
+              "$ref": "#/components/schemas/AlarmStateInformation"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ValidNextSteps": {
+            "items": {
+              "maxLength": 65535,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "WarningMessage": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StopAutomationExecutionRequestContent": {
+        "properties": {
+          "AutomationExecutionId": {
+            "maxLength": 36,
+            "minLength": 36,
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/StopType"
+          }
+        },
+        "required": [
+          "AutomationExecutionId"
+        ],
+        "type": "object"
+      },
+      "StopAutomationExecutionResponseContent": {
+        "properties": {},
+        "type": "object"
+      },
+      "StopType": {
+        "enum": [
+          "Complete",
+          "Cancel"
+        ],
+        "type": "string"
+      },
+      "Tag": {
+        "properties": {
+          "Key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$",
+            "type": "string"
+          },
+          "Value": {
+            "maxLength": 256,
+            "minLength": 0,
+            "pattern": "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "Key",
+          "Value"
+        ],
+        "type": "object"
+      },
+      "Target": {
+        "properties": {
+          "Key": {
+            "maxLength": 163,
+            "minLength": 1,
+            "pattern": "^[\\p{L}\\p{Z}\\p{N}_.:/=\\-@]*$|resource-groups:ResourceTypeFilters|resource-groups:Name$",
+            "type": "string"
+          },
+          "Values": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 0,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "TargetLocation": {
+        "properties": {
+          "Accounts": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ExcludeAccounts": {
+            "items": {
+              "maxLength": 68,
+              "minLength": 6,
+              "pattern": "^((ou-[a-z0-9]{4,32}-[a-z0-9]{8,32})|(\\d{12}))$",
+              "type": "string"
+            },
+            "maxItems": 5000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "ExecutionRoleName": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[\\w+=,.@/-]+$",
+            "type": "string"
+          },
+          "IncludeChildOrganizationUnits": {
+            "default": false,
+            "type": "boolean"
+          },
+          "Regions": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          },
+          "TargetLocationAlarmConfiguration": {
+            "$ref": "#/components/schemas/AlarmConfiguration"
+          },
+          "TargetLocationMaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "TargetLocationMaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          },
+          "Targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "maxItems": 1,
+            "minItems": 0,
+            "type": "array"
+          },
+          "TargetsMaxConcurrency": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[1-9][0-9]%|[1-9]%|100%)$",
+            "type": "string"
+          },
+          "TargetsMaxErrors": {
+            "maxLength": 7,
+            "minLength": 1,
+            "pattern": "^([1-9][0-9]*|[0]|[1-9][0-9]%|[0-9]%|100%)$",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TargetsSummary": {
+        "properties": {
+          "CompletedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "FailedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "StartedCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "SuccessfulCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          },
+          "TotalCount": {
+            "default": 0,
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TooManyUpdatesResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UnsupportedParameterTypeResponseContent": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UnsupportedPlatformTypeResponseContent": {
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "__type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon Simple Systems Manager (SSM)"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/CancelCommand": {
+      "post": {
+        "operationId": "CancelCommand",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelCommandRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelCommandRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelCommandResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelCommandResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DuplicateInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DuplicateInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DescribeAutomationExecutions": {
+      "post": {
+        "operationId": "DescribeAutomationExecutions",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAutomationExecutionsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeAutomationExecutionsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAutomationExecutionsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeAutomationExecutionsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DescribeInstanceInformation": {
+      "post": {
+        "operationId": "DescribeInstanceInformation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeInstanceInformationRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeInstanceInformationRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeInstanceInformationResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeInstanceInformationResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceInformationFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceInformationFilterValueResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetAutomationExecution": {
+      "post": {
+        "operationId": "GetAutomationExecution",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAutomationExecutionRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAutomationExecutionRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAutomationExecutionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAutomationExecutionResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationExecutionNotFoundExceptionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationExecutionNotFoundExceptionResponseContent"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetCommandInvocation": {
+      "post": {
+        "operationId": "GetCommandInvocation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetCommandInvocationRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetCommandInvocationRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommandInvocationResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCommandInvocationResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPluginNameResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvocationDoesNotExistResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPluginNameResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvocationDoesNotExistResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetDocument": {
+      "post": {
+        "operationId": "GetDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDocumentRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetDocumentRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDocumentResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDocumentResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetInventory": {
+      "post": {
+        "operationId": "GetInventory",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInventoryRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetInventoryRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInventoryResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInventoryResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidAggregatorExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInventoryGroupExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidResultAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTypeNameExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidAggregatorExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInventoryGroupExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidResultAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTypeNameExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/GetParameter": {
+      "post": {
+        "operationId": "GetParameter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetParameterRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/GetParameterRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetParameterResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetParameterResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterNotFoundResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterVersionNotFoundResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterNotFoundResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterVersionNotFoundResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListCommands": {
+      "post": {
+        "operationId": "ListCommands",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListCommandsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListCommandsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommandsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCommandsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidCommandIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListDocuments": {
+      "post": {
+        "operationId": "ListDocuments",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListDocumentsRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListDocumentsRequestContent"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDocumentsResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListDocumentsResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterKeyResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ListInventoryEntries": {
+      "post": {
+        "operationId": "ListInventoryEntries",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ListInventoryEntriesRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/ListInventoryEntriesRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInventoryEntriesResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListInventoryEntriesResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTypeNameExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/InvalidFilterResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNextTokenResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTypeNameExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/PutParameter": {
+      "post": {
+        "operationId": "PutParameter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutParameterRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/PutParameterRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutParameterResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutParameterResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/HierarchyLevelLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HierarchyTypeMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IncompatiblePolicyExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAllowedPatternExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyTypeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterAlreadyExistsResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterMaxVersionLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterPatternMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PoliciesLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TooManyUpdatesResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedParameterTypeResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/HierarchyLevelLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/HierarchyTypeMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IncompatiblePolicyExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAllowedPatternExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidKeyIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyAttributeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidPolicyTypeExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterAlreadyExistsResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterMaxVersionLimitExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/ParameterPatternMismatchExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/PoliciesLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TooManyUpdatesResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedParameterTypeResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SendCommand": {
+      "post": {
+        "operationId": "SendCommand",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendCommandRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/SendCommandRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendCommandResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendCommandResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DuplicateInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNotificationConfigResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidOutputFolderResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidParametersResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidRoleResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MaxDocumentSizeExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedPlatformTypeResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DuplicateInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidDocumentVersionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidInstanceIdResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidNotificationConfigResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidOutputFolderResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidParametersResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidRoleResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/MaxDocumentSizeExceededResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UnsupportedPlatformTypeResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/StartAutomationExecution": {
+      "post": {
+        "operationId": "StartAutomationExecution",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAutomationExecutionRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/StartAutomationExecutionRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartAutomationExecutionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartAutomationExecutionResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AutomationDefinitionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutomationDefinitionVersionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutomationExecutionLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdempotentParameterMismatchResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAutomationExecutionParametersExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTargetResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AutomationDefinitionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutomationDefinitionVersionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/AutomationExecutionLimitExceededExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/IdempotentParameterMismatchResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAutomationExecutionParametersExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidTargetResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/StopAutomationExecution": {
+      "post": {
+        "operationId": "StopAutomationExecution",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopAutomationExecutionRequestContent"
+              }
+            },
+            "application/x-amz-json-1.1": {
+              "schema": {
+                "$ref": "#/components/schemas/StopAutomationExecutionRequestContent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StopAutomationExecutionResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/StopAutomationExecutionResponseContent"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AutomationExecutionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAutomationStatusUpdateExceptionResponseContent"
+                    }
+                  ]
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AutomationExecutionNotFoundExceptionResponseContent"
+                    },
+                    {
+                      "$ref": "#/components/schemas/InvalidAutomationStatusUpdateExceptionResponseContent"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              },
+              "application/x-amz-json-1.1": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponseContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://ssm.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-amz-json": {
+    "endpointPrefix": "ssm",
+    "targetPrefix": "AmazonSSM",
+    "version": "1.1"
+  }
+}
