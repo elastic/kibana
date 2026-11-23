@@ -43,7 +43,7 @@ describe('notifyInvestigationLimitReached', () => {
     threadTs: '1700000000.000100',
   });
 
-  const setup = (executeResult: object = { status: 'ok' }) => {
+  const setup = (executeResult: object = { status: 'ok' }, runSignal = signal) => {
     const soClient = savedObjectsClientMock.create();
     soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
     const execute = jest.fn().mockResolvedValue(executeResult);
@@ -60,7 +60,7 @@ describe('notifyInvestigationLimitReached', () => {
         reason,
         settingsLocator,
         kibanaUrl,
-        signal,
+        signal: runSignal,
         logger,
       });
     const run = (
@@ -186,11 +186,44 @@ describe('notifyInvestigationLimitReached', () => {
     expect(execute).toHaveBeenCalledTimes(1);
   });
 
-  it('logs instead of throwing when delivery fails', async () => {
-    const { run } = setup({ status: 'error', serviceMessage: 'channel_not_found' });
+  it('logs a failed delivery and still posts to the other channels', async () => {
+    const { execute, notify } = setup();
+    execute.mockRejectedValueOnce(new Error('channel_not_found'));
 
-    await expect(run()).resolves.toBeUndefined();
+    await expect(
+      notify(
+        [
+          { connectorId: 'slack-connector', channel: 'C1' },
+          { connectorId: 'slack-connector', channel: 'C2' },
+        ],
+        { type: 'quota', deniedBy: 'automatic' }
+      )
+    ).resolves.toBeUndefined();
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('channel_not_found'));
+    expect(execute.mock.calls.map(([{ params }]) => params.subActionParams.channel)).toEqual([
+      'C1',
+      'C2',
+    ]);
+  });
+
+  it('claims no further channel once the run is cancelled', async () => {
+    const controller = new AbortController();
+    const { soClient, execute, notify } = setup(undefined, controller.signal);
+    execute.mockImplementationOnce(async () => {
+      controller.abort();
+      return { status: 'ok' };
+    });
+
+    await notify(
+      [
+        { connectorId: 'slack-connector', channel: 'C1' },
+        { connectorId: 'slack-connector', channel: 'C2' },
+      ],
+      { type: 'quota', deniedBy: 'automatic' }
+    );
+
+    expect(soClient.create).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledTimes(1);
   });
 
   it('logs instead of throwing when the saved objects client is unavailable', async () => {

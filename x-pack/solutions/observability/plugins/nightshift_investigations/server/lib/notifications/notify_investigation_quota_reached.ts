@@ -190,6 +190,7 @@ export const notifyInvestigationLimitReached = async ({
       | Awaited<ReturnType<ActionsPluginStart['getActionsClientWithRequestInSpace']>>
       | undefined;
     for (const { connectorId, channel, threadTs } of targets) {
+      if (signal.aborted) return;
       try {
         // Claimed before posting, so a failed post is not retried.
         const claimed = await consumeAutomationBudget(

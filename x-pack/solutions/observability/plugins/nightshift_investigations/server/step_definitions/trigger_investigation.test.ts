@@ -723,7 +723,14 @@ describe('automation budget enforcement before dispatch', () => {
       });
       expect(
         await definition.handler(
-          createContext({ ...input, subject_type: subjectType, subject_id: 'subject-1' })
+          createContext({
+            ...input,
+            subject_type: subjectType,
+            subject_id: 'subject-1',
+            notificationDestinations: [
+              { type: 'slack', connector_id: 'slack-connector', params: { channel: 'C2' } },
+            ],
+          })
         )
       ).toEqual({
         output: { skip_reason: 'daily_limit', daily_limit: 2 },
@@ -744,6 +751,7 @@ describe('automation budget enforcement before dispatch', () => {
       );
       expect(notifyInvestigationLimitReached).toHaveBeenCalledWith(
         expect.objectContaining({
+          targets: [{ connectorId: 'slack-connector', channel: 'C2' }],
           reason: {
             type: 'automation',
             automationId: 'a1',
