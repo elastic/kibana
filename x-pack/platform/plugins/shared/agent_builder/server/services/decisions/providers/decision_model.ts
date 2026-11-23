@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
-import type { DecisionQuestion } from '@kbn/inference-common';
 import { isInferenceRequestError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { BaseDecisionProviderOptions } from './base_decision_provider';
@@ -53,16 +52,11 @@ export class DecisionModelProvider extends BaseDecisionProvider {
   }: DecisionProviderParams): Promise<DecisionProviderResult> {
     const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
     const inferenceId = await this.resolveInferenceId(esClient, signal);
-    const [first, ...rest] = questions;
 
     try {
       const { answers } = await this.inference
         .getClient({ request })
-        .decide<[DecisionQuestion, ...DecisionQuestion[]]>(
-          { input, inferenceId, abortSignal: signal },
-          first,
-          ...rest
-        );
+        .decide({ input, inferenceId, questions, abortSignal: signal });
 
       return { inferenceId, answers };
     } catch (error) {

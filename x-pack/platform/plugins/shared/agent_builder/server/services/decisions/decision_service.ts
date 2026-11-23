@@ -7,12 +7,7 @@
 
 import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-builder-server';
-import type {
-  DecisionAnswer,
-  DecisionAnswerFor,
-  DecisionAnswersFor,
-  DecisionQuestion,
-} from '@kbn/inference-common';
+import type { DecisionAnswersFor, DecisionQuestion } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
@@ -70,30 +65,19 @@ export class DecisionService implements DecisionsStart {
     this.providers = providers;
   }
 
-  decide<const Q extends DecisionQuestion>(
-    params: DecideParams,
-    question: Q
-  ): Promise<DecideResult<{ answer: DecisionAnswerFor<Q> }>>;
-  decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    params: DecideParams,
-    ...questions: Q
-  ): Promise<DecideResult<{ answers: DecisionAnswersFor<Q> }>>;
   /** Runs the provider chain in a `decide` span that records which provider answered. */
-  decide(
-    params: DecideParams,
-    ...questions: DecisionQuestion[]
-  ): Promise<DecideResult<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> {
-    if (questions.length === 0) {
+  decide<const Q extends readonly DecisionQuestion[]>(
+    params: DecideParams<Q>
+  ): Promise<DecideResult<Q>> {
+    if (params.questions.length === 0) {
       throw new Error('decide() needs at least one question');
     }
 
     return withActiveInferenceSpan(
       'decide',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-      async (
-        span
-      ): Promise<DecideResult<{ answer: DecisionAnswer } | { answers: DecisionAnswer[] }>> => {
-        const { result, providerId } = await this.run(params, questions);
+      async (span): Promise<DecideResult<Q>> => {
+        const { result, providerId } = await this.run(params);
 
         span?.setAttributes({
           'elastic.decision.status': result.status,
@@ -105,26 +89,17 @@ export class DecisionService implements DecisionsStart {
             : {}),
         });
 
-        if (result.status !== 'decided') {
-          return result;
-        }
-
-        const { inferenceId, answers } = result;
-
-        return questions.length === 1
-          ? { status: 'decided', inferenceId, answer: answers[0] }
-          : { status: 'decided', inferenceId, answers };
+        return result;
       }
     );
   }
 
-  private async run(
-    { request, input, abortSignal }: DecideParams,
-    questions: DecisionQuestion[]
-  ): Promise<{
-    result: DecideResult<{ answers: DecisionAnswer[] }>;
-    providerId?: DecisionProviderId;
-  }> {
+  private async run<Q extends readonly DecisionQuestion[]>({
+    request,
+    input,
+    questions,
+    abortSignal,
+  }: DecideParams<Q>): Promise<{ result: DecideResult<Q>; providerId?: DecisionProviderId }> {
     const questionTypes = questions.map(({ type }) => type).join(', ');
     let lastError: Error | undefined;
 
@@ -154,7 +129,10 @@ export class DecisionService implements DecisionsStart {
             }ms: ${JSON.stringify(answers)}`
         );
 
-        return { result: { status: 'decided', inferenceId, answers }, providerId: provider.id };
+        return {
+          result: { status: 'decided', inferenceId, answers: answers as DecisionAnswersFor<Q> },
+          providerId: provider.id,
+        };
       } catch (error) {
         if (isDecisionProviderUnavailableError(error)) {
           this.logger.debug(

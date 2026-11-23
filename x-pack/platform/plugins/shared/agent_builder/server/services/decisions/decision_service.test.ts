@@ -8,11 +8,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecideResult } from '@kbn/agent-builder-server';
-import type {
-  DecisionAnswer,
-  DecisionChoiceQuestion,
-  DecisionPredicateQuestion,
-} from '@kbn/inference-common';
+import type { DecisionChoiceQuestion, DecisionPredicateQuestion } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { createDecisionProviders, DecisionService } from './decision_service';
 import { BaseDecisionProvider } from './providers/base_decision_provider';
@@ -54,7 +50,7 @@ const answered = (probability: number): DecisionProviderResult => ({
 const decided = (probability: number) => ({
   status: 'decided',
   inferenceId: 'model-1',
-  answer: { type: 'predicate', probability },
+  answers: [{ type: 'predicate', probability }],
 });
 
 type Ask = (params: DecisionProviderParams) => Promise<DecisionProviderResult>;
@@ -86,7 +82,7 @@ const setup = (providers: FakeProvider[]) => {
   const request = httpServerMock.createKibanaRequest();
 
   const decide = (abortSignal?: AbortSignal) =>
-    service.decide({ request, input, abortSignal }, shouldRespond);
+    service.decide({ request, input, questions: [shouldRespond], abortSignal });
 
   return { decide, logger, service, request };
 };
@@ -97,7 +93,7 @@ describe('DecisionService', () => {
     span.setAttributes.mockClear();
   });
 
-  it('returns a single answer for one question', async () => {
+  it('returns one answer for one question', async () => {
     const provider = fakeProvider('decision_model', async () => answered(0.9));
     const { decide } = setup([provider]);
 
@@ -109,7 +105,7 @@ describe('DecisionService', () => {
     );
 
     if (result.status === 'decided') {
-      const probability: number = result.answer.probability;
+      const [{ probability }] = result.answers;
       expect(probability).toBe(0.9);
     }
   });
@@ -127,7 +123,7 @@ describe('DecisionService', () => {
     }));
     const { service, request } = setup([provider]);
 
-    const result = await service.decide({ request, input }, shouldRespond, topic);
+    const result = await service.decide({ request, input, questions: [shouldRespond, topic] });
 
     expect(result).toEqual({
       status: 'decided',
@@ -146,7 +142,7 @@ describe('DecisionService', () => {
 
   it('throws when called without questions', () => {
     const { service, request } = setup([fakeProvider('decision_model')]);
-    expect(() => Reflect.apply(service.decide, service, [{ request, input }])).toThrow(
+    expect(() => service.decide({ request, input, questions: [] })).toThrow(
       'at least one question'
     );
   });
@@ -262,7 +258,7 @@ describe('DecisionService', () => {
     const slow = fakeProvider('fast_model', never, 2000);
     const { decide } = setup([slow]);
 
-    let result: DecideResult<{ answer: DecisionAnswer }> | undefined;
+    let result: DecideResult | undefined;
 
     decide().then((outcome) => {
       result = outcome;

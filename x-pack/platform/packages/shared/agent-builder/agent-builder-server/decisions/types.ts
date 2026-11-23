@@ -6,26 +6,25 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  DecisionAnswerFor,
-  DecisionAnswersFor,
-  DecisionQuestion,
-} from '@kbn/inference-common';
+import type { DecisionAnswersFor, DecisionQuestion } from '@kbn/inference-common';
 
-export interface DecideParams {
+export interface DecideParams<Q extends readonly DecisionQuestion[] = readonly DecisionQuestion[]> {
   /** The request whose user the decision model is called as. */
   request: KibanaRequest;
   /** The text the decision model reads. */
   input: string;
+  /** The questions to ask about the input, in one call. */
+  questions: Q;
   abortSignal?: AbortSignal;
 }
 
 /**
- * Outcome of a decision. Problems with the decision model are reported as `unavailable` or
- * `failed` rather than thrown, so each caller picks its own fallback.
+ * Outcome of a decision, with one answer per question in the questions' order. Problems with the
+ * decision model are reported as `unavailable` or `failed` rather than thrown, so each caller
+ * picks its own fallback.
  */
-export type DecideResult<T> =
-  | ({ status: 'decided'; inferenceId: string } & T)
+export type DecideResult<Q extends readonly DecisionQuestion[] = readonly DecisionQuestion[]> =
+  | { status: 'decided'; inferenceId: string; answers: DecisionAnswersFor<Q> }
   | { status: 'unavailable' }
   | { status: 'failed'; error: Error };
 
@@ -33,14 +32,8 @@ export type DecideResult<T> =
  * Quick decisions from a decision model, falling back to Agent Builder's fast model.
  */
 export interface DecisionsStart {
-  /** Asks one question about the input. */
-  decide<const Q extends DecisionQuestion>(
-    params: DecideParams,
-    question: Q
-  ): Promise<DecideResult<{ answer: DecisionAnswerFor<Q> }>>;
-  /** Asks several questions about the same input in one call; answers follow the questions' order. */
-  decide<const Q extends [DecisionQuestion, DecisionQuestion, ...DecisionQuestion[]]>(
-    params: DecideParams,
-    ...questions: Q
-  ): Promise<DecideResult<{ answers: DecisionAnswersFor<Q> }>>;
+  /** Asks one or more questions about the input in one call. */
+  decide<const Q extends readonly DecisionQuestion[]>(
+    params: DecideParams<Q>
+  ): Promise<DecideResult<Q>>;
 }

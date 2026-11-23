@@ -69,10 +69,12 @@ describe('DecisionModelProvider', () => {
 
     expect(listEndpoints).not.toHaveBeenCalled();
     expect(getClient).toHaveBeenCalledWith({ request });
-    expect(decide).toHaveBeenCalledWith(
-      { input, inferenceId: 'my-decision', abortSignal: expect.any(AbortSignal) },
-      shouldRespond
-    );
+    expect(decide).toHaveBeenCalledWith({
+      input,
+      inferenceId: 'my-decision',
+      questions: [shouldRespond],
+      abortSignal: expect.any(AbortSignal),
+    });
     expect(result).toEqual({
       inferenceId: 'my-decision',
       answers: [{ type: 'predicate', probability: 0.94 }],
@@ -110,7 +112,9 @@ describe('DecisionModelProvider', () => {
 
     const result = await run([shouldRespond, topic]);
 
-    expect(decide).toHaveBeenCalledWith(expect.anything(), shouldRespond, topic);
+    expect(decide).toHaveBeenCalledWith(
+      expect.objectContaining({ questions: [shouldRespond, topic] })
+    );
     expect(result).toEqual({ inferenceId: 'my-decision', answers });
   });
 
