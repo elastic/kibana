@@ -1,5 +1,5 @@
 {
-  "sha1": "61269d252e9c5b1cbc7aa27c28db13765f7e525f",
+  "sha1": "60c0e9199b2d68e4dce87c1f77831cf3ba62adb3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -66,6 +66,62 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/siem_deprecated_ui_actions.spec.ts",
         "line": 223,
         "column": 11
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-440967d915ac705",
+      "title": "Workflow insights APIs on Security Essentials denies reading workflow insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 42,
+        "column": 55
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-f667a73aa190af2",
+      "title": "Workflow insights APIs on Security Essentials denies updating a workflow insight",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 57,
+        "column": 24
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-91a9de21cefacb3",
+      "title": "Workflow insights APIs on Security Essentials does not expose reading running defend insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 72,
+        "column": 27
+      }
+    },
+    {
+      "id": "3ae7bb6bbd09657-b3615a40af9163e",
+      "title": "Workflow insights APIs on Security Essentials does not expose creating defend insights",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_rbac/api/tests/workflow_insights_tier_access_essentials.spec.ts",
+        "line": 81,
+        "column": 25
       }
     },
     {
