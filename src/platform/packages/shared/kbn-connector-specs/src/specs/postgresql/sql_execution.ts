@@ -14,6 +14,9 @@ import { getResponseLimit } from '../../lib/clients/postgresql_response_limit';
 export const DEFAULT_MAX_ROWS = 100;
 export const MAX_MAX_ROWS = 1000;
 
+// Rows fetched from a cursor per round trip, which bounds how much is buffered beyond the response limit.
+const FETCH_BATCH_SIZE = 20;
+
 // Fallback for xpack.actions.maxResponseContentLength when the client did not record one.
 const DEFAULT_MAX_CONTENT_LENGTH = 1024 * 1024;
 
@@ -53,10 +56,7 @@ export type ReadOnlyQuery = <T extends Row = Row>(
   maxRows?: number
 ) => Promise<SqlResult<T>>;
 
-/**
- * Runs `fn` in a `BEGIN READ ONLY` transaction on one pooled connection. The transaction is always rolled
- * back and the session reset before the connection returns to the pool.
- */
+/** Runs `fn` in a read-only transaction on one pooled connection, always rolled back and reset afterwards. */
 export const withReadOnlySession = async <R>(
   ctx: ActionContext,
   fn: (query: ReadOnlyQuery) => Promise<R>
@@ -71,15 +71,29 @@ export const withReadOnlySession = async <R>(
     ctx.log.warn(`[postgresql] Connection error during query: ${err.message}`);
   };
   client.on('error', onClientError);
+  let cursorCount = 0;
 
   const query: ReadOnlyQuery = async <T extends Row = Row>(
     text: string,
     values: unknown[] = [],
     maxRows: number = DEFAULT_MAX_ROWS
   ) => {
-    const result = await client.query<T>({ text, values });
-    const { rows, truncated, bytes } = capRows(result.rows, maxRows, remainingBytes);
-    remainingBytes -= bytes;
+    // Read through a server-side cursor so a few very wide rows cannot be buffered in full before the cap applies.
+    const cursor = `kibana_cursor_${cursorCount++}`;
+    await client.query({ text: `DECLARE ${cursor} NO SCROLL CURSOR FOR ${text}`, values });
+    const rows: T[] = [];
+    let truncated = false;
+    for (;;) {
+      const { rows: batch } = await client.query<T>(`FETCH ${FETCH_BATCH_SIZE} FROM ${cursor}`);
+      const capped = capRows(batch, maxRows - rows.length, remainingBytes);
+      rows.push(...capped.rows);
+      remainingBytes -= capped.bytes;
+      if (capped.truncated) {
+        truncated = true;
+        break;
+      }
+      if (batch.length < FETCH_BATCH_SIZE) break;
+    }
     return { rows, rowCount: rows.length, truncated };
   };
 
@@ -115,11 +129,7 @@ export interface StatementResult {
   truncated: boolean;
 }
 
-/**
- * Runs unrestricted SQL, possibly several statements, and returns one capped result per statement.
- * The statements may change session state (an unfinished BEGIN, SET, advisory locks), so the connection is
- * destroyed afterwards instead of being returned to the shared pool.
- */
+/** Runs unrestricted SQL, possibly several statements, and returns one capped result per statement. */
 export const runUnrestricted = async (
   ctx: ActionContext,
   sql: string
@@ -136,6 +146,8 @@ export const runUnrestricted = async (
     // A multi-statement string yields one result per statement at runtime, which the driver types as one.
     outcome = await client.query(sql);
   } finally {
+    // The statements may change session state (an unfinished BEGIN, SET, advisory locks), so destroy the
+    // connection instead of returning it to the shared pool.
     client.release(true);
   }
   const results = Array.isArray(outcome) ? outcome : [outcome];

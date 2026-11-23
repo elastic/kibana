@@ -94,10 +94,7 @@ const wrapQuery = (sql: string, code: string): string => {
   return `SELECT * FROM (\n${statement}\n) AS kibana_query LIMIT $1`;
 };
 
-/**
- * Validates a caller's `query` SQL and returns it wrapped as `SELECT * FROM (<sql>) AS kibana_query LIMIT $1`.
- * Throws unless it is a single SELECT or WITH statement without bind placeholders.
- */
+/** Returns the caller's `query` SQL wrapped with a bound row limit, throwing unless it is one read-only statement. */
 export const toReadOnlyQuery = (sql: string): string => {
   const code = blankNonCode(sql);
   assertReadOnly(code, SELECT_OR_WITH_PREFIX);

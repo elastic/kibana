@@ -33,6 +33,7 @@ const makePool = (
   // Consumes the next scripted result; the last one repeats.
   const nextResult = (): ScriptedResult => (queue.length > 1 ? queue.shift() ?? {} : queue[0]);
   const statements: Array<{ text: string; values?: unknown[] }> = [];
+  const cursors = new Map<string, Row[]>();
   const client = Object.assign(new EventEmitter(), {
     query: jest.fn(async (arg: string | { text: string; values?: unknown[] }) => {
       const statement = typeof arg === 'string' ? { text: arg } : arg;
@@ -46,6 +47,20 @@ const makePool = (
         if (discardFails) throw new Error('connection lost');
         return {};
       }
+      // Reads go through a cursor: DECLARE consumes the scripted result, FETCH serves its rows in batches.
+      const declare = /^DECLARE (\S+) NO SCROLL CURSOR FOR ([\s\S]*)$/.exec(statement.text);
+      if (declare) {
+        statements.pop();
+        statements.push({ ...statement, text: declare[2] });
+        const next = nextResult();
+        if (next.error) throw next.error;
+        cursors.set(declare[1], [...(next.rows ?? [])]);
+        return {};
+      }
+      const fetch = /^FETCH (\d+) FROM (\S+)$/.exec(statement.text);
+      if (fetch) {
+        return { rows: (cursors.get(fetch[2]) ?? []).splice(0, Number(fetch[1])) };
+      }
       const next = nextResult();
       if (next.error) throw next.error;
       return Array.isArray(next.rows) && next.command === undefined
@@ -56,7 +71,8 @@ const makePool = (
   });
   const pool = { connect: jest.fn().mockResolvedValue(client) };
   /** Statements that were not session control, in order. */
-  const sent = () => statements.filter(({ text }) => !SESSION_CONTROL.includes(text));
+  const sent = () =>
+    statements.filter(({ text }) => !SESSION_CONTROL.includes(text) && !text.startsWith('FETCH '));
   return { pool, client, statements, sent };
 };
 
@@ -229,6 +245,7 @@ describe('PostgresqlConnector', () => {
       expect(statements.map(({ text }) => text)).toEqual([
         'BEGIN READ ONLY',
         expect.stringContaining('SELECT id FROM t'),
+        'FETCH 20 FROM kibana_cursor_0',
         'ROLLBACK',
         // Releases session-level state such as advisory locks, which ROLLBACK leaves in place.
         'DISCARD ALL',
@@ -299,6 +316,33 @@ describe('PostgresqlConnector', () => {
         },
       ]);
       expect(result).toEqual({ rows: rowsOf(2), rowCount: 2, truncated: false });
+    });
+
+    it('stops fetching from the cursor as soon as the response size is reached', async () => {
+      const { pool, statements } = makePool([
+        { rows: Array.from({ length: 100 }, () => ({ v: 'x'.repeat(98) })) },
+      ]);
+      // Each row serializes to 106 bytes, so only the first 5 rows fit and the first batch already overflows.
+      setResponseLimit(pool, 106 * 5);
+
+      const result = (await PostgresqlConnector.actions.query.handler(makeContext(pool), {
+        sql: 'SELECT v FROM wide',
+      })) as { rowCount: number; truncated: boolean };
+
+      expect(result).toMatchObject({ rowCount: 5, truncated: true });
+      // Only one batch of 20 rows was pulled from the server, not all 100.
+      expect(statements.filter(({ text }) => text.startsWith('FETCH '))).toHaveLength(1);
+    });
+
+    it('fetches in batches until the rows run out', async () => {
+      const { pool, statements } = makePool([{ rows: rowsOf(45) }]);
+
+      const result = (await PostgresqlConnector.actions.query.handler(makeContext(pool), {
+        sql: 'SELECT id FROM t',
+      })) as { rowCount: number; truncated: boolean };
+
+      expect(result).toMatchObject({ rowCount: 45, truncated: false });
+      expect(statements.filter(({ text }) => text.startsWith('FETCH '))).toHaveLength(3);
     });
 
     it('defaults to 100 rows and flags truncation when more exist', async () => {
