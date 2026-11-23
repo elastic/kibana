@@ -38,7 +38,8 @@ const AREAS = [
   'Schemas',
   'Auth scopes',
   'Error responses',
-  'Schema variants',
+  'Response variants',
+  'Request variants',
   'Other',
 ] as const;
 
@@ -83,8 +84,6 @@ const tidy = (path: string): string => {
 const shortName = (name: string): string =>
   name.length > MAX_NAME_LENGTH ? `…${name.slice(-(MAX_NAME_LENGTH - 1))}` : name;
 
-const withoutMediaType = (text: string): string => text.replace(/\s*\(media type:[^)]*\)\s*$/, '');
-
 const scopeName = (scope: string): string => scope.slice(scope.lastIndexOf('/') + 1);
 
 /** The area a request or response rule is about. */
@@ -124,6 +123,40 @@ const detailOf = (id: string, rest: readonly string[]): string | undefined => {
   return undefined;
 };
 
+const MAX_VARIANTS_NAMED = 3;
+const COMBINATORS = new Set(['oneOf', 'anyOf', 'allOf']);
+
+/** `#/components/schemas/SlotContentId` as `SlotContentId`; an inline schema keeps its number. */
+const variantName = (variant: string): string =>
+  variant
+    .trim()
+    .replace(/^#\/components\/schemas\//, '')
+    .replace(/^#/, '');
+
+/**
+ * The variants a field of the request or the response gained or lost: the schemas added to or
+ * removed from its `oneOf`, `anyOf` or `allOf` list, or the keys of its discriminator mapping.
+ */
+const variantEntries = ({ id, text }: SpecChange): Entry[] | undefined => {
+  const [list, second] = quoted(text);
+  if (list === undefined) {
+    return undefined;
+  }
+  const names = list
+    .split(',')
+    .map(variantName)
+    .filter((name) => name !== '');
+  const shown = names.slice(0, MAX_VARIANTS_NAMED).join(', ');
+  const more = names.length - MAX_VARIANTS_NAMED;
+  const variants = more > 0 ? `${shown} and ${more} more` : shown;
+  // A response body has no field, only its list: `… to the response body `anyOf` list`.
+  const field =
+    second === undefined || COMBINATORS.has(second) ? 'the response body' : shortName(tidy(second));
+  const area = id.startsWith('request-') ? 'Request variants' : 'Response variants';
+  const section = /-(added)$/.test(id) ? 'added' : 'removed';
+  return [{ area, section, line: `${variants} on ${field}` }];
+};
+
 const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const { id, text } = change;
   const { name, rest } = subjectOf(change);
@@ -146,7 +179,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
     return [{ area: 'Enum values', section, line: `${value}${field}` }];
   }
   if (/discriminator-mapping|-(one|any|all)-of-(added|removed)$/.test(id)) {
-    return [{ area: 'Schema variants', section: 'changed', line: withoutMediaType(text) }];
+    return variantEntries(change);
   }
   if (id === 'api-schema-removed') {
     return path === undefined ? undefined : [{ area: 'Schemas', section: 'removed', line: path }];
@@ -323,15 +356,6 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
     }
     if (ofArea.length === 0) {
       return [];
-    }
-    if (area === 'Schema variants') {
-      const count = new Set(ofArea.map(({ line }) => line)).size;
-      return [
-        {
-          heading,
-          parts: [fixed(count, 'changed', `! ${count} ${count === 1 ? 'change' : 'changes'}`)],
-        },
-      ];
     }
     return [
       {

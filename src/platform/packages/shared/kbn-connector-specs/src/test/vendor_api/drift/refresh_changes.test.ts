@@ -208,23 +208,71 @@ describe('describeChanges', () => {
     );
   });
 
-  it('counts schema variants instead of naming them', () => {
+  it('names the variants a field gained or lost, and the field', () => {
+    const lines = describeChanges([
+      change(
+        'response-property-one-of-added',
+        'added `#/components/schemas/SlotContentId` to the `document/allOf[subschema #1]/children/items/componentProperties/value` response property `oneOf` list for the response status `200`'
+      ),
+      change(
+        'response-property-one-of-added',
+        'added `#/components/schemas/SlotContentId` to the `document/allOf[subschema #1]/children/items/componentProperties/value` response property `oneOf` list for the response status `200`'
+      ),
+      change(
+        'request-property-one-of-removed',
+        'removed `#/components/schemas/A, #/components/schemas/B` from the `query/source` request property `oneOf` list (media type: application/json)'
+      ),
+      change(
+        'request-property-discriminator-mapping-deleted',
+        'removed `A, B` discriminator mapping keys from the `query/source` request property (media type: application/json)'
+      ),
+      change(
+        'response-property-discriminator-mapping-added',
+        'added `#microsoft.graph.group` discriminator mapping keys to the `value/resource` response property'
+      ),
+    ]);
+
+    expect(lines).toEqual(
+      cellOf(
+        ['**Response variants**'],
+        block([
+          'added',
+          '+ SlotContentId on document/children/componentProperties/value',
+          '+ microsoft.graph.group on value/resource',
+        ]),
+        ['**Request variants**'],
+        block(['removed', '- A, B on query/source'])
+      )
+    );
+  });
+
+  it('names a variant added to a response body, which has no field', () => {
     expect(
       describeChanges([
         change(
-          'request-property-one-of-added',
-          'added `#/components/schemas/A` to the `q` request property `oneOf` list (media type: application/json)'
-        ),
-        change(
-          'request-property-one-of-added',
-          'added `#/components/schemas/A` to the `q` request property `oneOf` list (media type: application/x-www-form-urlencoded)'
-        ),
-        change(
-          'response-property-discriminator-mapping-added',
-          'added `#microsoft.graph.x` discriminator mapping keys to the `y` response property'
+          'response-body-any-of-added',
+          'added `#/components/schemas/A, #/components/schemas/B, #/components/schemas/C, #/components/schemas/D, #/components/schemas/E` to the response body `anyOf` list for the response status `200`'
         ),
       ])
-    ).toEqual(cellOf(['**Schema variants**'], block(['changed', '! 2 changes'])));
+    ).toEqual(
+      cellOf(
+        ['**Response variants**'],
+        block(['added', '+ A, B, C and 2 more on the response body'])
+      )
+    );
+  });
+
+  it('keeps an inline schema as it is named', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-any-of-added',
+          'added `subschema #1, subschema #2` to the `results/items` response property `anyOf` list for the response status `200`'
+        ),
+      ])
+    ).toEqual(
+      cellOf(['**Response variants**'], block(['added', '+ subschema #1, subschema #2 on results']))
+    );
   });
 
   it('names new error responses', () => {
