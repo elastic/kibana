@@ -21,7 +21,7 @@ import type {
   CheckPrivilegesWithRequest,
 } from '@kbn/security-plugin-types-server';
 
-import type { WorkloadBindingStore } from './bindings';
+import type { WorkloadBindingStore, WorkloadBindingSummary } from './bindings';
 import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { getOperationErrorType, serviceAccountsMetrics } from './metrics';
@@ -67,6 +67,12 @@ export interface ServiceAccountsManagementApi {
    * the list route does when it lists the accounts.
    */
   countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>>;
+
+  /**
+   * Summarizes every binding in every space, for usage telemetry. There is no privilege check,
+   * and the bindings aren't verified.
+   */
+  summarizeBoundWorkloads(): Promise<WorkloadBindingSummary>;
 
   /** Deletes the account, unless workloads are still bound to it and `force` is not set. */
   delete(
@@ -143,6 +149,10 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
 
   async countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>> {
     return await this.store.countByServiceAccountIds(serviceAccountIds);
+  }
+
+  async summarizeBoundWorkloads(): Promise<WorkloadBindingSummary> {
+    return await this.store.summarize();
   }
 
   async listWorkloads(

@@ -14,6 +14,8 @@ import {
   type GetWorkflowMigrationWorkflowsResponse,
 } from '../../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import type { SiemMigrationGetItemsOptions } from '../../../common/data/types';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { withLicense } from '../../../common/api/util/with_license';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 import { authz } from '../util/authz';
@@ -41,12 +43,45 @@ export const registerSiemWorkflowMigrationsGetWorkflowsRoute = (
       withLicense(
         withExistingMigration(
           async (
-            _context,
+            context,
             req,
             res
           ): Promise<IKibanaResponse<GetWorkflowMigrationWorkflowsResponse>> => {
-            logger.debug(`Workflow migration list is not implemented (${req.params.migration_id})`);
-            return res.ok({ body: { total: 0, data: [] } });
+            const { migration_id: migrationId } = req.params;
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'workflows'
+            );
+            try {
+              const ctx = await context.resolve(['securitySolution']);
+              const workflowsMigrationsClient =
+                ctx.securitySolution.siemMigrations.getWorkflowsClient();
+
+              const { page, per_page: size } = req.query;
+              const options: SiemMigrationGetItemsOptions = {
+                filters: {
+                  searchTerm: req.query.search_term,
+                  ids: req.query.ids,
+                  installed: req.query.is_installed,
+                  fullyTranslated: req.query.is_fully_translated,
+                  partiallyTranslated: req.query.is_partially_translated,
+                  untranslatable: req.query.is_untranslatable,
+                  failed: req.query.is_failed,
+                },
+                sort: { sortField: req.query.sort_field, sortDirection: req.query.sort_direction },
+                size,
+                from: page && size ? page * size : 0,
+              };
+
+              const result = await workflowsMigrationsClient.data.items.get(migrationId, options);
+
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId });
+              return res.ok({ body: result });
+            } catch (error) {
+              logger.error(error);
+              await siemMigrationAuditLogger.logGetMigrationItems({ migrationId, error });
+              return res.customError({ statusCode: 500, body: error.message });
+            }
           }
         )
       )

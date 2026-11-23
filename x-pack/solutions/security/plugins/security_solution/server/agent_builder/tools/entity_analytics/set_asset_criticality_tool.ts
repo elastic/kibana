@@ -228,7 +228,6 @@ export const setAssetCriticalityTool = (
             entityId,
             identifierType: entityType,
             getWriter: (ns) => riskScoreDataClient.getWriter({ namespace: ns }),
-            idBasedRiskScoringEnabled: true,
             logger,
             collectScores: true,
             telemetry: core.analytics,

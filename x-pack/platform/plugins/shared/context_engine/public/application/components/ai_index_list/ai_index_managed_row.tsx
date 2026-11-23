@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { KI_SUMMARY_PAGE_SIZE } from '../../../../common/constants';
+import { KI_NOT_DELETED_STATUSES } from '../../../../common/ki_lifecycle_status';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useListKi } from '../../hooks/use_list_ki';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -36,7 +37,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   const { summary, isLoading: isKiLoading } = useListKi({
     aiIndexId: aiIndex.id,
     size: KI_SUMMARY_PAGE_SIZE,
-    lifecycleStatus: ['active'],
+    status: KI_NOT_DELETED_STATUSES,
   });
 
   const viewDetailsLabel = i18n.translate('xpack.contextEngine.landing.managedRow.viewDetails', {

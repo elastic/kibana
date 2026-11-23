@@ -9,7 +9,7 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { ESQLCommand } from '@elastic/esql/types';
-import { EsqlQuery, isList, within } from '@elastic/esql';
+import { EsqlQuery, isList, isSource, Walker, within } from '@elastic/esql';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
 import type { ICommandCallbacks } from '../../commands/registry/types';
@@ -20,6 +20,12 @@ import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getInSubqueries, getSubqueriesToValidate, type InSubqueryReference } from './subqueries';
+import {
+  findNamedSubqueryForSource,
+  getNamedSubqueries,
+  getNamedSubqueriesAvailableTo,
+  type NamedSubquery,
+} from '../../commands/definitions/utils/named_subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
@@ -54,6 +60,63 @@ function shouldValidateCallback<K extends keyof ESQLCallbacks>(
   return callbacks?.[name] !== undefined;
 }
 
+/** Returns the LETs the main query reads with FROM, directly or through other LETs. */
+const getUsedNamedSubqueries = (
+  rootCommands: ESQLCommand[],
+  namedSubqueries: NamedSubquery[]
+): Set<NamedSubquery> => {
+  const used = new Set<NamedSubquery>();
+  const pending: Array<{ commands: ESQLCommand[]; available: readonly NamedSubquery[] }> = [
+    { commands: rootCommands, available: namedSubqueries },
+  ];
+
+  for (let next = pending.pop(); next; next = pending.pop()) {
+    const { commands, available } = next;
+    const fromCommands = Walker.matchAll(commands, {
+      type: 'command',
+      name: 'from',
+    }) as ESQLCommand[];
+
+    for (const source of fromCommands.flatMap(({ args }) => args.filter(isSource))) {
+      const namedSubquery = findNamedSubqueryForSource(source, available);
+
+      if (namedSubquery && !used.has(namedSubquery)) {
+        used.add(namedSubquery);
+        // A LET body can only read the LETs declared before it.
+        pending.push({
+          commands: namedSubquery.query.commands,
+          available: getNamedSubqueriesAvailableTo(namedSubqueries, namedSubquery),
+        });
+      }
+    }
+  }
+
+  return used;
+};
+
+/**
+ * True when the query reads a LET and uses METADATA, in the main query or in a LET it reads.
+ * We can't know every METADATA column Elasticsearch adds in this case, so we let it do the check.
+ */
+const readsNamedSubqueryWithMetadata = (
+  rootCommands: ESQLCommand[],
+  namedSubqueries: NamedSubquery[]
+): boolean => {
+  if (namedSubqueries.length === 0) {
+    return false;
+  }
+
+  const usedNamedSubqueries = [...getUsedNamedSubqueries(rootCommands, namedSubqueries)];
+
+  if (usedNamedSubqueries.length === 0) {
+    return false;
+  }
+
+  const commands = [...rootCommands, ...usedNamedSubqueries.flatMap(({ query }) => query.commands)];
+
+  return Walker.matchAll(commands, { type: 'option', name: 'metadata' }).length > 0;
+};
+
 /**
  * This function will perform an high level validation of the
  * query AST. An initial syntax validation is already performed by the parser
@@ -68,10 +131,30 @@ async function validateAst(
   const messages: ESQLMessage[] = [];
 
   const parsingResult = EsqlQuery.fromSrc(queryString);
+  const parserErrors = parsingResult.errors;
+
+  /**
+   * Some changes to the grammar deleted the literal names for some tokens.
+   * This is a workaround to restore the literals that were lost.
+   *
+   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
+   */
+  for (const error of parserErrors) {
+    error.message = error.message.replace(/\bLP\b/, "'('");
+    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
+  }
 
   const headerCommands = parsingResult.ast.header ?? [];
 
   const rootCommands = parsingResult.ast.commands;
+
+  // The LET bindings of the header; empty when the query has none.
+  const namedSubqueries = getNamedSubqueries(headerCommands);
+
+  // Only Elasticsearch can validate these queries semantically.
+  if (readsNamedSubqueryWithMetadata(rootCommands, namedSubqueries)) {
+    return { errors: parserErrors, warnings: [] };
+  }
 
   const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
     await Promise.all([
@@ -95,12 +178,16 @@ async function validateAst(
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;
 
+  // An IN subquery can read the LET bindings of the header.
+  const letCommands = namedSubqueries.map(({ command }) => command);
+
   const isRootTimeseries = isTimeseriesSourceCommand(rootCommands);
 
   // Validate the header commands
   for (const command of headerCommands) {
     const references: ReferenceMaps = {
       sources,
+      namedSubqueries,
       columns: new Map(), // no columns available in header
       policies: availablePolicies,
       query: queryString,
@@ -145,6 +232,7 @@ async function validateAst(
 
     const references: ReferenceMaps = {
       sources,
+      namedSubqueries,
       columns,
       policies: availablePolicies,
       query: queryString,
@@ -187,26 +275,18 @@ async function validateAst(
       // Cheap anyway: its source columns were already cached earlier in this loop.
       const rightColumns = await Promise.all(
         inSubqueries.map(({ query }) =>
-          new QueryColumns(query, queryString, callbacks, options).asMap()
+          new QueryColumns(
+            { ...query, header: letCommands },
+            queryString,
+            callbacks,
+            options
+          ).asMap()
         )
       );
       messages.push(
         ...validateInSubqueries(inSubqueries, columns, rightColumns, unmappedFieldsStrategy)
       );
     }
-  }
-
-  const parserErrors = parsingResult.errors;
-
-  /**
-   * Some changes to the grammar deleted the literal names for some tokens.
-   * This is a workaround to restore the literals that were lost.
-   *
-   * See https://github.com/elastic/elasticsearch/pull/124177 for context.
-   */
-  for (const error of parserErrors) {
-    error.message = error.message.replace(/\bLP\b/, "'('");
-    error.message = error.message.replace(/\bOPENING_BRACKET\b/, "'['");
   }
 
   return {
@@ -312,6 +392,7 @@ function validateCommand(
     columns: references.columns,
     policies: references.policies,
     sources: [...references.sources].map((source) => ({ name: source, hidden: false })),
+    namedSubqueries: references.namedSubqueries,
     joinSources: references.joinIndices,
     timeSeriesSources: references.timeSeriesSources,
     views: references.views,

@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type MobilePlatform = 'android' | 'ios';
+export const MOBILE_PLATFORM = {
+  ANDROID: 'android',
+  IOS: 'ios',
+} as const;
+
+export type MobilePlatform = (typeof MOBILE_PLATFORM)[keyof typeof MOBILE_PLATFORM];
+
+export const MOBILE_PLATFORMS: readonly MobilePlatform[] = Object.values(MOBILE_PLATFORM);
 
 export type DeviceProfileId =
   | 'pixel8Android15'
@@ -40,6 +47,7 @@ const androidAttributes = ({
   model: string;
   manufacturer: string;
 }): Record<string, string> => ({
+  'os.type': 'linux',
   'os.name': 'Android',
   'os.version': version,
   'os.description': `Android ${version}, API level ${apiLevel}, BUILD ${build}`,
@@ -80,7 +88,7 @@ const iosAttributes = ({
 export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> = {
   pixel8Android15: {
     id: 'pixel8Android15',
-    platform: 'android',
+    platform: MOBILE_PLATFORM.ANDROID,
     weight: 15,
     slowdown: 1,
     resourceAttributes: androidAttributes({
@@ -93,7 +101,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
   },
   galaxyS23Android14: {
     id: 'galaxyS23Android14',
-    platform: 'android',
+    platform: MOBILE_PLATFORM.ANDROID,
     weight: 20,
     slowdown: 1,
     resourceAttributes: androidAttributes({
@@ -106,7 +114,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
   },
   galaxyA14Android13: {
     id: 'galaxyA14Android13',
-    platform: 'android',
+    platform: MOBILE_PLATFORM.ANDROID,
     weight: 15,
     slowdown: 1.8,
     resourceAttributes: androidAttributes({
@@ -119,7 +127,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
   },
   iphone15ProIos18: {
     id: 'iphone15ProIos18',
-    platform: 'ios',
+    platform: MOBILE_PLATFORM.IOS,
     weight: 25,
     slowdown: 0.8,
     resourceAttributes: iosAttributes({
@@ -131,7 +139,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
   },
   iphone12Ios17: {
     id: 'iphone12Ios17',
-    platform: 'ios',
+    platform: MOBILE_PLATFORM.IOS,
     weight: 15,
     slowdown: 1.3,
     resourceAttributes: iosAttributes({
@@ -143,7 +151,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
   },
   ipadAirIpados18: {
     id: 'ipadAirIpados18',
-    platform: 'ios',
+    platform: MOBILE_PLATFORM.IOS,
     weight: 10,
     slowdown: 1,
     resourceAttributes: iosAttributes({
@@ -159,7 +167,7 @@ export const DEVICE_PROFILES: Readonly<Record<DeviceProfileId, DeviceProfile>> =
 export const pickDeviceProfile = (
   random: () => number = Math.random,
   weightOverrides: Partial<Record<DeviceProfileId, number>> = {},
-  platforms: readonly MobilePlatform[] = ['android', 'ios']
+  platforms: readonly MobilePlatform[] = MOBILE_PLATFORMS
 ): DeviceProfile | undefined => {
   const profiles = Object.values(DEVICE_PROFILES);
   const weights = profiles.map(({ id, weight, platform }) =>

@@ -26,13 +26,13 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { FoundConnector } from '../src/test/vendor_api/find_connector';
 import { listConnectors } from '../src/test/vendor_api/find_connector';
-import { fixedHttpsOrigins } from '../src/test/vendor_api/fixed_https_origins';
+import { fixedHttpsOrigins } from '../src/test/vendor_api/spec/fixed_https_origins';
 import {
   readRecordings,
   readResponseFixtures,
   RECORDINGS,
-} from '../src/test/vendor_api/load_responses';
-import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/load_vendor_specs';
+} from '../src/test/vendor_api/record/load_responses';
+import { loadVendorSpecs, readOptional } from '../src/test/vendor_api/spec/load_vendor_specs';
 
 const DEFAULT_PORT = 5690;
 const DEFAULT_CA_DIRECTORY = path.join(REPO_ROOT, 'data', 'connector_emulate');
@@ -269,6 +269,8 @@ run(
         pagination,
         fixtures,
         recordings,
+        // So GET /_mock/calls shows what Kibana sent and got, with secrets redacted.
+        capture: true,
         onCall: (call) => logCall(log, call, single ? '' : `[${name}] `),
       });
 
@@ -334,9 +336,12 @@ run(
     log.info(
       [
         'Emulator control endpoints:',
-        `- GET ${controlUrl('calls')}`,
+        `- GET ${controlUrl('calls')}?since=<n>`,
         `- POST ${controlUrl('reset')}`,
         `- GET ${controlUrl('operations')}`,
+        `- GET ${controlUrl('operations')}/<id>[?source=<name>]`,
+        `- GET, PUT ${controlUrl('fixtures')}`,
+        `- DELETE ${controlUrl('fixtures')}[?operation=<id>&source=<name>]`,
         ...(single ? [] : ['Add ?connector=<id> to scope them to one connector.']),
         '',
       ].join('\n')

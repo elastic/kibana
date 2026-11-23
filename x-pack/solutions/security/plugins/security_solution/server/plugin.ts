@@ -26,6 +26,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { ATTACK_FINGERPRINT_AI_INDEX_ID } from '@kbn/alertzero-plugin/common/ai_indices';
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
 import { registerCustomYaraSignaturesRoutes } from './endpoint/routes/custom_yara_signatures';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
@@ -149,7 +150,6 @@ import {
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
-import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
 import { accessesFrequentlyMaintainer } from './lib/entity_analytics/maintainers/accesses';
 import { communicatesWithMaintainer } from './lib/entity_analytics/maintainers/communicates_with';
@@ -357,7 +357,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       agentBuilder,
       experimentalFeatures,
       getStartServices: core.getStartServices,
-      kibanaVersion: this.pluginContext.env.packageInfo.version,
       logger,
       ml: plugins.ml,
       options: { endpointAppContextService },
@@ -405,36 +404,23 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
-    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
-      registerRiskScoreMaintainer({
+    registerRiskScoreMaintainer({
+      entityStore: plugins.entityStore,
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      auditLogger: plugins.security?.audit.withoutRequest,
+      productFeaturesService,
+      entityAnalyticsConfig: config.entityAnalytics,
+      experimentalFeatures,
+      telemetry: core.analytics,
+    });
+    if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
+      registerWatchlistMaintainer({
         entityStore: plugins.entityStore,
         getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
         logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        productFeaturesService,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
-        telemetry: core.analytics,
-      });
-      if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
-        registerWatchlistMaintainer({
-          entityStore: plugins.entityStore,
-          getStartServices: core.getStartServices,
-          logger: this.logger,
-          hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
-        });
-      }
-    } else {
-      registerRiskScoringTask({
-        getStartServices: core.getStartServices,
-        kibanaVersion: pluginContext.env.packageInfo.version,
-        logger: this.logger,
-        auditLogger: plugins.security?.audit.withoutRequest,
-        taskManager: plugins.taskManager,
-        telemetry: core.analytics,
-        entityAnalyticsConfig: config.entityAnalytics,
-        experimentalFeatures,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
       });
     }
 
@@ -963,7 +949,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginStart {
     if (plugins.alertzero) {
       const alertzero = plugins.alertzero;
-      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+      setFingerprintCreateAllowed(() =>
+        alertzero.isAiIndexWritable(ATTACK_FINGERPRINT_AI_INDEX_ID)
+      );
     }
 
     const { config, logger, productFeaturesService } = this;
@@ -1007,8 +995,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
-        automaticTroubleshootingUniversalSkillEnabled:
-          config.experimentalFeatures.automaticTroubleshootingUniversalSkill,
+        experimentalFeatures: config.experimentalFeatures,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });

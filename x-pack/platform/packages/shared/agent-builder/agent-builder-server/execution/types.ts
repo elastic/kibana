@@ -40,6 +40,8 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
+  /** Id of the inference feature the run uses - can't be used with connectorId */
+  inferenceFeatureId?: string;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -384,6 +386,13 @@ export interface AgentExecutionService {
    * The chat API's entry point; a caller that always runs the agent calls `executeAgent`.
    */
   maybeExecuteAgent(params: ExecuteAgentParams): Promise<MaybeExecuteAgentResult>;
+
+  /**
+   * Refuses a caller who could not start a run of `agentId` themselves: no `use` access to the
+   * agent, or no invoke privilege when it is bound to a service account. The check `executeAgent`
+   * runs before any write, for callers that join a run instead of starting one.
+   */
+  assertCanRunAgent(params: { request: KibanaRequest; agentId: string }): Promise<void>;
 
   /**
    * Retrieve an agent execution by its ID.

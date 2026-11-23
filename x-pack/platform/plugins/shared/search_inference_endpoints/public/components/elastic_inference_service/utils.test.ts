@@ -65,6 +65,7 @@ describe('utils', () => {
       ['sparse_embedding', 'Embedding'],
       ['embedding', 'Embedding'],
       ['rerank', 'Rerank'],
+      ['decision', 'Decision'],
     ] as const)('%s → %s', (taskType, expectedCategory) => {
       expect(TASK_TYPE_CATEGORY[taskType]).toBe(expectedCategory);
     });
@@ -77,6 +78,7 @@ describe('utils', () => {
       ['text_embedding', 'text embedding'],
       ['sparse_embedding', 'sparse embedding'],
       ['rerank', 'rerank'],
+      ['decision', 'decision'],
     ] as const)('%s → %s', (taskType, expectedName) => {
       expect(TASK_TYPE_DISPLAY_NAME[taskType]).toBe(expectedName);
     });
@@ -84,7 +86,12 @@ describe('utils', () => {
 
   describe('MODEL_TYPE_FILTERS', () => {
     it('covers all expected categories in order', () => {
-      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual(['Generative', 'Embedding', 'Rerank']);
+      expect(MODEL_TYPE_FILTERS.map((f) => f.key)).toEqual([
+        'Generative',
+        'Embedding',
+        'Rerank',
+        'Decision',
+      ]);
     });
   });
 
@@ -93,6 +100,7 @@ describe('utils', () => {
       ['Generative', 'Generative'],
       ['Embedding', 'Embedding'],
       ['Rerank', 'Rerank'],
+      ['Decision', 'Decision'],
     ] as const)('%s → %s', (category, expectedLabel) => {
       expect(getTaskTypeCategoryLabel(category)).toBe(expectedLabel);
     });
@@ -192,6 +200,18 @@ describe('utils', () => {
   describe('groupEndpointsByModel', () => {
     it('returns empty array for empty input', () => {
       expect(groupEndpointsByModel([])).toEqual([]);
+    });
+
+    it('assigns the Decision category to decision endpoints', () => {
+      const [model] = groupEndpointsByModel([
+        makeEndpoint({
+          inference_id: '.typesafe-jev-1.13_decision',
+          task_type: 'decision' as EisInferenceEndpoint['task_type'],
+          service_settings: { model_id: 'typesafe-jev-1.13' },
+        }),
+      ]);
+      expect(model.taskTypes).toEqual(['decision']);
+      expect(model.categories).toEqual(['Decision']);
     });
 
     it('groups by service + model name, aggregating task types and categories', () => {
@@ -453,6 +473,41 @@ describe('utils', () => {
           selectedTaskTypes: new Set(categories),
         });
         expect(result.map((m) => m.modelName)).toEqual(expectedModels);
+      });
+    });
+
+    describe('decision category filter', () => {
+      const decisionModel = makeGroupedModel({
+        modelName: 'TypeSafe Jev 1.13',
+        taskTypes: ['decision'],
+        categories: ['Decision'],
+      });
+
+      it('returns only decision models when Decision is selected', () => {
+        const result = filterGroupedModels([...models, decisionModel], {
+          ...noFilters,
+          selectedTaskTypes: new Set<TaskTypeCategory>(['Decision']),
+        });
+        expect(result.map((m) => m.modelName)).toEqual(['TypeSafe Jev 1.13']);
+      });
+
+      it('returns both decision and generative models when both are selected', () => {
+        const result = filterGroupedModels([...models, decisionModel], {
+          ...noFilters,
+          selectedTaskTypes: new Set<TaskTypeCategory>(['Generative', 'Decision']),
+        });
+        expect(result.map((m) => m.modelName)).toEqual([
+          'rainbow-sprinkle-completion',
+          'TypeSafe Jev 1.13',
+        ]);
+      });
+
+      it('excludes decision models when another category is selected', () => {
+        const result = filterGroupedModels([...models, decisionModel], {
+          ...noFilters,
+          selectedTaskTypes: new Set<TaskTypeCategory>(['Generative']),
+        });
+        expect(result.map((m) => m.modelName)).toEqual(['rainbow-sprinkle-completion']);
       });
     });
 

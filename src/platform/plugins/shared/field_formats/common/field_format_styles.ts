@@ -8,18 +8,16 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 
-export const arrayHighlightStyles = ({ euiTheme }: Partial<UseEuiTheme>) =>
-  css({
-    color: euiTheme?.colors.mediumShade ?? 'inherit',
-  });
-
-export const searchHighlightStyles = css({
-  textDecoration: 'dotted underline',
+export const arrayHighlightStyles = ({ euiTheme }: Partial<UseEuiTheme>): CSSObject => ({
+  color: euiTheme?.colors.mediumShade ?? 'inherit',
 });
 
-export const emptyValueStyles = ({ euiTheme }: Partial<UseEuiTheme>) =>
-  css({
-    color: euiTheme?.colors.darkShade ?? 'inherit',
-  });
+export const searchHighlightStyles: CSSObject = {
+  textDecoration: 'dotted underline',
+};
+
+export const emptyValueStyles = ({ euiTheme }: Partial<UseEuiTheme>): CSSObject => ({
+  color: euiTheme?.colors.darkShade ?? 'inherit',
+});

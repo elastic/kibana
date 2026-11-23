@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ElasticsearchHomeProvider } from './context';
+import { getIntegratedOnboardingEnabled$, useIntegratedOnboardingEnabled } from './feature_flags';
 import type {
   ElasticsearchHomePageProps,
   ElasticsearchHomePublicStart,
@@ -43,7 +44,11 @@ export class ElasticsearchHomePlugin
       </QueryClientProvider>
     );
 
-    return { HomePage };
+    return {
+      HomePage,
+      getIntegratedOnboardingEnabled$: () => getIntegratedOnboardingEnabled$(core.featureFlags),
+      useIntegratedOnboardingEnabled: () => useIntegratedOnboardingEnabled(core.featureFlags),
+    };
   }
 
   public stop() {}

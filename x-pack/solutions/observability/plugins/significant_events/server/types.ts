@@ -30,7 +30,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { CPSServerSetup } from '@kbn/cps/server';
+import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
 import type {
   FieldsMetadataServerSetup,
   FieldsMetadataServerStart,
@@ -45,6 +45,7 @@ import type {
   NightshiftSourcesServerSetup,
   NightshiftSourcesServerStart,
 } from '@kbn/nightshift-sources-plugin/server';
+import type { SeveritySync } from './lib/significant_events/events/severity';
 
 export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -83,6 +84,7 @@ export interface SignificantEventsPluginStartDependencies {
   nightshiftSources: NightshiftSourcesServerStart;
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  cps?: CPSServerStart;
 }
 
 export interface SignificantEventsServer {
@@ -106,4 +108,6 @@ export interface SignificantEventsServer {
   nightshiftInvestigations?: NightshiftInvestigationsServerStart;
   /** Reads investigations (status of the ones a significant event lists). */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
+  /** Keeps an event's stored severity in step with its investigation. */
+  severitySync: SeveritySync;
 }

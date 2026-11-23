@@ -26,6 +26,7 @@ describe('queryAiIndicesHandler', () => {
       query: 'FROM ai-index-runbooks | WHERE type == ?kind | LIMIT 5',
       params: { kind: 'dashboard' },
       limit: 5,
+      user_id: 'alice',
     };
 
     const result = await queryAiIndicesHandler({ deps, request, context });
