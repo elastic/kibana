@@ -23,18 +23,14 @@ import type {
   SettingsProps,
   SeriesIdentifier,
   TooltipValue,
-  PointerValue,
-  HeatmapCellDatum,
 } from '@elastic/charts';
 import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';
-import { ChartTooltipFooterMessage } from '@kbn/visualizations-components';
 import {
   getAccessorByDimension,
   getFormatByAccessor,
-  getFilterDrilldownWarningMessage,
   getOverridesFor,
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
@@ -315,14 +311,6 @@ export function getDateFormatPattern(
   return uiSettings.get('dateFormat');
 }
 
-const isHeatmapCellDatum = (datum: unknown): datum is HeatmapCellDatum =>
-  typeof datum === 'object' && datum !== null && 'originalIndex' in datum;
-
-// A y-axis label tooltip is one row whose datum is the category, not a cell.
-const isHeatmapYAxisLabelTooltip = (
-  items: Array<TooltipValue<HeatmapChartDatum, SeriesIdentifier>>
-): boolean => items.length === 1 && !isHeatmapCellDatum(items[0]?.datum);
-
 export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
   ({
     data: table,
@@ -525,30 +513,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     ]);
 
     const hasTooltipActions = interactive && !isEsqlMode;
-
-    // Compute warning message for ES|QL computed columns that cannot be filtered.
-    const warningMessage = useMemo(
-      () => (isEsqlMode ? getFilterDrilldownWarningMessage([xAxisColumn, yAxisColumn]) : undefined),
-      [isEsqlMode, xAxisColumn, yAxisColumn]
-    );
-
-    const TooltipFooter = useMemo<
-      | React.ComponentType<{
-          items: Array<TooltipValue<HeatmapChartDatum, SeriesIdentifier>>;
-          header: PointerValue<HeatmapChartDatum> | null;
-        }>
-      | 'default'
-    >(() => {
-      if (!warningMessage) return 'default';
-      return ({ items }) => {
-        // @elastic/charts still mounts the footer wrapper when this returns null.
-        // The wrapper goes away once charts skips footers for disableActions tooltips.
-        if (isHeatmapYAxisLabelTooltip(items)) {
-          return null;
-        }
-        return <ChartTooltipFooterMessage message={warningMessage} />;
-      };
-    }, [warningMessage]);
 
     const onElementClick = useCallback(
       (e: HeatmapElementEvent[]) => {
@@ -977,7 +941,6 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
                   : undefined
               }
               type={args.showTooltip ? TooltipType.Follow : TooltipType.None}
-              footer={TooltipFooter}
             />
             <Settings
               onRenderChange={onRenderChange}

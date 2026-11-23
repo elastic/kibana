@@ -822,8 +822,6 @@
     "changePointChartViewer.lens.focusedView": "Discoverタブを新規で開きます",
     "changePointChartViewer.lens.focusedViewLabel": "フォーカスビュー",
     "changePointChartViewer.pagination.ariaLabel": "変化点チャートのページネーションを変更する",
-    "chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription": "クエリ時に作成されたフィールドに依存しているため、{count, plural, one {from this value because it relies on a field} other {これらの値}}からフィルターをかけたり、ドリルダウンしたりすることはできません。",
-    "chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription": "クエリ時に作成された{count, plural, one {it relies on a field} other {フィールド}}に依存しているため、{names}からフィルターをかけたり、ドリルダウンしたりすることはできません。",
     "chartExpressionsCommon.function.findAccessorOrFail.error.accessor": "入力された列名またはインデックスが無効です：{accessor}",
     "charts.colormaps.bluesText": "青",
     "charts.colormaps.greensText": "緑",

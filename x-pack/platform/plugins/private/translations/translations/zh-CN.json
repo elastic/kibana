@@ -822,8 +822,6 @@
     "changePointChartViewer.lens.focusedView": "在新的 Discover 选项卡中打开",
     "changePointChartViewer.lens.focusedViewLabel": "聚焦视图",
     "changePointChartViewer.pagination.ariaLabel": "更改点图分页",
-    "chartExpressionsCommon.computedColumn.filterDrilldownDisabledDescription": "您不能对{count, plural, one {from this value because it relies on a field} other {这些值}}应用过滤器或向下钻取，因为它们依赖于在查询时创建的字段。",
-    "chartExpressionsCommon.computedColumn.partialFilterDrilldownDisabledDescription": "您不能对{names}应用过滤器或向下钻取，因为{count, plural, one {it relies on a field} other {它们依赖于字段}}是在查询时创建的。",
     "chartExpressionsCommon.function.findAccessorOrFail.error.accessor": "提供的列名称或索引无效：{accessor}",
     "charts.colormaps.bluesText": "蓝色",
     "charts.colormaps.greensText": "绿色",

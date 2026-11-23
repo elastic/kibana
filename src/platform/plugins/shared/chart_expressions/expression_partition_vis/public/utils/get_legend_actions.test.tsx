@@ -174,67 +174,44 @@ describe('getLegendActions', () => {
   });
 
   describe('ES|QL computed column', () => {
-    it('renders the action button when the column is computed', () => {
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
+    const getComputedColumnLegendActions = (data: Datatable) =>
+      getLegendActions(
+        jest.fn().mockResolvedValue(true),
+        makeGetFilterEventData(data),
         jest.fn(),
         [],
         visParams,
-        esqlVisDataWithComputedColumn,
+        data,
         fieldFormatsMock as unknown as FieldFormatsStart
       );
+
+    it('renders the action button when the column is computed', () => {
+      const Component = getComputedColumnLegendActions(esqlVisDataWithComputedColumn);
       renderWithKibanaRenderContext(<Component {...seriesProps} />);
       expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
     });
 
-    it('shows disabled Filter for and Filter out actions when the column is computed and cannot be filtered', async () => {
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
-        [],
-        visParams,
-        esqlVisDataWithComputedColumn,
-        fieldFormatsMock as unknown as FieldFormatsStart
-      );
+    it('enables Filter for and Filter out when the column is computed, as it is filtered with an ES|QL filter', async () => {
+      const Component = getComputedColumnLegendActions(esqlVisDataWithComputedColumn);
       await renderAndOpen(Component);
       await waitFor(() => {
-        expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeDisabled();
-        expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeDisabled();
+        expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeEnabled();
+        expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeEnabled();
       });
     });
 
-    it('shows a warning message when the column is computed and cannot be filtered', async () => {
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedColumn),
-        jest.fn(),
-        [],
-        visParams,
-        esqlVisDataWithComputedColumn,
-        fieldFormatsMock as unknown as FieldFormatsStart
-      );
+    it('does not show a message about the column, as there is nothing that cannot be done', async () => {
+      const Component = getComputedColumnLegendActions(esqlVisDataWithComputedColumn);
       await renderAndOpen(Component);
-      const warning = await screen.findByTestId('legendFilterFooterMessage');
-      expect(warning).toHaveTextContent(
-        `You can't apply a filter or drill down from this value because it relies on a field created at query time.`
-      );
+      await screen.findByRole('menuitem', { name: 'Filter for' });
+      expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
     });
 
-    it('does not render an action button for a non-filterable computed date column with no other actions', () => {
-      // There's no warning message to show for a suppressed date column, and no other cell
-      // actions here, so showing disabled Filter for/out buttons with nothing to explain them
-      // would be confusing — omit the button entirely instead.
-      const Component = getLegendActions(
-        undefined,
-        makeGetFilterEventData(esqlVisDataWithComputedDateColumn),
-        jest.fn(),
-        [],
-        visParams,
-        esqlVisDataWithComputedDateColumn,
-        fieldFormatsMock as unknown as FieldFormatsStart
-      );
+    it('does not render an action button for a computed date column with no other actions', () => {
+      // A computed date column is not filtered with a value (the time range is what changes), and
+      // there are no other cell actions here, so the button is omitted instead of showing nothing.
+      // The filter is allowed, so the column is what makes the difference.
+      const Component = getComputedColumnLegendActions(esqlVisDataWithComputedDateColumn);
       renderWithKibanaRenderContext(<Component {...seriesProps} />);
       expect(screen.queryByRole('button', { name: /legend actions/i })).not.toBeInTheDocument();
     });

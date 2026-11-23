@@ -329,7 +329,7 @@ describe('getLegendAction', () => {
     expect(screen.getByText('Action 2')).toBeInTheDocument();
   });
 
-  it('disables filter actions when the split column is a non-filterable computed column', async () => {
+  it('enables filter actions when the split column is computed, as it is filtered with an ES|QL filter', async () => {
     const tableWithComputedColumn: Datatable = {
       ...table,
       meta: { type: ESQL_TABLE_TYPE },
@@ -353,15 +353,16 @@ describe('getLegendAction', () => {
     const Component = buildComponent({ ...sampleLayer, table: tableWithComputedColumn });
     await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));
     await waitFor(() => {
-      expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeDisabled();
-      expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeDisabled();
+      expect(screen.getByRole('menuitem', { name: 'Filter for' })).toBeEnabled();
+      expect(screen.getByRole('menuitem', { name: 'Filter out' })).toBeEnabled();
     });
-    expect(screen.getByTestId('legendFilterFooterMessage')).toBeInTheDocument();
+    // there is nothing to explain, as the column can be filtered
+    expect(screen.queryByTestId('legendFilterFooterMessage')).not.toBeInTheDocument();
   });
 
   it('omits Filter for/out for a non-filterable computed date column, but keeps other cell actions', async () => {
-    // There's no warning message to show for a suppressed date column, so showing disabled
-    // Filter for/out buttons with nothing to explain them would be confusing — they're omitted
+    // A computed date column is not filtered with a value (the time range is what changes), so
+    // disabled Filter for/out buttons with nothing to explain them would be confusing: they're omitted
     // even though the popover itself still renders for the other (unrelated) cell actions.
     const tableWithComputedDateColumn: Datatable = {
       ...table,

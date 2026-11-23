@@ -9,11 +9,7 @@
 
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
-import {
-  getAccessorByDimension,
-  isFilterableColumnSet,
-  getFilterDrilldownWarningMessage,
-} from '@kbn/chart-expressions-common';
+import { getAccessorByDimension, isFilterableColumnSet } from '@kbn/chart-expressions-common';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { LayerCellValueActions, FilterEvent } from '../types';
@@ -88,12 +84,8 @@ export const getLegendAction = (
     }
 
     const filterableColumns = filterActionData.map((data) => data.table.columns[data.column]);
-    // isFilterable gates the action (disabled state + whether it runs); warningMessage is
-    // display-only and can be suppressed (e.g. for dates) without affecting isFilterable.
+    // The columns that the query creates are filtered with an ES|QL filter, except the date ones for now
     const isFilterable = !isEsqlMode || isFilterableColumnSet(filterableColumns);
-    const warningMessage = isEsqlMode
-      ? getFilterDrilldownWarningMessage(filterableColumns)
-      : undefined;
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
       if (isFilterable) {
@@ -128,7 +120,6 @@ export const getLegendAction = (
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
         showDisabledFilterActions={!isFilterable}
-        footerMessage={warningMessage}
       />
     );
   });
