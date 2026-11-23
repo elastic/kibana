@@ -42,29 +42,43 @@ export const recoveryReferenceDataSchema = lazySchema(() =>
 export type RecoveryReferenceData = z.infer<typeof recoveryReferenceDataSchema>;
 export type EarlierRound = NonNullable<RecoveryReferenceData['earlier_rounds']>[number];
 
-/** Budgets that keep the earlier rounds inside the judge's prompt. */
+/**
+ * Budgets that keep all earlier rounds together inside the judges' inputs, which are capped at
+ * `MAX_JUDGE_TEXT_LENGTH` characters. Each is shared by the rounds, so more rounds mean less of each
+ * rather than an input the model call rejects.
+ */
 const MAX_EARLIER_FIELD_CHARS = 1_500;
-const MAX_EARLIER_CALLS_CHARS = 60_000;
+const MAX_EARLIER_CONTEXT_CHARS = 80_000;
+const MAX_EARLIER_ANSWERS_CHARS = 60_000;
 
 const stringify = (value: unknown): string =>
   value === undefined ? '' : typeof value === 'string' ? value : JSON.stringify(value);
 
+/** One round's share of a budget shared by `count` rounds. */
+const shareOf = (budget: number, count: number): number => Math.floor(budget / Math.max(count, 1));
+
 /** The earlier rounds' answers, for the judge that checks which hypotheses the recovery revisited. */
-export const renderEarlierAnswers = (rounds: readonly EarlierRound[] | undefined): string =>
-  rounds && rounds.length > 0
-    ? rounds
-        .map(
-          ({ answer }, index) => `Round ${index + 1}:\n${truncate(answer, MAX_TOOL_FIELD_CHARS)}`
-        )
-        .join('\n\n')
-    : '(not available)';
+export const renderEarlierAnswers = (rounds: readonly EarlierRound[] | undefined): string => {
+  if (!rounds || rounds.length === 0) return '(not available)';
+  const perAnswer = Math.min(
+    MAX_TOOL_FIELD_CHARS,
+    shareOf(MAX_EARLIER_ANSWERS_CHARS, rounds.length)
+  );
+  return rounds
+    .map(({ answer }, index) => `Round ${index + 1}:\n${truncate(answer, perAnswer)}`)
+    .join('\n\n');
+};
 
 /**
- * The earlier rounds' answers and tool calls with results, each field cut short and the middle calls
- * dropped when they do not fit, for the judge that decides which claims have a source.
+ * The earlier rounds' answers and tool calls with results, for the judge that decides which claims
+ * have a source. The rounds share one budget: each gets an equal part, within which its answer is
+ * cut short, and its tool calls keep their first and last ones when they do not fit.
  */
 export const renderEarlierRounds = (rounds: readonly EarlierRound[] | undefined): string => {
   if (!rounds || rounds.length === 0) return '(not available)';
+  const perRound = shareOf(MAX_EARLIER_CONTEXT_CHARS, rounds.length);
+  const answerBudget = Math.min(MAX_TOOL_FIELD_CHARS, Math.floor(perRound / 4));
+  const callsBudget = perRound - answerBudget;
   return rounds
     .map(({ answer, tool_calls: toolCalls }, roundIndex) => {
       const calls = toolCalls.map(
@@ -76,7 +90,7 @@ export const renderEarlierRounds = (rounds: readonly EarlierRound[] | undefined)
       );
       const { headEnd, tailStart, omitted } = keepHeadAndTail(
         calls.map(({ length }) => length),
-        MAX_EARLIER_CALLS_CHARS
+        callsBudget
       );
       return [
         `### Round ${roundIndex + 1}`,
@@ -84,7 +98,7 @@ export const renderEarlierRounds = (rounds: readonly EarlierRound[] | undefined)
         ...calls.slice(0, headEnd),
         ...(omitted > 0 ? [`[${omitted} tool calls omitted here]`] : []),
         ...calls.slice(tailStart),
-        `Answer:\n${truncate(answer, MAX_TOOL_FIELD_CHARS)}`,
+        `Answer:\n${truncate(answer, answerBudget)}`,
       ].join('\n');
     })
     .join('\n\n');

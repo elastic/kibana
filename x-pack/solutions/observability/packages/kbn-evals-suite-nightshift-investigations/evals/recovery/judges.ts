@@ -98,13 +98,22 @@ const earlierRounds = (input: InvestigationExample['input']): EarlierRound[] =>
       ]
     : [];
 
-const failedJudge = (name: string, error: unknown) => ({
-  score: null,
-  label: 'n/a',
-  explanation: `The ${name} judge failed (${
-    error instanceof Error ? error.constructor.name : 'unknown error'
-  }), so this round is not scored by it.`,
-});
+/**
+ * A judge that failed scores n/a instead of failing the experiment. The error message goes to the
+ * log, not the explanation, because it can quote the judge's reply.
+ */
+const failedJudge = (deps: JudgeDeps, name: string, error: unknown) => {
+  deps.log.warning(
+    `The ${name} judge failed: ${error instanceof Error ? error.message : String(error)}`
+  );
+  return {
+    score: null,
+    label: 'n/a',
+    explanation: `The ${name} judge failed (${
+      error instanceof Error ? error.constructor.name : 'unknown error'
+    }), so this round is not scored by it. See the run log for the error.`,
+  };
+};
 
 export const createCausalChecklistEvaluator = (deps: JudgeDeps): RecoveryEvaluator => ({
   name: CAUSAL_CHECKLIST_EVALUATOR,
@@ -129,7 +138,7 @@ export const createCausalChecklistEvaluator = (deps: JudgeDeps): RecoveryEvaluat
       );
       result = recoveryChecklistOutputSchema.parse(raw);
     } catch (error) {
-      return failedJudge(CAUSAL_CHECKLIST_EVALUATOR, error);
+      return failedJudge(deps, CAUSAL_CHECKLIST_EVALUATOR, error);
     }
     const { statuses, uncited } = applyCitationRule(result.strategies, evidence.steps.length);
     const count = (wanted: StrategyStatus) =>
@@ -174,7 +183,7 @@ export const createRootCauseEvidenceEvaluator = (deps: JudgeDeps): RecoveryEvalu
       // The schema snaps each evidence score to 0, 0.5 or 1.
       result = recoveryRootCauseOutputSchema.parse(raw);
     } catch (error) {
-      return failedJudge(ROOT_CAUSE_EVIDENCE_EVALUATOR, error);
+      return failedJudge(deps, ROOT_CAUSE_EVIDENCE_EVALUATOR, error);
     }
     const mechanism = result.mechanism_evidenced;
     const closure = result.closure_evidenced;
@@ -225,7 +234,7 @@ export const createEvidenceFamiliesEvaluator = (deps: JudgeDeps): RecoveryEvalua
         evidence.steps.length
       );
     } catch (error) {
-      return failedJudge(EVIDENCE_FAMILIES_EVALUATOR, error);
+      return failedJudge(deps, EVIDENCE_FAMILIES_EVALUATOR, error);
     }
     return {
       score: reached.length / total,

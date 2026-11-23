@@ -9,7 +9,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { recoveryCausalChecklistJudge } from './causal_checklist';
-import { recoveryReferenceDataSchema, renderEarlierRounds } from './reference_data';
+import {
+  recoveryReferenceDataSchema,
+  renderEarlierAnswers,
+  renderEarlierRounds,
+} from './reference_data';
 import { recoveryEvidenceFamiliesJudge } from './evidence_families';
 import { recoveryRootCauseEvidenceJudge } from './root_cause_evidence';
 import { CAUSAL_STRATEGY_IDS, applyCitationRule } from './strategies';
@@ -260,6 +264,22 @@ describe('renderEarlierRounds', () => {
 
     expect(rendered).toContain('tool calls omitted here');
     expect(rendered.length).toBeLessThan(80_000);
+  });
+
+  it('shares one budget across the rounds, so many tool-heavy rounds stay under the judge input limit', () => {
+    const heavyRound = {
+      answer: 'a'.repeat(20_000),
+      tool_calls: Array.from({ length: 100 }, (_, index) => ({
+        tool_id: 'tool',
+        arguments: {},
+        result: `${index}`.padEnd(3_000, 'x'),
+      })),
+    };
+    const rounds = [heavyRound, heavyRound, heavyRound, heavyRound, heavyRound];
+
+    expect(renderEarlierRounds(rounds).length).toBeLessThan(100_000);
+    expect(renderEarlierAnswers(rounds).length).toBeLessThan(100_000);
+    expect(renderEarlierRounds(rounds)).toContain('### Round 5');
   });
 });
 

@@ -12,14 +12,6 @@ import { keepHeadAndTail } from './keep_head_and_tail';
 /** The most tool calls `evaluate()` accepts for one round. */
 export const MAX_EVIDENCE_TOOL_CALLS = 200;
 
-/**
- * The evidence judges grade for one round: its user input, tool calls and final response. When
- * there are more tool calls than `evaluate()` accepts, keeps the first and last ones, as the
- * judges' renderer does within its prompt budget; the final response is always included. An
- * alert outcome, the recovery round's conclusion, is the ground truth the round is graded against.
- * The agent's notes after its last tool call, where it draws its conclusion before answering,
- * have no tool call to sit on, so they travel as `closing_reasoning` for the judges that read them.
- */
 /** An earlier round's tool calls with their results, the first and last ones when there are many. */
 const earlierToolCalls = (round: ConversationRound): ToolCallEvidence[] => {
   const calls = round.steps.flatMap((step) =>
@@ -41,6 +33,14 @@ const earlierToolCalls = (round: ConversationRound): ToolCallEvidence[] => {
   return [...calls.slice(0, headEnd), ...calls.slice(tailStart)];
 };
 
+/**
+ * The evidence judges grade for one round: its user input, tool calls and final response. When
+ * there are more tool calls than `evaluate()` accepts, keeps the first and last ones, as the
+ * judges' renderer does within its prompt budget; the final response is always included. An
+ * alert outcome, the recovery round's conclusion, is the ground truth the round is graded against.
+ * The agent's notes after its last tool call, where it draws its conclusion before answering,
+ * have no tool call to sit on, so they travel as `closing_reasoning` for the judges that read them.
+ */
 export const buildOnlineEvalsEvidence = ({
   round,
   alertOutcome,

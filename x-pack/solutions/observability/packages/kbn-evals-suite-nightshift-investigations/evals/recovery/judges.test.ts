@@ -139,6 +139,7 @@ describe('judge failures', () => {
       const result = await run(create(deps));
       expect(result).toMatchObject({ score: null, label: 'n/a' });
     }
+    expect(deps.log.warning).toHaveBeenCalledWith(expect.stringContaining('model unavailable'));
   });
 
   it('returns n/a when the judge output does not match its schema', async () => {
