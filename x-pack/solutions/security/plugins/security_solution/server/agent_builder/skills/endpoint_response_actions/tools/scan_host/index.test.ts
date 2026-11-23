@@ -424,7 +424,8 @@ describe('scanHostTool', () => {
       actionId: 'action-scan-offline',
       status: 'pending',
       queued: true,
-      message: 'The action is queued and will execute when the endpoint reconnects.',
+      message:
+        'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
     });
     expect(mockGetActionDetailsById).not.toHaveBeenCalled();
   });

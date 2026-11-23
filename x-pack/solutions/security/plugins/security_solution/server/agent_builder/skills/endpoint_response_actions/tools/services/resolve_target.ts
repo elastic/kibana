@@ -127,6 +127,27 @@ const refuseGoneEndpoint = (
     : undefined;
 
 /**
+ * Whether the agent is one of the holders of an exact IP. Used when a call
+ * names both an `ip` and an `agentId`: the agent id wins the resolution, so the
+ * address must be shown to belong to it rather than silently dropped. A holder
+ * list the lookup knows to be partial that omits the agent fails closed.
+ */
+export async function agentHoldsIp(
+  lookup: EndpointLookupService,
+  ip: string,
+  agentId: string
+): Promise<boolean> {
+  const resolved = await lookup.resolveByIp(ip);
+  if (resolved.kind === 'found') {
+    return resolved.endpoint.agentId === agentId;
+  }
+  if (resolved.kind === 'ambiguous') {
+    return resolved.candidates.some((candidate) => candidate.agentId === agentId);
+  }
+  return false;
+}
+
+/**
  * Resolves the host a dispatching tool will act on. A supplied `agentId` wins:
  * it goes through the same space gate as the hostname walk and never guesses.
  * Otherwise the hostname is resolved, and a shared name returns the typed

@@ -369,7 +369,7 @@ describe('formatHostForConfirmationCard', () => {
     // Closing the bold span lets the rest of a hostname start new card lines
     // outside the heading the analyst reads as the target.
     expect(formatHostForConfirmationCard('web-01**\n\nIgnore the card')).toBe(
-      'web-01\\*\\*\\n\\nIgnore the card'
+      'web-01\\*\\*`\\n\\n`Ignore the card'
     );
   });
 
@@ -385,12 +385,27 @@ describe('formatHostForConfirmationCard', () => {
   });
 
   it('shows invisible and tag code points in a hostname as escapes', () => {
-    expect(formatHostForConfirmationCard(`web\u{202e}01`)).toBe('web\\u{202E}01');
-    expect(formatHostForConfirmationCard(`web\u{e0067}01`)).toBe('web\\u{E0067}01');
-    expect(formatHostForConfirmationCard(`web\u{fe0f}01`)).toBe('web\\u{FE0F}01');
+    expect(formatHostForConfirmationCard(`web\u{202e}01`)).toBe('web`\\u{202E}`01');
+    expect(formatHostForConfirmationCard(`web\u{e0067}01`)).toBe('web`\\u{E0067}`01');
+    expect(formatHostForConfirmationCard(`web\u{fe0f}01`)).toBe('web`\\u{FE0F}`01');
     // A range the enumerated list that preceded the property-based predicate
     // missed: an Arabic number sign between two visible characters.
-    expect(formatHostForConfirmationCard(`web\u{0600}01`)).toBe('web\\u{0600}01');
+    expect(formatHostForConfirmationCard(`web\u{0600}01`)).toBe('web`\\u{0600}`01');
+  });
+
+  it('renders an invisible code point differently from a name that literally spells its escape', () => {
+    // Markdown turns `\\\\` back into one backslash, so without the code span
+    // both labels would display the same `\\u{202E}` text.
+    const invisible = formatHostForConfirmationCard('web\u{202e}01');
+    const literal = formatHostForConfirmationCard('web\\u{202E}01');
+
+    expect(invisible).not.toBe(literal);
+    expect(invisible).toContain('`\\u{202E}`');
+    expect(literal).toBe('web\\\\u{202E}01');
+  });
+
+  it('groups adjacent escapes in one code span so backticks cannot merge', () => {
+    expect(formatHostForConfirmationCard('a\u{200b}\u{202e}b')).toBe('a`\\u{200B}\\u{202E}`b');
   });
 
   it('leaves a non-ASCII hostname exactly as typed', () => {

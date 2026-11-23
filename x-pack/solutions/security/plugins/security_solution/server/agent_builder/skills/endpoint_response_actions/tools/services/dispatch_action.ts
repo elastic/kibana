@@ -20,6 +20,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
+import { getActionList } from '../../../../../endpoint/services/actions';
+import { ACTIONS_SEARCH_PAGE_SIZE } from '../../../../../endpoint/services/actions/constants';
 import {
   formatForConfirmationCard,
   formatHostForConfirmationCard,
@@ -33,6 +35,7 @@ import {
 } from '../types';
 import { createEndpointLookupService, type ResolvedEndpoint } from './endpoint_lookup';
 import {
+  agentHoldsIp,
   resolveDispatchTarget,
   type DispatchActionName,
   type ResolvedDispatchTarget,
@@ -234,16 +237,26 @@ export const createDispatchLookup = async (
   });
 };
 
-const resolveTarget = async (request: DispatchRequest): Promise<ResolvedDispatchTarget> =>
-  resolveDispatchTarget(
-    await createDispatchLookup(
-      request.endpointAppContextService,
-      request.context.spaceId,
-      request.context.request
-    ),
-    request.action,
-    request.params
+const resolveTarget = async (
+  request: DispatchRequest
+): Promise<{ target: ResolvedDispatchTarget; ipMismatch: boolean }> => {
+  const lookup = await createDispatchLookup(
+    request.endpointAppContextService,
+    request.context.spaceId,
+    request.context.request
   );
+  const target = await resolveDispatchTarget(lookup, request.action, request.params);
+  const { ip, agentId } = request.params;
+
+  // An agent id wins over the address, so without this check the two inputs can
+  // name different hosts and the address the analyst asked about is dropped.
+  const ipMismatch =
+    target.kind === 'found' && Boolean(ip) && Boolean(agentId)
+      ? !(await agentHoldsIp(lookup, ip as string, target.endpoint.agentId))
+      : false;
+
+  return { target, ipMismatch };
+};
 
 /**
  * Distinguishes a missing role privilege from a license limit — and from a
@@ -345,6 +358,12 @@ const mismatchResult = (mismatch: HostNameMismatch) =>
     )}), so the target is ambiguous. Call the tool again with the agentId alone (or with one of those hostnames).`
   );
 
+const ipMismatchResult = (ip: string, agentId: string) =>
+  responseActionErrorResult(
+    'invalid_argument',
+    `The supplied ip '${ip}' is not an address the endpoint with agent ID ${agentId} could be confirmed to use, so the target is ambiguous. Call the tool again with the agentId alone (or with the ip alone).`
+  );
+
 /**
  * The model-facing arguments worth binding an approval to: only the ones with
  * a defined value (a tool with no `comment` records no `args` at all), so the
@@ -439,17 +458,21 @@ const isHostIsolationDisabled = async (
   // This setting exists only in the Linux policy schema and only governs the
   // two isolation actions. Unknown, Windows, and macOS platforms must not be
   // refused based on a sibling Linux block.
+  //
+  // Package policies are keyed by the unversioned agent policy id, so prefer
+  // `policy_base_id` over a version-suffixed `policy_id`.
+  const policyId = target.endpoint.policyBaseId ?? target.endpoint.policyId;
   if (
     (request.action !== 'isolate' && request.action !== 'unisolate') ||
-    target.endpoint.platform !== 'linux' ||
-    !target.endpoint.policyId
+    target.endpoint.osType !== 'linux' ||
+    !policyId
   ) {
     return false;
   }
 
   const fleet = request.endpointAppContextService.getInternalFleetServices(request.context.spaceId);
   const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${FLEET_ENDPOINT_PACKAGE} AND ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids: "${escapeQuotes(
-    target.endpoint.policyId
+    policyId
   )}"`;
   const { items } = await fleet.packagePolicy.list(fleet.getSoClient(), {
     kuery,
@@ -483,6 +506,32 @@ const getIsolationState = async (
     });
 
   return data?.[0]?.metadata?.Endpoint?.state?.isolation;
+};
+
+/**
+ * Whether an unexpired isolate or release is still waiting on this agent. The
+ * metadata isolation state only reflects actions that already completed, so a
+ * host with a queued isolate still reads as "not isolated" there — and the
+ * queued action will change that when the host next checks in.
+ */
+const hasPendingIsolationAction = async (
+  request: DispatchRequest,
+  agentId: string
+): Promise<boolean> => {
+  const { data } = await getActionList({
+    spaceId: request.context.spaceId,
+    endpointService: request.endpointAppContextService,
+    unExpiredOnly: true,
+    elasticAgentIds: [agentId],
+    commands: ['isolate', 'unisolate'],
+    pageSize: ACTIONS_SEARCH_PAGE_SIZE,
+  });
+
+  return data.some(
+    (action) =>
+      (action.command === 'isolate' || action.command === 'unisolate') &&
+      action.agentState?.[agentId]?.isCompleted !== true
+  );
 };
 
 /**
@@ -549,7 +598,20 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'result', result: insufficientPrivilegesResult(refusal.privilege) };
   }
 
-  const target = await resolveTarget(request);
+  // A declined card is honoured before any lookup: the analyst clicked Cancel,
+  // so a host that vanished, became ambiguous or moved to a policy that
+  // disables isolation while the card was open must not replace that answer.
+  // Approved and unprompted calls still run the fresh preflight below.
+  const promptId = hasUsableToolCallId(context)
+    ? `${request.action}.confirm.${context.callContext?.toolCallId}`
+    : undefined;
+  const confirmationStatus =
+    confirmation && promptId ? context.prompts.checkConfirmationStatus(promptId).status : undefined;
+  if (confirmationStatus === ConfirmationStatus.rejected) {
+    return { kind: 'result', result: cancelledResult(request.action) };
+  }
+
+  const { target, ipMismatch } = await resolveTarget(request);
 
   if (target.kind === 'respond') {
     return {
@@ -565,6 +627,10 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
   const mismatch = findHostNameMismatch(params.hostName, target.endpoint);
   if (mismatch) {
     return { kind: 'result', result: mismatchResult(mismatch) };
+  }
+
+  if (ipMismatch && params.ip) {
+    return { kind: 'result', result: ipMismatchResult(params.ip, target.endpoint.agentId) };
   }
 
   // The policy check runs before the card, so the analyst is never asked to
@@ -585,12 +651,11 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
     return { kind: 'ready', target };
   }
 
-  if (!hasUsableToolCallId(context)) {
+  if (!promptId || !confirmationStatus) {
     return { kind: 'result', result: unidentifiableCallResult(request.action) };
   }
 
-  const promptId = `${request.action}.confirm.${context.callContext.toolCallId}`;
-  const { status } = context.prompts.checkConfirmationStatus(promptId);
+  const status = confirmationStatus;
 
   // Returns the isolation action when the host is already in the state that
   // action asks for — so the caller can complete as a no-op — and `undefined`
@@ -604,6 +669,11 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
       (request.action === 'isolate' && isolated === true) ||
       (request.action === 'unisolate' && isolated === false)
     ) {
+      // A queued isolate/release will change the state when the host checks in,
+      // so the metadata state cannot be reported as the current one.
+      if (await hasPendingIsolationAction(request, target.endpoint.agentId)) {
+        return undefined;
+      }
       return request.action;
     }
     return undefined;
@@ -640,10 +710,6 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
         color: confirmation.color,
       }),
     };
-  }
-
-  if (status === ConfirmationStatus.rejected) {
-    return { kind: 'result', result: cancelledResult(request.action) };
   }
 
   const approved = context.stateManager.getState<DispatchConfirmationState>();

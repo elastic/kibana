@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createEndpointLookupService, LOOKUP_PAGE_SIZE } from './endpoint_lookup';
+import {
+  createEndpointLookupService,
+  LOOKUP_PAGE_SIZE,
+  MAX_AMBIGUOUS_CANDIDATES,
+} from './endpoint_lookup';
 import type { EndpointAppContextService } from '../../../../../endpoint/endpoint_app_context_services';
 import { NotFoundError } from '../../../../../endpoint/errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
@@ -19,6 +23,7 @@ describe('createEndpointLookupService', () => {
     ensureInCurrentSpace?: jest.Mock;
     scoped?: { isCpsRead: () => boolean };
     getHostMetadataList?: jest.Mock;
+    getAgent?: jest.Mock;
     agentTypes?: ResponseActionAgentType[];
     resolutionMode?: 'dispatch';
   }) => {
@@ -32,9 +37,13 @@ describe('createEndpointLookupService', () => {
     const getHostMetadataList =
       overrides?.getHostMetadataList ?? jest.fn().mockResolvedValue({ data: [], total: 0 });
 
+    // The IP path re-reads the chosen agent from Fleet; unavailable by default.
+    const getAgent =
+      overrides?.getAgent ?? jest.fn().mockRejectedValue(new Error('fleet agent unavailable'));
+
     const endpointAppContextService = {
       getInternalFleetServices: jest.fn(() => ({
-        agent: { listAgents },
+        agent: { listAgents, getAgent },
         ensureInCurrentSpace,
       })),
       getEndpointMetadataService: jest.fn(() => ({ getHostMetadataList })),
@@ -53,6 +62,7 @@ describe('createEndpointLookupService', () => {
       listAgents,
       ensureInCurrentSpace,
       getHostMetadataList,
+      getAgent,
     };
   };
 
@@ -1338,7 +1348,7 @@ describe('createEndpointLookupService', () => {
           {
             metadata: {
               elastic: { agent: { id: 'agent-ip' } },
-              host: { hostname: 'ip-host', os: { platform: 'linux' } },
+              host: { hostname: 'ip-host', os: { type: 'linux', platform: 'ubuntu' } },
             },
             host_status: HostStatus.HEALTHY,
             policy_info: { agent: { configured: { id: 'agent-policy-ip' } } },
@@ -1356,13 +1366,67 @@ describe('createEndpointLookupService', () => {
           packages: ['endpoint'],
           status: HostStatus.HEALTHY,
           hostName: 'ip-host',
-          platform: 'linux',
+          osType: 'linux',
           policyId: 'agent-policy-ip',
         },
       });
       expect(getHostMetadataList).toHaveBeenCalledWith(
         expect.objectContaining({ kuery: 'united.endpoint.host.ip: "10.0.0.7"' }),
         undefined
+      );
+    });
+
+    it('reads policy and OS from the Fleet agent, which is fresher than united metadata', async () => {
+      const getAgent = jest.fn().mockResolvedValue({
+        id: 'agent-ip',
+        policy_id: 'agent-policy-new:3',
+        policy_base_id: 'agent-policy-new',
+        local_metadata: { os: { family: 'debian', type: 'linux', platform: 'ubuntu' } },
+      });
+      const { lookup } = buildService({
+        getAgent,
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: { elastic: { agent: { id: 'agent-ip' } } },
+              host_status: HostStatus.HEALTHY,
+              policy_info: { agent: { configured: { id: 'agent-policy-stale' } } },
+            },
+          ],
+          total: 1,
+        }),
+      });
+
+      await expect(lookup.resolveByIp('10.0.0.7')).resolves.toEqual({
+        kind: 'found',
+        endpoint: expect.objectContaining({
+          policyId: 'agent-policy-new:3',
+          policyBaseId: 'agent-policy-new',
+          osType: 'linux',
+        }),
+      });
+      expect(getAgent).toHaveBeenCalledWith('agent-ip');
+    });
+
+    it('flags the ambiguity list as truncated when holders exceed the candidate cap', async () => {
+      const holders = MAX_AMBIGUOUS_CANDIDATES + 1;
+      const { lookup } = buildService({
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: Array.from({ length: holders }, (_, i) => ({
+            metadata: { elastic: { agent: { id: `agent-${i}` } } },
+            host_status: HostStatus.HEALTHY,
+          })),
+          total: holders,
+        }),
+      });
+
+      const result = await lookup.resolveByIp('10.0.0.8');
+
+      expect(result).toEqual(
+        expect.objectContaining({ kind: 'ambiguous', truncated: true, totalCandidates: holders })
+      );
+      expect(result.kind === 'ambiguous' && result.candidates).toHaveLength(
+        MAX_AMBIGUOUS_CANDIDATES
       );
     });
 
@@ -1543,6 +1607,25 @@ describe('createEndpointLookupService', () => {
         getHostMetadataList,
       };
     };
+
+    it('reports the OS type and unversioned policy id from the Fleet agent', async () => {
+      const { lookup } = buildByIdService({
+        id: 'agent-os',
+        packages: ['endpoint'],
+        policy_id: 'pol-1:7',
+        policy_base_id: 'pol-1',
+        local_metadata: { os: { family: 'debian', type: 'Linux', platform: 'ubuntu' } },
+      });
+
+      await expect(lookup.resolveByAgentId('agent-os')).resolves.toEqual({
+        kind: 'found',
+        endpoint: expect.objectContaining({
+          policyId: 'pol-1:7',
+          policyBaseId: 'pol-1',
+          osType: 'linux',
+        }),
+      });
+    });
 
     it('resolves the agent, its agentType and its Fleet hostname after the space check', async () => {
       const { lookup, ensureInCurrentSpace, getAgent } = buildByIdService({

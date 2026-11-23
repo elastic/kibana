@@ -23,7 +23,11 @@ import { unisolateHostTool } from '.';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
-  return { ...original, getActionDetailsById: jest.fn() };
+  return {
+    ...original,
+    getActionDetailsById: jest.fn(),
+    getActionList: jest.fn().mockResolvedValue({ data: [] }),
+  };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
@@ -185,7 +189,7 @@ describe('unisolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { host: { os: { platform: 'linux' } } },
+                local_metadata: { os: { type: 'linux' } },
               },
             ],
           }),
@@ -472,7 +476,7 @@ describe('unisolateHostTool', () => {
                 status: 'online',
                 packages: ['endpoint'],
                 policy_id: 'agent-policy-1',
-                local_metadata: { host: { os: { platform: 'linux' } } },
+                local_metadata: { os: { type: 'linux' } },
               },
             ],
           }),
@@ -646,7 +650,8 @@ describe('unisolateHostTool', () => {
         actionId: 'action-offline',
         status: 'pending',
         queued: true,
-        message: 'The action is queued and will execute when the endpoint reconnects.',
+        message:
+          'The action is queued and will execute if the endpoint reconnects before the action expires (two weeks); after that it will not run.',
       });
       expect(mockGetActionDetailsById).not.toHaveBeenCalled();
     });

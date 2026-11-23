@@ -73,8 +73,23 @@ export interface ResolvedEndpoint {
   status?: string;
   /** Agent policy assigned to this Fleet agent, used for policy-aware action preflight. */
   policyId?: string;
-  /** ECS host OS platform, used to interpret platform-specific endpoint policy settings. */
-  platform?: string;
+  /**
+   * Agent policy id without its version suffix, when Fleet reports one
+   * (`policy_base_id`). Package policies are keyed by the unversioned agent
+   * policy id, so the policy preflight reads this in preference to `policyId`.
+   */
+  policyBaseId?: string;
+  /**
+   * Operating system the endpoint runs, from the OS *family/type* fields
+   * (`local_metadata.os.type`/`.family` on the Fleet agent, `host.os.type` in
+   * Defend metadata) — e.g. `linux`, `windows`, `darwin`. NOT the ECS
+   * `platform`, which on Linux is the distribution (`ubuntu`, `centos`), so
+   * `platform === 'linux'` is false for most Linux hosts. Used to interpret
+   * platform-specific endpoint policy settings (the Linux isolation gate).
+   * Undefined when neither field is reported: callers must not refuse on an
+   * unknown OS.
+   */
+  osType?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -131,7 +146,7 @@ interface MetadataCandidate {
       hostname?: string;
       name?: string;
       ip?: string | readonly string[];
-      os?: { platform?: string };
+      os?: { type?: string; family?: string };
     };
   };
   host_status?: string;
@@ -164,6 +179,16 @@ function totalCandidatesOf(...collections: Array<{ truncated: boolean; total?: n
 
   return { totalCandidates: totals.reduce((sum, total) => sum + total, 0) };
 }
+
+/**
+ * The OS family/type an OS block reports, lower-cased. Reads `type` first and
+ * falls back to `family`; never `platform`, which is the distribution on Linux
+ * (see {@link ResolvedEndpoint.osType}).
+ */
+const osTypeOf = (os: { type?: string; family?: string } | undefined): string | undefined => {
+  const value = os?.type || os?.family;
+  return typeof value === 'string' && value ? value.toLowerCase() : undefined;
+};
 
 /**
  * Resolves a hostname to a single Fleet agent + its response-action `agentType`.
@@ -253,8 +278,9 @@ export function createEndpointLookupService(
     status: string;
     packages?: string[];
     policyId?: string;
+    policyBaseId?: string;
     hostName?: string;
-    platform?: string;
+    osType?: string;
     /**
      * Set when the candidate was admitted on Defend's own metadata rather than
      * Fleet `packages`; it then always resolves as Elastic Defend.
@@ -275,7 +301,12 @@ export function createEndpointLookupService(
     packages?: string[];
     enrolled_at?: string;
     policy_id?: string;
-    local_metadata?: { host?: { name?: string; os?: { platform?: string } } };
+    policy_base_id?: string;
+    // The OS block sits beside `host`, not under it (`local_metadata.os.*`).
+    local_metadata?: {
+      host?: { name?: string };
+      os?: { type?: string; family?: string };
+    };
   }
 
   interface CandidateCollection {
@@ -372,8 +403,9 @@ export function createEndpointLookupService(
       status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
       packages: candidate.packages,
       policyId: candidate.policy_id,
+      policyBaseId: candidate.policy_base_id,
       hostName: candidate.local_metadata?.host?.name,
-      platform: candidate.local_metadata?.host?.os?.platform,
+      osType: osTypeOf(candidate.local_metadata?.os),
       // Defend's metadata outranks Fleet `packages`, which may be stale or name
       // another vendor; routing by it would leave the Defend-only dispatch path.
       ...(hasSupportedPackage(candidate) ? {} : { agentType: 'endpoint' as const }),
@@ -539,7 +571,7 @@ export function createEndpointLookupService(
           isLive: isLiveHostStatus(entry.host_status as string),
           status: entry.host_status as string,
           hostName: entry.metadata?.host?.hostname ?? entry.metadata?.host?.name,
-          platform: entry.metadata?.host?.os?.platform,
+          osType: osTypeOf(entry.metadata?.host?.os),
           policyId: entry.policy_info?.agent?.configured?.id,
           sortKey: entry.last_checkin,
         },
@@ -624,20 +656,36 @@ export function createEndpointLookupService(
       return { kind: 'not_found' } as const;
     }
 
+    // The list is also incomplete when it is cut to the candidate cap, not
+    // only when the metadata walk stopped early: without the flag a model
+    // would read the first 10 of 11 holders as the whole set.
+    const listCut = distinct.length > MAX_AMBIGUOUS_CANDIDATES;
     if (metadata.truncated || distinct.length > 1) {
       return {
         kind: 'ambiguous' as const,
         candidates: distinct
           .slice(0, MAX_AMBIGUOUS_CANDIDATES)
           .map((candidate) => ({ agentId: candidate.agentId, status: candidate.status })),
-        ...(metadata.truncated ? { truncated: true as const } : {}),
+        ...(metadata.truncated || listCut ? { truncated: true as const } : {}),
         ...(metadata.truncated && metadata.total !== undefined
           ? { totalCandidates: metadata.total }
+          : listCut
+          ? { totalCandidates: distinct.length }
           : {}),
       };
     }
 
     const chosen = distinct[0];
+    // The united transform can lag a policy reassignment, and the policy
+    // decides whether an isolation is allowed, so the assignment is read from
+    // the Fleet agent itself — the same source the agent-ID path uses. Best
+    // effort: an agent Fleet cannot return (e.g. enrolled in a linked
+    // project) keeps the metadata values rather than failing the lookup.
+    const fleetAgent = await fleetServices.agent.getAgent(chosen.agentId).catch(() => undefined);
+    const policyId = fleetAgent?.policy_id ?? chosen.policyId;
+    const policyBaseId = fleetAgent?.policy_base_id ?? chosen.policyBaseId;
+    const osType = osTypeOf(fleetAgent?.local_metadata?.os) ?? chosen.osType;
+
     return {
       kind: 'found' as const,
       endpoint: {
@@ -646,8 +694,9 @@ export function createEndpointLookupService(
         packages: ['endpoint'],
         status: chosen.status,
         ...(chosen.hostName ? { hostName: chosen.hostName } : {}),
-        ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
-        ...(chosen.platform ? { platform: chosen.platform } : {}),
+        ...(policyId ? { policyId } : {}),
+        ...(policyBaseId ? { policyBaseId } : {}),
+        ...(osType ? { osType } : {}),
       },
     };
   };
@@ -687,6 +736,7 @@ export function createEndpointLookupService(
       }
 
       const fleetHostName = agent.local_metadata?.host?.name;
+      const agentOsType = osTypeOf(agent.local_metadata?.os);
       // Admitted on Defend's metadata alone: Fleet `packages` are stale or name
       // another vendor, and a vendor type would leave the Defend-only dispatch path.
       const agentType = hasSupportedPackage ? resolveAgentTypeFromPackages(packages) : 'endpoint';
@@ -703,9 +753,8 @@ export function createEndpointLookupService(
           packages,
           ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
           ...(agent.policy_id ? { policyId: agent.policy_id } : {}),
-          ...(agent.local_metadata?.host?.os?.platform
-            ? { platform: agent.local_metadata.host.os.platform }
-            : {}),
+          ...(agent.policy_base_id ? { policyBaseId: agent.policy_base_id } : {}),
+          ...(agentOsType ? { osType: agentOsType } : {}),
           ...(typeof fleetHostName === 'string' && fleetHostName
             ? { hostName: fleetHostName }
             : {}),
@@ -788,7 +837,8 @@ export function createEndpointLookupService(
           packages: chosen.packages ?? [],
           status: chosen.status,
           ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
-          ...(chosen.platform ? { platform: chosen.platform } : {}),
+          ...(chosen.policyBaseId ? { policyBaseId: chosen.policyBaseId } : {}),
+          ...(chosen.osType ? { osType: chosen.osType } : {}),
         },
       };
     },

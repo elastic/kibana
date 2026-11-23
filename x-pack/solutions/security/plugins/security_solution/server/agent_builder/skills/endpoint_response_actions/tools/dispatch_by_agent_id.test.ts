@@ -26,7 +26,11 @@ import { unisolateHostTool } from './unisolate_host';
 
 jest.mock('../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../endpoint/services/actions');
-  return { ...original, getActionDetailsById: jest.fn() };
+  return {
+    ...original,
+    getActionDetailsById: jest.fn(),
+    getActionList: jest.fn().mockResolvedValue({ data: [] }),
+  };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;

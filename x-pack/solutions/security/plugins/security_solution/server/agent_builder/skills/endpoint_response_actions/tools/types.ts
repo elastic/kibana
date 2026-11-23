@@ -166,16 +166,28 @@ const MARKDOWN_STRUCTURE = new Set<number>([
  */
 export function formatHostForConfirmationCard(value: string): string {
   let formatted = '';
+  let escapes = '';
+  // Markdown consumes the backslash that escapes a literal backslash, so a bare
+  // `\u{202E}` would render the same for an invisible code point and for a name
+  // that literally contains that text. Escapes are therefore shown as a code
+  // span (one per run, so adjacent backticks cannot merge into a longer
+  // delimiter), which a literal name never produces.
+  const flushEscapes = () => {
+    if (escapes) {
+      formatted += `\`${escapes}\``;
+      escapes = '';
+    }
+  };
   for (const ch of value) {
     const cp = ch.codePointAt(0) ?? ch.charCodeAt(0);
     if (isMisleadingCodePoint(cp)) {
-      formatted += escapeForCodeSpan(cp);
-    } else if (MARKDOWN_STRUCTURE.has(cp)) {
-      formatted += `\\${ch}`;
+      escapes += escapeForCodeSpan(cp);
     } else {
-      formatted += ch;
+      flushEscapes();
+      formatted += MARKDOWN_STRUCTURE.has(cp) ? `\\${ch}` : ch;
     }
   }
+  flushEscapes();
   return formatted;
 }
 
