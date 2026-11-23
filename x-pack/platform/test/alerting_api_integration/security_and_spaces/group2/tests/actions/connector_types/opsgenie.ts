@@ -599,6 +599,30 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
             });
           });
 
+          it('should truncate the message when it is over 130 characters when creating an alert', async () => {
+            const message = 'a'.repeat(131);
+            const truncatedMessage = 'a'.repeat(130);
+
+            const { body } = await supertest
+              .post(`/api/actions/connector/${opsgenieActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              .send({
+                params: {
+                  subAction: 'createAlert',
+                  subActionParams: { message },
+                },
+              })
+              .expect(200);
+
+            expect(simulator.requestData).to.eql({ message: truncatedMessage });
+            expect(simulator.requestUrl).to.eql(createAlertUrl);
+            expect(body).to.eql({
+              status: 'ok',
+              connector_id: opsgenieActionId,
+              data: opsgenieSuccessResponse,
+            });
+          });
+
           it('should sha256 hash the alias when it is over 512 characters when closing an alert', async () => {
             const alias = 'a'.repeat(513);
 

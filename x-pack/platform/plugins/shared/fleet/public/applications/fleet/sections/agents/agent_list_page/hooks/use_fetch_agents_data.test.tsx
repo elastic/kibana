@@ -184,6 +184,34 @@ describe('useFetchAgentsData', () => {
     expect(result?.current.pageSizeOptions).toEqual([...FLEET_PAGE_SIZE_OPTIONS]);
   });
 
+  it('should drop selected agent policies that are not available when agentless policies are hidden', async () => {
+    const sessionMock = jest.requireMock('./use_session_agent_list_state')
+      .useSessionAgentListState as jest.Mock;
+    const originalImplementation = sessionMock.getMockImplementation();
+    const updateTableState = jest.fn();
+    sessionMock.mockImplementation(() => ({
+      ...defaultState,
+      selectedAgentPolicies: ['agent-policy-1', 'agentless-policy'],
+      updateTableState,
+      onTableChange: jest.fn(),
+      clearFilters: jest.fn(),
+      resetToDefaults: jest.fn(),
+    }));
+
+    try {
+      const renderer = createFleetTestRendererMock();
+      renderer.renderHook(() => useFetchAgentsData());
+
+      await waitFor(() => {
+        expect(updateTableState).toHaveBeenCalledWith({
+          selectedAgentPolicies: ['agent-policy-1'],
+        });
+      });
+    } finally {
+      sessionMock.mockImplementation(originalImplementation);
+    }
+  });
+
   it('sync querystring kuery with current search', async () => {
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() => useFetchAgentsData());

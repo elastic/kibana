@@ -70,7 +70,7 @@ The Zod types in `@kbn/inbox-common` are generated from the OpenAPI `.schema.yam
 
 ```bash
 cd x-pack/platform/packages/shared/kbn-inbox-common
-yarn openapi:generate
+pnpm openapi:generate
 ```
 
 After regenerating, run eslint over the generated files to clean up any unused imports:
@@ -90,8 +90,8 @@ introducing a new one so existing grants continue to work.
 
 ```bash
 # Plugin unit tests
-yarn test:jest --config=x-pack/platform/plugins/shared/inbox/jest.config.js
+pnpm test:jest --config=x-pack/platform/plugins/shared/inbox/jest.config.js
 
 # Shared package tests
-yarn test:jest --config=x-pack/platform/packages/shared/kbn-inbox-common/jest.config.js
+pnpm test:jest --config=x-pack/platform/packages/shared/kbn-inbox-common/jest.config.js
 ```

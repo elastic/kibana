@@ -16,6 +16,7 @@ import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import type { ApiKeyAttributes } from '../services/api_key_service/api_key_service';
 
 const isoDateTimeString = z.string().datetime();
 
@@ -54,12 +55,18 @@ const normalizeThrottle = (
   };
 };
 
+export const toApiKeyAttributes = (auth: ApiKeyAttributes) => ({
+  apiKey: auth.apiKey,
+  apiKeyOwner: auth.owner,
+  apiKeyCreatedByUser: auth.createdByUser,
+});
+
 const toAuthResponse = (
-  auth: ActionPolicySavedObjectAttributes['auth']
+  attributes: Pick<ActionPolicySavedObjectAttributes, 'apiKeyOwner' | 'apiKeyCreatedByUser'>
 ): ActionPolicyResponse['auth'] => {
   return {
-    owner: auth.owner,
-    createdByUser: auth.createdByUser,
+    owner: attributes.apiKeyOwner,
+    createdByUser: attributes.apiKeyCreatedByUser,
   };
 };
 
@@ -72,7 +79,7 @@ export const buildCreateActionPolicyAttributes = ({
   updatedAt,
 }: {
   data: CreateActionPolicyData;
-  auth: ActionPolicySavedObjectAttributes['auth'];
+  auth: ApiKeyAttributes;
   createdBy: string | null;
   createdAt: string;
   updatedBy: string | null;
@@ -89,7 +96,7 @@ export const buildCreateActionPolicyAttributes = ({
     groupingMode: data.groupingMode ?? null,
     throttle: normalizeThrottle(data.throttle),
     snoozedUntil: null,
-    auth,
+    ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
     updatedBy,
@@ -106,7 +113,7 @@ export const buildUpdateActionPolicyAttributes = ({
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
-  auth: ActionPolicySavedObjectAttributes['auth'];
+  auth: ApiKeyAttributes;
   updatedBy: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
@@ -121,7 +128,7 @@ export const buildUpdateActionPolicyAttributes = ({
     groupingMode: resolveNextNullableField(update.groupingMode, existing.groupingMode),
     throttle: normalizeThrottle(resolveNextNullableField(update.throttle, existing.throttle)),
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
-    auth,
+    ...toApiKeyAttributes(auth),
     createdBy: existing.createdBy,
     updatedBy,
     createdAt: existing.createdAt,
@@ -151,7 +158,7 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     groupingMode: normalizeNullableField(attributes.groupingMode),
     throttle: normalizeThrottle(attributes.throttle),
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
-    auth: toAuthResponse(attributes.auth),
+    auth: toAuthResponse(attributes),
     createdBy: attributes.createdBy,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,

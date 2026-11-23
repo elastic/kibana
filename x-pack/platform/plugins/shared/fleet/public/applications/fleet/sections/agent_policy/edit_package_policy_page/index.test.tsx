@@ -25,16 +25,20 @@ import {
   useMultipleAgentPolicies,
   useGetPackagePolicies,
   sendBulkGetAgentPoliciesForRq,
+  useLink,
 } from '../../../hooks';
 import { useGetOnePackagePolicyQuery } from '../../../../integrations/hooks';
 
 import { ExperimentalFeaturesService } from '../../../services';
+
+import { UpgradePackagePolicyPage } from '../upgrade_package_policy_page';
 
 import { EditPackagePolicyPage } from '.';
 
 type MockFn = jest.MockedFunction<any>;
 
 let lastStepConfigureProps: any;
+let lastLayoutProps: any;
 
 jest.mock('../../../../../services/use_yaml', () => ({
   useYaml: () => require('yaml'),
@@ -217,6 +221,20 @@ jest.mock('../create_package_policy_page/components', () => {
   };
 });
 
+jest.mock('../create_package_policy_page/single_page_layout/components', () => {
+  const { createElement } = jest.requireActual('react');
+  const { CreatePackagePolicySinglePageLayout: ActualLayout } = jest.requireActual(
+    '../create_package_policy_page/single_page_layout/components/layout'
+  );
+  return {
+    ...jest.requireActual('../create_package_policy_page/single_page_layout/components'),
+    CreatePackagePolicySinglePageLayout: jest.fn((props) => {
+      lastLayoutProps = props;
+      return createElement(ActualLayout, props);
+    }),
+  };
+});
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useRouteMatch: jest.fn().mockReturnValue({
@@ -296,6 +314,9 @@ describe('edit package policy page', () => {
     } as any);
     testRenderer = createFleetTestRendererMock();
     lastStepConfigureProps = undefined;
+    lastLayoutProps = undefined;
+    (useUIExtension as MockFn).mockReset();
+    (useLink as MockFn).mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') });
 
     (useGetOnePackagePolicyQuery as MockFn).mockReturnValue({
       data: {
@@ -368,6 +389,56 @@ describe('edit package policy page', () => {
       renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((btn) => {
         expect(btn).toHaveAttribute('href', '/navigate/path');
       });
+    });
+  });
+
+  it('shows edit copy from Installed integrations', async () => {
+    testRenderer.history.push('?from=installed-integrations');
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Edit Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Modify integration settings and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows upgrade copy and returns to Installed integrations when upgrading from there', async () => {
+    (useLink as MockFn).mockReturnValue({
+      getHref: jest.fn((page: string) => `/${page}`),
+    });
+    (sendUpgradePackagePolicyDryRun as MockFn).mockResolvedValue({
+      data: [{ diff: [mockPackagePolicy, mockPackagePolicyNewVersion] }],
+    });
+    testRenderer.history.push('?from=installed-integrations');
+    renderResult = testRenderer.render(<UpgradePackagePolicyPage />, { legacyRoot: true });
+
+    await waitFor(() => {
+      expect(renderResult.getByRole('heading', { level: 1 })).toHaveTextContent(
+        'Upgrade Nginx integration'
+      );
+      expect(
+        renderResult.getByText(
+          'Upgrade this integration and deploy changes to the selected agent policies.'
+        )
+      ).toBeInTheDocument();
+      expect(renderResult.getByText('Upgrade integration').closest('button')!).not.toBeDisabled();
+    });
+
+    renderResult.getAllByRole('link', { name: 'Cancel' }).forEach((link) => {
+      expect(link).toHaveAttribute('href', '/integrations_installed');
+    });
+    fireEvent.click(renderResult.getByText('Upgrade integration').closest('button')!);
+
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToUrl).toHaveBeenCalledWith(
+        '/integrations_installed'
+      );
     });
   });
 
@@ -453,6 +524,25 @@ describe('edit package policy page', () => {
       );
 
       expect(useStartServices().application.navigateToUrl).not.toHaveBeenCalled();
+    });
+  });
+
+  it('passes useWidePageLayout from the replace-define-step extension to the layout', async () => {
+    (useUIExtension as MockFn).mockImplementation((_packageName: string, view: string) => {
+      if (view === 'package-policy-replace-define-step') {
+        return {
+          view,
+          useWidePageLayout: true,
+          Component: React.lazy(TestComponent),
+        };
+      }
+      return undefined;
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(lastLayoutProps?.useWidePageLayout).toBe(true);
     });
   });
 

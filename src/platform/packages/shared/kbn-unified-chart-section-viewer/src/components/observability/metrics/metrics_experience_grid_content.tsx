@@ -30,6 +30,8 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { extractUsedMetadataFields } from '../../../utils/extract_used_metadata_fields';
+import { useEsqlQueryInfo } from '../../../hooks';
 import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
@@ -64,6 +66,16 @@ export const MetricsExperienceGridContent = ({
   const esqlQuery = useMemo(() => getEsqlQuery(query), [query]);
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
+
+  const { metadataFields: declaredMetadataFields } = useEsqlQueryInfo({ query: esqlQuery ?? '' });
+  const metadataFields = useMemo(
+    () =>
+      extractUsedMetadataFields({
+        metadataFields: declaredMetadataFields,
+        filters: whereStatements,
+      }),
+    [declaredMetadataFields, whereStatements]
+  );
 
   const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
 
@@ -146,6 +158,7 @@ export const MetricsExperienceGridContent = ({
           fetchParams={fetchParams}
           searchTerm={searchTerm}
           whereStatements={whereStatements}
+          metadataFields={metadataFields}
           getUserMessages={getUserMessages}
           getDescription={getDescription}
           isTabSelected={isTabSelected}

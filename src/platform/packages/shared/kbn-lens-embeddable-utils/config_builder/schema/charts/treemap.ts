@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { colorMappingSchema, staticColorSchema, autoColorSchema } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 
 import {
@@ -87,7 +87,10 @@ const partitionConfigPrimaryMetricOptionsSchema = {
    */
   color: schema.maybe(
     schema.oneOf([staticColorSchema, autoColorSchema], {
-      defaultValue: AUTO_COLOR,
+      meta: {
+        description:
+          'Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.',
+      },
     })
   ),
 };

@@ -231,6 +231,73 @@ export interface CustomFieldsSolutionTelemetry {
   customFields: CustomFieldsTelemetry;
 }
 
+export interface TemplatesVersionPercentiles {
+  p50: number;
+  p90: number;
+  p99: number;
+}
+
+/**
+ * Sourced from `fieldCount`, counted before `$ref` resolution. Not comparable with the
+ * `fieldDefinitions` totals, which drop unresolvable refs.
+ */
+export interface TemplatesFieldCountTelemetry {
+  total: number;
+  max: number;
+  average: number;
+}
+
+/** Read from the indexed `fieldDefinitions` nested field, never from the YAML definition. */
+export interface TemplatesFieldTypesTelemetry {
+  totalsByControl: Record<string, number>;
+  totalsByType: Record<string, number>;
+}
+
+/**
+ * A case's template reference is mutable after creation, so these are current-state
+ * counts rather than created-from-a-template counts.
+ */
+export interface TemplatesCasesTelemetry {
+  withTemplate: Count;
+  withoutTemplate: Count;
+}
+
+/**
+ * Scoped to the latest version of each template, so version history cannot inflate it.
+ * `totalSoftDeleted` inverts the `deletedAt` condition; every other count excludes deleted.
+ */
+export interface TemplatesSolutionTelemetry {
+  total: number;
+  totalEnabled: number;
+  totalDisabled: number;
+  totalSoftDeleted: number;
+  totalMigratedFromV1: number;
+  versionPercentiles: TemplatesVersionPercentiles;
+  fieldCount: TemplatesFieldCountTelemetry;
+  fieldDefinitions: TemplatesFieldTypesTelemetry;
+  cases: TemplatesCasesTelemetry;
+}
+
+export interface TemplatesTelemetry {
+  all: TemplatesSolutionTelemetry;
+  sec: TemplatesSolutionTelemetry;
+  obs: TemplatesSolutionTelemetry;
+  main: TemplatesSolutionTelemetry;
+}
+
+export interface FieldLibrarySolutionTelemetry {
+  total: number;
+  totalGlobal: number;
+  totalReusable: number;
+}
+
+export interface FieldLibraryTelemetry {
+  all: FieldLibrarySolutionTelemetry;
+  sec: FieldLibrarySolutionTelemetry;
+  obs: FieldLibrarySolutionTelemetry;
+  main: FieldLibrarySolutionTelemetry;
+}
+
 export type CasesTelemetryConnectorKeys =
   | 'itsm'
   | 'sir'
@@ -296,6 +363,8 @@ export interface CasesTelemetry {
     totalCasesCreated: number;
     totalRules: number;
   };
+  templates: TemplatesTelemetry;
+  fieldLibrary: FieldLibraryTelemetry;
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -308,3 +377,5 @@ export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['atta
 export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
+export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
+export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;

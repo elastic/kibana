@@ -17,6 +17,10 @@ import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { ISearchStrategy, SearchStrategyDependencies } from '@kbn/data-plugin/server';
 import { createSearchSessionsClientMock } from '@kbn/data-plugin/server/search/mocks';
 import { createResolvedLogViewLazyMock } from '../../../common/log_views/resolved_log_view.mock';
+import {
+  LOG_ENTRIES_MAX_COLUMNS,
+  LOG_ENTRIES_MAX_SIZE,
+} from '../../../common/search_strategies/log_entries/log_entries';
 import { createLogViewsClientMock } from '../log_views/log_views_client.mock';
 import { createLogViewsServiceStartMock } from '../log_views/log_views_service.mock';
 import {
@@ -229,6 +233,168 @@ describe('LogEntries search strategy', () => {
     );
 
     await expect(response.toPromise()).rejects.toThrowError(errors.ResponseError);
+  });
+
+  describe('request bounds', () => {
+    const setup = (resolvedLogView = createResolvedLogViewLazyMock()) => {
+      const esSearchStrategyMock = createEsSearchStrategyMock({
+        id: 'ASYNC_REQUEST_ID',
+        isRunning: false,
+        rawResponse: {
+          took: 1,
+          _shards: { total: 1, failed: 0, skipped: 0, successful: 1 },
+          timed_out: false,
+          hits: { total: 0, max_score: 0, hits: [] },
+        },
+      });
+      const logViewsClientMock = createLogViewsClientMock();
+      logViewsClientMock.getResolvedLogView.mockResolvedValue(resolvedLogView);
+      const logViewsMock = createLogViewsServiceStartMock();
+      logViewsMock.getScopedClient.mockReturnValue(logViewsClientMock);
+
+      const logEntriesSearchStrategy = logEntriesSearchStrategyProvider({
+        data: createDataPluginMock(esSearchStrategyMock),
+        logViews: logViewsMock,
+      });
+
+      return { esSearchStrategyMock, logEntriesSearchStrategy };
+    };
+
+    const baseParams = {
+      logView: { type: 'log-view-reference' as const, logViewId: 'SOURCE_ID' },
+      startTimestamp: 100,
+      endTimestamp: 200,
+      size: 3,
+    };
+
+    const tooManyColumns = Array.from({ length: LOG_ENTRIES_MAX_COLUMNS + 1 }, () => ({
+      messageColumn: { id: 'MESSAGE_COLUMN_ID' },
+    }));
+
+    it.each([0, LOG_ENTRIES_MAX_SIZE + 1])('rejects a size of %d', async (size) => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await expect(
+        lastValueFrom(
+          logEntriesSearchStrategy.search(
+            { params: { ...baseParams, size } },
+            {},
+            createSearchStrategyDependenciesMock()
+          )
+        )
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining('Failed to validate'),
+      });
+      expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects requests with more columns than allowed', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await expect(
+        lastValueFrom(
+          logEntriesSearchStrategy.search(
+            { params: { ...baseParams, columns: tooManyColumns } },
+            {},
+            createSearchStrategyDependenciesMock()
+          )
+        )
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining(`Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns`),
+      });
+      expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
+    it('rejects inline log views with more columns than allowed', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await expect(
+        lastValueFrom(
+          logEntriesSearchStrategy.search(
+            {
+              params: {
+                ...baseParams,
+                logView: {
+                  type: 'log-view-inline',
+                  id: 'INLINE_LOG_VIEW_ID',
+                  attributes: {
+                    name: 'INLINE LOG VIEW',
+                    description: '',
+                    logIndices: { type: 'index_name', indexName: 'log-indices-*' },
+                    logColumns: tooManyColumns,
+                  },
+                },
+              },
+            },
+            {},
+            createSearchStrategyDependenciesMock()
+          )
+        )
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining(`Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns`),
+      });
+      expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
+    it('accepts persisted log views with more columns than the request limit', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup(
+        createResolvedLogViewLazyMock({ columns: tooManyColumns })
+      );
+
+      await lastValueFrom(
+        logEntriesSearchStrategy.search(
+          { params: baseParams },
+          {},
+          createSearchStrategyDependenciesMock()
+        )
+      );
+
+      expect(esSearchStrategyMock.search).toHaveBeenCalled();
+    });
+
+    it('rejects polling requests with more columns than allowed', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await expect(
+        lastValueFrom(
+          logEntriesSearchStrategy.search(
+            {
+              id: logEntriesSearchRequestStateRT.encode({ esRequestId: 'ASYNC_REQUEST_ID' }),
+              params: { ...baseParams, columns: tooManyColumns },
+            },
+            {},
+            createSearchStrategyDependenciesMock()
+          )
+        )
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining(`Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns`),
+      });
+      expect(esSearchStrategyMock.search).not.toHaveBeenCalled();
+    });
+
+    it('accepts requests at the limits', async () => {
+      const { esSearchStrategyMock, logEntriesSearchStrategy } = setup();
+
+      await lastValueFrom(
+        logEntriesSearchStrategy.search(
+          {
+            params: {
+              ...baseParams,
+              size: LOG_ENTRIES_MAX_SIZE,
+              columns: tooManyColumns.slice(0, LOG_ENTRIES_MAX_COLUMNS),
+            },
+          },
+          {},
+          createSearchStrategyDependenciesMock()
+        )
+      );
+
+      expect(esSearchStrategyMock.search).toHaveBeenCalled();
+    });
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {
