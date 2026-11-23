@@ -84,8 +84,6 @@ export const InboundWebhook: ConnectorSpec = {
     minimumLicense: 'gold',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows'],
-    docsUrl:
-      'https://www.elastic.co/docs/reference/kibana/connectors-kibana/inbound-webhook-action-type',
   },
 
   auth: {
