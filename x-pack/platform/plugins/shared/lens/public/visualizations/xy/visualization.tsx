@@ -323,7 +323,6 @@ export const getXyVisualization = ({
     }
 
     return {
-      title: 'Empty XY chart',
       legend: { isVisible: true, position: Position.Bottom, layout: LegendLayout.List },
       valueLabels: 'hide',
       preferredSeriesType: defaultSeriesType,

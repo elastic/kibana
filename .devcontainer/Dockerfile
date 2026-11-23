@@ -51,7 +51,7 @@ RUN set -e ; \
 WORKDIR ${KBN_DIR}
 
 # Node and NVM setup
-COPY .node-version /tmp/
+COPY .nvmrc /tmp/
 
 # Mac will have permissions issues if Node and NVM are installed as root
 USER vscode
@@ -59,7 +59,7 @@ USER vscode
 RUN mkdir -p $NVM_DIR && \
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash && \
   . "$NVM_DIR/nvm.sh" && \
-  NODE_VERSION=$(cat /tmp/.node-version) && \
+  NODE_VERSION=$(cat /tmp/.nvmrc) && \
   nvm install ${NODE_VERSION} && \
   nvm use ${NODE_VERSION} && \
   nvm alias default ${NODE_VERSION} && \

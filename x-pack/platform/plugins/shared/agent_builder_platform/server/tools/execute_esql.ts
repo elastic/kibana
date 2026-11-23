@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -13,12 +14,18 @@ import {
   buildTimeRangeParams,
   interpolateEsqlQuery,
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
-const executeEsqlToolSchema = z.object({
+const createExecuteEsqlToolSchemaShape = () => ({
   query: z.string().describe('The ES|QL query to execute'),
   params: z
     .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
@@ -42,7 +49,36 @@ const executeEsqlToolSchema = z.object({
     .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
 });
 
-export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
+const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createExecuteEsqlToolSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessExecuteEsqlToolSchema = once(() =>
+  z.object(createExecuteEsqlToolSchemaShape())
+);
+
+type ExecuteEsqlToolSchema =
+  | ReturnType<typeof createExecuteEsqlToolSchema>
+  | ReturnType<typeof createServerlessExecuteEsqlToolSchema>;
+
+const generateEsqlTool = sanitizeToolId(platformCoreTools.generateEsql);
+
+const dataTiersSection = `
+
+### Data tiers
+
+The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
+Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.`;
+
+export const executeEsqlTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
@@ -50,31 +86,38 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
 
 ## Usage
 
-**IMPORTANT**: This tool only **runs** queries; it does not write them.
-Think of this as the final step after a query has been prepared.
+This tool runs an ES|QL query; it does not write one.
 
-You **must** get the query from one of two sources before calling this tool:
-1.  The output of the \`${platformCoreTools.generateEsql}\` tool (if the tool is available).
-2.  A verbatim query provided directly by the user.
+### Where the query comes from
 
-Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+By default, when you need a new query, use the \`${generateEsqlTool}\` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call \`${generateEsqlTool}\` again for each new question.
+
+You can run a query as-is when it comes from:
+- the user,
+- your instructions or a skill you loaded, such as a query template,
+- the result of another tool, or an attachment.
+
+These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the \`${generateEsqlTool}\` tool is not available to you.
 
 ### Using a limit
 
 The \`limit\` parameter can be used to limit the number of results to return. It defaults to 100.
 You should avoid using a higher limit value unless explicitly asked by the user or if you know for sure the length of the data will not be a problem.
-Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.
-
-### Data tiers
-
-Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
-If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.`,
-    schema: executeEsqlToolSchema,
-    handler: async (
-      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
-      { esClient, attachments }
-    ) => {
+Note that this option can't be used to increase the number of results if the query already defines a \`LIMIT\` clause - the lowest limit will always prevail.${
+      isServerless ? '' : dataTiersSection
+    }`,
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessExecuteEsqlToolSchema()
+        : createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (toolParams, { esClient, attachments }) => {
+      const {
+        query: esqlQuery,
+        params: esqlParams = {},
+        time_range: explicitTimeRange,
+        limit = 100,
+      } = toolParams;
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const params: Array<Record<string, FieldValue>> = [
@@ -89,6 +132,7 @@ If results look incomplete for a time range that reaches far into the past, tell
         params,
         esClient: esClient.asCurrentUser,
         limit,
+        includeFrozen: getIncludeFrozenParam(toolParams),
       });
 
       // need the interpolated query to return in the results / to display in the UI

@@ -52,6 +52,11 @@ describe('createApiIndex lib function', () => {
         },
       },
     ],
+    properties: {
+      id: {
+        type: 'keyword',
+      },
+    },
   };
   const defaultSettings = {
     auto_expand_replicas: '0-3',

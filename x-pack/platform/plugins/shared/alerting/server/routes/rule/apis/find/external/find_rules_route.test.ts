@@ -108,6 +108,37 @@ describe('findRulesRoute', () => {
     });
   });
 
+  it('propagates find errors without opting into partial results', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    findRulesRoute(router, licenseState);
+    const [, handler] = router.get.mock.calls[0];
+    const error = new Error('Unable to transform rule');
+    rulesClient.find.mockRejectedValueOnce(error);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        query: {
+          per_page: 1,
+          page: 1,
+          default_search_operator: 'OR',
+        },
+      },
+      ['ok']
+    );
+
+    await expect(handler(context, req, res)).rejects.toBe(error);
+    expect(rulesClient.find).toHaveBeenCalledWith({
+      options: {
+        perPage: 1,
+        page: 1,
+        defaultSearchOperator: 'OR',
+      },
+    });
+    expect(res.ok).not.toHaveBeenCalled();
+  });
+
   it('should rewrite the rule and actions correctly', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();

@@ -467,8 +467,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       // open edit flyout when icon is clicked
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
+      await testSubjects.existOrFail('ruleForm');
 
-      await testSubjects.click('rulePageFooterCancelButton');
+      // Cancel can be swallowed while the edit form is still re-rendering, so navigate back instead.
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
     });
 
     it('should delete all selection', async () => {
@@ -584,8 +590,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       expect(expandRulesErrorLink).to.have.length(0);
 
       await createFailingAlert({ supertest, objectRemover });
+      // The banner counts errors from an aggregation, but expanding reads the rules-list snapshot.
       await retry.try(async () => {
         await refreshAlertsList();
+        const refreshResults = await pageObjects.triggersActionsUI.getAlertsListWithStatus();
+        expect(refreshResults.some((item: any) => item.status === 'Failed')).to.equal(true);
         expandRulesErrorLink = await find.allByCssSelector('[data-test-subj="expandRulesError"]');
         expect(expandRulesErrorLink).to.have.length(1);
       });

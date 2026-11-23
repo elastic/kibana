@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
@@ -192,6 +192,7 @@ const DEV_DIRECTORIES = [
   'storybook',
   'scripts',
   'test',
+  'test_plugins',
   'test-d',
   'test_utils',
   'test_utilities',
@@ -479,11 +480,11 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/inference/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/observability_ai_assistant/server/service/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/shared/osquery/cypress/**/*.{js,mjs,ts,tsx}',
+  'x-pack/platform/packages/private/osquery-plugin-cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
@@ -503,7 +504,7 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
+  'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/config/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
 ];
 
@@ -904,6 +905,7 @@ module.exports = {
         'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
         'x-pack/solutions/*/test/alerting_api_integration/**/*',
         'x-pack/solutions/*/test/serverless/*/configs/**/*',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/{apps,configs}/**/*',
         'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/platform/test/ui_capabilities/*/tests/**/*',
         'x-pack/platform/test/upgrade_assistant_integration/**/*',
@@ -912,8 +914,8 @@ module.exports = {
         'x-pack/platform/test/serverless/*/test_suites/**/*',
         'x-pack/platform/test/serverless/functional/config*.ts',
         'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
+        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/test_suites/**/*',
+        'x-pack/solutions/security/test_suites/test-suites-security-solution-apis/**/config*.ts',
         '**/playwright.config.ts',
         '**/playwright.v2.config.ts',
         '**/*.playwright.config.ts',
@@ -1415,6 +1417,9 @@ module.exports = {
         'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
+      ],
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
@@ -1431,7 +1436,10 @@ module.exports = {
     },
     // Allow node.js imports for security solution test packages
     {
-      files: ['x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}'],
+      files: [
+        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**/*.{js,mjs,ts,tsx}',
+      ],
       rules: {
         'import/no-nodejs-modules': 'off',
       },
@@ -1463,6 +1471,7 @@ module.exports = {
         'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/packages/shared/kbn-langchain/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/packages/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
         'x-pack/solutions/security/plugins/security_solution/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_ess/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/solutions/security/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1490,6 +1499,9 @@ module.exports = {
         'x-pack/solutions/security/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/platform/plugins/shared/cases/**/*.{ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1525,6 +1537,9 @@ module.exports = {
         'x-pack/platform/plugins/shared/cases/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/security/packages/data-stream-adapter/**/*.{js,mjs,ts,tsx}',
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1752,36 +1767,50 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft'],
+            assertFunctionPatterns: ['^assert[A-Z]'],
+          },
+        ],
+        'playwright/consistent-spacing-between-blocks': 'error',
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
-        'playwright/no-conditional-in-test': 'warn',
         'playwright/no-duplicate-hooks': 'error',
-        'playwright/no-focused-test': 'error',
+        'playwright/no-element-handle': 'error',
+        'playwright/no-eval': 'error',
         'playwright/no-get-by-title': 'error',
+        'playwright/no-identical-title': 'error',
+        'playwright/no-magic-timeouts': 'warn',
+        'playwright/no-nested-step': 'error',
         'playwright/no-nth-methods': 'error',
         'playwright/no-page-pause': 'error',
+        'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
         'playwright/no-restricted-matchers': 'error',
         'playwright/no-slowed-test': 'error',
-        'playwright/no-standalone-expect': 'error',
-        'playwright/no-unsafe-references': 'error',
+        'playwright/no-test-return-statement': 'error',
+        'playwright/no-unnecessary-assertions': 'error',
         'playwright/no-useless-await': 'error',
         'playwright/no-wait-for-selector': 'error',
         'playwright/max-nested-describe': ['error', { max: 1 }],
-        'playwright/missing-playwright-await': 'error',
         'playwright/prefer-comparison-matcher': 'error',
         'playwright/prefer-equality-matcher': 'error',
         'playwright/prefer-hooks-in-order': 'error',
         'playwright/prefer-hooks-on-top': 'error',
+        'playwright/prefer-native-locators': 'warn',
         'playwright/prefer-strict-equal': 'error',
         'playwright/prefer-to-be': 'error',
         'playwright/prefer-to-contain': 'error',
         'playwright/prefer-to-have-count': 'error',
         'playwright/prefer-to-have-length': 'error',
-        'playwright/prefer-web-first-assertions': 'error',
         'playwright/require-to-throw-message': 'error',
         'playwright/require-top-level-describe': 'error',
-        'playwright/valid-describe-callback': 'error',
-        'playwright/valid-title': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
         // Check all function arguments to catch unused destructured params
@@ -1795,6 +1824,17 @@ module.exports = {
             argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
           },
         ],
+      },
+    },
+    {
+      // no-export only applies to spec files — fixture/helper modules legitimately export
+      files: [
+        '**/kbn-scout*/src/playwright/**/*.spec.ts',
+        `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.spec.ts`,
+        'packages/**/test/scout{_*,}/**/*.spec.ts',
+      ],
+      rules: {
+        'playwright/no-export': 'error',
       },
     },
     {
@@ -2779,18 +2819,22 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
-      files: '.buildkite/**/*.{js,ts}',
+      files: '.buildkite/**/*.{cjs,js,mjs,ts}',
+      parserOptions: {
+        ecmaVersion: 2022,
+      },
       rules: {
         'no-console': 'off',
         '@kbn/imports/no_unresolvable_imports': 'off',
+        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
       },
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [
@@ -3136,6 +3180,7 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
+        'x-pack/solutions/security/packages/kbn-test-suites-xpack-security-endpoint/**',
         'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {

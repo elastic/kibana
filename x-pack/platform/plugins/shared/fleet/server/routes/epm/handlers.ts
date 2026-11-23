@@ -543,6 +543,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
     skipDependencyCheck: request.query?.skipDependencyCheck,
+    checkBreakingChanges: true,
+    acknowledgeBreakingChanges: request.body?.acknowledge_breaking_changes,
   });
 
   if (!res.error) {
@@ -676,6 +678,8 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     prerelease: request.query.prerelease,
     force: request.body.force,
     request,
+    checkBreakingChanges: true,
+    acknowledgeBreakingChanges: request.body.acknowledge_breaking_changes,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {

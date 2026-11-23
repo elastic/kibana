@@ -12,6 +12,7 @@ import {
   ExperimentalDataStreamFeaturesSchema,
 } from '../models/package_policy';
 import { OtelCollectorConfigSchema } from '../models';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION } from '../../../common/constants';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -1004,6 +1005,13 @@ export const InstallPackageFromRegistryRequestSchema = {
       {
         force: schema.boolean({ defaultValue: false }),
         ignore_constraints: schema.boolean({ defaultValue: false }),
+        acknowledge_breaking_changes: schema.boolean({
+          defaultValue: false,
+          meta: {
+            description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+            availability: { since: '9.5.0', stability: 'stable' },
+          },
+        }),
       },
       { meta: { id: 'install_package_from_registry_request' } }
     )
@@ -1056,6 +1064,13 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
         { minSize: 1, maxSize: 1000 }
       ),
       force: schema.boolean({ defaultValue: false }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_install_packages_from_registry_request' } }
   ),
@@ -1084,6 +1099,13 @@ export const BulkUpgradePackagesRequestSchema = {
       prerelease: schema.maybe(schema.boolean()),
       force: schema.boolean({ defaultValue: false }),
       upgrade_package_policies: schema.boolean({ defaultValue: false }),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'bulk_upgrade_packages_request' } }
   ),

@@ -3,14 +3,14 @@ info:
   contact:
     name: Kibana Team
   description: |
-    The Kibana REST APIs for Elastic serverless enable you to manage resources
+    The Kibana REST API for Elastic serverless enables you to manage resources
     such as connectors, data views, and saved objects. The API calls are
     stateless. Each request that you make happens in isolation from other calls
     and must include all of the necessary information for Kibana to fulfill the
     request. API requests return JSON output, which is a format that is
     machine-readable and works well for automation.
 
-    To interact with Kibana APIs, use the following operations:
+    To interact with the Kibana API, use the following operations:
 
     - GET: Fetches the information.
     - POST: Adds new information.
@@ -28,7 +28,7 @@ info:
 
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
-  title: Kibana Serverless APIs
+  title: Kibana Serverless API
   version: ''
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
@@ -47,7 +47,7 @@ tags:
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using the Kibana API.
     externalDocs:
       description: Agent Builder docs
       url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
@@ -464,8 +464,9 @@ paths:
       responses:
         '200':
           description: Returns the OAuth callback script
-      summary: ''
-      tags: []
+      summary: Get OAuth callback script
+      tags:
+        - connectors
       x-state: ''
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -4336,15 +4337,21 @@ paths:
                         description: |-
                           Execute an ES|QL query and return the results in a tabular format.
 
-                          **IMPORTANT**: This tool only **runs** queries; it does not write them.
-                          Think of this as the final step after a query has been prepared.
+                          ## Usage
 
-                          You **must** get the query from one of two sources before calling this tool:
-                          1.  The output of the `platform.core.generate_esql` tool (if the tool is available).
-                          2.  A verbatim query provided directly by the user.
+                          This tool runs an ES|QL query; it does not write one.
 
-                          Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-                          If you need a query, use the `platform.core.generate_esql` tool first.
+                          ### Where the query comes from
+
+                          By default, when you need a new query, use the `platform_core_generate_esql` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+                          Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call `platform_core_generate_esql` again for each new question.
+
+                          You can run a query as-is when it comes from:
+                          - the user,
+                          - your instructions or a skill you loaded, such as a query template,
+                          - the result of another tool, or an attachment.
+
+                          These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the `platform_core_generate_esql` tool is not available to you.
                         id: platform.core.execute_esql
                         readonly: true
                         schema:
@@ -12908,7 +12915,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -12987,7 +12994,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Detections_API_UUID'
+            $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         - description: The rule's `rule_id` value.
           in: query
           name: rule_id
@@ -15465,7 +15472,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the created or updated rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -15479,7 +15486,7 @@ paths:
         > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
       operationId: ImportRules
       parameters:
-        - description: Determines whether existing rules with the same `rule_id` are overwritten.
+        - description: Determines whether existing rules with the same `rule_id` are overwritten. If an imported rule matches the existing rule's settings, including whether it's enabled, the existing rule isn't updated. It keeps its `revision`, `updated_at` timestamp, and API key, and is counted in `rules_summary.skipped`.
           in: query
           name: overwrite
           required: false
@@ -15536,6 +15543,11 @@ paths:
                     exceptions_success: true
                     exceptions_success_count: 0
                     rules_count: 1
+                    rules_summary:
+                      created: 1
+                      failed: 0
+                      skipped: 0
+                      updated: 0
                     success: true
                     success_count: 1
               schema:
@@ -15571,6 +15583,32 @@ paths:
                   rules_count:
                     minimum: 0
                     type: integer
+                  rules_summary:
+                    additionalProperties: false
+                    description: Counts of imported rules by outcome. `created`, `updated`, and `skipped` are included in `success_count`. `failed` did not import successfully.
+                    type: object
+                    properties:
+                      created:
+                        description: Rules created by this import.
+                        minimum: 0
+                        type: integer
+                      failed:
+                        description: Rules that did not import successfully.
+                        minimum: 0
+                        type: integer
+                      skipped:
+                        description: Existing rules skipped because nothing changed. Included in `success_count`.
+                        minimum: 0
+                        type: integer
+                      updated:
+                        description: Existing rules overwritten because the payload changed.
+                        minimum: 0
+                        type: integer
+                    required:
+                      - created
+                      - updated
+                      - skipped
+                      - failed
                   success:
                     type: boolean
                   success_count:
@@ -15583,6 +15621,7 @@ paths:
                   - rules_count
                   - success
                   - success_count
+                  - rules_summary
                   - errors
                   - action_connectors_errors
                   - action_connectors_warnings
@@ -15622,7 +15661,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: '#/components/schemas/Security_Exceptions_API_UUID'
+            $ref: '#/components/schemas/Security_Exceptions_API_RuleId'
       requestBody:
         content:
           application/json:
@@ -16602,7 +16641,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -16727,7 +16766,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -16904,7 +16943,7 @@ paths:
                     updated_at: '2025-01-01T12:00:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -17073,7 +17112,7 @@ paths:
                     updated_at: '2025-01-15T09:30:00.000Z'
                     updated_by: elastic
               schema:
-                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
           description: Successful response
         '400':
           content:
@@ -17163,7 +17202,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_NonEmptyString'
+            $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_FindEndpointListItemsFilter'
         - description: The page number to return
           in: query
           name: page
@@ -17233,7 +17272,7 @@ paths:
                   data:
                     description: The list of endpoint exception list items.
                     items:
-                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_ExceptionListItem'
+                      $ref: '#/components/schemas/Security_Endpoint_Exceptions_API_EndpointListItem'
                     type: array
                   page:
                     description: The current page number.
@@ -22569,7 +22608,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: '#/components/schemas/Security_Exceptions_API_NonEmptyString'
+              $ref: '#/components/schemas/Security_Exceptions_API_FindExceptionListItemsFilter'
             type: array
         - description: |
             Determines whether the returned containers are Kibana associated with a Kibana space
@@ -24127,6 +24166,13 @@ paths:
           required: false
           schema:
             type: string
+        - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
+          in: query
+          name: showAgentless
+          required: false
+          schema:
+            default: true
+            type: boolean
         - description: use withAgentCount instead
           in: query
           name: noAgentCount
@@ -24873,7 +24919,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: (fleet-agent-policies-read AND integrations-read) OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The ID of the agent policy
@@ -24991,7 +25037,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
+        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The ID of the agent policy
@@ -27350,6 +27396,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -28016,6 +28064,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -28498,6 +28548,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -30187,10 +30239,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30337,10 +30391,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30452,10 +30508,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30566,10 +30624,12 @@ paths:
                   anyOf:
                     - items:
                         description: List of collector agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
+                      maxLength: 500000
                       type: string
                 dryRun:
                   type: boolean
@@ -30685,10 +30745,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30793,10 +30855,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -30908,10 +30972,12 @@ paths:
                   anyOf:
                     - items:
                         description: list of agent IDs
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
+                      maxLength: 500000
                       type: string
                 batchSize:
                   type: number
@@ -31029,10 +31095,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -31151,10 +31219,12 @@ paths:
                 agents:
                   anyOf:
                     - items:
+                        maxLength: 512
                         type: string
                       maxItems: 10000
                       type: array
-                    - type: string
+                    - maxLength: 500000
+                      type: string
                 batchSize:
                   type: number
                 dryRun:
@@ -46659,6 +46729,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_FindLiveQueryDetailsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id` exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -46751,6 +46837,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Security_Osquery_API_GetLiveQueryResultsResponse'
           description: Indicates a successful call.
+        '404':
+          content:
+            application/json:
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: Action not found
+              schema:
+                type: object
+                properties:
+                  message:
+                    example: Action not found
+                    type: string
+          description: |
+            No live query with this `id`, or no query with this `actionId`, exists in the current space. Live queries issued from another space also return 404.
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -59664,6 +59766,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -112442,7 +112619,7 @@ paths:
                     title: Escalated case review
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -112538,7 +112715,7 @@ paths:
                     title: Malware containment
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
@@ -112615,7 +112792,7 @@ paths:
                     title: Copy of investigation
                     version: WzE1LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
       summary: Copies timeline or timeline template
       tags:
@@ -112655,7 +112832,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -112742,7 +112919,7 @@ paths:
                     title: ''
                     version: WzE0LDFd
               schema:
-                $ref: '#/components/schemas/Security_Timeline_API_TimelineResponse'
+                $ref: '#/components/schemas/Security_Timeline_API_PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
@@ -122517,6 +122694,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -122802,6 +122984,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -122816,6 +123003,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -122890,8 +123082,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -124033,12 +124228,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -124066,12 +124259,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -124119,12 +124310,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -124648,23 +124837,28 @@ components:
               type: string
             groupBy:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 100
               type: array
             searchConfiguration:
               additionalProperties: false
               type: object
               properties:
                 index:
+                  maxLength: 10000
                   type: string
               required:
                 - index
             threshold:
               items:
                 type: number
+              maxItems: 2
               type: array
             timeSize:
               type: number
             timeUnit:
+              maxLength: 64
               type: string
           required:
             - timeUnit
@@ -124930,7 +125124,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-                description: Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+                description: Color configuration for ES|QL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
               column:
                 description: Column to use
                 type: string
@@ -125013,7 +125207,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         column:
           description: Column to use
           type: string
@@ -125074,7 +125268,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125152,7 +125346,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -125233,7 +125427,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -125310,7 +125504,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125387,7 +125581,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125467,7 +125661,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125553,7 +125747,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -125634,7 +125828,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125716,7 +125910,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125798,7 +125992,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -125880,7 +126074,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -125962,7 +126156,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValue'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.
+          description: Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -126239,6 +126433,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         drop_partial_intervals:
           description: When `true`, drops partial intervals from the results.
           type: boolean
@@ -126302,6 +126497,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         filters:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_filterWithLabel'
@@ -126352,6 +126548,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the histogram.
           type: string
@@ -126415,6 +126612,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the range.
           type: string
@@ -126482,6 +126680,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorMapping'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Color configuration for datatable rows. Defaults to `auto`. Ignored without `apply_color_to`.
         excludes:
           additionalProperties: false
           type: object
@@ -126561,6 +126760,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -128704,7 +128904,7 @@ components:
               type: object
               properties:
                 mode:
-                  description: Tick placement mode.
+                  description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
                   enum:
                     - auto
                     - bands
@@ -128813,7 +129013,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -128899,7 +129099,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -128992,7 +129192,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129087,7 +129287,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129178,7 +129378,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129269,7 +129469,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129360,7 +129560,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -129451,7 +129651,7 @@ components:
           type: object
           properties:
             mode:
-              description: Tick placement mode.
+              description: Tick placement mode. Defaults to `bands`. Ignored when the ticks are not visible.
               enum:
                 - auto
                 - bands
@@ -130608,8 +130808,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_value_cell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_range_key'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_multi_field_key'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -131904,6 +132107,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -135407,7 +135615,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -135490,7 +135698,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -135572,7 +135780,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -135813,7 +136021,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -135897,7 +136105,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -135981,7 +136189,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         field:
           description: Field to be used for the metric
           type: string
@@ -136065,7 +136273,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -136149,7 +136357,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
-          description: Color configuration based on the metric value.
+          description: Color configuration based on the metric value. Defaults to `auto`. Ignored without `apply_color_to`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -136829,12 +137037,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -136862,12 +137068,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -136919,12 +137123,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -137343,6 +137545,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -139663,7 +139866,7 @@ components:
               type: object
               properties:
                 placement:
-                  description: Label placement relative to the secondary metric value (before or after).
+                  description: Label placement relative to the secondary metric value (before or after). Defaults to `before`. Ignored when the label is not visible.
                   enum:
                     - before
                     - after
@@ -141975,6 +142178,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -142208,6 +142412,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -142891,6 +143096,7 @@ components:
       type: object
     Kibana_HTTP_APIs_multi_field_key:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -142906,6 +143112,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_multi_value_cell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_new_agent_policy:
       additionalProperties: false
       properties:
@@ -143106,7 +143328,7 @@ components:
         overrides:
           additionalProperties:
             nullable: true
-          description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
+          description: Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
           nullable: true
           type: object
         package_agent_version_conditions:
@@ -145710,12 +145932,10 @@ components:
                         vars:
                           additionalProperties:
                             anyOf:
-                              - maxLength: 10000
-                                type: string
+                              - type: string
                               - type: number
                               - type: boolean
                               - items:
-                                  maxLength: 10000
                                   type: string
                                 maxItems: 100
                                 type: array
@@ -145743,12 +145963,10 @@ components:
                   vars:
                     additionalProperties:
                       anyOf:
-                        - maxLength: 10000
-                          type: string
+                        - type: string
                         - type: number
                         - type: boolean
                         - items:
-                            maxLength: 10000
                             type: string
                           maxItems: 100
                           type: array
@@ -145866,12 +146084,10 @@ components:
               type: object
             - additionalProperties:
                 anyOf:
-                  - maxLength: 10000
-                    type: string
+                  - type: string
                   - type: number
                   - type: boolean
                   - items:
-                      maxLength: 10000
                       type: string
                     maxItems: 100
                     type: array
@@ -146154,6 +146370,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -146419,6 +146636,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -146460,6 +146678,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146496,6 +146715,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -146535,6 +146755,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -146570,6 +146791,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146605,6 +146827,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146643,6 +146866,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146687,6 +146911,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -146726,6 +146951,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146766,6 +146992,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146806,6 +147033,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -146846,6 +147074,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -146886,6 +147115,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -147184,6 +147414,7 @@ components:
         - stream
     Kibana_HTTP_APIs_range_key:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -147205,8 +147436,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -147220,8 +147449,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object
@@ -147916,6 +148143,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -148914,12 +149142,10 @@ components:
                     vars:
                       additionalProperties:
                         anyOf:
-                          - maxLength: 10000
-                            type: string
+                          - type: string
                           - type: number
                           - type: boolean
                           - items:
-                              maxLength: 10000
                               type: string
                             maxItems: 100
                             type: array
@@ -148947,12 +149173,10 @@ components:
               vars:
                 additionalProperties:
                   anyOf:
-                    - maxLength: 10000
-                      type: string
+                    - type: string
                     - type: number
                     - type: boolean
                     - items:
-                        maxLength: 10000
                         type: string
                       maxItems: 100
                       type: array
@@ -149018,12 +149242,10 @@ components:
         vars:
           additionalProperties:
             anyOf:
-              - maxLength: 10000
-                type: string
+              - type: string
               - type: number
               - type: boolean
               - items:
-                  maxLength: 10000
                   type: string
                 maxItems: 100
                 type: array
@@ -151738,6 +151960,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -151828,6 +152051,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -151888,6 +152112,34 @@ components:
         - desc
       title: termsRankByCustomDirection
       type: string
+    Kibana_HTTP_APIs_termsRankByCustomLastValueOperation:
+      additionalProperties: false
+      description: Terms ranked by the last value of a field.
+      properties:
+        direction:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomDirection'
+        field:
+          description: Numeric field to be used for the custom operation.
+          type: string
+        operation:
+          enum:
+            - last_value
+          type: string
+        time_field:
+          description: Time field used to determine document recency for the last-value ranking.
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - custom
+          type: string
+      required:
+        - type
+        - field
+        - direction
+        - operation
+      title: Terms Rank By Custom Last Value Operation
+      type: object
     Kibana_HTTP_APIs_termsRankByCustomOperation:
       additionalProperties: false
       description: Terms ranked by custom operation.
@@ -151906,7 +152158,6 @@ components:
             - standard_deviation
             - unique_count
             - sum
-            - last_value
           type: string
         type:
           enum:
@@ -152102,12 +152353,16 @@ components:
             excludeTransforms:
               default: null
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               nullable: true
               type: array
             includeTransforms:
               items:
+                maxLength: 1000
                 type: string
+              maxItems: 1000
               type: array
             testsConfig:
               additionalProperties: false
@@ -152326,6 +152581,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -152591,6 +152847,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -152632,6 +152889,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -152668,6 +152926,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -152707,6 +152966,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -152742,6 +153002,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -152777,6 +153038,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -152815,6 +153077,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -152859,6 +153122,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -152898,6 +153162,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -152938,6 +153203,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -152978,6 +153244,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -153018,6 +153285,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -153058,6 +153326,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -153486,6 +153755,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -153655,6 +153925,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -153671,6 +153942,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -153762,6 +154034,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -153851,6 +154124,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -153867,6 +154141,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string
@@ -154451,6 +154726,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         packagePolicyIds:
           items:
             type: string
@@ -154890,6 +155170,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
               column:
                 description: Column to use
                 type: string
@@ -155155,6 +155436,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -155202,6 +155484,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155238,6 +155521,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -155277,6 +155561,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -155312,6 +155597,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155347,6 +155633,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155385,6 +155672,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155429,6 +155717,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -155468,6 +155757,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155508,6 +155798,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155548,6 +155839,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         field:
           description: Field to be used for the metric
           type: string
@@ -155588,6 +155880,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -155628,6 +155921,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the metric. Defaults to `auto`. Ignored with a non-collapsed `group_by` dimension.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -157551,6 +157845,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -157671,7 +157966,7 @@ components:
         layers:
           description: ES|QL chart layers
           items:
-            $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLayerESQL'
+            $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLayersESQL'
           maxItems: 100
           minItems: 1
           type: array
@@ -157946,6 +158241,7 @@ components:
                 anyOf:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+                description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
               column:
                 description: Column to use
                 type: string
@@ -159539,6 +159835,7 @@ components:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankBySignificant'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByMetric'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomOperation'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomLastValueOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByCustomCountOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileOperation'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_termsRankByPercentileRankOperation'
@@ -159560,6 +159857,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -159602,6 +159900,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -159647,6 +159946,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to cumulatively sum. When omitted, cumulative sum is applied to the count of records.
           type: string
@@ -159688,6 +159988,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -159729,6 +160030,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -159773,6 +160075,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -159823,6 +160126,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         filter:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         format:
@@ -159868,6 +160172,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -159914,6 +160219,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -159960,6 +160266,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         field:
           description: Field to be used for the metric
           type: string
@@ -160006,6 +160313,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -160052,6 +160360,7 @@ components:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_staticColor'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
+          description: Static color of the Y metric. Defaults to `auto`. Ignored with a non-collapsed `breakdown_by`.
         empty_as_null:
           default: false
           description: When `true`, treats empty buckets as null instead of zero.
@@ -163208,6 +163517,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -163245,6 +163555,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:
@@ -164037,7 +164351,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -164141,7 +164455,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -164509,7 +164823,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -164638,7 +164952,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -165125,7 +165439,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -165245,7 +165559,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -165625,7 +165939,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -165754,7 +166068,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -166283,7 +166597,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -166406,7 +166720,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -166618,7 +166932,7 @@ components:
         execution_summary:
           $ref: '#/components/schemas/Security_Detections_API_RuleExecutionSummary'
         id:
-          $ref: '#/components/schemas/Security_Detections_API_UUID'
+          $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
         immutable:
           $ref: '#/components/schemas/Security_Detections_API_IsRuleImmutable'
         required_fields:
@@ -167529,7 +167843,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -167652,7 +167966,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -168298,7 +168612,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -168430,7 +168744,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -168900,7 +169214,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -169026,7 +169340,7 @@ components:
             from:
               $ref: '#/components/schemas/Security_Detections_API_RuleIntervalFrom'
             id:
-              $ref: '#/components/schemas/Security_Detections_API_UUID'
+              $ref: '#/components/schemas/Security_Detections_API_RuleObjectId'
             interval:
               $ref: '#/components/schemas/Security_Detections_API_RuleInterval'
             investigation_fields:
@@ -170428,11 +170742,25 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
-                  description: The full file path to retrieve from the endpoint.
+                  description: The full file path to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both.
                   type: string
-              required:
-                - path
+                paths:
+                  description: The list of file paths to retrieve from the endpoint. Either `path` or `paths` must be defined, but not both. Valid for the Elastic Defend Endpoint agent type only, and requires an Endpoint that supports the `get_file_multi_path` capability.
+                  example:
+                    - /var/log/syslog
+                    - /var/log/auth.log
+                  items:
+                    maxLength: 4096
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
@@ -174496,19 +174824,19 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CopyPacksResponse:
       description: The response for copying a pack.
       example:
@@ -174548,22 +174876,22 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
               items:
                 type: object
                 properties:
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                   id:
                     type: string
                   interval:
@@ -174575,9 +174903,9 @@ components:
                   removed:
                     type: boolean
                   rrule_schedule:
-                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                    $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                   schedule_type:
-                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                    $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                   snapshot:
                     type: boolean
                   timeout:
@@ -174586,12 +174914,12 @@ components:
                     type: string
               type: array
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               description: Shard configuration as an array of key-value pairs.
               items:
@@ -174652,9 +174980,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -174662,15 +174990,15 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -174724,7 +175052,7 @@ components:
             type: string
           type: array
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         event_ids:
           description: A list of event IDs associated with the live query.
           items:
@@ -174735,13 +175063,13 @@ components:
           nullable: true
           type: object
         pack_id:
-          $ref: '#/components/schemas/Security_Osquery_API_PackId'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIdOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ArrayQueries'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
     Security_Osquery_API_CreateLiveQueryResponse:
       description: The response for creating a live query.
       example:
@@ -174832,7 +175160,7 @@ components:
                       type: string
                     type: array
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   id:
                     type: string
                   platform:
@@ -174882,15 +175210,15 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         rrule_schedule:
@@ -174944,15 +175272,15 @@ components:
               description: The profile UID of the user who created the pack.
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
               $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             rrule_schedule:
@@ -175006,23 +175334,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
           $ref: '#/components/schemas/Security_Osquery_API_Interval'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_CreateSavedQueryResponse:
       description: The response for creating a saved query.
       example:
@@ -175057,9 +175385,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -175068,19 +175396,19 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               description: Whether the saved query is prebuilt.
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               description: The saved object ID of the saved query.
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               description: The query timeout in seconds.
               type: integer
@@ -175353,7 +175681,7 @@ components:
                     description: Number of result documents.
                     type: integer
                   ecs_mapping:
-                    $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                    $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                   failed:
                     description: Number of failed queries.
                     type: integer
@@ -175458,7 +175786,7 @@ components:
                                 type: string
                               type: array
                             ecs_mapping:
-                              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
                             id:
                               type: string
                             query:
@@ -175525,11 +175853,11 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             namespaces:
@@ -175538,19 +175866,19 @@ components:
                 type: string
               type: array
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             read_only:
               description: Whether the pack is read-only (true for prebuilt packs).
               type: boolean
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             type:
@@ -175615,22 +175943,22 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
               enabled:
-                $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+                $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
               interval:
-                $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+                $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
               name:
                 $ref: '#/components/schemas/Security_Osquery_API_PackName'
               policy_ids:
-                $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+                $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
               queries:
                 description: 'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
                 items:
                   type: object
                   properties:
                     ecs_mapping:
-                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArray'
+                      $ref: '#/components/schemas/Security_Osquery_API_ECSMappingArrayOrUndefined'
                     id:
                       type: string
                     interval:
@@ -175642,9 +175970,9 @@ components:
                     removed:
                       type: boolean
                     rrule_schedule:
-                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                      $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
                     schedule_type:
-                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                      $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
                     snapshot:
                       type: boolean
                     timeout:
@@ -175656,12 +175984,12 @@ components:
                 description: Whether the pack is read-only (true for prebuilt packs).
                 type: boolean
               rrule_schedule:
-                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+                $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
               saved_object_id:
                 description: The saved object ID of the pack.
                 type: string
               schedule_type:
-                $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+                $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
               updated_at:
                 format: date-time
                 type: string
@@ -175724,9 +176052,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -175734,17 +176062,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
@@ -175804,9 +176132,9 @@ components:
               created_by_profile_uid:
                 type: string
               description:
-                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+                $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
               ecs_mapping:
-                $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+                $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
               id:
                 $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
               interval:
@@ -175814,17 +176142,17 @@ components:
                   - type: integer
                   - type: string
               platform:
-                $ref: '#/components/schemas/Security_Osquery_API_Platform'
+                $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
               prebuilt:
                 type: boolean
               query:
                 $ref: '#/components/schemas/Security_Osquery_API_Query'
               removed:
-                $ref: '#/components/schemas/Security_Osquery_API_Removed'
+                $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
               saved_object_id:
                 type: string
               snapshot:
-                $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+                $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
               timeout:
                 type: integer
               updated_at:
@@ -176100,7 +176428,7 @@ components:
       type: object
       properties:
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
         interval:
@@ -176109,21 +176437,21 @@ components:
           nullable: true
           type: integer
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
           $ref: '#/components/schemas/Security_Osquery_API_Query'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         saved_query_id:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryIdOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_PackDescription:
       description: The pack description.
       example: Pack description
@@ -176432,21 +176760,21 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
         enabled:
-          $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+          $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+          $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
         name:
           $ref: '#/components/schemas/Security_Osquery_API_PackName'
         policy_ids:
-          $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+          $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
         queries:
           $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
         rrule_schedule:
-          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+          $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
         schedule_type:
-          $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+          $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
         shards:
           $ref: '#/components/schemas/Security_Osquery_API_Shards'
     Security_Osquery_API_UpdatePacksResponse:
@@ -176491,24 +176819,24 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_PackDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_PackDescriptionOrUndefined'
             enabled:
-              $ref: '#/components/schemas/Security_Osquery_API_Enabled'
+              $ref: '#/components/schemas/Security_Osquery_API_EnabledOrUndefined'
             interval:
-              $ref: '#/components/schemas/Security_Osquery_API_PackInterval'
+              $ref: '#/components/schemas/Security_Osquery_API_PackIntervalOrUndefined'
             name:
               $ref: '#/components/schemas/Security_Osquery_API_PackName'
             policy_ids:
-              $ref: '#/components/schemas/Security_Osquery_API_PolicyIds'
+              $ref: '#/components/schemas/Security_Osquery_API_PolicyIdsOrUndefined'
             queries:
               $ref: '#/components/schemas/Security_Osquery_API_ObjectQueries'
             rrule_schedule:
-              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfig'
+              $ref: '#/components/schemas/Security_Osquery_API_RRuleScheduleConfigOrUndefined'
             saved_object_id:
               description: The saved object ID of the pack.
               type: string
             schedule_type:
-              $ref: '#/components/schemas/Security_Osquery_API_ScheduleType'
+              $ref: '#/components/schemas/Security_Osquery_API_ScheduleTypeOrUndefined'
             shards:
               $ref: '#/components/schemas/Security_Osquery_API_Shards'
             updated_at:
@@ -176528,23 +176856,23 @@ components:
       type: object
       properties:
         description:
-          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+          $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
         ecs_mapping:
-          $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+          $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
         interval:
-          $ref: '#/components/schemas/Security_Osquery_API_Interval'
+          $ref: '#/components/schemas/Security_Osquery_API_IntervalOrUndefined'
         platform:
-          $ref: '#/components/schemas/Security_Osquery_API_Platform'
+          $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
         query:
-          $ref: '#/components/schemas/Security_Osquery_API_Query'
+          $ref: '#/components/schemas/Security_Osquery_API_QueryOrUndefined'
         removed:
-          $ref: '#/components/schemas/Security_Osquery_API_Removed'
+          $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
         snapshot:
-          $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+          $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
         version:
-          $ref: '#/components/schemas/Security_Osquery_API_Version'
+          $ref: '#/components/schemas/Security_Osquery_API_VersionOrUndefined'
     Security_Osquery_API_UpdateSavedQueryResponse:
       description: The response for updating a saved query.
       example:
@@ -176573,9 +176901,9 @@ components:
             created_by_profile_uid:
               type: string
             description:
-              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescription'
+              $ref: '#/components/schemas/Security_Osquery_API_SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
+              $ref: '#/components/schemas/Security_Osquery_API_ECSMappingOrUndefined'
             id:
               $ref: '#/components/schemas/Security_Osquery_API_SavedQueryId'
             interval:
@@ -176583,17 +176911,17 @@ components:
                 - type: integer
                 - type: string
             platform:
-              $ref: '#/components/schemas/Security_Osquery_API_Platform'
+              $ref: '#/components/schemas/Security_Osquery_API_PlatformOrUndefined'
             prebuilt:
               type: boolean
             query:
               $ref: '#/components/schemas/Security_Osquery_API_Query'
             removed:
-              $ref: '#/components/schemas/Security_Osquery_API_Removed'
+              $ref: '#/components/schemas/Security_Osquery_API_RemovedOrUndefined'
             saved_object_id:
               type: string
             snapshot:
-              $ref: '#/components/schemas/Security_Osquery_API_Snapshot'
+              $ref: '#/components/schemas/Security_Osquery_API_SnapshotOrUndefined'
             timeout:
               type: integer
             updated_at:
