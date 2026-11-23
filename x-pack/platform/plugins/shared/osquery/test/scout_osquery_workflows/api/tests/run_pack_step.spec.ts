@@ -26,6 +26,7 @@ import {
   deleteTestSpace,
   findAgentActionIds,
   findPackActionDocs,
+  historyClient,
   indexFakeAgents,
   loadPrebuiltPacks,
   stepOf,
@@ -46,6 +47,9 @@ const AGENT: FakeAgent = {
   namespaces: ['default', PREBUILT_SPACE],
 };
 const PREBUILT_PACK = 'forensic-persistence';
+/** Holds a pack that exists only outside the default space, where the workflows run. */
+const OTHER_SPACE = 'osq-wf-run-pack-other';
+const OTHER_SPACE_PACK = 'osq-wf-pack-other-space-only';
 
 const runPackStep = (pack: string, extra = '') => `  - name: p
     type: osquery.runPack
@@ -85,6 +89,13 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     await createTestSpace(kbnClient, PREBUILT_SPACE);
     // The space is ours: a previous, interrupted run may have left prebuilt copies in it.
     await deleteLoadedPrebuiltPacks(kbnClient, PREBUILT_SPACE);
+    await createTestSpace(kbnClient, OTHER_SPACE);
+    await createPack(
+      kbnClient,
+      OTHER_SPACE_PACK,
+      { procs: { query: 'SELECT pid FROM processes', interval: 3600 } },
+      OTHER_SPACE
+    );
     ({ apiKeyHeader: adminHeaders } = await requestAuth.getApiKeyForAdmin());
   });
 
@@ -97,6 +108,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
     await deleteDispatchedActions(systemEs, takeDispatchedActionIds());
     // Deleting the space removes the prebuilt copies loaded in it.
     await deleteTestSpace(kbnClient, PREBUILT_SPACE);
+    await deleteTestSpace(kbnClient, OTHER_SPACE);
     await deletePack(kbnClient, packId);
     await deletePack(kbnClient, placeholderPackId);
     await deleteFakeAgents(systemEs, [AGENT.id]);
@@ -192,9 +204,87 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
 
     const { output } = stepOf(await workflows.waitForEnd(executionId), 'p');
     expect(output).toMatchObject({ status: 'success' });
-    expect(output?.queries).toHaveLength(2);
+    const queries = output?.queries as Array<Record<string, any>>;
+    expect(queries).toHaveLength(2);
+    for (const query of queries) {
+      expect(query).toMatchObject({
+        status: 'success',
+        row_count: 1,
+        truncated: false,
+        agents: { total: 1, responded: 1, pending: 0, failed: 0 },
+      });
+      expect(query.rows).toHaveLength(1);
+    }
+
     await workflows.delete(workflowId);
   });
+
+  apiTest(
+    'success with the minimal role: the step runs as the calling user, not as an admin',
+    async ({ apiClient, esClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        osqueryRole(['minimal_read', 'packs_read', 'run_saved_queries', 'live_queries_read'])
+      );
+      const workflows = workflowsClient(apiClient, apiKeyHeader);
+      const workflowId = await workflows.create(
+        'osq-wf-pack-minimal-role',
+        runPackStep(`pack: osq-wf-pack`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'p');
+      for (const { action_id: queryActionId } of state.queries) {
+        await answerQuery(esClient, {
+          queryActionId,
+          agent: AGENT,
+          rows: [{ pid: '1', name: 'systemd', uid: '0' }],
+        });
+      }
+
+      const execution = await workflows.waitForEnd(executionId);
+      expect(execution.status).toBe('completed');
+      const { output } = stepOf(execution, 'p');
+      expect(output).toMatchObject({ status: 'success' });
+      expect(
+        (output?.queries as Array<{ status: string }>).map(({ status }) => status)
+      ).toStrictEqual(['success', 'success']);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'history: a pack dispatch records the workflow origin and is listed with source Workflow',
+    async ({ apiClient, esClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const history = historyClient(apiClient, adminHeaders, new Date().toISOString());
+      const workflowId = await workflows.create(
+        'osq-wf-pack-history-source',
+        runPackStep(`pack: osq-wf-pack`)
+      );
+      const executionId = await workflows.run(workflowId);
+      const state = await workflows.waitForDispatch(executionId, 'p');
+      for (const { action_id: queryActionId } of state.queries) {
+        await answerQuery(esClient, {
+          queryActionId,
+          agent: AGENT,
+          rows: [{ pid: '1', name: 'systemd', uid: '0' }],
+        });
+      }
+
+      await workflows.waitForEnd(executionId);
+
+      // The execution ID comes from the engine's `x-kibana-workflow-execution-id`, not the step.
+      const [action] = await findPackActionDocs(systemEs, packId, state.action_id);
+      expect(action).toMatchObject({
+        origin: { type: 'workflow', run_id: executionId, verified: false },
+      });
+
+      // One action for the whole pack, so one history row.
+      expect(await history(state.action_id)).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(state.action_id, 'workflow')).toMatchObject([{ source: 'Workflow' }]);
+      expect(await history(state.action_id, 'live,rule')).toHaveLength(0);
+      await workflows.delete(workflowId);
+    }
+  );
 
   apiTest('timed_out: no agent answers any pack query by the deadline', async ({ apiClient }) => {
     const workflows = workflowsClient(apiClient, adminHeaders);
@@ -227,6 +317,17 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
 
     const { output } = stepOf(await workflows.waitForEnd(executionId), 'p');
     expect(output?.status).toBe('failed');
+    const queries = output?.queries as Array<Record<string, any>>;
+    expect(queries).toHaveLength(2);
+    for (const query of queries) {
+      expect(query).toMatchObject({
+        status: 'failed',
+        rows: [],
+        row_count: 0,
+        agents: { total: 1, responded: 1, failed: 1 },
+      });
+    }
+
     await workflows.delete(workflowId);
   });
 
@@ -260,6 +361,24 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       const workflowId = await workflows.create(
         'osq-wf-pack-not-found',
         runPackStep('pack: osq-wf-does-not-exist')
+      );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
+      const execution = await workflows.waitForEnd(await workflows.run(workflowId));
+
+      expect(execution.status).toBe('failed');
+      expect(stepOf(execution, 'p').error?.details?.code).toBe('PACK_NOT_FOUND');
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'PACK_NOT_FOUND for a pack that exists only in another space, before anything is dispatched',
+    async ({ apiClient }) => {
+      const workflows = workflowsClient(apiClient, adminHeaders);
+      const workflowId = await workflows.create(
+        'osq-wf-pack-other-space',
+        runPackStep(`pack: ${OTHER_SPACE_PACK}`)
       );
       const before = await findAgentActionIds(systemEs, AGENT.id);
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
