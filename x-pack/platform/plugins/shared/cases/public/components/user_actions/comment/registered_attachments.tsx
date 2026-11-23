@@ -156,13 +156,13 @@ export const createRegisteredAttachmentUserActionBuilder = <
         timelineAvatarAriaLabel: attachmentType.getLabel(),
         actions: (
           <UserActionContentToolbar id={attachment.id}>
-            {visiblePrimaryActions.map(
-              (action) =>
-                (action.type === AttachmentActionType.BUTTON && (
+            {visiblePrimaryActions.map((action, actionIndex) => {
+              if (action.type === AttachmentActionType.BUTTON) {
+                return (
                   <EuiFlexItem
                     grow={false}
+                    key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
                     data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
-                    key={`attachment-${attachmentTypeId}-${attachment.id}`}
                   >
                     <EuiToolTip content={action.label} disableScreenReaderOutput>
                       <EuiButtonIcon
@@ -171,13 +171,22 @@ export const createRegisteredAttachmentUserActionBuilder = <
                         color={action.color ?? 'text'}
                         onClick={action.onClick}
                         data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                )) ||
-                (action.type === AttachmentActionType.CUSTOM && action.render())
-            )}
+                );
+              }
+              if (action.type === AttachmentActionType.CUSTOM) {
+                return (
+                  <React.Fragment
+                    key={`custom-action-${attachmentTypeId}-${attachment.id}-${actionIndex}`}
+                  >
+                    {action.render()}
+                  </React.Fragment>
+                );
+              }
+              return null;
+            })}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
               onDelete={() => handleDeleteComment(attachment.id, deleteSuccessToast)}

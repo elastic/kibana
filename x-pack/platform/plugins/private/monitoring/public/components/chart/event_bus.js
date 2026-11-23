@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import $ from 'jquery';
+import $ from '@kbn/flot-charts';
 export const eventBus = $({});

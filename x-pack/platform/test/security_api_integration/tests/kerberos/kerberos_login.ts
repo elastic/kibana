@@ -470,7 +470,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../plugins/audit_log/kerberos.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../test_plugins/security_api_integration/plugins/audit_log/kerberos.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -499,8 +502,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'success' } },
+          { event: { action: 'user_logout', outcome: 'unknown' } },
+        ]);
 
         expect(auditEvents).to.have.length(2);
 
@@ -525,8 +530,9 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'failure' } },
+        ]);
 
         expect(auditEvents).to.have.length(1);
         expect(auditEvents[0]).to.be.ok();

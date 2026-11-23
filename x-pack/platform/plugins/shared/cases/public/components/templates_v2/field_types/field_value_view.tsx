@@ -6,10 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiIcon, EuiText, EuiTextColor, useEuiTheme, useEuiFontSize } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiMarkdownFormat,
+  EuiText,
+  EuiTextColor,
+  useEuiTheme,
+  useEuiFontSize,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
+import { useProseCss } from '../../markdown_editor/use_prose_css';
 import * as commonI18n from '../../../common/translations';
 import * as i18n from '../translations';
 
@@ -236,9 +244,22 @@ export const FieldValueRow: React.FC<FieldValueRowProps> = ({
   }
 
   return (
-    <button
-      type="button"
-      onClick={onEdit}
+    // div + role="button" instead of a native <button> so nested <a> links are valid HTML.
+    // The click/keydown handlers skip anchor targets so links navigate without opening edit mode.
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        onEdit();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          if ((e.target as HTMLElement).closest('a')) return;
+          e.preventDefault();
+          onEdit();
+        }
+      }}
       aria-label={i18n.EDIT_FIELD_LABEL(label)}
       data-test-subj={`template-field-edit-${name}`}
       css={[styles.row, styles.interactiveRow]}
@@ -246,7 +267,7 @@ export const FieldValueRow: React.FC<FieldValueRowProps> = ({
       <span data-test-subj={`template-field-value-${name}`} css={{ display: 'contents' }}>
         {content}
       </span>
-    </button>
+    </div>
   );
 };
 
@@ -259,10 +280,14 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
   isRequiredOnClose,
   onEdit,
 }) => {
+  const proseCss = useProseCss();
   const valueText = useMemo(() => getValueText(field, value), [field, value]);
   const label = field.label ?? field.name;
+  const isMarkdownTextarea =
+    field.control === FieldType.TEXTAREA && field.metadata?.markdown === true;
   const isTextValue =
-    field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA;
+    !isMarkdownTextarea &&
+    (field.control === FieldType.INPUT_TEXT || field.control === FieldType.TEXTAREA);
 
   // "Required" is only actionable while the field is empty; repeating it on filled fields is noise.
   // "Required on close" is a standing obligation, so it stays regardless.
@@ -281,7 +306,13 @@ export const FieldValueView: React.FC<FieldValueViewProps> = ({
       onEdit={onEdit}
     >
       {valueText !== undefined ? (
-        valueText
+        isMarkdownTextarea ? (
+          <EuiMarkdownFormat css={proseCss} textSize="s">
+            {valueText}
+          </EuiMarkdownFormat>
+        ) : (
+          valueText
+        )
       ) : (
         // One phrase for every empty field, editable or not, so a column of them reads as one
         // state rather than a mix of instructions. Subdued but upright: italics on a third of

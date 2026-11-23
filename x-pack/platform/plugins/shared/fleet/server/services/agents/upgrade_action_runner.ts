@@ -20,7 +20,11 @@ import {
 
 import type { Agent } from '../../types';
 
-import { HostedAgentPolicyRestrictionRelatedError, FleetError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+  FleetError,
+} from '../../errors';
 import { getValidSpaceId } from '../spaces/helpers';
 import { appContextService } from '../app_context';
 
@@ -29,7 +33,7 @@ import { ActionRunner } from './action_runner';
 import type { GetAgentsOptions } from './crud';
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 import { getCancelledActions } from './action_status';
 import { getLatestAvailableAgentVersion } from './versions';
@@ -79,13 +83,13 @@ export async function upgradeBatch(
   const soClient = appContextService.getInternalUserSOClientForSpaceId(getValidSpaceId(spaceIds));
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
 
   // results from getAgents with options.kuery '' (or even 'active:false') may include hosted agents
   // filter them out unless options.force
   const agentsToCheckUpgradeable =
     'kuery' in options && !options.force
-      ? givenAgents.filter((agent: Agent) => !isHostedAgent(hostedPolicies, agent))
+      ? givenAgents.filter((agent: Agent) => !isHostedAgent(restrictions, agent))
       : givenAgents;
 
   const latestAgentVersion = await getLatestAvailableAgentVersion();
@@ -113,10 +117,14 @@ export async function upgradeBatch(
         );
       }
 
-      if (!options.force && isHostedAgent(hostedPolicies, agent)) {
+      if (!options.force && isHostedAgent(restrictions, agent)) {
         throw new HostedAgentPolicyRestrictionRelatedError(
           `Cannot upgrade agent in hosted agent policy ${agent.policy_id}`
         );
+      }
+      // force skips the hosted validation, but never the agentless one
+      if (isAgentlessAgent(restrictions, agent)) {
+        throw new AgentlessAgentRestrictionError(`Cannot upgrade managed agent ${agent.id}`);
       }
       return agent;
     })

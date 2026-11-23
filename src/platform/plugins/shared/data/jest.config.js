@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/data'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/data',

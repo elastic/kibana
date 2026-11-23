@@ -25,6 +25,8 @@ export const GetFileActionResult = memo<
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
+    // `force` is a bare boolean flag; it is only ever defined for the `endpoint` agent type
+    const force = command.args.hasArg('force');
 
     return endpointId
       ? {
@@ -32,11 +34,14 @@ export const GetFileActionResult = memo<
           endpoint_ids: [endpointId],
           comment: comment?.[0],
           parameters: {
-            path: path[0],
+            // A single `--path` is sent as `path`. Multiple `--path` arguments (which are only
+            // allowed for the Endpoint agent type) are sent as `paths`
+            ...(path.length > 1 ? { paths: path } : { path: path[0] }),
+            ...(force ? { force: true } : {}),
           },
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta]);
+  }, [command.args, command.commandDefinition?.meta]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,

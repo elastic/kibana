@@ -14,7 +14,7 @@ import type { XYConfig, XYConfigNoESQL, XYConfigESQL, XYLayer } from '../../../s
 import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
+import { isAPIDataLayer, isAPIesqlXYLayer, isLensStateDataLayer } from './helpers';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import { getReversibleMappings, getScaleTypeFromColumnType } from '../utils';
 import {
@@ -72,8 +72,26 @@ function convertAPIDomainToStateFormat(
   }
 }
 
+/**
+ * Y axes (`y`, `y2`) that at least one data layer plots a metric on: the only Y axes the runtime
+ * draws.
+ */
+function getUsedYAxes(layers: XYConfig['layers']): Set<'y' | 'y2'> {
+  const usedAxes = new Set<'y' | 'y2'>();
+  for (const layer of layers) {
+    if (!isAPIDataLayer(layer)) {
+      continue;
+    }
+    for (const metric of layer.y) {
+      usedAxes.add(metric.axis ?? 'y');
+    }
+  }
+  return usedAxes;
+}
+
 function convertAxisSettingsToStateFormat(
-  axis: XYConfig['axis']
+  axis: XYConfig['axis'],
+  layers: XYConfig['layers']
 ): Pick<
   XYPersistedState,
   | 'xTitle'
@@ -89,9 +107,12 @@ function convertAxisSettingsToStateFormat(
   | 'yRightExtent'
   | 'labelsOrientation'
 > {
+  // The runtime draws a Y axis only when a data layer plots a metric on it (a reference line does
+  // not create one), so the settings of any other Y axis are not stored.
+  const usedYAxes = getUsedYAxes(layers);
   const xAxis = axis?.x;
-  const yLeftAxis = axis?.y;
-  const yRightAxis = axis?.y2;
+  const yLeftAxis = usedYAxes.has('y') ? axis?.y : undefined;
+  const yRightAxis = usedYAxes.has('y2') ? axis?.y2 : undefined;
 
   const xExtent = convertAPIDomainToStateFormat(xAxis?.domain, DEFAULT_X_AXIS_DOMAIN);
   const yLeftExtent = convertAPIDomainToStateFormat(yLeftAxis?.domain, DEFAULT_Y_AXIS_DOMAIN);
@@ -138,9 +159,12 @@ function convertAxisSettingsToStateFormat(
             yRightAxis?.labels?.orientation ?? 'horizontal'
           ),
         };
-  const xTitle = xAxis?.title?.text;
-  const yTitle = yLeftAxis?.title?.text;
-  const yRightTitle = yRightAxis?.title?.text;
+  // Lens shows an axis title's text only on the axis, so the text of a hidden title is not stored.
+  const getTitleText = (title: { visible?: boolean; text?: string } | undefined) =>
+    title?.visible === false ? undefined : title?.text;
+  const xTitle = getTitleText(xAxis?.title);
+  const yTitle = getTitleText(yLeftAxis?.title);
+  const yRightTitle = getTitleText(yRightAxis?.title);
   const yLeftScale = yLeftAxis?.scale;
   const yRightScale = yRightAxis?.scale;
   return stripUndefined({
@@ -175,11 +199,14 @@ export function buildVisualizationState(
   const layers = config.layers
     .map((layer, index) => buildXYLayer(config, layer, index, annotationGroupReferences))
     .filter(nonNullable);
+  const dataLayers = layers.filter(isLensStateDataLayer);
   return {
-    preferredSeriesType: layers.filter(isLensStateDataLayer)[0]?.seriesType ?? 'bar_stacked',
+    preferredSeriesType: dataLayers[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
-    ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.styling ? convertStylingToStateFormat(config.styling) : {}),
+    ...convertAxisSettingsToStateFormat(config.axis, config.layers),
+    ...(config.styling
+      ? convertStylingToStateFormat(config.styling, getLayerPresence(dataLayers))
+      : {}),
     layers,
   };
 }

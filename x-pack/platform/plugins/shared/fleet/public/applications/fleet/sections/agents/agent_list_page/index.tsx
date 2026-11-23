@@ -10,6 +10,7 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
+import { AGENT_TYPE_OPAMP, AGENTS_PREFIX } from '../../../../../../common/constants';
 import {
   isAgentMigrationSupported,
   isAgentPrivilegeLevelChangeSupported,
@@ -321,7 +322,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => setAddCollectorFlyoutOpen(false)}
             onClickViewAgents={() => {
               setAddCollectorFlyoutOpen(false);
-              fetchData();
+              onSubmitSearch(`${AGENTS_PREFIX}.type:${AGENT_TYPE_OPAMP}`);
             }}
           />
         </EuiPortal>

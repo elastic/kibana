@@ -46,6 +46,8 @@ properties:
               $ref: 'case_customfields.yaml'
         description:
           $ref: 'case_description.yaml'
+        extended_fields:
+          $ref: 'case_extended_fields.yaml'
         id:
           description: The identifier for the case.
           type: string

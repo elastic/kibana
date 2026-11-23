@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-nightshift'],
   coveragePathIgnorePatterns: ['.*\\.stories\\.tsx$', '.storybook/', 'jest.config.js'],

@@ -76,7 +76,9 @@ jest.mock('../../../hooks', () => ({
   }),
   useBreadcrumbs: jest.fn(),
   useLink: jest.fn().mockReturnValue({ getHref: jest.fn() }),
-  useUrlParams: jest.fn().mockReturnValue({ urlParams: { kuery: '' } }),
+  useUrlParams: jest
+    .fn()
+    .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: jest.fn(() => '') }),
   useKibanaVersion: jest.fn().mockReturnValue('8.3.0'),
   useFleetServerUnhealthy: jest.fn().mockReturnValue({
     isUnhealthy: false,
@@ -95,6 +97,8 @@ const mockSessionState = {
   page: { index: 0, size: 20 },
 };
 
+const mockUpdateTableState = jest.fn();
+
 const mockOnTableChange = jest.fn((changes: any) => {
   if (changes.sort) {
     mockSessionState.sort = changes.sort;
@@ -107,7 +111,7 @@ const mockOnTableChange = jest.fn((changes: any) => {
 jest.mock('./hooks/use_session_agent_list_state', () => ({
   useSessionAgentListState: jest.fn(() => ({
     ...mockSessionState,
-    updateTableState: jest.fn(),
+    updateTableState: mockUpdateTableState,
     onTableChange: mockOnTableChange,
     clearFilters: jest.fn(),
     resetToDefaults: jest.fn(),
@@ -134,9 +138,33 @@ jest.mock('./hooks/use_session_agent_list_state', () => ({
 
 jest.mock('./components/search_and_filter_bar', () => {
   return {
-    SearchAndFilterBar: () => <>SearchAndFilterBar</>,
+    SearchAndFilterBar: ({ onClickAddCollector }: { onClickAddCollector: () => void }) => (
+      <>
+        SearchAndFilterBar
+        <button data-test-subj="mockAddCollectorButton" onClick={onClickAddCollector}>
+          Add collector
+        </button>
+      </>
+    ),
   };
 });
+
+jest.mock('./components/add_collector_flyout', () => ({
+  AddCollectorFlyout: ({
+    onClose,
+    onClickViewAgents,
+  }: {
+    onClose: () => void;
+    onClickViewAgents: () => void;
+  }) => (
+    <div data-test-subj="addCollectorFlyout">
+      <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
+        View connected collectors
+      </button>
+      <button onClick={onClose}>Close</button>
+    </div>
+  ),
+}));
 
 const mockedSendGetAgentsForRq = sendGetAgentsForRq as jest.Mock;
 const mockedSendGetAgentStatus = sendGetAgentStatus as jest.Mock;
@@ -428,6 +456,49 @@ describe('agent_list_page', () => {
       });
 
       expect(renderResult.queryByTestId('uninstall-command-flyout')).toBeInTheDocument();
+    });
+  });
+
+  describe('Add collector flyout', () => {
+    beforeEach(async () => {
+      mockUpdateTableState.mockClear();
+      mockedSendGetAgentsForRq.mockResolvedValue({
+        items: [],
+        total: 0,
+        statusSummary: {},
+      });
+      mockedSendGetAgentStatus.mockResolvedValue({
+        data: { results: { inactive: 0 }, totalInactive: 0 },
+      });
+    });
+
+    it('filters the agent list to OPAMP collectors when "View connected collectors" is clicked', async () => {
+      const renderer = createFleetTestRendererMock();
+      let renderResult: RenderResult;
+
+      await act(async () => {
+        renderResult = renderer.render(<AgentListPage />);
+      });
+
+      // Open the Add Collector flyout
+      await act(async () => {
+        fireEvent.click(renderResult!.getByTestId('mockAddCollectorButton'));
+      });
+
+      await waitFor(() => {
+        expect(renderResult!.getByTestId('addCollectorFlyout')).toBeInTheDocument();
+      });
+
+      // Click "View connected collectors"
+      await act(async () => {
+        fireEvent.click(renderResult!.getByTestId('mockViewCollectorsButton'));
+      });
+
+      // The flyout should close and the search state should be updated with the OPAMP filter
+      expect(renderResult!.queryByTestId('addCollectorFlyout')).not.toBeInTheDocument();
+      expect(mockUpdateTableState).toHaveBeenCalledWith(
+        expect.objectContaining({ search: 'fleet-agents.type:OPAMP' })
+      );
     });
   });
 });

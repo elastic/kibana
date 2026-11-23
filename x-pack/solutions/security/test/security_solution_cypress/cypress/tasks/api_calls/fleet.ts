@@ -81,10 +81,14 @@ const deletePackages = () => {
     url: 'api/fleet/epm/packages',
   }).then((response) => {
     response.body.items.forEach((item) => {
-      if (item.status === 'installed') {
+      // `security_detection_engine` is installed and continuously reconciled by a background task,
+      // so deleting it here races that task (400/404) or times out on its slow uninstall — and it
+      // isn't installed by these tests, so it's excluded from this best-effort teardown.
+      if (item.status === 'installed' && item.name !== 'security_detection_engine') {
         rootRequest({
           method: 'DELETE',
           url: `api/fleet/epm/packages/${item.name}/${item.version}`,
+          failOnStatusCode: false, // Don't fail if the package is already uninstalled
         });
       }
     });

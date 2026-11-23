@@ -8,6 +8,7 @@
 import { useQuery } from '@kbn/react-query';
 
 import type {
+  GetOutputAgentPolicyCountResponse,
   GetOutputHealthResponse,
   GetRemoteSyncedIntegrationsStatusResponse,
 } from '../../../common/types';
@@ -22,14 +23,27 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, sendRequestForRq, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq } from './use_request';
 
-export function useGetOutputs() {
-  return useRequest<GetOutputsResponse>({
+export const OUTPUTS_QUERY_KEY = ['fleet', 'outputs'];
+
+function sendGetOutputs() {
+  return sendRequestForRq<GetOutputsResponse>({
     method: 'get',
     path: outputRoutesService.getListPath(),
     version: API_VERSIONS.public.v1,
   });
+}
+
+export function useGetOutputs() {
+  const result = useQuery(OUTPUTS_QUERY_KEY, sendGetOutputs);
+  return {
+    data: result.data,
+    error: result.error,
+    isLoading: result.isLoading,
+    isInitialRequest: result.isLoading,
+    resendRequest: result.refetch,
+  };
 }
 
 export function useDefaultOutput() {
@@ -86,6 +100,22 @@ export function sendGetOutputHealth(outputId: string) {
     method: 'get',
     path: outputRoutesService.getOutputHealthPath(outputId),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendGetOutputAgentPolicyCount(
+  outputId: string,
+  pendingFlags?: { isDefault?: boolean; isDefaultMonitoring?: boolean }
+) {
+  const query: Record<string, boolean> = {};
+  if (pendingFlags?.isDefault !== undefined) query.isDefault = pendingFlags.isDefault;
+  if (pendingFlags?.isDefaultMonitoring !== undefined)
+    query.isDefaultMonitoring = pendingFlags.isDefaultMonitoring;
+  return sendRequest<GetOutputAgentPolicyCountResponse>({
+    method: 'get',
+    path: outputRoutesService.getOutputAgentPolicyCountPath(outputId),
+    version: API_VERSIONS.internal.v1,
+    query,
   });
 }
 
