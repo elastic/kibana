@@ -230,7 +230,6 @@ const severityNotices = ({ events = [] }: ConversationLike): string[] =>
         }to "${data?.severity}". Do not set the severity.`
     );
 
-const OPEN_PROPOSAL_COMMENT_NOTICE_CHARS = 1_000;
 const OPEN_PROPOSAL_INPUT_NOTICE_CHARS = 1_000;
 const CLOSED_PROPOSAL_COMMENT_NOTICE_CHARS = 240;
 
@@ -306,7 +305,10 @@ const buildProposalsContext = (
       ]
         .filter(Boolean)
         .join(', ');
-      const body = clipNoticeText(proposal.comment.trim(), OPEN_PROPOSAL_COMMENT_NOTICE_CHARS)
+      // Never clipped: a revision replaces the whole comment, so the model rewrites it from what it
+      // sees here. At most MAX_OPEN_PROPOSALS are open, which bounds the cost.
+      const body = proposal.comment
+        .trim()
         .split('\n')
         .map((line) => `  ${line}`)
         .join('\n');
@@ -502,8 +504,11 @@ const writeRecorderProposals = async ({
       continue;
     }
     emittedTitles.add(key);
-    openCount++;
-    await write(title, () => proposals.propose({ request, conversationId, proposal }));
+    const created = await write(title, async () => {
+      await proposals.propose({ request, conversationId, proposal });
+      return true;
+    });
+    if (created) openCount++;
   }
 
   if (changedByPerson.length > 0) {

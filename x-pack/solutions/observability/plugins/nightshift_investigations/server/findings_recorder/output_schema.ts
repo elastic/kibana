@@ -401,6 +401,12 @@ const EVIDENCE_JSON_SCHEMA = {
   },
 } as const;
 
+/**
+ * The tool call is validated against this schema before {@link findingsOutputSchema} reads it, so
+ * an optional proposal field the parser accepts as `null` must accept it here too.
+ */
+const orNull = <T extends object>(schema: T) => ({ anyOf: [schema, { type: 'null' }] } as const);
+
 /** The same shape as {@link findingsOutputSchema}, for the inference client. */
 export const FINDINGS_JSON_SCHEMA = {
   type: 'object',
@@ -455,7 +461,7 @@ export const FINDINGS_JSON_SCHEMA = {
         type: 'object',
         properties: {
           supersedes: {
-            type: 'string',
+            ...orNull({ type: 'string' }),
             description:
               'ID of an open proposal listed in this conversation (such as P1) that this proposal refines or replaces. Omit only when the action is genuinely new and not covered by any open proposal.',
           },
@@ -466,23 +472,20 @@ export const FINDINGS_JSON_SCHEMA = {
               'What to do and why, in Markdown: the concrete steps and the findings that support them. When superseding an open proposal, give the complete standalone comment.',
           },
           impact: {
-            type: 'string',
-            enum: proposalImpactSchema.options,
+            ...orNull({ type: 'string', enum: proposalImpactSchema.options }),
             description: 'How disruptive carrying out the action is.',
           },
           confidence: {
-            type: 'string',
-            enum: proposalConfidenceSchema.options,
+            ...orNull({ type: 'string', enum: proposalConfidenceSchema.options }),
             description: 'How strongly the findings support that this action resolves the issue.',
           },
           action_workflow_id: {
-            type: 'string',
+            ...orNull({ type: 'string' }),
             description:
               'Id of a workflow listed under Workflows that carries this action out once approved. Omit when none fits, or when none are listed. When superseding, it must be the workflow the open proposal already runs: a proposal cannot change or gain a workflow.',
           },
           action_input: {
-            type: 'object',
-            additionalProperties: true,
+            ...orNull({ type: 'object', additionalProperties: true }),
             description:
               "The workflow's actionInput, filled to match its input schema. Only with action_workflow_id.",
           },

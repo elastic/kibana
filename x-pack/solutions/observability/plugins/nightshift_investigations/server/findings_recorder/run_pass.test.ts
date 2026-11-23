@@ -847,6 +847,17 @@ describe('runFindingsPass', () => {
       });
     });
 
+    it("shows an open proposal's whole comment, since a revision replaces all of it", async () => {
+      const long = `${'Step. '.repeat(300)}Owner: Sam, due Friday.`;
+      const proposals = proposed([existingProposal({ comment: long })]);
+      const { deps, chatComplete, memory } = setup({ answers: finalWith([]), proposals });
+
+      await run(deps, memory, { answer: 'Done.' });
+
+      expect(long.length).toBeGreaterThan(1_000);
+      expect(sentMessages(chatComplete)).toContain('Owner: Sam, due Friday.');
+    });
+
     it('resolves supersedes by handle in any case, or by id', async () => {
       const proposals = proposed([
         existingProposal({ id: 'p-a', title: 'First action', comment: 'a' }),
@@ -1097,6 +1108,31 @@ describe('runFindingsPass', () => {
         expect.stringContaining(
           '"Fix the checkout-api alert escalation policy": 7 proposals are already open, the most an investigation holds is 5'
         )
+      );
+    });
+
+    it('does not spend an open slot on a proposal that could not be created', async () => {
+      const proposals = proposed(
+        Array.from({ length: 4 }, (_, i) =>
+          existingProposal({ id: `p-${i}`, title: `Open action ${i}`, comment: `Step ${i}` })
+        )
+      );
+      proposals.propose.mockRejectedValueOnce(new Error('actionInput does not satisfy'));
+      const { deps, memory } = setup({
+        answers: finalWith([
+          { title: 'Rejected action', comment: 'Invalid input.' },
+          { title: 'Valid fifth action', comment: 'Fits.' },
+        ]),
+        proposals,
+      });
+
+      await run(deps, memory, { answer: 'Done.' });
+
+      expect(proposals.propose).toHaveBeenCalledTimes(2);
+      expect(proposals.propose).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          proposal: expect.objectContaining({ title: 'Valid fifth action' }),
+        })
       );
     });
 

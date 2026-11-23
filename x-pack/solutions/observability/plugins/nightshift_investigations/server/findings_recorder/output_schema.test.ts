@@ -9,6 +9,7 @@ import {
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
 } from '@kbn/agentic-investigations-plugin/common';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import {
   FINDINGS_JSON_SCHEMA,
   LIVE_FINDINGS_JSON_SCHEMA,
@@ -200,6 +201,28 @@ describe('proposals', () => {
         },
       ]) ?? [];
     expect(proposal).toEqual({ title: 'a', comment: 'c' });
+  });
+
+  it('accepts the same null optional fields in the schema the inference client validates against', () => {
+    const toolSchema = fromJSONSchema(FINDINGS_JSON_SCHEMA as unknown as Record<string, unknown>);
+    const result = toolSchema?.safeParse({
+      summary: 's',
+      verdict: 'v',
+      severity: 'low',
+      hypotheses: [],
+      proposals: [
+        {
+          supersedes: null,
+          title: 'a',
+          comment: 'c',
+          impact: null,
+          confidence: null,
+          action_workflow_id: null,
+          action_input: null,
+        },
+      ],
+    });
+    expect(result?.success).toBe(true);
   });
 
   it('leaves the field out of the record when the model sent none', () => {
