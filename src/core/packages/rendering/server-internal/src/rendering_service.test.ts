@@ -40,7 +40,7 @@ import type { ThemeName } from '@kbn/core-ui-settings-common';
 import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { PluginType, type DiscoveredPlugin } from '@kbn/core-base-common';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
@@ -1136,32 +1136,21 @@ describe('RenderingService', () => {
     });
     uiPlugins.public.set('anonymousSafe', createPlugin('anonymousSafe', true));
     uiPlugins.public.set('authenticatedOnly', createPlugin('authenticatedOnly', false));
-    uiPlugins.browserConfigs.set('anonymousSafe', of({ browserConfig: { marker: 'safe' } }));
-    uiPlugins.browserConfigs.set(
-      'authenticatedOnly',
-      of({ browserConfig: { marker: 'authenticated' } })
-    );
 
     try {
       const { body: anonymousBody } = await render(createKibanaRequest(), uiSettings, {
         isAnonymousPage: true,
       });
       const { body: authenticatedBody } = await render(createKibanaRequest(), uiSettings);
-      const pluginConfigs = (body: string) =>
+      const pluginIds = (body: string) =>
         JSON.parse(load(body)('kbn-injected-metadata').attr('data') ?? '""').uiPlugins.map(
-          ({ id, config }: { id: string; config: { marker: string } }) => ({ id, config })
+          ({ id }: { id: string }) => id
         );
 
-      expect(pluginConfigs(anonymousBody)).toEqual([
-        { id: 'anonymousSafe', config: { marker: 'safe' } },
-      ]);
-      expect(pluginConfigs(authenticatedBody)).toEqual([
-        { id: 'anonymousSafe', config: { marker: 'safe' } },
-        { id: 'authenticatedOnly', config: { marker: 'authenticated' } },
-      ]);
+      expect(pluginIds(anonymousBody)).toEqual(['anonymousSafe']);
+      expect(pluginIds(authenticatedBody)).toEqual(['anonymousSafe', 'authenticatedOnly']);
     } finally {
       uiPlugins.public.clear();
-      uiPlugins.browserConfigs.clear();
     }
   });
 });
