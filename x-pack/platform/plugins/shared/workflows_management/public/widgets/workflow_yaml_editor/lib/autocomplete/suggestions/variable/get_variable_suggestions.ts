@@ -111,7 +111,11 @@ export function getVariableSuggestions(autocompleteContext: AutocompleteContext)
 
   for (const key of filteredKeys) {
     const keySchema = shape[key];
-    const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
+    // The description is shown after the type, so the type text leaves it out.
+    const propertyTypeName = getDetailedTypeDescription(keySchema, {
+      singleLine: true,
+      includeDescriptions: false,
+    });
 
     suggestions.push(
       wrapAsMonacoSuggestion(

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { closest, distance } from 'fastest-levenshtein';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { extractTemplateVariables } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
@@ -98,6 +99,17 @@ export const isSecretAllowedAtPath = ({
   const stepName = getStepNameOfInput(workflowDefinition, path);
   const stepNode = stepName === undefined ? undefined : workflowGraph.getStepNode(stepName);
   return stepNode?.type === 'atomic' && stepNode.stepType !== CONSOLE_STEP_TYPE;
+};
+
+// A typo changes few characters: a name further away than this is another secret.
+const MAX_TYPO_DISTANCE = 2;
+
+const getUnknownSecretMessage = (name: string, secretNames: ReadonlySet<string>): string => {
+  const message = `No secret named "${name}" exists in this space`;
+  const closestName = secretNames.size > 0 ? closest(name, [...secretNames]) : undefined;
+  return closestName !== undefined && distance(name, closestName) <= MAX_TYPO_DISTANCE
+    ? `${message}. Did you mean "${closestName}"?`
+    : message;
 };
 
 const getSecretNamesInText = (text: string): string[] => {
@@ -192,7 +204,7 @@ export const validateSecretReferences = ({
       return toResult(variableItem, {
         ruleId: 'unknownSecret',
         severity: 'warning',
-        message: `No secret named "${name}" exists in this space`,
+        message: getUnknownSecretMessage(name, secretNames),
       });
     }
     return [];

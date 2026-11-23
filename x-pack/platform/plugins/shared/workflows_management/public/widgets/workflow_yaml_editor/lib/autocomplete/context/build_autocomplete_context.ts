@@ -57,6 +57,19 @@ function buildCompletionInsertRange(
   };
 }
 
+// One string per secret, described by the description of the secret when it has one.
+const getSecretsSchema = (
+  secretDescriptions: ReadonlyMap<string, string | undefined>
+): z.ZodObject =>
+  z.object(
+    Object.fromEntries(
+      [...secretDescriptions].map(([name, description]) => [
+        name,
+        description ? z.string().describe(description) : z.string(),
+      ])
+    )
+  );
+
 function resolveContextSchemaForAutocomplete(
   registry: WorkflowContextRegistry,
   workflowDefinition: WorkflowYaml | null | undefined,
@@ -66,7 +79,7 @@ function resolveContextSchemaForAutocomplete(
   absoluteOffset: number,
   lineParseResult: LineParseResult | null,
   yamlSource: string,
-  secretNames: ReadonlySet<string> | undefined
+  secretDescriptions: ReadonlyMap<string, string | undefined> | undefined
 ): { contextSchema: z.ZodType; contextScopedToPath: string | null } {
   let contextSchema: z.ZodType = DynamicStepContextSchema;
   let contextScopedToPath: string | null = null;
@@ -83,12 +96,10 @@ function resolveContextSchemaForAutocomplete(
     );
     // Secrets are only suggested where they can be used, so that a suggestion is never an error.
     const canUseSecrets =
-      secretNames !== undefined &&
+      secretDescriptions !== undefined &&
       isSecretAllowedAtPath({ workflowDefinition, workflowGraph, path });
     contextSchema = canUseSecrets
-      ? pathSchema.extend({
-          secrets: z.object(Object.fromEntries([...secretNames].map((name) => [name, z.string()]))),
-        })
+      ? pathSchema.extend({ secrets: getSecretsSchema(secretDescriptions) })
       : pathSchema;
   }
 
@@ -124,8 +135,8 @@ export interface BuildAutocompleteContextParams {
   model: monaco.editor.ITextModel;
   position: monaco.Position;
   completionContext: monaco.languages.CompletionContext;
-  /** The names of the secrets of the space, when they could be listed. */
-  secretNames?: ReadonlySet<string>;
+  /** The description of each secret of the space, by name, when they could be listed. */
+  secretDescriptions?: ReadonlyMap<string, string | undefined>;
 }
 
 export function buildAutocompleteContext({
@@ -134,7 +145,7 @@ export function buildAutocompleteContext({
   model,
   position,
   completionContext,
-  secretNames,
+  secretDescriptions,
 }: BuildAutocompleteContextParams): AutocompleteContext | null {
   // derived from workflow state
   const currentDynamicConnectorTypes = editorState?.connectors?.connectorTypes;
@@ -179,7 +190,7 @@ export function buildAutocompleteContext({
     absoluteOffset,
     parseResult,
     yamlSource,
-    secretNames
+    secretDescriptions
   );
 
   // Check if we're actually inside a liquid block
