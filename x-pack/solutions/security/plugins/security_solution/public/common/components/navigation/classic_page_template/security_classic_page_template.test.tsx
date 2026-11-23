@@ -55,6 +55,12 @@ describe('SecurityClassicPageTemplate', () => {
     );
   });
 
+  it('should not add a main landmark when the host page renders its own', () => {
+    renderTemplate();
+
+    expect(screen.queryByRole('main')).not.toBeInTheDocument();
+  });
+
   it('should link to Security pages without the Security URL state when outside the Security app', () => {
     renderTemplate();
     const [{ getSecuritySolutionLinkProps }] = mockSideNavContent.mock.calls[0];

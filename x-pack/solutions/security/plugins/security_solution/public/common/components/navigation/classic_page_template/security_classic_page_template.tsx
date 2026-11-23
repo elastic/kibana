@@ -66,8 +66,14 @@ export const SecurityClassicPageTemplate: React.FC<SecurityClassicPageTemplatePr
     spaces,
   });
 
+  // The host app renders its own `main` landmark where it needs one, so the wrapper must not add another.
   return (
-    <SecurityKibanaPageTemplate paddingSize="none" restrictWidth={false} solutionNav={solutionNav}>
+    <SecurityKibanaPageTemplate
+      component="div"
+      paddingSize="none"
+      restrictWidth={false}
+      solutionNav={solutionNav}
+    >
       {children}
     </SecurityKibanaPageTemplate>
   );

@@ -51,5 +51,11 @@ test.describe('AlertZero in a Classic space', { tag: tags.stateful.classic }, ()
       await expect(page).toHaveURL(/\/app\/alertzero\/escalations/);
       await expect(escalationsNavLink).toBeVisible();
     });
+
+    await test.step('open a Security page from an AlertZero page', async () => {
+      await page.testSubj.locator('solutionSideNavItemLink-cases').click();
+      await expect(page).toHaveURL(/\/app\/security\/cases/);
+      await expect(alertZeroNavLink).toBeVisible();
+    });
   });
 });
