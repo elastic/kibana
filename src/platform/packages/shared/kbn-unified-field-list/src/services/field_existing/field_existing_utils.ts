@@ -68,8 +68,6 @@ export async function fetchFieldExistence({
     if (!previousField) {
       newFields.push(field);
     } else if (
-      // A runtime field (incl. one shadowing a mapped field) has its own type, not the mapped one
-      !previousField.runtimeField &&
       previousField.type !== field.type &&
       // A `conflict` field in the full field list can resolve to a concrete type in the
       // time-filtered subset of indices, which is not a mapping change

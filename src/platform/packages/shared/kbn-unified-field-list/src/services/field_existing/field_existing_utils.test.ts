@@ -213,27 +213,6 @@ describe('fetchFieldExistence', () => {
       ],
     },
     {
-      scenario: 'a runtime field shadows a mapped field of a different type',
-      shouldRefresh: false,
-      expectedNewFields: [],
-      existingFields: [
-        {
-          name: 'shadowed_field',
-          type: 'number',
-          isMapped: true,
-          runtimeField: { type: 'long' },
-        },
-      ],
-      returnedFields: [
-        {
-          name: 'shadowed_field',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
-    },
-    {
       scenario: 'new fields are detected',
       shouldRefresh: true,
       expectedNewFields: [{ name: 'new_field', type: 'long' }],
