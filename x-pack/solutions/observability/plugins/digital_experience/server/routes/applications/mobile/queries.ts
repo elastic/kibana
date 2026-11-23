@@ -7,7 +7,7 @@
 
 import { esql, type ComposerQuery } from '@elastic/esql';
 import { mobileDocuments } from '../../../../common/mobile/documents';
-import { inValues, mobileColumn, resultColumn } from '../../../../common/mobile/fields';
+import { mobileColumn, resultColumn } from '../../../../common/mobile/fields';
 import { kpiStats } from '../../../../common/mobile/kpis';
 import { withEnvironmentCounts, withLatestReleases } from '../../../lib/mobile/queries';
 import { MAX_APPLICATIONS_PER_SOURCE } from '../constants';
@@ -29,12 +29,11 @@ export const applicationsQuery = (): ComposerQuery =>
   )} ASC`.pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /**
- * The newest release of each of `serviceNames` on any platform over the window the query is run
- * with.
+ * The newest release of each application on any platform, over the window and the applications
+ * of the `filter` the query is run with.
  */
-export const latestReleasesQuery = (serviceNames: string[]): ComposerQuery =>
-  withLatestReleases(mobileDocuments().pipe`WHERE ${inValues('serviceName', serviceNames)}`)
-    .pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
+export const latestReleasesQuery = (): ComposerQuery =>
+  withLatestReleases(mobileDocuments()).pipe`LIMIT ${MAX_APPLICATIONS_PER_SOURCE}`;
 
 /** Every environment of the mobile applications, for the picker. */
 export const environmentsQuery = (): ComposerQuery => withEnvironmentCounts(mobileDocuments());

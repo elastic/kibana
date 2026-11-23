@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { SERVICE_NAME } from '@kbn/apm-types';
 import { withSpan } from '@kbn/apm-utils';
+import { termsQuery } from '@kbn/es-query';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { MOBILE_FIELDS, RESULT_COLUMNS } from '../../../../common/mobile/fields';
 import { runEsql, timeFilter } from '../../../lib/esql';
@@ -61,8 +63,15 @@ const searchMobileApplications = async ({
       ? await runEsql<LatestReleaseRow>(
           esClient,
           'get_mobile_latest_releases',
-          latestReleasesQuery(serviceNames),
-          timeFilter(Math.max(start, end - DAY_MS), end, environment)
+          latestReleasesQuery(),
+          {
+            bool: {
+              filter: [
+                timeFilter(Math.max(start, end - DAY_MS), end, environment),
+                ...termsQuery(SERVICE_NAME, serviceNames),
+              ],
+            },
+          }
         )
       : [];
   const latestByApplication = new Map(

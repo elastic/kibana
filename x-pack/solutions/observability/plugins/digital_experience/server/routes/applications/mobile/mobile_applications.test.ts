@@ -37,20 +37,17 @@ describe('applicationsQuery', () => {
 });
 
 describe('latestReleasesQuery', () => {
-  it('picks one release per listed application, any platform, the names escaped', () => {
-    const { query } = latestReleasesQuery(['shop-mobile', 'a"b']).toRequest();
+  it('picks one release per application, any platform, up to the applications cap', () => {
+    const { query } = latestReleasesQuery().toRequest();
 
-    expect(query).toContain('| WHERE `service.name` IN ("shop-mobile", "a\\"b")');
     expect(query).toMatch(/\| STATS numeric_release = [^|]+ BY `service.name`/);
+    expect(query).toMatch(/\| KEEP `service\.name`, latest_release \| LIMIT 1000$/);
   });
 
-  it('narrows to the listed applications before picking their releases', () => {
-    const { query } = latestReleasesQuery(['shop-mobile']).toRequest();
+  it('names no application, which the filter narrows to, so the query text never changes', () => {
+    const { query } = latestReleasesQuery().toRequest();
 
-    expect(query).toMatch(
-      /WHERE `service\.name` IN \("shop-mobile"\) \| WHERE `service\.version` IS NOT NULL/
-    );
-    expect(query).toMatch(/\| KEEP `service\.name`, latest_release \| LIMIT 1000$/);
+    expect(query).not.toContain('`service.name` IN');
   });
 });
 
@@ -173,22 +170,65 @@ describe('getMobileApplications', () => {
         errorRate: 1 / 3,
       }),
     ]);
-    // The latest release is of the listed applications, over the last 24 hours of the range.
+    // The latest release is of the listed applications, over the last 24 hours of the range, the
+    // names in the Query DSL filter rather than in the query text.
     const [[request]] = client.esql.query.mock.calls.slice(2);
-    expect(request.query).toContain('`service.name` IN ("trailmap-android")');
+    expect(request.query).not.toContain('trailmap-android');
     expect(request.filter).toEqual({
       bool: {
         filter: [
           {
-            range: {
-              '@timestamp': {
-                gte: range.end - 24 * 60 * 60 * 1000,
-                lt: range.end,
-                format: 'epoch_millis',
-              },
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: range.end - 24 * 60 * 60 * 1000,
+                      lt: range.end,
+                      format: 'epoch_millis',
+                    },
+                  },
+                },
+                expect.anything(),
+              ],
             },
           },
+          { terms: { 'service.name': ['trailmap-android'] } },
+        ],
+      },
+    });
+  });
+
+  it('sends the release query the same text whatever the applications, the names in its filter', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    const applicationRow = (serviceName: string) => ({
+      'service.name': serviceName,
+      sessions: 1,
+      users: 1,
+      exceptions: 0,
+      platforms: 'android',
+      last_seen: '2021-01-18T12:00:00.000Z',
+    });
+    const releaseQueryFor = async (serviceNames: string[]) => {
+      client.esql.query.mockReset();
+      client.esql.query
+        .mockResolvedValueOnce(esqlResponse(serviceNames.map(applicationRow)))
+        .mockResolvedValueOnce(esqlResponse([]))
+        .mockResolvedValueOnce(esqlResponse([]));
+      await getMobileApplications({ esClient, ...range });
+      const [[request]] = client.esql.query.mock.calls.slice(2);
+      return request;
+    };
+
+    const one = await releaseQueryFor(['shop-mobile']);
+    const many = await releaseQueryFor(['shop-mobile', 'a"b', 'x'.repeat(1024)]);
+
+    expect(many.query).toBe(one.query);
+    expect(many.filter).toEqual({
+      bool: {
+        filter: [
           expect.anything(),
+          { terms: { 'service.name': ['shop-mobile', 'a"b', 'x'.repeat(1024)] } },
         ],
       },
     });
