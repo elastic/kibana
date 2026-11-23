@@ -53,7 +53,7 @@ apiTest.describe('ui settings metadata', { tag: tags.deploymentAgnostic }, () =>
   });
 
   apiTest(
-    'returns the namespace definitions without saved values to a user without settings privileges',
+    'returns the namespace definitions without saved values to a read-only user',
     async ({ apiClient }) => {
       const response = await apiClient.get(`/s/${spaceId}${NAMESPACE_METADATA_PATH}`, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
@@ -73,7 +73,7 @@ apiTest.describe('ui settings metadata', { tag: tags.deploymentAgnostic }, () =>
   );
 
   apiTest(
-    'returns the global definitions without saved values to a user without settings privileges',
+    'returns the global definitions without saved values to a read-only user',
     async ({ apiClient }) => {
       const response = await apiClient.get(GLOBAL_METADATA_PATH, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
