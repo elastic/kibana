@@ -29,6 +29,9 @@ const buildLocator = () => ({ navigate: jest.fn(), getRedirectUrl: jest.fn() });
 const buildDashboardApi = (savedObjectId: string | undefined) => ({
   savedObjectId$: { getValue: () => savedObjectId },
   setState: jest.fn(),
+  setViewMode: jest.fn(),
+  isEditableByUser: true,
+  getAppContext: () => ({ currentAppId: 'dashboards' }),
   locator: buildLocator(),
 });
 

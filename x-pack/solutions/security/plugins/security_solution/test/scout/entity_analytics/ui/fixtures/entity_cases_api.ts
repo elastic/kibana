@@ -45,6 +45,8 @@ export interface EntityCasesApiFixture {
     entityType: string;
     caseOverrides?: Partial<CreateCaseParams>;
   }) => Promise<CreatedCase>;
+  /** Find a case this space created through the UI, matched on the exact title. */
+  findCaseByTitle: (title: string) => Promise<CreatedCase>;
 }
 
 /**
@@ -85,5 +87,14 @@ export const createEntityCasesApi = (cases: CasesApi, spaceId: string): EntityCa
       return created;
     };
 
-  return { createCase, createCaseWithEntityAttachment };
+  const findCaseByTitle: EntityCasesApiFixture['findCaseByTitle'] = async (title) => {
+    const { data } = await cases.find({ search: title, searchFields: ['title'] }, spaceId);
+    const match = data.find((item) => item.title === title);
+    if (!match) {
+      throw new Error(`Case titled "${title}" was not found`);
+    }
+    return match;
+  };
+
+  return { createCase, createCaseWithEntityAttachment, findCaseByTitle };
 };

@@ -33,6 +33,17 @@ const RuleDetailsRouteWrapper = lazy(
 const RulesPage = lazy(() => import('./sections/rules_page/rules_page_container'));
 const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'));
 
+/*
+ * Route components are module-scoped so their identity is stable across renders; a new
+ * component type on <Route component> unmounts and remounts the whole matched page.
+ */
+const SuspendedCreateRuleFromTemplateRoute = suspendedComponentWithProps(RuleFormRoute, 'xl');
+const SuspendedCreateRuleRoute = suspendedComponentWithProps(RuleFormRoute, 'xl');
+const SuspendedEditRuleRoute = suspendedComponentWithProps(RuleFormRoute, 'xl');
+const SuspendedRuleLogsRoute = suspendedComponentWithProps(RulesPage, 'xl');
+const SuspendedRuleDetailsRoute = suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl');
+const SuspendedRulesListRoute = suspendedComponentWithProps(RulesPage, 'xl');
+
 export const renderRulesPageApp = (deps: TriggersAndActionsUiServices) => {
   const { element } = deps;
   render(<RulesPageApp deps={deps} />, element);
@@ -81,28 +92,13 @@ const AppWithoutRouter = () => {
           <Route
             exact
             path={createRuleFromTemplateRoute}
-            component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
+            component={SuspendedCreateRuleFromTemplateRoute}
           />
-          <Route
-            exact
-            path={createRuleRoute}
-            component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
-          />
-          <Route
-            exact
-            path={editRuleRoute}
-            component={suspendedComponentWithProps(RuleFormRoute, 'xl')}
-          />
-          <Route
-            exact
-            path={ruleLogsRoute}
-            component={suspendedComponentWithProps(RulesPage, 'xl')}
-          />
-          <Route
-            path={rulesAppDetailsRoute}
-            component={suspendedComponentWithProps(RuleDetailsRouteWrapper, 'xl')}
-          />
-          <Route path="/" component={suspendedComponentWithProps(RulesPage, 'xl')} />
+          <Route exact path={createRuleRoute} component={SuspendedCreateRuleRoute} />
+          <Route exact path={editRuleRoute} component={SuspendedEditRuleRoute} />
+          <Route exact path={ruleLogsRoute} component={SuspendedRuleLogsRoute} />
+          <Route path={rulesAppDetailsRoute} component={SuspendedRuleDetailsRoute} />
+          <Route path="/" component={SuspendedRulesListRoute} />
         </Routes>
       </PerformanceContextProvider>
     </ConnectorProvider>

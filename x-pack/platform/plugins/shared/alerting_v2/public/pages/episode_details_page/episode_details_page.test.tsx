@@ -268,6 +268,7 @@ beforeEach(() => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -276,6 +277,7 @@ beforeEach(() => {
       order: 40,
       displayName: 'Edit tags',
       iconType: 'tag',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     },
@@ -530,6 +532,7 @@ describe('EpisodeDetailsPage', () => {
         order: 10,
         displayName: 'Acknowledge',
         iconType: 'checkCircle',
+        enforcesOwnPrivileges: false,
         isCompatible: () => true,
         execute,
       },
@@ -555,6 +558,7 @@ describe('EpisodeDetailsPage', () => {
       order: 10,
       displayName: 'Acknowledge',
       iconType: 'checkCircle',
+      enforcesOwnPrivileges: false,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };
@@ -576,6 +580,9 @@ describe('EpisodeDetailsPage', () => {
 
       await openAppMenuOverflow();
 
+      expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+        expect.objectContaining({ canWriteNativeEpisodes: true })
+      );
       expect(
         await screen.findByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
       ).toBeInTheDocument();
@@ -584,9 +591,9 @@ describe('EpisodeDetailsPage', () => {
       ).toBeInTheDocument();
     });
 
-    it('hides mutating actions and keeps Open in Discover when the user only has read privilege', async () => {
+    it('builds the actions without write privilege when the user only has read privilege', async () => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
-      mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+      mockCreateEpisodeActions.mockReturnValue([discoverAction]);
 
       renderPage();
 
@@ -595,9 +602,9 @@ describe('EpisodeDetailsPage', () => {
           `episodeActionsBar-primaryAction-${OPEN_IN_DISCOVER_EPISODE_ACTION_ID}`
         )
       ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('episodeActionsBar-primary-ALERTING_V2_ACK_EPISODE')
-      ).not.toBeInTheDocument();
+      expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+        expect.objectContaining({ canWriteNativeEpisodes: false })
+      );
     });
   });
 

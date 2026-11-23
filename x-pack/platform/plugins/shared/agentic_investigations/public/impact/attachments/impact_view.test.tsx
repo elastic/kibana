@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { ImpactEntityTarget } from '@kbn/agentic-investigations-common';
 import type { Impact } from '../../../common/impact/impact';
 import type { InvestigationAttachmentVariant } from '../../investigation_attachments';
-import { ImpactView } from './impact_view';
+import { ImpactDetailsView, ImpactView } from './impact_view';
 
 jest.mock('../../evidence/evidence_chart', () => ({
   EvidenceChart: ({ chart }: { chart: { title: string } }) => (
@@ -275,6 +275,51 @@ describe('ImpactView', () => {
 
   it('says so when nothing has been recorded', () => {
     renderView({ ...base, entities: [] });
+
+    expect(screen.getByTestId('investigationImpactEmpty')).toBeInTheDocument();
+  });
+});
+
+describe('ImpactDetailsView', () => {
+  const renderDetails = (documents: Impact[]) =>
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <ImpactDetailsView documents={documents} />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+  it('merges the entities of several documents into one list, deduped by id', () => {
+    renderDetails([
+      { ...base, id: 'impact-1', summary: 'First', entities: [{ id: 'host-1' }, { id: 'user-1' }] },
+      {
+        ...base,
+        id: 'impact-2',
+        summary: 'Second',
+        entities: [{ id: 'host-1', name: 'web-01', type: 'host' }, { id: 'svc-1' }],
+      },
+    ]);
+
+    expect(screen.getAllByTestId('investigationImpactEntities')).toHaveLength(1);
+    expect(screen.getAllByTestId('investigationImpactEntityRow')).toHaveLength(3);
+    // The later document fills in the name the first one omitted.
+    expect(screen.getByText('web-01')).toBeInTheDocument();
+    expect(screen.queryByText('host-1')).not.toBeInTheDocument();
+  });
+
+  it('keeps every document summary above the single list', () => {
+    renderDetails([
+      { ...base, id: 'impact-1', summary: 'First summary', entities: [{ id: 'a' }] },
+      { ...base, id: 'impact-2', summary: 'Second summary', entities: [{ id: 'b' }] },
+    ]);
+
+    expect(screen.getByText('First summary')).toBeInTheDocument();
+    expect(screen.getByText('Second summary')).toBeInTheDocument();
+  });
+
+  it('says so when no document recorded anything', () => {
+    renderDetails([base, { ...base, id: 'impact-2' }]);
 
     expect(screen.getByTestId('investigationImpactEmpty')).toBeInTheDocument();
   });

@@ -426,7 +426,12 @@ describe('WaitForInputStepImpl', () => {
       });
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { otherKey: 'preserved', resumeInput: null, pendingInteractiveResume: false },
+        context: {
+          otherKey: 'preserved',
+          resumeInput: null,
+          pendingInteractiveResume: false,
+          resumeInputTakenFor: null,
+        },
       });
     });
 

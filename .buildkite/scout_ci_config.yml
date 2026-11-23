@@ -66,6 +66,7 @@ plugins:
     - lens
     - license_management
     - links
+    - logs_shared
     - logstash
     - maintenance_windows
     - management
@@ -120,13 +121,13 @@ plugins:
     - vegaSandboxExample
     - vis_types/timeseries
     - vis_types/vega
+    - visualizations
     - watcher
     - workflows_extensions
     - workflows_management
     - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:

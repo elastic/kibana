@@ -95,8 +95,21 @@ from chat: say so and point the analyst to the Response Actions UI.
   (and \`reason: ambiguous_hostname\` when several endpoints share the name);
   \`error: invalid_argument\` means the request itself was out of range (narrow
   filters instead of paging further), while \`error: insufficient_privileges\`
-  and \`error: unknown_error\` mean the lookup itself could not run. Details in
-  \`./reference\`.`;
+  and \`error: unknown_error\` mean the lookup itself could not run, and
+  \`error: license_tier_required\` means the deployment's license tier does not
+  include the capability — report the \`requiredLicenseTier\` it returns, do not
+  suggest a role grant or the Security UI (the same limit applies there), and
+  do not re-offer that action this conversation. \`error: license_unavailable\`
+  means the license itself expired or could not be read — tell the analyst to
+  renew or restore it, not to change tier, and do not re-offer the action until
+  it is restored. \`error: product_feature_disabled\` means the deployment's
+  product configuration excludes response actions entirely — report that as a
+  property of the project (serverless: requires the Endpoint Complete tier),
+  do not suggest a role grant, a license upgrade, or the Security UI, and do
+  not re-offer that action this conversation. License tier or product tier can
+  also make a write unavailable before you call it, so do not promise isolate,
+  scan, or running-processes will succeed until the tool result confirms.
+  Details in \`./reference\`.`;
 
 export const createEndpointResponseActionsSkill = (
   endpointAppContextService: EndpointAppContextService

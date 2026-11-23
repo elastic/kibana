@@ -430,7 +430,25 @@ describe('WorkflowManagementAuditLog', () => {
         error: err,
       });
       expect(l2.mock.calls[0][0].event.outcome).toBe('failure');
+      expect(l2.mock.calls[0][0].message).not.toContain('[claimReleased=');
     });
+
+    it.each([true, false])(
+      'logExecutionResumed reports claimReleased=%s on failure',
+      async (claimReleased) => {
+        const { audit, request, log } = await createAuditHarness();
+        audit.logExecutionResumed(request, {
+          executionId: 'r-1',
+          channel: 'inbox',
+          error: err,
+          claimReleased,
+        });
+        expect(log.mock.calls[0][0].event.outcome).toBe('failure');
+        expect(log.mock.calls[0][0].message).toContain(
+          `[channel=inbox] [claimReleased=${claimReleased}]`
+        );
+      }
+    );
 
     it('logHitlWaiting and logHitlTimedOut use System actor without a request', async () => {
       const { audit, systemLog } = await createAuditHarness();

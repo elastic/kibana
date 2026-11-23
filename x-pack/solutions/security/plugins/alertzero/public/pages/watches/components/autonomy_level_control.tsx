@@ -80,69 +80,96 @@ function LevelCardBody({ card }: { card: AutonomyLevelCard }) {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
   const factLabelFont = euiFontSize(euiThemeContext, 'xs');
+  const hasFactLabels = card.facts.some((fact) => fact.label);
   return (
     <div>
-      <EuiText size="xs" color="subdued">
-        <p
-          data-test-subj="alertZeroAutonomyCardWho"
+      {card.who ? (
+        <>
+          <EuiText size="xs" color="subdued">
+            <p
+              data-test-subj="alertZeroAutonomyCardWho"
+              css={css`
+                margin: 0;
+              `}
+            >
+              {card.who}
+            </p>
+          </EuiText>
+          <EuiHorizontalRule
+            margin="none"
+            data-test-subj="alertZeroAutonomyCardDivider"
+            css={css`
+              margin-block: 10px;
+            `}
+          />
+        </>
+      ) : null}
+      {/* Rows without labels are full sentences that start with who acts, so they stack. */}
+      {!hasFactLabels ? (
+        <ul
           css={css`
+            list-style: none;
             margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            color: ${euiTheme.colors.textSubdued};
           `}
         >
-          {card.who}
-        </p>
-      </EuiText>
-      <EuiHorizontalRule
-        margin="none"
-        data-test-subj="alertZeroAutonomyCardDivider"
-        css={css`
-          margin-block: 10px;
-        `}
-      />
+          {card.facts.map((fact) => (
+            <li key={fact.value} data-test-subj="alertZeroAutonomyCardFact">
+              <FactParts parts={factValueParts(fact.value)} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {/*
         Label-left / value-right, on the same `SettingRow` grid the rest of the Worker's settings
         use, so a card's facts line up with the rows above and below it instead of stacking.
       */}
-      <dl
-        css={css`
-          display: grid;
-          grid-template-columns: max-content minmax(0, 1fr);
-          column-gap: ${FACT_LABEL_GAP_PX}px;
-          row-gap: 8px;
-          align-items: baseline;
-          margin: 0;
-        `}
-      >
-        {card.facts.map((fact) => (
-          <div
-            key={fact.label}
-            data-test-subj="alertZeroAutonomyCardFact"
-            css={css`
-              display: contents;
-            `}
-          >
-            <dt
+      {hasFactLabels ? (
+        <dl
+          css={css`
+            display: grid;
+            grid-template-columns: max-content minmax(0, 1fr);
+            column-gap: ${FACT_LABEL_GAP_PX}px;
+            row-gap: 8px;
+            align-items: baseline;
+            margin: 0;
+          `}
+        >
+          {card.facts.map((fact) => (
+            <div
+              key={fact.label ?? fact.value}
+              data-test-subj="alertZeroAutonomyCardFact"
               css={css`
-                margin: 0;
-                font-size: ${factLabelFont.fontSize};
-                line-height: ${factLabelFont.lineHeight};
-                font-weight: ${euiTheme.font.weight.semiBold};
+                display: contents;
               `}
             >
-              {fact.label}
-            </dt>
-            <dd
-              css={css`
-                margin: 0;
-                min-width: 0;
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              <FactParts parts={factValueParts(fact.value)} />
-            </dd>
-          </div>
-        ))}
-      </dl>
+              <dt
+                css={css`
+                  margin: 0;
+                  font-size: ${factLabelFont.fontSize};
+                  line-height: ${factLabelFont.lineHeight};
+                  font-weight: ${euiTheme.font.weight.semiBold};
+                `}
+              >
+                {fact.label}
+              </dt>
+              <dd
+                css={css`
+                  margin: 0;
+                  min-width: 0;
+                  color: ${euiTheme.colors.textSubdued};
+                `}
+              >
+                <FactParts parts={factValueParts(fact.value)} />
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
     </div>
   );
 }
@@ -228,7 +255,9 @@ export const AutonomyLevelControl: React.FC<AutonomyLevelControlProps> = ({
     levels.length > 1 &&
     selectedLevel === levels[levels.length - 1] &&
     selectedLevel === 'supervised';
-  const warn = isHighest ? supervisedWarnForWorker(workerNameForCards(workerId)) : null;
+  const warn = isHighest
+    ? cards.supervisedWarning ?? supervisedWarnForWorker(workerNameForCards(workerId))
+    : null;
 
   return (
     <div data-test-subj="alertZeroAutonomyLevelControl">

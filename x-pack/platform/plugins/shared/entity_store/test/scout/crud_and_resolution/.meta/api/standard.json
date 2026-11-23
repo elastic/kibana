@@ -1,5 +1,5 @@
 {
-  "sha1": "8550672434e233246b38018574d66b9dda482b50",
+  "sha1": "c182d03ac5063d7df61986ade71aa13826ce3db7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -427,7 +427,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 996,
+        "line": 999,
         "column": 17
       }
     },
@@ -443,7 +443,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 1032,
+        "line": 1035,
         "column": 21
       }
     },
@@ -459,7 +459,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/crud_and_resolution/api/tests/automated_resolution.spec.ts",
-        "line": 1073,
+        "line": 1076,
         "column": 10
       }
     },

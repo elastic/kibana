@@ -39,6 +39,7 @@ export interface Alert {
   alert_status: AlertEpisodeStatus;
   severity?: AlertEventSeverity;
   data?: AlertData;
+  alert_url: string;
 }
 
 /** Suppression fact read from `.alert-actions`; a null `alert_id` means series-scoped. */

@@ -196,16 +196,21 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const additionalFilters = useMemo(() => {
     try {
       return [
-        buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
-          ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
-          ...(defaultFilters ?? []),
-          ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
-        ]),
+        buildEsQuery(
+          undefined,
+          globalQuery != null ? [globalQuery] : [],
+          [
+            ...(globalFilters?.filter((f) => f.meta.disabled === false) ?? []),
+            ...(defaultFilters ?? []),
+            ...(parentGroupingFilter ? JSON.parse(parentGroupingFilter) : []),
+          ],
+          getEsQueryConfig(uiSettings)
+        ),
       ];
     } catch (e) {
       return [];
     }
-  }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter]);
+  }, [defaultFilters, globalFilters, globalQuery, parentGroupingFilter, uiSettings]);
 
   // create a unique, but stable (across re-renders) value
   const uniqueValue = useMemo(() => `SuperUniqueValue-${uuidv4()}`, []);

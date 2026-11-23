@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { GlobalDataTag } from '../../../common/types';
 
 import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
-import { isValidNamespace } from '../../../common/services';
+import { getDeniedAgentPolicyOverrideKey, isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
 import { ProxyHeadersSchema } from '../rest_spec/fleet_proxies';
@@ -54,6 +54,44 @@ function validateCPU(s: string) {
     return 'Invalid CPU format';
   }
 }
+
+/**
+ * `overrides` as accepted from REST API requests: rejects the denied keys, including dotted paths
+ * below them. Not used for `xpack.fleet.agentPolicies` in kibana.yml, where rejecting them would
+ * stop Kibana from starting after an upgrade.
+ *
+ * Not part of `AgentPolicyBaseSchema` on purpose: that object feeds the frozen SO model-version
+ * schemas (create and forward compatibility) and the response schemas. Policies saved before this
+ * check may still hold denied keys, and rejecting them there would break copying them, the space
+ * awareness migration and reading them. Stored denied keys are stripped when the full agent policy
+ * is built instead.
+ */
+export const AgentPolicyOverridesRequestSchema = schema.maybe(
+  schema.oneOf([
+    schema.literal(null),
+    schema.recordOf(
+      schema.querySortField.warn({ label: 'fleet.agent_policies.overrides.key' }),
+      schema.any(),
+      {
+        validate: (val) => {
+          if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
+            return 'inputs overrides is not allowed';
+          }
+          for (const key of Object.keys(val)) {
+            const denied = getDeniedAgentPolicyOverrideKey(key);
+            if (denied) {
+              return `${denied} overrides is not allowed`;
+            }
+          }
+        },
+        meta: {
+          description:
+            'Override settings that are defined in the agent policy. Input, output permissions and OpenTelemetry collector settings (receivers, exporters, processors, connectors, extensions, service) cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.',
+        },
+      }
+    ),
+  ])
+);
 
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
@@ -117,6 +155,9 @@ export const AgentPolicyBaseSchema = {
     )
   ),
   is_protected: schema.maybe(schema.boolean()),
+  // Keep this permissive: it also feeds the frozen SO model-version schemas and the response
+  // schemas, and policies saved before the OpenTelemetry keys were denied may still hold them.
+  // Requests are validated with `AgentPolicyOverridesRequestSchema` instead.
   overrides: schema.maybe(
     schema.oneOf([
       schema.literal(null),
@@ -421,6 +462,8 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
       ])
     ),
     force: schema.maybe(schema.boolean()),
+    // REST-only: see AgentPolicyOverridesRequestSchema.
+    overrides: AgentPolicyOverridesRequestSchema,
   },
   { meta: { id: 'new_agent_policy' } }
 );
@@ -697,6 +740,11 @@ export const FullAgentPolicyResponseSchema = schema.object(
           secrets: schema.maybe(BaseSecretsSchema),
           timeout: schema.maybe(schema.string()),
           target_directory: schema.maybe(schema.string()),
+          reserve_diskspace: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
           proxy_url: schema.maybe(schema.string()),
           proxy_headers: schema.maybe(ProxyHeadersSchema),
         }),

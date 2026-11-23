@@ -36,7 +36,7 @@ import { BreadcrumbProvider } from './breadcrumb_context';
 import { LocatorProvider } from './locator_context';
 import { TabsProvider } from './tabs_context';
 import { bindLocatorsToHost, getAlertingV2Locators } from './bind_locators_to_host';
-import type { AlertingV2HostApp } from '../locators';
+import type { AlertingV2HostApp } from '../../common/locators';
 import type { AlertsKibanaServices } from '../alerts_kibana_services';
 import { PrivilegeCheckProvider, type PrivilegeCheck } from './privilege_check_context';
 import { ManageRulesHrefProvider } from './manage_rules_href_context';

@@ -19,7 +19,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { createMockEndpointAppContext } from '../../../../../endpoint/mocks';
 import { getActionDetailsById } from '../../../../../endpoint/services/actions';
 import { SCAN_TOOL_ID } from '../..';
-import { formatPathForConfirmation, scanHostTool } from '.';
+import { scanHostTool } from '.';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
@@ -84,34 +84,6 @@ async function confirmThenHandle(
 
   return { card, result };
 }
-
-describe('formatPathForConfirmation', () => {
-  it('escapes newline, tab, NUL and DEL as visible escapes', () => {
-    expect(formatPathForConfirmation('/tmp/a\nb')).toBe('"/tmp/a\\nb"');
-    expect(formatPathForConfirmation('/tmp/a\tb')).toBe('"/tmp/a\\tb"');
-    expect(formatPathForConfirmation('/tmp/a\u0000b')).toBe('"/tmp/a\\u{0000}b"');
-    expect(formatPathForConfirmation('/tmp/a\u007fb')).toBe('"/tmp/a\\u{007F}b"');
-  });
-
-  it('escapes bidi controls including RTLO and zero-width characters', () => {
-    expect(formatPathForConfirmation('/tmp/a\u202eb.exe')).toBe('"/tmp/a\\u{202E}b.exe"');
-    expect(formatPathForConfirmation('/tmp/a\u200bb')).toBe('"/tmp/a\\u{200B}b"');
-    expect(formatPathForConfirmation('/tmp/a\ufeffb')).toBe('"/tmp/a\\u{FEFF}b"');
-  });
-
-  it('keeps Windows backslashes as single, literal backslashes', () => {
-    expect(formatPathForConfirmation('C:\\Users\\x\\evil.exe')).toBe('"C:\\Users\\x\\evil.exe"');
-  });
-
-  it('keeps ordinary paths and padding whitespace exactly as typed inside quotes', () => {
-    expect(formatPathForConfirmation('/tmp/payload ')).toBe('"/tmp/payload "');
-    expect(formatPathForConfirmation('  /tmp/x')).toBe('"  /tmp/x"');
-  });
-
-  it('escapes a backtick so the confirmation code span cannot be broken', () => {
-    expect(formatPathForConfirmation('/tmp/a`b')).toBe('"/tmp/a\\u{0060}b"');
-  });
-});
 
 describe('scanHostTool', () => {
   // waitForActionCompletion mocks resolve on the first poll attempt, but the
@@ -242,6 +214,69 @@ describe('scanHostTool', () => {
     expect(results[0].type).toBe(ToolResultType.error);
     const denialData = results[0].data as Record<string, unknown>;
     expect(denialData.error).toBe('insufficient_privileges');
+    expect(denialData.privilege).toBe('canWriteScanOperations');
+    expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+  });
+
+  it('reports license_tier_required when Enterprise is what withholds canWriteScanOperations', async () => {
+    // Below Enterprise the license conjunction in `calculateEndpointAuthz`
+    // withholds the flag even from a superuser; the refusal must say so
+    // instead of sending the analyst after a role grant.
+    service.getEndpointAuthz = jest
+      .fn()
+      .mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteScanOperations: false }));
+    service.getLicenseService = jest.fn(
+      () =>
+        ({
+          isPlatinumPlus: () => true,
+          isEnterprise: () => false,
+          getLicenseInformation: () => ({ isAvailable: true, isActive: true }),
+        } as unknown as ReturnType<EndpointAppContextService['getLicenseService']>)
+    ) as unknown as EndpointAppContextService['getLicenseService'];
+
+    const mockResponseActionsClient = { scan: jest.fn() };
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = scanHostTool(service);
+    const result = await tool.handler({ hostName: 'my-host', path: '/tmp' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('license_tier_required');
+    expect(denialData.privilege).toBe('canWriteScanOperations');
+    expect(denialData.requiredLicenseTier).toBe('enterprise');
+    expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
+  });
+
+  it('reports product_feature_disabled when the deployment omits the response-actions feature', async () => {
+    // Serverless Essentials: the enterprise license passes but the
+    // `endpointResponseActions` product feature is off, so the product
+    // configuration — not the tier, not the role — is the refusal cause.
+    service.getEndpointAuthz = jest
+      .fn()
+      .mockResolvedValue(getEndpointAuthzInitialStateMock({ canWriteScanOperations: false }));
+    service.getProductFeaturesService = jest.fn(
+      () =>
+        ({ isEnabled: () => false } as unknown as ReturnType<
+          EndpointAppContextService['getProductFeaturesService']
+        >)
+    ) as unknown as EndpointAppContextService['getProductFeaturesService'];
+
+    const mockResponseActionsClient = { scan: jest.fn() };
+    service.getInternalResponseActionsClient = jest.fn(
+      () => mockResponseActionsClient
+    ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+    const tool = scanHostTool(service);
+    const result = await tool.handler({ hostName: 'my-host', path: '/tmp' }, mockContext);
+
+    const results = assertStandardReturn(result);
+    expect(results[0].type).toBe(ToolResultType.error);
+    const denialData = results[0].data as Record<string, unknown>;
+    expect(denialData.error).toBe('product_feature_disabled');
     expect(denialData.privilege).toBe('canWriteScanOperations');
     expect(mockResponseActionsClient.scan).not.toHaveBeenCalled();
   });

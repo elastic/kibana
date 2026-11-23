@@ -125,6 +125,36 @@ steps:
       message: "scout"
 `;
 
+/**
+ * Workflow YAML whose single step POSTs `{ marker }` to `path` through the `.http`
+ * connector `connectorId`, so a spec can prove the connector resolved and ran.
+ */
+export const buildHttpConnectorWorkflowYaml = ({
+  name,
+  connectorId,
+  path,
+  marker,
+}: {
+  name: string;
+  connectorId: string;
+  path: string;
+  marker: string;
+}): string => `name: ${JSON.stringify(name)}
+enabled: true
+description: Scout action policy destination using a connector
+triggers:
+  - type: manual
+steps:
+  - name: notify
+    type: http
+    connector-id: ${JSON.stringify(connectorId)}
+    with:
+      method: POST
+      path: ${JSON.stringify(path)}
+      body:
+        marker: ${JSON.stringify(marker)}
+`;
+
 export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     type: 'workflow' as const,

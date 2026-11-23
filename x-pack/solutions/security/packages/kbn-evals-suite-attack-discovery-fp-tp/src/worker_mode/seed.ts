@@ -31,7 +31,12 @@ import {
   anonymizationFieldsIndexForSpace,
   UI_SETTINGS_ROUTE,
 } from './constants';
-import { workerModeCleanupTargets, type WorkerModeSeedPlan } from './plan';
+import {
+  hostUserFromAlerts,
+  workerModeCleanupTargets,
+  type WorkerModeHostUser,
+  type WorkerModeSeedPlan,
+} from './plan';
 
 const PREVIOUS_SEED_PAGE_SIZE = 10_000;
 const DETECTION_ENGINE_API_VERSION = '2023-10-31';
@@ -345,7 +350,38 @@ export const cleanupWorkerModeSpace = async ({
   return { alerts: previous.hits.hits.length, hostIds };
 };
 
-/** Deletes exactly what `plan` wrote. */
+/**
+ * Host and user of the seed already in `space`. `--append` builds the next sets
+ * onto it. Throws when the space has no seed, or when its alerts do not share one
+ * host and one user.
+ */
+export const readWorkerModeHostUser = async ({
+  esClient,
+  space,
+}: {
+  esClient: EsClient;
+  space: string;
+}): Promise<WorkerModeHostUser> => {
+  const targets = workerModeCleanupTargets(space);
+  const previous = await esClient.search<Record<string, unknown>>({
+    index: targets.alertsIndex,
+    ignore_unavailable: true,
+    size: PREVIOUS_SEED_PAGE_SIZE,
+    _source: ['host.id', 'host.name', 'user.name'],
+    query: targets.seededAlertsQuery,
+  });
+  const alerts = previous.hits.hits.flatMap(({ _source: source }) =>
+    source === undefined ? [] : [{ source }]
+  );
+  if (alerts.length === 0) {
+    throw new Error(
+      '--append needs an existing seed in this space. Seed once without --append first.'
+    );
+  }
+  return hostUserFromAlerts(alerts);
+};
+
+/** Deletes exactly what `plan` wrote. A set that shares its host leaves that host's entities. */
 export const cleanupWorkerModePlan = async ({
   esClient,
   kbnRequest,
@@ -359,6 +395,9 @@ export const cleanupWorkerModePlan = async ({
     ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
     ...plan.events,
   ]);
+  if (plan.sharesHostUser) {
+    return;
+  }
   for (const entity of plan.entities) {
     await deleteEntity(kbnRequest, entity.entityId);
   }

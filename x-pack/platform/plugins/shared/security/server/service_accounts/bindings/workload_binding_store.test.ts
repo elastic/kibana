@@ -8,6 +8,8 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { KueryNode } from '@kbn/es-query';
+import { toKqlExpression } from '@kbn/es-query';
 import type { MockedLogger } from '@kbn/logging-mocks';
 
 import type { WorkloadBindingAttributes } from './binding_saved_object';
@@ -86,13 +88,18 @@ describe('WorkloadBindingStore', () => {
       const written = attributes();
       const binding = await store.set(written);
 
-      expect(client.create).toHaveBeenCalledWith(SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE, written, {
-        id: getWorkloadBindingId(COORDINATES),
-        // The binding lives in the workload's space, which is what retires it with that space.
-        namespace: 'default',
-        overwrite: true,
-        refresh: 'wait_for',
-      });
+      expect(client.create).toHaveBeenCalledWith(
+        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        // The binding key is the saved object ID, so the cleanup can page in a stable order.
+        { ...written, bindingKey: getWorkloadBindingId(COORDINATES) },
+        {
+          id: getWorkloadBindingId(COORDINATES),
+          // The binding lives in the workload's space, which is what retires it with that space.
+          namespace: 'default',
+          overwrite: true,
+          refresh: 'wait_for',
+        }
+      );
       // Never `update`: a partial write would not re-derive the canary's authentication.
       expect(client.update).not.toHaveBeenCalled();
 
@@ -341,6 +348,162 @@ describe('WorkloadBindingStore', () => {
     });
   });
 
+  describe('#findPageForSweep', () => {
+    const findResponse = (objects: Array<Partial<WorkloadBindingAttributes>>) => ({
+      saved_objects: objects.map((overrides) => ({
+        id: 'id',
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        references: [],
+        score: 0,
+        attributes: attributes(overrides),
+      })),
+      total: objects.length,
+      page: 1,
+      per_page: objects.length,
+    });
+    const filterOf = () => toKqlExpression(client.find.mock.calls[0][0].filter as KueryNode);
+
+    it('reads keyed bindings made before the cutoff, in binding key order, across all spaces', async () => {
+      client.find.mockResolvedValue(findResponse([{ bindingKey: 'a' }, { bindingKey: 'b' }]));
+
+      const { bindings, nextAfterKey } = await store.findPageForSweep({
+        cutoff: '2026-10-25T00:00:00.000Z',
+        size: 100,
+      });
+
+      expect(bindings).toEqual([
+        expect.objectContaining(COORDINATES),
+        expect.objectContaining(COORDINATES),
+      ]);
+      expect(nextAfterKey).toBe('b');
+      // Neither the canary nor the key leaves the store on a binding.
+      expect(bindings[0]).not.toHaveProperty('canary');
+      expect(bindings[0]).not.toHaveProperty('bindingKey');
+      expect(client.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          perPage: 100,
+          namespaces: ['*'],
+          sortField: 'bindingKey',
+          sortOrder: 'asc',
+        })
+      );
+      expect(filterOf()).toBe(
+        '(service-account-workload-binding.attributes.boundAt < 2026-10-25T00\\:00\\:00.000Z AND service-account-workload-binding.attributes.bindingKey: *)'
+      );
+    });
+
+    it('starts after the given binding key', async () => {
+      client.find.mockResolvedValue(findResponse([]));
+
+      await expect(
+        store.findPageForSweep({
+          cutoff: '2026-10-25T00:00:00.000Z',
+          afterKey: 'abc',
+          size: 10,
+        })
+      ).resolves.toEqual({ bindings: [], nextAfterKey: undefined });
+
+      expect(filterOf()).toContain('service-account-workload-binding.attributes.bindingKey > abc');
+    });
+  });
+
+  describe('#findUnkeyedPage', () => {
+    it('reads bindings made before the cutoff that have no binding key', async () => {
+      client.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await expect(
+        store.findUnkeyedPage({ cutoff: '2026-10-25T00:00:00.000Z', size: 100 })
+      ).resolves.toEqual([]);
+
+      expect(client.find).toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 100, namespaces: ['*'], sortField: 'boundAt' })
+      );
+      expect(toKqlExpression(client.find.mock.calls[0][0].filter as KueryNode)).toBe(
+        '(service-account-workload-binding.attributes.boundAt < 2026-10-25T00\\:00\\:00.000Z AND NOT service-account-workload-binding.attributes.bindingKey: *)'
+      );
+    });
+  });
+
+  describe('#setBindingKey', () => {
+    it('writes only the binding key, in the binding’s own space', async () => {
+      await expect(store.setBindingKey(COORDINATES)).resolves.toBe(true);
+
+      expect(client.update).toHaveBeenCalledWith(
+        SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        getWorkloadBindingId(COORDINATES),
+        // Nothing encrypted or authenticated, so the canary still verifies afterwards.
+        { bindingKey: getWorkloadBindingId(COORDINATES) },
+        { namespace: 'default' }
+      );
+    });
+
+    it('resolves false when the binding is gone', async () => {
+      client.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          'id'
+        )
+      );
+
+      await expect(store.setBindingKey(COORDINATES)).resolves.toBe(false);
+    });
+
+    it('propagates other failures', async () => {
+      client.update.mockRejectedValue(new Error('unavailable'));
+
+      await expect(store.setBindingKey(COORDINATES)).rejects.toThrow('unavailable');
+    });
+  });
+
+  describe('#verifyUnchanged', () => {
+    const expected = {
+      serviceAccountId: 'service-account-id',
+      boundAt: '2026-08-21T00:00:00.000Z',
+    };
+    const stored = (overrides: Partial<WorkloadBindingAttributes> = {}) =>
+      encryptedClient.getDecryptedAsInternalUser.mockResolvedValue({
+        id: getWorkloadBindingId(COORDINATES),
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        references: [],
+        attributes: attributes(overrides),
+      });
+
+    it('answers verified for the same account and bind time', async () => {
+      stored();
+      await expect(store.verifyUnchanged(COORDINATES, expected)).resolves.toBe('verified');
+    });
+
+    it.each([
+      ['another account', { serviceAccountId: 'other-account' }],
+      ['another bind time', { boundAt: '2026-10-25T00:00:00.000Z' }],
+    ])('answers changed for %s', async (_, overrides) => {
+      stored(overrides);
+      await expect(store.verifyUnchanged(COORDINATES, expected)).resolves.toBe('changed');
+    });
+
+    it('answers absent when the binding is gone', async () => {
+      encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+          'id'
+        )
+      );
+      await expect(store.verifyUnchanged(COORDINATES, expected)).resolves.toBe('absent');
+    });
+
+    it('answers integrity_failed when the binding no longer verifies', async () => {
+      isEncryptionError.mockReturnValue(true);
+      encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(new Error('cannot decrypt'));
+      await expect(store.verifyUnchanged(COORDINATES, expected)).resolves.toBe('integrity_failed');
+    });
+
+    it('propagates other failures', async () => {
+      encryptedClient.getDecryptedAsInternalUser.mockRejectedValue(new Error('unavailable'));
+      await expect(store.verifyUnchanged(COORDINATES, expected)).rejects.toThrow('unavailable');
+    });
+  });
+
   describe('#countByServiceAccountIds', () => {
     const field = `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.serviceAccountId`;
 
@@ -420,6 +583,123 @@ describe('WorkloadBindingStore', () => {
       await expect(store.countByServiceAccountIds(['first-account'])).rejects.toThrowError(
         'search failed'
       );
+    });
+  });
+
+  describe('#summarize', () => {
+    const field = (attribute: string) =>
+      `${SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE}.attributes.${attribute}`;
+
+    const mockAggregations = (aggregations: Record<string, unknown>) =>
+      client.find.mockResolvedValue({
+        saved_objects: [],
+        total: 10_000,
+        page: 1,
+        per_page: 0,
+        aggregations,
+      } as never);
+
+    it('summarizes every binding with one aggregation across every space', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 0,
+          buckets: [
+            {
+              key: 'workflowsExecutionEngine',
+              doc_count: 3,
+              byWorkloadType: { buckets: [{ key: 'workflow', doc_count: 3 }] },
+            },
+            {
+              key: 'alerting',
+              doc_count: 2,
+              byWorkloadType: {
+                buckets: [
+                  { key: 'rule', doc_count: 1 },
+                  { key: 'action', doc_count: 1 },
+                ],
+              },
+            },
+          ],
+        },
+        byBinderType: {
+          buckets: [
+            { key: 'user', doc_count: 4 },
+            { key: 'service_account', doc_count: 1 },
+          ],
+        },
+        serviceAccounts: { value: 2 },
+      });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 5,
+        serviceAccounts: 2,
+        byWorkload: [
+          { pluginId: 'workflowsExecutionEngine', workloadType: 'workflow', count: 3 },
+          { pluginId: 'alerting', workloadType: 'rule', count: 1 },
+          { pluginId: 'alerting', workloadType: 'action', count: 1 },
+        ],
+        byBinderType: { user: 4, api_key: 0, service_account: 1 },
+      });
+      expect(client.find).toHaveBeenCalledTimes(1);
+      expect(client.find).toHaveBeenCalledWith({
+        type: SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
+        perPage: 0,
+        namespaces: ['*'],
+        aggs: {
+          byPlugin: {
+            terms: { field: field('pluginId'), size: 100 },
+            aggs: { byWorkloadType: { terms: { field: field('workloadType'), size: 100 } } },
+          },
+          byBinderType: { terms: { field: field('boundBy.type'), size: 100 } },
+          serviceAccounts: {
+            cardinality: { field: field('serviceAccountId'), precision_threshold: 40_000 },
+          },
+        },
+      });
+    });
+
+    it('counts bindings outside the returned plugin buckets in the total', async () => {
+      mockAggregations({
+        byPlugin: {
+          sum_other_doc_count: 7,
+          buckets: [
+            { key: 'workflowsExecutionEngine', doc_count: 3, byWorkloadType: { buckets: [] } },
+          ],
+        },
+        byBinderType: { buckets: [] },
+        serviceAccounts: { value: 1 },
+      });
+
+      const { total } = await store.summarize();
+      expect(total).toBe(10);
+    });
+
+    it('ignores binder types it does not know', async () => {
+      mockAggregations({
+        byPlugin: { buckets: [] },
+        byBinderType: { buckets: [{ key: 'something_new', doc_count: 1 }] },
+        serviceAccounts: { value: 0 },
+      });
+
+      const { byBinderType } = await store.summarize();
+      expect(byBinderType).toEqual({ user: 0, api_key: 0, service_account: 0 });
+    });
+
+    it('summarizes nothing when the search returns no aggregations', async () => {
+      client.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await expect(store.summarize()).resolves.toEqual({
+        total: 0,
+        serviceAccounts: 0,
+        byWorkload: [],
+        byBinderType: { user: 0, api_key: 0, service_account: 0 },
+      });
+    });
+
+    it('propagates a failed search', async () => {
+      client.find.mockRejectedValue(new Error('search failed'));
+
+      await expect(store.summarize()).rejects.toThrow('search failed');
     });
   });
 

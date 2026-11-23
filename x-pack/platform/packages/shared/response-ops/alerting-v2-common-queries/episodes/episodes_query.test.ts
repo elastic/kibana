@@ -43,6 +43,13 @@ describe('buildEpisodesBaseQuery', () => {
     expect(queryString).toContain('WHERE @timestamp == last_timestamp');
   });
 
+  it('keeps a single row per episode when its latest events share a timestamp', () => {
+    const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
+
+    expect(esql).toContain('| WHERE @timestamp == last_timestamp | LIMIT 1 BY episode.id');
+    expect(esql).not.toMatch(/\b_id\b/);
+  });
+
   it('computes last_snooze_action and snoozed_until grouped by series_id', () => {
     const esql = buildEpisodesBaseQuery(SPACE_ID).print('basic');
     expect(esql).toMatch(

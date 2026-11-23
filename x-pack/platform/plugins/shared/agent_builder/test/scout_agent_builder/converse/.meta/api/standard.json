@@ -1,5 +1,5 @@
 {
-  "sha1": "28e3ccd562f48ffefcfa6cc16cc1f54630ff8114",
+  "sha1": "369fceb08620c5b4b12229feac801b030aeb53ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 114,
+        "line": 113,
         "column": 7
       }
     },
@@ -304,7 +304,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 187,
+        "line": 186,
         "column": 13
       }
     },
@@ -320,7 +320,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 243,
+        "line": 242,
         "column": 17
       }
     },
@@ -336,7 +336,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 260,
+        "line": 259,
         "column": 13
       }
     },
@@ -352,7 +352,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
-        "line": 278,
+        "line": 277,
         "column": 23
       }
     },
@@ -624,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 138,
-        "column": 23
+        "line": 142,
+        "column": 24
       }
     },
     {
@@ -640,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 225,
-        "column": 14
+        "line": 228,
+        "column": 7
       }
     },
     {
@@ -656,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 268,
-        "column": 14
+        "line": 271,
+        "column": 23
       }
     },
     {
@@ -672,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 365,
-        "column": 15
+        "line": 366,
+        "column": 77
       }
     },
     {
@@ -688,7 +688,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 397,
+        "line": 400,
         "column": 18
       }
     },
@@ -704,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 439,
-        "column": 19
+        "line": 442,
+        "column": 12
       }
     },
     {
@@ -720,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 507,
-        "column": 17
+        "line": 510,
+        "column": 25
       }
     },
     {
@@ -736,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 568,
-        "column": 13
+        "line": 571,
+        "column": 21
       }
     },
     {
@@ -752,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 627,
-        "column": 13
+        "line": 631,
+        "column": 22
       }
     },
     {
@@ -768,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 668,
-        "column": 32
+        "line": 671,
+        "column": 26
       }
     },
     {

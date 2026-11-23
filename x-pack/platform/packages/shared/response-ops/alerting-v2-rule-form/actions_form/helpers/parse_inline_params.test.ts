@@ -42,6 +42,28 @@ describe('parseInlineParams', () => {
     });
   });
 
+  describe('default templates', () => {
+    it.each([
+      [
+        'email',
+        email,
+        email.paramsTemplate
+          .replace('- ""', '- ops@example.com')
+          .replace('subject: ""', 'subject: Alert'),
+        'message',
+      ],
+      ['slack', slack, slack.paramsTemplate.replace('channel: ""', 'channel: C123'), 'text'],
+    ])(
+      'accepts the %s template once the user-supplied fields are filled in',
+      (_, definition, params, bodyField) => {
+        const result = parseInlineParams(definition, params);
+
+        expect(result.errors).toEqual([]);
+        expect(result.params?.[bodyField]).toContain('{{ alert.alert_url }}');
+      }
+    );
+  });
+
   describe('yaml errors', () => {
     it('reports malformed YAML with its location', () => {
       expect(parseInlineParams(email, 'to: "unterminated\n').errors).toEqual([
@@ -62,8 +84,8 @@ describe('parseInlineParams', () => {
 
   describe('schema errors', () => {
     it.each([
-      ['the untouched email template', email, email.paramsTemplate, ['to', 'subject', 'message']],
-      ['the untouched slack template', slack, slack.paramsTemplate, ['channel', 'text']],
+      ['the untouched email template', email, email.paramsTemplate, ['to', 'subject']],
+      ['the untouched slack template', slack, slack.paramsTemplate, ['channel']],
       ['an empty map', email, '{}\n', ['to', 'subject', 'message']],
     ])('names every mandatory field of %s', (_, definition, params, fields) => {
       expect(parseInlineParams(definition, params).errors).toEqual(

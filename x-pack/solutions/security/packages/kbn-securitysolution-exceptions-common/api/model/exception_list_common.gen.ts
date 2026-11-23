@@ -37,6 +37,7 @@ For endpoint artifacts, use one of the following values:
 * `endpoint_event_filters`: Event filters list
 * `endpoint_host_isolation_exceptions`: Host isolation exceptions list
 * `endpoint_blocklists`: Blocklist
+* `endpoint_custom_yara_signatures`: Custom YARA signatures list
 
   */
 export const ExceptionListHumanId = lazySchema(() =>

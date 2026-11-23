@@ -66,12 +66,14 @@ const storageSettings = {
         },
       }),
       decidedAt: types.date({}),
+      decisionMode: types.keyword({}),
       dismissReason: types.keyword({}),
       rationale: types.text({}),
       executionError: types.text({}),
       previousExecutionError: types.text({}),
 
       workflowExecutionId: types.keyword({}),
+      gateReleasedAt: types.date({}),
 
       createdAt: types.date({}),
       createdBy: types.object({

@@ -38,13 +38,21 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
   });
   const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
   const setState = jest.fn();
+  const setViewMode = jest.fn();
   const upsertAttachment = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
       events: { ui: { activeConversation$ }, getChatEvents$ },
     } as unknown as AgentBuilderPluginStart,
-    api: { savedObjectId$: { getValue: () => savedObjectId }, setState } as unknown as DashboardApi,
+    api: {
+      savedObjectId$: { getValue: () => savedObjectId },
+      setState,
+      isEditableByUser: true,
+      getAppContext: () => ({ currentAppId: 'dashboards' }),
+      setViewMode,
+    } as unknown as DashboardApi,
+    canWriteDashboards: true,
     upsertAttachment,
   });
 
@@ -53,6 +61,7 @@ const createHarness = (savedObjectId: string | undefined, isNewConversation = fa
     activeConversation$,
     getChatEvents$,
     setState,
+    setViewMode,
     upsertAttachment,
     subscription,
   };
@@ -79,8 +88,14 @@ describe('createAgentLiveUpdatesSubscription', () => {
   );
 
   it('applies the dashboard state from the first run of a new conversation', () => {
-    const { chatEvents$, activeConversation$, getChatEvents$, setState, subscription } =
-      createHarness(undefined, true);
+    const {
+      chatEvents$,
+      activeConversation$,
+      getChatEvents$,
+      setState,
+      setViewMode,
+      subscription,
+    } = createHarness(undefined, true);
     expect(getChatEvents$).not.toHaveBeenCalled();
 
     // The chat creates the conversation before sending, so its id is published before the run streams
@@ -89,6 +104,7 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
     expect(getChatEvents$).toHaveBeenCalledWith('new-conversation');
     expect(setState).toHaveBeenCalledTimes(1);
+    expect(setViewMode).toHaveBeenCalledWith('edit');
     expect(setState).toHaveBeenCalledWith(expect.anything(), { changedBy: ['agent'] });
     subscription.unsubscribe();
   });

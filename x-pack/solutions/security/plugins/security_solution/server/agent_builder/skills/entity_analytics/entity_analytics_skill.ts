@@ -391,9 +391,9 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description:
-      'Security entity investigations (hosts, users, services, generic): entity store search/get_entity, get_entity_risk_score_history (risk-over-time chart), temporal relationship history (first/last seen, ever related to), resolve a watchlist name to its id (get_watchlist_id) to find its members, risk and criticality. ' +
-      'Rich attachments: `security.entity` (emitted automatically by search_entities/get_entity — renders as a single-entity card for 1 entity and as an entities table for 2+ entities); `security.entity_risk_score_history` (emitted by get_entity_risk_score_history); `security.entity_analytics_dashboard` (explicit attachments.add — only when the user asks to show/open/view the Entity Analytics home/overview product page). After each tool result that emits a rich attachment, paste its `renderTag` verbatim in markdown (required for Preview/Canvas UI). ' +
-      'Risk history, alert contributions, watchlists, behaviors, discovering risky entities, relationship event history.',
+      'Investigate security entities (hosts, users, services, generic) in Entity Analytics: search for entities and view their profiles, risk scores and risk score history over time, alert contributions to risk, asset criticality, watchlist membership, behaviors, relationship graphs, and relationship history (first/last seen, ever related to). Also discovers the riskiest entities and lists the members of a watchlist. ' +
+      'Also covers Entity Analytics management requests with no dedicated tool — enabling/disabling Entity Analytics, clearing/deleting/resetting entity data, changing risk scoring settings, CSV uploads, and flyout-based editing — by pointing the user to the right UI page. ' +
+      'Do NOT use for creating or editing watchlists (manage-watchlists skill) or entity resolution groups (entity-resolution skill).',
     content: `
 # Entity Analysis Guide
 

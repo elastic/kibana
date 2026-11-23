@@ -108,6 +108,7 @@ export interface AgentSOAttributes {
   local_metadata: AgentMetadata;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
@@ -354,6 +355,7 @@ export interface DownloadSourceSOAttributes {
   is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  reserve_diskspace?: boolean;
   ssl?: string | null; // encrypted ssl field
   auth?: string | null; // encrypted auth field
   secrets?: {

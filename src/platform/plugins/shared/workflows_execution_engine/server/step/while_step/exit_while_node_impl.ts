@@ -62,7 +62,7 @@ export class ExitWhileNodeImpl implements NodeImplementation {
       // on loop exit by unpinLoopScope) closes that residual TOCTOU gap.
       this.stepIoService.pinLoopSource(this.node.stepId, this.node.condition);
 
-      const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      const renderedCondition = this.stepExecutionRuntime.contextManager.renderConditionWithContext(
         this.node.condition,
         context
       );

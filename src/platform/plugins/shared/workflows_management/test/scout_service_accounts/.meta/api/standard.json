@@ -1,5 +1,5 @@
 {
-  "sha1": "1e5082e415fc811e15673b7436f1d52d8d1713fa",
+  "sha1": "fb4544fbfad6ba2ffcce2e648e38662b5335c2f5",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 33,
-        "column": 32
+        "line": 39,
+        "column": 20
       }
     },
     {
@@ -84,8 +84,22 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 33,
-        "column": 32
+        "line": 39,
+        "column": 20
+      }
+    },
+    {
+      "id": "da471a0a48fcee6-bf7fd3cf2aa301c",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when deleting a bound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 39,
+        "column": 20
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 75,
-        "column": 24
+        "line": 77,
+        "column": 15
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 102,
-        "column": 23
+        "line": 104,
+        "column": 26
       }
     },
     {
@@ -153,7 +167,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 34
       }
     },
@@ -166,7 +180,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 241,
+        "line": 242,
         "column": 8
       }
     },
@@ -179,7 +193,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 214,
+        "line": 215,
         "column": 34
       }
     },
@@ -192,7 +206,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 241,
+        "line": 242,
         "column": 8
       }
     },
@@ -205,7 +219,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 303,
+        "line": 304,
         "column": 28
       }
     },
@@ -218,7 +232,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 321,
+        "line": 322,
         "column": 28
       }
     },
@@ -231,7 +245,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 303,
+        "line": 304,
         "column": 28
       }
     },
@@ -244,7 +258,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 321,
+        "line": 322,
         "column": 28
       }
     },
@@ -257,7 +271,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 344,
+        "line": 345,
         "column": 24
       }
     },
@@ -270,7 +284,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 344,
+        "line": 345,
         "column": 24
       }
     },
@@ -283,7 +297,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 379,
+        "line": 380,
         "column": 18
       }
     },
@@ -296,7 +310,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 436,
+        "line": 437,
         "column": 25
       }
     },
@@ -309,7 +323,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 466,
+        "line": 467,
         "column": 16
       }
     },
@@ -322,7 +336,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 466,
+        "line": 467,
         "column": 16
       }
     },
@@ -335,7 +349,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 520,
+        "line": 521,
         "column": 13
       }
     },
@@ -348,7 +362,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 520,
+        "line": 521,
         "column": 13
       }
     },
@@ -361,7 +375,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 555,
+        "line": 556,
         "column": 30
       }
     },
@@ -374,7 +388,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 555,
+        "line": 556,
         "column": 30
       }
     },
@@ -387,7 +401,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 578,
+        "line": 579,
         "column": 32
       }
     },
@@ -400,7 +414,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 578,
+        "line": 579,
         "column": 32
       }
     },
@@ -413,7 +427,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 621,
+        "line": 622,
         "column": 19
       }
     },
@@ -426,7 +440,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 644,
+        "line": 645,
         "column": 23
       }
     },
@@ -439,7 +453,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 658,
+        "line": 659,
         "column": 26
       }
     },
@@ -452,8 +466,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 688,
+        "line": 689,
         "column": 16
+      }
+    },
+    {
+      "id": "e973271af1ca9cb-55412dfefd455b6",
+      "title": "Managed child service account inheritance refuses a standalone run of an unconditional inherit parent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
+        "line": 697,
+        "column": 67
       }
     },
     {
@@ -465,8 +492,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 693,
-        "column": 27
+        "line": 712,
+        "column": 78
       }
     },
     {
@@ -478,8 +505,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 701,
-        "column": 27
+        "line": 723,
+        "column": 9
       }
     },
     {
@@ -491,8 +518,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_inheritance.spec.ts",
-        "line": 730,
-        "column": 57
+        "line": 754,
+        "column": 34
       }
     },
     {
@@ -608,6 +635,20 @@
       }
     },
     {
+      "id": "de4adc7eaf2d461-60e2d68c7d018b3",
+      "title": "[NON-MKI] Workflow service accounts: resume reports a resume identity failure to Task Manager as a user error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
+        "line": 89,
+        "column": 13
+      }
+    },
+    {
       "id": "de4adc7eaf2d461-c9a7ffbcf5c5b73",
       "title": "[NON-MKI] Workflow service accounts: resume SA continuation audit: timer retains the bound identity",
       "expectedStatus": "passed",
@@ -617,8 +658,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 89,
-        "column": 55
+        "line": 122,
+        "column": 15
       }
     },
     {
@@ -631,8 +672,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_resume.spec.ts",
-        "line": 89,
-        "column": 55
+        "line": 122,
+        "column": 15
       }
     },
     {

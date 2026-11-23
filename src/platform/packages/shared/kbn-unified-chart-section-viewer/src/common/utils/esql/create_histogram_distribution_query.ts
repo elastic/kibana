@@ -40,11 +40,13 @@ export const createHistogramDistributionQuery = ({
   metricItem,
   bounds,
   whereStatements = [],
+  metadataFields = [],
   originalSource,
 }: {
   metricItem: ParsedMetricItem;
   bounds: HistogramBounds; // temporary until https://github.com/elastic/elasticsearch/issues/158876 is resolved
   whereStatements?: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
 }): string | undefined => {
   const expression = getHistogramFieldExpression(metricItem);
@@ -53,7 +55,7 @@ export const createHistogramDistributionQuery = ({
   }
 
   const index = resolveSource(originalSource, metricItem.indexName);
-  const query = esql.ts(index);
+  const query = esql.ts([index], [...metadataFields]);
   const trimmedWhere = whereStatements
     .map((statement) => statement.trim())
     .filter((statement) => statement.length > 0);

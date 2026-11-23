@@ -14,7 +14,6 @@ test.describe('Core Web Vitals', { tag: tags.stateful.classic }, () => {
     await test.step('Navigate to UX Dashboard', async () => {
       await browserAuth.loginAsViewer();
       await pageObjects.uxDashboard.goto();
-      await pageObjects.uxDashboard.waitForLoadingToFinish();
     });
 
     await test.step('Check Core Web Vitals labels', async () => {

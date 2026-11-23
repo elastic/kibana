@@ -25,6 +25,8 @@ export interface ServiceDetailsPanelProps extends Record<string, unknown> {
   identityFields: IdentityFields;
   path?: PanelPath;
   scopeId: string;
+  entityId?: string;
+  hasNonClosedAlerts?: boolean;
   entityStoreEntityId?: string;
 }
 export interface ServiceDetailsExpandableFlyoutProps extends FlyoutPanelProps {
@@ -38,13 +40,15 @@ export const ServiceDetailsPanel = ({
   identityFields,
   path,
   scopeId,
+  entityId,
+  hasNonClosedAlerts,
   entityStoreEntityId,
 }: ServiceDetailsPanelProps) => {
   const serviceName = useMemo(
     () => getServiceNameFromEntityIdentifiers(identityFields ?? {}),
     [identityFields]
   );
-  const tabs = useTabs(serviceName, scopeId, entityStoreEntityId);
+  const tabs = useTabs(serviceName, scopeId, entityStoreEntityId, hasNonClosedAlerts, entityId);
 
   const { selectedTabId, setSelectedTabId } = useSelectedTab(
     isRiskScoreExist,
@@ -52,7 +56,9 @@ export const ServiceDetailsPanel = ({
     scopeId,
     tabs,
     path,
-    entityStoreEntityId
+    entityStoreEntityId,
+    entityId,
+    hasNonClosedAlerts
   );
 
   if (!selectedTabId) {
@@ -77,7 +83,9 @@ const useSelectedTab = (
   scopeId: string,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined,
-  entityStoreEntityId?: string
+  entityStoreEntityId?: string,
+  entityId?: string,
+  hasNonClosedAlerts?: boolean
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -95,6 +103,8 @@ const useSelectedTab = (
         identityFields,
         isRiskScoreExist,
         scopeId,
+        entityId,
+        hasNonClosedAlerts,
         entityStoreEntityId,
         path: {
           tab: tabId,

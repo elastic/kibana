@@ -38,6 +38,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -313,6 +314,18 @@ describe('WorkflowOutputStepSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('WorkflowFailStepSchema', () => {
+  it('keeps the error type, which a parent reads as steps.<name>.error.type', () => {
+    const step = WorkflowFailStepSchema.parse({
+      name: 'fail',
+      type: 'workflow.fail',
+      with: { message: 'The process is no longer running', type: 'NonRetryableError' },
+    });
+
+    expect(step.with?.type).toBe('NonRetryableError');
   });
 });
 

@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import {
-  getDataTestSubjectSelector,
-  getDataTestSubjectSelectorStartWith,
-} from '../../helpers/common';
+import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
 export const VIEW_CASE_TOASTER_CLOSE_BUTTON = getDataTestSubjectSelector('toastCloseButton');
 export const NEW_CASE_NAME_INPUT = `[data-test-subj="input"][aria-describedby="caseTitle"]`;
 export const NEW_CASE_DESCRIPTION_INPUT = getDataTestSubjectSelector('euiMarkdownEditorTextArea');
-export const EXISTING_CASE_SELECT_BUTTON =
-  getDataTestSubjectSelectorStartWith('cases-table-row-select-');
+export const EXISTING_CASE_SELECT_BUTTON = (caseId: string) =>
+  getDataTestSubjectSelector(`cases-table-row-select-${caseId}`);
 export const CREATE_NEW_CASE_FROM_MODAL_BUTTON = getDataTestSubjectSelector(
   'cases-table-add-case-filter-bar'
 );

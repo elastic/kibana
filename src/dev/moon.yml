@@ -61,6 +61,8 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.js'

@@ -926,7 +926,10 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns,
-      allSuggestions: allSuggestionsMock,
+      allSuggestions: allSuggestionsMock.map((suggestion) => ({
+        ...suggestion,
+        datasourceState: { layers: { main: { columns: [], query: queryStats } } },
+      })),
       table,
     });
 
@@ -959,7 +962,10 @@ describe('LensVisService attributes', () => {
       timeInterval,
       breakdownField: undefined,
       columns,
-      allSuggestions: allSuggestionsMock,
+      allSuggestions: allSuggestionsMock.map((suggestion) => ({
+        ...suggestion,
+        datasourceState: { layers: { main: { columns: [], query: queryStats } } },
+      })),
       table,
     });
 

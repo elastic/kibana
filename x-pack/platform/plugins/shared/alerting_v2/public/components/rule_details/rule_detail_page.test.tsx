@@ -18,7 +18,7 @@ import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
-import { createAlertingV2HostApp } from '../../locators';
+import { createAlertingV2HostApp } from '../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -27,7 +27,7 @@ const TEST_HOST = createAlertingV2HostApp('test-app', {
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
-import { AlertingV2RulesLocatorDefinition } from '../../locators';
+import { AlertingV2RulesLocatorDefinition } from '../../../common/locators';
 
 const mockLocators = createMockLocators();
 
