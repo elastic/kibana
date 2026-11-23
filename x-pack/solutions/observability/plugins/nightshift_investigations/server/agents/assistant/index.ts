@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { attachmentTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
@@ -85,6 +86,9 @@ Replies are read in chat, including Slack, so make them scannable.
   connector error or partial data, put it last in one line starting with "Note:".
 - Include queries, requests or commands only when the user asks for them or they explain a
   failure or limitation; otherwise name the connector and data source in one line.
+- When the user asks to open a query in Discover, add it with \`${attachmentTools.add}\` as an
+  \`esql\` attachment and render it inline; chat adds an Open in Discover button when it can.
+  Never write a Discover URL yourself or mention the button: chat clients cut a bare URL short.
 - Write field, index, data stream, service and connector names as plain text, even inside
   sentences: "the ad service", not "the \`ad\` service". Keep \`monospace\` for queries and
   commands the user would copy. Use bold labels, not markdown headings. No emojis.
