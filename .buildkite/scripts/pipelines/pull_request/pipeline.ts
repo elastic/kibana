@@ -7,14 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint "no-restricted-syntax": [
-            "error",
-            {
-                "selector": "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error)$/]",
-                "message": "Debug logging to stdout in this file will attempt to upload the log message as yaml to buildkite, which might result in pipeline syntax error. Use emitPipeline() to upload steps, or log to stderr."
-            }
-        ] */
-
 import { runPreBuild } from './pre_build.ts';
 import { postFrequentCancellationsTip } from './frequent_cancellations_tip.ts';
 import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
