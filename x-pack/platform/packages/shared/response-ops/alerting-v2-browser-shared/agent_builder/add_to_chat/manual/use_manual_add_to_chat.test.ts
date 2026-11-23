@@ -10,11 +10,17 @@ import { BehaviorSubject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ApplicationStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { AttachmentConverter } from '../../types';
 import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
 
-const applicationWithShow = (show: boolean): ApplicationStart =>
-  ({ capabilities: { agentBuilder: { show } } } as unknown as ApplicationStart);
+const applicationWithShow = (show: boolean): ApplicationStart => {
+  const { application } = coreMock.createStart();
+  return {
+    ...application,
+    capabilities: { ...application.capabilities, agentBuilder: { show } },
+  };
+};
 
 interface TestItem {
   id: string;

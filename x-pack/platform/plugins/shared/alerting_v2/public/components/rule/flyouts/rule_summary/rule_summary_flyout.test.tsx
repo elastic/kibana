@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, type Observable } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { EuiHealthProps } from '@elastic/eui';
@@ -20,6 +20,12 @@ import {
   AlertingV2RulesLocatorDefinition,
   createAlertingV2HostApp,
 } from '../../../../../common/locators';
+
+interface MockAgentBuilder {
+  openChat?: jest.Mock;
+  addAttachment?: jest.Mock;
+  events?: { ui: { activeConversation$: Observable<{ id: string } | null> } };
+}
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -71,10 +77,10 @@ jest.mock('../../../../services/user_capabilities', () => ({
 
 jest.mock('@kbn/core-di-browser', () => {
   const canRead = jest.fn(() => true);
-  let agentBuilder: unknown = {};
+  let agentBuilder: MockAgentBuilder = {};
   let agentBuilderShow = false;
   return {
-    useService: (token: unknown) => {
+    useService: (token: string | symbol) => {
       if (token === 'http') {
         return { basePath: { prepend: (p: string) => `/base${p}` } };
       }
@@ -91,7 +97,7 @@ jest.mock('@kbn/core-di-browser', () => {
     },
     CoreStart: (key: string) => key,
     mockCanRead: canRead,
-    setMockAgentBuilder: (next: unknown) => {
+    setMockAgentBuilder: (next: MockAgentBuilder) => {
       agentBuilder = next;
     },
     setMockAgentBuilderShow: (show: boolean) => {
@@ -104,7 +110,7 @@ const { mockCanRead, setMockAgentBuilder, setMockAgentBuilderShow } = jest.requi
   '@kbn/core-di-browser'
 ) as {
   mockCanRead: jest.Mock;
-  setMockAgentBuilder: (agentBuilder: unknown) => void;
+  setMockAgentBuilder: (agentBuilder: MockAgentBuilder) => void;
   setMockAgentBuilderShow: (show: boolean) => void;
 };
 

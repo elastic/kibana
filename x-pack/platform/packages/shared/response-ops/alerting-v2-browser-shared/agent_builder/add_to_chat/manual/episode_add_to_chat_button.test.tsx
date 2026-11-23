@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { ApplicationStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { EpisodeAddToChatButton } from './episode_add_to_chat_button';
 import { AddToChatButton } from './add_to_chat_button';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
@@ -31,9 +31,14 @@ const mockRule = {
   grouping: { fields: ['host.name'] },
 } as RuleResponse;
 
+const { application } = coreMock.createStart();
+
 const services: ManualAddToChatServices = {
   agentBuilder: undefined,
-  application: { capabilities: { agentBuilder: { show: true } } } as unknown as ApplicationStart,
+  application: {
+    ...application,
+    capabilities: { ...application.capabilities, agentBuilder: { show: true } },
+  },
 };
 
 describe('EpisodeAddToChatButton', () => {
