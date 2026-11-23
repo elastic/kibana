@@ -34,6 +34,8 @@ interface FakeDocker {
   runHook?: () => void;
   /** Makes `docker run` fail with this error. */
   runError?: Error;
+  /** What `docker ps -aq --filter label=...` prints. */
+  psOutput?: string;
 }
 
 function fakeDocker({
@@ -79,6 +81,8 @@ function fakeDocker({
         return fake.pullProc ?? Object.assign(Promise.resolve({ stdout: '' }), { kill: () => {} });
       case 'rm':
         return Promise.resolve({ stdout: '' });
+      case 'ps':
+        return Promise.resolve({ stdout: fake.psOutput ?? '' });
       case 'run':
         fake.runHook?.();
         return fake.runError
@@ -158,8 +162,10 @@ describe('runDockerServer', () => {
     const [runArgs] = dockerCall(docker.calls, 'run');
     expect(runArgs.slice(0, 2)).toEqual(['run', '-dit']);
     expect(runArgs[2]).toBe('--name');
-    expect(runArgs[3]).toMatch(/^registry-6104-/);
-    expect(runArgs.slice(4)).toEqual([
+    expect(runArgs[3]).toMatch(/^test-registry-6104-[0-9a-f]{8}$/);
+    expect(runArgs[4]).toBe('--label');
+    expect(runArgs[5]).toMatch(/^kbn-test-docker-server=[0-9a-f-]{36}$/);
+    expect(runArgs.slice(6)).toEqual([
       '-e',
       'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
       '-p',
@@ -302,14 +308,37 @@ describe('runDockerServer', () => {
     expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
   });
 
-  it('removes a container that docker created but could not start', async () => {
+  it('removes a container that docker created but could not start, matched by this attempt label', async () => {
     const docker = fakeDocker({ cached: true });
     docker.runError = Object.assign(new Error('port is already allocated'), { exitCode: 125 });
+    docker.psOutput = 'created-1\n';
 
     await expect(runDockerServer(server, { log })).rejects.toThrow('already listening on port');
-    const [rmArgs] = dockerCall(docker.calls, 'rm');
-    expect(rmArgs.slice(0, 2)).toEqual(['rm', '-f']);
-    expect(rmArgs[2]).toMatch(/^registry-6104-/);
+    const [psArgs] = dockerCall(docker.calls, 'ps');
+    expect(psArgs[3]).toMatch(/^label=kbn-test-docker-server=[0-9a-f-]{36}$/);
+    expect(dockerCall(docker.calls, 'rm')).toEqual([['rm', '-f', 'created-1']]);
+  });
+
+  it('removes nothing when docker run failed and no container carries this attempt label', async () => {
+    const docker = fakeDocker({ cached: true });
+    docker.runError = Object.assign(new Error('Conflict. The container name is already in use'), {
+      exitCode: 125,
+    });
+
+    await expect(runDockerServer(server, { log })).rejects.toThrow('already in use');
+    expect(dockerCall(docker.calls, 'rm')).toHaveLength(0);
+  });
+
+  it('gives the container a name docker accepts even for a config key starting with an underscore', async () => {
+    const docker = fakeDocker({ cached: true });
+    const pending = runDockerServer({ ...server, name: '_registry' }, { log });
+    await new Promise((resolve) => setImmediate(resolve));
+    docker.stdout.write('package manifests loaded\n');
+    const running = await pending;
+
+    const [runArgs] = dockerCall(docker.calls, 'run');
+    expect(runArgs[3]).toMatch(/^test-_registry-6104-/);
+    await running.stop();
   });
 
   it('does not run the container when the signal is already aborted', async () => {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
@@ -110,17 +111,41 @@ async function dockerPull(server: DockerServer, log: ToolingLog, signal?: AbortS
   }
 }
 
-/** A name of our own for the container, so the error paths can find it before `docker run` returned its id. */
-function containerName(server: DockerServer) {
-  return `${server.name}-${server.port}-${Date.now().toString(36)}`.replace(
-    /[^a-zA-Z0-9_.-]/g,
-    '-'
-  );
+const ATTEMPT_LABEL = 'kbn-test-docker-server';
+
+/**
+ * An identity of our own for the container, so the error paths can find it before `docker run`
+ * returned its id: a readable name (a fixed alphanumeric prefix, since a config key may start
+ * with a character docker rejects) and a unique per-attempt label, which is what the cleanup
+ * matches on, so a name collision can never remove another attempt's container.
+ */
+function containerIdentity(server: DockerServer) {
+  const attempt = randomUUID();
+  const safeName = `${server.name}-${server.port}`.replace(/[^a-zA-Z0-9_.-]/g, '-');
+  return {
+    name: `test-${safeName}-${attempt.slice(0, 8)}`,
+    label: `${ATTEMPT_LABEL}=${attempt}`,
+  };
+}
+
+async function removeContainersByLabel(label: string) {
+  try {
+    const { stdout } = await execa('docker', ['ps', '-aq', '--filter', `label=${label}`]);
+    const ids = stdout
+      .split('\n')
+      .map((id) => id.trim())
+      .filter(Boolean);
+    if (ids.length > 0) {
+      await execa('docker', ['rm', '-f', ...ids]);
+    }
+  } catch {
+    // best effort: the start failure is the error to report
+  }
 }
 
 async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string> {
   const { args, name, image, port, portInContainer } = server;
-  const containerNameArg = containerName(server);
+  const identity = containerIdentity(server);
   try {
     log.info(`[docker:${name}] running image "${image}"`);
 
@@ -128,7 +153,9 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
       'run',
       '-dit',
       '--name',
-      containerNameArg,
+      identity.name,
+      '--label',
+      identity.label,
       args || [],
       // loopback only: Kibana on this host is the only client, nothing else needs the registry
       '-p',
@@ -139,8 +166,9 @@ async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string>
 
     return res.stdout.trim();
   } catch (error) {
-    // docker may have created (even started) the container before failing; do not leave it
-    await execa('docker', ['rm', '-f', containerNameArg]).catch(() => {});
+    // docker may have created (even started) this attempt's container before failing; do not
+    // leave it. Matched by the unique label: a name conflict with another run removes nothing.
+    await removeContainersByLabel(identity.label);
     if (error?.exitCode === 125 && error?.message?.includes('port is already allocated')) {
       throw new Error(
         `
