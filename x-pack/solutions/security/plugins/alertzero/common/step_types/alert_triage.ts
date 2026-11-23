@@ -537,7 +537,7 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
     unsettled_decisions: z
       .number()
       .describe(
-        'Decisions whose alerts the sweep could not check or put back after it wrote to them: the decision could not be read again, or a revoke that landed in between could not be undone. The alerts keep their tags. If the decision was revoked, run the revoke again. An alert that no longer carries the decision tag is not found by a revoke and needs a manual review.'
+        'Decisions whose alerts the sweep could not check or put back after it wrote to them: the decision could not be read again, or a revoke that landed in between could not be undone. The sweep leaves the alerts as they are, and they may still carry the decision tag, but that is not certain: a revoke that ran in the meantime can have taken the tag off an alert before the sweep closed it. If the decision was revoked, run the revoke again: it finds the alerts that still carry the tag. An alert that does not carry it is not found and needs a manual review.'
       ),
     blocked_by_verdict: z
       .number()

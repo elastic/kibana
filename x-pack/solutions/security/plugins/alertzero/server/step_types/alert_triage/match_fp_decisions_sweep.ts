@@ -177,8 +177,9 @@ export const createDecisionSweep = ({
    * closes that gap: either the decision is still in force, and then the revoke has not deleted it
    * yet and will find these alerts, or it is gone, and the caller puts back what it wrote. A
    * decision that only lapsed (expired) keeps what it did while it was in force. A read that fails
-   * answers `unknown` and the decision is counted in `unsettled_decisions`: the tags stay, and
-   * nothing checks again, so a revoke that already ran would not find these alerts.
+   * answers `unknown` and the decision is counted in `unsettled_decisions`: the sweep leaves the
+   * alerts as they are, and nothing checks again. A revoke that already ran would find only the
+   * alerts that still carry the tag.
    */
   const statusAfterWrite = async (
     id: string,
