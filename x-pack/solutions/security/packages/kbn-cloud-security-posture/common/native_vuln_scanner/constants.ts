@@ -24,8 +24,8 @@ export const KNOWLEDGE_PATH = `${NATIVE_VULN_SCANNER_API_BASE_PATH}/knowledge/{k
  */
 export const KNOWLEDGE_ID_PATTERN =
   '^(cve|adv):(ubuntu|redhat):[a-z0-9-]{1,16}:[A-Za-z0-9:._-]{1,64}$';
-/** Longest possible id under {@link KNOWLEDGE_ID_PATTERN}. */
-export const KNOWLEDGE_ID_MAX_LENGTH = 96;
+/** Longest possible id under {@link KNOWLEDGE_ID_PATTERN} (3+1+6+1+16+1+64). */
+export const KNOWLEDGE_ID_MAX_LENGTH = 92;
 export const MAX_KNOWLEDGE_ADVISORIES = 20;
 
 /**
