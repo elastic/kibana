@@ -16,14 +16,20 @@ export const controlTitleSchema = z
   })
   .strict();
 
-const sharedDataControlProps = {
-  ...controlTitleSchema.shape,
+/**
+ * only pinned controls can be required
+ */
+export const pinnedDataControlProps = {
   required: lazySchema(() =>
     z.boolean().default(DEFAULT_DATA_CONTROL_STATE.required).meta({
       description:
-        'When `true`, dashboard panels do not render until a selection is made in the control. Only applies to pinned controls.',
+        'When `true`, dashboard panels do not render until a selection is made in the control.',
     })
   ),
+};
+
+const sharedDataControlProps = {
+  ...controlTitleSchema.shape,
   use_global_filters: z.boolean().default(DEFAULT_DATA_CONTROL_STATE.use_global_filters).meta({
     description:
       "When `true`, the control's available options are narrowed by the page's active filters.",

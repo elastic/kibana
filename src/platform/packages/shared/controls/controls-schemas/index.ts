@@ -46,6 +46,10 @@ export type {
 export {
   optionsListESQLControlSchema,
   optionsListDSLControlSchema,
+  pinnedOptionsListDSLControlSchema,
 } from './src/options_list_schema';
-export { rangeSliderControlSchema } from './src/range_slider_schema';
+export {
+  rangeSliderControlSchema,
+  pinnedRangeSliderControlSchema,
+} from './src/range_slider_schema';
 export { timeSliderControlSchema } from './src/time_slider_schema';

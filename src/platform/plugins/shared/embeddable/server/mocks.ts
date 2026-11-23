@@ -49,7 +49,11 @@ export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
       transformIn: jest.fn(),
       transformOut: jest.fn(),
     });
-    return { ...transforms, schema: registration?.getSchema?.(mockGetDrilldownsSchema) };
+    return {
+      ...transforms,
+      schema: registration?.getSchema?.(mockGetDrilldownsSchema),
+      pinnedSchema: registration?.getPinnedSchema?.(mockGetDrilldownsSchema),
+    };
   }),
 });
 

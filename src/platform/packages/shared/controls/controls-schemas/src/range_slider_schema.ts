@@ -12,6 +12,7 @@ import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 import {
   dataControlEsqlVariantSchema,
   dataControlFieldVariantSchema,
+  pinnedDataControlProps,
   withFieldValuesSourceDefault,
 } from './control_schema';
 
@@ -27,18 +28,30 @@ const rangeSliderExtras = {
   }),
 };
 
-export const rangeSliderControlSchema = z.preprocess(
-  withFieldValuesSourceDefault,
-  z.discriminatedUnion('values_source', [
-    dataControlEsqlVariantSchema.extend(rangeSliderExtras).meta({
-      id: 'kbn-controls-schemas-range-slider-control-schema-esql',
-      title: 'EsqlRangeSliderControl',
-      description: "A range slider control whose values come from an ES|QL query's results.",
-    }),
-    dataControlFieldVariantSchema.extend(rangeSliderExtras).meta({
-      id: 'kbn-controls-schemas-range-slider-control-schema-field',
-      title: 'FieldRangeSliderControl',
-      description: 'A range slider control whose values come from a numeric data view field.',
-    }),
-  ])
+const getRangeSliderControlSchema = <TProps extends z.ZodRawShape>(
+  props: TProps,
+  idPrefix: string
+) => {
+  const extras = { ...rangeSliderExtras, ...props };
+  return z.preprocess(
+    withFieldValuesSourceDefault,
+    z.discriminatedUnion('values_source', [
+      dataControlEsqlVariantSchema.extend(extras).meta({
+        id: `${idPrefix}-range-slider-control-schema-esql`,
+        title: 'EsqlRangeSliderControl',
+        description: "A range slider control whose values come from an ES|QL query's results.",
+      }),
+      dataControlFieldVariantSchema.extend(extras).meta({
+        id: `${idPrefix}-range-slider-control-schema-field`,
+        title: 'FieldRangeSliderControl',
+        description: 'A range slider control whose values come from a numeric data view field.',
+      }),
+    ])
+  );
+};
+
+export const rangeSliderControlSchema = getRangeSliderControlSchema({}, 'kbn-controls-schemas');
+export const pinnedRangeSliderControlSchema = getRangeSliderControlSchema(
+  pinnedDataControlProps,
+  'kbn-controls-schemas-pinned'
 );

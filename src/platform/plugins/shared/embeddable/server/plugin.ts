@@ -76,6 +76,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
         schema?: ZodObjectType;
+        pinnedSchema?: ZodObjectType;
         throwOnUnmappedPanel?: EmbeddableServerDefinition['throwOnUnmappedPanel'];
       })
     | undefined;

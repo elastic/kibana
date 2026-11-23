@@ -11,6 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
   optionsListDSLControlSchema,
+  pinnedOptionsListDSLControlSchema,
   type LegacyStoredDataControlState,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
@@ -31,6 +32,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
   embeddable.registerEmbeddableServerDefinition(OPTIONS_LIST_CONTROL, {
     title: 'Options list control',
     getSchema: () => optionsListDSLControlSchema,
+    getPinnedSchema: () => pinnedOptionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
         const { state: dataControlState, references } =
