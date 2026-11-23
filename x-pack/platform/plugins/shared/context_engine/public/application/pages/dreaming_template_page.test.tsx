@@ -186,11 +186,13 @@ describe('DreamingTemplatePage', () => {
       expect.objectContaining({ version: '1' })
     );
     expect(putBody(services)).toEqual({
-      enabled: true,
+      enabled: false,
       instructions: 'Acme customer support knowledge base.\n\nRecord confirmed fixes.',
       facts: SUPPORT.dreaming.facts,
       entities: null,
       relationships: [],
+      lucid: { enabled: true },
+      relationship_dreaming: { enabled: true },
     });
   });
 
@@ -228,11 +230,13 @@ describe('DreamingTemplatePage', () => {
 
     await waitFor(() => expect(services.http.put).toHaveBeenCalled());
     expect(putBody(services)).toEqual({
-      enabled: true,
+      enabled: false,
       facts: [{ type: 'incident_cause' }],
       entities: null,
       instructions: 'Incident reviews.',
       relationships: [],
+      lucid: { enabled: true },
+      relationship_dreaming: { enabled: true },
     });
   });
 

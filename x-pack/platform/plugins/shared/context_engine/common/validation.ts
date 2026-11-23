@@ -15,7 +15,13 @@ import {
   MAX_AI_INDEX_USER_ID_LENGTH,
   MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES,
 } from './constants';
-import { MIN_DREAMING_INTERVAL_MINUTES } from './dreaming';
+import {
+  MAX_LUCID_DREAMING_INTERVAL_MINUTES,
+  MAX_RELATIONSHIP_DREAMING_INTERVAL_MINUTES,
+  MIN_DREAMING_INTERVAL_MINUTES,
+  MIN_LUCID_DREAMING_INTERVAL_MINUTES,
+  MIN_RELATIONSHIP_DREAMING_INTERVAL_MINUTES,
+} from './dreaming';
 import type { QueryAiIndicesRequest } from './http_api/ai_indices';
 
 // Starts with a lowercase letter or number, then lowercase letters, numbers, hyphens, or underscores.
@@ -84,6 +90,30 @@ export const validateDreamingInterval = (value: string): string | undefined => {
     });
   }
   return undefined;
+};
+
+/** Returns a translated error message for an invalid lucid dreaming interval, or `undefined` when valid. */
+export const validateLucidDreamingInterval = (value: string): string | undefined => {
+  const minutes = parseIntervalMinutes(value);
+  return minutes !== undefined &&
+    minutes >= MIN_LUCID_DREAMING_INTERVAL_MINUTES &&
+    minutes <= MAX_LUCID_DREAMING_INTERVAL_MINUTES
+    ? undefined
+    : i18n.translate('xpack.contextEngine.dreaming.error.invalidLucidInterval', {
+        defaultMessage: 'Must be from 1m to 59m, for example 5m.',
+      });
+};
+
+/** Returns a translated error message for an invalid relationship dreaming interval, or `undefined` when valid. */
+export const validateRelationshipDreamingInterval = (value: string): string | undefined => {
+  const minutes = parseIntervalMinutes(value);
+  return minutes !== undefined &&
+    minutes >= MIN_RELATIONSHIP_DREAMING_INTERVAL_MINUTES &&
+    minutes <= MAX_RELATIONSHIP_DREAMING_INTERVAL_MINUTES
+    ? undefined
+    : i18n.translate('xpack.contextEngine.dreaming.error.invalidRelationshipInterval', {
+        defaultMessage: 'Must be from 1h to 30d, for example 6h or 1d.',
+      });
 };
 
 const RELATIVE_FROM_PATTERN = /^now-([1-9][0-9]*)(m|h|d|w|M|y)$/;

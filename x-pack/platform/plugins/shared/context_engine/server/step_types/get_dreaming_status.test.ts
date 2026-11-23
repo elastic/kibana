@@ -140,6 +140,45 @@ describe('getDreamingStatusStepDefinition', () => {
     });
   });
 
+  it('runs each source only while its own toggle is on', async () => {
+    const trace = { type: 'elastic_agent', value: 'elastic-ai-agent', query: 'FROM traces' };
+    const split = {
+      ...dreaming,
+      enabled: false,
+      entities: { nodes: [{ type: 'customer' }] },
+      relationships: [{ type: 'knows' }],
+    };
+    const get = (config: Record<string, unknown>) =>
+      jest.fn().mockResolvedValue({ id: 'support', dreaming: config, traces: [trace] });
+    const lucidOnly = {
+      ...split,
+      lucid: { enabled: true },
+      relationship_dreaming: { enabled: false },
+    };
+    const relationshipsOnly = {
+      ...split,
+      lucid: { enabled: false },
+      relationship_dreaming: { enabled: true },
+    };
+
+    await expect(run({ get: get(lucidOnly) })).resolves.toEqual({ output: { dream: true } });
+    await expect(run({ source: 'traces', get: get(lucidOnly) })).resolves.toEqual({
+      output: { dream: true },
+    });
+    await expect(run({ source: 'relationships', get: get(lucidOnly) })).resolves.toEqual({
+      output: {
+        dream: false,
+        reason: "Relationship dreaming is not turned on for AI index 'support'.",
+      },
+    });
+    await expect(run({ source: 'relationships', get: get(relationshipsOnly) })).resolves.toEqual({
+      output: { dream: true },
+    });
+    await expect(run({ source: 'traces', get: get(relationshipsOnly) })).resolves.toEqual({
+      output: { dream: false, reason: "Lucid dreaming is not turned on for AI index 'support'." },
+    });
+  });
+
   it('fails on any other error reading the AI index', async () => {
     await expect(run({ get: jest.fn().mockRejectedValue(new Error('boom')) })).rejects.toThrow(
       'boom'

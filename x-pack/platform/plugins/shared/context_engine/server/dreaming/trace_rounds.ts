@@ -61,7 +61,10 @@ const SPAN_END = 'TO_DATETIME(TO_LONG(@timestamp) + duration / 1000000)';
 const isUnknownDurationError = (error: unknown): boolean =>
   /unknown column \[duration\]/i.test(formatErrorMessage(error));
 
-/** Finds the rounds of a trace source query that ended after the cursor and by `until`. */
+/**
+ * Finds the rounds of a trace source query that ended after the cursor and by `until`, only
+ * those of `traceIds` when set.
+ */
 export const findTraceRounds = async ({
   esClient,
   query,
@@ -69,6 +72,7 @@ export const findTraceRounds = async ({
   after,
   until,
   size,
+  traceIds,
 }: {
   esClient: ElasticsearchClient;
   query: string;
@@ -76,14 +80,19 @@ export const findTraceRounds = async ({
   after: string;
   until: string;
   size: number;
+  traceIds?: string[];
 }): Promise<TraceRound[]> => {
   const target = targetOfTraceQuery(query);
   const lookback = new Date(Date.parse(since) - ROUND_LOOKBACK_MS).toISOString();
+  const traceIdParams = (traceIds ?? []).map((traceId, i) => ({ [`trace_${i}`]: traceId }));
   const run = (spanEnd: string) =>
     esClient.esql.query({
       query: [
         query,
         '| WHERE @timestamp >= TO_DATETIME(?lookback)',
+        ...(traceIdParams.length > 0
+          ? [`| WHERE trace_id IN (${traceIdParams.map((_, i) => `?trace_${i}`).join(', ')})`]
+          : []),
         `| EVAL ended_at = ${spanEnd}`,
         '| STATS last_at = MAX(ended_at) BY trace_id',
         '| WHERE last_at <= TO_DATETIME(?until)',
@@ -91,7 +100,7 @@ export const findTraceRounds = async ({
         '| SORT last_at ASC, trace_id ASC',
         `| LIMIT ${size}`,
       ].join('\n'),
-      params: [{ lookback }, { until }, { since }, { after }],
+      params: [{ lookback }, ...traceIdParams, { until }, { since }, { after }],
     });
   let response;
   try {
@@ -245,47 +254,50 @@ const toMemory = (
   permissions: { kibana: { privileges: [{ space: spaceId }] } },
 });
 
-/**
- * Reads the rounds of an AI index's trace sources since the cursor as transcripts, oldest first.
- * A source that fails is reported in `sources` and does not stop the others from being read.
- */
-export const readTraceTranscripts = async ({
-  esClient,
-  traces,
-  spaceId,
-  since,
-  after = '',
-  until,
-  size,
-  maxTokens = Infinity,
-}: {
+interface FindNewTraceRoundsParams {
   /** Scoped to the workflow user: traces are read with their Elasticsearch privileges. */
   esClient: ElasticsearchClient;
   traces: AiIndexTraceWithQuery[];
-  spaceId: string;
   since: string;
   after?: string;
   until: string;
   size: number;
-  /** The read stops before its transcripts exceed this many estimated tokens. */
-  maxTokens?: number;
-}): Promise<Omit<ReadTraceTranscriptsOutput, 'batches'>> => {
-  if (Date.parse(until) <= Date.parse(since)) {
-    return {
-      memories: [],
-      resume_from: since,
-      ...(after && { resume_after: after }),
-      sources: [],
-      skipped: 0,
-    };
-  }
+  /** Find only these rounds, as the trace sources find them. */
+  traceIds?: string[];
+}
 
+/**
+ * Finds the rounds of an AI index's trace sources since the cursor, oldest first and each once.
+ * `capped` is set when more rounds may follow the last one. A source that fails is reported in
+ * `sources` and does not stop the others from being read.
+ */
+export const findNewTraceRounds = async ({
+  esClient,
+  traces,
+  since,
+  after = '',
+  until,
+  size,
+  traceIds,
+}: FindNewTraceRoundsParams): Promise<{
+  rounds: TraceRound[];
+  capped: boolean;
+  sources: ReadTraceTranscriptsOutput['sources'];
+}> => {
   const sources: ReadTraceTranscriptsOutput['sources'] = [];
   const found: TraceRound[] = [];
   let boundary: TraceRound | undefined;
   for (const { type, value, query } of traces) {
     try {
-      const rounds = await findTraceRounds({ esClient, query, since, after, until, size });
+      const rounds = await findTraceRounds({
+        esClient,
+        query,
+        since,
+        after,
+        until,
+        size,
+        ...(traceIds && { traceIds }),
+      });
       sources.push({ type, value, rounds: rounds.length });
       found.push(...rounds);
       const last = rounds[rounds.length - 1];
@@ -302,7 +314,55 @@ export const readTraceTranscripts = async ({
     .sort(compareRounds)
     .filter(({ traceId }) => !seen.has(traceId) && !!seen.add(traceId))
     .filter((round) => !boundary || compareRounds(round, boundary) <= 0);
-  const taken = eligible.slice(0, size);
+  return {
+    rounds: eligible.slice(0, size),
+    capped: boundary !== undefined || eligible.length > size,
+    sources,
+  };
+};
+
+/**
+ * Reads the rounds of an AI index's trace sources since the cursor as transcripts, oldest first.
+ * A source that fails is reported in `sources` and does not stop the others from being read.
+ */
+export const readTraceTranscripts = async ({
+  esClient,
+  traces,
+  spaceId,
+  since,
+  after = '',
+  until,
+  size,
+  maxTokens = Infinity,
+  traceIds,
+}: FindNewTraceRoundsParams & {
+  spaceId: string;
+  /** The read stops before its transcripts exceed this many estimated tokens. */
+  maxTokens?: number;
+}): Promise<Omit<ReadTraceTranscriptsOutput, 'batches'>> => {
+  if (Date.parse(until) <= Date.parse(since)) {
+    return {
+      memories: [],
+      resume_from: since,
+      ...(after && { resume_after: after }),
+      sources: [],
+      skipped: 0,
+    };
+  }
+
+  const {
+    rounds: taken,
+    capped: cut,
+    sources,
+  } = await findNewTraceRounds({
+    esClient,
+    traces,
+    since,
+    after,
+    until,
+    size,
+    ...(traceIds && { traceIds }),
+  });
 
   const byTarget = new Map<string, TraceRound[]>();
   for (const round of taken) {
@@ -341,7 +401,7 @@ export const readTraceTranscripts = async ({
     tokens += memoryTokens;
     read++;
   }
-  const capped = boundary !== undefined || eligible.length > size || read < taken.length;
+  const capped = cut || read < taken.length;
   const last = taken[read - 1];
 
   return {

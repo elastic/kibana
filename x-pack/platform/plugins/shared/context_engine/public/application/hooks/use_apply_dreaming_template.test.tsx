@@ -16,7 +16,7 @@ import { useApplyDreamingTemplate } from './use_apply_dreaming_template';
 describe('useApplyDreamingTemplate', () => {
   const config = { facts: [{ type: 'preference' }] };
 
-  it('turns dreaming on, caches the saved config and refetches the AI index', async () => {
+  it('turns lucid and relationship dreaming on, caches the saved config and refetches the AI index', async () => {
     const core = coreMock.createStart();
     core.http.put.mockResolvedValue({ dreaming: { enabled: true, ...config } });
     const queryClient = new QueryClient();
@@ -35,8 +35,10 @@ describe('useApplyDreamingTemplate', () => {
 
     const [, { body }] = core.http.put.mock.calls[0] as unknown as [string, { body: string }];
     expect(JSON.parse(body)).toEqual({
-      enabled: true,
       ...config,
+      enabled: false,
+      lucid: { enabled: true },
+      relationship_dreaming: { enabled: true },
     });
     expect(queryClient.getQueryData(contextEngineQueryKeys.aiIndex.dreaming('support'))).toEqual({
       dreaming: { enabled: true, ...config },

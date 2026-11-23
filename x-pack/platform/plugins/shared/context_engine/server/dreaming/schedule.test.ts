@@ -10,6 +10,8 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
   CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
   CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
@@ -17,10 +19,13 @@ import {
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
+import type { LucidDreamingScheduler } from '../lucid_dreaming/task';
 import type { DreamingWorkflowsApi } from './schedule';
 import {
   createDreamingScheduleService,
   dreamingWorkflowIdFor,
+  lucidDreamingWorkflowIdFor,
+  lucidTraceDreamingWorkflowIdFor,
   relationshipsWorkflowIdFor,
   shouldDream,
   traceDreamingBatchWorkflowIdFor,
@@ -60,6 +65,24 @@ describe('shouldDream', () => {
     expect(shouldDream(aiIndex({ dreaming: { enabled: true } }))).toBe(false);
     expect(shouldDream(aiIndex({ dreaming: undefined }))).toBe(false);
   });
+
+  it('dreams with lucid or relationship dreaming on, whatever enabled says', () => {
+    const off = { ...dreaming, enabled: true, lucid: { enabled: false } };
+    expect(shouldDream(aiIndex({ dreaming: off }))).toBe(false);
+    expect(
+      shouldDream(aiIndex({ dreaming: { ...off, enabled: false, lucid: { enabled: true } } }))
+    ).toBe(true);
+    expect(
+      shouldDream(aiIndex({ dreaming: { ...off, relationship_dreaming: { enabled: true } } }))
+    ).toBe(true);
+    expect(
+      shouldDream(
+        aiIndex({
+          dreaming: { ...off, relationships: [], relationship_dreaming: { enabled: true } },
+        })
+      )
+    ).toBe(false);
+  });
 });
 
 describe('createDreamingScheduleService', () => {
@@ -69,6 +92,7 @@ describe('createDreamingScheduleService', () => {
     cancelAllActiveWorkflowExecutions: jest.Mock;
   };
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'addAutomation' | 'removeAutomation'>>;
+  let lucidDreaming: jest.Mocked<LucidDreamingScheduler>;
   let request: KibanaRequest;
 
   const createService = (management: typeof workflowsManagement | undefined) =>
@@ -77,6 +101,7 @@ describe('createDreamingScheduleService', () => {
       getManagedWorkflowsClient: async () => client as unknown as PluginScopedManagedWorkflowsApi,
       getWorkflowsManagement: async () => management as unknown as DreamingWorkflowsApi | undefined,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      lucidDreaming,
     });
 
   beforeEach(() => {
@@ -91,6 +116,10 @@ describe('createDreamingScheduleService', () => {
     aiIndexService = {
       addAutomation: jest.fn().mockResolvedValue('attached'),
       removeAutomation: jest.fn().mockResolvedValue('removed'),
+    };
+    lucidDreaming = {
+      schedule: jest.fn().mockResolvedValue(undefined),
+      unschedule: jest.fn().mockResolvedValue(undefined),
     };
     request = httpServerMock.createKibanaRequest();
   });
@@ -308,6 +337,199 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
+  describe('lucid and relationship dreaming', () => {
+    const lucid = {
+      ...dreaming,
+      enabled: false,
+      connector_id: 'big-model',
+      lucid: { enabled: true },
+      relationship_dreaming: { enabled: true },
+    };
+    const lucidWorkflowId = `${CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID}-${suffix}`;
+    const lucidTraceWorkflowId = `${CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID}-${suffix}`;
+    const installedIds = () => client.install.mock.calls.map(([definitionId]) => definitionId);
+    const uninstalledIds = () => client.uninstall.mock.calls.map(([definitionId]) => definitionId);
+    const installedValuesOf = (definitionId: string) =>
+      client.install.mock.calls.find(([id]) => id === definitionId)?.[1].values;
+
+    it('names its workflows per AI index and space', () => {
+      expect(lucidDreamingWorkflowIdFor('support', SPACE)).toBe(lucidWorkflowId);
+      expect(lucidTraceDreamingWorkflowIdFor('support', SPACE)).toBe(lucidTraceWorkflowId);
+    });
+
+    it('installs the lucid workflows and relationships instead of the scheduled ones', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: lucid }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+      ]);
+      expect(client.uninstall.mock.calls.map(([definitionId]) => definitionId)).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+      ]);
+      expect(aiIndexService.removeAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
+        WORKFLOW_ID,
+        `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${suffix}`,
+      ]);
+      expect(aiIndexService.addAutomation.mock.calls.map(([, , { value }]) => value)).toEqual([
+        lucidWorkflowId,
+        lucidTraceWorkflowId,
+        relationshipsWorkflowIdFor('support', SPACE),
+      ]);
+    });
+
+    it('starts the watcher as the caller, every minute by default', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: lucid }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(lucidDreaming.schedule).toHaveBeenCalledWith({
+        aiIndexId: 'support',
+        spaceId: SPACE,
+        request,
+        interval: '1m',
+      });
+      expect(lucidDreaming.unschedule).not.toHaveBeenCalled();
+    });
+
+    it('runs each on its own interval, ignoring the dreaming schedule', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({
+          dreaming: {
+            ...lucid,
+            lucid: { enabled: true, interval: '5m' },
+            relationship_dreaming: { enabled: true, interval: '2h' },
+          },
+        }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(lucidDreaming.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ interval: '5m' })
+      );
+      expect(installedValuesOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID)?.intervalMinutes).toBe(
+        120
+      );
+    });
+
+    it('links relationships daily by default', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: lucid }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installedValuesOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID)?.intervalMinutes).toBe(
+        24 * 60
+      );
+    });
+
+    it('prompts with the lucid connector, and links relationships with the dreaming one', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({
+          dreaming: { ...lucid, lucid: { enabled: true, connector_id: 'small-model' } },
+        }),
+        spaceId: SPACE,
+        request,
+      });
+
+      const connectorOf = (definitionId: string) =>
+        client.install.mock.calls.find(([id]) => id === definitionId)?.[1].values?.connectorId;
+      expect(connectorOf(CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID)).toBe('small-model');
+      expect(connectorOf(CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID)).toBe('small-model');
+      expect(connectorOf(CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID)).toBe('small-model');
+      expect(connectorOf(CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID)).toBe('big-model');
+    });
+
+    it('prompts with the dreaming connector when lucid dreaming names none', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: lucid }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(
+        client.install.mock.calls.find(
+          ([id]) => id === CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID
+        )?.[1].values?.connectorId
+      ).toBe('big-model');
+    });
+
+    it('runs lucid dreaming alone', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: { ...lucid, relationship_dreaming: { enabled: false } } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installedIds()).toEqual([
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
+      ]);
+      expect(uninstalledIds()).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID,
+      ]);
+      expect(lucidDreaming.schedule).toHaveBeenCalledTimes(1);
+    });
+
+    it('runs relationship dreaming alone, without the watcher', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ dreaming: { ...lucid, lucid: { enabled: false } } }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(installedIds()).toEqual([CONTEXT_ENGINE_RELATIONSHIPS_WORKFLOW_ID]);
+      expect(uninstalledIds()).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_BATCH_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_LUCID_TRACE_DREAMING_WORKFLOW_ID,
+      ]);
+      expect(lucidDreaming.schedule).not.toHaveBeenCalled();
+      expect(lucidDreaming.unschedule).toHaveBeenCalledWith({
+        aiIndexId: 'support',
+        spaceId: SPACE,
+      });
+    });
+
+    it('stops everything with both off, and with the AI index', async () => {
+      const service = createService(workflowsManagement);
+      await service.reconcile({
+        aiIndex: aiIndex({
+          dreaming: {
+            ...lucid,
+            enabled: true,
+            lucid: { enabled: false },
+            relationship_dreaming: { enabled: false },
+          },
+        }),
+        spaceId: SPACE,
+        request,
+      });
+      expect(client.install).not.toHaveBeenCalled();
+      expect(uninstalledIds()).toHaveLength(6);
+      expect(lucidDreaming.unschedule).toHaveBeenCalledTimes(1);
+
+      await service.remove({ aiIndexId: 'support', spaceId: SPACE, request });
+      expect(lucidDreaming.unschedule).toHaveBeenCalledTimes(2);
+    });
+  });
+
   it('refuses to install a workflow it could not enable', async () => {
     await expect(
       createService(undefined).reconcile({ aiIndex: aiIndex(), spaceId: SPACE, request })
@@ -350,7 +572,7 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(6);
+    expect(client.uninstall).toHaveBeenCalledTimes(8);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

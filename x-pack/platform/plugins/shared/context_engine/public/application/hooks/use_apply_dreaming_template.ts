@@ -36,7 +36,15 @@ export const useApplyDreamingTemplate = () => {
     ApplyDreamingTemplateArgs
   >({
     mutationFn: ({ aiIndexId, config }) =>
-      setAiIndexDreaming(http, { aiIndexId, config: { enabled: true, ...config } }),
+      setAiIndexDreaming(http, {
+        aiIndexId,
+        config: {
+          ...config,
+          enabled: false,
+          lucid: { enabled: true },
+          relationship_dreaming: { enabled: true },
+        },
+      }),
     onSuccess: (data, { aiIndexId }) => {
       queryClient.setQueryData(contextEngineQueryKeys.aiIndex.dreaming(aiIndexId), data);
       queryClient.invalidateQueries({ queryKey: contextEngineQueryKeys.aiIndex.detail(aiIndexId) });

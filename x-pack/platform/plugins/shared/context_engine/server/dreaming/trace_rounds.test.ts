@@ -128,6 +128,31 @@ describe('findTraceRounds', () => {
     ]);
   });
 
+  it('finds only the rounds it is given, as the source query finds them', async () => {
+    esClient.esql.query.mockResolvedValue(roundsResponse([]) as never);
+
+    await findTraceRounds({
+      esClient,
+      query: AGENT_QUERY,
+      since: '2026-11-11T12:00:00.000Z',
+      after: '',
+      until: '2026-11-11T13:15:00.000Z',
+      size: 2,
+      traceIds: ['trace-1', 'trace-2'],
+    });
+
+    const [{ query, params }] = esClient.esql.query.mock.calls[0] as [
+      { query: string; params: unknown[] }
+    ];
+    expect(query.startsWith(AGENT_QUERY)).toBe(true);
+    expect(query.indexOf('| WHERE trace_id IN (?trace_0, ?trace_1)')).toBeLessThan(
+      query.indexOf('| STATS')
+    );
+    expect(params).toEqual(
+      expect.arrayContaining([{ trace_0: 'trace-1' }, { trace_1: 'trace-2' }])
+    );
+  });
+
   it('falls back to span starts for a source without a duration', async () => {
     esClient.esql.query
       .mockRejectedValueOnce(
