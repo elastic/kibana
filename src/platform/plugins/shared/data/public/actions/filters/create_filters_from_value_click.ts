@@ -10,8 +10,8 @@
 import _ from 'lodash';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
-import { EsqlSource, getOrRegisterEsqlDataView, type FilterableSource } from '@kbn/data-source';
-import type { DataViewBase, Filter } from '@kbn/es-query';
+import { EsqlSource, type FilterableSource } from '@kbn/data-source';
+import type { DataViewBaseNoFields, Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
@@ -26,8 +26,6 @@ import {
   buildPhrasesFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -145,17 +143,18 @@ type RawColumnValue = string | number | boolean | (string | number | boolean)[] 
 const isUnfilterableComputedColumn = (column: DatatableColumn): boolean =>
   column.isComputedColumn === true && column.meta?.sourceParams?.isSourceFieldFilterable !== true;
 
+// `source` is only the identity of the dataset, which is all that the filters carry
 const buildRawColumnFilter = (
   filterFieldName: string,
   value: RawColumnValue,
   column: DatatableColumn,
-  dataView: DataViewBase
+  source: DataViewBaseNoFields
 ) => {
   // Only null/undefined mean "no value" here. ES|QL rows never contain the MISSING_TOKEN
   // sentinel (it is injected by the DSL terms agg), so a literal "__missing__" string is a
   // real document value and must produce a phrase filter, not a negated exists filter.
   if (value == null) {
-    const existsFilter = buildSimpleExistFilter(filterFieldName, dataView.id ?? '');
+    const existsFilter = buildSimpleExistFilter(filterFieldName, source.id ?? '');
     existsFilter.meta.negate = true;
     return [existsFilter];
   }
@@ -165,22 +164,15 @@ const buildRawColumnFilter = (
   // match phrase if it is a text. So you don't have to worry about the field type.
   const fieldDescriptor = { name: filterFieldName, type: column.meta?.type };
   const filter = Array.isArray(value)
-    ? buildPhrasesFilter(fieldDescriptor, value, dataView)
-    : buildPhraseFilter(fieldDescriptor, value, dataView);
+    ? buildPhrasesFilter(fieldDescriptor, value, source)
+    : buildPhraseFilter(fieldDescriptor, value, source);
   return [filter];
 };
 
-/** The DataView registered for the dataset of the index pattern, with the filterable fields of its ES|QL schema. */
-const getEsqlDataView = async (indexPattern: string): Promise<DataView> => {
-  const http = getHttp();
-  const source = await EsqlSource.create({ query: 'FROM ' + indexPattern, http });
-  return getOrRegisterEsqlDataView(getIndexPatterns() as DataViewsPublicPluginStart, source, http);
-};
-
 /**
- * The source of the dataset of the index pattern. Its id is the one that the filters carry in `meta.index`.
- * It is not a data view, so there is nothing to register, which is all that a filter on a column that
- * the query creates needs.
+ * The source of the dataset of the index pattern: the FROM target, which can be an index, a view or a
+ * dataset, with the filterable fields of its schema. Its id is the one that the filters carry in `meta.index`.
+ * Asking for the fields is a request for the schema, so it is only for what needs them.
  */
 const getEsqlFilterableSource = async (indexPattern: string): Promise<FilterableSource> => {
   const http = getHttp();
@@ -188,43 +180,47 @@ const getEsqlFilterableSource = async (indexPattern: string): Promise<Filterable
   return source.toFilterableSource(http);
 };
 
-const createFilterFromRawColumnsESQL = async (column: DatatableColumn, value: RawColumnValue) => {
-  const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
-
+// `sourceField` is the name of the column in the output of the query. `column.name` can be a custom label
+const createFilterFromRawColumnsESQL = async (
+  column: DatatableColumn,
+  value: RawColumnValue,
+  { indexPattern, sourceField }: { indexPattern: string; sourceField: string }
+) => {
+  // The FROM target is empty when the query does not have one, as in ROW
   if (!indexPattern) {
     return [];
   }
 
-  // Prefer `sourceField` (the column name in the query output). Fall back to `column.name` when it
-  // is not a string, as it can be a custom label
-  const sourceFieldName = column.meta?.sourceParams?.sourceField;
-  const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
-
   // A column created by the query (e.g. EVAL bytes = bytes * 2) can have the same name as a real,
-  // filterable field, so the field check isn't enough: fieldName would resolve to that
+  // filterable field, so the field check isn't enough: sourceField would resolve to that
   // unrelated field, but the value shown is the computed one, not the raw field's value.
   // It can't be a DSL filter, so it is an ES|QL one that is applied to the queries that have the column.
-  if (isUnfilterableComputedColumn(column)) {
-    // the date columns can't be filtered with a value, brushing updates the time range instead
-    if (column.meta?.type === 'date') {
-      return [];
-    }
-    const source = await getEsqlFilterableSource(indexPattern);
-    return buildRawColumnFilter(fieldName, value, column, source).map((filter) => ({
-      ...filter,
-      meta: { ...filter.meta, kind: 'esql' as const },
-    }));
-  }
+  const isComputedColumn = isUnfilterableComputedColumn(column);
 
-  const dataView = await getEsqlDataView(indexPattern);
-  const field = dataView.getFieldByName(fieldName);
-
-  // The field should be present in the data view and filterable.
-  if (!field?.filterable) {
+  // this shoould update the time picker, we don't do it for DSL either, should be handled together
+  if (isComputedColumn && column.meta?.type === 'date') {
     return [];
   }
 
-  return buildRawColumnFilter(fieldName, value, column, dataView);
+  if (isComputedColumn) {
+    // The filter only needs the identity of the dataset, the schema is not asked for
+    const { datasetId, title } = await EsqlSource.resolveDataset({
+      query: 'FROM ' + indexPattern,
+      http: getHttp(),
+    });
+    return buildRawColumnFilter(sourceField, value, column, { id: datasetId, title }).map(
+      (filter) => ({ ...filter, meta: { ...filter.meta, kind: 'esql' as const } })
+    );
+  }
+
+  const source = await getEsqlFilterableSource(indexPattern);
+
+  // The field should be present in the source and filterable.
+  if (!source.getFieldByName(sourceField)?.filterable) {
+    return [];
+  }
+
+  return buildRawColumnFilter(sourceField, value, column, source);
 };
 
 export const createFilterESQL = async (
@@ -250,7 +246,9 @@ export const createFilterESQL = async (
   }
   const value = table.rows[rowIndex][column.id];
   if (value == null) {
-    return !operationType ? await createFilterFromRawColumnsESQL(column, value) : [];
+    return !operationType
+      ? await createFilterFromRawColumnsESQL(column, value, { indexPattern, sourceField })
+      : [];
   }
 
   const filters: Filter[] = [];
@@ -273,7 +271,9 @@ export const createFilterESQL = async (
       )
     );
   } else if (!operationType) {
-    filters.push(...(await createFilterFromRawColumnsESQL(column, value)));
+    filters.push(
+      ...(await createFilterFromRawColumnsESQL(column, value, { indexPattern, sourceField }))
+    );
   } else {
     filters.push(buildSimpleExistFilter(sourceField, indexPattern));
   }
