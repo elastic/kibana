@@ -7,10 +7,10 @@
 
 import { createToken } from '@kbn/core-di';
 import type {
-  DesiredRules,
-  DesiredRulesContext,
+  DesiredResources,
   DetectionSignalGenerator,
   DetectionStrategyDescriptor,
+  ResourceContext,
 } from './types';
 
 /**
@@ -20,8 +20,12 @@ import type {
 export interface DetectionStrategy {
   descriptor: DetectionStrategyDescriptor;
   generator: DetectionSignalGenerator;
-  /** The alerting rules this strategy runs on, when the engine owns them. */
-  desiredRules?(context: DesiredRulesContext): Promise<DesiredRules>;
+  /**
+   * What the strategy needs to exist outside the engine, such as the alerting rules it reads. The
+   * engine reconciles them when knowledge or sources change, never on a tick. A strategy that
+   * throws keeps everything it already owns.
+   */
+  resources?(context: ResourceContext): Promise<DesiredResources>;
 }
 
 /**

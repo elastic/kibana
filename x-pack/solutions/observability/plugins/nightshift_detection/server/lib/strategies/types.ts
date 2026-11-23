@@ -12,6 +12,7 @@ import type {
   CreateRuleData,
 } from '@kbn/alerting-v2-schemas';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 import type { z } from '@kbn/zod/v4';
 import type { detectionSignalReadingSchema } from '../../../common/detection_signal';
 import type { SeriesId } from './series_key';
@@ -98,22 +99,51 @@ export interface DetectionSignalGenerator {
   generate(context: GeneratorContext): Promise<GenerateResult>;
 }
 
-/** An alerting rule the engine wants to exist for a strategy. */
-export interface DesiredRule {
+/**
+ * An Alerting v2 rule a strategy wants to exist. The engine owns its identity: it derives the rule
+ * id from the space, strategy, source and query, adds its ownership tags and prefixes the name.
+ */
+export interface AlertingRuleResource {
+  kind: 'alerting_rule';
   source_id: string;
-  data: CreateRuleData;
-  /** What the generator needs to read the rule's rows back, such as the condition used. */
-  meta?: Record<string, string>;
+  /** Whether the rule should run; false for the rules of a disabled source. */
+  enabled: boolean;
+  /**
+   * The rule as created. `metadata.name` is the strategy's title for it, without the prefix. No
+   * tags: the engine's are its ownership record, and `nightshift:source:*` belongs to
+   * significant_events, which deletes those rules.
+   */
+  data: Omit<CreateRuleData, 'metadata'> & {
+    metadata: Omit<CreateRuleData['metadata'], 'tags'>;
+  };
 }
 
-/** The rules a strategy needs, and the sources it cannot watch. */
-export interface DesiredRules {
-  rules: DesiredRule[];
+/**
+ * Something a strategy needs to exist outside the engine, tagged by `kind`. One kind for now; the
+ * union grows when a strategy needs another (an ML job, a connector check).
+ */
+export type DesiredResource = AlertingRuleResource;
+
+/** The resources a strategy needs, and the sources it cannot watch. */
+export interface DesiredResources {
+  resources: DesiredResource[];
+  /** Sources the strategy cannot watch for now. Their existing rules stay as they are. */
   skipped: Array<{ source_id: string; reason: string }>;
 }
 
-/** What building a strategy's rules needs. */
-export type DesiredRulesContext = Pick<
-  GeneratorContext,
-  'spaceId' | 'sources' | 'esClient' | 'abortSignal'
->;
+/** What building a strategy's resources needs. */
+export interface ResourceContext
+  extends Pick<GeneratorContext, 'spaceId' | 'esClient' | 'abortSignal'> {
+  /**
+   * Every source of the space, enabled or not, so a strategy keeps a disabled source's rules,
+   * disabled, instead of leaving them out and having them deleted.
+   */
+  sources: NightshiftSource[];
+  /**
+   * The space's knowledge indicators, read as the internal user with no privilege check. Read only
+   * those of `sources`: the account's own read of the sources is what limits what it watches.
+   */
+  knowledge: KnowledgeIndicatorReader;
+  /** Whether cross-project search is on, so queries carry the project routing prefix. */
+  cpsEnabled: boolean;
+}

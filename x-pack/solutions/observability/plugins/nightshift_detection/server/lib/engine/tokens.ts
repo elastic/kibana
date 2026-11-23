@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { createToken } from '@kbn/core-di';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
+import type { KnowledgeIndicatorReader } from '@kbn/significant-events-plugin/server';
 
 /** What identifies one tick. */
 export interface RunContext {
@@ -25,14 +27,48 @@ export interface RunContext {
 /** The tick's identity. Bound per tick scope: by the `_tick` route from the request, by tests directly. */
 export const RunContext = createToken<RunContext>('nightshiftDetection.RunContext');
 
-/** The sources the admin enabled for the tick's space. */
-export interface EnabledSources {
-  /** The sources enabled in the tick's space. */
-  list(): Promise<NightshiftSource[]>;
+/** The sources of the scope's space. */
+export interface Sources {
+  /**
+   * The space's sources, enabled and disabled, or only the ones the admin enabled. Throws when the
+   * space has more sources than one read returns.
+   */
+  list(params: { enabledOnly: boolean }): Promise<NightshiftSource[]>;
 }
 
 /**
- * Reads the enabled sources. Bound per tick scope next to {@link RunContext}, because the sources
- * client of `nightshift_sources` is built from the request.
+ * Reads the space's sources. Bound per account scope, because the sources client of
+ * `nightshift_sources` is built from the request.
  */
-export const EnabledSources = createToken<EnabledSources>('nightshiftDetection.EnabledSources');
+export const Sources = createToken<Sources>('nightshiftDetection.Sources');
+
+/**
+ * The space's knowledge indicators, read as the internal user: `significant_events` checks no
+ * privilege, so a strategy reads only those of the sources the account listed. Bound per scope,
+ * because the reader is built for the scope's space.
+ */
+export const KnowledgeIndicators = createToken<KnowledgeIndicatorReader>(
+  'nightshiftDetection.KnowledgeIndicators'
+);
+
+/**
+ * The engine's own Elasticsearch client: `asInternalUser` (the kibana_system user). Every read
+ * and write on `.nightshift-detection_engine-*` goes through it, so the indices stay writable
+ * without giving the detection service account any privilege on them.
+ *
+ * No service takes a client from `core` directly; it asks for this token or for
+ * {@link DetectionEngineDataClient}.
+ */
+export const DetectionEngineSystemClient = createToken<ElasticsearchClient>(
+  'nightshiftDetection.EngineSystemClient'
+);
+
+/**
+ * Request-scoped client authenticated as the space's detection service account. Generators read
+ * customer data with it, and it is the only client that touches customer indices.
+ *
+ * Bound per account scope, for a tick or a reconciliation; it is unbound outside one.
+ */
+export const DetectionEngineDataClient = createToken<ElasticsearchClient>(
+  'nightshiftDetection.EngineDataClient'
+);

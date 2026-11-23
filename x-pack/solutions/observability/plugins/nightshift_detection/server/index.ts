@@ -10,6 +10,7 @@ import { bindEngine } from './setup/bind_engine';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
+import { bindReconcile } from './setup/bind_reconcile';
 import { bindServiceAccount } from './setup/bind_service_account';
 import { bindServices } from './setup/bind_services';
 import { bindSignals } from './setup/bind_signals';
@@ -30,6 +31,7 @@ const pluginModule = new KibanaContainerModule((options) => {
   bindServiceAccount(options);
   bindWorkflows(options);
   bindTick(options);
+  bindReconcile(options);
   bindRoutes(options);
   bindOnSetup(options);
   bindOnStart(options);

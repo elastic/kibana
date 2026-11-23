@@ -17,15 +17,18 @@ import type { DetectionSignal } from '../../common/detection_signal';
 import { NIGHTSHIFT_DETECTION_TIERED_FEATURES } from '../../common/constants';
 import { module } from '..';
 import { AvailabilityService } from '../lib/availability/availability_service';
-import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
+import { DetectionEngineSystemClient } from '../lib/engine/tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
+import { ScopedReconcileRunner } from '../lib/reconcile/scoped_reconcile_runner';
+import { SpaceReconcileLock } from '../lib/reconcile/space_reconcile_lock';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
 import { WorkflowInstaller } from '../lib/workflows/workflow_installer';
 import { DetectionSignalStore } from '../lib/signals/signal_store';
 import { DetectionStateClient, detectionStateSavedObjectType } from '../lib/state';
+import { DetectionStrategy } from '../lib/strategies/detection_strategy';
 import { StrategyCatalog } from '../lib/strategies/strategy_catalog';
 import { InMemorySavedObjectsRepository } from '../test_utils/in_memory_saved_objects_repository';
 import { DETECTION_ENGINE_WORKLOAD_TYPE } from '../lib/service_account/workload';
@@ -53,6 +56,9 @@ function createContainer() {
   const createSignalEvent = jest.fn().mockResolvedValue({ group_hash: 'hash' });
   const alerting = {
     getAlertEventsClientWithRequest: jest.fn().mockResolvedValue({ createSignalEvent }),
+    getRulesClientWithRequestInSpace: jest
+      .fn()
+      .mockResolvedValue({ findRules: async () => ({ items: [], total: 0 }) }),
   } as unknown as AlertingServerStart;
   const spaces = {
     spacesService: { getSpaceId: jest.fn().mockReturnValue('default') },
@@ -66,10 +72,17 @@ function createContainer() {
   container.bind(PluginStart('nightshiftSources')).toConstantValue({
     getSourcesClient: async () => ({ list: async () => ({ sources: [], total: 0 }) }),
   });
+  container.bind(PluginStart('significantEvents')).toConstantValue({
+    getKnowledgeIndicatorReader: () => ({
+      listQueries: async () => [],
+      listFeatures: async () => [],
+    }),
+  });
   container.bind(PluginStart('workflowsExtensions')).toConstantValue({});
   container.bind(PluginSetup('workflowsExtensions')).toConstantValue({
     registerManagedWorkflowOwner: jest.fn(),
   });
+  container.bind(PluginSetup('nightshiftSources')).toConstantValue({ onSourceChange: jest.fn() });
   container.bind(PluginSetup('workflowsManagement')).toConstantValue({});
   container.load(module);
 
@@ -101,6 +114,8 @@ describe('module', () => {
     container.get(ScopedTickRunner);
     container.get(SpaceRunLock);
     container.get(SpaceSetupLock);
+    container.get(ScopedReconcileRunner);
+    container.get(SpaceReconcileLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
@@ -146,6 +161,45 @@ describe('module', () => {
     });
 
     expect(result).toMatchObject({ status: 'completed', strategies: [] });
+  });
+
+  // Same reason as the tick: the reconciler and its rule reader are bound in the fork.
+  it('reconciles rules through a forked scope and reports a strategy whose resources fail', async () => {
+    const { container } = createContainer();
+    // Reported, the reconciler keeps the strategy's rules; dropped, it would delete them all.
+    container.bind(DetectionStrategy).toConstantValue({
+      descriptor: {
+        id: 'flaky',
+        version: 1,
+        name: 'Flaky',
+        description: 'Cannot read its knowledge',
+        cadence_minutes: 1,
+        settle_minutes: 0,
+        daily_new_event_cap: 1,
+      },
+      generator: {} as DetectionStrategy['generator'],
+      resources: async () => {
+        throw new Error('knowledge unreadable');
+      },
+    });
+    await container.unbind(SpaceReconcileLock);
+    const lock: Pick<SpaceReconcileLock, 'run'> = {
+      run: async ({ callback }) => ({ ran: true, result: await callback() }),
+    };
+    container.bind(SpaceReconcileLock).toConstantValue(lock as unknown as SpaceReconcileLock);
+
+    const result = await container.get(ScopedReconcileRunner).run({
+      accountRequest: httpServerMock.createKibanaRequest(),
+      spaceId: 'default',
+      abortSignal: new AbortController().signal,
+    });
+
+    expect(result).toMatchObject({
+      status: 'completed',
+      created: 0,
+      failures: [],
+      strategy_errors: [{ strategy: 'flaky', message: 'knowledge unreadable' }],
+    });
   });
 
   it('gives every tick scope the signal store of its own request', async () => {

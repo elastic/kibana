@@ -16,12 +16,11 @@ import { wrapReading } from '../signals/wrap_reading';
 import { DetectionStateClient } from '../state/detection_state_client';
 import { StrategyCatalog } from '../strategies/strategy_catalog';
 import type { GenerateResult } from '../strategies/types';
-import { DetectionEngineDataClient } from './es_client_tokens';
 import { planWindows } from './plan_windows';
 import type { PlannedWindow } from './plan_windows';
 import { SpaceRunLock } from './space_run_lock';
 import type { StrategyRunResult, TickResult } from './tick_result';
-import { EnabledSources, RunContext } from './tokens';
+import { DetectionEngineDataClient, RunContext, Sources } from './tokens';
 
 /**
  * Deadline for the generators of one tick, counted from taking the space's run lock, so a slow
@@ -72,7 +71,7 @@ export class EngineRunner {
     @inject(DetectionStateClient) private readonly state: DetectionStateClient,
     @inject(SpaceRunLock) private readonly spaceRunLock: Pick<SpaceRunLock, 'run'>,
     @inject(DetectionSignalStore) private readonly signalStore: DetectionSignalStore,
-    @inject(EnabledSources) private readonly enabledSources: EnabledSources,
+    @inject(Sources) private readonly sources: Sources,
     @inject(DetectionEngineDataClient) private readonly dataClient: ElasticsearchClient,
     @inject(CoreLogger) private readonly logger: Logger
   ) {}
@@ -145,7 +144,7 @@ export class EngineRunner {
       const windows = planWindows({ strategies, processedUntil, now, skipBacklog });
 
       // 4 and 5. Every due strategy runs on its own; one failing does not stop the others.
-      const sources = windows.length > 0 ? await this.enabledSources.list() : [];
+      const sources = windows.length > 0 ? await this.sources.list({ enabledOnly: true }) : [];
       const results = await Promise.all(
         windows.map((window) => this.runStrategy({ window, sources, runSignal: budget.signal }))
       );
