@@ -9,8 +9,8 @@ import type {
   ConnectorEventEmitter,
   PluginSetupContract as ActionsPluginSetupContract,
 } from '@kbn/actions-plugin/server';
+import { slack2HitlAction } from '@kbn/connector-topics';
 import type { Logger } from '@kbn/core/server';
-import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -209,7 +209,7 @@ export function registerWorkflowsConnectorEventEmitter({
 
       try {
         const client = await workflowsExtensions.getClient(request);
-        if (eventId === HITL_SLACK_ACTION_EVENT_ID) {
+        if (eventId === slack2HitlAction.name) {
           await resumeHitlFromSlackAction(client, enriched, { configurationUtilities, logger });
           return;
         }
