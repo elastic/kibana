@@ -36,18 +36,18 @@ export const validate = (
       const canLoadFields =
         isUnmappedFieldsStrategy(context.unmappedFieldsStrategy) &&
         context.unmappedFieldsStrategy !== UnmappedFieldsStrategy.DEFAULT;
-      // ES can load fields referenced later in the pipeline before resolving FILLNULL patterns.
+      // ES can load exact targets here or references later in the pipeline before resolving patterns.
       // Keep the warning when such a reference may satisfy the pattern; the server resolves it.
-      const laterNames = canLoadFields
+      const loadableNames = canLoadFields
         ? new Set(
-            Walker.findAll(ast, (node) => node.location.min > command.location.max)
+            [...fields, ...Walker.findAll(ast, (node) => node.location.min > command.location.max)]
               .filter(isColumn)
               .filter((column) => !isParametrized(column) && !hasWildcard(column.text))
               .map(getColumnName)
           )
         : new Set<string>();
 
-      if (!columnIsPresent(field, laterNames)) {
+      if (!columnIsPresent(field, loadableNames)) {
         return [errors.unknownColumn(field)];
       }
     }

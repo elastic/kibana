@@ -16,6 +16,36 @@ const check = (query: string, errors: string[] = []) =>
 
 describe('FILLNULL validation', () => {
   describe('unmapped targets', () => {
+    it.each(['load', 'load_all', 'nullify'])(
+      'accepts patterns matching exact targets in the same ON list under %s',
+      async (strategy) => {
+        const { validate: validateQuery } = await setup();
+        for (const targets of ['extra_*, extra_name', 'extra_name, extra_*']) {
+          const { errors } = await validateQuery(
+            `SET unmapped_fields="${strategy}"; FROM index | FILLNULL "x" ON ${targets}`
+          );
+          expect(errors).toEqual([]);
+        }
+      }
+    );
+
+    it('still rejects a pattern when the exact target does not match', async () => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        'SET unmapped_fields="load"; FROM index | FILLNULL "x" ON extra_*, another_name'
+      );
+      expect(errors).toEqual([expect.objectContaining({ text: 'Unknown column "extra_*"' })]);
+    });
+
+    it('does not use same-list targets to load fields under the default strategy', async () => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery('FROM index | FILLNULL "x" ON extra_*, extra_name');
+      expect(errors).toEqual([
+        expect.objectContaining({ text: 'Unknown column "extra_*"' }),
+        expect.objectContaining({ text: 'Unknown column "extra_name"' }),
+      ]);
+    });
+
     it.each(['load', 'nullify'])('accepts a field retained by KEEP under %s', async (strategy) => {
       const { validate: validateQuery } = await setup();
       const { errors, warnings } = await validateQuery(
