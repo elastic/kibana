@@ -1461,6 +1461,28 @@ describe('createEndpointLookupService', () => {
       expect(getHostMetadataList).toHaveBeenCalledTimes(2);
     });
 
+    it('dispatch mode reports not_found, not ambiguous, when only linked projects share the IP', async () => {
+      // Two linked-project hosts share the IP and the origin project has no
+      // match: the candidates are undispatchable from here, so origin presence
+      // outranks ambiguity instead of asking the analyst to choose between
+      // them (same rule as the hostname walk).
+      const getHostMetadataList = jest.fn(async (_query: unknown, passedScoped?: unknown) => ({
+        data: (passedScoped ? ['linked-a', 'linked-b'] : []).map((id) => ({
+          metadata: { elastic: { agent: { id } } },
+          host_status: HostStatus.HEALTHY,
+        })),
+        total: passedScoped ? 2 : 0,
+      }));
+      const { lookup } = buildService({
+        resolutionMode: 'dispatch',
+        scoped: { isCpsRead: () => true },
+        getHostMetadataList,
+      });
+
+      expect(await lookup.resolveByIp('10.0.0.8')).toEqual({ kind: 'not_found' });
+      expect(getHostMetadataList).toHaveBeenCalledTimes(2);
+    });
+
     it('dispatch mode reports ambiguity when a linked project host shares the IP', async () => {
       const { lookup } = buildService({
         resolutionMode: 'dispatch',

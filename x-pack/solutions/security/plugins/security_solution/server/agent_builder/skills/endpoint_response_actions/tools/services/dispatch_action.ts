@@ -430,7 +430,7 @@ const isolationNoOpResult = (
 
 /** Refusal for a Linux endpoint whose policy disallows host isolation. */
 const hostIsolationDisabledMessage = (hostLabel: string): string =>
-  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse this action. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
+  `Host isolation is disabled by the endpoint policy assigned to ${hostLabel}, so the endpoint will refuse to isolate or release it. Enable linux.advanced.host_isolation.allowed in that policy before trying again.`;
 
 const isHostIsolationDisabled = async (
   request: DispatchRequest,

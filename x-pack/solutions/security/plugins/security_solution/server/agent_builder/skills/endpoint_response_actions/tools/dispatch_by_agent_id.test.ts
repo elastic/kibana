@@ -974,6 +974,57 @@ describe.each(CASES)(
       expect(data.actionMayHaveBeenSent).toBeUndefined();
     });
 
+    itGated('does not dispatch a confirmed replay whose scan path alone changed', async () => {
+      // The comment-swap case is covered above; this locks the other
+      // displayed argument: a resume that swaps only scan's `path` (same
+      // comment, same target) must not inherit the approval.
+      if (!('path' in extraParams)) {
+        return;
+      }
+      const tool = build(service);
+
+      await cardFor(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/first' });
+      expect(toolCallState.value).toEqual(
+        expect.objectContaining({ args: expect.objectContaining({ path: '/tmp/first' }) })
+      );
+
+      const out = results(
+        await runApproved(tool, { agentId: 'agent-b', ...extraParams, path: '/tmp/second' })
+      );
+
+      expect(out[0].type).toBe('error');
+      const data = out[0].data as Record<string, unknown>;
+      expect(data.error).toBe('invalid_argument');
+      expect(data.message).toEqual(
+        expect.stringContaining('differ from the ones the analyst confirmed')
+      );
+      expect(String(data.message)).toContain('path');
+      expect(client[clientMethod]).not.toHaveBeenCalled();
+    });
+
+    itGated(
+      're-checks access after the card is shown and refuses a revoked privilege on resume',
+      async () => {
+        const tool = build(service);
+
+        await cardFor(tool, { agentId: 'agent-b', ...extraParams });
+
+        // The analyst's access is revoked between the card and the resume: the
+        // approval must not outlive the privilege it was granted under.
+        Object.assign(service, {
+          getEndpointAuthz: jest
+            .fn()
+            .mockResolvedValue(getEndpointAuthzInitialStateMock({ [privilege]: false })),
+        });
+
+        const out = results(await runApproved(tool, { agentId: 'agent-b', ...extraParams }));
+
+        expect(out[0].type).toBe('error');
+        expect((out[0].data as Record<string, unknown>).error).toBe('insufficient_privileges');
+        expect(client[clientMethod]).not.toHaveBeenCalled();
+      }
+    );
+
     it('keeps the dispatched action ID when every completion read fails', async () => {
       jest.useFakeTimers();
       try {
