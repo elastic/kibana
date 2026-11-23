@@ -29,12 +29,8 @@ export const BROWSER_SDK_LANGUAGE = 'webjs';
 /** `telemetry.distro.name` of the Elastic distributions, EDOT Android and iOS included. */
 export const ELASTIC_DISTRO_NAME = 'elastic';
 
-/**
- * `telemetry.sdk.name` of EDOT Android and EDOT iOS before they report the Elastic distribution
- * and the upstream SDK values. Not the language: EDOT Android's is `java`, as backend Java's.
- */
+/** `MOBILE_SDK_NAMES` per platform, to tell an older SDK's platform from its name. */
 export const MOBILE_SDK_NAME_BY_PLATFORM = { android: 'android', ios: 'iOS' } as const;
-export const MOBILE_SDK_NAMES = Object.values(MOBILE_SDK_NAME_BY_PLATFORM);
 
 /**
  * `telemetry.sdk.name` of EDOT Android and EDOT iOS, which EDOT React Native runs on. Not the
@@ -73,9 +69,7 @@ export const attributeField = (name: string): string => `attributes.${name}`;
 /** A resource attribute as stored in the OTel indices, e.g. `resource.attributes.service.name`. */
 export const resourceAttributeField = (name: string): string => `resource.attributes.${name}`;
 
-/** OTel resource attributes the mobile data carries that `@kbn/apm-types` doesn't name. */
-export const OS_NAME = 'os.name';
-export const TELEMETRY_DISTRO_NAME = 'telemetry.distro.name';
+/** One per install of a mobile app, which `@kbn/apm-types` doesn't name. */
 export const APP_INSTALLATION_ID = 'app.installation.id';
 
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
