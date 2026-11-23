@@ -230,6 +230,41 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '- x: object', '+ x: string (now required)'));
   });
 
+  it('says what a field that gained discriminator keys got, since its type looks the same', () => {
+    const added = (keys: string) =>
+      change(
+        'response-property-discriminator-mapping-added',
+        `added \`${keys}\` discriminator mapping keys to the \`calendarView/items/allOf[#/components/schemas/outlookItem]\` response property`,
+        'object',
+        'object'
+      );
+
+    expect(
+      describeChanges([
+        added('#microsoft.graph.a, #microsoft.graph.b'),
+        added('#microsoft.graph.b, #microsoft.graph.c, #microsoft.graph.d'),
+      ])
+    ).toEqual(
+      object(
+        'Response',
+        '! calendarView: object (+ discriminator: microsoft.graph.a, microsoft.graph.b, microsoft.graph.c and 1 more)'
+      )
+    );
+  });
+
+  it('names the root of a shape by its schema', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#microsoft.graph.group` discriminator mapping keys to the `allOf[#/components/schemas/microsoft.graph.baseItem]/allOf[subschema #1: entity]` response property',
+          'object',
+          'object'
+        ),
+      ])
+    ).toEqual(object('Response', '! entity: object (+ discriminator: microsoft.graph.group)'));
+  });
+
   it('shows the type of a field that gained a variant, or the variants when the type is unknown', () => {
     expect(
       describeChanges([
@@ -248,7 +283,11 @@ describe('describeChanges', () => {
       ])
     ).toEqual(
       areas(
-        object('Response', '! (response body) (- Q1)', '! resource (+ microsoft.graph.group)'),
+        object(
+          'Response',
+          '! (response body) (- Q1)',
+          '! resource (+ discriminator: microsoft.graph.group)'
+        ),
         object('Request', '! source (+ A, B, C and 1 more)')
       )
     );

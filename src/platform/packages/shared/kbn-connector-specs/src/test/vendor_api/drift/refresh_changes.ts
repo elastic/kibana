@@ -100,7 +100,20 @@ const shortName = (name: string): string =>
  * often shared. A map's values keep the name of the map (`labels/additionalProperties`).
  */
 const fieldOf = (path: string): string => {
-  const segments = tidy(path).split('/');
+  const tidied = tidy(path);
+  // Nothing but composition selectors are left: the root of a shape, named by the schema the last
+  // one selects, `allOf[#/…/baseItem]/allOf[subschema #1: entity]` as `entity`.
+  const selectors = [...tidied.matchAll(/(?:allOf|oneOf|anyOf)\[([^\]]*)\]/g)];
+  const onlySelectors =
+    tidied.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\//g, '') === '';
+  if (selectors.length > 0 && onlySelectors) {
+    const [, selected] = selectors[selectors.length - 1];
+    const named = selected.includes(': ')
+      ? selected.slice(selected.lastIndexOf(': ') + 2)
+      : selected.slice(selected.lastIndexOf('/') + 1);
+    return shortName(named.trim());
+  }
+  const segments = tidied.split('/');
   const last = segments[segments.length - 1];
   const name =
     last === 'additionalProperties' && segments.length > 1
@@ -187,16 +200,11 @@ const variantName = (variant: string): string =>
     .replace(/^#\/components\/schemas\//, '')
     .replace(/^#/, '');
 
-const listedVariants = (list: string): string => {
-  const names = list
+const variantNames = (list: string): string[] =>
+  list
     .split(',')
     .map(variantName)
     .filter((name) => name !== '');
-  const more = names.length - MAX_VARIANTS_NAMED;
-  return more > 0
-    ? `${names.slice(0, MAX_VARIANTS_NAMED).join(', ')} and ${more} more`
-    : names.join(', ');
-};
 
 const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const { id, text, type } = change;
@@ -224,8 +232,13 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
     const [list, second] = names;
     if (list === undefined) return undefined;
     const body = second === undefined || COMBINATORS.has(second);
-    const added = /-added$/.test(id);
-    const what = isEnum ? list : listedVariants(list);
+    const sign = /-added$/.test(id) ? '+' : '-';
+    const what = isEnum ? list : variantNames(list).join(', ');
+    const discriminator = /discriminator-mapping/.test(id);
+    const detail = discriminator ? `${sign} discriminator: ${what}` : `${sign} ${what}`;
+    // Discriminator keys aren't a part of the type, so a field that gained them looks the same.
+    // A value or variant is in the type, unless it is unknown, cut short or unchanged.
+    const visible = type !== undefined && !type.includes('…') && type !== change.typeBefore;
     return [
       {
         area: id.startsWith('request-') ? 'Request' : 'Response',
@@ -233,8 +246,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
         name: body ? RESPONSE_BODY : fieldOf(second),
         type,
         typeBefore: change.typeBefore,
-        // A type that was cut may have lost the value or variant that changed.
-        details: type === undefined || type.includes('…') ? [`${added ? '+' : '-'} ${what}`] : [],
+        details: discriminator || !visible ? [detail] : [],
       },
     ];
   }
@@ -311,15 +323,48 @@ interface Field {
   readonly details: Set<string>;
 }
 
+const LISTED_DETAIL = /^([+-] (?:discriminator: )?)(.+)$/;
+
+/**
+ * What changed about a field, for the brackets after it: the values, variants and discriminator
+ * keys that were added or removed, from all the changes of the field, are one list of their names.
+ */
+const detailsOf = (details: ReadonlySet<string>): string[] => {
+  const listed = new Map<string, Set<string>>();
+  const plain: string[] = [];
+  for (const detail of details) {
+    const match = LISTED_DETAIL.exec(detail);
+    if (match === null) {
+      plain.push(detail);
+    } else {
+      const names = listed.get(match[1]) ?? new Set<string>();
+      match[2].split(', ').forEach((name) => names.add(name));
+      listed.set(match[1], names);
+    }
+  }
+  return [
+    ...plain,
+    ...[...listed].map(([prefix, names]) => {
+      const sorted = [...names].sort(byText);
+      const more = sorted.length - MAX_VARIANTS_NAMED;
+      return `${prefix}${sorted.slice(0, MAX_VARIANTS_NAMED).join(', ')}${
+        more > 0 ? ` and ${more} more` : ''
+      }`;
+    }),
+  ].sort(byLocationFirst);
+};
+
 /** A field's name and type, then in brackets what changed about it. */
-const lineOf = ({ name, type, details }: Field): string =>
-  `${name}${type === undefined ? '' : `: ${type}`}${
-    details.size > 0 ? ` (${[...details].sort(byLocationFirst).join(', ')})` : ''
+const lineOf = ({ name, type, details }: Field): string => {
+  const brackets = detailsOf(details);
+  return `${name}${type === undefined ? '' : `: ${type}`}${
+    brackets.length > 0 ? ` (${brackets.join(', ')})` : ''
   }`;
+};
 
 // What is told by the two lines of a field that changed its type: not said again in brackets.
 const isTypeChange = (detail: string): boolean =>
-  /^(was |[+-] |now nullable$|no longer nullable$)/.test(detail);
+  /^(was |[+-] (?!discriminator: )|now nullable$|no longer nullable$)/.test(detail);
 
 /** The lines of a field: what it was and what it is when its type changed, else one line. */
 const linesOf = (sign: Sign, field: Field): string[] => {
