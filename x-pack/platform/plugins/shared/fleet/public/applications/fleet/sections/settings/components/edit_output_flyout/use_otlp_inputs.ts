@@ -37,7 +37,7 @@ import {
   validateOtlpPositiveCount,
   validateOtlpPositiveDuration,
   validateOtlpRandomizationFactor,
-  parseOtlpDurationMs,
+  parseOtlpDurationNs,
   validateOtlpProxyUrl,
   validateOtlpShortString,
 } from './output_form_validators';
@@ -59,6 +59,7 @@ const OTLP_QUEUE_SPEC_DEFAULT_SIZE = 1000;
 const OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE = 8192;
 const OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL = '5s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL = '30s';
+const OTLP_RETRY_SPEC_DEFAULT_MAX_ELAPSED_TIME = '5m';
 
 /** Re-validates an input that shows an error when what its check depends on changes. */
 const useRevalidateWhenChanged = (
@@ -262,14 +263,17 @@ export function useOtlpInputs(
   const queueInitial: OtlpQueueConfig | null | undefined = otlpOutput ? queue : QUEUE_DEFAULTS;
   const batchInitial = queueInitial?.batch;
   const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
+  // the collector does not check a queue that is off: it only has to be a number
+  const validateQueueCount = (value: string) =>
+    otlpQueueEnabledInput.value ? validateOtlpPositiveCount(value) : validateOtlpCount(value);
   const otlpQueueNumConsumersInput = useInput(
     toInputValue(queueInitial?.num_consumers),
-    validateIfSelected(validateOtlpPositiveCount),
+    validateIfSelected(validateQueueCount),
     disabled
   );
   const otlpQueueSizeInput = useInput(
     toInputValue(queueInitial?.queue_size),
-    validateIfSelected(validateOtlpPositiveCount),
+    validateIfSelected(validateQueueCount),
     disabled
   );
   const otlpQueueSizerInput = useInput(
@@ -296,25 +300,30 @@ export function useOtlpInputs(
     disabled
   );
   // an empty unit is the spec default, the unit of the queue: a stored batch without one keeps it
-  const otlpBatchSizerInput = useInput(batchInitial?.sizer ?? '', undefined, disabled);
+  const otlpBatchSizerInput = Object.assign(
+    useInput(batchInitial?.sizer ?? '', undefined, disabled),
+    // the schema can not unset a stored unit, so it can not go back to the unit of the queue
+    { hasStoredValue: !!(otlpOutput && batchInitial?.sizer) }
+  );
   const otlpBatchMinSizeInput = useInput(
     toInputValue(batchInitial?.min_size),
     validateIfBatching((value: string) => {
       const error = validateOtlpCount(value);
-      if (error || !value.trim() || !otlpQueueEnabledInput.value) {
+      if (error || !otlpQueueEnabledInput.value) {
         return error;
       }
-      // the sizes are compared when both use the same unit
+      // the sizes are compared when both use the same unit, and a blank minimum is the spec default
       const batchSizer = otlpBatchSizerInput.value || otlpQueueSizerInput.value;
       const queueSize = otlpQueueSizeInput.value.trim()
         ? Number(otlpQueueSizeInput.value)
         : OTLP_QUEUE_SPEC_DEFAULT_SIZE;
-      if (batchSizer === otlpQueueSizerInput.value && Number(value) > queueSize) {
+      const minSize = value.trim() ? Number(value) : OTLP_BATCH_SPEC_DEFAULT_MIN_SIZE;
+      if (batchSizer === otlpQueueSizerInput.value && minSize > queueSize) {
         return [
           i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMinSizeTooBig', {
             defaultMessage:
-              'The minimum size can not be more than the queue size ({queueSize}) when both use the same unit',
-            values: { queueSize },
+              'The minimum size ({minSize}) can not be more than the queue size ({queueSize}) when both use the same unit',
+            values: { minSize, queueSize },
           }),
         ];
       }
@@ -358,6 +367,15 @@ export function useOtlpInputs(
     otlpBatchSizerInput.value,
   ]);
   useRevalidateWhenChanged(otlpBatchMaxSizeInput, [otlpBatchMinSizeInput.value]);
+  useRevalidateWhenChanged(otlpQueueNumConsumersInput, [otlpQueueEnabledInput.value]);
+  useRevalidateWhenChanged(otlpQueueSizeInput, [otlpQueueEnabledInput.value]);
+  // a batch can not use the requests of the queue as its unit, so it does not inherit them
+  useEffect(() => {
+    if (otlpQueueSizerInput.value === 'requests' && !otlpBatchSizerInput.value) {
+      otlpBatchSizerInput.setValue('items');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [otlpQueueSizerInput.value, otlpBatchSizerInput.value]);
   // the errors of the batch settings do not apply when batching is off
   useEffect(() => {
     if (!otlpBatchEnabledInput.value) {
@@ -397,10 +415,14 @@ export function useOtlpInputs(
     toInputValue(retry?.max_elapsed_time),
     validateIfSelected((value: string) => {
       const error = validateOtlpDuration(value);
-      const elapsed = parseOtlpDurationMs(value);
-      if (error || !elapsed) {
-        // empty, or 0 to retry forever
+      // the collector does not check a retry that is off
+      if (error || !otlpRetryEnabledInput.value) {
         return error;
+      }
+      // a blank time is the spec default: only a 0 retries forever
+      const elapsed = parseOtlpDurationNs(value.trim() || OTLP_RETRY_SPEC_DEFAULT_MAX_ELAPSED_TIME);
+      if (!elapsed) {
+        return;
       }
       // a blank interval is the spec default
       const intervals = [
@@ -414,10 +436,10 @@ export function useOtlpInputs(
         },
       ].map(({ text: intervalText, fallback }) => {
         const interval = intervalText || fallback;
-        return { interval, ms: parseOtlpDurationMs(interval) ?? 0 };
+        return { interval, ns: parseOtlpDurationNs(interval) ?? BigInt(0) };
       });
-      const longest = intervals.reduce((a, b) => (b.ms > a.ms ? b : a));
-      if (elapsed < longest.ms) {
+      const longest = intervals.reduce((a, b) => (b.ns > a.ns ? b : a));
+      if (elapsed < longest.ns) {
         return [
           i18n.translate('xpack.fleet.settings.outputForm.otlpRetryMaxElapsedTimeTooSmall', {
             defaultMessage:
@@ -430,6 +452,7 @@ export function useOtlpInputs(
     disabled
   );
   useRevalidateWhenChanged(otlpRetryMaxElapsedTimeInput, [
+    otlpRetryEnabledInput.value,
     otlpRetryInitialIntervalInput.value,
     otlpRetryMaxIntervalInput.value,
   ]);

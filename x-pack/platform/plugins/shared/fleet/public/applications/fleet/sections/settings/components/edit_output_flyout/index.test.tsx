@@ -2519,7 +2519,7 @@ describe('EditOutputFlyout', () => {
           otlp_exporter: {
             protocol: 'grpc',
             endpoint: 'collector.example.com:4317',
-            sending_queue: { enabled: true, batch: {} },
+            sending_queue: { enabled: true, sizer: 'bytes', queue_size: 50000000, batch: {} },
           },
         } as Output);
         expect(utils.getByTestId('settingsOutputsFlyout.otlpBatchEnabledInput')).toBeChecked();
@@ -2769,6 +2769,125 @@ describe('EditOutputFlyout', () => {
         fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMaxSizeInput'));
 
         expect(utils.getByText(/minimum size \(8192\)/)).toBeInTheDocument();
+      });
+
+      it('should not offer the unit of the queue for a batch whose unit is stored', () => {
+        const { utils } = renderFlyout(otlpOutput);
+
+        expect(
+          within(utils.getByTestId('settingsOutputsFlyout.otlpBatchSizerInput')).queryByText(
+            'Same as the queue'
+          )
+        ).toBeNull();
+      });
+
+      it('should offer the unit of the queue for a new batch', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+
+        expect(
+          within(utils.getByTestId('settingsOutputsFlyout.otlpBatchSizerInput')).getByText(
+            'Same as the queue'
+          )
+        ).toBeInTheDocument();
+      });
+
+      it('should not let the batch use the requests of the queue as its unit', () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        setValue(utils, 'otlpBatchSizerInput', '');
+        setValue(utils, 'otlpQueueSizerInput', 'requests');
+
+        const sizer = utils.getByTestId('settingsOutputsFlyout.otlpBatchSizerInput');
+        expect(within(sizer).queryByText('Same as the queue')).toBeNull();
+        expect(value(utils, 'otlpBatchSizerInput')).toBe('items');
+      });
+
+      it('should save a queue that is off with a size of 0', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            ...otlpOutput.otlp_exporter,
+            sending_queue: { enabled: false, queue_size: 0 },
+          },
+        } as Output);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'renamed' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+      });
+
+      it('should clear the queue size error when the queue is turned off', async () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpQueueSizeInput', '0');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpQueueSizeInput'));
+        expect(utils.getByText('Specify a whole number, 1 or more')).toBeInTheDocument();
+
+        click(utils, 'otlpQueueEnabledInput');
+
+        await waitFor(() => {
+          expect(utils.queryByText('Specify a whole number, 1 or more')).toBeNull();
+        });
+      });
+
+      it('should compare the default minimum batch size with the queue size', () => {
+        const { utils } = renderFlyout(otlpOutput);
+        setValue(utils, 'otlpQueueSizeInput', '1000');
+        clear(utils, 'otlpBatchMinSizeInput');
+        clear(utils, 'otlpBatchMaxSizeInput');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+
+        // the queue and the batch both count items
+        expect(
+          utils.getByText(/minimum size \(8192\) can not be more than the queue size \(1000\)/)
+        ).toBeInTheDocument();
+      });
+
+      it('should not check the maximum elapsed time while retry is off', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            ...otlpOutput.otlp_exporter,
+            retry_on_failure: { enabled: true },
+          },
+        } as Output);
+        setValue(utils, 'otlpRetryMaxElapsedTimeInput', '10s');
+        fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpRetryMaxElapsedTimeInput'));
+        expect(utils.getByText(/longest retry interval/)).toBeInTheDocument();
+
+        click(utils, 'otlpRetryEnabledInput');
+
+        await waitFor(() => {
+          expect(utils.queryByText(/longest retry interval/)).toBeNull();
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+      });
+
+      it('should use the default maximum elapsed time when it is blank', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            ...otlpOutput.otlp_exporter,
+            retry_on_failure: { enabled: true, max_interval: '10m' },
+          },
+        } as Output);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'renamed' },
+        });
+        // the default is 5m: it is less than the 10m interval
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(utils.getByText(/longest retry interval \(10m\)/)).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
       });
 
       it('should accept a maximum batch size of 0, which has no limit', async () => {

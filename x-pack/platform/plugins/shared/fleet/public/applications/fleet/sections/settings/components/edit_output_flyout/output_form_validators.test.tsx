@@ -42,7 +42,7 @@ import {
   validateOtlpPositiveDuration,
   validateOtlpProxyUrl,
   validateOtlpRandomizationFactor,
-  parseOtlpDurationMs,
+  parseOtlpDurationNs,
   validateOtlpShortString,
   validateSSLCertificate,
   validateSSLKey,
@@ -733,6 +733,11 @@ describe('OTLP validators', () => {
       ]);
     });
 
+    it('should compare the keys like the collector, character by character', () => {
+      // `toLowerCase` of the whole key would turn both of them into a final sigma
+      expect(validateOtlpMetadataKeys('ΟΣ, ος')).toBeUndefined();
+    });
+
     it('should reject an empty key', () => {
       expect(validateOtlpMetadataKeys('a,,b')).toEqual([
         'Specify up to 100 metadata keys, separated by commas',
@@ -763,7 +768,7 @@ describe('OTLP validators', () => {
       expect(validateOtlpPositiveDuration(value)).toBeUndefined();
     });
 
-    it.each(['0', '0s', '0.0s', '0m0s'])('should reject %p', (value) => {
+    it.each(['0', '0s', '0.0s', '0m0s', '0.5ns'])('should reject %p', (value) => {
       expect(validateOtlpPositiveDuration(value)).toEqual([
         'Specify a duration longer than zero, such as 200ms, 1s',
       ]);
@@ -790,19 +795,23 @@ describe('OTLP validators', () => {
     });
   });
 
-  describe('parseOtlpDurationMs', () => {
+  describe('parseOtlpDurationNs', () => {
     it.each([
-      ['500ms', 500],
-      ['5s', 5000],
-      ['1m30s', 90000],
-      ['1h', 3600000],
-      ['0', 0],
+      ['500ms', '500000000'],
+      ['5s', '5000000000'],
+      ['1m30s', '90000000000'],
+      ['1h', '3600000000000'],
+      ['1.001s', '1001000000'],
+      ['1s1ms', '1001000000'],
+      ['.5s', '500000000'],
+      ['0.5ns', '0'],
+      ['0', '0'],
     ])('should parse %p', (value, expected) => {
-      expect(parseOtlpDurationMs(value as string)).toBe(expected);
+      expect(parseOtlpDurationNs(value)?.toString()).toBe(expected);
     });
 
     it.each(['', 'soon'])('should not parse %p', (value) => {
-      expect(parseOtlpDurationMs(value)).toBeUndefined();
+      expect(parseOtlpDurationNs(value)).toBeUndefined();
     });
   });
 

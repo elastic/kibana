@@ -796,7 +796,10 @@ export function validateOtlpMetadataKeys(value: string) {
       }),
     ];
   }
-  if (new Set(keys.map((key) => key.toLowerCase())).size !== keys.length) {
+  // Go lowercases each character on its own, while `toLowerCase` of a string looks at the context
+  // (a final sigma), so the keys are lowercased one character at a time
+  const lowercase = (key: string) => Array.from(key, (char) => char.toLowerCase()).join('');
+  if (new Set(keys.map(lowercase)).size !== keys.length) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysDuplicate', {
         defaultMessage: 'Metadata keys must be unique, whatever their case',
@@ -820,27 +823,41 @@ export function validateOtlpPositiveCount(value: string) {
   }
 }
 
-const GO_DURATION_COMPONENT_REGEX = /(\d+(?:\.\d*)?|\.\d+)(ns|us|µs|μs|ms|s|m|h)/g;
-const GO_DURATION_UNIT_MS: Record<string, number> = {
-  ns: 1e-6,
-  us: 1e-3,
-  µs: 1e-3,
-  μs: 1e-3,
-  ms: 1,
-  s: 1000,
-  m: 60 * 1000,
-  h: 60 * 60 * 1000,
+const GO_DURATION_COMPONENT_REGEX =
+  /(\d+)(?:\.(\d*))?(ns|us|µs|μs|ms|s|m|h)|\.(\d+)(ns|us|µs|μs|ms|s|m|h)/g;
+const GO_DURATION_UNIT_NS: Record<string, bigint> = {
+  ns: BigInt(1),
+  us: BigInt(1e3),
+  µs: BigInt(1e3),
+  μs: BigInt(1e3),
+  ms: BigInt(1e6),
+  s: BigInt(1e9),
+  m: BigInt(60e9),
+  h: BigInt(3600e9),
 };
 
-/** The milliseconds of a valid duration, or undefined if it is empty or not a duration. */
-export function parseOtlpDurationMs(value: string): number | undefined {
+/**
+ * The nanoseconds of a valid duration, or undefined if it is empty or not a duration. Like the
+ * collector, it counts whole nanoseconds, so a fraction of a nanosecond is dropped.
+ */
+export function parseOtlpDurationNs(value: string): bigint | undefined {
   const duration = value?.trim() ?? '';
   if (!duration || !GO_DURATION_REGEX.test(duration)) {
     return undefined;
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
-    (total, [, amount, unit]) => total + Number(amount) * GO_DURATION_UNIT_MS[unit],
-    0
+    (total, [, whole, fraction, unit, leadingFraction, leadingFractionUnit]) => {
+      const unitNs = GO_DURATION_UNIT_NS[unit ?? leadingFractionUnit];
+      const fractionDigits = fraction ?? leadingFraction ?? '';
+      return (
+        total +
+        BigInt(whole ?? 0) * unitNs +
+        (fractionDigits
+          ? (BigInt(fractionDigits) * unitNs) / BigInt(10) ** BigInt(fractionDigits.length)
+          : BigInt(0))
+      );
+    },
+    BigInt(0)
   );
 }
 
@@ -850,7 +867,7 @@ export function validateOtlpPositiveDuration(value: string) {
   if (error) {
     return error;
   }
-  if (value?.trim() && !parseOtlpDurationMs(value)) {
+  if (value?.trim() && !parseOtlpDurationNs(value)) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpPositiveDurationInvalid', {
         defaultMessage: 'Specify a duration longer than zero, such as {examples}',

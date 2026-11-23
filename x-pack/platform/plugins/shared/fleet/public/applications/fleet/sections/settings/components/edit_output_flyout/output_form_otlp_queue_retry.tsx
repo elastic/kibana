@@ -26,15 +26,13 @@ const QUEUE_SIZER_OPTIONS = ['requests', 'items', 'bytes'].map((value) => ({
   text: value,
 }));
 
-const BATCH_SIZER_OPTIONS = [
-  {
-    value: '',
-    text: i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpBatchSizerSameAsQueue', {
-      defaultMessage: 'Same as the queue',
-    }),
-  },
-  ...['items', 'bytes'].map((value) => ({ value, text: value })),
-];
+const BATCH_UNIT_OPTIONS = ['items', 'bytes'].map((value) => ({ value, text: value }));
+const BATCH_SAME_AS_QUEUE_OPTION = {
+  value: '',
+  text: i18n.translate('xpack.fleet.settings.editOutputFlyout.otlpBatchSizerSameAsQueue', {
+    defaultMessage: 'Same as the queue',
+  }),
+};
 
 const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ inputs }) => (
   <>
@@ -108,7 +106,12 @@ const OtlpBatchFields: React.FunctionComponent<{ inputs: OutputFormInputsType }>
       }
       input={inputs.otlpBatchSizerInput}
       testSubj="otlpBatchSizerInput"
-      options={BATCH_SIZER_OPTIONS}
+      // a batch can not use the requests of the queue, and a unit that is stored can not be unset
+      options={
+        inputs.otlpQueueSizerInput.value === 'requests' || inputs.otlpBatchSizerInput.hasStoredValue
+          ? BATCH_UNIT_OPTIONS
+          : [BATCH_SAME_AS_QUEUE_OPTION, ...BATCH_UNIT_OPTIONS]
+      }
     />
     <OtlpTextSetting
       label={
