@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH, type SignificantEvent } from '@kbn/significant-events-schema';
 import type { ContinuationCycle, ContinuationEvaluator } from './continuation_stability';
 
 export interface ContinuationNarrativeEvolutionResult {
@@ -25,6 +25,11 @@ interface RuleVerdicts {
   readonly all: ReadonlySet<string>;
 }
 
+interface PreviousNarrative {
+  readonly event: WrittenEvent;
+  readonly ruleVerdicts: ReadonlyMap<string, string>;
+}
+
 const ruleVerdicts = (event: WrittenEvent): RuleVerdicts => {
   const confirming = new Set<string>();
   const offTopic = new Set<string>();
@@ -38,6 +43,14 @@ const ruleVerdicts = (event: WrittenEvent): RuleVerdicts => {
   }
   return { confirming, offTopic, all };
 };
+
+const ruleVerdictByUuid = (event: WrittenEvent): Map<string, string> =>
+  new Map(
+    (event.signals ?? []).flatMap((signal) => {
+      const ruleUuid = signal.metadata?.rule_uuid;
+      return ruleUuid === undefined ? [] : [[ruleUuid, signal.verdict] as const];
+    })
+  );
 
 /** The wording a reader already knows: the stored text with its whitespace normalised. */
 const storedWording = (text: string): string => text.replace(/\s+/g, ' ').trim();
@@ -75,7 +88,7 @@ const keepsStoredSentences = (previous: string, next: string): boolean => {
 export const scoreContinuationNarrativeEvolution = (
   cycles: ContinuationCycle[]
 ): ContinuationNarrativeEvolutionResult => {
-  const previousByEventId = new Map<string, WrittenEvent>();
+  const previousByEventId = new Map<string, PreviousNarrative>();
   const evolution: string[] = [];
   const issues: string[] = [];
   let passedChecks = 0;
@@ -88,38 +101,53 @@ export const scoreContinuationNarrativeEvolution = (
   };
 
   cycles.forEach((cycle, cycleIndex) => {
-    for (const event of cycle.writeItems ?? []) {
-      const eventId = event.event_id;
+    const canUseProducedEventId =
+      cycle.writeItems?.length === 1 && cycle.producedEventIds.length === 1;
+    for (const [itemIndex, event] of (cycle.writeItems ?? []).entries()) {
+      const eventId =
+        event.event_id ??
+        (canUseProducedEventId && itemIndex === 0 ? cycle.producedEventIds[0] : undefined);
       if (!eventId) continue;
       const previous = previousByEventId.get(eventId);
-      previousByEventId.set(eventId, event);
+      const currentRuleVerdicts = ruleVerdictByUuid(event);
+      previousByEventId.set(eventId, {
+        event,
+        ruleVerdicts: new Map([...(previous?.ruleVerdicts ?? []), ...currentRuleVerdicts]),
+      });
       if (!previous) continue;
 
       const label = `cycle ${cycleIndex}: "${eventId}"`;
-      const before = ruleVerdicts(previous);
+      const before = ruleVerdicts(previous.event);
       const now = ruleVerdicts(event);
       const newRules = [...now.all].filter((ruleUuid) => !before.all.has(ruleUuid));
       const addedConfirmingRules = [...now.confirming].filter(
         (ruleUuid) => !before.all.has(ruleUuid)
       );
       const newlyConfirmingRules = [...now.confirming].filter(
-        (ruleUuid) => !before.confirming.has(ruleUuid)
+        (ruleUuid) => previous.ruleVerdicts.get(ruleUuid) !== 'confirms'
       );
       const rewriteAllowed = [...before.offTopic].some((ruleUuid) => now.confirming.has(ruleUuid));
 
-      if (previous.title !== undefined && event.title !== undefined) {
-        check(previous.title === event.title, `${label} title changed`);
+      if (previous.event.title !== undefined && event.title !== undefined && !rewriteAllowed) {
+        check(previous.event.title === event.title, `${label} title changed`);
       }
-      if (previous.summary !== undefined && event.summary !== undefined && !rewriteAllowed) {
+      const summaryAtCapacity = previous.event.summary?.length === MAX_TEXT_LENGTH;
+      if (
+        previous.event.summary !== undefined &&
+        event.summary !== undefined &&
+        !rewriteAllowed &&
+        !summaryAtCapacity
+      ) {
         check(
-          keepsStoredSentences(previous.summary, event.summary),
+          keepsStoredSentences(previous.event.summary, event.summary),
           `${label} summary was rewritten`
         );
       }
-      const evidenceMoved = newlyConfirmingRules.length > 0 || previous.severity !== event.severity;
-      if (evidenceMoved && previous.assessment_note !== undefined) {
+      const evidenceMoved =
+        newlyConfirmingRules.length > 0 || previous.event.severity !== event.severity;
+      if (evidenceMoved && previous.event.assessment_note !== undefined) {
         check(
-          previous.assessment_note !== event.assessment_note,
+          previous.event.assessment_note !== event.assessment_note,
           `${label} assessment_note is unchanged although ${
             newlyConfirmingRules.length > 0 ? 'a rule newly confirms' : 'severity changed'
           }`
@@ -127,7 +155,7 @@ export const scoreContinuationNarrativeEvolution = (
       }
 
       const changed = (['summary', 'symptom_hypothesis', 'assessment_note'] as const).filter(
-        (field) => previous[field] !== event[field]
+        (field) => previous.event[field] !== event[field]
       );
       const notConfirming = newRules.length - addedConfirmingRules.length;
       evolution.push(

@@ -400,9 +400,11 @@ Reading `breakdown`:
 - When groups overlap (two or more at or above `affected`, or counts adding up to clearly more than
   it; the queries run moments apart, so allow a small timing excess), the rows carry several values per row:
   name the values with no count or share, since those counts exceed the whole.
-- Groups that differ in what they report or in level are several populations (Reading `examples`):
-  give each its figures, with its `sampled_message` illustrating it in one clause; the shares of what
-  the lines say come from the categories. Say once which population the sampled row belongs to.
+- A `sampled_message` illustrates one failing row, not the group: do not infer that groups are
+  separate populations from their samples. Only the `examples` categories establish whether the
+  failing lines report distinct problems. When they do, give each established population its figures
+  and use a sampled message only as an illustration; the shares of what the lines say come from the
+  categories. Say once which population the sampled row belongs to.
 - A `breakdown` that failed while `dimensions` shows a reporter or target field with `f` of 2 or more
   leaves the split unmeasured: say the sampled row's population may be one of several.
 
@@ -528,13 +530,16 @@ feature IDs are unique only within a source.
   set, so it needs a fetch that is not filtered by id.
 - **Arguments.** When every seed is a referenced feature ID: pass them as `feature_ids` and set
   `slugs` to the matched queries' `source_id` values from the Retrieve step (for example `logs`),
-  not the batch `source_id`. Otherwise (a seed is a row value, or there are no seeds): omit
-  `feature_ids` and set `slugs` to all distinct batch `source_id` values.
-- **Result.** A seed is a topology node only when this search returned it. When none is in the
-  result, make one extra call with `feature_ids` omitted and `slugs` set to all batch `source_id`
-  values, without paginating. Otherwise stop after page 1, unless `has_more` is true and a
-  referenced ID is missing: then request `next_page` once. The returned topology already expands
-  dependency endpoints and their matching entity identity fields, so no further call is needed.
+  not the batch `source_id`. When a row value also needs matching by `properties.name`, omit
+  `feature_ids` but still set `slugs` to the union of those matched-query source IDs and all distinct
+  batch `source_id` values, so the referenced topology stays in scope.
+- **Result.** A seed is a topology node only when this search returned it. When the first search was
+  filtered by `feature_ids` and none is in the result, make one extra call with `feature_ids`
+  omitted and the same `slugs`, without paginating. A first search that already omitted
+  `feature_ids` is the broad fallback: do not repeat it. Otherwise stop after page 1, unless
+  `has_more` is true and a referenced ID is missing: then request `next_page` once. The returned
+  topology already expands dependency endpoints and their matching entity identity fields, so no
+  further call is needed.
 
 A fetched feature reads as follows: `properties` are stable identity and topology facts;
 `evidence[]` supports hypotheses; `meta` contains diagnostic hints, not current-state proof;

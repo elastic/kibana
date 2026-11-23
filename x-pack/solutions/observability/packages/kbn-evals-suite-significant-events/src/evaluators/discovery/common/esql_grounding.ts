@@ -36,12 +36,22 @@ export function createExecuteEsqlGroundingEvaluator<
       }
 
       const grounded = noOfToolCallsWithResults > 0;
+      const noOfCallsWithoutResult =
+        noOfToolCalls - noOfToolCallsWithResults - noOfToolCallsWithErrors;
       const failureReason =
-        noOfToolCallsWithErrors === 0
+        noOfToolCallsWithErrors === 0 && noOfCallsWithoutResult === 0
           ? `All ${noOfToolCalls} execute_esql call(s) returned zero rows`
-          : `${noOfToolCallsWithErrors} of ${noOfToolCalls} execute_esql call(s) failed with a query error${
-              noOfToolCallsWithErrors < noOfToolCalls ? ' and the rest returned zero rows' : ''
-            }`;
+          : [
+              noOfToolCallsWithErrors > 0 &&
+                `${noOfToolCallsWithErrors} execute_esql call(s) failed with a query error`,
+              noOfCallsWithoutResult > 0 &&
+                `${noOfCallsWithoutResult} execute_esql call(s) returned no result`,
+              noOfToolCallsWithResults === 0 &&
+                noOfToolCallsWithErrors + noOfCallsWithoutResult < noOfToolCalls &&
+                'the remaining call(s) returned zero rows',
+            ]
+              .filter(Boolean)
+              .join('; ');
       return Promise.resolve({
         score: grounded ? 1 : 0,
         explanation: grounded

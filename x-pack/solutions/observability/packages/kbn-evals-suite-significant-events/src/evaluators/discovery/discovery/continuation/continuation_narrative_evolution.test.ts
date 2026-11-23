@@ -149,7 +149,7 @@ describe('scoreContinuationNarrativeEvolution', () => {
         event({ signals: [signal('rule-a', 'confirms')] })
       )
     );
-    expect([result.passedChecks, result.comparableChecks]).toEqual([1, 2]);
+    expect([result.passedChecks, result.comparableChecks]).toEqual([0, 1]);
     expect(result.explanation).toContain(
       'assessment_note is unchanged although a rule newly confirms'
     );
@@ -165,6 +165,48 @@ describe('scoreContinuationNarrativeEvolution', () => {
           assessment_note: 'High: now confirmed. Confidence is 70.0%.',
           signals: [signal('rule-a', 'confirms')],
         })
+      )
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('allows the title to change when a rule held as off_topic now confirms', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({ signals: [signal('rule-a', 'off_topic')] }),
+        event({
+          title: 'Storage — connection refused',
+          assessment_note: 'High: now confirmed. Confidence is 70.0%.',
+          signals: [signal('rule-a', 'confirms')],
+        })
+      )
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('compares a first continuation against the event ID returned for a create', () => {
+    const result = scoreContinuationNarrativeEvolution([
+      {
+        producedEventIds: ['event-1'],
+        writeItems: [event({ event_id: undefined })],
+      },
+      {
+        producedEventIds: ['event-1'],
+        writeItems: [event({ summary: 'Storage times out. Exports fail. Retries follow.' })],
+      },
+    ]);
+    expect(result.score).toBe(1);
+  });
+
+  it('does not treat a returning confirmed rule as newly confirming', () => {
+    const result = scoreContinuationNarrativeEvolution(
+      cycles(
+        event({ signals: [signal('rule-a', 'confirms')] }),
+        event({
+          assessment_note: 'High: rule-b confirms. Confidence is 60.0%.',
+          signals: [signal('rule-b', 'confirms')],
+        }),
+        event({ signals: [signal('rule-a', 'confirms')] })
       )
     );
     expect(result.score).toBe(1);

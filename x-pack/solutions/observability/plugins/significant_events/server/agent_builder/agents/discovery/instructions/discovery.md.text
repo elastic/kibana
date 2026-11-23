@@ -543,9 +543,11 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
      change.
 
    An extension keeps what the text already says and adds what the evidence now shows as part of
-   the event's one description, within the field's own contract: the summary keeps its one headline
-   figure, and no sentence refers to this cycle or an earlier one, because the reader meets the event
-   as it stands, not as a change log. The hypothesis rephrases only to stay within its three sentences. A repeat `confirms` for a rule the event already holds with nothing changed, a
+   the event's one description, unless new confirming evidence supersedes an earlier impact claim:
+   replace that claim so the summary gives one consistent account. Within the field's own contract,
+   the summary keeps its one headline figure, and no sentence refers to this cycle or an earlier one,
+   because the reader meets the event as it stands, not as a change log. The hypothesis rephrases
+   only to stay within its three sentences. A repeat `confirms` for a rule the event already holds with nothing changed, a
    new rule UUID whose signal does not help explain the problem, and a signal whose verdict is
    `refutes`, `inconclusive` or `not_checked` change nothing here.
 
