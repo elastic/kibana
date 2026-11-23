@@ -314,6 +314,8 @@ describe('ChangePasswordModal', () => {
 
       fireEvent.change(newPasswordInput, { target: { value: 'short' } });
 
+      fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
+
       await waitFor(() => {
         expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
@@ -321,6 +323,8 @@ describe('ChangePasswordModal', () => {
       fireEvent.blur(newPasswordInput);
 
       expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
+
+      expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
     });
 
     it('enables submit button when valid matching passwords are entered', async () => {
@@ -470,6 +474,8 @@ describe('ChangePasswordModal', () => {
 
         fireEvent.change(newPasswordInput, { target: { value: 'short' } });
 
+        fireEvent.change(confirmPasswordInput, { target: { value: 'short' } });
+
         await waitFor(() => {
           expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
         });
@@ -477,6 +483,8 @@ describe('ChangePasswordModal', () => {
         fireEvent.blur(newPasswordInput);
 
         expect(await screen.findByText('Enter at least 6 characters.')).toBeInTheDocument();
+
+        expect(screen.getByTestId('changePasswordFormSubmitButton')).toBeDisabled();
       });
 
       it('enables submit button when all password fields are valid for current user', async () => {
