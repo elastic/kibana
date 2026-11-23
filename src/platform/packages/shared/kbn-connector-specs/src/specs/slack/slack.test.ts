@@ -49,8 +49,7 @@ describe('Slack', () => {
 
   it('should be discoverable via getConnectorSpec (all_specs wiring)', () => {
     const spec = getConnectorSpec('.slack2');
-    expect(spec?.metadata).toBe(Slack.metadata);
-    expect(spec?.actions).toBe(Slack.actions);
+    expect(spec).toBe(Slack);
     expect(spec?.actions.listChannels).toBeDefined();
     expect(spec?.actions.listChannels.isTool).toBe(true);
   });

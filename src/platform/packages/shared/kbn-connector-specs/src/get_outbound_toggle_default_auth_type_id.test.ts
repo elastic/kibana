@@ -36,9 +36,12 @@ describe('getOutboundToggleDefaultAuthTypeId', () => {
     ).toBe('basic');
   });
 
+  it('returns the first credentialed auth type for a dual connector that does not list none', () => {
+    expect(getOutboundToggleDefaultAuthTypeId(createSpec({ authTypes: ['basic'] }))).toBe('basic');
+  });
+
   it.each([
     ['no spec', undefined],
-    ['no none auth type', createSpec({ authTypes: ['basic'] })],
     ['only the none auth type', createSpec({ authTypes: ['none'] })],
     ['no events', createSpec({ authTypes: ['basic', 'none'], hasEvents: false })],
     ['no actions', createSpec({ authTypes: ['basic', 'none'], hasActions: false })],

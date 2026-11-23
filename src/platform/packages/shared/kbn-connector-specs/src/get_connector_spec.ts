@@ -9,14 +9,11 @@
 
 import * as connectorsSpecs from './all_specs';
 import type { ConnectorSpec } from './connector_spec';
-import { withReceiveOnlyAuth } from './with_receive_only_auth';
 
 /**
  * Returns the ConnectorSpec for a given connector type ID, or undefined if not found.
- * Dual specs include the receive-only `none` auth type.
  */
 export function getConnectorSpec(connectorTypeId: string): ConnectorSpec | undefined {
   const specEntries = Object.values(connectorsSpecs);
-  const spec = specEntries.find((s) => s.metadata.id === connectorTypeId);
-  return spec === undefined ? undefined : withReceiveOnlyAuth(spec);
+  return specEntries.find((s) => s.metadata.id === connectorTypeId);
 }

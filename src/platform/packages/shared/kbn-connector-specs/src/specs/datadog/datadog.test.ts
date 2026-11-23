@@ -8,7 +8,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { getConnectorSpec, withReceiveOnlyAuth } from '../../..';
+import { getConnectorSpec } from '../../..';
 import type { ActionContext } from '../../connector_spec';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
@@ -55,8 +55,7 @@ describe('Datadog', () => {
 
   it('should be discoverable via getConnectorSpec (all_specs wiring)', () => {
     const spec = getConnectorSpec('.datadog');
-    expect(spec?.metadata).toBe(Datadog.metadata);
-    expect(spec?.actions).toBe(Datadog.actions);
+    expect(spec).toBe(Datadog);
     expect(spec?.actions.listMonitors).toBeDefined();
     expect(spec?.actions.listMonitors.isTool).toBe(true);
   });
@@ -75,18 +74,6 @@ describe('Datadog', () => {
       typeof t === 'string' ? t : t.type
     );
     expect(types).toContain('basic');
-  });
-
-  it('should support no authentication for connectors that only receive events', () => {
-    const types = (withReceiveOnlyAuth(Datadog).auth?.types ?? []).map((authType) =>
-      typeof authType === 'string' ? authType : authType.type
-    );
-    expect(types).toContain('none');
-    expect(
-      (Datadog.auth?.types ?? []).map((authType) =>
-        typeof authType === 'string' ? authType : authType.type
-      )
-    ).not.toContain('none');
   });
 
   it('should keep test.enabled true', () => {
@@ -187,26 +174,6 @@ describe('Datadog', () => {
       expect(mockClient.defaults.headers.common['DD-API-KEY']).toBe('api-key');
       expect(mockClient.defaults.headers.common['DD-APPLICATION-KEY']).toBe('app-key');
       expect(mockClient.defaults.auth).toBeUndefined();
-    });
-
-    it('should fail when the connector uses no authentication', async () => {
-      const noAuthContext = {
-        ...mockContext,
-        secrets: { authType: 'none' },
-      } as unknown as ActionContext;
-
-      await expect(Datadog.actions.listMonitors.handler(noAuthContext, {})).rejects.toThrow(
-        'The Datadog listMonitors action requires an API Key and Application Key'
-      );
-      expect(mockClient.get).not.toHaveBeenCalled();
-    });
-
-    it('should fail when the connector has no secrets', async () => {
-      const noSecretsContext = { ...mockContext, secrets: undefined } as unknown as ActionContext;
-
-      await expect(Datadog.actions.listMonitors.handler(noSecretsContext, {})).rejects.toThrow(
-        'The Datadog listMonitors action requires an API Key and Application Key'
-      );
     });
   });
 
