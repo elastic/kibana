@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
+  - '@kbn/connector-specs'
   - '@kbn/core-di-server'
   - '@kbn/esql'
   - '@kbn/esql-utils'
@@ -63,7 +64,6 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/std'
   - '@kbn/eval-kql'
-  - '@kbn/alerting-plugin'
   - '@kbn/react-query'
   - '@kbn/core-security-server'
   - '@kbn/encrypted-saved-objects-plugin'
@@ -165,6 +165,8 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/announcement-banner'
   - '@kbn/ftr-llm-proxy'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
 tags:
   - plugin
   - prod

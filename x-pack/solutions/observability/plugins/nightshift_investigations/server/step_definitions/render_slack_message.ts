@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
@@ -13,7 +14,7 @@ import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationLocator } from '../../common/locators';
 import type { GetInvestigationsClient } from '../routes/types';
 import { notificationPhaseSchema } from '../lib/notifications/notification_routing';
-import { renderInvestigationSlackMessage } from '../lib/notifications/format_investigation_slack_message';
+import { renderInvestigationSlackMessage } from '../lib/notifications/investigation_slack_composition';
 
 const inputSchema = z.object({
   investigation_id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
@@ -28,13 +29,15 @@ const inputSchema = z.object({
 export const renderSlackMessageStepDefinition = ({
   investigationLocator,
   getInvestigationsClient,
+  getIsomerRuntime,
 }: {
   investigationLocator: Pick<InvestigationLocator, 'getRedirectUrl'>;
   getInvestigationsClient: GetInvestigationsClient;
+  getIsomerRuntime: IsomerPluginStart['getRuntime'];
 }) =>
   createServerStepDefinition({
     id: 'nightshift.renderSlackMessage',
-    label: 'Render Nightshift Slack message',
+    label: 'Render nightshift Slack message',
     category: StepCategory.Ai,
     description:
       'Renders an investigation lifecycle message as Slack Block Kit blocks with fallback text.',
@@ -55,6 +58,7 @@ export const renderSlackMessageStepDefinition = ({
       ).getNotifiableInvestigation(investigationId);
       return {
         output: renderInvestigationSlackMessage({
+          runtime: await getIsomerRuntime(),
           investigation,
           url: new URL(
             investigationLocator.getRedirectUrl({ investigationId }, { spaceId }),

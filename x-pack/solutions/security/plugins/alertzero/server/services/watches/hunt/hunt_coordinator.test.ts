@@ -720,6 +720,44 @@ describe('huntCoordinator', () => {
     );
   });
 
+  it('widens what Tier 2 may read to linked projects when cross-project search is on', async () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
+    mockScope.mockClear();
+    mockScope.mockResolvedValueOnce({
+      ...okScope,
+      actionable_indices: ['logs-endpoint.events.process-default*'],
+    });
+    const mockModels = allTiers({} as ScopedModel);
+
+    await huntCoordinator({ esClient, reportsEsClient: esClient }, mockModels, logger, {
+      spaceId: 'default',
+      indexPatterns: INDEX_PATTERNS,
+      crossProjectSearch: true,
+      trigger: 'scheduled',
+      run_id: 'run-tier2-cps',
+      text: 'report text',
+    });
+
+    expect(mockScope).toHaveBeenCalledWith(expect.objectContaining({ crossProjectSearch: true }));
+    expect(mockT2).toHaveBeenLastCalledWith(
+      expect.anything(),
+      logger,
+      expect.objectContaining({
+        allowed_indices: [
+          'logs-aws.cloudtrail-*',
+          '*:logs-aws.cloudtrail-*',
+          'logs-endpoint.events.process-default*',
+          '*:logs-endpoint.events.process-default*',
+        ],
+        cross_project_search: true,
+        excluded_indices: ['*elastic-cloud-logs-*'],
+      }),
+      esClient,
+      undefined
+    );
+  });
+
   describe('the techniques an earlier run already searched', () => {
     const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
@@ -830,6 +868,7 @@ describe('huntCoordinator', () => {
         esClient,
         spaceId: 'hunt-a',
         indexPatterns: INDEX_PATTERNS,
+        crossProjectSearch: false,
         report: {
           vendor: 'Fortinet',
           product: 'FortiOS',
@@ -1031,6 +1070,58 @@ describe('huntCoordinator', () => {
       );
       expect(result.next_step).toBe(
         "Ingest data into an index the space's Security Solution default data view covers, or adjust the `securitySolution:defaultIndex` setting."
+      );
+    });
+
+    it.each([
+      ['only skipped entries', ['.siem-signals-x'], [], true],
+      ['skipped and missing', ['.siem-signals-x'], ['custom-1'], false],
+      ['nothing skipped', [], ['custom-1'], false],
+    ])('words a blocked scope with %s', async (_label, policySkipped, missing, policyCopy) => {
+      mockScope.mockResolvedValueOnce({
+        ...blockedScope('blocked:empty_universe'),
+        policy_skipped: policySkipped,
+        missing,
+      });
+      const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-policy-copy',
+      });
+
+      if (policyCopy) {
+        expect(result.message).toContain('no pattern this hunt may search');
+        expect(result.next_step).toBe(
+          'Add a pattern for the data to hunt to the `securitySolution:defaultIndex` setting.'
+        );
+        expect(result.headline).toBe(
+          "hunt blocked, the space's default data view names only hidden or alerts indices"
+        );
+        expect(result.narrative).toContain('names only hidden or alerts indices');
+        expect(result.narrative).not.toContain('is visible to this hunt');
+      } else {
+        expect(result.message).toContain('is visible to this hunt');
+        expect(result.headline).toBe(
+          "hunt blocked, no index in the space's default data view is visible to this hunt"
+        );
+        expect(result.narrative).toContain('is visible to this hunt');
+      }
+    });
+
+    it('forwards the skipped list to scope resolution', async () => {
+      mockScope.mockClear();
+      mockScope.mockResolvedValueOnce(blockedScope('blocked:empty_universe'));
+      await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        policySkippedPatterns: ['.alerts-x'],
+        trigger: 'scheduled',
+        run_id: 'run-forward-skipped',
+      });
+
+      expect(mockScope).toHaveBeenCalledWith(
+        expect.objectContaining({ policySkippedPatterns: ['.alerts-x'] })
       );
     });
 
@@ -3176,6 +3267,8 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.excluded_report_iocs).toEqual({ count: 2 });
+      // The coordinator marks the failure for the narrative; it is not inferred from empty fields.
+      expect(result.narrative).toContain('Hunt Watch could not work out which indices to search.');
     });
 
     it('does not pass exclusions when the caller supplies iocs', async () => {
@@ -3208,6 +3301,122 @@ describe('huntCoordinator', () => {
 
       expect(mockT2.mock.calls[0][2]).not.toHaveProperty('excluded_iocs');
       expect(result.excluded_report_iocs).toBeUndefined();
+    });
+  });
+
+  describe('a name the scope dropped from the search', () => {
+    const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
+    const droppedScope = (names: string[]) => ({
+      ...okScope,
+      index_patterns: ['logs-*'],
+      missing: names,
+    });
+    const run = (extra: Record<string, unknown>, models: HuntModels | Record<string, never>) =>
+      huntCoordinator({ esClient, reportsEsClient: esClient }, models, logger, {
+        spaceId: 'default',
+        indexPatterns: INDEX_PATTERNS,
+        trigger: 'scheduled',
+        run_id: 'run-dropped',
+        iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        ...extra,
+      });
+    const expectRecorded = (
+      result: Awaited<ReturnType<typeof run>>,
+      completeness: 'incomplete_final' | 'incomplete_retryable' = 'incomplete_final'
+    ) => {
+      expect(result.completeness).toBe(completeness);
+      expect(result.incomplete?.filter(({ reason }) => reason === 'index_not_searched')).toEqual([
+        {
+          reason: 'index_not_searched',
+          detail:
+            'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.',
+        },
+      ]);
+      expect(result.index_patterns).toEqual(['logs-*']);
+      expect(result.narrative).toContain('Coverage: incomplete');
+      expect(result.narrative).toContain('custom-edr-1');
+    };
+
+    // The hunt child quotes `message` as the gap that retired the report, so it has to name it.
+    const GAP_SENTENCE =
+      'The default data view names `custom-edr-1`, which this hunt could not read (no read access, not found, or closed), so the hunt never searched there.';
+
+    it('records the gap on the tier1_only shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.status).toBe('tier1_only');
+      expectRecorded(result);
+      expect(result.message).toMatch(
+        /^IOC Hunt: .*Behavior Hunt skipped \(.*\)\. The default data view/
+      );
+      expect(result.message).toContain(GAP_SENTENCE);
+    });
+
+    it('records the gap on the tier2_only_skipped shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run({ tier2_when: 'always' }, allTiers({} as ScopedModel));
+      expect(result.status).toBe('tier2_only_skipped');
+      // This path carries a retryable gap of its own (no report text), which wins.
+      expectRecorded(result, 'incomplete_retryable');
+      expect(result.message).toBe(
+        `IOC Hunt: ${result.tier1.status}. Behavior Hunt skipped (no report text). ${GAP_SENTENCE}`
+      );
+    });
+
+    it('leaves the message alone when nothing was dropped', async () => {
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.message).not.toContain('default data view names');
+    });
+
+    it('records the gap on the tier1_and_tier2 shape', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      const result = await run(
+        { tier2_when: 'always', text: 'report text' },
+        allTiers({} as ScopedModel)
+      );
+      expect(result.status).toBe('tier1_and_tier2');
+      expectRecorded(result);
+      // The Worker runs both tiers, so this is the message its hunt reason quotes.
+      expect(result.message).toMatch(
+        new RegExp(
+          `^IOC Hunt: .*Behavior Hunt: .*coverage gap\\(s\\)\\)\\. ${GAP_SENTENCE.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            '\\$&'
+          )}$`
+        )
+      );
+    });
+
+    it('ends a message with no full stop before adding the gap sentence', async () => {
+      const { huntBehavior: mockTier2 } = jest.requireMock('./tier2/hunt_behavior');
+      mockScope.mockResolvedValueOnce(droppedScope(['custom-edr-1']));
+      mockTier2.mockRejectedValueOnce(new Error('Request timed out'));
+      const result = await run(
+        { tier2_when: 'always', text: 'report text' },
+        allTiers({} as ScopedModel)
+      );
+      expect(result.tier2_skipped_reason).toBe('tier2_failed');
+      expect(result.message).toBe(
+        `IOC Hunt: ${result.tier1.status}. Behavior Hunt failed: Request timed out. ${GAP_SENTENCE}`
+      );
+    });
+
+    it('words the detail for two names and caps it at ten names', async () => {
+      mockScope.mockResolvedValueOnce(droppedScope(['a-1', 'b-1']));
+      const two = await run({ tier2_when: 'on_hits' }, {});
+      expect(two.incomplete?.[0].detail).toContain('`a-1` and `b-1`');
+
+      const twelve = Array.from({ length: 12 }, (_value, index) => `idx-${index}`);
+      mockScope.mockResolvedValueOnce(droppedScope(twelve));
+      const many = await run({ tier2_when: 'on_hits' }, {});
+      expect(many.incomplete?.[0].detail).toContain('`idx-9` and 2 more');
+      expect(many.incomplete?.[0].detail).not.toContain('idx-10');
+    });
+
+    it('adds no such gap when nothing was dropped', async () => {
+      const result = await run({ tier2_when: 'on_hits' }, {});
+      expect(result.completeness).toBe('complete');
+      expect(result.incomplete ?? []).toEqual([]);
     });
   });
 });

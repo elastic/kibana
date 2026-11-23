@@ -91,9 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         expect((await scoreElement.getVisibleText()) === '0%').to.be(true); // based on the ingested findings
       });
-
-      // Blocked by https://github.com/elastic/kibana/issues/184621
-      it.skip('todo - Access with invalid user role', async () => {});
     });
   });
 }

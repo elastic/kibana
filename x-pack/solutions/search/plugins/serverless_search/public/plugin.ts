@@ -14,7 +14,6 @@ import type { Subscription } from 'rxjs';
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { docLinks } from '../common/doc_links';
 import type {
   ServerlessSearchPluginSetup,
   ServerlessSearchPluginSetupDependencies,
@@ -75,6 +74,7 @@ export class ServerlessSearchPlugin
       id: 'serverlessHomeRedirect',
       title: homeTitle,
       appRoute: '/app/elasticsearch',
+      exactRoute: true,
       euiIconType: 'logoElastic',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       visibleIn: [],
@@ -83,27 +83,6 @@ export class ServerlessSearchPlugin
         coreStart.chrome.docTitle.change(homeTitle);
         coreStart.application.navigateToApp('searchHomepage');
         return () => {};
-      },
-    });
-
-    const connectorsTitle = i18n.translate('xpack.serverlessSearch.app.connectors.title', {
-      defaultMessage: 'Connectors',
-    });
-
-    core.application.register({
-      id: 'serverlessConnectors',
-      title: connectorsTitle,
-      appRoute: '/app/connectors',
-      euiIconType: 'logoElastic',
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      visibleIn: ['globalSearch'],
-      async mount({ element, history }: AppMountParameters) {
-        const { renderApp } = await import('./application/connectors');
-        const [coreStart, services] = await core.getStartServices();
-        coreStart.chrome.docTitle.change(connectorsTitle);
-        docLinks.setDocLinks(coreStart.docLinks.links);
-
-        return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
     });
 
@@ -118,7 +97,6 @@ export class ServerlessSearchPlugin
         const { renderApp } = await import('./application/web_crawlers');
         const [coreStart, services] = await core.getStartServices();
         coreStart.chrome.docTitle.change(WEB_CRAWLERS_LABEL);
-        docLinks.setDocLinks(coreStart.docLinks.links);
 
         return await renderApp(element, coreStart, { history, ...services }, queryClient);
       },
@@ -147,7 +125,7 @@ export class ServerlessSearchPlugin
         });
       })
     );
-    navigation.initNavigation('es', navigationTree$);
+    navigation.initNavigation('es', navigationTree$, 'serverlessSearch');
 
     this.managementCardsSubscription = serverless
       .getNavigationCards$(

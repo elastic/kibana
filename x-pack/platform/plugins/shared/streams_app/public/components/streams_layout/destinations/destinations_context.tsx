@@ -8,13 +8,15 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import { useActorRef, useSelector } from '@xstate/react';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_DEFAULT_UNIT_ID, type ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
+import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTimefilter } from '../../../hooks/use_timefilter';
+import { useUnitId } from '../../../hooks/use_unit_id';
 import { createUnitRepository, type Unit } from '../../../services/unit_repository';
 import {
   getDestinationViewModels,
   type DestinationsActorRef,
+  type ResolvedIndicesError,
   type ResolvedIndicesStatus,
 } from './state_machines/destinations_state_machine';
 import type { DestinationIndexStats } from './destination_index_stats';
@@ -35,7 +37,7 @@ export interface DestinationsController {
   destinations: DestinationViewModel[];
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
   resolvedIndicesStatus: ResolvedIndicesStatus;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   /** Only destinations whose details were shown. */
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
   showDestinationDetail: (destinationId: string, viewerId: string) => void;
@@ -92,20 +94,22 @@ export const useDestinationsTable = (): DestinationsTableController => {
     },
   } = useKibana();
   const { timeState, timeState$ } = useTimefilter();
+  const unitId = useUnitId();
   const unitDefinitionRepository = useMemo(
     () =>
       createUnitRepository({
         streamsRepositoryClient: streams.streamsRepositoryClient,
+        unitId,
         toasts,
       }),
-    [streams.streamsRepositoryClient, toasts]
+    [streams.streamsRepositoryClient, toasts, unitId]
   );
   const tableActorRef = useActorRef(destinationsTableStateMachine, {
     input: {
       toasts,
       apiKeyGenerationDeps: {
         streamsRepositoryClient: streams.streamsRepositoryClient,
-        unitId: STREAMS_DEFAULT_UNIT_ID,
+        unitId,
       },
       timeState,
       timeState$,

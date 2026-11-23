@@ -251,7 +251,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         } as never
       );
 
-      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(2);
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledTimes(3);
       expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
         'security-investigations',
         expect.objectContaining({
@@ -262,6 +262,12 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         'security-attack-fingerprints',
         expect.objectContaining({
           dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
+        })
+      );
+      expect(contextEngine.registerAiIndex).toHaveBeenCalledWith(
+        'security-triage-decisions',
+        expect.objectContaining({
+          dest: { type: 'index', value: '.ai-index-idx-security-triage-decisions' },
         })
       );
     });
@@ -345,6 +351,49 @@ describe('AlertZeroPlugin feature-flag gating', () => {
       expect(features.registerKibanaFeature.mock.calls[0][0].subFeatures).toBeUndefined();
       expect(registerRoutes).toHaveBeenCalled();
       expect(registerAgentType).toHaveBeenCalled();
+    });
+
+    const setupEnabled = (plugin: AlertZeroPlugin) =>
+      plugin.setup(
+        coreMock.createSetup() as never,
+        {
+          features: { registerKibanaFeature: jest.fn() },
+          workflowsExtensions: {
+            registerManagedWorkflowOwner: jest.fn(),
+            registerStepDefinition: jest.fn(),
+          },
+          workflowsManagement: { management: {} },
+          proposals: {},
+          agenticInvestigations: {},
+          agentBuilder: {
+            skills: { register: jest.fn() },
+            tools: { register: jest.fn() },
+            attachments: { registerType: jest.fn() },
+            conversationTemplates: { register: jest.fn() },
+            conversations: { enableUpdatedTrigger: jest.fn() },
+          },
+        } as never
+      );
+
+    const routeDependencies = () => jest.mocked(registerRoutes).mock.calls[0][0];
+
+    it('hands routes a cluster-client getter that throws before start', () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+
+      expect(() => routeDependencies().getClusterClient()).toThrow(
+        'CoreStart is not available until the AlertZero plugin has started'
+      );
+    });
+
+    it('hands routes a cluster-client getter that returns the core start client after start', async () => {
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      setupEnabled(plugin);
+      const coreStart = coreMock.createStart();
+
+      await plugin.start(coreStart, {} as never);
+
+      expect(routeDependencies().getClusterClient()).toBe(coreStart.elasticsearch.client);
     });
 
     it('grants no agentic investigations or escalations API privileges with the feature', () => {
@@ -567,7 +616,7 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           solution,
           settingEnabled = true,
         }: {
-          solution?: 'security' | 'classic';
+          solution?: 'security' | 'classic' | 'oblt' | 'es';
           settingEnabled?: boolean;
         }) => {
           const coreSetup = coreMock.createSetup();
@@ -607,7 +656,17 @@ describe('AlertZeroPlugin feature-flag gating', () => {
         });
 
         it.each([['classic' as const], [undefined]])(
-          'is off in a Classic space even with the setting on (%s)',
+          'uses the AlertZero setting in a Classic space (%s)',
+          async (solution) => {
+            const { enabled, uiSettingsClient } = await resolveOptIn({ solution });
+
+            expect(enabled).toBe(true);
+            expect(uiSettingsClient.get).toHaveBeenCalledWith(ALERTZERO_ENABLED_SETTING_ID);
+          }
+        );
+
+        it.each([['oblt' as const], ['es' as const]])(
+          'is off in a space with another solution view even with the setting on (%s)',
           async (solution) => {
             const { enabled, uiSettingsClient } = await resolveOptIn({ solution });
 

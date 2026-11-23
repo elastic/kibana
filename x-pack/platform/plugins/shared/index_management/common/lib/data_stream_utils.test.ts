@@ -10,6 +10,7 @@ import {
   serializeAsESLifecycle,
   deserializeESLifecycle,
   resolveLogisticsLifecycle,
+  serializeComponentTemplateLifecycle,
   HOT_ONLY_INFINITE_DATA_RETENTION,
 } from './data_stream_utils';
 
@@ -96,6 +97,46 @@ describe('Data stream utils', () => {
         resolveLogisticsLifecycle({ enabled: false }, { isDataStreamTemplate: false })
       ).toEqual({ enabled: false });
     });
+  });
+
+  describe('serializeComponentTemplateLifecycle', () => {
+    const deleteOnly = { enabled: true, value: 60, unit: 'd' };
+    const frozenOnly = { enabled: false, frozen: { enabled: true, value: 30, unit: 'd' } };
+
+    test('omits lifecycle without an optional phase for templates without an existing lifecycle', () => {
+      const options = { hasExistingLifecycle: false };
+
+      expect(serializeComponentTemplateLifecycle(undefined, options)).toBeUndefined();
+      expect(serializeComponentTemplateLifecycle({ enabled: false }, options)).toBeUndefined();
+      expect(
+        serializeComponentTemplateLifecycle(HOT_ONLY_INFINITE_DATA_RETENTION, options)
+      ).toBeUndefined();
+    });
+
+    test('keeps hot-only lifecycle for templates with an existing lifecycle', () => {
+      const options = { hasExistingLifecycle: true };
+
+      expect(
+        serializeComponentTemplateLifecycle(HOT_ONLY_INFINITE_DATA_RETENTION, options)
+      ).toEqual({ enabled: true });
+      expect(serializeComponentTemplateLifecycle({ enabled: false }, options)).toEqual({
+        enabled: true,
+      });
+    });
+
+    test.each([false, true])(
+      'serializes delete and frozen phases (hasExistingLifecycle: %s)',
+      (hasExistingLifecycle) => {
+        expect(serializeComponentTemplateLifecycle(deleteOnly, { hasExistingLifecycle })).toEqual({
+          enabled: true,
+          data_retention: '60d',
+        });
+        expect(serializeComponentTemplateLifecycle(frozenOnly, { hasExistingLifecycle })).toEqual({
+          enabled: true,
+          frozen_after: '30d',
+        });
+      }
+    );
   });
 
   describe('deserializeESLifecycle', () => {

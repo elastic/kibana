@@ -2816,6 +2816,27 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  describe('overrides', () => {
+    it('ignores stored overrides with denied keys and keeps the allowed ones', async () => {
+      mockAgentPolicy({
+        revision: 1,
+        overrides: {
+          receivers: { 'filelog/x': { include: ['/etc/hosts'] } },
+          'extensions.pprof.save_to_file': '/tmp/x',
+          service: { pipelines: {} },
+          'agent.logging.level': 'debug',
+        },
+      });
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(agentPolicy).not.toHaveProperty('receivers');
+      expect(agentPolicy).not.toHaveProperty('service');
+      expect(agentPolicy).not.toHaveProperty('extensions.pprof.save_to_file');
+      expect(agentPolicy).not.toHaveProperty(['extensions.pprof.save_to_file']);
+      expect(agentPolicy).toHaveProperty(['agent.logging.level'], 'debug');
+    });
+  });
+
   describe('secret_references reconciliation', () => {
     const buildPolicyWithSecretRef = (id: string, compiledInputValue: string | null) => ({
       id: `pp-${id}`,
@@ -4403,6 +4424,37 @@ describe('getBinarySourceSettings', () => {
     expect(getBinarySourceSettings([downloadSource], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       sources: ['http://custom-registry-test'],
+    });
+  });
+
+  it.each([true, false])(
+    'should return agent download config with reserve_diskspace.enabled %s if set',
+    (reserveDiskspace) => {
+      expect(
+        getBinarySourceSettings(
+          [{ ...downloadSource, reserve_diskspace: reserveDiskspace }],
+          undefined
+        )
+      ).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
+        reserve_diskspace: { enabled: reserveDiskspace },
+      });
+    }
+  );
+
+  it('should use reserve_diskspace of the primary download source only', () => {
+    expect(
+      getBinarySourceSettings(
+        [
+          downloadSource,
+          { ...downloadSource, id: 'test-ds-2', host: 'http://other', reserve_diskspace: false },
+        ],
+        undefined
+      )
+    ).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test', 'http://other'],
     });
   });
 

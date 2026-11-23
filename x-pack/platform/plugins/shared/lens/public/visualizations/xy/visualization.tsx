@@ -32,7 +32,8 @@ import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-com
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getColorsFromMapping } from '@kbn/coloring';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { getKbnPalettes, useKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
+import { useKbnPalettes } from '@kbn/palettes-components';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type {

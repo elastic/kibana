@@ -29,5 +29,6 @@ export default function loadTests(providerContext) {
     loadTestFile(require.resolve('./deployment_modes'));
     loadTestFile(require.resolve('./reusable_policies'));
     loadTestFile(require.resolve('./conditions'));
+    loadTestFile(require.resolve('./variable_values'));
   });
 }

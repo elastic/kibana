@@ -18,8 +18,6 @@ import {
   withSandboxOutputRedaction,
 } from './sandbox_output_redaction';
 
-import type { SandboxCallContext } from './tool_utils';
-
 const CONNECTOR_SECRET = 'connector-api-key-123';
 const SAVED_CONNECTOR_ID = 'saved-1';
 const SAVED_CONNECTOR_TOKEN = 'saved-connector-token-value';
@@ -37,11 +35,9 @@ const setup = ({
     ],
   },
   allowedConnectorIds = [],
-  prepareCallContext,
 }: {
   handlerReturn?: unknown;
   allowedConnectorIds?: string[];
-  prepareCallContext?: (callContext: SandboxCallContext) => Promise<void>;
 } = {}) => {
   const handler = jest.fn().mockResolvedValue(handlerReturn);
   const tool = { id: 'sandbox_tool', schema, handler } as unknown as BuiltinToolDefinition<
@@ -72,9 +68,9 @@ const setup = ({
   } as unknown as ActionsPluginStart;
   const logger = loggingSystemMock.createLogger();
   const wrapped = withSandboxOutputRedaction(tool, {
-    prepareCallContext,
     getOutputRedactor: createSandboxOutputRedactorProvider({
       getDeps: () => ({ actions }),
+      logger,
     }),
     logger,
   });
@@ -83,13 +79,7 @@ const setup = ({
   const run = () =>
     (wrapped.handler as unknown as (p: unknown, c: unknown) => Promise<unknown>)(
       {},
-      {
-        request,
-        agentConfiguration: { connector_ids: allowedConnectorIds },
-        runContext: {
-          stack: [{ type: 'agent', agentId: 'nightshift.investigation', conversationId: 'inv-c0' }],
-        },
-      }
+      { request, agentConfiguration: { connector_ids: allowedConnectorIds } }
     );
 
   return { run, handler, logger, request, actionsClient, actions };
@@ -100,44 +90,6 @@ const resultWithStdout = (stdout: string) => ({
 });
 
 describe('withSandboxOutputRedaction', () => {
-  it('applies conversation scoping before reading credentials and passes that scope to the tool', async () => {
-    const prepareCallContext = jest.fn(async (callContext: SandboxCallContext) => {
-      expect(callContext.conversationId).toBe('inv-c0');
-      expect(callContext.agentId).toBe('nightshift.investigation');
-      callContext.allowedConnectorIds = [SAVED_CONNECTOR_ID];
-    });
-    const { run, handler, actionsClient } = setup({
-      allowedConnectorIds: [SAVED_CONNECTOR_ID, 'unselected-telemetry'],
-      prepareCallContext,
-    });
-    await run();
-    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledTimes(1);
-    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: SAVED_CONNECTOR_ID });
-    expect(handler).toHaveBeenCalledWith(
-      {},
-      expect.objectContaining({
-        sandboxCallContext: expect.objectContaining({ allowedConnectorIds: [SAVED_CONNECTOR_ID] }),
-      })
-    );
-  });
-
-  it('blocks the tool before credentials are read when conversation telemetry cannot be resolved', async () => {
-    const { run, handler, actionsClient } = setup({
-      allowedConnectorIds: [SAVED_CONNECTOR_ID],
-      prepareCallContext: jest.fn().mockRejectedValue(new Error('Conversation unavailable')),
-    });
-    await expect(run()).resolves.toMatchObject({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: { message: expect.stringContaining('conversation telemetry') },
-        },
-      ],
-    });
-    expect(handler).not.toHaveBeenCalled();
-    expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
-  });
-
   it('redacts connector secrets anywhere in the results', async () => {
     const { run } = setup();
 
@@ -178,6 +130,7 @@ describe('withSandboxOutputRedaction', () => {
     const wrapped = withSandboxOutputRedaction(tool, {
       getOutputRedactor: createSandboxOutputRedactorProvider({
         getDeps: () => ({ actions }),
+        logger,
       }),
       logger,
     });
@@ -249,21 +202,22 @@ describe('withSandboxOutputRedaction', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('does not run the tool when a sandbox capable connector cannot be resolved', async () => {
-    const { run, handler, logger } = setup({ allowedConnectorIds: ['broken-1'] });
-
-    await expect(run()).resolves.toEqual({
-      results: [
-        {
-          type: ToolResultType.error,
-          data: { message: expect.stringContaining("connector 'broken-1' assigned to this agent") },
-        },
-      ],
+  it('skips a sandbox capable connector that cannot be resolved and still runs the tool', async () => {
+    const { run, handler, logger, actionsClient } = setup({
+      allowedConnectorIds: ['broken-1', SAVED_CONNECTOR_ID],
+      handlerReturn: resultWithStdout(SAVED_CONNECTOR_TOKEN),
     });
-    expect(handler).not.toHaveBeenCalled();
-    expect(logger.error).toHaveBeenCalledTimes(1);
-    expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Resolving connector credentials for output redaction failed')
+
+    await expect(run()).resolves.toEqual(resultWithStdout(REDACTED_PLACEHOLDER));
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: 'broken-1' });
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Connector 'broken-1' assigned to this agent cannot be resolved, so its credentials cannot be injected into sandbox commands: Unauthorized to execute connector broken-1"
+      )
     );
   });
 

@@ -8,6 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AlertEpisodeDetailsFlyout } from '@kbn/alerting-v2-episodes-ui/components/details/details_flyout';
+import type { AlertSubjectSnapshot } from '../../../common/subjects/subject';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
 import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 import type { SubjectFlyoutServices } from './subject_services';
@@ -18,6 +19,8 @@ export interface SubjectDetailsFlyoutProps {
   alertId: string;
   /** `snapshot.source`: set only on an alerting v2 alert, which opens the episode flyout. */
   source?: string;
+  /** The alert as it was when the investigation started; handed to a registered flyout. */
+  snapshot?: AlertSubjectSnapshot;
   /** The subject's details page, shown as the flyout's "View details" link. */
   detailsHref?: string;
   onClose: () => void;
@@ -32,18 +35,33 @@ const createQueryClient = (): QueryClient =>
   new QueryClient({ defaultOptions: { queries: { retry: false, refetchOnWindowFocus: false } } });
 
 /**
- * The alert behind a subject, in a flyout: the shared alerting v2 episode flyout for a v2
- * episode, a thin classic-alert flyout otherwise. Both keep a link to the full details page.
+ * The alert behind a subject, in a flyout: the one registered for its source, else the shared
+ * alerting v2 episode flyout for a v2 episode, a thin classic-alert flyout otherwise. The last two
+ * keep a link to the full details page.
  */
 export const SubjectDetailsFlyout = ({
   alertId,
   source,
+  snapshot,
   detailsHref,
   onClose,
   services,
 }: SubjectDetailsFlyoutProps) => {
   // Created once per mount; the flyout is unmounted when it closes.
   const [queryClient] = React.useState(createQueryClient);
+
+  // A solution that registered a flyout for this source owns it and brings its own providers.
+  const RegisteredFlyout = services.getAlertFlyout?.(source, snapshot);
+  if (RegisteredFlyout) {
+    return (
+      <RegisteredFlyout
+        alertId={alertId}
+        snapshot={snapshot}
+        detailsHref={detailsHref}
+        onClose={onClose}
+      />
+    );
+  }
 
   if (isUniversalAlertSnapshot({ source })) {
     if (!hasEpisodeFlyoutServices(services)) {

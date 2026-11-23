@@ -7,7 +7,7 @@
 
 import { FLEET_ENDPOINT_PACKAGE } from '../../../common/constants/epm';
 
-import { getInputsWithIds } from './get_input_with_ids';
+import { getInputsWithIds, validateNoTraversalInCompiledIds } from './get_input_with_ids';
 
 describe('getInputsWithIds', () => {
   it('should return inputs and streams with populated IDs if not already present', () => {
@@ -363,6 +363,41 @@ describe('getInputsWithIds', () => {
       expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
     });
 
+    it('throws when input.config.streams.value[*].id contains a traversal sequence', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { streams: { value: [{ id: 'a/../../../../tmp/evil' }] } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when input.config.streams.value adds a traversal stream to an input with no streams', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].streams = [];
+      policy.inputs[0].config = { streams: { value: [{ id: '../../../../tmp/evil' }] } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('throws when input.config.streams.value is an index-keyed object with a traversal id', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = { streams: { value: { 0: { id: '../../../../tmp/evil' } } } };
+      expect(() => getInputsWithIds(policy, 'policy123')).toThrow('path traversal');
+    });
+
+    it('does not throw for safe input.config.streams.value ids', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = {
+        streams: { value: [{ id: 'logfile-system.syslog-policy123', paths: ['/var/log/../x'] }] },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
+    it('does not throw for non-identity nested ids in input.config.streams.value', () => {
+      const policy = policyWithInputId('safe-input-id') as any;
+      policy.inputs[0].config = {
+        streams: { value: [{ processors: [{ add_fields: { fields: { id: '../../x' } } }] }] },
+      };
+      expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
+    });
+
     it('does not throw for a non-identity nested id in an override (e.g. event-data field)', () => {
       const policy = policyWithInputId('safe-input-id') as any;
       policy.overrides = {
@@ -406,5 +441,71 @@ describe('getInputsWithIds', () => {
       policy.inputs[0].config = { id: { value: null } };
       expect(() => getInputsWithIds(policy, 'policy123')).not.toThrow();
     });
+  });
+});
+
+describe('validateNoTraversalInCompiledIds', () => {
+  const inputWith = (compiled: { input?: any; stream?: any }) =>
+    [
+      {
+        id: 'safe-input-id',
+        type: 'logfile',
+        enabled: true,
+        ...(compiled.input !== undefined ? { compiled_input: compiled.input } : {}),
+        streams: [
+          {
+            id: 'safe-stream-id',
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'test-dataset' },
+            ...(compiled.stream !== undefined ? { compiled_stream: compiled.stream } : {}),
+          },
+        ],
+      },
+    ] as any;
+
+  it('throws when compiled_stream.id contains a traversal sequence', () => {
+    expect(() =>
+      validateNoTraversalInCompiledIds(inputWith({ stream: { id: '../../../tmp/evil' } }))
+    ).toThrow('path traversal');
+  });
+
+  it('throws when compiled_input.id contains a traversal sequence', () => {
+    expect(() =>
+      validateNoTraversalInCompiledIds(inputWith({ input: { id: 'a/../../tmp/evil' } }))
+    ).toThrow('path traversal');
+  });
+
+  it('throws when compiled_input.streams[*].id contains a traversal sequence', () => {
+    expect(() =>
+      validateNoTraversalInCompiledIds(
+        inputWith({ input: { streams: [{ id: '../../../tmp/evil' }] } })
+      )
+    ).toThrow('path traversal');
+  });
+
+  it('does not throw for safe compiled ids, including ones with a slash', () => {
+    expect(() =>
+      validateNoTraversalInCompiledIds(
+        inputWith({
+          input: { id: 'cloudbeat/cis_k8s-safe' },
+          stream: { id: 'logfile-system.syslog-policy123' },
+        })
+      )
+    ).not.toThrow();
+  });
+
+  it('does not throw when there is no compiled output', () => {
+    expect(() => validateNoTraversalInCompiledIds(inputWith({}))).not.toThrow();
+  });
+
+  it('ignores non-string compiled ids and non-identity nested ids', () => {
+    expect(() =>
+      validateNoTraversalInCompiledIds(
+        inputWith({
+          input: { id: 42, processors: [{ add_fields: { fields: { id: '../../x' } } }] },
+          stream: { id: { nested: '../x' }, meta: { id: '../../x' } },
+        })
+      )
+    ).not.toThrow();
   });
 });

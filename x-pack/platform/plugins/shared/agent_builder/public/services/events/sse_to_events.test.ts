@@ -126,6 +126,47 @@ describe('sseToEvents', () => {
     expect(streamingEvent(state)?.data.message).toBe('Hello');
   });
 
+  it('ignores model reasoning chunks and appends a step for model reasoning, keeping later step ids in sequence', () => {
+    const state = fold(
+      executionStarted(),
+      {
+        type: ChatEventType.modelReasoningChunk,
+        data: { message_id: 'm1', text_chunk: 'Let me think.' },
+      } as ChatEvent,
+      {
+        type: ChatEventType.modelReasoning,
+        data: { message_id: 'm1', reasoning: 'Let me think.', tool_call_group_id: 'g1' },
+      } as ChatEvent,
+      toolCall('t1')
+    );
+
+    expect(ids(state)).toEqual([
+      `${EXECUTION_ID}::execution_started`,
+      executionStepEventId(ROUND_ID, 0, 0),
+      executionStepEventId(ROUND_ID, 0, 1),
+    ]);
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.modelReasoning,
+      reasoning: 'Let me think.',
+      tool_call_group_id: 'g1',
+    });
+    expect(stepAt(state, executionStepEventId(ROUND_ID, 0, 1))?.tool_call_id).toBe('t1');
+  });
+
+  it('moves the answer written so far into a step when the run reads a message after it', () => {
+    const interim = {
+      type: ChatEventType.interimAnswer,
+      data: { message: 'first answer' },
+    } as ChatEvent;
+    const state = fold(executionStarted(), chunk('first answer'), interim, chunk('second'));
+
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.interimAnswer,
+      message: 'first answer',
+    });
+    expect(streamingEvent(state)?.data.message).toBe('second');
+  });
+
   it('patches the same step event through tool call, progress and result', () => {
     const stepId = executionStepEventId(ROUND_ID, 0, 0);
     const state = fold(
@@ -151,6 +192,16 @@ describe('sseToEvents', () => {
       progression: [{ message: 'halfway', metadata: {} }],
       results: [{ tool_result_id: 'r1', type: ToolResultType.other, data: { ok: true } }],
     });
+  });
+
+  it('carries the tool call intent onto the step', () => {
+    const stepId = executionStepEventId(ROUND_ID, 0, 0);
+    const state = fold(executionStarted(), {
+      type: ChatEventType.toolCall,
+      data: { tool_call_id: 't1', tool_id: 'my_tool', params: {}, intent: 'Searching logs' },
+    } as ChatEvent);
+
+    expect(stepAt(state, stepId)).toMatchObject({ tool_call_id: 't1', intent: 'Searching logs' });
   });
 
   it('builds a step from a resume’s tool_result when no tool_call preceded it', () => {
