@@ -62,7 +62,7 @@ apiTest.describe(
           kind: 'signal',
           metadata: {
             name: 'Retired strategy rule',
-            tags: ['detection_engine:managed', 'detection_engine:strategy:retired'],
+            tags: ['nightshift:detection_engine:managed', 'nightshift:detection_engine:strategy:retired'],
           },
           time_field: '@timestamp',
           schedule: { every: '5m', lookback: '5m' },

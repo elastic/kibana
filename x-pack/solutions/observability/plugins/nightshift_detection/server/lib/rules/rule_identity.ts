@@ -12,15 +12,19 @@ import { stableStringify } from '@kbn/std';
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';
 
-/** On every rule the engine manages; the reconciler lists and deletes only these. */
-export const MANAGED_RULE_TAG = 'detection_engine:managed';
-
 /**
- * Prefix of the tag naming the strategy that owns a rule. Never `nightshift:source:*`: that prefix
- * is `significant_events`', which deletes the rules it finds under it.
+ * Every tag the engine writes starts with `nightshift:detection_engine:`. Never `nightshift:source:*`:
+ * that prefix is `significant_events`', which deletes the rules it finds under it.
  */
-const STRATEGY_TAG_PREFIX = 'detection_engine:strategy:';
-const SOURCE_TAG_PREFIX = 'detection_engine:source:';
+const TAG_PREFIX = 'nightshift:detection_engine:';
+
+/** On every rule the engine manages; the reconciler lists and deletes only these. */
+export const MANAGED_RULE_TAG = `${TAG_PREFIX}managed`;
+
+/** Prefix of the tag naming the strategy that owns a rule. */
+const STRATEGY_TAG_PREFIX = `${TAG_PREFIX}strategy:`;
+/** Prefix of the tag naming the source a rule watches. */
+const SOURCE_TAG_PREFIX = `${TAG_PREFIX}source:`;
 
 /** The tag of the rules a strategy owns. */
 export const getStrategyTag = (strategyId: string): string => `${STRATEGY_TAG_PREFIX}${strategyId}`;
