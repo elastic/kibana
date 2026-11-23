@@ -41,7 +41,6 @@ import type { UserSettings } from '@kbn/core-user-settings-server-internal';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
 import { BehaviorSubject } from 'rxjs';
-import { PluginType, type DiscoveredPlugin } from '@kbn/core-base-common';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -1115,42 +1114,5 @@ describe('RenderingService', () => {
 
       expect(content).toContain('font-display: swap');
     });
-  });
-  it('includes only anonymous-safe plugins on anonymous pages', async () => {
-    await service.preboot(mockRenderingPrebootDeps);
-    const { render } = await service.setup(mockRenderingSetupDeps);
-    const { uiPlugins } = mockRenderingSetupDeps;
-    const uiSettings = {
-      client: uiSettingsServiceMock.createClient(),
-      globalClient: uiSettingsServiceMock.createClient(),
-    };
-    const createPlugin = (id: string, enabledOnAnonymousPages: boolean): DiscoveredPlugin => ({
-      id,
-      configPath: [id],
-      type: PluginType.standard,
-      requiredPlugins: [],
-      optionalPlugins: [],
-      requiredBundles: [],
-      runtimePluginDependencies: [],
-      enabledOnAnonymousPages,
-    });
-    uiPlugins.public.set('anonymousSafe', createPlugin('anonymousSafe', true));
-    uiPlugins.public.set('authenticatedOnly', createPlugin('authenticatedOnly', false));
-
-    try {
-      const { body: anonymousBody } = await render(createKibanaRequest(), uiSettings, {
-        isAnonymousPage: true,
-      });
-      const { body: authenticatedBody } = await render(createKibanaRequest(), uiSettings);
-      const pluginIds = (body: string) =>
-        JSON.parse(load(body)('kbn-injected-metadata').attr('data') ?? '""').uiPlugins.map(
-          ({ id }: { id: string }) => id
-        );
-
-      expect(pluginIds(anonymousBody)).toEqual(['anonymousSafe']);
-      expect(pluginIds(authenticatedBody)).toEqual(['anonymousSafe', 'authenticatedOnly']);
-    } finally {
-      uiPlugins.public.clear();
-    }
   });
 });

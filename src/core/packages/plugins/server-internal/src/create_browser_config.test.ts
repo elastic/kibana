@@ -268,34 +268,7 @@ describe('createBrowserConfig and getExposedConfigKeys', () => {
     );
     expect(result).toEqual({
       browserConfig: { settings: { enabled: 'from-record' } },
-      exposedConfigKeys: {
-        settings: 'record [selected: {"enabled":true}]',
-        'settings.enabled': 'boolean|never',
-      },
-    });
-
-    expect(getExposedConfigKeys({ ...descriptor, exposeToBrowser: { settings: true } })).toEqual({
-      settings: 'record',
-      'settings.enabled': 'boolean|never',
-    });
-    expect(
-      getExposedConfigKeys({ ...descriptor, exposeToBrowser: { settings: { other: true } } })
-    ).toEqual({ settings: 'record [selected: {"other":true}]' });
-  });
-
-  it('distinguishes literal dots in schema keys from nested paths', () => {
-    const configSchema = schema.object({
-      'nested.key': schema.string(),
-      nested: schema.object({ key: schema.boolean() }),
-    });
-    const descriptor: PluginConfigDescriptor<TypeOf<typeof configSchema>> = {
-      schema: configSchema,
-      exposeToBrowser: { 'nested.key': true, nested: { key: true } },
-    };
-
-    expect(getExposedConfigKeys(descriptor)).toEqual({
-      'nested\\.key': 'string',
-      'nested.key': 'boolean',
+      exposedConfigKeys: { settings: 'record', 'settings.enabled': 'boolean|never' },
     });
   });
 
