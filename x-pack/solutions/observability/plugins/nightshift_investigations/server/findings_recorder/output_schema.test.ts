@@ -607,6 +607,21 @@ describe('limitDescriptionBullets', () => {
   });
 });
 
+describe('limitFindings summary', () => {
+  it('keeps a lead sentence and at most three bullets', () => {
+    const parsed = findingsOutputSchema.safeParse({
+      summary:
+        'Chat requests fail. Every request returns 500. It began on Friday. Two orgs are hit. Nothing has recovered.',
+      hypotheses: [],
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(limitFindings(parsed.data).summary).toBe(
+      'Chat requests fail.\n\n- Every request returns 500.\n- It began on Friday.\n- Two orgs are hit.'
+    );
+  });
+});
+
 describe('limitBulletList', () => {
   it('turns a paragraph into short bullets', () => {
     const text = 'Alert fired. Shipping pod crashed. A deploy changed it. Fourth. Fifth. Sixth.';

@@ -606,6 +606,8 @@ export const limitImpactMap = (
 
 const MAX_EVENT_DESCRIPTION_LENGTH = 1_000;
 const MAX_EVENT_DESCRIPTION_BULLETS = 4;
+/** What's happened: a lead sentence, then at most this many bullets. */
+const MAX_SUMMARY_BULLETS = 3;
 
 const MAX_EVENT_BULLET_LENGTH = 200;
 
@@ -643,7 +645,10 @@ export const limitBulletList = (text: string, maxItems: number, maxChars: number
  * bullets only is kept as bullets. A paragraph becomes its first sentence and the next few as
  * bullets, so a verbose answer never reaches the reader as a wall of text.
  */
-export const limitDescriptionBullets = (text: string): string => {
+export const limitDescriptionBullets = (
+  text: string,
+  maxBullets: number = MAX_EVENT_DESCRIPTION_BULLETS
+): string => {
   const lines = text.split('\n').filter((line) => line.trim());
   const isBullet = (line: string) => /^\s*[-*]\s/.test(line);
   const unbullet = (line: string) => line.replace(/^\s*[-*]\s+/, '').trim();
@@ -661,7 +666,7 @@ export const limitDescriptionBullets = (text: string): string => {
     items = sentences;
   }
   const bullets = items
-    .slice(0, MAX_EVENT_DESCRIPTION_BULLETS)
+    .slice(0, maxBullets)
     .map((item) => `- ${clipAtWord(item, MAX_EVENT_BULLET_LENGTH)}`)
     .join('\n');
   const head = lead ? clipAtWord(lead, MAX_EVENT_BULLET_LENGTH) : '';
@@ -773,7 +778,7 @@ export const limitFindings = (
     ...(impactMap ? { impact_map: impactMap } : {}),
     ...(events.length ? { events } : {}),
     impact_evidence: impactEvidence,
-    summary: limitBulletList(normalizeEventLinks(output.summary), 5, 160),
+    summary: limitDescriptionBullets(normalizeEventLinks(output.summary), MAX_SUMMARY_BULLETS),
     ...(output.verdict !== undefined
       ? { verdict: limitDescriptionBullets(normalizeEventLinks(output.verdict)) }
       : {}),
@@ -966,7 +971,7 @@ export const FINDINGS_JSON_SCHEMA = {
     },
     proposals: {
       type: 'array',
-      description: `Concrete actions for a person to decide, at most ${MAX_PROPOSALS}: a command, a config change, a code fix or a rollback the findings support. Leave out general advice and anything already proposed.`,
+      description: `Concrete actions for a person to decide, at most ${MAX_PROPOSALS}: a command, a config change, a code fix or a rollback the findings support. When there is no fix yet, propose the next step for the operator that would settle the cause: a specific check, query, log or person, naming the target. Always give at least one, but leave out general advice and anything already proposed.`,
       items: {
         type: 'object',
         properties: {

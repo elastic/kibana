@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -144,7 +145,11 @@ const LearningsSection: React.FC = () => {
   return (
     <EuiAccordion
       id={accordionId}
-      buttonContent={LEARNINGS_TITLE}
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>{LEARNINGS_TITLE}</h3>
+        </EuiTitle>
+      }
       paddingSize="m"
       data-test-subj="agenticInvestigationsLearningsSection"
     >
@@ -152,7 +157,7 @@ const LearningsSection: React.FC = () => {
         data-test-subj="agenticInvestigationsLearningsPlaceholder"
         iconType="sparkles"
         titleSize="xs"
-        title={<h3>{LEARNINGS_TITLE}</h3>}
+        title={<h4>{LEARNINGS_TITLE}</h4>}
         body={<p>{LEARNINGS_BODY}</p>}
       />
     </EuiAccordion>

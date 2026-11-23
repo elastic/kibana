@@ -6,33 +6,32 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiAccordion, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 
+/** A titled section of the investigation view. Open to begin with, and the title folds it. */
 export const DetailsBlock = memo<{
   title: string;
   /** Rendered beside the title, e.g. how many proposals were applied. */
   titleAppend?: React.ReactNode;
+  /** Whether the section starts folded. Open by default, so nothing is hidden until asked. */
+  initialIsOpen?: boolean;
   children: React.ReactNode;
-}>(({ title, titleAppend, children }) => {
+}>(({ title, titleAppend, initialIsOpen = true, children }) => {
+  const accordionId = useGeneratedHtmlId({ prefix: 'investigationSection' });
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="spaceBetween"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
-          </EuiFlexItem>
-          {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiAccordion
+      id={accordionId}
+      initialIsOpen={initialIsOpen}
+      paddingSize="s"
+      buttonContent={
+        <EuiTitle size="xs">
+          <h3>{title}</h3>
+        </EuiTitle>
+      }
+      extraAction={titleAppend}
+    >
+      {children}
+    </EuiAccordion>
   );
 });
 
