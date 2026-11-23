@@ -32,14 +32,29 @@ import { updateByQueryAndWait } from './update_by_query_task';
 /**
  * Whether the retry of an update tags action leaves out the agents the update already changed.
  *
- * It restarts behind the action's kuery, and `updateAgentTags` only narrows that kuery for an
- * update that adds one tag or removes one tag: an agent that has the tag (or no longer has it)
- * does not match again. For a rename, or an update of several tags, the retry goes through every
- * agent again, so what a failed attempt recorded would be recorded a second time.
+ * It restarts behind the action's kuery, and `updateAgentTags` narrows that kuery for an update
+ * that adds one tag or removes one tag: an agent that has the tag (or no longer has it) does not
+ * match again.
+ *
+ * The kuery can leave out updated agents for other updates too. The tag rename in the UI searches
+ * for the agents that have the old tag, and the renamed agents no longer match it. It is free text,
+ * so all that is checked is whether it searches the tags field and names a tag of the update, and
+ * when it does the retry is assumed to skip the agents that were updated.
+ *
+ * That is a guess, and a wrong one either way costs something. Recording agents the retry goes
+ * through again counts them twice, which can make the action look complete early. Not recording
+ * agents the retry skips leaves the action short of its total for good. So the guess leans towards
+ * recording, which is also how a retry after a version conflict has always been recorded.
  */
-export const retrySkipsUpdatedAgents = (tagsToAdd: string[] = [], tagsToRemove: string[] = []) =>
+export const retrySkipsUpdatedAgents = (
+  tagsToAdd: string[] = [],
+  tagsToRemove: string[] = [],
+  kuery: string = ''
+) =>
   (tagsToAdd.length === 1 && tagsToRemove.length === 0) ||
-  (tagsToRemove.length === 1 && tagsToAdd.length === 0);
+  (tagsToRemove.length === 1 && tagsToAdd.length === 0) ||
+  (/\btags\s*:/.test(kuery) &&
+    [...tagsToAdd, ...tagsToRemove].some((tag) => tag !== '' && kuery.includes(tag)));
 
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -53,7 +68,8 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
         tagsToRemove: this.actionParams?.tagsToRemove,
         retrySkipsUpdated: retrySkipsUpdatedAgents(
           this.actionParams?.tagsToAdd,
-          this.actionParams?.tagsToRemove
+          this.actionParams?.tagsToRemove,
+          this.actionParams?.kuery
         ),
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,

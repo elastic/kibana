@@ -518,15 +518,29 @@ describe('update_agent_tags', () => {
 
   describe('retrySkipsUpdatedAgents', () => {
     it.each([
-      [['a'], [], true],
-      [[], ['a'], true],
-      [['a'], ['b'], false],
-      [['a', 'b'], [], false],
-      [[], ['a', 'b'], false],
-      [[], [], false],
-    ])('tagsToAdd %j, tagsToRemove %j -> %s', (tagsToAdd, tagsToRemove, expected) => {
-      expect(retrySkipsUpdatedAgents(tagsToAdd, tagsToRemove)).toBe(expected);
-    });
+      // the update adds one tag or removes one tag
+      [['a'], [], '', true],
+      [[], ['a'], '', true],
+      // a rename, or several tags, with a kuery that does not leave out the updated agents
+      [['a'], ['b'], '', false],
+      [['a'], ['b'], 'status:online', false],
+      [['a', 'b'], [], 'status:online', false],
+      [[], ['a', 'b'], '', false],
+      [[], [], '', false],
+      // a kuery that names a tag of the update, like the tag rename in the UI
+      [['new'], ['old'], 'tags:"old"', true],
+      [['new'], ['old'], '(tags:"old") AND status:online', true],
+      [['a', 'b'], [], 'NOT tags:a', true],
+      // a kuery that searches other tags, or names the tag in another field, says nothing
+      [['new'], ['old'], 'tags:other', false],
+      // an empty tag is in every kuery, so it says nothing about it
+      [['', 'b'], [], 'status:online', false],
+    ])(
+      'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
+      (tagsToAdd, tagsToRemove, kuery, expected) => {
+        expect(retrySkipsUpdatedAgents(tagsToAdd, tagsToRemove, kuery)).toBe(expected);
+      }
+    );
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
