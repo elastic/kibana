@@ -553,7 +553,10 @@ export interface TaskDetails {
   completed_by?: Actor | null;
   started_at?: string | null;
   completed_at?: string | null;
+  /** Name of the task list the task came from. */
   template_ref?: string | null;
+  /** Id of the task list the task came from (a list is applied to a record once). */
+  template_id?: string | null;
   priority: TaskPriority;
   /** User profile uids. */
   assignees: string[];
@@ -834,17 +837,15 @@ export interface ProcedureTemplateTask {
   subtasks?: ProcedureTemplateSubtask[];
 }
 
-/** A reusable task list, keyed by the Cases template (investigation type) that points at it. */
-export interface ProcedureTemplate {
-  /** Cases template id. */
-  template_id: string;
-  /** Type (template) name, for display. */
-  type: string;
+/** A reusable task list of the space. Templates reference lists; applying one adds its tasks. */
+export interface TaskList {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
   tasks: ProcedureTemplateTask[];
-  updated_at: string | null;
+  updated_at: string;
   updated_by: Actor | null;
-  /** False while the type still uses the built-in default procedure. */
-  saved: boolean;
   version?: string;
 }
 
@@ -864,6 +865,8 @@ export interface InvestigationTypeField {
   required: boolean;
   required_on_close: boolean;
   display_only: boolean;
+  /** True for a global field of the Cases field library: it applies to every investigation. */
+  is_global: boolean;
 }
 
 /** An investigation type is a Cases template tagged `investigation-type`. */
@@ -873,6 +876,8 @@ export interface InvestigationType {
   version: number;
   description?: string | null;
   fields: InvestigationTypeField[];
+  /** Ids of the task lists linked to the template, in the order they are applied. */
+  task_list_ids: string[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -902,7 +907,7 @@ export interface CreateRecordRequest {
   ai_enabled?: boolean;
   /** Create the main Agent Builder conversation. Defaults to `ai_enabled`. */
   create_conversation?: boolean;
-  /** Apply the procedure template for the investigation type. Default true. */
+  /** Apply the task lists linked to the template. Default true. */
   apply_procedure?: boolean;
   alerts?: AlertRefInput[];
   display_id?: string;
@@ -1386,4 +1391,33 @@ export interface LinkRecordResponse {
   record: InvestigationRecord;
   /** The record on the other side of the link. */
   other: { id: string; display_id: string; title: string };
+}
+
+/* Global fields: Cases field library definitions with `isGlobal` */
+
+/** `GET _types`: the investigation types and the owner's global fields (which apply to every type). */
+export interface InvestigationTypesResponse {
+  types: InvestigationType[];
+  global_fields: InvestigationTypeField[];
+}
+
+/* Task lists */
+
+export interface SaveTaskListRequest {
+  name: string;
+  description?: string;
+  tags?: string[];
+  tasks: ProcedureTemplateTask[];
+  /** Required when updating. */
+  version?: string;
+}
+
+/** The ordered task lists linked to one investigation template. */
+export interface TemplateTaskLists {
+  template_id: string;
+  task_list_ids: string[];
+}
+
+export interface ApplyTaskListRequest {
+  task_list_id: string;
 }

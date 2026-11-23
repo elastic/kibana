@@ -56,6 +56,7 @@ import { ManageTemplatesLink } from '../fields/manage_templates_link';
 import { ServerErrorsCallout } from '../fields/server_errors_callout';
 import { ConfirmModal } from '../shared/confirm_modal';
 import { DuplicateStatus } from './duplicate_callout';
+import { GlobalFieldsSection } from './global_fields_section';
 import { TypeFieldsSection } from './type_fields_section';
 import { MarkdownEditor } from '../../../components/markdown_editor';
 import * as i18n from './translations';
@@ -119,7 +120,9 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
     silentErrors: true,
   });
   const fieldsFormRef = useRef<ExtendedFieldsFormApi | null>(null);
+  const globalFieldsFormRef = useRef<ExtendedFieldsFormApi | null>(null);
   const [areFieldsDirty, setAreFieldsDirty] = useState(false);
+  const [areGlobalFieldsDirty, setAreGlobalFieldsDirty] = useState(false);
   const [serverErrors, setServerErrors] = useState<string[]>([]);
 
   const [values, setValues] = useState<CreateFormValues>(EMPTY_FORM);
@@ -164,7 +167,8 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
     values.tags.length > 0 ||
     values.entities.length > 0 ||
     values.alertIds.length > 0 ||
-    areFieldsDirty;
+    areFieldsDirty ||
+    areGlobalFieldsDirty;
 
   const update = useCallback((change: Partial<CreateFormValues>) => {
     setValues((current) => ({ ...current, ...change }));
@@ -180,7 +184,11 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
     title: values.title.trim(),
     description: values.description.trim(),
     template_id: values.templateId,
-    extended_fields: collectExtendedFieldValues(fieldsFormRef.current?.getValues() ?? {}),
+    // A global field wins over a template field of the same name, as in Cases.
+    extended_fields: {
+      ...collectExtendedFieldValues(fieldsFormRef.current?.getValues() ?? {}),
+      ...collectExtendedFieldValues(globalFieldsFormRef.current?.getValues() ?? {}),
+    },
     priority: values.priority,
     tags: values.tags,
     ai_enabled: values.aiEnabled && !agentUnavailable,
@@ -197,7 +205,14 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
           setServerErrors([message]);
           return;
         }
-        setServerErrors(fieldsFormRef.current?.showServerErrors(fieldErrors) ?? [message]);
+        // A message that names a global field is shown there; the rest go to the template fields.
+        const notGlobal =
+          globalFieldsFormRef.current?.showServerErrors(fieldErrors) ??
+          fieldErrors.map((fieldError) => fieldError.message);
+        const remaining = fieldErrors.filter((fieldError) =>
+          notGlobal.includes(fieldError.message)
+        );
+        setServerErrors(fieldsFormRef.current?.showServerErrors(remaining) ?? notGlobal);
       },
     });
   };
@@ -205,8 +220,11 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
   const submit = async () => {
     setShowErrors(true);
     // Validate the type's fields too, so every problem is marked at once.
-    const areFieldsValid = (await fieldsFormRef.current?.trigger()) ?? true;
-    if (hasErrors(errors) || !areFieldsValid) {
+    const [areTemplateFieldsValid, areGlobalFieldsValid] = await Promise.all([
+      fieldsFormRef.current?.trigger() ?? true,
+      globalFieldsFormRef.current?.trigger() ?? true,
+    ]);
+    if (hasErrors(errors) || !areTemplateFieldsValid || !areGlobalFieldsValid) {
       return;
     }
     const hasIdentifiers = values.entities.length > 0 || values.alertIds.length > 0;
@@ -389,6 +407,13 @@ export const CreateInvestigationFlyout: React.FC<CreateInvestigationFlyoutProps>
                 onDirtyChange={setAreFieldsDirty}
               />
             ) : null}
+
+            <GlobalFieldsSection
+              templateId={selectedType?.template_id}
+              templateVersion={selectedType?.version}
+              formApiRef={globalFieldsFormRef}
+              onDirtyChange={setAreGlobalFieldsDirty}
+            />
 
             <EuiHorizontalRule margin="m" />
             <EuiFormRow label={i18n.ENTITIES_LABEL} helpText={i18n.ENTITIES_HELP} fullWidth>

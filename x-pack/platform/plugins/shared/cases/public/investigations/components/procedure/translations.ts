@@ -16,9 +16,6 @@ export const LOADING = i18n.translate('xpack.cases.investigations.procedure.load
 export const LOAD_ERROR = i18n.translate('xpack.cases.investigations.procedure.loadError', {
   defaultMessage: 'The procedure could not be loaded',
 });
-export const CONFIGURE = i18n.translate('xpack.cases.investigations.procedure.configure', {
-  defaultMessage: 'Edit task list',
-});
 export const TYPE_NOT_SET = i18n.translate('xpack.cases.investigations.procedure.typeNotSet', {
   defaultMessage: 'No template set',
 });
@@ -45,12 +42,6 @@ export const ALL_REQUIRED_DONE = i18n.translate(
   'xpack.cases.investigations.procedure.allRequiredDone',
   { defaultMessage: 'All required tasks are done' }
 );
-export const HEADER_NOTE = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.headerNote', {
-    defaultMessage:
-      'The {type} task list sets these tasks. Claims and approved actions complete their tasks automatically, and each completion names who or what did it. Change the template with Take action, Change template.',
-    values: { type },
-  });
 export const CLOSE_INVESTIGATION = i18n.translate(
   'xpack.cases.investigations.procedure.closeInvestigation',
   { defaultMessage: 'Close investigation' }
@@ -243,7 +234,7 @@ export const REOPEN_ARIA = (title: string) =>
   });
 export const PRIORITY_ARIA = (title: string) =>
   i18n.translate('xpack.cases.investigations.procedure.priorityAria', {
-    defaultMessage: 'Change the severity of {title}',
+    defaultMessage: 'Change the priority of {title}',
     values: { title },
   });
 export const DRAG_TO_REORDER = i18n.translate(
@@ -420,6 +411,9 @@ export const FIELD_DESCRIPTION = i18n.translate(
 export const FIELD_PHASE = i18n.translate('xpack.cases.investigations.procedure.fieldPhase', {
   defaultMessage: 'Phase',
 });
+export const FIELD_PRIORITY = i18n.translate('xpack.cases.investigations.procedure.fieldPriority', {
+  defaultMessage: 'Priority',
+});
 export const FIELD_ASSIGNEES = i18n.translate(
   'xpack.cases.investigations.procedure.fieldAssignees',
   { defaultMessage: 'Assignees' }
@@ -469,53 +463,12 @@ export const TEXT_TOO_LONG = i18n.translate('xpack.cases.investigations.procedur
 export const EMPTY_TITLE = i18n.translate('xpack.cases.investigations.procedure.emptyTitle', {
   defaultMessage: 'No tasks yet',
 });
-export const EMPTY_BODY = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.emptyBody', {
-    defaultMessage: 'Add a task or apply the {type} task list to track this investigation.',
-    values: { type },
-  });
 export const APPLY_PROCEDURE = i18n.translate(
   'xpack.cases.investigations.procedure.applyProcedure',
-  { defaultMessage: 'Apply procedure' }
-);
-export const APPLY_TITLE = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.applyTitle', {
-    defaultMessage: 'Apply the {type} procedure?',
-    values: { type },
-  });
-export const APPLY_BODY_NO_TASKS = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.applyBodyNoTasks', {
-    defaultMessage: 'This adds the tasks of the {type} task list to this investigation.',
-    values: { type },
-  });
-export const APPLY_BODY_REPLACE = (type: string, open: number) =>
-  i18n.translate('xpack.cases.investigations.procedure.applyBodyReplace', {
-    defaultMessage:
-      '{open, plural, one {# unfinished task is} other {# unfinished tasks are}} replaced by the tasks of the {type} task list. Tasks that are completed or cancelled stay.',
-    values: { type, open },
-  });
-export const APPLY_CONFIRM = i18n.translate('xpack.cases.investigations.procedure.applyConfirm', {
-  defaultMessage: 'Replace unfinished tasks',
-});
-export const APPLY_SUCCESS = (type: string) =>
-  i18n.translate('xpack.cases.investigations.procedure.applySuccess', {
-    defaultMessage: 'Applied the {type} procedure.',
-    values: { type },
-  });
-export const NO_TEMPLATE_FOR_TYPE = i18n.translate(
-  'xpack.cases.investigations.procedure.noTemplateForType',
-  { defaultMessage: 'This template has no tasks yet. Add some in Edit task list first.' }
+  { defaultMessage: 'Apply task list' }
 );
 
 /* Task list editor */
-export const EDITOR_SAVED_BADGE = i18n.translate(
-  'xpack.cases.investigations.procedure.editorSavedBadge',
-  { defaultMessage: 'Saved' }
-);
-export const EDITOR_DEFAULT_BADGE = i18n.translate(
-  'xpack.cases.investigations.procedure.editorDefaultBadge',
-  { defaultMessage: 'Built-in default' }
-);
 export const EDITOR_READ_ONLY_TITLE = i18n.translate(
   'xpack.cases.investigations.procedure.editorReadOnlyTitle',
   { defaultMessage: 'You can view task lists but not change them' }
@@ -715,3 +668,52 @@ export const EDITOR_KEEP_EDITING = i18n.translate(
   'xpack.cases.investigations.procedure.editorKeepEditing',
   { defaultMessage: 'Keep editing' }
 );
+
+/* Applying a task list */
+
+export const CONFIGURE = i18n.translate('xpack.cases.investigations.procedure.configure', {
+  defaultMessage: 'Manage task lists',
+});
+export const EMPTY_BODY = i18n.translate('xpack.cases.investigations.procedure.emptyBody', {
+  defaultMessage: 'Add a task or apply a task list to track this investigation.',
+});
+export const HEADER_NOTE = (type: string) =>
+  i18n.translate('xpack.cases.investigations.procedure.headerNote', {
+    defaultMessage:
+      'The task lists of the {type} template added these tasks, and you can apply more from Apply task list. Claims and approved actions complete their tasks automatically, and each completion names who or what did it. Change the template with Take action, Change template.',
+    values: { type },
+  });
+export const APPLY_SELECT_LABEL = i18n.translate(
+  'xpack.cases.investigations.procedure.applySelectLabel',
+  { defaultMessage: 'Select a task list' }
+);
+export const APPLY_NO_TASK_LISTS = i18n.translate(
+  'xpack.cases.investigations.procedure.applyNoTaskLists',
+  {
+    defaultMessage:
+      'No task lists are available. Add one in Investigation settings, on the Task lists tab.',
+  }
+);
+export const APPLY_TASK_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.investigations.procedure.applyTaskCount', {
+    defaultMessage: '{count, plural, one {# task} other {# tasks}}',
+    values: { count },
+  });
+export const ALREADY_APPLIED = i18n.translate(
+  'xpack.cases.investigations.procedure.alreadyApplied',
+  {
+    defaultMessage: 'Already applied',
+  }
+);
+export const APPLY_SUCCESS = (name: string) =>
+  i18n.translate('xpack.cases.investigations.procedure.applySuccess', {
+    defaultMessage: 'Applied the task list "{name}".',
+    values: { name },
+  });
+export const NO_TASK_LISTS_TOOLTIP = i18n.translate(
+  'xpack.cases.investigations.procedure.noTaskListsTooltip',
+  { defaultMessage: 'No task lists yet. Add one in Investigation settings first.' }
+);
+export const APPLY_SEARCH = i18n.translate('xpack.cases.investigations.procedure.applySearch', {
+  defaultMessage: 'Search task lists',
+});

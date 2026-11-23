@@ -7,19 +7,12 @@
 
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
-import type { ProcedureTemplateTask, TaskItem } from '../../../common/investigations/types';
+import type { TaskItem } from '../../../common/investigations/types';
 import { TASK_SORT_ORDER_GAP } from '../../../common/investigations/constants';
-import {
-  applyRecordProcedure,
-  getWorkflows,
-  reorderTasks,
-  runTaskWorkflow,
-  saveProcedureTemplate,
-} from '../api/client';
+import { getWorkflows, reorderTasks, runTaskWorkflow } from '../api/client';
 import { investigationKeys } from '../api/query_keys';
 import { useInvestigationsServices } from '../services';
 import { useInvestigationToasts } from './use_investigation_toasts';
-import { APPLY_PROCEDURE_ERROR } from './translations';
 
 const REORDER_TASKS_ERROR = kbnI18n.translate(
   'xpack.cases.investigations.hooks.reorderTasksError',
@@ -94,41 +87,6 @@ export const useRunTaskWorkflow = (recordId: string) => {
       void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
     },
   });
-};
-
-/** Applies the procedure of the record's type (`replace` swaps the unfinished tasks). */
-export const useApplyRecordProcedure = (recordId: string) => {
-  const { http } = useInvestigationsServices();
-  const queryClient = useQueryClient();
-  const { showError } = useInvestigationToasts();
-
-  return useMutation(
-    (body: { replace: boolean; template_id?: string | null }) =>
-      applyRecordProcedure(http, recordId, body),
-    {
-      onSuccess: () => {
-        void queryClient.invalidateQueries(investigationKeys.recordScope(recordId));
-        void queryClient.invalidateQueries(investigationKeys.findAll());
-      },
-      onError: (error) => showError(error, APPLY_PROCEDURE_ERROR),
-    }
-  );
-};
-
-/** Saves the task list of one investigation type. The caller handles errors (a 403 means read-only). */
-export const useSaveProcedureTemplate = () => {
-  const { http } = useInvestigationsServices();
-  const queryClient = useQueryClient();
-
-  return useMutation(
-    ({ templateId, tasks }: { templateId: string; tasks: ProcedureTemplateTask[] }) =>
-      saveProcedureTemplate(http, templateId, { tasks }),
-    {
-      onSuccess: () => {
-        void queryClient.invalidateQueries(investigationKeys.procedureTemplates());
-      },
-    }
-  );
 };
 
 const THIRTY_SECONDS_MS = 30 * 1000;

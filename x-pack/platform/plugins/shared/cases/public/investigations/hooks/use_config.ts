@@ -7,13 +7,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import type { StatusesConfiguration } from '../../../common/investigations/statuses';
-import {
-  getCapabilities,
-  getInvestigationTypes,
-  getProcedureTemplates,
-  getStatuses,
-  saveStatuses,
-} from '../api/client';
+import { getCapabilities, getInvestigationTypes, getStatuses, saveStatuses } from '../api/client';
 import { investigationKeys } from '../api/query_keys';
 import { useInvestigationsServices } from '../services';
 
@@ -23,15 +17,6 @@ export const useInvestigationTypes = () => {
   const { http } = useInvestigationsServices();
 
   return useQuery(investigationKeys.types(), () => getInvestigationTypes(http), {
-    staleTime: FIVE_MINUTES_MS,
-    retry: false,
-  });
-};
-
-export const useProcedureTemplates = () => {
-  const { http } = useInvestigationsServices();
-
-  return useQuery(investigationKeys.procedureTemplates(), () => getProcedureTemplates(http), {
     staleTime: FIVE_MINUTES_MS,
     retry: false,
   });

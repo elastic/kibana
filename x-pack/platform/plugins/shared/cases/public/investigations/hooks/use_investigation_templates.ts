@@ -33,7 +33,7 @@ export const useInvestigationTemplates = () =>
   });
 
 /**
- * Refreshes what the app derives from templates (the template pickers and the task lists) after
+ * Refreshes what the app derives from templates (the template pickers and their task lists) after
  * a template is created, edited, enabled or disabled.
  */
 export const useRefreshInvestigationTemplates = (): (() => Promise<void>) => {
@@ -42,7 +42,7 @@ export const useRefreshInvestigationTemplates = (): (() => Promise<void>) => {
   return useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries(investigationKeys.types()),
-      queryClient.invalidateQueries(investigationKeys.procedureTemplates()),
+      queryClient.invalidateQueries(investigationKeys.taskLists()),
     ]);
   }, [queryClient]);
 };

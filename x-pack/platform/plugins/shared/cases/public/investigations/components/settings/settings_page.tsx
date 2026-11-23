@@ -18,14 +18,22 @@ import { css } from '@emotion/react';
 import { matchPath, useLocation } from 'react-router-dom';
 import { useInvestigationBreadcrumbs, useInvestigationsNavigation } from '../../hooks';
 import { ICONS } from '../../icons';
-import { SETTINGS_PATH, TASK_LIST_PATH_PATTERN, TEMPLATES_PATH } from './paths';
+import {
+  NEW_TASK_LIST_PATH,
+  SETTINGS_PATH,
+  TASK_LISTS_PATH,
+  TASK_LIST_PATH_PATTERN,
+  TEMPLATES_PATH,
+} from './paths';
 import { StatusesTab } from './statuses_tab';
+import { TaskListsTab } from './task_lists_tab';
 import { TemplatesTab } from './templates_tab';
 import * as i18n from './translations';
 
 /**
  * `/settings`: the status list and pause reasons of the space. `/settings/templates` lists the
- * investigation templates, and `/settings/templates/:templateId/tasks` opens a template's task list.
+ * investigation templates. `/settings/task-lists` lists the reusable task lists; `/new` and
+ * `/:taskListId` open the task list editor.
  */
 export const SettingsPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -35,9 +43,12 @@ export const SettingsPage: React.FC = () => {
   useInvestigationBreadcrumbs(i18n.PAGE_TITLE);
 
   const isTemplates = pathname.startsWith(TEMPLATES_PATH);
-  const taskListTemplateId =
-    matchPath<{ templateId: string }>(pathname, { path: TASK_LIST_PATH_PATTERN, exact: true })
-      ?.params.templateId ?? undefined;
+  const isTaskLists = pathname.startsWith(TASK_LISTS_PATH);
+  const isAddingTaskList = pathname === NEW_TASK_LIST_PATH;
+  const editTaskListId = isAddingTaskList
+    ? undefined
+    : matchPath<{ taskListId: string }>(pathname, { path: TASK_LIST_PATH_PATTERN, exact: true })
+        ?.params.taskListId ?? undefined;
 
   return (
     <div
@@ -65,7 +76,7 @@ export const SettingsPage: React.FC = () => {
       />
       <EuiTabs data-test-subj="investigationsSettingsTabs" aria-label={i18n.TABS_ARIA}>
         <EuiTab
-          isSelected={!isTemplates}
+          isSelected={!isTemplates && !isTaskLists}
           href={getHref(SETTINGS_PATH)}
           onClick={(event: React.MouseEvent) => {
             event.preventDefault();
@@ -86,9 +97,24 @@ export const SettingsPage: React.FC = () => {
         >
           {i18n.TAB_TEMPLATES}
         </EuiTab>
+        <EuiTab
+          isSelected={isTaskLists}
+          href={getHref(TASK_LISTS_PATH)}
+          onClick={(event: React.MouseEvent) => {
+            event.preventDefault();
+            navigate(TASK_LISTS_PATH);
+          }}
+          data-test-subj="investigationsSettingsTabTaskLists"
+        >
+          {i18n.TAB_TASK_LISTS}
+        </EuiTab>
       </EuiTabs>
       <EuiSpacer size="l" />
-      {isTemplates ? <TemplatesTab taskListTemplateId={taskListTemplateId} /> : <StatusesTab />}
+      {isTemplates ? <TemplatesTab /> : null}
+      {isTaskLists ? (
+        <TaskListsTab editTaskListId={editTaskListId} isAdding={isAddingTaskList} />
+      ) : null}
+      {isTemplates || isTaskLists ? null : <StatusesTab />}
     </div>
   );
 };

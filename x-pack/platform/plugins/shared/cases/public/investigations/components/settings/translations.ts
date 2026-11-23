@@ -14,7 +14,7 @@ export const PAGE_DESCRIPTION = i18n.translate(
   'xpack.cases.investigations.settings.pageDescription',
   {
     defaultMessage:
-      'Define the statuses your team uses to work investigations, the reasons analysts can give when they pause one, and the templates that set the fields and task list of each kind of investigation.',
+      'Define the statuses your team uses to work investigations, the reasons analysts can give when they pause one, the templates that set the fields of each kind of investigation, and the task lists they add.',
   }
 );
 export const BACK_TO_QUEUE = i18n.translate('xpack.cases.investigations.settings.backToQueue', {
@@ -334,7 +334,7 @@ export const TEMPLATES_DESCRIPTION = i18n.translate(
   'xpack.cases.investigations.settings.templatesDescription',
   {
     defaultMessage:
-      'A template sets the fields an investigation collects and the task list it starts with. Analysts pick a template when they create an investigation or apply one to an existing investigation.',
+      'A template sets the fields an investigation collects and the task lists it starts with. Analysts pick a template when they create an investigation or apply one to an existing investigation.',
   }
 );
 export const TEMPLATES_LOADING = i18n.translate(
@@ -383,14 +383,8 @@ export const COLUMN_DESCRIPTION = i18n.translate(
 export const COLUMN_FIELDS = i18n.translate('xpack.cases.investigations.settings.columnFields', {
   defaultMessage: 'Fields',
 });
-export const COLUMN_TASKS = i18n.translate('xpack.cases.investigations.settings.columnTasks', {
-  defaultMessage: 'Tasks',
-});
 export const COLUMN_VERSION = i18n.translate('xpack.cases.investigations.settings.columnVersion', {
   defaultMessage: 'Version',
-});
-export const COLUMN_UPDATED = i18n.translate('xpack.cases.investigations.settings.columnUpdated', {
-  defaultMessage: 'Task list updated',
 });
 export const COLUMN_ENABLED = i18n.translate('xpack.cases.investigations.settings.columnEnabled', {
   defaultMessage: 'Enabled',
@@ -401,14 +395,6 @@ export const COLUMN_ACTIONS = i18n.translate('xpack.cases.investigations.setting
 export const NO_DESCRIPTION = i18n.translate('xpack.cases.investigations.settings.noDescription', {
   defaultMessage: 'No description',
 });
-export const TASKS_UNAVAILABLE = i18n.translate(
-  'xpack.cases.investigations.settings.tasksUnavailable',
-  { defaultMessage: 'Not available while the template is disabled' }
-);
-export const BUILT_IN_TASK_LIST = i18n.translate(
-  'xpack.cases.investigations.settings.builtInTaskList',
-  { defaultMessage: 'Built-in default' }
-);
 export const VERSION_VALUE = (version: number) =>
   i18n.translate('xpack.cases.investigations.settings.versionValue', {
     defaultMessage: 'v{version}',
@@ -426,14 +412,6 @@ export const EDIT_TEMPLATE = i18n.translate('xpack.cases.investigations.settings
 export const EDIT_TEMPLATE_ARIA = (name: string) =>
   i18n.translate('xpack.cases.investigations.settings.editTemplateAria', {
     defaultMessage: 'Edit the template {name}',
-    values: { name },
-  });
-export const EDIT_TASK_LIST = i18n.translate('xpack.cases.investigations.settings.editTaskList', {
-  defaultMessage: 'Edit task list',
-});
-export const EDIT_TASK_LIST_ARIA = (name: string) =>
-  i18n.translate('xpack.cases.investigations.settings.editTaskListAria', {
-    defaultMessage: 'Edit the task list of the template {name}',
     values: { name },
   });
 export const DISABLE_TEMPLATE = i18n.translate(
@@ -506,21 +484,307 @@ export const TEMPLATE_NOT_INVESTIGATION = i18n.translate(
 );
 
 /* Task list */
-export const TASK_LIST_TITLE = i18n.translate('xpack.cases.investigations.settings.taskListTitle', {
-  defaultMessage: 'Edit task list',
+export const GLOBAL_FIELDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsDescription',
+  {
+    defaultMessage:
+      "Global fields apply to every investigation, whether or not a template is applied. They are listed before the template's fields. Drag to reorder them.",
+  }
+);
+export const GLOBAL_FIELDS_LOADING = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsLoading',
+  { defaultMessage: 'Loading the global fields' }
+);
+export const GLOBAL_FIELDS_LOAD_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsLoadError',
+  { defaultMessage: 'Could not load the global fields' }
+);
+export const GLOBAL_FIELDS_EMPTY_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsEmptyTitle',
+  { defaultMessage: 'No global fields yet' }
+);
+export const GLOBAL_FIELDS_EMPTY_BODY = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsEmptyBody',
+  {
+    defaultMessage:
+      'Create a global field to ask for the same information on every investigation, whatever its template.',
+  }
+);
+export const GLOBAL_FIELDS_NO_PERMISSION = i18n.translate(
+  'xpack.cases.investigations.settings.globalFieldsNoPermission',
+  { defaultMessage: 'You can view the global fields but not change them.' }
+);
+
+/* Task lists */
+
+export const TAB_TASK_LISTS = i18n.translate('xpack.cases.investigations.settings.tabTaskLists', {
+  defaultMessage: 'Task lists',
 });
-export const TASK_LIST_HINT = i18n.translate('xpack.cases.investigations.settings.taskListHint', {
+export const TASK_LISTS_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsTitle',
+  { defaultMessage: 'Task lists' }
+);
+export const TASK_LISTS_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsDescription',
+  {
+    defaultMessage:
+      'Reusable checklists analysts can apply to an investigation. Reference a task list from a template to add its tasks when an investigation is created.',
+  }
+);
+export const ADD_TASK_LIST = i18n.translate('xpack.cases.investigations.settings.addTaskList', {
+  defaultMessage: 'Add task list',
+});
+export const TASK_LISTS_EMPTY = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsEmpty',
+  {
+    defaultMessage: 'No task lists yet. Add one to reuse a checklist across investigations.',
+  }
+);
+export const TASK_LISTS_LOADING = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsLoading',
+  { defaultMessage: 'Loading task lists' }
+);
+export const TASK_LISTS_LOAD_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsLoadError',
+  { defaultMessage: 'Could not load the task lists' }
+);
+export const TASK_LISTS_TABLE_CAPTION = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsTableCaption',
+  { defaultMessage: 'Task lists' }
+);
+export const TASK_LISTS_MAX = (max: number) =>
+  i18n.translate('xpack.cases.investigations.settings.taskListsMax', {
+    defaultMessage: 'You have reached the maximum of {max} task lists.',
+    values: { max },
+  });
+export const TASK_LISTS_READ_ONLY = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsReadOnly',
+  {
+    defaultMessage:
+      'Adding, changing and deleting task lists needs the Cases settings privilege. Ask an administrator for access.',
+  }
+);
+export const COLUMN_TAGS = i18n.translate('xpack.cases.investigations.settings.columnTags', {
+  defaultMessage: 'Tags',
+});
+export const COLUMN_TASK_COUNT = i18n.translate(
+  'xpack.cases.investigations.settings.columnTaskCount',
+  { defaultMessage: 'Tasks' }
+);
+export const COLUMN_USED_BY = i18n.translate('xpack.cases.investigations.settings.columnUsedBy', {
+  defaultMessage: 'Used by templates',
+});
+export const COLUMN_UPDATED = i18n.translate('xpack.cases.investigations.settings.columnUpdated', {
+  defaultMessage: 'Updated',
+});
+export const NOT_USED = i18n.translate('xpack.cases.investigations.settings.notUsed', {
+  defaultMessage: 'No template',
+});
+export const NO_TAGS = i18n.translate('xpack.cases.investigations.settings.noTags', {
+  defaultMessage: 'No tags',
+});
+export const TASK_COUNT = (count: number) =>
+  i18n.translate('xpack.cases.investigations.settings.taskCount', {
+    defaultMessage: '{count, plural, one {# task} other {# tasks}}',
+    values: { count },
+  });
+export const EDIT_TASK_LIST = i18n.translate('xpack.cases.investigations.settings.editTaskList', {
+  defaultMessage: 'Edit',
+});
+export const EDIT_TASK_LIST_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.editTaskListAria', {
+    defaultMessage: 'Edit the task list {name}',
+    values: { name },
+  });
+export const DELETE_TASK_LIST = i18n.translate(
+  'xpack.cases.investigations.settings.deleteTaskList',
+  { defaultMessage: 'Delete' }
+);
+export const DELETE_TASK_LIST_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.deleteTaskListAria', {
+    defaultMessage: 'Delete the task list {name}',
+    values: { name },
+  });
+export const DELETE_TASK_LIST_TITLE = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.deleteTaskListTitle', {
+    defaultMessage: 'Delete task list "{name}"?',
+    values: { name },
+  });
+export const DELETE_TASK_LIST_BODY = i18n.translate(
+  'xpack.cases.investigations.settings.deleteTaskListBody',
+  {
+    defaultMessage:
+      "Templates that reference this task list stop adding its tasks. Tasks already added to investigations are kept. This can't be undone.",
+  }
+);
+export const TASK_LIST_DELETED = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.taskListDeleted', {
+    defaultMessage: 'Deleted the task list {name}.',
+    values: { name },
+  });
+export const TASK_LIST_DELETE_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.taskListDeleteError',
+  { defaultMessage: 'Could not delete the task list' }
+);
+
+/* Task list editor */
+
+export const EDITOR_ADD_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.editorAddTitle',
+  { defaultMessage: 'Add task list' }
+);
+export const EDITOR_EDIT_TITLE = i18n.translate(
+  'xpack.cases.investigations.settings.editorEditTitle',
+  { defaultMessage: 'Edit task list' }
+);
+export const EDITOR_HINT = i18n.translate('xpack.cases.investigations.settings.editorHint', {
   defaultMessage:
-    'The tasks a new investigation starts with when it uses this template. Analysts can apply the list again from the Procedure tab.',
+    'The tasks this list adds to an investigation. A template that references the list adds them when an investigation is created, and analysts can apply the list from the Procedure tab.',
+});
+export const FIELD_NAME = i18n.translate('xpack.cases.investigations.settings.fieldName', {
+  defaultMessage: 'Name',
+});
+export const NAME_REQUIRED = i18n.translate('xpack.cases.investigations.settings.nameRequired', {
+  defaultMessage: 'Name is required.',
+});
+export const NAME_TOO_LONG = i18n.translate('xpack.cases.investigations.settings.nameTooLong', {
+  defaultMessage: 'Use 160 characters or fewer.',
+});
+export const FIELD_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.fieldDescription',
+  { defaultMessage: 'Description' }
+);
+export const DESCRIPTION_TOO_LONG = i18n.translate(
+  'xpack.cases.investigations.settings.descriptionTooLong',
+  { defaultMessage: 'Use 30,000 characters or fewer.' }
+);
+export const FIELD_TAGS = i18n.translate('xpack.cases.investigations.settings.fieldTags', {
+  defaultMessage: 'Tags',
+});
+export const TAGS_PLACEHOLDER = i18n.translate(
+  'xpack.cases.investigations.settings.tagsPlaceholder',
+  { defaultMessage: 'Add a tag and press Enter' }
+);
+export const TAGS_TOO_MANY = (max: number) =>
+  i18n.translate('xpack.cases.investigations.settings.tagsTooMany', {
+    defaultMessage: 'Use up to {max} tags.',
+    values: { max },
+  });
+export const FIELD_TASKS = i18n.translate('xpack.cases.investigations.settings.fieldTasks', {
+  defaultMessage: 'Tasks',
+});
+export const TASKS_REQUIRED = i18n.translate('xpack.cases.investigations.settings.tasksRequired', {
+  defaultMessage: 'Add at least one task with a title.',
 });
 export const TASK_LIST_UNAVAILABLE_TITLE = i18n.translate(
   'xpack.cases.investigations.settings.taskListUnavailableTitle',
-  { defaultMessage: 'This template has no task list to edit' }
+  { defaultMessage: 'This task list no longer exists' }
 );
 export const TASK_LIST_UNAVAILABLE_BODY = i18n.translate(
   'xpack.cases.investigations.settings.taskListUnavailableBody',
+  { defaultMessage: 'It may have been deleted. Go back to the task lists to pick another.' }
+);
+
+/* Task lists of a template */
+
+export const COLUMN_TASK_LISTS = i18n.translate(
+  'xpack.cases.investigations.settings.columnTaskLists',
+  { defaultMessage: 'Task lists' }
+);
+export const NO_LINKED_TASK_LISTS = i18n.translate(
+  'xpack.cases.investigations.settings.noLinkedTaskLists',
+  { defaultMessage: 'None' }
+);
+export const TASK_LISTS_BUTTON = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsButton',
+  { defaultMessage: 'Task lists…' }
+);
+export const TASK_LISTS_BUTTON_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.taskListsButtonAria', {
+    defaultMessage: 'Choose the task lists of the template {name}',
+    values: { name },
+  });
+export const PICKER_TITLE = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerTitle', {
+    defaultMessage: 'Task lists for {name}',
+    values: { name },
+  });
+export const PICKER_DESCRIPTION = i18n.translate(
+  'xpack.cases.investigations.settings.pickerDescription',
   {
     defaultMessage:
-      'Only enabled investigation templates have a task list. Enable the template, or check that it still exists.',
+      'An investigation created with this template gets the tasks of these task lists, in this order.',
   }
+);
+export const PICKER_LINKED = (count: number, max: number) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerLinked', {
+    defaultMessage: 'Added to new investigations ({count} of {max})',
+    values: { count, max },
+  });
+export const PICKER_NONE_LINKED = i18n.translate(
+  'xpack.cases.investigations.settings.pickerNoneLinked',
+  { defaultMessage: 'No task lists selected. New investigations start without tasks.' }
+);
+export const PICKER_AVAILABLE = i18n.translate(
+  'xpack.cases.investigations.settings.pickerAvailable',
+  { defaultMessage: 'Other task lists' }
+);
+export const PICKER_NONE_AVAILABLE = i18n.translate(
+  'xpack.cases.investigations.settings.pickerNoneAvailable',
+  { defaultMessage: 'Every task list is selected.' }
+);
+export const PICKER_MAX = (max: number) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerMax', {
+    defaultMessage: 'A template can have up to {max} task lists.',
+    values: { max },
+  });
+export const PICKER_ADD = i18n.translate('xpack.cases.investigations.settings.pickerAdd', {
+  defaultMessage: 'Add',
+});
+export const PICKER_ADD_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerAddAria', {
+    defaultMessage: 'Add the task list {name}',
+    values: { name },
+  });
+export const PICKER_REMOVE_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerRemoveAria', {
+    defaultMessage: 'Remove the task list {name}',
+    values: { name },
+  });
+export const PICKER_MOVE_UP_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerMoveUpAria', {
+    defaultMessage: 'Move the task list {name} up',
+    values: { name },
+  });
+export const PICKER_MOVE_DOWN_ARIA = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerMoveDownAria', {
+    defaultMessage: 'Move the task list {name} down',
+    values: { name },
+  });
+export const PICKER_CREATE = i18n.translate('xpack.cases.investigations.settings.pickerCreate', {
+  defaultMessage: 'Create task list',
+});
+export const PICKER_SAVE = i18n.translate('xpack.cases.investigations.settings.pickerSave', {
+  defaultMessage: 'Save task lists',
+});
+export const PICKER_SAVED = (name: string) =>
+  i18n.translate('xpack.cases.investigations.settings.pickerSaved', {
+    defaultMessage: 'Saved the task lists of {name}.',
+    values: { name },
+  });
+export const PICKER_SAVE_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.pickerSaveError',
+  { defaultMessage: 'The task lists could not be saved' }
+);
+export const PICKER_LOAD_ERROR = i18n.translate(
+  'xpack.cases.investigations.settings.pickerLoadError',
+  { defaultMessage: 'The task lists could not be loaded' }
+);
+export const TEMPLATE_TASK_LISTS_HELP = i18n.translate(
+  'xpack.cases.investigations.settings.templateTaskListsHelp',
+  { defaultMessage: 'Task lists added to a new investigation that uses this template.' }
+);
+export const TASK_LISTS_UNAVAILABLE = i18n.translate(
+  'xpack.cases.investigations.settings.taskListsUnavailable',
+  { defaultMessage: 'Not available while the template is disabled' }
 );

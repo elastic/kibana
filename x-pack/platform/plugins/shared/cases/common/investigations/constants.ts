@@ -34,8 +34,9 @@ export const INVESTIGATIONS_INDICATOR_LOOKUP_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/_indicators` as const;
 export const INVESTIGATIONS_TYPES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_types` as const;
 export const INVESTIGATIONS_STATUSES_URL = `${INVESTIGATIONS_INTERNAL_URL}/_statuses` as const;
-export const INVESTIGATIONS_PROCEDURE_TEMPLATES_URL =
-  `${INVESTIGATIONS_INTERNAL_URL}/_procedure_templates` as const;
+export const INVESTIGATIONS_TASK_LISTS_URL = `${INVESTIGATIONS_INTERNAL_URL}/_task_lists` as const;
+export const INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL =
+  `${INVESTIGATIONS_INTERNAL_URL}/_template_task_lists` as const;
 export const INVESTIGATIONS_CAPABILITIES_URL =
   `${INVESTIGATIONS_INTERNAL_URL}/_capabilities` as const;
 
@@ -73,6 +74,9 @@ export const INVESTIGATION_LIMITS = {
 /** Task-list limits (same names and values as Cases task lists, which are not on main yet). */
 export const MAX_TASKS_PER_CASE = 100;
 export const MAX_COMMENTS_PER_TASK = 100;
+/** Reusable task lists: at most this many per space, and this many linked to one template. */
+export const MAX_TASK_LISTS_PER_SPACE = 100;
+export const MAX_TASK_LISTS_PER_TEMPLATE = 10;
 export const TASK_SORT_ORDER_GAP = 1000;
 
 /** Display prefixes for item `ref` values (E12, C3, P1, T4, N2, L5, S7). */

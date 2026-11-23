@@ -12,8 +12,9 @@ import {
   INVESTIGATIONS_FIND_URL,
   INVESTIGATIONS_INDICATOR_LOOKUP_URL,
   INVESTIGATIONS_INTERNAL_URL,
-  INVESTIGATIONS_PROCEDURE_TEMPLATES_URL,
   INVESTIGATIONS_STATUSES_URL,
+  INVESTIGATIONS_TASK_LISTS_URL,
+  INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL,
   INVESTIGATIONS_TYPES_URL,
   getRecordActivityUrl,
   getRecordItemUrl,
@@ -53,20 +54,21 @@ import type {
   InvestigationItem,
   InvestigationRecord,
   InvestigationTimings,
-  InvestigationType,
+  InvestigationTypesResponse,
   LinkRecordResponse,
   MergeRecordRequest,
   MergeRecordResponse,
-  ProcedureTemplate,
-  ProcedureTemplateTask,
   RecordComment,
   RelatedRecord,
   RelatedRecordsResponse,
   ReorderTasksRequest,
+  SaveTaskListRequest,
   ReportResponse,
   RunTaskWorkflowResponse,
   SinceLastHandoffResponse,
   TaskItem,
+  TaskList,
+  TemplateTaskLists,
   ThreadRef,
   UpdateCommentRequest,
   UpdateExternalTicketRequest,
@@ -132,12 +134,46 @@ export const lookupIndicators = (http: HttpStart, values: string[]) =>
   });
 
 export const getInvestigationTypes = (http: HttpStart) =>
-  http.fetch<{ types: InvestigationType[] }>(INVESTIGATIONS_TYPES_URL, { method: 'GET' });
+  http.fetch<InvestigationTypesResponse>(INVESTIGATIONS_TYPES_URL, { method: 'GET' });
 
-export const getProcedureTemplates = (http: HttpStart) =>
-  http.fetch<{ templates: ProcedureTemplate[] }>(INVESTIGATIONS_PROCEDURE_TEMPLATES_URL, {
-    method: 'GET',
+/* Task lists: reusable checklists, linked to investigation templates */
+
+export const getTaskLists = (http: HttpStart) =>
+  http.fetch<{ task_lists: TaskList[] }>(INVESTIGATIONS_TASK_LISTS_URL, { method: 'GET' });
+
+/** Rejects with 403 without the Cases settings privilege. */
+export const createTaskList = (http: HttpStart, body: SaveTaskListRequest) =>
+  http.fetch<{ task_list: TaskList }>(INVESTIGATIONS_TASK_LISTS_URL, {
+    method: 'POST',
+    body: JSON.stringify(body),
   });
+
+export const updateTaskList = (http: HttpStart, taskListId: string, body: SaveTaskListRequest) =>
+  http.fetch<{ task_list: TaskList }>(
+    `${INVESTIGATIONS_TASK_LISTS_URL}/${encodeURIComponent(taskListId)}`,
+    { method: 'PUT', body: JSON.stringify(body) }
+  );
+
+export const deleteTaskList = (http: HttpStart, taskListId: string) =>
+  http.fetch<void>(`${INVESTIGATIONS_TASK_LISTS_URL}/${encodeURIComponent(taskListId)}`, {
+    method: 'DELETE',
+  });
+
+export const getTemplateTaskLists = (http: HttpStart, templateId: string) =>
+  http.fetch<TemplateTaskLists>(
+    `${INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL}/${encodeURIComponent(templateId)}`,
+    { method: 'GET' }
+  );
+
+export const saveTemplateTaskLists = (
+  http: HttpStart,
+  templateId: string,
+  body: { task_list_ids: string[] }
+) =>
+  http.fetch<TemplateTaskLists>(
+    `${INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL}/${encodeURIComponent(templateId)}`,
+    { method: 'PUT', body: JSON.stringify(body) }
+  );
 
 export const getCapabilities = (http: HttpStart) =>
   http.fetch<CapabilitiesResponse>(INVESTIGATIONS_CAPABILITIES_URL, { method: 'GET' });
@@ -373,27 +409,12 @@ export const runTaskWorkflow = (http: HttpStart, recordId: string, taskId: strin
     }
   );
 
-/** Applies the procedure of the record's type (or `template_id`). */
-export const applyRecordProcedure = (
-  http: HttpStart,
-  recordId: string,
-  body: { template_id?: string | null; replace: boolean }
-) =>
-  http.fetch<{ tasks: TaskItem[] }>(recordPath(recordId, '/_apply_procedure'), {
+/** Adds one task list to the record. Rejects with 409 when the list was already applied. */
+export const applyRecordTaskList = (http: HttpStart, recordId: string, taskListId: string) =>
+  http.fetch<{ tasks: TaskItem[] }>(recordPath(recordId, '/_apply_task_list'), {
     method: 'POST',
-    body: JSON.stringify(body),
+    body: JSON.stringify({ task_list_id: taskListId }),
   });
-
-/** Saves the task list of one investigation type. Rejects with 403 without the settings privilege. */
-export const saveProcedureTemplate = (
-  http: HttpStart,
-  templateId: string,
-  body: { tasks: ProcedureTemplateTask[] }
-) =>
-  http.fetch<{ template: ProcedureTemplate }>(
-    `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/${encodeURIComponent(templateId)}`,
-    { method: 'PUT', body: JSON.stringify(body) }
-  );
 
 export interface WorkflowListItem {
   id: string;

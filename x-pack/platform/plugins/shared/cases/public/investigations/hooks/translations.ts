@@ -55,7 +55,7 @@ export const MERGE_RECORD_SUCCESS = i18n.translate(
 
 export const APPLY_PROCEDURE_ERROR = i18n.translate(
   'xpack.cases.investigations.hooks.applyProcedureError',
-  { defaultMessage: 'Could not apply the procedure' }
+  { defaultMessage: 'Could not apply the task list' }
 );
 
 export const CREATE_THREAD_ERROR = i18n.translate(
@@ -102,12 +102,12 @@ export const CREATE_ACTIVITY_ERROR = i18n.translate(
 
 export const UPDATE_TEMPLATE_ERROR = i18n.translate(
   'xpack.cases.investigations.hooks.updateTemplateError',
-  { defaultMessage: 'Could not save the procedure template' }
+  { defaultMessage: 'Could not save the task list' }
 );
 
 export const UPDATE_TEMPLATE_SUCCESS = i18n.translate(
   'xpack.cases.investigations.hooks.updateTemplateSuccess',
-  { defaultMessage: 'Procedure template saved.' }
+  { defaultMessage: 'Task list saved.' }
 );
 
 export const ADD_COMMENT_ERROR = i18n.translate(

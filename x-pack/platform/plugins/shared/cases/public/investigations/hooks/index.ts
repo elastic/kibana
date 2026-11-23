@@ -37,7 +37,6 @@ export { useActivity, useCreateActivity, useLivePolling } from './use_activity';
 export {
   useCapabilities,
   useInvestigationTypes,
-  useProcedureTemplates,
   useReloadStatuses,
   useSaveStatuses,
   useStatuses,
@@ -46,6 +45,14 @@ export {
   useInvestigationTemplates,
   useRefreshInvestigationTemplates,
 } from './use_investigation_templates';
+export {
+  useApplyRecordTaskList,
+  useDeleteTaskList,
+  useSaveTaskList,
+  useSaveTemplateTaskLists,
+  useTaskLists,
+  useTemplateTaskLists,
+} from './use_task_lists';
 export { useBulkRecordRun } from './use_bulk_actions';
 export type { BulkRecordOutcome, BulkRecordResult, BulkRunState } from './use_bulk_actions';
 export { getHttpErrorMessage, getHttpErrorStatus } from './errors';

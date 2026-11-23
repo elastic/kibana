@@ -253,7 +253,7 @@ const setupAgent = async () => {
 // 6. Investigation-type templates (Cases templates v2)
 // ---------------------------------------------------------------------------------------------
 // An investigation type is a Cases template of owner securitySolution tagged `investigation-type`. The template
-// names are fixed: the server picks the procedure template (default tasks) whose key equals the template name.
+// names are fixed: the server turns the built-in procedure of each name into the task list "<Template> procedure".
 // Across the four templates every field control and every validation rule is used at least once.
 const INVESTIGATION_TYPE_TAG = 'investigation-type';
 
@@ -509,6 +509,73 @@ const setupTemplates = async () => {
 };
 
 // ---------------------------------------------------------------------------------------------
+// 6b. Global fields (Cases field library definitions with isGlobal)
+// ---------------------------------------------------------------------------------------------
+// A global field applies to every case of the owner (investigations AND classic Security cases), so these two are
+// optional and carry no close rule: a close-required global would block closing every Security case in the space.
+// They are the ones a ticket sync would map later. Their names must not match a template field name (a collision resolves to the global
+// definition): the templates use `ticket` and `impact`, so these are `external_reference` and `customer_impact`.
+// Created through the Cases field library routes; an existing definition (same name) is updated to this definition
+// (so the live stack loses a rule removed here), and a re-run changes nothing. Stored values are never touched.
+const GLOBAL_FIELDS = [
+  {
+    name: 'external_reference',
+    description: 'The id of the linked ticket in the external ticketing system.',
+    definition: toYaml(
+      field('external_reference', 'External reference', 'INPUT_TEXT', 'keyword', {
+        validation: {
+          pattern: {
+            regex: '^[A-Z]{2,10}-\\d{1,8}$',
+            message: 'Use a ticket key like HELP-4821 (2-10 capital letters, a dash, 1-8 digits).',
+          },
+        },
+      })
+    ),
+  },
+  {
+    name: 'customer_impact',
+    description: 'How badly customers were affected. Optional.',
+    definition: toYaml(
+      field('customer_impact', 'Customer impact', 'SELECT_BASIC', 'keyword', {
+        metadata: { options: ['None', 'Low', 'Moderate', 'Severe'] },
+      })
+    ),
+  },
+];
+
+const setupGlobalFields = async () => {
+  let existing;
+  try {
+    const { json } = await kbn('GET', `/internal/cases/field_definitions?owner=${OWNER}`);
+    existing = new Map((json?.fieldDefinitions ?? []).map((d) => [d.name, d]));
+  } catch (e) {
+    record('global fields', 'list existing', 'failed', messageOf(e));
+    return;
+  }
+  for (const globalField of GLOBAL_FIELDS) {
+    const current = existing.get(globalField.name);
+    try {
+      if (!current) {
+        await kbn('POST', '/internal/cases/field_definitions', { ...globalField, owner: OWNER, isGlobal: true });
+        record('global fields', globalField.name, 'created');
+      } else if (current.isGlobal !== true || current.definition.trim() !== globalField.definition.trim()) {
+        await kbn('PUT', `/internal/cases/field_definitions/${current.fieldDefinitionId}`, {
+          ...globalField,
+          owner: OWNER,
+          isGlobal: true,
+          ...(current.displayOrder !== undefined ? { displayOrder: current.displayOrder } : {}),
+        });
+        record('global fields', globalField.name, 'updated');
+      } else {
+        record('global fields', globalField.name, 'unchanged');
+      }
+    } catch (e) {
+      record('global fields', globalField.name, 'failed', messageOf(e));
+    }
+  }
+};
+
+// ---------------------------------------------------------------------------------------------
 // 7. Statuses and pause reasons (PUT _statuses)
 // ---------------------------------------------------------------------------------------------
 // Rules (common/investigations/statuses.ts): the three built-ins stay, a status can only be disabled (never removed),
@@ -589,10 +656,13 @@ const setupCloseReasons = async () => {
 };
 
 // ---------------------------------------------------------------------------------------------
-// 8. Procedure task list for the Phishing type (PUT _procedure_templates/<template_id>)
+// 8. Task lists (GET/POST/PUT _task_lists) linked to the templates (PUT _template_task_lists/<template_id>)
 // ---------------------------------------------------------------------------------------------
-// Based on DEFAULT_PROCEDURE_TEMPLATES.Phishing (server/investigations/default_templates.ts), with a priority and a
-// due-within time on each task and one task that has subtasks.
+// The server turns DEFAULT_PROCEDURE_TEMPLATES (server/investigations/default_templates.ts), with their priorities,
+// due-within times and subtasks, into one task list per template named "<Template> procedure" and links it, the first
+// time the lists or the types are read. Setup makes sure the four lists exist and are linked, replaces the Phishing
+// one with a customised copy (a priority and a due-within time on each task, one task with subtasks), and adds one
+// reusable list, "Evidence preservation", linked to Malware and Account compromise to show reuse.
 const procedureTask = (title, phase, description, required, ownerType, extra = {}) => ({
   title,
   phase,
@@ -652,21 +722,105 @@ const PHISHING_PROCEDURE = [
   }),
 ];
 
-const setupProcedure = async () => {
+const TEMPLATE_NAMES = ['Malware', 'Phishing', 'Account compromise', 'Alert triage'];
+const procedureListName = (templateName) => `${templateName} procedure`;
+const procedureListDescription = (templateName) => `The starting checklist for ${templateName} investigations.`;
+const INVESTIGATIONS_URL = '/internal/cases/investigations';
+
+const EVIDENCE_PRESERVATION = [
+  procedureTask('Collect volatile data from the affected systems', 'Contain', 'Capture memory, running processes and network connections before containment changes them.', true, 'person', {
+    priority: 'high',
+    due_within: { value: 2, unit: 'hours' },
+  }),
+  procedureTask('Export the relevant logs and alerts', 'Contain', 'Save the logs and alerts that show the activity to the case before they roll off.', true, 'person', {
+    priority: 'medium',
+    due_within: { value: 4, unit: 'hours' },
+  }),
+  procedureTask('Record the chain of custody', 'Contain', 'Note who collected each item, when, and where it is stored.', false, 'person', {
+    priority: 'medium',
+    due_within: { value: 1, unit: 'days' },
+  }),
+];
+
+const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+/** Creates the task list named `name`, or updates it when it differs. `tasks` defaults to the stored ones. */
+const ensureTaskList = async (name, { description, tags, tasks }) => {
+  const { json } = await kbn('GET', `${INVESTIGATIONS_URL}/_task_lists`);
+  const current = (json.task_lists ?? []).find((list) => list.name === name);
+  if (!current) {
+    if (!tasks) throw new Error(`the task list "${name}" does not exist`);
+    const created = await kbn('POST', `${INVESTIGATIONS_URL}/_task_lists`, { name, description, tags, tasks });
+    return { list: created.json.task_list, status: 'created' };
+  }
+  const nextTasks = tasks ?? current.tasks;
+  if (current.description === description && sameJson(current.tags, tags) && sameJson(current.tasks, nextTasks)) {
+    return { list: current, status: 'unchanged' };
+  }
+  const updated = await kbn('PUT', `${INVESTIGATIONS_URL}/_task_lists/${encodeURIComponent(current.id)}`, {
+    name,
+    description,
+    tags,
+    tasks: nextTasks,
+    version: current.version,
+  });
+  return { list: updated.json.task_list, status: 'updated' };
+};
+
+/** Appends `listId` to the template's linked task lists when it is not linked yet. */
+const ensureLinked = async (template, listId) => {
+  const { json } = await kbn('GET', `${INVESTIGATIONS_URL}/_template_task_lists/${encodeURIComponent(template.template_id)}`);
+  const ids = json.task_list_ids ?? [];
+  if (ids.includes(listId)) return 'linked';
+  await kbn('PUT', `${INVESTIGATIONS_URL}/_template_task_lists/${encodeURIComponent(template.template_id)}`, {
+    task_list_ids: [...ids, listId],
+  });
+  return 'linked now';
+};
+
+const setupTaskLists = async () => {
+  let types;
   try {
-    const { json: types } = await kbn('GET', '/internal/cases/investigations/_types');
-    const phishing = (types.types ?? types).find((t) => t.name === 'Phishing');
-    if (!phishing) throw new Error('the Phishing type is missing (template step failed?)');
-    const { json: listed } = await kbn('GET', '/internal/cases/investigations/_procedure_templates');
-    const current = (listed.templates ?? []).find((t) => t.template_id === phishing.template_id);
-    if (current?.saved && JSON.stringify(current.tasks) === JSON.stringify(PHISHING_PROCEDURE)) {
-      record('procedure', 'Phishing task list', 'unchanged', `${PHISHING_PROCEDURE.length} tasks`);
-      return;
-    }
-    await kbn('PUT', `/internal/cases/investigations/_procedure_templates/${encodeURIComponent(phishing.template_id)}`, { tasks: PHISHING_PROCEDURE });
-    record('procedure', 'Phishing task list', current?.saved ? 'updated' : 'created', `${PHISHING_PROCEDURE.length} tasks, template ${phishing.template_id}`);
+    const { json } = await kbn('GET', `${INVESTIGATIONS_URL}/_types`);
+    types = json.types ?? json;
   } catch (e) {
-    record('procedure', 'Phishing task list', 'failed', messageOf(e));
+    record('task lists', 'investigation types', 'failed', messageOf(e));
+    return;
+  }
+  const byName = new Map(types.map((type) => [type.name, type]));
+  for (const templateName of TEMPLATE_NAMES) {
+    const name = procedureListName(templateName);
+    try {
+      const template = byName.get(templateName);
+      if (!template) throw new Error(`the ${templateName} type is missing (template step failed?)`);
+      const isPhishing = templateName === 'Phishing';
+      const { list, status } = await ensureTaskList(name, {
+        description: procedureListDescription(templateName),
+        tags: ['procedure'],
+        tasks: isPhishing ? PHISHING_PROCEDURE : undefined,
+      });
+      const link = await ensureLinked(template, list.id);
+      record('task lists', name, status, `${list.tasks.length} tasks, ${link} to ${templateName}`);
+    } catch (e) {
+      record('task lists', name, 'failed', messageOf(e));
+    }
+  }
+  try {
+    const { list, status } = await ensureTaskList('Evidence preservation', {
+      description: 'Preserve the evidence before containment changes it. Reused by several templates.',
+      tags: ['evidence', 'reusable'],
+      tasks: EVIDENCE_PRESERVATION,
+    });
+    const linked = [];
+    for (const templateName of ['Malware', 'Account compromise']) {
+      const template = byName.get(templateName);
+      if (!template) throw new Error(`the ${templateName} type is missing`);
+      await ensureLinked(template, list.id);
+      linked.push(templateName);
+    }
+    record('task lists', 'Evidence preservation', status, `${list.tasks.length} tasks, linked to ${linked.join(' and ')}`);
+  } catch (e) {
+    record('task lists', 'Evidence preservation', 'failed', messageOf(e));
   }
 };
 
@@ -683,9 +837,10 @@ const main = async () => {
   await setupSettings();
   await setupAgent();
   await setupTemplates();
+  await setupGlobalFields();
   await setupStatuses();
   await setupCloseReasons();
-  await setupProcedure();
+  await setupTaskLists();
 
   console.log('\nSummary');
   console.table(summary);

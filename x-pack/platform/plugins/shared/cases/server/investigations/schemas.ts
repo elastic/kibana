@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   INVESTIGATION_LIMITS as L,
   MAX_TASKS_PER_CASE,
+  MAX_TASK_LISTS_PER_TEMPLATE,
 } from '../../common/investigations/constants';
 import { MAX_TITLE_LENGTH as CASE_TITLE_MAX } from '../../common/constants';
 import {
@@ -285,6 +286,7 @@ const taskFields = {
   started_at: schema.maybe(schema.nullable(isoDate())),
   completed_at: schema.maybe(schema.nullable(isoDate())),
   template_ref: optStr(256),
+  template_id: optStr(512),
   priority: taskPrioritySchema,
   assignees: schema.arrayOf(str(512, 1), { maxSize: 10, defaultValue: [] }),
   due_date: schema.maybe(schema.nullable(isoDate())),
@@ -525,11 +527,7 @@ export const mergeRecordBody = schema.object({
   keep: lits(['this', 'other'] as const),
 });
 
-export const applyProcedureBody = schema.object({
-  /** Cases template id; defaults to the record's type. */
-  template_id: schema.maybe(schema.nullable(str(512, 1))),
-  replace: schema.boolean({ defaultValue: false }),
-});
+export const applyTaskListBody = schema.object({ task_list_id: id() });
 
 export const sinceQuery = schema.object({ since: schema.maybe(isoDate()) });
 export const historyQuery = schema.object({ target_id: schema.maybe(id()) });
@@ -665,36 +663,46 @@ export const indicatorLookupQuery = schema.object({
   exclude_record_id: schema.maybe(id()),
 });
 
-export const procedureTemplateParams = schema.object({ template_id: str(512, 1) });
-export const procedureTemplateBody = schema.object({
-  tasks: schema.arrayOf(
-    schema.object({
-      title: str(L.maxTitleLength, 1),
-      phase: lits(PROCEDURE_PHASES),
-      description: optStr(L.maxShortTextLength),
-      required: schema.boolean(),
-      owner_type: lits(['person', 'team', 'agent', 'automation'] as const),
-      owner: optStr(512),
-      auto: schema.maybe(schema.nullable(taskAutoSchema)),
-      after: optStr(L.maxTitleLength),
-      priority: schema.maybe(taskPrioritySchema),
-      due_within: schema.maybe(schema.nullable(dueWithinSchema)),
-      workflow_id: optStr(512),
-      subtasks: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            title: str(L.maxTitleLength, 1),
-            description: optStr(L.maxShortTextLength),
-            priority: schema.maybe(taskPrioritySchema),
-            required: schema.boolean(),
-            due_within: schema.maybe(schema.nullable(dueWithinSchema)),
-          }),
-          { maxSize: 20 }
-        )
-      ),
-    }),
-    { maxSize: MAX_TASKS_PER_CASE }
-  ),
+const taskListTasksSchema = schema.arrayOf(
+  schema.object({
+    title: str(L.maxTitleLength, 1),
+    phase: lits(PROCEDURE_PHASES),
+    description: optStr(L.maxShortTextLength),
+    required: schema.boolean(),
+    owner_type: lits(['person', 'team', 'agent', 'automation'] as const),
+    owner: optStr(512),
+    auto: schema.maybe(schema.nullable(taskAutoSchema)),
+    after: optStr(L.maxTitleLength),
+    priority: schema.maybe(taskPrioritySchema),
+    due_within: schema.maybe(schema.nullable(dueWithinSchema)),
+    workflow_id: optStr(512),
+    subtasks: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          title: str(L.maxTitleLength, 1),
+          description: optStr(L.maxShortTextLength),
+          priority: schema.maybe(taskPrioritySchema),
+          required: schema.boolean(),
+          due_within: schema.maybe(schema.nullable(dueWithinSchema)),
+        }),
+        { maxSize: 20 }
+      )
+    ),
+  }),
+  { minSize: 1, maxSize: MAX_TASKS_PER_CASE }
+);
+
+export const taskListParams = schema.object({ id: id() });
+export const taskListBody = schema.object({
+  name: str(160, 1),
+  description: schema.maybe(str(L.maxTextLength)),
+  tags: schema.maybe(schema.arrayOf(str(256, 1), { maxSize: 200 })),
+  tasks: taskListTasksSchema,
+});
+export const updateTaskListBody = taskListBody.extends({ version: str(64, 3) });
+export const templateTaskListsParams = schema.object({ template_id: str(512, 1) });
+export const templateTaskListsBody = schema.object({
+  task_list_ids: schema.arrayOf(id(), { maxSize: MAX_TASK_LISTS_PER_TEMPLATE }),
 });
 
 export const reorderTasksBody = schema.object({

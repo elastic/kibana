@@ -17,6 +17,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { CasesClient } from '../client';
+import type { ApplicableField } from '../../common/types/domain/template/applicable_field';
 import {
   COMMENT_ATTACHMENT_TYPE,
   MAX_ASSIGNEES_PER_CASE,
@@ -33,6 +34,8 @@ import {
   INVESTIGATIONS_OWNER,
   ITEM_REF_PREFIX,
   MAX_TASKS_PER_CASE,
+  MAX_TASK_LISTS_PER_SPACE,
+  MAX_TASK_LISTS_PER_TEMPLATE,
   MAX_COMMENTS_PER_TASK,
   TASK_SORT_ORDER_GAP,
 } from '../../common/investigations/constants';
@@ -79,14 +82,15 @@ import type {
   InvestigationRecord,
   InvestigationTimings,
   InvestigationType,
+  InvestigationTypeField,
   ItemFacets,
   ItemInput,
   ItemKind,
   ItemPatch,
   LinkRecordResponse,
   MergeRecordResponse,
-  ProcedureTemplate,
   ProcedureTemplateTask,
+  SaveTaskListRequest,
   ProposalItem,
   RecordCounters,
   RelatedRecord,
@@ -94,7 +98,9 @@ import type {
   ReportResponse,
   SinceLastHandoffResponse,
   TaskItem,
+  TaskList,
   TaskWorkflowRun,
+  TemplateTaskLists,
   ThreadRef,
   UpdateExternalTicketRequest,
   UpdateItemRequest,
@@ -168,6 +174,31 @@ type StoredRecord = Omit<InvestigationRecord, 'version'> & {
 };
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 type StoredItem = DistributiveOmit<InvestigationItem, 'version'> & { ref_num: number };
+interface TemplateRef {
+  id: string;
+  name: string;
+}
+interface StoredTaskList {
+  doc_type: 'task_list';
+  space_id: string;
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+  tasks: ProcedureTemplateTask[];
+  updated_at: string;
+  updated_by: Actor | null;
+}
+const toTaskList = (source: StoredTaskList, seqNo?: number, primaryTerm?: number): TaskList => ({
+  id: source.id,
+  name: source.name,
+  description: source.description ?? '',
+  tags: source.tags ?? [],
+  tasks: source.tasks,
+  updated_at: source.updated_at,
+  updated_by: source.updated_by,
+  version: encodeVersion(seqNo, primaryTerm),
+});
 
 export interface AlertsClientLike {
   bulkUpdateCases(args: {
@@ -327,6 +358,20 @@ const orderTasks = (tasks: TaskItem[]): TaskItem[] => {
     ...orphans,
   ];
 };
+/** A Cases applicable field (template or global) as the investigation contract describes it. */
+const toTypeField = (field: ApplicableField): InvestigationTypeField => ({
+  key: field.key,
+  name: field.name,
+  label: field.label,
+  type: field.type,
+  control: field.control,
+  mirror_key: getMirrorKey(field.name, field.type, field.control),
+  ...(field.options ? { options: [...field.options] } : {}),
+  required: field.required,
+  required_on_close: field.requiredOnClose,
+  display_only: field.displayOnly,
+  is_global: field.isGlobal,
+});
 const closeReasonLabel = (reason: string): string => reason.replace(/_/g, ' ');
 const closeBlockedMessage = (tasks: string[], fields: string[]): string =>
   [
@@ -1039,9 +1084,9 @@ export class InvestigationsService {
       connector: { id: 'none', name: 'none', type: '.none' as const, fields: null },
       settings: { syncAlerts: true },
       ...(restrictedCreatorUid ? { assignees: [{ uid: restrictedCreatorUid }] } : {}),
-      ...(template
-        ? { template: { id: template.id }, extended_fields: req.extended_fields ?? {} }
-        : {}),
+      // Sent without a template too: Cases applies and validates the global fields.
+      extended_fields: req.extended_fields ?? {},
+      ...(template ? { template: { id: template.id } } : {}),
     } as Parameters<CasesClient['cases']['create']>[0]);
 
     const aiEnabled = req.ai_enabled ?? true;
@@ -1145,13 +1190,7 @@ export class InvestigationsService {
     ]);
 
     if (req.apply_procedure ?? true) {
-      await this.applyProcedureInternal(
-        record,
-        record.template_id ?? null,
-        false,
-        actor,
-        createdAt
-      );
+      await this.applyTemplateTaskLists(record, record.template_id ?? null, actor, createdAt);
     }
     if (req.alerts?.length) {
       await this.bulkCreateItemsInternal(
@@ -2267,12 +2306,11 @@ export class InvestigationsService {
       if (updatedCase && (casePatch.extended_fields || casePatch.template !== undefined)) {
         Object.assign(patch, await this.templatePatchFromCase(record, updatedCase));
       }
-      // Choosing a type sets both the fields and the procedure (when none was applied yet).
+      // Choosing a template sets both the fields and its task lists (when no tasks were added yet).
       if (casePatch.template && !(record.counters?.tasks ?? 0)) {
-        await this.applyProcedureInternal(
+        await this.applyTemplateTaskLists(
           { ...record, ...patch } as StoredRecord,
           (casePatch.template as { id: string }).id,
-          false,
           actor,
           ts
         );
@@ -2887,6 +2925,9 @@ export class InvestigationsService {
       isDeleted: false,
       isEnabled: true,
     });
+    const linked = await this.linkedTaskListIds(
+      found.templates.map((template) => ({ id: template.templateId, name: template.name }))
+    );
     return Promise.all(
       found.templates.map(async (template) => {
         const { fields } = await casesClient.cases.getApplicableFields({
@@ -2898,199 +2939,441 @@ export class InvestigationsService {
           template_id: template.templateId,
           version: template.templateVersion,
           description: template.description ?? null,
-          fields: fields.map((field) => ({
-            key: field.key,
-            name: field.name,
-            label: field.label,
-            type: field.type,
-            control: field.control,
-            mirror_key: getMirrorKey(field.name, field.type, field.control),
-            ...(field.options ? { options: [...field.options] } : {}),
-            required: field.required,
-            required_on_close: field.requiredOnClose,
-            display_only: field.displayOnly,
-          })),
+          fields: fields.map(toTypeField),
+          task_list_ids: linked.get(template.templateId) ?? [],
         };
       })
     );
   }
 
-  /** One procedure (task list) per investigation type, keyed by the Cases template id. */
-  public async listProcedureTemplates(): Promise<ProcedureTemplate[]> {
-    await this.ensureCanReadOwner();
-    const [types, res] = await Promise.all([
-      this.listTypes(),
-      this.es.search<{
-        template_id: string;
-        tasks: ProcedureTemplateTask[];
-        updated_at: string;
-        updated_by: Actor;
-      }>({
-        index: INVESTIGATION_CONFIG_INDEX,
-        size: 100,
-        seq_no_primary_term: true,
-        query: {
-          bool: {
-            filter: [term('doc_type', 'procedure_template'), term('space_id', this.deps.spaceId)],
-          },
-        },
-      }),
-    ]);
-    const stored = new Map(res.hits.hits.map((h) => [h._source?.template_id ?? '', h]));
-    return types.map((type) => {
-      const hit = stored.get(type.template_id);
-      if (hit?._source) {
-        return {
-          template_id: type.template_id,
-          type: type.name,
-          tasks: hit._source.tasks,
-          updated_at: hit._source.updated_at,
-          updated_by: hit._source.updated_by,
-          saved: true,
-          version: encodeVersion(hit._seq_no, hit._primary_term),
-        };
-      }
-      return {
-        template_id: type.template_id,
-        type: type.name,
-        tasks: DEFAULT_PROCEDURE_TEMPLATES[type.name] ?? [],
-        updated_at: null,
-        updated_by: null,
-        saved: false,
-      };
+  /** Global fields: the owner's Cases field library definitions with `isGlobal`, in Cases' order. */
+  public async listGlobalFields(): Promise<InvestigationTypeField[]> {
+    const { fields } = await this.deps.casesClient.cases.getApplicableFields({
+      owner: INVESTIGATIONS_OWNER,
     });
+    return fields.filter((field) => field.isGlobal).map(toTypeField);
   }
 
-  public async saveProcedureTemplate(
-    templateId: string,
-    tasks: ProcedureTemplateTask[]
-  ): Promise<ProcedureTemplate> {
-    await this.ensureCanReadOwner();
+  /* ---------------------------------------------------------------- */
+  /* Task lists: reusable checklists linked to investigation templates  */
+  /* ---------------------------------------------------------------- */
+
+  private taskListDocId(listId: string): string {
+    return `task_list:${this.deps.spaceId}:${listId}`;
+  }
+
+  private templateLinksDocId(templateId: string): string {
+    return `template_task_lists:${this.deps.spaceId}:${templateId}`;
+  }
+
+  private async ensureCanManageTaskLists(): Promise<void> {
     if (!(await this.deps.canManageSettings())) {
-      throw Boom.forbidden('You need the Cases settings privilege to change procedures.');
+      throw Boom.forbidden('You need the Cases settings privilege to change task lists.');
     }
-    const template = await this.getInvestigationTemplate(templateId);
-    const total = tasks.reduce((n, t) => n + 1 + (t.subtasks?.length ?? 0), 0);
-    if (total > MAX_TASKS_PER_CASE) {
-      throw Boom.badRequest(`A procedure can have at most ${MAX_TASKS_PER_CASE} tasks`);
-    }
-    const actor = this.actor();
-    const ts = now();
-    const res = await this.es.index({
+  }
+
+  /** The enabled investigation templates (Cases templates tagged `investigation-type`), id and name. */
+  private async templateRefs(): Promise<TemplateRef[]> {
+    const found = await this.deps.casesClient.templates.getAllTemplates({
+      owner: [INVESTIGATIONS_OWNER],
+      tags: [INVESTIGATION_TYPE_TEMPLATE_TAG],
+      page: 1,
+      perPage: 100,
+      sortField: 'name',
+      sortOrder: 'asc',
+      search: '',
+      author: [],
+      isDeleted: false,
+      isEnabled: true,
+    });
+    return found.templates.map((template) => ({ id: template.templateId, name: template.name }));
+  }
+
+  private async getStoredTaskList(listId: string): Promise<TaskList | undefined> {
+    const res = await this.es
+      .get<StoredTaskList>({ index: INVESTIGATION_CONFIG_INDEX, id: this.taskListDocId(listId) })
+      .catch((error) => {
+        if (error?.meta?.statusCode === 404) return undefined;
+        throw error;
+      });
+    return res?._source ? toTaskList(res._source, res._seq_no, res._primary_term) : undefined;
+  }
+
+  private async getTaskListOrThrow(listId: string): Promise<TaskList> {
+    const list = await this.getStoredTaskList(listId);
+    if (!list) throw Boom.notFound(`Task list ${listId} not found`);
+    return list;
+  }
+
+  private async countTaskLists(): Promise<number> {
+    const { count } = await this.es.count({
       index: INVESTIGATION_CONFIG_INDEX,
-      id: `procedure_template:${this.deps.spaceId}:${template.id}`,
-      refresh: true,
-      document: {
-        doc_type: 'procedure_template',
-        space_id: this.deps.spaceId,
-        template_id: template.id,
-        type: template.name,
-        tasks,
-        updated_at: ts,
-        updated_by: actor,
+      query: {
+        bool: { filter: [term('doc_type', 'task_list'), term('space_id', this.deps.spaceId)] },
       },
     });
+    return count;
+  }
+
+  /**
+   * The task list ids linked to each template, in order. A template without a link document yet
+   * gets its former procedure (the saved per-template task list, or the built-in default for its
+   * name) as a task list "<Template name> procedure", linked to it.
+   */
+  private async linkedTaskListIds(refs: TemplateRef[]): Promise<Map<string, string[]>> {
+    const linked = new Map<string, string[]>();
+    if (!refs.length) return linked;
+    const res = await this.es.mget<{ task_list_ids?: string[] }>({
+      index: INVESTIGATION_CONFIG_INDEX,
+      docs: refs.map((ref) => ({ _id: this.templateLinksDocId(ref.id) })),
+    });
+    const missing: TemplateRef[] = [];
+    res.docs.forEach((doc, index) => {
+      if ('found' in doc && doc.found) {
+        linked.set(refs[index].id, doc._source?.task_list_ids ?? []);
+      } else {
+        missing.push(refs[index]);
+      }
+    });
+    for (const ref of missing) {
+      linked.set(ref.id, await this.migrateProcedure(ref));
+    }
+    return linked;
+  }
+
+  private async migrateProcedure(ref: TemplateRef): Promise<string[]> {
+    const isConflict = (error: { meta?: { statusCode?: number } }) =>
+      error?.meta?.statusCode === 409;
+    const procedureId = `procedure_template:${this.deps.spaceId}:${ref.id}`;
+    const stored = await this.es
+      .get<{
+        tasks: ProcedureTemplateTask[];
+        updated_at: string;
+        updated_by: Actor | null;
+      }>({ index: INVESTIGATION_CONFIG_INDEX, id: procedureId })
+      .catch((error) => {
+        if (error?.meta?.statusCode === 404) return undefined;
+        throw error;
+      });
+    const tasks = stored?._source?.tasks ?? DEFAULT_PROCEDURE_TEMPLATES[ref.name] ?? [];
+    if (!tasks.length) return [];
+    const listId = `migrated-${ref.id}`;
+    const ts = now();
+    const updatedBy = stored?._source?.updated_by ?? {
+      type: 'automation' as const,
+      id: 'task-list-migration',
+      name: 'Migration',
+    };
+    const updatedAt = stored?._source?.updated_at ?? ts;
+    await this.es
+      .index({
+        index: INVESTIGATION_CONFIG_INDEX,
+        id: this.taskListDocId(listId),
+        op_type: 'create',
+        refresh: true,
+        document: {
+          doc_type: 'task_list',
+          space_id: this.deps.spaceId,
+          id: listId,
+          name: `${ref.name} procedure`,
+          description: '',
+          tags: [],
+          tasks,
+          updated_at: updatedAt,
+          updated_by: updatedBy,
+        },
+      })
+      .catch((error) => {
+        if (!isConflict(error)) throw error;
+      });
+    let ids = [listId];
+    await this.es
+      .index({
+        index: INVESTIGATION_CONFIG_INDEX,
+        id: this.templateLinksDocId(ref.id),
+        op_type: 'create',
+        refresh: true,
+        document: {
+          doc_type: 'template_task_lists',
+          space_id: this.deps.spaceId,
+          template_id: ref.id,
+          task_list_ids: ids,
+          updated_at: ts,
+          updated_by: updatedBy,
+        },
+      })
+      .catch(async (error) => {
+        if (!isConflict(error)) throw error;
+        const current = await this.es.get<{ task_list_ids?: string[] }>({
+          index: INVESTIGATION_CONFIG_INDEX,
+          id: this.templateLinksDocId(ref.id),
+        });
+        ids = current._source?.task_list_ids ?? [];
+      });
+    if (stored) {
+      await this.es
+        .delete({ index: INVESTIGATION_CONFIG_INDEX, id: procedureId, refresh: true })
+        .catch((error) => {
+          if (error?.meta?.statusCode !== 404) throw error;
+        });
+    }
+    return ids;
+  }
+
+  /** The reusable task lists of the space, by name. */
+  public async listTaskLists(): Promise<TaskList[]> {
+    await this.ensureCanReadOwner();
+    // Reading links first turns the former per-template procedures into task lists.
+    await this.linkedTaskListIds(await this.templateRefs());
+    const res = await this.es.search<StoredTaskList>({
+      index: INVESTIGATION_CONFIG_INDEX,
+      size: MAX_TASK_LISTS_PER_SPACE,
+      seq_no_primary_term: true,
+      query: {
+        bool: { filter: [term('doc_type', 'task_list'), term('space_id', this.deps.spaceId)] },
+      },
+    });
+    return res.hits.hits
+      .flatMap((hit) =>
+        hit._source ? [toTaskList(hit._source, hit._seq_no, hit._primary_term)] : []
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private validateTaskListInput(input: SaveTaskListRequest): SaveTaskListRequest {
+    const name = input.name.trim();
+    if (!name) throw Boom.badRequest('Name is required');
+    const total = input.tasks.reduce((n, t) => n + 1 + (t.subtasks?.length ?? 0), 0);
+    if (total > MAX_TASKS_PER_CASE) {
+      throw Boom.badRequest(`A task list can have at most ${MAX_TASKS_PER_CASE} tasks`);
+    }
     return {
-      template_id: template.id,
-      type: template.name,
-      tasks,
-      updated_at: ts,
-      updated_by: actor,
-      saved: true,
-      version: encodeVersion(res._seq_no, res._primary_term),
+      ...input,
+      name,
+      description: (input.description ?? '').trim(),
+      tags: Array.from(new Set((input.tags ?? []).map((tag) => tag.trim()).filter(Boolean))),
     };
   }
 
-  /** The procedure for a record: its type's task list, or the built-in default for its type name. */
-  private async procedureFor(
-    templateId: string | null | undefined,
-    typeName: string
-  ): Promise<{ name: string; tasks: ProcedureTemplateTask[] } | null> {
-    if (templateId) {
-      const found = (await this.listProcedureTemplates()).find((t) => t.template_id === templateId);
-      if (found) return { name: found.type, tasks: found.tasks };
+  public async createTaskList(input: SaveTaskListRequest): Promise<TaskList> {
+    await this.ensureCanReadOwner();
+    await this.ensureCanManageTaskLists();
+    const valid = this.validateTaskListInput(input);
+    if ((await this.countTaskLists()) >= MAX_TASK_LISTS_PER_SPACE) {
+      throw Boom.badRequest(
+        `At most ${MAX_TASK_LISTS_PER_SPACE} task lists can be created per space`
+      );
     }
-    const fallback = DEFAULT_PROCEDURE_TEMPLATES[typeName];
-    return fallback ? { name: typeName, tasks: fallback } : null;
+    const id = uuidv4();
+    const source: StoredTaskList = {
+      doc_type: 'task_list',
+      space_id: this.deps.spaceId,
+      id,
+      name: valid.name,
+      description: valid.description ?? '',
+      tags: valid.tags ?? [],
+      tasks: valid.tasks,
+      updated_at: now(),
+      updated_by: this.actor(),
+    };
+    const res = await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: this.taskListDocId(id),
+      op_type: 'create',
+      refresh: true,
+      document: source,
+    });
+    return toTaskList(source, res._seq_no, res._primary_term);
   }
 
-  public async applyProcedure(
-    recordId: string,
-    templateId: string | null,
-    replace: boolean
-  ): Promise<TaskItem[]> {
-    const { record } = await this.loadForWrite(recordId);
+  public async updateTaskList(listId: string, input: SaveTaskListRequest): Promise<TaskList> {
+    await this.ensureCanReadOwner();
+    await this.ensureCanManageTaskLists();
+    const valid = this.validateTaskListInput(input);
+    const current = await this.getTaskListOrThrow(listId);
+    if ((input.version ?? null) !== (current.version ?? null)) {
+      throw Boom.conflict('The task list was changed by someone else. Reload and try again.');
+    }
+    const source: StoredTaskList = {
+      doc_type: 'task_list',
+      space_id: this.deps.spaceId,
+      id: listId,
+      name: valid.name,
+      description: valid.description ?? '',
+      tags: valid.tags ?? [],
+      tasks: valid.tasks,
+      updated_at: now(),
+      updated_by: this.actor(),
+    };
+    const res = await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: this.taskListDocId(listId),
+      refresh: true,
+      ...(current.version ? decodeVersion(current.version) : {}),
+      document: source,
+    });
+    return toTaskList(source, res._seq_no, res._primary_term);
+  }
+
+  /** Deleting a list removes it from every template link; tasks already on records stay. */
+  public async deleteTaskList(listId: string): Promise<void> {
+    await this.ensureCanReadOwner();
+    await this.ensureCanManageTaskLists();
+    await this.getTaskListOrThrow(listId);
+    await this.es.delete({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: this.taskListDocId(listId),
+      refresh: true,
+    });
+    const links = await this.es.search<{ task_list_ids?: string[] }>({
+      index: INVESTIGATION_CONFIG_INDEX,
+      size: 1000,
+      query: {
+        bool: {
+          filter: [term('doc_type', 'template_task_lists'), term('space_id', this.deps.spaceId)],
+        },
+      },
+    });
+    const affected = links.hits.hits.filter((hit) => hit._source?.task_list_ids?.includes(listId));
+    if (!affected.length) return;
+    const ts = now();
     const actor = this.actor();
-    const tasks = await this.applyProcedureInternal(
-      record,
-      templateId ?? record.template_id ?? null,
-      replace,
-      actor,
-      now()
-    );
+    await this.es.bulk({
+      refresh: true,
+      operations: affected.flatMap((hit) => [
+        { update: { _index: INVESTIGATION_CONFIG_INDEX, _id: hit._id } },
+        {
+          doc: {
+            task_list_ids: (hit._source?.task_list_ids ?? []).filter((id) => id !== listId),
+            updated_at: ts,
+            updated_by: actor,
+          },
+        },
+      ]),
+    });
+  }
+
+  public async getTemplateTaskLists(templateId: string): Promise<TemplateTaskLists> {
+    await this.ensureCanReadOwner();
+    const template = await this.getInvestigationTemplate(templateId, undefined, true);
+    const linked = await this.linkedTaskListIds([{ id: template.id, name: template.name }]);
+    return { template_id: template.id, task_list_ids: linked.get(template.id) ?? [] };
+  }
+
+  /** Replaces the ordered task lists of a template. */
+  public async setTemplateTaskLists(
+    templateId: string,
+    taskListIds: string[]
+  ): Promise<TemplateTaskLists> {
+    await this.ensureCanReadOwner();
+    await this.ensureCanManageTaskLists();
+    const template = await this.getInvestigationTemplate(templateId);
+    const unique = Array.from(new Set(taskListIds));
+    if (unique.length > MAX_TASK_LISTS_PER_TEMPLATE) {
+      throw Boom.badRequest(
+        `A template can have at most ${MAX_TASK_LISTS_PER_TEMPLATE} task lists`
+      );
+    }
+    if (unique.length) {
+      const found = await this.es.mget({
+        index: INVESTIGATION_CONFIG_INDEX,
+        docs: unique.map((id) => ({ _id: this.taskListDocId(id), _source: false })),
+      });
+      const missing = unique.filter((_id, index) => {
+        const doc = found.docs[index];
+        return !('found' in doc && doc.found);
+      });
+      if (missing.length) {
+        throw Boom.badRequest(`Task list ${missing.join(', ')} not found`);
+      }
+    }
+    await this.es.index({
+      index: INVESTIGATION_CONFIG_INDEX,
+      id: this.templateLinksDocId(template.id),
+      refresh: true,
+      document: {
+        doc_type: 'template_task_lists',
+        space_id: this.deps.spaceId,
+        template_id: template.id,
+        task_list_ids: unique,
+        updated_at: now(),
+        updated_by: this.actor(),
+      },
+    });
+    return { template_id: template.id, task_list_ids: unique };
+  }
+
+  /** Adds one task list to a record; refused when any of its tasks came from that list. */
+  public async applyTaskList(recordId: string, taskListId: string): Promise<TaskItem[]> {
+    const { record } = await this.loadForWrite(recordId);
+    const list = await this.getTaskListOrThrow(taskListId);
+    const actor = this.actor();
+    const tasks = await this.applyTaskListInternal(record, list, actor, now());
     await this.refreshCounters(recordId, actor);
     return tasks;
   }
 
-  private async applyProcedureInternal(
+  /**
+   * Applies the task lists linked to a record's template, in order. A list that cannot be applied
+   * is logged and skipped so that it never fails the write that chose the template.
+   */
+  private async applyTemplateTaskLists(
     record: StoredRecord,
     templateId: string | null,
-    replace: boolean,
     actor: Actor,
     ts: string
   ): Promise<TaskItem[]> {
-    const template = await this.procedureFor(templateId, record.investigation_type);
-    if (!template) {
-      this.deps.logger.debug(`No procedure for investigation type "${record.investigation_type}"`);
-      return [];
+    const ref = templateId
+      ? await this.getInvestigationTemplate(templateId, undefined, true).catch(() => undefined)
+      : (await this.templateRefs()).find(
+          (candidate) => candidate.name === record.investigation_type
+        );
+    if (!ref) return [];
+    const ids = (await this.linkedTaskListIds([{ id: ref.id, name: ref.name }])).get(ref.id) ?? [];
+    const created: TaskItem[] = [];
+    for (const listId of ids) {
+      try {
+        const list = await this.getTaskListOrThrow(listId);
+        created.push(...(await this.applyTaskListInternal(record, list, actor, ts)));
+      } catch (error) {
+        this.deps.logger.warn(
+          `Task list ${listId} was not applied to investigation ${record.id}: ${error.message}`
+        );
+      }
     }
-    const type = template.name;
+    return created;
+  }
+
+  private async applyTaskListInternal(
+    record: StoredRecord,
+    list: Pick<TaskList, 'id' | 'name' | 'tasks'>,
+    actor: Actor,
+    ts: string
+  ): Promise<TaskItem[]> {
     const existing = await this.searchItems<TaskItem>(
       record.id,
       term('kind', 'task'),
-      MAX_TASKS_PER_CASE
+      MAX_TASKS_PER_CASE + 1
     );
-    const keptTitles = new Set<string>();
-    if (replace) {
-      const removable = existing.filter((t) => !isTaskFinished(t.status));
-      existing
-        .filter((t) => isTaskFinished(t.status))
-        .forEach((t) => keptTitles.add(t.title.toLowerCase()));
-      if (removable.length) {
-        await this.es.deleteByQuery({
-          index: INVESTIGATION_ITEMS_INDEX,
-          refresh: true,
-          query: {
-            bool: {
-              filter: [
-                term('record_id', record.id),
-                terms(
-                  'id',
-                  removable.map((t) => t.id)
-                ),
-              ],
-            },
-          },
-        });
-      }
-    } else {
-      existing.forEach((t) => keptTitles.add(t.title.toLowerCase()));
+    if (existing.some((t) => t.task.template_id === list.id)) {
+      throw Boom.conflict(
+        `Task list "${list.name}" has already been applied to this investigation`
+      );
     }
-    const claims = await this.searchItems<ClaimItem>(record.id, term('kind', 'claim'), 1000);
-    const toCreate = template.tasks.filter((t) => !keptTitles.has(t.title.toLowerCase()));
-    const kept = replace ? existing.filter((t) => isTaskFinished(t.status)) : existing;
+    const toCreate = list.tasks;
     const newCount = toCreate.reduce((n, t) => n + 1 + (t.subtasks?.length ?? 0), 0);
-    if (kept.length + newCount > MAX_TASKS_PER_CASE) {
+    if (existing.length + newCount > MAX_TASKS_PER_CASE) {
       throw Boom.badRequest(`An investigation can have at most ${MAX_TASKS_PER_CASE} tasks`);
     }
+    const claims = await this.searchItems<ClaimItem>(record.id, term('kind', 'claim'), 1000);
     const lastRoot = Math.max(
       0,
-      ...kept.filter((t) => !t.task.parent_task_id).map((t) => t.task.sort_order ?? 0)
+      ...existing.filter((t) => !t.task.parent_task_id).map((t) => t.task.sort_order ?? 0)
     );
     const ids = toCreate.map(() => uuidv4());
     const idByTitle = new Map<string, string>();
-    toCreate.forEach((t, i) => idByTitle.set(t.title.toLowerCase(), ids[i]));
     existing.forEach((t) => idByTitle.set(t.title.toLowerCase(), t.id));
+    toCreate.forEach((t, i) => idByTitle.set(t.title.toLowerCase(), ids[i]));
     const inputs: Array<ItemInput & { _id?: string }> = toCreate.map((t, i) => {
       const owner =
         t.owner_type === 'agent'
@@ -3131,7 +3414,8 @@ export class InvestigationsService {
           completed_by: null,
           started_at: null,
           completed_at: null,
-          template_ref: template.name,
+          template_ref: list.name,
+          template_id: list.id,
           priority: t.priority ?? 'medium',
           assignees: [],
           due_date: dueDateFrom(t.due_within, ts),
@@ -3160,7 +3444,8 @@ export class InvestigationsService {
           completed_by: null,
           started_at: null,
           completed_at: null,
-          template_ref: template.name,
+          template_ref: list.name,
+          template_id: list.id,
           priority: sub.priority ?? t.priority ?? 'medium',
           assignees: [],
           due_date: dueDateFrom(sub.due_within, ts),
@@ -3175,16 +3460,14 @@ export class InvestigationsService {
     const created = all.length
       ? (await this.bulkCreateItemsInternal(record, all, actor, { silent: true, ts })).items
       : [];
-    const required = template.tasks.filter((t) => t.required).length;
+    const required = toCreate.filter((t) => t.required).length;
     await this.appendActivity(record.id, [
       {
         ts,
         actor,
         action: 'procedure.applied',
-        message: `Applied the ${type} procedure`,
-        details: `${plural(template.tasks.length, 'task')}, ${required} required.${
-          replace ? ' Unfinished tasks from the previous procedure were removed.' : ''
-        }`,
+        message: `Applied the task list "${list.name}"`,
+        details: `${plural(toCreate.length, 'task')}, ${required} required.`,
         links: [{ kind: 'tab', id: 'procedure', label: 'Procedure' }],
       },
     ]);
@@ -5948,12 +6231,11 @@ export class InvestigationsService {
     return res.hits.hits[0]?._source?.id ?? null;
   }
 
-  /** Required (now or on close) template fields of the record that have no value, at most 8. */
+  /** Required (now or on close) template and global fields of the record that have no value, at most 8. */
   private async emptyRequiredFields(
     record: StoredRecord,
     values: Record<string, string>
   ): Promise<Array<{ key: string; label: string; onClose: boolean }>> {
-    if (!record.template_id) return [];
     const { fields } = await this.deps.casesClient.cases
       .getApplicableFields({ caseId: record.case_id })
       .catch(() => ({ fields: [] }));

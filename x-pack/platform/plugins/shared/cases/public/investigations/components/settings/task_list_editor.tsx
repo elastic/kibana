@@ -7,37 +7,43 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiComboBox,
   EuiDragDropContext,
   EuiDraggable,
   EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormRow,
   EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { DropResult } from '@elastic/eui';
+import type { DropResult, EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { INVESTIGATION_LIMITS } from '../../../../common/investigations/constants';
+import type { TaskList } from '../../../../common/investigations/types';
 import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import {
   getHttpErrorMessage,
   getHttpErrorStatus,
   useInvestigationToasts,
-  useProcedureTemplates,
+  useSaveTaskList,
+  useTaskLists,
 } from '../../hooks';
-import { useSaveProcedureTemplate, useWorkflowList } from '../../hooks/use_tasks';
+import { useWorkflowList } from '../../hooks/use_tasks';
 import { ICONS } from '../../icons';
 import { ConfirmModal, ErrorState, LoadingState } from '../shared';
 import { TemplateTaskRow } from './template_task_row';
@@ -57,24 +63,50 @@ import type { DraftSubtask, DraftTask } from './template_draft';
 import * as i18n from '../procedure/translations';
 import * as settingsI18n from './translations';
 
+const MAX_NAME_LENGTH = 160;
+const MAX_TAGS = 200;
+
+/** A stable string of what would be saved, to tell whether the form changed. */
+const snapshotOf = (
+  name: string,
+  description: string,
+  tags: readonly string[],
+  draft: readonly DraftTask[]
+): string =>
+  JSON.stringify({
+    name: name.trim(),
+    description: description.trim(),
+    tags,
+    tasks: serializeDraft(draft),
+  });
+
 export interface TaskListEditorProps {
-  /** Cases template id of the investigation template whose task list is edited. */
-  templateId: string;
+  /** The task list to edit. Omit it to add a new one. */
+  taskListId?: string;
   onClose: () => void;
+  /** Called with the saved list, before `onClose`. */
+  onSaved?: (taskList: TaskList) => void;
+  /** Skip the success toast, when the caller already shows the result. */
+  silent?: boolean;
 }
 
 /**
- * Edits the reusable task list of one investigation template, with the built-in default shown
- * until a list is saved.
+ * Adds or edits one reusable task list: its name, description and tags, and the tasks it adds to an
+ * investigation.
  */
-export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onClose }) => {
+export const TaskListEditor: React.FC<TaskListEditorProps> = ({
+  taskListId,
+  onClose,
+  onSaved,
+  silent = false,
+}) => {
   const flyoutTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const { showSuccess } = useInvestigationToasts();
   const { permissions } = useCasesContext();
-  const templatesQuery = useProcedureTemplates();
+  const taskListsQuery = useTaskLists();
   const workflowsQuery = useWorkflowList();
-  const saveTemplate = useSaveProcedureTemplate();
+  const saveTaskList = useSaveTaskList();
 
   const counter = useRef(0);
   const nextKey = useCallback(() => {
@@ -82,35 +114,57 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
     return createDraftKey(counter.current);
   }, []);
 
-  const [loaded, setLoaded] = useState(false);
+  const isNew = taskListId === undefined;
+  const [loaded, setLoaded] = useState(isNew);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [draft, setDraft] = useState<DraftTask[]>([]);
-  const [baseline, setBaseline] = useState('[]');
+  const [baseline, setBaseline] = useState(() => snapshotOf('', '', [], []));
   const [showErrors, setShowErrors] = useState(false);
   const [isDiscardOpen, setIsDiscardOpen] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState('');
 
-  const templates = templatesQuery.data?.templates;
+  const taskLists = taskListsQuery.data?.task_lists;
   const readOnly = !permissions.settings || isForbidden;
+  const selected = taskLists?.find((list) => list.id === taskListId);
 
-  const selected = templates?.find((template) => template.template_id === templateId);
-
-  // Load the draft once, not on every refetch of the lists.
+  // Load the form once, not on every refetch of the lists.
   useEffect(() => {
     if (!selected || loaded) {
       return;
     }
     const initial = toDraft(selected.tasks, nextKey);
+    setName(selected.name);
+    setDescription(selected.description);
+    setTags(selected.tags);
     setDraft(initial);
-    setBaseline(serializeDraft(initial));
+    setBaseline(snapshotOf(selected.name, selected.description, selected.tags, initial));
     setLoaded(true);
   }, [selected, loaded, nextKey]);
 
-  const isDirty = serializeDraft(draft) !== baseline;
+  const isDirty = snapshotOf(name, description, tags, draft) !== baseline;
   const errors = useMemo(() => validateDraft(draft), [draft]);
   const totalTasks = countDraftTasks(draft);
-  const hasErrors = Object.keys(errors).length > 0 || totalTasks > MAX_TEMPLATE_TASKS;
+  const trimmedName = name.trim();
+  const nameError =
+    trimmedName.length === 0
+      ? settingsI18n.NAME_REQUIRED
+      : trimmedName.length > MAX_NAME_LENGTH
+      ? settingsI18n.NAME_TOO_LONG
+      : undefined;
+  const descriptionError =
+    description.length > INVESTIGATION_LIMITS.maxTextLength
+      ? settingsI18n.DESCRIPTION_TOO_LONG
+      : undefined;
+  const tagsError = tags.length > MAX_TAGS ? settingsI18n.TAGS_TOO_MANY(MAX_TAGS) : undefined;
+  const tasksError = draft.length === 0 ? settingsI18n.TASKS_REQUIRED : undefined;
+  const hasErrors =
+    Object.keys(errors).length > 0 ||
+    totalTasks > MAX_TEMPLATE_TASKS ||
+    Boolean(nameError || descriptionError || tagsError || tasksError);
   const isFull = totalTasks >= MAX_TEMPLATE_TASKS;
 
   const updateTask = (key: string, patch: Partial<DraftTask>) =>
@@ -178,13 +232,25 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
   const handleSave = async () => {
     setShowErrors(true);
     setSaveError(null);
-    if (hasErrors || !selected) {
+    if (hasErrors) {
       return;
     }
     try {
-      await saveTemplate.mutateAsync({ templateId, tasks: toTemplateTasks(draft) });
-      showSuccess(i18n.EDITOR_SAVED(selected.type));
-      setBaseline(serializeDraft(draft));
+      const { task_list: saved } = await saveTaskList.mutateAsync({
+        taskListId,
+        body: {
+          name: trimmedName,
+          description: description.trim(),
+          tags,
+          tasks: toTemplateTasks(draft),
+          version: selected?.version,
+        },
+      });
+      if (!silent) {
+        showSuccess(i18n.EDITOR_SAVED(saved.name));
+      }
+      setBaseline(snapshotOf(name, description, tags, draft));
+      onSaved?.(saved);
       onClose();
     } catch (error) {
       if (getHttpErrorStatus(error) === 403) {
@@ -196,19 +262,19 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
   };
 
   const renderBody = () => {
-    if (templatesQuery.isLoading) {
+    if (!isNew && taskListsQuery.isLoading) {
       return <LoadingState label={i18n.EDITOR_LOADING} />;
     }
-    if (templatesQuery.error || !templates) {
+    if (!isNew && (taskListsQuery.error || !taskLists)) {
       return (
         <ErrorState
           title={i18n.EDITOR_LOAD_ERROR}
-          error={templatesQuery.error}
-          onRetry={() => void templatesQuery.refetch()}
+          error={taskListsQuery.error}
+          onRetry={() => void taskListsQuery.refetch()}
         />
       );
     }
-    if (!selected) {
+    if (!isNew && !selected) {
       return (
         <EuiCallOut
           announceOnMount
@@ -216,7 +282,7 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
           size="s"
           title={settingsI18n.TASK_LIST_UNAVAILABLE_TITLE}
           text={<p>{settingsI18n.TASK_LIST_UNAVAILABLE_BODY}</p>}
-          data-test-subj="investigationTemplateUnavailable"
+          data-test-subj="investigationTaskListUnavailable"
         />
       );
     }
@@ -230,14 +296,78 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
               color="primary"
               title={i18n.EDITOR_READ_ONLY_TITLE}
               text={<p>{i18n.EDITOR_READ_ONLY_BODY}</p>}
-              data-test-subj="investigationTemplateReadOnly"
+              data-test-subj="investigationTaskListReadOnly"
             />
             <EuiSpacer size="m" />
           </>
         ) : null}
+        <EuiFormRow
+          label={settingsI18n.FIELD_NAME}
+          fullWidth
+          isInvalid={showErrors && Boolean(nameError)}
+          error={nameError}
+        >
+          <EuiFieldText
+            fullWidth
+            value={name}
+            readOnly={readOnly}
+            isInvalid={showErrors && Boolean(nameError)}
+            onChange={(event) => setName(event.target.value)}
+            data-test-subj="investigationTaskListName"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={settingsI18n.FIELD_DESCRIPTION}
+          fullWidth
+          isInvalid={showErrors && Boolean(descriptionError)}
+          error={descriptionError}
+        >
+          <EuiTextArea
+            fullWidth
+            rows={2}
+            value={description}
+            readOnly={readOnly}
+            isInvalid={showErrors && Boolean(descriptionError)}
+            onChange={(event) => setDescription(event.target.value)}
+            data-test-subj="investigationTaskListDescription"
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={settingsI18n.FIELD_TAGS}
+          fullWidth
+          isInvalid={showErrors && Boolean(tagsError)}
+          error={tagsError}
+        >
+          <EuiComboBox
+            isInvalid={showErrors && Boolean(tagsError)}
+            fullWidth
+            noSuggestions
+            isDisabled={readOnly}
+            placeholder={settingsI18n.TAGS_PLACEHOLDER}
+            selectedOptions={tags.map((tag) => ({ label: tag }))}
+            onCreateOption={(value) => {
+              const tag = value.trim().slice(0, INVESTIGATION_LIMITS.maxTagLength);
+              if (tag.length > 0 && !tags.includes(tag)) {
+                setTags([...tags, tag]);
+              }
+            }}
+            onChange={(options: Array<EuiComboBoxOptionOption<string>>) =>
+              setTags(options.map(({ label }) => label))
+            }
+            data-test-subj="investigationTaskListTags"
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+        <EuiTitle size="xxs">
+          <h3>{settingsI18n.FIELD_TASKS}</h3>
+        </EuiTitle>
         {draft.length === 0 ? (
-          <EuiText size="s" color="subdued" data-test-subj="investigationTemplateEmpty">
-            <p>{i18n.EDITOR_NO_TASKS}</p>
+          <EuiText
+            size="s"
+            color={showErrors ? 'danger' : 'subdued'}
+            data-test-subj="investigationTaskListEmpty"
+          >
+            <p>{showErrors ? settingsI18n.TASKS_REQUIRED : i18n.EDITOR_NO_TASKS}</p>
           </EuiText>
         ) : (
           <EuiText size="xs" color="subdued">
@@ -302,13 +432,13 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
             size="s"
             iconType={ICONS.add}
             onClick={addTask}
-            data-test-subj="investigationTemplateAddTask"
+            data-test-subj="investigationTaskListAddTask"
           >
             {i18n.EDITOR_ADD_TASK}
           </EuiButtonEmpty>
         )}
         {isFull ? (
-          <EuiText size="xs" color="subdued" data-test-subj="investigationTemplateMaxTasks">
+          <EuiText size="xs" color="subdued" data-test-subj="investigationTaskListMaxTasks">
             {i18n.MAX_TASKS_REACHED(MAX_TEMPLATE_TASKS)}
           </EuiText>
         ) : null}
@@ -321,7 +451,7 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
               size="s"
               title={i18n.EDITOR_SAVE_ERROR}
               text={<p>{saveError}</p>}
-              data-test-subj="investigationTemplateSaveError"
+              data-test-subj="investigationTaskListSaveError"
             />
           </>
         ) : null}
@@ -333,13 +463,15 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
               color="danger"
               size="s"
               title={i18n.EDITOR_FIX_ERRORS}
-              data-test-subj="investigationTemplateErrors"
+              data-test-subj="investigationTaskListErrors"
             />
           </>
         ) : null}
       </>
     );
   };
+
+  const canSave = isNew || Boolean(selected);
 
   return (
     <>
@@ -348,30 +480,14 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
         size="l"
         ownFocus
         aria-labelledby={flyoutTitleId}
-        data-test-subj="investigationTemplateEditor"
+        data-test-subj="investigationTaskListEditor"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={flyoutTitleId}>{settingsI18n.TASK_LIST_TITLE}</h2>
+            <h2 id={flyoutTitleId}>
+              {isNew ? settingsI18n.EDITOR_ADD_TITLE : settingsI18n.EDITOR_EDIT_TITLE}
+            </h2>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" data-test-subj="investigationTemplateName">
-                <strong>{selected?.type ?? ''}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            {selected ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color={selected.saved ? 'success' : 'hollow'}
-                  data-test-subj="investigationTemplateSavedBadge"
-                >
-                  {selected.saved ? i18n.EDITOR_SAVED_BADGE : i18n.EDITOR_DEFAULT_BADGE}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiText
             size="xs"
@@ -380,14 +496,14 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
               max-width: ${euiTheme.breakpoint.s}px;
             `}
           >
-            {settingsI18n.TASK_LIST_HINT}
+            {settingsI18n.EDITOR_HINT}
           </EuiText>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{renderBody()}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={requestClose} data-test-subj="investigationTemplateCancel">
+              <EuiButtonEmpty onClick={requestClose} data-test-subj="investigationTaskListCancel">
                 {readOnly ? i18n.EDITOR_CLOSE : i18n.EDITOR_CANCEL}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -395,10 +511,10 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
               <EuiFlexItem grow={false}>
                 <EuiButton
                   fill
-                  isLoading={saveTemplate.isLoading}
-                  isDisabled={!selected}
+                  isLoading={saveTaskList.isLoading}
+                  isDisabled={!canSave || !loaded}
                   onClick={() => void handleSave()}
-                  data-test-subj="investigationTemplateSave"
+                  data-test-subj="investigationTaskListSave"
                 >
                   {i18n.EDITOR_SAVE}
                 </EuiButton>
@@ -407,7 +523,7 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
           </EuiFlexGroup>
         </EuiFlyoutFooter>
         <EuiScreenReaderOnly>
-          <div role="status" aria-live="polite" data-test-subj="investigationTemplateAnnouncement">
+          <div role="status" aria-live="polite" data-test-subj="investigationTaskListAnnouncement">
             {announcement}
           </div>
         </EuiScreenReaderOnly>
@@ -424,7 +540,7 @@ export const TaskListEditor: React.FC<TaskListEditorProps> = ({ templateId, onCl
             onClose();
           }}
           onCancel={() => setIsDiscardOpen(false)}
-          data-test-subj="investigationTemplateDiscardModal"
+          data-test-subj="investigationTaskListDiscardModal"
         />
       ) : null}
     </>

@@ -23,8 +23,10 @@ import type { CasesPublicStartDependencies } from '../types';
 import { DetailPage } from './components/detail/detail_page';
 import { QueuePage } from './components/queue/queue_page';
 import {
+  NEW_TASK_LIST_PATH,
   NEW_TEMPLATE_PATH,
   SETTINGS_PATH,
+  TASK_LISTS_PATH,
   TASK_LIST_PATH_PATTERN,
   TEMPLATES_PATH,
   TEMPLATE_PATH_PATTERN,
@@ -102,6 +104,8 @@ export const InvestigationsApp: React.FC<InvestigationsAppProps> = ({
                 <Route exact path={SETTINGS_PATH} component={SettingsPage} />
                 <Route exact path={TEMPLATES_PATH} component={SettingsPage} />
                 <Route exact path={NEW_TEMPLATE_PATH} component={TemplateCreatePage} />
+                <Route exact path={TASK_LISTS_PATH} component={SettingsPage} />
+                <Route exact path={NEW_TASK_LIST_PATH} component={SettingsPage} />
                 <Route exact path={TASK_LIST_PATH_PATTERN} component={SettingsPage} />
                 <Route exact path={TEMPLATE_PATH_PATTERN} component={TemplateEditPage} />
                 <Route exact path="/:id" component={DetailPage} />

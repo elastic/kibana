@@ -22,62 +22,53 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ProcedureTemplate } from '../../../../common/investigations/types';
 import type { TemplateListItem } from '../../../../common/types/api/template/v1';
 import { useCasesContext } from '../../../components/cases_context/use_cases_context';
 import { useUpdateTemplate } from '../../../components/templates_v2/hooks/use_update_template';
 import {
   useInvestigationTemplates,
   useInvestigationToasts,
+  useInvestigationTypes,
   useInvestigationsNavigation,
-  useProcedureTemplates,
   useRefreshInvestigationTemplates,
+  useTaskLists,
 } from '../../hooks';
 import { ICONS } from '../../icons';
-import { ConfirmModal, EmptyState, ErrorState, LoadingState, RelativeTime } from '../shared';
-import { NEW_TEMPLATE_PATH, TEMPLATES_PATH, getTaskListPath, getTemplatePath } from './paths';
-import { TaskListEditor } from './task_list_editor';
+import { ConfirmModal, EmptyState, ErrorState, LoadingState } from '../shared';
+import { GlobalFieldsSection } from './global_fields_section';
+import { NEW_TEMPLATE_PATH, getTemplatePath } from './paths';
+import { LinkedTaskListBadges } from './linked_task_list_badges';
+import { TemplateTaskListsPicker } from './template_task_lists_picker';
 import * as i18n from './translations';
-
-export interface TemplatesTabProps {
-  /** Opens the task list editor for this template (the `/settings/templates/:id/tasks` route). */
-  taskListTemplateId?: string;
-}
-
-/** A template's task count: its tasks and their sub-tasks. */
-const countTasks = (procedure: ProcedureTemplate): number =>
-  procedure.tasks.reduce((total, task) => total + 1 + (task.subtasks?.length ?? 0), 0);
 
 /**
  * The investigation templates of the space: Cases templates tagged `investigation-type`. Creating
- * and editing a template opens the Cases template editor inside this app; the task list of a
- * template is edited here too.
+ * and editing a template opens the Cases template editor inside this app; the task lists a
+ * template adds are chosen here too.
  */
-export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }) => {
+export const TemplatesTab: React.FC = () => {
   const { permissions } = useCasesContext();
   const { navigate, getHref } = useInvestigationsNavigation();
   const { showSuccess, showError } = useInvestigationToasts();
   const templatesQuery = useInvestigationTemplates();
-  const procedureQuery = useProcedureTemplates();
+  const typesQuery = useInvestigationTypes();
+  const taskListsQuery = useTaskLists();
   const refreshTemplates = useRefreshInvestigationTemplates();
   const { mutate: updateTemplate, isLoading: isUpdating } = useUpdateTemplate({
     disableDefaultSuccessToast: true,
   });
   const [templateToDisable, setTemplateToDisable] = useState<TemplateListItem | null>(null);
+  const [templateForTaskLists, setTemplateForTaskLists] = useState<TemplateListItem | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const canManage = permissions.manageTemplates;
   const templates = useMemo(() => templatesQuery.data?.templates ?? [], [templatesQuery.data]);
-  const procedures = useMemo(
+  const linkedIds = useMemo(
     () =>
-      new Map(
-        (procedureQuery.data?.templates ?? []).map((procedure) => [
-          procedure.template_id,
-          procedure,
-        ])
-      ),
-    [procedureQuery.data]
+      new Map((typesQuery.data?.types ?? []).map((type) => [type.template_id, type.task_list_ids])),
+    [typesQuery.data]
   );
+  const taskLists = useMemo(() => taskListsQuery.data?.task_lists ?? [], [taskListsQuery.data]);
 
   const setEnabled = useCallback(
     (template: TemplateListItem, isEnabled: boolean) => {
@@ -148,17 +139,16 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
       ),
     },
     {
-      name: i18n.COLUMN_TASKS,
-      width: '80px',
-      align: 'right',
+      name: i18n.COLUMN_TASK_LISTS,
+      width: '220px',
       render: (template: TemplateListItem) => {
-        const procedure = procedures.get(template.templateId);
-        if (!procedure) {
+        const ids = linkedIds.get(template.templateId);
+        if (!ids) {
           return (
-            <EuiToolTip content={i18n.TASKS_UNAVAILABLE}>
+            <EuiToolTip content={i18n.TASK_LISTS_UNAVAILABLE}>
               <span
                 tabIndex={0}
-                data-test-subj={`investigationTemplateTasks-${template.templateId}`}
+                data-test-subj={`investigationTemplateTaskLists-${template.templateId}`}
               >
                 {'-'}
               </span>
@@ -166,9 +156,11 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
           );
         }
         return (
-          <span data-test-subj={`investigationTemplateTasks-${template.templateId}`}>
-            {countTasks(procedure)}
-          </span>
+          <LinkedTaskListBadges
+            taskListIds={ids}
+            taskLists={taskLists}
+            data-test-subj={`investigationTemplateTaskLists-${template.templateId}`}
+          />
         );
       },
     },
@@ -177,23 +169,6 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
       name: i18n.COLUMN_VERSION,
       width: '80px',
       render: (version: number) => i18n.VERSION_VALUE(version),
-    },
-    {
-      name: i18n.COLUMN_UPDATED,
-      width: '140px',
-      render: (template: TemplateListItem) => {
-        const procedure = procedures.get(template.templateId);
-        if (!procedure) {
-          return '-';
-        }
-        return procedure.updated_at ? (
-          <RelativeTime value={procedure.updated_at} />
-        ) : (
-          <EuiText size="s" color="subdued">
-            {i18n.BUILT_IN_TASK_LIST}
-          </EuiText>
-        );
-      },
     },
     {
       field: 'isEnabled',
@@ -213,7 +188,6 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
       width: '330px',
       render: (template: TemplateListItem) => {
         const isEnabled = template.isEnabled !== false;
-        const hasTaskList = procedures.has(template.templateId);
         return (
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap={false}>
             {canManage ? (
@@ -230,18 +204,15 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={hasTaskList ? undefined : i18n.TASKS_UNAVAILABLE}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType={ICONS.procedure}
-                  aria-label={i18n.EDIT_TASK_LIST_ARIA(template.name)}
-                  isDisabled={!hasTaskList}
-                  onClick={() => navigate(getTaskListPath(template.templateId))}
-                  data-test-subj={`investigationTemplateEditTasks-${template.templateId}`}
-                >
-                  {i18n.EDIT_TASK_LIST}
-                </EuiButtonEmpty>
-              </EuiToolTip>
+              <EuiButtonEmpty
+                size="xs"
+                iconType={ICONS.procedure}
+                aria-label={i18n.TASK_LISTS_BUTTON_ARIA(template.name)}
+                onClick={() => setTemplateForTaskLists(template)}
+                data-test-subj={`investigationTemplateEditTasks-${template.templateId}`}
+              >
+                {i18n.TASK_LISTS_BUTTON}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             {canManage ? (
               <EuiFlexItem grow={false}>
@@ -271,7 +242,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
   ];
 
   const renderTable = () => {
-    if (templatesQuery.isLoading || (procedureQuery.isLoading && templates.length === 0)) {
+    if (templatesQuery.isLoading || (typesQuery.isLoading && templates.length === 0)) {
       return <LoadingState label={i18n.TEMPLATES_LOADING} />;
     }
     if (templatesQuery.isError) {
@@ -358,6 +329,8 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
         </>
       )}
       {renderTable()}
+      <EuiSpacer size="xl" />
+      <GlobalFieldsSection />
       {templateToDisable ? (
         <ConfirmModal
           title={i18n.DISABLE_TEMPLATE_TITLE(templateToDisable.name)}
@@ -373,11 +346,12 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ taskListTemplateId }
           data-test-subj="investigationTemplateDisableModal"
         />
       ) : null}
-      {taskListTemplateId ? (
-        <TaskListEditor
-          key={taskListTemplateId}
-          templateId={taskListTemplateId}
-          onClose={() => navigate(TEMPLATES_PATH)}
+      {templateForTaskLists ? (
+        <TemplateTaskListsPicker
+          key={templateForTaskLists.templateId}
+          templateId={templateForTaskLists.templateId}
+          templateName={templateForTaskLists.name}
+          onClose={() => setTemplateForTaskLists(null)}
         />
       ) : null}
     </div>

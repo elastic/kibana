@@ -20,8 +20,9 @@ import {
   INVESTIGATIONS_FIND_URL,
   INVESTIGATIONS_INDICATOR_LOOKUP_URL,
   INVESTIGATIONS_INTERNAL_URL,
-  INVESTIGATIONS_PROCEDURE_TEMPLATES_URL,
   INVESTIGATIONS_STATUSES_URL,
+  INVESTIGATIONS_TASK_LISTS_URL,
+  INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL,
   INVESTIGATIONS_TYPES_URL,
 } from '../../common/investigations/constants';
 import type {
@@ -38,7 +39,7 @@ import type {
   FindItemsRequest,
   FindRecordsRequest,
   LinkRecordRequest,
-  ProcedureTemplateTask,
+  SaveTaskListRequest,
   UpdateExternalTicketRequest,
   UpdateItemRequest,
   UpdateRecordRequest,
@@ -51,7 +52,7 @@ import {
   findCommentsQuery,
   recordCommentParams,
   updateCommentBody,
-  applyProcedureBody,
+  applyTaskListBody,
   statusesBody,
   bulkCreateItemsBody,
   bulkDeleteItemsBody,
@@ -71,12 +72,15 @@ import {
   indicatorLookupQuery,
   mergeRecordBody,
   preserveBody,
-  procedureTemplateBody,
-  procedureTemplateParams,
   recordIdParams,
   recordItemParams,
   recordLinkParams,
   sinceQuery,
+  taskListBody,
+  taskListParams,
+  templateTaskListsBody,
+  templateTaskListsParams,
+  updateTaskListBody,
   toArray,
   updateExternalTicketBody,
   updateItemBody,
@@ -180,28 +184,75 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
       path: INVESTIGATIONS_TYPES_URL,
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: { types: await service.listTypes() } });
+        const [types, globalFields] = await Promise.all([
+          service.listTypes(),
+          service.listGlobalFields(),
+        ]);
+        return response.ok({ body: { types, global_fields: globalFields } });
       },
     }),
     route({
       method: 'get',
-      path: INVESTIGATIONS_PROCEDURE_TEMPLATES_URL,
+      path: INVESTIGATIONS_TASK_LISTS_URL,
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        return response.ok({ body: { templates: await service.listProcedureTemplates() } });
+        return response.ok({ body: { task_lists: await service.listTaskLists() } });
+      },
+    }),
+    route({
+      method: 'post',
+      path: INVESTIGATIONS_TASK_LISTS_URL,
+      params: { body: taskListBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        return response.ok({
+          body: { task_list: await service.createTaskList(request.body as SaveTaskListRequest) },
+        });
       },
     }),
     route({
       method: 'put',
-      path: `${INVESTIGATIONS_PROCEDURE_TEMPLATES_URL}/{template_id}`,
-      params: { params: procedureTemplateParams, body: procedureTemplateBody },
+      path: `${INVESTIGATIONS_TASK_LISTS_URL}/{id}`,
+      params: { params: taskListParams, body: updateTaskListBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { id: listId } = request.params as { id: string };
+        return response.ok({
+          body: {
+            task_list: await service.updateTaskList(listId, request.body as SaveTaskListRequest),
+          },
+        });
+      },
+    }),
+    route({
+      method: 'delete',
+      path: `${INVESTIGATIONS_TASK_LISTS_URL}/{id}`,
+      params: { params: taskListParams },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        await service.deleteTaskList((request.params as { id: string }).id);
+        return response.noContent();
+      },
+    }),
+    route({
+      method: 'get',
+      path: `${INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL}/{template_id}`,
+      params: { params: templateTaskListsParams },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
         const { template_id: templateId } = request.params as { template_id: string };
-        const { tasks } = request.body as { tasks: ProcedureTemplateTask[] };
-        return response.ok({
-          body: { template: await service.saveProcedureTemplate(templateId, tasks) },
-        });
+        return response.ok({ body: await service.getTemplateTaskLists(templateId) });
+      },
+    }),
+    route({
+      method: 'put',
+      path: `${INVESTIGATIONS_TEMPLATE_TASK_LISTS_URL}/{template_id}`,
+      params: { params: templateTaskListsParams, body: templateTaskListsBody },
+      handler: async ({ context, request, response }) => {
+        const service = await getService({ context, request });
+        const { template_id: templateId } = request.params as { template_id: string };
+        const { task_list_ids: taskListIds } = request.body as { task_list_ids: string[] };
+        return response.ok({ body: await service.setTemplateTaskLists(templateId, taskListIds) });
       },
     }),
     route({
@@ -360,21 +411,14 @@ export const getInvestigationRoutes = (getService: GetInvestigationsService): Ca
     }),
     route({
       method: 'post',
-      path: `${base}/{id}/_apply_procedure`,
-      params: { params: recordIdParams, body: applyProcedureBody },
+      path: `${base}/{id}/_apply_task_list`,
+      params: { params: recordIdParams, body: applyTaskListBody },
       handler: async ({ context, request, response }) => {
         const service = await getService({ context, request });
-        const { template_id: templateId, replace } = request.body as {
-          template_id?: string | null;
-          replace: boolean;
-        };
+        const { task_list_id: taskListId } = request.body as { task_list_id: string };
         return response.ok({
           body: {
-            tasks: await service.applyProcedure(
-              (request.params as { id: string }).id,
-              templateId ?? null,
-              replace
-            ),
+            tasks: await service.applyTaskList((request.params as { id: string }).id, taskListId),
           },
         });
       },

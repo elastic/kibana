@@ -278,6 +278,7 @@ export const ITEMS_MAPPING: MappingTypeMapping = {
         started_at: date,
         completed_at: date,
         template_ref: keyword,
+        template_id: keyword,
         order: long,
         priority: keyword,
         assignees: keyword,

@@ -18,12 +18,12 @@ Note: the Elasticsearch URL is read from `UIPOC_ES_URL`, not `ES_URL`, because d
 node setup.mjs
 ```
 
-Waits for Kibana, then creates or updates: POC users (`braxton.w`, `priya.k`, `dana.r`, `marcus.r`, `aisha.l`, `jun.t` as superuser; `viewer.v` with role `uipoc_cases_read`), the `uipoc-mock-llm` connector, the default AI connector and agent chat settings, the `cases-investigation-agent` Agent Builder agent, four investigation-type Cases templates (Malware, Phishing, Account compromise, Alert triage), the statuses and pause reasons, and a saved Phishing task list. All passwords are `changeme`.
+Waits for Kibana, then creates or updates: POC users (`braxton.w`, `priya.k`, `dana.r`, `marcus.r`, `aisha.l`, `jun.t` as superuser; `viewer.v` with role `uipoc_cases_read`), the `uipoc-mock-llm` connector, the default AI connector and agent chat settings, the `cases-investigation-agent` Agent Builder agent, four investigation-type Cases templates (Malware, Phishing, Account compromise, Alert triage), two global fields (`external_reference`, `customer_impact`), the statuses and pause reasons, and the task lists (one "<Template> procedure" list per template, linked to its template, plus a reusable "Evidence preservation" list). All passwords are `changeme`.
 
-### Statuses, pause reasons and the Phishing task list
+### Statuses, pause reasons and the task lists
 
 - `PUT /internal/cases/investigations/_statuses`: setup reads the current configuration first and keeps every existing key (a status can only be disabled, never removed). The built-ins stay the defaults, "Waiting on the employee" (`waiting_on_the_employee`, in progress, pauses time tracking) is enabled, and every other custom status (for example `on_hold`) ends up disabled. Pause reasons are the Cases defaults (`DEFAULT_CASE_PAUSE_REASONS`) plus "Waiting on the employee's reply".
-- `PUT /internal/cases/investigations/_procedure_templates/<template_id>`: setup saves one task list for the Phishing type (based on `DEFAULT_PROCEDURE_TEMPLATES.Phishing`) with a `priority` and `due_within` on every task and one task with `subtasks`.
+- Task lists (`GET/POST /internal/cases/investigations/_task_lists`, `PUT/DELETE …/_task_lists/<id>`) are reusable checklists; a template links an ordered list of them (`GET/PUT …/_template_task_lists/<template_id>`, `{ task_list_ids }`, up to 10), and creating an investigation with the template adds their tasks. The server turns each built-in procedure (`DEFAULT_PROCEDURE_TEMPLATES`, or a procedure saved in an earlier version) into the task list "<Template name> procedure", linked to its template, the first time the lists or the types are read. Setup makes sure the four lists exist and are linked, replaces the Phishing one with a copy that has a `priority` and `due_within` on every task and one task with `subtasks`, and adds "Evidence preservation" (3 tasks) linked to Malware and Account compromise, so one list is reused by two templates. `POST /internal/cases/investigations/<id>/_apply_task_list { task_list_id }` adds one list to a record (409 when it was already applied).
 - A custom close reason ("Resolved and remediated") is written to the Security Solution advanced setting `securitySolution:detectionsCloseReasons`; the Cases close route accepts only the Cases defaults and reasons configured there. The setting is sensitive, so setup overwrites the whole list.
 - The statuses and task-list steps compare with what is stored and report `unchanged` on a re-run.
 
@@ -31,7 +31,7 @@ If the investigation tools are not registered yet, the agent step prints a warni
 
 ### Investigation types
 
-An investigation type is a Cases template (templates v2) of owner `securitySolution` tagged `investigation-type`; `GET /internal/cases/investigations/_types` lists them with their fields. Setup creates or updates (new template version) four of them. The names must stay `Malware`, `Phishing`, `Account compromise` and `Alert triage`, because the default procedure is picked by type name.
+An investigation type is a Cases template (templates v2) of owner `securitySolution` tagged `investigation-type`; `GET /internal/cases/investigations/_types` lists them with their fields. Setup creates or updates (new template version) four of them. The names must stay `Malware`, `Phishing`, `Account compromise` and `Alert triage`, because the built-in procedure of each name becomes its "<Template name> procedure" task list.
 
 Every type has guidance (Markdown, display only), business unit (select), impact (text, required to close), data classification (select, required, default Internal), ticket (text, pattern `SEC-1234`) and root cause notes (textarea, up to 2,000 characters, required to close). On top of that:
 
@@ -43,6 +43,19 @@ Every type has guidance (Markdown, display only), business unit (select), impact
 | Alert triage | alert count (number 1 to 100,000), reviewer (single user picker), tuning action (select, required to close) |
 
 Records are created with `template_id` and `extended_fields` (Cases storage format: strings keyed `<name>_as_<type>`; toggles `"true"`/`"false"`, checkbox groups and user pickers as JSON array strings). Cases validates every rule. The record keeps a typed copy in `fields.<name>_<keyword|text|long|double|bool|date>` for queue filters, sorting and columns.
+
+### Global fields
+
+A global field is a Cases field library definition with `isGlobal: true`. It applies to every investigation of the owner, with or without a template: Cases applies its default when a record is created, validates it on every write, lists it before the template's fields (`getApplicableFields`) and checks it on close when it is required on close. `GET /internal/cases/investigations/_types` returns them as `global_fields` (each field also carries `is_global`; the fields of each type include the globals, flagged). Cases stays the source of truth: they are the fields a ticket sync would map, both ways, through `extended_fields`.
+
+Setup creates two, in the Cases field library, and leaves an existing one alone on a re-run:
+
+| Field | Key | Control and rules |
+|---|---|---|
+| External reference | `external_reference_as_keyword` | text, optional, pattern `HELP-4821` (2-10 capital letters, a dash, 1-8 digits) |
+| Customer impact | `customer_impact_as_keyword` | select None, Low, Moderate, Severe; optional |
+
+Their names do not match any template field name (a template field with the same name as a global one resolves to the global definition, so the templates use `ticket` and `impact`). Both are optional and exist for the future ticket sync (the external reference holds the ticket key, customer impact is a value to map). A global field applies to every case of the owner, classic Security cases included, so a global must never carry a close rule (`required_on_close`) or be required here: it would block closing every Security case in the space. Close rules belong on template fields. Setup updates an existing definition to match, so a rule removed from it disappears from the live stack on the next run. Seeds: scenario C (INV-240) fills both, B and D fill Customer impact, and closed seeded or migrated records fill it too (`CLOSE_VALUES` in `lib/scenarios/common.mjs`), but nothing depends on it. Manage global fields in the app under Investigation settings, Investigation templates, Global fields (the Cases field library components), or in the Cases field library.
 
 ## Seeds (`node seed.mjs --scenario A|B|C|D|E|all [--clean]`)
 

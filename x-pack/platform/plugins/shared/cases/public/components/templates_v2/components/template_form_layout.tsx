@@ -105,6 +105,8 @@ interface TemplateFormLayoutProps {
    * app that embeds the editor return to its own list.
    */
   back?: AppHeaderProps['back'];
+  /** Rendered between the header and the editor, for an app that embeds the editor. */
+  belowHeader?: React.ReactNode;
 }
 
 // The template editor is always rendered `fullHeight` (see CasesPageLayout). On Security Solution a
@@ -195,6 +197,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialIsEnabled = true,
   initialSettings,
   back,
+  belowHeader,
 }) => {
   const styles = useMemoCss(componentStyles);
   const { docLinks } = useKibana().services;
@@ -644,6 +647,8 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
             docLink={docLinks.links.cases.manageCaseTemplates}
           />
         </EuiFlexItem>
+
+        {belowHeader ? <EuiFlexItem grow={false}>{belowHeader}</EuiFlexItem> : null}
 
         <EuiFlexItem css={styles.fullHeightEditorWrapper}>
           <TemplateEditorLayout

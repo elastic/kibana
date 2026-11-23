@@ -44,7 +44,7 @@ import {
   useBulkDeleteItems,
   useInvestigationToasts,
   useInvestigationsNavigation,
-  useProcedureTemplates,
+  useTaskLists,
   useUpdateItem,
 } from '../../hooks';
 import { useReorderTasks, useRunTaskWorkflow, useWorkflowList } from '../../hooks/use_tasks';
@@ -52,12 +52,12 @@ import { investigationKeys } from '../../api/query_keys';
 import { ICONS } from '../../icons';
 import { useInvestigationsServices } from '../../services';
 import { converse } from '../conversation/conversation_api';
-import { TEMPLATES_PATH, getTaskListPath } from '../settings/paths';
+import { TASK_LISTS_PATH } from '../settings/paths';
 import { ConfirmModal, EmptyState, ErrorState, LoadingState, useNow } from '../shared';
 import { isTaskItem, useAllItems } from '../scope/use_all_items';
 import { useItemsByIds } from '../scope/use_items_by_ids';
 import type { TabProps } from '../tabs/tab_props';
-import { ApplyProcedureModal } from './apply_procedure_modal';
+import { ApplyTaskListModal } from './apply_task_list_modal';
 import { CancelTaskModal } from './cancel_task_modal';
 import {
   MAX_TASKS,
@@ -102,7 +102,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const { data: currentUserProfile } = useGetCurrentUserProfile();
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const tasksQuery = useAllItems(recordId, 'task', isTaskItem, MAX_TASKS);
-  const templatesQuery = useProcedureTemplates();
+  const taskListsQuery = useTaskLists();
   const updateItem = useUpdateItem(recordId);
   const deleteItems = useBulkDeleteItems(recordId);
   const reorderTasks = useReorderTasks(recordId);
@@ -141,13 +141,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
   const workflows = useWorkflowList(hasWorkflowTasks);
   const hasRunningWorkflow = tasks.some((task) => task.task.workflow_run?.status === 'running');
 
-  const templates = templatesQuery.data?.templates ?? [];
-  const template = templates.find(
-    (candidate) =>
-      (record.template_id && candidate.template_id === record.template_id) ||
-      candidate.type === record.investigation_type
-  );
-  const hasTaskList = (template?.tasks.length ?? 0) > 0;
+  const hasTaskList = (taskListsQuery.data?.task_lists.length ?? 0) > 0;
   const isClosed = record.status === 'closed';
   const canEdit = permissions.update;
   const canAdd = canEdit && !isClosed && tasks.length < MAX_TASKS;
@@ -427,22 +421,17 @@ export const ProcedurePanel: React.FC<TabProps> = ({
         />
       ) : null}
       {isApplyOpen ? (
-        <ApplyProcedureModal
-          record={record}
-          tasks={tasks}
-          template={template}
-          onClose={() => setIsApplyOpen(false)}
-        />
+        <ApplyTaskListModal record={record} tasks={tasks} onClose={() => setIsApplyOpen(false)} />
       ) : null}
     </>
   );
 
   const applyButton = (
-    <EuiToolTip content={hasTaskList ? undefined : i18n.NO_TEMPLATE_FOR_TYPE}>
+    <EuiToolTip content={hasTaskList ? undefined : i18n.NO_TASK_LISTS_TOOLTIP}>
       <EuiButton
         size="s"
         fill={tasks.length === 0}
-        iconType={ICONS.refresh}
+        iconType={ICONS.add}
         isDisabled={!hasTaskList || !canEdit || isClosed}
         onClick={() => setIsApplyOpen(true)}
         data-test-subj="investigationProcedureApply"
@@ -461,8 +450,8 @@ export const ProcedurePanel: React.FC<TabProps> = ({
       {i18n.ADD_TASK}
     </EuiButton>
   ) : null;
-  // Task lists are edited in one place: the template's task list in Investigation settings.
-  const taskListPath = template ? getTaskListPath(template.template_id) : TEMPLATES_PATH;
+  // Task lists are managed in one place: the Task lists tab of Investigation settings.
+  const taskListPath = TASK_LISTS_PATH;
   const configureButton = (
     <EuiButton
       size="s"
@@ -484,7 +473,7 @@ export const ProcedurePanel: React.FC<TabProps> = ({
         <EmptyState
           iconType={ICONS.procedure}
           title={i18n.EMPTY_TITLE}
-          body={i18n.EMPTY_BODY(record.investigation_type || i18n.TYPE_NOT_SET)}
+          body={i18n.EMPTY_BODY}
           actions={
             <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>{applyButton}</EuiFlexItem>

@@ -22,6 +22,7 @@ import { EmptyState, ErrorState, LoadingState } from '../shared';
 import { TEMPLATES_PATH } from './paths';
 import { withInvestigationTag, withoutInvestigationTag } from './template_tags';
 import { EDIT_DRAFT_KEY } from './template_form_shared';
+import { TemplateTaskListsSection } from './template_task_lists_section';
 import { useTemplateBreadcrumbs } from './use_template_breadcrumbs';
 import * as i18n from './translations';
 
@@ -135,6 +136,9 @@ export const TemplateEditPage: React.FC = () => {
         templateId={template.templateId}
         initialIsEnabled={template.isEnabled}
         back={back}
+        belowHeader={
+          <TemplateTaskListsSection templateId={template.templateId} templateName={template.name} />
+        }
       />
     </div>
   );
