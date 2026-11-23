@@ -175027,74 +175027,65 @@ components:
                                   - trigger
                                   - type
                             title: dashboard_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                              - type: object
-                                properties:
-                                  label:
+                          - properties:
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_apply_filter
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_apply_filter
-                                        type: string
-                                  type:
-                                    enum:
-                                      - discover_drilldown
-                                    type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                              type:
+                                enum:
+                                  - discover_drilldown
+                                type: string
+                            required:
+                              - label
+                              - trigger
+                              - type
                             title: discover_drilldown
-                          - allOf:
-                              - additionalProperties: false
-                                type: object
-                                properties:
-                                  encode_url:
-                                    default: true
-                                    description: When true, URL is escaped using percent encoding
-                                    type: boolean
-                                  open_in_new_tab:
-                                    default: true
-                                    type: boolean
-                                  url:
-                                    description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: object
+                          - properties:
+                              encode_url:
+                                default: true
+                                description: When true, URL is escaped using percent encoding
+                                type: boolean
+                              label:
+                                type: string
+                              open_in_new_tab:
+                                default: true
+                                type: boolean
+                              trigger:
+                                anyOf:
+                                  - enum:
+                                      - on_click_row
                                     type: string
-                                required:
-                                  - url
-                              - type: object
-                                properties:
-                                  label:
+                                  - enum:
+                                      - on_click_value
                                     type: string
-                                  trigger:
-                                    anyOf:
-                                      - enum:
-                                          - on_click_row
-                                        type: string
-                                      - enum:
-                                          - on_click_value
-                                        type: string
-                                      - enum:
-                                          - on_open_panel_menu
-                                        type: string
-                                      - enum:
-                                          - on_select_range
-                                        type: string
-                                  type:
-                                    enum:
-                                      - url_drilldown
+                                  - enum:
+                                      - on_open_panel_menu
                                     type: string
-                                required:
-                                  - label
-                                  - trigger
-                                  - type
+                                  - enum:
+                                      - on_select_range
+                                    type: string
+                              type:
+                                enum:
+                                  - url_drilldown
+                                type: string
+                              url:
+                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                                type: string
+                            required:
+                              - url
+                              - label
+                              - trigger
+                              - type
                             title: url_drilldown
+                            type: object
                       maxItems: 100
                       type: array
                     hide_border:
@@ -175167,74 +175158,65 @@ components:
                               - trigger
                               - type
                         title: dashboard_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                          - type: object
-                            properties:
-                              label:
+                      - properties:
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_apply_filter
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_apply_filter
-                                    type: string
-                              type:
-                                enum:
-                                  - discover_drilldown
-                                type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                          type:
+                            enum:
+                              - discover_drilldown
+                            type: string
+                        required:
+                          - label
+                          - trigger
+                          - type
                         title: discover_drilldown
-                      - allOf:
-                          - additionalProperties: false
-                            type: object
-                            properties:
-                              encode_url:
-                                default: true
-                                description: When true, URL is escaped using percent encoding
-                                type: boolean
-                              open_in_new_tab:
-                                default: true
-                                type: boolean
-                              url:
-                                description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                        type: object
+                      - properties:
+                          encode_url:
+                            default: true
+                            description: When true, URL is escaped using percent encoding
+                            type: boolean
+                          label:
+                            type: string
+                          open_in_new_tab:
+                            default: true
+                            type: boolean
+                          trigger:
+                            anyOf:
+                              - enum:
+                                  - on_click_row
                                 type: string
-                            required:
-                              - url
-                          - type: object
-                            properties:
-                              label:
+                              - enum:
+                                  - on_click_value
                                 type: string
-                              trigger:
-                                anyOf:
-                                  - enum:
-                                      - on_click_row
-                                    type: string
-                                  - enum:
-                                      - on_click_value
-                                    type: string
-                                  - enum:
-                                      - on_open_panel_menu
-                                    type: string
-                                  - enum:
-                                      - on_select_range
-                                    type: string
-                              type:
-                                enum:
-                                  - url_drilldown
+                              - enum:
+                                  - on_open_panel_menu
                                 type: string
-                            required:
-                              - label
-                              - trigger
-                              - type
+                              - enum:
+                                  - on_select_range
+                                type: string
+                          type:
+                            enum:
+                              - url_drilldown
+                            type: string
+                          url:
+                            description: Templated Url. Variables documented at https://www.elastic.co/docs/explore-analyze/dashboards/drilldowns#url-template-variable
+                            type: string
+                        required:
+                          - url
+                          - label
+                          - trigger
+                          - type
                         title: url_drilldown
+                        type: object
                   maxItems: 100
                   type: array
                 hide_border:
