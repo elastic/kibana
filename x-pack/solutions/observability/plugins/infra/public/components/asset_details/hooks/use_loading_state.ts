@@ -20,6 +20,7 @@ import {
   debounce,
   of,
   interval,
+  startWith,
 } from 'rxjs';
 import createContainer from 'constate';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -132,7 +133,10 @@ export const useLoadingState = () => {
 
       autoRefreshTick$.pipe(
         skipUntil(isAutoRefreshEnabled$()),
-        withLatestFrom(search.session.state$, isAutoRefreshRequestPending$),
+        withLatestFrom(
+          search.session.state$.pipe(startWith(SearchSessionState.None)),
+          isAutoRefreshRequestPending$
+        ),
         switchMap(([_, state, isAutoRefreshRequestPending]) => {
           // if the current state$ value is not Completed
           if (state === SearchSessionState.Loading) {

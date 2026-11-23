@@ -48,7 +48,7 @@ describe('useLoadingState', () => {
     UseDateRangeProviderProps['autoRefresh'] | undefined
   >({ interval: 1000, isPaused: false });
 
-  const sessionState$ = new BehaviorSubject<SearchSessionState>(SearchSessionState.None);
+  let sessionState$: Subject<SearchSessionState>;
 
   const updateReloadRequestTimeMock = jest.fn();
 
@@ -87,6 +87,7 @@ describe('useLoadingState', () => {
 
   beforeEach(() => {
     subscription = new Subscription();
+    sessionState$ = new Subject<SearchSessionState>();
     jest.useFakeTimers();
     // @ts-expect-error upgrade typescript v5.9.3
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.None));
@@ -177,6 +178,25 @@ describe('useLoadingState', () => {
     // waitUntilNextSessionCompletes$ returns something when the status is Completed or BackgroundCompleted
     sessionState$.next(SearchSessionState.Loading);
     waitUntilNextSessionCompletesMock$.mockReturnValue(of(SearchSessionState.Completed));
+
+    act(() => {
+      autoRefreshTick$.next(null);
+      jest.runOnlyPendingTimers();
+    });
+
+    await waitFor(() => expect(updateReloadRequestTimeMock).toHaveBeenCalledTimes(2));
+
+    unmount();
+  });
+
+  // `search.session.state$` emits only search session changes, so it has no value until an app
+  // that uses search sessions (e.g. Discover) is visited in the browser tab. Auto-refresh must
+  // still reload when Infra is opened directly in a fresh tab.
+  it('should call updateRequestTime on auto-refresh tick before the search session state emits', async () => {
+    const { unmount } = renderHook(() => useLoadingState());
+
+    // only the mount call
+    expect(updateReloadRequestTimeMock).toHaveBeenCalledTimes(1);
 
     act(() => {
       autoRefreshTick$.next(null);
