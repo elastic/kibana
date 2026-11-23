@@ -218,7 +218,7 @@ FLEET_PACKAGE_REGISTRY_PORT=12345 pnpm test:ftr:runner --config  x-pack/test_ser
 
 #### Cypress tests
 
-We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](./cypress/README.md) for how to run these tests.
+We support UI end-to-end testing with Cypress. Refer to [cypress/README.md](../fleet-cypress/README.md) for how to run these tests.
 
 #### Jest integration tests
 

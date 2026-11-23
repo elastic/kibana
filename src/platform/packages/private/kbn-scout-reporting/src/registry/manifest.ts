@@ -17,8 +17,11 @@ import type { ScoutTestChannel } from '@kbn/scout-info';
 
 let git: SimpleGit;
 
+// Awaited inside ScoutManifestUpdater.onExit, which Playwright does not time out.
+const GIT_COMMAND_TIMEOUT_MS = 30_000;
+
 export const getGitSHA1ForPath = async (p: string) => {
-  if (git === undefined) git = simpleGit(REPO_ROOT);
+  if (git === undefined) git = simpleGit(REPO_ROOT, { timeout: { block: GIT_COMMAND_TIMEOUT_MS } });
   return (await git.raw(['ls-tree', '--object-only', 'HEAD', p])).trim();
 };
 

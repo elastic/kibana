@@ -89,6 +89,17 @@ describe('ensureUriAllowed', () => {
     );
   });
 
+  test('does not throw for an unparseable uri when "any" hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: [AllowedHosts.Any],
+      enabledActionTypes: [],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).ensureUriAllowed('https//test.com')
+    ).toBeUndefined();
+  });
+
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
@@ -171,6 +182,24 @@ describe('isUriAllowed', () => {
     );
   });
 
+  test('returns true for an unparseable uri when "any" hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: [AllowedHosts.Any],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('https//test.com')).toEqual(true);
+  });
+
+  test('returns false for an unparseable uri when only specific hostnames are allowed', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['test.com'],
+      enabledActionTypes: [],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('https//test.com')).toEqual(false);
+  });
+
   test('returns true when the hostname in the requested uri is in the allowedHosts', () => {
     const config: ActionsConfig = {
       ...defaultActionsConfig,
@@ -180,6 +209,59 @@ describe('isUriAllowed', () => {
     expect(
       getActionsConfigurationUtilities(config).isUriAllowed('https://github.com/elastic/kibana')
     ).toEqual(true);
+  });
+
+  test('returns false when an encoded dot hides the real hostname', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(false);
+  });
+
+  test('uses the decoded hostname for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['github.com.127.0.0.1.nip.io'],
+    };
+    expect(
+      getActionsConfigurationUtilities(config).isUriAllowed(
+        'http://github.com%2e127.0.0.1.nip.io:18080/internal'
+      )
+    ).toEqual(true);
+  });
+
+  test('uses the normalized IPv4 address for allowlist checks', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['0x7f.1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://0x7f.1/')).toEqual(false);
+  });
+
+  test('returns true for IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['::1'],
+    };
+    expect(getActionsConfigurationUtilities(config).isUriAllowed('http://[::1]:8080/foo')).toEqual(
+      true
+    );
+  });
+
+  test('returns true for non-compressed IPv6 hostnames in the allowedHosts', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:DB8:0:0:0:0:0:1'],
+    };
+    const { isUriAllowed } = getActionsConfigurationUtilities(config);
+    expect(isUriAllowed('http://[2001:db8:0:0:0:0:0:1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::1]/')).toEqual(true);
+    expect(isUriAllowed('http://[2001:db8::2]/')).toEqual(false);
   });
 });
 
@@ -205,6 +287,17 @@ describe('isHostnameAllowed', () => {
       enabledActionTypes: [],
     };
     expect(getActionsConfigurationUtilities(config).isHostnameAllowed('github.com')).toEqual(true);
+  });
+
+  test('matches equivalent IPv6 representations', () => {
+    const config: ActionsConfig = {
+      ...defaultActionsConfig,
+      allowedHosts: ['2001:db8::1'],
+    };
+    const { isHostnameAllowed } = getActionsConfigurationUtilities(config);
+    expect(isHostnameAllowed('2001:db8:0:0:0:0:0:1')).toEqual(true);
+    expect(isHostnameAllowed('[2001:DB8::1]')).toEqual(true);
+    expect(isHostnameAllowed('2001:db8::2')).toEqual(false);
   });
 });
 

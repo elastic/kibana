@@ -20,7 +20,6 @@ node scripts/build \
     --docker-images \
     --docker-namespace="kibana-ci" \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
-    --docker-push \
     --skip-docker-ubi \
     --skip-docker-ubuntu \
     --skip-docker-wolfi \
@@ -33,7 +32,9 @@ node scripts/build \
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
-KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+KIBANA_FIPS_IMAGE="$(kibana_ci_image_repository kibana-wolfi-fips):$FULL_VERSION-$BUILDKITE_COMMIT"
+retag_and_push_image "$BUILD_OUTPUT_IMAGE" "$KIBANA_FIPS_IMAGE"
 
 cat <<EOF | buildkite-agent annotate --style "info" --context kibana-wolfi-fips-image
 

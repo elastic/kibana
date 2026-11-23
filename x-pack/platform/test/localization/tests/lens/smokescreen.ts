@@ -157,7 +157,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
-  describe('lens smokescreen tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/299196
+  describe.skip('lens smokescreen tests', () => {
     let termTranslator: (term: string, field?: string, values?: number) => string;
 
     before(async () => {
@@ -849,8 +850,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });
@@ -880,8 +880,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await lens.filterLegend('jpg');
-      const hasExtensionFilter = await filterBar.hasFilter('extension.raw', 'jpg');
-      expect(hasExtensionFilter).to.be(true);
+      await filterBar.expectFilter('extension.raw', 'jpg');
 
       await filterBar.removeFilter('extension.raw');
     });

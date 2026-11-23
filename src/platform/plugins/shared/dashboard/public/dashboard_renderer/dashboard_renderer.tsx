@@ -32,6 +32,10 @@ import { DashboardRedirect } from '../dashboard_app/types';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
   savedObjectId?: string;
   showPlainSpinner?: boolean;
   dashboardRedirect?: DashboardRedirect;
@@ -46,6 +50,7 @@ export function DashboardRenderer({
   showPlainSpinner,
   locator,
   onApiAvailable,
+  onApiCleanup,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -75,7 +80,12 @@ export function DashboardRenderer({
           return;
         }
 
-        cleanupDashboardApi = results.cleanup;
+        // Only a published API gets a consumer cleanup. A canceled load never called
+        // onApiAvailable, so notifying here would let a late A→B→A resolution clear the live API.
+        cleanupDashboardApi = () => {
+          results.cleanup();
+          onApiCleanup?.();
+        };
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
         onApiAvailable?.(results.api);

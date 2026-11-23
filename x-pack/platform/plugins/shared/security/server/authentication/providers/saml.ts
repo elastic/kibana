@@ -438,7 +438,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
 
       if (stateRequestIds.length && inResponseToRequestId) {
-        redirectURLForRequestId = stateRequestIdMap[inResponseToRequestId].redirectURL;
+        redirectURLForRequestId = this.getInternalRedirectURL(
+          request,
+          stateRequestIdMap[inResponseToRequestId].redirectURL
+        );
       } else {
         this.logger.info(
           'No requestId found in SAML response or state does not contain requestId.'
@@ -792,7 +795,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     if (originalURLHash != null) {
       return this.authenticateViaHandshake(
         request,
-        `${this.options.getRequestOriginalURL(request)}${originalURLHash}`,
+        this.getRequestOriginalURLWithHash(request, originalURLHash),
         state
       );
     }

@@ -51,6 +51,7 @@ interface State {
   activeSpace: Space | null;
   spaces: Space[];
   showTour: boolean;
+  tourStateResolved: boolean;
 }
 
 const popoutContentId = 'headerSpacesMenuContent';
@@ -67,6 +68,7 @@ class NavControlPopoverUI extends Component<Props, State> {
       activeSpace: null,
       spaces: [],
       showTour: false,
+      tourStateResolved: false,
     };
   }
 
@@ -80,7 +82,7 @@ class NavControlPopoverUI extends Component<Props, State> {
     });
 
     this.showTour$Sub = this.props.showTour$.subscribe((showTour) => {
-      this.setState({ showTour });
+      this.setState({ showTour, tourStateResolved: true });
     });
   }
 
@@ -198,6 +200,8 @@ class NavControlPopoverUI extends Component<Props, State> {
   };
 
   private getButton = (linkIcon: JSX.Element, linkTitle: string) => {
+    const tourState = this.state.showTour ? 'open' : 'closed';
+
     return (
       <EuiHeaderSectionItemButton
         aria-controls={popoutContentId}
@@ -208,6 +212,9 @@ class NavControlPopoverUI extends Component<Props, State> {
         })}
         aria-describedby="spacesNavDetails"
         data-test-subj="spacesNavSelector"
+        data-tour-state={
+          this.state.activeSpace && this.state.tourStateResolved ? tourState : undefined
+        }
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
       >
