@@ -56,6 +56,20 @@ describe('PdfMaker', () => {
 
       expect(isUint8Array(await pdf.generate())).toBe(true);
     });
+
+    it('rejects a logo outside the bundled assets', async () => {
+      const maker = new PdfMaker(layout, '/etc/passwd', packageInfo, logger);
+      maker.addImage(imageBase64, { title: 'viz', description: '' });
+
+      await expect(maker.generate()).rejects.toThrow(/Access to local file denied/);
+    });
+
+    it('rejects a remote logo URL', async () => {
+      const maker = new PdfMaker(layout, 'https://example.com/logo.png', packageInfo, logger);
+      maker.addImage(imageBase64, { title: 'viz', description: '' });
+
+      await expect(maker.generate()).rejects.toThrow(/denied by resource access policy/);
+    });
   });
 
   describe('worker', () => {
