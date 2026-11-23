@@ -76,9 +76,6 @@ export interface KibanaAsStreamOptions {
 
 const noop = () => undefined;
 
-const normalizeHeaders = (headers: IncomingHttpHeaders): IncomingHttpHeaders =>
-  Object.fromEntries(Object.entries(headers).map(([name, value]) => [name.toLowerCase(), value]));
-
 const isStreamBody = (body: unknown): body is NodeJS.ReadableStream => {
   return typeof body === 'object' && body !== null && !!isReadable(body as NodeJS.ReadableStream);
 };
@@ -160,7 +157,7 @@ export const createTransport = ({
     constructor(options: TransportOptions) {
       const { headers = {}, ...otherOptions } = options;
       super(otherOptions);
-      this.headers = normalizeHeaders(headers);
+      this.headers = headers;
     }
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
@@ -196,13 +193,10 @@ export const createTransport = ({
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
-        ...normalizeHeaders(options?.headers ?? {}),
+        ...options?.headers,
       };
 
       onRequest({ scoped }, params, opts, logger);
-      // HTTP header names are case-insensitive. Normalize before sending so the renewal handler
-      // sees the same effective authorization value as Elasticsearch.
-      opts.headers = normalizeHeaders(opts.headers ?? {});
 
       const retryUnauthorizedRequest = async (error: UnauthorizedError) => {
         const unauthorizedErrorHandler = getUnauthorizedErrorHandler
@@ -213,12 +207,12 @@ export const createTransport = ({
           if (isRetryResult(result)) {
             this.headers = {
               ...this.headers,
-              ...normalizeHeaders(result.authHeaders),
+              ...result.authHeaders,
             };
             const retryOpts = { ...opts };
             retryOpts.headers = {
               ...this.headers,
-              ...normalizeHeaders(options?.headers ?? {}),
+              ...options?.headers,
             };
 
             const retryResponse = (await super.request(params, retryOpts)) as TransportResult<
