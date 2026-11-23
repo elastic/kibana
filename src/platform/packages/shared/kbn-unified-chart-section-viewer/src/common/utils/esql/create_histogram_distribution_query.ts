@@ -80,7 +80,6 @@ export const createHistogramDistributionQuery = ({
     `STATS ${HISTOGRAM_COUNT_COLUMN} = COUNT(${expression}, ${HISTOGRAM_BUCKET_COLUMN}) ` +
       `BY ${HISTOGRAM_BUCKET_COLUMN} = BUCKET(${expression}, ${HISTOGRAM_BUCKET_COUNT}, ${bounds.min}, ${max}), ${timeBucket}`
   );
-  query.pipe(`EVAL ${HISTOGRAM_BUCKET_COLUMN} = RANGE_MIN(${HISTOGRAM_BUCKET_COLUMN})`);
 
   return query.print('pipe-multiline');
 };

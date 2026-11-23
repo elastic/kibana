@@ -24,7 +24,7 @@ jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({
 const mockRefetch = jest.fn();
 const mockAttack = { id: 'attack-1' } as unknown as AttackDiscoveryAlert;
 
-jest.mock('../../flyout/attack_details/hooks/use_attack_details', () => ({
+jest.mock('../../flyout_v2/attack/main/hooks/use_attack_details', () => ({
   useAttackDetails: jest.fn(() => ({
     attack: mockAttack,
     loading: false,
@@ -47,7 +47,7 @@ jest.mock('../../flyout_v2/shared/components/flyout_loading', () => ({
 }));
 
 const { useAttackDetails } = jest.requireMock(
-  '../../flyout/attack_details/hooks/use_attack_details'
+  '../../flyout_v2/attack/main/hooks/use_attack_details'
 );
 
 describe('AttackFlyoutFooter', () => {

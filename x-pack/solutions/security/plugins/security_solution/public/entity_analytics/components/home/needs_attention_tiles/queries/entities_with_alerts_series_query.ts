@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TimeRange } from '../../entities_grid/common';
+import type { TimeRange } from '../../queries/time_range';
 import { GROUP_ON_WATCHLIST, buildAlertTilesHead } from './entities_with_alerts_query';
 import { buildGroupFilterSteps } from './group_filter_steps';
 import {

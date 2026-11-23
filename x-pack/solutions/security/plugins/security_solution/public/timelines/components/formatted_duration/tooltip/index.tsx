@@ -8,7 +8,7 @@
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { getHumanizedDuration } from '../helpers';
 

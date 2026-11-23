@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   TruncatedBadgeList,
   toEntitySourceArray,
-} from '../../../../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../../../../flyout_v2/entity/shared/components/entity_source_value';
 
 const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.watchlistsOverflowTitle',

@@ -259,6 +259,9 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     let result;
     if (blockParamId) {
       result = this.lookupBlockParam(blockParamId, path);
+    } else if (!path.parts[0]) {
+      // Context reference, i.e. `{{.}}`, `{{this}}` or `{{..}}`. Like upstream, no strict check applies.
+      result = this.contexts[path.depth];
     } else if (path.data) {
       result = this.lookupData(this.runtimeOptions!.data, path);
     } else {
@@ -395,10 +398,10 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
   }
 
   // Looks up the value of `parts` on the given block param and pushes
-  // it onto the stack.
+  // it onto the stack. Like upstream, the terminal part is never strict-checked.
   private lookupBlockParam(blockParamId: [number, any], path: hbs.AST.PathExpression) {
     const value = this.blockParamValues[blockParamId[0]][blockParamId[1]];
-    return this.resolvePath(value, path, 1);
+    return this.resolvePath(value, path, 1, false);
   }
 
   // Push the data lookup operator
@@ -755,12 +758,17 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return result;
   }
 
-  private resolvePath(obj: any, path: hbs.AST.PathExpression, index = 0) {
+  private resolvePath(
+    obj: any,
+    path: hbs.AST.PathExpression,
+    startPartIndex = 0,
+    checkTerminal = true
+  ) {
     if (this.compileOptions.strict || this.compileOptions.assumeObjects) {
-      return this.strictLookup(obj, path);
+      return this.strictLookup(obj, path, startPartIndex, checkTerminal);
     }
 
-    for (; index < path.parts.length; index++) {
+    for (let index = startPartIndex; index < path.parts.length; index++) {
       if (obj == null) return;
       obj = this.container.lookupProperty(obj, path.parts[index]);
     }
@@ -768,12 +776,17 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
     return obj;
   }
 
-  private strictLookup(obj: any, path: hbs.AST.PathExpression) {
+  private strictLookup(
+    obj: any,
+    path: hbs.AST.PathExpression,
+    startPartIndex: number,
+    checkTerminal: boolean
+  ) {
     // @ts-expect-error strict is not a valid property on PathExpression, but we used in the same way it's also used in the original handlebars
-    const requireTerminal = this.compileOptions.strict && path.strict;
+    const requireTerminal = checkTerminal && this.compileOptions.strict && path.strict;
     const len = path.parts.length - (requireTerminal ? 1 : 0);
 
-    for (let i = 0; i < len; i++) {
+    for (let i = startPartIndex; i < len; i++) {
       obj = this.container.lookupProperty(obj, path.parts[i]);
     }
 

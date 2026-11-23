@@ -134,6 +134,10 @@ export {
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 
+export { toFromSourceQuery } from './src/sources/to_from_source_query';
+
+export { SOURCE_TIMESTAMP_FIELD, getTimestampColumnProblem } from './src/sources/timestamp_column';
+
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,
   NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
@@ -141,6 +145,8 @@ export {
   NIGHTSHIFT_DISCOVERY_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_USAGE_ID,
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_WIKI_USAGE_ID,
+  NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
   NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
@@ -164,6 +170,8 @@ export {
   NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
 } from './src/spaces';
 
+export type { NightshiftAutomationLocatorParams } from './src/automations';
+
 export {
   SETTINGS_TAB_IDS,
   type NightshiftSettingsLocatorParams,
@@ -172,6 +180,7 @@ export {
 
 export {
   createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccount,
   ensureNightshiftServiceAccounts,
   getSecurityRoleUrl,
   NightshiftServiceAccountSetupError,
@@ -191,5 +200,6 @@ export {
   getNightshiftServiceAccountName,
   NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
   type NightshiftServiceAccountIds,
+  type NightshiftInvestigationAccountKind,
   type NightshiftServiceAccountKind,
 } from './src/service_accounts/service_account';

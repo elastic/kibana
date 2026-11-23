@@ -17,8 +17,10 @@ import {
   LOADING_SKELETON_TEXT_LINES,
   SCROLL_ELEMENT_ID,
   SEARCH_FILTER_CATEGORIES,
+  TELEMETRY_INTEGRATION_CARD,
   TELEMETRY_INTEGRATION_TAB,
 } from '../constants';
+import { APP_UI_ID, ONBOARDING_PATH } from '../../../../../common/constants';
 import type { TopCalloutRenderer } from '../types';
 import { IntegrationTabId } from '../types';
 import { useStoredIntegrationSearchTerm } from '../hooks/use_stored_state';
@@ -101,6 +103,26 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
         reportLinkClick?.(trackId);
       },
       [setSelectedTabId, reportLinkClick]
+    );
+
+    // Collection tiles (several packages for one technology) open Fleet's variant chooser inside
+    // the grid. Picked variants return to the onboarding page (Get started) after Cancel/Save, like
+    // regular package tiles, which hardcode the same `ONBOARDING_PATH` in `useAddSecurityProps`.
+    // This grid is also rendered on Manage Automatic Migrations (`/siem_migrations/manage`), so a
+    // user starting there is returned to Get started too. That is the existing behaviour for all
+    // tiles; returning to the originating page would have to change both kinds of tile.
+    const collectionReturnLocation = useMemo(
+      () => ({ appId: APP_UI_ID, path: ONBOARDING_PATH }),
+      []
+    );
+    const onCollectionClick = useCallback(
+      (card: IntegrationCardItem) => reportLinkClick?.(`${TELEMETRY_INTEGRATION_CARD}_${card.id}`),
+      [reportLinkClick]
+    );
+    const onCollectionVariantClick = useCallback(
+      (member: IntegrationCardItem) =>
+        reportLinkClick?.(`${TELEMETRY_INTEGRATION_CARD}_${member.id}`),
+      [reportLinkClick]
     );
 
     const buttonGroupStyles = useIntegrationCardGridTabsStyles();
@@ -198,6 +220,9 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
                 ) : null
               }
               calloutTopSpacerSize="m"
+              collectionReturnLocation={collectionReturnLocation}
+              onCollectionClick={onCollectionClick}
+              onCollectionVariantClick={onCollectionVariantClick}
               categories={SEARCH_FILTER_CATEGORIES} // We do not want to show categories and subcategories as the search bar filter
               emptyStateStyles={emptyStateStyles}
               list={list}

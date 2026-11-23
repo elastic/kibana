@@ -48,6 +48,8 @@ import {
   LENS_ROW_HEIGHT_MODE as RowHeightMode,
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_PAGE_SIZE,
+  LENS_DATATABLE_PAGE_SIZE_OPTIONS,
 } from '@kbn/lens-common';
 import type {
   LensTableRowContextMenuEvent,
@@ -93,9 +95,6 @@ const DATA_GRID_STYLE_DEFAULT: EuiDataGridStyle = {
   footer: 'shade',
 };
 
-export const DEFAULT_PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [DEFAULT_PAGE_SIZE, 20, 30, 50, 100];
-
 export const DatatableComponent = (props: DatatableRenderProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
@@ -128,7 +127,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       props.args.pageSize
         ? {
             pageIndex: 0,
-            pageSize: props.args.pageSize ?? DEFAULT_PAGE_SIZE,
+            pageSize: props.args.pageSize ?? LENS_DATATABLE_DEFAULT_PAGE_SIZE,
           }
         : undefined
     );
@@ -691,7 +690,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           pagination={
             pagination && {
               ...pagination,
-              pageSizeOptions: PAGE_SIZE_OPTIONS,
+              pageSizeOptions: [...LENS_DATATABLE_PAGE_SIZE_OPTIONS],
               onChangeItemsPerPage,
               onChangePage,
             }
