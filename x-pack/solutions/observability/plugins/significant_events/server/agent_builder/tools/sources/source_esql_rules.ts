@@ -7,4 +7,4 @@
 
 /** What a source's ES|QL query may contain, for the tools that take one. */
 export const SOURCE_ESQL_RULES =
-  'A `FROM` (or `TS`) source command, optionally followed by `WHERE` filters and nothing else. All its indices must hold the same kind of data, for example logs, and map `@timestamp` as a date: a query over indices without it is refused.';
+  'A `FROM` (or `TS`) source command, optionally followed by `WHERE` filters and nothing else. All its indices must hold the same kind of data, for example logs. The query output must include a `@timestamp` column of type date or date_nanos, otherwise it is refused; a query over indices that do not exist yet is accepted.';
