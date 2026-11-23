@@ -250,6 +250,14 @@ describe('esql query helpers', () => {
       ).toBe('event.ingested');
     });
 
+    it('should prefer the time field of the main query over the one of a LET', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET a = (FROM logs | WHERE event.ingested >= ?_tstart); FROM a | WHERE event.created >= ?_tstart'
+        )
+      ).toBe('event.created');
+    });
+
     it('should return the time field used inside a LET read by an IN subquery', () => {
       expect(
         parseTimeFieldFromESQLQuery(
