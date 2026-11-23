@@ -16,9 +16,6 @@ export const HITL_SLACK_ACTION_REJECT = 'workflows.hitl.reject' as const;
 /** Slack Block Kit `action_id` for waitForInput submit. */
 export const HITL_SLACK_ACTION_SUBMIT = 'workflows.hitl.submit' as const;
 
-/** Inbound connector event id — resume only; not a workflow trigger. */
-export const HITL_SLACK_ACTION_EVENT_ID = 'slack2.hitl_action' as const;
-
 /** Slack button `value` / correlation codec version. */
 export const HITL_SLACK_CORRELATION_VERSION = 1 as const;
 
