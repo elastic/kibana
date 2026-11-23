@@ -684,9 +684,15 @@ describe('update_agent_tags', () => {
       [[], ['a'], '', false],
       [['a'], ['b'], '', false],
       [[], [], '', false],
-      // a tag with a wildcard in it: an agent with another tag still matches the clause
+      // a tag with a wildcard in it. Removed, an agent with another tag, like `production`, still
+      // matches the clause. Added, the agent has the tag, which matches the wildcard it makes
       [[], ['prod*'], '(tags:prod*)', false],
-      [['prod*'], [], '(NOT (tags:prod*))', false],
+      [['prod*'], [], '(NOT (tags:prod*))', true],
+      [['prod*'], [], '((namespaces:"default")) AND (NOT (tags:prod*))', true],
+      [['prod*', 'web'], [], 'NOT tags:prod*', true],
+      // a wildcard that none of the tags the update adds matches settles nothing
+      [['staging'], [], 'NOT tags:prod*', false],
+      [['x'], ['prod*'], 'NOT tags:prod*', false],
       // an unquoted value in a kuery can have a space in it, and is then the whole tag
       [[], ['my tag'], '(tags:my tag)', true],
       // a rename, or several tags, with a kuery that does not leave out the updated agents

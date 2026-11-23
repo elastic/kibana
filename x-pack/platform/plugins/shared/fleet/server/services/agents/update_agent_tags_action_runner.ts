@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, nodeTypes, toElasticsearchQuery } from '@kbn/es-query';
 import type { KueryNode } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
@@ -119,6 +119,17 @@ const clauseUpdatedAgentsMeet = (
 
   switch (node.function) {
     case 'is': {
+      const [field, value] = args;
+      if (field?.type !== 'literal' || field.value !== 'tags') {
+        return undefined;
+      }
+      if (value?.type === 'wildcard') {
+        // An updated agent has every tag the update adds, so a wildcard is met when one of them
+        // matches it: adding `prod*` makes the agent match `tags:prod*`, which is what a tag with
+        // a wildcard in it does to the clause `updateAgentTags` adds. For a tag the update removes
+        // it settles nothing, as the agent can have another tag that matches.
+        return [...tagsToAdd].some((tag) => nodeTypes.wildcard.test(value, tag)) ? node : undefined;
+      }
       const tag = tagOfClause(node);
       return tag !== undefined && tagsToAdd.has(tag) ? node : undefined;
     }
