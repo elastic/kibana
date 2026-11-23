@@ -8,6 +8,7 @@
 import { escapeStringValue } from '@kbn/esql-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
+import { getUnmappedLatestFieldPlaceholders } from '@kbn/entity-store/common/domain/latest_index_added_fields';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -149,20 +150,11 @@ export const joinAnd = (...parts: Array<string | undefined | null | false>): str
   return filtered.length ? filtered.join(' AND ') : undefined;
 };
 
-/**
- * Entity fields the grid keeps that an index created before the definition stored them may lack.
- * `unmapped_fields="nullify"` does not reach a lookup index's field once a `STATS` or `KEEP`
- * precedes the join, so the join sets them to null first: the lookup index's own value replaces
- * the null where the field is mapped.
- * Keep in sync with `LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES` in the entity_store plugin
- * (`server/domain/logs_extraction/query_builder_commons.ts`): edit both together.
- */
-const JOINED_FIELDS_UNMAPPED_ON_OLDER_INDICES = ['user.entity.id'] as const;
-
 /** Joins on `entity.id` only: ES|QL rejects KQL in `ON`, and the join needs a concrete index name. */
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   [
-    ...JOINED_FIELDS_UNMAPPED_ON_OLDER_INDICES.map((field) => `| EVAL ${field} = TO_STRING(null)`),
+    // The grid keeps every field the entity store added to the latest index after it shipped.
+    ...getUnmappedLatestFieldPlaceholders(),
     `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``,
   ].join('\n');
 

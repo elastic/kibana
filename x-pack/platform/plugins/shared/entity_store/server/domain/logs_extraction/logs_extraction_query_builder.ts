@@ -9,6 +9,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
 import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
+import { getUnmappedLatestFieldPlaceholders } from '../../../common/domain/latest_index_added_fields';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
@@ -40,7 +41,6 @@ import {
   buildPaginationSection,
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
-  LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -156,11 +156,7 @@ export function buildLogsExtractionEsqlQuery({
   // The aggregation leaves only `recent.*` columns, so these names are free until the join. An older
   // latest index lacks them, and the join resolves every column the query names; where it maps them,
   // its value replaces the null.
-  for (const field of LOOKUP_FIELDS_UNMAPPED_ON_OLDER_INDICES) {
-    if (fields.some(({ destination }) => destination === field)) {
-      parts.push(`| EVAL ${field} = TO_STRING(null)`);
-    }
-  }
+  parts.push(...getUnmappedLatestFieldPlaceholders(fields.map(({ destination }) => destination)));
 
   // Lookup join to the latest index to perform data retention
   parts.push(`| LOOKUP JOIN _coordinator:${latestIndex}

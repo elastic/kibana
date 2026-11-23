@@ -9,12 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
 import type { CoreStart } from '@kbn/core/server';
 import {
+  isUnrecoverableError,
   throwRetryableError,
   throwUnrecoverableError,
+  type RunContext,
   type TaskManagerSetupContract,
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { RunContext } from '@kbn/task-manager-plugin/server/task';
 import { getErrorMessage } from '../../common';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
@@ -37,6 +38,39 @@ interface NamespaceFailure {
 const throwAborted = (): void =>
   throwRetryableError(new Error('Latest index mappings migration aborted'), true);
 
+// Retrying cannot fix a bad request or a missing privilege (for example a 403 on `putMapping` on
+// serverless, or a `total_fields` limit), so these end the task instead of burning its attempts.
+const PERMANENT_STATUS_CODES: readonly number[] = [400, 401, 403];
+const MAX_CAUSE_DEPTH = 5;
+
+interface ErrorWithStatus {
+  statusCode?: unknown;
+  meta?: { statusCode?: unknown };
+  output?: { statusCode?: unknown };
+  cause?: unknown;
+}
+
+const getStatusCode = ({ statusCode, meta, output }: ErrorWithStatus): number | undefined =>
+  [statusCode, meta?.statusCode, output?.statusCode].find(
+    (candidate): candidate is number => typeof candidate === 'number'
+  );
+
+/**
+ * True when the error carries a 400, 401 or 403 status: `statusCode` (Elasticsearch
+ * `ResponseError`), `meta.statusCode` or `output.statusCode` (Boom). Wrapped errors are followed
+ * through `cause` until one carries a status. Never decided from the message.
+ */
+const isPermanentError = (error: unknown, depth = 0): boolean => {
+  if (typeof error !== 'object' || error === null || depth > MAX_CAUSE_DEPTH) {
+    return false;
+  }
+  const statusCode = getStatusCode(error);
+  if (statusCode !== undefined) {
+    return PERMANENT_STATUS_CODES.includes(statusCode);
+  }
+  return isPermanentError((error as ErrorWithStatus).cause, depth + 1);
+};
+
 const namespacesWithResult = (
   results: Record<string, MigrateLatestIndexMappingsResult>,
   result: MigrateLatestIndexMappingsResult
@@ -48,9 +82,10 @@ const namespacesWithResult = (
 /**
  * Brings the latest index of every space that has the Entity Store installed up to the current
  * definition mappings, running as the Kibana internal user. Each space is independent: a failure
- * in one is recorded and the others still run, then the task fails (retryable) naming the failed
- * spaces. A failed space keeps its old index `_meta` version, so the retry or the next start
- * picks it up again.
+ * in one is recorded and the others still run, then the task fails naming the failed spaces.
+ * That is retryable, unless every failure is permanent (400, 401 or 403): then it is unrecoverable
+ * and Task Manager removes the one-shot task, which the next start schedules again. A failed
+ * space keeps its old index `_meta` version, so the retry or the next start picks it up again.
  */
 export const runLatestIndexMappingsMigration = async ({
   coreStart,
@@ -108,14 +143,15 @@ export const runLatestIndexMappingsMigration = async ({
         )}`
       );
     }
-    throwRetryableError(
-      new Error(
-        `Latest index mappings migration failed in: ${failures
-          .map(({ namespace }) => namespace)
-          .join(', ')}`
-      ),
-      true
+    const failure = new Error(
+      `Latest index mappings migration failed in: ${failures
+        .map(({ namespace }) => namespace)
+        .join(', ')}`
     );
+    if (failures.every(({ error }) => isPermanentError(error))) {
+      throwUnrecoverableError(failure);
+    }
+    throwRetryableError(failure, true);
   }
 
   return results;
@@ -133,7 +169,9 @@ export const registerLatestIndexMappingsMigrationTask = ({
   taskManager.registerTaskDefinitions({
     [config.type]: {
       title: config.title,
+      description: config.description,
       timeout: config.timeout,
+      cost: config.cost,
       maxAttempts: 3,
       paramsSchema: schema.object({}),
       createTaskRunner: ({ signal }: RunContext) => ({
@@ -147,9 +185,9 @@ export const registerLatestIndexMappingsMigrationTask = ({
             if (signal.aborted) {
               throwRetryableError(err, true);
             }
-            logger.error(`Task "${config.type}" failed: ${getErrorMessage(err)}`);
-            // Permanent misconfig / unexpected shape: do not spin forever.
-            if (/saved object type.*not defined|unknown type/i.test(err.message)) {
+            // Task Manager logs the thrown error; a failed space was already logged by namespace.
+            // Already unrecoverable when every failed space was permanent: keep it that way.
+            if (isUnrecoverableError(err) || isPermanentError(err)) {
               throwUnrecoverableError(err);
             }
             throwRetryableError(err, true);
