@@ -9,7 +9,11 @@ import { v4 as generateUuid } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { ExecutionStatus, pickManagedWorkflowFields } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  pickManagedWorkflowFields,
+  pickTemplateOriginFields,
+} from '@kbn/workflows';
 
 import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/task_recovery';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
@@ -197,6 +201,7 @@ export async function checkAndSkipIfExistingScheduledExecution(
       workflowId: workflow.id,
       ...(workflow.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
       ...pickManagedWorkflowFields(workflow),
+      ...pickTemplateOriginFields(workflow),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,
       yaml: workflow.yaml,
