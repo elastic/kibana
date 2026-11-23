@@ -248,6 +248,20 @@ export class PolicyArtifactsPage {
     await this.page.testSubj.locator('eventFilters-form-description-input').click();
   }
 
+  /**
+   * Swaps the field of the single event filters condition in the open
+   * flyout; the builder clears the old value when the field changes.
+   */
+  async replaceEventFiltersCondition(field: string, value: string) {
+    // The form shows a loader until the field list loads. Driving the combo
+    // before it renders makes the helper clear the field first, and the
+    // builder then re-fills the edited item's original field.
+    await this.page.testSubj.locator('fieldAutocompleteComboBox').waitFor({ state: 'visible' });
+    await this.fillComboBox('fieldAutocompleteComboBox', field);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true);
+    await this.page.testSubj.locator('eventFilters-form-description-input').click();
+  }
+
   private async fillBlocklistForm(name = 'Blocklist name') {
     await this.fillNameAndDescription('blocklists', name, 'This is the blocklist description');
     await this.blocklistFieldSelect.click();
