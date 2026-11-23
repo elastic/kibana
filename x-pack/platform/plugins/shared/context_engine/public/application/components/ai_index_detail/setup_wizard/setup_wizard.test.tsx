@@ -125,7 +125,12 @@ describe('SetupWizard', () => {
     renderWizard({ initialStep: 'sources', done: { ...noneDone, connect: true } });
 
     expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAccessibleName(
-      expect.stringMatching(/has warnings/i)
+      'Step 1: Shape dreaming, skipped'
+    );
+    // No warning icon: skipping is fine, so a skipped step looks like any step that is not done.
+    expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAttribute(
+      'data-step-status',
+      'incomplete'
     );
     expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
       expect.stringMatching(/complete/i)
@@ -141,7 +146,7 @@ describe('SetupWizard', () => {
     fireEvent.click(screen.getByTestId('contextSetupWizardStep-dreaming'));
 
     expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
-      expect.stringMatching(/has warnings/i)
+      'Step 2: Connect agent, skipped'
     );
     expect(screen.getByTestId('contextSetupWizardStep-sources')).toHaveAccessibleName(
       expect.stringMatching(/incomplete/i)

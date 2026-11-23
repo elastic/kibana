@@ -59,11 +59,28 @@ const placeholderText = i18n.translate('xpack.contextEngine.setupWizard.placehol
 
 type StepStatus = EuiStepsHorizontalProps['steps'][number]['status'];
 
-/**
- * A step the user already went past without finishing it counts as skipped. "Went past" means it
- * comes before the furthest step reached, so steps before a saved step are skipped after a refresh.
- */
 const getStepStatus = ({
+  stepId,
+  currentStep,
+  done,
+}: {
+  stepId: SetupWizardStepId;
+  currentStep: SetupWizardStepId;
+  done: SetupWizardDoneSteps;
+}): StepStatus => {
+  if (stepId === currentStep) {
+    return 'current';
+  }
+  return done[stepId] ? 'complete' : 'incomplete';
+};
+
+/**
+ * A step the user already went past without finishing it is skipped. "Went past" means it comes
+ * before the furthest step reached, so steps before a saved step are skipped after a refresh.
+ * Skipping is fine, so a skipped step looks like any step that is not done (no warning icon); only
+ * its label for screen readers says it was skipped.
+ */
+const isStepSkipped = ({
   stepId,
   stepIndex,
   currentStep,
@@ -75,15 +92,13 @@ const getStepStatus = ({
   currentStep: SetupWizardStepId;
   furthestIndex: number;
   done: SetupWizardDoneSteps;
-}): StepStatus => {
-  if (stepId === currentStep) {
-    return 'current';
-  }
-  if (done[stepId]) {
-    return 'complete';
-  }
-  return stepIndex < furthestIndex ? 'warning' : 'incomplete';
-};
+}): boolean => stepId !== currentStep && !done[stepId] && stepIndex < furthestIndex;
+
+const getSkippedStepLabel = (stepNumber: number, title: string): string =>
+  i18n.translate('xpack.contextEngine.setupWizard.skippedStepAriaLabel', {
+    defaultMessage: 'Step {stepNumber}: {title}, skipped',
+    values: { stepNumber, title },
+  });
 
 interface SetupWizardProps {
   aiIndex: GetAiIndexResponse;
@@ -191,7 +206,10 @@ export const SetupWizard = ({
 
   const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId, stepIndex) => ({
     title: SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle,
-    status: getStepStatus({ stepId, stepIndex, currentStep, furthestIndex, done }),
+    status: getStepStatus({ stepId, currentStep, done }),
+    ...(isStepSkipped({ stepId, stepIndex, currentStep, furthestIndex, done }) && {
+      'aria-label': getSkippedStepLabel(stepIndex + 1, SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle),
+    }),
     onClick: () => goToStep(stepId),
     disabled: isBusy,
     'data-test-subj': `contextSetupWizardStep-${stepId}`,
