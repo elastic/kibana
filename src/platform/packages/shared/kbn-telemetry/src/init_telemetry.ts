@@ -15,8 +15,23 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import {
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  ATTR_PROCESS_COMMAND_ARGS,
 } from '@opentelemetry/semantic-conventions/incubating';
 import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
+
+/**
+ * We are not interested in the CLI arguments, so this omits `process.command_args` and keeps only a count.
+ */
+const processDetector: resources.ResourceDetector = {
+  detect(config) {
+    const detected = resources.processDetector.detect(config);
+    const { [ATTR_PROCESS_COMMAND_ARGS]: commandArgs, ...attributes } = detected.attributes || {};
+    if (Array.isArray(commandArgs)) {
+      attributes['process.args_count'] = commandArgs.length;
+    }
+    return { attributes };
+  },
+};
 
 /**
  *
@@ -55,7 +70,7 @@ export const initTelemetry = (
         resources.envDetector,
         resources.hostDetector,
         resources.osDetector,
-        resources.processDetector,
+        processDetector,
       ],
     })
     .merge(

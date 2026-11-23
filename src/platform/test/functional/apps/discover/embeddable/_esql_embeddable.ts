@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getSavedSearchTitle()
           .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing ES|QL Discover Session')),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
       ]);
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .getSavedSearchTitle()
           .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing ES|QL Discover Session')),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .exists('unifiedTabs_tabsBar')
           .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
       ]);
@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(lastBreadcrumb).to.be('ES|QL Discover Session Saved As')
           ),
         testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+          .waitForExists('unifiedTabs_tabsBar', { timeout: 1000 })
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);

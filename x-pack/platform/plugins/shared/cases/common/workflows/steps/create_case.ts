@@ -59,7 +59,7 @@ export const createCaseStepCommonDefinition: CommonStepDefinition<
     severity: "critical"
     settings:
       syncAlerts: true
-      autoExtractObersvables: true
+      extractObservables: true
 \`\`\``,
       `## Using data from previous steps
 \`\`\`yaml

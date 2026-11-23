@@ -72,6 +72,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       await lens.closeExportFlyout();
+      // A failed configureDimension can leave the dimension-editor flyout open, which blocks
+      // the next test's save modal from opening; reset the editor so state can't cascade.
+      if (await lens.isDimensionEditorOpen()) {
+        await lens.closeDimensionEditor();
+      }
     });
 
     it('should not cause PDF reports to fail', async () => {

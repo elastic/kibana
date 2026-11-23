@@ -83,6 +83,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         `--xpack.fleet.developer.disableBundledPackagesCache=true`,
+        `--xpack.fleet.productVersionsApiTimeoutMs=2000`,
         '--xpack.cloudSecurityPosture.enabled=true',
         `--xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10`,
         `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(

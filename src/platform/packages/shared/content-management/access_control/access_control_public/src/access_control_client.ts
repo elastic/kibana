@@ -38,13 +38,16 @@ export class AccessControlClient implements AccessControlClientPublic {
   ) {}
 
   async checkGlobalPrivilege(contentTypeId: string): Promise<CheckGlobalPrivilegeResponse> {
-    const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
-      `/internal/access_control/global_access/${contentTypeId}`
-    );
-
-    return {
-      isGloballyAuthorized: response?.isGloballyAuthorized,
-    };
+    try {
+      const response = await this.deps.http.get<CheckGlobalPrivilegeResponse>(
+        `/internal/access_control/global_access/${contentTypeId}`
+      );
+      return {
+        isGloballyAuthorized: response?.isGloballyAuthorized ?? false,
+      };
+    } catch {
+      return { isGloballyAuthorized: false };
+    }
   }
 
   async changeAccessMode({
@@ -107,10 +110,13 @@ export class AccessControlClient implements AccessControlClientPublic {
   }
 
   async isAccessControlEnabled(): Promise<boolean> {
-    const response = await this.deps.http.get<IsAccessControlEnabledResponse>(
-      '/internal/access_control/is_enabled'
-    );
-
-    return response?.isAccessControlEnabled ?? false;
+    try {
+      const response = await this.deps.http.get<IsAccessControlEnabledResponse>(
+        '/internal/access_control/is_enabled'
+      );
+      return response?.isAccessControlEnabled ?? false;
+    } catch {
+      return false;
+    }
   }
 }

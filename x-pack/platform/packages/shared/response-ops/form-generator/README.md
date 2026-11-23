@@ -48,7 +48,7 @@ Zod Schema → Field Definitions → Widget Components → React Elements
 node scripts/storybook response-ops
 
 # Run tests
-yarn test:jest src/platform/packages/shared/response-ops/form-generator
+pnpm test:jest src/platform/packages/shared/response-ops/form-generator
 ```
 
 ### Extending - Adding a New Widget

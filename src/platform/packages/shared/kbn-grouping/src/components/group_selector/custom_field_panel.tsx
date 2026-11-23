@@ -22,6 +22,7 @@ interface Props {
   onSubmit: (field: string) => void;
   fields: FieldSpec[];
   currentOptions: GroupByOptions[];
+  allowedFieldTypes?: string[];
 }
 
 interface SelectedOption {
@@ -38,12 +39,12 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
   public static displayName = 'CustomFieldPanel';
   public readonly state: State = initialState;
   public render() {
-    const { fields, currentOptions } = this.props;
+    const { fields, currentOptions, allowedFieldTypes = ['string', 'ip'] } = this.props;
     const options = fields
       .filter(
         (f) =>
           f.aggregatable &&
-          f.type === 'string' &&
+          allowedFieldTypes.includes(f.type) &&
           !(currentOptions && currentOptions.some((o) => o.field === f.name))
       )
       .map<EuiComboBoxOptionOption>((f) => ({ label: f.name }));

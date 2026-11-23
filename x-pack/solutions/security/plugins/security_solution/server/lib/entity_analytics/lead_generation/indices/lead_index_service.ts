@@ -40,7 +40,7 @@ export const createLeadIndexService = ({ esClient, logger, spaceId }: LeadIndexS
         options: {
           index: name,
           mappings,
-          settings: { hidden: true },
+          settings: { hidden: true, auto_expand_replicas: '0-1' },
         },
       });
     }

@@ -80,8 +80,10 @@ const licenseMock = {
 
 const renderPrivilegeRolesForm = ({
   preSelectedRoles,
+  features = kibanaFeatures,
 }: {
   preSelectedRoles?: Role[];
+  features?: typeof kibanaFeatures;
 } = {}) => {
   return render(
     <EuiThemeProvider>
@@ -119,7 +121,7 @@ const renderPrivilegeRolesForm = ({
           <PrivilegesRolesForm
             {...{
               space,
-              features: kibanaFeatures,
+              features,
               closeFlyout,
               defaultSelected: preSelectedRoles,
               onSaveCompleted,
@@ -484,15 +486,20 @@ describe('PrivilegesRolesForm', () => {
       ];
 
       getRolesSpy.mockResolvedValue([]);
-      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
-      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+      // Render only the single feature-with-sub-features this spec asserts on. Rendering the full
+      // kibanaFeatures set makes each user.click re-render the entire privilege table, and the
+      // accumulated cost tips the test over Jest's 5s budget under CI load.
+      const featureUT = kibanaFeatures.filter((kibanaFeature) =>
         Boolean(kibanaFeature.subFeatures.length)
-      );
-      const featureUT = featuresWithSubFeatures[0];
+      )[0];
+      const featuresUT = [featureUT];
+
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(featuresUT));
 
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
+        features: featuresUT,
       });
 
       // Wait for KibanaPrivilegeTable to render — it only appears once kibanaPrivileges is loaded
@@ -550,15 +557,20 @@ describe('PrivilegesRolesForm', () => {
       });
 
       getRolesSpy.mockResolvedValue([]);
-      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(kibanaFeatures));
 
-      const featuresWithSubFeatures = kibanaFeatures.filter((kibanaFeature) =>
+      // Render only the single feature-with-sub-features this spec asserts on. Rendering the full
+      // kibanaFeatures set makes each user.click re-render the entire privilege table, and the
+      // accumulated cost tips the test over Jest's 5s budget under CI load.
+      const featureUT = kibanaFeatures.filter((kibanaFeature) =>
         Boolean(kibanaFeature.subFeatures.length)
-      );
-      const featureUT = featuresWithSubFeatures[0];
+      )[0];
+      const featuresUT = [featureUT];
+
+      getAllKibanaPrivilegeSpy.mockResolvedValue(createRawKibanaPrivileges(featuresUT));
 
       renderPrivilegeRolesForm({
         preSelectedRoles: roles,
+        features: featuresUT,
       });
 
       // Wait for KibanaPrivilegeTable to render — it only appears once kibanaPrivileges is loaded

@@ -178,10 +178,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.selectValue('jsm-subActionSelect', 'closeAlert');
 
           await testSubjects.missingOrFail('messageInput');
-          await retry.waitFor('message input to be displayed', async () => {
-            await testSubjects.selectValue('jsm-subActionSelect', 'createAlert');
-            return await testSubjects.exists('messageInput');
-          });
+          await testSubjects.click('jsm-subActionSelect');
+          await browser.pressKeys(browser.keys.ARROW_UP, browser.keys.ENTER);
+          expect(await testSubjects.getAttribute('jsm-subActionSelect', 'value')).to.be(
+            'createAlert'
+          );
+          await testSubjects.existOrFail('messageInput', { timeout: 15000 });
 
           expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
         });

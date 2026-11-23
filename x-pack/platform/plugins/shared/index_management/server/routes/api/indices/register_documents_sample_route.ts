@@ -26,7 +26,7 @@ export function registerDocumentsSampleRoute({
       },
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1000 }),
         }),
       },
     },
