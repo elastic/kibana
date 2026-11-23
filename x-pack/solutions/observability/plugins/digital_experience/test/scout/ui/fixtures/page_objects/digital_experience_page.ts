@@ -25,6 +25,9 @@ type OverviewFilterName =
   | 'pageUrl'
   | 'pageContains';
 
+/** The KPIs of the mobile page's row. */
+type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate';
+
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: EuiBasicTableObject;
@@ -87,6 +90,15 @@ export class DigitalExperiencePage {
   public readonly permissionDenied: Locator;
   public readonly classicRumPageLoadMetric: Locator;
   public readonly classicRumServiceSelect: Locator;
+  public readonly mobileTab: Locator;
+  public readonly mobileApplicationsTable: EuiBasicTableObject;
+  public readonly mobileKpis: Locator;
+  public readonly mobilePagePlatforms: Locator;
+  public readonly mobileOsFilter: Locator;
+  public readonly mobileCompareToggle: Locator;
+  public readonly mobileOpenInDiscover: Locator;
+  public readonly platformFilter: Locator;
+  public readonly platformList: EuiSelectableObject;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.mainContainer = page.getByTestId('digitalExperienceMainContainer');
@@ -152,6 +164,71 @@ export class DigitalExperiencePage {
     this.permissionDenied = page.getByTestId('ResetSessionButton');
     this.classicRumPageLoadMetric = page.getByTestId('uxClientMetrics-totalPageLoad');
     this.classicRumServiceSelect = page.getByTestId('uxServiceNameFilterSelect');
+    this.mobileTab = page.getByTestId('digitalExperienceApplicationTypeTab-mobile');
+    this.mobileApplicationsTable = page.components.basicTable(
+      'digitalExperienceMobileApplicationsTable'
+    );
+    this.mobileKpis = page.getByTestId('digitalExperienceMobileKpis');
+    // The header's badges, one per platform the application reported on.
+    this.mobilePagePlatforms = page.getByTestId(/^digitalExperienceMobilePlatformBadge-/);
+    this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
+    this.mobileCompareToggle = page.getByTestId('digitalExperienceMobileCompareToggle');
+    this.mobileOpenInDiscover = page.getByTestId('digitalExperienceMobileOpenInDiscover');
+    this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
+    this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
+  }
+
+  /** The link that opens a mobile application's page, by its exact name. */
+  mobileApplicationLink(serviceName: string): Locator {
+    return this.mobileApplicationsTable.rows.getByRole('link', { name: serviceName, exact: true });
+  }
+
+  /** The row of a mobile application in the Mobile tab's table, by its exact name. */
+  mobileApplicationRow(serviceName: string): Locator {
+    return this.mobileApplicationsTable.rows.filter({
+      has: this.page.getByRole('link', { name: serviceName, exact: true }),
+    });
+  }
+
+  /** The value of a KPI of the mobile page, e.g. `Sessions`. */
+  mobileKpiValue(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
+  }
+
+  /** A mobile KPI's change against the previous period, shown with Compare on. */
+  mobileKpiChange(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Change`);
+  }
+
+  /** A mobile KPI's value in the previous period, shown with Compare on. */
+  mobileKpiPrevious(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`);
+  }
+
+  /**
+   * Narrows the mobile page to one OS, e.g. `iPadOS`, by its value: its option's label also has its
+   * sessions, as the Sessions list's facets.
+   */
+  async selectMobileOs(osName: string): Promise<void> {
+    await this.mobileOsFilter.click();
+    await this.page.getByTestId(`digitalExperienceMobileOsFilterOption-${osName}`).click();
+  }
+
+  /**
+   * Turns the mobile page's Compare on or off from its header, whose narrow layouts move the menu
+   * items into the overflow menu.
+   */
+  async toggleMobileCompare(): Promise<void> {
+    if (!(await this.mobileCompareToggle.isVisible())) {
+      await this.page.getByTestId('app-menu-overflow-button').click();
+    }
+    await this.mobileCompareToggle.click();
+  }
+
+  /** Narrows the Mobile tab to one platform by its label, `Android` or `iOS`. */
+  async selectPlatform(label: 'Android' | 'iOS'): Promise<void> {
+    await this.platformFilter.click();
+    await this.platformList.selectOption(label);
   }
 
   /** Opens the list with the given URL query, by default only the time range. */

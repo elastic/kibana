@@ -8,6 +8,7 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/apm-types",
     "@kbn/apm-types-shared",
+    "@kbn/custom-icons",
     "@kbn/apm-utils",
     "@kbn/es-types",
     "@kbn/traced-es-client",

@@ -59,6 +59,22 @@ describe('getShareParams', () => {
     });
   });
 
+  it("keeps a mobile application's OS, release and Compare, so its short URL opens the same page", () => {
+    expect(
+      getShareParams({
+        ...base,
+        search: '?applicationType=mobile&osName=iOS&release=2.0.0&compare=true&rangeFrom=now-1h',
+      })
+    ).toEqual({
+      ...base,
+      applicationType: 'mobile',
+      osName: 'iOS',
+      release: '2.0.0',
+      compare: 'true',
+      rangeFrom: 'now-1h',
+    });
+  });
+
   it('leaves out what the locator does not list, and the empty and repeated params', () => {
     expect(
       getShareParams({

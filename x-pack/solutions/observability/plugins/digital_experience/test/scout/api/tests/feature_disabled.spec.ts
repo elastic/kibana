@@ -17,6 +17,7 @@ const BASE = 'internal/digital_experience';
 // Valid, authorized requests, as authorization and param validation run before the flag check.
 const ROUTES: ReadonlyArray<{ method: 'get' | 'post'; path: string }> = [
   { method: 'get', path: `${BASE}/applications?${TIME_RANGE}` },
+  { method: 'get', path: `${BASE}/mobile_applications/shop-mobile/kpis?${TIME_RANGE}` },
   { method: 'get', path: `${BASE}/sessions/status` },
   { method: 'post', path: `${BASE}/sessions/enable` },
 ];

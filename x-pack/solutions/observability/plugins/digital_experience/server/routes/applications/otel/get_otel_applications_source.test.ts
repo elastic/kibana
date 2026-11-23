@@ -11,7 +11,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { BROWSER_SESSIONS_PLATFORM } from '../../../services/sessions/sessions_platforms';
 import { getSessionsStatus } from '../../../services/sessions/sessions_status';
-import type { SourceApplications } from '../types';
+import type { WebSourceApplications } from '../types';
 import { getOtelApplications } from './get_otel_applications';
 import {
   createSessionsReadableCache,
@@ -33,15 +33,15 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const SETTINGS = { frequency: '1m' };
 
 const application = (serviceName: string) =>
-  ({ serviceName, source: 'otel' } as SourceApplications['applications'][number]);
+  ({ serviceName, source: 'otel' } as WebSourceApplications['applications'][number]);
 
-const FROM_SESSIONS: SourceApplications = {
+const FROM_SESSIONS: WebSourceApplications = {
   applications: [application('from-sessions')],
   environments: ['production'],
   pageLoadsOverTime: [],
   sessionsOverTime: [],
 };
-const FROM_RAW: SourceApplications = {
+const FROM_RAW: WebSourceApplications = {
   applications: [application('from-raw')],
   environments: ['staging'],
   pageLoadsOverTime: [],
