@@ -9,7 +9,8 @@ import type { IRouter } from '@kbn/core/server';
 import { isBoom, notFound } from '@hapi/boom';
 import unified from 'unified';
 import markdown from 'remark-parse-no-trim';
-import { some, filter } from 'lodash';
+import { some, filter, uniq } from 'lodash';
+import pMap from 'p-map';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
@@ -32,6 +33,9 @@ import {
 import { createLiveQueryResponseSchema } from './response_schemas';
 import { toEcsMappingRecord } from '../../lib/resolve_query_reference';
 import type { DispatchSource } from '../../handlers/action/dispatch_source';
+
+// alert_ids is not bounded by the request schema, so cap parallel alert lookups.
+const ALERT_LOOKUP_CONCURRENCY = 10;
 
 export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -81,15 +85,17 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
             // Every referenced alert must resolve; the first one drives the rest of the request.
             // The alerts client reports both missing and unauthorized alerts as a Boom 404.
-            const alerts = await Promise.all(
-              request.body.alert_ids.map(async (id) => {
+            const alerts = await pMap(
+              uniq(request.body.alert_ids),
+              async (id) => {
                 const alert = await client.get({ id });
                 if (!alert) {
                   throw notFound();
                 }
 
                 return alert as ParsedTechnicalFields & { _index: string };
-              })
+              },
+              { concurrency: ALERT_LOOKUP_CONCURRENCY }
             );
 
             alertData = alerts[0];
@@ -107,7 +113,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
             };
           } else {
             logger.error(
-              `Failed to retrieve alert for osquery live query request: ${error.message}`,
+              `Failed to retrieve alert for osquery live query request: ${
+                error instanceof Error ? error.message : String(error)
+              }`,
               {
                 error,
               }

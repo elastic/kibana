@@ -409,6 +409,38 @@ describe('createLiveQueryRoute', () => {
       });
       expect(mockedCreateActionHandler).not.toHaveBeenCalled();
     });
+
+    it('returns a controlled 500 when the lookup throws an error without a status code', async () => {
+      const racGet = jest.fn().mockRejectedValue(new Error('boom'));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      const response = await invokeRoute(
+        { query: 'select 1;', alert_ids: ['alert-1'], agent_ids: ['agent-1'] },
+        { coreStart, racGet }
+      );
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: 'Error occurred while retrieving the alert' },
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('looks up each distinct alert id only once', async () => {
+      const racGet = jest.fn(async ({ id }: { id: string }) => ({ ...readableAlert, id }));
+      const coreStart = createMockCoreStart({}, { writeLiveQueries: true });
+
+      await invokeRoute(
+        {
+          query: 'select 1;',
+          alert_ids: ['alert-1', 'alert-1', 'alert-2'],
+          agent_ids: ['agent-1'],
+        },
+        { coreStart, racGet }
+      );
+
+      expect(racGet).toHaveBeenCalledTimes(2);
+    });
   });
 
   it('returns 403 and no alert details when the caller cannot run the query and the alert is missing', async () => {
