@@ -128,7 +128,9 @@ export const CreateDetectionRuleInputSchema = lazySchema(() =>
     status: z
       .enum(['enabled', 'disabled'])
       .default('enabled')
-      .describe("Whether the rule runs on its schedule: 'enabled' or 'disabled'."),
+      .describe(
+          "Whether the rule runs on its schedule: 'enabled' or 'disabled'. Defaults to 'enabled' when omitted, so pass 'disabled' explicitly to stage an inactive rule."
+        ),
     queryText: z
       .string()
       .min(1)

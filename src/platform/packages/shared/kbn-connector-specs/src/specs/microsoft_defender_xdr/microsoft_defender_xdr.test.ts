@@ -8,7 +8,7 @@
  */
 
 import { MicrosoftDefenderXdr } from './microsoft_defender_xdr';
-import { UpdateAlertInputSchema } from './types';
+import { UpdateAlertInputSchema, UpdateIncidentInputSchema } from './types';
 import type { AuthTypeDef, ConnectorSpec } from '../../connector_spec';
 
 const isAuthTypeDef = (t: string | AuthTypeDef): t is AuthTypeDef => typeof t === 'object';
@@ -371,6 +371,15 @@ describe('updateIncident handler', () => {
     expect(body).not.toHaveProperty('customTags');
     expect(body).not.toHaveProperty('comment');
   });
+
+  it('accepts determination notMalicious through the schema', () => {
+    const result = UpdateIncidentInputSchema.safeParse({
+      incidentId: '5',
+      classification: 'falsePositive',
+      determination: 'notMalicious',
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 // ---- addIncidentComment handler ----
@@ -483,6 +492,15 @@ describe('updateAlert handler', () => {
       severity: 'high',
     });
     expect(result.success).toBe(false);
+  });
+
+  it('accepts determination notMalicious through the schema', () => {
+    const result = UpdateAlertInputSchema.safeParse({
+      alertId: 'alert-7',
+      classification: 'falsePositive',
+      determination: 'notMalicious',
+    });
+    expect(result.success).toBe(true);
   });
 });
 
