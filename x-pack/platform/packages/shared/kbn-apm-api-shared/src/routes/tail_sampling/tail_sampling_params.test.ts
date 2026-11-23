@@ -106,10 +106,18 @@ describe('saveTailSamplingRoute params', () => {
     );
   });
 
+  it('rejects an empty version, which would skip the concurrent-edit check', () => {
+    expectParseError(
+      saveTailSamplingRoute.params!.safeParse({
+        body: { ...settings([keepErrors]), version: '' },
+      })
+    );
+  });
+
   it('rejects a version over the length limit', () => {
     expectParseError(
       saveTailSamplingRoute.params!.safeParse({
-        body: { ...settings([keepErrors]), version: 'v'.repeat(129) },
+        body: { ...settings([keepErrors]), version: 'v'.repeat(257) },
       })
     );
   });

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, savedObjectVersion } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
-import { MAX_TAIL_SAMPLING_VERSION_LENGTH, tailSamplingSettingsSchema } from './types';
+import { tailSamplingSettingsSchema } from './types';
 import type { TailSamplingResponse } from './types';
 
 /**
@@ -21,7 +21,8 @@ export const saveTailSamplingRoute = defineRoute<TailSamplingResponse>()({
   params: lazySchema(() =>
     z.object({
       body: tailSamplingSettingsSchema.extend({
-        version: z.string().max(MAX_TAIL_SAMPLING_VERSION_LENGTH).optional(),
+        // Rejects an empty string: Saved Objects treats it as no version and skips the check.
+        version: savedObjectVersion().optional(),
       }),
     })
   ),
