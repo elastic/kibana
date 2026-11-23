@@ -57,3 +57,18 @@ steps:
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/nightshift/detection/_reconcile"
       body: {}
+
+  # The route answers 200 when another reconciliation held the space and when some rules or
+  # strategies failed. Failing the run shows it; the next change or the schedule tries again.
+  - name: report_incomplete_reconciliation
+    type: if
+    condition: "${{ steps.reconcile.output.status == 'busy' or steps.reconcile.output.failures.size > 0 or steps.reconcile.output.strategy_errors.size > 0 }}"
+    steps:
+      - name: fail
+        type: workflow.fail
+        with:
+          message: >-
+            The reconciliation did not finish: status {{ steps.reconcile.output.status }},
+            {{ steps.reconcile.output.failures.size | default: 0 }} rule operation(s) failed,
+            {{ steps.reconcile.output.strategy_errors.size | default: 0 }} strategy(ies) failed.
+            The next change or the six-hour schedule tries again.

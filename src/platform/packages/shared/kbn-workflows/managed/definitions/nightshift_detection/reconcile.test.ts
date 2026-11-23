@@ -40,7 +40,22 @@ describe('Nightshift detection rule reconcile workflow', () => {
     allowedStarts.forEach((type) =>
       expect(guard.condition).toContain(`execution.triggeredBy : "${type}"`)
     );
-    expect(workflow.steps.at(-1)?.type).toBe('kibana.request');
+    expect(workflow.steps.some(({ type }) => type === 'kibana.request')).toBe(true);
+  });
+
+  // The route answers 200 for these, so without the step the run would show green.
+  it('fails a run whose reconciliation was busy or partly failed, and only those', () => {
+    const condition = workflow.steps.at(-1)?.condition ?? '';
+    const isFailed = (output: Record<string, unknown>) =>
+      createWorkflowLiquidEngine().evalValueSync(condition.slice(3, -2), {
+        steps: { reconcile: { output } },
+      });
+    const completed = { status: 'completed', failures: [], strategy_errors: [] };
+
+    expect(isFailed(completed)).toBe(false);
+    expect(isFailed({ status: 'busy' })).toBe(true);
+    expect(isFailed({ ...completed, failures: [{ rule_id: 'a' }] })).toBe(true);
+    expect(isFailed({ ...completed, strategy_errors: [{ strategy: 'a' }] })).toBe(true);
   });
 
   // The group is applied before the guard runs, so a refused run sharing it would cancel the
