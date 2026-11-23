@@ -24,7 +24,7 @@ export interface EvaluationAfterKey extends AggregationsCompositeAggregateKey {
 }
 
 export const EVALUATION_PAGE_SIZE = 1000;
-const CANDIDATES_PAGE_SIZE = 10_000;
+const CANDIDATES_PAGE_SIZE = 1000;
 
 export const LONG_WINDOW = 'LONG';
 export const SHORT_WINDOW = 'SHORT';
