@@ -10,6 +10,7 @@ import type { Condition } from '@kbn/streamlang';
 import type { SignalFieldPresence } from './check_signal_fields';
 import { planMeasurementDefinition } from './plan_measurement_definitions';
 import { renderSignalQuery } from './render_signal_query';
+import type { SignalQueryRenderPlan } from './render_signal_query';
 import type { MeasurementDefinition, SignalTemplate, SkippedMeasurementDefinition } from './types';
 
 export type MetricsTypeKnowledgeIndicator = Feature & {
@@ -59,11 +60,11 @@ export const buildMeasurementDefinitions = ({
 }): {
   definitions: MeasurementDefinition[];
   skipped: SkippedMeasurementDefinition[];
-  previewQueries: string[];
+  previewPlans: SignalQueryRenderPlan[];
 } => {
   const definitions: MeasurementDefinition[] = [];
   const skipped: SkippedMeasurementDefinition[] = [];
-  const previewQueries: string[] = [];
+  const previewPlans: SignalQueryRenderPlan[] = [];
 
   for (const typeKI of typeKIs) {
     const breakdown = getBreakdown(typeKI);
@@ -100,10 +101,6 @@ export const buildMeasurementDefinitions = ({
         ...renderOptions,
         perMinute: false,
       });
-      const { esql: previewEsql } = renderSignalQuery({
-        ...renderOptions,
-        perMinute: true,
-      });
       definitions.push({
         signal: template.signal,
         type_ki_id: typeKI.id,
@@ -123,9 +120,9 @@ export const buildMeasurementDefinitions = ({
           source,
         })),
       });
-      previewQueries.push(previewEsql);
+      previewPlans.push(renderOptions);
     }
   }
 
-  return { definitions, skipped, previewQueries };
+  return { definitions, skipped, previewPlans };
 };

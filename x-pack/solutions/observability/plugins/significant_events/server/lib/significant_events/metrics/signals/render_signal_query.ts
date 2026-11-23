@@ -13,8 +13,8 @@ import type { SignalTemplate, SignalTemplateVariant, SignalTemplateEntityField }
 const CLUSTER_FIELD = 'orchestrator.cluster.name';
 const POD_FIELD = 'kubernetes.pod.name';
 const CONTAINER_FIELD = 'kubernetes.container.name';
-const PREVIEW_WINDOW = '15 minutes';
-export const DEFINITION_PREVIEW_LIMIT = 10_000;
+export const PREVIEW_ENTITY_COUNT_COLUMN = 'preview_entity_count';
+export const DEFINITION_PREVIEW_ROW_LIMIT = 160;
 
 const WORKLOAD_KIND_BY_SUBTYPE: Readonly<Record<string, string>> = {
   'k8s.deployment': 'deployment',
@@ -39,8 +39,13 @@ const buildVariantFilter = (variants: readonly SignalTemplateVariant[]): string 
 const filteredAggregation = (
   name: string,
   expression: string,
-  variant: SignalTemplateVariant
-): string => `${name} = ${expression} WHERE ${variantCondition(variant)}`;
+  variant: SignalTemplateVariant,
+  additionalCondition?: string
+): string =>
+  `${name} = ${expression} WHERE ${[
+    variantCondition(variant),
+    ...(additionalCondition ? [additionalCondition] : []),
+  ].join(' AND ')}`;
 
 const coalesce = (columns: readonly string[]): string =>
   columns.length === 1 ? columns[0] : `COALESCE(${columns.join(', ')})`;
@@ -76,6 +81,19 @@ interface VariantArm {
   evaluations: string[];
   valueColumn: string;
   contextColumns: Readonly<Record<string, string>>;
+}
+
+export interface SignalQueryRenderPlan {
+  esql: string;
+  subtype: string;
+  breakdown: readonly string[];
+  template: SignalTemplate;
+  variants: readonly SignalTemplateVariant[];
+}
+
+export interface SignalQueryTimeRange {
+  from: string;
+  to: string;
 }
 
 const renderVariantArm = (
@@ -119,7 +137,7 @@ const renderVariantArm = (
         aggregations: [
           filteredAggregation(
             valueColumn,
-            `MAX(CASE(${variant.field} IN (${variant.matchingValues
+            `MAX(CASE(${variant.field} IS NULL, NULL, ${variant.field} IN (${variant.matchingValues
               .map(quoteEsqlString)
               .join(', ')}), 1, 0))`,
             variant
@@ -133,14 +151,23 @@ const renderVariantArm = (
       const minimumColumn = `minimum_${index}`;
       return {
         aggregations: [filteredAggregation(minimumColumn, `MIN(${variant.field})`, variant)],
-        evaluations: [`${valueColumn} = 1 - ${minimumColumn}`],
+        evaluations: [
+          `${valueColumn} = CASE(${minimumColumn} IS NULL, NULL, ${minimumColumn} < 1, 1, 0)`,
+        ],
         valueColumn,
         contextColumns: {},
       };
     }
     case 'maximum':
       return {
-        aggregations: [filteredAggregation(valueColumn, `MAX(${variant.field})`, variant)],
+        aggregations: [
+          filteredAggregation(
+            valueColumn,
+            `MAX(${variant.field})`,
+            variant,
+            `${variant.field} >= 0`
+          ),
+        ],
         evaluations: [],
         valueColumn,
         contextColumns: {},
@@ -198,10 +225,10 @@ const renderGenericAggregation = ({
   const outputEvaluations = [
     `value = ${coalesce(arms.map(({ valueColumn }) => valueColumn))}`,
     ...contextColumns.map((column) => {
-      const armColumns = arms.flatMap(({ contextColumns: armContext }) =>
-        armContext[column] ? [armContext[column]] : []
+      const choices = arms.flatMap(({ valueColumn, contextColumns: armContext }) =>
+        armContext[column] ? [`${valueColumn} IS NOT NULL`, armContext[column]] : []
       );
-      return `${column} = ${coalesce(armColumns)}`;
+      return `${column} = CASE(${choices.join(', ')}, NULL)`;
     }),
   ];
 
@@ -237,6 +264,23 @@ const renderContainerAggregation = (
 | KEEP ${renderOutputColumns(entityFields, ['value', 'worst_container'], perMinute)}`;
 };
 
+const renderPreviewRanking = (entityFields: readonly string[], lowerIsWorse: boolean): string => {
+  const entityParts = entityFields.flatMap((field, index) => [
+    ...(index > 0 ? ['"/"'] : []),
+    `COALESCE(${field}, "")`,
+  ]);
+  const entityId = entityParts.length === 1 ? entityParts[0] : `CONCAT(${entityParts.join(', ')})`;
+  const rankAggregation = lowerIsWorse ? 'MIN(value)' : 'MAX(value)';
+  const sortDirection = lowerIsWorse ? 'ASC' : 'DESC';
+
+  return `| EVAL preview_entity_id = ${entityId}
+| INLINE STATS rank_value = ${rankAggregation}
+  BY ${entityFields.join(', ')}
+| INLINE STATS ${PREVIEW_ENTITY_COUNT_COLUMN} = COUNT_DISTINCT(preview_entity_id)
+| SORT rank_value ${sortDirection}, ${[...entityFields, 'minute'].join(', ')}
+| LIMIT ${DEFINITION_PREVIEW_ROW_LIMIT}`;
+};
+
 /** Renders one stored or per minute measurement query. */
 export const renderSignalQuery = ({
   esql,
@@ -245,14 +289,14 @@ export const renderSignalQuery = ({
   template,
   variants,
   perMinute,
-}: {
-  esql: string;
-  subtype: string;
-  breakdown: readonly string[];
-  template: SignalTemplate;
-  variants: readonly SignalTemplateVariant[];
+  timeRange,
+}: SignalQueryRenderPlan & {
   perMinute: boolean;
+  timeRange?: SignalQueryTimeRange;
 }): { entityFields: string[]; esql: string } => {
+  if (perMinute && !timeRange) {
+    throw new Error('Per minute queries require a time range.');
+  }
   const workloadKind = WORKLOAD_KIND_BY_SUBTYPE[subtype];
   const additionalEntityFields = template.additionalEntityFields ?? [];
   const entityFields = workloadKind
@@ -277,7 +321,12 @@ export const renderSignalQuery = ({
           perMinute,
         });
   const filters = [
-    ...(perMinute ? [`@timestamp >= NOW() - ${PREVIEW_WINDOW}`] : []),
+    ...(perMinute && timeRange
+      ? [
+          `@timestamp >= ${quoteEsqlString(timeRange.from)}`,
+          `@timestamp < ${quoteEsqlString(timeRange.to)}`,
+        ]
+      : []),
     buildVariantFilter(variants),
   ];
 
@@ -289,7 +338,7 @@ export const renderSignalQuery = ({
       ...workloadPipeline,
       ...renderEntityFieldDerivations(additionalEntityFields),
       aggregation,
-      ...(perMinute ? [`| LIMIT ${DEFINITION_PREVIEW_LIMIT}`] : []),
+      ...(perMinute ? [renderPreviewRanking(entityFields, template.hint.comparison === '<')] : []),
     ].join('\n'),
   };
 };

@@ -9,7 +9,11 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { timeoutSignal } from '@kbn/std';
-import { DEFINITION_PREVIEW_LIMIT } from './render_signal_query';
+import {
+  PREVIEW_ENTITY_COUNT_COLUMN,
+  renderSignalQuery,
+  type SignalQueryRenderPlan,
+} from './render_signal_query';
 import type {
   MeasurementDefinition,
   MeasurementDefinitionPreview,
@@ -19,6 +23,7 @@ import type {
 const PREVIEW_CONCURRENCY = 4;
 const PREVIEW_TIMEOUT_MS = 30_000;
 const PREVIEW_WINDOW_MS = 15 * 60 * 1000;
+const ONE_MINUTE_MS = 60 * 1000;
 const PREVIEW_ENTITY_LIMIT = 10;
 
 type PreviewScalar = string | number | boolean | null;
@@ -66,48 +71,37 @@ const getPreviewRows = (
   });
 };
 
-const selectPreviewEntities = (
-  definition: MeasurementDefinition,
-  rows: MeasurementPreviewRow[]
-): MeasurementPreviewRow[] => {
-  const latestByEntity = new Map<string, MeasurementPreviewRow>();
-  for (const row of rows) {
-    const latest = latestByEntity.get(row.entity);
-    if (!latest || row.minute > latest.minute) {
-      latestByEntity.set(row.entity, row);
+const selectPreviewEntities = (rows: MeasurementPreviewRow[]): MeasurementPreviewRow[] => {
+  const selectedEntities = new Set<string>();
+  return rows.filter(({ entity }) => {
+    if (selectedEntities.has(entity)) {
+      return true;
     }
-  }
-  const lowerIsWorse = definition.hint.comparison === '<';
-  const selectedEntities = new Set(
-    [...latestByEntity.values()]
-      .sort(
-        (left, right) =>
-          (lowerIsWorse ? left.value - right.value : right.value - left.value) ||
-          left.entity.localeCompare(right.entity)
-      )
-      .slice(0, PREVIEW_ENTITY_LIMIT)
-      .map(({ entity }) => entity)
-  );
+    if (selectedEntities.size === PREVIEW_ENTITY_LIMIT) {
+      return false;
+    }
+    selectedEntities.add(entity);
+    return true;
+  });
+};
 
-  return rows
-    .filter(({ entity }) => selectedEntities.has(entity))
-    .sort(
-      (left, right) =>
-        left.minute.localeCompare(right.minute) || left.entity.localeCompare(right.entity)
-    );
+const getPreviewEntityCount = (response: ESQLSearchResponse): number => {
+  const position = response.columns.findIndex(({ name }) => name === PREVIEW_ENTITY_COUNT_COLUMN);
+  const value = position >= 0 ? response.values[0]?.[position] : undefined;
+  return typeof value === 'number' ? value : 0;
 };
 
 const runPreview = async ({
   esClient,
   definition,
-  previewQuery,
+  previewPlan,
   signal,
   from,
   to,
 }: {
   esClient: ElasticsearchClient;
   definition: MeasurementDefinition;
-  previewQuery: string;
+  previewPlan: SignalQueryRenderPlan;
   signal?: AbortSignal;
   from: string;
   to: string;
@@ -115,16 +109,21 @@ const runPreview = async ({
   const deadline = timeoutSignal(PREVIEW_TIMEOUT_MS);
   try {
     const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
+    const { esql: previewQuery } = renderSignalQuery({
+      ...previewPlan,
+      perMinute: true,
+      timeRange: { from, to },
+    });
     const response = (await esClient.esql.query(
       { query: previewQuery },
       { signal: requestSignal }
     )) as ESQLSearchResponse;
-    const rows = selectPreviewEntities(definition, getPreviewRows(definition, response));
+    const rows = selectPreviewEntities(getPreviewRows(definition, response));
     const preview: MeasurementDefinitionPreview = {
       from,
       to,
       rows,
-      truncated: response.values.length === DEFINITION_PREVIEW_LIMIT,
+      truncated: getPreviewEntityCount(response) > PREVIEW_ENTITY_LIMIT,
     };
     return { ...definition, preview };
   } catch (error) {
@@ -147,17 +146,17 @@ const runPreview = async ({
 export const runDefinitionPreviews = async ({
   esClient,
   definitions,
-  previewQueries,
+  previewPlans,
   signal,
 }: {
   esClient: ElasticsearchClient;
   definitions: readonly MeasurementDefinition[];
-  previewQueries: readonly string[];
+  previewPlans: readonly SignalQueryRenderPlan[];
   signal?: AbortSignal;
 }): Promise<MeasurementDefinition[]> => {
-  const toDate = new Date();
-  const from = new Date(toDate.getTime() - PREVIEW_WINDOW_MS).toISOString();
-  const to = toDate.toISOString();
+  const toTime = Math.floor(Date.now() / ONE_MINUTE_MS) * ONE_MINUTE_MS;
+  const from = new Date(toTime - PREVIEW_WINDOW_MS).toISOString();
+  const to = new Date(toTime).toISOString();
   const limit = pLimit(PREVIEW_CONCURRENCY);
 
   return Promise.all(
@@ -166,7 +165,7 @@ export const runDefinitionPreviews = async ({
         runPreview({
           esClient,
           definition,
-          previewQuery: previewQueries[index],
+          previewPlan: previewPlans[index],
           signal,
           from,
           to,

@@ -540,7 +540,7 @@ const getMetricsDefinitionsRoute = createServerRoute({
       definitions: await runDefinitionPreviews({
         esClient: streamDataEsClient,
         definitions: result.definitions,
-        previewQueries: result.previewQueries,
+        previewPlans: result.previewPlans,
         signal: requestSignal,
       }),
       skipped: result.skipped,

@@ -11,11 +11,16 @@ import {
   type MetricsTypeKnowledgeIndicator,
 } from './build_measurement_definitions';
 import type { SignalFieldPresence } from './check_signal_fields';
+import { renderSignalQuery, type SignalQueryRenderPlan } from './render_signal_query';
 import { SIGNAL_TEMPLATES } from './signal_templates';
 import { getSignalVariantFields } from './types';
 import type { SignalTemplate, SignalTemplateVariant } from './types';
 
 const SOURCE_ID = 'source-id';
+const PREVIEW_RANGE = {
+  from: '2026-11-23T09:45:00.000Z',
+  to: '2026-11-23T10:00:00.000Z',
+};
 
 const BREAKDOWN_BY_SUBTYPE: Record<string, string[]> = {
   'k8s.namespace': ['orchestrator.cluster.name', 'kubernetes.namespace'],
@@ -76,7 +81,22 @@ const build = (
     fieldPresence,
   });
 
+const renderPreview = (plan: SignalQueryRenderPlan): string =>
+  renderSignalQuery({ ...plan, perMinute: true, timeRange: PREVIEW_RANGE }).esql;
+
 describe('buildMeasurementDefinitions', () => {
+  it('skips a template whose fields have no data', () => {
+    const { definitions, skipped } = build(['service'], getTemplate('service.error_rate'), []);
+
+    expect(definitions).toEqual([]);
+    expect(skipped).toEqual([
+      expect.objectContaining({
+        signal: 'service.error_rate',
+        reason: expect.stringContaining('No ECS or OTel template field has data'),
+      }),
+    ]);
+  });
+
   it('renders a stored definition with only entity grouping and one output value column', () => {
     const template = getTemplate('host.cpu.utilization');
     const { definitions } = build(['host'], template, [
@@ -107,7 +127,9 @@ describe('buildMeasurementDefinitions', () => {
     expect(definition.esql).toContain(`data_stream.dataset == "${otel.dataset}"`);
     expect(definition.esql).toContain(`data_stream.dataset == "${ecs.dataset}"`);
     expect(definition.esql).toContain('value = COALESCE(value_0, value_1)');
-    expect(definition.esql).toContain('sample_count = COALESCE(sample_count_0, sample_count_1)');
+    expect(definition.esql).toContain(
+      'sample_count = CASE(value_0 IS NOT NULL, sample_count_0, value_1 IS NOT NULL, sample_count_1, NULL)'
+    );
   });
 
   it('normalises ECS only and OTel only state entities to one or zero', () => {
@@ -118,11 +140,21 @@ describe('buildMeasurementDefinitions', () => {
     const [definition] = definitions;
     expect(definition.metric_type).toBe('state');
     expect(definition.hint).toEqual(expect.objectContaining({ comparison: '==', threshold: 1 }));
-    expect(definition.esql).toContain('1 - minimum_0');
     expect(definition.esql).toContain(
-      'MAX(CASE(kubernetes.node.status.ready IN ("false", "unknown"), 1, 0))'
+      'value_0 = CASE(minimum_0 IS NULL, NULL, minimum_0 < 1, 1, 0)'
+    );
+    expect(definition.esql).toContain(
+      'MAX(CASE(kubernetes.node.status.ready IS NULL, NULL, kubernetes.node.status.ready IN ("false", "unknown"), 1, 0))'
     );
     expect(definition.esql).toContain('value = COALESCE(value_0, value_1)');
+
+    const pressureTemplate = getTemplate('k8s.node.memory_pressure');
+    const { definitions: pressureDefinitions } = build(
+      ['k8s.node'],
+      pressureTemplate,
+      pressureTemplate.variants.map(createPresence)
+    );
+    expect(pressureDefinitions[0].esql).toContain('k8s.node.condition_memory_pressure >= 0');
   });
 
   it('measures containers before workloads and names the worst container', () => {
@@ -150,21 +182,26 @@ describe('buildMeasurementDefinitions', () => {
 
   it('adds the preview range and puts the minute bucket first in every grouping', () => {
     const template = getTemplate('k8s.container.memory_vs_limit');
-    const { definitions, previewQueries } = build(
+    const { definitions, previewPlans } = build(
       ['k8s.deployment'],
       template,
       template.variants.map(createPresence)
     );
-    const previewQuery = previewQueries[0];
+    const previewQuery = renderPreview(previewPlans[0]);
     const groupings = [...previewQuery.matchAll(/\n  BY ([^\n]+)/g)].map((match) => match[1]);
 
     expect(definitions[0].esql).not.toContain('minute');
-    expect(previewQuery).toContain('| WHERE @timestamp >= NOW() - 15 minutes');
-    expect(groupings).toHaveLength(3);
+    expect(previewQuery).toContain(
+      '| WHERE @timestamp >= "2026-11-23T09:45:00.000Z"\n    AND @timestamp < "2026-11-23T10:00:00.000Z"'
+    );
+    expect(groupings).toHaveLength(4);
     expect(groupings[0]).toMatch(/^minute = BUCKET\(@timestamp, 1 minute\), /);
-    expect(groupings.slice(1).every((grouping) => grouping.startsWith('minute, '))).toBe(true);
+    expect(groupings.slice(1, 3).every((grouping) => grouping.startsWith('minute, '))).toBe(true);
+    expect(groupings[3]).toBe('orchestrator.cluster.name, kubernetes.namespace, workload');
     expect(previewQuery).toContain('| KEEP minute, ');
-    expect(previewQuery).toContain('| LIMIT 10000');
+    expect(previewQuery).toContain('| INLINE STATS rank_value = MAX(value)');
+    expect(previewQuery).toContain('| SORT rank_value DESC, ');
+    expect(previewQuery).toContain('| LIMIT 160');
   });
 
   it('ships ten signals without restarts or OOM kills', () => {
@@ -181,11 +218,11 @@ describe('buildMeasurementDefinitions', () => {
     ]);
 
     fieldPresenceSets.forEach(({ template, presence }) => {
-      const { definitions, previewQueries } = build([template.subtypes[0]], template, presence);
+      const { definitions, previewPlans } = build([template.subtypes[0]], template, presence);
       expect(definitions).toHaveLength(1);
       const [definition] = definitions;
       expect(Parser.parse(definition.esql).errors).toEqual([]);
-      expect(Parser.parse(previewQueries[0]).errors).toEqual([]);
+      expect(Parser.parse(renderPreview(previewPlans[0])).errors).toEqual([]);
     });
   });
 });
