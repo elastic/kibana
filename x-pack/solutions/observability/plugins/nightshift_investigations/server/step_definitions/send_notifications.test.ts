@@ -299,8 +299,8 @@ describe('nightshift.sendNotifications step', () => {
       });
     });
 
-    it('claims the thread of a receipt recorded before the workspace was stored', async () => {
-      const { definition, context, execute, claimSlackThread } = setup(
+    it('claims a receipt recorded before the workspace was stored at its own timestamp', async () => {
+      const { definition, context, execute, claimSlackThread, routing } = setup(
         'default',
         'elastic-apps-slack'
       );
@@ -308,12 +308,28 @@ describe('nightshift.sendNotifications step', () => {
         status: 'ok',
         data: { ts: '1.2', channel: 'C123', externalConversationId: 'slack:T1:C123:1.2' },
       } as never);
+      claimSlackThread.mockRejectedValueOnce(new Error('boom'));
       await definition.handler(context('started'));
-      expect(claimSlackThread).toHaveBeenCalledWith({
+      const { id } = routing.client;
+      const stored = routing.storage.entries.get(id)?.source;
+      expect(stored?.destinations[0].thread?.thread_ts).toBe('1.2');
+      routing.storage.put(id, {
+        ...stored!,
+        attempts: stored!.attempts.map((attempt) => ({
+          ...attempt,
+          message_ts: '1.0',
+          external_conversation_id: 'slack:T1:C123:1.0',
+        })),
+      });
+
+      await definition.handler(context('started'));
+
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(claimSlackThread).toHaveBeenLastCalledWith({
         investigationId: 'inv-1',
-        externalConversationId: 'slack:T1:C123:1.2',
+        externalConversationId: 'slack:T1:C123:1.0',
         channel: 'C123',
-        threadTs: '1.2',
+        threadTs: '1.0',
         workspace: undefined,
         summary: 'Latency',
       });
