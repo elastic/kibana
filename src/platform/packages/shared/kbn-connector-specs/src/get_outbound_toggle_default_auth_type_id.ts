@@ -9,13 +9,12 @@
 
 import type { ConnectorSpec } from './connector_spec';
 import { isDualConnectorSpec } from './is_dual_connector_spec';
-import { withReceiveOnlyAuth } from './with_receive_only_auth';
 
 const NO_AUTH_TYPE_ID = 'none';
 
 /**
- * Auth type the Outbound switch turns on for a dual connector that also offers no authentication,
- * or undefined when the connector gets no switch.
+ * Auth type the Outbound switch turns on for a dual connector, or undefined when the connector
+ * gets no switch.
  */
 export const getOutboundToggleDefaultAuthTypeId = (
   spec: ConnectorSpec | undefined
@@ -23,11 +22,7 @@ export const getOutboundToggleDefaultAuthTypeId = (
   if (spec === undefined || !isDualConnectorSpec(spec)) {
     return undefined;
   }
-  const authTypeIds = (withReceiveOnlyAuth(spec).auth?.types ?? []).map((authType) =>
-    typeof authType === 'string' ? authType : authType.type
-  );
-  if (!authTypeIds.includes(NO_AUTH_TYPE_ID)) {
-    return undefined;
-  }
-  return authTypeIds.find((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID);
+  return (spec.auth?.types ?? [])
+    .map((authType) => (typeof authType === 'string' ? authType : authType.type))
+    .find((authTypeId) => authTypeId !== NO_AUTH_TYPE_ID);
 };

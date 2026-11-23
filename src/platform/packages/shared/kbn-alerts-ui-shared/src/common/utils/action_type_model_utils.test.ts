@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { httpServiceMock, docLinksServiceMock } from '@kbn/core/public/mocks';
-import { connectorsSpecs, fromConnectorSpecSchema, getMeta } from '@kbn/connector-specs';
+import {
+  connectorsSpecs,
+  fromConnectorSpecSchema,
+  getMeta,
+  withReceiveOnlyAuth,
+} from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
 import {
@@ -338,7 +343,7 @@ describe('action_type_model_utils', () => {
 
     it('marks only the given auth type as hidden in the picker', () => {
       const schema = fromConnectorSpecSchema(
-        serializeConnectorSpec(connectorsSpecs.Datadog).schema
+        serializeConnectorSpec(withReceiveOnlyAuth(connectorsSpecs.Datadog)).schema
       );
       if (schema === undefined) {
         throw new Error('Expected the Datadog spec schema to parse');
