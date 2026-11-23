@@ -161663,6 +161663,9 @@ components:
           enum:
             - data_table
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -164252,6 +164255,9 @@ components:
           enum:
             - gauge
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -165291,6 +165297,9 @@ components:
           enum:
             - heatmap
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
         x:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
@@ -171959,6 +171968,9 @@ components:
           enum:
             - legacy_metric
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -173058,6 +173070,9 @@ components:
           enum:
             - metric
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -175520,6 +175535,9 @@ components:
           enum:
             - mosaic
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -180526,6 +180544,9 @@ components:
           enum:
             - pie
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -180710,6 +180731,9 @@ components:
           enum:
             - region_map
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -185384,6 +185408,9 @@ components:
           enum:
             - tag_cloud
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -185867,6 +185894,9 @@ components:
           enum:
             - treemap
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -189208,6 +189238,9 @@ components:
           enum:
             - data_table
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -190060,6 +190093,9 @@ components:
           enum:
             - gauge
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -190403,6 +190439,9 @@ components:
           enum:
             - heatmap
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
         x:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_visDateHistogramOperation'
@@ -190819,6 +190858,9 @@ components:
           enum:
             - legacy_metric
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -191360,6 +191402,9 @@ components:
           enum:
             - metric
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -191812,6 +191857,9 @@ components:
           enum:
             - mosaic
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -192263,6 +192311,9 @@ components:
           enum:
             - pie
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -192532,6 +192583,9 @@ components:
           enum:
             - region_map
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -192805,6 +192859,9 @@ components:
           enum:
             - tag_cloud
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -193396,6 +193453,9 @@ components:
           enum:
             - treemap
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -193723,6 +193783,9 @@ components:
           enum:
             - waffle
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -194186,6 +194249,9 @@ components:
           enum:
             - xy
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - layers
@@ -195608,6 +195674,9 @@ components:
           enum:
             - waffle
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - data_source
@@ -196894,6 +196963,9 @@ components:
           enum:
             - xy
           type: string
+        use_esql:
+          description: When `true`, fetches the data with ES|QL instead of DSL aggregations. The chart configuration stays the same. Defaults to `false`.
+          type: boolean
       required:
         - type
         - layers
