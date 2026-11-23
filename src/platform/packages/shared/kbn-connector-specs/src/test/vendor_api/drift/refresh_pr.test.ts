@@ -80,10 +80,12 @@ describe('renderRefreshPr', () => {
         '</td>',
         '<td>',
         '',
-        '**Response fields**',
+        '**Response**',
         '```diff',
-        'added',
+        '{',
+        '  ...',
         '+ title',
+        '}',
         '```',
         '',
         '</td>',
@@ -95,7 +97,7 @@ describe('renderRefreshPr', () => {
         '</tr>',
       ].join('\n')
     );
-    expect(body).toContain('+ name\n```');
+    expect(body).toContain('+ name\n}\n```');
     expect(body).toContain('`listB`');
     expect(body).toMatch(/<\/table>\n\n<\/details>/);
   });
@@ -185,7 +187,7 @@ describe('renderRefreshPr', () => {
       ]),
     ]);
 
-    expect(body).toContain('```diff\nadded\n+ title\n\nchanged\n! old (deprecated)\n```');
+    expect(body).toContain('```diff\n{\n  ...\n+ title\n! old (deprecated)\n}\n```');
   });
 
   it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {
@@ -237,25 +239,25 @@ describe('renderRefreshPr', () => {
       const shownOfLong = listedNames(body, '.a');
       expect(shownOfLong).toBeGreaterThan(10);
       expect(shownOfLong).toBeLessThan(1000);
-      expect(body).toContain(`… and ${1000 - shownOfLong} more response fields`);
+      expect(body).toContain(`… and ${1000 - shownOfLong} more added`);
       expect(body.length).toBeLessThanOrEqual(MAX_LENGTH);
       expect(body.length).toBeGreaterThan(MAX_LENGTH - 400);
     });
 
     it('shows fewer than ten names rather than leave a connector out', () => {
       const body = renderRefreshPr(
-        Array.from({ length: 60 }, (_, index) =>
+        Array.from({ length: 90 }, (_, index) =>
           changed(`.connector${String(index).padStart(2, '0')}`, manyFields('GET /a', 30, 60))
         )
       );
 
       const included = [...body.matchAll(/^### `(\.connector\d+)`/gm)].map(([, name]) => name);
-      expect(included).toHaveLength(60);
+      expect(included).toHaveLength(90);
       expect(body).not.toContain('more connector');
       expect(body.length).toBeLessThanOrEqual(MAX_LENGTH);
       expect(body.length).toBeGreaterThan(MAX_LENGTH - 200);
-      expect(listedNames(body, '.connector59')).toBeLessThan(10);
-      expect(listedNames(body, '.connector59')).toBeGreaterThan(0);
+      expect(listedNames(body, '.connector89')).toBeLessThan(10);
+      expect(listedNames(body, '.connector89')).toBeGreaterThan(0);
     });
 
     it('shows ten names where that fits every connector', () => {

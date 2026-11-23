@@ -8,11 +8,19 @@
  */
 
 /**
- * The changes `oasdiff` found on one endpoint, as markdown for a cell of the refresh PR: for each
- * place a change is in (response fields, request fields, …), the names that were removed, added
- * or changed, as the lines of a diff block. It names fields and leaves out what only matters to
- * the diff itself: the schema composition a field sits in, the media types it was reported for,
- * a scope list that was only regrouped.
+ * The changes `oasdiff` found on one endpoint, as markdown for a cell of the refresh PR. What
+ * changed in the response and in the request is shown as the object it is, with a line per field
+ * that was added (`+`), removed (`-`) or changed (`!`) and its type:
+ *
+ *     {
+ *       ...
+ *     + fontVariantPosition: NORMAL | SUPER | SUB
+ *     ! value: boolean | string | SlotContentId
+ *     }
+ *
+ * Auth scopes, error responses and removed schemas follow as lists. The fields are named by their
+ * path without what only matters to the diff itself: the schema composition a field sits in, the
+ * media types it was reported for, a scope list that was only regrouped.
  */
 
 import type { SpecChange } from './detect_drift';
@@ -20,51 +28,56 @@ import type { SpecChange } from './detect_drift';
 const MAX_NAME_LENGTH = 80;
 /** How many names of a list a cell shows to begin with; the refresh PR may show more. */
 export const DEFAULT_NAMES_SHOWN = 10;
+const MAX_VARIANTS_NAMED = 3;
+const COMBINATORS = new Set(['oneOf', 'anyOf', 'allOf']);
+const RESPONSE_BODY = '(response body)';
 
-type Section = 'removed' | 'added' | 'changed';
+type Sign = '-' | '+' | '!';
 
-const SECTIONS: ReadonlyArray<{ readonly section: Section; readonly sign: string }> = [
-  { section: 'removed', sign: '-' },
-  { section: 'added', sign: '+' },
-  { section: 'changed', sign: '!' },
-];
+const SIGNS: readonly Sign[] = ['-', '+', '!'];
+const SIGN_WORDS: Readonly<Record<Sign, string>> = { '-': 'removed', '+': 'added', '!': 'changed' };
 
 // The places a change can be in, in the order they are shown.
 const AREAS = [
-  'Response fields',
-  'Request fields',
-  'Request parameters',
-  'Enum values',
+  'Response',
+  'Request',
   'Schemas',
   'Auth scopes',
   'Error responses',
-  'Response variants',
-  'Request variants',
   'Other',
 ] as const;
 
 type Area = (typeof AREAS)[number];
 
+/** These are shown as the object they describe; the other areas as lists. */
+const isObjectArea = (area: Area): boolean => area === 'Response' || area === 'Request';
+
 interface Entry {
   readonly area: Area;
-  readonly section: Section;
-  /** The line of the diff, after its sign. */
-  readonly line: string;
+  readonly sign: Sign;
+  /** The field, scope or schema the line is about. */
+  readonly name: string;
+  readonly type?: string;
   /** What changed about it, shown in brackets; a field with several changes shows them all. */
-  readonly detail?: string;
+  readonly details: readonly string[];
 }
 
 const quoted = (text: string): string[] => [...text.matchAll(/`([^`]+)`/g)].map(([, name]) => name);
 
 const isParameter = (id: string): boolean => /parameter/.test(id);
 
+const LOCATION = /^(query|header|path|cookie)$/;
+
 /** What a change is about, and what the text says of it: for a parameter, after its location. */
-const subjectOf = ({ id, text }: SpecChange): { name?: string; rest: string[] } => {
+const subjectOf = ({
+  id,
+  text,
+}: SpecChange): { name?: string; rest: string[]; location?: string } => {
   const names = quoted(text);
   if (isParameter(id)) {
-    const location = names.findIndex((name) => /^(query|header|path|cookie)$/.test(name));
-    if (location >= 0) {
-      return { name: names[location + 1], rest: names.slice(location + 2) };
+    const at = names.findIndex((name) => LOCATION.test(name));
+    if (at >= 0) {
+      return { name: names[at + 1], rest: names.slice(at + 2), location: names[at] };
     }
   }
   return { name: names[0], rest: names.slice(1) };
@@ -86,11 +99,39 @@ const shortName = (name: string): string =>
 
 const scopeName = (scope: string): string => scope.slice(scope.lastIndexOf('/') + 1);
 
-/** The area a request or response rule is about. */
+/** The scopes a security change adds or removes, as names. */
+const scopesOf = ({ id, text }: SpecChange): string[] => {
+  const names = quoted(text);
+  if (id === 'api-security-added' || id === 'api-security-removed') {
+    // `Oauth2: [https://…/auth/a, https://…/auth/b]`: a set of scopes one scheme asks for.
+    const list = /^[^[]*\[([^\]]*)\]/.exec(names[0] ?? '');
+    return (list?.[1] ?? '')
+      .split(',')
+      .map((scope) => scopeName(scope.trim()))
+      .filter((scope) => scope !== '');
+  }
+  const scope = id.startsWith('api-security-component') ? names[names.length - 1] : names[0];
+  return scope === undefined ? [] : [scopeName(scope)];
+};
+
+/** The scopes really added or removed: a set that is only regrouped changes nothing. */
+const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
+  const added = new Set(changes.filter(({ id }) => id.endsWith('-added')).flatMap(scopesOf));
+  const removed = new Set(changes.filter(({ id }) => id.endsWith('-removed')).flatMap(scopesOf));
+  return [
+    ...[...added]
+      .filter((scope) => !removed.has(scope))
+      .map((name) => ({ area: 'Auth scopes' as const, sign: '+' as const, name, details: [] })),
+    ...[...removed]
+      .filter((scope) => !added.has(scope))
+      .map((name) => ({ area: 'Auth scopes' as const, sign: '-' as const, name, details: [] })),
+  ];
+};
+
+/** The part of the API a request or response rule is about. */
 const areaOf = (id: string): Area | undefined => {
-  if (isParameter(id)) return 'Request parameters';
-  if (id.startsWith('request-') || id.startsWith('new-')) return 'Request fields';
-  if (id.startsWith('response-')) return 'Response fields';
+  if (isParameter(id) || id.startsWith('request-') || id.startsWith('new-')) return 'Request';
+  if (id.startsWith('response-')) return 'Response';
   return undefined;
 };
 
@@ -98,9 +139,13 @@ const camelCase = (kebab: string): string =>
   kebab.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 
 /** What changed about a field, in a few words, for the rules that say more than their name. */
-const detailOf = (id: string, rest: readonly string[]): string | undefined => {
+const detailOf = (
+  id: string,
+  rest: readonly string[],
+  type: string | undefined
+): string | undefined => {
   if (/-type-(changed|specialized|generalized)$/.test(id) && rest.length >= 3) {
-    return `${rest[1]} → ${rest[2]}`;
+    return type === undefined ? `${rest[1]} → ${rest[2]}` : `was ${rest[1]}`;
   }
   if (/-default-value-changed$/.test(id) && rest.length >= 2) {
     return `default ${rest[0]} → ${rest[1]}`;
@@ -123,9 +168,6 @@ const detailOf = (id: string, rest: readonly string[]): string | undefined => {
   return undefined;
 };
 
-const MAX_VARIANTS_NAMED = 3;
-const COMBINATORS = new Set(['oneOf', 'anyOf', 'allOf']);
-
 /** `#/components/schemas/SlotContentId` as `SlotContentId`; an inline schema keeps its number. */
 const variantName = (variant: string): string =>
   variant
@@ -133,104 +175,90 @@ const variantName = (variant: string): string =>
     .replace(/^#\/components\/schemas\//, '')
     .replace(/^#/, '');
 
-/**
- * The variants a field of the request or the response gained or lost: the schemas added to or
- * removed from its `oneOf`, `anyOf` or `allOf` list, or the keys of its discriminator mapping.
- */
-const variantEntries = ({ id, text }: SpecChange): Entry[] | undefined => {
-  const [list, second] = quoted(text);
-  if (list === undefined) {
-    return undefined;
-  }
+const listedVariants = (list: string): string => {
   const names = list
     .split(',')
     .map(variantName)
     .filter((name) => name !== '');
-  const shown = names.slice(0, MAX_VARIANTS_NAMED).join(', ');
   const more = names.length - MAX_VARIANTS_NAMED;
-  const variants = more > 0 ? `${shown} and ${more} more` : shown;
-  // A response body has no field, only its list: `… to the response body `anyOf` list`.
-  const field =
-    second === undefined || COMBINATORS.has(second) ? 'the response body' : shortName(tidy(second));
-  const area = id.startsWith('request-') ? 'Request variants' : 'Response variants';
-  const section = /-(added)$/.test(id) ? 'added' : 'removed';
-  return [{ area, section, line: `${variants} on ${field}` }];
+  return more > 0
+    ? `${names.slice(0, MAX_VARIANTS_NAMED).join(', ')} and ${more} more`
+    : names.join(', ');
 };
 
 const entriesOf = (change: SpecChange): Entry[] | undefined => {
-  const { id, text } = change;
-  const { name, rest } = subjectOf(change);
-  const path = name === undefined ? undefined : tidy(name);
+  const { id, text, type } = change;
+  const names = quoted(text);
   const area = areaOf(id);
 
   if (id.startsWith('api-security')) {
     return []; // Netted out over every security change of the endpoint, in `scopeEntries`.
   }
   if (id === 'response-non-success-status-added') {
-    return name === undefined
+    return names[0] === undefined
       ? undefined
-      : [{ area: 'Error responses', section: 'added', line: name }];
-  }
-  if (/-enum-value-(added|removed)$/.test(id)) {
-    const [value, property] = quoted(text);
-    if (value === undefined) return undefined;
-    const field = property === undefined ? '' : ` (${shortName(tidy(property))})`;
-    const section = id.endsWith('-added') ? 'added' : 'removed';
-    return [{ area: 'Enum values', section, line: `${value}${field}` }];
-  }
-  if (/discriminator-mapping|-(one|any|all)-of-(added|removed)$/.test(id)) {
-    return variantEntries(change);
+      : [{ area: 'Error responses', sign: '+', name: names[0], details: [] }];
   }
   if (id === 'api-schema-removed') {
-    return path === undefined ? undefined : [{ area: 'Schemas', section: 'removed', line: path }];
+    return names[0] === undefined
+      ? undefined
+      : [{ area: 'Schemas', sign: '-', name: tidy(names[0]), details: [] }];
   }
-  if (area === undefined || path === undefined) {
+
+  // An enum value or a variant is a change of the field it is of, which has its new type.
+  const isEnum = /-enum-value-(added|removed)$/.test(id);
+  const isVariant = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/.test(id);
+  if (isEnum || isVariant) {
+    const [list, second] = names;
+    if (list === undefined) return undefined;
+    const body = second === undefined || COMBINATORS.has(second);
+    const added = /-added$/.test(id);
+    const what = isEnum ? list : listedVariants(list);
+    return [
+      {
+        area: id.startsWith('request-') ? 'Request' : 'Response',
+        sign: '!',
+        name: body ? RESPONSE_BODY : shortName(tidy(second)),
+        type,
+        // A type that was cut may have lost the value or variant that changed.
+        details: type === undefined || type.includes('…') ? [`${added ? '+' : '-'} ${what}`] : [],
+      },
+    ];
+  }
+
+  const { name, rest, location } = subjectOf(change);
+  if (area === undefined || name === undefined) {
     return undefined;
   }
+  const entry = (sign: Sign, details: ReadonlyArray<string | undefined>): Entry[] => [
+    {
+      area,
+      sign,
+      name: shortName(tidy(name)),
+      type,
+      details: [location, ...details].filter((detail): detail is string => detail !== undefined),
+    },
+  ];
   if (id.endsWith('-deprecated')) {
-    return [{ area, section: 'changed', line: shortName(path), detail: 'deprecated' }];
+    return entry('!', ['deprecated']);
   }
   if (
     /^new-(optional|required)-request-(property|parameter)$/.test(id) ||
     /^response-(optional|required)-property-added$/.test(id)
   ) {
-    return [{ area, section: 'added', line: shortName(path) }];
+    return entry('+', []);
   }
   if (/-(removed|deleted)$/.test(id)) {
-    return [{ area, section: 'removed', line: shortName(path) }];
+    return entry('-', []);
   }
-  return [{ area, section: 'changed', line: shortName(path), detail: detailOf(id, rest) }];
-};
-
-const scopesOf = ({ id, text }: SpecChange): string[] => {
-  const names = quoted(text);
-  if (id === 'api-security-added' || id === 'api-security-removed') {
-    // `Oauth2: [https://…/auth/a, https://…/auth/b]`: a set of scopes one scheme asks for.
-    const list = /^[^[]*\[([^\]]*)\]/.exec(names[0] ?? '');
-    return (list?.[1] ?? '')
-      .split(',')
-      .map((scope) => scopeName(scope.trim()))
-      .filter((scope) => scope !== '');
-  }
-  const scope = id.startsWith('api-security-component') ? names[names.length - 1] : names[0];
-  return scope === undefined ? [] : [scopeName(scope)];
-};
-
-/** The scopes really added or removed: a set that is only regrouped changes nothing. */
-const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
-  const added = new Set(changes.filter(({ id }) => id.endsWith('-added')).flatMap(scopesOf));
-  const removed = new Set(changes.filter(({ id }) => id.endsWith('-removed')).flatMap(scopesOf));
-  return [
-    ...[...added]
-      .filter((scope) => !removed.has(scope))
-      .map((line) => ({ area: 'Auth scopes' as const, section: 'added' as const, line })),
-    ...[...removed]
-      .filter((scope) => !added.has(scope))
-      .map((line) => ({ area: 'Auth scopes' as const, section: 'removed' as const, line })),
-  ];
+  return entry('!', [detailOf(id, rest, type)]);
 };
 
 const byText = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+// The location of a parameter comes before what changed about it.
+const byLocationFirst = (a: string, b: string): number =>
+  Number(LOCATION.test(b)) - Number(LOCATION.test(a)) || byText(a, b);
 
 /** Lines of a diff that are always shown whole. */
 interface FixedPart {
@@ -240,11 +268,11 @@ interface FixedPart {
   readonly count: number;
 }
 
-/** A list of names under its section's name, of which `shown` are written out. */
+/** A list of names, of which `shown` are written out, under a title unless the area is an object. */
 export interface ListPart {
   readonly kind: 'list';
-  readonly title: string;
-  readonly sign: string;
+  readonly title?: string;
+  readonly sign: Sign;
   readonly names: readonly string[];
   /** What the names are, for the line that counts the ones left out. */
   readonly moreLabel: string;
@@ -253,35 +281,46 @@ export interface ListPart {
 
 export type ChangePart = FixedPart | ListPart;
 
-/** The changes in one place (response fields, …): a heading and the parts of its diff block. */
+/** The changes in one place (response, request, …): a heading and the parts of its diff block. */
 export interface ChangeArea {
   readonly heading: string;
+  readonly braced: boolean;
   readonly parts: readonly ChangePart[];
 }
 
-const listPart = (
-  area: Area,
-  section: Section,
-  sign: string,
-  entries: readonly Entry[]
-): ListPart => {
-  const details = new Map<string, string[]>();
-  for (const { line, detail } of entries) {
-    const known = details.get(line) ?? [];
-    details.set(line, detail !== undefined && !known.includes(detail) ? [...known, detail] : known);
+interface Field {
+  readonly name: string;
+  readonly type?: string;
+  readonly details: Set<string>;
+}
+
+/** One line per field: its name and type, then in brackets what changed about it. */
+const lineOf = ({ name, type, details }: Field): string =>
+  `${name}${type === undefined ? '' : `: ${type}`}${
+    details.size > 0 ? ` (${[...details].sort(byLocationFirst).join(', ')})` : ''
+  }`;
+
+const listPart = (area: Area, sign: Sign, entries: readonly Entry[]): ListPart => {
+  // A field that several changes are about is one line, with the type and all the details.
+  const fields = new Map<string, Field>();
+  for (const { name, type, details } of entries) {
+    const known = fields.get(name);
+    const field: Field = {
+      name,
+      type: known?.type ?? type,
+      details: known?.details ?? new Set<string>(),
+    };
+    details.forEach((detail) => field.details.add(detail));
+    fields.set(name, field);
   }
-  const names = [...details.entries()]
-    .map(
-      ([line, found]) =>
-        `${line}${found.length > 0 ? ` (${[...found].sort(byText).join(', ')})` : ''}`
-    )
-    .sort(byText);
+  const names = [...fields.values()].map(lineOf).sort(byText);
+  const object = isObjectArea(area);
   return {
     kind: 'list',
-    title: section,
+    ...(object ? {} : { title: SIGN_WORDS[sign] }),
     sign,
     names,
-    moreLabel: section === 'changed' ? 'changed' : area.toLowerCase(),
+    moreLabel: object || sign === '!' ? SIGN_WORDS[sign] : area.toLowerCase(),
     shown: Math.min(names.length, DEFAULT_NAMES_SHOWN),
   };
 };
@@ -293,17 +332,22 @@ export const partLines = (part: ChangePart): string[] => {
   }
   const more = part.names.length - part.shown;
   return [
-    part.title,
+    ...(part.title === undefined ? [] : [part.title]),
     ...part.names.slice(0, part.shown).map((name) => `${part.sign} ${name}`),
     ...(more > 0 ? [`  … and ${more} more ${part.moreLabel}`] : []),
   ];
 };
 
-/** The lines of an area: its bold heading, then one diff block with its parts a blank line apart. */
-export const areaLines = ({ heading, parts }: ChangeArea): string[] => [
+/**
+ * The lines of an area: its bold heading, then one diff block. The response and the request are
+ * shown as the object they are; the other areas have their parts a blank line apart.
+ */
+export const areaLines = ({ heading, braced, parts }: ChangeArea): string[] => [
   heading,
   '```diff',
-  ...parts.flatMap((part, index) => (index === 0 ? partLines(part) : ['', ...partLines(part)])),
+  ...(braced
+    ? ['{', '  ...', ...parts.flatMap(partLines), '}']
+    : parts.flatMap((part, index) => (index === 0 ? partLines(part) : ['', ...partLines(part)]))),
   '```',
   '',
 ];
@@ -324,11 +368,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   const scopes = scopeEntries(securityChanges);
   entries.push(...scopes);
   const regrouped = securityChanges.length > 0 && scopes.length === 0;
-  const fixed = (count: number, ...lines: string[]): FixedPart => ({
-    kind: 'fixed',
-    count,
-    lines,
-  });
+  const fixed = (count: number, ...lines: string[]): FixedPart => ({ kind: 'fixed', count, lines });
 
   return AREAS.flatMap((area): ChangeArea[] => {
     const heading = `**${area}**`;
@@ -338,6 +378,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
         : [
             {
               heading,
+              braced: false,
               parts: [
                 fixed(
                   [...otherRules.values()].reduce((total, count) => total + count, 0),
@@ -350,19 +391,20 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
             },
           ];
     }
-    const ofArea = entries.filter((entry) => entry.area === area);
     if (area === 'Auth scopes' && regrouped) {
-      return [{ heading, parts: [fixed(0, '! same scopes, reordered')] }];
+      return [{ heading, braced: false, parts: [fixed(0, '! same scopes, reordered')] }];
     }
+    const ofArea = entries.filter((entry) => entry.area === area);
     if (ofArea.length === 0) {
       return [];
     }
     return [
       {
         heading,
-        parts: SECTIONS.flatMap(({ section, sign }) => {
-          const inSection = ofArea.filter((entry) => entry.section === section);
-          return inSection.length === 0 ? [] : [listPart(area, section, sign, inSection)];
+        braced: isObjectArea(area),
+        parts: SIGNS.flatMap((sign) => {
+          const withSign = ofArea.filter((entry) => entry.sign === sign);
+          return withSign.length === 0 ? [] : [listPart(area, sign, withSign)];
         }),
       },
     ];

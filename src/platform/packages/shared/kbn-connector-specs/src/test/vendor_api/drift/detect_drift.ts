@@ -15,6 +15,8 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
+import { fieldTypeOf } from './field_type';
+import type { SnapshotDocuments } from './field_type';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
 import {
@@ -53,6 +55,12 @@ export interface SpecChange {
   readonly text: string;
   /** `METHOD /path`, or an MCP tool's name, for changes to an operation. */
   readonly operation?: string;
+  /**
+   * The type of the field the change is about, such as `string` or `boolean | string | Slot`, read
+   * from the snapshot it is in: the committed one for a field that was removed, else the refreshed
+   * one. Missing when the change isn't about a field or its path can't be followed.
+   */
+  readonly type?: string;
 }
 
 export interface SourceDrift {
@@ -356,6 +364,19 @@ const outcomeOf = (drift: Omit<ConnectorDrift, 'outcome'>): DriftOutcome => {
     : 'none';
 };
 
+const parseSnapshot = (text: string | undefined): unknown => {
+  try {
+    return text === undefined ? undefined : JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+};
+
+const withType = (change: SpecChange, documents: SnapshotDocuments): SpecChange => {
+  const type = fieldTypeOf(change, documents);
+  return type === undefined ? change : { ...change, type };
+};
+
 const classifyChanges = async ({
   format,
   committed,
@@ -372,7 +393,10 @@ const classifyChanges = async ({
 }): Promise<readonly SpecChange[] | undefined> => {
   if (!isProtocolFormat(format)) {
     const entries = await diff(committed ?? '{}', current ?? '{}');
-    return entries?.filter((entry) => !stillInSpec(entry, latestDocument)).map(toSpecChange);
+    const documents = { committed: parseSnapshot(committed), current: parseSnapshot(current) };
+    return entries
+      ?.filter((entry) => !stillInSpec(entry, latestDocument))
+      .map((entry) => withType(toSpecChange(entry), documents));
   }
   if (committed === undefined || current === undefined) {
     return undefined;

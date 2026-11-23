@@ -177,6 +177,27 @@ describe('detectDrift', () => {
     });
   });
 
+  it('gives a change the type of its field, read from the refreshed snapshot', async () => {
+    documents[SPEC_URL] = specYaml({
+      itemProperties: '{ name: { type: string }, color: { type: string, enum: [red, blue] } }',
+    });
+    diffEntries = [
+      {
+        ...entry('response-optional-property-added', 1),
+        text: 'added the optional property `color` to the response with the `200` status',
+      },
+      entry('api-path-added', 1),
+    ];
+
+    const { sources } = await detect();
+
+    expect(sources.main.changes).toMatchObject([
+      { id: 'response-optional-property-added', type: 'red | blue' },
+      { id: 'api-path-added' },
+    ]);
+    expect(sources.main.changes?.[1]).not.toHaveProperty('type');
+  });
+
   it('reports vendor drift when an action fails against the latest spec only', async () => {
     documents[SPEC_URL] = specYaml({ itemsPath: '/v2/items' });
     diffEntries = [entry('api-path-removed-without-deprecation', 3)];
