@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { tasks } from './tasks';
@@ -91,6 +92,22 @@ describe('data telemetry collection tasks', () => {
         });
 
         expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({});
+      });
+
+      it('only looks for the latest transaction within the last 7 days', async () => {
+        const search = jest.fn().mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+
+        await task?.executor({ indices, telemetryClient: { search } } as any);
+
+        expect(search).toHaveBeenCalledTimes(1);
+        expect(search.mock.calls[0][0].query).toEqual({
+          bool: {
+            filter: [
+              { term: { 'processor.event': 'transaction' } },
+              { range: { '@timestamp': { gte: 'now-7d' } } },
+            ],
+          },
+        });
       });
     });
 
@@ -247,6 +264,17 @@ describe('data telemetry collection tasks', () => {
       });
     });
 
+    it('only looks at documents from the last day', async () => {
+      const search = jest.fn().mockResolvedValueOnce({});
+
+      await task?.executor({ indices, telemetryClient: { search } } as any);
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(search.mock.calls[0][0].query).toEqual({
+        bool: { filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }] },
+      });
+    });
+
     describe('with no results', () => {
       it('returns an empty map', async () => {
         const search = jest.fn().mockResolvedValueOnce({});
@@ -282,6 +310,17 @@ describe('data telemetry collection tasks', () => {
         host: {
           os: { platform: ['linux', 'windows', 'macos'] },
         },
+      });
+    });
+
+    it('only looks at documents from the last day', async () => {
+      const search = jest.fn().mockResolvedValueOnce({});
+
+      await task?.executor({ indices, telemetryClient: { search } } as any);
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(search.mock.calls[0][0].query).toEqual({
+        bool: { filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }] },
       });
     });
 
@@ -363,6 +402,65 @@ describe('data telemetry collection tasks', () => {
       });
 
       getTime.mockRestore();
+    });
+
+    // this task is exempt from the generic time range test, so check its bounded searches here
+    it('limits the 1d counts to the last day and leaves the all-time counts unbounded', async () => {
+      const search = jest.fn().mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      await task?.executor({ indices, telemetryClient: { search } } as any);
+
+      const countFilters: Array<Array<{ range?: object }>> = search.mock.calls
+        .map(([params]) => params)
+        .filter((params) => params.track_total_hits === true)
+        .map((params) => params.query.bool.filter);
+
+      const lastDay = countFilters.filter((filter) => filter.some((clause) => clause.range));
+      const allTime = countFilters.filter((filter) => !filter.some((clause) => clause.range));
+
+      expect(lastDay).toHaveLength(5);
+      lastDay.forEach((filter) =>
+        expect(filter).toContainEqual({ range: { '@timestamp': { gte: 'now-1d' } } })
+      );
+      expect(allTime).toHaveLength(5);
+    });
+  });
+
+  describe('versions', () => {
+    const task = tasks.find((t) => t.name === 'versions');
+
+    it('returns the version of the latest APM Server', async () => {
+      const search = jest.fn().mockResolvedValueOnce({
+        hits: { hits: [{ fields: { 'observer.version': ['9.1.2'] } }] },
+      });
+
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({
+        version: { apm_server: { major: 9, minor: 1, patch: 2 } },
+      });
+    });
+
+    it('returns an empty result without data in the last 7 days', async () => {
+      const search = jest.fn().mockResolvedValueOnce({ hits: { hits: [] } });
+
+      expect(await task?.executor({ indices, telemetryClient: { search } } as any)).toEqual({});
+    });
+
+    it('only looks at documents from the last 7 days and stops after the first match', async () => {
+      const search = jest.fn().mockResolvedValueOnce({ hits: { hits: [] } });
+
+      await task?.executor({ indices, telemetryClient: { search } } as any);
+
+      expect(search).toHaveBeenCalledTimes(1);
+      const [params] = search.mock.calls[0];
+      expect(params.terminate_after).toBe(1);
+      expect(params.query).toEqual({
+        bool: {
+          filter: [
+            { exists: { field: 'observer.version' } },
+            { range: { '@timestamp': { gte: 'now-7d' } } },
+          ],
+        },
+      });
     });
   });
 
@@ -1033,6 +1131,103 @@ describe('data telemetry collection tasks', () => {
       expect(
         await task?.executor({ indices, telemetryClient: { search } } as any)
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('time range bounds', () => {
+    interface RecordedSearch {
+      task: string;
+      params: estypes.SearchRequest;
+    }
+
+    // Tasks that are allowed to search without a lower bound on `@timestamp`, and why.
+    const UNBOUNDED_SEARCH_EXEMPTIONS: Record<string, string> = {
+      agent_configuration: 'counts the documents of the small .apm-agent-configuration index',
+      per_agent_config_settings: 'reads the small .apm-agent-configuration index',
+      processor_events: 'reports the documented all-time `counts.*.all` and `retainment.*` metrics',
+    };
+
+    const hasTimestampLowerBound = (query?: estypes.QueryDslQueryContainer): boolean => {
+      if (!query) {
+        return false;
+      }
+
+      const range = query.range?.[AT_TIMESTAMP] as { gte?: string | number; gt?: string | number };
+      if (range?.gte !== undefined || range?.gt !== undefined) {
+        return true;
+      }
+
+      const { filter, must } = query.bool ?? {};
+      return [filter, must].flat().some((clause) => hasTimestampLowerBound(clause));
+    };
+
+    const recordSearches = async (): Promise<RecordedSearch[]> => {
+      const recorded: RecordedSearch[] = [];
+
+      for (const task of tasks) {
+        const search = jest.fn().mockImplementation(async (params: estypes.SearchRequest) => {
+          recorded.push({ task: task.name, params });
+
+          return {
+            hits: {
+              // aggregated_transactions anchors its follow-up queries on the latest transaction
+              hits:
+                task.name === 'aggregated_transactions'
+                  ? [{ fields: { [AT_TIMESTAMP]: [new Date().toISOString()] } }]
+                  : [],
+              total: { value: 0 },
+            },
+          };
+        });
+
+        const savedObjectsClient = savedObjectsClientMock.create();
+        savedObjectsClient.find.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          page: 1,
+          per_page: 0,
+        });
+
+        await task.executor({
+          indices,
+          savedObjectsClient,
+          telemetryClient: {
+            search,
+            indicesStats: jest.fn().mockResolvedValue({}),
+            fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
+            transportRequest: jest.fn().mockResolvedValue({}),
+          },
+        } as any);
+      }
+
+      return recorded;
+    };
+
+    it('only exempts tasks that exist', () => {
+      const taskNames = tasks.map((task) => task.name);
+
+      expect(
+        Object.keys(UNBOUNDED_SEARCH_EXEMPTIONS).filter((name) => !taskNames.includes(name))
+      ).toEqual([]);
+    });
+
+    it('bounds every search by a @timestamp range unless the task is exempt', async () => {
+      const recorded = await recordSearches();
+
+      // make sure the recording harness sees the searches of the tasks it is meant to guard
+      const recordedTasks = new Set(recorded.map(({ task }) => task));
+      ['aggregated_transactions', 'cloud', 'host', 'versions', 'services'].forEach((name) =>
+        expect(recordedTasks).toContain(name)
+      );
+
+      const unbounded = recorded
+        .filter(
+          ({ task, params }) =>
+            !(task in UNBOUNDED_SEARCH_EXEMPTIONS) && !hasTimestampLowerBound(params.query)
+        )
+        .map(({ task, params }) => `${task}: ${JSON.stringify(params.index)}`);
+
+      expect(unbounded).toEqual([]);
     });
   });
 });

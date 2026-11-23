@@ -91,6 +91,8 @@ const AGENT_NAMES_WITHOUT_OTEL = without(AGENT_NAMES, ...OPEN_TELEMETRY_AGENT_NA
 type TimeRange = (typeof TIME_RANGES)[number];
 
 const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
+// For lookups of the latest document, which can be older than a day on quiet clusters
+const range7d = { range: { '@timestamp': { gte: 'now-7d' } } };
 const timeout = '5m';
 
 interface TelemetryTask {
@@ -194,7 +196,7 @@ export const tasks: TelemetryTask[] = [
           timeout,
           query: {
             bool: {
-              filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }],
+              filter: [{ term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } }, range7d],
             },
           },
           size: 1,
@@ -305,6 +307,11 @@ export const tasks: TelemetryTask[] = [
         track_total_hits: false,
         size: 0,
         timeout,
+        query: {
+          bool: {
+            filter: [range1d],
+          },
+        },
         aggs: {
           [az]: {
             terms: {
@@ -356,6 +363,11 @@ export const tasks: TelemetryTask[] = [
         track_total_hits: false,
         size: 0,
         timeout,
+        query: {
+          bool: {
+            filter: [range1d],
+          },
+        },
         aggs: {
           platform: {
             terms: {
@@ -758,8 +770,8 @@ export const tasks: TelemetryTask[] = [
         index: [indices.transaction, indices.span, indices.error],
         terminate_after: 1,
         query: {
-          exists: {
-            field: 'observer.version',
+          bool: {
+            filter: [{ exists: { field: 'observer.version' } }, range7d],
           },
         },
         track_total_hits: false,

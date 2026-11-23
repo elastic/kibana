@@ -6243,7 +6243,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud availability zones in terms of document count overall. Example: [us-east1-c, us-east1-b]"
+                  "description": "An array of the top 10 cloud availability zones in terms of document count within the last day. Example: [us-east1-c, us-east1-b]"
                 }
               }
             },
@@ -6252,7 +6252,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud providers in terms of document count overall. Example: [azure]"
+                  "description": "An array of the top 10 cloud providers in terms of document count within the last day. Example: [azure]"
                 }
               }
             },
@@ -6261,7 +6261,7 @@
               "items": {
                 "type": "keyword",
                 "_meta": {
-                  "description": "An array of the top 10 cloud regions in terms of document count overall. Example: [us-west1, us-central1]"
+                  "description": "An array of the top 10 cloud regions in terms of document count within the last day. Example: [us-west1, us-central1]"
                 }
               }
             }
@@ -6276,7 +6276,7 @@
                   "items": {
                     "type": "keyword",
                     "_meta": {
-                      "description": "An array of the top 10 operating system platforms in terms of document count within an hour. Example: [linux, win32]"
+                      "description": "An array of the top 10 operating system platforms in terms of document count within the last day. Example: [linux, win32]"
                     }
                   }
                 }

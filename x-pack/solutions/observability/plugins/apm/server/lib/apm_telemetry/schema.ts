@@ -831,7 +831,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud availability zones in terms of document count overall. Example: [us-east1-c, us-east1-b]',
+            'An array of the top 10 cloud availability zones in terms of document count within the last day. Example: [us-east1-c, us-east1-b]',
         },
       },
     },
@@ -841,7 +841,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud providers in terms of document count overall. Example: [azure]',
+            'An array of the top 10 cloud providers in terms of document count within the last day. Example: [azure]',
         },
       },
     },
@@ -851,7 +851,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
         type: 'keyword',
         _meta: {
           description:
-            'An array of the top 10 cloud regions in terms of document count overall. Example: [us-west1, us-central1]',
+            'An array of the top 10 cloud regions in terms of document count within the last day. Example: [us-west1, us-central1]',
         },
       },
     },
@@ -864,7 +864,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'keyword',
           _meta: {
             description:
-              'An array of the top 10 operating system platforms in terms of document count within an hour. Example: [linux, win32]',
+              'An array of the top 10 operating system platforms in terms of document count within the last day. Example: [linux, win32]',
           },
         },
       },
