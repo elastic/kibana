@@ -282,7 +282,8 @@ describe('digital experience session replay', () => {
       it('keeps typical sessions as they were before the option existed', () => {
         // Taken from the output of the scenario before `sessionLength` was added, with the browser
         // dataset's index names, and before users and frustration signals, which don't change
-        // anything else
+        // anything else. Updated for app versions, diurnal traffic, incidents and the clicks
+        // retried after a failure, which do.
         const docs = generate(
           {
             replaySize: 'light',
@@ -300,10 +301,10 @@ describe('digital experience session replay', () => {
           last: Math.max(...times),
           sha: createHash('sha256').update(JSON.stringify(docs)).digest('hex'),
         }).toEqual({
-          count: 6035,
-          first: 1792152000326,
-          last: 1792152599999,
-          sha: 'a118ec96033e232517165d1729767f93b6fd0ef9dbb4de44614e4dccbb63145f',
+          count: 7085,
+          first: 1792152000161,
+          last: 1792152597374,
+          sha: '926897f888373ae002838bfbf3691adf170933ca5e0b0f9fcd933c470c641a32',
         });
       });
 

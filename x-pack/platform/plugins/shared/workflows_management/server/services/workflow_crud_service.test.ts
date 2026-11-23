@@ -36,6 +36,7 @@ import {
 } from '../api/lib/workflow_disable_all';
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
+import { WorkflowIndexUnavailableError } from '../lib/transient_es_errors';
 import { applyWorkflowVersion } from '../lib/workflow_version';
 import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
@@ -743,11 +744,14 @@ describe('WorkflowCrudService', () => {
         const service = new WorkflowCrudService(deps);
         const read = service.getWorkflowDocumentsWithVersionByIds(['wf-1']);
         const assertion = expect(read).rejects.toThrow(
-          'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+          new WorkflowIndexUnavailableError(
+            'Could not read workflow wf-1: No shard available for [MultiGetShardRequest/unset]'
+          )
         );
         await jest.advanceTimersByTimeAsync(100 + 200 + 400 + 800 + 1600);
 
         await assertion;
+        await expect(read).rejects.toBeInstanceOf(WorkflowIndexUnavailableError);
         expect(mget).toHaveBeenCalledTimes(6);
       });
     });
@@ -850,6 +854,88 @@ describe('WorkflowCrudService', () => {
         { status: 'written' },
         { status: 'rejected', error: new Error('queue full') },
       ]);
+    });
+
+    it.each([502, 503, 504])(
+      'reports items that failed with status %i as index unavailable',
+      async (status) => {
+        const { deps, client } = makeDeps();
+        client.bulk.mockResolvedValue({
+          items: [
+            {
+              create: {
+                _id: 'wf-unavailable',
+                status,
+                error: { type: 'node_not_connected_exception', reason: 'node disconnected' },
+              },
+            },
+          ],
+        });
+
+        const service = new WorkflowCrudService(deps);
+        const [result] = await service.bulkWriteWorkflowDocuments([
+          { id: 'wf-unavailable', document: makeSource() },
+        ]);
+
+        expect(result.status === 'failed' && result.error).toBeInstanceOf(
+          WorkflowIndexUnavailableError
+        );
+      }
+    );
+
+    it('reports items that failed for good with a plain error', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              _id: 'wf-invalid',
+              status: 400,
+              error: { type: 'document_parsing_exception', reason: 'strict mapping' },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const [result] = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-invalid', document: makeSource() },
+      ]);
+
+      expect(result.status === 'failed' && result.error).not.toBeInstanceOf(
+        WorkflowIndexUnavailableError
+      );
+    });
+
+    it('reports items whose shard was not available with an index unavailable error', async () => {
+      const { deps, client } = makeDeps();
+      client.bulk.mockResolvedValue({
+        items: [
+          {
+            create: {
+              _id: 'wf-unassigned',
+              status: 503,
+              error: {
+                type: 'unavailable_shards_exception',
+                reason: 'primary shard is not active',
+              },
+            },
+          },
+        ],
+      });
+
+      const service = new WorkflowCrudService(deps);
+      const [result] = await service.bulkWriteWorkflowDocuments([
+        { id: 'wf-unassigned', document: makeSource() },
+      ]);
+
+      expect(result).toEqual({
+        status: 'failed',
+        error: new WorkflowIndexUnavailableError('primary shard is not active'),
+      });
+      expect(result.status === 'failed' && result.error).toBeInstanceOf(
+        WorkflowIndexUnavailableError
+      );
     });
 
     it('reports every item as rejected when Elasticsearch rejects the whole request as too busy', async () => {
