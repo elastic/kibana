@@ -182,7 +182,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 | # | Step | Responsibility |
 | --- | --- | --- |
-| 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
+| 1 | `WaitForResourcesStep` | Wait for the `.rule-events` and `.alert-actions` data streams the rule executor uses (`RULE_EXECUTOR_RESOURCE_KEYS`). Other resources cannot delay or fail a run. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
 | 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `alerts.max`) and thread them onto `state.activeGroups`. |
