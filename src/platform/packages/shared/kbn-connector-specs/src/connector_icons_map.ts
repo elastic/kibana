@@ -446,4 +446,8 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.postgresql',
+    lazy(() => import(/* webpackChunkName: "connectorIconPostgresql" */ './specs/postgresql/icon')),
+  ],
 ]);

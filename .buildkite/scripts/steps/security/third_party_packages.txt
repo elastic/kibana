@@ -46,6 +46,7 @@ browserslist
 react-day-picker
 mysql2
 mssql
+pg
 jszip
 @rsdoctor/rspack-plugin
 @rspack/core
@@ -75,4 +76,5 @@ oxlint-tsgolint
 bump-cli
 @oxlint/plugins
 @types/mssql
+@types/pg
 monaco-marker-data-provider

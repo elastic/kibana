@@ -27,6 +27,7 @@ const RSPACK_ONLY_EXTERNALS = [
   'mssql',
   'mysql2',
   'mysql2/promise',
+  'pg',
 ];
 
 describe('externals configuration', () => {
