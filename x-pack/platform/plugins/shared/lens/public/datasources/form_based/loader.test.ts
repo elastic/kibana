@@ -474,6 +474,20 @@ describe('loader', () => {
       const { references, state: persistedState } = extractReferences(state);
       expect(injectReferences(persistedState, references).layers).toEqual(state.layers);
     });
+
+    it('should not persist useEsql when it is not set or false', () => {
+      [state, { ...state, useEsql: false }].forEach((currentState) => {
+        const { references, state: persistedState } = extractReferences(currentState);
+        expect(persistedState).not.toHaveProperty('useEsql');
+        expect(injectReferences(persistedState, references)).not.toHaveProperty('useEsql');
+      });
+    });
+
+    it('should round-trip useEsql when true', () => {
+      const { references, state: persistedState } = extractReferences({ ...state, useEsql: true });
+      expect(persistedState.useEsql).toBe(true);
+      expect(injectReferences(persistedState, references).useEsql).toBe(true);
+    });
   });
 
   describe('changeIndexPattern', () => {

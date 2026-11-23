@@ -109,6 +109,11 @@ export interface FormBasedLayer {
 
 export interface FormBasedPersistedState {
   layers: Record<string, Omit<FormBasedLayer, 'indexPatternId'>>;
+  /**
+   * When true, the chart fetches data with ES|QL instead of DSL behind the scenes.
+   * Only persisted when true, so charts saved before this field existed keep using DSL.
+   */
+  useEsql?: boolean;
 }
 
 export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
@@ -116,6 +121,7 @@ export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, FormBasedLayer>;
+  useEsql?: boolean;
 }
 
 export interface TextBasedLayerColumn {

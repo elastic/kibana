@@ -53,10 +53,11 @@ function getLayerReferenceName(layerId: string) {
   return `indexpattern-datasource-layer-${layerId}`;
 }
 
-export function extractReferences({ layers }: FormBasedPrivateState) {
+export function extractReferences({ layers, useEsql }: FormBasedPrivateState) {
   const references: Reference[] = [];
   const persistableState: FormBasedPersistedState = {
     layers: {},
+    ...(useEsql ? { useEsql } : {}),
   };
   Object.entries(layers).forEach(([layerId, { indexPatternId, ...persistableLayer }]) => {
     persistableState.layers[layerId] = persistableLayer;
@@ -85,6 +86,7 @@ export function injectReferences(state: FormBasedPersistedState, references: Ref
   });
   return {
     layers,
+    ...(state.useEsql ? { useEsql: true } : {}),
   };
 }
 
