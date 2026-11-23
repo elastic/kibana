@@ -1,0 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import { ExecutionStatus } from '@kbn/workflows';
+
+export const STATUS_LABELS = {
+  [ExecutionStatus.PENDING]: i18n.translate('workflows.executionStatus.pending', {
+    defaultMessage: 'Pending',
+  }),
+  [ExecutionStatus.QUEUED]: i18n.translate('workflows.executionStatus.queued', {
+    defaultMessage: 'Queued',
+  }),
+  [ExecutionStatus.WAITING]: i18n.translate('workflows.executionStatus.waiting', {
+    defaultMessage: 'Waiting',
+  }),
+  [ExecutionStatus.WAITING_FOR_INPUT]: i18n.translate('workflows.executionStatus.waitingForInput', {
+    defaultMessage: 'Waiting',
+  }),
+  [ExecutionStatus.WAITING_FOR_CHILD]: i18n.translate('workflows.executionStatus.waitingForChild', {
+    defaultMessage: 'Waiting',
+  }),
+  [ExecutionStatus.RUNNING]: i18n.translate('workflows.executionStatus.running', {
+    defaultMessage: 'Running',
+  }),
+  [ExecutionStatus.COMPLETED]: i18n.translate('workflows.executionStatus.completed', {
+    defaultMessage: 'Success',
+  }),
+  [ExecutionStatus.FAILED]: i18n.translate('workflows.executionStatus.failed', {
+    defaultMessage: 'Failed',
+  }),
+  [ExecutionStatus.CANCELLED]: i18n.translate('workflows.executionStatus.cancelled', {
+    defaultMessage: 'Canceled',
+  }),
+  [ExecutionStatus.TIMED_OUT]: i18n.translate('workflows.executionStatus.timedOut', {
+    defaultMessage: 'Timed out',
+  }),
+  [ExecutionStatus.SKIPPED]: i18n.translate('workflows.executionStatus.skipped', {
+    defaultMessage: 'Skipped',
+  }),
+};
+
+/**
+ * Gets the localized label for a given execution status
+ */
+export function getStatusLabel(status: ExecutionStatus): string {
+  return STATUS_LABELS[status];
+}

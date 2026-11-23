@@ -159,6 +159,131 @@ export const improvementAuditEvent = ({
   },
 });
 
+export enum MemoryAuditAction {
+  FORGET = 'memory_forget',
+  REMEMBER = 'memory_remember',
+  SAVE_EVENT = 'memory_save_event',
+}
+
+export interface SessionMemoryForgetAuditEventParams {
+  memoryId: string;
+  targetUserId?: string;
+  failure?: 'not_found' | Error;
+}
+
+const notFoundFailure = { name: 'not_found', message: 'Session memory not found' };
+
+/** Audits forgetting one session memory; core adds the caller, the space and the request id. */
+export const sessionMemoryForgetAuditEvent = ({
+  memoryId,
+  targetUserId,
+  failure: failureParam,
+}: SessionMemoryForgetAuditEventParams): AuditEvent => {
+  const doc =
+    targetUserId !== undefined
+      ? `session memory [id=${memoryId}] of user [id=${targetUserId}]`
+      : `session memory [id=${memoryId}]`;
+  const failure = failureParam === 'not_found' ? notFoundFailure : failureParam;
+
+  return {
+    message: failure ? `Failed attempt to forget ${doc}` : `User has forgotten ${doc}`,
+    event: {
+      action: MemoryAuditAction.FORGET,
+      category: ['database'],
+      type: ['deletion'],
+      outcome: failure ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+    kibana: {
+      saved_object: { type: 'session_memory', id: memoryId },
+    },
+    error: failure && {
+      code: failure.name,
+      message: failure.message,
+    },
+  };
+};
+
+export interface SessionMemoryRememberAuditEventParams {
+  memoryId?: string;
+  sessionId: string;
+  targetUserId?: string;
+  revision: boolean;
+  error?: Error;
+}
+
+/**
+ * Audits one `_remember` request when its write finishes or the route rejects it. Core adds the
+ * caller, the space, and the request id.
+ */
+export const sessionMemoryRememberAuditEvent = ({
+  memoryId,
+  sessionId,
+  targetUserId,
+  revision,
+  error,
+}: SessionMemoryRememberAuditEventParams): AuditEvent => {
+  const doc = `session memory${
+    memoryId !== undefined ? ` [id=${memoryId}]` : ''
+  } of session [id=${sessionId}]`;
+
+  return {
+    message: error ? `Failed attempt to remember ${doc}` : `User has remembered ${doc}`,
+    event: {
+      action: MemoryAuditAction.REMEMBER,
+      category: ['database'],
+      type: [revision ? 'change' : 'creation'],
+      outcome: error ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+    ...(memoryId !== undefined && {
+      kibana: { saved_object: { type: 'session_memory', id: memoryId } },
+    }),
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
+/** Audits one `_save_event` request; core adds the caller, the space and the request id. */
+export const sessionEventsSaveAuditEvent = ({
+  sessionId,
+  targetUserId,
+  saved = 0,
+  failed = 0,
+  error,
+}: {
+  sessionId: string;
+  targetUserId?: string;
+  saved?: number;
+  failed?: number;
+  error?: Error;
+}): AuditEvent => {
+  const failedAll = error === undefined && saved === 0 && failed > 0;
+  return {
+    message: error
+      ? `Failed attempt to save events of session [id=${sessionId}]`
+      : failedAll
+      ? `Failed to save ${failed} event(s) of session [id=${sessionId}]`
+      : `User has saved ${saved} event(s) of session [id=${sessionId}], ${failed} failed`,
+    event: {
+      action: MemoryAuditAction.SAVE_EVENT,
+      category: ['database'],
+      type: ['creation'],
+      outcome: error || failedAll ? 'failure' : 'success',
+    },
+    ...(targetUserId !== undefined && { user: { target: { id: targetUserId } } }),
+    kibana: {
+      saved_object: { type: 'session_events', id: sessionId },
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
+
 export const aiIndexAuditEvent = ({
   action,
   id,
