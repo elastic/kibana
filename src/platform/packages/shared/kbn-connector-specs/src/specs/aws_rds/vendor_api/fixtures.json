@@ -1,0 +1,130 @@
+{
+  "query": {
+    "input": {
+      "sql": "SELECT 1"
+    },
+    "queries": [
+      {
+        "source": "rds_data",
+        "method": "POST",
+        "path": "/Execute"
+      }
+    ],
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  },
+  "listDatabases": {
+    "queries": [
+      {
+        "source": "rds_data",
+        "method": "POST",
+        "path": "/Execute"
+      }
+    ],
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  },
+  "listTables": {
+    "config": {
+      "database": "shop"
+    },
+    "queries": [
+      {
+        "source": "rds_data",
+        "method": "POST",
+        "path": "/Execute"
+      }
+    ],
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  },
+  "describeTable": {
+    "config": {
+      "database": "shop"
+    },
+    "queries": [
+      {
+        "source": "rds_data",
+        "method": "POST",
+        "path": "/Execute"
+      }
+    ],
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[{\"column_name\": \"id\", \"data_type\": \"int\"}]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  },
+  "getSchema": {
+    "config": {
+      "database": "shop"
+    },
+    "queries": [
+      {
+        "source": "rds_data",
+        "method": "POST",
+        "path": "/Execute"
+      }
+    ],
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  },
+  "executeSql": {
+    "input": {
+      "sql": "UPDATE orders SET status = 'shipped' WHERE id = 1"
+    },
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/Execute",
+        "status": 200,
+        "body": {
+          "formattedRecords": "[]",
+          "numberOfRecordsUpdated": 0
+        }
+      }
+    ]
+  }
+}

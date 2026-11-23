@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
+import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
 
 import {
   toSOAuthMethod,
@@ -15,13 +16,19 @@ import {
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { DetectAndReviewStepState } from '../../onboarding_flow_context';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
-import { detectServiceVarsDrift, detectAuthDrift, detectAgentPoliciesDrift } from './detect_drift';
+import {
+  detectServiceVarsDrift,
+  detectGlobalNamespaceDrift,
+  detectAuthDrift,
+  detectAgentPoliciesDrift,
+} from './detect_drift';
+import { detectPolicySettingsDrift } from '../../common/policy_settings';
 
 interface UseOnboardingDriftDetectionParams {
   onboardingDeploymentId: string | undefined;
   policyIdsByInstance: Record<string, string> | null | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
-  deploymentMethod: string;
+  deploymentMethod: DeploymentMethod;
   connectorId: string | undefined;
   agentBasedDeployment: {
     agentCredentialMethod: AgentCredentialMethod | undefined;
@@ -91,8 +98,12 @@ export function useOnboardingDriftDetection({
     const thisId = ++driftCheckIdRef.current;
     // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
     // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
-    // effect re-runs with a loaded map).
-    if (!onboardingDeploymentId || awsServicesMap === undefined) return;
+    // effect re-runs with a loaded map). Also wait for the manifests of the compared instances: a
+    // check before they load compares untyped vars against the saved ones, which can read as drift
+    // for a moment and flash the callout.
+    if (!onboardingDeploymentId || awsServicesMap === undefined || !comparedManifestsSettled) {
+      return;
+    }
     setDriftSettled(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
@@ -145,7 +156,32 @@ export function useOnboardingDriftDetection({
           },
           { agentPolicyIds: item.agentPolicyIds }
         );
-        const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
+        // Instances are absent from a session that never went through Step 2's Next, and then
+        // every deployed instance is an original, since duplicates only exist as instances.
+        const namespaceDeployedIds = serviceSettings?.instances
+          ? deployedInstanceIds
+          : Object.keys(policyIdsByInstance ?? {});
+        const namespaceDirty = detectGlobalNamespaceDrift(
+          serviceSettings?.namespace,
+          item.namespace,
+          namespaceDeployedIds,
+          serviceSettings?.serviceVars
+        );
+        // Every deployed policy carries the package policy settings, so any deployed instance
+        // follows them.
+        const policySettingsDirty =
+          [...namespaceDeployedIds].length > 0 &&
+          detectPolicySettingsDrift(
+            serviceSettings?.policySettings,
+            item.policySettings,
+            deploymentMethod
+          );
+        const dirty =
+          dirtyVarIds.length > 0 ||
+          namespaceDirty ||
+          policySettingsDirty ||
+          authDirty ||
+          agentPoliciesDirty;
         driftDirtyRef.current = dirty;
         // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
         // hasn't been touched.
@@ -166,10 +202,11 @@ export function useOnboardingDriftDetection({
       cancelled = true;
     };
     // awsServicesMap is captured from the closure, standing in the deps as comparedManifestsSettled.
-    // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
-    // service-var and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
-    // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
+    // serviceSettings.serviceVars, namespace, policySettings and globalRegion are intentionally
+    // captured from the closure: service-var, namespace, policy-setting and region changes come from
+    // Step 2 navigation (full remount), not same-step edits. Auth mutations (MI: connector swap;
+    // agent-based: credential method) and agent-based mode changes (agentHostsMode, policy
+    // selection) happen in this component's lifetime.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,

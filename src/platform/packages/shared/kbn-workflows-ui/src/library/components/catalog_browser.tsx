@@ -112,12 +112,12 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
         announceOnMount
         color="danger"
         iconType="warning"
-        title={i18n.translate('workflows.library.error.title', {
+        title={i18n.translate('workflowsUi.library.error.title', {
           defaultMessage: 'Unable to load the template library',
         })}
       >
         <EuiButton onClick={handleRetry} color="danger" data-test-subj="workflowLibraryRetryButton">
-          {i18n.translate('workflows.library.error.retry', { defaultMessage: 'Retry' })}
+          {i18n.translate('workflowsUi.library.error.retry', { defaultMessage: 'Retry' })}
         </EuiButton>
       </EuiCallOut>
     );
@@ -125,7 +125,7 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
     content = (
       <CenteredMessage dataTestSubj="workflowLibraryEmptyCatalog">
         <EuiText color="subdued">
-          {i18n.translate('workflows.library.emptyCatalog', {
+          {i18n.translate('workflowsUi.library.emptyCatalog', {
             defaultMessage: 'No templates are available for this Kibana version yet.',
           })}
         </EuiText>
@@ -135,7 +135,7 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
     content = (
       <CenteredMessage dataTestSubj="workflowLibraryNoMatches">
         <EuiText color="subdued">
-          {i18n.translate('workflows.library.noMatches', {
+          {i18n.translate('workflowsUi.library.noMatches', {
             defaultMessage: 'No templates match the current filters.',
           })}
         </EuiText>
@@ -158,7 +158,7 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
           <EuiFlexItem>
             <EuiFieldSearch
               fullWidth
-              placeholder={i18n.translate('workflows.library.searchPlaceholder', {
+              placeholder={i18n.translate('workflowsUi.library.searchPlaceholder', {
                 defaultMessage: 'Search templates',
               })}
               value={search}

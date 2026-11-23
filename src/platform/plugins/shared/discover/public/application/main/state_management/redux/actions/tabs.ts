@@ -69,6 +69,7 @@ export const setTabs: InternalStateThunkActionCreator<
       getCascadedDocumentsStateManager,
       getContextAwarenessToolkit,
       services,
+      searchSessionManager,
     }
   ) {
     const previousState = getState();
@@ -100,6 +101,12 @@ export const setTabs: InternalStateThunkActionCreator<
       justRemovedTabs.push(newRecentlyClosedTab);
 
       dispatch(disconnectTab({ tabId: tab.id }));
+
+      // Only tabs closed by the user lose their cache. Opening or saving a Discover session
+      // swaps the tabs instead, and reopening that session brings the same tabs back.
+      if (!params.updatedDiscoverSession) {
+        searchSessionManager.forgetTab(tab.id);
+      }
     }
 
     // Wait to delete runtime state until after all removed tabs
@@ -478,7 +485,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       : undefined;
 
     const initialTabState = services.getScopedHistory<InitialTabState>()?.location.state;
-    const { draftSessionTitle, outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
+    const { outdatedSelectedTab, hasNewSavedVersion, ...initialTabsState } =
       tabsStorageManager.loadLocally({
         userId,
         spaceId,
@@ -517,7 +524,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       replace: true,
     });
 
-    dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
 
     if (hasNewSavedVersion) {

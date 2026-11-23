@@ -13,6 +13,7 @@ import { inputsSelectors } from '../../../../../common/store';
 import { useHostDetails } from '../../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
 import type { HostItem } from '../../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
@@ -27,7 +28,7 @@ import {
   getEntityGroupRecords,
   isEntityGroupView,
   mergeEntityGroupDetails,
-} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
+} from '../../../shared/utils/entity_store_group_utils';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
@@ -50,8 +51,10 @@ export const useObservedHost = (
     inputsSelectors.timelineTimeRangeSelector(state)
   );
   const globalTime = useGlobalTime();
+  const flyoutTimeRange = getScopeFlyoutTimeRange(scopeId);
   const isActiveTimelines = isActiveTimeline(scopeId);
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  // A scope that pins a time range wins over timeline / global time.
+  const { to, from } = flyoutTimeRange ?? (isActiveTimelines ? timelineTime : globalTime);
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
   const { indexPatterns } = useSecurityDefaultPatterns();

@@ -39,9 +39,37 @@ export const NONGROUPED_SPANS: Record<string, string[]> = {
 export const GROUPABLE_SPAN_TYPE = 'external';
 export const GROUPABLE_SPAN_SUBTYPE = 'http';
 
-// Node dimensions for React Flow service map
-export const SERVICE_NODE_CIRCLE_SIZE = 56;
+/**
+ * Failure rate at or above this share is a warning on the service map (amber ring / text).
+ * Below it, a non-zero rate stays a low (grey) signal.
+ */
+export const FAILURE_RATE_WARNING = 0.01;
+
+/**
+ * Failure rate at or above this share is a problem on the service map (red ring / text).
+ */
+export const FAILURE_RATE_DANGER = 0.05;
+
+/**
+ * Below this many requests over the map range, a failure rate is noise and stays uncoloured
+ * (one failure of five reads as 20%).
+ */
+export const MIN_REQUESTS_FOR_FAILURE_RATE = 20;
+
+/**
+ * A service whose throughput is below this share of the map's median is drawn faded (idle).
+ * Relative, not a fixed rate: on a quiet estate every service would be below any fixed rate.
+ */
+export const IDLE_SHARE_OF_MEDIAN = 0.1;
+
+/** Opacity for idle (low-traffic) service nodes. */
+export const IDLE_NODE_OPACITY = 0.5;
+
+// Node dimensions for React Flow service map (circle for services, square for closed groups)
+export const SERVICE_NODE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;
+/** Max width for service / group labels and badge rows under the node. */
+export const NODE_LABEL_MAX_WIDTH = 220;
 
 /** Border width (px) for service and dependency nodes when not selected. */
 export const NODE_BORDER_WIDTH_DEFAULT = 3;

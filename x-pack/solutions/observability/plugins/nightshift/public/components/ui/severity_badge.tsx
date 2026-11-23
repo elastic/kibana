@@ -52,12 +52,20 @@ export const scoreSeverity = (score: number): Severity => {
   return 'critical';
 };
 
-export function SeverityBadge({ score, severity }: { score?: number; severity?: Severity }) {
+export function SeverityBadge({
+  score,
+  severity,
+  textSize = 'xs',
+}: {
+  score?: number;
+  severity?: Severity;
+  textSize?: 'xs' | 's';
+}) {
   const { euiTheme } = useEuiTheme();
   const normalizedSeverity = severity ?? (score !== undefined ? scoreSeverity(score) : undefined);
   if (!normalizedSeverity) {
     return (
-      <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">
+      <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize={textSize}>
         {i18n.translate('xpack.nightshift.significantEventsTable.severityBadge.noSeverity', {
           defaultMessage: 'None',
         })}
@@ -69,7 +77,7 @@ export function SeverityBadge({ score, severity }: { score?: number; severity?: 
     <EuiHealth
       color={euiTheme.colors.severity[color]}
       style={{ lineHeight: 'inherit' }}
-      textSize="xs"
+      textSize={textSize}
     >
       {label}
     </EuiHealth>

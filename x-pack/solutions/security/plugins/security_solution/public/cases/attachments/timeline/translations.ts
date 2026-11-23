@@ -41,6 +41,12 @@ export const FAILED_TO_RETRIEVE_TIMELINE = (timelineId: string) =>
     values: { timelineId },
   });
 
+export const TIMELINES_COUNT = (count: number) =>
+  i18n.translate('xpack.securitySolution.cases.timelineAttachment.timelinesCount', {
+    defaultMessage: '{count, plural, one {# timeline} other {# timelines}}',
+    values: { count },
+  });
+
 export const TIMELINE_DISPLAY_NAME = i18n.translate(
   'xpack.securitySolution.cases.timelineAttachment.displayName',
   {

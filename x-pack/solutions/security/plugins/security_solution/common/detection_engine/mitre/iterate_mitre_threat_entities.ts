@@ -7,13 +7,9 @@
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { MitreFramework } from '@kbn/security-mitre-attack-common';
-import {
-  THREAT_FRAMEWORK_NAME,
-  getMitreFrameworkByThreatName,
-} from '@kbn/security-mitre-attack-common';
+import { getMitreFrameworkByThreatName } from '@kbn/security-mitre-attack-common';
 
-export const MITRE_ATTACK_FRAMEWORK = THREAT_FRAMEWORK_NAME.enterprise;
-export const MITRE_ATLAS_FRAMEWORK = THREAT_FRAMEWORK_NAME.atlas;
+export { MITRE_ATTACK_FRAMEWORK, MITRE_ATLAS_FRAMEWORK } from '@kbn/security-mitre-attack-common';
 
 export type MitreThreatEntityType = 'tactic' | 'technique' | 'subtechnique';
 

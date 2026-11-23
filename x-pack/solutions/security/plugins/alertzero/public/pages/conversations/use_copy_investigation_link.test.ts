@@ -19,6 +19,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 const mockCopy = copyToClipboard as jest.MockedFunction<typeof copyToClipboard>;
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
+const reportEvent = jest.fn();
 const getUrlForApp = jest.fn(
   (appId: string, { path }: { path: string }) => `http://localhost:5601/app/${appId}${path}`
 );
@@ -28,6 +29,7 @@ describe('useCopyInvestigationLink', () => {
     jest.clearAllMocks();
     (useKibana as jest.Mock).mockReturnValue({
       services: {
+        analytics: { reportEvent },
         application: { getUrlForApp },
         notifications: { toasts: { addSuccess, addDanger } },
       },
@@ -36,7 +38,7 @@ describe('useCopyInvestigationLink', () => {
 
   it('copies the app link that opens the conversation and confirms', () => {
     mockCopy.mockReturnValue(true);
-    const { result } = renderHook(() => useCopyInvestigationLink());
+    const { result } = renderHook(() => useCopyInvestigationLink('queue'));
 
     expect(result.current('conv-1')).toBe(true);
 
@@ -54,11 +56,34 @@ describe('useCopyInvestigationLink', () => {
 
   it('reports a failed copy', () => {
     mockCopy.mockReturnValue(false);
-    const { result } = renderHook(() => useCopyInvestigationLink());
+    const { result } = renderHook(() => useCopyInvestigationLink('queue'));
 
     expect(result.current('conv-1')).toBe(false);
 
     expect(addDanger).toHaveBeenCalledWith('Could not copy the link');
     expect(addSuccess).not.toHaveBeenCalled();
+  });
+
+  it.each(['queue', 'flyout'] as const)(
+    'reports a failed copy from the %s as a clipboard error, never the link',
+    (surface) => {
+      mockCopy.mockReturnValue(false);
+      const { result } = renderHook(() => useCopyInvestigationLink(surface));
+
+      result.current('conv-1');
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'clipboard', surface }],
+      ]);
+    }
+  );
+
+  it('reports nothing for a copy that worked', () => {
+    mockCopy.mockReturnValue(true);
+    const { result } = renderHook(() => useCopyInvestigationLink('queue'));
+
+    result.current('conv-1');
+
+    expect(reportEvent).not.toHaveBeenCalled();
   });
 });

@@ -28,6 +28,14 @@ if [[ ! "${ES_SNAPSHOT_MANIFEST:-}" ]]; then
   buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT "$ES_SNAPSHOT_MANIFEST_DEFAULT"
 fi
 
+# Non-fatal: test steps run in full when the selection is missing.
+# `timeout` hard-stops hung requests and git fetches that the script's own 2m timeout can't interrupt.
+if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-on-merge" && "${ON_MERGE_SELECTIVE_MODE:-off}" == "shadow" ]]; then
+  ES_SNAPSHOT_MANIFEST_DEFAULT="${ES_SNAPSHOT_MANIFEST_DEFAULT:-}" \
+    timeout 3m node "$(dirname "${0}")/resolve_on_merge_selection.ts" ||
+    echo "Failed to resolve on-merge selection; test steps will run in full" >&2
+fi
+
 if [[ "${KIBANA_BUILD_ID:-}" && "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" ]]; then
   cat << EOF | buildkite-agent annotate --style default --context kibana-reusable-build
   This build is using the Kibana distributable built from a different job, as the changes since this build do not seem to require a rebuild.

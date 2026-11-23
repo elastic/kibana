@@ -60,9 +60,9 @@ import type {
   CasesMetricsRequest,
 } from '../common/types/api';
 import type { UnifiedAttachmentPayload } from '../common/types/domain';
-import type { DashboardAttachmentPayload } from '../common/types/domain_zod/attachment/dashboard/v2';
-import type { MapAttachmentPayload } from '../common/types/domain_zod/attachment/map/v2';
-import type { DiscoverSessionAttachmentPayload } from '../common/types/domain_zod/attachment/saved_object/v2';
+import type { DashboardAttachmentPayload } from '../common/types/domain/attachment/dashboard/v2';
+import type { MapAttachmentPayload } from '../common/types/domain/attachment/map/v2';
+import type { DiscoverSessionAttachmentPayload } from '../common/types/domain/attachment/saved_object/v2';
 
 export interface CasesPublicSetupDependencies {
   files: FilesSetup;

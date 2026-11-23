@@ -7,4 +7,4 @@
 
 export const gridLayoutPrompt = `## Panel Layout
 
-Panel positions and sizes are set automatically from the operations: new, moved, and removed panels and sections are placed without help. Set \`layout\` only to pass on the user's own arrangement or size request, or when the enhance workflow says to set it. Never write coordinates.`;
+Panel positions and sizes are set automatically from the changes: new, moved, and removed panels and sections are placed without help. Set \`layout\` only to pass on the user's own arrangement or size request, or when the enhance workflow says to set it. Never write coordinates.`;

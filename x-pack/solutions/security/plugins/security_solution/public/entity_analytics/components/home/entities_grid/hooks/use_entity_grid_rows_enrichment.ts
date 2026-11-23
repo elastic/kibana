@@ -11,10 +11,11 @@ import { useQueries } from '@kbn/react-query';
 import type { QueryFunctionContext, UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import { isAbortError } from '../../../../../common/utils/exceptions';
 import type { QueryArgs, Row } from '../common';
-import { getEntityId, getEntityIds } from '../common';
-import { PAGE_ENRICHERS } from '../grid_columns';
+import { ENTITY_GRID_QUERY_KEY, getEntityId, getEntityIds } from '../common';
+import { getPageEnrichers } from '../grid_columns';
 import { createEsqlRunner } from '../queries/esql';
 import type { EnrichedFields, PageEnricher, RunContext } from '../queries/types';
 import {
@@ -90,7 +91,7 @@ const getEnrichKey = (
   chunk: readonly Row[]
 ) =>
   [
-    'entity-grid',
+    ENTITY_GRID_QUERY_KEY,
     getKeyScope(options),
     'enrich',
     {
@@ -98,6 +99,7 @@ const getEnrichKey = (
       sortDirection: options.sortDirection,
       entityIds: getEntityIds(chunk).join('\0'),
       anomalyJobIds: context.anomalyJobIds.join('\0'),
+      columnIds: options.columnIds.join('\0'),
     },
   ] as const;
 
@@ -112,8 +114,19 @@ const fetchEnrichedChunk = (
   return fetchEnrichedRows(
     chunk,
     buildQueryArgs(ready, options),
-    { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
-    PAGE_ENRICHERS[options.rowsMode]
+    {
+      runQuery: createEsqlRunner(
+        context.searchService,
+        {
+          id: 'entities_grid_enrich',
+          meta: { rowsMode: options.rowsMode, timeRange: options.timeRange },
+        },
+        signal
+      ),
+      http: context.http,
+      signal,
+    },
+    getPageEnrichers(options.rowsMode, options.columnIds)
   );
 };
 
@@ -224,10 +237,11 @@ export const useEntityGridRowsEnrichment = (
   const onRowsInViewChange = useEnrichRowsInView(context, options, chunks, isPreviousData);
   const rows = useLoadedRows(chunks, enrichQueries);
   // Columns whose enricher failed show no value; say so, as an empty cell also means none.
-  useErrorToast(
-    ENRICH_ERROR_TITLE,
-    enrichQueries.find(({ data }) => data?.errors.length)?.data?.errors[0]
-  );
+  // A space that has never run a detection rule has no alerts index. That is empty data.
+  const enrichError = enrichQueries
+    .flatMap(({ data }) => data?.errors ?? [])
+    .find((error) => !isMissingIndexError(error));
+  useErrorToast(ENRICH_ERROR_TITLE, enrichError);
 
   return {
     rows,
@@ -237,5 +251,8 @@ export const useEntityGridRowsEnrichment = (
     isFetching: enrichQueries.some((q) => q.isFetching),
     dataUpdatedAt: Math.max(0, ...enrichQueries.map((q) => q.dataUpdatedAt)),
     error: enrichQueries.find((q) => q.error)?.error,
+    // For the load telemetry: whether the rows asked for so far have their computed columns.
+    hasEnrichedRows: enrichQueries.some(({ data, error }) => data != null || error != null),
+    hasFailedColumns: enrichQueries.some(({ data }) => !!data?.errors.length),
   };
 };

@@ -148,21 +148,15 @@ export class ImportResolver {
   private adaptReq(req: string, dirname: string): string | undefined {
     // handle typescript aliases
     if (req === 'kibana/public') {
-      return this.adaptReq('src/core/public', dirname);
+      return this.adaptReq('src/core/packages/core/public', dirname);
     }
     if (req === 'kibana/server') {
-      return this.adaptReq('src/core/server', dirname);
+      return this.adaptReq('src/core/packages/core/server', dirname);
     }
 
     if (req.startsWith('@modelcontextprotocol/sdk')) {
       const relPath = req.split('@modelcontextprotocol/sdk')[1];
       return Path.resolve(REPO_ROOT, `node_modules/@modelcontextprotocol/sdk/dist/esm/${relPath}`);
-    }
-
-    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
-    // We should be able to remove this once we support cjs/esm interop.
-    if (req.startsWith('@elastic/opentelemetry-node/sdk')) {
-      return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
     }
 
     if (req.startsWith('@typescript-eslint/parser')) {

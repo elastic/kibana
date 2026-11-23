@@ -12,7 +12,10 @@ import { isNotEmptyCondition } from '../common_fields';
 import {
   MAX_DYNAMIC_IDENTITY_FIELDS,
   NO_IDENTITY_ATTRIBUTE_RULE,
+  RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
+  SUGGESTED_FILTER_RULE,
+  getIdentityCompositions,
   getPresenceFilter,
 } from './dynamic_definition_rules';
 import {
@@ -82,6 +85,22 @@ describe('dynamic definition rules', () => {
 
       it('accepts skipTypePrepend: false', () => {
         expectAccepted(definition({ singleField: 'k8s.pod.uid', skipTypePrepend: false }));
+      });
+
+      it('rejects the reserved last_seen field', () => {
+        expectRejected(
+          definition({ singleField: RESERVED_LAST_SEEN_FIELD }),
+          ['identityField', 'singleField'],
+          SERVABLE_IDENTITY_RULE
+        );
+        expect(issuesOf(definition({ singleField: 'last_seen' }))[0].message).toContain(
+          '"last_seen" is the inventory\'s own output column'
+        );
+      });
+
+      it('accepts entity.id and a field merely containing last_seen', () => {
+        expectAccepted(definition({ singleField: 'entity.id' }));
+        expectAccepted(definition({ singleField: 'host.last_seen' }));
       });
 
       it.each(['k8s.pod.*', 'TO_LOWER(k8s.pod.uid)', 'k8s pod'])(
@@ -198,6 +217,18 @@ describe('dynamic definition rules', () => {
           ['identityField', 'euidRanking', 'branches', 0, 'ranking', 1, 0, 'field'],
           SERVABLE_IDENTITY_RULE
         );
+      });
+
+      it('rejects the reserved last_seen field in a ranking composition', () => {
+        expectRejected(
+          definition(ranked(['host.id', RESERVED_LAST_SEEN_FIELD])),
+          ['identityField', 'euidRanking', 'branches', 0, 'ranking', 1, 0, 'field'],
+          SERVABLE_IDENTITY_RULE
+        );
+      });
+
+      it('accepts entity.id as a ranking field', () => {
+        expectAccepted(definition(ranked(['entity.id', 'host.name'])));
       });
 
       it(`accepts ${MAX_DYNAMIC_IDENTITY_FIELDS} distinct fields`, () => {
@@ -335,6 +366,55 @@ describe('dynamic definition rules', () => {
 
     it('accepts an attribute on a different field', () => {
       expectAccepted(withAttribute(hostIdentity, 'host.os.name'));
+    });
+  });
+
+  describe('suggested filters are attributes or identity fields', () => {
+    const withSuggestedFilters = (identityField: EntityIdentity, suggestedFilters: string[]) =>
+      definition(identityField, { dynamic: { ...dynamic, suggestedFilters } });
+
+    it('accepts an attribute of a source', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['os_name']));
+    });
+
+    it('accepts the single identity field', () => {
+      expectAccepted(withSuggestedFilters({ singleField: 'k8s.pod.uid' }, ['k8s.pod.uid']));
+    });
+
+    it('accepts a field of a ranking and an attribute together', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['host.name', 'os_name']));
+    });
+
+    it('rejects the entity id, even when it is the identity field', () => {
+      expectRejected(
+        withSuggestedFilters({ singleField: 'entity.id' }, ['entity.id']),
+        ['dynamic', 'suggestedFilters', 0],
+        SUGGESTED_FILTER_RULE
+      );
+    });
+
+    it('rejects a name that is neither an attribute nor an identity field', () => {
+      expectRejected(
+        withSuggestedFilters(hostIdentity, ['os_name', 'missing']),
+        ['dynamic', 'suggestedFilters', 1],
+        SUGGESTED_FILTER_RULE
+      );
+    });
+  });
+
+  describe('getIdentityCompositions', () => {
+    it('lists the fields of each composition, separators dropped', () => {
+      expect(getIdentityCompositions({ singleField: 'service.name' })).toEqual([['service.name']]);
+      expect(
+        getIdentityCompositions({
+          euidRanking: {
+            branches: [
+              { ranking: [[{ field: 'a' }, { sep: '/' }, { field: 'b' }], [{ field: 'c' }]] },
+            ],
+          },
+          documentsFilter: getPresenceFilter([['a', 'b'], ['c']]),
+        })
+      ).toEqual([['a', 'b'], ['c']]);
     });
   });
 

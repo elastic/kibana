@@ -8,9 +8,9 @@
  */
 
 import { isFilterable, getFieldSubtypeNested } from '@kbn/data-views-plugin/common';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { escapeKuery } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { sortPrefixFirst } from './sort_prefix_first';
 import type { QuerySuggestionField } from '../query_suggestion_provider';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
@@ -52,7 +52,8 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
       } else {
         return (
           (!nestedPath || (nestedPath && subTypeNested?.nested.path.includes(nestedPath))) &&
-          field.name.toLowerCase().includes(search)
+          (field.name.toLowerCase().includes(search) ||
+            Boolean(field.customLabel?.toLowerCase().includes(search)))
         );
       }
     });
@@ -97,6 +98,8 @@ export const setupGetFieldSuggestions: KqlQuerySuggestionProvider<QuerySuggestio
         end,
         cursorIndex,
         field,
+        // The custom label is only shown next to the suggestion, `text` has to stay the real field name
+        ...(field.customLabel ? { description: field.customLabel } : {}),
       };
     });
 

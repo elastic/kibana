@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { DataViewField, RuntimeField } from '@kbn/data-views-plugin/common';
 import type { DataViewsContract, DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 export type SearchHandler = (
   params: IKibanaSearchRequest['params']
@@ -58,6 +59,7 @@ export async function fetchFieldExistence({
   // Identify two categories of fields requiring a refresh:
   // 1. New fields - fields that don't exist in the current data view
   // 2. Fields with mapping changes - existing fields with updated mapping information
+  // Both are returned as `newFields`, so consumers can replace their stale field objects.
   const newFields: typeof existingFieldList = [];
   const fieldsWithMappingChanges: typeof existingFieldList = [];
 
@@ -65,7 +67,12 @@ export async function fetchFieldExistence({
     const previousField = dataView.getFieldByName(field.name);
     if (!previousField) {
       newFields.push(field);
-    } else if (previousField.type !== field.type) {
+    } else if (
+      previousField.type !== field.type &&
+      // A `conflict` field in the full field list can resolve to a concrete type in the
+      // time-filtered subset of indices, which is not a mapping change
+      previousField.type !== KBN_FIELD_TYPES.CONFLICT
+    ) {
       fieldsWithMappingChanges.push(field);
     }
   }
@@ -77,11 +84,15 @@ export async function fetchFieldExistence({
     // Refresh with force=true to ensure all fields are properly loaded
     await dataViewsService.refreshFields(dataView, false, true);
   }
+  // Take remapped fields from the refreshed data view, so their saved attributes (custom label, popularity count) are preserved
+  const remappedFields = fieldsWithMappingChanges.map(
+    (field) => dataView.getFieldByName(field.name)?.toSpec() ?? field
+  );
   const allFields = buildFieldList(dataView, metaFields);
   return {
     indexPatternTitle: dataView.getIndexPattern(),
     existingFieldNames: getExistingFields(existingFieldList, allFields),
-    newFields,
+    newFields: [...newFields, ...remappedFields],
   };
 }
 

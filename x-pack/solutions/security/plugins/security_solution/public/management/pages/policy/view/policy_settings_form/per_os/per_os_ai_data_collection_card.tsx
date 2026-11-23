@@ -30,7 +30,7 @@ const AI_DATA_COLLECTION_OS_VALUES: Immutable<AiDataCollectionOSes[]> = [
 export const PER_OS_AI_DATA_COLLECTION_CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.aiDataCollection',
   {
-    defaultMessage: 'AI Data Collection',
+    defaultMessage: 'AI data collection',
   }
 );
 

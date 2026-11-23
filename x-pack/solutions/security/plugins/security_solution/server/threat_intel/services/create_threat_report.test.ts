@@ -57,6 +57,13 @@ describe('createThreatReport', () => {
     expect(esClient.create.mock.calls[0][0].id).toBe(result.report_id);
   });
 
+  it('leaves content.published_at unset since paste time is not a publication date', async () => {
+    const esClient = buildEsClient();
+    await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
+    const doc = esClient.create.mock.calls[0][0].document as { content: object };
+    expect(doc.content).not.toHaveProperty('published_at');
+  });
+
   it('returns duplicate status when content fingerprint already exists', async () => {
     const esClient = buildEsClient({ totalHits: 1 });
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
@@ -66,9 +73,9 @@ describe('createThreatReport', () => {
   });
 
   it('ignores a missing reports index on the dedup precheck so the first ingest still writes', async () => {
-    // The reports index is created lazily on first write. Without
-    // ignore_unavailable the precheck would throw index_not_found_exception and
-    // 500 the very request that would have created the index.
+    // Bootstrap usually creates the companion index, but without
+    // ignore_unavailable a missing index would throw index_not_found_exception
+    // and 500 the precheck before create can run.
     const esClient = buildEsClient();
     const result = await createThreatReport(esClient, logger, 'default', BASE_PARAMS);
 

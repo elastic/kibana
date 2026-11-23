@@ -19,6 +19,8 @@ export const MAX_FILTER_LENGTH = 2000;
 export const MAX_ATTRIBUTES_PER_SOURCE = 32;
 /** Longest attribute name. */
 export const MAX_ATTRIBUTE_NAME_LENGTH = 64;
+/** Most attributes one block may offer as suggested filters. */
+export const MAX_SUGGESTED_FILTERS = 16;
 /** Longest literal field path. */
 export const MAX_FIELD_PATH_LENGTH = 512;
 /** Most entries in one attribute's `valueLabels`. */
@@ -28,8 +30,6 @@ export const MAX_VALUE_LABEL_LENGTH = 256;
 
 /** A mapped field path: dot-separated segments, no wildcards, expressions, quoting or whitespace. */
 export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)*$/;
-/** An attribute name, which becomes an ES|QL column: lowercase letters, digits and `_`, starting with a letter. */
-export const ATTRIBUTE_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
 /** One index pattern per source: no whitespace and no comma-separated list. */
 export const INDEX_PATTERN_PATTERN = /^[^\s,]+$/;
 
@@ -46,10 +46,13 @@ export const literalFieldPathSchema = lazySchema(() =>
   })
 );
 
+/**
+ * An attribute name, which becomes an ES|QL column: a field path such as `host.arch`, so a column
+ * can carry the OTel semantic convention name while each source reads its own field.
+ */
 const attributeNameSchema = lazySchema(() =>
-  z.string().min(1).max(MAX_ATTRIBUTE_NAME_LENGTH).regex(ATTRIBUTE_NAME_PATTERN, {
-    message:
-      'must be a lowercase identifier (letters, digits and underscores, starting with a letter)',
+  z.string().min(1).max(MAX_ATTRIBUTE_NAME_LENGTH).regex(LITERAL_FIELD_PATH_PATTERN, {
+    message: 'must be a field path: dot-separated segments of letters, digits, `_`, `@` and `-`',
   })
 );
 
@@ -117,9 +120,26 @@ export const dynamicSourceSchema = lazySchema(() =>
 
 /** What the inventory reads to generate ES|QL over raw telemetry for an entity type. */
 export const dynamicBlockSchema = lazySchema(() =>
-  z.strictObject({
-    sources: z.array(dynamicSourceSchema).min(1).max(MAX_SOURCES),
-  })
+  z
+    .strictObject({
+      sources: z.array(dynamicSourceSchema).min(1).max(MAX_SOURCES),
+      // Names of the columns the inventory offers as dropdown filters, in display order. Each is an
+      // attribute or an identity field, which the whole-definition rules check.
+      suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
+    })
+    .superRefine(({ suggestedFilters = [] }, ctx) => {
+      const seen = new Set<string>();
+      suggestedFilters.forEach((name, index) => {
+        if (seen.has(name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['suggestedFilters', index],
+            message: `suggested filter "${name}" is listed more than once`,
+          });
+        }
+        seen.add(name);
+      });
+    })
 );
 
 /** The `dynamic` block of an entity definition. */

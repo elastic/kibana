@@ -7,17 +7,20 @@
 
 import expect from '@kbn/expect';
 
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import {
   AttachmentType,
   CaseStatuses,
   UserActionTypes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CASE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
 import { ALERT_WORKFLOW_REASON, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { getPostCaseRequest, postCaseReq, postCaseResp } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
   createComment,
+  getCase,
   removeServerGeneratedPropertiesFromCase,
   updateCase,
   findCaseUserActions,
@@ -591,6 +594,154 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(patchedCases[0].status).to.eql(CaseStatuses.closed);
+      });
+    });
+
+    describe('extractObservables owner rule', () => {
+      // The real owners are used on purpose: the fixture owners are not in the owner table,
+      // so the server does not guard them.
+      const ownersThatCannotAutoExtract = ['cases', 'observability'];
+
+      const createCaseWithValue = (owner: string, extractObservables: boolean) =>
+        createCase(
+          supertest,
+          getPostCaseRequest({ owner, settings: { syncAlerts: true, extractObservables } })
+        );
+
+      /**
+       * The API cannot create this state for an owner that cannot auto-extract, so the stored
+       * value is written directly. It stands for a case created before the server enforced the
+       * rule. The raw document nests the attributes under the saved-object type.
+       */
+      const storeExtractObservablesTrue = async (caseId: string) => {
+        await es.update({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          id: `${CASE_SAVED_OBJECT}:${caseId}`,
+          doc: { [CASE_SAVED_OBJECT]: { settings: { extractObservables: true } } },
+          refresh: true,
+        });
+      };
+
+      for (const owner of ownersThatCannotAutoExtract) {
+        describe(`owner ${owner}`, () => {
+          it('rejects a change from false to true with a 400 and keeps the stored value', async () => {
+            const postedCase = await createCaseWithValue(owner, false);
+
+            const response = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: postedCase.id,
+                    version: postedCase.version,
+                    settings: { syncAlerts: true, extractObservables: true },
+                  },
+                ],
+              },
+              expectedHttpCode: 400,
+            });
+
+            expect((response as unknown as { message: string }).message).to.contain(
+              `Setting extractObservables to true is not allowed for the "${owner}" owner`
+            );
+
+            const storedCase = await getCase({ supertest, caseId: postedCase.id });
+            expect(storedCase.settings.extractObservables).to.be(false);
+          });
+
+          it('accepts an update that keeps a stored true', async () => {
+            const postedCase = await createCaseWithValue(owner, false);
+            await storeExtractObservablesTrue(postedCase.id);
+            const storedCase = await getCase({ supertest, caseId: postedCase.id });
+            expect(storedCase.settings.extractObservables).to.be(true);
+
+            const patchedCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: storedCase.id,
+                    version: storedCase.version,
+                    // syncAlerts changes, so the whole settings object is sent with the stored true.
+                    settings: { syncAlerts: false, extractObservables: true },
+                  },
+                ],
+              },
+            });
+
+            expect(patchedCases[0].settings).to.eql({
+              syncAlerts: false,
+              extractObservables: true,
+            });
+          });
+
+          it('accepts a change from a stored true to false', async () => {
+            const postedCase = await createCaseWithValue(owner, false);
+            await storeExtractObservablesTrue(postedCase.id);
+            const storedCase = await getCase({ supertest, caseId: postedCase.id });
+
+            const patchedCases = await updateCase({
+              supertest,
+              params: {
+                cases: [
+                  {
+                    id: storedCase.id,
+                    version: storedCase.version,
+                    settings: { syncAlerts: true, extractObservables: false },
+                  },
+                ],
+              },
+            });
+
+            expect(patchedCases[0].settings.extractObservables).to.be(false);
+          });
+        });
+      }
+
+      it('rejects the whole request when one of the cases is rejected', async () => {
+        const securityCase = await createCaseWithValue('securitySolution', false);
+        const stackCase = await createCaseWithValue('cases', false);
+
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: securityCase.id,
+                version: securityCase.version,
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+              {
+                id: stackCase.id,
+                version: stackCase.version,
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+            ],
+          },
+          expectedHttpCode: 400,
+        });
+
+        const storedSecurityCase = await getCase({ supertest, caseId: securityCase.id });
+        expect(storedSecurityCase.settings.extractObservables).to.be(false);
+      });
+
+      it('accepts a change from false to true for the securitySolution owner', async () => {
+        const postedCase = await createCaseWithValue('securitySolution', false);
+
+        const patchedCases = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                settings: { syncAlerts: true, extractObservables: true },
+              },
+            ],
+          },
+        });
+
+        expect(patchedCases[0].settings.extractObservables).to.be(true);
       });
     });
   });

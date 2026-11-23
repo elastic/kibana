@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/config-schema'
   - '@kbn/esql-utils'
+  - '@kbn/esql-controls-utils'
   - '@kbn/esql-browser'
   - '@kbn/ui-actions-plugin'
   - '@kbn/data-plugin'
@@ -38,6 +39,7 @@ dependsOn:
   - '@kbn/esql-types'
   - '@kbn/esql-server-utils'
   - '@kbn/licensing-plugin'
+  - '@kbn/cloud-plugin'
   - '@kbn/projects-solutions-groups'
   - '@kbn/esql-language'
   - '@kbn/presentation-util'
@@ -63,17 +65,17 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/es-errors'
   - '@kbn/es-types'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

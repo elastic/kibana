@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-security/ui';
-import { getResponseActionsAccessRole } from '../fixtures/response_actions_access_role';
+import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import { attachAlertToCase } from '../fixtures/attach_alert_to_case';
 import { spaceTest, tags } from '../fixtures';
 import { seedHostWithAlert, type SeededHostAlert } from '../../common/seed_endpoint_hosts';
@@ -15,6 +15,7 @@ import {
   deleteSubmittedHostActions,
   waitForHostIsolation,
 } from '../../common/complete_host_action';
+import { runCleanups } from '../../common/run_cleanups';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 
 spaceTest.describe(
@@ -59,24 +60,14 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ esClient, config }) => {
-      const failures: unknown[] = [];
-      for (const cleanup of [
-        () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
-        cleanupCase,
-        () => seeded?.cleanup(),
-      ]) {
-        try {
-          await cleanup?.();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up the seeded case and host');
-      }
+      await runCleanups(
+        [
+          () => deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds }),
+          cleanupCase,
+          () => seeded?.cleanup(),
+        ],
+        'Failed to clean up the seeded case and host'
+      );
     });
 
     spaceTest(

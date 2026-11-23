@@ -1,0 +1,47 @@
+# Installed per space, bound to the detection engine service account, by the space's setup. The
+# schedule starts it every minute and it calls the engine's tick route as that account.
+version: "1"
+name: "Nightshift Continuous Detection"
+description: "Runs the Nightshift detection strategies for the space every minute."
+# A first install starts off; the space's setup turns it on after checking the binding. A later
+# install keeps whatever state the installed workflow has.
+enabled: false
+tags:
+  - observability
+  - nightshift
+  - detection-engine
+settings:
+  # Replaced with the bound service account when the workflow is installed in a space.
+  run_as: __SERVICE_ACCOUNT_ID__
+  # A tick spends at most four minutes on its generators; the rest is the call and its overhead.
+  timeout: "5m"
+  # A tick that outlives its minute must not pile up: the next trigger is dropped, and the
+  # engine's own lease would turn a second tick away anyway.
+  concurrency:
+    key: "nightshift-continuous-detection"
+    strategy: drop
+    max: 1
+triggers:
+  - type: scheduled
+    with:
+      every: "1m"
+steps:
+  # Only the schedule starts this workflow. Anyone allowed to run workflows could otherwise run
+  # the engine as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "scheduled"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs the Nightshift detection engine as its service account on its
+            schedule and cannot be run directly. This run was started by {{ execution.triggeredBy }}.
+
+  - name: tick
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/nightshift/detection/_tick"
+      body: {}

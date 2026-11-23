@@ -266,6 +266,7 @@ describe('generateSampleFromJsonSchema', () => {
           space_id: INPUT_STRING_PLACEHOLDER,
           group_hash: INPUT_STRING_PLACEHOLDER,
           alert_id: INPUT_STRING_PLACEHOLDER,
+          alert_url: INPUT_STRING_PLACEHOLDER,
           alert_status: INPUT_STRING_PLACEHOLDER,
         },
       ]);

@@ -67,6 +67,7 @@ describe('CasesClientFactory', () => {
 
     expect(context.casesClient).toBe(casesClient);
     expect(context.workflowOperations).toEqual({
+      confirmAlertIndices: expect.any(Function),
       ensureAuthorizedToRunWorkflow: expect.any(Function),
       preflightWorkflowExecution: expect.any(Function),
       recordWorkflowExecution: expect.any(Function),

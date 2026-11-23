@@ -26,8 +26,8 @@ const isSlugChar = (char: string): boolean =>
   (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9');
 
 /**
- * Normalizes free text into the kebab-case slug shape Cortex ids use.
- * Mirrors `canonicalizeSlug` in the Cortex page store so a slug survives the round trip.
+ * Normalizes free text into the kebab-case slug shape Wiki ids use.
+ * Mirrors `canonicalizeSlug` in the Wiki page store so a slug survives the round trip.
  *
  * Implemented with a single pass over a length-capped string so hyphen collapsing cannot
  * become ReDoS via quantified dash regexes.

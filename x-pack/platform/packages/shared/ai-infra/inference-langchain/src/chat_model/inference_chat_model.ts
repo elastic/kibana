@@ -37,6 +37,8 @@ import type {
   FunctionCallingMode,
   ConnectorTelemetryMetadata,
   ChatCompleteResponse,
+  FeatureChatCompleteAPI,
+  FeatureChatCompleteOptions,
 } from '@kbn/inference-common';
 import {
   isChatCompletionChunkEvent,
@@ -58,9 +60,30 @@ import {
   responseToLangchainMessage,
 } from './from_inference';
 
-export interface InferenceChatModelParams extends BaseChatModelParams {
+/**
+ * What the model calls `chatComplete` with. Building the model from a feature requires a
+ * `chatComplete` accepting the feature call shape (the server-side inference client does).
+ */
+export type InferenceChatModelTarget =
+  | {
+      chatComplete: ChatCompleteAPI & FeatureChatCompleteAPI;
+      /**
+       * When set, calls go out as `chatComplete({ featureId })` instead of `chatComplete({ connectorId })`:
+       * the feature's own `reasoning` applies and the `reasoning` option is not forwarded.
+       */
+      featureId?: string;
+    }
+  | {
+      chatComplete: ChatCompleteAPI;
+      featureId?: undefined;
+    };
+
+export interface InferenceChatModelBaseParams extends BaseChatModelParams {
+  /**
+   * The connector the model targets. When `featureId` is set, this is a snapshot of the feature's
+   * resolved connector, only used for metadata (model name, provider) and `getConnector()`.
+   */
   connector: InferenceConnector;
-  chatComplete: ChatCompleteAPI;
   functionCallingMode?: FunctionCallingMode;
   temperature?: number;
   model?: string;
@@ -72,6 +95,8 @@ export interface InferenceChatModelParams extends BaseChatModelParams {
   sessionId?: string;
   reasoning?: ChatCompletionReasoning;
 }
+
+export type InferenceChatModelParams = InferenceChatModelBaseParams & InferenceChatModelTarget;
 
 export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions {
   functionCallingMode?: FunctionCallingMode;
@@ -85,10 +110,25 @@ export interface InferenceChatModelCallOptions extends BaseChatModelCallOptions 
   reasoning?: ChatCompletionReasoning;
 }
 
-type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
+type MessagesParams = Pick<ChatCompleteOptions, 'messages' | 'system'>;
+
+type ConnectorInvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'stream'>;
+
+type FeatureInvocationParams = Omit<FeatureChatCompleteOptions, 'messages' | 'system' | 'stream'>;
+
+type InvocationParams = ConnectorInvocationParams | FeatureInvocationParams;
+
+type ChatCompleteRequest = InvocationParams & MessagesParams;
+
+const isFeatureRequest = (
+  request: ChatCompleteRequest
+): request is FeatureInvocationParams & MessagesParams =>
+  'featureId' in request && request.featureId !== undefined;
 
 /**
  * Langchain chatModel utilizing the inference API under the hood for communication with the LLM.
+ *
+ * Reasoning text (`additional_kwargs.reasoning_content`) is only included when streaming.
  *
  * @example
  * ```ts
@@ -102,8 +142,9 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
  * ```
  */
 export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOptions> {
-  private readonly chatComplete: ChatCompleteAPI;
+  private readonly chatComplete: ChatCompleteAPI & FeatureChatCompleteAPI;
   private readonly connector: InferenceConnector;
+  private readonly featureId?: string;
   // @ts-ignore unused for now
   private readonly logger: Logger;
   private readonly telemetryMetadata?: ConnectorTelemetryMetadata;
@@ -121,8 +162,11 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   constructor(args: InferenceChatModelParams) {
     super(args);
-    this.chatComplete = args.chatComplete;
+    // `InferenceChatModelTarget` only requires the feature call shape when `featureId` is set; on
+    // the connector path the `FeatureChatCompleteAPI` signature is never called.
+    this.chatComplete = args.chatComplete as ChatCompleteAPI & FeatureChatCompleteAPI;
     this.connector = args.connector;
+    this.featureId = args.featureId;
     this.telemetryMetadata = args.telemetryMetadata;
 
     this.temperature = args.temperature;
@@ -208,8 +252,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     const hasTools = inferredTools ? Object.keys(inferredTools).length > 0 : false;
     const resolvedToolChoice = options.tool_choice ?? 'auto';
 
-    return {
-      connectorId: this.connector.connectorId,
+    const params = {
       functionCalling: options.functionCallingMode ?? this.functionCallingMode,
       modelName: options.model ?? this.model,
       temperature: options.temperature ?? this.temperature,
@@ -227,15 +270,28 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       maxContentLength: this.maxContentLength,
       cacheControl: options.cacheControl ?? this.cacheControl,
       sessionId: options.sessionId ?? this.sessionId,
+    };
+
+    // On the feature path, the feature's own `reasoning` applies: the option is not forwarded.
+    if (this.featureId !== undefined) {
+      return { featureId: this.featureId, ...params };
+    }
+
+    return {
+      connectorId: this.connector.connectorId,
+      ...params,
       reasoning: options.reasoning ?? this.reasoning,
     };
   }
 
   completionWithRetry = <TStream extends boolean | undefined = false>(
-    request: ChatCompleteOptions & { stream?: TStream }
+    request: ChatCompleteRequest & { stream?: TStream }
   ) => {
     return this.caller.call(async () => {
       try {
+        if (isFeatureRequest(request)) {
+          return await this.chatComplete(request);
+        }
         return await this.chatComplete(request);
       } catch (e) {
         throw wrapInferenceError(e);
@@ -284,7 +340,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           ? {
               tokenUsage: {
                 promptTokens: response.tokens.prompt,
-                completionTokens: response.tokens.completion,
+                completionTokens: response.tokens.completion + (response.tokens.thinking ?? 0),
                 totalTokens: response.tokens.total,
               },
             }

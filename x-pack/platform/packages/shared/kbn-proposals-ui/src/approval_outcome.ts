@@ -32,13 +32,16 @@ export type ApprovalPhase =
   | ApprovalOutcomeStatus
   | 'failed'
   | 'expired'
-  | 'no_action';
+  | 'no_action'
+  /** A to-do proposal (`isTodoProposal`) the analyst marked as applied. */
+  | 'marked_applied';
 
 export interface ApprovalOutcomeBadge {
   color: EuiBadgeProps['color'];
   iconType: IconType;
   label: string;
   isLoading: boolean;
+  isDisabled?: boolean;
 }
 
 export interface ApprovalOutcomeBanner {
@@ -71,6 +74,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.applyingBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'declining':
       return {
@@ -78,6 +82,7 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         iconType: 'clock',
         label: APPROVAL_MODAL_TRANSLATIONS.decliningBadge,
         isLoading: true,
+        isDisabled: true,
       };
     case 'failed':
       return {
@@ -95,9 +100,16 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
       };
     case 'no_action':
       return {
-        color: 'default',
+        color: 'success',
         iconType: 'check',
         label: APPROVAL_MODAL_TRANSLATIONS.noActionBadge,
+        isLoading: false,
+      };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        iconType: 'check',
+        label: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBadge,
         isLoading: false,
       };
     default:
@@ -141,8 +153,14 @@ export const getApprovalOutcomeBanner = (
       };
     case 'no_action':
       return {
-        color: 'primary',
+        color: 'success',
         title: APPROVAL_MODAL_TRANSLATIONS.noActionBannerTitle,
+        isLoading: false,
+      };
+    case 'marked_applied':
+      return {
+        color: 'success',
+        title: APPROVAL_MODAL_TRANSLATIONS.markedAppliedBannerTitle,
         isLoading: false,
       };
     default:

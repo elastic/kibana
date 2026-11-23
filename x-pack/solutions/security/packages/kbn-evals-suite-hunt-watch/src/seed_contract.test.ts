@@ -91,6 +91,12 @@ describe('Investigation id binding', () => {
     );
   });
 
+  it('returns the hash material the alertzero plugin derives the id from', () => {
+    expect(
+      readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
+    ).toContain('`${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId}`');
+  });
+
   it('returns the frozen uuid namespace the alertzero plugin hashes with', () => {
     expect(
       readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
@@ -179,10 +185,18 @@ describe('canary report', () => {
   it('returns no seeded evidence', () => {
     expect(doc).not.toHaveProperty('evidence');
   });
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 });
 
 describe('IOC dump report', () => {
   const doc = buildIocDumpReportDoc('2026-01-01T00:00:00.000Z');
+
+  it('stamps content.published_at to match generator historic reports', () => {
+    expect(doc.content.published_at).toBe('2026-01-01T00:00:00.000Z');
+  });
 
   it('returns the per-hunt IOC bound the coordinator enforces', () => {
     const source = readRepoFile(
@@ -208,6 +222,17 @@ describe('IOC dump report', () => {
 
   it('returns no ATT&CK technique ids for Tier 2 to anchor on', () => {
     expect(JSON.stringify(doc)).not.toMatch(/\bT\d{4}(\.\d{3})?\b/);
+  });
+
+  // Prose like "observed scanning exposed services" is a real technique (T1595); a model that
+  // extracts it can leave a retryable gap, and the row then ends `partial`, not retired.
+  it('returns text that describes no behavior Tier 2 could extract a technique from', () => {
+    const prose = `${doc.content.title} ${doc.content.body_text} ${doc.extracted.categories.join(
+      ' '
+    )}`;
+    expect(prose).not.toMatch(
+      /scan|recon|prob(e|ing)|brute|exploit|phish|malware|beacon|command.and.control|c2\b|exfiltrat|lateral|credential/i
+    );
   });
 
   it('returns no seeded evidence', () => {
@@ -305,8 +330,13 @@ describe('dataset bindings', () => {
     expect(canaryDataset).toHaveLength(1);
   });
 
-  it('returns three named reports for multi-candidate', () => {
-    expect(HUNT_REPORT_IDS.multiCandidate).toHaveLength(3);
+  it('returns four named reports for multi-candidate, including two assume-role slots', () => {
+    expect(HUNT_REPORT_IDS.multiCandidate).toHaveLength(4);
+    // The two assume-role slots are what make convergence observable: same principals and
+    // process chain, distinct report ids and Investigations.
+    expect(HUNT_REPORT_IDS.multiCandidate.filter((id) => id.includes('assume-role'))).toHaveLength(
+      2
+    );
   });
 
   it('returns holdout ids within the seeded historic slots', () => {

@@ -25,7 +25,14 @@ describe('getMessageBlocks', () => {
       { type: 'text', content: 'Looking it up' },
       { type: 'tool_call', id: 'call-1', name: 'search', arguments: { q: 'x' } },
       { type: 'tool_call_response', id: 'call-1', response: { hits: [] } },
-      { type: 'unknown', value: { type: 'reasoning', content: 'hmm' } },
+      { type: 'reasoning', content: 'hmm' },
+    ]);
+  });
+
+  it('keeps a reasoning part without string content as an unknown block', () => {
+    const part = { type: 'reasoning', foo: 'bar' };
+    expect(getMessageBlocks({ role: 'assistant', parts: [part] })).toEqual([
+      { type: 'unknown', value: part },
     ]);
   });
 

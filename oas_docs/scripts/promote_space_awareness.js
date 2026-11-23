@@ -28,14 +28,14 @@ const NON_SPACE_PATH_PREFIXES = [
     '/api/security/role',
     '/api/spaces',
     '/api/security/session/_invalidate',
-    // These paths are replaced by placeholder operations in
-    // kibana.overlays.bump_slim.yaml and should not get the spaces section injected.
-    // Remove these entries when the primary API docs can render the full schemas.
-    // See https://github.com/elastic/kibana/issues/266195
-    '/api/dashboards',
-    '/api/visualizations',
   ]),
 ];
+
+// These paths are replaced by placeholder operations in kibana.overlays.bump_slim.yaml, so they
+// should not get the spaces section injected, unless the document is the full (non-slim) one.
+// Remove this list when Bump.sh is decommissioned.
+// See https://github.com/elastic/kibana/issues/266195
+const BUMP_SLIM_PLACEHOLDER_PATH_PREFIXES = ['/api/dashboards', '/api/visualizations'];
 
 const SPACE_PREFIX = '/s/';
 
@@ -54,13 +54,16 @@ run(
     const [relativeFilePath] = flagsReader.getPositionals();
     const absPath = path.resolve(REPO_ROOT, relativeFilePath);
     const oasDoc = parse(fs.readFileSync(absPath, 'utf8'));
+    const nonSpacePathPrefixes = flagsReader.boolean('full')
+      ? NON_SPACE_PATH_PREFIXES
+      : [...NON_SPACE_PATH_PREFIXES, ...BUMP_SLIM_PLACEHOLDER_PATH_PREFIXES];
 
     for (const [_pathName, pathValue] of Object.entries(oasDoc.paths)) {
       const pathName = _pathName.trim();
       log.debug(`Processing path: ${pathName}`);
       if (
         pathName.startsWith(SPACE_PREFIX) ||
-        NON_SPACE_PATH_PREFIXES.some((nonSpacePrefix) => {
+        nonSpacePathPrefixes.some((nonSpacePrefix) => {
           return pathName.startsWith(nonSpacePrefix);
         })
       ) {
@@ -111,6 +114,12 @@ run(
   },
   {
     description: 'Promote space awareness in OAS documents',
-    usage: 'node scripts/promote_space_awareness.js <path-to-kbn-oas-file>',
+    usage: 'node scripts/promote_space_awareness.js <path-to-kbn-oas-file> [--full]',
+    flags: {
+      boolean: ['full'],
+      help: `
+        --full  The file does not contain the bump-slim placeholders, so Dashboards and Visualizations get the spaces section too.
+      `,
+    },
   }
 );

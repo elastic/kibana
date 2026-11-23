@@ -7,9 +7,11 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { EventHit } from '@kbn/timelines-plugin/common/search_strategy';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
+import type {
+  EventHit,
+  TimelineEventsDetailsItem,
+} from '@kbn/securitysolution-timeline-search-strategy';
+import { getTimelineFieldsDataFromHit } from '../../../../../common/utils/get_timeline_fields_data_from_hit';
 
 /**
  * Converts a `DataTableRecord` into the `TimelineEventsDetailsItem[]` format expected by the table

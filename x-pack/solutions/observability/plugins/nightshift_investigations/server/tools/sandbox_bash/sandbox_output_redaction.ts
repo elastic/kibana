@@ -6,16 +6,22 @@
  */
 
 import type { ZodObject } from '@kbn/zod/v4';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { isToolHandlerStandardReturn } from '@kbn/agent-builder-server';
-import type { SandboxSecretsClient } from '../../sandbox_secrets';
-import { deriveConnectorCredentialSecretValues } from './connector_credentials';
+import {
+  buildConnectorEnv,
+  deriveConnectorCredentialSecretValues,
+  resolveSandboxCredentials,
+} from './connector_credentials';
+import { listSandboxCapableAgentConnectors } from './agent_connectors';
 import { createOutputRedactor, redactDeep, type OutputRedactor } from './output_redactor';
+import type { SandboxCallContext, SandboxToolHandlerContext } from './tool_utils';
+import { getSandboxCallContext } from './tool_utils';
 
-export type GetSandboxOutputRedactor = (request: KibanaRequest) => Promise<OutputRedactor>;
+export type GetSandboxOutputRedactor = (callContext: SandboxCallContext) => Promise<OutputRedactor>;
 
 const collectSecretLeaves = (value: unknown): string[] => {
   if (typeof value === 'string') return [value];
@@ -27,23 +33,86 @@ const collectSecretLeaves = (value: unknown): string[] => {
   return [];
 };
 
+export class SandboxConnectorRedactionError extends Error {
+  constructor(cause: Error) {
+    super(
+      `Connectors assigned to this agent cannot be listed for output redaction: ${cause.message}`
+    );
+    this.name = 'SandboxConnectorRedactionError';
+  }
+}
+
 /**
- * Builds the redactor for sandbox tool output: every sandbox secret stored in the request's space
- * and every in-memory connector secret. Whether or not a call requested them, any of these may
- * have been written to a file or kept alive in a process by an earlier command.
+ * Secret values the sandbox could have received from an agent's connectors: the auth header
+ * values `buildConnectorEnv` injects, resolved for every sandbox capable connector on the
+ * allow-list, preconfigured or saved. The redactor knows the exact header values the bash tool
+ * would inject, including values derived from secrets (e.g. a basic auth header or an OAuth2
+ * access token). Allow-listed connectors that are not sandbox capable, deleted or not readable
+ * never had credentials injected, so they are skipped.
+ *
+ * A connector whose credentials cannot be resolved (for example an OAuth2 token endpoint that
+ * does not answer) is skipped too, with a warning: its credentials cannot be injected into this
+ * command either, and the credential proxy keeps the sandbox from ever holding a real header
+ * value, so output redaction is defense in depth, not the control. Failing every sandbox tool
+ * over one misconfigured connector would stop the agent from using the healthy ones. The
+ * failure stays memoized in `callContext.resolvedCredentials`, so a command that asks for that
+ * connector fails with the same cause.
+ */
+const getAllowedConnectorSecretValues = async ({
+  actions,
+  callContext,
+  logger,
+}: {
+  actions: ActionsPluginStart;
+  callContext: SandboxCallContext;
+  logger: Logger;
+}): Promise<string[]> => {
+  if (callContext.allowedConnectorIds.length === 0) return [];
+
+  const actionsClient = await actions.getActionsClientWithRequest(callContext.request);
+  const connectors = await listSandboxCapableAgentConnectors(
+    actionsClient,
+    callContext.allowedConnectorIds
+  ).catch((err) => {
+    throw new SandboxConnectorRedactionError(err);
+  });
+  const connectorIds = [...new Set(connectors.map(({ id }) => id))];
+
+  const secretValues = await Promise.all(
+    connectorIds.map(async (connectorId) => {
+      try {
+        const credentials = await resolveSandboxCredentials({ actions, callContext, connectorId });
+        return buildConnectorEnv(credentials).secretValues;
+      } catch (err) {
+        logger.warn(
+          `Connector '${connectorId}' assigned to this agent cannot be resolved, so its credentials cannot be injected into sandbox commands: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+        return [];
+      }
+    })
+  );
+  return secretValues.flat();
+};
+
+/**
+ * Builds the redactor for sandbox tool output: every in-memory connector secret, and the resolved credentials of every connector assigned to
+ * the agent. Every allow-listed connector (preconfigured or saved) is resolved, so the exact header
+ * values the bash tool would inject are known to the redactor. Whether or not a call requested
+ * them, any of these may have been written to a file or kept alive in a process by an earlier
+ * command.
  */
 export const createSandboxOutputRedactorProvider =
   ({
     getDeps,
+    logger,
   }: {
-    getDeps: () => {
-      actions?: ActionsPluginStart;
-      sandboxSecretsClient?: Pick<SandboxSecretsClient, 'getRedactionValues'>;
-    };
+    getDeps: () => { actions?: ActionsPluginStart };
+    logger: Logger;
   }): GetSandboxOutputRedactor =>
-  async (request) => {
-    const { actions, sandboxSecretsClient } = getDeps();
-    const sandboxSecretValues = (await sandboxSecretsClient?.getRedactionValues(request)) ?? [];
+  async (callContext) => {
+    const { actions } = getDeps();
     // Every raw secret leaf, plus any values a credential resolver derives from them (e.g. the
     // bare API key `deriveConnectorCredentialSecretValues` extracts out of an `Authorization`
     // header) — a value that never appears verbatim in `secrets` itself would otherwise round-trip
@@ -52,13 +121,17 @@ export const createSandboxOutputRedactorProvider =
       ...collectSecretLeaves(secrets),
       ...deriveConnectorCredentialSecretValues(secrets),
     ]);
-    return createOutputRedactor([...sandboxSecretValues, ...connectorSecretValues]);
+    const allowedConnectorSecretValues = actions
+      ? await getAllowedConnectorSecretValues({ actions, callContext, logger })
+      : [];
+    return createOutputRedactor([...connectorSecretValues, ...allowedConnectorSecretValues]);
   };
 
 /**
- * Wraps a sandbox tool so every string in its results is redacted. The redactor is loaded before
- * the tool runs: when stored secrets cannot be loaded the tool is not run at all, since its output
- * could not be redacted.
+ * Wraps a sandbox tool so every string in its results is redacted. It creates the sandbox call
+ * context and hands it to the tool through `sandboxCallContext`. The redactor is loaded before
+ * the tool runs: when the connectors cannot be listed the tool is not run at all, since its
+ * output could not be redacted.
  */
 export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
   tool: BuiltinToolDefinition<TSchema>,
@@ -72,25 +145,30 @@ export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
 ): BuiltinToolDefinition<TSchema> => ({
   ...tool,
   handler: async (params, context) => {
+    const callContext = getSandboxCallContext(context);
     let redactor: OutputRedactor;
     try {
-      redactor = await getOutputRedactor(context.request);
+      redactor = await getOutputRedactor(callContext);
     } catch (err) {
-      logger.error(`Loading sandbox secrets for output redaction failed: ${err.message}`);
-      return {
-        results: [
-          {
-            type: ToolResultType.error,
-            data: {
-              message:
-                'Sandbox tools are unavailable: stored sandbox secrets could not be loaded to redact tool output. Ask an administrator to re-save the sandbox secrets.',
+      if (err instanceof SandboxConnectorRedactionError) {
+        logger.error(`Listing connectors for output redaction failed: ${err.message}`);
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  'Sandbox tools are unavailable: the connectors assigned to this agent could not be listed, so their credentials cannot be redacted from tool output. Try again or check the Kibana logs.',
+              },
             },
-          },
-        ],
-      };
+          ],
+        };
+      }
+      throw err;
     }
 
-    const toolReturn = await tool.handler(params, context);
+    const toolContext: SandboxToolHandlerContext = { ...context, sandboxCallContext: callContext };
+    const toolReturn = await tool.handler(params, toolContext);
     if (!isToolHandlerStandardReturn(toolReturn)) {
       return toolReturn;
     }

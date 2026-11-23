@@ -6,11 +6,14 @@
  */
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { TimeRange } from '../../entities_grid/common';
-import { TIME_RANGE_DAYS } from './tile_period';
+import { TIME_RANGE_DAYS, type TimeRange } from '../../queries/time_range';
 
-/** Hours between two dots of the sparkline of each time range. */
-const SERIES_STEP_HOURS: Record<TimeRange, number> = { '24h': 1, '7d': 6, '30d': 24 };
+/**
+ * Hours between two dots of the sparkline of each time range: 6 dots for every range. Each dot is
+ * the count over the range ending that many hours ago, so fewer dots read fewer buckets without
+ * changing the value of any dot.
+ */
+const SERIES_STEP_HOURS: Record<TimeRange, number> = { '24h': 4, '7d': 28, '30d': 120 };
 
 /** The column that holds the bucket of an alert, set by the alert pipeline. */
 export const SERIES_BUCKET_COLUMN = 'bucket';

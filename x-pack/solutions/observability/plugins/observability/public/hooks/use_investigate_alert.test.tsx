@@ -7,18 +7,24 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, fireEvent, renderHook, screen, waitFor } from '@testing-library/react';
+import type { ToastInputFields } from '@kbn/core-notifications-browser';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type {
   NightshiftInvestigationsRepositoryClient,
   InvestigationLocator,
 } from '@kbn/nightshift-investigations-plugin/public';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { NIGHTSHIFT_SETTINGS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { NightshiftSettingsLocatorParams } from '@kbn/nightshift-shared';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   INVESTIGATIONS_INTERNAL_URL,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
+  QUOTAS_LOOKUP_TIMEOUT_MS,
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_URL,
   useInvestigateAlert,
@@ -32,15 +38,104 @@ jest.mock('../utils/kibana_react');
 const useKibanaMock = useKibana as jest.Mock;
 const fetchMock = jest.fn();
 const httpGet = jest.fn();
-const addSuccess = jest.fn();
+const addSuccess = jest.fn<void, [ToastInputFields]>();
 const addDanger = jest.fn();
 const mockLocator = {
   getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
   ),
 } as unknown as InvestigationLocator;
+const mockSettingsLocator = {
+  getRedirectUrl: jest.fn(
+    ({ tab }: NightshiftSettingsLocatorParams) => `/app/nightshift/settings/${tab}`
+  ),
+} as unknown as LocatorPublic<NightshiftSettingsLocatorParams>;
+const getLocatorById = (
+  id: string
+): InvestigationLocator | LocatorPublic<NightshiftSettingsLocatorParams> | undefined =>
+  id === NIGHTSHIFT_SETTINGS_LOCATOR_ID ? mockSettingsLocator : mockLocator;
+const getLocator = jest.fn(getLocatorById);
+
+/** An HTTP error as Kibana's http service throws it: over HTTP/2 its own message is empty. */
+const httpErrorWithBody = (status: number, body: unknown) =>
+  Object.assign(new Error(''), { name: 'Error', request: {}, response: { status }, body });
+
+/** An HTTP error with Kibana's JSON error body. */
+const httpError = (status: number, message: string) =>
+  httpErrorWithBody(status, { statusCode: status, error: 'Error', message });
+
+const DAILY_LIMIT_MESSAGE = 'The daily limit of 5 for manual investigations has been reached';
+
+interface QuotasMock {
+  canManage: boolean;
+  manualLimit?: number | null;
+  manualCount?: number;
+}
+
+const mockStartFailure = (
+  error: Error,
+  quotas: QuotasMock | 'unavailable' | 'unanswered' = 'unavailable'
+): void => {
+  fetchMock.mockImplementation(
+    async (endpoint: string, { signal }: { signal?: AbortSignal | null } = {}) => {
+      if (endpoint === 'POST /internal/nightshift/investigations') {
+        throw error;
+      }
+      if (endpoint === 'GET /internal/nightshift/investigation_quotas') {
+        if (quotas === 'unavailable') {
+          throw new Error('Quotas unavailable');
+        }
+        if (quotas === 'unanswered') {
+          return new Promise((_, reject) =>
+            signal?.addEventListener('abort', () => reject(new Error('Aborted')))
+          );
+        }
+        const { canManage, manualLimit = 5, manualCount = 5 } = quotas;
+        return {
+          enabled: true,
+          limits: {
+            automatic_investigation: 5,
+            manual_investigation: manualLimit,
+            total_investigation: 10,
+          },
+          counts: {
+            automatic_investigation: 0,
+            manual_investigation: manualCount,
+            total_investigation: manualCount,
+          },
+          window: {
+            start: '2026-11-17T00:00:00.000Z',
+            resetsAt: new Date(Date.now() + 5 * 60 * 60_000).toISOString(),
+            timezone: 'UTC',
+          },
+          canManage,
+        };
+      }
+      return { available: true };
+    }
+  );
+};
+
+/** Renders the danger toast's text, which is a mount point when it carries more than a message. */
+const renderDangerText = (): HTMLElement => {
+  const [[{ text }]] = addDanger.mock.calls;
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  if (typeof text === 'function') {
+    const unmount = text(container);
+    unmountToasts.push(() => {
+      unmount();
+      container.remove();
+    });
+  } else {
+    container.textContent = text;
+    unmountToasts.push(() => container.remove());
+  }
+  return container;
+};
 
 let queryClient: QueryClient;
+let unmountToasts: Array<() => void>;
 
 const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
@@ -93,6 +188,19 @@ describe('useInvestigateAlert', () => {
   beforeEach(() => {
     window.localStorage.clear();
     jest.clearAllMocks();
+    getLocator.mockReset();
+    getLocator.mockImplementation(getLocatorById);
+    unmountToasts = [];
+    addSuccess.mockImplementation(({ text }) => {
+      if (typeof text !== 'function') return;
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const unmount = text(container);
+      unmountToasts.push(() => {
+        unmount();
+        container.remove();
+      });
+    });
     queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => {}, warn: () => {}, error: () => {} },
@@ -103,11 +211,12 @@ describe('useInvestigateAlert', () => {
         share: {
           url: {
             locators: {
-              get: jest.fn(() => mockLocator),
+              get: getLocator,
             },
           },
         },
         notifications: { toasts: { addSuccess, addDanger } },
+        rendering: renderingServiceMock.create(),
       },
     });
     setInvestigationsClient({
@@ -117,6 +226,7 @@ describe('useInvestigateAlert', () => {
   });
 
   afterEach(() => {
+    act(() => unmountToasts.forEach((unmount) => unmount()));
     window.localStorage.clear();
     queryClient.clear();
   });
@@ -166,6 +276,7 @@ describe('useInvestigateAlert', () => {
     expect(result.current.isInvestigating).toBe(true);
     expect(result.current.showInvestigateButton).toBe(false);
     expect(result.current.showViewInvestigation).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBe('/app/nightshift?investigationId=inv-running');
     await act(() => result.current.handleInvestigate());
     expect(fetchMock).not.toHaveBeenCalledWith(
       'POST /internal/nightshift/investigations',
@@ -288,14 +399,198 @@ describe('useInvestigateAlert', () => {
       'POST /internal/nightshift/investigations',
       expect.objectContaining({
         params: {
-          body: { subject: { type: 'alert', id: 'alert-1' } },
+          body: { subject: { type: 'alert', ids: ['alert-1'] } },
         },
       })
     );
-    expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Investigation started',
+      text: expect.any(Function),
+    });
+    expect(screen.getByText('You will find it in Nightshift')).toBeVisible();
+    const viewLink = screen.getByRole('link', { name: 'View investigation' });
+    expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
     // The list does not show the started investigation yet: it counts as in progress anyway.
-    expect(result.current.investigateActionLabel).toBe('Investigating…');
+    await waitFor(() => expect(result.current.investigateActionLabel).toBe('Investigating…'));
     expect(result.current.isInvestigating).toBe(true);
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBe(
+      '/app/nightshift?investigationId=investigation-1'
+    );
+    expect(result.current.viewInvestigationEbtProps).toEqual({
+      'data-ebt-action': 'viewInvestigation',
+      'data-ebt-element': 'testElement',
+      'data-ebt-detail': 'running',
+    });
+    act(() => result.current.markInvestigationViewed());
+
+    viewLink.addEventListener('click', (event) => event.preventDefault());
+    fireEvent.click(viewLink);
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual(['investigation-1']);
+  });
+
+  it('links to and marks the returned investigation as viewed when an older one is listed', async () => {
+    mockInvestigationsApi({ listed: list(summary('older-investigation')) });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showViewInvestigation).toBe(true));
+    act(() => result.current.markInvestigationViewed());
+
+    await act(() => result.current.handleInvestigate());
+
+    const viewLink = screen.getByRole('link', { name: 'View investigation' });
+    expect(viewLink).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
+    viewLink.addEventListener('click', (event) => event.preventDefault());
+    fireEvent.click(viewLink);
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual(['investigation-1', 'older-investigation']);
+  });
+
+  it('keeps the title-only success toast when the investigation locator is unavailable', async () => {
+    getLocator.mockReturnValue(undefined);
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
+    expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
+  });
+
+  it('exposes the started investigation before the list refresh completes', async () => {
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    let resolveList = (value: ReturnType<typeof list>) => {};
+    httpGet.mockImplementationOnce(
+      () =>
+        new Promise<ReturnType<typeof list>>((resolve) => {
+          resolveList = resolve;
+        })
+    );
+    let start = Promise.resolve();
+    act(() => {
+      start = result.current.handleInvestigate();
+    });
+
+    await waitFor(() =>
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=investigation-1'
+      )
+    );
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.showViewInvestigation).toBe(false);
+    await act(async () => {
+      resolveList(list(summary('investigation-1', { in_progress: true })));
+      await start;
+    });
+  });
+
+  it('prevents another start while the start request is pending', async () => {
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    let resolveStart = (value: { investigation_id: string }) => {};
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<{ investigation_id: string }>((resolve) => {
+          resolveStart = resolve;
+        })
+    );
+    let start = Promise.resolve();
+    act(() => {
+      start = result.current.handleInvestigate();
+    });
+    await waitFor(() => expect(result.current.isStarting).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    expect(
+      fetchMock.mock.calls.filter(
+        ([endpoint]) => endpoint === 'POST /internal/nightshift/investigations'
+      )
+    ).toHaveLength(1);
+    await act(async () => {
+      resolveStart({ investigation_id: 'investigation-1' });
+      await start;
+    });
+  });
+
+  it('does not expose a pending start belonging to another alert', async () => {
+    const { result, rerender } = renderHook(
+      ({ alertId }) => useInvestigateAlert({ alertId, ebtElement: 'testElement' }),
+      { wrapper, initialProps: { alertId: 'alert-1' } }
+    );
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    rerender({ alertId: 'alert-2' });
+
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
+    expect(result.current.isInvestigating).toBe(false);
+    act(() => result.current.markInvestigationViewed());
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual([]);
+  });
+
+  it.each([false, true])(
+    'keeps the current alert start when an earlier alert request settles with failure=%s',
+    async (shouldFail) => {
+      const { result, rerender } = renderHook(
+        ({ alertId }) => useInvestigateAlert({ alertId, ebtElement: 'testElement' }),
+        { wrapper, initialProps: { alertId: 'alert-1' } }
+      );
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      let finishStart = () => {};
+      fetchMock.mockImplementationOnce(
+        () =>
+          new Promise<{ investigation_id: string }>((resolve, reject) => {
+            finishStart = () => {
+              if (shouldFail) {
+                reject(new Error('Request failed'));
+              } else {
+                resolve({ investigation_id: 'first-investigation' });
+              }
+            };
+          })
+      );
+      let request = Promise.resolve();
+      act(() => {
+        request = result.current.handleInvestigate();
+      });
+      await waitFor(() => expect(result.current.isStarting).toBe(true));
+
+      rerender({ alertId: 'alert-2' });
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      expect(result.current.isStarting).toBe(false);
+      expect(result.current.viewInvestigationUrl).toBeUndefined();
+      fetchMock.mockResolvedValueOnce({ investigation_id: 'second-investigation' });
+      await act(() => result.current.handleInvestigate());
+
+      await act(async () => {
+        finishStart();
+        await request;
+      });
+      expect(result.current.isStarting).toBe(false);
+      expect(result.current.viewInvestigationUrl).toBe(
+        '/app/nightshift?investigationId=second-investigation'
+      );
+      expect(result.current.isInvestigating).toBe(true);
+    }
+  );
+
+  it('stops exposing an unlisted start after the pending timeout', async () => {
+    const { result, rerender } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+    await act(() => result.current.handleInvestigate());
+    const now = Date.now();
+    const dateNow = jest.spyOn(Date, 'now').mockReturnValue(now + 2 * 60_000);
+    try {
+      rerender();
+      await waitFor(() => expect(result.current.showInvestigateButton).toBe(true));
+      expect(result.current.viewInvestigationUrl).toBeUndefined();
+    } finally {
+      dateNow.mockRestore();
+    }
   });
 
   it('stops waiting for a started investigation once the list shows it', async () => {
@@ -326,6 +621,168 @@ describe('useInvestigateAlert', () => {
       title: 'Failed to start investigation',
       text: 'Request failed',
     });
+    expect(result.current.isStarting).toBe(false);
+    expect(result.current.showInvestigateButton).toBe(true);
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(screen.queryByRole('link', { name: 'View investigation' })).not.toBeInTheDocument();
+  });
+
+  it('reports the server reason when the HTTP error has no message of its own', async () => {
+    mockStartFailure(httpError(403, 'Missing privileges to start investigations'));
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addDanger).toHaveBeenCalledWith({
+      title: 'Failed to start investigation',
+      text: 'Missing privileges to start investigations',
+    });
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      'GET /internal/nightshift/investigation_quotas',
+      expect.anything()
+    );
+  });
+
+  it('explains a reached daily limit and links users who can change it to the settings', async () => {
+    mockStartFailure(httpError(429, DAILY_LIMIT_MESSAGE), { canManage: true });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    const text = renderDangerText();
+    // The server's fragment ends as a sentence, like the lines after it.
+    expect(text).toHaveTextContent(`${DAILY_LIMIT_MESSAGE}.`);
+    expect(text).toHaveTextContent('The limit resets in 5 hours.');
+    expect(text).not.toHaveTextContent('Ask an admin');
+    expect(screen.getByRole('link', { name: 'Change limits' })).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/investigations'
+    );
+  });
+
+  it('asks users who cannot change a reached daily limit to ask an admin', async () => {
+    mockStartFailure(httpError(429, DAILY_LIMIT_MESSAGE), { canManage: false });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    const text = renderDangerText();
+    expect(text).toHaveTextContent(DAILY_LIMIT_MESSAGE);
+    expect(text).toHaveTextContent('The limit resets in 5 hours.');
+    expect(text).toHaveTextContent('Ask an admin to raise the limit.');
+    expect(screen.queryByRole('link', { name: 'Change limits' })).not.toBeInTheDocument();
+  });
+
+  it('tells users who can change a reached daily limit where to, without a settings link', async () => {
+    getLocator.mockImplementation((id) =>
+      id === NIGHTSHIFT_SETTINGS_LOCATOR_ID ? undefined : mockLocator
+    );
+    mockStartFailure(httpError(429, DAILY_LIMIT_MESSAGE), { canManage: true });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    const text = renderDangerText();
+    expect(text).toHaveTextContent(
+      'You can raise the limit in the Nightshift investigation settings.'
+    );
+    expect(text).not.toHaveTextContent('Ask an admin');
+    expect(screen.queryByRole('link', { name: 'Change limits' })).not.toBeInTheDocument();
+  });
+
+  it('drops the reset countdown when a reached limit of 0 blocks starts until it changes', async () => {
+    mockStartFailure(
+      httpError(429, 'The daily limit of 0 for manual investigations has been reached'),
+      { canManage: false, manualLimit: 0, manualCount: 0 }
+    );
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    const text = renderDangerText();
+    expect(text).toHaveTextContent('New investigations stay blocked until the limit is changed.');
+    expect(text).not.toHaveTextContent('The limit resets');
+    expect(text).toHaveTextContent('Ask an admin to raise the limit.');
+  });
+
+  it('reports a 429 that no reached limit explains with its reason alone', async () => {
+    mockStartFailure(httpError(429, 'Server is overloaded'), {
+      canManage: true,
+      manualCount: 2,
+    });
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addDanger).toHaveBeenCalledWith({
+      title: 'Failed to start investigation',
+      text: 'Server is overloaded',
+    });
+  });
+
+  it('reports the status when the error body is not Kibana JSON', async () => {
+    mockStartFailure(httpErrorWithBody(502, '<html>Bad gateway</html>'));
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addDanger).toHaveBeenCalledWith({
+      title: 'Failed to start investigation',
+      text: 'The request failed with status 502.',
+    });
+  });
+
+  it('reports the daily limit reason alone when the limits cannot be read', async () => {
+    mockStartFailure(httpError(429, DAILY_LIMIT_MESSAGE), 'unavailable');
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    expect(addDanger).toHaveBeenCalledWith({
+      title: 'Failed to start investigation',
+      text: DAILY_LIMIT_MESSAGE,
+    });
+  });
+
+  it('stops waiting for the limits and reports the reason alone after the lookup timeout', async () => {
+    mockStartFailure(httpError(429, DAILY_LIMIT_MESSAGE), 'unanswered');
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+    jest.useFakeTimers();
+
+    try {
+      await act(async () => {
+        const started = result.current.handleInvestigate();
+        await jest.advanceTimersByTimeAsync(QUOTAS_LOOKUP_TIMEOUT_MS);
+        await started;
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+
+    expect(addDanger).toHaveBeenCalledWith({
+      title: 'Failed to start investigation',
+      text: DAILY_LIMIT_MESSAGE,
+    });
+  });
+
+  it('hides actions when the investigation lookup fails', async () => {
+    httpGet.mockRejectedValue(new Error('Lookup failed'));
+    const { result } = renderInvestigateAlert();
+
+    await waitFor(() => expect(httpGet).toHaveBeenCalled());
+    expect(result.current.showInvestigateButton).toBe(false);
+    expect(result.current.showViewInvestigation).toBe(false);
+    expect(result.current.viewInvestigationUrl).toBeUndefined();
   });
 
   it('does not fetch alert investigations when enabled is false', async () => {

@@ -376,7 +376,7 @@ export const collectHuntArtifacts = async ({
       byId(RESOLVE_RUN_OUTCOME_STEP_ID)
     );
 
-    const conversationId = buildHuntInvestigationConversationId(reportId);
+    const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
     const conversation = await getConversation({ fetch, spaceId, conversationId });
     const proposals = conversation
       ? await listProposalsWhenSettled({ fetch, spaceId, conversationId })

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { DetailPanelMetadataTab } from '@kbn/session-view-plugin/public';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { isCustomProcess, isProcess } from '../utils/helpers';
-import type { CustomProcess } from '../../../../../flyout/document_details/session_view/context';
+import type { CustomProcess } from '../context';
 
 export interface MetadataTabProps {
   /**

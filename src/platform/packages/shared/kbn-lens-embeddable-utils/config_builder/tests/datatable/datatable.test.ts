@@ -8,9 +8,8 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
 
-import type { DatatableConfig } from '../../schema';
+import { datatableConfigSchema, lensApiConfigSchema, type DatatableConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -24,6 +23,7 @@ import {
   sortedByRowDatatableAttributes,
   defaultColorByValueAttributes,
   selectorColorByValueAttributes,
+  progressBarDatatableAttributes,
 } from './lens_state_config_dsl.mock';
 import {
   singleMetricESQLDatatableAttributes,
@@ -31,6 +31,7 @@ import {
   multipleMetricRowSplitESQLDatatableAttributes,
   fullConfigESQLDatatableAttributes,
   sortedByTransposedMetricColumnESQLDatatableAttributes,
+  progressBarESQLDatatableAttributes,
 } from './lens_state_config_esql.mock';
 import {
   singleMetricDatatableWithAdhocDataView,
@@ -39,6 +40,7 @@ import {
   fullConfigDatatableWithDataView,
   sortedByPivotedMetricColumnDatatable,
   sortedByRowDatatable,
+  progressBarDatatable,
 } from './lens_api_config_dsl.mock';
 import {
   singleMetricESQLDatatable,
@@ -46,20 +48,8 @@ import {
   fullConfigESQLDatatable,
   sortedByPivotedMetricColumnESQLDatatable,
   sortedByRowColumnESQLDatatable,
+  progressBarESQLDatatable,
 } from './lens_api_config_esql.mock';
-
-type DatatableLensAttributes = Extract<
-  TypedLensSerializedState['attributes'],
-  { visualizationType: 'lnsDatatable' }
->;
-
-function assertDatatableLensAttributes(
-  attributes: LensAttributes
-): asserts attributes is DatatableLensAttributes {
-  if (attributes.visualizationType !== 'lnsDatatable') {
-    throw new Error('Expected datatable Lens attributes');
-  }
-}
 
 function toDatatableApiConfig(
   builder: LensConfigBuilder,
@@ -128,28 +118,13 @@ describe('Datatable', () => {
       validator.data_table.fromState(selectorColorByValueAttributes);
     });
 
-    it.each([
-      ['DSL', singleMetricDatatableAttributes],
-      ['ESQL', singleMetricESQLDatatableAttributes],
-    ])(
-      'should reject progress decoration when exporting a %s datatable to Lens as code',
-      (_label, attributes) => {
-        const progressDatatableAttributes = structuredClone(attributes);
-        assertDatatableLensAttributes(progressDatatableAttributes);
+    it('should convert a datatable chart with progress bars', () => {
+      validator.data_table.fromState(progressBarDatatableAttributes);
+    });
 
-        progressDatatableAttributes.state.visualization.columns[0] = {
-          ...progressDatatableAttributes.state.visualization.columns[0],
-          colorMode: 'progress',
-          fillStyle: { fillMode: 'single', color: '#abcdef', valueRange: { mode: 'auto' } },
-        };
-
-        const builder = new LensConfigBuilder(undefined, true);
-
-        expect(() => builder.toAPIFormat(progressDatatableAttributes)).toThrow(
-          /unsupported 'progress' cell decoration/i
-        );
-      }
-    );
+    it('should convert an ESQL datatable chart with progress bars', () => {
+      validator.data_table.fromState(progressBarESQLDatatableAttributes);
+    });
   });
 
   describe('api transform validation', () => {
@@ -195,6 +170,114 @@ describe('Datatable', () => {
 
     it('should convert an ESQL datatable chart sorted by a row column', () => {
       validator.data_table.fromApi(sortedByRowColumnESQLDatatable);
+    });
+
+    it('should convert a datatable chart with progress bars', () => {
+      validator.data_table.fromApi(progressBarDatatable);
+    });
+
+    it('should convert an ESQL datatable chart with progress bars', () => {
+      validator.data_table.fromApi(progressBarESQLDatatable);
+    });
+  });
+
+  describe('progress bar', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const statusPalette = { type: 'distributed_palette', palette: 'status' };
+
+    it('(SO -> API) should export the editor progress bars without the values kept for another fill mode', () => {
+      const apiOutput = toDatatableApiConfig(builder, progressBarDatatableAttributes);
+
+      expect(apiOutput.metrics).toEqual([
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'gradient',
+          color: statusPalette,
+          value_range: { type: 'auto' },
+          alignment: 'right',
+        }),
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'gradient',
+          color: statusPalette,
+          value_range: { type: 'custom', min: 8000, max: 10942.5 },
+          alignment: 'right',
+        }),
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'single',
+          color: { type: 'static', color: '#16C5C0' },
+          value_range: { type: 'auto' },
+          alignment: 'right',
+        }),
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'solid',
+          color: {
+            type: 'dynamic',
+            range: 'absolute',
+            steps: [
+              { lt: 10000, color: '#24c292' },
+              { gte: 10000, lte: 11000, color: '#aee8d2' },
+            ],
+          },
+          value_range: { type: 'custom', min: 4179.1, max: 10942.5 },
+          alignment: 'left',
+        }),
+      ]);
+    });
+
+    it('(SO -> API) should export the editor progress bars of an ESQL metric and row', () => {
+      const apiOutput = toDatatableApiConfig(builder, progressBarESQLDatatableAttributes);
+
+      expect(apiOutput.metrics).toEqual([
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'gradient',
+          color: statusPalette,
+          value_range: { type: 'auto' },
+          alignment: 'right',
+        }),
+      ]);
+      expect(apiOutput.rows).toEqual([
+        expect.objectContaining({
+          apply_color_to: 'progress_bar',
+          fill_mode: 'single',
+          color: { type: 'static', color: '#16C5C0' },
+          value_range: { type: 'auto' },
+          alignment: 'left',
+        }),
+      ]);
+    });
+
+    it('(API -> SO -> API) should return dynamic colors with open and closed outer bounds unchanged', () => {
+      const dslOutput = toDatatableApiConfig(builder, builder.fromAPIFormat(progressBarDatatable));
+      const esqlOutput = toDatatableApiConfig(
+        builder,
+        builder.fromAPIFormat(progressBarESQLDatatable)
+      );
+
+      expect(dslOutput.metrics?.[2].color).toEqual(progressBarDatatable.metrics?.[2].color);
+      expect(esqlOutput.metrics?.[1].color).toEqual(progressBarESQLDatatable.metrics?.[1].color);
+    });
+
+    it('(API -> SO -> API) should not add `steps` to a default `status` palette fill', () => {
+      const dslOutput = toDatatableApiConfig(builder, builder.fromAPIFormat(progressBarDatatable));
+
+      expect(dslOutput.metrics?.[1].color).toEqual(statusPalette);
+    });
+
+    it.each([
+      ['DSL', progressBarDatatable],
+      ['ESQL', progressBarESQLDatatable],
+    ])('(API -> SO -> API) should return a stable %s config', (_label, config) => {
+      const apiOutput = toDatatableApiConfig(
+        builder,
+        builder.fromAPIFormat(datatableConfigSchema.parse(config))
+      );
+
+      expect(lensApiConfigSchema.parse(apiOutput)).toEqual(apiOutput);
+      expect(toDatatableApiConfig(builder, builder.fromAPIFormat(apiOutput))).toEqual(apiOutput);
     });
   });
 
@@ -273,6 +356,77 @@ describe('Datatable', () => {
 
       expect(apiOutput.metrics?.[0].color).not.toBeDefined();
       expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();
+    });
+
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified in DSL datatable', () => {
+      const config = {
+        ...baseDatatable,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        rows: [{ operation: 'terms', fields: ['agent.keyword'], limit: 5 }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.rows?.[0].color).not.toBeDefined();
+      expect(parsed.metrics?.[0].color).not.toBeDefined();
+      expect(parsed.rows?.[0].color).not.toBeDefined();
+    });
+
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified in ES|QL datatable', () => {
+      const config = {
+        type: 'data_table',
+        title: 'Color default test',
+        data_source: {
+          type: 'esql',
+          query: 'FROM logs | STATS count = count() BY product',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        metrics: [{ column: 'count' }],
+        rows: [{ column: 'product' }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.rows?.[0].color).not.toBeDefined();
+      expect(parsed.metrics?.[0].color).not.toBeDefined();
+      expect(parsed.rows?.[0].color).not.toBeDefined();
+    });
+
+    it('should apply AUTO_COLOR on an ES|QL metric and row with apply_color_to and keep it after schema parse', () => {
+      const config = {
+        type: 'data_table',
+        title: 'Color default test',
+        data_source: {
+          type: 'esql',
+          query: 'FROM logs | STATS count = count() BY product',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        metrics: [{ column: 'count', apply_color_to: 'value' }],
+        rows: [{ column: 'product', apply_color_to: 'background' }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.rows?.[0].color).toEqual(AUTO_COLOR);
+      expect(parsed.metrics?.[0].color).toEqual(AUTO_COLOR);
+      expect(parsed.rows?.[0].color).toEqual(AUTO_COLOR);
     });
   });
 });

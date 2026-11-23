@@ -51,7 +51,9 @@ export const anonymizationSettingsSchema = schema.object({
   onFailure: schema.oneOf([schema.literal('block'), schema.literal('allow_unsafe')], {
     defaultValue: 'block',
   }),
-  rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 100 }),
+  // Headroom above 100: a built-in added in a later release is appended to saved rules, and must
+  // not make a previously valid full list unsaveable.
+  rules: schema.arrayOf(schema.oneOf([regexRuleSchema, nerRuleSchema]), { maxSize: 150 }),
 });
 
 /**

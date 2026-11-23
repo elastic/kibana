@@ -148,4 +148,6 @@ export interface CloudConnectorField {
   id: string;
   helpText?: string;
   tooltip?: string;
+  /** Format error for a non-empty value, shown inline as the user types. */
+  validate?: (value: string | undefined) => string | undefined;
 }

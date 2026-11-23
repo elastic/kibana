@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -13,7 +14,6 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
@@ -24,6 +24,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
  * (`mountEpisodesApp` + `KibanaContextProvider`).
  */
 export type AlertsKibanaServices = CoreStart & {
+  agentBuilder?: AgentBuilderPluginStart;
   share: SharePluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -37,5 +38,4 @@ export type AlertsKibanaServices = CoreStart & {
   unifiedDocViewer: UnifiedDocViewerStart;
   userProfile: CoreStart['userProfile'];
   spaces: SpacesPluginStart;
-  licensing: LicensingPluginStart;
 };

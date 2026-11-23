@@ -5,126 +5,48 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
-import {
-  listKiTestAiIndex,
-  renderListKiWithProviders,
-  SAMPLE_DISCOVER_URL,
-  SAMPLE_INDEX_MANAGEMENT_URL,
-} from './test_helpers';
-import { ListKiPanel } from './list_ki_panel';
+import { ListKiHeader } from './list_ki_header';
 
-const mockUseListKi = jest.fn();
+const DISCOVER_URL = 'http://localhost/app/discover';
 
-jest.mock('../../../hooks/use_list_ki', () => ({
-  useListKi: (...args: unknown[]) => mockUseListKi(...args),
-}));
-
-const stableCountsByType = [
-  { type: 'playbook', count: 1 },
-  { type: 'policy', count: 1 },
-  { type: 'faq', count: 4 },
-];
-
-const selectTypeFilter = (type: string) => {
-  fireEvent.click(screen.getByTestId(`contextListKiFilter-${type}`));
-};
+const renderHeader = ({ isLoading = false, hasError = false } = {}) =>
+  render(
+    <I18nProvider>
+      <ListKiHeader
+        total={12}
+        isLoading={isLoading}
+        hasError={hasError}
+        discoverHref={DISCOVER_URL}
+      />
+    </I18nProvider>
+  );
 
 describe('ListKiHeader', () => {
-  beforeEach(() => {
-    mockUseListKi.mockImplementation(({ type }: { type?: string }) => ({
-      kis: [
-        {
-          id: 'ki-1',
-          index: 'ai-index-idx-sample-ki',
-          type: 'playbook',
-          title: 'Refund playbook',
-        },
-      ],
-      total: type === undefined ? 6 : 1,
-      summary: { total: 6, countsByType: stableCountsByType },
-      isLoading: false,
-      isFetching: false,
-      error: undefined,
-      refetch: jest.fn(),
-    }));
-  });
+  it('shows the count after the data has loaded', () => {
+    renderHeader();
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders type filters and backing index link', async () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-
-    expect(screen.getByTestId('contextListKiTypeFilters')).toHaveTextContent('All (6)');
-    expect(screen.getByTestId('contextListKiFilter-playbook')).toBeInTheDocument();
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDestLink')).toHaveAttribute(
-        'href',
-        SAMPLE_INDEX_MANAGEMENT_URL
-      );
-    });
-  });
-
-  it('renders plain dest text without index management access', async () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, {
-      indexManagementMonitor: false,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent(
-        'ai-index-idx-sample-ki'
-      );
-    });
-    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
-  });
-
-  it('requests a type filter when a type is selected', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    selectTypeFilter('playbook');
-    expect(mockUseListKi).toHaveBeenLastCalledWith(expect.objectContaining({ type: 'playbook' }));
-  });
-
-  it('keeps all filter options after selecting a type', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    selectTypeFilter('playbook');
-    expect(screen.getByTestId('contextListKiFilter-all')).toBeInTheDocument();
-    expect(screen.getByTestId('contextListKiFilter-faq')).toBeInTheDocument();
-  });
-
-  it('keeps summary label when a type is selected', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    selectTypeFilter('playbook');
-    expect(screen.getByTestId('contextListKiPanelSummary')).toHaveTextContent(
-      '1 Knowledge Indicator in ai-index-idx-sample-ki'
+    expect(screen.getByTestId('contextListKiHeaderCount')).toHaveTextContent(
+      '12 Knowledge documents'
     );
+    expect(screen.queryByTestId('contextListKiHeaderCountLoading')).not.toBeInTheDocument();
   });
 
-  it('renders Discover link when available', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
-    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
-      'href',
-      SAMPLE_DISCOVER_URL
-    );
+  it('shows a skeleton instead of the count on the first load', () => {
+    renderHeader({ isLoading: true });
+
+    expect(screen.getByTestId('contextListKiHeaderCountLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiHeaderCount')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiHeaderDiscoverLink')).toBeInTheDocument();
   });
 
-  it('hides Discover link when unavailable', () => {
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />, { discoverShow: false });
-    expect(screen.queryByTestId('contextListKiDiscoverLink')).not.toBeInTheDocument();
-  });
+  it('hides the count when loading fails', () => {
+    renderHeader({ hasError: true });
 
-  it('renders index pattern dest as plain text', () => {
-    renderListKiWithProviders(
-      <ListKiPanel
-        aiIndex={{
-          ...listKiTestAiIndex,
-          dest: { type: 'index', value: 'ai-index-idx-logs-*' },
-        }}
-      />
-    );
-    expect(screen.getByTestId('contextListKiPanelDest')).toHaveTextContent('ai-index-idx-logs-*');
-    expect(screen.queryByTestId('contextListKiPanelDestLink')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiHeaderCount')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiHeaderCountLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextListKiHeaderDiscoverLink')).toBeInTheDocument();
   });
 });

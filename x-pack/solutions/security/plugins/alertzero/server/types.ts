@@ -14,6 +14,7 @@ import type {
 import type { ProposalsPluginSetup, ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
+import type { CPSServerSetup } from '@kbn/cps/server';
 import type {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
@@ -23,6 +24,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { MitreAttackServerStart } from '@kbn/mitre-attack-plugin/server';
+import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -30,10 +32,15 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SubscriptionAvailability } from '../common/availability';
+import type { AlertZeroAiIndexId } from './context_engine/ai_index_registry';
 
 export type AlertZeroRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-  alertzero: { subscription: SubscriptionAvailability; hasRequiredDependencies: boolean };
+  alertzero: {
+    subscription: SubscriptionAvailability;
+    hasRequiredDependencies: boolean;
+    isSpaceSupported: boolean;
+  };
 }>;
 
 /**
@@ -72,6 +79,12 @@ export interface AlertZeroPluginStart {
   registerThreatIntelSupplyWorkflowInstaller: (
     installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
+  /**
+   * False while a space-scoped AI index's template install is in flight, and after it fails, so
+   * its writer does not auto-create the index from the base template. True for any other index.
+   * Read it before each write: the value changes after `start` returns.
+   */
+  isAiIndexWritable: (aiIndexId: AlertZeroAiIndexId) => boolean;
 }
 
 export interface AlertZeroSetupDependencies {
@@ -83,6 +96,7 @@ export interface AlertZeroSetupDependencies {
   proposals?: ProposalsPluginSetup;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
   contextEngine?: ContextEnginePluginSetup;
+  cps?: CPSServerSetup;
 }
 
 export interface AlertZeroStartDependencies {
@@ -118,6 +132,11 @@ export interface AlertZeroStartDependencies {
    * technique catalog. Absence (or its managed source being off) leaves the catalog empty.
    */
   mitreAttack?: MitreAttackServerStart;
+  /**
+   * Optional, matching the plugin manifest. The report step reads its opt-in state before any
+   * Elasticsearch work; a missing telemetry plugin counts as opted out.
+   */
+  telemetry?: TelemetryPluginStart;
 }
 
 export type AlertZeroRouter = IRouter<AlertZeroRequestHandlerContext>;
