@@ -31,6 +31,13 @@ export interface ScoutTestFailureExtended extends TestFailure {
     path?: string;
     contentType: string;
   }>;
+  infraReason?: ScoutInfraFailureReason;
+}
+
+/** Why a Scout failure is attributed to infrastructure rather than to the test or Kibana. */
+export interface ScoutInfraFailureReason {
+  category: 'auth' | 'role' | 'connection' | 'cdn' | 'network';
+  message: string;
 }
 
 // Scout Failure Tracking Entry interface
@@ -54,6 +61,7 @@ interface ScoutFailureTrackingEntry {
     stack_trace?: string;
   };
   stdout?: string;
+  consoleErrors?: string;
   attachments: Array<{
     name: string;
     path?: string;
@@ -68,20 +76,100 @@ interface ScoutFailureTrackingEntry {
   };
 }
 
-// Failure substrings that indicate environmental/infrastructure issues rather than
-// real test failures. Matches mark the failure as "likely irrelevant" so we skip
-// filing GitHub issues for them.
-const LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS: readonly string[] = [
-  // SAML response parsing failures are environmental (cloud IAM service, test account).
-  'Failed to parse SAML response value',
-  // Cloud session creation failures are environmental (cloud login endpoint unavailable, MFA, etc.).
-  'Failed to create the new cloud session',
-  // Network connection refused errors are environmental (target host/service unreachable).
-  'connect ECONNREFUSED',
+/** `error` is the test error/stack trace, `consoleErrors` the captured browser console errors. */
+type InfraFailureSource = 'error' | 'consoleErrors';
+
+interface InfraFailureRule extends ScoutInfraFailureReason {
+  /** A rule matches when any of its substrings appears in any of these. */
+  sources: readonly InfraFailureSource[];
+  /** Set when the same signal on a local run may be a Kibana bug caused by the change under test. */
+  cloudOnly: boolean;
+  substrings: readonly string[];
+}
+
+// Failures matching a rule are infrastructure issues rather than real test failures: no GitHub
+// issue is filed, and the rule's message is shown in the HTML report instead. First match wins.
+const INFRA_FAILURE_RULES: readonly InfraFailureRule[] = [
+  {
+    category: 'auth',
+    sources: ['error'],
+    cloudOnly: true,
+    substrings: [
+      'Failed to parse SAML response value',
+      'SAML callback failed',
+      'Failed to create the new cloud session',
+    ],
+    message:
+      'Authentication on Elastic Cloud failed. Likely an issue with the identity provider or the test accounts, not with the test.',
+  },
+  {
+    category: 'role',
+    sources: ['error'],
+    cloudOnly: true,
+    substrings: ['role is not defined'],
+    message:
+      'The role used by the test has no user configured for the Elastic Cloud project. Contact the Kibana DX team to add the missing role.',
+  },
+  {
+    category: 'connection',
+    sources: ['error'],
+    cloudOnly: false,
+    substrings: ['ECONNREFUSED'],
+    message:
+      'The test runner could not connect to the target host. Check that the deployment was reachable during the run.',
+  },
+  {
+    category: 'cdn',
+    sources: ['consoleErrors'],
+    cloudOnly: true,
+    // 'Kibana bootstrap failed' is logged by the bootstrap template in @kbn/core-rendering-server-internal.
+    // '__kbnSharedDeps__ is not defined' means the bundle loaded but only in part.
+    substrings: [
+      'ChunkLoadError',
+      'Kibana bootstrap failed: could not load',
+      'Failed to load plugins: ReferenceError: __kbnSharedDeps__ is not defined',
+    ],
+    message:
+      'Kibana bundles failed to load from the CDN, so the app never finished loading. If this keeps happening, contact Kibana Core (@elastic/kibana-core) about a possible CDN issue.',
+  },
+  {
+    category: 'network',
+    // Chromium reports these on the request that failed, so they surface either in the browser
+    // console or, when the failing request is the navigation itself, in the page.goto() error.
+    sources: ['error', 'consoleErrors'],
+    cloudOnly: true,
+    substrings: [
+      'net::ERR_ADDRESS_UNREACHABLE',
+      'net::ERR_CONNECTION_CLOSED',
+      'net::ERR_CONNECTION_RESET',
+      'net::ERR_CONNECTION_REFUSED',
+      'net::ERR_EMPTY_RESPONSE',
+      'net::ERR_INTERNET_DISCONNECTED',
+      'net::ERR_NAME_NOT_RESOLVED',
+      'net::ERR_QUIC_PROTOCOL_ERROR',
+    ],
+    message:
+      'The Cloud deployment dropped or refused browser connections. Likely a bad deployment or a proxy/load balancer issue; check the project health before investigating the test.',
+  },
 ];
 
-const isLikelyIrrelevant = (name: string, failure: string) => {
-  return LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS.some((substring) => failure.includes(substring));
+const getInfraReason = (
+  { target, consoleErrors = '' }: ScoutFailureTrackingEntry,
+  failure: string
+): ScoutInfraFailureReason | undefined => {
+  const isCloudTarget = target.startsWith('cloud-');
+
+  const rule = INFRA_FAILURE_RULES.find(({ sources, cloudOnly, substrings }) => {
+    if (cloudOnly && !isCloudTarget) {
+      return false;
+    }
+    return sources.some((source) => {
+      const text = source === 'error' ? failure : consoleErrors;
+      return substrings.some((substring) => text.includes(substring));
+    });
+  });
+
+  return rule ? { category: rule.category, message: rule.message } : undefined;
 };
 
 export async function getScoutFailures(reportPath: string): Promise<ScoutTestFailureExtended[]> {
@@ -109,7 +197,8 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
   for (const entry of lines) {
     // Convert Scout failure tracking entry to compatible TestFailure format
     const failure = stripAnsi(entry.error.stack_trace || entry.error.message || '');
-    const likelyIrrelevant = isLikelyIrrelevant(entry.title, failure);
+    const infraReason = getInfraReason(entry, failure);
+    const likelyIrrelevant = infraReason !== undefined;
 
     const testFailure: ScoutTestFailureExtended = {
       // Map Scout fields to JUnit-compatible fields
@@ -129,6 +218,7 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
       kibanaModule: entry.kibanaModule,
       duration: entry.duration,
       attachments: entry.attachments,
+      infraReason,
 
       // Additional fields for compatibility
       time: String(entry.duration / 1000), // Convert ms to seconds

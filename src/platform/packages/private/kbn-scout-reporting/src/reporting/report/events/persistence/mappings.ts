@@ -200,6 +200,12 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
 export const suiteProperties: Record<PropertyName, MappingProperty> = {
   title: {
     type: 'text',
+    fields: {
+      keyword: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+    },
   },
   type: {
     type: 'keyword',
@@ -212,6 +218,12 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   },
   title: {
     type: 'text',
+    fields: {
+      keyword: {
+        type: 'keyword',
+        ignore_above: 1024,
+      },
+    },
   },
   tags: {
     type: 'keyword',
