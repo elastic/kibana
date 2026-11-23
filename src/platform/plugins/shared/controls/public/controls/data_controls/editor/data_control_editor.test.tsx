@@ -210,6 +210,20 @@ describe('Data control editor', () => {
         expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('true');
         expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('false');
       });
+
+      test('falls back to the first compatible control type when the next field does not fit the selected one', async () => {
+        await act(async () => {
+          fireEvent.click(controlEditor.getByTestId('create__rangeSlider'));
+        });
+        expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('true');
+
+        await selectField(controlEditor, 'machine.os.raw');
+
+        await waitFor(() => {
+          expect(getPressedAttribute(controlEditor, 'create__optionsList')).toBe('true');
+        });
+        expect(getPressedAttribute(controlEditor, 'create__rangeSlider')).toBe('false');
+      });
     });
 
     test('renders custom settings when provided', async () => {
