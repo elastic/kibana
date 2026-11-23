@@ -6,18 +6,18 @@
  */
 
 import { type Attributes, metrics } from '@opentelemetry/api';
-import { metrics as sdkMetrics } from '@elastic/opentelemetry-node/sdk';
+import { MeterProvider, MetricReader } from '@opentelemetry/sdk-metrics';
 import { BACKPRESSURE_REASONS } from '../lib/backpressure_reason';
 import type { taskManagerMetricsTelemetry as TelemetryInstance } from './task_metrics_telemetry';
 
-class TestMetricReader extends sdkMetrics.MetricReader {
+class TestMetricReader extends MetricReader {
   protected async onForceFlush(): Promise<void> {}
   protected async onShutdown(): Promise<void> {}
 }
 
 describe('taskManagerMetricsTelemetry', () => {
   let reader: TestMetricReader;
-  let provider: InstanceType<typeof sdkMetrics.MeterProvider>;
+  let provider: MeterProvider;
   let telemetry: typeof TelemetryInstance;
 
   const collect = async () => {
@@ -33,7 +33,7 @@ describe('taskManagerMetricsTelemetry', () => {
   beforeEach(() => {
     metrics.disable();
     reader = new TestMetricReader();
-    provider = new sdkMetrics.MeterProvider({ readers: [reader] });
+    provider = new MeterProvider({ readers: [reader] });
     metrics.setGlobalMeterProvider(provider);
     // the instruments are created when the module loads, so load it after the provider is set
     jest.isolateModules(() => {

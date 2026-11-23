@@ -8,7 +8,7 @@
 import { cloneDeep } from 'lodash/fp';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { EuiThemeProvider } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { DEFAULT_SEARCH_RESULTS_PER_PAGE } from '../../pages/timelines_page';
