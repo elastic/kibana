@@ -41,8 +41,9 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       state: { data_view_id: dataViewId, field_name: fieldName },
       source,
     }) => {
+      if (!fieldName) return false;
       const dataView = source ?? (dataViewId ? await dataViewsService.get(dataViewId) : undefined);
-      if (!dataView || !fieldName) return false;
+      if (!dataView) return false;
       // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
       // declaring the field non-existent
       const field =

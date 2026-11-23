@@ -183,7 +183,7 @@ const CompatibleControlTypesComponent = ({
               key={`disabled__${action.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
-                  fieldSelected: Boolean(data_view_id && field_name),
+                  fieldSelected: Boolean((data_view_id || source) && field_name),
                   controlType: action.type,
                 }
               )}

@@ -268,6 +268,40 @@ describe('Data control editor', () => {
       isTimeBased: () => false,
     };
 
+    test('explains that a type needs another kind of field, since a field is selected', async () => {
+      mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
+      mockGetESQLSingleColumnValues.mockResolvedValue({
+        values: ['linux'],
+        column: { name: 'os', type: 'keyword' },
+      });
+      const controlEditor = await mountComponent({
+        controlId: 'myControl',
+        controlType: 'optionsList',
+        initialState: {
+          values_source: ControlValuesSource.ESQL,
+          esql_query: 'FROM logs | STATS BY os',
+          field_name: 'os',
+          data_view_id: undefined,
+        } as Partial<DataControlState>,
+        waitForDataView: false,
+      });
+      await waitFor(() => {
+        expect(controlEditor.getByTestId('control-editor-save')).toBeEnabled();
+      });
+
+      await act(async () => {
+        // a disabled button does not get mouse events, its tooltip anchor does
+        fireEvent.mouseOver(
+          controlEditor.getByTestId('create__rangeSlider').parentElement as HTMLElement
+        );
+      });
+
+      expect(
+        await controlEditor.findByText('Select a compatible control type.')
+      ).toBeInTheDocument();
+      expect(controlEditor.queryByText('Select a field first.')).not.toBeInTheDocument();
+    });
+
     test('does not use the id of the source as a data view, neither in field mode nor for the next control', async () => {
       mockGetSourceFromESQLQuery.mockResolvedValue(esqlSource);
       mockGetESQLSingleColumnValues.mockResolvedValue({

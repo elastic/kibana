@@ -129,34 +129,34 @@ export const initializeDataControlManager = async <EditorState extends object = 
     dataControlStateManager.api.valuesSource$,
   ])
     .pipe(
-      // The source of an ESQL control comes from its query, which is not always a data view that the id can load
-      filter(([, valuesSource]) => valuesSource !== ControlValuesSource.ESQL),
-      tap(() => {
-        filtersLoading$.next(true);
-        if (blockingError$.value) {
-          setBlockingError(undefined);
+      switchMap(
+        async ([currentDataViewId, valuesSource]): Promise<
+          { skipped: true } | { dataSource: FilterableSource } | { error: Error }
+        > => {
+          // The source of an ESQL control comes from its query, which is not always a data view that the id
+          // can load. It is handled here, and not filtered before, so that it also cancels a pending lookup.
+          if (valuesSource === ControlValuesSource.ESQL) return { skipped: true };
+          filtersLoading$.next(true);
+          if (blockingError$.value) {
+            setBlockingError(undefined);
+          }
+          try {
+            return { dataSource: await dataViewsService.get(currentDataViewId ?? '') };
+          } catch (error) {
+            return { error };
+          }
         }
-      }),
-      switchMap(async ([currentDataViewId]) => {
-        let dataSource: FilterableSource | undefined;
-        try {
-          dataSource = await dataViewsService.get(currentDataViewId ?? '');
-          return { dataSource };
-        } catch (error) {
-          return { error };
-        }
-      })
+      )
     )
-    .subscribe(({ dataSource, error }) => {
-      if (error || !dataSource) {
-        setBlockingError(error);
-        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(error);
+    .subscribe((result) => {
+      if ('skipped' in result) return;
+      if ('error' in result) {
+        setBlockingError(result.error);
+        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(result.error);
         return;
       }
-      if (dataSource) {
-        resolveInitialDataSourceReady(dataSource);
-      }
-      dataSources$.next(dataSource ? [dataSource] : undefined);
+      resolveInitialDataSourceReady(result.dataSource);
+      dataSources$.next([result.dataSource]);
     });
 
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
@@ -261,9 +261,9 @@ export const initializeDataControlManager = async <EditorState extends object = 
     // The source of the query depends on the project routing
     parentProjectRouting$,
   ]).subscribe(async ([query, valuesSource, esqlVariables]) => {
-    if (valuesSource !== ControlValuesSource.ESQL) return;
-    // Only the latest run applies, as the query, the variables and the routing can change while one is pending
+    // Only the latest run applies. Any change invalidates a pending run, also a switch away from ESQL
     const run = ++latestEsqlRun;
+    if (valuesSource !== ControlValuesSource.ESQL) return;
     try {
       if (!query) {
         throw new Error(

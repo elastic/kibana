@@ -494,6 +494,61 @@ describe('initializeDataControlManager', () => {
       expect(errors).toEqual([]);
     });
 
+    it('is not overwritten by the source of the query when the control goes back to field mode meanwhile', async () => {
+      const esqlSource = esqlSourceOf('esqlSourceId');
+      let resolveSource: (source: unknown) => void = () => {};
+      (getSourceFromESQLQuery as jest.Mock).mockReturnValueOnce(
+        new Promise((resolve) => (resolveSource = resolve))
+      );
+      const manager = await initializeEsqlManager();
+
+      manager.api.setValuesSource(ControlValuesSource.FIELD);
+      manager.api.setDataViewId('myDataViewId');
+      manager.api.setFieldName('myFieldName');
+      await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+      resolveSource(esqlSource);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(manager.api.dataSources$.value?.[0].id).toBe('myDataViewId');
+      expect(manager.api.dataViewId$.value).toBe('myDataViewId');
+      expect(manager.api.fieldName$.value).toBe('myFieldName');
+    });
+
+    it('is not replaced by a data view lookup that was pending when the control switched to a query', async () => {
+      const esqlSource = esqlSourceOf('esqlSourceId');
+      const originalGet = dataViewsService.get;
+      let resolveLookup: (dataView: DataView) => void = () => {};
+      dataViewsService.get = jest
+        .fn()
+        .mockImplementation((id: string) =>
+          id === 'slowDataViewId'
+            ? new Promise((resolve) => (resolveLookup = resolve))
+            : originalGet(id)
+        );
+      (getSourceFromESQLQuery as jest.Mock).mockResolvedValue(esqlSource);
+      try {
+        const manager = await initializeDataControlManager({
+          controlId: 'myControlId',
+          controlType: 'myControlType',
+          state: { ...dataControlState, data_view_id: 'slowDataViewId' },
+          editorStateManager: initializeStateManager({}, {}),
+          parentApi: {},
+          typeDisplayName: 'My Control Type',
+        });
+
+        manager.api.setEsqlQuery('FROM logs-* | STATS BY myFieldName');
+        manager.api.setValuesSource(ControlValuesSource.ESQL);
+        await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+        resolveLookup(await originalGet('myDataViewId'));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        expect(manager.api.dataSources$.value?.[0]).toBe(esqlSource);
+        expect(manager.api.blockingError$.value).toBeUndefined();
+      } finally {
+        dataViewsService.get = originalGet;
+      }
+    });
+
     it('applies only the latest query when an earlier one finishes last', async () => {
       const firstSource = esqlSourceOf('firstSourceId');
       const secondSource = esqlSourceOf('secondSourceId');

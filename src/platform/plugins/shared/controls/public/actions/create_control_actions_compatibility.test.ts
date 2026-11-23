@@ -46,6 +46,19 @@ describe('compatibility of the control types with a field', () => {
     }
   );
 
+  it.each([
+    ['options list', createOptionsListControlAction()],
+    ['range slider', createRangeSliderControlAction()],
+  ])(
+    'the %s is not compatible without a field, and does not load the data view for it',
+    async (_, action) => {
+      expect(
+        await action.isCompatible({ state: { data_view_id: 'stale-data-view-id' } } as never)
+      ).toBe(false);
+      expect(dataViewsService.get).not.toHaveBeenCalled();
+    }
+  );
+
   it('is not compatible without a source or a data view id', async () => {
     const action = createOptionsListControlAction();
 

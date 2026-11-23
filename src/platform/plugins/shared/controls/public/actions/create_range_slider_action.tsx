@@ -36,9 +36,10 @@ export const createRangeSliderControlAction =
         state: { data_view_id: dataViewId, field_name: fieldName },
         source,
       }) => {
+        if (!fieldName) return false;
         const dataView =
           source ?? (dataViewId ? await dataViewsService.get(dataViewId) : undefined);
-        if (!dataView || !fieldName) return false;
+        if (!dataView) return false;
         const field = dataView.getFieldByName(fieldName);
         return Boolean(field && isFieldCompatible(field));
       },
