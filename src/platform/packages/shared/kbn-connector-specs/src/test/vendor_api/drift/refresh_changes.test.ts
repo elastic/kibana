@@ -430,6 +430,29 @@ describe('describeChanges', () => {
     ).toEqual(object('Auth scopes', '+ apiKey (scheme)'));
   });
 
+  it('names a scope that is a URL ending in a slash by its host', () => {
+    expect(
+      describeChanges([
+        change(
+          'api-security-removed',
+          'the endpoint scheme security `Oauth2: [https://mail.google.com/, https://x/auth/gmail.labels]` was removed from the API'
+        ),
+        change(
+          'api-security-added',
+          'the endpoint scheme security `Oauth2: [https://mail.google.com/]` was added to the API'
+        ),
+      ])
+    ).toEqual(object('Auth scopes', '- gmail.labels'));
+    expect(
+      describeChanges([
+        change(
+          'api-security-added',
+          'the endpoint scheme security `Oauth2: [https://mail.google.com/]` was added to the API'
+        ),
+      ])
+    ).toEqual(object('Auth scopes', '+ mail.google.com'));
+  });
+
   it('names the scheme of a scope when the same scopes moved to another scheme', () => {
     expect(
       describeChanges([

@@ -129,7 +129,12 @@ const fieldOf = (path: string): string => {
   return shortName(name);
 };
 
-const scopeName = (scope: string): string => scope.slice(scope.lastIndexOf('/') + 1);
+// `https://www.googleapis.com/auth/gmail.labels` as `gmail.labels`, `https://mail.google.com/` as
+// `mail.google.com`.
+const scopeName = (scope: string): string => {
+  const trimmed = scope.replace(/\/+$/, '');
+  return trimmed.slice(trimmed.lastIndexOf('/') + 1);
+};
 
 /** A scheme an endpoint's security asks for, with one of its scopes when it has any. */
 interface Grant {
