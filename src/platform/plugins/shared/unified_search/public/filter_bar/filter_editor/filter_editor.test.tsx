@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { type ComponentProps } from 'react';
 import { act } from '@testing-library/react';
 import type { UseEuiTheme, EuiThemeComputed } from '@elastic/eui';
 import type { TestBed } from '@kbn/test-jest-helpers';
@@ -15,6 +15,7 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterStateStore } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FilterEditorProps } from '.';
 import { FilterEditor } from '.';
@@ -207,6 +208,12 @@ describe('<FilterEditor />', () => {
         customLabel: '',
         dataViewId: nestedDataView.id,
       };
+      const services = { data: dataMock, uiSettings: coreMock.createStart().uiSettings };
+      const FilterEditorWithServices = (props: ComponentProps<typeof FilterEditor>) => (
+        <KibanaContextProvider services={services}>
+          <FilterEditor {...props} />
+        </KibanaContextProvider>
+      );
       let onSubmit: jest.Mock;
       let onLocalFilterCreate: jest.Mock;
       let onLocalFilterUpdate: jest.Mock;
@@ -233,9 +240,18 @@ describe('<FilterEditor />', () => {
           docLinks: coreMock.createStart().docLinks,
           dataViews: dataMock.dataViews,
         };
-        nestedTestBed = await registerTestBed(FilterEditor, { defaultProps })();
+        nestedTestBed = await registerTestBed(FilterEditorWithServices, { defaultProps })();
         await act(async () => {});
         nestedTestBed.component.update();
+      });
+
+      it('shows the loaded filter in the builder and reports it as unchanged', () => {
+        const { exists } = nestedTestBed;
+        expect(exists('filterParams')).toBe(true);
+
+        // Baseline and latest update match, so closing the editor doesn't report unsaved changes.
+        expect(onLocalFilterCreate).toHaveBeenLastCalledWith(expect.objectContaining({ filter }));
+        expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(filter);
       });
 
       it('generates the Query DSL for the loaded data view and keeps the filter when unchanged', () => {

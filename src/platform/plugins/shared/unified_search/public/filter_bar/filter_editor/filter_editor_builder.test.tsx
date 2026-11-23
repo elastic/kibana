@@ -852,7 +852,7 @@ describe('Filter whose data view cannot be found', () => {
     );
 
     it('generates the Query DSL for the data view selected by the filter fields', async () => {
-      const { onSubmit } = await renderWithMissingDataView(nestedFilter, {
+      const { onSubmit, onLocalFilterUpdate } = await renderWithMissingDataView(nestedFilter, {
         indexPatterns: [mockedDataView, nestedDataView],
       });
       await waitFor(() => {
@@ -864,6 +864,11 @@ describe('Filter whose data view cannot be found', () => {
       });
 
       fireEvent.click(screen.getByTestId('editQueryDSL'));
+
+      expect(onLocalFilterUpdate).toHaveBeenLastCalledWith(
+        expect.objectContaining({ queryDsl: nestedQueryDsl })
+      );
+
       fireEvent.click(screen.getByTestId('saveFilter'));
 
       // Unchanged Query DSL is saved as the recovered phrase filter, not as a custom filter.

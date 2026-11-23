@@ -254,17 +254,19 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
       const dataView = await dataViews.get(dataViewId, false);
       if (signal.aborted) return;
       const indexPatterns = [dataView, ...this.props.indexPatterns];
+      const localFilter = merge({}, this.props.filter);
       const queryDsl = this.parseFilterToQueryDsl(this.props.filter, indexPatterns);
-      // The loaded data view can change the Query DSL (e.g. nested fields), so it's the new baseline.
+      // The loaded filter replaces the empty one reported on mount as the unchanged baseline.
       this.props.onLocalFilterCreate?.({
-        filter: this.props.filter,
+        filter: localFilter,
         queryDslFilter: this.getQueryDslFilter({ queryDsl }),
       });
+      this.props.onLocalFilterUpdate?.(localFilter);
       this.setState({
         selectedDataView: dataView,
         isLoadingDataView: false,
         indexPatterns,
-        localFilter: merge({}, this.props.filter),
+        localFilter,
         queryDsl,
         initialQueryDsl: queryDsl,
       });
