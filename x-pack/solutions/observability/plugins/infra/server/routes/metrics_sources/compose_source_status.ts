@@ -119,6 +119,13 @@ export const composeSourceStatus = async ({
         error.stack = original.stack.startsWith(originalHeader)
           ? `${error.name}: ${message}${original.stack.slice(originalHeader.length)}`
           : `${error.name}: ${message}\n${original.stack}`;
+      } else {
+        // The original stack is not a string we can splice the enriched header into, and the
+        // wrapper's own stack points at this helper rather than where the probe failed. Reporting
+        // those frames would replace the original diagnostic with a misleading location, so drop
+        // the stack entirely: `%message` then renders `error.message`, which already carries the
+        // source, pattern and original message.
+        error.stack = undefined;
       }
       logger.error(error);
     }

@@ -181,9 +181,15 @@ describe('composeSourceStatus', () => {
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
     const loggedError = logger.error.mock.calls[0][0] as Error;
-    expect(loggedError.message).toBe(
-      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy'
-    );
+    const expectedMessage =
+      'Metric index status check failed for source "default" (pattern: metrics-*,metricbeat-*): cluster unhealthy';
+    expect(loggedError.message).toBe(expectedMessage);
+    // We can't rewrite a non-string stack's header, so rather than report the wrapper's own frames
+    // (which point at this helper, not where the probe failed) the stack is omitted. The rendered
+    // body then falls back to the enriched message, so the context survives and no misleading
+    // frames are printed.
+    expect(loggedError.stack).toBeUndefined();
+    expect(renderMessage(loggedError)).toBe(expectedMessage);
   });
 
   it('collapses line breaks in the request-controlled source id so it cannot forge log lines', async () => {
