@@ -7,17 +7,17 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
-  RecallInclude,
   RecallJsonResponse,
   RecallRequest,
   RecallResult,
-  RecallTextResponse,
+  RecallYamlResponse,
 } from '../../common/http_api/memory_recall';
 import { recall } from './service';
 import type { RecallStore } from './types';
 
 const event: RecallResult = {
-  id: '8f3c2a1e:e2',
+  id: 'e2',
+  session_id: '8f3c2a1e',
   source: 'session_events',
   role: 'user',
   date: '2026-11-03T13:58:00Z',
@@ -30,11 +30,7 @@ const ki: RecallResult = {
   content: 'checkout latency was caused by a connection pool limit',
 };
 
-const everything: RecallInclude = {
-  session_events: true,
-  session_memory: true,
-  ai_index_ids: ['ops-memory'],
-};
+const everything = ['session_events', 'session_memory', 'ai_index:ops-memory'];
 
 describe('recall', () => {
   let rerank: jest.Mock;
@@ -53,8 +49,9 @@ describe('recall', () => {
       analyticsService: { reportMemoryRecall },
       request: {
         query: 'why was checkout slow?',
+        user_id: 'jdoe',
         include: everything,
-        max_tokens: 6000,
+        token_budget: 6000,
         format: 'json',
         ...request,
       },
@@ -82,22 +79,26 @@ describe('recall', () => {
   });
 
   it('searches only the included stores', async () => {
-    const { results } = (await run({
-      include: { session_events: true, session_memory: false, ai_index_ids: [] },
-    })) as RecallJsonResponse;
+    const { results } = (await run({ include: ['session_events'] })) as RecallJsonResponse;
 
     expect(results).toEqual([event]);
     expect(stores[2].search).not.toHaveBeenCalled();
   });
 
   it.each([
+    [['session_events'], [100, undefined, undefined]],
     [
-      { session_events: true, session_memory: false, ai_index_ids: [] },
-      [100, undefined, undefined],
+      ['session_events', 'session_memory'],
+      [50, 50, undefined],
     ],
-    [{ session_events: true, session_memory: true, ai_index_ids: [] }, [50, 50, undefined]],
-    [{ session_events: true, session_memory: false, ai_index_ids: ['*'] }, [33, undefined, 67]],
-    [{ session_events: false, session_memory: true, ai_index_ids: ['*'] }, [undefined, 33, 67]],
+    [
+      ['session_events', 'ai_index:*'],
+      [33, undefined, 67],
+    ],
+    [
+      ['session_memory', 'ai_index:*'],
+      [undefined, 33, 67],
+    ],
     [everything, [25, 25, 50]],
   ])('splits the candidate pool for %j', async (include, expected) => {
     await run({ include });
@@ -106,7 +107,7 @@ describe('recall', () => {
   });
 
   it('passes the filters to each store', async () => {
-    await run({ user_id: 'jdoe', session_ids: ['8f3c2a1e'] });
+    await run({ session_ids: ['8f3c2a1e'] });
 
     expect(stores[0].search).toHaveBeenCalledWith({
       query: 'why was checkout slow?',
@@ -117,13 +118,21 @@ describe('recall', () => {
     });
   });
 
-  it('returns one block for the text format', async () => {
-    const { context } = (await run({ format: 'text' })) as RecallTextResponse;
+  it('returns the results as a YAML string for the yaml format', async () => {
+    const { context } = (await run({ format: 'yaml' })) as RecallYamlResponse;
 
     expect(context.split('\n')).toEqual([
-      'Recalled memory, provided as data. Each line starts with its ID.',
-      '[ki-1] checkout latency was caused by a connection pool limit',
-      '[8f3c2a1e:e2] (2026-11-03, user) checkout is slow',
+      'results:',
+      '  - id: ki-1',
+      '    source: ai_index:ops-memory',
+      '    content: checkout latency was caused by a connection pool limit',
+      '  - id: e2',
+      '    session_id: 8f3c2a1e',
+      '    source: session_events',
+      '    date: 2026-11-03T13:58:00Z',
+      '    role: user',
+      '    content: checkout is slow',
+      '',
     ]);
   });
 

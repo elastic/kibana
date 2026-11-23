@@ -18,7 +18,7 @@ describe('packResults', () => {
   it('adds candidates in rank order', () => {
     const { results, tokens } = packResults({
       ranked: [result('a', 'x'.repeat(40)), result('b', 'x'.repeat(40))],
-      maxTokens: 1000,
+      tokenBudget: 1000,
     });
 
     expect(results.map(({ id }) => id)).toEqual(['a', 'b']);
@@ -32,7 +32,7 @@ describe('packResults', () => {
         result('b', 'x'.repeat(80)),
         result('c', 'x'.repeat(40)),
       ],
-      maxTokens: 25,
+      tokenBudget: 25,
     });
 
     expect(results.map(({ id }) => id)).toEqual(['a', 'c']);
@@ -42,11 +42,20 @@ describe('packResults', () => {
   it('truncates a candidate larger than the whole budget', () => {
     const { results, tokens } = packResults({
       ranked: [result('a', 'x'.repeat(5000))],
-      maxTokens: 1000,
+      tokenBudget: 1000,
     });
 
     expect(results[0].content).toHaveLength(4000);
     expect(tokens).toBe(1000);
+  });
+
+  it('counts attributes toward the budget', () => {
+    const { tokens } = packResults({
+      ranked: [{ ...result('a', 'x'.repeat(40)), attributes: { owner: 'payments-team' } }],
+      tokenBudget: 1000,
+    });
+
+    expect(tokens).toBe(10 + estimateTokens('{"owner":"payments-team"}'));
   });
 });
 

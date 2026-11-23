@@ -179,12 +179,14 @@ export const MAX_RECALL_QUERY_LENGTH = 4096;
 export const MAX_RECALL_USER_ID_LENGTH = 512;
 export const MAX_RECALL_SESSION_ID_LENGTH = 512;
 export const MAX_RECALL_SESSION_IDS = 100;
-export const MIN_RECALL_MAX_TOKENS = 1000;
-export const MAX_RECALL_MAX_TOKENS = 25000;
-export const DEFAULT_RECALL_MAX_TOKENS = 6000;
+export const MIN_RECALL_TOKEN_BUDGET = 1000;
+export const MAX_RECALL_TOKEN_BUDGET = 25000;
+export const DEFAULT_RECALL_TOKEN_BUDGET = 6000;
 /** Candidates sent to the reranker, split across the included stores by weight. */
 export const RECALL_CANDIDATE_POOL = 100;
 export const RECALL_STORE_WEIGHTS = { session_events: 1, session_memory: 1, ai_index: 2 } as const;
-/** In `include.ai_index_ids`, every AI index the caller can read. */
+/** An AI index in `include` and in a result's `source`: `ai_index:<id>`. */
+export const RECALL_AI_INDEX_PREFIX = 'ai_index:';
+/** In `include`, `ai_index:*` is every AI index the caller can read. */
 export const RECALL_ALL_AI_INDICES = '*';
 export const RECALL_RERANK_INFERENCE_ID = '.jina-reranker-v3';

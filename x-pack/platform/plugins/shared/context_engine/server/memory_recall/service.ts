@@ -6,7 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { RECALL_CANDIDATE_POOL, RECALL_STORE_WEIGHTS } from '../../common/constants';
+import {
+  RECALL_AI_INDEX_PREFIX,
+  RECALL_CANDIDATE_POOL,
+  RECALL_STORE_WEIGHTS,
+} from '../../common/constants';
 import type {
   RecallRequest,
   RecallResponse,
@@ -16,7 +20,7 @@ import { RECALL_SOURCES } from '../../common/http_api/memory_recall';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { errorTypeForTelemetry } from '../telemetry';
 import { estimateTokens, packResults } from './pack';
-import { renderContext } from './render';
+import { renderYaml } from './render';
 import { rerankCandidates } from './rerank';
 import type { RecallStore } from './types';
 
@@ -38,7 +42,7 @@ const splitCandidatePool = (sources: RecallSource[]): Map<RecallSource, number> 
 
 /**
  * Searches the included stores, reranks their candidates together, and fills the response up to
- * `max_tokens`.
+ * about `token_budget`.
  */
 export const recall = async ({
   esClient,
@@ -57,13 +61,15 @@ export const recall = async ({
     user_id: userId,
     session_ids: sessionIds,
     include,
-    max_tokens: maxTokens,
+    token_budget: tokenBudget,
     format,
   } = request;
-  const aiIndexIds = include.ai_index_ids;
+  const aiIndexIds = include
+    .filter((store) => store.startsWith(RECALL_AI_INDEX_PREFIX))
+    .map((store) => store.slice(RECALL_AI_INDEX_PREFIX.length));
   const limits = splitCandidatePool(
     RECALL_SOURCES.filter((source) =>
-      source === 'ai_index' ? aiIndexIds.length > 0 : include[source]
+      source === 'ai_index' ? aiIndexIds.length > 0 : include.includes(source)
     )
   );
   try {
@@ -77,8 +83,8 @@ export const recall = async ({
     );
     const candidates = found.flat();
     const ranked = await rerankCandidates({ esClient, query, candidates });
-    const { results, tokens } = packResults({ ranked, maxTokens });
-    const context = format === 'text' ? renderContext(results) : undefined;
+    const { results, tokens } = packResults({ ranked, tokenBudget });
+    const context = format === 'yaml' ? renderYaml(results) : undefined;
     const tookMs = Date.now() - startedAt;
     analyticsService.reportMemoryRecall({
       outcome: 'success',

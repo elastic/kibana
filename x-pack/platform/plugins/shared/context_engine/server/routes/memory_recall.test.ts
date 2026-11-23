@@ -18,7 +18,7 @@ interface RegisteredRoute {
   config: {
     path: string;
     access: string;
-    security: { authz: { requiredPrivileges: string[] } };
+    security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } };
   };
   handler: RequestHandler;
   validate: { request: { body: Type<RecallRequest> } };
@@ -29,8 +29,6 @@ describe('memory recall routes', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let list: jest.Mock;
-  let query: jest.Mock;
-  let inference: jest.Mock;
 
   const createContext = () =>
     ({
@@ -39,24 +37,33 @@ describe('memory recall routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         elasticsearch: {
-          client: { asCurrentUser: { inference: { rerank: inference } } },
+          client: { asCurrentUser: { inference: { rerank: jest.fn() }, search: jest.fn() } },
         },
+        userProfile: { getCurrentProfileId: jest.fn().mockResolvedValue('jdoe') },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
-  const callRoute = (body: Record<string, unknown>) =>
+  const callRoute = (body: Record<string, unknown>, canManageMemory = false) =>
     route.handler(
       createContext(),
-      httpServerMock.createKibanaRequest({ body: route.validate.request.body.validate(body) }),
+      Object.assign(
+        httpServerMock.createKibanaRequest({ body: route.validate.request.body.validate(body) }),
+        { authzResult: { [apiPrivileges.manageMemory]: canManageMemory } }
+      ),
       response
     );
+
+  const recallFor = (userId: string) => ({
+    query: 'why was checkout slow?',
+    user_id: userId,
+    include: ['ai_index:ops-memory'],
+    format: 'json',
+  });
 
   beforeEach(() => {
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
     list = jest.fn().mockResolvedValue([]);
-    query = jest.fn();
-    inference = jest.fn();
 
     const router = {
       versioned: {
@@ -73,69 +80,92 @@ describe('memory recall routes', () => {
 
     registerMemoryRecallRoutes({
       router,
-      getAiIndexDataReadService: () => ({ list, query, describe: jest.fn() }),
+      getAiIndexDataReadService: () => ({ list, query: jest.fn(), describe: jest.fn() }),
       analyticsService: {
         reportMemoryRecall: jest.fn(),
       } as unknown as ContextEngineAnalyticsService,
     });
   });
 
-  it('registers a public read route', () => {
+  it('registers a public read route that checks manage_memory', () => {
     expect(route.config).toMatchObject({
       path: MEMORY_RECALL_PATH,
       access: 'public',
-      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+      security: {
+        authz: {
+          requiredPrivileges: [apiPrivileges.readContextEngine],
+          extendedPrivileges: [apiPrivileges.manageMemory],
+        },
+      },
     });
   });
 
   it('returns 404 when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
-    await callRoute({ query: 'why was checkout slow?', include: { session_events: true } });
+    await callRoute(recallFor('jdoe'));
 
     expect(response.notFound).toHaveBeenCalledTimes(1);
   });
 
-  it('defaults include flags, max_tokens and format', () => {
+  it('defaults token_budget and format', () => {
     expect(
       route.validate.request.body.validate({
         query: 'why was checkout slow?',
-        include: { session_events: true },
+        user_id: 'jdoe',
+        include: ['session_events', 'ai_index:ops-memory', 'ai_index:*'],
       })
     ).toEqual({
       query: 'why was checkout slow?',
-      include: { session_events: true, session_memory: false, ai_index_ids: [] },
-      max_tokens: 6000,
-      format: 'text',
+      user_id: 'jdoe',
+      include: ['session_events', 'ai_index:ops-memory', 'ai_index:*'],
+      token_budget: 6000,
+      format: 'yaml',
     });
   });
 
-  it('rejects a request that includes no store', () => {
-    expect(() => route.validate.request.body.validate({ query: 'q', include: {} })).toThrow(
-      'at least one store is required'
-    );
+  it('requires user_id', () => {
+    expect(() =>
+      route.validate.request.body.validate({ query: 'q', include: ['session_events'] })
+    ).toThrow();
   });
 
-  it('rejects max_tokens outside its bounds', () => {
+  it.each([[[]], [['ops-memory']], [['ai_index:Not Valid']]])('rejects include %j', (include) => {
+    expect(() =>
+      route.validate.request.body.validate({ query: 'q', user_id: 'jdoe', include })
+    ).toThrow();
+  });
+
+  it('rejects token_budget outside its bounds', () => {
     expect(() =>
       route.validate.request.body.validate({
         query: 'q',
-        include: { session_events: true },
-        max_tokens: 500,
+        user_id: 'jdoe',
+        include: ['session_events'],
+        token_budget: 500,
       })
     ).toThrow();
   });
 
-  it('returns the recall response', async () => {
-    await callRoute({
-      query: 'why was checkout slow?',
-      include: { ai_index_ids: ['ops-memory'] },
-      format: 'json',
-    });
+  it('recalls for the caller', async () => {
+    await callRoute(recallFor('jdoe'));
 
     expect(list).toHaveBeenCalledWith(['ops-memory']);
     expect(response.ok).toHaveBeenCalledWith({
       body: { results: [], took_ms: expect.any(Number) },
     });
+  });
+
+  it('returns 403 for another user without manage_memory', async () => {
+    await callRoute(recallFor('asmith'));
+
+    expect(response.forbidden).toHaveBeenCalledTimes(1);
+    expect(list).not.toHaveBeenCalled();
+  });
+
+  it('recalls for another user with manage_memory', async () => {
+    await callRoute(recallFor('asmith'), true);
+
+    expect(response.ok).toHaveBeenCalledTimes(1);
   });
 });

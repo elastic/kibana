@@ -10,7 +10,7 @@ import type { RecallResult, RecallSource } from '../../common/http_api/memory_re
 export interface RecallSearchParams {
   query: string;
   limit: number;
-  userId?: string;
+  userId: string;
   sessionIds?: string[];
   aiIndexIds?: string[];
 }

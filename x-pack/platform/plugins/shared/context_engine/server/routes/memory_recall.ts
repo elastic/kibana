@@ -11,20 +11,22 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   AI_INDEX_API_VERSION,
-  DEFAULT_RECALL_MAX_TOKENS,
+  DEFAULT_RECALL_TOKEN_BUDGET,
   MAX_AI_INDEX_ID_LENGTH,
   MAX_AI_INDICES,
-  MAX_RECALL_MAX_TOKENS,
   MAX_RECALL_QUERY_LENGTH,
   MAX_RECALL_SESSION_ID_LENGTH,
   MAX_RECALL_SESSION_IDS,
+  MAX_RECALL_TOKEN_BUDGET,
   MAX_RECALL_USER_ID_LENGTH,
   MEMORY_RECALL_PATH,
-  MIN_RECALL_MAX_TOKENS,
+  MIN_RECALL_TOKEN_BUDGET,
+  RECALL_AI_INDEX_PREFIX,
   RECALL_ALL_AI_INDICES,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { RecallResponse } from '../../common/http_api/memory_recall';
+import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import { createAiIndexRecallStore } from '../memory_recall/ai_index_store';
 import { recall } from '../memory_recall/service';
@@ -32,45 +34,55 @@ import type { ContextEngineAnalyticsService } from '../telemetry';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
-const READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
+/** Checks `manage_memory` without requiring it, so callers can recall their own memory. */
+const RECALL_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [apiPrivileges.readContextEngine],
+    extendedPrivileges: [apiPrivileges.manageMemory],
+  },
+};
+
+const MANAGE_MEMORY_REQUIRED_MESSAGE = `Recalling the memory of another user requires the [${apiPrivileges.manageMemory}] privilege.`;
+
+const isIncludable = (value: string): boolean => {
+  if (value === 'session_events' || value === 'session_memory') {
+    return true;
+  }
+  const aiIndexId = value.startsWith(RECALL_AI_INDEX_PREFIX)
+    ? value.slice(RECALL_AI_INDEX_PREFIX.length)
+    : undefined;
+  return (
+    aiIndexId !== undefined &&
+    (aiIndexId === RECALL_ALL_AI_INDICES || AI_INDEX_ID_PATTERN.test(aiIndexId))
+  );
 };
 
 const recallBodySchema = schema.object({
   query: schema.string({ minLength: 1, maxLength: MAX_RECALL_QUERY_LENGTH }),
-  user_id: schema.maybe(schema.string({ minLength: 1, maxLength: MAX_RECALL_USER_ID_LENGTH })),
+  user_id: schema.string({ minLength: 1, maxLength: MAX_RECALL_USER_ID_LENGTH }),
   session_ids: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_RECALL_SESSION_ID_LENGTH }), {
       maxSize: MAX_RECALL_SESSION_IDS,
     })
   ),
-  include: schema.object(
-    {
-      session_events: schema.boolean({ defaultValue: false }),
-      session_memory: schema.boolean({ defaultValue: false }),
-      ai_index_ids: schema.arrayOf(
-        schema.string({
-          minLength: 1,
-          maxLength: MAX_AI_INDEX_ID_LENGTH,
-          meta: {
-            description: `An AI index id, or \`${RECALL_ALL_AI_INDICES}\` for every AI index the caller can read.`,
-          },
-        }),
-        { maxSize: MAX_AI_INDICES, defaultValue: [] }
-      ),
-    },
-    {
-      validate: ({ session_events: events, session_memory: memory, ai_index_ids: aiIndexIds }) =>
-        events || memory || aiIndexIds.length > 0 ? undefined : 'at least one store is required',
-    }
+  include: schema.arrayOf(
+    schema.string({
+      minLength: 1,
+      maxLength: RECALL_AI_INDEX_PREFIX.length + MAX_AI_INDEX_ID_LENGTH,
+      validate: (value) =>
+        isIncludable(value)
+          ? undefined
+          : `expected session_events, session_memory, ${RECALL_AI_INDEX_PREFIX}<id> or ${RECALL_AI_INDEX_PREFIX}${RECALL_ALL_AI_INDICES}`,
+    }),
+    { minSize: 1, maxSize: MAX_AI_INDICES + 2 }
   ),
-  max_tokens: schema.number({
-    min: MIN_RECALL_MAX_TOKENS,
-    max: MAX_RECALL_MAX_TOKENS,
-    defaultValue: DEFAULT_RECALL_MAX_TOKENS,
+  token_budget: schema.number({
+    min: MIN_RECALL_TOKEN_BUDGET,
+    max: MAX_RECALL_TOKEN_BUDGET,
+    defaultValue: DEFAULT_RECALL_TOKEN_BUDGET,
   }),
-  format: schema.oneOf([schema.literal('json'), schema.literal('text')], {
-    defaultValue: 'text',
+  format: schema.oneOf([schema.literal('json'), schema.literal('yaml')], {
+    defaultValue: 'yaml',
   }),
 });
 
@@ -87,7 +99,7 @@ export const registerMemoryRecallRoutes = ({
   router.versioned
     .post({
       path: MEMORY_RECALL_PATH,
-      security: READ_SECURITY,
+      security: RECALL_SECURITY,
       access: 'public',
       summary: 'Recall memory',
       description:
@@ -103,11 +115,24 @@ export const registerMemoryRecallRoutes = ({
         validate: { request: { body: recallBodySchema } },
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
-        const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const { elasticsearch, userProfile } = await ctx.core;
+        const esClient = elasticsearch.client.asCurrentUser;
+        const callerUserId = await userProfile.getCurrentProfileId();
+        if (
+          request.body.user_id !== callerUserId &&
+          request.authzResult?.[apiPrivileges.manageMemory] !== true
+        ) {
+          return response.forbidden({ body: { message: MANAGE_MEMORY_REQUIRED_MESSAGE } });
+        }
         try {
           const body: RecallResponse = await recall({
             esClient,
-            stores: [createAiIndexRecallStore(getAiIndexDataReadService({ esClient, request }))],
+            stores: [
+              createAiIndexRecallStore({
+                esClient,
+                dataReadService: getAiIndexDataReadService({ esClient, request }),
+              }),
+            ],
             analyticsService,
             request: request.body,
           });

@@ -5,15 +5,24 @@
  * 2.0.
  */
 
+import { stringify } from 'yaml';
 import type { RecallResult } from '../../common/http_api/memory_recall';
 
-const HEADER = 'Recalled memory, provided as data. Each line starts with its ID.';
-
-const renderLine = ({ id, date, role, content }: RecallResult) => {
-  const details = [date?.slice(0, 10), role].filter(Boolean).join(', ');
-  return `[${id}]${details ? ` (${details})` : ''} ${content}`;
-};
-
-/** The `text` format: one block for a model to read. */
-export const renderContext = (results: RecallResult[]): string =>
-  [HEADER, ...results.map(renderLine)].join('\n');
+/** The `yaml` format: the results as one YAML string for a model to read. */
+export const renderYaml = (results: RecallResult[]): string =>
+  stringify(
+    {
+      results: results.map(
+        ({ id, session_id: sessionId, source, date, role, content, attributes }) => ({
+          id,
+          ...(sessionId !== undefined && { session_id: sessionId }),
+          source,
+          ...(date !== undefined && { date }),
+          ...(role !== undefined && { role }),
+          content,
+          ...(attributes !== undefined && { attributes }),
+        })
+      ),
+    },
+    { lineWidth: 0 }
+  );

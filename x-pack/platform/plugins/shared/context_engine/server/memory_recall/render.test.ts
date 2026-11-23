@@ -5,30 +5,46 @@
  * 2.0.
  */
 
-import { renderContext } from './render';
+import { renderYaml } from './render';
 
-describe('renderContext', () => {
-  it('renders one line per result', () => {
+describe('renderYaml', () => {
+  it('renders the results as YAML', () => {
     expect(
-      renderContext([
+      renderYaml([
         {
-          id: '8f3c2a1e:e2',
+          id: 'e2',
+          session_id: '8f3c2a1e',
           source: 'session_events',
           date: '2026-11-03T13:58:00Z',
           role: 'user',
-          content: 'checkout is slow',
+          content: 'checkout is slow, can you look?',
         },
         {
-          id: 'jdoe/3f9a1c7e',
+          id: 'entity-service--checkout-service',
           source: 'ai_index:ops-memory',
-          content: 'checkout-service latency was caused by a connection pool limit.',
+          content: '**checkout-service**, also called checkout.\n\n- Tier 1',
+          attributes: { owner: 'payments-team', tier: '1' },
         },
       ])
     ).toBe(
       [
-        'Recalled memory, provided as data. Each line starts with its ID.',
-        '[8f3c2a1e:e2] (2026-11-03, user) checkout is slow',
-        '[jdoe/3f9a1c7e] checkout-service latency was caused by a connection pool limit.',
+        'results:',
+        '  - id: e2',
+        '    session_id: 8f3c2a1e',
+        '    source: session_events',
+        '    date: 2026-11-03T13:58:00Z',
+        '    role: user',
+        '    content: checkout is slow, can you look?',
+        '  - id: entity-service--checkout-service',
+        '    source: ai_index:ops-memory',
+        '    content: |-',
+        '      **checkout-service**, also called checkout.',
+        '',
+        '      - Tier 1',
+        '    attributes:',
+        '      owner: payments-team',
+        '      tier: "1"',
+        '',
       ].join('\n')
     );
   });

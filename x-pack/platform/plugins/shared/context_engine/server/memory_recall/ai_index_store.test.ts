@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexItem } from '../../common/http_api/ai_indices';
 import { applyKiLifecycle } from '../ai_indices/ki_lifecycle';
 import { buildAiIndexRecallQuery, createAiIndexRecallStore } from './ai_index_store';
@@ -20,24 +21,24 @@ const columns = ['id', '_id', '_index', 'content', '@timestamp'].map((name) => (
 describe('createAiIndexRecallStore', () => {
   let list: jest.Mock;
   let query: jest.Mock;
+  let search: jest.Mock;
 
   beforeEach(() => {
     list = jest.fn();
     query = jest.fn().mockResolvedValue({ columns, values: [] });
+    search = jest.fn().mockResolvedValue({ hits: { hits: [] } });
   });
 
-  const search = (aiIndexIds: string[], userId?: string) =>
-    createAiIndexRecallStore({ list, query }).search({
-      query: 'checkout',
-      limit: 67,
-      aiIndexIds,
-      userId,
-    });
+  const recall = (aiIndexIds: string[]) =>
+    createAiIndexRecallStore({
+      esClient: { search } as unknown as ElasticsearchClient,
+      dataReadService: { list, query },
+    }).search({ query: 'checkout', limit: 67, userId: 'jdoe', aiIndexIds });
 
   it('returns nothing when no AI index is readable', async () => {
     list.mockResolvedValue([]);
 
-    expect(await search(['ops-memory'])).toEqual([]);
+    expect(await recall(['ops-memory'])).toEqual([]);
     expect(list).toHaveBeenCalledWith(['ops-memory']);
     expect(query).not.toHaveBeenCalled();
   });
@@ -45,12 +46,12 @@ describe('createAiIndexRecallStore', () => {
   it('searches every readable AI index for *', async () => {
     list.mockResolvedValue([]);
 
-    await search(['*']);
+    await recall(['*']);
 
     expect(list).toHaveBeenCalledWith(undefined);
   });
 
-  it('maps rows to results with their AI index', async () => {
+  it('maps rows to results with their AI index and attributes', async () => {
     list.mockResolvedValue([
       aiIndex('ops-memory', 'index', 'ai-index-idx-ops-memory'),
       aiIndex('ops-stream', 'data_stream', 'ai-index-ds-ops-stream'),
@@ -63,13 +64,25 @@ describe('createAiIndexRecallStore', () => {
         ['ki-3', 'doc-3', 'ai-index-idx-ops-memory', null, null],
       ],
     });
+    search.mockResolvedValue({
+      hits: {
+        hits: [
+          {
+            _index: 'ai-index-idx-ops-memory',
+            _id: 'doc-1',
+            _source: { attributes: { owner: 'payments-team' } },
+          },
+        ],
+      },
+    });
 
-    expect(await search(['ops-memory', 'ops-stream'])).toEqual([
+    expect(await recall(['ops-memory', 'ops-stream'])).toEqual([
       {
         id: 'ki-1',
         source: 'ai_index:ops-memory',
         content: 'pool limit',
         date: '2026-11-07T02:00:41Z',
+        attributes: { owner: 'payments-team' },
       },
       { id: 'doc-2', source: 'ai_index:ops-stream', content: 'rolled back' },
     ]);
@@ -77,30 +90,25 @@ describe('createAiIndexRecallStore', () => {
       query: buildAiIndexRecallQuery({
         dests: ['ai-index-idx-ops-memory', 'ai-index-ds-ops-stream'],
         limit: 67,
-        filterByUser: false,
       }),
-      params: { query: 'checkout' },
+      params: { query: 'checkout', user_id: 'jdoe' },
       limit: 67,
     });
-  });
-
-  it('filters by user_id when one is sent', async () => {
-    list.mockResolvedValue([aiIndex('ops-memory', 'index', 'ai-index-idx-ops-memory')]);
-
-    await search(['ops-memory'], 'jdoe');
-
-    const [request] = query.mock.calls[0];
-    expect(request.query).toContain('WHERE user_id IS NULL OR user_id == ?user_id');
-    expect(request.params).toEqual({ query: 'checkout', user_id: 'jdoe' });
+    expect(search).toHaveBeenCalledWith({
+      index: ['ai-index-idx-ops-memory', '.ds-ai-index-ds-ops-stream-2026.11.07-000001'],
+      size: 4,
+      _source: ['attributes'],
+      query: { ids: { values: ['doc-1', 'doc-2'] } },
+    });
   });
 });
 
 describe('buildAiIndexRecallQuery', () => {
   const dest = { type: 'data_stream' as const, value: 'ai-index-ds-ops-stream' };
-  const query = buildAiIndexRecallQuery({ dests: [dest.value], limit: 100, filterByUser: false });
+  const query = buildAiIndexRecallQuery({ dests: [dest.value], limit: 100 });
 
-  it('reads dreamed KIs only', () => {
-    expect(query).toContain('WHERE STARTS_WITH(type, "fact.") OR STARTS_WITH(type, "entity.")');
+  it("reads shared KIs and the user's own", () => {
+    expect(query).toContain('WHERE user_id IS NULL OR user_id == ?user_id');
   });
 
   it('builds a query the lifecycle pipeline accepts', () => {

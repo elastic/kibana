@@ -8,30 +8,29 @@
 export const RECALL_SOURCES = ['session_events', 'session_memory', 'ai_index'] as const;
 export type RecallSource = (typeof RECALL_SOURCES)[number];
 
-export type RecallFormat = 'json' | 'text';
-
-export interface RecallInclude {
-  session_events: boolean;
-  session_memory: boolean;
-  ai_index_ids: string[];
-}
+export type RecallFormat = 'json' | 'yaml';
 
 export interface RecallRequest {
   query: string;
-  user_id?: string;
+  user_id: string;
   session_ids?: string[];
-  include: RecallInclude;
-  max_tokens: number;
+  /** `session_events`, `session_memory`, `ai_index:<id>` or `ai_index:*`. */
+  include: string[];
+  token_budget: number;
   format: RecallFormat;
 }
 
 export interface RecallResult {
   id: string;
+  /** Present on session events and session memories. */
+  session_id?: string;
   /** `session_events`, `session_memory`, or `ai_index:<id>`. */
   source: string;
   date?: string;
-  content: string;
   role?: 'user' | 'assistant';
+  /** Markdown. */
+  content: string;
+  attributes?: Record<string, unknown>;
 }
 
 export interface RecallJsonResponse {
@@ -39,9 +38,10 @@ export interface RecallJsonResponse {
   took_ms: number;
 }
 
-export interface RecallTextResponse {
+/** `context` holds the results as a YAML string. */
+export interface RecallYamlResponse {
   context: string;
   took_ms: number;
 }
 
-export type RecallResponse = RecallJsonResponse | RecallTextResponse;
+export type RecallResponse = RecallJsonResponse | RecallYamlResponse;
