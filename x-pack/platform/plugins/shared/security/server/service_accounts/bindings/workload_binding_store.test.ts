@@ -212,7 +212,7 @@ describe('WorkloadBindingStore', () => {
     it('refuses to write bindings of more than one space in one request', async () => {
       await expect(
         store.bulkSet([attributes(), attributes({ spaceId: 'marketing' })])
-      ).rejects.toThrowError('A bulk write of workload bindings must address a single space.');
+      ).rejects.toThrow('A bulk write of workload bindings must address a single space.');
       expect(client.bulkCreate).not.toHaveBeenCalled();
     });
 
@@ -223,7 +223,7 @@ describe('WorkloadBindingStore', () => {
 
     it('propagates a failure of the whole write', async () => {
       client.bulkCreate.mockRejectedValue(new Error('cluster unavailable'));
-      await expect(store.bulkSet([attributes()])).rejects.toThrowError('cluster unavailable');
+      await expect(store.bulkSet([attributes()])).rejects.toThrow('cluster unavailable');
     });
   });
 
@@ -289,7 +289,7 @@ describe('WorkloadBindingStore', () => {
     it('refuses to remove bindings of more than one space in one request', async () => {
       await expect(
         store.bulkDelete([COORDINATES, { ...COORDINATES, spaceId: 'marketing' }])
-      ).rejects.toThrowError('A bulk write of workload bindings must address a single space.');
+      ).rejects.toThrow('A bulk write of workload bindings must address a single space.');
       expect(client.bulkDelete).not.toHaveBeenCalled();
     });
 
@@ -300,7 +300,7 @@ describe('WorkloadBindingStore', () => {
 
     it('propagates a failure of the whole delete', async () => {
       client.bulkDelete.mockRejectedValue(new Error('cluster unavailable'));
-      await expect(store.bulkDelete([COORDINATES])).rejects.toThrowError('cluster unavailable');
+      await expect(store.bulkDelete([COORDINATES])).rejects.toThrow('cluster unavailable');
     });
   });
 
