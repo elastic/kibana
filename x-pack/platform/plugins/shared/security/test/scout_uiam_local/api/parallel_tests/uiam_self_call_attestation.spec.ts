@@ -87,9 +87,8 @@ apiTest.describe(
           });
 
           expect(response).toHaveStatusCode(200);
-          expect(response.body).toStrictEqual(
-            expect.objectContaining({ username: internalUiamApiKey.id })
-          );
+          // The key authenticates as the user who created it, like an Elasticsearch API key.
+          expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
         } finally {
           const invalidateResponse = await apiClient.post(
             'test_endpoints/uiam/api_keys/_invalidate',

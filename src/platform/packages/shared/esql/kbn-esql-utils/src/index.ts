@@ -65,6 +65,7 @@ export {
   getAnySourceCommandFromESQLQuery,
 } from './utils/get_index_pattern_from_query';
 export type { ESQLIndexPatterns } from './utils/get_index_pattern_from_query';
+export { formatEsqlSources } from './utils/format_esql_sources';
 export { classifyESQLSource, isSingleSource } from './utils/classify_esql_source';
 export type { ESQLSourceKind } from './utils/classify_esql_source';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
@@ -83,12 +84,10 @@ export { castESQLValue } from './utils/cast_esql_value';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
-  getESQLResults,
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
-  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   hasGeotilePrecisionParam,

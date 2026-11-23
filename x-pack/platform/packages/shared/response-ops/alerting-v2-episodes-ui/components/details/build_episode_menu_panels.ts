@@ -35,6 +35,8 @@ export interface BuildEpisodeMenuPanelsParams {
   episodes: AlertEpisode[];
   /** Full episode details page href, rendered as the first menu item when present. */
   viewDetailsHref?: string | null;
+  /** Adds the episode to the Agent Builder chat. The item is rendered only when present. */
+  onAddToChat?: () => void;
   onSuccess?: () => void;
 }
 
@@ -47,6 +49,7 @@ export const buildEpisodeMenuPanels = ({
   actions,
   episodes,
   viewDetailsHref,
+  onAddToChat,
   onSuccess,
 }: BuildEpisodeMenuPanelsParams): FlyoutFooterMenuPanel[] => {
   const [navigationActions, nonNavigationActions] = partition(
@@ -102,7 +105,21 @@ export const buildEpisodeMenuPanels = ({
         },
       ]
     : [];
-  const navigationGroup = [...viewDetailsItems, ...navigationActions.map(toMenuItem)];
+  const addToChatItems: FlyoutFooterMenuItem[] = onAddToChat
+    ? [
+        {
+          name: i18n.FLYOUT_ADD_TO_CHAT,
+          icon: 'productAgent',
+          onClick: onAddToChat,
+          'data-test-subj': 'alertingV2EpisodeTakeAction-addToChat',
+        },
+      ]
+    : [];
+  const navigationGroup = [
+    ...viewDetailsItems,
+    ...addToChatItems,
+    ...navigationActions.map(toMenuItem),
+  ];
 
   const items = [navigationGroup, workflowActions.map(toMenuItem), otherActions.map(toMenuItem)]
     .filter((group) => group.length > 0)

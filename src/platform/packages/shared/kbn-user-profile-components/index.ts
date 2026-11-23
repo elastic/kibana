@@ -21,7 +21,9 @@ export {
   getUserAvatarInitials,
   getUserDisplayName,
   isValidUserProfileAvatarColor,
+  isValidUserProfileAvatarInitials,
   USER_AVATAR_MAX_INITIALS,
+  USER_AVATAR_MAX_INITIALS_CODE_UNITS,
 } from './src/user_profile';
 export type { GetUserDisplayNameParams } from './src/user_profile';
 export type {

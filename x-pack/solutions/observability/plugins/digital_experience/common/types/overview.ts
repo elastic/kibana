@@ -6,7 +6,7 @@
  */
 
 import type { OverviewFilterOptions, OverviewPercentile } from '../overview_filters';
-import type { HttpRequests, WebVitals } from './applications';
+import type { HistogramBuckets, HttpRequests, WebVitals } from './applications';
 
 /** One bucket of the Overview trend; both charts read the same buckets. */
 export interface OverviewTrendPoint {
@@ -37,6 +37,8 @@ export interface ApplicationOverview {
   webVitals: WebVitals;
   /** The same buckets over the whole time range; empty ones included. */
   trend: OverviewTrendPoint[];
+  /** The buckets of the trend. */
+  trendHistogram: HistogramBuckets;
 }
 
 export interface ApplicationOverviewResponse {

@@ -10,8 +10,8 @@
  * means: add the field to `RuleTuningWorkerExtras` in `detection_watch_settings.schema.yaml`, add
  * its default to `RULE_TUNING_WORKER_SETTINGS_DEFAULTS` in
  * `kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts`, forward it in the Rule
- * Tuning workflow template, bump the definition version, and build its control under the Watch
- * page's `custom_settings/rule_tuning/`.
+ * Tuning workflow template, and build its control under the Watch page's
+ * `custom_settings/rule_tuning/`.
  */
 
 import {

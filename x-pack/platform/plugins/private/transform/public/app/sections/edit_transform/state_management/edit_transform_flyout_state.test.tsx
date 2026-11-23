@@ -15,6 +15,7 @@ import {
   useEditTransformFlyoutActions,
   EditTransformFlyoutProvider,
 } from './edit_transform_flyout_state';
+import { useAreNonRetentionFieldsValid } from './selectors/are_non_retention_fields_valid';
 import { useFormField } from './selectors/form_field';
 import { useIsFormTouched } from './selectors/is_form_touched';
 import { useIsFormValid } from './selectors/is_form_valid';
@@ -33,6 +34,7 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
     // actions and state selection, so they react to the same redux store.
     const useHooks = () => ({
       actions: useEditTransformFlyoutActions(),
+      areNonRetentionFieldsValid: useAreNonRetentionFieldsValid(),
       isFormTouched: useIsFormTouched(),
       isFormValid: useIsFormValid(),
       frequency: useFormField('frequency'),
@@ -69,8 +71,23 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
 
     expect(result.current.isFormTouched).toBe(true);
     expect(result.current.isFormValid).toBe(false);
+    expect(result.current.areNonRetentionFieldsValid).toBe(false);
     expect(result.current.frequency.errorMessages).toStrictEqual([
       'The frequency value is not valid.',
     ]);
+
+    act(() => {
+      result.current.actions.setFormField({
+        field: 'frequency',
+        value: '1m',
+      });
+      result.current.actions.setFormSection({
+        section: 'retentionPolicy',
+        enabled: true,
+      });
+    });
+
+    expect(result.current.isFormValid).toBe(false);
+    expect(result.current.areNonRetentionFieldsValid).toBe(true);
   });
 });

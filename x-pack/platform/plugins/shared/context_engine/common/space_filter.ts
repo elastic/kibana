@@ -46,3 +46,27 @@ export const buildAiIndexSpaceFilter = (spaceId: string): QueryDslQueryContainer
     minimum_should_match: 1,
   },
 });
+
+const USER_ID_FIELD = 'user_id';
+
+/** Docs with no `user_id`, or one equal to `userId`. */
+export const buildAiIndexUserFilter = (userId: string): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { bool: { must_not: { exists: { field: USER_ID_FIELD } } } },
+      { term: { [USER_ID_FIELD]: userId } },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const buildAiIndexReadFilter = ({
+  spaceId,
+  userId,
+}: {
+  spaceId: string;
+  userId?: string;
+}): QueryDslQueryContainer =>
+  userId === undefined
+    ? buildAiIndexSpaceFilter(spaceId)
+    : { bool: { filter: [buildAiIndexSpaceFilter(spaceId), buildAiIndexUserFilter(userId)] } };

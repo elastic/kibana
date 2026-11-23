@@ -39,8 +39,10 @@ const generate = (
     errorReplayRate: 0,
     replaySize: 'light' as ReplaySize,
     sessionLength: 'typical' as SessionLength,
+    ongoingSessions: false,
     scale: 1,
     seed: 'digital-experience-replay-test',
+    frustration: true,
     ...opts,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
@@ -278,9 +280,18 @@ describe('digital experience session replay', () => {
       };
 
       it('keeps typical sessions as they were before the option existed', () => {
-        // Taken from the output of the scenario before `sessionLength` was added
+        // Taken from the output of the scenario before `sessionLength` was added, with the browser
+        // dataset's index names, and before users and frustration signals, which don't change
+        // anything else. Updated for app versions, diurnal traffic, incidents and the clicks
+        // retried after a failure, which do.
         const docs = generate(
-          { replaySize: 'light', seed: 'fingerprint-seed', sessionLength: 'typical' },
+          {
+            replaySize: 'light',
+            seed: 'fingerprint-seed',
+            sessionLength: 'typical',
+            signedInRate: 0,
+            frustration: false,
+          },
           { from: FROM }
         );
         const times = docs.map((doc) => Number(doc['@timestamp']));
@@ -290,10 +301,10 @@ describe('digital experience session replay', () => {
           last: Math.max(...times),
           sha: createHash('sha256').update(JSON.stringify(docs)).digest('hex'),
         }).toEqual({
-          count: 6035,
-          first: 1792152000326,
-          last: 1792152599999,
-          sha: '86b04dce0083098ac1b024eebfefb918cbff00dd0aa2a3c293093807e9380009',
+          count: 7085,
+          first: 1792152000161,
+          last: 1792152597374,
+          sha: '926897f888373ae002838bfbf3691adf170933ca5e0b0f9fcd933c470c641a32',
         });
       });
 

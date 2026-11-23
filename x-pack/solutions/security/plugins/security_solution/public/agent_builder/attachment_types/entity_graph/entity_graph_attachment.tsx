@@ -46,8 +46,6 @@ const OPEN_FULL_GRAPH_LABEL = i18n.translate(
   { defaultMessage: 'Open full graph' }
 );
 
-const AGENT_BUILDER_ENTITY_GRAPH_SCOPE = 'agent-builder-entity-graph' as const;
-
 const LazyEntityGraphInlineContent = React.lazy(() =>
   import('./entity_graph_inline_content').then((module) => ({
     default: module.EntityGraphInlineContent,
@@ -69,9 +67,7 @@ const buildEntityGraphFlyout = (
 
   const left = buildEntityLeftPanel({
     identifier,
-    scopeId: AGENT_BUILDER_ENTITY_GRAPH_SCOPE,
     path: { tab: EntityDetailsLeftPanelTab.GRAPH_VIEW },
-    isRiskScoreExist: false,
   });
   if (!left) {
     return null;

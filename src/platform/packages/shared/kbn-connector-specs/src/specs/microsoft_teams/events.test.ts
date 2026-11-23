@@ -7,31 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  microsoftTeamsChannelCreated,
+  microsoftTeamsChannelMessage,
+  microsoftTeamsChatCreated,
+  microsoftTeamsChatMessage,
+  microsoftTeamsTeamMemberAdded,
+} from '@kbn/connector-topics';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ConnectorIngressContext, HandleEventsResult } from '../../connector_spec_events';
 import { buildEventId } from '../../event_type_id';
 import { validateEmittedEvents } from '../../validate_emitted_events';
 import {
-  MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
   MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY,
-  MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
   MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY,
-  MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
   MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY,
-  MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
   MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY,
   MICROSOFT_TEAMS_CONNECTOR_TYPE_ID,
-  MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
   MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY,
 } from './constants';
 import { MicrosoftTeams } from './microsoft_teams';
 
 const NAMED_TEAMS_EVENTS = [
-  [MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY, MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID],
-  [MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY, MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID],
-  [MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY, MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID],
-  [MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY, MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID],
-  [MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY, MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID],
+  [MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_KEY, microsoftTeamsChannelMessage.name],
+  [MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_KEY, microsoftTeamsChatMessage.name],
+  [MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_KEY, microsoftTeamsChannelCreated.name],
+  [MICROSOFT_TEAMS_CHAT_CREATED_EVENT_KEY, microsoftTeamsChatCreated.name],
+  [MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_KEY, microsoftTeamsTeamMemberAdded.name],
 ] as const;
 
 describe('Microsoft Teams inbound events', () => {
@@ -74,7 +76,7 @@ describe('Microsoft Teams inbound events', () => {
       expect(events.definitions[eventKey]?.eventId).toBe(eventId);
       expect(eventId).toBe(buildEventId(MICROSOFT_TEAMS_CONNECTOR_TYPE_ID, eventKey));
     }
-    expect(MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID).toBe('microsoft-teams.channel_message');
+    expect(microsoftTeamsChannelMessage.name).toBe('microsoft-teams.channel_message');
   });
 
   it('echoes validationToken as text/plain and emits nothing', async () => {
@@ -113,7 +115,7 @@ describe('Microsoft Teams inbound events', () => {
     );
     expect(result.events).toEqual([
       {
-        eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+        eventId: microsoftTeamsChannelMessage.name,
         correlationKey: 'n-message',
         payload: {
           team_id: 'team-1',
@@ -158,7 +160,7 @@ describe('Microsoft Teams inbound events', () => {
     );
     expect(result.events).toEqual([
       {
-        eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+        eventId: microsoftTeamsChannelMessage.name,
         correlationKey: 'notification-1',
         payload: {
           team_id: 'team-1',
@@ -187,7 +189,7 @@ describe('Microsoft Teams inbound events', () => {
       )
     );
     expect(result.events[0]).toMatchObject({
-      eventId: MICROSOFT_TEAMS_CHANNEL_MESSAGE_EVENT_ID,
+      eventId: microsoftTeamsChannelMessage.name,
       payload: {
         team_id: 'team-1',
         channel_id: 'channel-1',
@@ -210,7 +212,7 @@ describe('Microsoft Teams inbound events', () => {
       )
     );
     expect(result.events[0]).toMatchObject({
-      eventId: MICROSOFT_TEAMS_CHAT_MESSAGE_EVENT_ID,
+      eventId: microsoftTeamsChatMessage.name,
       payload: { chat_id: 'chat-1', message_id: 'message-1', tenant_id: 'tenant-1' },
     });
   });
@@ -249,17 +251,17 @@ describe('Microsoft Teams inbound events', () => {
     );
     expect(result.events).toEqual([
       {
-        eventId: MICROSOFT_TEAMS_CHANNEL_CREATED_EVENT_ID,
+        eventId: microsoftTeamsChannelCreated.name,
         correlationKey: 'n-channel',
         payload: { team_id: 'team-1', channel_id: 'channel-1' },
       },
       {
-        eventId: MICROSOFT_TEAMS_CHAT_CREATED_EVENT_ID,
+        eventId: microsoftTeamsChatCreated.name,
         correlationKey: 'n-chat',
         payload: { chat_id: 'chat-1' },
       },
       {
-        eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+        eventId: microsoftTeamsTeamMemberAdded.name,
         correlationKey: 'n-member',
         payload: { team_id: 'team-1', user_id: 'user-1', tenant_id: 'tenant-1' },
       },
@@ -284,7 +286,7 @@ describe('Microsoft Teams inbound events', () => {
     );
     expect(result.events).toEqual([
       {
-        eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+        eventId: microsoftTeamsTeamMemberAdded.name,
         correlationKey: 'notification-1',
         payload: {
           team_id: 'ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062',
@@ -315,7 +317,7 @@ describe('Microsoft Teams inbound events', () => {
     );
     expect(result.events).toEqual([
       {
-        eventId: MICROSOFT_TEAMS_TEAM_MEMBER_ADDED_EVENT_ID,
+        eventId: microsoftTeamsTeamMemberAdded.name,
         correlationKey: 'notification-1',
         payload: {
           team_id: 'ee0f5ae2-8bc6-4ae5-8466-7daeebbfa062',
