@@ -72,7 +72,6 @@ export class EventLoopWatchdogService {
   private nodeRoles: readonly string[] = [];
   private subscription?: Subscription;
   private overall$?: Observable<ServiceStatus>;
-  private profileDir?: string;
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get(...LOGGER_CONTEXT);
@@ -93,7 +92,6 @@ export class EventLoopWatchdogService {
       running: profiling[key].asMilliseconds(),
     });
     this.enabledFallback = config.enabled;
-    this.profileDir = profiling.dir ?? resolveDiagnosticDir();
     this.watchdog = new EventLoopWatchdog({
       logger: this.logger,
       thresholdsMs: {
@@ -109,7 +107,7 @@ export class EventLoopWatchdogService {
         startAfterMs: perPhaseMs('startAfter'),
         maxDurationMs: perPhaseMs('maxDuration'),
         cooldownMs: perPhaseMs('cooldown'),
-        diagnosticDir: this.profileDir,
+        diagnosticDir: profiling.dir ?? resolveDiagnosticDir(),
       },
     });
   }

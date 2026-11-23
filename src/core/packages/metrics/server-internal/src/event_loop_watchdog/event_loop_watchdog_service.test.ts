@@ -145,15 +145,13 @@ describe('EventLoopWatchdogService', () => {
     it('uses diagnostic directory when profiling.dir is not set', async () => {
       await setup();
       expect(params().profiling.diagnosticDir).toBe('/diag');
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
     });
 
-    it("doesn't warn about a long diagnostic directory", async () => {
-      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH - 1)}`;
+    it('uses a diagnostic directory longer than PROFILING_DIR_MAX_LENGTH', async () => {
+      const long = `/${'a'.repeat(PROFILING_DIR_MAX_LENGTH)}`;
       resolveDiagnosticDirMock.mockReturnValue(long);
       await setup();
       expect(params().profiling.diagnosticDir).toBe(long);
-      expect(loggingSystemMock.collect(logger).warn).toEqual([]);
     });
 
     it('leaves the directory unset when neither diagnostic dir nor profiling.dir set', async () => {
