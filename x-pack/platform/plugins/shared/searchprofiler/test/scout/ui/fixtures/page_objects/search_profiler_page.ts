@@ -33,8 +33,8 @@ export class SearchProfilerPage {
     this.jsonParseErrorToast = this.page.testSubj.locator('jsonParseErrorToast');
     this.noShardsNotification = this.page.testSubj.locator('noShardsNotification');
     this.consolePanel = this.page.testSubj.locator('consolePanel');
-    this.consoleTab = this.page.getByRole('tab', { name: 'Console', exact: true });
-    this.searchProfilerTab = this.page.getByRole('tab', { name: 'Search Profiler', exact: true });
+    this.consoleTab = this.page.testSubj.locator('consoleTab');
+    this.searchProfilerTab = this.page.testSubj.locator('searchprofilerTab');
     this.viewShardDetailsLink = this.page.getByTestId('viewShardDetails');
     this.shardDetailsFlyoutCloseButton = this.page.getByTestId('euiFlyoutCloseButton');
     this.openCloseShardDetailsLink = this.page.getByTestId('openCloseShardDetails');

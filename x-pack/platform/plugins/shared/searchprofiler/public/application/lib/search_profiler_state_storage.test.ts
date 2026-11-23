@@ -146,6 +146,16 @@ describe('search profiler state storage', () => {
     ).toBe('');
   });
 
+  it('uses the default query when no URL query or stored draft exists', () => {
+    expect(
+      getInitialSearchProfilerQuery({
+        defaultQuery: DEFAULT_QUERY,
+        queryFromUrl: null,
+        storedQuery: undefined,
+      })
+    ).toBe(DEFAULT_QUERY);
+  });
+
   it('persists unfinished and empty query drafts', () => {
     writeSearchProfilerState({
       index: 'logs-*',
