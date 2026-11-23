@@ -57,6 +57,7 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   lastError: null,
   enabledBy: 'elastic',
   retentionDays: 30,
+  canEnable: false,
   autoEnable: false,
   canManage: true,
   setUpBlocker: null,
@@ -216,7 +217,11 @@ describe('SessionsTab', () => {
   describe('when sessions are not set up', () => {
     it('sets sessions up by itself for a user who can, once, then lists the sessions', async () => {
       respondWith({ sessionsStatus: notSetUp() });
-      mockFetch.mockImplementationOnce(async () => ({ ...notSetUp(), autoEnable: true }));
+      mockFetch.mockImplementationOnce(async () => ({
+        ...notSetUp(),
+        canEnable: true,
+        autoEnable: true,
+      }));
       renderTab();
 
       expect(
@@ -231,7 +236,7 @@ describe('SessionsTab', () => {
         if (endpoint === ENABLE_ENDPOINT) {
           throw forbidden('Missing privileges: index:traces-*:read');
         }
-        return { ...notSetUp(), autoEnable: true };
+        return { ...notSetUp(), canEnable: true, autoEnable: true };
       });
       renderTab();
 
@@ -258,6 +263,17 @@ describe('SessionsTab', () => {
     });
   });
 
+  it('offers a button rather than setting sessions up by itself when the app holds back', async () => {
+    respondWith({ sessionsStatus: { ...notSetUp(), canEnable: true } });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsEnable')).toBeInTheDocument();
+    expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(0);
+
+    fireEvent.click(screen.getByTestId('digitalExperienceSessionsEnable'));
+    await waitFor(() => expect(fetchesOf(ENABLE_ENDPOINT)).toHaveLength(1));
+  });
+
   it('tells users why nobody can set sessions up', async () => {
     respondWith({ sessionsStatus: { ...notSetUp(), setUpBlocker: 'encryptionKey' } });
     renderTab();
@@ -270,7 +286,9 @@ describe('SessionsTab', () => {
 
   describe('when the API key of sessions no longer works', () => {
     it('grants a new key by itself for a user who can, and shows a failure with a retry', async () => {
-      respondWith({ sessionsStatus: status({ apiKeyInvalid: true, autoEnable: true }) });
+      respondWith({
+        sessionsStatus: status({ apiKeyInvalid: true, canEnable: true, autoEnable: true }),
+      });
       const respond = mockFetch.getMockImplementation();
       let enableFails = true;
       mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {

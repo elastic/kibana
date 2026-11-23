@@ -41,7 +41,7 @@ test.describe(
       });
 
       await test.step('says the range starts before the oldest kept sessions', async () => {
-        await expect(digitalExperience.sessionsRetention).toContainText('Sessions are kept for');
+        await expect(digitalExperience.sessionsRetention).toContainText('Sessions are built from the last');
       });
 
       await test.step('shows one EDOT Browser row with a hint for a name with both sources', async () => {

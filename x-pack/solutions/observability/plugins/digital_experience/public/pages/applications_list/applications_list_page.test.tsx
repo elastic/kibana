@@ -79,6 +79,7 @@ const HEALTHY_SESSIONS: SessionsStatus = {
   lastError: null,
   enabledBy: null,
   retentionDays: 30,
+  canEnable: false,
   autoEnable: false,
   canManage: false,
   setUpBlocker: null,
@@ -693,7 +694,7 @@ describe('ApplicationsListPage', () => {
     });
 
     it('offers to set sessions up, and explains the empty list', async () => {
-      mockSessionsStatus({ status: { ...NOT_SET_UP, autoEnable: true } });
+      mockSessionsStatus({ status: { ...NOT_SET_UP, canEnable: true, autoEnable: true } });
       respondWith([]);
       renderPage();
 
@@ -765,6 +766,7 @@ describe('ApplicationsListPage', () => {
             ...HEALTHY_SESSIONS,
             disabled: true,
             health: 'disabled',
+            canEnable: false,
             autoEnable: false,
             canManage,
           },

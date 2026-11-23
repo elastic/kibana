@@ -27,6 +27,7 @@ import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
 import { savedViewSavedObjectType } from './saved_objects/saved_view';
 import { SESSIONS_PLATFORMS } from './services/sessions/sessions_platforms';
+import { createSessionsSetUpBackoff } from './services/sessions/sessions_set_up_backoff';
 import { registerSessionsTask } from './services/sessions/sessions_task';
 
 interface DigitalExperienceSetupDeps {
@@ -83,6 +84,7 @@ export class Plugin
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
         sessionsSettings: this.config.sessions,
+        sessionsSetUpBackoff: createSessionsSetUpBackoff(),
         getSessionsServices: async () => {
           const [, pluginsStart] = await core.getStartServices();
           return {

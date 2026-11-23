@@ -36,6 +36,7 @@ import {
   type SessionsEnableStep,
 } from '../../services/sessions/enable_sessions';
 import { disableSessions } from '../../services/sessions/disable_sessions';
+import { hasSessionsSourceData } from '../../services/sessions/has_sessions_source_data';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
@@ -199,6 +200,7 @@ const statusRoute = createDigitalExperienceServerRoute({
     request,
     sessionsSettings,
     getSessionsServices,
+    sessionsSetUpBackoff,
     isServerless,
     logger,
   }): Promise<SessionsStatusResponse> => {
@@ -222,15 +224,14 @@ const statusRoute = createDigitalExperienceServerRoute({
       return { ...status, setUpBlocker: taskManager ? 'encryptionKey' : 'taskManager' };
     }
     const { elasticsearch } = await context.core;
-    return {
-      ...status,
-      autoEnable: await canEnableSessions({
-        client: elasticsearch.client.asCurrentUser,
-        canEncrypt,
-        isServerless,
-        logger,
-      }),
-    };
+    const client = elasticsearch.client.asCurrentUser;
+    const canEnable = await canEnableSessions({ client, canEncrypt, isServerless, logger });
+    // Only set up by itself with events to summarize, and not again on every visit while it fails.
+    const autoEnable =
+      canEnable &&
+      !sessionsSetUpBackoff.isBackingOff() &&
+      (await hasSessionsSourceData(client, logger));
+    return { ...status, canEnable, autoEnable };
   },
 });
 
@@ -271,6 +272,7 @@ const enableRoute = createDigitalExperienceServerRoute({
     request,
     sessionsSettings,
     getSessionsServices,
+    sessionsSetUpBackoff,
     isServerless,
     logger,
   }): Promise<SessionsStatusResponse> => {
@@ -318,8 +320,14 @@ const enableRoute = createDigitalExperienceServerRoute({
       });
     } catch (error) {
       audit.log('failure', error);
-      throw toEnableError(error, logger);
+      const clientError = toEnableError(error, logger);
+      // Privilege failures are already caught by the status checks, before setting up by itself.
+      if (clientError.output.statusCode >= 500) {
+        sessionsSetUpBackoff.failed();
+      }
+      throw clientError;
     }
+    sessionsSetUpBackoff.succeeded();
     audit.log('success');
     logger.info(`Sessions enabled by [${audit.username}]`);
     return getStatus();

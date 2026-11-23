@@ -16,7 +16,7 @@ import {
   MANAGE_SESSIONS_SUB_FEATURE_PRIVILEGE_ID,
 } from '../common/feature';
 import { SAVED_VIEW_TYPE } from '../common/saved_views';
-import { SESSIONS_INDEX_PATTERN } from '../common/sessions';
+import { ALL_SESSIONS_INDEX_PATTERN } from '../common/sessions';
 
 /** The saved object type of the share plugin's short URLs. */
 const SHORT_URL_TYPE = 'url';
@@ -62,7 +62,7 @@ export const registerDigitalExperienceFeature = (features: FeaturesPluginSetup):
           {
             defaultMessage:
               'Requires "*" (All spaces). Turning sessions back on also needs read on the OTel logs and traces in full, and write on the {sessionsIndex} indices.',
-            values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
+            values: { sessionsIndex: ALL_SESSIONS_INDEX_PATTERN },
           }
         ),
         privilegeGroups: [

@@ -258,10 +258,12 @@ apiTest.describe(
           async () => {
             expect(await getStatus(apiClient, adminHeaders)).toMatchObject({
               installed: false,
+              canEnable: true,
               autoEnable: true,
             });
             expect(await getStatus(apiClient, viewerHeaders)).toMatchObject({
               installed: false,
+              canEnable: false,
               autoEnable: false,
             });
           }

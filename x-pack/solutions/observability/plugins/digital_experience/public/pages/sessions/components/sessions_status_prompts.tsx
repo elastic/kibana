@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
-  SESSIONS_INDEX_PATTERN,
+  ALL_SESSIONS_INDEX_PATTERN,
   type SessionsSetUpBlocker,
   type SessionsStatus,
 } from '../../../../common/sessions';
@@ -24,7 +24,7 @@ const SET_UP_BY_OTHERS_TEXT = i18n.translate(
   {
     defaultMessage:
       'They are set up automatically when someone who can read your EDOT Browser data in full and write to the {sessionsIndex} indices opens Digital Experience.',
-    values: { sessionsIndex: SESSIONS_INDEX_PATTERN },
+    values: { sessionsIndex: ALL_SESSIONS_INDEX_PATTERN },
   }
 );
 
@@ -68,7 +68,7 @@ export const EnableError = ({ error }: { error: Error }) => (
 );
 
 export interface EnableProps {
-  /** The user can set sessions up, or give them a working key again: the status's `autoEnable`. */
+  /** The user can set sessions up, or give them a working key again: the status's `canEnable`. */
   canEnable: boolean;
   /** The user can turn sessions off and back on. */
   canManage: boolean;

@@ -115,7 +115,7 @@ describe('enableSessions', () => {
     // A no-op unless sessions were turned off.
     expect(taskManager.bulkEnable).toHaveBeenCalledWith(
       [SESSIONS_TASK_ID, MOBILE_SESSIONS_TASK_ID],
-      true,
+      false,
       { request }
     );
     expect(taskManager.runSoon).toHaveBeenCalledWith(SESSIONS_TASK_ID);
@@ -174,7 +174,7 @@ describe('enableSessions', () => {
       expect.objectContaining({ id: MOBILE_SESSIONS_TASK_ID }),
       expect.anything()
     );
-    expect(taskManager.bulkEnable).toHaveBeenCalledWith([MOBILE_SESSIONS_TASK_ID], true, {
+    expect(taskManager.bulkEnable).toHaveBeenCalledWith([MOBILE_SESSIONS_TASK_ID], false, {
       request,
     });
     expect(taskManager.runSoon).toHaveBeenCalledTimes(1);

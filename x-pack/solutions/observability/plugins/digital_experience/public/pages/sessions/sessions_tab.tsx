@@ -343,7 +343,7 @@ export function SessionsTab({
   } = useSessionsStatus();
   const canManage = status?.canManage === true;
   const enableProps = {
-    canEnable: status?.autoEnable === true,
+    canEnable: status?.canEnable === true,
     canManage,
     onEnable: enable,
     enabling,

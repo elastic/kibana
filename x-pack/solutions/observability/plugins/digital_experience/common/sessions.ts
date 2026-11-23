@@ -159,8 +159,13 @@ export interface SessionsStatus {
   retentionDays: number;
   /**
    * True when sessions aren't set up, or their API key no longer works, and the current user has
-   * every privilege enabling checks: the app then sets them up without asking. Never once they
-   * were turned off.
+   * every privilege enabling checks, so they can set them up. Never once they were turned off.
+   */
+  canEnable: boolean;
+  /**
+   * True when the current user can set sessions up, there are EDOT Browser or mobile events to
+   * summarize, and setting them up hasn't failed on this Kibana in the last hour: the app then sets
+   * them up without asking.
    */
   autoEnable: boolean;
   /**

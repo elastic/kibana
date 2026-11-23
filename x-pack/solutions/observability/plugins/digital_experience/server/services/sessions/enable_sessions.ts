@@ -139,7 +139,7 @@ export const enableSessions = async ({
       errors: [failure],
     } = await taskManager.bulkEnable(
       platforms.map(({ taskId }) => taskId),
-      true,
+      false,
       { request }
     );
     if (failure) {

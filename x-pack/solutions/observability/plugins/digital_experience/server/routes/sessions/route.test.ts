@@ -29,6 +29,11 @@ import {
   SESSIONS_PLATFORMS,
 } from '../../services/sessions/sessions_platforms';
 import { getSessionsStatusResponse } from '../../services/sessions/sessions_status';
+import { hasSessionsSourceData } from '../../services/sessions/has_sessions_source_data';
+import {
+  createSessionsSetUpBackoff,
+  type SessionsSetUpBackoff,
+} from '../../services/sessions/sessions_set_up_backoff';
 import { disableSessions } from '../../services/sessions/disable_sessions';
 import { canManageSessionsInAllSpaces } from '../../services/sessions/manage_sessions_privilege';
 import type { SessionsServices } from '../create_digital_experience_server_route';
@@ -47,6 +52,7 @@ jest.mock('./get_session');
 jest.mock('./list_sessions');
 jest.mock('../../services/sessions/sessions_status');
 jest.mock('../../services/sessions/disable_sessions');
+jest.mock('../../services/sessions/has_sessions_source_data');
 jest.mock('../../services/sessions/manage_sessions_privilege');
 jest.mock('../../services/sessions/enable_sessions', () => ({
   ...jest.requireActual('../../services/sessions/enable_sessions'),
@@ -73,6 +79,7 @@ const browserStatus: SessionsStatus = {
   lastError: null,
   enabledBy: 'ana',
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  canEnable: false,
   autoEnable: false,
   canManage: true,
   setUpBlocker: null,
@@ -114,10 +121,12 @@ const runHandler = (
       canEncrypt: true,
       authz: undefined,
     },
+    sessionsSetUpBackoff = createSessionsSetUpBackoff(),
   }: {
     params?: Record<string, unknown>;
     authzResult?: Record<string, boolean>;
     services?: SessionsServices;
+    sessionsSetUpBackoff?: SessionsSetUpBackoff;
   } = {}
 ) => {
   const coreContext = coreMock.createRequestHandlerContext();
@@ -134,6 +143,7 @@ const runHandler = (
     logger,
     sessionsSettings: settings,
     getSessionsServices: async () => services,
+    sessionsSetUpBackoff,
     isServerless: true,
   });
   return { result, coreContext, logger, request, services };
@@ -167,6 +177,7 @@ describe('sessions routes', () => {
   beforeEach(() => {
     jest.mocked(getSessionsStatusResponse).mockResolvedValue(status);
     jest.mocked(enableSessions).mockResolvedValue();
+    jest.mocked(hasSessionsSourceData).mockResolvedValue(true);
   });
 
   afterEach(() => {
@@ -243,7 +254,7 @@ describe('sessions routes', () => {
           jest.mocked(canEnableSessions).mockResolvedValue(canEnable);
           const { result, coreContext, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
-          expect(await result).toEqual({ ...sessionsStatus, autoEnable: canEnable });
+          expect(await result).toEqual({ ...sessionsStatus, canEnable, autoEnable: canEnable });
           expect(canEnableSessions).toHaveBeenCalledWith({
             client: coreContext.elasticsearch.client.asCurrentUser,
             canEncrypt: true,
@@ -276,7 +287,41 @@ describe('sessions routes', () => {
         jest.mocked(canEnableSessions).mockResolvedValue(true);
         const { result } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
-        expect(await result).toEqual({ ...mobileMissing, autoEnable: true });
+        expect(await result).toEqual({ ...mobileMissing, canEnable: true, autoEnable: true });
+      });
+
+      it('only sets sessions up by itself once there are events to build them from', async () => {
+        jest.mocked(getSessionsStatusResponse).mockResolvedValue(notSetUp);
+        jest.mocked(canEnableSessions).mockResolvedValue(true);
+        jest.mocked(hasSessionsSourceData).mockResolvedValue(false);
+        const { result, coreContext, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
+
+        expect(await result).toEqual({ ...notSetUp, canEnable: true, autoEnable: false });
+        expect(hasSessionsSourceData).toHaveBeenCalledWith(
+          coreContext.elasticsearch.client.asCurrentUser,
+          logger
+        );
+      });
+
+      it('does not look for events for a user who cannot set sessions up', async () => {
+        jest.mocked(getSessionsStatusResponse).mockResolvedValue(notSetUp);
+        jest.mocked(canEnableSessions).mockResolvedValue(false);
+        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT);
+
+        await result;
+
+        expect(hasSessionsSourceData).not.toHaveBeenCalled();
+      });
+
+      it('does not set sessions up by itself for an hour after setting them up failed', async () => {
+        jest.mocked(getSessionsStatusResponse).mockResolvedValue(notSetUp);
+        jest.mocked(canEnableSessions).mockResolvedValue(true);
+        const sessionsSetUpBackoff = createSessionsSetUpBackoff();
+        sessionsSetUpBackoff.failed();
+        const { result } = runHandler(SESSIONS_STATUS_ENDPOINT, { sessionsSetUpBackoff });
+
+        expect(await result).toEqual({ ...notSetUp, canEnable: true, autoEnable: false });
+        expect(hasSessionsSourceData).not.toHaveBeenCalled();
       });
 
       it('never offers to set up the mobile sessions once sessions were turned off', async () => {
@@ -561,6 +606,47 @@ describe('sessions routes', () => {
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(
         expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
       );
+    });
+  });
+
+  describe('setting up again after a failure', () => {
+    beforeEach(() => {
+      jest.mocked(getSessionsStatusResponse).mockResolvedValueOnce(notSetUp);
+      jest.mocked(canManageSessionsInAllSpaces).mockResolvedValue(false);
+    });
+
+    it('holds back setting up by itself after setup fails on this Kibana', async () => {
+      jest
+        .mocked(enableSessions)
+        .mockRejectedValue(new SessionsEnableError('task', new Error('boom')));
+      const sessionsSetUpBackoff = createSessionsSetUpBackoff();
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { sessionsSetUpBackoff });
+
+      await clientErrorOf(result);
+
+      expect(sessionsSetUpBackoff.isBackingOff()).toBe(true);
+    });
+
+    it('does not hold it back when the user lacks a privilege', async () => {
+      jest
+        .mocked(enableSessions)
+        .mockRejectedValue(new SessionsPrivilegesError(['index:logs-*.otel-*:read']));
+      const sessionsSetUpBackoff = createSessionsSetUpBackoff();
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { sessionsSetUpBackoff });
+
+      await clientErrorOf(result);
+
+      expect(sessionsSetUpBackoff.isBackingOff()).toBe(false);
+    });
+
+    it('lets the app set sessions up by itself again once setting them up works', async () => {
+      const sessionsSetUpBackoff = createSessionsSetUpBackoff();
+      sessionsSetUpBackoff.failed();
+      const { result } = runHandler(SESSIONS_ENABLE_ENDPOINT, { sessionsSetUpBackoff });
+
+      await result;
+
+      expect(sessionsSetUpBackoff.isBackingOff()).toBe(false);
     });
   });
 

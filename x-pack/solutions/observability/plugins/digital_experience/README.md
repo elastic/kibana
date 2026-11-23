@@ -485,7 +485,12 @@ Sessions are set up with `POST /internal/digital_experience/sessions/enable`, wh
 list needs them, the app calls it by itself, once per visit, when status reports `autoEnable`:
 sessions aren't set up (or their API key no longer works) and weren't turned off, Task Manager is
 available, Kibana can store an API key, and the user passes the Elasticsearch checks below, which
-status runs so that users who would fail write no failed audit event. Each task is set up on its
+status runs so that users who would fail write no failed audit event (`canEnable`). On top of that,
+there must be an EDOT Browser or mobile event from the last 30 days to summarize (a `LIMIT 1` ES|QL
+search per platform), so deployments without that data get no task or API key, and setting sessions
+up must not have failed on this Kibana node in the last hour, so a setup that keeps failing isn't
+retried, logged and audited on every visit. Otherwise users with `canEnable` get the **Set up
+sessions** button instead. Each task is set up on its
 own, so a reader only sets up the ones that need it (like the mobile task added by an upgrade)
 without replacing the working key of the other. Without Task Manager or an encryption key, status
 reports why (`setUpBlocker`) and the app says so instead of waiting for someone else to set sessions
@@ -692,7 +697,8 @@ logged and answer 500 without Elasticsearch details:
 
 - `GET /internal/digital_experience/sessions/status`: whether sessions are set up or turned off, the
   task's health, lag and last error, whether it is still building, how many days sessions are kept,
-  whether the app should set them up for the current user (`autoEnable`), what keeps anyone from
+  whether the current user can set them up (`canEnable`) and whether the app should do it for them
+  (`autoEnable`), what keeps anyone from
   setting them up (`setUpBlocker`), and whether the user manages them in all spaces (`canManage`),
   with the same for the mobile task under `mobile`.
 - `GET /internal/digital_experience/applications/{serviceName}/sessions`: search, facets (browser,

@@ -41,6 +41,7 @@ const missingStatusOf = ({ version }: SessionsPlatform): SessionsStatus => ({
   lastError: null,
   enabledBy: null,
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+  canEnable: false,
   autoEnable: false,
   canManage: false,
   setUpBlocker: null,

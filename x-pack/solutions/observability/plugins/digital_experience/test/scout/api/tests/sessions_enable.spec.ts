@@ -95,7 +95,7 @@ apiTest.describe('Enabling Digital Experience sessions', { tag: DIGITAL_EXPERIEN
       const headers = { ...COMMON_HEADERS, ...cookieHeader };
 
       const status = await apiClient.get(SESSIONS_STATUS_PATH, { headers, responseType: 'json' });
-      expect(status.body).toMatchObject({ installed: false, autoEnable: true });
+      expect(status.body).toMatchObject({ installed: false, canEnable: true });
 
       const response = await apiClient.post(SESSIONS_ENABLE_PATH, {
         headers,
