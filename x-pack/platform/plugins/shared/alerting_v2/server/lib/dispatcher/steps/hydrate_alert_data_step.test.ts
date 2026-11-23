@@ -949,15 +949,17 @@ describe('HydrateAlertDataStep', () => {
         loggerService
       );
 
+      // Past the budget, the last query carries only the rest of the first series.
       expect(queriedIds(mockEsClient)).toEqual([
         ['ep-1', 'ep-2', 'ep-3', 'ep-4'],
         ['ep-1', 'ep-2'],
-        ['ep-3', 'ep-4'],
+        ['ep-3'],
       ]);
       expect(result.type).toBe('continue');
       if (result.type !== 'continue') return;
-      expect(result.data?.scan).toBeUndefined();
-      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2', 'ep-3', 'ep-4']);
+      expect(ids(result.data?.triage?.dispatchable)).toEqual(['ep-1', 'ep-2', 'ep-3']);
+      expect(result.data?.scan?.deferred).toBe(true);
+      expect(ids(result.data?.scan?.alerts)).toEqual(['ep-1', 'ep-2', 'ep-3']);
     });
 
     it('does not count a fully suppressed series as the first series', async () => {

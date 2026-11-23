@@ -179,7 +179,8 @@ export class HydrateAlertDataStep implements DispatcherStep {
    * the response cap, the batch is halved and retried. After a full batch, the size grows to
    * what its widest row projects to fit, but never back to a size that failed in this tick. Once
    * the next response could overflow the tick budget, the remaining ids are deferred, but never
-   * before the first series is complete, so every tick makes progress.
+   * before the first series is complete, so every tick makes progress. Queries past the budget
+   * carry only first-series ids.
    */
   private async fetchAlertData({
     alertIds,
@@ -208,10 +209,13 @@ export class HydrateAlertDataStep implements DispatcherStep {
           return { rows, oversizedAlertIds, processed };
         }
 
-        const batch = alertIds.slice(
-          processed,
-          Math.min(processed + this.maxIdsPerQuery, chunkEnd)
+        // Past the budget, only the rest of the first series is exempt, not the series after it.
+        const batchEnd = Math.min(
+          processed + this.maxIdsPerQuery,
+          chunkEnd,
+          budgetReached ? firstSeriesSize : chunkEnd
         );
+        const batch = alertIds.slice(processed, batchEnd);
         let batchRows: RawAlertData[];
         try {
           batchRows = await this.queryService.executeQuery<RawAlertData>({
