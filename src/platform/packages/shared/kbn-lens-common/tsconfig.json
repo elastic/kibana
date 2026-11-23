@@ -7,6 +7,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/lens-test-helpers",
     "@kbn/lens-formula-docs",
     "@kbn/navigation-plugin",
     "@kbn/expression-xy-plugin",

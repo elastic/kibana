@@ -45,8 +45,8 @@ If the cherry-pick has conflicts:
    - Treat same-major dependency updates as mechanical, even when the target branch is on an older minor version. For example, updating an existing `1.20.x` package to the source PR's `1.24.x` target is still a same-major dependency update, not a structural conflict.
    - Return `needs manual backport` for dependency conflicts only when a source PR package is missing from the target branch, the source PR changes a package across majors, or the package/version intent cannot be verified from the PR body and source commit diff.
    - Never manually resolve lockfile conflicts.
-   - Run `yarn kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
-   - Do not edit lockfiles that were not part of the conflict unless `yarn kbn bootstrap` updates them as part of dependency regeneration.
+   - Run `pnpm kbn bootstrap` when a lockfile conflict exists or package conflict resolution requires dependency regeneration.
+   - Do not edit lockfiles that were not part of the conflict unless `pnpm kbn bootstrap` updates them as part of dependency regeneration.
 5. If a conflict is structural, semantic, or requires product judgment that cannot be verified from the source and target branch context, abort the cherry-pick, leave the worktree for logs, and return `needs manual backport` with the conflicted files and reason.
 6. After resolving, verify no conflict markers remain with a worktree search for `<<<<<<<`, `=======`, and `>>>>>>>`.
 7. Stage only the resolved cherry-pick files.

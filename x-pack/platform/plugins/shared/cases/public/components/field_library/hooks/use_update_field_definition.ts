@@ -15,6 +15,7 @@ import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/consta
 import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
+import { useFieldDefinitionUpdatedEBT } from '../../../analytics/field_library';
 
 interface MutationArgs {
   id: string;
@@ -28,6 +29,7 @@ interface UseUpdateFieldDefinitionProps {
 export const useUpdateFieldDefinition = ({ onSuccess }: UseUpdateFieldDefinitionProps = {}) => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
+  const reportFieldDefinitionUpdated = useFieldDefinitionUpdatedEBT();
 
   return useMutation<FieldDefinition, ServerError, MutationArgs>(
     ({ id, fieldDefinition }) => putFieldDefinition({ id, fieldDefinition }),
@@ -37,6 +39,7 @@ export const useUpdateFieldDefinition = ({ onSuccess }: UseUpdateFieldDefinition
         queryClient.invalidateQueries(casesQueriesKeys.fieldDefinitions);
         showSuccessToast(i18n.SUCCESS_UPDATING_FIELD_DEFINITION);
         onSuccess?.(data);
+        reportFieldDefinitionUpdated({ isGlobal: data.isGlobal === true });
       },
       onError: (error: ServerError) => {
         showErrorToast(error, { title: i18n.ERROR_UPDATING_FIELD_DEFINITION });

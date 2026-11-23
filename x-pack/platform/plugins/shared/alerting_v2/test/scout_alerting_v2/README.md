@@ -11,7 +11,10 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 | `rules` | Rule HTTP CRUD, error-envelope contract, matcher data-field suggestions | Rules list, builder, Discover flyout | Local-only (`@local-stateful-classic`) |
 | `action_policies` | Action-policy HTTP CRUD | — | Local-only. API-only. |
 | `alerts` | Alert actions, execution history | Alert episodes, Discover compose, execution-history smoke | Local-only |
-| `engine` | Executor, director, dispatcher, end-to-end, telemetry | — | Every `tags.stateful.classic` spec (local **and** cloud). API-only. |
+| `engine` | End-to-end, telemetry | — | `tags.stateful.classic` (local **and** cloud). API-only. |
+| `engine_director` | Director | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
+| `engine_dispatcher` | Dispatcher | — | Split out of `engine` to cut CI wall-time. `tags.stateful.classic`. API-only. |
+| `engine_executor` | Rule executor | — | Split out of `engine` to cut CI wall-time (heaviest suite). `tags.stateful.classic`. API-only. |
 | `management` | — | `management_required_privileges` | `tags.deploymentAgnostic`. UI-only. |
 
 `common/` is shared utilities and Playwright fixtures. It is **not** a namespace (no `playwright.config.ts`).
@@ -19,7 +22,7 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 ### Where a new spec goes
 
 - HTTP route for rules / action policies / alert actions / execution history → that family's namespace, `api/tests/`.
-- Executor → director → dispatcher pipeline, or anything that polls `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`.
+- Rule executor specs → `engine_executor`. Director specs → `engine_director`. Dispatcher specs → `engine_dispatcher`. End-to-end, telemetry, and other engine specs that poll `.rule-events` / `.alert-actions` with `POLL_TIMEOUT_MS` → `engine`. (The `engine*` namespaces were split apart to keep each CI config's wall-time down; keep new engine specs in the smallest matching one.)
 - UI for a management page → the matching namespace's `ui/tests/`.
 - Cross-page privilege interstitial → `management`.
 
@@ -41,6 +44,9 @@ test/scout_alerting_v2/
 ├── action_policies/api/
 ├── alerts/{api,ui}/
 ├── engine/api/
+├── engine_director/api/
+├── engine_dispatcher/api/
+├── engine_executor/api/
 └── management/ui/
 ```
 

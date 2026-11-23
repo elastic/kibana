@@ -15,12 +15,12 @@ import type {
   SharedResponseProps,
   TypeSpecificResponse,
 } from '../../../api/detection_engine/model/rule_schema';
-import { addEcsToRequiredFields } from '../../rule_management/utils';
 import {
   normalizeThreatArray,
   normalizeRuleThreshold,
   normalizeFilterArray,
   normalizeQueryField,
+  normalizeRequiredFields,
 } from './normalizers';
 
 export const normalizeRuleResponse = (rule: RuleResponse): RuleResponse => {
@@ -57,7 +57,7 @@ const normalizeCommonResponseFields = (rule: RuleResponse): SharedResponseProps 
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
-    required_fields: addEcsToRequiredFields(rule.required_fields),
+    required_fields: normalizeRequiredFields(rule.required_fields),
     interval: (TimeDuration.parse(rule.interval) ?? new TimeDuration(5, 'm')).toString(),
     from: normalizeDateMath(rule.from ?? 'now-6m'),
     to: normalizeDateMath(rule.to ?? 'now'),

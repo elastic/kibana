@@ -45,8 +45,6 @@ export class RunnerFactoryImpl implements RunnerFactory {
         logger: this.deps.logger.get('modelProvider'),
         inference,
         trackingService,
-        uiSettings,
-        savedObjects,
         searchInferenceEndpoints,
       }),
     };

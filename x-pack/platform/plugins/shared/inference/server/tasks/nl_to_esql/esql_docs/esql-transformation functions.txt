@@ -1,0 +1,30 @@
+# MV_ZIP
+
+The MV_ZIP function combines values from two multi-value fields into a new multi-value field, joining values at the same position with a delimiter.
+
+## Syntax
+
+`MV_ZIP(first, second, delimiter)`
+
+### Parameters
+
+#### first
+
+The first multi-value field.
+
+#### second
+
+The second multi-value field. Values are combined with values at the same positions in `first`.
+
+#### delimiter
+
+The string delimiter used between combined values.
+
+## Examples
+
+Combine first names and last names with a space delimiter:
+
+```esql
+ROW first = ["Alice", "Bob"], last = ["Wong", "Smith"]
+| EVAL full = MV_ZIP(first, last, " ")
+```

@@ -1,5 +1,8 @@
 {
-  "sha1": "ab09fc4db7cfb2da258e3430dbdc728014bb9470",
+  "sha1": "a6d853024a36b86bedaa3c691332769994cde72b",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "1927b5fbbdf0acf-9f84f21350dbcbe",
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
-        "line": 40,
-        "column": 10
+        "line": 33,
+        "column": 24
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_access_token_errors.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 59,
+        "column": 11
       }
     },
     {
@@ -81,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 46,
+        "column": 26
       }
     },
     {
@@ -109,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 91,
+        "column": 25
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 149,
-        "column": 12
+        "line": 129,
+        "column": 50
       }
     },
     {
@@ -165,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_api_keys.spec.ts",
-        "line": 166,
-        "column": 12
+        "line": 150,
+        "column": 7
       }
     },
     {
@@ -193,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 30,
-        "column": 10
+        "line": 24,
+        "column": 14
       }
     },
     {
@@ -221,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 53,
-        "column": 10
+        "line": 45,
+        "column": 14
       }
     },
     {
@@ -249,8 +252,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 78,
-        "column": 10
+        "line": 70,
+        "column": 24
       }
     },
     {
@@ -277,8 +280,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_convert_api_keys.spec.ts",
-        "line": 93,
-        "column": 10
+        "line": 84,
+        "column": 60
       }
     },
     {
@@ -305,8 +308,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_create_session.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 13,
+        "column": 17
       }
     },
     {
@@ -333,8 +336,48 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_invalidate_session.spec.ts",
-        "line": 67,
-        "column": 10
+        "line": 58,
+        "column": 25
+      }
+    },
+    {
+      "id": "26e841eed7d5649-93028d84c37a40e",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies a session-authenticated request as a user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 18,
+        "column": 1
+      }
+    },
+    {
+      "id": "26e841eed7d5649-fb67ddb14300b0f",
+      "title": "[NON-MKI] Core security.authc.getPrincipal with UIAM credentials classifies an external UIAM API key as a UIAM API key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@local-serverless-security_complete",
+        "@local-serverless-security_essentials",
+        "@local-serverless-security_ease",
+        "@local-serverless-workplaceai",
+        "@local-serverless-vectordb"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_principal.spec.ts",
+        "line": 46,
+        "column": 25
       }
     },
     {
@@ -361,8 +404,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 47,
-        "column": 10
+        "line": 31,
+        "column": 24
       }
     },
     {
@@ -389,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 73,
-        "column": 10
+        "line": 64,
+        "column": 18
       }
     },
     {
@@ -417,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_refresh_session.spec.ts",
-        "line": 105,
-        "column": 10
+        "line": 91,
+        "column": 21
       }
     },
     {
@@ -445,8 +488,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 54,
+        "column": 26
       }
     },
     {
@@ -473,8 +516,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 77,
+        "column": 25
       }
     },
     {
@@ -501,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 125,
+        "column": 10
       }
     },
     {
@@ -529,8 +572,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 156,
-        "column": 12
+        "line": 142,
+        "column": 9
       }
     },
     {
@@ -557,8 +600,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_local/api/parallel_tests/uiam_use_uiam_credentials.spec.ts",
-        "line": 177,
-        "column": 12
+        "line": 160,
+        "column": 19
       }
     }
   ]

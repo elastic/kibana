@@ -1,8 +1,7 @@
 {
-  "sha1": "bb3796873b30d51788f0c4de5f18af10f02c7401",
+  "sha1": "547d5582442c2f322f1ec5cfc16675600a6051eb",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -12,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.setup.ts",
-        "line": 13,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
@@ -34,8 +33,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/custom_columns.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -56,8 +55,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/custom_columns.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 39,
+        "column": 16
       }
     },
     {
@@ -78,8 +77,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_alerts.spec.ts",
-        "line": 146,
-        "column": 14
+        "line": 134,
+        "column": 9
       }
     },
     {
@@ -100,8 +99,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 71,
-        "column": 14
+        "line": 67,
+        "column": 25
       }
     },
     {
@@ -122,8 +121,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 100,
-        "column": 14
+        "line": 84,
+        "column": 29
       }
     },
     {
@@ -144,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 147,
-        "column": 14
+        "line": 130,
+        "column": 15
       }
     },
     {
@@ -166,8 +165,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 198,
-        "column": 14
+        "line": 190,
+        "column": 17
       }
     },
     {
@@ -188,8 +187,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 234,
-        "column": 14
+        "line": 221,
+        "column": 17
       }
     },
     {
@@ -210,8 +209,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 261,
-        "column": 14
+        "line": 245,
+        "column": 7
       }
     },
     {
@@ -232,8 +231,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 289,
-        "column": 14
+        "line": 262,
+        "column": 17
       }
     },
     {
@@ -254,8 +253,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 317,
-        "column": 14
+        "line": 287,
+        "column": 33
       }
     },
     {
@@ -276,8 +275,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_apm.spec.ts",
-        "line": 363,
-        "column": 14
+        "line": 329,
+        "column": 30
       }
     },
     {
@@ -298,8 +297,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_slo.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 43,
+        "column": 25
       }
     },
     {
@@ -320,8 +319,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_slo.spec.ts",
-        "line": 75,
-        "column": 14
+        "line": 57,
+        "column": 13
       }
     },
     {
@@ -342,8 +341,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/explore_from_slo.spec.ts",
-        "line": 99,
-        "column": 14
+        "line": 78,
+        "column": 15
       }
     },
     {
@@ -364,8 +363,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/flyout_cascade_close.spec.ts",
-        "line": 60,
-        "column": 14
+        "line": 51,
+        "column": 61
       }
     },
     {
@@ -386,8 +385,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/logs_overview_tab.spec.ts",
-        "line": 59,
-        "column": 14
+        "line": 51,
+        "column": 35
       }
     },
     {
@@ -408,8 +407,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 59,
-        "column": 14
+        "line": 49,
+        "column": 61
       }
     },
     {
@@ -430,8 +429,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 80,
-        "column": 14
+        "line": 61,
+        "column": 27
       }
     },
     {
@@ -452,8 +451,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 104,
-        "column": 14
+        "line": 71,
+        "column": 24
       }
     },
     {
@@ -474,8 +473,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 126,
-        "column": 14
+        "line": 92,
+        "column": 15
       }
     },
     {
@@ -496,8 +495,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 155,
-        "column": 14
+        "line": 111,
+        "column": 11
       }
     },
     {
@@ -518,8 +517,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 195,
-        "column": 14
+        "line": 137,
+        "column": 24
       }
     },
     {
@@ -540,8 +539,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 223,
-        "column": 14
+        "line": 158,
+        "column": 17
       }
     },
     {
@@ -562,8 +561,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 273,
-        "column": 14
+        "line": 196,
+        "column": 7
       }
     },
     {
@@ -584,8 +583,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab_usage.spec.ts",
-        "line": 316,
-        "column": 14
+        "line": 219,
+        "column": 6
       }
     },
     {
@@ -606,8 +605,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab.spec.ts",
-        "line": 66,
-        "column": 16
+        "line": 61,
+        "column": 50
       }
     },
     {
@@ -628,8 +627,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab.spec.ts",
-        "line": 105,
-        "column": 16
+        "line": 96,
+        "column": 26
       }
     },
     {
@@ -650,8 +649,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab.spec.ts",
-        "line": 66,
-        "column": 16
+        "line": 61,
+        "column": 50
       }
     },
     {
@@ -672,8 +671,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab.spec.ts",
-        "line": 105,
-        "column": 16
+        "line": 96,
+        "column": 26
       }
     },
     {
@@ -694,8 +693,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/overview_tab.spec.ts",
-        "line": 132,
-        "column": 14
+        "line": 121,
+        "column": 17
       }
     },
     {
@@ -714,8 +713,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 36,
-        "column": 16
+        "line": 31,
+        "column": 50
       }
     },
     {
@@ -734,8 +733,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 55,
-        "column": 16
+        "line": 41,
+        "column": 56
       }
     },
     {
@@ -754,8 +753,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 72,
-        "column": 16
+        "line": 57,
+        "column": 41
       }
     },
     {
@@ -774,8 +773,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 36,
-        "column": 16
+        "line": 31,
+        "column": 50
       }
     },
     {
@@ -794,8 +793,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 55,
-        "column": 16
+        "line": 41,
+        "column": 56
       }
     },
     {
@@ -814,8 +813,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 72,
-        "column": 16
+        "line": 57,
+        "column": 41
       }
     },
     {
@@ -834,8 +833,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 36,
-        "column": 16
+        "line": 31,
+        "column": 50
       }
     },
     {
@@ -854,8 +853,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 55,
-        "column": 16
+        "line": 41,
+        "column": 56
       }
     },
     {
@@ -874,8 +873,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 72,
-        "column": 16
+        "line": 57,
+        "column": 41
       }
     },
     {
@@ -896,8 +895,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 46,
-        "column": 14
+        "line": 42,
+        "column": 33
       }
     },
     {
@@ -918,8 +917,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 65,
-        "column": 14
+        "line": 54,
+        "column": 40
       }
     },
     {
@@ -940,8 +939,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 86,
-        "column": 14
+        "line": 72,
+        "column": 9
       }
     },
     {
@@ -962,8 +961,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 103,
-        "column": 14
+        "line": 84,
+        "column": 7
       }
     },
     {
@@ -984,8 +983,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 119,
-        "column": 14
+        "line": 99,
+        "column": 11
       }
     },
     {
@@ -1006,8 +1005,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/red_metrics_charts.spec.ts",
-        "line": 153,
-        "column": 14
+        "line": 122,
+        "column": 27
       }
     },
     {
@@ -1028,8 +1027,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 63,
-        "column": 14
+        "line": 56,
+        "column": 13
       }
     },
     {
@@ -1050,8 +1049,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 197,
-        "column": 14
+        "line": 144,
+        "column": 15
       }
     },
     {
@@ -1072,8 +1071,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 224,
-        "column": 14
+        "line": 176,
+        "column": 15
       }
     },
     {
@@ -1094,8 +1093,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 263,
-        "column": 14
+        "line": 209,
+        "column": 11
       }
     },
     {
@@ -1116,8 +1115,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 285,
-        "column": 14
+        "line": 226,
+        "column": 33
       }
     },
     {
@@ -1138,8 +1137,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/waterfall_flyout_usage.spec.ts",
-        "line": 313,
-        "column": 14
+        "line": 235,
+        "column": 43
       }
     },
     {
@@ -1149,8 +1148,8 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/global.teardown.ts",
-        "line": 13,
-        "column": 19
+        "line": 7,
+        "column": 1
       }
     }
   ]

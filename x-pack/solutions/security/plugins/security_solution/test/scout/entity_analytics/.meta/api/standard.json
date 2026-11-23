@@ -1,8 +1,7 @@
 {
-  "sha1": "cd13d08ac8f2cbdb32cbcf733de6490ef6760e25",
+  "sha1": "5da2e195f6f77312e60862cc8416d57c15604472",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,8 +16,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 145,
-        "column": 12
+        "line": 142,
+        "column": 11
       }
     },
     {
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 170,
+        "column": 27
       }
     },
     {
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 192,
-        "column": 12
+        "line": 194,
+        "column": 42
       }
     },
     {
@@ -65,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 228,
-        "column": 12
+        "line": 240,
+        "column": 57
       }
     },
     {
@@ -81,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 256,
-        "column": 12
+        "line": 272,
+        "column": 29
       }
     },
     {
@@ -97,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ai_summary/ai_summary_permissions.spec.ts",
-        "line": 291,
-        "column": 12
+        "line": 323,
+        "column": 67
       }
     },
     {
@@ -111,8 +110,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -125,8 +124,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 71,
-        "column": 12
+        "line": 58,
+        "column": 15
       }
     },
     {
@@ -139,8 +138,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 95,
-        "column": 12
+        "line": 75,
+        "column": 21
       }
     },
     {
@@ -153,8 +152,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 98,
+        "column": 21
       }
     },
     {
@@ -167,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 107,
+        "column": 32
       }
     },
     {
@@ -181,8 +180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 119,
+        "column": 98
       }
     },
     {
@@ -195,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 155,
-        "column": 12
+        "line": 130,
+        "column": 13
       }
     },
     {
@@ -209,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/bulk_update_leads.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 142,
+        "column": 16
       }
     },
     {
@@ -223,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -237,8 +236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 55,
+        "column": 27
       }
     },
     {
@@ -251,8 +250,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 91,
-        "column": 12
+        "line": 70,
+        "column": 7
       }
     },
     {
@@ -265,8 +264,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 113,
-        "column": 12
+        "line": 83,
+        "column": 10
       }
     },
     {
@@ -279,8 +278,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/dismiss_lead.spec.ts",
-        "line": 125,
-        "column": 12
+        "line": 94,
+        "column": 15
       }
     },
     {
@@ -293,8 +292,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 54,
-        "column": 12
+        "line": 42,
+        "column": 32
       }
     },
     {
@@ -307,8 +306,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -335,8 +334,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/enable_disable.spec.ts",
-        "line": 116,
-        "column": 12
+        "line": 100,
+        "column": 11
       }
     },
     {
@@ -349,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 45,
+        "column": 13
       }
     },
     {
@@ -363,8 +362,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 55,
+        "column": 70
       }
     },
     {
@@ -377,8 +376,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 86,
-        "column": 12
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -391,8 +390,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 107,
-        "column": 12
+        "line": 89,
+        "column": 15
       }
     },
     {
@@ -405,8 +404,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 124,
-        "column": 12
+        "line": 100,
+        "column": 25
       }
     },
     {
@@ -419,8 +418,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 140,
-        "column": 12
+        "line": 111,
+        "column": 44
       }
     },
     {
@@ -433,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 161,
-        "column": 12
+        "line": 137,
+        "column": 23
       }
     },
     {
@@ -447,8 +446,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 181,
-        "column": 12
+        "line": 150,
+        "column": 27
       }
     },
     {
@@ -461,8 +460,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 201,
-        "column": 12
+        "line": 166,
+        "column": 46
       }
     },
     {
@@ -475,8 +474,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/get_leads.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 185,
+        "column": 15
       }
     },
     {
@@ -489,8 +488,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -503,8 +502,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 56,
+        "column": 34
       }
     },
     {
@@ -517,8 +516,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/lead_generation/lead_generation_status.spec.ts",
-        "line": 89,
-        "column": 12
+        "line": 67,
+        "column": 9
       }
     },
     {
@@ -533,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 120,
-        "column": 10
+        "line": 128,
+        "column": 18
       }
     },
     {
@@ -549,8 +548,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
-        "line": 150,
-        "column": 10
+        "line": 153,
+        "column": 15
       }
     },
     {
@@ -566,7 +565,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entity_maintainers.spec.ts",
         "line": 170,
-        "column": 10
+        "column": 92
       }
     },
     {
@@ -581,8 +580,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 158,
-        "column": 14
+        "line": 146,
+        "column": 9
       }
     },
     {
@@ -597,8 +596,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 189,
-        "column": 14
+        "line": 175,
+        "column": 28
       }
     },
     {
@@ -613,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 252,
-        "column": 14
+        "line": 246,
+        "column": 27
       }
     },
     {
@@ -629,8 +628,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 295,
-        "column": 16
+        "line": 283,
+        "column": 31
       }
     },
     {
@@ -645,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/host_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 320,
-        "column": 16
+        "line": 309,
+        "column": 82
       }
     },
     {
@@ -661,8 +660,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 118,
-        "column": 14
+        "line": 104,
+        "column": 31
       }
     },
     {
@@ -677,8 +676,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 151,
-        "column": 14
+        "line": 135,
+        "column": 17
       }
     },
     {
@@ -693,8 +692,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 226,
-        "column": 14
+        "line": 222,
+        "column": 35
       }
     },
     {
@@ -709,8 +708,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 286,
-        "column": 14
+        "line": 293,
+        "column": 36
       }
     },
     {
@@ -725,8 +724,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 324,
-        "column": 14
+        "line": 320,
+        "column": 31
       }
     },
     {
@@ -741,8 +740,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/user_target_raw_identifiers_maintainer_suite.spec.ts",
-        "line": 354,
-        "column": 14
+        "line": 351,
+        "column": 26
       }
     },
     {
@@ -757,8 +756,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 271,
-        "column": 12
+        "line": 295,
+        "column": 24
       }
     },
     {
@@ -773,8 +772,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 315,
-        "column": 12
+        "line": 341,
+        "column": 69
       }
     },
     {
@@ -789,8 +788,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 337,
-        "column": 12
+        "line": 363,
+        "column": 25
       }
     },
     {
@@ -805,8 +804,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 353,
-        "column": 12
+        "line": 375,
+        "column": 25
       }
     },
     {
@@ -821,8 +820,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 368,
-        "column": 12
+        "line": 386,
+        "column": 27
       }
     },
     {
@@ -837,8 +836,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 382,
-        "column": 12
+        "line": 397,
+        "column": 62
       }
     },
     {
@@ -853,8 +852,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 395,
-        "column": 12
+        "line": 409,
+        "column": 67
       }
     },
     {
@@ -869,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 423,
-        "column": 12
+        "line": 441,
+        "column": 16
       }
     },
     {
@@ -885,8 +884,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 439,
-        "column": 12
+        "line": 462,
+        "column": 35
       }
     },
     {
@@ -901,8 +900,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 472,
-        "column": 12
+        "line": 487,
+        "column": 6
       }
     },
     {
@@ -917,8 +916,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 489,
-        "column": 12
+        "line": 502,
+        "column": 21
       }
     },
     {
@@ -933,8 +932,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 506,
-        "column": 12
+        "line": 519,
+        "column": 21
       }
     },
     {
@@ -949,8 +948,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 525,
-        "column": 12
+        "line": 536,
+        "column": 25
       }
     },
     {
@@ -965,8 +964,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 544,
-        "column": 12
+        "line": 564,
+        "column": 20
       }
     },
     {
@@ -981,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 560,
-        "column": 12
+        "line": 577,
+        "column": 69
       }
     },
     {
@@ -997,8 +996,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 573,
-        "column": 12
+        "line": 590,
+        "column": 64
       }
     },
     {
@@ -1013,8 +1012,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 586,
-        "column": 12
+        "line": 606,
+        "column": 39
       }
     },
     {
@@ -1029,8 +1028,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 602,
-        "column": 12
+        "line": 693,
+        "column": 32
       }
     },
     {
@@ -1045,8 +1044,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 648,
-        "column": 12
+        "line": 663,
+        "column": 16
       }
     },
     {
@@ -1061,8 +1060,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 670,
-        "column": 12
+        "line": 684,
+        "column": 21
       }
     },
     {
@@ -1077,8 +1076,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 688,
-        "column": 12
+        "line": 698,
+        "column": 26
       }
     },
     {
@@ -1093,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 703,
-        "column": 12
+        "line": 710,
+        "column": 41
       }
     },
     {
@@ -1109,8 +1108,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 717,
-        "column": 12
+        "line": 724,
+        "column": 31
       }
     },
     {
@@ -1125,8 +1124,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 735,
-        "column": 12
+        "line": 742,
+        "column": 39
       }
     },
     {
@@ -1141,8 +1140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 754,
-        "column": 12
+        "line": 759,
+        "column": 69
       }
     },
     {
@@ -1157,8 +1156,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 774,
-        "column": 12
+        "line": 779,
+        "column": 69
       }
     },
     {
@@ -1173,8 +1172,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 794,
-        "column": 12
+        "line": 800,
+        "column": 64
       }
     },
     {
@@ -1189,8 +1188,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 811,
-        "column": 12
+        "line": 817,
+        "column": 17
       }
     },
     {
@@ -1205,8 +1204,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 828,
-        "column": 12
+        "line": 834,
+        "column": 17
       }
     },
     {
@@ -1221,8 +1220,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 841,
-        "column": 12
+        "line": 847,
+        "column": 17
       }
     },
     {
@@ -1237,8 +1236,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 854,
-        "column": 12
+        "line": 860,
+        "column": 17
       }
     },
     {
@@ -1253,8 +1252,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 870,
-        "column": 12
+        "line": 876,
+        "column": 18
       }
     },
     {
@@ -1269,8 +1268,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 883,
-        "column": 12
+        "line": 887,
+        "column": 69
       }
     },
     {
@@ -1285,8 +1284,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 896,
-        "column": 12
+        "line": 900,
+        "column": 41
       }
     },
     {
@@ -1301,8 +1300,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 910,
-        "column": 12
+        "line": 913,
+        "column": 32
       }
     },
     {
@@ -1317,8 +1316,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 924,
-        "column": 12
+        "line": 926,
+        "column": 16
       }
     },
     {
@@ -1333,8 +1332,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 938,
-        "column": 12
+        "line": 936,
+        "column": 6
       }
     },
     {
@@ -1349,8 +1348,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 952,
-        "column": 12
+        "line": 947,
+        "column": 26
       }
     },
     {
@@ -1365,8 +1364,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 965,
-        "column": 12
+        "line": 957,
+        "column": 25
       }
     },
     {
@@ -1381,8 +1380,168 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
-        "line": 979,
-        "column": 12
+        "line": 969,
+        "column": 69
+      }
+    },
+    {
+      "id": "635d9d2633f6320-b4484bd14cdb09d",
+      "title": "Entity risk score calculation privileges an admin can recalculate the risk score of an entity",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 187,
+        "column": 4
+      }
+    },
+    {
+      "id": "635d9d2633f6320-fed04db99c4cb5b",
+      "title": "Entity risk score calculation privileges a user with only the index privileges the calculation needs can recalculate, without cluster privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 216,
+        "column": 20
+      }
+    },
+    {
+      "id": "635d9d2633f6320-31b44204e66e95e",
+      "title": "Entity risk score calculation privileges a user without read access to the risk score lookup index is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 244,
+        "column": 35
+      }
+    },
+    {
+      "id": "635d9d2633f6320-0204f2c8c1dd03b",
+      "title": "Entity risk score calculation privileges a user without write access to the risk score index is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 244,
+        "column": 35
+      }
+    },
+    {
+      "id": "635d9d2633f6320-6a83657fc63530c",
+      "title": "Entity risk score calculation privileges a user without write access to the entity store is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 244,
+        "column": 35
+      }
+    },
+    {
+      "id": "635d9d2633f6320-df7478aab0eeb6b",
+      "title": "Entity risk score calculation privileges a user without the entity analytics feature privilege is rejected with a 403",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/entity_calculation_privileges.spec.ts",
+        "line": 276,
+        "column": 32
+      }
+    },
+    {
+      "id": "01eae7fe29218ec-86a99f2b1e98d13",
+      "title": "Risk score maintainer multi-valued IdP user scores an IdP user whose alert has the IAM event type after the first value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/multi_value_idp_user.spec.ts",
+        "line": 167,
+        "column": 29
+      }
+    },
+    {
+      "id": "ff1db85b2923667-0571d50f5279240",
+      "title": "Risk score maintainer resolution inputs scores only the group's members, with each alert's own timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/resolution_inputs.spec.ts",
+        "line": 158,
+        "column": 11
+      }
+    },
+    {
+      "id": "386fddb37521d8c-18e56c2f2bde0ae",
+      "title": "Risk score maintainer resolution reassignment ignores the previous run's lookup row for a target whose only alias has moved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/resolution_reassignment.spec.ts",
+        "line": 211,
+        "column": 7
+      }
+    },
+    {
+      "id": "f788f1b4abedbd0-895c7fcf5dc3c85",
+      "title": "Risk score maintainer risk inputs ranks risk inputs by their numeric risk score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/risk_inputs_ranking.spec.ts",
+        "line": 132,
+        "column": 11
       }
     }
   ]

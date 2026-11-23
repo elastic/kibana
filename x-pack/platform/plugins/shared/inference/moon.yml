@@ -21,7 +21,7 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/core'
   - '@kbn/logging'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/dev-cli-runner'
   - '@kbn/expect'
   - '@kbn/tooling-log'
@@ -63,6 +63,4 @@ fileGroups:
     - .storybook/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-  jest-config:
-    - jest.config.js
 tasks: {}

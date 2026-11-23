@@ -2015,6 +2015,10 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {},
+      rawRecoveredAlerts: {},
+    });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
     const taskRunner = createTaskRunner();
@@ -2064,7 +2068,10 @@ describe('Task Runner', () => {
       recovered: { count: 0, data: [] },
     });
 
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {},
+      rawRecoveredAlerts: {},
+    });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
     const taskRunner = createTaskRunner();

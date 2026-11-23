@@ -1,21 +1,9 @@
 {
-  "sha1": "75ea9a0a8bf4968aefbda7c855dfe54e1a7857c0",
+  "sha1": "a0d6aaaddfcd6d52b4edf11574b597b7cff013d8",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
-      "title": "Teardown environment for streams tests",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
-      }
-    },
     {
       "id": "230fcfe7ad78991-744ce32675c025c",
       "title": "Setup environment for streams tests",
@@ -23,8 +11,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -39,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 118,
+        "column": 7
       }
     },
     {
@@ -55,8 +43,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
-        "line": 137,
-        "column": 9
+        "line": 122,
+        "column": 26
       }
     },
     {
@@ -71,8 +59,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
-        "line": 152,
-        "column": 9
+        "line": 134,
+        "column": 25
       }
     },
     {
@@ -87,8 +75,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/attachments.spec.ts",
-        "line": 194,
-        "column": 9
+        "line": 163,
+        "column": 7
       }
     },
     {
@@ -103,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 42,
+        "column": 46
       }
     },
     {
@@ -119,8 +107,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 52,
+        "column": 25
       }
     },
     {
@@ -135,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 61,
+        "column": 7
       }
     },
     {
@@ -151,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 107,
-        "column": 9
+        "line": 84,
+        "column": 11
       }
     },
     {
@@ -167,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 51,
+        "column": 7
       }
     },
     {
@@ -183,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 100,
-        "column": 9
+        "line": 89,
+        "column": 20
       }
     },
     {
@@ -199,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 126,
-        "column": 9
+        "line": 109,
+        "column": 25
       }
     },
     {
@@ -215,8 +203,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 33,
+        "column": 25
       }
     },
     {
@@ -231,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 60,
+        "line": 45,
         "column": 9
       }
     },
@@ -247,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 50,
+        "column": 26
       }
     },
     {
@@ -265,8 +253,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/classic_stream_creation.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 92,
+        "column": 14
       }
     },
     {
@@ -281,8 +269,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_collapsible_rows.spec.ts",
-        "line": 46,
-        "column": 9
+        "line": 39,
+        "column": 16
       }
     },
     {
@@ -297,8 +285,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 111,
+        "column": 28
       }
     },
     {
@@ -313,8 +301,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
-        "line": 142,
-        "column": 9
+        "line": 139,
+        "column": 60
       }
     },
     {
@@ -330,7 +318,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 167,
-        "column": 9
+        "column": 10
       }
     },
     {
@@ -346,7 +334,18 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_list_view/streams_table_values.spec.ts",
         "line": 177,
-        "column": 9
+        "column": 80
+      }
+    },
+    {
+      "id": "fbe5c6bcfe99e83-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

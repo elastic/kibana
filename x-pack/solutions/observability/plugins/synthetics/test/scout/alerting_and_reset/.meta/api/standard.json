@@ -1,8 +1,7 @@
 {
-  "sha1": "a9944810c690243a56bff05a6fd15a2820cc6449",
+  "sha1": "03dcb122d8f17b8e8c0ba30733d6d53d9c5c5a69",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -15,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 118,
-        "column": 12
+        "line": 127,
+        "column": 19
       }
     },
     {
@@ -29,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 139,
+        "column": 14
       }
     },
     {
@@ -43,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 148,
+        "column": 13
       }
     },
     {
@@ -57,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 163,
+        "column": 27
       }
     },
     {
@@ -72,7 +71,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/enable_default_alerting.spec.ts",
         "line": 222,
-        "column": 12
+        "column": 80
       }
     },
     {
@@ -85,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 190,
+        "column": 42
       }
     },
     {
@@ -99,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 204,
+        "column": 25
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 267,
-        "column": 12
+        "line": 256,
+        "column": 16
       }
     },
     {
@@ -127,8 +126,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 277,
-        "column": 12
+        "line": 263,
+        "column": 71
       }
     },
     {
@@ -141,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 287,
-        "column": 12
+        "line": 269,
+        "column": 14
       }
     },
     {
@@ -155,8 +154,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 298,
-        "column": 12
+        "line": 278,
+        "column": 24
       }
     },
     {
@@ -169,8 +168,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 314,
-        "column": 12
+        "line": 289,
+        "column": 24
       }
     },
     {
@@ -183,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 352,
-        "column": 12
+        "line": 326,
+        "column": 7
       }
     },
     {
@@ -197,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/get_certs.spec.ts",
-        "line": 410,
-        "column": 12
+        "line": 390,
+        "column": 16
       }
     },
     {
@@ -211,8 +210,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 114,
+        "column": 56
       }
     },
     {
@@ -225,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows_route.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 154,
+        "column": 49
       }
     },
     {
@@ -239,8 +238,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 191,
-        "column": 12
+        "line": 184,
+        "column": 72
       }
     },
     {
@@ -253,8 +252,134 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 220,
-        "column": 12
+        "line": 203,
+        "column": 25
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-2a45512b10497e8",
+      "title": "Synthetics manage rules privilege does not let a read-only user create a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 99,
+        "column": 14
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-eb10c137e1bb265",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules manage a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 102,
+        "column": 27
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-00fbde421470293",
+      "title": "Synthetics manage rules privilege does not let a read user with can_manage_rules write monitors, settings, params, or private locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 165,
+        "column": 58
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-341aea6a7844c49",
+      "title": "Synthetics manage rules privilege does not let a read-only user enable or update default alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 205,
+        "column": 7
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-6de230ddfe36819",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules enable default alerting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 227,
+        "column": 26
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-8744401896c479b",
+      "title": "Synthetics manage rules privilege does not let a read-only user inspect status or TLS rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 237,
+        "column": 16
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-5fbc0194638957c",
+      "title": "Synthetics manage rules privilege lets a read user with can_manage_rules inspect status and TLS rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 250,
+        "column": 14
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-0d121d36a5033e6",
+      "title": "Synthetics manage rules privilege keeps rule management available to all users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 257,
+        "column": 94
+      }
+    },
+    {
+      "id": "ab73d14a87a24d3-fc6ea4cbb43447f",
+      "title": "Synthetics manage rules privilege keeps rule management available to minimal_all users",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/manage_rules_privilege.spec.ts",
+        "line": 267,
+        "column": 14
       }
     },
     {
@@ -267,8 +392,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 99,
-        "column": 12
+        "line": 92,
+        "column": 13
       }
     },
     {
@@ -281,8 +406,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 114,
-        "column": 12
+        "line": 102,
+        "column": 11
       }
     },
     {
@@ -295,8 +420,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 143,
-        "column": 12
+        "line": 132,
+        "column": 29
       }
     },
     {
@@ -309,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 156,
+        "column": 16
       }
     },
     {
@@ -323,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 179,
-        "column": 12
+        "line": 172,
+        "column": 16
       }
     },
     {
@@ -337,8 +462,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 194,
-        "column": 12
+        "line": 188,
+        "column": 17
       }
     },
     {
@@ -351,8 +476,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 222,
-        "column": 12
+        "line": 232,
+        "column": 30
       }
     },
     {
@@ -365,8 +490,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 249,
+        "column": 29
       }
     },
     {
@@ -379,8 +504,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor_bulk.spec.ts",
-        "line": 254,
-        "column": 12
+        "line": 251,
+        "column": 27
       }
     },
     {
@@ -393,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 116,
-        "column": 12
+        "line": 109,
+        "column": 60
       }
     },
     {
@@ -407,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 126,
-        "column": 12
+        "line": 119,
+        "column": 27
       }
     },
     {
@@ -421,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 142,
+        "column": 15
       }
     },
     {
@@ -435,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 175,
-        "column": 12
+        "line": 165,
+        "column": 15
       }
     },
     {
@@ -449,8 +574,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 191,
-        "column": 12
+        "line": 181,
+        "column": 71
       }
     },
     {
@@ -463,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 205,
-        "column": 12
+        "line": 194,
+        "column": 24
       }
     },
     {
@@ -477,8 +602,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 209,
+        "column": 64
       }
     },
     {
@@ -491,8 +616,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 231,
+        "column": 64
       }
     },
     {
@@ -505,8 +630,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 256,
-        "column": 12
+        "line": 247,
+        "column": 29
       }
     },
     {
@@ -519,8 +644,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 270,
-        "column": 12
+        "line": 259,
+        "column": 24
       }
     },
     {
@@ -533,8 +658,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 299,
-        "column": 12
+        "line": 281,
+        "column": 18
       }
     },
     {
@@ -547,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 327,
-        "column": 12
+        "line": 310,
+        "column": 13
       }
     },
     {
@@ -561,8 +686,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 333,
-        "column": 12
+        "line": 313,
+        "column": 73
       }
     },
     {
@@ -575,8 +700,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 342,
-        "column": 12
+        "line": 323,
+        "column": 6
       }
     },
     {
@@ -589,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/reset_monitor.spec.ts",
-        "line": 351,
-        "column": 12
+        "line": 331,
+        "column": 7
       }
     },
     {
@@ -603,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 190,
+        "column": 18
       }
     },
     {
@@ -617,8 +742,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 193,
-        "column": 12
+        "line": 194,
+        "column": 25
       }
     },
     {
@@ -632,7 +757,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
         "line": 202,
-        "column": 12
+        "column": 63
       }
     },
     {
@@ -645,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 216,
-        "column": 12
+        "line": 214,
+        "column": 7
       }
     },
     {
@@ -659,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 243,
-        "column": 12
+        "line": 235,
+        "column": 24
       }
     },
     {
@@ -673,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -687,8 +812,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -701,8 +826,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 258,
-        "column": 14
+        "line": 253,
+        "column": 5
       }
     },
     {
@@ -715,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 288,
-        "column": 12
+        "line": 285,
+        "column": 5
       }
     },
     {
@@ -729,8 +854,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 319,
-        "column": 12
+        "line": 320,
+        "column": 7
       }
     },
     {
@@ -743,8 +868,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 372,
-        "column": 12
+        "line": 373,
+        "column": 25
       }
     },
     {
@@ -758,7 +883,7 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
         "line": 377,
-        "column": 12
+        "column": 75
       }
     },
     {
@@ -771,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 385,
-        "column": 12
+        "line": 383,
+        "column": 7
       }
     },
     {
@@ -785,8 +910,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 394,
-        "column": 12
+        "line": 390,
+        "column": 14
       }
     },
     {
@@ -799,8 +924,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/synthetics_enablement.spec.ts",
-        "line": 403,
-        "column": 12
+        "line": 396,
+        "column": 14
       }
     },
     {
@@ -813,8 +938,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
-        "line": 205,
-        "column": 12
+        "line": 210,
+        "column": 21
       }
     },
     {
@@ -827,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs_alert.spec.ts",
-        "line": 215,
-        "column": 12
+        "line": 217,
+        "column": 29
       }
     },
     {
@@ -841,8 +966,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 88,
+        "column": 7
       }
     },
     {
@@ -855,8 +980,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/tls_rule_browser_certs.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 94,
+        "column": 21
       }
     }
   ]

@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/discoveries'
   - '@kbn/security-plugin'
   - '@kbn/scout-security'
+  - '@kbn/security-solution-test-api-clients'
   - '@kbn/securitysolution-es-utils'
   - '@kbn/securitysolution-utils'
   - '@kbn/spaces-plugin'
@@ -65,12 +66,11 @@ tags:
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '**/*.d.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
