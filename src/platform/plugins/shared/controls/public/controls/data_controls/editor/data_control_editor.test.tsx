@@ -256,6 +256,17 @@ describe('Data control editor', () => {
       // Toggling ES|QL on requires a successful query run before the control can be saved.
       expect(saveButton).toHaveAttribute('aria-disabled', 'true');
     });
+    test('does not read the source of a query that has not run yet', async () => {
+      mockGetSourceFromESQLQuery.mockClear();
+      const controlEditor = await mountComponent({});
+      await selectField(controlEditor, 'machine.os.raw');
+
+      await act(async () => {
+        fireEvent.click(controlEditor.getByTestId('control-editor-input-esql'));
+      });
+
+      expect(mockGetSourceFromESQLQuery).not.toHaveBeenCalled();
+    });
   });
 
   describe('control on a query that reads an ES|QL source', () => {

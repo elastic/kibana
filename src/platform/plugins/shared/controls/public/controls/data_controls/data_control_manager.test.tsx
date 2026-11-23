@@ -494,6 +494,17 @@ describe('initializeDataControlManager', () => {
       expect(errors).toEqual([]);
     });
 
+    it('reads the source of a query once, although it then sets the data view id of the control', async () => {
+      (getSourceFromESQLQuery as jest.Mock).mockClear();
+      (getSourceFromESQLQuery as jest.Mock).mockResolvedValue(esqlSourceOf('esqlSourceId'));
+      const manager = await initializeEsqlManager();
+      await firstValueFrom(manager.api.dataSources$.pipe(filter(Boolean)));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(manager.api.dataViewId$.value).toBe('esqlSourceId');
+      expect(getSourceFromESQLQuery).toHaveBeenCalledTimes(1);
+    });
+
     it('is not overwritten by the source of the query when the control goes back to field mode meanwhile', async () => {
       const esqlSource = esqlSourceOf('esqlSourceId');
       let resolveSource: (source: unknown) => void = () => {};

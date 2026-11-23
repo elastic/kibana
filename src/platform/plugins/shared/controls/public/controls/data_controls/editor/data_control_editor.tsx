@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
 import { apiHasEditorConfig } from '@kbn/control-group-renderer';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -55,6 +55,8 @@ import {
   uiActionsService,
 } from '../../../services/kibana_services';
 import { DataControlEditorStrings } from '../data_control_constants';
+import { resolveControlSource } from '../../utils/resolve_control_source';
+import type { ControlSourceKey } from '../../utils/resolve_control_source';
 import type { DataControlEditorState } from './types';
 import type { ReopenDataControlEditorOverrides } from '../open_data_control_editor';
 import { ConfigureValuesQuery } from './configure_values_query';
@@ -249,29 +251,39 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
     return dataViewsService.getIdsWithTitle();
   });
 
+  // A query has a source once it has run, the source of a field is the data view that it belongs to
+  const sourceKey = useMemo<ControlSourceKey | undefined>(() => {
+    if (isESQLValuesSource) {
+      return esqlQueryValidation
+        ? { valuesSource: ControlValuesSource.ESQL, esqlQuery: editorState.esql_query ?? '' }
+        : undefined;
+    }
+    return editorState.data_view_id
+      ? { valuesSource: ControlValuesSource.FIELD, dataViewId: editorState.data_view_id }
+      : undefined;
+  }, [isESQLValuesSource, esqlQueryValidation, editorState.esql_query, editorState.data_view_id]);
+
   const {
     loading: dataViewLoading,
-    value: { selectedDataView } = {
+    value: { selectedSource, selectedDataView } = {
+      selectedSource: undefined,
       selectedDataView: undefined,
     },
     error: fieldListError,
-  } = useAsync(async () => {
-    // The source of a query comes from the query, and is not always a data view
-    if (!editorState.data_view_id || editorState.values_source === ControlValuesSource.ESQL) {
-      return;
+  } = useAsync(async (): Promise<{
+    selectedSource?: FilterableSource;
+    selectedDataView?: DataView;
+  }> => {
+    if (!sourceKey) return {};
+    if (sourceKey.valuesSource === ControlValuesSource.ESQL) {
+      return { selectedSource: await resolveControlSource(sourceKey, { parentApi }) };
     }
-    const dataView = await dataViewsService.get(editorState.data_view_id);
-    return {
-      selectedDataView: dataView,
-    };
-  }, [editorState.data_view_id, editorState.values_source]);
-
-  const [esqlSource, setEsqlSource] = useState<FilterableSource>();
-  const selectedSource: FilterableSource | undefined = isESQLValuesSource
-    ? esqlSource
-    : selectedDataView;
+    // the pickers of a field need the data view itself
+    const dataView = await resolveControlSource(sourceKey, { parentApi });
+    return { selectedSource: dataView, selectedDataView: dataView };
+  }, [sourceKey]);
   const isEsqlSource = Boolean(
-    isESQLValuesSource && esqlSource && isEsqlFilterableSource(esqlSource)
+    isESQLValuesSource && selectedSource && isEsqlFilterableSource(selectedSource)
   );
 
   const CustomSettingsComponent = useMemo(() => {
@@ -318,13 +330,15 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
         ...editorState,
         values_source: nextSource as ControlValuesSource,
         ...(nextEsqlQuery ? { esql_query: nextEsqlQuery } : {}),
-        // the source of a query that is an ES|QL source cannot be loaded as a data view in field mode
-        ...(nextSource === ControlValuesSource.FIELD && isEsqlSource
-          ? { data_view_id: undefined, field_name: undefined }
+        // the field of a query goes with its source, which is no data view when it is an ES|QL source
+        ...(nextSource === ControlValuesSource.FIELD && isESQLValuesSource && selectedSource
+          ? isEsqlSource
+            ? { data_view_id: undefined, field_name: undefined }
+            : { data_view_id: selectedSource.id }
           : {}),
       });
     },
-    [editorState, selectedSource, isEsqlSource]
+    [editorState, selectedSource, isEsqlSource, isESQLValuesSource]
   );
   const esqlQueryNeedsRunning = useMemo(
     () => !valuesSourceValid && isESQLValuesSource,
@@ -489,7 +503,6 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
               esqlVariables={parentESQLVariables}
               parentApi={parentApi}
               selectedControlType={selectedControlType}
-              onSourceDerived={setEsqlSource}
               reopenEditor={
                 reopenEditor
                   ? (esqlOverrides) =>
@@ -588,7 +601,7 @@ export const DataControlEditor = <State extends DataControlEditorState = DataCon
                     onUpdate(transformedState ?? editorState);
                   }
                   // the id of an ES|QL source is not the id of a data view that a next control can start from
-                  onSave(isEsqlSource ? undefined : editorState.data_view_id);
+                  onSave(isEsqlSource ? undefined : selectedSource?.id);
                 }}
               >
                 {DataControlEditorStrings.manageControl.getSaveChangesTitle()}

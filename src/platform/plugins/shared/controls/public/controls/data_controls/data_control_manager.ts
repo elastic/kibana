@@ -37,13 +37,13 @@ import { apiPublishesProjectRouting, type StateComparators } from '@kbn/presenta
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import type { StateManager, WithAllKeys } from '@kbn/presentation-publishing/state_manager/types';
 
-import { dataService, dataViewsService } from '../../services/kibana_services';
+import { dataService } from '../../services/kibana_services';
 import { openDataControlEditor } from './open_data_control_editor';
 import type { DataControlApi, DataControlFieldFormatter, ValuesSourceFetchPlan } from './types';
 import { initializeLabelManager, defaultControlLabelComparators } from '../control_labels';
 import { getESQLSingleColumnValues } from '../../../common/options_list';
 import { getControlsTimezone } from '../utils';
-import { getSourceFromESQLQuery } from '../utils/get_source_from_esql_query';
+import { resolveControlSource } from '../utils/resolve_control_source';
 
 export const defaultDataControlComparators: StateComparators<DataControlState> = {
   ...defaultControlLabelComparators,
@@ -124,41 +124,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   const field$ = new BehaviorSubject<FilterableField | undefined>(undefined);
   const defaultFieldFormatter = (toFormat: any) => String(toFormat);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>(defaultFieldFormatter);
-  const dataViewIdSubscription = combineLatest([
-    dataControlStateManager.api.dataViewId$,
-    dataControlStateManager.api.valuesSource$,
-  ])
-    .pipe(
-      switchMap(
-        async ([currentDataViewId, valuesSource]): Promise<
-          { skipped: true } | { dataSource: FilterableSource } | { error: Error }
-        > => {
-          // The source of an ESQL control comes from its query, which is not always a data view that the id
-          // can load. It is handled here, and not filtered before, so that it also cancels a pending lookup.
-          if (valuesSource === ControlValuesSource.ESQL) return { skipped: true };
-          filtersLoading$.next(true);
-          if (blockingError$.value) {
-            setBlockingError(undefined);
-          }
-          try {
-            return { dataSource: await dataViewsService.get(currentDataViewId ?? '') };
-          } catch (error) {
-            return { error };
-          }
-        }
-      )
-    )
-    .subscribe((result) => {
-      if ('skipped' in result) return;
-      if ('error' in result) {
-        setBlockingError(result.error);
-        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(result.error);
-        return;
-      }
-      resolveInitialDataSourceReady(result.dataSource);
-      dataSources$.next([result.dataSource]);
-    });
-
   const defaultFieldLabel$ = new BehaviorSubject<string>(state.field_name ?? '');
   const fieldNameSubscription = combineLatest([
     dataSources$,
@@ -176,9 +141,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       })
     )
     .subscribe(([nextDataSources, nextFieldName]) => {
-      const dataSource = nextDataSources
-        ? nextDataSources.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
-        : undefined;
+      const dataSource = nextDataSources?.[0];
       if (!dataSource) {
         return;
       }
@@ -246,10 +209,10 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ? parentApi.projectRouting$
     : new BehaviorSubject<string | undefined>(undefined);
 
-  let latestEsqlRun = 0;
-  const esqlQueryDataSourceSubscription = combineLatest([
-    dataControlStateManager.api.esqlQuery$,
+  const dataSourceSubscription = combineLatest([
     dataControlStateManager.api.valuesSource$,
+    dataControlStateManager.api.dataViewId$,
+    dataControlStateManager.api.esqlQuery$,
     // Re-derive the column when the set of available variables changes
     parentEsqlVariables$.pipe(
       distinctUntilChanged((prev, next) => {
@@ -260,53 +223,60 @@ export const initializeDataControlManager = async <EditorState extends object = 
     ),
     // The source of the query depends on the project routing
     parentProjectRouting$,
-  ]).subscribe(async ([query, valuesSource, esqlVariables]) => {
-    // Only the latest run applies. Any change invalidates a pending run, also a switch away from ESQL
-    const run = ++latestEsqlRun;
-    if (valuesSource !== ControlValuesSource.ESQL) return;
-    try {
-      if (!query) {
-        throw new Error(
-          i18n.translate('controls.dataControl.esqlMissingQuery', {
-            defaultMessage: 'Variable control is missing a query',
-          })
-        );
-      }
-      const source = await getSourceFromESQLQuery(query, { parentApi });
-      if (run !== latestEsqlRun) return;
-      if (!source.id) {
-        throw new Error(
-          i18n.translate('controls.dataControl.esqlDataViewDeriveFailed', {
-            defaultMessage: 'Could not derive a data view from the ES|QL query',
-          })
-        );
-      }
+  ])
+    .pipe(
+      map(([valuesSource, dataViewId, esqlQuery, esqlVariables, projectRouting]) =>
+        valuesSource === ControlValuesSource.ESQL
+          ? { valuesSource, esqlQuery, esqlVariables, projectRouting }
+          : { valuesSource, dataViewId }
+      ),
+      distinctUntilChanged(isEqual),
+      tap(() => {
+        filtersLoading$.next(true);
+        if (blockingError$.value) {
+          setBlockingError(undefined);
+        }
+      }),
+      switchMap(async (key) => {
+        let source: FilterableSource | undefined;
+        try {
+          source = await resolveControlSource(key, { parentApi });
+          if (key.valuesSource !== ControlValuesSource.ESQL) return { key, source };
 
-      dataControlStateManager.api.setDataViewId(source.id);
-      dataSources$.next([source]);
-      resolveInitialDataSourceReady(source);
-      const result = await getESQLSingleColumnValues({
-        query,
-        search: dataService.search.search,
-        esqlVariables,
-        timeRange: dataService.query.timefilter.timefilter.getTime(),
-        timezone: getControlsTimezone(),
-      });
-      if (run !== latestEsqlRun) return;
-      if (!getESQLSingleColumnValues.isSuccess(result)) {
-        throw result.errors[0];
+          const result = await getESQLSingleColumnValues({
+            query: key.esqlQuery,
+            search: dataService.search.search,
+            esqlVariables: key.esqlVariables,
+            timeRange: dataService.query.timefilter.timefilter.getTime(),
+            timezone: getControlsTimezone(),
+          });
+          if (!getESQLSingleColumnValues.isSuccess(result)) {
+            throw result.errors[0];
+          }
+          return { key, source, fieldName: result.column.name };
+        } catch (error) {
+          return { key, source, error };
+        }
+      })
+    )
+    .subscribe(({ key, source, fieldName, error }) => {
+      if (source) {
+        if (key.valuesSource === ControlValuesSource.ESQL) {
+          dataControlStateManager.api.setDataViewId(source.id);
+        }
+        dataSources$.next([source]);
+        resolveInitialDataSourceReady(source);
       }
-
-      dataControlStateManager.api.setFieldName(result.column.name);
-      if (blockingError$.value) {
-        setBlockingError(undefined);
+      if (error) {
+        setBlockingError(error);
+        if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(error);
+        return;
       }
-    } catch (e) {
-      if (run !== latestEsqlRun) return;
-      setBlockingError(e);
-      if (willHaveInitialFilter && getInitialFilter) rejectInitialDataSourceReady(e);
-    }
-  });
+      if (fieldName !== undefined) {
+        dataControlStateManager.api.setFieldName(fieldName);
+        if (blockingError$.value) setBlockingError(undefined);
+      }
+    });
 
   // build initial filter
   let initialFilter: Filter | undefined;
@@ -382,9 +352,8 @@ export const initializeDataControlManager = async <EditorState extends object = 
       isPinnable: true,
     },
     cleanup: () => {
-      dataViewIdSubscription.unsubscribe();
       fieldNameSubscription.unsubscribe();
-      esqlQueryDataSourceSubscription.unsubscribe();
+      dataSourceSubscription.unsubscribe();
       valuesSourceFetchPlanSubscription.unsubscribe();
       labelManager.cleanup();
     },

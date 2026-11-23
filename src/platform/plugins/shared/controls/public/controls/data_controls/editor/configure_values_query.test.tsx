@@ -43,11 +43,6 @@ jest.mock('../../../../common/options_list/get_esql_single_column_values', () =>
   return { getESQLSingleColumnValues: fn };
 });
 
-const mockGetSourceFromESQLQuery = jest.fn();
-jest.mock('../../utils/get_source_from_esql_query', () => ({
-  getSourceFromESQLQuery: (...args: unknown[]) => mockGetSourceFromESQLQuery(...args),
-}));
-
 jest.mock('../../utils/get_controls_timezone', () => ({
   getControlsTimezone: () => 'UTC',
 }));
@@ -82,7 +77,6 @@ describe('ConfigureValuesQuery', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLastControlsContext.current = undefined;
-    mockGetSourceFromESQLQuery.mockResolvedValue({ kind: 'esql', id: 'source-id', title: 'logs' });
   });
 
   it('reports the query as valid when a successful run returns at least one option', async () => {
@@ -117,25 +111,20 @@ describe('ConfigureValuesQuery', () => {
     });
   });
 
-  it('gives the editor the source that the query reads, and saves its id as the data view of the state', async () => {
-    const source = { kind: 'esql', id: 'derived-source-id', title: 'logs' };
-    mockGetSourceFromESQLQuery.mockResolvedValue(source);
+  it('saves the query and the column that it returns, and no data view', async () => {
     mockGetESQLSingleColumnValues.mockResolvedValueOnce({
       values: ['linux'],
       column: { name: 'os', type: 'keyword' },
     });
     const updateEditorState = jest.fn();
-    const onSourceDerived = jest.fn();
 
-    renderConfigureValuesQuery({ isEdit: true, updateEditorState, onSourceDerived });
+    renderConfigureValuesQuery({ isEdit: true, updateEditorState });
 
     await waitFor(() => {
-      expect(onSourceDerived).toHaveBeenCalledWith(source);
-    });
-    expect(updateEditorState).toHaveBeenCalledWith({
-      esql_query: 'FROM logs | KEEP os',
-      field_name: 'os',
-      data_view_id: 'derived-source-id',
+      expect(updateEditorState).toHaveBeenCalledWith({
+        esql_query: 'FROM logs | KEEP os',
+        field_name: 'os',
+      });
     });
   });
 
