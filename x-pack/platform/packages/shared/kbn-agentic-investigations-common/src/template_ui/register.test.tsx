@@ -124,18 +124,20 @@ const renderDetailsFlyout = async (
             </div>
           ))}
         </div>
-        {[footer?.secondary, footer?.primary].map(
-          (action) =>
-            action && (
-              <button
-                key={action.label}
-                data-test-subj={action['data-test-subj']}
-                onClick={action.onClick}
-              >
-                {action.label}
-              </button>
-            )
-        )}
+        {[footer?.secondary, footer?.primary].map((action) => {
+          if (!action || !('label' in action)) {
+            return null;
+          }
+          return (
+            <button
+              key={action.label}
+              data-test-subj={action['data-test-subj']}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </button>
+          );
+        })}
       </>
     );
   };
