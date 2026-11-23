@@ -484,6 +484,36 @@ describe('SearchMethodsService', () => {
         ]);
       });
 
+      it('sends the same rounded bounds in the filter and the named params', async () => {
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2026-10-22T12:34:56.789Z'));
+        try {
+          await service.esql({
+            query: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend',
+            kibanaQueryContext: {
+              timeRange: { from: 'now-15m', to: 'now' },
+              timeField: '@timestamp',
+            },
+          });
+        } finally {
+          jest.useRealTimers();
+        }
+
+        expect(getRequestParams().params).toEqual([
+          { _tstart: '2026-10-22T12:19:56.000Z' },
+          { _tend: '2026-10-22T12:34:56.000Z' },
+        ]);
+        expect(getRequestParams().filter.bool.filter).toContainEqual({
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2026-10-22T12:19:56.000Z',
+              lte: '2026-10-22T12:34:56.000Z',
+            },
+          },
+        });
+      });
+
       it('adds control variables used in the query as named params', async () => {
         await service.esql({
           query: 'FROM logs | STATS COUNT(*) BY ?field',

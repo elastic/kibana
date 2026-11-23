@@ -8,12 +8,11 @@
  */
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import dateMath, { getTimeRangeResolution } from '@kbn/datemath';
+import dateMath, { parseTimeRange } from '@kbn/datemath';
 import { omitBy } from 'lodash';
 import type { TimeRange, RangeFilterParams } from '@kbn/es-query';
 import { buildRangeFilter } from '@kbn/es-query';
 import type { DataViewBase } from '@kbn/es-query';
-import moment from 'moment';
 import type { Moment } from 'moment';
 import type { TimeRangeBounds } from '../..';
 
@@ -31,33 +30,12 @@ const isRelativeTime = (value: string | Moment): boolean => {
   return typeof value === 'string' && value.includes('now');
 };
 
-/**
- * Resolves time range bounds rounded to the `@kbn/datemath` time range resolution: `now` is
- * truncated to it and rounded-up relative ends (e.g. `now/d`) end on the last whole unit.
- * Absolute bounds, and ranges using a finer unit than the resolution, keep full precision.
- */
+/** Resolves time range bounds rounded to whole seconds; see `parseTimeRange` in `@kbn/datemath`. */
 export function calculateBounds(
   timeRange: TimeRange,
   options: CalculateBoundsOptions = {}
 ): TimeRangeBounds {
-  const { from, to } = timeRange;
-  const resolution = getTimeRangeResolution(from, to);
-  if (!resolution) {
-    return {
-      min: calculateLowerBound(from, options.forceNow),
-      max: calculateUpperBound(to, options.forceNow),
-    };
-  }
-
-  const forceNow = moment(options.forceNow ?? new Date())
-    .startOf(resolution)
-    .toDate();
-  const max = calculateUpperBound(to, forceNow);
-  return {
-    min: calculateLowerBound(from, forceNow),
-    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
-    max: max && isRelativeTime(to) ? max.clone().startOf(resolution) : max,
-  };
+  return parseTimeRange(timeRange.from, timeRange.to, options);
 }
 
 export function getAbsoluteTimeRange(

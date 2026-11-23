@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import dateMath from '@kbn/datemath';
+import { parseTimeRange } from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -29,9 +29,10 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   const startNamedParams = hasNamedParam(query, '_tstart');
   const endNamedParams = hasNamedParam(query, '_tend');
   if (time && (startNamedParams || endNamedParams)) {
+    const { min, max } = parseTimeRange(time.from, time.to);
     const timeParams = {
-      start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
+      start: startNamedParams ? min?.toISOString() : undefined,
+      end: endNamedParams ? max?.toISOString() : undefined,
     };
     const namedParams = [];
     if (timeParams?.start) {

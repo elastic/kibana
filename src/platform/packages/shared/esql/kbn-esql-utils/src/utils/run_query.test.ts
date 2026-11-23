@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import dateMath from '@kbn/datemath';
 import { GRID_RESOLUTION } from '@kbn/geo-precision';
 import { of } from 'rxjs';
 import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
@@ -85,6 +86,41 @@ describe('run query helpers', () => {
       expect(params).toHaveLength(2);
       expect(params[0]).toHaveProperty('_tstart');
       expect(params[1]).toHaveProperty('_tend');
+    });
+  });
+
+  describe('getStartEndParams rounding', () => {
+    const query = 'FROM foo | where time < ?_tend AND time > ?_tstart';
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2026-10-22T12:34:56.789Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('truncates now to the last whole second', () => {
+      expect(getStartEndParams(query, { from: 'now-15m', to: 'now' })).toEqual([
+        { _tstart: '2026-10-22T12:19:56.000Z' },
+        { _tend: '2026-10-22T12:34:56.000Z' },
+      ]);
+    });
+
+    it('ends rounded-up relative bounds on the last whole second', () => {
+      const [, end] = getStartEndParams(query, { from: 'now/d', to: 'now/d' });
+      const unroundedEnd = dateMath.parse('now/d', { roundUp: true })?.valueOf() ?? NaN;
+      expect(end).toEqual({ _tend: new Date(unroundedEnd - 999).toISOString() });
+    });
+
+    it('keeps millisecond precision on absolute bounds', () => {
+      expect(
+        getStartEndParams(query, {
+          from: '2026-10-21T01:02:03.456Z',
+          to: '2026-10-21T04:05:06.789Z',
+        })
+      ).toEqual([{ _tstart: '2026-10-21T01:02:03.456Z' }, { _tend: '2026-10-21T04:05:06.789Z' }]);
     });
   });
 

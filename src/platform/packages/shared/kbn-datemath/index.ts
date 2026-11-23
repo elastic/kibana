@@ -205,9 +205,39 @@ export function getTimeRangeResolution(
   return usesFinerUnit || hasFinerAbsoluteBound ? null : resolution;
 }
 
+/**
+ * Resolves a time range to bounds rounded to the time range resolution: `now` is truncated to it
+ * and rounded-up relative ends (e.g. `now/d`) end on the last whole unit. Absolute bounds, and
+ * ranges using a finer unit than the resolution, keep full precision.
+ */
+export function parseTimeRange(
+  from: string,
+  to: string,
+  { forceNow }: { forceNow?: Date } = {}
+): { min: moment.Moment | undefined; max: moment.Moment | undefined } {
+  const resolution = getTimeRangeResolution(from, to);
+  if (!resolution) {
+    return {
+      min: parse(from, { forceNow }),
+      max: parse(to, { roundUp: true, forceNow }),
+    };
+  }
+
+  const roundedNow = moment(forceNow ?? new Date())
+    .startOf(resolution)
+    .toDate();
+  const max = parse(to, { roundUp: true, forceNow: roundedNow });
+  return {
+    min: parse(from, { forceNow: roundedNow }),
+    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
+    max: max && to.includes('now') ? max.clone().startOf(resolution) : max,
+  };
+}
+
 // eslint-disable-next-line import/no-default-export
 export default {
   parse,
+  parseTimeRange,
   unitsMap: Object.freeze(unitsMap),
   units: Object.freeze(units),
   unitsAsc: Object.freeze(unitsAsc),

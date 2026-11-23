@@ -417,3 +417,51 @@ describe('getTimeRangeResolution', function () {
     expect(getTimeRangeResolution('2026-10-21T01:02:03.000Z', 'now', 'm')).toBeNull();
   });
 });
+
+describe('parseTimeRange', function () {
+  const { parseTimeRange } = dateMath;
+  const forceNow = new Date('2026-10-22T12:34:56.789Z');
+
+  it('truncates "now" to the last whole second', function () {
+    const { min, max } = parseTimeRange('now-15m', 'now', { forceNow });
+    expect(min.toISOString()).toBe('2026-10-22T12:19:56.000Z');
+    expect(max.toISOString()).toBe('2026-10-22T12:34:56.000Z');
+  });
+
+  it('ends rounded-up relative bounds on the last whole second', function () {
+    const { min, max } = parseTimeRange('now/d', 'now/d', { forceNow });
+    const startOfDay = moment(forceNow).startOf('day');
+    expect(min.toISOString()).toBe(startOfDay.toISOString());
+    expect(max.toISOString()).toBe(startOfDay.clone().endOf('day').startOf('second').toISOString());
+    expect(max.milliseconds()).toBe(0);
+  });
+
+  it('keeps milliseconds when a bound uses the ms unit', function () {
+    const { min, max } = parseTimeRange('now-500ms', 'now/d', { forceNow });
+    expect(min.toISOString()).toBe('2026-10-22T12:34:56.289Z');
+    expect(max.toISOString()).toBe(moment(forceNow).endOf('day').toISOString());
+    expect(max.milliseconds()).toBe(999);
+  });
+
+  it('keeps millisecond precision on absolute bounds', function () {
+    const { min, max } = parseTimeRange('2026-10-21T01:02:03.456Z', '2026-10-21T04:05:06.789Z', {
+      forceNow,
+    });
+    expect(min.toISOString()).toBe('2026-10-21T01:02:03.456Z');
+    expect(max.toISOString()).toBe('2026-10-21T04:05:06.789Z');
+  });
+
+  it('keeps milliseconds in "now" when an absolute bound has milliseconds', function () {
+    const { min, max } = parseTimeRange('2026-10-22T12:34:56.456Z', 'now', { forceNow });
+    expect(min.toISOString()).toBe('2026-10-22T12:34:56.456Z');
+    expect(max.toISOString()).toBe('2026-10-22T12:34:56.789Z');
+  });
+
+  it('uses the clock when forceNow is omitted', function () {
+    jest.useFakeTimers();
+    jest.setSystemTime(forceNow);
+    const { max } = parseTimeRange('now-15m', 'now');
+    jest.useRealTimers();
+    expect(max.toISOString()).toBe('2026-10-22T12:34:56.000Z');
+  });
+});

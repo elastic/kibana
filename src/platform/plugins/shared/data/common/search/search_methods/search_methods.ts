@@ -49,7 +49,7 @@ import type {
   EQL_SEARCH_STRATEGY,
   SQL_SEARCH_STRATEGY,
 } from '..';
-import { getTime } from '../../query';
+import { getAbsoluteTimeRange, getTime } from '../../query';
 import { mapEsqlResponseToDatatable, formatAndRethrowEsqlError } from './datatable_mapper';
 import {
   getDslRequestInspectorStats,
@@ -528,7 +528,10 @@ export class SearchMethodsService implements ISearchMethods {
     // https://github.com/elastic/elasticsearch/pull/122459
     const esqlQuery = fixESQLQueryWithVariables(params.query, esqlVariables);
 
-    const timeFilter = timeRange && getTime(undefined, timeRange, { fieldName: timeField });
+    // Resolve relative bounds once so the DSL filter and the `?_tstart`/`?_tend` params agree
+    const absoluteTimeRange = timeRange && getAbsoluteTimeRange(timeRange);
+    const timeFilter =
+      absoluteTimeRange && getTime(undefined, absoluteTimeRange, { fieldName: timeField });
     const contextFilters = [...kibanaFilters, ...(timeFilter ? [timeFilter] : [])];
     const contextQueries = castArray(kqlQuery ?? []).filter(isOfQueryType);
     const contextFilter =
@@ -540,7 +543,7 @@ export class SearchMethodsService implements ISearchMethods {
     // valid alongside named params from the caller
     const namedParams = [
       ...(params.params ?? []),
-      ...(getNamedParams(esqlQuery, timeRange, esqlVariables) ?? []),
+      ...(getNamedParams(esqlQuery, absoluteTimeRange, esqlVariables) ?? []),
     ] as NonNullable<IEsqlSearchParams['params']>;
 
     return {
