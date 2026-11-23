@@ -95,6 +95,7 @@ describe('GenAiSettingsApp', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     coreStart.settings.client.get.mockReset();
+    coreStart.settings.client.isDeclared.mockReset();
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -498,10 +499,22 @@ describe('GenAiSettingsApp', () => {
     });
 
     describe('when the setting definitions fail to load', () => {
-      const renderWithLoadError = async (savedChatExperience: AIChatExperience) => {
+      const renderWithLoadError = async (chatExperience: {
+        value: AIChatExperience;
+        userValue?: AIChatExperience;
+      }) => {
         mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
-        coreStart.settings.client.get.mockImplementation((key: string, defaultOverride?: unknown) =>
-          key === AI_CHAT_EXPERIENCE_TYPE ? savedChatExperience : defaultOverride
+        coreStart.settings.client.isDeclared.mockImplementation(
+          (key: string) => key === AI_CHAT_EXPERIENCE_TYPE
+        );
+        // Like the real client, a default override replaces the registered default.
+        coreStart.settings.client.get.mockImplementation(
+          (key: string, defaultOverride?: unknown) => {
+            if (key !== AI_CHAT_EXPERIENCE_TYPE) {
+              return defaultOverride;
+            }
+            return chatExperience.userValue ?? defaultOverride ?? chatExperience.value;
+          }
         );
         coreStart.settings.metadata.getAll.mockRejectedValue(new Error('Internal Server Error'));
 
@@ -518,13 +531,25 @@ describe('GenAiSettingsApp', () => {
       };
 
       it('shows Documentation section when the saved chat experience is Agent', async () => {
-        await renderWithLoadError(AIChatExperience.Agent);
+        await renderWithLoadError({
+          value: AIChatExperience.Classic,
+          userValue: AIChatExperience.Agent,
+        });
 
         expect(screen.getByTestId('documentationSection')).toBeInTheDocument();
       });
 
       it('hides Documentation section when the saved chat experience is Classic', async () => {
-        await renderWithLoadError(AIChatExperience.Classic);
+        await renderWithLoadError({
+          value: AIChatExperience.Agent,
+          userValue: AIChatExperience.Classic,
+        });
+
+        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      });
+
+      it('hides Documentation section when nothing is saved and the default chat experience is Classic', async () => {
+        await renderWithLoadError({ value: AIChatExperience.Classic });
 
         expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
       });

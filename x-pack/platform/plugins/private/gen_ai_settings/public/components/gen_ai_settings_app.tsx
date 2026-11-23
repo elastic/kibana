@@ -22,6 +22,7 @@ import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { SettingDefinitionsLoadError } from '@kbn/management-settings-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isEmpty } from 'lodash';
 import {
@@ -59,6 +60,14 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
+// A default passed to `get` replaces the registered default, which can resolve to Classic.
+const getClientChatExperience = (client: IUiSettingsClient): AIChatExperience => {
+  if (!client.isDeclared(AI_CHAT_EXPERIENCE_TYPE)) {
+    return AIChatExperience.Agent;
+  }
+  return client.get(AI_CHAT_EXPERIENCE_TYPE);
+};
+
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
   const {
@@ -95,7 +104,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     chatExperienceField?.defaultValue ??
-    settings.client.get(AI_CHAT_EXPERIENCE_TYPE, AIChatExperience.Agent);
+    getClientChatExperience(settings.client);
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
