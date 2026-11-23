@@ -1,0 +1,41 @@
+---
+id: webCrawler
+slug: /web-crawler
+title: Web Crawler
+description: Crawls websites into Elasticsearch indices.
+tags: ['elasticsearch', 'crawler', 'shared']
+---
+
+## Overview
+
+This plugin will crawl a website into an Elasticsearch index. It is being built in steps, and so far
+holds only what a crawl needs to find its way around a site: normalizing and filtering the links of
+a page, reading `robots.txt` and sitemaps, and narrowing a crawl to path prefixes.
+
+## Enabling it
+
+The plugin is off by default and loads where `xpack.webCrawler.enabled` is set to `true`. The
+Elasticsearch and vector database serverless project types set it.
+
+The crawler is still being built, so there everything it offers is also behind the
+`webCrawler.enabled` feature flag, which is off by default. To turn it on locally:
+
+```yaml
+xpack.webCrawler.enabled: true
+feature_flags.overrides:
+  webCrawler.enabled: true
+```
+
+## Finding pages
+
+A crawl follows same-site links. Links are normalized to absolute http(s) URLs without fragment or
+credentials, and links to assets such as images and archives are left out. Links with more than 16
+path segments or more than 10 query parameters are not followed, as those are mostly calendars and
+faceted listings.
+
+`robots.txt` is honoured using the `Elastic-Crawler` group when the file has one and the `*` group
+otherwise, including its `Crawl-delay` and the sitemaps it names. Sitemaps and sitemap indexes are
+read within a small request budget.
+
+A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
+followed, and pages under an `excludePaths` prefix never are.
