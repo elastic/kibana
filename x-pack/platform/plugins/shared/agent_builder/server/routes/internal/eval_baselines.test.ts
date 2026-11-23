@@ -46,6 +46,7 @@ const createSearchResponse = (sources: Array<Record<string, unknown>>, total = s
 
 describe('eval baselines routes', () => {
   let handlers: Record<string, (ctx: any, req: any, res: any) => Promise<any>>;
+  let routeConfigs: Record<string, { security?: { authz?: { requiredPrivileges?: string[] } } }>;
   let pin: jest.Mock;
   let findLatest: jest.Mock;
   let getScores: jest.Mock;
@@ -72,8 +73,13 @@ describe('eval baselines routes', () => {
     evalsStart = { evaluationScoreService: { search } };
 
     handlers = {};
-    const register = (config: { path: string }, handler: any) => {
+    routeConfigs = {};
+    const register = (
+      config: { path: string; security?: { authz?: { requiredPrivileges?: string[] } } },
+      handler: any
+    ) => {
       handlers[config.path] = handler;
+      routeConfigs[config.path] = config;
     };
 
     registerEvalBaselineRoutes({
@@ -83,8 +89,38 @@ describe('eval baselines routes', () => {
       },
       getInternalServices: () =>
         ({ evalBaselines: { pin, findLatest, getScores } } as unknown as InternalStartServices),
+      pluginsSetup: { evals: { mode: 'full' } },
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
+  });
+
+  it('registers nothing unless the evals plugin runs in full mode', () => {
+    for (const pluginsSetup of [{}, { evals: { mode: 'runtime' } }]) {
+      const registered: string[] = [];
+      const capture = (config: { path: string }) => registered.push(config.path);
+
+      registerEvalBaselineRoutes({
+        router: { get: capture, post: capture },
+        coreSetup: { getStartServices: jest.fn() },
+        getInternalServices: () => ({} as InternalStartServices),
+        pluginsSetup,
+        logger: loggingSystemMock.createLogger(),
+      } as unknown as RouteDependencies);
+
+      expect(registered).toEqual([]);
+    }
+  });
+
+  it('demands the evals privileges, which the evaluations-cluster keys carry', () => {
+    expect(routeConfigs[EVAL_BASELINES_PIN_URL].security?.authz?.requiredPrivileges).toEqual([
+      'manage_evals',
+    ]);
+    expect(routeConfigs[EVAL_BASELINES_LATEST_URL].security?.authz?.requiredPrivileges).toEqual([
+      'read_evals',
+    ]);
+    expect(routeConfigs[EVAL_BASELINE_SCORES_URL].security?.authz?.requiredPrivileges).toEqual([
+      'read_evals',
+    ]);
   });
 
   describe('pin', () => {
@@ -116,6 +152,7 @@ describe('eval baselines routes', () => {
         expect.objectContaining({
           size: MAX_PINNABLE_SCORES,
           track_total_hits: true,
+          allow_partial_search_results: false,
           _source_excludes: UNBOUNDED_SCORE_FIELDS,
         })
       );

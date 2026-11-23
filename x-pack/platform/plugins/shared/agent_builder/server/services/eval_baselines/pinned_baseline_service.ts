@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { AnyIDataStreamClient } from '@kbn/data-streams';
@@ -37,6 +38,18 @@ interface PinnedBaselinePointerDocument {
     git?: { branch?: string | null; commit_sha?: string | null };
   };
 }
+
+// Elasticsearch caps document IDs at 512 bytes. A source score ID long enough to overflow
+// the combined ID is hashed instead (still deterministic per source doc, so retried pins
+// don't duplicate), keeping the readable form for the common auto-generated IDs.
+const MAX_DOCUMENT_ID_BYTES = 512;
+const snapshotDocumentId = (baselineId: string, scoreId: string): string => {
+  const documentId = `${baselineId}:${scoreId}`;
+  if (Buffer.byteLength(documentId, 'utf8') <= MAX_DOCUMENT_ID_BYTES) {
+    return documentId;
+  }
+  return `${baselineId}:${createHash('sha256').update(scoreId).digest('hex')}`;
+};
 
 const pointerToResponse = (doc: PinnedBaselinePointerDocument): PinnedBaseline => ({
   baseline_id: doc.baseline.id,
@@ -107,8 +120,11 @@ export class PinnedBaselineService {
     };
 
     const scoreDocuments = scores.map(({ id, document }) => ({
-      _id: `${pointer.baseline_id}:${id}`,
+      _id: snapshotDocumentId(pointer.baseline_id, id),
       ...document,
+      // The snapshot is visible where the pin is: source scores shared into other spaces
+      // must not make their snapshot copies readable from spaces the pin was never in.
+      space_ids: spaceIds,
       doc_kind: 'score' as const,
       baseline: { id: pointer.baseline_id },
     }));

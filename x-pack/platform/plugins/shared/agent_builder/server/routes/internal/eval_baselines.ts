@@ -22,9 +22,9 @@ import {
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
+import { EVALS_API_PRIVILEGES } from '@kbn/evals-plugin/common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
-import { apiPrivileges } from '../../../common/features';
 
 /**
  * The pinned-baseline registry for regression eval suites. The registry lives on the
@@ -37,8 +37,16 @@ export function registerEvalBaselineRoutes({
   router,
   coreSetup,
   getInternalServices,
+  pluginsSetup,
   logger,
 }: RouteDependencies) {
+  // Registered only where the evals product runs (the evaluations cluster, local eval
+  // stacks): the registry is meaningless without it, and the privileges these routes
+  // require (`read_evals` / `manage_evals`) only exist once the evals feature registers.
+  if (pluginsSetup.evals?.mode !== 'full') {
+    return;
+  }
+
   const wrapHandler = getHandlerWrapper({ logger });
 
   router.post(
@@ -46,7 +54,10 @@ export function registerEvalBaselineRoutes({
       path: EVAL_BASELINES_PIN_URL,
       security: {
         authz: {
-          requiredPrivileges: [apiPrivileges.writeAgentBuilder],
+          // Pinning snapshots evals score documents and promotes the active regression
+          // baseline, so it demands the same privilege as score ingestion — not merely
+          // Agent Builder write access.
+          requiredPrivileges: [EVALS_API_PRIVILEGES.manage],
         },
       },
       options: { access: 'internal' },
@@ -86,6 +97,9 @@ export function registerEvalBaselineRoutes({
         sort: SCORES_SORT_ORDER,
         size: MAX_PINNABLE_SCORES,
         track_total_hits: true,
+        // A failed shard would otherwise pass the total-vs-hits check below and publish a
+        // permanently incomplete snapshot.
+        allow_partial_search_results: false,
         // The same fields the compare flow reads scores without; keeps the snapshot small.
         _source_excludes: UNBOUNDED_SCORE_FIELDS,
       });
@@ -160,7 +174,9 @@ export function registerEvalBaselineRoutes({
       path: EVAL_BASELINES_LATEST_URL,
       security: {
         authz: {
-          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+          // Baselines are snapshots of evals scores, so reading them demands the evals
+          // read privilege, which the evaluations-cluster API keys already carry.
+          requiredPrivileges: [EVALS_API_PRIVILEGES.read],
         },
       },
       options: { access: 'internal' },
@@ -186,7 +202,7 @@ export function registerEvalBaselineRoutes({
       path: EVAL_BASELINE_SCORES_URL,
       security: {
         authz: {
-          requiredPrivileges: [apiPrivileges.readAgentBuilder],
+          requiredPrivileges: [EVALS_API_PRIVILEGES.read],
         },
       },
       options: { access: 'internal' },

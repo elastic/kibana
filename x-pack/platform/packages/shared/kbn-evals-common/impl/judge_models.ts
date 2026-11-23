@@ -15,7 +15,10 @@ import type { EvaluationScoreDocument } from './schemas/common_attributes.gen';
 export const resolveJudgeModelIds = (scores: EvaluationScoreDocument[]): string[] => {
   const counts = new Map<string, number>();
   for (const score of scores) {
-    const modelId = score.evaluator.kind === 'llm' ? score.evaluator.model?.id : undefined;
+    const { kind, model } = score.evaluator;
+    // `kind` is absent on documents written before per-evaluator attribution existed; a
+    // recorded model on such a document still identifies a judge.
+    const modelId = kind === 'llm' || kind === undefined ? model?.id : undefined;
     if (modelId) {
       counts.set(modelId, (counts.get(modelId) ?? 0) + 1);
     }

@@ -118,12 +118,46 @@ describe('PinnedBaselineService', () => {
       baseline: { id: 'baseline-1' },
       evaluator: { name: 'correctness' },
     });
+    // The snapshot is stamped with the pin's spaces, not the source scores' sharing.
+    expect(captured[0].space_ids).toEqual(['default']);
     expect(baseline).toMatchObject({
       baseline_id: 'baseline-1',
       suite_id: 'suite-1',
       score_count: 1,
       dataset_ids: ['dataset-1'],
     });
+  });
+
+  it('pin scopes snapshot scores to its own spaces and bounds oversized document ids', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { coreDataStreams, create } = createDataStreamsMock();
+    const captured: Array<{ _id: string } & Record<string, unknown>> = [];
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      captured.push(...(documents as Array<{ _id: string } & Record<string, unknown>>));
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new PinnedBaselineService(logger, coreDataStreams);
+    const oversizedId = 'x'.repeat(600);
+    await service.pin({
+      pointer: getPointer(),
+      scores: [
+        {
+          id: oversizedId,
+          // The source score was shared into another space; the snapshot must not be.
+          document: getScoreDocument({ space_ids: ['space-a', 'space-b'] } as never),
+        },
+      ],
+      spaceIds: ['space-a'],
+    });
+
+    expect(captured[0].space_ids).toEqual(['space-a']);
+    // Elasticsearch rejects IDs over 512 bytes, so the oversized source ID is hashed.
+    expect(captured[0]._id).toMatch(/^baseline-1:[0-9a-f]{64}$/);
   });
 
   it('pin treats 409 conflicts as a successful retry, and throws on real failures', async () => {

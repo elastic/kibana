@@ -33,4 +33,12 @@ describe('resolveJudgeModelIds', () => {
     expect(resolveJudgeModelIds([deterministicScore()])).toEqual([]);
     expect(resolveJudgeModelIds([])).toEqual([]);
   });
+
+  it('counts a recorded judge on legacy documents that predate evaluator.kind', () => {
+    const legacyScore = {
+      evaluator: { name: 'judge', score: 1, model: { id: 'glm-5.2' } },
+    } as unknown as EvaluationScoreDocument;
+
+    expect(resolveJudgeModelIds([legacyScore, llmScore('glm-5.2')])).toEqual(['glm-5.2']);
+  });
 });

@@ -187,8 +187,12 @@ export class AgentBuilderPlugin
     coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Pinned regression baselines for eval suites; served through the internal
-    // `/internal/agent_builder/evals/baselines` routes on the evaluations cluster.
-    coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
+    // `/internal/agent_builder/evals/baselines` routes on the evaluations cluster. Only
+    // registered where the evals product runs, so ordinary deployments install no
+    // template for it (the routes are gated the same way).
+    if (setupDeps.evals?.mode === 'full') {
+      coreSetup.dataStreams.registerDataStream(pinnedBaselinesDataStreamDefinition);
+    }
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
