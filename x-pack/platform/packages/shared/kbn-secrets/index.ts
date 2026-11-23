@@ -38,6 +38,7 @@ export type {
   SecretMetadata,
   SecretProvider,
   SecretProviders,
+  ConnectorSecretProvider,
   SecretProviderType,
   SecretResolutionFailure,
   SecretsClient,

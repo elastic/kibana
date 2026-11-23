@@ -29,6 +29,8 @@ const BACKGROUND_TASK_REQUESTER_ID = 'background_task';
 const ALLOWED_REQUESTER_IDS = [
   NOTIFICATIONS_REQUESTER_ID,
   BACKGROUND_TASK_REQUESTER_ID,
+  // The secrets plugin reads values from secret manager connectors on behalf of workflow runs
+  'secrets',
   // For functional testing
   'functional_tester',
 ];

@@ -14,9 +14,12 @@ import {
 } from './constants';
 import { SecretValidationError } from './errors';
 import { isValidSecretName } from './secret_name';
-import type { SecretSource, WriteSecretParams } from './types';
+import type { ConnectorSecretProvider, SecretSource, WriteSecretParams } from './types';
 
-const validateSource = (source: SecretSource, connectorSecretsAvailable: boolean): void => {
+const validateSource = async (
+  source: SecretSource,
+  connectorProvider: ConnectorSecretProvider | undefined
+): Promise<void> => {
   if (source.provider === SECRET_PROVIDER_TYPE.kibana) {
     const { length } = source.value;
     if (length < SECRET_VALUE_MIN_LENGTH || length > SECRET_VALUE_MAX_LENGTH) {
@@ -26,7 +29,7 @@ const validateSource = (source: SecretSource, connectorSecretsAvailable: boolean
     }
     return;
   }
-  if (!connectorSecretsAvailable) {
+  if (!connectorProvider) {
     throw new SecretValidationError('Secrets from a connector are not available');
   }
   if (source.connectorId.length === 0) {
@@ -37,16 +40,20 @@ const validateSource = (source: SecretSource, connectorSecretsAvailable: boolean
       `A secret reference has between 1 and ${SECRET_REFERENCE_MAX_LENGTH} characters`
     );
   }
+  await connectorProvider.validateSource({ source });
 };
 
-/** Throws `SecretValidationError` when a secret cannot be created or replaced as requested. */
-export const validateSecret = ({
+/**
+ * Throws `SecretValidationError` when a secret cannot be created or replaced as requested.
+ * A secret from a connector is also checked by the connector provider, when there is one.
+ */
+export const validateSecret = async ({
   secret: { name, description, source },
-  connectorSecretsAvailable,
+  connectorProvider,
 }: {
   secret: WriteSecretParams;
-  connectorSecretsAvailable: boolean;
-}): void => {
+  connectorProvider: ConnectorSecretProvider | undefined;
+}): Promise<void> => {
   if (!isValidSecretName(name)) {
     throw new SecretValidationError(
       'A secret name starts with a letter or an underscore and contains only letters, digits and underscores'
@@ -57,5 +64,5 @@ export const validateSecret = ({
       `A secret description has at most ${SECRET_DESCRIPTION_MAX_LENGTH} characters`
     );
   }
-  validateSource(source, connectorSecretsAvailable);
+  await validateSource(source, connectorProvider);
 };

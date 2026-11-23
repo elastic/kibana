@@ -87,11 +87,20 @@ export interface SecretProvider<TEntry extends SecretEntry = SecretEntry> {
   resolve(params: { entry: TEntry }): Promise<string>;
 }
 
+/** Reads values from external secret managers through connectors. */
+export interface ConnectorSecretProvider extends SecretProvider<ConnectorSecretEntry> {
+  /**
+   * Throws `SecretValidationError` when the author of a secret cannot use the connector, the
+   * connector is not a secret manager, or the reference is not valid for it.
+   */
+  validateSource(params: { source: ConnectorSecretSource }): Promise<void>;
+}
+
 /** The providers a secrets client can use, by provider type. */
 export interface SecretProviders {
   readonly kibana: SecretProvider<KibanaSecretEntry>;
   /** Absent when secrets from external managers are not available. */
-  readonly connector?: SecretProvider<ConnectorSecretEntry>;
+  readonly connector?: ConnectorSecretProvider;
 }
 
 /** Secrets of one space, as seen by one consumer feature. */

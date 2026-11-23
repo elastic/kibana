@@ -43,8 +43,6 @@ export const createSecretsClient = ({
   username,
   providers,
 }: CreateSecretsClientParams): SecretsClient => {
-  const connectorSecretsAvailable = providers.connector !== undefined;
-
   const isUsable = (secret: SecretMetadata): boolean => secret.allowedConsumers.includes(consumer);
 
   /** Returns the secret stored under exactly this name, if this consumer may use it. */
@@ -76,7 +74,7 @@ export const createSecretsClient = ({
     list: async () => (await storage.list()).filter(isUsable),
 
     create: async (secret) => {
-      validateSecret({ secret, connectorSecretsAvailable });
+      await validateSecret({ secret, connectorProvider: providers.connector });
       const { name, description, source } = secret;
       const timestamp = new Date().toISOString();
       const entry: SecretEntry = {
@@ -94,7 +92,7 @@ export const createSecretsClient = ({
     },
 
     replace: async (secret) => {
-      validateSecret({ secret, connectorSecretsAvailable });
+      await validateSecret({ secret, connectorProvider: providers.connector });
       const { name, description, source } = secret;
       const existing = await findOrThrow(name);
       const { allowedConsumers, createdBy, createdAt } = existing;

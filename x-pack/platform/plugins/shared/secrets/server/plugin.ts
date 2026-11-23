@@ -13,7 +13,9 @@ import {
   createSecretsClient,
   SecretsUnavailableError,
 } from '@kbn/secrets';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { createConnectorSecretProvider } from './providers/connector_secret_provider';
+import { createSecretManagers } from './providers/secret_managers';
 import { registerSecretType, SECRET_SAVED_OBJECT_TYPE } from './saved_objects/secret_saved_object';
 import { createSavedObjectsSecretsStorage } from './storage/saved_objects_secrets_storage';
 import type {
@@ -56,7 +58,7 @@ export class SecretsPlugin
 
   public start(
     core: CoreStart,
-    { encryptedSavedObjects, spaces }: SecretsPluginStartDependencies
+    { encryptedSavedObjects, spaces, actions }: SecretsPluginStartDependencies
   ): SecretsPluginStart {
     // Every call passes its namespace. Callers include task runs, whose request has no
     // credentials for the space check that the spaces extension makes.
@@ -66,6 +68,8 @@ export class SecretsPlugin
     });
     const encryptedClient = encryptedSavedObjects.getClient({ includedHiddenTypes });
     const kibanaSecretProvider = createKibanaSecretProvider();
+    // Throws, so that Kibana does not start, when a listed connector type is not a secret manager.
+    const secretManagers = createSecretManagers();
 
     return {
       getClient: ({ request, consumer }) => {
@@ -83,7 +87,17 @@ export class SecretsPlugin
           }),
           consumer,
           username: core.security.authc.getCurrentUser(request)?.username ?? UNKNOWN_USERNAME,
-          providers: { kibana: kibanaSecretProvider },
+          providers: {
+            kibana: kibanaSecretProvider,
+            connector: actions
+              ? createConnectorSecretProvider({
+                  actions,
+                  request,
+                  spaceId: brandSpaceId(spaceId),
+                  secretManagers,
+                })
+              : undefined,
+          },
         });
       },
     };

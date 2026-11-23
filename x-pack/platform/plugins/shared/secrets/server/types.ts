@@ -11,6 +11,7 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { GetSecretsClientParams, SecretsClient } from '@kbn/secrets';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 /**
  * Setup contract of the secrets plugin. It has no members yet: dependants use its presence
@@ -34,4 +35,6 @@ export interface SecretsPluginSetupDependencies {
 export interface SecretsPluginStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   spaces?: SpacesPluginStart;
+  /** Optional: without it, secrets cannot come from external secret managers. */
+  actions?: ActionsPluginStart;
 }

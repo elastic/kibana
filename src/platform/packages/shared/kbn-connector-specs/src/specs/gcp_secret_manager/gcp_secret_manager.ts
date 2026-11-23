@@ -212,6 +212,22 @@ const buildSecretUpdate = (
   return { body, updateMask };
 };
 
+const SECRET_REFERENCE_PATTERN = /^projects\/([^/]+)\/secrets\/([^/]+)(?:\/versions\/([^/]+))?$/;
+
+/** Splits a secret or version resource name into the input of accessSecretVersion. */
+const toAccessSecretVersionInput = (
+  reference: string
+): z.input<typeof AccessSecretVersionInputSchema> | undefined => {
+  const [, projectId, secretId, version] = SECRET_REFERENCE_PATTERN.exec(reference) ?? [];
+  if (!projectId || !secretId) {
+    return undefined;
+  }
+  return { projectId, secretId, ...(version ? { version } : {}), revealPayload: true };
+};
+
+const hasPayload = (output: unknown): output is { payload: unknown } =>
+  typeof output === 'object' && output !== null && 'payload' in output;
+
 export const GcpSecretManager: ConnectorSpec = {
   metadata: {
     id: '.gcp_secret_manager',
@@ -273,6 +289,15 @@ Gotchas:
 - getSecret returns the secret name using the project NUMBER, not the project id you passed. Do not feed that name back in as an id.
 - A secret's own IAM policy is often empty because access is inherited from the project. An empty bindings list from getSecretIamPolicy does NOT mean nobody can read the secret.
 - Reads need roles/secretmanager.viewer, reading a value needs roles/secretmanager.secretAccessor, and version lifecycle changes need roles/secretmanager.secretVersionManager.`,
+
+  secretManager: {
+    action: 'accessSecretVersion',
+    referenceFormat:
+      'projects/<project>/secrets/<secret> or projects/<project>/secrets/<secret>/versions/<version>',
+    toInput: toAccessSecretVersionInput,
+    getValue: (output) =>
+      hasPayload(output) && typeof output.payload === 'string' ? output.payload : undefined,
+  },
 
   actions: {
     listSecrets: {

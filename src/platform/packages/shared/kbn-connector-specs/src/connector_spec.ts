@@ -363,6 +363,22 @@ export interface ConnectorSigningKey {
 }
 
 // ============================================================================
+// SECRET MANAGER
+// ============================================================================
+
+/** How to read one value from a connector whose service stores secrets. */
+export interface ConnectorSecretManager {
+  /** Name of the action of this connector that returns a value. */
+  action: string;
+  /** The form of a reference, shown to whoever writes one. */
+  referenceFormat: string;
+  /** Turns a reference into the input of the action. Returns undefined when it has another form. */
+  toInput: (reference: string) => Record<string, unknown> | undefined;
+  /** Takes the value out of the output of the action. */
+  getValue: (output: unknown) => string | undefined;
+}
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -426,6 +442,10 @@ export interface ConnectorSpec {
   // Optional Kibana-managed signing key. When present, creating a connector generates
   // a key pair, Kibana publishes the public key, and actions get `signJwt`.
   signingKey?: ConnectorSigningKey;
+
+  // Present when the service behind the connector stores secrets. Says how to read one value
+  // with an existing action, for features that take values from an external secret manager.
+  secretManager?: ConnectorSecretManager;
 
   transformations?: Transformations;
 
