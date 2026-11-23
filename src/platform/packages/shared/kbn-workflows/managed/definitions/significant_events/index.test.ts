@@ -17,7 +17,6 @@ import { convertToWorkflowGraph } from '../../../graph';
 
 interface WorkflowJsonSchema {
   type?: string;
-  enum?: string[];
   description?: string;
   properties?: Record<string, WorkflowJsonSchema>;
   items?: WorkflowJsonSchema;
@@ -85,7 +84,7 @@ describe('significant events persistence workflow contracts', () => {
   });
 
   it('reports only the written rule uuids in the discovery output schema', () => {
-    const schema = requireStep(discovery, 'build_agent_answer_schema').with?.schema;
+    const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
     const properties = schema?.properties;
 
     // Nothing reads per-event outcomes from the agent: discovery starts no investigation.

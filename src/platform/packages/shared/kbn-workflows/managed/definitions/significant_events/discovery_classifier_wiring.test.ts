@@ -172,33 +172,6 @@ describe('discovery workflow detection classifier wiring', () => {
       ).toBe(3);
     });
 
-    it('limits the agent answer to the rule uuids of the batch', () => {
-      const schemaStep = requireStep('build_agent_answer_schema');
-      const agent = requireStep('run_discovery_agent');
-      const schema = schemaStep.with?.schema as {
-        properties: { written_rule_uuids: { items: { enum: string } } };
-      };
-      const batch = [
-        { rule_uuid: 'rule-A', detection_id: 'detection-A' },
-        { rule_uuid: 'rule-B', detection_id: 'detection-B' },
-        { rule_uuid: 'rule-A', detection_id: 'detection-A2' },
-        { detection_id: 'detection-C' },
-      ];
-      const builtSchema = { type: 'object' };
-
-      expect(
-        evaluate(
-          schema.properties.written_rule_uuids.items.enum,
-          withClassify({ output: { batch } })
-        )
-      ).toEqual(['rule-A', 'rule-B']);
-      expect(
-        evaluate(agent.with?.schema, {
-          steps: { build_agent_answer_schema: { output: { schema: builtSchema } } },
-        })
-      ).toBe(builtSchema);
-    });
-
     it('passes the detection rows, the space and every classifier input to the step', () => {
       const withBlock = requireStep('classify_detections').with ?? {};
 

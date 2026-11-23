@@ -6,34 +6,19 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { lazySchema, z } from '@kbn/zod/v4';
-import { batchEntrySchema, type BatchEntry } from './detection_batch';
+import type { BatchEntry } from './detection_batch';
+import {
+  resolveWrittenDetectionsInputSchema,
+  resolveWrittenDetectionsOutputSchema,
+} from '../../common/workflows/steps/resolve_written_detections';
 import {
   RuleEventsClient,
   type WrittenDetectionPair,
 } from '../lib/significant_events/events/rule_events_client';
 
 export const MAX_RUN_VERSIONS = 1_000;
-const MAX_BATCH_ENTRIES = 1_000;
-
-const inputSchema = lazySchema(() =>
-  z.object({
-    workflow_execution_id: z.string().max(MAX_ID_LENGTH),
-    batch: z.array(batchEntrySchema).max(MAX_BATCH_ENTRIES),
-    reported_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_BATCH_ENTRIES),
-  })
-);
-
-const outputSchema = lazySchema(() =>
-  z.object({
-    stamp_rule_uuids: z.array(z.string().max(MAX_ID_LENGTH)).max(MAX_BATCH_ENTRIES),
-    derived_count: z.number().int().min(0).max(MAX_BATCH_ENTRIES),
-    unknown_reported_count: z.number().int().min(0).max(MAX_BATCH_ENTRIES),
-  })
-);
 
 interface ResolveStampRulesParams {
   batch: readonly BatchEntry[];
@@ -57,6 +42,7 @@ export const resolveStampRules = ({
       detectionId === undefined || ruleUuid === undefined ? [] : [`${detectionId}\u0000${ruleUuid}`]
     )
   );
+  // A batch rule without a detection_id can never be derived from written events, so it stamps by report only.
   const batchRules = new Set(batch.flatMap(({ rule_uuid: ruleUuid }) => ruleUuid ?? []));
   const derivedRules = new Set(
     runWrittenPairs.flatMap(({ detection_id: detectionId, rule_uuid: ruleUuid }) =>
@@ -86,8 +72,8 @@ export const resolveWrittenDetectionsStepDefinition = ({ logger }: { logger: Log
     category: StepCategory.Elasticsearch,
     description:
       'Finds the batch detections recorded in events written by this discovery execution, then combines them with the agent-reported rules that have no event.',
-    inputSchema,
-    outputSchema,
+    inputSchema: resolveWrittenDetectionsInputSchema,
+    outputSchema: resolveWrittenDetectionsOutputSchema,
     handler: async (context) => {
       const {
         batch,

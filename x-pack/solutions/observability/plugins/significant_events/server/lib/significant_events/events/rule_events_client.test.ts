@@ -205,7 +205,9 @@ describe('findDetectionsWrittenByRun', () => {
         }),
       },
     ];
-    const { client } = createClient(async () => sourceResponse(rows));
+    const { client } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
 
     await expect(
       client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1_000 })
@@ -230,7 +232,9 @@ describe('findDetectionsWrittenByRun', () => {
         }),
       },
     ];
-    const { client, query } = createClient(async () => sourceResponse(rows));
+    const { client, query } = createClient(async () =>
+      dataJsonResponse(rows.map(({ dataJson }) => dataJson))
+    );
 
     await expect(
       client.findDetectionsWrittenByRun({ workflowExecutionId: 'execution-1', limit: 1 })

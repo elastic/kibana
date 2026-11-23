@@ -24,7 +24,7 @@ settings:
             parent_workflow_execution_id: '{{ parent.executionId }}'
             outcome: failed
             error_type: '{{ steps.run_discovery_agent.error.type }}'
-            error_message: '${{ steps.run_discovery_agent.error.message | default: steps.get_written_rules_backlog.error.message | default: steps.resolve_model.error.message | default: steps.classify_detections.error.message | default: steps.build_agent_answer_schema.error.message | default: "" | truncate: 1024, "" }}'
+            error_message: '${{ steps.run_discovery_agent.error.message | default: steps.get_written_rules_backlog.error.message | default: steps.resolve_model.error.message | default: steps.classify_detections.error.message | default: "" | truncate: 1024, "" }}'
           headers:
             x-elastic-internal-origin: 'kibana'
         timeout: '10s'
@@ -424,30 +424,6 @@ steps:
       step: discovery
       connector_id: '{{ inputs.connector_id }}'
 
-  # The enum only steers the model; resolve_written_detections enforces the batch (elastic/nightshift-program#2439).
-  - name: build_agent_answer_schema
-    type: data.set
-    with:
-      schema:
-        type: object
-        properties:
-          written_rule_uuids:
-            type: array
-            items:
-              type: string
-              enum: "${{ steps.classify_detections.output.batch | map: 'rule_uuid' | compact | uniq }}"
-            description: >-
-              rule_uuid of every detection that is done this cycle: a detection whose
-              events_write result was written: true or skipped with reason
-              existing_active_event or unchanged_outcome, or a detection intentionally
-              determined not event-eligible for which no write was attempted.
-              Failed (bulk_error or unknown_event_id) or unattempted event-eligible writes
-              must not be included.
-              Used as a hallucination guardrail for deliberately not-written rules.
-              Rules with a stored event are resolved from the event's detection metadata;
-              full discovery data is written via the events_write tool.
-        required: [written_rule_uuids]
-
   - name: run_discovery_agent
     type: ai.agent
     agent-id: 'significant-events.discovery'
@@ -466,7 +442,22 @@ steps:
         ## Detection batch
 
         {{ steps.classify_detections.output.batch | json }}
-      schema: '${{ steps.build_agent_answer_schema.output.schema }}'
+      # The agent's answer is a hint: resolve_written_detections keeps only rules in the batch.
+      schema:
+        type: object
+        properties:
+          written_rule_uuids:
+            type: array
+            items:
+              type: string
+            description: >-
+              rule_uuid of every detection that is done this cycle: a detection whose
+              events_write result was written: true or skipped with reason
+              existing_active_event or unchanged_outcome, or a detection intentionally
+              determined not event-eligible for which no write was attempted.
+              Failed (bulk_error or unknown_event_id) or unattempted event-eligible writes
+              must not be included.
+        required: [written_rule_uuids]
 
   - name: compute_written_rule_uuids
     # Normalise the agent's self-reported summary before validating it against the batch.
