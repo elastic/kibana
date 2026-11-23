@@ -17,11 +17,11 @@
  * know, gives no type rather than a guess.
  */
 
-import type { SpecChange } from './detect_drift';
-import { getAtTokens, localRefToPointer, resolvePathItem, toTokens } from '../json_pointer';
-import { isRecord } from '../values';
-import { pathItemOf } from './locate_operation';
-import { quoted, requestParameterOf } from './oasdiff_text';
+import type { SpecChange } from '../detect_drift';
+import { getAtTokens, localRefToPointer, resolvePathItem, toTokens } from '../../json_pointer';
+import { isRecord } from '../../values';
+import { pathItemOf } from '../locate_operation';
+import { quoted, requestParameterOf } from '../oasdiff_text';
 
 type Json = Record<string, unknown>;
 

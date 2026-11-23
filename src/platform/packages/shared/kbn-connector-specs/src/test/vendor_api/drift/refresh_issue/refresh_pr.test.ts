@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ActionDrift, ConnectorDrift, SpecChange } from './detect_drift';
-import { healthy } from './drift_fixtures';
+import type { ActionDrift, ConnectorDrift, SpecChange } from '../detect_drift';
+import { healthy } from '../drift_fixtures';
 import { renderRefreshPr } from './refresh_pr';
 
 const MAX_LENGTH = 63_000;

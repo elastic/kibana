@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpecChange } from './detect_drift';
+import type { SpecChange } from '../detect_drift';
 import { fieldTypeOf, fieldTypesOf } from './field_type';
 
 const schema = (name: string) => ({ $ref: `#/components/schemas/${name}` });

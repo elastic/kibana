@@ -9,8 +9,8 @@
 
 import type { ConnectorDrift, DriftReportEntry, FailedDrift } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
-import { findingsOf, renderDriftIssue } from './issue';
-import { renderRefreshPr } from './refresh_pr';
+import { findingsOf, renderDriftIssue } from './drift_issue';
+import { renderRefreshPr } from './refresh_issue/refresh_pr';
 import type { VendorApiLog } from '../record/update_vendor_api';
 import { errorMessage } from '../values';
 

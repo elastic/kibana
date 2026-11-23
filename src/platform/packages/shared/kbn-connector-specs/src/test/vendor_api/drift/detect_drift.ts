@@ -15,8 +15,8 @@ import type { ConnectorSpec } from '../../../connector_spec';
 import { loadVendorSpec } from '../spec/load_vendor_spec';
 import { MANIFEST, OVERLAY, readOptional, snapshotFile } from '../spec/load_vendor_specs';
 import { compareFields } from './compare_fields';
-import { fieldTypesOf } from './field_type';
-import type { SnapshotDocuments } from './field_type';
+import { fieldTypesOf } from './refresh_issue/field_type';
+import type { SnapshotDocuments } from './refresh_issue/field_type';
 import type { OperationLocation } from './locate_operation';
 import { locateOperation, serverUrls } from './locate_operation';
 import {

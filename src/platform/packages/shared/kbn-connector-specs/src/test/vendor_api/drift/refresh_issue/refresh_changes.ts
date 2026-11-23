@@ -20,10 +20,10 @@
  * media types it was reported for, a scope list that was only regrouped.
  */
 
-import type { SpecChange } from './detect_drift';
-import { byText } from '../values';
+import type { SpecChange } from '../detect_drift';
+import { byText } from '../../values';
 import { ownerOfPart } from './field_type';
-import { quoted, requestParameterOf } from './oasdiff_text';
+import { quoted, requestParameterOf } from '../oasdiff_text';
 
 const MAX_NAME_LENGTH = 80;
 /** How many names of a list a cell shows to begin with; the refresh PR may show more. */

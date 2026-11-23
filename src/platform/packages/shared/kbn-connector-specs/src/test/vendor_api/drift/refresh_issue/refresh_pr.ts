@@ -13,9 +13,9 @@
  * changed on each and the actions that call it.
  */
 
-import type { ConnectorDrift, SpecChange } from './detect_drift';
-import { byText } from '../values';
-import { code, listed, plural } from './issue/issue_markdown';
+import type { ConnectorDrift, SpecChange } from '../detect_drift';
+import { byText } from '../../values';
+import { code, listed, plural } from '../drift_issue/issue_markdown';
 import type { ChangeArea, ChangePart, ListPart } from './refresh_changes';
 import {
   areaLines,

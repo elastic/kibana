@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SpecChange } from './detect_drift';
+import type { SpecChange } from '../detect_drift';
 import { describeChanges } from './refresh_changes';
 
 const change = (id: string, text: string, type?: string, typeBefore?: string): SpecChange => ({
