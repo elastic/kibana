@@ -193,9 +193,14 @@ const showMoreNames = (lists: readonly ListPart[], room: number): void => {
  */
 export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const intro = [
-    'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
+    '## Summary',
     '',
-    `Each connector says what its new spec changed. Open its table for the endpoints that changed, what changed on each, as diffs of what was removed, added or changed, and the actions that call them. Each list shows its first names: ${DEFAULT_NAMES_SHOWN}, or fewer or more depending on how much room this description has. The drift report attached to the build lists every change.`,
+    '> [!NOTE]',
+    '>  ### This PR is the result of a weekly Connector vendor API refresh. ',
+    '> A script fetches vendor specs, compares the old version with the new one and tests if all connector actions still work with the new one. ',
+    '>',
+    '> The connectors mentioned in this PR **all still work** with the new version of the spec. **This PR is safe to merge.**',
+    '> Any connectors that have one or more broken actions due to vendor API updates will have separate Github issues created for them.',
     '',
   ].join('\n');
 
