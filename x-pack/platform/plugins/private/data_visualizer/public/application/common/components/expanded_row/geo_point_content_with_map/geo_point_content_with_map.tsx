@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   ES_GEO_FIELD_TYPE,
+  ESQLSourceDescriptor,
   LayerDescriptor,
   VectorLayerDescriptor,
 } from '@kbn/maps-plugin/common';
@@ -65,7 +66,7 @@ export const GeoPointContentWithMap: FC<{
     let ignore = false;
     mapsPlugin.createLayerDescriptors
       .createESSearchSourceLayerDescriptor({
-        index_pattern_id: dataView.id,
+        indexPatternId: dataView.id,
         geoFieldName: config.fieldName,
         geoFieldType: config.type as ES_GEO_FIELD_TYPE,
       })
@@ -76,14 +77,7 @@ export const GeoPointContentWithMap: FC<{
         if (esql !== undefined) {
           // Currently, createESSearchSourceLayerDescriptor doesn't support ES|QL yet
           // but we can manually override the source descriptor with the ES|QL ESQLSourceDescriptor
-          const esqlSourceDescriptor = {
-            columns: [
-              {
-                name: config.fieldName,
-                type: config.type,
-              },
-            ],
-            dataViewId: dataView.id,
+          const esqlSourceDescriptor: ESQLSourceDescriptor = {
             date_field: dataView.timeFieldName ?? timeFieldName,
             geo_field: config.fieldName,
             esql,
