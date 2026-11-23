@@ -1322,7 +1322,12 @@ describe('triage match decisions step in on mode', () => {
 
   describe('counts that are about decisions', () => {
     /** Page one is full and has alert `a`, page two has alert `b`: both match the same decision. */
-    const twoPages = (callKibanaApi: jest.Mock) => {
+    const twoPages = (
+      callKibanaApi: jest.Mock,
+      secondPage: Array<{ _id: string; _source: Record<string, unknown>; sort: unknown[] }> = [
+        { _id: 'b', _source: source('C:\\x.exe'), sort: [20_000, 'b'] },
+      ]
+    ) => {
       const first = [
         { _id: 'a', _source: source('C:\\x.exe'), sort: [1, 'a'] },
         ...Array.from({ length: ALERT_FETCH_LIMIT - 1 }, (_unused, i) => ({
@@ -1343,9 +1348,7 @@ describe('triage match decisions step in on mode', () => {
             !body?.query?.bool?.filter?.[0]?.ids;
           if (!candidateSearch) return inner(params);
           pages++;
-          const hits =
-            pages === 1 ? first : [{ _id: 'b', _source: source('C:\\x.exe'), sort: [20_000, 'b'] }];
-          return { body: { hits: { hits } } };
+          return { body: { hits: { hits: pages === 1 ? first : secondPage } } };
         }
       );
     };
@@ -1392,6 +1395,50 @@ describe('triage match decisions step in on mode', () => {
       // Both pages tried to close, and both failed: the count is one because it is per decision.
       expect(closes().flatMap(({ signal_ids: ids }) => ids)).toEqual(['a', 'b']);
       expect(output).toEqual(expect.objectContaining({ close_failures: 1 }));
+    });
+
+    it('counts only the decisions a failed verdict lookup was for, and still blocks a decision known to conflict', async () => {
+      // Page one finds that decision X has a verdict. On page two the lookup fails: X is not part of
+      // it, Y is.
+      const { run, callKibanaApi, closes, tags } = setup({
+        mode: 'on',
+        alerts: [],
+        decisions: { ...approved('C:\\x.exe'), ...approved('C:\\y.exe') },
+      });
+      twoPages(callKibanaApi, [
+        { _id: 'b', _source: source('C:\\x.exe'), sort: [20_000, 'b'] },
+        { _id: 'c', _source: source('C:\\y.exe'), sort: [20_001, 'c'] },
+      ]);
+      const paged = callKibanaApi.getMockImplementation()!;
+      let lookups = 0;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (params.path.endsWith('/signals/search') && params.body?.aggs) {
+            if (++lookups > 1) throw new Error('es down');
+            return {
+              body: {
+                aggregations: {
+                  keys: { buckets: [{ key: strictKeyTag(hashOf('C:\\x.exe')) }] },
+                },
+              },
+            };
+          }
+          return paged(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(lookups).toBe(2);
+      expect(closes()).toEqual([]);
+      // X stays blocked on both pages and is tagged for shadow data; only Y is a failed close.
+      const tagged = (id: string) =>
+        tags().filter(({ tags: change }) => change.tags_to_add.some((tag) => tag.endsWith(id)));
+      expect(tagged(idOf('C:\\x.exe')).flatMap(({ ids }) => ids)).toEqual(['a', 'b']);
+      expect(tagged(idOf('C:\\y.exe'))).toEqual([]);
+      expect(output).toEqual(
+        expect.objectContaining({ close_failures: 1, blocked_by_verdict: 2, closed: 0 })
+      );
     });
 
     it('counts a decision once in the deferred decisions when it is deferred in the close and in the shadow tags', async () => {
