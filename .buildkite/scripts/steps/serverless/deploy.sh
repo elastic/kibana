@@ -5,13 +5,15 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+load_project_deploy_credentials
+
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
   PR_NUMBER="$GITHUB_PR_NUMBER"
 else
   PR_NUMBER="$BUILDKITE_PULL_REQUEST"
 fi
 
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:pr-$PR_NUMBER-${BUILDKITE_COMMIT:0:12}"
+KIBANA_IMAGE="$(kibana_ci_image_repository kibana-serverless):pr-$PR_NUMBER-${BUILDKITE_COMMIT:0:12}"
 
 deploy() {
   PROJECT_TYPE=$1

@@ -17,9 +17,19 @@ interface KibanaStatusResponse {
   };
 }
 
+// undici's default `connect.timeout` is 10s, too tight for Cloud; @kbn/kbn-client uses 60s.
+const CONNECT_TIMEOUT_MS = 60_000;
+const MAX_ATTEMPTS = 5;
+
+const delay = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 /**
  * Fetches Kibana version string in the same shape as @kbn/kbn-client KbnClientVersion.get()
- * (for use as the `kbn-version` header on SAML requests). Single GET to `/api/status`; no retries.
+ * (for use as the `kbn-version` header on SAML requests). Idempotent GET to `/api/status`, retried
+ * up to 5 times with linear backoff so a transient network failure doesn't fail the caller.
  */
 export async function fetchKibanaVersionHeaderString(
   kbnBaseUrl: string,
@@ -32,31 +42,48 @@ export async function fetchKibanaVersionHeaderString(
   url.searchParams.set('v8format', 'true');
 
   const isHttps = url.protocol === 'https:';
-  const dispatcher = isHttps ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined;
+  const dispatcher = isHttps
+    ? new Agent({ connect: { rejectUnauthorized: false, timeout: CONNECT_TIMEOUT_MS } })
+    : undefined;
 
-  log.debug(`Fetching Kibana version from ${url.origin}/api/status`);
+  for (let attempt = 1; ; attempt++) {
+    log.debug(`Fetching Kibana version from ${url.origin}/api/status`);
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-      'kbn-xsrf': 'kbn-client',
-      'x-elastic-internal-origin': 'kbn-client',
-    },
-    ...(dispatcher ? { dispatcher } : {}),
-  } as RequestInit);
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+          'kbn-xsrf': 'kbn-client',
+          'x-elastic-internal-origin': 'kbn-client',
+        },
+        ...(dispatcher ? { dispatcher } : {}),
+      } as RequestInit);
 
-  // 200 (running) and 503 (initializing) both expose `version`, any other status is unexpected.
-  if (response.status !== 200 && response.status !== 503) {
-    throw new Error(`${response.status}:${await response.text()}`);
+      // 200 (running) and 503 (initializing) both expose `version`, any other status is unexpected.
+      if (response.status !== 200 && response.status !== 503) {
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      const data = (await response.json()) as KibanaStatusResponse;
+      if (!data?.version) {
+        throw new Error(
+          `Unable to get version from Kibana, invalid response from server: ${JSON.stringify(data)}`
+        );
+      }
+
+      return data.version.number + (data.version.build_snapshot ? '-SNAPSHOT' : '');
+    } catch (error) {
+      if (attempt >= MAX_ATTEMPTS) {
+        throw error;
+      }
+
+      log.debug(
+        `Fetching Kibana version failed, attempt ${attempt}/${MAX_ATTEMPTS}: ${
+          (error as Error).message
+        }`
+      );
+      await delay(1000 * attempt);
+    }
   }
-
-  const data = (await response.json()) as KibanaStatusResponse;
-  if (!data?.version) {
-    throw new Error(
-      `Unable to get version from Kibana, invalid response from server: ${JSON.stringify(data)}`
-    );
-  }
-
-  return data.version.number + (data.version.build_snapshot ? '-SNAPSHOT' : '');
 }

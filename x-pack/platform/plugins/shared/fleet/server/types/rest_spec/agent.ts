@@ -17,6 +17,27 @@ import { NewAgentActionSchema } from '../models';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 
+const validateAgentsKueryField = (value: string) => {
+  const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+  if (validationObj?.error) {
+    return validationObj?.error;
+  }
+};
+
+export const AGENT_ID_MAX_LENGTH = 512;
+// The Fleet UI "select all" bulk selection excludes every managed and agentless agent by ID
+// (up to SO_SEARCH_LIMIT IDs, ~420k characters), so the limit must fit that generated query.
+export const AGENTS_KUERY_MAX_LENGTH = 500_000;
+
+const bulkAgentsSchema = () =>
+  schema.oneOf([
+    schema.arrayOf(schema.string({ maxLength: AGENT_ID_MAX_LENGTH })),
+    schema.string({
+      maxLength: AGENTS_KUERY_MAX_LENGTH,
+      validate: validateAgentsKueryField,
+    }),
+  ]);
+
 export const GetAgentsRequestSchema = {
   query: schema.object(
     {
@@ -93,7 +114,7 @@ export const PostAgentUnenrollRequestSchema = {
 
 export const PostBulkAgentUnenrollRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: bulkAgentsSchema(),
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
     batchSize: schema.maybe(schema.number()),
@@ -123,7 +144,7 @@ export const PostAgentUpgradeRequestSchema = {
 
 export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: bulkAgentsSchema(),
     source_uri: schema.maybe(schema.string()),
     version: schema.string({ validate: validateVersion }),
     force: schema.maybe(schema.boolean()),
@@ -176,7 +197,7 @@ export const PostRequestDiagnosticsActionRequestSchema = {
 
 export const PostBulkRequestDiagnosticsActionRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     additional_metrics: schema.maybe(
       schema.arrayOf(schema.oneOf([schema.literal(RequestDiagnosticsAdditionalMetrics.CPU)]))
@@ -206,7 +227,7 @@ export const DeleteAgentUploadFileRequestSchema = {
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: bulkAgentsSchema(),
     batchSize: schema.maybe(schema.number()),
     includeInactive: schema.boolean({ defaultValue: false }),
   }),
@@ -230,7 +251,7 @@ export const UpdateAgentRequestSchema = {
 
 export const PostBulkUpdateAgentTagsRequestSchema = {
   body: schema.object({
-    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    agents: bulkAgentsSchema(),
     tagsToAdd: schema.maybe(schema.arrayOf(schema.string())),
     tagsToRemove: schema.maybe(schema.arrayOf(schema.string())),
     batchSize: schema.maybe(schema.number()),

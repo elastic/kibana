@@ -39,6 +39,8 @@ import type { InstallResult } from '../../../common';
 
 import { appContextService } from '..';
 
+import type { ArchiveIterator, AssetsMap } from '../../../common/types';
+
 import {
   type CustomPackageDatasetConfiguration,
   type EnsurePackageResult,
@@ -49,7 +51,8 @@ import { getPackageFieldsMetadata } from './registry';
 import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
-import { installTransforms, isTransform } from './elasticsearch/transform/install';
+import { installTransforms } from './elasticsearch/transform/install';
+import { isTransform } from './elasticsearch/transform/transform_utils';
 import {
   ensureInstalledPackage,
   getInstallation,
@@ -58,9 +61,10 @@ import {
   getTemplateInputs,
   getPackageInfo,
 } from './packages';
-import { generatePackageInfoFromArchiveBuffer } from './archive';
+import { generatePackageInfoFromArchiveBuffer, unpackBufferToAssetsMap } from './archive';
 import { getEsPackage } from './archive/storage';
 import { createArchiveIteratorFromMap } from './archive/archive_iterator';
+import { getBundledPackageForInstallation } from './packages/bundled_packages';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -389,19 +393,38 @@ class PackageClientImpl implements PackageClient {
       throw new PackageNotFoundError(`Installation not found for package: ${packageInfo.name}`);
     }
 
-    const esPackage = await getEsPackage(
-      packageInfo.name,
-      packageInfo.version,
-      installation.package_assets ?? [],
-      this.internalSoClient
-    );
+    // An `upload` installation recorded for a package that is also bundled with Kibana (installs
+    // persisted before bundled installs were recorded as `bundled`, or by elastic-package) is
+    // reinstalled from the bundled archive as `bundled`, mirroring reinstallPackageForInstallation.
+    // The stored package_assets of an upload are never trusted by package name alone.
+    const bundledPackage =
+      installation.install_source === 'upload'
+        ? await getBundledPackageForInstallation(installation)
+        : undefined;
 
-    if (!esPackage) {
-      throw new PackageNotFoundError(`ES package not found for package: ${packageInfo.name}`);
+    let assetsMap: AssetsMap;
+    let archiveIterator: ArchiveIterator;
+    if (bundledPackage) {
+      ({ assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+        contentType: 'application/zip',
+        archiveBuffer: await bundledPackage.getBuffer(),
+        useStreaming: false,
+      }));
+    } else {
+      const esPackage = await getEsPackage(
+        packageInfo.name,
+        packageInfo.version,
+        installation.package_assets ?? [],
+        this.internalSoClient
+      );
+
+      if (!esPackage) {
+        throw new PackageNotFoundError(`ES package not found for package: ${packageInfo.name}`);
+      }
+
+      assetsMap = esPackage.assetsMap;
+      archiveIterator = createArchiveIteratorFromMap(assetsMap);
     }
-
-    const { assetsMap } = esPackage;
-    const archiveIterator = createArchiveIteratorFromMap(assetsMap);
 
     const { installedTransforms } = await installTransforms({
       packageInstallContext: {
@@ -416,6 +439,9 @@ class PackageClientImpl implements PackageClient {
       force: true,
       esReferences: undefined,
       authorizationHeader,
+      // Reinstalls replay the archive stored at install time, so the original install source
+      // decides whether these transforms may run as kibana_system.
+      installSource: bundledPackage ? 'bundled' : installation.install_source,
     });
     return installedTransforms;
   }

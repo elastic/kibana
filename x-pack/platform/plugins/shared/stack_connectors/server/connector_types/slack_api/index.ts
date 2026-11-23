@@ -25,7 +25,6 @@ import {
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
   SlackApiConfigSchema,
-  setDefaultSubAction,
 } from '../../../common/slack_api/schema';
 import { SLACK_API_CONNECTOR_ID, SLACK_URL } from '../../../common/slack_api/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
@@ -51,9 +50,7 @@ export const getConnectorType = (): SlackApiConnectorType => {
         customValidator: validateSlackUrl,
       },
       params: {
-        schema: {
-          validate: (value: unknown) => SlackApiParamsSchema.validate(setDefaultSubAction(value)),
-        },
+        schema: SlackApiParamsSchema,
       },
     },
     renderParameterTemplates,
