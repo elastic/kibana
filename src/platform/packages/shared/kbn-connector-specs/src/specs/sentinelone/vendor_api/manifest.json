@@ -716,6 +716,7 @@
   "sources": {
     "s1": {
       "apiVersion": "2.1",
+      "captured": true,
       "fetchedAt": "2026-11-19T10:06:32.000Z",
       "format": "swagger",
       "note": "Exported from a SentinelOne management console (Swagger 2.0, 'S1 MGMT API 2.1'), which is login-gated and has no public URL, so the source URL is a placeholder and the drift check cannot refetch it. The export was normalised before trimming: keywords set to null and 52 regular expressions that JavaScript cannot parse were removed. Redistribution of a trimmed snapshot was confirmed by the Kibana reviewers.",
