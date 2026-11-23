@@ -30,7 +30,7 @@ import {
   DIGITAL_EXPERIENCE_EBT_ACTIONS,
 } from '../../../../ebt_constants';
 import { useFormatters } from '../../../../hooks/use_formatters';
-import { FRUSTRATION_DEFINITIONS } from '../../../../labels';
+import { FRUSTRATION_DEFINITIONS } from '../../../../utils/frustration_definitions';
 import type { SessionsListUrlQuery } from '../../../../utils/sessions_list_query';
 import { frustrationFilterRt } from '../../../../utils/sessions_list_query';
 

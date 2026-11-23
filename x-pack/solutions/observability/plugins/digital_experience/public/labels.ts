@@ -83,21 +83,6 @@ export const ANONYMOUS_USER = i18n.translate(
   { defaultMessage: 'Anonymous' }
 );
 
-/** What EDOT Browser reports as each frustration signal. */
-export const FRUSTRATION_DEFINITIONS = {
-  rage: i18n.translate('xpack.digitalExperience.overview.frustration.rageDefinition', {
-    defaultMessage: 'Rage click: 3 or more clicks on the same element within 1 second.',
-  }),
-  dead: i18n.translate('xpack.digitalExperience.overview.frustration.deadDefinition', {
-    defaultMessage:
-      'Dead click: a click on a link, a button or another clickable-looking element with no page reaction within 1 second.',
-  }),
-  error: i18n.translate('xpack.digitalExperience.overview.frustration.errorDefinition', {
-    defaultMessage:
-      'Error click: a click followed by an uncaught JavaScript error, within 1 second or after a slow request it started.',
-  }),
-};
-
 /** A page visit whose page view carried no URL, so there is no page to name. */
 export const UNKNOWN_PAGE = i18n.translate(
   'xpack.digitalExperience.sessionDetail.unknownPageLabel',
