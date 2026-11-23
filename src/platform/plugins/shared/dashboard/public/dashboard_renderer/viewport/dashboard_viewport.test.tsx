@@ -178,6 +178,34 @@ describe('DashboardViewport', () => {
       await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
     });
 
+    test('does not revert to the initial value when a pinned control is added after the first mount', async () => {
+      const { component, dashboardApi, awaitingRequiredFilters$ } = await renderDashboardViewport({
+        pinnedPanels: pinnedControls,
+        initiallyAwaitingFilters: true,
+      });
+      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
+      act(() => {
+        dashboardApi.registerChildApi({ uuid: 'control1' } as DefaultEmbeddableApi);
+      });
+      await waitFor(() => component.getByTestId('mockDashboardGrid'));
+
+      // a new pinned control is in the layout but has not registered its api yet
+      act(() => {
+        const { layout$ } = dashboardApi;
+        const { pinnedPanels } = layout$.value;
+        layout$.next({
+          ...layout$.value,
+          pinnedPanels: { ...pinnedPanels, control2: { ...pinnedPanels.control1, order: 1 } },
+        });
+      });
+      await waitFor(() => expect(component.getByTestId('mockDashboardGrid')).toBeInTheDocument());
+      expect(component.queryByTestId('mockAwaitingFiltersScreen')).toBeNull();
+
+      // the live value still takes over once it is mounted
+      act(() => awaitingRequiredFilters$.next(true));
+      await waitFor(() => component.getByTestId('mockAwaitingFiltersScreen'));
+    });
+
     test('does not show the awaiting screen when not initially awaiting and controls are unmounted', async () => {
       const { component } = await renderDashboardViewport({
         pinnedPanels: pinnedControls,

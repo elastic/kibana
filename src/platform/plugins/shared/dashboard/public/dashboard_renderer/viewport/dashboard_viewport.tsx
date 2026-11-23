@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 
 import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
@@ -54,7 +54,13 @@ export const DashboardViewport = ({
   const allPinnedMounted = Object.keys(layout.pinnedPanels).every((uuid) =>
     Boolean(children[uuid])
   );
-  const awaitingRequired = allPinnedMounted ? awaitingRequiredFilters : initiallyAwaitingFilters;
+  // the initial value only covers the first load; a pinned control added later must not revert to it
+  const hasMountedAllPinned = useRef(false);
+  if (allPinnedMounted) hasMountedAllPinned.current = true;
+  const awaitingRequired =
+    hasMountedAllPinned.current || allPinnedMounted
+      ? awaitingRequiredFilters
+      : initiallyAwaitingFilters;
 
   const onExit = useCallback(() => {
     dashboardApi.setFullScreenMode(false);
