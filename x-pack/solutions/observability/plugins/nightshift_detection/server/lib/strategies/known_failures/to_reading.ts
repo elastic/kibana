@@ -16,8 +16,8 @@ export interface ActiveKnownFailure {
 }
 
 /**
- * The reading of an active known failure. Returns nothing until the mapping lands
- * (nightshift-program#2070), so the strategy is wired end to end but stores no signal yet.
+ * The reading of an active known failure. Returns nothing until the row to reading mapping lands
+ * in a follow-up, so the strategy is wired end to end but stores no signal yet.
  */
 export function toReading(_active: ActiveKnownFailure): DetectionSignalReading | undefined {
   return undefined;
