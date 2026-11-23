@@ -167,7 +167,8 @@ export const SettingsApplication = () => {
     spaceFilteredFields,
     globalAllFields,
     globalFilteredFields,
-    isLoading,
+    isSpaceLoading,
+    isGlobalLoading,
     spaceError,
     globalError,
     retry,
@@ -179,7 +180,7 @@ export const SettingsApplication = () => {
   // settings. Whether there are any is unknown until they load, so keep the tab until then, and
   // keep it to show the error if they fail to load.
   const globalTabEnabled =
-    canShowGlobalSettings && (isLoading || !!globalError || globalAllFields.length > 0);
+    canShowGlobalSettings && (isGlobalLoading || !!globalError || globalAllFields.length > 0);
 
   const tabs: SettingsTabs = {
     [SPACE_SETTINGS_TAB_ID]: {
@@ -207,6 +208,8 @@ export const SettingsApplication = () => {
   // The Global tab shows while settings load, and goes away if there are no global settings.
   const selectedTabId = tabs[requestedTabId] ? requestedTabId : SPACE_SETTINGS_TAB_ID;
   const selectedTab = tabs[selectedTabId];
+  const isSelectedTabLoading =
+    selectedTabId === GLOBAL_SETTINGS_TAB_ID ? isGlobalLoading : isSpaceLoading;
 
   const title = (
     <EuiText>
@@ -231,7 +234,7 @@ export const SettingsApplication = () => {
         <EuiFlexItem>
           <QueryInput
             {...{ categories: Object.keys(selectedTab.categoryCounts), query, onQueryChange }}
-            isDisabled={isLoading}
+            isDisabled={isSelectedTabLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -259,7 +262,7 @@ export const SettingsApplication = () => {
       )}
       <EuiSpacer size="xl" />
       <SettingsBody
-        isLoading={isLoading}
+        isLoading={isSelectedTabLoading}
         loadError={selectedTabId === GLOBAL_SETTINGS_TAB_ID ? globalError : undefined}
         onRetry={retry}
         selectedTab={selectedTab}

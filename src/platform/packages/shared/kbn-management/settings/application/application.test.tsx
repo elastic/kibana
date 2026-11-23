@@ -230,6 +230,52 @@ describe('Settings application', () => {
     expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeInTheDocument();
   });
 
+  it('keeps the Space tab usable while the global settings are fetched again from the Global tab', async () => {
+    let globalAttempts = 0;
+    const services: SettingsApplicationServices = {
+      ...createSettingsApplicationServicesMock(true),
+      metadataClient: {
+        getAll: (scope: UiSettingsScope) => {
+          if (scope === 'namespace') {
+            return Promise.resolve(getSettingsMock());
+          }
+          globalAttempts++;
+          if (globalAttempts === 1) {
+            return Promise.reject(new Error('Internal Server Error'));
+          }
+          return new Promise<UiSettingsMetadataState>(() => {});
+        },
+      },
+    };
+    const spaceTabTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${SPACE_SETTINGS_TAB_ID}`;
+    const globalTabTestSubj = `${DATA_TEST_SUBJ_PREFIX_TAB}-${GLOBAL_SETTINGS_TAB_ID}`;
+
+    const { findByTestId, getByTestId, queryByTestId } = render(
+      wrap(<SettingsApplication />, services)
+    );
+
+    act(() => {
+      fireEvent.click(getByTestId(globalTabTestSubj));
+    });
+    await findByTestId(DATA_TEST_SUBJ_SETTINGS_LOAD_ERROR);
+    act(() => {
+      fireEvent.click(getByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY));
+    });
+
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeInTheDocument();
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeDisabled();
+
+    act(() => {
+      fireEvent.click(getByTestId(spaceTabTestSubj));
+    });
+
+    expect(queryByTestId(DATA_TEST_SUBJ_SETTINGS_LOADING)).toBeNull();
+    expect(getByTestId(DATA_TEST_SUBJ_SETTINGS_SEARCH_BAR)).toBeEnabled();
+    for (const category of spaceCategories) {
+      expect(getByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`)).toBeInTheDocument();
+    }
+  });
+
   it('fetches the failed settings again when retrying from the error callout', async () => {
     const client = uiSettingsServiceMock.createStartContract();
     client.getAll.mockReturnValue({
