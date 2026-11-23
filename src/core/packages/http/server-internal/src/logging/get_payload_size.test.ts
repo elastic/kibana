@@ -10,8 +10,9 @@
 import type { Request } from '@hapi/hapi';
 import Boom from '@hapi/boom';
 
-import mockFs from 'mock-fs';
-import { createReadStream } from 'fs';
+import { createReadStream, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
 import { PassThrough } from 'stream';
 import { createGunzip, createGzip } from 'zlib';
 
@@ -59,7 +60,17 @@ describe('getPayloadSize', () => {
   });
 
   describe('handles streams', () => {
-    afterEach(() => mockFs.restore());
+    let tmpDir: string;
+    const writeTestFile = (content: string) => {
+      const path = join(tmpDir, 'test.txt');
+      writeFileSync(path, content);
+      return path;
+    };
+
+    beforeEach(() => {
+      tmpDir = mkdtempSync(join(tmpdir(), 'get-payload-size-'));
+    });
+    afterEach(() => rmSync(tmpDir, { recursive: true, force: true }));
 
     test('ignores streams that are not fs or zlib streams', async () => {
       const result = getResponsePayloadBytes(
@@ -75,8 +86,7 @@ describe('getPayloadSize', () => {
 
     describe('fs streams', () => {
       test('with ascii characters', async () => {
-        mockFs({ 'test.txt': 'heya' });
-        const source = createReadStream('test.txt');
+        const source = createReadStream(writeTestFile('heya'));
 
         let data = '';
         for await (const chunk of source) {
@@ -95,8 +105,7 @@ describe('getPayloadSize', () => {
       });
 
       test('with special characters', async () => {
-        mockFs({ 'test.txt': '¡hola!' });
-        const source = createReadStream('test.txt');
+        const source = createReadStream(writeTestFile('¡hola!'));
 
         let data = '';
         for await (const chunk of source) {
@@ -117,8 +126,7 @@ describe('getPayloadSize', () => {
 
     describe('zlib streams', () => {
       test('with ascii characters', async () => {
-        mockFs({ 'test.txt': 'heya' });
-        const readStream = createReadStream('test.txt');
+        const readStream = createReadStream(writeTestFile('heya'));
         const source = readStream.pipe(createGzip()).pipe(createGunzip());
 
         let data = '';
@@ -139,8 +147,7 @@ describe('getPayloadSize', () => {
       });
 
       test('with special characters', async () => {
-        mockFs({ 'test.txt': '¡hola!' });
-        const readStream = createReadStream('test.txt');
+        const readStream = createReadStream(writeTestFile('¡hola!'));
         const source = readStream.pipe(createGzip()).pipe(createGunzip());
 
         let data = '';
