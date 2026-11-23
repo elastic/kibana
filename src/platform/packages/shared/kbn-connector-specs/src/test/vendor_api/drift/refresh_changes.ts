@@ -434,9 +434,11 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
               .replace(/\//g, '') === ''
           : unselected(resolved).replace(/\//g, '') === '';
       const ownerName =
-        resolved !== undefined && /(^|\/)items\/?$/.test(unselected(resolved))
+        resolved === undefined
+          ? fieldName
+          : /(^|\/)items$/.test(unselected(resolved))
           ? 'items'
-          : fieldName;
+          : fieldOf(resolved);
       return [
         {
           area: entryArea,

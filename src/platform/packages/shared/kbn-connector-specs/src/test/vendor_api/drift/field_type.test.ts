@@ -383,6 +383,45 @@ describe('fieldTypeOf', () => {
     ).toBe('payload/items');
   });
 
+  it("takes an array's items for its field when a variant of them extends the base", () => {
+    const document = {
+      paths: {
+        '/payloads': {
+          get: {
+            responses: {
+              '200': {
+                content: {
+                  'application/json': {
+                    schema: {
+                      properties: {
+                        payload: {
+                          type: 'array',
+                          items: { oneOf: [schema('Slot'), { type: 'string' }] },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: { schemas: { Slot: { properties: { id: { type: 'string' } } } } },
+    };
+    const types = fieldTypesOf(
+      change(
+        'response-property-discriminator-mapping-added',
+        'added `#Key` discriminator mapping keys to the `payload/items/oneOf[subschema #1]/allOf[subschema #1: Base]` response property for the response status `200`',
+        'GET /payloads'
+      ),
+      { current: document }
+    );
+
+    expect(types.owner).toBe('payload');
+    expect(types.type).toBe('(Slot | string)[]');
+  });
+
   it('finds a parameter whose new enum value looks like a location', () => {
     const document = {
       paths: {

@@ -736,6 +736,22 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '! items: Slot (base: + Key)'));
   });
 
+  it('names an array, not its items, when a variant of its items extends the base', () => {
+    expect(
+      describeChanges([
+        {
+          ...change(
+            'response-property-discriminator-mapping-added',
+            'added `#Key` discriminator mapping keys to the `payload/items/oneOf[subschema #1]/allOf[subschema #1: Base]` response property',
+            'Slot[]',
+            'Slot[]'
+          ),
+          owner: 'payload',
+        },
+      ])
+    ).toEqual(object('Response', '! payload: Slot[] (Base: + Key)'));
+  });
+
   it('counts the repeats of the GraphQL or MCP texts it leaves out', () => {
     const texts = Array.from({ length: 11 }, (_, index) =>
       change('FIELD_ADDED', `Field "Board.f${String(index).padStart(2, '0')}" was added.`)

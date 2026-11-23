@@ -231,6 +231,9 @@ const responseOf = (responses: unknown, text: string): unknown => {
 const VARIANT_RULE = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/;
 
 /** The field the change names: for an enum value or a variant, the field they are of. */
+// A selector at the end of a path, `…/oneOf[subschema #1]`.
+const SELECTOR_TAIL = /\/?(?:allOf|oneOf|anyOf)\[[^\]]*\]$/;
+
 // A path that ends in the `allOf` part of a field, `value/items/allOf[subschema #1: entity]`.
 const PART_OF_FIELD = /(?:\/?allOf\[[^\]]*\])+$/;
 
@@ -317,13 +320,19 @@ const lookupIn = ({ id, text, operation }: SpecChange, document: unknown): Looku
   }
   const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
   let field = fieldPathOf(id, names);
-  // The part may be of an array's items, `value/items/allOf[…]`, whose field is the array; but
-  // `items` is only that when what holds it is an array, as a property may have that name.
-  while (ofPart && field !== undefined && /(^|\/)items$/.test(field)) {
+  // The part may be of a variant of an array's items, `value/items/oneOf[…]/allOf[…]`, whose field
+  // is the array: selectors and array steps are taken off in turn, down to a property or the body.
+  // `items` is an array step only when what holds it is an array, as a property may have that name.
+  while (ofPart && field !== undefined) {
+    if (SELECTOR_TAIL.test(field)) {
+      field = field.replace(SELECTOR_TAIL, '') || undefined;
+      continue;
+    }
+    if (!/(^|\/)items$/.test(field)) break;
     const parent = field.replace(/\/?items$/, '');
     const holder = deref(document, parent === '' ? root : walk(document, root, splitPath(parent)));
     if (!isRecord(holder) || (holder.type !== 'array' && holder.items === undefined)) break;
-    field = parent === '' ? undefined : parent;
+    field = parent || undefined;
   }
   const node = field === undefined ? root : walk(document, root, splitPath(field));
   if (node === undefined) {
