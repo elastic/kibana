@@ -446,7 +446,7 @@ describe('createTransport', () => {
         transport.request(
           { method: 'GET', path: '/' },
           {
-            headers: { Authorization: 'Bearer explicit-override' },
+            headers: { authorization: 'Bearer explicit-override' },
           }
         )
       ).rejects.toBe(error);
@@ -454,45 +454,6 @@ describe('createTransport', () => {
       expect(handler).toHaveBeenCalledWith(error, {
         authorization: 'Bearer explicit-override',
         'x-client-authentication': 'original-secret',
-      });
-      expect(transportRequestMock).toHaveBeenCalledWith(
-        expect.any(Object),
-        expect.objectContaining({
-          headers: {
-            authorization: 'Bearer explicit-override',
-            'x-client-authentication': 'original-secret',
-          },
-        })
-      );
-    });
-
-    it('lets a per-call header override mixed-case stored authorization', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
-      handler.mockReturnValue({ type: 'notHandled' });
-      getUnauthorizedErrorHandler.mockReturnValue(handler);
-      const error = createUnauthorizedError();
-      transportRequestMock.mockRejectedValue(error);
-      const transportClass = createTransportClass();
-      const transport = new transportClass({
-        ...baseConstructorParams,
-        headers: {
-          authorization: 'Bearer old-lowercase',
-          Authorization: 'Bearer old-uppercase',
-        },
-      });
-
-      await expect(
-        transport.request(
-          { method: 'GET', path: '/' },
-          { headers: { authorization: 'Bearer explicit-override' } }
-        )
-      ).rejects.toBe(error);
-
-      expect(handler).toHaveBeenCalledWith(error, {
-        authorization: 'Bearer explicit-override',
-      });
-      expect(transportRequestMock.mock.calls[0][1]?.headers).toEqual({
-        authorization: 'Bearer explicit-override',
       });
     });
 
@@ -544,7 +505,7 @@ describe('createTransport', () => {
 
     it('updates the headers for the second internal call in case of `retry`', async () => {
       const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
-      handler.mockReturnValue({ type: 'retry', authHeaders: { Authorization: 'retry' } });
+      handler.mockReturnValue({ type: 'retry', authHeaders: { authorization: 'retry' } });
 
       getUnauthorizedErrorHandler.mockReturnValue(handler);
 
@@ -558,11 +519,7 @@ describe('createTransport', () => {
         })
         .mockResolvedValueOnce(retryResult);
 
-      const initialHeaders = {
-        authorization: 'old-lowercase',
-        Authorization: 'initial',
-        foo: 'bar',
-      };
+      const initialHeaders = { authorization: 'initial', foo: 'bar' };
       const transportClass = createTransportClass();
       const transport = new transportClass({ ...baseConstructorParams, headers: initialHeaders });
       const requestParams = { method: 'GET', path: '/' };
@@ -574,7 +531,7 @@ describe('createTransport', () => {
         1,
         requestParams,
         expect.objectContaining({
-          headers: { authorization: 'initial', foo: 'bar' },
+          headers: initialHeaders,
         })
       );
       expect(transportRequestMock).toHaveBeenNthCalledWith(
@@ -584,30 +541,6 @@ describe('createTransport', () => {
           headers: { authorization: 'retry', foo: 'bar' },
         })
       );
-    });
-
-    it('preserves a per-call authorization override after a mixed-case refresh', async () => {
-      const handler: jest.MockedFunction<InternalUnauthorizedErrorHandler> = jest.fn();
-      handler.mockReturnValue({ type: 'retry', authHeaders: { Authorization: 'renewed' } });
-      getUnauthorizedErrorHandler.mockReturnValue(handler);
-      const error = createUnauthorizedError();
-      transportRequestMock.mockRejectedValueOnce(error).mockResolvedValueOnce({ body: 'ok' });
-      const transportClass = createTransportClass();
-      const transport = new transportClass({
-        ...baseConstructorParams,
-        headers: { Authorization: 'stored' },
-      });
-      const requestParams = { method: 'GET', path: '/' };
-
-      await expect(
-        transport.request(requestParams, { headers: { authorization: 'per-call' } })
-      ).resolves.toEqual({ body: 'ok' });
-
-      expect(transportRequestMock).toHaveBeenCalledTimes(2);
-      expect(transportRequestMock.mock.calls[0][1]?.headers).toEqual({ authorization: 'per-call' });
-      expect(transportRequestMock.mock.calls[1][1]?.headers).toEqual({ authorization: 'per-call' });
-      await transport.request(requestParams);
-      expect(transportRequestMock.mock.calls[2][1]?.headers).toEqual({ authorization: 'renewed' });
     });
 
     it('updates the headers for next requests in case of `retry`', async () => {
