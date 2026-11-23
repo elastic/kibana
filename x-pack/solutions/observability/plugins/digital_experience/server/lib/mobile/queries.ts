@@ -27,21 +27,44 @@ export const withOsCounts = (query: ComposerQuery): ComposerQuery =>
       BY ${resultColumn('osName')} = ${mobileColumn('osName')}, ${resultColumn('platform')}`
     .pipe`SORT ${resultColumn('sessions')} DESC`.pipe`LIMIT ${MAX_OS_ROWS}`;
 
+/** Documents with a release: an empty `service.version` names none. */
+const withRelease = (query: ComposerQuery): ComposerQuery =>
+  query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL AND ${mobileColumn(
+    'serviceVersion'
+  )} != ""`;
+
 /** The sessions per release, most first (then the higher release), up to `limit`. */
 export const withReleaseCounts = (query: ComposerQuery, limit: number): ComposerQuery =>
-  query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`.pipe`STATS ${resultColumn(
-    'sessions'
-  )} = COUNT_DISTINCT(${mobileColumn('sessionId')})
+  withRelease(query).pipe`STATS ${resultColumn('sessions')} = COUNT_DISTINCT(${mobileColumn(
+    'sessionId'
+  )})
       BY ${resultColumn('release')} = ${mobileColumn('serviceVersion')}`.pipe`SORT ${resultColumn(
     'sessions'
   )} DESC, ${resultColumn('release')} DESC`.pipe`LIMIT ${limit}`;
 
 /**
+ * A release the `version` type orders by number, e.g. `1.2` or `2.10.0`: dot-separated numbers
+ * without leading zeros, nor a pre-release or build, so no beta beats it and `debug` can't.
+ */
+export const RELEASE_VERSION_PATTERN = '(0|[1-9][0-9]*)([.](0|[1-9][0-9]*))*';
+
+/**
  * Each application's newest release on any platform, compared as versions so `2.10.0` is after
- * `2.9.0`, one row per application, so no cut on releases can leave one without.
+ * `2.9.0`, one row per application, so no cut on releases can leave one without. Without a
+ * numeric release, the one that first showed up last.
  */
 export const withLatestReleases = (query: ComposerQuery): ComposerQuery =>
-  query.pipe`WHERE ${mobileColumn('serviceVersion')} IS NOT NULL`.pipe`STATS ${resultColumn(
-    'latestRelease'
-  )} = MAX(TO_VERSION(${mobileColumn('serviceVersion')}))
-      BY ${mobileColumn('serviceName')}`;
+  withRelease(query).pipe`STATS ${resultColumn('firstSeen')} = MIN(@timestamp)
+      BY ${mobileColumn('serviceName')}, ${mobileColumn('serviceVersion')}`
+    .pipe`EVAL ${resultColumn('numericRelease')} = CASE(
+      ${mobileColumn('serviceVersion')} RLIKE ${RELEASE_VERSION_PATTERN},
+      TO_VERSION(${mobileColumn('serviceVersion')}),
+      NULL
+    )`.pipe`STATS ${resultColumn('numericRelease')} = MAX(${resultColumn('numericRelease')}),
+      ${resultColumn('newestRelease')} = LAST(${mobileColumn('serviceVersion')}, ${resultColumn(
+    'firstSeen'
+  )})
+      BY ${mobileColumn('serviceName')}`.pipe`EVAL ${resultColumn('latestRelease')} = COALESCE(
+      TO_STRING(${resultColumn('numericRelease')}),
+      ${resultColumn('newestRelease')}
+    )`.pipe`KEEP ${mobileColumn('serviceName')}, ${resultColumn('latestRelease')}`;

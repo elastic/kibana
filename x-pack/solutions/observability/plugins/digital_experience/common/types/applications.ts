@@ -126,7 +126,7 @@ export interface MobileApplicationSummary {
   environments: string[];
   /**
    * The newest `service.version` in the last 24 hours, compared as versions (2.10.0 after 2.9.0),
-   * any platform; `null` if none.
+   * any platform; without a numeric one, the release that first showed up last; `null` if none.
    */
   latestRelease: string | null;
   sessions: { count: number };

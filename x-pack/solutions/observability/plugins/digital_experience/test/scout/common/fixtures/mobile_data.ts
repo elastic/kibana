@@ -12,6 +12,9 @@ const TRACES_INDEX = 'traces-generic.otel-default';
 
 /** Inside `TIME_RANGE`. */
 const TIMESTAMP = '2021-01-18T12:30:00.000Z';
+/** Inside `TIME_RANGE`, before and after `TIMESTAMP`, for releases that show up apart. */
+const EARLIER_TIMESTAMP = '2021-01-18T12:10:00.000Z';
+const LATER_TIMESTAMP = '2021-01-18T12:45:00.000Z';
 
 /**
  * The edges of `TIME_RANGE` (12:00 to 13:00) and of the hour before it, the previous period. Both
@@ -29,14 +32,17 @@ export const BOUNDARY_TIMESTAMPS = {
  * (`telemetry.distro.name: elastic`) on a mobile `os.name`, with the upstream `telemetry.sdk.*`.
  * A React Native app on Android, iOS and iPadOS, an Android app, an Android app on an SDK that
  * still sends `telemetry.sdk.name: android` without the distribution, an Android app with sessions
- * on the edges of the periods, and two services that must never show up as mobile: a backend Java
- * service, and EDOT Browser on an iPhone, which is the Elastic distribution on `os.name: iOS` too.
+ * on the edges of the periods, an Android app without numeric releases, an iOS app on two-part
+ * releases, and two services that must never show up as mobile: a backend Java service, and EDOT
+ * Browser on an iPhone, which is the Elastic distribution on `os.name: iOS` too.
  */
 export const MOBILE_APPS = {
   reactNative: 'scout-shop-mobile',
   android: 'scout-trailmap-android',
   legacyAndroid: 'scout-legacy-android',
   boundaryAndroid: 'scout-boundary-android',
+  nightlyAndroid: 'scout-nightly-android',
+  shortVersionIos: 'scout-short-version-ios',
   backendJava: 'scout-backend-java',
   browserOnIphone: 'scout-browser-on-iphone',
 } as const;
@@ -107,18 +113,25 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     isSpan: true,
   },
   // Most sessions still on 2.9.0, the newest release 2.10.0, which only a version sort puts last.
+  // Later in the same session, versions that aren't releases: the `version` type would sort each
+  // after 2.10.0, and each showed up after it.
   ...[
     { version: '2.9.0', sessionId: 'android-1' },
     { version: '2.9.0', sessionId: 'android-2' },
     { version: '2.10.0', sessionId: 'android-3' },
-  ].map(({ version, sessionId }) => ({
+    ...['debug', '', 'v3.0.0', '3.0.0-beta', '3.0.0+45', '2.010.0'].map((version) => ({
+      version,
+      sessionId: 'android-3',
+      timestamp: LATER_TIMESTAMP,
+    })),
+  ].map(({ sessionId, ...doc }) => ({
     ...EDOT_MOBILE,
     serviceName: MOBILE_APPS.android,
     sdkLanguage: 'java',
     osName: 'Android',
-    version,
     installationId: `installation-${sessionId}`,
     sessionId,
+    ...doc,
   })),
   {
     serviceName: MOBILE_APPS.legacyAndroid,
@@ -137,6 +150,34 @@ const MOBILE_DOCUMENTS: MobileDocument[] = [
     osName: 'Android',
     installationId: 'installation-boundary',
     sessionId: `boundary-${edge}`,
+    timestamp,
+  })),
+  // Only releases that aren't numeric: `build-b` first, then `build-a`, which text order puts first.
+  ...[
+    { version: 'build-b', timestamp: EARLIER_TIMESTAMP },
+    { version: 'build-a', timestamp: TIMESTAMP },
+  ].map(({ version, timestamp }) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.nightlyAndroid,
+    sdkLanguage: 'java',
+    osName: 'Android',
+    version,
+    installationId: 'installation-nightly',
+    sessionId: 'nightly-1',
+    timestamp,
+  })),
+  // iOS short versions have two parts: 1.10 first, then 1.9, which text order puts last too.
+  ...[
+    { version: '1.10', timestamp: EARLIER_TIMESTAMP },
+    { version: '1.9', timestamp: LATER_TIMESTAMP },
+  ].map(({ version, timestamp }) => ({
+    ...EDOT_MOBILE,
+    serviceName: MOBILE_APPS.shortVersionIos,
+    sdkLanguage: 'swift',
+    osName: 'iOS',
+    version,
+    installationId: 'installation-short-version',
+    sessionId: 'SHORT-1',
     timestamp,
   })),
   {
@@ -207,7 +248,7 @@ export const EXPECTED_MOBILE_ROWS = [
     errorRate: 0.25,
   },
   {
-    // The newest release, not the one with the most sessions.
+    // The newest release, not the one with the most sessions, nor a later non-release.
     serviceName: MOBILE_APPS.android,
     platforms: ['android'],
     latestRelease: '2.10.0',
@@ -229,6 +270,24 @@ export const EXPECTED_MOBILE_ROWS = [
     serviceName: MOBILE_APPS.boundaryAndroid,
     platforms: ['android'],
     latestRelease: '1.0.0',
+    sessions: { count: 1 },
+    users: { count: 1 },
+    errorRate: 0,
+  },
+  {
+    // No numeric release: the one that first showed up last.
+    serviceName: MOBILE_APPS.nightlyAndroid,
+    platforms: ['android'],
+    latestRelease: 'build-a',
+    sessions: { count: 1 },
+    users: { count: 1 },
+    errorRate: 0,
+  },
+  {
+    // Two-part releases compared as versions, not by text nor by when they showed up.
+    serviceName: MOBILE_APPS.shortVersionIos,
+    platforms: ['ios'],
+    latestRelease: '1.10',
     sessions: { count: 1 },
     users: { count: 1 },
     errorRate: 0,

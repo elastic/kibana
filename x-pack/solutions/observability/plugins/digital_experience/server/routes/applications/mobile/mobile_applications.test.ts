@@ -41,13 +41,16 @@ describe('latestReleasesQuery', () => {
     const { query } = latestReleasesQuery(['shop-mobile', 'a"b']).toRequest();
 
     expect(query).toContain('| WHERE `service.name` IN ("shop-mobile", "a\\"b")');
-    expect(query).toMatch(/\| STATS latest_release = [^|]+ BY `service.name`/);
+    expect(query).toMatch(/\| STATS numeric_release = [^|]+ BY `service.name`/);
   });
 
-  it('picks the newest release compared as versions, whatever its sessions', () => {
+  it('narrows to the listed applications before picking their releases', () => {
     const { query } = latestReleasesQuery(['shop-mobile']).toRequest();
 
-    expect(query).toContain('latest_release = MAX(TO_VERSION(`service.version`))');
+    expect(query).toMatch(
+      /WHERE `service\.name` IN \("shop-mobile"\) \| WHERE `service\.version` IS NOT NULL/
+    );
+    expect(query).toMatch(/\| KEEP `service\.name`, latest_release \| LIMIT 1000$/);
   });
 });
 
