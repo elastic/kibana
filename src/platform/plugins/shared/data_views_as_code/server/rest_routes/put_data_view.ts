@@ -88,7 +88,7 @@ export const registerPutDataViewAsCodeRoute = ({
       requestHandler(args, async (ctx, req, res) => {
         const id = req.params.id;
         const dataViewsAsCodeService = await getDataViewsAsCodeService(ctx, getStartServices, req);
-        const response = await dataViewsAsCodeService.upsert(id, req.body);
+        const response = await dataViewsAsCodeService.upsert(id, req.body, req.spaceId);
 
         return response.action === 'created'
           ? res.created({ body: response.body })

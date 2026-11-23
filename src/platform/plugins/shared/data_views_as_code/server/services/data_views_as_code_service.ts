@@ -21,7 +21,8 @@ import type { DataViewsService } from '@kbn/data-views-plugin/server';
 import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { badRequest } from '@hapi/boom';
+import { badRequest, Boom } from '@hapi/boom';
+import { UNKNOWN_SPACE } from '@kbn/core-spaces-common';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
@@ -113,12 +114,17 @@ export class DataViewsAsCodeService {
     return this.dataViewsService.delete(id);
   }
 
-  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
+  public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>, urlSpaceId: string) {
     this.validateFieldFormatTypes(spec);
 
     const existingDataView = await this.getDataViewLazy(id);
 
     if (!!existingDataView) {
+      // If the data view is present in an unknown space, meaning the user doesn't have access to it,
+      // the request is refused with a 403 error.
+      if (existingDataView.namespaces.includes(UNKNOWN_SPACE))
+        throw new Boom('Cannot update data view in unknown space.', { statusCode: 403 });
+
       // The id can be a legacy alias, for that we use the resolved id.
       const resolvedId = existingDataView.id!;
 
@@ -135,10 +141,13 @@ export class DataViewsAsCodeService {
         { mergeAttributes: false, refresh: true }
       );
 
-      // 3 . Clear the data view service cache
+      // 3. Update the spaces of the data view
+      await this.updateSpaces(resolvedId, existingDataView, spec.spaces, urlSpaceId);
+
+      // 4 . Clear the data view service cache
       this.dataViewsService.clearInstanceCache(resolvedId);
 
-      // 4. Return the updated data view.
+      // 5. Return the updated data view.
       return {
         action: 'updated',
         // After that, it needs to be refetched, otherwise it won't get the meta fields correctly.
@@ -150,6 +159,42 @@ export class DataViewsAsCodeService {
       toStoredDataView({ id, ...spec })
     );
     return { action: 'created', body: await this.mapDataView(createdDataView) };
+  }
+
+  private async updateSpaces(
+    id: string,
+    existingDataView: DataViewLazy,
+    bodySpaces: string[] | undefined,
+    urlSpaceId: string
+  ) {
+    const hasBodySpaces = bodySpaces && bodySpaces.length > 0;
+    const spacesToUpdate = hasBodySpaces ? bodySpaces : [urlSpaceId];
+
+    // Body spaces have priority over the url space when updating.
+    const spacesToAdd = spacesToUpdate.filter(
+      (space) => !existingDataView.namespaces.includes(space)
+    );
+    const spacesToRemove = existingDataView.namespaces.filter(
+      (space) => !spacesToUpdate.includes(space)
+    );
+    if (spacesToAdd.length === 0 && spacesToRemove.length === 0) {
+      // Nothing to update
+      return;
+    }
+
+    const { objects } = await this.savedObjectsClient.updateObjectsSpaces(
+      [{ id, type: DATA_VIEW_SAVED_OBJECT_TYPE }],
+      spacesToAdd,
+      spacesToRemove
+    );
+
+    // `updateObjectsSpaces` reports failures per object instead of throwing.
+    const failure = objects.find(({ error }) => !!error)?.error;
+    if (failure) {
+      throw new Boom(`Failed to update data view spaces: ${failure.message}`, {
+        statusCode: failure.statusCode,
+      });
+    }
   }
 
   private async getDataViewLazy(id: string) {

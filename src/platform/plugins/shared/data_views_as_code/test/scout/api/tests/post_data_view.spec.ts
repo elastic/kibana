@@ -30,8 +30,10 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
 
   // Track created data view IDs so we can clean them up
   const createdIds: string[] = [];
+  const spaceId = `data-views-post-space-${Date.now()}`;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
+    await apiServices.spaces.create({ id: spaceId, name: spaceId });
     adminApiCredentials = await requestAuth.getApiKeyForAdmin();
     readOnlyApiCredentials = await requestAuth.getApiKeyForCustomRole(INDEX_PATTERNS_READ_ROLE);
   });
@@ -44,6 +46,7 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
         // ignore cleanup errors
       }
     }
+    await apiServices.spaces.delete(spaceId);
   });
 
   apiTest('can create a data view with index_pattern only', async ({ apiClient }) => {
@@ -359,4 +362,74 @@ apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgno
       expect(duplicateResponse.body.message).toContain('Duplicate data view');
     }
   );
+
+  apiTest('can create a data view in the given spaces', async ({ apiClient }) => {
+    const uniqueIndexPattern = `logs-spaces-${Date.now()}-*`;
+
+    const response = await apiClient.post(BASE_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        index_pattern: uniqueIndexPattern,
+        spaces: ['default', spaceId],
+      },
+      responseType: 'json',
+    });
+
+    createdIds.push(response.body.id);
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.meta.spaces).toStrictEqual(expect.arrayContaining(['default', spaceId]));
+    expect(response.body.meta.spaces).toHaveLength(2);
+
+    const spaceResponse = await apiClient.get(`s/${spaceId}${BASE_PATH}/${response.body.id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(spaceResponse).toHaveStatusCode(200);
+    expect(spaceResponse.body.data.index_pattern).toBe(uniqueIndexPattern);
+  });
+
+  apiTest(
+    'creates the data view only in the current space when spaces is omitted',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(BASE_PATH, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: `logs-no-spaces-${Date.now()}-*`,
+        },
+        responseType: 'json',
+      });
+
+      createdIds.push(response.body.id);
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.meta.spaces).toStrictEqual(['default']);
+    }
+  );
+
+  apiTest('returns 400 when spaces contains an empty id', async ({ apiClient }) => {
+    const response = await apiClient.post(BASE_PATH, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...adminApiCredentials.apiKeyHeader,
+      },
+      body: {
+        index_pattern: `logs-bad-spaces-${Date.now()}-*`,
+        spaces: [''],
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(400);
+  });
 });
