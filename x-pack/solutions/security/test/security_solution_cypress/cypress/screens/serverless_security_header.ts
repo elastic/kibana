@@ -105,10 +105,6 @@ export const openNavigationPanelFor = (pageName: string) => {
       panel = ASSETS_PANEL_BTN;
       break;
     }
-    case ONBOARDING: {
-      panel = FOOTER_LAUNCHPAD;
-      break;
-    }
   }
   if (panel) {
     openNavigationPanel(panel);
