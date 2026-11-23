@@ -625,8 +625,9 @@ which the investigator prompt pulls in at `{{response_style_section}}`. A PR tha
 label runs the `nightshift-investigations-writeup` suite: this eval alone, on Sonnet 5.5, judged by GPT 6 Sol.
 The PR run rewrites each reply twice, under the PR's prompt and under the prompt at the commit the
 PR branched from, and the report's `vs_baseline` row is the head to head between them: more wins
-than losses means the change reads better to the judge. The command above reproduces it locally
-with `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base`.
+than losses means the change reads better to the judge. A PR that doesn't change the prompt (only
+the eval, say) has the same prompt on both sides, so the run skips the baseline and scores one arm.
+The command above reproduces it locally with `NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base`.
 
 A change that only touches how the agent replies needs nothing else. A change to the method, the
 tools or the recorder can change how the agent investigates, which this eval can't see, so it
@@ -731,12 +732,14 @@ NIGHTSHIFT_WRITEUP_BASELINE_PROMPT=merge-base \
 ```
 
 Replies are cached under `data/nightshift_writeup/cache/` by round, model, prompt and
-repetition, so a re-run only makes judge calls; delete that folder to regenerate. Use
+repetition, so a re-run only makes judge calls; delete that folder to regenerate. A round that ends
+without a reply (usually the model still wanting to query) is tried once more, under either prompt,
+before it counts as missing. Use
 `--repetitions 2` or more before replacing a golden, which is decided per round, or when two
 prompts are only a few words apart.
 
-How big a margin means something: a PR run that didn't change the prompt compared the same prompt
-against itself ([build 2151](https://buildkite.com/elastic/kibana-evals-pr-llm-evals/builds/2151))
+How big a margin means something: before same-prompt baselines were skipped, a PR run that didn't
+change the prompt compared it with itself ([build 2151](https://buildkite.com/elastic/kibana-evals-pr-llm-evals/builds/2151))
 and came out 41–27, from sampling and judge noise alone. On the 20-round ORCA set that's about 70
 votes, and a sign test only clears p < 0.05 from about 43–25. Treat that as a floor, not a pass
 mark: votes on the same round aren't independent, so the real noise is wider. A change that should

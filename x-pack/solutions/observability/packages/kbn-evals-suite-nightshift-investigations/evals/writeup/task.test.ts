@@ -200,6 +200,23 @@ describe('createWriteupTask', () => {
     await expect(rerun(example)).resolves.toMatchObject({ reply: first.reply, cached: true });
   });
 
+  it('tries a round once more when it ends without a reply', async () => {
+    // Three empty answers end a try without a reply; the second try replies.
+    const client = fakeClient([reply(''), reply(''), reply(''), reply(REPLY)]);
+    const task = createWriteupTask({ inferenceClient: client, connectorId: 'model', arm });
+    await expect(task(example)).resolves.toMatchObject({ reply: REPLY, retried: true });
+    expect(client.chatComplete).toHaveBeenCalledTimes(4);
+
+    // Only once: a second miss counts as missing.
+    const never = fakeClient(Array(6).fill(reply('')));
+    const out = await createWriteupTask({ inferenceClient: never, connectorId: 'model', arm })(
+      example
+    );
+    expect(out).toMatchObject({ error: 'empty reply' });
+    expect(out.reply).toBeUndefined();
+    expect(never.chatComplete).toHaveBeenCalledTimes(6);
+  });
+
   it('generates again when the replayed conversation changes under the same case ID', async () => {
     const cache = testCache();
     const run = (ex: WriteupExample, text: string) =>

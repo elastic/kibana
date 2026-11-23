@@ -72,7 +72,15 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       // The checkout's prompt unless NIGHTSHIFT_WRITEUP_PROMPT names another (a git ref or a file).
       const arm = loadPromptArm(process.env.NIGHTSHIFT_WRITEUP_PROMPT);
       const baselineSpec = baselinePromptSpec();
-      const baseline = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
+      const loaded = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
+      // The same prompt on both sides is a comparison with itself: noise at twice the cost, and
+      // both arms would share one cache key. So an unchanged prompt runs one arm.
+      const baseline = loaded && loaded.hash !== arm.hash ? loaded : undefined;
+      if (loaded && !baseline) {
+        log.info(
+          `Baseline ${loaded.label} has the same prompt (${loaded.hash}); skipping the head to head`
+        );
+      }
       log.info(
         `Rewriting the final reply of ${dataset.examples.length} rounds of ${dataset.name} with prompt ${arm.label} (${arm.hash})` +
           (baseline ? ` against baseline ${baseline.label} (${baseline.hash})` : '')

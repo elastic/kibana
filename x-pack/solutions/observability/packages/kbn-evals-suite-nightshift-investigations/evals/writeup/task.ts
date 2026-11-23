@@ -319,7 +319,13 @@ export const createWriteupTask = ({
     ]);
     const hit = key ? cache?.read(key) : undefined;
     if (hit) return { ...hit, cached: true };
-    const out = await replayReply(inferenceClient, replay);
+    let out = await replayReply(inferenceClient, replay);
+    // A round that ends without a reply (usually the model still wanting to query) gets one more
+    // try, the same for both arms, so a single unlucky sample doesn't count against the run.
+    if (!out.reply) {
+      const retry = await replayReply(inferenceClient, replay);
+      out = retry.reply ? { ...retry, retried: true } : retry;
+    }
     if (key) cache?.write(key, out);
     return out;
   };
