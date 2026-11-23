@@ -249,6 +249,41 @@ describe('dynamicBlockSchema', () => {
     });
   });
 
+  describe('displayLabels and suggestedFilters together', () => {
+    const block = (overrides: Record<string, unknown> = {}) => ({
+      sources: [source({ attributes: [attribute()] })],
+      displayLabels: [displayLabel({ name: 'os_name', label: 'OS' })],
+      suggestedFilters: ['os_name'],
+      ...overrides,
+    });
+
+    it('accepts both, and a label and a filter of the same name are not duplicates', () => {
+      const result = dynamicBlockSchema.safeParse(block());
+
+      expect(result.success).toBe(true);
+      expect(result.data?.displayLabels).toEqual([{ name: 'os_name', label: 'OS' }]);
+      expect(result.data?.suggestedFilters).toEqual(['os_name']);
+    });
+
+    it('reports a duplicate label and a duplicate filter, each under its own path', () => {
+      const result = dynamicBlockSchema.safeParse(
+        block({
+          displayLabels: [
+            displayLabel({ name: 'os_name', label: 'OS' }),
+            displayLabel({ name: 'os_name', label: 'Operating system' }),
+          ],
+          suggestedFilters: ['os_name', 'os_name'],
+        })
+      );
+
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([
+        ['displayLabels', 1, 'name'],
+        ['suggestedFilters', 1],
+      ]);
+    });
+  });
+
   describe('unknown keys', () => {
     it('rejects an unknown key on the block', () => {
       expect(dynamicBlockSchema.safeParse({ sources: [source()], metrics: [] }).success).toBe(

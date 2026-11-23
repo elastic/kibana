@@ -134,6 +134,21 @@ export const dynamicDisplayLabelSchema = lazySchema(() =>
   })
 );
 
+/** Adds one issue for each name that an earlier item of the list already has. */
+const addDuplicateIssues = (
+  ctx: z.RefinementCtx,
+  names: string[],
+  toIssue: (name: string, index: number) => { path: Array<string | number>; message: string }
+) => {
+  const seen = new Set<string>();
+  names.forEach((name, index) => {
+    if (seen.has(name)) {
+      ctx.addIssue({ code: 'custom', ...toIssue(name, index) });
+    }
+    seen.add(name);
+  });
+};
+
 /** What the inventory reads to generate ES|QL over raw telemetry for an entity type. */
 export const dynamicBlockSchema = lazySchema(() =>
   z
@@ -147,29 +162,18 @@ export const dynamicBlockSchema = lazySchema(() =>
       suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
     })
     .superRefine(({ displayLabels = [], suggestedFilters = [] }, ctx) => {
-      const seenLabels = new Set<string>();
-      displayLabels.forEach(({ name }, index) => {
-        if (seenLabels.has(name)) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['displayLabels', index, 'name'],
-            message: `display label name "${name}" is already declared; names are unique within a block`,
-          });
-        }
-        seenLabels.add(name);
-      });
-
-      const seenFilters = new Set<string>();
-      suggestedFilters.forEach((name, index) => {
-        if (seenFilters.has(name)) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['suggestedFilters', index],
-            message: `suggested filter "${name}" is listed more than once`,
-          });
-        }
-        seenFilters.add(name);
-      });
+      addDuplicateIssues(
+        ctx,
+        displayLabels.map(({ name }) => name),
+        (name, index) => ({
+          path: ['displayLabels', index, 'name'],
+          message: `display label name "${name}" is already declared; names are unique within a block`,
+        })
+      );
+      addDuplicateIssues(ctx, suggestedFilters, (name, index) => ({
+        path: ['suggestedFilters', index],
+        message: `suggested filter "${name}" is listed more than once`,
+      }));
     })
 );
 

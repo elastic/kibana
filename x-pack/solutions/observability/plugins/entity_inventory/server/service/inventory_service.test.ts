@@ -121,6 +121,27 @@ describe('InventoryService.listTypes', () => {
     expect(type.suggestedFilters).toStrictEqual(['paused', 'k8s.cluster.name']);
   });
 
+  it('returns the labelled columns and the suggested filters of a definition that declares both', async () => {
+    const both = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: {
+        ...getDynamicBlock(k8sDeploymentOtelAndAgentFixture),
+        displayLabels: [{ name: 'kubernetes.namespace', label: 'Namespace' }],
+        suggestedFilters: ['kubernetes.namespace', 'paused'],
+      },
+    };
+    const { service } = createService([both]);
+
+    const {
+      types: [type],
+    } = await service.listTypes();
+
+    expect(type.columns.find(({ name }) => name === 'kubernetes.namespace')?.label).toBe(
+      'Namespace'
+    );
+    expect(type.suggestedFilters).toStrictEqual(['kubernetes.namespace', 'paused']);
+  });
+
   it('omits definitions without a dynamic block', async () => {
     const { dynamic, ...withoutDynamic } = k8sNodeFixture;
     const { service } = createService([withoutDynamic, hostLikeFixture]);
