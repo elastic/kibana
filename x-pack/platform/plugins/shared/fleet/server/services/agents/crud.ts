@@ -37,10 +37,7 @@ import {
   FleetUnauthorizedError,
   AgentRequestInvalidError,
 } from '../../errors';
-import {
-  findUnmappedAgentFieldInKuery,
-  isAgentFieldNotInMappings,
-} from '../../routes/utils/filter_utils';
+import { validateAgentField, validateAgentKueryFields } from '../../routes/utils/filter_utils';
 import { auditLoggingService } from '../audit_logging';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -84,19 +81,18 @@ function kueryReferencesStatusField(kuery?: string): boolean {
 }
 
 /**
- * Rejects a sort field or kuery that names an agent field omitted from `AGENT_MAPPINGS`
- * (`AGENT_FIELDS_NOT_IN_MAPPINGS`), or a kuery that uses a wildcard field name. Runs for every caller of {@link getAgentsByKuery} — the agent
- * list/status/tags routes, the report route, and the Osquery fleet wrapper — so sort and filter
- * parameters stay consistent with the mappings even for callers that build their own kuery.
- * Field-less terms are not handled here.
+ * Rejects a sort field or kuery field that is not in `AGENT_QUERYABLE_MAPPINGS`. The kuery is checked
+ * after `removeSOAttributes`, as it is searched, so prefixed fields such as `fleet-agents.<field>`
+ * are validated too. Runs for every caller of {@link getAgentsByKuery}, including those that do not
+ * validate the kuery at the route (e.g. the Osquery fleet wrapper).
  */
 export function assertAgentFieldsAreMapped(sortField?: string, kuery?: string): void {
-  if (isAgentFieldNotInMappings(sortField)) {
+  if (sortField && validateAgentField(sortField)) {
     throw new AgentRequestInvalidError(`Sorting by '${sortField}' is not supported`);
   }
-  const kueryField = findUnmappedAgentFieldInKuery(kuery);
-  if (kueryField) {
-    throw new AgentRequestInvalidError(`Filtering by '${kueryField}' is not supported`);
+  const kueryError = validateAgentKueryFields(kuery ? removeSOAttributes(kuery) : undefined);
+  if (kueryError) {
+    throw new AgentRequestInvalidError(`Kuery is not supported: ${kueryError}`);
   }
 }
 
