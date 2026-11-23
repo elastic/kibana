@@ -507,25 +507,8 @@ describe('Color Schema', () => {
       });
     });
 
-    describe('validation errors', () => {
-      it('throws on invalid mode in color mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          // @ts-expect-error
-          mode: 'invalid',
-          mapping: [
-            {
-              values: ['value1'],
-              color: { type: 'color_code', value: '#FF00FF' },
-            },
-          ],
-        } satisfies ColorMappingCategoricalType;
-
-        const result = allColoringTypeSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
-      });
-
-      it('rejects a `null` range key bound', () => {
+    describe('open-ended range keys', () => {
+      it('accepts a `null` range key bound', () => {
         const input = {
           palette: 'kibana_palette',
           mode: 'categorical',
@@ -537,11 +520,10 @@ describe('Color Schema', () => {
           ],
         };
 
-        const result = colorMappingSchema.safeParse(input);
-        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+        expect(colorMappingSchema.parse(input)).toEqual(input);
       });
 
-      it('rejects a `null` bound on a nested range', () => {
+      it('accepts a `null` bound on a nested range', () => {
         const input = {
           palette: 'kibana_palette',
           mode: 'categorical',
@@ -560,7 +542,25 @@ describe('Color Schema', () => {
           ],
         };
 
-        const result = colorMappingSchema.safeParse(input);
+        expect(colorMappingSchema.parse(input)).toEqual(input);
+      });
+    });
+
+    describe('validation errors', () => {
+      it('throws on invalid mode in color mapping', () => {
+        const input = {
+          palette: 'kibana_palette',
+          // @ts-expect-error
+          mode: 'invalid',
+          mapping: [
+            {
+              values: ['value1'],
+              color: { type: 'color_code', value: '#FF00FF' },
+            },
+          ],
+        } satisfies ColorMappingCategoricalType;
+
+        const result = allColoringTypeSchema.safeParse(input);
         expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
       });
 
