@@ -74,6 +74,12 @@ export const createFailClosedOlsExtension = (
   async getInitialAcl({ type, requested }) {
     const policy = typeRegistry.getAccessPolicy(type);
     if (!policy) {
+      // The type has no ACL to store the requested access in, so it would be silently lost.
+      if (requested) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          `Access cannot be set because type [${type}] does not support object-level security (OLS)`
+        );
+      }
       return;
     }
 

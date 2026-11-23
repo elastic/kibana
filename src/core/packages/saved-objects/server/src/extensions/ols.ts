@@ -43,7 +43,8 @@ export interface OlsObject {
  * client excludes the security extension, so that consumers with their own feature checks, such as
  * Actions, still enforce object-level access.
  *
- * Types without an access policy are always allowed and get no read filter.
+ * Types without an access policy are always allowed and get no read filter, but cannot be created
+ * with requested access.
  */
 export interface ISavedObjectsOlsExtension {
   /**
@@ -76,7 +77,8 @@ export interface ISavedObjectsOlsExtension {
   /**
    * Returns the ACL to store with a new object, or `undefined` when the object is created without
    * one. `id` is the ID the object is stored with, generated or not, so that the provider can audit
-   * the creation. Throws a Saved Objects error when the requested access is not allowed.
+   * the creation. Throws a Saved Objects error when the requested access is not allowed, including a
+   * bad request when access is requested for a type without an access policy.
    */
   getInitialAcl(params: {
     type: string;

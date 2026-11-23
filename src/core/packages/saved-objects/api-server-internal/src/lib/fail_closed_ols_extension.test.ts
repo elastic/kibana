@@ -141,6 +141,16 @@ describe('createFailClosedOlsExtension', () => {
       ).resolves.toBeUndefined();
     });
 
+    it('refuses requested access for a type without a policy', async () => {
+      await expect(
+        extension.getInitialAcl({
+          type: OTHER_TYPE,
+          id: 'new',
+          requested: { general: { access: 'none' } },
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+    });
+
     it('rethrows errors other than a refused request', async () => {
       const bug = new TypeError('unexpected');
       jest.mocked(prepareInitialAcl).mockImplementationOnce(() => {
