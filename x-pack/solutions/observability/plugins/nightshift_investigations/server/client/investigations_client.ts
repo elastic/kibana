@@ -13,8 +13,14 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { toSlackPlainText } from '@kbn/connector-specs';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { ExecutionStatus, ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
+  ExecutionStatus,
+  ExecutionType,
+  isSyncParentInvocation,
+  TerminalExecutionStatuses,
+} from '@kbn/workflows';
+import {
+  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
 } from '@kbn/workflows/managed';
@@ -162,6 +168,15 @@ export const UNSUCCESSFUL_EXECUTION_STATUSES: readonly ExecutionStatus[] = [
 ];
 
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+
+/** An unsuccessful investigation run to report. */
+export interface UnsuccessfulInvestigationRun {
+  /** The execution the outcome is recorded and notified under. */
+  execution: WorkflowExecutionDto;
+  investigationId: string;
+  /** The execution whose status and error explain the outcome. */
+  cause: WorkflowExecutionDto;
+}
 
 /** How an investigation run started, recorded as `inputs.context.entry_point`. */
 export type InvestigationEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert_recovery';
@@ -1185,10 +1200,14 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  /** Reads a persisted unsuccessful investigation run under this request's space and permissions. */
-  async getUnsuccessfulRun(
-    executionId: string
-  ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
+  /**
+   * Reads a persisted unsuccessful investigation run under this request's space and permissions.
+   * A space's entry point and the shared investigation it ran are one run, reported once, through
+   * the entry point, under the shared investigation. Resolves to undefined when there is nothing
+   * to report for this execution: the entry point reports it, or the investigation completed and
+   * delivered its own outcome.
+   */
+  async getUnsuccessfulRun(executionId: string): Promise<UnsuccessfulInvestigationRun | undefined> {
     if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
     const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
     if (execution.isTestRun || !UNSUCCESSFUL_EXECUTION_STATUSES.includes(execution.status)) {
@@ -1196,7 +1215,68 @@ export class NightshiftInvestigationsClient {
     }
     const investigationId = asString(inputs?.investigation_id) ?? executionId;
     if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
-    return { execution, investigationId };
+    if (await this.isStartedByEntryPoint(execution)) return undefined;
+    const child =
+      execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
+        ? await this.readInvestigationChild(investigationId, execution.id)
+        : undefined;
+    if (!child) return { execution, investigationId, cause: execution };
+    if (child.status === ExecutionStatus.COMPLETED) return undefined;
+    if (!TerminalExecutionStatuses.includes(child.status)) {
+      throw new Error(`Investigation execution ${child.id} has not finished yet`);
+    }
+    // The entry point's step timeout cancels the investigation, which then carries no reason.
+    const parentTimedOut =
+      execution.status === ExecutionStatus.TIMED_OUT || execution.error?.type === 'TimeoutError';
+    return {
+      execution: child,
+      investigationId,
+      cause: child.status === ExecutionStatus.CANCELLED && parentTimedOut ? execution : child,
+    };
+  }
+
+  /**
+   * Whether a space's entry point waits on this run. The entry point then fails with it and
+   * reports it. Other workflows that run the investigation, such as the Slack thread workflow,
+   * keep going when it fails, so their runs are reported on their own.
+   */
+  private async isStartedByEntryPoint(execution: WorkflowExecutionDto): Promise<boolean> {
+    if (
+      execution.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID ||
+      !isSyncParentInvocation(execution.context)
+    ) {
+      return false;
+    }
+    const { workflowsManagement } = this.requireWriteDeps();
+    const parent = await workflowsManagement.management.getWorkflowExecution(
+      execution.context.parentWorkflowExecutionId,
+      this.getSpaceId(),
+      { includeOutput: false, omitStepExecutions: true, request: this.request }
+    );
+    return (
+      parent?.spaceId === this.getSpaceId() &&
+      parent.originManagedWorkflowId === NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
+    );
+  }
+
+  /** The latest shared investigation run a space's entry point started, if it started one. */
+  private async readInvestigationChild(
+    investigationId: string,
+    parentExecutionId: string
+  ): Promise<WorkflowExecutionDto | undefined> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    const children = await workflowsManagement.management.getChildWorkflowExecutions(
+      parentExecutionId,
+      this.getSpaceId(),
+      this.request
+    );
+    const latest = children.filter(isInvestigationWorkflowExecution).at(-1);
+    if (!latest) return undefined;
+    const { execution } = await this.readInvestigationExecution(
+      investigationId,
+      latest.executionId
+    );
+    return execution;
   }
 
   /** Prevents a delayed outcome from replacing the aggregate state of a newer investigation run. */

@@ -16,49 +16,75 @@ jest.mock('./notifications/send_investigation_notifications', () => ({
 }));
 const sendNotifications = jest.mocked(sendInvestigationNotificationsForExecution);
 
-const report = (execution: { status: ExecutionStatus; error?: { message: string } }) => {
+interface Execution {
+  id: string;
+  status: ExecutionStatus;
+  error?: { type: string; message: string };
+}
+
+const report = async (execution: Execution, cause: Execution) => {
   const client = {
-    getUnsuccessfulRun: jest.fn().mockResolvedValue({
-      execution: { id: 'exec-1', ...execution },
-      investigationId: 'inv-1',
-    }),
+    getUnsuccessfulRun: jest.fn().mockResolvedValue({ execution, investigationId: 'inv-1', cause }),
     ensureForFailure: jest.fn().mockResolvedValue('inv-1'),
     isLatestInvestigationRun: jest.fn().mockResolvedValue(false),
   };
-  return reportUnsuccessfulInvestigation(
+  await reportUnsuccessfulInvestigation(
     { getInvestigationsClient: () => client, getTriggerEmitter: jest.fn() } as never,
     {
       request: httpServerMock.createKibanaRequest(),
       spaceId: 'default',
-      executionId: 'exec-1',
+      executionId: 'parent-1',
       kibanaUrl: 'https://kibana.test',
       logger: loggerMock.create(),
       abortSignal: new AbortController().signal,
     }
   );
+  return client;
+};
+
+const timedOutParent = {
+  id: 'parent-1',
+  status: ExecutionStatus.FAILED,
+  error: {
+    type: 'TimeoutError',
+    message: 'Step execution exceeded the configured timeout of 10s.',
+  },
+};
+const cancelledChild = {
+  id: 'child-1',
+  status: ExecutionStatus.CANCELLED,
+  error: { type: 'CancellationError', message: 'Cancelled by user' },
+};
+const failedChild = {
+  id: 'child-1',
+  status: ExecutionStatus.FAILED,
+  error: { type: 'Error', message: 'Step failed' },
 };
 
 describe('reportUnsuccessfulInvestigation', () => {
   beforeEach(() => sendNotifications.mockReset().mockResolvedValue({} as never));
 
-  it('tells a cancelled run apart from a failure, whatever error it carries', async () => {
-    await report({
-      status: ExecutionStatus.CANCELLED,
-      error: { message: 'Sub-workflow execution cancelled: Cancelled by user' },
-    });
+  it.each([
+    [
+      'the entry point timeout that cancelled the investigation',
+      cancelledChild,
+      timedOutParent,
+      'Step execution exceeded the configured timeout of 10s.',
+    ],
+    [
+      'a stopped investigation, whatever error it carries',
+      cancelledChild,
+      cancelledChild,
+      'Investigation was stopped',
+    ],
+    ['the error of a failed investigation', failedChild, failedChild, 'Step failed'],
+  ])('reports %s under the investigation run', async (_, execution, cause, reason) => {
+    const client = await report(execution, cause);
+    expect(client.ensureForFailure).toHaveBeenCalledWith('inv-1', 'child-1', reason);
     expect(sendNotifications).toHaveBeenCalledWith(
       expect.anything(),
-      expect.anything(),
-      expect.objectContaining({ phase: 'failed', reason: 'Investigation was stopped' })
-    );
-  });
-
-  it('reports the error of a failed run', async () => {
-    await report({ status: ExecutionStatus.FAILED, error: { message: 'Step failed' } });
-    expect(sendNotifications).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.anything(),
-      expect.objectContaining({ phase: 'failed', reason: 'Step failed' })
+      expect.objectContaining({ executionId: 'child-1' }),
+      expect.objectContaining({ phase: 'failed', reason })
     );
   });
 });

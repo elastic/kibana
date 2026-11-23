@@ -19,7 +19,7 @@ export const sweepInvestigationFailuresStepDefinition = (deps: InvestigationFail
   createServerStepDefinition({
     id: 'nightshift.sweepInvestigationFailures',
     label: 'Reconcile nightshift investigation failures',
-    description: 'Reports persisted failed and timed-out investigation executions.',
+    description: 'Reports persisted failed, timed-out and cancelled investigation executions.',
     category: StepCategory.Ai,
     inputSchema: z.object({}),
     outputSchema: investigationFailureSweepOutputSchema,
