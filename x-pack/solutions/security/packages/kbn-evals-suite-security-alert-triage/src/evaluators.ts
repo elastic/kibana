@@ -58,6 +58,16 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
   createToolCallCountEvaluator('security.alerts calls', SECURITY_ALERTS_TOOL_ID),
   createToolCallCountEvaluator('search_relevant_skills calls', internalTools.searchRelevantSkills),
   createToolCallCountEvaluator('load_skill calls', internalTools.loadSkill),
+  // security-team#21037 — queue questions must not spend tokens on these triage tools
+  createToolCallCountEvaluator(
+    'security.alert-analysis.get-related-alerts calls',
+    'security.alert-analysis.get-related-alerts'
+  ),
+  createToolCallCountEvaluator(
+    'security.security_labs_search calls',
+    'security.security_labs_search'
+  ),
+  createToolCallCountEvaluator('security.get_entity calls', 'security.get_entity'),
   {
     name: 'Tool sequence (steps)',
     kind: 'CODE' as const,

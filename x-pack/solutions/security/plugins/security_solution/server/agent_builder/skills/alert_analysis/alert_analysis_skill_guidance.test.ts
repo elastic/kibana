@@ -57,12 +57,31 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
     expect(fetchesUnconditionally && !isConditionalOnAttachment).toBe(false);
   });
 
+  // Why: security-team#21037 — queue/list questions with the skill cost ~2.8x tokens vs no-skill when
+  // the model still runs related-alerts, Security Labs, and get_entity. The queue path must stop after
+  // security.alerts.
+  it('tells the model to stop after security.alerts on list/count/prioritize questions', () => {
+    const { content } = alertAnalysisSkill;
+    const queuePath = content.slice(
+      content.indexOf('### Queue path'),
+      content.indexOf('### Triage path')
+    );
+
+    expect(queuePath).toMatch(/call only 'security\.alerts'/i);
+    expect(queuePath).toMatch(/stop/i);
+    expect(queuePath).toMatch(/do NOT call 'security\.alert-analysis\.get-related-alerts'/i);
+    expect(queuePath).toMatch(/'security\.security_labs_search'/i);
+    expect(queuePath).toMatch(/'security\.get_entity'/i);
+  });
+
   // Why: security.get_entity exists only when the Entity Store V2 index exists. Where it is missing,
   // a skill that names it without a fallback sends the model looking for it (extra load_skill calls).
+  // PR #304299 made Claude call it on every triage run (0.07 → 2.0); keep it triage-only.
   it('says what to do when security.get_entity is not available', () => {
     const { content } = alertAnalysisSkill;
     const step4 = content.slice(content.indexOf('### 4.'), content.indexOf('### 5.'));
 
+    expect(step4).toMatch(/only on the triage path/i);
     expect(step4).toMatch(/if 'security\.get_entity' is available/i);
     expect(step4).toMatch(/if it is not available, skip this step/i);
     expect(step4).not.toMatch(/entity-analytics skill/i);
@@ -73,7 +92,7 @@ describe('alertAnalysisSkill guidance for literal-following models (security-tea
   // Why: a plain list needs a few fields per alert. Without this line, the model asks for full rows,
   // which the tool cuts to about 25.
   it('tells the model to ask for summary detail on plain list requests', () => {
-    expect(alertAnalysisSkill.content).toMatch(/detail[^.\n]*'summary'[^.\n]*list/i);
+    expect(alertAnalysisSkill.content).toMatch(/detail[^.\n]*'summary'/i);
   });
 
   it('only names registry tools that are loadable when skills are enabled', async () => {

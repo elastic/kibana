@@ -22,6 +22,8 @@ export interface ConverseEvalExample extends Example {
   metadata?: {
     attachments?: Array<{ type: string; data?: unknown }>;
     expectedAttachmentReads?: number;
+    /** When set, passed to converse as configuration_overrides.skill_ids. */
+    skillIds?: string[];
   };
 }
 
@@ -69,13 +71,14 @@ export const createEvaluateConverse = ({
           } satisfies EvaluationDataset,
         ],
         task: async ({ input, metadata }) => {
-          const { attachments = [] } = metadata ?? {};
+          const { attachments = [], skillIds } = metadata ?? {};
           return callConverse({
             fetch,
             connectorId: connector.id,
             question: input.question,
             attachments,
             log,
+            configurationOverrides: skillIds !== undefined ? { skill_ids: skillIds } : undefined,
           });
         },
       },

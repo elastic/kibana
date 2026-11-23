@@ -27,7 +27,8 @@ export const alertAnalysisSkill = defineSkillType({
   description:
     'Count, list, prioritize, and investigate Security detection alerts in the current Kibana space. ' +
     'Use for questions like "how many alerts", "high/critical alerts in last 24h", or triage of a specific alert. ' +
-    'Fetches alerts via security.alerts (space-scoped), correlates related alerts, enriches with Security Labs, and assesses entity risk.',
+    'List and count questions use only security.alerts. Single-alert triage may correlate related alerts, ' +
+    'enrich with Security Labs, and assess entity risk.',
   content: `# Alert Analysis Guide
 
 ## When to Use This Skill
@@ -40,7 +41,20 @@ Use this skill when:
 - Enriching alert data with threat intelligence from Elastic Security Labs
 - Assessing entity risk scores for hosts or users involved in alerts
 
-## Alert Analysis Process
+## Choose a Path First
+
+Pick one path before any other tool call:
+
+### Queue path (list, count, prioritize, summarize many alerts)
+- Call only 'security.alerts'. For a plain list, use detail 'summary'. Keep the default detail when the question needs alert content such as command lines.
+- Answer from that result. Stop.
+- Do NOT call 'security.alert-analysis.get-related-alerts', 'security.security_labs_search', or 'security.get_entity' on this path.
+- Do NOT run the triage steps below.
+
+### Triage path (one specific alert, attached or named by id)
+- Follow the triage steps below. Skip any step that does not apply.
+
+## Triage Steps (specific alert only)
 
 ### 1. Initial Alert Assessment
 - If the alert is already attached to the conversation or its details are already in context, use that data and do NOT fetch it again
@@ -62,6 +76,7 @@ Use this skill when:
   - IOC context for IPs, domains, or file hashes found in the alert
 
 ### 4. Assess Entity Risk
+- Only on the triage path. Skip this step for list, count, prioritize, or summarize-queue questions
 - If 'security.get_entity' is available, use it to look up the involved hosts and users, including their risk scores
 - If it is not available, skip this step and state that entity risk was not checked. Do not load another skill or search for another tool to replace it
 - High risk scores (>80) on involved entities increase alert priority
@@ -86,14 +101,7 @@ Use this skill when:
 - For a plain list of alerts (the user only wants to see them), call 'security.alerts' with detail 'summary' to list more alerts with their key fields. Keep the default detail when you need to analyze alert content.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
 - Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, or workflow tools for alert inventory, count, or related-alert correlation. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
-
-## Best Practices
-- Always start with the alert details (from the attachment or context when present) before expanding investigation scope
-- Use entity relationships to efficiently find related security data
-- Maintain chronological context when analyzing events and alerts
-- Prioritize high-severity alerts and entities with critical asset criticality
-- Document your analysis reasoning for future reference
-- Cross-reference multiple data points before making disposition decisions`,
+`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,
