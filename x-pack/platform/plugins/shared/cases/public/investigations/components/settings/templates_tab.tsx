@@ -247,12 +247,14 @@ export const TemplatesTab: React.FC = () => {
     if (templatesQuery.isLoading || typesQuery.isLoading || taskListsQuery.isLoading) {
       return <LoadingState label={i18n.TEMPLATES_LOADING} />;
     }
-    if (templatesQuery.isError) {
+    // The Task lists column depends on all three, so any failure is shown instead of a table of "-".
+    const failed = [templatesQuery, typesQuery, taskListsQuery].filter((query) => query.isError);
+    if (failed.length > 0) {
       return (
         <ErrorState
           title={i18n.TEMPLATES_LOAD_ERROR}
-          error={templatesQuery.error}
-          onRetry={() => void templatesQuery.refetch()}
+          error={failed[0].error}
+          onRetry={() => failed.forEach((query) => void query.refetch())}
         />
       );
     }

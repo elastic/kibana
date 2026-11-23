@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getPausedSeconds } from '../../../../common/investigations/statuses';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { formatDuration } from '../shared/formatters';
@@ -40,6 +41,7 @@ export const AgeCell: React.FC<AgeCellProps> = ({ record }) => {
     <EuiToolTip content={i18n.AGE_TOOLTIP}>
       <span
         tabIndex={0}
+        css={noWrapStyles}
         data-age-ms={ageMs}
         data-test-subj={`investigationAge-${record.display_id}`}
       >
@@ -49,3 +51,7 @@ export const AgeCell: React.FC<AgeCellProps> = ({ record }) => {
   );
 };
 AgeCell.displayName = 'AgeCell';
+
+const noWrapStyles = css`
+  white-space: nowrap;
+`;

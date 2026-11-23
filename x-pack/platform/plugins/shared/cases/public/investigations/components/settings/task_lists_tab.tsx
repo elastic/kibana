@@ -166,10 +166,11 @@ export const TaskListsTab: React.FC<TaskListsTabProps> = ({ editTaskListId, isAd
             gutterSize="xs"
             wrap
             responsive={false}
+            css={fitColumnStyles}
             data-test-subj={`investigationTaskListUsedBy-${taskList.id}`}
           >
             {names.map((name) => (
-              <EuiFlexItem grow={false} key={name}>
+              <EuiFlexItem grow={false} key={name} css={fitColumnStyles}>
                 <EuiBadge color="hollow">{name}</EuiBadge>
               </EuiFlexItem>
             ))}
@@ -342,4 +343,10 @@ const clampStyles = css`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+`;
+
+/** Long template names truncate inside the column (EuiBadge shows the full name as its title). */
+const fitColumnStyles = css`
+  min-width: 0;
+  max-width: 100%;
 `;

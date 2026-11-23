@@ -291,33 +291,44 @@ export const QueueTable: React.FC<QueueTableProps> = ({
         description: i18n.COLUMN_EVIDENCE_CLAIMS,
         sortable: true,
         align: 'right',
-        width: '100px',
-        render: (_value: number, record) => (
-          <span
-            css={css`
-              white-space: nowrap;
-            `}
-            data-test-subj="investigationQueueEvidenceClaims"
-          >
-            {i18n.EVIDENCE_CLAIMS(
-              record.counters.evidence,
-              record.counters.claims_by_status.open ?? 0
-            )}
-          </span>
-        ),
+        width: '112px',
+        render: (_value: number, record) => {
+          const text = i18n.EVIDENCE_CLAIMS(
+            record.counters.evidence,
+            record.counters.claims_by_status.open ?? 0
+          );
+          // Large evidence counts truncate inside the column instead of running into Alerts.
+          return (
+            <span
+              css={truncateStyle}
+              title={text}
+              data-test-subj="investigationQueueEvidenceClaims"
+            >
+              {text}
+            </span>
+          );
+        },
       },
       {
         field: 'created_at',
         name: i18n.COLUMN_AGE,
-        width: '72px',
+        width: '88px',
         render: (_value: string, record) => <AgeCell record={record} />,
       },
       {
         field: 'updated_at',
         name: i18n.COLUMN_UPDATED,
         sortable: true,
-        width: '88px',
-        render: (value: string) => <RelativeTime value={value} />,
+        width: '96px',
+        render: (value: string) => (
+          <span
+            css={css`
+              white-space: nowrap;
+            `}
+          >
+            <RelativeTime value={value} />
+          </span>
+        ),
       },
       ...fieldColumns.map(
         ({ mirrorKey, label }): EuiBasicTableColumn<InvestigationRecord> => ({

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { CaseStatusConfiguration } from '../../../../common/investigations/statuses';
 import type { InvestigationRecord } from '../../../../common/investigations/types';
 import { StatusLabelBadge } from './status_label_badge';
@@ -25,9 +26,11 @@ export const StatusCell: React.FC<StatusCellProps> = ({ record, status }) => (
     alignItems="center"
     responsive={false}
     wrap
+    css={fitColumnStyles}
     data-test-subj={`investigationStatusCell-${record.display_id}`}
   >
-    <EuiFlexItem grow={false}>
+    {/* min-width 0 lets a long custom status label truncate (EuiBadge shows the full text as its title). */}
+    <EuiFlexItem grow={false} css={fitColumnStyles}>
       <StatusLabelBadge
         label={status.label}
         category={status.category}
@@ -56,3 +59,8 @@ export const StatusCell: React.FC<StatusCellProps> = ({ record, status }) => (
   </EuiFlexGroup>
 );
 StatusCell.displayName = 'StatusCell';
+
+const fitColumnStyles = css`
+  min-width: 0;
+  max-width: 100%;
+`;

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { TaskList } from '../../../../common/investigations/types';
 import * as i18n from './translations';
 
@@ -32,9 +33,15 @@ export const LinkedTaskListBadges: React.FC<LinkedTaskListBadgesProps> = ({
     );
   }
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj={dataTestSubj}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      wrap
+      responsive={false}
+      css={fitColumnStyles}
+      data-test-subj={dataTestSubj}
+    >
       {linked.map(({ id, name }) => (
-        <EuiFlexItem grow={false} key={id}>
+        <EuiFlexItem grow={false} key={id} css={fitColumnStyles}>
           <EuiBadge color="hollow">{name}</EuiBadge>
         </EuiFlexItem>
       ))}
@@ -42,3 +49,9 @@ export const LinkedTaskListBadges: React.FC<LinkedTaskListBadgesProps> = ({
   );
 };
 LinkedTaskListBadges.displayName = 'LinkedTaskListBadges';
+
+/** Long list names truncate inside the column (EuiBadge shows the full name as its title). */
+const fitColumnStyles = css`
+  min-width: 0;
+  max-width: 100%;
+`;
