@@ -10,7 +10,11 @@
         "-1",
         "0"
       ],
-      "from": ""
+      "from": "",
+      "initial_delay": [
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "POST"
