@@ -27,12 +27,22 @@ import type { UpsertSectionItem } from './schema';
 
 const applyMetadata = (
   dashboardData: DashboardAttachmentData,
-  { title, description, time_range: timeRange }: DashboardMetadata
+  {
+    title,
+    description,
+    time_range: timeRange,
+    options,
+    refresh_interval: refreshInterval,
+    esql_approximation: esqlApproximation,
+  }: DashboardMetadata
 ): DashboardAttachmentData => ({
   ...dashboardData,
   ...(title !== undefined ? { title } : {}),
   ...(description !== undefined ? { description } : {}),
   ...(timeRange !== undefined ? { time_range: timeRange } : {}),
+  ...(options !== undefined ? { options: { ...dashboardData.options, ...options } } : {}),
+  ...(refreshInterval !== undefined ? { refresh_interval: refreshInterval } : {}),
+  ...(esqlApproximation !== undefined ? { esql_approximation: esqlApproximation } : {}),
 });
 
 const updateSections = (
