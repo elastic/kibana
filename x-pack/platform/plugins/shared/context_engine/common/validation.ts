@@ -103,8 +103,12 @@ export const validateRelativeSignalWindow = (value: string): string | undefined 
       })
     : undefined;
 
-/** Returns a translated error message for an invalid absolute signal window, or `undefined` when valid. */
-export const validateAbsoluteSignalWindow = (value: string): string | undefined =>
+/** Returns an error message when a string is empty or whitespace-only, or `undefined` when valid. */
+export const validateNonBlank = (value: string): string | undefined =>
+  value.trim().length > 0 ? undefined : 'must not be blank';
+
+/** Returns a translated error message for a value `Date.parse` cannot read, or `undefined` when valid. */
+export const validateIsoDate = (value: string): string | undefined =>
   Number.isNaN(Date.parse(value))
     ? i18n.translate('xpack.contextEngine.feedbackAnalysis.error.invalidAbsoluteFrom', {
         defaultMessage: 'Must be an ISO 8601 date, for example 2026-01-31T00:00:00.000Z.',

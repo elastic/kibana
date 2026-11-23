@@ -14,6 +14,8 @@ export {
   MAX_DURATION_LENGTH,
   parseDuration,
 } from './duration/duration';
+export { applyBackoffJitter } from './backoff_jitter/backoff_jitter';
+export { computeRetryDelayMs, type RetryDelayConfig } from './retry_delay/retry_delay';
 export { extractTemplateVariables } from './extract_template_variables/extract_template_variables';
 export {
   findInputsInGraph,
@@ -45,6 +47,12 @@ export {
   type ManagedWorkflowFieldsSource,
   type ManagedWorkflowTelemetryFields,
 } from './pick_managed_workflow_fields/pick_managed_workflow_fields';
+export {
+  parseTemplateOriginFields,
+  pickTemplateOriginFields,
+  type TemplateOriginFields,
+  type TemplateOriginFieldsSource,
+} from './pick_template_origin_fields/pick_template_origin_fields';
 export {
   isValidWorkflowDocumentVersion,
   pickWorkflowDocumentVersion,

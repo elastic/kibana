@@ -8,9 +8,9 @@
  */
 
 /**
- * Calculates the ceiling of a number, i.e. rounds a number towards positive infinity. For arrays, the function will be applied index-wise to each element.
+ * Calculates the ceiling of a number, that is, rounds a number toward positive infinity. For arrays, the function will be applied index-wise to each element.
  * @param {(number|number[])} a a number or an array of numbers
- * @return {(number|number[])} The ceiling of `a`. Returns an array with the the ceilings of each element if `a` is an array.
+ * @return {(number|number[])} The ceiling of `a`. Returns an array with the ceilings of each element if `a` is an array.
  *
  * @example
  * ceil(1.2) // returns 2

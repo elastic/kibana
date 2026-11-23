@@ -172,21 +172,28 @@ go in the PR description as the follow-up. Build them when this invocation is th
 
 1. Add `metadata.id` to `SPECS_ALLOWED_EVENTS` in `src/specs_allowed_events.ts` in the same change.
    The contract test rejects `events` on an id that is not in the set.
-2. Put definitions and `handleEvents` in `{connector}/events.ts`. Schemas go in `types.ts` or
-   `event_schemas.ts`, each wrapped in `lazySchema()`. Assign the export to `events` on the spec,
-   next to `actions`. Do not spread it into `actions`.
-3. Keep the outbound `actions` on a dual connector. An inbound-only connector (nothing to call on
+2. Define the event in `@kbn/connector-topics` first, in
+   `src/platform/packages/shared/kbn-connector-topics/src/events/{connector}.ts`, and export it from
+   that package's `index.ts`. The export is `{ name, eventSchema }`. `name` is the public event id
+   (`github.issues`, the same string `buildEventId(metadata.id, definitionKey)` produces).
+   `eventSchema` is the spoke payload: `lazySchema(() => z.object(...))` with `.describe()` on each
+   field. Leave `title`, `description`, `connectorId`, `connectorTypeId`, `spaceId`, and
+   `correlationKey` off it.
+3. In `{connector}/events.ts`, build the spec event with `toConnectorSpecEvent` from that export.
+   `title` and `description` stay on the spec and use `i18n.translate`. Assign the export to
+   `events` on the spec, next to `actions`. Do not spread it into `actions`. Do not keep a second
+   schema in `types.ts` or `event_schemas.ts`, and do not declare a second event id.
+4. Keep the outbound `actions` on a dual connector. An inbound-only connector (nothing to call on
    the vendor) uses `actions: {}` and `test.enabled: false`.
-4. One typed event per product event you can name and a workflow, case, or alert will use.
-   `eventId` is `buildEventId(metadata.id, definitionKey)`. `title` and `description` use
-   `i18n.translate`.
-5. `handleEvents` emits that id for a recognized body and `{ type: 'emit', events: [] }` otherwise.
+5. One typed event per product event you can name and a workflow, case, or alert will use.
+6. `handleEvents` emits that topic `name` for a recognized body and `{ type: 'emit', events: [] }`
+   otherwise.
    A vendor handshake (URL verification, `validationToken`, a top-level `challenge`) returns
    `{ type: 'http', httpResponse }` and does not emit. Use a vendor id as `correlationKey` when
    the payload has one (max 128 characters); use a UUID only when it does not.
-6. Do not put `ingestTokenHash` on the schema. Do not read secrets in `handleEvents`. `events.headers`
+7. Do not put `ingestTokenHash` on the schema. Do not read secrets in `handleEvents`. `events.headers`
    lists only lowercase names, and never `authorization` or `cookie`. Do not log `rawBody` at info.
-7. Add `{connector}/events.test.ts` (Step 4). Document the ingest URL, the token, and an example
+8. Add `{connector}/events.test.ts` (Step 4). Document the ingest URL, the token, and an example
    payload on the connector docs page (Step 5).
 
 Copy a shipped spoke: `servicenow_search/events.ts` for typed case events, `github/events.ts` for a
@@ -256,7 +263,7 @@ Add tests following the existing examples:
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
 2. **Inbound event tests**, when the spec has `events` — `{connector}/events.test.ts`, following
    `servicenow_search/events.test.ts` or `github/events.test.ts`. Assert the id is allowlisted, every
-   `eventId` equals `buildEventId`, a recognized body emits that id and passes `validateEmittedEvents`,
+   `eventId` is the topic `name`, a recognized body emits that name and passes `validateEmittedEvents`,
    an unrecognized body emits nothing, and a handshake (if the vendor has one) returns `type: 'http'`
    without emitting. Prefer the vendor id as `correlationKey` in the recognized case.
 
@@ -457,7 +464,8 @@ Then, before treating the connector as done, re-read the whole diff once, end to
   `'workflows'`, once the type is on every Production-NonCanary version
 - `events` missing on that follow-up when the first PR recorded event keys, or `events` present
   while `metadata.id` is absent from `SPECS_ALLOWED_EVENTS`
-- an `eventId` that is not `buildEventId(metadata.id, definitionKey)`, a payload with secrets, or
+- an event defined only on the spec, or an `eventId` that is not the `@kbn/connector-topics` `name`
+  (that name still equals `buildEventId(metadata.id, definitionKey)`), a payload with secrets, or
   `events.headers` containing `authorization`, `cookie`, or a mixed-case name
 - `handleEvents` logging `rawBody` at info, or `ingestTokenHash` declared on the connector schema
 - Leftover schemas/constants from earlier iterations that are no longer referenced anywhere

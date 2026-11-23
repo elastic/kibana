@@ -13,6 +13,7 @@ import type {
   CspRegion,
 } from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
+import type { TESTABLE_TASK_TYPES } from './constants';
 
 export type { CspRegion };
 
@@ -27,7 +28,20 @@ export const APIRoutes = {
   GET_INFERENCE_CONNECTORS: INFERENCE_CONNECTORS_INTERNAL_API_PATH,
   // Single path shared by GET, PUT, and DELETE region policy operations
   REGION_POLICY: '/internal/search_inference_endpoints/region_policy',
+  TEST_INFERENCE_ENDPOINT: '/internal/search_inference_endpoints/endpoints/{id}/_test',
 } as const;
+
+export type TestableTaskType = (typeof TESTABLE_TASK_TYPES)[number];
+
+export interface TestEndpointResponse {
+  ok: boolean;
+  latencyMs: number;
+  statusCode?: number;
+  raw?: unknown;
+  error?: {
+    reason: string;
+  };
+}
 
 export interface InferenceConnectorsResponse {
   connectors: InferenceConnector[];
