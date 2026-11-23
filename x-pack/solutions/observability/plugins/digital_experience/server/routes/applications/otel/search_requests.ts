@@ -14,6 +14,7 @@ import type { HistogramParams } from '../../../lib/helpers/time_series';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter } from '../../../lib/helpers/environment';
 import {
+  ENVIRONMENT_FIELDS,
   EVENT_EXCEPTION,
   EVENT_NAVIGATION_TIMING,
   EVENT_WEB_VITAL,
@@ -21,7 +22,6 @@ import {
   OTEL_TRACES_INDEX,
 } from '../../../../common/otel_data';
 import {
-  ENVIRONMENT_FIELDS,
   browserDocuments,
   byEnvironment,
   environmentTerms,

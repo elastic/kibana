@@ -535,7 +535,7 @@
     {
       "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
-        "@mswjs/http-middleware",
+        "@msw/serve",
         "@types/byte-size",
         "byte-size",
         "msw",
@@ -2305,7 +2305,6 @@
       "matchDepNames": [
         "@grpc/grpc-js",
         "@opentelemetry/api",
-        "@opentelemetry/api-logs",
         "@opentelemetry/context-async-hooks",
         "@opentelemetry/core",
         "@opentelemetry/exporter-logs-otlp-grpc",

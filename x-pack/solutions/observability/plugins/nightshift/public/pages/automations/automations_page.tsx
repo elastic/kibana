@@ -12,6 +12,7 @@ import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
 import { useKibana } from '../../hooks/use_kibana';
+import { useAllRelayAppBindings } from '../../data/relay_apps/use_relay_app_bindings';
 import { useInvestigatorServiceAccount } from '../../data/service_accounts/use_investigator_service_account';
 import {
   MANAGE_SECURITY_REQUIRED_BODY,
@@ -72,6 +73,7 @@ export const AutomationsPage = (): React.ReactElement => {
       ? MANAGE_SECURITY_REQUIRED_REASON
       : undefined;
   const { data, error, isInitialLoading, refetch } = useFetchAutomations();
+  const connectedChannels = useAllRelayAppBindings();
   const deleteAutomation = useDeleteAutomation();
   const runAutomation = useRunAutomation();
   const refreshAutomations = useRefreshAutomations();
@@ -172,6 +174,7 @@ export const AutomationsPage = (): React.ReactElement => {
         getFacets={getFacets}
         isRateLimited={isRateLimited}
         isGlobalLimitReached={isGlobalLimitReached}
+        connectedChannels={connectedChannels}
         pageIndex={pageIndex}
         pageSize={page.size}
         onPageChange={(index, size) => setPage({ index, size })}

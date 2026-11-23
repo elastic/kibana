@@ -568,6 +568,72 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
     });
   });
 
+  describe('step exposure hover', () => {
+    it.each([
+      ['internal', monaco.MarkerSeverity.Warning],
+      ['managed_only', monaco.MarkerSeverity.Error],
+    ])(
+      'should show the step hover next to the %s step marker',
+      async (_exposure, markerSeverity) => {
+        jest.spyOn(monaco.editor, 'getModelMarkers').mockReturnValue([
+          {
+            owner: 'custom-yaml-validation',
+            source: 'step-exposure-validation',
+            startLineNumber: 2,
+            startColumn: 12,
+            endLineNumber: 2,
+            endColumn: 26,
+            message: 'Step type "custom.restricted" is an internal step.',
+            severity: markerSeverity,
+          },
+        ] as monaco.editor.IMarker[]);
+
+        const mockHandler = {
+          generateHoverContent: jest.fn().mockResolvedValue({
+            value: 'step hover',
+            isTrusted: true,
+          }),
+        };
+        mockGetMonacoConnectorHandler.mockReturnValue(mockHandler);
+        mockGetPathAtOffset.mockReturnValue(['steps', 0, 'type']);
+        mockPerformComputation.mockReturnValue({
+          workflowLookup: {
+            steps: {
+              restricted_step: {
+                stepId: 'restricted_step',
+                stepType: 'custom.restricted',
+                lineStart: 1,
+                lineEnd: 4,
+                isInWithBlock: false,
+                stepYamlNode: {},
+                propInfos: { type: { valueNode: {} } },
+              },
+            },
+          },
+        });
+
+        const stepExposureHoverProvider = new UnifiedHoverProvider({
+          getYamlDocument: () =>
+            ({
+              getIn: jest.fn().mockReturnValue(null),
+            } as never),
+        });
+
+        const result = await stepExposureHoverProvider.provideHover(
+          createMockModel('steps:\n  - type: custom.restricted'),
+          createMockPosition(2, 20),
+          {} as monaco.CancellationToken
+        );
+
+        expect(result).toEqual({ contents: [{ value: 'step hover', isTrusted: true }] });
+        expect(mockHandler.generateHoverContent).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorType: 'custom.restricted' })
+        );
+        expect(getInterceptedHover).not.toHaveBeenCalled();
+      }
+    );
+  });
+
   describe('provideHover cancellation', () => {
     it('should return null without querying markers when the request is already cancelled', async () => {
       const getModelMarkersSpy = jest.spyOn(monaco.editor, 'getModelMarkers');
