@@ -121,8 +121,12 @@ export class EditLayerPanel extends Component<Props, State> {
     }
   }
 
-  _onSourceChange = (...args: OnSourceChangeArgs[]) => {
-    return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
+  _onSourceChange = (...args: Array<OnSourceChangeArgs<Record<string, unknown>>>) => {
+    // Sources from other plugins can change keys unknown to maps, propName is not narrowed to SourcePropName for them
+    return this.props.updateSourceProps(
+      this.props.selectedLayer!.getId(),
+      args as OnSourceChangeArgs[]
+    );
   };
 
   _renderFilterSection() {
