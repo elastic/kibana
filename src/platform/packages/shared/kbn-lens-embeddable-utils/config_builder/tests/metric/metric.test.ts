@@ -12,7 +12,7 @@ import type { MetricVisualizationState, TermsIndexPatternColumn } from '@kbn/len
 
 import { validator } from '../utils/validator';
 import { DEFAULT_LAYER_ID } from '../../constants';
-import type { MetricConfig } from '../../schema/charts/metric';
+import { metricConfigSchema, type MetricConfig } from '../../schema/charts/metric';
 import { AUTO_COLOR, NO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -164,6 +164,43 @@ describe('Metric', () => {
           ?.fieldName
       ).toBe('custom_time_bucket');
     });
+
+    it('derives the trendline from the FORK branch producing the metric column', () => {
+      const builder = new LensConfigBuilder(undefined, true);
+      const query =
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | FORK (STATS `Total Flights` = COUNT(*)) (STATS `Flight Count` = COUNT(*) BY `Time Bucket` = BUCKET(timestamp, 75, ?_tstart, ?_tend))';
+      const lensState = builder.fromAPIFormat({
+        type: 'metric',
+        title: 'FORK metric with trendline',
+        data_source: { type: 'esql', query },
+        ignore_global_filters: false,
+        sampling: 1,
+        metrics: [
+          {
+            type: 'primary',
+            column: 'Total Flights',
+            background_chart: { type: 'trend' },
+          },
+        ],
+      } satisfies MetricConfig);
+      const visualization = lensState.state.visualization as MetricVisualizationState;
+      const trendlineLayerId = visualization.trendlineLayerId;
+      const trendlineTimeAccessor = visualization.trendlineTimeAccessor;
+
+      if (!trendlineLayerId || !trendlineTimeAccessor) {
+        throw new Error('Expected trendline accessors in metric visualization state');
+      }
+
+      const trendlineLayer = lensState.state.datasourceStates.textBased?.layers[trendlineLayerId];
+      expect(trendlineLayer?.query?.esql).toBe(
+        'FROM kibana_sample_data_flights | WHERE timestamp >= ?_tstart AND timestamp < ?_tend | STATS `Total Flights` = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
+      );
+      expect(trendlineLayer?.query?.esql).not.toContain('FORK');
+      expect(
+        trendlineLayer?.columns.find(({ columnId }) => columnId === trendlineTimeAccessor)
+          ?.fieldName
+      ).toBe('BUCKET(timestamp, 75, ?_tstart, ?_tend)');
+    });
   });
 
   describe('form-based trendline breakdown ordering', () => {
@@ -307,6 +344,47 @@ describe('Metric', () => {
     });
   });
 
+  describe('secondary metric label placement', () => {
+    const getConfigWithSecondaryLabel = (
+      label: NonNullable<NonNullable<MetricConfig['styling']>['secondary']>['label']
+    ) =>
+      ({
+        ...baseMetric,
+        metrics: [
+          ...baseMetric.metrics,
+          {
+            type: 'secondary',
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        styling: { secondary: { label } },
+      } satisfies MetricConfig);
+
+    const convert = (config: MetricConfig) => {
+      const builder = new LensConfigBuilder();
+      return builder.toAPIFormat(builder.fromAPIFormat(config)) as MetricConfig;
+    };
+
+    it('should keep the default placement of a visible label after schema validation', () => {
+      const apiOutput = convert(getConfigWithSecondaryLabel({ visible: true }));
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: true, placement: 'before' });
+    });
+
+    it('should not add a placement after schema validation when the label is hidden', () => {
+      const apiOutput = convert(
+        getConfigWithSecondaryLabel({ visible: false, placement: 'after' })
+      );
+      const validated = metricConfigSchema.validate(apiOutput);
+
+      expect(apiOutput.styling?.secondary?.label).toEqual({ visible: false });
+      expect(validated.styling?.secondary?.label).toEqual({ visible: false });
+    });
+  });
+
   describe('color by value named palette', () => {
     it('(API -> SO -> API) round-trips a named palette on a single-value metric as a numeric range', () => {
       const config = {
@@ -422,6 +500,57 @@ describe('Metric', () => {
       expect(outViz.palette?.params?.continuity).toBe('all');
       expect(outViz.palette?.params?.stops).toBeUndefined();
       expect(outViz.palette?.params?.colorStops).toBeUndefined();
+    });
+  });
+
+  describe('ES|QL Control Variable', () => {
+    const builder = new LensConfigBuilder(undefined, true);
+    const esqlControlMetric = {
+      type: 'metric',
+      title: 'Identifier Control variable',
+      data_source: {
+        type: 'esql',
+        query: 'FROM logs | STATS count = COUNT(*) BY ??field',
+      },
+      metrics: [{ type: 'primary', column: 'count' }],
+      breakdown_by: { column: '??field', columns: 3 },
+      sampling: 1,
+      ignore_global_filters: true,
+    } satisfies MetricConfig;
+
+    const getColumnByFieldName = (
+      attributes: ReturnType<LensConfigBuilder['fromAPIFormat']>,
+      fieldName: string
+    ) =>
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})
+        .flatMap((layer) => layer.columns)
+        .find((column) => column.fieldName === fieldName);
+
+    it('(SO -> API -> SO) preserves `variable`', () => {
+      const original = builder.fromAPIFormat(esqlControlMetric);
+      expect(getColumnByFieldName(original, '??field')?.variable).toBe('field');
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+      expect(getColumnByFieldName(so, '??field')?.variable).toBe('field');
+    });
+
+    it('(SO -> API -> SO) does not stamp `variable` for a Value (`?`) control', () => {
+      const original = builder.fromAPIFormat({
+        ...esqlControlMetric,
+        title: 'Value Control variable',
+        data_source: {
+          ...esqlControlMetric.data_source,
+          query: 'FROM logs | STATS count = COUNT(*) BY ??field, ?os',
+        },
+        breakdown_by: { ...esqlControlMetric.breakdown_by, column: '?os' },
+      } satisfies MetricConfig);
+      expect(getColumnByFieldName(original, '?os')?.variable).toBeUndefined();
+
+      const api = builder.toAPIFormat(original) as MetricConfig;
+      const so = builder.fromAPIFormat(api);
+
+      expect(getColumnByFieldName(so, '?os')?.variable).toBeUndefined();
     });
   });
 });

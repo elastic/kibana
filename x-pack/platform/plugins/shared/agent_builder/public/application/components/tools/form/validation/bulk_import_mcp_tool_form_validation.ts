@@ -84,7 +84,7 @@ export const useBulkImportMcpToolFormValidationSchema = () => {
         .array(
           z.object({
             name: z.string(),
-            description: z.string(),
+            description: z.string().optional(),
           })
         )
         .min(1, { message: bulkImportMcpI18nMessages.tools.requiredError }),

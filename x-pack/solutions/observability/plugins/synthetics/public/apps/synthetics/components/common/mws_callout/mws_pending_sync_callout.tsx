@@ -10,14 +10,15 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SyncNowLink } from './sync_now_link';
+import { MwsSyncOverdueNote } from './mws_sync_overdue_note';
 import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
 
 export const MwsPendingSyncCallout = ({
-  syncInterval,
   hasOutdatedAgent = false,
+  isSyncOverdue = false,
 }: {
-  syncInterval: number;
   hasOutdatedAgent?: boolean;
+  isSyncOverdue?: boolean;
 }) => {
   return (
     <>
@@ -34,13 +35,17 @@ export const MwsPendingSyncCallout = ({
           defaultMessage="One or more maintenance windows have been recently modified or deleted."
         />
         <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          <FormattedMessage
-            id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
-            defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for changes to be applied to private location monitors. {syncNowLink}"
-            values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
-          />
-        </EuiText>
+        {isSyncOverdue ? (
+          <MwsSyncOverdueNote />
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.synthetics.maintenanceWindowCallout.pendingSync.syncNote"
+              defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+              values={{ syncNowLink: <SyncNowLink /> }}
+            />
+          </EuiText>
+        )}
         {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
       </EuiCallOut>
       <EuiSpacer size="s" />

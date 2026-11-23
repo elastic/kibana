@@ -43,8 +43,81 @@ describe('putCriblRoutingPipeline', () => {
       transport: {
         request: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
+      indices: {
+        getIndexTemplate: jest.fn().mockResolvedValue({}),
+      },
     } as unknown as jest.Mocked<ElasticsearchClient>;
     logger = createLogger();
+  });
+
+  const mockIndexTemplates = (templates: Array<{ name: string; indexPatterns: string[] }>) => {
+    (esClient.indices.getIndexTemplate as jest.Mock).mockResolvedValue({
+      index_templates: templates.map(({ name, indexPatterns }) => ({
+        name,
+        index_template: { index_patterns: indexPatterns },
+      })),
+    });
+  };
+
+  const getPutRerouteDatasets = (): string[] => {
+    const [[{ body }]] = (esClient.transport.request as jest.Mock).mock.calls;
+    return body.processors.map(
+      (processor: { reroute: { dataset: string } }) => processor.reroute.dataset
+    );
+  };
+
+  it('routes to the dataset from the index pattern of an OTel input template', async () => {
+    mockIndexTemplates([
+      { name: 'logs-claude_cowork.events', indexPatterns: ['logs-claude_cowork.events.otel-*'] },
+    ]);
+    const policy = createPolicy('[{"dataId":"claude","datastream":"logs-claude_cowork.events"}]');
+
+    await putCriblRoutingPipeline(esClient, policy, logger);
+
+    expect(getPutRerouteDatasets()).toEqual(['claude_cowork.events.otel']);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps the template name dataset for regular templates', async () => {
+    mockIndexTemplates([{ name: 'logs-nginx.access', indexPatterns: ['logs-nginx.access-*'] }]);
+    const policy = createPolicy('[{"dataId":"nginx","datastream":"logs-nginx.access"}]');
+
+    await putCriblRoutingPipeline(esClient, policy, logger);
+
+    expect(getPutRerouteDatasets()).toEqual(['nginx.access']);
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns and falls back to the template name when the template is not found', async () => {
+    const policy = createPolicy('[{"dataId":"missing","datastream":"logs-missing.dataset"}]');
+
+    await putCriblRoutingPipeline(esClient, policy, logger);
+
+    expect(getPutRerouteDatasets()).toEqual(['missing.dataset']);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Cribl route for _dataId "missing" could not be resolved')
+    );
+  });
+
+  it('warns and falls back to template names when index templates cannot be read', async () => {
+    (esClient.indices.getIndexTemplate as jest.Mock).mockRejectedValue(new Error('forbidden'));
+    const policy = createPolicy('[{"dataId":"claude","datastream":"logs-claude_cowork.events"}]');
+
+    await putCriblRoutingPipeline(esClient, policy, logger);
+
+    expect(getPutRerouteDatasets()).toEqual(['claude_cowork.events']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to read index templates for the Cribl routing pipeline')
+    );
+  });
+
+  it('does not read index templates when there are no route entries', async () => {
+    const policy = createPolicy('[]');
+
+    await putCriblRoutingPipeline(esClient, policy, logger);
+
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
   });
 
   it('puts the routing pipeline for valid mappings', async () => {

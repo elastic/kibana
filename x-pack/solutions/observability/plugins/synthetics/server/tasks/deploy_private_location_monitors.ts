@@ -42,6 +42,30 @@ interface SyncConfig {
   globalParams: Record<string, string>;
 }
 
+/** What is needed to strip a deleted maintenance window from a monitor saved object. */
+interface MonitorMwReference {
+  id: string;
+  type: string;
+  namespace?: string;
+  maintenanceWindows: string[];
+}
+
+interface PendingMwRemoval {
+  mwId: string;
+  monitors: MonitorMwReference[];
+}
+
+/** Per-space count of package policies `editMonitors` could not create. */
+export interface FailedCreatesBySpace {
+  spaceId: string;
+  count: number;
+}
+
+export const formatFailedCreates = (failedCreatesBySpace: FailedCreatesBySpace[]) =>
+  `[DeployPrivateLocationMonitors] Failed to create policies during sync for spaces: [${failedCreatesBySpace
+    .map(({ spaceId, count }) => `${spaceId} (${count})`)
+    .join(', ')}]`;
+
 export class DeployPrivateLocationMonitors {
   constructor(
     public serverSetup: SyntheticsServerSetup,
@@ -75,26 +99,47 @@ export class DeployPrivateLocationMonitors {
     const listOfUpdatedConfigs: Array<string> = [];
 
     return this.serverSetup.fleet.runWithCache(async () => {
+      const { privateLocationAPI } = this.syntheticsMonitorClient;
+      // Fleet bumps (and redeploys) the agent policy on every write, i.e. once per
+      // page of monitors. Collect the bumps and issue them once for the whole sync.
+      const deferredBumps = new Set<string>();
+      // A deleted maintenance window stays referenced on its monitors until it is
+      // deployed: that reference is how the next run finds the window to retry.
+      const pendingMwRemovals: PendingMwRemoval[] = [];
       const commonProps = {
         listOfUpdatedConfigs,
         allPrivateLocations,
         maintenanceWindows,
         soClient,
         paramsBySpace,
+        deferredBumps,
+        pendingMwRemovals,
       };
-      for (const mw of updatedMWs || []) {
-        await this.updateMonitorsForMw({
-          ...commonProps,
-          mwId: mw.id,
-        });
+
+      try {
+        for (const mw of updatedMWs || []) {
+          await this.updateMonitorsForMw({
+            ...commonProps,
+            mwId: mw.id,
+          });
+        }
+
+        for (const mwId of missingMWIds || []) {
+          await this.updateMonitorsForMw({
+            ...commonProps,
+            mwId,
+            isMissingMw: true,
+          });
+        }
+      } finally {
+        // in a finally: pages already written used `bumpRevision: false`, so an
+        // early exit would leave them undeployed until a later write bumps
+        await privateLocationAPI.scheduleRevisionBumps(deferredBumps);
       }
 
-      for (const mwId of missingMWIds || []) {
-        await this.updateMonitorsForMw({
-          ...commonProps,
-          mwId,
-          isMissingMw: true,
-        });
+      // only reached once every bump succeeded
+      for (const { mwId, monitors } of pendingMwRemovals) {
+        await this.removeMwsFromMonitorConfigs({ mwId, monitors, soClient });
       }
     });
   }
@@ -106,6 +151,8 @@ export class DeployPrivateLocationMonitors {
     maintenanceWindows,
     soClient,
     paramsBySpace,
+    deferredBumps,
+    pendingMwRemovals,
     isMissingMw = false,
   }: {
     mwId: string;
@@ -115,6 +162,9 @@ export class DeployPrivateLocationMonitors {
     allPrivateLocations: PrivateLocationAttributes[];
     paramsBySpace: Record<string, Record<string, string>>;
     listOfUpdatedConfigs: Array<string>;
+    deferredBumps?: Set<string>;
+    /** When given, a missing MW's removal is queued here instead of run per page. */
+    pendingMwRemovals?: PendingMwRemoval[];
     isMissingMw?: boolean;
   }) {
     const {
@@ -133,43 +183,56 @@ export class DeployPrivateLocationMonitors {
         }
       );
 
-    for await (const result of finder.find()) {
-      const monitors = result.saved_objects.filter((monitor) => {
-        // Avoid processing the same config multiple times, updating it once will update all mws on it
-        if (listOfUpdatedConfigs.includes(monitor.id)) {
-          this.debugLog(
-            `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
-          );
-          return false;
-        }
-        listOfUpdatedConfigs.push(monitor.id);
-        return true;
-      });
-      this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
-
-      const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
-        monitors,
-        paramsBySpace
-      );
-
-      await this.deployEditMonitors({
-        allPrivateLocations,
-        configsBySpaces,
-        monitorSpaceIds,
-        paramsBySpace,
-        maintenanceWindows,
-      });
-
-      if (isMissingMw) {
-        await this.removeMwsFromMonitorConfigs({
-          mwId,
-          monitors,
-          soClient,
+    try {
+      for await (const result of finder.find()) {
+        const monitors = result.saved_objects.filter((monitor) => {
+          // Avoid processing the same config multiple times, updating it once will update all mws on it
+          if (listOfUpdatedConfigs.includes(monitor.id)) {
+            this.debugLog(
+              `Skipping monitor id: ${monitor.id} as it has already been processed for another maintenance window`
+            );
+            return false;
+          }
+          listOfUpdatedConfigs.push(monitor.id);
+          return true;
         });
-      }
-    }
+        this.debugLog(`Processing mw id: ${mwId}, monitors count: ${monitors?.length ?? 0}`);
 
-    finder.close().catch(() => {});
+        const { configsBySpaces, monitorSpaceIds } = this.mixParamsWithMonitors(
+          monitors,
+          paramsBySpace
+        );
+
+        await this.deployEditMonitors({
+          allPrivateLocations,
+          configsBySpaces,
+          monitorSpaceIds,
+          paramsBySpace,
+          maintenanceWindows,
+          deferredBumps,
+        });
+
+        if (isMissingMw) {
+          const references = monitors.map(
+            ({ id, type, namespaces, attributes }): MonitorMwReference => ({
+              id,
+              type,
+              namespace: namespaces?.[0],
+              maintenanceWindows: attributes[ConfigKey.MAINTENANCE_WINDOWS] || [],
+            })
+          );
+          if (pendingMwRemovals) {
+            pendingMwRemovals.push({ mwId, monitors: references });
+          } else {
+            await this.removeMwsFromMonitorConfigs({ mwId, monitors: references, soClient });
+          }
+        }
+      }
+    } finally {
+      // close in a finally: the SO point-in-time generator has no cleanup of its
+      // own, so an early exit would leak the PIT until its keep-alive expires
+      finder.close().catch(() => {});
+    }
 
     this.debugLog(`Syncing package policies for updated maintenance window id: ${mwId}`);
   }
@@ -188,10 +251,10 @@ export class DeployPrivateLocationMonitors {
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
     modifiedParamKeys?: string[];
-  }) {
+  }): Promise<{ failedCreatesBySpace: FailedCreatesBySpace[] }> {
     if (allPrivateLocations.length === 0) {
       this.debugLog('No private locations found, skipping sync of private location monitors');
-      return;
+      return { failedCreatesBySpace: [] };
     }
 
     const { configsBySpaces, paramsBySpace, monitorSpaceIds, maintenanceWindows } =
@@ -209,7 +272,7 @@ export class DeployPrivateLocationMonitors {
           ? 'No monitors found that use the modified parameters, skipping sync of private location monitors'
           : 'No monitors found, skipping sync of private location monitors'
       );
-      return;
+      return { failedCreatesBySpace: [] };
     }
 
     return this.serverSetup.fleet.runWithCache(async () => {
@@ -218,7 +281,7 @@ export class DeployPrivateLocationMonitors {
           ', '
         )}`
       );
-      await this.deployEditMonitors({
+      const failedCreatesBySpace = await this.deployEditMonitors({
         allPrivateLocations: allPrivateLocations.filter(
           (loc) => loc.id === privateLocationId || !privateLocationId
         ),
@@ -228,6 +291,7 @@ export class DeployPrivateLocationMonitors {
         maintenanceWindows,
       });
       this.debugLog('Completed sync of private location monitors');
+      return { failedCreatesBySpace };
     });
   }
 
@@ -237,14 +301,17 @@ export class DeployPrivateLocationMonitors {
     monitorSpaceIds,
     paramsBySpace,
     maintenanceWindows,
+    deferredBumps,
   }: {
     allPrivateLocations: PrivateLocationAttributes[];
     configsBySpaces: Record<string, HeartbeatConfig[]>;
     monitorSpaceIds: Set<string>;
     paramsBySpace: Record<string, Record<string, string>>;
     maintenanceWindows: MaintenanceWindow[];
+    deferredBumps?: Set<string>;
   }) {
     const { privateLocationAPI } = this.syntheticsMonitorClient;
+    const failedCreatesBySpace: FailedCreatesBySpace[] = [];
 
     for (const spaceId of monitorSpaceIds) {
       const privateConfigs: Array<SyncConfig> = [];
@@ -273,18 +340,27 @@ export class DeployPrivateLocationMonitors {
           privateConfigs,
           allPrivateLocations,
           spaceId,
-          maintenanceWindows
+          maintenanceWindows,
+          deferredBumps
         );
 
         if (result?.failedCreates && result.failedCreates.length > 0) {
-          this.serverSetup.logger.error(
-            `[DeployPrivateLocationMonitors] Failed to create ${result.failedCreates.length} policies during sync`
-          );
+          failedCreatesBySpace.push({ spaceId, count: result.failedCreates.length });
         }
       } else {
         this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
     }
+
+    // Report rather than throw: this method is shared by the maintenance-window
+    // and global-params sync paths, where aborting would silently skip the
+    // monitors that come after the failure. Callers that need to retry the
+    // recreate (the post-cleanup per-location sync) act on the returned list.
+    if (failedCreatesBySpace.length > 0) {
+      this.serverSetup.logger.error(formatFailedCreates(failedCreatesBySpace));
+    }
+
+    return failedCreatesBySpace;
   }
 
   async getAllMonitorConfigs({
@@ -404,24 +480,20 @@ export class DeployPrivateLocationMonitors {
     soClient,
   }: {
     mwId: string;
-    monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>;
+    monitors: MonitorMwReference[];
     soClient: SavedObjectsClientContract;
   }) => {
     this.debugLog(
       `Removing maintenance window id: ${mwId} from monitors count: ${monitors?.length ?? 0}`
     );
-    const toUpdateMonitors = monitors.map((monitor) => {
-      const existingMws = monitor.attributes[ConfigKey.MAINTENANCE_WINDOWS] || [];
-      const updatedMws = existingMws.filter((id) => id !== mwId);
-      return {
-        id: monitor.id,
-        type: monitor.type,
-        attributes: {
-          [ConfigKey.MAINTENANCE_WINDOWS]: updatedMws,
-        },
-        namespace: monitor.namespaces?.[0],
-      };
-    });
+    const toUpdateMonitors = monitors.map(({ id, type, namespace, maintenanceWindows }) => ({
+      id,
+      type,
+      attributes: {
+        [ConfigKey.MAINTENANCE_WINDOWS]: maintenanceWindows.filter((mw) => mw !== mwId),
+      },
+      namespace,
+    }));
 
     const result = await soClient.bulkUpdate(toUpdateMonitors);
     this.debugLog(

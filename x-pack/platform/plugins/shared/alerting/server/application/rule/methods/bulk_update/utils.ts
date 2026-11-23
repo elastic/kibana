@@ -51,21 +51,32 @@ export const loadRulesByIds = async (
     return [];
   }
 
-  const finder =
-    await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
-      {
+  // createPointInTimeFinder ≈ finder setup; find ≈ ES pages + decrypt.
+  const finder = await withSpan(
+    {
+      name: 'loadRulesByIds.createPointInTimeFinder',
+      type: 'rules',
+      labels: { count: String(ids.length) },
+    },
+    () =>
+      context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
         filter: convertRuleIdsToKueryNode(ids),
         type: RULE_SAVED_OBJECT_TYPE,
         perPage: 100,
         ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
-      }
-    );
+      })
+  );
 
   const loaded: Array<SavedObject<RawRule>> = [];
   try {
-    for await (const response of finder.find()) {
-      loaded.push(...response.saved_objects);
-    }
+    await withSpan(
+      { name: 'loadRulesByIds.find', type: 'rules', labels: { count: String(ids.length) } },
+      async () => {
+        for await (const response of finder.find()) {
+          loaded.push(...response.saved_objects);
+        }
+      }
+    );
   } finally {
     await finder.close();
   }
@@ -176,6 +187,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
+      refresh: false,
     });
 
     const newKeys: ApiKeyEntry = {

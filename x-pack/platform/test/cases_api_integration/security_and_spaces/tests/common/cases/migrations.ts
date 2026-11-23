@@ -25,15 +25,15 @@ import { findAttachments } from '../../../../common/lib/api/attachments';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const spaces = getService('spaces');
 
-  // Failing: See https://github.com/elastic/kibana/issues/238817
-  describe.skip('migrations', () => {
+  describe('migrations', () => {
     // tests upgrading a 7.10.0 saved object to the latest version
     describe('7.10.0 -> latest stack version', () => {
       before(async () => {
+        await deleteAllCaseItems(es);
         await kibanaServer.importExport.load(
           'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.10.0/data.json'
         );
@@ -141,13 +141,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     // tests upgrading a 7.11.1 saved object to the latest version
     describe('7.11.1 -> latest stack version', () => {
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1');
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.11.1/cases.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.11.1'
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.11.1/cases.json'
         );
+        await deleteAllCaseItems(es);
       });
 
       it('adds rule info to only alert comments for 7.12', async () => {
@@ -194,13 +197,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.13.2', () => {
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
+        await deleteAllCaseItems(es);
       });
 
       describe('owner field', () => {
@@ -290,13 +296,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('7.16.0', () => {
       before(async () => {
-        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2');
+        await kibanaServer.importExport.load(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.13.2'
+        await kibanaServer.importExport.unload(
+          'x-pack/platform/test/functional/fixtures/kbn_archives/cases/7.13.2/cases.json'
         );
+        await deleteAllCaseItems(es);
       });
 
       describe('resolve', () => {
@@ -363,25 +372,100 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('8.0 id migration', () => {
       describe('awesome space', () => {
+        const spaceId = 'awesome-space';
+        // The pre-8.0.0 space-scoped case ID.
+        const oldCaseId = 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed';
+        // The IDs produced by the 8.0.0 namespace conversion migration:
+        // uuid(`${spaceId}:${type}:${oldId}`).
+        const newCaseId = 'f3a43e72-4b37-55b0-bc51-eceb8616a5ce';
+        const newCommentId = 'dd56f75d-6edf-5e49-b1b6-7105b47a51c0';
+        // legacy-url-alias SO ID: `${targetNamespace}:${targetType}:${sourceId}`
+        const legacyAliasId = `${spaceId}:cases:${oldCaseId}`;
+
         before(async () => {
-          await esArchiver.load(
-            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
-          );
+          await spaces.create({ id: spaceId, name: spaceId, disabledFeatures: [] });
+
+          // Create the case and comment with their post-conversion IDs and pre-8.0
+          // migrationVersion so that DocumentMigrator upgrades them on creation.
+          await kibanaServer.savedObjects.create({
+            type: 'cases',
+            id: newCaseId,
+            space: spaceId,
+            overwrite: true,
+            attributes: {
+              closed_at: null,
+              closed_by: null,
+              connector: { fields: [], name: 'none', type: '.none' },
+              created_at: '2021-10-01T20:10:45.741Z',
+              created_by: { email: null, full_name: null, username: 'elastic' },
+              description: 'a description',
+              external_service: null,
+              owner: 'securitySolution',
+              settings: { syncAlerts: true },
+              status: 'open',
+              tags: ['security'],
+              title: 'Case name',
+              type: 'individual',
+              updated_at: '2021-10-01T20:10:50.708Z',
+              updated_by: { email: null, full_name: null, username: 'elastic' },
+            },
+            migrationVersion: { cases: '7.15.0' },
+            references: [],
+          });
+
+          await kibanaServer.savedObjects.create({
+            type: 'cases-comments',
+            id: newCommentId,
+            space: spaceId,
+            overwrite: true,
+            attributes: {
+              associationType: 'case',
+              comment: 'a comment',
+              created_at: '2021-10-01T20:10:50.708Z',
+              created_by: { email: null, full_name: null, username: 'elastic' },
+              owner: 'securitySolution',
+              pushed_at: null,
+              pushed_by: null,
+              type: 'user',
+              updated_at: null,
+              updated_by: null,
+            },
+            migrationVersion: { 'cases-comments': '7.16.0' },
+            references: [{ id: newCaseId, name: 'associated-cases', type: 'cases' }],
+          });
+
+          // Create a legacy-url-alias mapping the old case ID to the new one with
+          // purpose 'savedObjectConversion', replicating what the 8.0.0 namespace
+          // conversion migration would have produced.
+          await kibanaServer.savedObjects.create({
+            type: 'legacy-url-alias',
+            id: legacyAliasId,
+            overwrite: true,
+            attributes: {
+              sourceId: oldCaseId,
+              targetNamespace: spaceId,
+              targetType: 'cases',
+              targetId: newCaseId,
+              purpose: 'savedObjectConversion',
+            },
+            migrationVersion: { 'legacy-url-alias': '8.2.0' },
+            references: [],
+          });
         });
 
         after(async () => {
-          await esArchiver.unload(
-            'x-pack/platform/test/fixtures/es_archives/cases/migrations/7.16.0_space'
-          );
+          await kibanaServer.savedObjects.delete({ type: 'legacy-url-alias', id: legacyAliasId });
+          await deleteAllCaseItems(es);
+          await spaces.delete(spaceId);
         });
 
         describe('resolve', () => {
-          const auth = { user: superUser, space: 'awesome-space' };
+          const auth = { user: superUser, space: spaceId };
 
           it('should return aliasMatch outcome', async () => {
             const { outcome } = await resolveCase({
               supertest,
-              caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
+              caseId: oldCaseId,
               auth,
             });
 
@@ -391,7 +475,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           it('should preserve the same case info', async () => {
             const { case: theCase } = await resolveCase({
               supertest,
-              caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
+              caseId: oldCaseId,
               auth,
             });
 
@@ -403,7 +487,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           it('should preserve the comment', async () => {
             const { comments } = await findAttachments({
               supertest,
-              caseId: 'f3a43e72-4b37-55b0-bc51-eceb8616a5ce',
+              caseId: newCaseId,
               auth,
             });
 

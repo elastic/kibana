@@ -5,120 +5,148 @@
  * 2.0.
  */
 
-import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import {
-  EVENT_SOURCE_FIELD_NAME,
-  LEGACY_EVENT_SOURCE_FIELD_NAME,
-} from '../../../../timelines/components/timeline/body/renderers/constants';
-import { ANCESTOR_INDEX, LEGACY_ANCESTOR_INDEX } from '../constants/field_names';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { ANCESTORS, LEGACY_ANCESTORS } from '../constants/field_names';
 import { getAncestorsIndexById } from './get_ancestors_index_by_id';
-
-const item = (field: string, values: string[]): TimelineEventsDetailsItem => ({
-  field,
-  values,
-  isObjectArray: false,
-});
 
 const LOCAL_DOCUMENT_INDEX = '.alerts-security.alerts-default';
 const REMOTE_DOCUMENT_INDEX = 'project-a:.internal.alerts-security.alerts-default-000001';
 
+interface AncestorEntry {
+  id?: string;
+  index?: string;
+}
+
+const makeHit = ({
+  ancestors,
+  legacyAncestors,
+  ruleType,
+}: {
+  ancestors?: AncestorEntry[];
+  legacyAncestors?: AncestorEntry[];
+  ruleType?: string;
+}): DataTableRecord =>
+  ({
+    id: '1',
+    raw: {
+      _source: {
+        ...(ancestors ? { [ANCESTORS]: ancestors } : {}),
+        ...(legacyAncestors ? { [LEGACY_ANCESTORS]: legacyAncestors } : {}),
+      },
+    },
+    flattened: ruleType ? { 'kibana.alert.rule.type': [ruleType] } : {},
+  } as unknown as DataTableRecord);
+
 describe('getAncestorsIndexById', () => {
   it('maps a single ancestor id to its index', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
-    ];
+    const hit = makeHit({ ancestors: [{ id: 'ancestor-1', index: '.ds-logs-source-1' }] });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
     });
   });
 
-  it('aligns multiple ancestor ids with their indices by position', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1', 'ancestor-2']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1', '.internal.alerts-security.alerts-default']),
-    ];
+  it('maps each ancestor id to its own index', () => {
+    const hit = makeHit({
+      ancestors: [
+        { id: 'ancestor-1', index: '.ds-logs-source-1' },
+        { id: 'ancestor-2', index: '.internal.alerts-security.alerts-default' },
+      ],
+    });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
       'ancestor-2': '.internal.alerts-security.alerts-default',
     });
   });
 
-  it('maps ancestor ids from the legacy signal.ancestors.* fields', () => {
-    const data = [
-      item(LEGACY_EVENT_SOURCE_FIELD_NAME, ['ancestor-1']),
-      item(LEGACY_ANCESTOR_INDEX, ['.ds-logs-source-1']),
-    ];
+  // Regression for kibana #288207: an EQL sequence alert interleaves depth-0 events (real index)
+  // with depth-1 `signal` legs (empty index). Reading the paired objects keeps each event mapped to
+  // its own index; a positional align of the flattened arrays would pair `evt-outside` with the
+  // first index (`logs-inside`) once the empty signal indices are dropped.
+  it('pairs each source event with its own index for an EQL sequence alert', () => {
+    const hit = makeHit({
+      ancestors: [
+        { id: 'evt-inside', index: 'logs-inside' },
+        { id: 'sig-1', index: '' },
+        { id: 'evt-outside', index: 'myidx-outside' },
+        { id: 'sig-2', index: '' },
+      ],
+    });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
+      'evt-inside': 'logs-inside',
+      'evt-outside': 'myidx-outside',
+    });
+  });
+
+  it('maps ancestor ids from the legacy signal.ancestors field', () => {
+    const hit = makeHit({ legacyAncestors: [{ id: 'ancestor-1', index: '.ds-logs-source-1' }] });
+
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
     });
   });
 
   it('merges ancestor ids from both the current and legacy fields', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
-      item(LEGACY_EVENT_SOURCE_FIELD_NAME, ['ancestor-2']),
-      item(LEGACY_ANCESTOR_INDEX, ['.ds-logs-source-2']),
-    ];
+    const hit = makeHit({
+      ancestors: [{ id: 'ancestor-1', index: '.ds-logs-source-1' }],
+      legacyAncestors: [{ id: 'ancestor-2', index: '.ds-logs-source-2' }],
+    });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
       'ancestor-2': '.ds-logs-source-2',
     });
   });
 
   it('returns an empty map for threshold rules to avoid linking the synthetic ancestor', () => {
-    const data = [
-      item(ALERT_RULE_TYPE, ['threshold']),
-      item(EVENT_SOURCE_FIELD_NAME, ['fake-ancestor']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
-    ];
+    const hit = makeHit({
+      ruleType: 'threshold',
+      ancestors: [{ id: 'fake-ancestor', index: '.ds-logs-source-1' }],
+    });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({});
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({});
   });
 
-  it('skips ancestor ids that have no aligned index', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1', 'ancestor-2']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1']),
-    ];
+  it('skips ancestors that have no index', () => {
+    const hit = makeHit({
+      ancestors: [
+        { id: 'ancestor-1', index: '.ds-logs-source-1' },
+        { id: 'ancestor-2', index: '' },
+        { id: 'ancestor-3' },
+      ],
+    });
 
-    expect(getAncestorsIndexById(data, LOCAL_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, LOCAL_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': '.ds-logs-source-1',
     });
   });
 
-  it('returns an empty map when there are no ancestor ids', () => {
-    expect(
-      getAncestorsIndexById([item(ANCESTOR_INDEX, ['.ds-logs-source-1'])], LOCAL_DOCUMENT_INDEX)
-    ).toEqual({});
-    expect(getAncestorsIndexById([], LOCAL_DOCUMENT_INDEX)).toEqual({});
+  it('returns an empty map when there are no ancestors', () => {
+    expect(getAncestorsIndexById(makeHit({}), LOCAL_DOCUMENT_INDEX)).toEqual({});
   });
 
   it('qualifies ancestor indices with the linked-project prefix when the alert lives in a remote project', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1', 'ancestor-2']),
-      item(ANCESTOR_INDEX, ['.ds-logs-source-1', '.internal.alerts-security.alerts-default']),
-    ];
+    const hit = makeHit({
+      ancestors: [
+        { id: 'ancestor-1', index: '.ds-logs-source-1' },
+        { id: 'ancestor-2', index: '.internal.alerts-security.alerts-default' },
+      ],
+    });
 
-    expect(getAncestorsIndexById(data, REMOTE_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, REMOTE_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': 'project-a:.ds-logs-source-1',
       'ancestor-2': 'project-a:.internal.alerts-security.alerts-default',
     });
   });
 
   it('leaves an already-qualified ancestor index unchanged when the alert lives in a remote project', () => {
-    const data = [
-      item(EVENT_SOURCE_FIELD_NAME, ['ancestor-1']),
-      item(ANCESTOR_INDEX, ['project-a:.ds-logs-source-1']),
-    ];
+    const hit = makeHit({
+      ancestors: [{ id: 'ancestor-1', index: 'project-a:.ds-logs-source-1' }],
+    });
 
-    expect(getAncestorsIndexById(data, REMOTE_DOCUMENT_INDEX)).toEqual({
+    expect(getAncestorsIndexById(hit, REMOTE_DOCUMENT_INDEX)).toEqual({
       'ancestor-1': 'project-a:.ds-logs-source-1',
     });
   });

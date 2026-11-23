@@ -14,7 +14,7 @@ import { execSync } from 'child_process';
 
 let mockKibanaDir: string;
 
-jest.mock('../utils', () => ({
+jest.mock('../utils.ts', () => ({
   getKibanaDir: () => mockKibanaDir,
 }));
 
@@ -24,10 +24,10 @@ import {
   getModuleDependencies,
   buildModuleDownstreamGraph,
   resetModuleLookupCache,
-} from './module_lookup';
-import { getAffectedModulesGit } from './strategy_git';
-import { filterIgnoredFiles } from './utils';
-import { UNCATEGORIZED_MODULE_ID } from './const';
+} from './module_lookup.ts';
+import { getAffectedModulesGit } from './strategy_git.ts';
+import { filterIgnoredFiles } from './utils.ts';
+import { UNCATEGORIZED_MODULE_ID } from './const.ts';
 
 function git(cwd: string, command: string): string {
   return execSync(`git ${command}`, { cwd, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
@@ -326,6 +326,32 @@ describe('module_lookup', () => {
       for (const spec of MODULES) {
         expect(graph.has(spec.id)).toBe(true);
       }
+    });
+  });
+
+  describe('getAffectedModulesGit – changedFiles', () => {
+    it('classifies an explicit file list without git merge-base', () => {
+      const affected = getAffectedModulesGit({
+        changedFiles: ['packages/core/src/index.ts'],
+        includeDownstream: false,
+      });
+      expect(affected).toEqual(new Set(['@kbn/core']));
+    });
+
+    it('includes downstream for an explicit file list', () => {
+      const affected = getAffectedModulesGit({
+        changedFiles: ['packages/core/src/index.ts'],
+        includeDownstream: true,
+      });
+      expect(affected).toEqual(
+        new Set(['@kbn/core', '@kbn/utils', '@kbn/my-plugin', '@kbn/analytics'])
+      );
+    });
+
+    it('throws when neither changedFiles nor mergeBase is provided', () => {
+      expect(() => getAffectedModulesGit({ includeDownstream: false })).toThrow(
+        'No merge base found'
+      );
     });
   });
 

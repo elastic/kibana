@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 // Shared with the mock factory below; jest hoisting requires the `mock` prefix.
 const mockEditor = { fake: 'editor' };
@@ -66,7 +66,7 @@ describe('FieldDefinitionYamlEditor', () => {
 
   it('mounts the actions menu in fieldDefinition mode once the editor is available', async () => {
     const onChange = jest.fn();
-    renderWithTestingProviders(
+    renderWithI18n(
       <FieldDefinitionYamlEditor
         value="control: INPUT_TEXT"
         onChange={onChange}
@@ -86,7 +86,7 @@ describe('FieldDefinitionYamlEditor', () => {
   });
 
   it('forwards the data-test-subj to the editor container', () => {
-    renderWithTestingProviders(
+    renderWithI18n(
       <FieldDefinitionYamlEditor
         value=""
         onChange={jest.fn()}
@@ -101,7 +101,7 @@ describe('FieldDefinitionYamlEditor', () => {
     const dashedFieldYaml = 'name: risk-score\ncontrol: INPUT_TEXT\ntype: keyword\n';
 
     it('shows the charset error for a dashed name when creating', async () => {
-      renderWithTestingProviders(
+      renderWithI18n(
         <FieldDefinitionYamlEditor
           value={dashedFieldYaml}
           onChange={jest.fn()}
@@ -116,7 +116,7 @@ describe('FieldDefinitionYamlEditor', () => {
     });
 
     it('does not show the charset error for a stored dashed name when editing', async () => {
-      renderWithTestingProviders(
+      renderWithI18n(
         <FieldDefinitionYamlEditor
           value={dashedFieldYaml}
           onChange={jest.fn()}
@@ -132,7 +132,7 @@ describe('FieldDefinitionYamlEditor', () => {
   });
 
   it('prefers the editor schema error when the YAML does not describe an inline field', async () => {
-    renderWithTestingProviders(
+    renderWithI18n(
       <FieldDefinitionYamlEditor
         value="name: only_a_name"
         onChange={jest.fn()}

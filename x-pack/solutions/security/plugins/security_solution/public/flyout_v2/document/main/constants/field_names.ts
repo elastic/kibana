@@ -19,5 +19,7 @@ export const ENTRY_LEADER_NAME = `${ENTRY_LEADER}.name`;
 const GROUP_LEADER = `${PROCESS}.group_leader`;
 export const GROUP_LEADER_WORKING_DIRECTORY = `${GROUP_LEADER}.working_directory`;
 
-export const ANCESTOR_INDEX = 'kibana.alert.ancestors.index';
-export const LEGACY_ANCESTOR_INDEX = 'signal.ancestors.index';
+export const ANCESTORS = 'kibana.alert.ancestors';
+export const ANCESTOR_INDEX = `${ANCESTORS}.index`;
+export const LEGACY_ANCESTORS = 'signal.ancestors';
+export const LEGACY_ANCESTOR_INDEX = `${LEGACY_ANCESTORS}.index`;

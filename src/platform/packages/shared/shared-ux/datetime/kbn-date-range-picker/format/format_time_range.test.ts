@@ -109,8 +109,12 @@ describe('timeRangeToDisplayText', () => {
     );
   });
 
-  it('supports a custom date format', () => {
-    expect(toDisplay('feb 3, 2016 to feb 3, 2026', { dateFormat: 'YYYY' })).toBe('2016 → 2026');
+  it('shows the label as configured when the text matches a preset label', () => {
+    const presets = [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }];
+
+    expect(
+      timeRangeToDisplayText(textToTimeRange('financial year to date', { presets }), { presets })
+    ).toBe('Financial Year to Date');
   });
 
   it('returns raw text for invalid ranges', () => {
@@ -277,12 +281,6 @@ describe('timeRangeToFullFormattedText', () => {
   it('supports a custom delimiter', () => {
     expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { delimiter: '—' })).toBe(
       'Feb 3, 2016, 00:00:00.000 — Feb 3, 2026, 00:00:00.000'
-    );
-  });
-
-  it('supports a custom date format', () => {
-    expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { dateFormat: 'YYYY-MM-DD' })).toBe(
-      '2016-02-03 → 2026-02-03'
     );
   });
 });

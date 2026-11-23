@@ -5,7 +5,6 @@ set -euo pipefail
 # Skip building shared webpack bundles during bootstrap because
 # node scripts/build rebuilds them in production mode with --dist
 export KBN_BOOTSTRAP_NO_PREBUILT=true
-export KEEP_INSTALL_CACHE=1
 
 source .buildkite/scripts/common/util.sh
 
@@ -16,7 +15,9 @@ is_pr_with_label "ci:build-with-rspack-optimizer" && EXPECTS_RSPACK=true
 # When the legacy optimizer is removed, delete this block and restore the
 # if: condition in base.yml to skip the build step entirely when a cache hit exists.
 if [[ "${KIBANA_BUILD_ID:-}" && "$KIBANA_BUILD_ID" != "$BUILDKITE_BUILD_ID" ]]; then
-  CACHED_TYPE="legacy"
+  # Reused builds do not upload a distribution of their own. Without a type marker,
+  # the referenced build is not a safe cache hit for downstream jobs.
+  CACHED_TYPE="missing"
   if download_artifact "kibana-build-type.txt" . --build "$KIBANA_BUILD_ID" 2>/dev/null; then
     CACHED_TYPE=$(cat kibana-build-type.txt)
   fi

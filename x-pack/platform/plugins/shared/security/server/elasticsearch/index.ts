@@ -16,3 +16,4 @@ export type {
   OnlineStatusRetryScheduler,
 } from './elasticsearch_service';
 export { ElasticsearchService } from './elasticsearch_service';
+export { createOnlineStatusTaskRunner } from './online_status_task_runner';

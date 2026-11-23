@@ -12,7 +12,7 @@ export interface AutoFollowPattern {
   active: boolean;
   remoteCluster: string;
   leaderIndexPatterns: string[];
-  followIndexPattern: string;
+  followIndexPattern?: string;
 }
 
 export interface AutoFollowPatternFromEs {
@@ -21,14 +21,14 @@ export interface AutoFollowPatternFromEs {
     active: boolean;
     remote_cluster: string;
     leader_index_patterns: string[];
-    follow_index_pattern: string;
+    follow_index_pattern?: string;
   };
 }
 
 export interface AutoFollowPatternToEs {
   remote_cluster: string;
   leader_index_patterns: string[];
-  follow_index_pattern: string;
+  follow_index_pattern?: string;
 }
 
 export interface ShardFromEs {

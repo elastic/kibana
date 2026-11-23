@@ -202,7 +202,15 @@ describe('prettifyValue', () => {
       expect(prettifyValue('now-3d/d to now', { presets })).toBe('-3d/d');
     });
 
-    it('ignores display-form preset labels (non natural-language) and prettifies the bounds', () => {
+    it('resolves matching bounds to a custom preset label', () => {
+      expect(
+        prettifyValue('now-3M/y+3M to now', {
+          presets: [{ start: 'now-3M/y+3M', end: 'now', label: 'Financial Year to Date' }],
+        })
+      ).toBe('Financial Year to Date');
+    });
+
+    it('ignores display-form preset labels and prettifies the bounds', () => {
       const start = '2026-05-01T00:00:00.000Z';
       const end = '2026-05-02T23:59:00.000Z';
 

@@ -192,6 +192,8 @@ export async function createOrUpdatePreconfiguredOutputs(
         await outputService.update(soClient, esClient, id, data, {
           fromPreconfiguration: true,
           secretHashes,
+          // the Kibana config file declares the whole output: a secret it no longer names is removed
+          declaresAllSecrets: true,
         });
         // Bump revision of all policies using that output
         await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, id, {
@@ -455,9 +457,10 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.otel_exporter_config_yaml,
         preconfiguredOutput.otel_exporter_config_yaml
       ) ||
+        // `false` and unset are equivalent for this flag
         isDifferent(
-          existingOutput.otel_disable_beatsauth,
-          preconfiguredOutput.otel_disable_beatsauth
+          existingOutput.otel_disable_beatsauth ?? false,
+          preconfiguredOutput.otel_disable_beatsauth ?? false
         ))) ||
     // Kafka does not support proxies; proxy_id is always cleared on save (#267281)
     (existingOutput.type !== 'kafka' &&

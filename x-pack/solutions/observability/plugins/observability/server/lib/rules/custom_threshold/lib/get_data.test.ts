@@ -133,7 +133,7 @@ describe('getData', () => {
     expect(response).toEqual(expectedNoDataResponse);
   });
 
-  it('returns no data when a grouped search has no buckets', async () => {
+  it('returns an empty result when a grouped search has no surviving composite buckets', async () => {
     const response = await callGetData(
       jest.fn().mockResolvedValue({
         aggregations: {
@@ -148,13 +148,13 @@ describe('getData', () => {
       'host.name'
     );
 
-    expect(response).toEqual(expectedNoDataResponse);
+    expect(response).toEqual({});
+    expect(response).not.toHaveProperty(UNGROUPED_FACTORY_KEY);
   });
 
   it('returns a fresh object for each no-data call so in-place mutation cannot leak across rules', async () => {
     const search = jest.fn().mockResolvedValue({
-      aggregations: { groupings: { buckets: [] } },
-      _shards: { successful: 1 },
+      _shards: { successful: 0 },
     });
 
     const first = await callGetData(search, 'host.name');
