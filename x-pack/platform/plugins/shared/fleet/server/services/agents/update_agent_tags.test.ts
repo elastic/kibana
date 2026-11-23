@@ -7,6 +7,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { agentPolicyService } from '../agent_policy';
@@ -18,8 +19,8 @@ import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
 import {
   UpdateAgentTagsActionRunner,
-  retrySkipsUpdatedAgents,
   updateTagsBatch,
+  updatedAgentsClause,
 } from './update_agent_tags_action_runner';
 
 jest.mock('../spaces/helpers');
@@ -531,6 +532,8 @@ describe('update_agent_tags', () => {
         ...cancelledTask,
         response: { ...cancelledTask.response, failures },
       };
+      // the kuery of the action leaves out the agents that have the tag the update removes
+      const clause = updatedAgentsClause(['new'], ['old'], '(tags:old)');
       const batch = (retryCount?: number, retrySkipsUpdated?: boolean) =>
         updateTagsBatch(
           soClient,
@@ -543,9 +546,15 @@ describe('update_agent_tags', () => {
             kuery: '',
             total: 5,
             retryCount,
-            retrySkipsUpdated,
+            updatedAgentsClause: retrySkipsUpdated ? clause : undefined,
           }
         );
+
+      beforeEach(() => {
+        // the agents the runs updated between them: the second run did not go through the same ones
+        esClient.count.mockReset();
+        esClient.count.mockResolvedValue({ count: 4 } as any);
+      });
 
       it('should record why agents failed when no retry of the action is left', async () => {
         mockRuns(cancelledWithFailures, cancelledWithFailures);
@@ -563,9 +572,25 @@ describe('update_agent_tags', () => {
 
         await expect(batch(1, true)).rejects.toThrow(/giving up/);
 
-        // the 3 agents updated, and not the one that failed, which the retry runs again
-        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(3);
+        // the 4 agents the runs updated between them, as Elasticsearch counts them, and not the 3
+        // of the last run or the one that failed, which the retry runs again
+        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(4);
         expect(getErrorResults(esClient)).toEqual([]);
+      });
+
+      it('should count the agents of the batch that fail the clause of the kuery', async () => {
+        mockRuns(cancelledTask, cancelledTask);
+
+        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+
+        const { index, query } = esClient.count.mock.calls[0][0] as any;
+        expect(index).toEqual('.fleet-agents');
+        // the agents of the update: its ids, without the ones that are in another space
+        expect(query.bool.filter).toEqual([(esClient.updateByQuery.mock.calls[0][0] as any).query]);
+        // that do not match what the retry selects by: they were updated, and it leaves them out
+        expect(query.bool.must_not).toEqual([
+          toElasticsearchQuery(fromKueryExpression('tags:old')),
+        ]);
       });
 
       it('should make the writes of the cancelled runs visible before the retry can select agents', async () => {
@@ -575,8 +600,11 @@ describe('update_agent_tags', () => {
 
         expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
         expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: '.fleet-agents' });
-        // and before what the retry will leave out is recorded
+        // before the agents are counted, which needs them, and what the retry leaves out is recorded
         expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+          esClient.count.mock.invocationCallOrder[0]
+        );
+        expect(esClient.count.mock.invocationCallOrder[0]).toBeLessThan(
           esClient.create.mock.invocationCallOrder[0]
         );
       });
@@ -587,6 +615,7 @@ describe('update_agent_tags', () => {
         await expect(batch(1, false)).rejects.toThrow(/giving up/);
 
         expect(esClient.indices.refresh).not.toHaveBeenCalled();
+        expect(esClient.count).not.toHaveBeenCalled();
       });
 
       it('should record both when no retry of the action is left', async () => {
@@ -595,7 +624,8 @@ describe('update_agent_tags', () => {
         await expect(batch(MAX_RETRY_COUNT, true)).rejects.toThrow(/giving up/);
 
         expect(esClient.create).toHaveBeenCalledTimes(1);
-        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(4);
+        // the 4 agents updated and the one that failed
+        expect((esClient.create.mock.calls[0][0] as any).document.agents.length).toEqual(5);
         expect(getErrorResults(esClient).map((result: any) => result.error)).toEqual([
           'error reason',
         ]);
@@ -643,7 +673,7 @@ describe('update_agent_tags', () => {
     });
   });
 
-  describe('retrySkipsUpdatedAgents', () => {
+  describe('updatedAgentsClause', () => {
     it.each([
       // the kuery of an update of one tag, as `updateAgentTags` builds it
       [['a'], [], '(NOT (tags:a))', true],
@@ -690,9 +720,32 @@ describe('update_agent_tags', () => {
     ])(
       'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
       (tagsToAdd, tagsToRemove, kuery, expected) => {
-        expect(retrySkipsUpdatedAgents(tagsToAdd, tagsToRemove, kuery)).toBe(expected);
+        expect(updatedAgentsClause(tagsToAdd, tagsToRemove, kuery) !== undefined).toBe(expected);
       }
     );
+  });
+
+  describe('the clause that updatedAgentsClause returns', () => {
+    const dslOf = (kuery: string) => toElasticsearchQuery(fromKueryExpression(kuery));
+    const clauseDsl = (tagsToAdd: string[], tagsToRemove: string[], kuery: string) =>
+      toElasticsearchQuery(updatedAgentsClause(tagsToAdd, tagsToRemove, kuery)!);
+
+    it('should hold only the condition on the tags, and not the rest of the kuery', () => {
+      // the rest can have conditions that only the search of the agents knows how to run
+      expect(
+        clauseDsl(['new'], ['old'], '((namespaces:"default")) AND (status:online) AND (tags:"old")')
+      ).toEqual(dslOf('tags:"old"'));
+    });
+
+    it('should hold the negation of what the updated agents have', () => {
+      expect(clauseDsl(['a', 'b'], [], 'status:online AND NOT tags:a')).toEqual(
+        dslOf('NOT tags:a')
+      );
+    });
+
+    it('should hold every part of an or, which the updated agents all fail', () => {
+      expect(clauseDsl(['x'], ['a', 'b'], 'tags:(a or b)')).toEqual(dslOf('tags:a or tags:b'));
+    });
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {

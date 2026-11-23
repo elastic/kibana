@@ -6,10 +6,13 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  UpdateByQueryRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { KueryNode } from '@kbn/es-query';
 
 import type { Agent } from '../../types';
@@ -40,99 +43,139 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
-type TagsMatch = 'yes' | 'no' | 'unknown';
+/** The tag a clause of a kuery is about, when it is `tags:<tag>` for one whole tag. */
+const tagOfClause = (node: KueryNode): string | undefined => {
+  const [field, value] = node.arguments ?? [];
+  return node.function === 'is' &&
+    field?.type === 'literal' &&
+    field.value === 'tags' &&
+    value?.type === 'literal'
+    ? String(value.value)
+    : undefined;
+};
+
+const notClause = (clause: KueryNode): KueryNode => ({
+  type: 'function',
+  function: 'not',
+  arguments: [clause],
+});
 
 /**
- * Whether an agent the update has just changed matches a kuery, as far as its tags can tell.
+ * A clause of a kuery, made of conditions on the tags only, that every agent the update has just
+ * changed fails, or `undefined` if there is none. Such an agent has every tag the update adds, and
+ * none that it removes (unless it also adds it), which settles a clause on the `tags` field for
+ * those tags, and with `not`, `and` and `or` the clauses around it. Everything else, another
+ * field, a wildcard, a tag the update does not touch, settles nothing.
  *
- * Such an agent has every tag the update adds, and none that it removes (unless it also adds it).
- * That decides a clause on the `tags` field for those tags, and with `not`, `and` and `or` the
- * clauses around it. Everything else, another field, a wildcard, a tag the update does not touch,
- * is `unknown`.
+ * It is the smallest such clause, so that it can be run on its own: it holds nothing else of the
+ * kuery, which can have conditions that only the search of the agents knows how to run.
  */
-const matchesUpdatedAgent = (
+const clauseUpdatedAgentsFail = (
   node: KueryNode | undefined,
   tagsToAdd: Set<string>,
   tagsToRemove: Set<string>
-): TagsMatch => {
+): KueryNode | undefined => {
   if (node?.type !== 'function') {
-    return 'unknown';
+    return undefined;
   }
   const args: KueryNode[] = node.arguments ?? [];
-  const matches = (arg: KueryNode | undefined) => matchesUpdatedAgent(arg, tagsToAdd, tagsToRemove);
+  const fail = (arg: KueryNode | undefined) =>
+    clauseUpdatedAgentsFail(arg, tagsToAdd, tagsToRemove);
 
   switch (node.function) {
     case 'is': {
-      const [field, value] = args;
-      if (field?.type !== 'literal' || field.value !== 'tags' || value?.type !== 'literal') {
-        return 'unknown';
-      }
-      const tag = String(value.value);
-      if (tagsToAdd.has(tag)) {
-        return 'yes';
-      }
-      return tagsToRemove.has(tag) ? 'no' : 'unknown';
+      const tag = tagOfClause(node);
+      return tag !== undefined && tagsToRemove.has(tag) && !tagsToAdd.has(tag) ? node : undefined;
     }
     case 'not': {
-      const match = matches(args[0]);
-      return match === 'unknown' ? 'unknown' : match === 'yes' ? 'no' : 'yes';
+      const meet = clauseUpdatedAgentsMeet(args[0], tagsToAdd, tagsToRemove);
+      return meet && notClause(meet);
     }
-    case 'and': {
-      const results = args.map(matches);
-      if (results.includes('no')) {
-        return 'no';
-      }
-      return results.length > 0 && results.every((result) => result === 'yes') ? 'yes' : 'unknown';
-    }
+    case 'and':
+      return args.map(fail).find((clause) => clause !== undefined);
     case 'or': {
-      const results = args.map(matches);
-      if (results.includes('yes')) {
-        return 'yes';
-      }
-      return results.length > 0 && results.every((result) => result === 'no') ? 'no' : 'unknown';
+      const clauses = args.map(fail);
+      return clauses.length > 0 && clauses.every((clause) => clause !== undefined)
+        ? { type: 'function', function: 'or', arguments: clauses }
+        : undefined;
     }
     default:
-      return 'unknown';
+      return undefined;
+  }
+};
+
+/** The same for a clause that every agent the update has just changed meets. */
+const clauseUpdatedAgentsMeet = (
+  node: KueryNode | undefined,
+  tagsToAdd: Set<string>,
+  tagsToRemove: Set<string>
+): KueryNode | undefined => {
+  if (node?.type !== 'function') {
+    return undefined;
+  }
+  const args: KueryNode[] = node.arguments ?? [];
+  const meet = (arg: KueryNode | undefined) =>
+    clauseUpdatedAgentsMeet(arg, tagsToAdd, tagsToRemove);
+
+  switch (node.function) {
+    case 'is': {
+      const tag = tagOfClause(node);
+      return tag !== undefined && tagsToAdd.has(tag) ? node : undefined;
+    }
+    case 'not': {
+      const fail = clauseUpdatedAgentsFail(args[0], tagsToAdd, tagsToRemove);
+      return fail && notClause(fail);
+    }
+    case 'and': {
+      const clauses = args.map(meet);
+      return clauses.length > 0 && clauses.every((clause) => clause !== undefined)
+        ? { type: 'function', function: 'and', arguments: clauses }
+        : undefined;
+    }
+    case 'or':
+      return args.map(meet).find((clause) => clause !== undefined);
+    default:
+      return undefined;
   }
 };
 
 /**
- * Whether the retry of an update tags action leaves out the agents the update already changed.
+ * The clause of the kuery of an update tags action that the retry of the action leaves the agents
+ * the update already changed out with, or `undefined` if it does not leave them out.
  *
- * It restarts behind the action's kuery, so it leaves them out when they can no longer match it.
- * That is what the kuery is read for, and not the number of tags the update adds or removes: for
- * an update of one tag `updateAgentTags` adds `(NOT (tags:x))` or `(tags:x)` to it, but a tag with
- * a wildcard in it, `prod*`, makes that a wildcard clause that an agent with another tag, like
+ * The retry restarts behind the action's kuery, so it leaves them out when they can no longer match
+ * it. That is what the kuery is read for, and not the number of tags the update adds or removes:
+ * for an update of one tag `updateAgentTags` adds `(NOT (tags:x))` or `(tags:x)` to it, but a tag
+ * with a wildcard in it, `prod*`, makes that a wildcard clause that an agent with another tag, like
  * `production`, still matches. The tag rename in the UI searches for the agents that have the old
- * tag, which the renamed agents no longer have. The kuery is read as the search of the agents
- * reads it, and the answer is yes only when the tags it names, whole, and only in the places that
- * decide it, show that an updated agent does not match.
+ * tag, which the renamed agents no longer have. The kuery is read as the search of the agents reads
+ * it, and there is a clause only when the tags it names, whole, and only in the places that decide
+ * it, show that an updated agent does not match.
  *
- * It is only used for a batch that is cancelled on every run: the agents it updated are recorded
- * when the retry is going to leave them out, as nothing else will. Whatever the kuery does not
- * settle (another field, a wildcard, a tag the update does not touch) counts as no, and nothing is
- * recorded then. For an `or` of a clause on the tags and one that does not settle, the retry leaves
- * out some of the agents that were updated and not others, and no count is right for that.
+ * With the clause, the agents of a batch that were updated are the ones that fail it, wherever the
+ * update stopped: it is what the retry leaves out. It is only used for a batch that is cancelled
+ * on every run, as nothing else would record them. Whatever the kuery does not settle (another
+ * field, a wildcard, a tag the update does not touch) gives no clause, and nothing is recorded
+ * then. For an `or` of a clause on the tags and one that does not settle, the retry leaves out
+ * some of the agents that were updated and not others, and no count is right for that.
  */
-export const retrySkipsUpdatedAgents = (
+export const updatedAgentsClause = (
   tagsToAdd: string[] = [],
   tagsToRemove: string[] = [],
   kuery: string = ''
-): boolean => {
+): KueryNode | undefined => {
   if (kuery.trim() === '') {
-    return false;
+    return undefined;
   }
   try {
-    return (
-      matchesUpdatedAgent(
-        fromKueryExpression(removeSOAttributes(kuery)),
-        new Set(tagsToAdd),
-        new Set(tagsToRemove)
-      ) === 'no'
+    return clauseUpdatedAgentsFail(
+      fromKueryExpression(removeSOAttributes(kuery)),
+      new Set(tagsToAdd),
+      new Set(tagsToRemove)
     );
   } catch (error) {
     // Not a kuery that can be read, so there is nothing in it to leave agents out.
-    return false;
+    return undefined;
   }
 };
 
@@ -146,7 +189,7 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       {
         tagsToAdd: this.actionParams?.tagsToAdd,
         tagsToRemove: this.actionParams?.tagsToRemove,
-        retrySkipsUpdated: retrySkipsUpdatedAgents(
+        updatedAgentsClause: updatedAgentsClause(
           this.actionParams?.tagsToAdd,
           this.actionParams?.tagsToRemove,
           this.actionParams?.kuery
@@ -200,8 +243,8 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
-    /** See {@link retrySkipsUpdatedAgents}: only used for a batch that is cancelled on every run. */
-    retrySkipsUpdated?: boolean;
+    /** See {@link updatedAgentsClause}: only used for a batch that is cancelled on every run. */
+    updatedAgentsClause?: KueryNode;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.
@@ -323,12 +366,28 @@ export async function updateTagsBatch(
       // updated, so the retry runs them again, and they are recorded when there is no retry left
       // to do that, and logged until then.
       const failures = res.failures ?? [];
-      const recordedUpdatedIds = getUuidArray(options.retrySkipsUpdated ? res.updated ?? 0 : 0);
-      if (recordedUpdatedIds.length > 0) {
-        // The retry leaves these agents out only if it sees what the update wrote. A cancelled
-        // update by query does not refresh, whatever its `refresh` is, so it is done here, before
-        // the retry can be scheduled. Without it the retry could select agents that are recorded.
+      let recordedUpdatedIds: string[] = [];
+      if (options.updatedAgentsClause) {
+        // The agents that both runs updated between them are the ones that fail the clause, and
+        // those are the agents the retry leaves out. The runs do not tell: the second one does not
+        // go through the documents in the order of the first, as the ones that were updated are
+        // written again, so neither the larger of their counts nor their sum is the number.
+        //
+        // The retry leaves them out only if it sees what the updates wrote. A cancelled update by
+        // query does not refresh, whatever its `refresh` is, so it is done here, before the count
+        // and before the retry can be scheduled. Without it the retry could select agents that are
+        // recorded.
         await esClient.indices.refresh({ index: AGENTS_INDEX });
+        const { count } = await esClient.count({
+          index: AGENTS_INDEX,
+          query: {
+            bool: {
+              filter: [request.query as QueryDslQueryContainer],
+              must_not: [toElasticsearchQuery(options.updatedAgentsClause)],
+            },
+          },
+        });
+        recordedUpdatedIds = getUuidArray(count);
       }
       const recordedFailures = options.retryCount === MAX_RETRY_COUNT ? failures : [];
       if (recordedUpdatedIds.length > 0 || recordedFailures.length > 0) {
