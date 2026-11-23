@@ -151,10 +151,13 @@ are absent when no alert triggered the run:
 - `source_kind`: `significant_events`, `elastic_configured` when the alert has a rule, otherwise
   `external`. An external sender may also use `internal` as its source, so use this field to split
   rule alerts from external ones.
-- `fingerprint`: for Significant Events, the `event_id`, which joins to the `significant-events-*`
-  events. Otherwise `sha256(space_id:source:rule_id:group_hash)` from `toAlertFingerprint`, with an
-  empty `rule_id` for external alerts, because a rule's `group_hash` is only unique within the rule.
-  Any other event about the same alert series must derive it with the same function.
+- `fingerprint`: for Significant Events, the `event_id`, which joins to `fingerprint` on
+  `nightshift-agent-tool-event-create`, `nightshift-agent-tool-event-write`, and
+  `nightshift-event-status-changed`. A create or write that failed before it had a persisted
+  caller-visible ID may omit it. Otherwise `sha256(space_id:source:rule_id:group_hash)` from
+  `toAlertFingerprint`, with an empty `rule_id` for external alerts, because a rule's `group_hash`
+  is only unique within the rule. Any other event about the same alert series must derive it with
+  the same function.
 
 `trigger_type` on the started event separates automatic from manual runs. No alert title, message,
 tag, or other customer alert content is sent. The skipped event also carries `event_id`, the
@@ -344,6 +347,8 @@ Investigations are public conversations, and Agent Builder lets anyone who can c
 `POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed by the Relay's thread key `slack:<T>:<C>:<ts>`. A Slack-trigger automation records the same subject for the message that started it, taking the key from the event's `externalConversationId`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
 With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
+
+The subject's summary is the message that started the thread, as plain text, not the automation's name. Its `slack.permalink` opens the thread in Slack's web client (`https://app.slack.com/client/<T>/<C>/thread/<C>-<ts>`), since Slack's documented message link needs the workspace domain, which events don't carry. A thread recorded without a link gets one on its next `_slack_thread` call.
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 

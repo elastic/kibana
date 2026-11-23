@@ -1,0 +1,54 @@
+{
+  "operations": {
+    "describeTable": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ],
+    "executeSql": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ],
+    "getSchema": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ],
+    "listDatabases": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ],
+    "listTables": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ],
+    "query": [
+      {
+        "method": "post",
+        "path": "/Execute",
+        "source": "rds_data"
+      }
+    ]
+  },
+  "sources": {
+    "rds_data": {
+      "apiVersion": "2018-08-01",
+      "fetchedAt": "2026-11-17T20:32:09.527Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/rds-data/service/2018-08-01/rds-data-2018-08-01.json"
+    }
+  }
+}

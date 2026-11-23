@@ -1,5 +1,5 @@
 {
-  "sha1": "b67fc6d7469e5d8dfb4ab07ae82e42042463168a",
+  "sha1": "f4c182c3b7abf5e9ac76cc110094b136713e34e2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -743,7 +743,35 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
         "line": 898,
-        "column": 60
+        "column": 47
+      }
+    },
+    {
+      "id": "d00330aaa254910-e0e6d7dd88c159c",
+      "title": "context engine dreaming templates API serves the built-in dreaming templates to a reader session only while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "d00330aaa254910-682ad5b28f57304",
+      "title": "context engine dreaming templates API returns 403 to a session without Context Engine read access while memory is on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/dreaming_templates.spec.ts",
+        "line": 139,
+        "column": 5
       }
     },
     {

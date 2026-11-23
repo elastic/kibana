@@ -50,7 +50,8 @@
     "@kbn/es-errors",
     "@kbn/spaces-plugin",
     "@kbn/core-spaces-common",
-    "@kbn/i18n"
+    "@kbn/i18n",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

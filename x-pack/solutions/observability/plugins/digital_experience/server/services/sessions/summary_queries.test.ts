@@ -10,6 +10,7 @@ import { FULL_HASH_RANGE, HASH_SPACE } from './hash_ranges';
 import {
   SESSION_ATTRIBUTE_GROUPS,
   attributeColumn,
+  browserSessionEvents,
   bucketDigitsOf,
   changedSessionIdsQuery,
   changedSessionsCountQuery,
@@ -21,7 +22,7 @@ const REBUILD = { changedTo: WINDOW.changedTo, rebuildFrom: '2026-11-09T10:00:00
 
 describe('changedSessionsCountQuery', () => {
   it('counts the browser sessions with an event in the window', () => {
-    const { query, params } = changedSessionsCountQuery(WINDOW);
+    const { query, params } = changedSessionsCountQuery(WINDOW, browserSessionEvents);
 
     expect(query).toMatch(/^SET unmapped_fields = "NULLIFY";/);
     expect(query).toContain('telemetry.sdk.language == "webjs"');
@@ -35,7 +36,7 @@ describe('changedSessionsCountQuery', () => {
 
 describe('changedSessionIdsQuery', () => {
   it('lists the ids of the sessions with an event in the window, a row per hash bucket', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE);
+    const { query, params } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents);
 
     expect(query).toContain('@timestamp >= ?changed_from AND @timestamp < ?changed_to');
     expect(query).toContain('STATS BY session_id = attributes.session.id');
@@ -59,7 +60,7 @@ describe('changedSessionIdsQuery', () => {
     expect(bucketDigitsOf(255)).toBe(1);
     expect(bucketDigitsOf(15)).toBe(0);
 
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 1_000);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 1_000);
 
     expect(query).toContain(
       'STATS session_ids = VALUES(session_id) BY bucket = SUBSTRING(session_hash, 1, 2)'
@@ -68,17 +69,18 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('puts every id in one row when even 16 buckets would not fit', () => {
-    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, 10);
+    const { query } = changedSessionIdsQuery(WINDOW, FULL_HASH_RANGE, browserSessionEvents, 10);
 
     expect(query).toContain('STATS session_ids = VALUES(session_id)\n');
     expect(query).not.toContain('SUBSTRING');
   });
 
   it('keeps the sessions of a hash range only', () => {
-    const { query, params } = changedSessionIdsQuery(WINDOW, {
-      from: HASH_SPACE / 4,
-      to: HASH_SPACE / 2,
-    });
+    const { query, params } = changedSessionIdsQuery(
+      WINDOW,
+      { from: HASH_SPACE / 4, to: HASH_SPACE / 2 },
+      browserSessionEvents
+    );
 
     expect(query).toContain('WHERE session_hash >= ?hash_from AND session_hash < ?hash_to');
     expect(params).toEqual(
@@ -87,11 +89,12 @@ describe('changedSessionIdsQuery', () => {
   });
 
   it('leaves out the bound of a range that starts or ends the hash space', () => {
-    expect(changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }).params).toContainEqual({
-      hash_to: '80000000',
-    });
     expect(
-      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }).query
+      changedSessionIdsQuery(WINDOW, { from: 0, to: HASH_SPACE / 2 }, browserSessionEvents).params
+    ).toContainEqual({ hash_to: '80000000' });
+    expect(
+      changedSessionIdsQuery(WINDOW, { from: HASH_SPACE / 2, to: HASH_SPACE }, browserSessionEvents)
+        .query
     ).not.toContain('?hash_to');
   });
 });
@@ -157,6 +160,15 @@ describe('sessionSummaryQuery', () => {
       `${attributeColumn(
         'browser'
       )} = COALESCE(CASE(TRIM(TO_STRING(raw_resource_attributes_browser_name))`
+    );
+  });
+
+  it('shows a signed-in user by name before their id, which EDOT Browser always writes', () => {
+    const { query } = sessionSummaryQuery(REBUILD, ['a']);
+    const userEval = query.slice(query.indexOf(`${attributeColumn('user')} = COALESCE(`));
+
+    expect(userEval.indexOf('raw_attributes_user_full_name')).toBeLessThan(
+      userEval.indexOf('raw_attributes_user_id')
     );
   });
 

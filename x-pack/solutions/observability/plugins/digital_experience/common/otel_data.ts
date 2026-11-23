@@ -13,6 +13,33 @@ export const OTEL_TRACES_INDEX = 'traces-*.otel-*';
 export const BROWSER_SDK_LANGUAGE = 'webjs';
 
 /**
+ * `telemetry.sdk.name` of EDOT Android and EDOT iOS, which EDOT React Native runs on. Not the
+ * language: EDOT Android's is `java`, as backend Java services'. Both SDKs are moving to the
+ * upstream SDK values, identifying themselves with `ELASTIC_DISTRO` instead.
+ */
+export const MOBILE_SDK_NAMES = ['android', 'iOS'] as const;
+export const TELEMETRY_DISTRO_NAME = 'telemetry.distro.name';
+export const ELASTIC_DISTRO = 'elastic';
+/** The resource's `os.name`; not `os.type`, which is `linux` on Android and `darwin` on iOS. */
+export const OS_NAME = 'os.name';
+/** `os.name` per mobile platform: EDOT iOS takes it from `UIDevice.systemName`, `iPadOS` on iPads. */
+export const MOBILE_OS_NAMES = {
+  android: ['Android'],
+  ios: ['iOS', 'iPadOS'],
+} as const;
+export type MobilePlatform = keyof typeof MOBILE_OS_NAMES;
+
+/** EDOT Android and EDOT iOS crash events; EDOT iOS names them `crash` with legacy names. */
+export const CRASH_EVENTS = ['app.crash', 'crash'] as const;
+/** Taps, as EDOT React Native records them. */
+export const EVENT_WIDGET_CLICK = 'app.widget.click';
+/** The instrumentation scope of EDOT iOS view controller spans: one per screen shown. */
+export const VIEW_CONTROLLER_SCOPE = 'UIViewController';
+export const OTEL_SCOPE_NAME = 'scope.name';
+/** When the SDK observed a log record; only the OTel logs indices map it, as `date_nanos`. */
+export const OTEL_OBSERVED_TIMESTAMP = 'observed_timestamp';
+
+/**
  * An attribute as stored in the OTel indices, e.g. `attributes.session.id`. Queries can use the
  * unprefixed name, which the templates' passthrough objects resolve to the highest-priority
  * scope that maps it; the session summaries group by the stored fields so that a scope mapping
@@ -24,6 +51,7 @@ export const resourceAttributeField = (name: string): string => `resource.attrib
 
 /** Span name in the OTel traces indices; events are named in `event_name` instead. */
 export const OTEL_SPAN_NAME = 'name';
+export const OTEL_SPAN_ID = 'span_id';
 
 export const WEB_VITAL_NAME = 'browser.web_vital.name';
 export const WEB_VITAL_VALUE = 'browser.web_vital.value';
