@@ -10,6 +10,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MobileKpisResponse } from '../../../../common/types/mobile';
+import { EnvironmentFilter } from '../../../components/environment_filter';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { useApiClient } from '../../../hooks/use_api_client';
 import { useDigitalExperienceParams } from '../../../hooks/use_digital_experience_params';
@@ -32,19 +33,18 @@ jest.mock('../../../hooks/use_formatters', () => ({
 jest.mock('../../../hooks/use_time_range');
 jest.mock('../../../hooks/use_update_url_query');
 jest.mock('../../../components/time_range_picker', () => ({ TimeRangePicker: () => null }));
-jest.mock('../../../components/environment_filter', () => ({ EnvironmentFilter: () => null }));
+jest.mock('../../../components/environment_filter', () => ({
+  EnvironmentFilter: jest.fn(() => null),
+}));
 jest.mock('../../../components/single_select_filter', () => ({
   SingleSelectFilter: jest.fn(() => null),
 }));
-
-const NO_VALUE = { value: null, previous: null, delta: null };
 
 const KPIS: MobileKpisResponse = {
   hasData: true,
   isPartial: false,
   sessions: { value: 12, previous: 10, delta: 2 },
   users: { value: 4, previous: 4, delta: 0 },
-  crashFreeSessions: NO_VALUE,
   errorRate: { value: 0.5, previous: 0.25, delta: 0.25 },
   releases: ['2.0.0', '1.9.0'],
   osNames: ['iOS', 'iPadOS', 'Android'],
@@ -56,7 +56,7 @@ const KPIS: MobileKpisResponse = {
 const fetch = jest.fn();
 const updateUrlQuery = jest.fn();
 
-const mockParams = (query: { release?: string; osName?: string } = {}) =>
+const mockParams = (query: { release?: string; osName?: string; compare?: 'true' } = {}) =>
   jest.mocked(useDigitalExperienceParams).mockReturnValue({
     path: { serviceName: 'shop-mobile' },
     query: { source: 'otel', applicationType: 'mobile', ...query },
@@ -101,44 +101,48 @@ beforeEach(() => {
 });
 
 describe('MobileOverview', () => {
-  it('shows the KPI row and every section', async () => {
+  it('shows the KPIs that have data: sessions, users and error rate, in order', async () => {
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileKpiSessionsValue')).toHaveTextContent(
       '12'
     );
-    expect(screen.getByTestId('digitalExperienceMobileKpiCrashFreeValue')).toHaveTextContent(
-      'Not enough data'
-    );
+    expect(screen.getByTestId('digitalExperienceMobileKpiUsersValue')).toHaveTextContent('4');
     expect(screen.getByTestId('digitalExperienceMobileKpiErrorRateValue')).toHaveTextContent('0.5');
-    [
-      'healthSummary',
-      'releaseHealth',
-      'stability',
-      'usersAndEngagement',
-      'performance',
-      'views',
-    ].forEach((section) =>
-      expect(
-        screen.getByTestId(`digitalExperienceMobileSection-${section}Empty`)
-      ).toHaveTextContent('Coming soon')
-    );
+    expect(
+      Array.from(
+        screen
+          .getByTestId('digitalExperienceMobileKpis')
+          .querySelectorAll('[data-test-subj$="Value"]'),
+        (value) => value.getAttribute('data-test-subj')
+      )
+    ).toEqual([
+      'digitalExperienceMobileKpiSessionsValue',
+      'digitalExperienceMobileKpiUsersValue',
+      'digitalExperienceMobileKpiErrorRateValue',
+    ]);
   });
 
-  it('links the KPI row to Discover once, and shows the crash-free change in percentage points', async () => {
-    fetch.mockResolvedValue({
-      ...KPIS,
-      crashFreeSessions: { value: 0.99, previous: 0.98, delta: 0.01 },
-    });
+  it('shows no crash-free card nor placeholder sections until the sibling issues fill them', async () => {
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.queryByTestId('digitalExperienceMobileKpiCrashFree')).toBeNull();
+    expect(screen.queryByText('Not enough data')).toBeNull();
+    expect(screen.queryByText('Coming soon')).toBeNull();
+    expect(
+      document.querySelector('[data-test-subj^="digitalExperienceMobileSection-"]')
+    ).toBeNull();
+  });
+
+  it('links the KPI row to Discover once', async () => {
     renderPage();
 
     expect(await screen.findByTestId('digitalExperienceMobileKpisDiscover')).toHaveAttribute(
       'href',
       '/app/discover'
     );
-    expect(screen.getByTestId('digitalExperienceMobileKpiCrashFreeChange')).toHaveTextContent(
-      '+1 pp'
-    );
+    expect(screen.getAllByTestId('digitalExperienceMobileKpisDiscover')).toHaveLength(1);
     expect(useDiscoverHref).toHaveBeenLastCalledWith(KPIS.esql, {
       from: '2021-01-18T12:00:00.000Z',
       to: '2021-01-18T13:00:00.000Z',
@@ -288,28 +292,75 @@ describe('MobileOverview', () => {
     ).toEqual(['android', 'ios']);
   });
 
-  it('shows the previous period on every KPI with Compare on', async () => {
+  it('shows the environment filter loading only until its first options, not on every filter change', async () => {
+    const environmentProps = () => jest.mocked(EnvironmentFilter).mock.calls.at(-1)?.[0];
+    const { rerender } = renderPage();
+    expect(environmentProps()).toMatchObject({ isLoading: true, environments: [] });
+    await screen.findByTestId('digitalExperienceMobileKpis');
+    expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
+
+    // A new OS loads: the picker keeps its options without a spinner.
+    fetch.mockReturnValue(new Promise(() => {}));
+    mockParams({ osName: 'iOS' });
+    rerender(<MobileOverview serviceName="shop-mobile" />);
+    await waitFor(() =>
+      expect(screen.queryByTestId('digitalExperienceMobileKpisDiscover')).toBeNull()
+    );
+    expect(environmentProps()).toMatchObject({ isLoading: false, environments: ['production'] });
+  });
+
+  it('shows no change nor previous period with Compare off, its default', async () => {
     renderPage();
     await screen.findByTestId('digitalExperienceMobileKpis');
-    expect(screen.queryByTestId('digitalExperienceMobileKpiSessionsPrevious')).toBeNull();
 
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).not.toBeChecked();
+    ['Sessions', 'Users', 'ErrorRate'].forEach((kpi) => {
+      expect(screen.queryByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeNull();
+      expect(screen.queryByTestId(`digitalExperienceMobileKpi${kpi}Previous`)).toBeNull();
+    });
+  });
 
+  it('shows the change and the previous period on every KPI with Compare on in the URL', async () => {
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+
+    expect(screen.getByTestId('digitalExperienceMobileCompareToggle')).toBeChecked();
+    expect(screen.getByTestId('digitalExperienceMobileKpiSessionsChange')).toHaveTextContent(
+      '+20%'
+    );
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toHaveTextContent(
       'Previous period: 10'
     );
-    expect(screen.getByTestId('digitalExperienceMobileKpiUsersPrevious')).toBeInTheDocument();
+    ['Users', 'ErrorRate'].forEach((kpi) => {
+      expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Change`)).toBeInTheDocument();
+      expect(screen.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`)).toBeInTheDocument();
+    });
+  });
+
+  it('keeps Compare in the URL, so a reload or Share keeps it, and removes it when off', async () => {
+    const { unmount } = renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+    expect(updateUrlQuery).toHaveBeenLastCalledWith({ compare: 'true' });
+    unmount();
+
+    mockParams({ compare: 'true' });
+    renderPage();
+    await screen.findByTestId('digitalExperienceMobileKpis');
+    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
+    expect(updateUrlQuery).toHaveBeenLastCalledWith({ compare: undefined });
   });
 
   it("shows neither the previous filters' values nor their access warning while new ones load", async () => {
+    mockParams({ compare: 'true' });
     fetch.mockResolvedValue({ ...KPIS, isPartial: true });
     const { rerender } = renderPage();
     await screen.findByTestId('digitalExperienceMobileKpisPartialAccess');
-    fireEvent.click(screen.getByTestId('digitalExperienceMobileCompareToggle'));
     expect(screen.getByTestId('digitalExperienceMobileKpiSessionsPrevious')).toBeInTheDocument();
 
     fetch.mockReturnValue(new Promise(() => {}));
-    mockParams({ release: '2.0.0' });
+    mockParams({ release: '2.0.0', compare: 'true' });
     rerender(<MobileOverview serviceName="shop-mobile" />);
 
     await waitFor(() =>

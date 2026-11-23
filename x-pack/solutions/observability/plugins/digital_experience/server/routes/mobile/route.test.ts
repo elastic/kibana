@@ -22,7 +22,6 @@ const KPIS: Omit<MobileKpisResponse, 'isPartial'> = {
   hasData: true,
   sessions: { value: 7, previous: 5, delta: 2 },
   users: { value: 3, previous: 3, delta: 0 },
-  crashFreeSessions: { value: null, previous: null, delta: null },
   errorRate: { value: 0.5, previous: null, delta: null },
   releases: ['1.2.3'],
   osNames: ['iOS'],

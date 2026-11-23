@@ -30,6 +30,7 @@ import type { Formatters } from '../../../hooks/use_formatters';
 import {
   LAST_SEEN_LABEL,
   MOBILE_ERROR_RATE_DESCRIPTION,
+  MOBILE_USERS_DESCRIPTION,
   NOT_ENOUGH_DATA_LABEL,
   SESSIONS_LABEL,
   valueWithChangeLabel,
@@ -166,6 +167,7 @@ export function MobileApplicationsTable({
       {
         field: 'users.count',
         name: columnNames.users,
+        nameTooltip: { content: MOBILE_USERS_DESCRIPTION },
         dataType: 'number',
         sortable: true,
         ...metricColumnPreset<MobileApplicationSummary>(),
@@ -183,7 +185,13 @@ export function MobileApplicationsTable({
         nameTooltip: { content: MOBILE_ERROR_RATE_DESCRIPTION },
         sortable: true,
         ...metricColumnPreset<MobileApplicationSummary>(),
-        render: (rate: number | null) => (rate === null ? <EmptyCellValue /> : formatNumber(rate)),
+        // Two decimals, as the web table's error rate, so the column's values line up.
+        render: (rate: number | null) =>
+          rate === null ? (
+            <EmptyCellValue />
+          ) : (
+            <span data-test-subj="digitalExperienceMobileErrorRate">{rate.toFixed(2)}</span>
+          ),
       },
       {
         field: 'lastSeen',

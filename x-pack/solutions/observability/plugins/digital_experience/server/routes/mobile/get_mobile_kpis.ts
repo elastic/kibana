@@ -97,8 +97,6 @@ export const getMobileKpis = async ({
       kpiOf(current, RESULT_COLUMNS.users),
       kpiOf(before, RESULT_COLUMNS.users)
     ),
-    // A crash isn't defined yet (#64) and session start doesn't reach the SDKs: not enough data.
-    crashFreeSessions: toComparedValue(null, null),
     errorRate: toComparedValue(errorRateOf(current), errorRateOf(before)),
     releases: toReleases(releaseRows),
     osNames: toOsNames(osRows),

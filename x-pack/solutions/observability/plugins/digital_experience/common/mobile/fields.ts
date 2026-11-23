@@ -65,7 +65,6 @@ export const RESULT_COLUMNS = {
   newestRelease: 'newest_release',
   firstSeen: 'first_seen',
   osName: 'os_name',
-  bucket: 'bucket',
   environments: 'environments',
   environmentNames: 'environment_names',
 } as const;

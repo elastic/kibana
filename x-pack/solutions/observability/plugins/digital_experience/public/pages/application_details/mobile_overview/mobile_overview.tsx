@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { DataPanel } from '../../../components/data_panel';
 import { SingleSelectFilter } from '../../../components/single_select_filter';
 import { EnvironmentFilter } from '../../../components/environment_filter';
 import { TimeRangePicker } from '../../../components/time_range_picker';
@@ -38,7 +37,7 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { useQueryParam } from '../../../hooks/use_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useUpdateUrlQuery } from '../../../hooks/use_update_url_query';
-import { MOBILE_ERROR_RATE_DESCRIPTION } from '../../../labels';
+import { MOBILE_ERROR_RATE_DESCRIPTION, MOBILE_USERS_DESCRIPTION } from '../../../labels';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
 import { PlatformBadges } from '../../../components/platform_badges';
 import { MobilePanel } from './mobile_panel';
@@ -67,64 +66,22 @@ const toOptions = (
     .map((value) => ({ value, label: value })),
 ];
 
-/** The sections the sibling issues fill; each shows a placeholder until then. */
-const MOBILE_SECTIONS = [
-  {
-    id: 'healthSummary',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.healthSummary', {
-      defaultMessage: 'Health summary',
-    }),
-  },
-  {
-    id: 'releaseHealth',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.releaseHealth', {
-      defaultMessage: 'Release health',
-    }),
-  },
-  {
-    id: 'stability',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.stability', {
-      defaultMessage: 'Stability',
-    }),
-  },
-  {
-    id: 'usersAndEngagement',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.usersAndEngagement', {
-      defaultMessage: 'Users and engagement',
-    }),
-  },
-  {
-    id: 'performance',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.performance', {
-      defaultMessage: 'Performance',
-    }),
-  },
-  {
-    id: 'views',
-    title: i18n.translate('xpack.digitalExperience.mobile.section.views', {
-      defaultMessage: 'Views',
-    }),
-  },
-] as const;
-
-const COMING_SOON = i18n.translate('xpack.digitalExperience.mobile.section.comingSoon', {
-  defaultMessage: 'Coming soon',
-});
-
 const DISCOVER_LABEL = i18n.translate('xpack.digitalExperience.mobile.kpis.openInDiscover', {
   defaultMessage: 'Open in Discover',
 });
 
-type MobileKpi = 'sessions' | 'users' | 'crashFreeSessions' | 'errorRate';
+type MobileKpi = 'sessions' | 'users' | 'errorRate';
 
-/** The KPI row, in order; the share KPIs change in percentage points, the others relatively. */
+/**
+ * The KPI row, in order. Crash-free sessions joins it once a crash is defined (#64), rather than
+ * showing "Not enough data" while crash reporting may already work.
+ */
 const MOBILE_KPIS: ReadonlyArray<
   Pick<
     MobilePanelProps,
     'title' | 'tooltip' | 'changeUnit' | 'higherIsBetter' | 'data-test-subj'
   > & {
     kpi: MobileKpi;
-    format: 'number' | 'percent';
   }
 > = [
   {
@@ -136,7 +93,6 @@ const MOBILE_KPIS: ReadonlyArray<
     tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.sessionsTooltip', {
       defaultMessage: 'Distinct session.id values in the time range.',
     }),
-    format: 'number',
     changeUnit: 'relative',
   },
   {
@@ -145,25 +101,8 @@ const MOBILE_KPIS: ReadonlyArray<
     title: i18n.translate('xpack.digitalExperience.mobile.kpi.users', {
       defaultMessage: 'Users',
     }),
-    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.usersTooltip', {
-      defaultMessage: 'Distinct app.installation.id values in the time range.',
-    }),
-    format: 'number',
+    tooltip: MOBILE_USERS_DESCRIPTION,
     changeUnit: 'relative',
-  },
-  {
-    kpi: 'crashFreeSessions',
-    'data-test-subj': 'digitalExperienceMobileKpiCrashFree',
-    title: i18n.translate('xpack.digitalExperience.mobile.kpi.crashFree', {
-      defaultMessage: 'Crash-free sessions',
-    }),
-    tooltip: i18n.translate('xpack.digitalExperience.mobile.kpi.crashFreeTooltip', {
-      defaultMessage:
-        'Share of sessions without a crash. Needs a crash definition and session start events, which are not available yet.',
-    }),
-    format: 'percent',
-    changeUnit: 'percentagePoints',
-    higherIsBetter: true,
   },
   {
     kpi: 'errorRate',
@@ -172,7 +111,6 @@ const MOBILE_KPIS: ReadonlyArray<
       defaultMessage: 'Error rate',
     }),
     tooltip: MOBILE_ERROR_RATE_DESCRIPTION,
-    format: 'number',
     changeUnit: 'relative',
     higherIsBetter: false,
   },
@@ -228,18 +166,19 @@ const ClearFiltersButton = ({ onClear }: { onClear: () => void }) => (
 );
 
 /**
- * The mobile application page, all its platforms: filters, the KPI row and the sections the
- * sibling issues fill.
+ * The mobile application page, all its platforms: filters and the KPI row. The sibling issues add
+ * their sections below it as they fill them.
  */
 export function MobileOverview({ serviceName }: { serviceName: string }) {
   const apiClient = useApiClient();
   const { timeRange } = useTimeRange();
   const { environment, setEnvironment } = useEnvironment();
-  const { formatNumber, formatPercent } = useFormatters();
+  const { formatNumber } = useFormatters();
   // In the URL, so a reload or a shared link keeps them.
   const { value: release, setValue: setRelease } = useQueryParam('release');
   const { value: osName, setValue: setOsName } = useQueryParam('osName');
-  const [isComparing, setIsComparing] = useState(false);
+  const { value: compare, setValue: setCompare } = useQueryParam('compare');
+  const isComparing = compare === 'true';
 
   const {
     value: kpis,
@@ -267,7 +206,6 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
     [timeRange.rangeFrom, timeRange.rangeTo]
   );
   const discoverHref = useDiscoverHref(currentKpis?.esql, discoverTimeRange);
-  const valueFormatters = { number: formatNumber, percent: formatPercent };
 
   const releaseOptions = useMemo(
     () => toOptions(ALL_RELEASES_LABEL, kpis?.releases, release),
@@ -309,12 +247,13 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
+          <EuiFilterGroup compressed>
             <EnvironmentFilter
               environments={kpis?.environments ?? []}
               selected={environment}
               onChange={setEnvironment}
-              isLoading={isLoading}
+              // Only until the first options: they stay while new filters load, as the Overview's.
+              isLoading={isLoading && !kpis}
             />
             <SingleSelectFilter
               data-test-subj="digitalExperienceMobileOsFilter"
@@ -349,7 +288,7 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
               defaultMessage: 'Compare to the previous period',
             })}
             checked={isComparing}
-            onChange={({ target: { checked } }) => setIsComparing(checked)}
+            onChange={({ target: { checked } }) => setCompare(checked ? 'true' : undefined)}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -397,12 +336,12 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
         ) : (
           <>
             <EuiFlexGroup gutterSize="m" data-test-subj="digitalExperienceMobileKpis" wrap>
-              {MOBILE_KPIS.map(({ kpi, format, ...panel }) => (
+              {MOBILE_KPIS.map(({ kpi, ...panel }) => (
                 <MobilePanel
                   key={kpi}
                   {...panel}
                   value={currentKpis?.[kpi]}
-                  formatValue={valueFormatters[format]}
+                  formatValue={formatNumber}
                   isComparing={isComparing}
                   isLoading={isLoading}
                 />
@@ -429,20 +368,6 @@ export function MobileOverview({ serviceName }: { serviceName: string }) {
                 </EuiFlexGroup>
               </>
             )}
-            {MOBILE_SECTIONS.map(({ id, title }) => (
-              <React.Fragment key={id}>
-                <EuiSpacer size="l" />
-                <DataPanel
-                  data-test-subj={`digitalExperienceMobileSection-${id}`}
-                  title={title}
-                  isLoading={false}
-                  isEmpty
-                  emptyMessage={COMING_SOON}
-                >
-                  {null}
-                </DataPanel>
-              </React.Fragment>
-            ))}
           </>
         ))}
     </>

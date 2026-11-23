@@ -64,7 +64,6 @@ describe('getMobileKpis', () => {
         hasData: true,
         sessions: { value: 4, previous: 2, delta: 2 },
         users: { value: 2, previous: 2, delta: 0 },
-        crashFreeSessions: { value: null, previous: null, delta: null },
         errorRate: { value: 0.5, previous: 0, delta: 0.5 },
         releases: ['1.0.0', '1.1.0'],
         osNames: ['iOS', 'iPadOS'],
@@ -72,6 +71,8 @@ describe('getMobileKpis', () => {
         environments: ['production'],
       })
     );
+    // No crash-free sessions until a crash is defined (#64), rather than a value that's always empty.
+    expect(kpis).not.toHaveProperty('crashFreeSessions');
     const [[currentRequest], [previousRequest], [releasesRequest], [osRequest]] =
       client.esql.query.mock.calls;
     // The previous period has the same length and ends, exclusive, where the range starts.

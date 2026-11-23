@@ -21,10 +21,27 @@ describe('mobilePanelDiscoverEsql', () => {
     expect(query).not.toMatch(/\?(?!_tstart|_tend)/);
   });
 
-  it("buckets the KPIs over Discover's time range, which leaves out the event at the end", () => {
+  it("keeps Discover's time range without the event at its end, as the panel does", () => {
     const query = mobilePanelDiscoverEsql({ serviceName: 'shop-mobile' }, {});
 
     expect(query).toContain('@timestamp >= ?_tstart AND @timestamp < ?_tend');
-    expect(query).toContain('BUCKET(@timestamp, 50, ?_tstart, ?_tend)');
+  });
+
+  it('opens the events, newest first, not aggregates, so each crash and stack trace can be read', () => {
+    const query = mobilePanelDiscoverEsql({ serviceName: 'shop-mobile' }, {});
+
+    expect(query).not.toMatch(/\bSTATS\b/);
+    expect(query).not.toMatch(/\bBUCKET\(/);
+    expect(query).not.toMatch(/\bKEEP\b|\bDROP\b|\bLIMIT\b/);
+    expect(query.trim()).toMatch(/\| SORT @timestamp DESC$/);
+  });
+
+  it('only reads the mobile documents of the application', () => {
+    const query = mobilePanelDiscoverEsql({ serviceName: 'shop-mobile' }, {});
+
+    expect(query).toMatch(
+      /^SET unmapped_fields = "nullify";\s*FROM traces-\*\.otel-\*, logs-\*\.otel-\*/
+    );
+    expect(query).toContain('`service.name` == "shop-mobile"');
   });
 });

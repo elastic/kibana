@@ -45,8 +45,8 @@ const changeColor = (
 };
 
 /**
- * A mobile KPI: the current value with its change against the previous period, the Compare overlay
- * and a tooltip with how the value is calculated.
+ * A mobile KPI: the current value, a tooltip with how it's calculated and, with Compare on, its
+ * change and value of the previous period.
  */
 export function MobilePanel({
   title,
@@ -75,7 +75,7 @@ export function MobilePanel({
       }
       footer={
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          {change !== null && (
+          {isComparing && change !== null && (
             <EuiFlexItem grow={false}>
               <EuiBadge
                 color={changeColor(change.direction, higherIsBetter)}

@@ -13,7 +13,7 @@ import { useUpdateUrlQuery } from './use_update_url_query';
 
 /**
  * Filters kept in the URL, each with the route that declares it: the list's, and the mobile page's
- * OS and release. The time range has its own hook, `useTimeRange`.
+ * OS, release and Compare toggle. The time range has its own hook, `useTimeRange`.
  */
 const QUERY_PARAM_ROUTES = {
   environment: '/',
@@ -22,6 +22,7 @@ const QUERY_PARAM_ROUTES = {
   applicationType: '/',
   osName: '/{serviceName}',
   release: '/{serviceName}',
+  compare: '/{serviceName}',
 } as const;
 
 type QueryParam = keyof typeof QUERY_PARAM_ROUTES;
@@ -34,7 +35,7 @@ type QueryParams = Pick<
   ListQuery,
   'environment' | 'sourceFilter' | 'platformFilter' | 'applicationType'
 > &
-  Pick<ApplicationQuery, 'osName' | 'release'>;
+  Pick<ApplicationQuery, 'osName' | 'release' | 'compare'>;
 
 export interface QueryParamState<TValue> {
   /** The param's value, `undefined` when unset. */

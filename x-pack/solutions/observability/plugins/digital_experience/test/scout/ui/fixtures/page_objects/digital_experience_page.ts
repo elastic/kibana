@@ -25,6 +25,9 @@ type OverviewFilterName =
   | 'pageUrl'
   | 'pageContains';
 
+/** The KPIs of the mobile page's row. */
+type MobileKpi = 'Sessions' | 'Users' | 'ErrorRate';
+
 export class DigitalExperiencePage {
   public readonly mainContainer: Locator;
   public readonly applicationsTable: EuiBasicTableObject;
@@ -92,6 +95,7 @@ export class DigitalExperiencePage {
   public readonly mobileKpis: Locator;
   public readonly mobilePagePlatforms: Locator;
   public readonly mobileOsFilter: Locator;
+  public readonly mobileCompareToggle: Locator;
   public readonly mobileOsList: EuiSelectableObject;
   public readonly platformFilter: Locator;
   public readonly platformList: EuiSelectableObject;
@@ -169,6 +173,7 @@ export class DigitalExperiencePage {
       .getByTestId('digitalExperienceMobilePagePlatforms')
       .getByTestId('digitalExperiencePlatformBadge');
     this.mobileOsFilter = page.getByTestId('digitalExperienceMobileOsFilter');
+    this.mobileCompareToggle = page.getByTestId('digitalExperienceMobileCompareToggle');
     this.mobileOsList = page.components.selectable('digitalExperienceMobileOsFilterList');
     this.platformFilter = page.getByTestId('digitalExperiencePlatformFilter');
     this.platformList = page.components.selectable('digitalExperiencePlatformFilterList');
@@ -187,8 +192,18 @@ export class DigitalExperiencePage {
   }
 
   /** The value of a KPI of the mobile page, e.g. `Sessions`. */
-  mobileKpiValue(kpi: 'Sessions' | 'Users' | 'CrashFree' | 'ErrorRate'): Locator {
+  mobileKpiValue(kpi: MobileKpi): Locator {
     return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Value`);
+  }
+
+  /** A mobile KPI's change against the previous period, shown with Compare on. */
+  mobileKpiChange(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Change`);
+  }
+
+  /** A mobile KPI's value in the previous period, shown with Compare on. */
+  mobileKpiPrevious(kpi: MobileKpi): Locator {
+    return this.page.getByTestId(`digitalExperienceMobileKpi${kpi}Previous`);
   }
 
   /** Narrows the mobile page to one OS by its label, e.g. `iPadOS`. */

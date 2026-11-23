@@ -6,10 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
-import { TARGET_BUCKETS } from '../histogram';
-import { resultColumn } from './fields';
 import { mobilePanelQuery, withEnvironment, type MobilePanelFilters } from './filters';
-import { kpiStats } from './kpis';
 
 /**
  * Discover fills `?_tstart` and `?_tend` with its time range. Its own time filter includes the
@@ -18,19 +15,15 @@ import { kpiStats } from './kpis';
 const inDiscoverTimeRange = () => esql.exp`@timestamp >= ?_tstart AND @timestamp < ?_tend`;
 
 /**
- * The ES|QL that Discover opens for a panel: the KPIs over time with every filter, the
- * environment included, and the values written into the text, as a Discover link takes no params.
- * The buckets follow Discover's time range, so they stay readable when it changes there:
- * `BUCKET` divides the range by `TARGET_BUCKETS` and rounds the width up to a standard one
- * (30 minutes, 1 day…), so there are never more buckets than that.
+ * The ES|QL that Discover opens for a panel: the events behind it, newest first, with every filter
+ * (the environment included) and the values written into the text, as a Discover link takes no
+ * params. Events rather than aggregates, so each crash, exception and its stack trace can be read.
  */
 export const mobilePanelDiscoverEsql = (
   filters: MobilePanelFilters,
   { environment }: { environment?: string }
 ): string =>
   withEnvironment(mobilePanelQuery(filters), environment).pipe`WHERE ${inDiscoverTimeRange()}`
-    .pipe`STATS ${kpiStats()}
-      BY ${resultColumn('bucket')} = BUCKET(@timestamp, ${TARGET_BUCKETS}, ?_tstart, ?_tend)`
-    .pipe`SORT ${resultColumn('bucket')} ASC`
+    .pipe`SORT @timestamp DESC`
     .inlineParams()
     .print('pipe-multiline');

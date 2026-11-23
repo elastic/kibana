@@ -15,8 +15,6 @@ export interface MobileKpisResponse {
   isPartial: boolean;
   sessions: ComparedValue;
   users: ComparedValue;
-  /** `null` values until a crash is defined (#64) and session start reaches the SDKs. */
-  crashFreeSessions: ComparedValue;
   /** Exceptions per session. */
   errorRate: ComparedValue;
   /** Releases in the time range and OS, whatever the release filter, most sessions first. */

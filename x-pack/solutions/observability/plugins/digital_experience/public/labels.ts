@@ -101,6 +101,15 @@ export const MOBILE_ERROR_RATE_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Exceptions per session in the time range.' }
 );
 
+/** What mobile users count: installations, not signed-in people. */
+export const MOBILE_USERS_DESCRIPTION = i18n.translate(
+  'xpack.digitalExperience.mobile.usersDescription',
+  {
+    defaultMessage:
+      'Distinct app installations (app.installation.id) in the time range. A reinstall counts as a new one, and so does each device of the same person.',
+  }
+);
+
 /** A mobile value that can't be computed yet, e.g. crash-free sessions until a crash is defined. */
 export const NOT_ENOUGH_DATA_LABEL = i18n.translate(
   'xpack.digitalExperience.mobile.notEnoughData',

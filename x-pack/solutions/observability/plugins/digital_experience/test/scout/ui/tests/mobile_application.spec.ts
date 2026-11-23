@@ -88,5 +88,21 @@ test.describe('Digital Experience mobile applications', { tag: DIGITAL_EXPERIENC
       await expect(page).toHaveURL(/osName=iPadOS/);
       await expect(digitalExperience.mobileKpiValue('Sessions')).toHaveText('1');
     });
+
+    await test.step('compares to the previous period only with Compare on, kept across a reload', async () => {
+      await expect(digitalExperience.mobileKpiChange('Sessions')).toBeHidden();
+
+      await digitalExperience.mobileCompareToggle.click();
+      await expect(page).toHaveURL(/compare=true/);
+      await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeVisible();
+
+      await page.reload();
+      await expect(digitalExperience.mobileCompareToggle).toBeChecked();
+      await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeVisible();
+
+      await digitalExperience.mobileCompareToggle.click();
+      await expect(page).not.toHaveURL(/compare=/);
+      await expect(digitalExperience.mobileKpiPrevious('Sessions')).toBeHidden();
+    });
   });
 });

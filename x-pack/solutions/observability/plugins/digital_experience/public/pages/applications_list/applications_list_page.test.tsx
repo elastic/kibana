@@ -255,6 +255,43 @@ describe('ApplicationsListPage mobile applications', () => {
     );
   });
 
+  it('explains that users are installations, not signed-in people, in its column header', async () => {
+    respondWith([mobileApp()]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    const header = screen.getByRole('columnheader', { name: /Users/ });
+    fireEvent.mouseOver(within(header).getByTestId('tableHeaderSortButton'));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'Distinct app installations (app.installation.id) in the time range. A reinstall counts as a new one'
+    );
+  });
+
+  it.each([
+    [1 / 3, '0.33'],
+    [2, '2.00'],
+    [0, '0.00'],
+  ])(
+    'shows an error rate of %s with two decimals, as the web table, as %s',
+    async (errorRate, shown) => {
+      respondWith([{ ...mobileApp(), errorRate }]);
+      renderPage();
+
+      expect(await screen.findByTestId('digitalExperienceMobileErrorRate')).toHaveTextContent(
+        new RegExp(`^${shown}$`)
+      );
+    }
+  );
+
+  it('shows no error rate without sessions', async () => {
+    respondWith([{ ...mobileApp(), errorRate: null }]);
+    renderPage();
+
+    await screen.findByTestId('digitalExperienceMobileApplicationsTable');
+    expect(screen.queryByTestId('digitalExperienceMobileErrorRate')).toBeNull();
+  });
+
   it('shows the web tab first when there are both, with the count of each', async () => {
     respondWith([webApp(), mobileApp(), mobileApp('news-mobile')]);
     renderPage();
@@ -325,7 +362,7 @@ describe('ApplicationsListPage mobile applications', () => {
     expect(screen.queryByTestId('digitalExperienceApplicationsTable')).toBeNull();
   });
 
-  it("ignores the web source filter of a URL on the Mobile tab: the Web count and the mobile links", async () => {
+  it('ignores the web source filter of a URL on the Mobile tab: the Web count and the mobile links', async () => {
     // E.g. a shared link, or the way back from an application, with both tabs' filters.
     mockApplicationType('mobile');
     mockSourceFilter('classic');

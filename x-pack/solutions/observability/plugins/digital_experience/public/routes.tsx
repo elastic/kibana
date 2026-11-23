@@ -82,6 +82,8 @@ const digitalExperienceRoutes = {
             t.partial({
               osName: boundedParamRt(MAX_OS_NAME_LENGTH),
               release: boundedParamRt(MAX_RELEASE_LENGTH),
+              // Its Compare toggle: on when `true`, off when unset, so a reload or Share keeps it.
+              compare: t.literal('true'),
             }),
           ]),
         }),

@@ -53,7 +53,8 @@ const renderPanel = (props: Partial<React.ComponentProps<typeof MobilePanel>> = 
       value={{ value: 12, previous: 10, delta: 2 }}
       formatValue={(value) => `${value} sessions`}
       changeUnit="relative"
-      isComparing={false}
+      // On, as the change shows only then; the last test turns it off.
+      isComparing
       isLoading={false}
       {...props}
     />,
@@ -128,23 +129,15 @@ describe('MobilePanel', () => {
     }
   );
 
-  it('shows the previous value only while comparing', () => {
-    const { rerender } = renderPanel();
+  it('shows the change and the previous value only while comparing, so the toggle means both', () => {
+    const { unmount } = renderPanel({ isComparing: false });
+    expect(screen.getByTestId('kpiValue')).toHaveTextContent('12 sessions');
+    expect(screen.queryByTestId('kpiChange')).not.toBeInTheDocument();
     expect(screen.queryByTestId('kpiPrevious')).not.toBeInTheDocument();
+    unmount();
 
-    rerender(
-      <MobilePanel
-        data-test-subj="kpi"
-        title="Sessions"
-        tooltip="Distinct session.id values."
-        value={{ value: 12, previous: 10, delta: 2 }}
-        formatValue={(value) => `${value} sessions`}
-        changeUnit="relative"
-        isComparing
-        isLoading={false}
-      />
-    );
-
+    renderPanel({ isComparing: true });
+    expect(screen.getByTestId('kpiChange')).toHaveTextContent('+20%');
     expect(screen.getByTestId('kpiPrevious')).toHaveTextContent('Previous period: 10 sessions');
   });
 });
