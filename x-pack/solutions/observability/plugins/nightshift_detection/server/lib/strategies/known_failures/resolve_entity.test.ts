@@ -8,7 +8,7 @@
 import type { Feature } from '@kbn/significant-events-schema';
 import { resolveEntity } from './resolve_entity';
 
-const createService = (id: string, name?: string): Feature => ({
+const createService = ({ id, name }: { id: string; name?: string }): Feature => ({
   id,
   uuid: `uuid-${id}`,
   source_id: 'source-1',
@@ -31,14 +31,16 @@ const resolve = (featureIds: string[], features: Feature[]) =>
 
 describe('resolveEntity', () => {
   it('names the one service the knowledge indicator is linked to', () => {
-    expect(resolve(['checkout'], [createService('checkout', 'checkout-api')])).toEqual({
+    expect(
+      resolve(['checkout'], [createService({ id: 'checkout', name: 'checkout-api' })])
+    ).toEqual({
       type: 'service',
       name: 'checkout-api',
     });
   });
 
   it('falls back to the feature title when the service has no name', () => {
-    expect(resolve(['checkout'], [createService('checkout')])).toEqual({
+    expect(resolve(['checkout'], [createService({ id: 'checkout' })])).toEqual({
       type: 'service',
       name: 'Service checkout',
     });
@@ -47,9 +49,12 @@ describe('resolveEntity', () => {
   it('names the source when no service, or more than one, is linked', () => {
     const source = { type: 'source', name: 'source-1' };
 
-    expect(resolve([], [createService('checkout', 'checkout-api')])).toEqual(source);
+    expect(resolve([], [createService({ id: 'checkout', name: 'checkout-api' })])).toEqual(source);
     expect(
-      resolve(['checkout', 'cart'], [createService('checkout', 'a'), createService('cart', 'b')])
+      resolve(
+        ['checkout', 'cart'],
+        [createService({ id: 'checkout', name: 'a' }), createService({ id: 'cart', name: 'b' })]
+      )
     ).toEqual(source);
   });
 
@@ -58,8 +63,8 @@ describe('resolveEntity', () => {
       resolve(
         ['checkout'],
         [
-          createService('checkout', 'checkout-api'),
-          { ...createService('checkout', 'other'), source_id: 'source-2' },
+          createService({ id: 'checkout', name: 'checkout-api' }),
+          { ...createService({ id: 'checkout', name: 'other' }), source_id: 'source-2' },
         ]
       )
     ).toEqual({ type: 'service', name: 'checkout-api' });
@@ -70,7 +75,10 @@ describe('resolveEntity', () => {
     expect(
       resolve(
         ['services:source-1', 'checkout'],
-        [createService('services:source-1'), createService('checkout', 'checkout-api')]
+        [
+          createService({ id: 'services:source-1' }),
+          createService({ id: 'checkout', name: 'checkout-api' }),
+        ]
       )
     ).toEqual({ type: 'service', name: 'checkout-api' });
   });

@@ -150,13 +150,15 @@ export class ScopedReconcileRunner {
 
         try {
           const result = await strategy.resources(context);
-          if (result.skipped.length > 0) {
+          const unwatched = [
+            ...result.skipped.map(({ source_id: id, reason }) => `${id}: ${reason}`),
+            ...(result.notes ?? []),
+          ];
+          if (unwatched.length > 0) {
             this.logger.debug(
-              `${descriptor.id} cannot watch ${result.skipped.length} item(s) in space [${
+              `${descriptor.id} cannot watch ${unwatched.length} item(s) in space [${
                 context.spaceId
-              }]: ${result.skipped
-                .map(({ source_id: id, reason }) => `${id}: ${reason}`)
-                .join('; ')}`
+              }]: ${unwatched.join('; ')}`
             );
           }
           skippedSources.push(

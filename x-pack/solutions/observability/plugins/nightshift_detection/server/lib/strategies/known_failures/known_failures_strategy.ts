@@ -35,7 +35,8 @@ export class KnownFailuresStrategy implements DetectionStrategy {
 
   /**
    * One rule per countable match knowledge indicator, on while its source is enabled. A STATS
-   * indicator, or one that is more than `FROM` and `WHERE`, is reported as skipped.
+   * indicator, or one that is more than `FROM` and `WHERE`, is only noted: skipping its source
+   * would freeze the source's other rules, so an edited indicator's old rule would never go.
    */
   public async resources({
     sources,
@@ -44,12 +45,12 @@ export class KnownFailuresStrategy implements DetectionStrategy {
   }: ResourceContext): Promise<DesiredResources> {
     const links = await knowledge.listQueries({ sourceIds: sources.map(({ id }) => id) });
     const enabledSourceIds = new Set(sources.filter(({ enabled }) => enabled).map(({ id }) => id));
-    const result: DesiredResources = { resources: [], skipped: [] };
+    const result: Required<DesiredResources> = { resources: [], skipped: [], notes: [] };
 
     links.forEach(({ query, source_id: sourceId }) => {
       const reason = getUnwatchableReason(query);
       if (reason) {
-        result.skipped.push({ source_id: sourceId, reason });
+        result.notes.push(`${sourceId}: ${reason}`);
         return;
       }
 

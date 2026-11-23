@@ -70,12 +70,18 @@ describe('KnownFailuresStrategy', () => {
       ]);
     });
 
-    it('skips STATS, non-filter, SET and overlong knowledge indicators', async () => {
-      const { resources, skipped } = await new KnownFailuresStrategy().resources(
+    // Noted, not skipped: a skipped source keeps all its rules, so the old rule of an edited
+    // indicator beside a STATS one would never be deleted.
+    it('notes STATS, non-filter, SET, subquery and overlong knowledge indicators without skipping their source', async () => {
+      const { resources, skipped, notes } = await new KnownFailuresStrategy().resources(
         createContext([
           createLink({ id: 'stats', type: 'stats' }),
           createLink({ id: 'sorted', esql: 'FROM logs-* | WHERE a == 1 | SORT b' }),
           createLink({ id: 'set', esql: 'SET a = 1; FROM logs-* | WHERE a == 1' }),
+          createLink({
+            id: 'subquery',
+            esql: 'FROM logs-*, (FROM other | STATS c = COUNT(*)) | WHERE a == 1',
+          }),
           createLink({
             id: 'long',
             esql: `FROM logs-* | WHERE message == "${'a'.repeat(9_500)}"`,
@@ -84,11 +90,13 @@ describe('KnownFailuresStrategy', () => {
       );
 
       expect(resources).toEqual([]);
-      expect(skipped).toEqual([
-        { source_id: 'source-1', reason: expect.stringContaining('[stats]') },
-        { source_id: 'source-1', reason: expect.stringContaining('[sorted]') },
-        { source_id: 'source-1', reason: expect.stringContaining('[set]') },
-        { source_id: 'source-1', reason: expect.stringContaining('[long] is too long') },
+      expect(skipped).toEqual([]);
+      expect(notes).toEqual([
+        expect.stringMatching(/^source-1: .*\[stats\]/),
+        expect.stringMatching(/^source-1: .*\[sorted\]/),
+        expect.stringMatching(/^source-1: .*\[set\]/),
+        expect.stringMatching(/^source-1: .*\[subquery\]/),
+        expect.stringMatching(/^source-1: .*\[long\] is too long/),
       ]);
     });
 

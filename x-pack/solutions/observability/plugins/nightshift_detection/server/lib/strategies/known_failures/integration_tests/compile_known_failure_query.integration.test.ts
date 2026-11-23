@@ -9,7 +9,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { compileKnownFailureQuery } from '../compile_known_failure_query';
-import { KNOWN_FAILURES_SETTINGS } from '../constants';
 
 const MINUTE_MS = 60_000;
 /** Minutes of history seeded before now; more than the window, so the window starts full. */
@@ -145,7 +144,8 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
         level_at_change: 80,
         recovery_threshold: 41,
         recent_max: 80,
-        minute_count: KNOWN_FAILURES_SETTINGS.window_minutes,
+        // Every minute of the six-hour window, empty or not.
+        minute_count: 360,
       }),
     ]);
   });
@@ -164,7 +164,7 @@ describe('compileKnownFailureQuery against Elasticsearch', () => {
   });
 
   it.each([
-    ['recovered', 'a step up whose last five minutes are back to normal'],
+    ['recovered', 'a step up that has been back to normal for fifteen minutes'],
     ['step_down_after_up', 'a step down after a step up'],
     ['quiet', 'a knowledge indicator that never matches'],
     ['flat_high', 'a level that is high but never changed'],

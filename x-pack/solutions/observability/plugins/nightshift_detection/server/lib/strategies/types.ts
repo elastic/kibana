@@ -139,6 +139,11 @@ export interface DesiredResources {
   resources: DesiredResource[];
   /** Sources the strategy cannot watch for now. Their existing rules stay as they are. */
   skipped: Array<{ source_id: string; reason: string }>;
+  /**
+   * Single items the strategy cannot watch, such as one knowledge indicator, only logged. Unlike
+   * `skipped` they hold no rules back, so the rules of the source's other items still update.
+   */
+  notes?: string[];
 }
 
 /** What building a strategy's resources needs. */
