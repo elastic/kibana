@@ -6,64 +6,56 @@
  */
 
 import React from 'react';
-import type { ComponentType, ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { screen, within } from '@testing-library/react';
+import { capitalize } from 'lodash/fp';
 
 import type { FieldMappingProps } from './field_mapping';
 import { FieldMapping } from './field_mapping';
 import { mappings } from './__mock__';
-import { TestProviders } from '../../common/mock';
-import { FieldMappingRowStatic } from './field_mapping_row_static';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('FieldMappingRow', () => {
-  let wrapper: ReactWrapper;
   const props: FieldMappingProps = {
     actionTypeName: 'ServiceNow ITSM',
     isLoading: false,
     mappings,
   };
 
-  beforeAll(() => {
-    wrapper = mount(<FieldMapping {...props} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
-  });
-
   test('it renders', () => {
-    expect(
-      wrapper.find('[data-test-subj="case-configure-field-mappings-row-wrapper"]').first().exists()
-    ).toBe(true);
+    renderWithTestingProviders(<FieldMapping {...props} />);
 
-    expect(wrapper.find(FieldMappingRowStatic).length).toEqual(3);
+    expect(screen.getByTestId('case-configure-field-mappings-row-wrapper')).toBeInTheDocument();
+    expect(screen.getAllByTestId('static-mappings')).toHaveLength(3);
   });
 
   test('it does not render without mappings', () => {
-    const newWrapper = mount(<FieldMapping {...props} mappings={[]} />, {
-      wrappingComponent: TestProviders as ComponentType<React.PropsWithChildren<{}>>,
-    });
+    renderWithTestingProviders(<FieldMapping {...props} mappings={[]} />);
+
     expect(
-      newWrapper
-        .find('[data-test-subj="case-configure-field-mappings-row-wrapper"]')
-        .first()
-        .exists()
-    ).toBe(false);
+      screen.queryByTestId('case-configure-field-mappings-row-wrapper')
+    ).not.toBeInTheDocument();
   });
 
   test('it pass the corrects props to mapping row', () => {
-    const rows = wrapper.find(FieldMappingRowStatic);
+    renderWithTestingProviders(<FieldMapping {...props} />);
+
+    const rows = screen.getAllByTestId('static-mappings');
     rows.forEach((row, index) => {
-      expect(row.prop('casesField')).toEqual(mappings[index].source);
-      expect(row.prop('selectedActionType')).toEqual(mappings[index].actionType);
-      expect(row.prop('selectedThirdParty')).toEqual(mappings[index].target);
+      expect(within(row).getByTestId('field-mapping-source')).toHaveTextContent(
+        mappings[index].source
+      );
+      expect(within(row).getByTestId('field-mapping-target')).toHaveTextContent(
+        mappings[index].target ?? 'not_mapped'
+      );
+      expect(row).toHaveTextContent(capitalize(mappings[index].actionType));
     });
   });
 
   test('displays the label of the second column correctly', () => {
-    expect(
-      wrapper
-        .find('[data-test-subj="case-configure-field-mappings-second-col-label"]')
-        .first()
-        .text()
-    ).toBe('ServiceNow ITSM field');
+    renderWithTestingProviders(<FieldMapping {...props} />);
+
+    expect(screen.getByTestId('case-configure-field-mappings-second-col-label')).toHaveTextContent(
+      'ServiceNow ITSM field'
+    );
   });
 });

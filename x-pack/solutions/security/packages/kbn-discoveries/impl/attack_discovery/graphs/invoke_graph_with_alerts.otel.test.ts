@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { context, SpanStatusCode } from '@opentelemetry/api';
 import { defaultResource } from '@opentelemetry/resources';
 import { InMemorySpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace';
@@ -31,7 +31,7 @@ const MODEL_FRAGMENT = 'SECRET-MODEL-PAYLOAD-FRAGMENT';
 
 describe('invokeAttackDiscoveryGraphWithAlerts with a real tracer', () => {
   const exporter = new InMemorySpanExporter();
-  const contextManager = new AsyncHooksContextManager();
+  const contextManager = new AsyncLocalStorageContextManager();
   const logger = {
     debug: jest.fn(),
     error: jest.fn(),
