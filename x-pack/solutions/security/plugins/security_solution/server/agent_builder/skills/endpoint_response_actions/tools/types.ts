@@ -30,13 +30,17 @@ export type { HostInfo };
 export const MAX_HOSTNAME_LENGTH = 256;
 export const MAX_HOSTNAME_FILTER_LENGTH = 256;
 /**
- * The spelling Defend stores in `host.ip`: IPv6 lowercase and RFC 5952
- * compressed (`fe80::1`), IPv4 unchanged. The schema accepts any valid IPv6
- * spelling, but the lookup is an exact keyword match, so `FE80:0:0:0:0:0:0:1`
- * would report `not_found` for a host that holds `fe80::1`.
+ * Keeps the IP echoed in result messages and other model-visible values in one
+ * spelling: IPv6 lowercase and RFC 5952 compressed (`fe80::1`), IPv4 unchanged.
+ * (`united.endpoint.host.ip` is an `ip` field, so Elasticsearch already matches
+ * any IPv6 spelling; this is about output, not matching.) Anything that is not a
+ * four-part decimal IPv4 or an IPv6 address, including legacy IPv4 forms such as
+ * `010.0.0.1`, is returned unchanged so it is never retargeted to another host.
  */
 export const canonicalizeIp = (ip: string): string =>
-  ipaddr.isValid(ip) ? ipaddr.parse(ip).toString() : ip;
+  ipaddr.IPv4.isValidFourPartDecimal(ip) || ipaddr.IPv6.isValid(ip)
+    ? ipaddr.parse(ip).toString()
+    : ip;
 
 /** Fleet agent IDs are UUIDs/ULIDs; generous bound for schema validation. */
 export const MAX_AGENT_ID_LENGTH = 64;

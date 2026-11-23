@@ -7,6 +7,7 @@
 
 import {
   buildResponseActionComment,
+  canonicalizeIp,
   endpointNotFoundData,
   formatForConfirmationCard,
   formatHostForConfirmationCard,
@@ -516,6 +517,20 @@ describe('formatHostForConfirmationCard', () => {
   it('leaves a non-ASCII hostname exactly as typed', () => {
     expect(formatHostForConfirmationCard('café.internal')).toBe('café\\.internal');
     expect(formatHostForConfirmationCard('主机')).toBe('主机');
+  });
+});
+
+describe('canonicalizeIp', () => {
+  it.each([
+    ['FE80:0:0:0:0:0:0:1', 'fe80::1'],
+    ['fe80::0001', 'fe80::1'],
+    ['10.0.0.7', '10.0.0.7'],
+  ])('writes %s as %s', (ip, expected) => {
+    expect(canonicalizeIp(ip)).toBe(expected);
+  });
+
+  it('returns a legacy IPv4 form unchanged instead of retargeting it', () => {
+    expect(canonicalizeIp('010.0.0.1')).toBe('010.0.0.1');
   });
 });
 
