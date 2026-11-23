@@ -488,14 +488,27 @@ function maybeAddAgentlessPermissions(
   // the package must be agentless-eligible and every enabled input must be allowed in agentless mode
   // (the per-input, per-template deployment-mode check). This mirrors `validateAgentlessForPackagePolicy`
   // so a legitimately saved policy keeps the grant while an invalid stored one does not.
-  const isAgentlessDeployment =
-    Boolean(packagePolicy.supports_agentless) &&
-    isAgentlessIntegration(pkg) &&
-    packagePolicy.inputs
-      .filter((input) => input.enabled)
-      .every((input) => isInputAllowedForDeploymentMode(input, 'agentless', pkg));
+  if (!packagePolicy.supports_agentless) {
+    return existing;
+  }
 
-  if (!isAgentlessDeployment) {
+  const isPackageEligible = isAgentlessIntegration(pkg);
+  const disallowedInputTypes = packagePolicy.inputs
+    .filter((input) => input.enabled && !isInputAllowedForDeploymentMode(input, 'agentless', pkg))
+    .map((input) => input.type);
+
+  if (!isPackageEligible || disallowedInputTypes.length > 0) {
+    // The policy is marked agentless but is not a valid agentless deployment, so it does not get
+    // agentless index permissions. Log it so an affected policy can be found and fixed: saving it
+    // through Fleet reports which input is not allowed, and disabling that input restores the grant.
+    const reason = !isPackageEligible
+      ? `package "${pkg.name}" does not support agentless deployment mode`
+      : `input(s) not allowed in agentless deployment mode: ${disallowedInputTypes.join(', ')}`;
+    appContextService
+      .getLogger()
+      .warn(
+        `Package policy "${packagePolicy.id}" has agentless enabled but is not eligible (${reason}); agentless index permissions are not granted.`
+      );
     return existing;
   }
   existing.indices!.push({

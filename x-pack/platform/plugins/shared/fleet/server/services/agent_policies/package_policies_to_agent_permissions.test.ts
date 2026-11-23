@@ -795,6 +795,53 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
       expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
     });
+
+    describe('warning when agentless permissions are withheld', () => {
+      let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+      beforeEach(() => {
+        mockLogger = loggingSystemMock.createLogger();
+        jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+      });
+
+      it('logs the package reason when the package is not agentless-eligible', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildAgentlessPackagePolicy('non_agentless_pkg', true),
+        ]);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Package policy "package-policy-non_agentless_pkg" has agentless enabled but is not eligible (package "non_agentless_pkg" does not support agentless deployment mode)'
+          )
+        );
+      });
+
+      it('logs the disallowed input types when an enabled input is not agentless-eligible', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildMixedInputsPackagePolicy(true),
+        ]);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('input(s) not allowed in agentless deployment mode: httpjson')
+        );
+      });
+
+      it('does not log when the policy is a valid agentless deployment', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildMixedInputsPackagePolicy(false),
+        ]);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('does not log when agentless is not enabled on the policy', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildAgentlessPackagePolicy('non_agentless_pkg', false),
+        ]);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('role descriptor names', () => {
