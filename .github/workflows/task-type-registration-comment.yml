@@ -1,0 +1,47 @@
+name: task-type-registration-comment
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+    paths:
+      - 'x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts'
+
+jobs:
+  task-type-registration-comment:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'backport') }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const marker = '<!-- Task type registration comment marker -->';
+            const comment = `@${context.payload.pull_request.user.login}, it looks like you're adding, renaming or removing a Task Manager task type!
+
+            The Response Ops team is requested as a code owner of the registered task types list, so that we can verify the background task follows our guidelines before it ships.
+
+            Please check your task against the [task registration skill](https://github.com/elastic/kibana/blob/main/.agents/skills/task-manager-registration/SKILL.md) and its author checklist: an explicit \`timeout\`, the abort \`signal\` passed to every Elasticsearch and HTTP call, classified errors, \`cost\` and \`priority\` matched to the workload, and \`ensureScheduled\` for tasks scheduled on plugin start.
+
+            ${marker}
+            `;
+
+            const existingComments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = existingComments.find((c) => c.body && c.body.includes(marker));
+
+            if (!botComment) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment,
+              });
+            }
