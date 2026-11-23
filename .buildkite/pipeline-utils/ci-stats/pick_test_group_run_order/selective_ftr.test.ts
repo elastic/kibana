@@ -226,6 +226,7 @@ describe('getFtrRelevantModules + shouldSkipFtrTests', () => {
       await skipFor([
         '.agents/skills/scout-ui-testing/SKILL.md',
         'docs/extend/testing/page-objects.md',
+        'packages/kbn-rspack-optimizer/limits.yml',
         'src/platform/packages/shared/kbn-scout/src/playwright/index.ts',
         'src/platform/plugins/shared/console/test/scout/ui/fixtures/page_objects/console_page.ts',
         'x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/fixtures/page_objects/gen_ai_settings_page.ts',

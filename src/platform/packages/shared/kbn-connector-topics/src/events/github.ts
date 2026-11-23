@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
+import type { ConnectorEventTopicDefinition } from './connector_event_topic';
 
 const identifier = () => z.number().int().nonnegative();
 
@@ -71,14 +72,14 @@ const CommonBodySchema = lazySchema(() =>
   })
 );
 
-export const GithubIssuesEventSchema = lazySchema(() =>
+const GithubIssuesEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('issues'),
     body: CommonBodySchema.extend({ issue: IssueSchema.optional() }),
   })
 );
 
-export const GithubIssueCommentEventSchema = lazySchema(() =>
+const GithubIssueCommentEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('issue_comment'),
     body: CommonBodySchema.extend({
@@ -95,7 +96,7 @@ export const GithubIssueCommentEventSchema = lazySchema(() =>
   })
 );
 
-export const GithubPullRequestEventSchema = lazySchema(() =>
+const GithubPullRequestEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('pull_request'),
     body: CommonBodySchema.extend({
@@ -105,7 +106,7 @@ export const GithubPullRequestEventSchema = lazySchema(() =>
   })
 );
 
-export const GithubPullRequestReviewEventSchema = lazySchema(() =>
+const GithubPullRequestReviewEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('pull_request_review'),
     body: CommonBodySchema.extend({
@@ -134,7 +135,7 @@ const CommitSchema = lazySchema(() =>
   })
 );
 
-export const GithubPushEventSchema = lazySchema(() =>
+const GithubPushEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('push'),
     body: CommonBodySchema.extend({
@@ -154,7 +155,7 @@ export const GithubPushEventSchema = lazySchema(() =>
   })
 );
 
-export const GithubReleaseEventSchema = lazySchema(() =>
+const GithubReleaseEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('release'),
     body: CommonBodySchema.extend({
@@ -175,7 +176,7 @@ export const GithubReleaseEventSchema = lazySchema(() =>
   })
 );
 
-export const GithubDeploymentStatusEventSchema = lazySchema(() =>
+const GithubDeploymentStatusEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('deployment_status'),
     body: CommonBodySchema.extend({
@@ -208,7 +209,7 @@ export const GithubDeploymentStatusEventSchema = lazySchema(() =>
   })
 );
 
-export const GithubCheckRunEventSchema = lazySchema(() =>
+const GithubCheckRunEventSchema = lazySchema(() =>
   z.object({
     eventType: z.literal('check_run'),
     body: CommonBodySchema.extend({
@@ -232,3 +233,43 @@ export const GithubCheckRunEventSchema = lazySchema(() =>
     }),
   })
 );
+
+export const githubIssues = {
+  name: 'github.issues',
+  eventSchema: GithubIssuesEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubIssueComment = {
+  name: 'github.issue_comment',
+  eventSchema: GithubIssueCommentEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubPullRequest = {
+  name: 'github.pull_request',
+  eventSchema: GithubPullRequestEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubPullRequestReview = {
+  name: 'github.pull_request_review',
+  eventSchema: GithubPullRequestReviewEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubPush = {
+  name: 'github.push',
+  eventSchema: GithubPushEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubRelease = {
+  name: 'github.release',
+  eventSchema: GithubReleaseEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubDeploymentStatus = {
+  name: 'github.deployment_status',
+  eventSchema: GithubDeploymentStatusEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
+
+export const githubCheckRun = {
+  name: 'github.check_run',
+  eventSchema: GithubCheckRunEventSchema,
+} as const satisfies ConnectorEventTopicDefinition;
