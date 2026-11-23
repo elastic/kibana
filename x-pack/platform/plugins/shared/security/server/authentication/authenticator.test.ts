@@ -1476,6 +1476,15 @@ describe('Authenticator', () => {
           keepIntermediateSession ? 0 : 1
         );
         expect(mockOptions.session.create).toHaveBeenCalledTimes(1);
+        expect(loggingSystemMock.collect(mockOptions.loggers).info).toEqual(
+          keepIntermediateSession
+            ? [
+                [
+                  `Session is authenticated, but the existing unauthenticated session is still needed and won't be invalidated.`,
+                ],
+              ]
+            : []
+        );
       }
     );
   });

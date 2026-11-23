@@ -835,6 +835,10 @@ export class Authenticator {
           sessionValue: existingSessionValue,
           skipAuditEvent: true, // Skip writing an audit event when we are replacing an intermediate session with a fully authenticated session
         });
+      } else {
+        this.logger.info(
+          `Session is authenticated, but the existing unauthenticated session is still needed and won't be invalidated.`
+        );
       }
       existingSessionValue = null;
     } else if (usernameHasChanged) {
