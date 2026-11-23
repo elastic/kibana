@@ -19,7 +19,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const find = getService('find');
   const retry = getService('retry');
 
-  describe('Configure', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/296138
+  describe.skip('Configure', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
     });

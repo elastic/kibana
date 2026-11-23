@@ -132,7 +132,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
 
         // Get alert state from task document
-        let state: any = await getTaskState(ruleId);
+        let state: any = await getTaskState(ruleId, 0);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertB.state.patternIndex).to.equal(0);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(0);
@@ -226,7 +226,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 1);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(1);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC).to.be(undefined);
@@ -388,7 +388,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
 
         // Get alert state from task document
-        state = await getTaskState(ruleId);
+        state = await getTaskState(ruleId, 2);
         expect(state.alertInstances.alertA.state.patternIndex).to.equal(2);
         expect(state.alertInstances.alertB).to.be(undefined);
         expect(state.alertInstances.alertC.state.patternIndex).to.equal(2);
@@ -521,7 +521,150 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(alertCDocRun3[ALERT_PREVIOUS_ACTION_GROUP]).to.be(undefined);
       });
     }
+
+    // A rule run can persist its alert docs and then die before Task Manager saves its state.
+    // The next run must find those docs and reuse them instead of creating duplicates.
+    describe('when task state lost an alert that has an alert doc', () => {
+      it('should reuse the existing alert doc while the alert keeps firing', async () => {
+        const pattern = { alertA: [true, true, false] };
+        const ruleId = await createPatternFiringRule(pattern);
+
+        // RUN 1 - alertA is new
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+        await getTaskState(ruleId, 0);
+        const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocsRun1.length).to.equal(1);
+        const alertDocRun1 = alertDocsRun1[0];
+        const alertUuid = alertDocRun1._id;
+        expect(alertDocRun1._source![ALERT_STATUS]).to.equal('active');
+
+        // Simulate the died run: the doc exists but task state does not know the alert
+        await removeAlertFromTaskState(ruleId, 'alertA');
+
+        // RUN 2 - alertA still fires and must be treated as ongoing, not new
+        await runSoon(ruleId);
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+        const state = await getTaskState(ruleId, 1);
+        expect(state.alertInstances.alertA.meta.uuid).to.equal(alertUuid);
+
+        const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocsRun2.length).to.equal(1);
+        const alertDocRun2 = alertDocsRun2[0];
+        expect(alertDocRun2._id).to.equal(alertUuid);
+        expect(alertDocRun2._source![ALERT_STATUS]).to.equal('active');
+        expect(alertDocRun2._source![EVENT_ACTION]).to.equal('active');
+        expect(alertDocRun2._source![ALERT_START]).to.equal(alertDocRun1._source![ALERT_START]);
+        expect(alertDocRun2._source![ALERT_DURATION]).to.be.greaterThan(0);
+        expect(alertDocRun2._source![ALERT_TRACKED]).to.equal(true);
+
+        // The event log agrees: only run 1 logged new-instance. Every active alert also logs
+        // active-instance, so there is one from each run.
+        await waitForEventLogDocs(
+          ruleId,
+          new Map([
+            ['new-instance', { equal: 1 }],
+            ['active-instance', { equal: 2 }],
+          ])
+        );
+
+        // RUN 3 - alertA stops firing and the same doc recovers
+        await runSoon(ruleId);
+        await waitForEventLogDocs(
+          ruleId,
+          new Map([
+            ['execute', { equal: 3 }],
+            ['recovered-instance', { equal: 1 }],
+          ])
+        );
+
+        const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocsRun3.length).to.equal(1);
+        const alertDocRun3 = alertDocsRun3[0];
+        expect(alertDocRun3._id).to.equal(alertUuid);
+        expect(alertDocRun3._source![ALERT_STATUS]).to.equal('recovered');
+        expect(alertDocRun3._source![EVENT_ACTION]).to.equal('close');
+        expect(alertDocRun3._source![ALERT_END]).to.match(timestampPattern);
+        expect(alertDocRun3._source![ALERT_START]).to.equal(alertDocRun1._source![ALERT_START]);
+      });
+
+      it('should recover the existing alert doc when the alert stops firing', async () => {
+        const pattern = { alertA: [true, false] };
+        const ruleId = await createPatternFiringRule(pattern);
+
+        // RUN 1 - alertA is new
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+        await getTaskState(ruleId, 0);
+        const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocsRun1.length).to.equal(1);
+        const alertUuid = alertDocsRun1[0]._id;
+
+        // Simulate the died run
+        await removeAlertFromTaskState(ruleId, 'alertA');
+
+        // RUN 2 - alertA does not fire; the lost alert must recover, not stay active forever
+        await runSoon(ruleId);
+        await waitForEventLogDocs(
+          ruleId,
+          new Map([
+            ['execute', { equal: 2 }],
+            ['recovered-instance', { equal: 1 }],
+          ])
+        );
+
+        const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>(ruleId);
+        expect(alertDocsRun2.length).to.equal(1);
+        const alertDocRun2 = alertDocsRun2[0];
+        expect(alertDocRun2._id).to.equal(alertUuid);
+        expect(alertDocRun2._source![ALERT_STATUS]).to.equal('recovered');
+        expect(alertDocRun2._source![EVENT_ACTION]).to.equal('close');
+        expect(alertDocRun2._source![ALERT_END]).to.match(timestampPattern);
+        expect(alertDocRun2._source![ALERT_START]).to.equal(alertDocsRun1[0]._source![ALERT_START]);
+      });
+    });
   });
+
+  async function createPatternFiringRule(pattern: Record<string, boolean[]>): Promise<string> {
+    const createdRule = await supertestWithoutAuth
+      .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+      .set('kbn-xsrf', 'foo')
+      .send(
+        getTestRuleData({
+          rule_type_id: 'test.patternFiringAad',
+          // set the schedule long so we can use "runSoon" to specify rule runs
+          schedule: { interval: '1d' },
+          throttle: null,
+          params: { pattern },
+          actions: [],
+        })
+      );
+    expect(createdRule.status).to.eql(200);
+    const ruleId = createdRule.body.id;
+    objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+    return ruleId;
+  }
+
+  async function runSoon(ruleId: string) {
+    const response = await supertestWithoutAuth
+      .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+      .set('kbn-xsrf', 'foo');
+    expect(response.status).to.eql(204);
+  }
+
+  // Drops one alert from the rule's task state, as if the run that created it never
+  // returned its state to Task Manager.
+  async function removeAlertFromTaskState(ruleId: string, alertId: string) {
+    const taskId = `task:${ruleId}`;
+    const task = await es.get<TaskManagerDoc>({ id: taskId, index: '.kibana_task_manager' });
+    const state = JSON.parse(task._source!.task.state);
+    expect(state.alertInstances[alertId]).not.to.be(undefined);
+    delete state.alertInstances[alertId];
+    await es.update({
+      id: taskId,
+      index: '.kibana_task_manager',
+      doc: { task: { state: JSON.stringify(state) } },
+      refresh: true,
+    });
+  }
 
   function testExpectRuleData(
     alertDocs: Array<SearchHit<PatternFiringAlert>>,
@@ -551,21 +694,48 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     }
   }
 
-  async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
+  async function queryForAlertDocs<T>(ruleId?: string): Promise<Array<SearchHit<T>>> {
+    // `es.search` is not realtime and the alerts-as-data bulk write isn't refresh-forced,
+    // so refresh first to make docs written during the just-completed run searchable.
+    await es.indices.refresh({ index: alertsAsDataIndex });
+    const query: any = ruleId
+      ? {
+          bool: {
+            must: [
+              {
+                term: {
+                  'kibana.alert.rule.uuid': ruleId,
+                },
+              },
+            ],
+          },
+        }
+      : { match_all: {} };
+
     const searchResult = await es.search({
       index: alertsAsDataIndex,
-      body: { query: { match_all: {} } },
+      query,
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }
 
-  async function getTaskState(ruleId: string) {
-    const task = await es.get<TaskManagerDoc>({
-      id: `task:${ruleId}`,
-      index: '.kibana_task_manager',
-    });
-
-    return JSON.parse(task._source!.task.state);
+  async function getTaskState(ruleId: string, expectedAlertAPatternIndex: number) {
+    // The `execute` event log doc is written before Task Manager persists the updated task
+    // state, so the `execute` count is not a valid barrier for this read. Poll the task doc
+    // until alertA's patternIndex reaches the just-completed run's value.
+    let state: any;
+    await retry.waitFor(
+      `task state for rule ${ruleId} to reach patternIndex ${expectedAlertAPatternIndex}`,
+      async () => {
+        const task = await es.get<TaskManagerDoc>({
+          id: `task:${ruleId}`,
+          index: '.kibana_task_manager',
+        });
+        state = JSON.parse(task._source!.task.state);
+        return state.alertInstances?.alertA?.state?.patternIndex === expectedAlertAPatternIndex;
+      }
+    );
+    return state;
   }
 
   async function waitForEventLogDocs(

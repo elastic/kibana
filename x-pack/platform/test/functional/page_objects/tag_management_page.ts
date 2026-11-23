@@ -328,7 +328,7 @@ export class TagManagementPageObject extends FtrService {
         firstRow
       );
       await actionButton.click();
-      const actionPresent = await this.testSubjects.exists(`tagsTableAction-${action}`);
+      const actionPresent = await this.testSubjects.waitForExists(`tagsTableAction-${action}`);
       await actionButton.click();
       return actionPresent;
     } else {

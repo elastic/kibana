@@ -455,6 +455,111 @@ describe('builtin helpers', () => {
           world: 'world',
         })
         .toCompileTo('cruel world!');
+
+      expectTemplate('{{#each it}}{{#if @last}}{{text}}!{{/if}}{{/each}}')
+        .withInput({
+          it: new Iterable([{ text: 'goodbye' }, { text: 'Goodbye' }, { text: 'GOODBYE' }]),
+        })
+        .toCompileTo('GOODBYE!');
+    });
+
+    describe('each on iterable with lazy iterator', () => {
+      let pulled: number;
+      let closed: boolean;
+
+      function countingIterable(length: number, withReturn: boolean | string) {
+        const iterable: any = {};
+        iterable[Symbol.iterator] = function () {
+          // The test bench renders the same input twice (eval + AST), so reset the state for each new iteration
+          pulled = 0;
+          closed = false;
+          const iterator: any = {
+            next() {
+              pulled++;
+              return { value: pulled, done: pulled > length };
+            },
+          };
+          if (withReturn === 'throwing getter') {
+            Object.defineProperty(iterator, 'return', {
+              get() {
+                closed = true;
+                throw new Error('getter failed');
+              },
+            });
+          } else if (withReturn) {
+            iterator.return = function () {
+              // Only count calls with the iterator as the receiver.
+              closed = this === iterator;
+              if (withReturn === 'throw') {
+                throw new Error('cleanup failed');
+              }
+              return { done: true };
+            };
+          }
+          return iterator;
+        };
+        return iterable;
+      }
+
+      function failOn(failingValue: number) {
+        return function (value: number) {
+          if (value === failingValue) {
+            throw new Error('render failed');
+          }
+        };
+      }
+
+      beforeEach(() => {
+        pulled = 0;
+        closed = false;
+      });
+
+      it('renders while iterating instead of collecting all values first', () => {
+        expectTemplate('{{#each items}}{{pulledCount}}{{/each}}')
+          .withInput({ items: countingIterable(3, true) })
+          .withHelper('pulledCount', () => pulled)
+          .toCompileTo('234');
+      });
+
+      it('closes the iterator when the block throws', () => {
+        expectTemplate('{{#each items}}{{fail this}}{{/each}}')
+          .withInput({ items: countingIterable(3, true) })
+          .withHelper('fail', failOn(2))
+          .toThrow('render failed');
+        expect(closed).toEqual(true);
+        expect(pulled).toEqual(3);
+      });
+
+      it('does not close an exhausted iterator when the last block throws', () => {
+        expectTemplate('{{#each items}}{{fail this}}{{/each}}')
+          .withInput({ items: countingIterable(3, true) })
+          .withHelper('fail', failOn(3))
+          .toThrow('render failed');
+        expect(closed).toEqual(false);
+      });
+
+      it('rethrows the block error when closing the iterator fails', () => {
+        expectTemplate('{{#each items}}{{fail this}}{{/each}}')
+          .withInput({ items: countingIterable(3, 'throw') })
+          .withHelper('fail', failOn(2))
+          .toThrow('render failed');
+        expect(closed).toEqual(true);
+      });
+
+      it('rethrows the block error when reading the return method fails', () => {
+        expectTemplate('{{#each items}}{{fail this}}{{/each}}')
+          .withInput({ items: countingIterable(3, 'throwing getter') })
+          .withHelper('fail', failOn(2))
+          .toThrow('render failed');
+        expect(closed).toEqual(true);
+      });
+
+      it('rethrows block errors for iterators without a return method', () => {
+        expectTemplate('{{#each items}}{{fail this}}{{/each}}')
+          .withInput({ items: countingIterable(3, false) })
+          .withHelper('fail', failOn(2))
+          .toThrow('render failed');
+      });
     });
   });
 

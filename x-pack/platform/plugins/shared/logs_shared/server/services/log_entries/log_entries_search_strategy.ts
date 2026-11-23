@@ -15,6 +15,7 @@ import type {
   IEsSearchRequest,
 } from '@kbn/search-types';
 import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import {
   getLogEntryCursorFromHit,
   LogColumn,
@@ -31,6 +32,7 @@ import {
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
+  LOG_ENTRIES_MAX_COLUMNS,
   LogEntriesSearchRequestParams,
   logEntriesSearchRequestParamsRT,
   LogEntriesSearchResponsePayload,
@@ -69,7 +71,8 @@ export const logEntriesSearchStrategyProvider = ({
   return {
     search: (rawRequest, options, dependencies) =>
       defer(() => {
-        const request = decodeOrThrow(asyncRequestRT)(rawRequest);
+        const request = decodeOrThrow(asyncRequestRT, createBadRequestError)(rawRequest);
+        assertBoundedRequestColumns(request.params);
 
         const resolvedLogView$ = defer(() =>
           logViews.getScopedClient(dependencies.request).getResolvedLogView(request.params.logView)
@@ -255,6 +258,21 @@ function getResponseCursors(entries: LogEntry[]) {
 
   return { topCursor, bottomCursor };
 }
+
+// Only request-supplied columns are bounded: persisted log views can only be written by users
+// with write privileges on log views, and existing ones may legitimately exceed the limit.
+const assertBoundedRequestColumns = ({ columns, logView }: LogEntriesSearchRequestParams): void => {
+  const inlineColumns = logView.type === 'log-view-inline' ? logView.attributes.logColumns : [];
+  const columnCount = Math.max(columns?.length ?? 0, inlineColumns.length);
+
+  if (columnCount > LOG_ENTRIES_MAX_COLUMNS) {
+    throw createBadRequestError(
+      `Expected at most ${LOG_ENTRIES_MAX_COLUMNS} columns, got ${columnCount}`
+    );
+  }
+};
+
+const createBadRequestError = (message: string): KbnServerError => new KbnServerError(message, 400);
 
 const VIEW_IN_CONTEXT_FIELDS = ['log.file.path', 'host.name', 'container.id'];
 

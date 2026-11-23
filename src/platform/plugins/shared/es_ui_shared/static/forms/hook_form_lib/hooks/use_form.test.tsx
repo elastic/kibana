@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { render } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
@@ -273,6 +274,74 @@ describe('useForm() hook', () => {
       expect(data.format()).toEqual({ user: { name: 'JOHN' } });
       // As we have touched all fields, the validity went from "undefined" to "true"
       expect(isValid).toBe(true);
+    });
+  });
+
+  describe('removing fields', () => {
+    const TestComp = ({
+      fieldPaths,
+      fieldKey = '',
+    }: {
+      fieldPaths: string[];
+      fieldKey?: string;
+    }) => {
+      const { form } = useForm();
+
+      useEffect(() => {
+        onFormHook(form);
+      }, [form]);
+
+      return (
+        <Form form={form}>
+          {fieldPaths.map((path) => (
+            <UseField key={`${path}${fieldKey}`} path={path} defaultValue={path} />
+          ))}
+        </Form>
+      );
+    };
+
+    test('should update the form data once when many fields are removed at once', async () => {
+      const fieldPaths = Array.from({ length: 10 }, (_, i) => `field${i}`);
+      const { rerender } = render(<TestComp fieldPaths={fieldPaths} />);
+      const onFormDataChange = jest.fn();
+      const subscription = formHook!.__getFormData$().subscribe(onFormDataChange);
+      onFormDataChange.mockClear();
+
+      await act(async () => {
+        rerender(<TestComp fieldPaths={['field0']} />);
+      });
+
+      expect(onFormDataChange).toHaveBeenCalledTimes(1);
+      expect(formHook!.__getFormData$().value).toEqual({ field0: 'field0' });
+
+      subscription.unsubscribe();
+    });
+
+    test('should remove the field from the form data synchronously', () => {
+      render(<TestComp fieldPaths={['field0', 'field1']} />);
+      const onFormDataChange = jest.fn();
+      const subscription = formHook!.__getFormData$().subscribe(onFormDataChange);
+      onFormDataChange.mockClear();
+
+      act(() => {
+        formHook!.__removeField('field1');
+
+        expect(formHook!.__getFormData$().value).toEqual({ field0: 'field0' });
+        expect(onFormDataChange).not.toHaveBeenCalled();
+      });
+
+      subscription.unsubscribe();
+    });
+
+    test('should keep the form data of a field added back with the same path', async () => {
+      const { rerender } = render(<TestComp fieldPaths={['foo']} fieldKey="initial" />);
+
+      await act(async () => {
+        rerender(<TestComp fieldPaths={['foo']} fieldKey="remounted" />);
+      });
+
+      expect(formHook!.__getFormData$().value).toEqual({ foo: 'foo' });
+      expect(formHook!.getFormData()).toEqual({ foo: 'foo' });
     });
   });
 

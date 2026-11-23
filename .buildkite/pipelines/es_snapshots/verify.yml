@@ -31,6 +31,7 @@ steps:
       provider: gcp
       machineType: n2-standard-8
       preemptible: true
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -69,8 +70,8 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
       SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
@@ -88,6 +89,7 @@ steps:
     depends_on:
       - ftr-configs
       - jest-integration
+      - scout_test_lanes
 
   - wait: ~
     continue_on_failure: true

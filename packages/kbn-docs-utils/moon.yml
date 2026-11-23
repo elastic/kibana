@@ -32,11 +32,10 @@ tags:
   - dev
   - group-undefined
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '!**/__fixtures__/**'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

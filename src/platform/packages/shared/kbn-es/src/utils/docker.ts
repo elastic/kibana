@@ -71,6 +71,18 @@ export const isServerlessProjectType = (value: string): value is ServerlessProje
 
 export type ServerlessProjectType = 'es' | 'oblt' | 'security';
 
+export const serverlessProductTiers = [
+  'essentials',
+  'logs_essentials',
+  'complete',
+  'search_ai_lake',
+] as const;
+export type ServerlessProductTier = (typeof serverlessProductTiers)[number];
+
+export const isServerlessProjectTier = (value: string): value is ServerlessProductTier => {
+  return serverlessProductTiers.includes(value as ServerlessProductTier);
+};
+
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
   dockerCmd?: string;
 }

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { isEmpty } from 'lodash/fp';
 import type { EuiDescriptionListProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiDescriptionList,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -36,6 +37,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
+import { dedupeRequiredFields } from '../../../../../common/detection_engine/rule_management/utils';
 import * as descriptionStepI18n from '../../../rule_creation_ui/components/description_step/translations';
 import { RelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { AlertSuppressionLabel } from '../../../rule_creation_ui/components/description_step/alert_suppression_label';
@@ -69,6 +71,8 @@ import {
 import { useDataView } from './three_way_diff/final_edit/fields/hooks/use_data_view';
 import { matchFiltersToIndexPattern } from '../../../../common/components/query_bar/match_filters_to_index_pattern';
 import { RuleFieldName } from './rule_field_name';
+import { MAX_UNFOLDED_REQUIRED_FIELDS } from '../../../rule_creation/components/required_fields/constants';
+import * as requiredFieldsI18n from '../../../rule_creation/components/required_fields/translations';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -339,28 +343,57 @@ interface RequiredFieldsProps {
 export const RequiredFields = ({ requiredFields }: RequiredFieldsProps) => {
   const styles = useRequiredFieldsStyles();
 
+  /* Stored lists may contain duplicates, see required fields diff algorithms */
+  const uniqueRequiredFields = useMemo(
+    () => dedupeRequiredFields(requiredFields),
+    [requiredFields]
+  );
+
+  /* Long lists are folded to keep rule details and flyouts compact */
+  const [isExpanded, toggleExpanded] = useToggle(false);
+  const foldedFieldsCount = Math.max(uniqueRequiredFields.length - MAX_UNFOLDED_REQUIRED_FIELDS, 0);
+  const visibleRequiredFields = isExpanded
+    ? uniqueRequiredFields
+    : uniqueRequiredFields.slice(0, MAX_UNFOLDED_REQUIRED_FIELDS);
+
   return (
-    <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
-      {requiredFields.map((rF, index) => (
-        <EuiFlexItem grow={false} key={rF.name}>
-          <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
-            <EuiFlexItem grow={false}>
-              <RequiredFieldIcon type={rF.type} data-test-subj="field-type-icon" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText
-                data-test-subj="requiredFieldsPropertyValueItem"
-                className={styles.fieldNameText}
-                grow={false}
-                size="xs"
-              >
-                {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+    <>
+      <EuiFlexGrid data-test-subj="requiredFieldsPropertyValue" gutterSize={'s'}>
+        {visibleRequiredFields.map((rF, index) => (
+          <EuiFlexItem grow={false} key={`${rF.name}-${rF.type}`}>
+            <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
+              <EuiFlexItem grow={false}>
+                <RequiredFieldIcon type={rF.type} data-test-subj="field-type-icon" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  data-test-subj="requiredFieldsPropertyValueItem"
+                  className={styles.fieldNameText}
+                  grow={false}
+                  size="xs"
+                >
+                  {` ${rF.name}${index + 1 !== visibleRequiredFields.length ? ', ' : ''}`}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
+
+      {foldedFieldsCount > 0 && (
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+          onClick={toggleExpanded}
+          data-test-subj="toggleRequiredFieldsPropertyValueFoldButton"
+        >
+          {isExpanded
+            ? requiredFieldsI18n.SHOW_LESS_REQUIRED_FIELDS
+            : requiredFieldsI18n.SHOW_MORE_REQUIRED_FIELDS(foldedFieldsCount)}
+        </EuiButtonEmpty>
+      )}
+    </>
   );
 };
 

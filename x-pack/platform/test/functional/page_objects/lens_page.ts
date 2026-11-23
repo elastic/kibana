@@ -813,7 +813,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async saveAndReturn() {
-      await testSubjects.click('lnsApp_saveAndReturnButton');
+      await testSubjects.clickWhenNotDisabled('lnsApp_saveAndReturnButton', {
+        timeout: 60_000,
+      });
     },
 
     async replaceInDashboard() {
@@ -1052,6 +1054,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const paginationControl = await testSubjects.find('lnsWorkspaceErrorsPaginationControl');
       const paginationItems = await paginationControl.findAllByCssSelector('.euiPagination__item');
       return paginationItems.length;
+    },
+
+    /** Waits for the visible warnings in the config panel to settle on the expected count */
+    async assertWorkspaceErrorCount(expectedCount: number) {
+      await retry.waitForWithTimeout(
+        `workspace error count to be ${expectedCount}`,
+        10_000,
+        async () => {
+          const actualCount = await this.getWorkspaceErrorCount();
+          if (actualCount !== expectedCount) {
+            throw new Error(`Expected ${expectedCount} workspace errors, found ${actualCount}`);
+          }
+          return true;
+        }
+      );
     },
 
     async searchOnChartSwitch(subVisualizationId: string, searchTerm?: string) {
