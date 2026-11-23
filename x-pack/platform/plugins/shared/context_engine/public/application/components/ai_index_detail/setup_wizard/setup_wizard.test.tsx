@@ -121,6 +121,33 @@ describe('SetupWizard', () => {
     );
   });
 
+  it('opening on a saved step marks the earlier steps that are not done as skipped', () => {
+    renderWizard({ initialStep: 'sources', done: { ...noneDone, connect: true } });
+
+    expect(screen.getByTestId('contextSetupWizardStep-dreaming')).toHaveAccessibleName(
+      expect.stringMatching(/has warnings/i)
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
+      expect.stringMatching(/complete/i)
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-describe')).toHaveAccessibleName(
+      expect.stringMatching(/incomplete/i)
+    );
+  });
+
+  it('going back keeps the steps after it marked as skipped', () => {
+    renderWizard({ initialStep: 'sources' });
+
+    fireEvent.click(screen.getByTestId('contextSetupWizardStep-dreaming'));
+
+    expect(screen.getByTestId('contextSetupWizardStep-connect')).toHaveAccessibleName(
+      expect.stringMatching(/has warnings/i)
+    );
+    expect(screen.getByTestId('contextSetupWizardStep-sources')).toHaveAccessibleName(
+      expect.stringMatching(/incomplete/i)
+    );
+  });
+
   it('Continue opens the next step when the step is done', () => {
     const { onStepChange } = renderWizard({
       initialStep: 'sources',

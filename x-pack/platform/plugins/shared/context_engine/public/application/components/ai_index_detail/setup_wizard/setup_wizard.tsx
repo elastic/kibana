@@ -59,16 +59,22 @@ const placeholderText = i18n.translate('xpack.contextEngine.setupWizard.placehol
 
 type StepStatus = EuiStepsHorizontalProps['steps'][number]['status'];
 
+/**
+ * A step the user already went past without finishing it counts as skipped. "Went past" means it
+ * comes before the furthest step reached, so steps before a saved step are skipped after a refresh.
+ */
 const getStepStatus = ({
   stepId,
+  stepIndex,
   currentStep,
+  furthestIndex,
   done,
-  skippedSteps,
 }: {
   stepId: SetupWizardStepId;
+  stepIndex: number;
   currentStep: SetupWizardStepId;
+  furthestIndex: number;
   done: SetupWizardDoneSteps;
-  skippedSteps: ReadonlySet<SetupWizardStepId>;
 }): StepStatus => {
   if (stepId === currentStep) {
     return 'current';
@@ -76,7 +82,7 @@ const getStepStatus = ({
   if (done[stepId]) {
     return 'complete';
   }
-  return skippedSteps.has(stepId) ? 'warning' : 'incomplete';
+  return stepIndex < furthestIndex ? 'warning' : 'incomplete';
 };
 
 interface SetupWizardProps {
@@ -110,7 +116,7 @@ export const SetupWizard = ({
   const { euiTheme } = useEuiTheme();
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [currentStep, setCurrentStep] = useState<SetupWizardStepId>(initialStep);
-  const [skippedSteps, setSkippedSteps] = useState<ReadonlySet<SetupWizardStepId>>(new Set());
+  const [furthestIndex, setFurthestIndex] = useState(() => steps.indexOf(initialStep));
   const [description, setDescription] = useState(aiIndex.description ?? '');
   // Covers the save and the refetch after it, so Finish setup can't be clicked twice.
   const [isFinishing, setIsFinishing] = useState(false);
@@ -145,6 +151,7 @@ export const SetupWizard = ({
 
   const goToStep = (stepId: SetupWizardStepId) => {
     setCurrentStep(stepId);
+    setFurthestIndex((current) => Math.max(current, steps.indexOf(stepId)));
     onStepChange(stepId);
   };
 
@@ -161,7 +168,6 @@ export const SetupWizard = ({
   };
 
   const skip = () => {
-    setSkippedSteps((current) => new Set(current).add(currentStep));
     if (isLastStep) {
       close(finishedToast);
       return;
@@ -183,9 +189,9 @@ export const SetupWizard = ({
     setIsFinishing(false);
   };
 
-  const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId) => ({
+  const stepsBar: EuiStepsHorizontalProps['steps'] = steps.map((stepId, stepIndex) => ({
     title: SETUP_WIZARD_STEP_TEXTS[stepId].stepTitle,
-    status: getStepStatus({ stepId, currentStep, done, skippedSteps }),
+    status: getStepStatus({ stepId, stepIndex, currentStep, furthestIndex, done }),
     onClick: () => goToStep(stepId),
     disabled: isBusy,
     'data-test-subj': `contextSetupWizardStep-${stepId}`,
