@@ -24,17 +24,25 @@ export interface DeferredDataClientBundleDeps {
 }
 
 export class DeferredDataClientBundle implements DataClientBundle {
-  private readonly dataClientBundle: DataClientBundle;
+  private dataClientBundle: DataClientBundle;
+  private source: ExecutionStorageSource;
+  private generation = 0;
+  private switchChain: Promise<void> = Promise.resolve();
   private startPromise: Promise<void> | undefined;
   private setupPromise: Promise<void> | undefined;
+  private coreSetup: CoreSetup | undefined;
+  private coreStart: CoreStart | undefined;
 
   constructor(private readonly deps: DeferredDataClientBundleDeps) {
-    this.dataClientBundle = this.createDataClientBundle();
+    this.source = deps.source;
+    this.dataClientBundle = this.createDataClientBundle(deps.source);
   }
 
   initSetup(coreSetup: CoreSetup): Promise<void> {
+    this.coreSetup = coreSetup;
     if (!this.setupPromise) {
-      this.setupPromise = this.dataClientBundle.initSetup(coreSetup);
+      const bundle = this.dataClientBundle;
+      this.setupPromise = bundle.initSetup(coreSetup);
     }
     return this.setupPromise;
   }
@@ -44,14 +52,23 @@ export class DeferredDataClientBundle implements DataClientBundle {
       throw new Error('initSetup must be called first');
     }
 
+    this.coreStart = coreStart;
+
     if (!this.startPromise) {
-      this.startPromise = this.setupPromise.then(() => this.dataClientBundle.initStart(coreStart));
+      const bundle = this.dataClientBundle;
+      const setupPromise = this.setupPromise;
+      this.startPromise = setupPromise.then(() => bundle.initStart(coreStart));
     }
     return this.startPromise;
   }
 
   stop(): Promise<void> {
-    return this.dataClientBundle.stop();
+    return this.enqueue(() => this.dataClientBundle.stop());
+  }
+
+  /** Points deferred clients at `source`, initializing that backend when setup or start has already run. */
+  switchSource(source: ExecutionStorageSource): Promise<void> {
+    return this.enqueue(() => this.applySource(source));
   }
 
   createWorkflowDataClient(): WorkflowExecutionsDataClient {
@@ -62,27 +79,78 @@ export class DeferredDataClientBundle implements DataClientBundle {
     return this.deferClient(() => this.dataClientBundle.createStepDataClient());
   }
 
-  private createDataClientBundle(): DataClientBundle {
-    const { deps } = this;
-    switch (deps.source) {
+  private enqueue(task: () => Promise<void>): Promise<void> {
+    const run = this.switchChain.then(task);
+    this.switchChain = run.then(
+      () => undefined,
+      () => undefined
+    );
+    return run;
+  }
+
+  private async applySource(source: ExecutionStorageSource): Promise<void> {
+    if (source === this.source) {
+      return;
+    }
+
+    const next = this.createDataClientBundle(source);
+    if (this.coreSetup) {
+      await next.initSetup(this.coreSetup);
+    }
+    if (this.coreStart) {
+      await next.initStart(this.coreStart);
+    }
+
+    const previous = this.dataClientBundle;
+    this.dataClientBundle = next;
+    this.source = source;
+    this.generation += 1;
+    await previous.stop();
+  }
+
+  private createDataClientBundle(source: ExecutionStorageSource): DataClientBundle {
+    const deps = { ...this.deps, source };
+    switch (source) {
       case 'plain_index':
         return new PlainIndexDataClientBundle(deps);
       case 'data_stream':
         return new DataStreamDataClientBundle(deps);
-      default:
-        throw new Error(`Unsupported storage source: ${deps.source}`);
+      default: {
+        const unexpected: never = source;
+        throw new Error(`Unsupported storage source: ${unexpected}`);
+      }
     }
   }
 
   private deferClient<TExecution extends { id: string }>(
     factory: () => DataClient<TExecution>
   ): DataClient<TExecution> {
-    const { startPromise: initPromise } = this;
-    if (!initPromise) {
+    if (!this.startPromise) {
       throw new Error('initStart must be called before creating data clients');
     }
+
     let resolved: DataClient<TExecution> | undefined;
-    const get = () => initPromise.then(() => (resolved ??= factory()));
+    let resolvedGeneration = -1;
+    const get = (): Promise<DataClient<TExecution>> => {
+      const start = this.startPromise;
+      if (!start) {
+        return Promise.reject(new Error('initStart must be called before creating data clients'));
+      }
+
+      return start.then(() => {
+        const chain = this.switchChain;
+        return chain.then(() => {
+          if (this.switchChain !== chain) {
+            return get();
+          }
+          const client =
+            resolved !== undefined && resolvedGeneration === this.generation ? resolved : factory();
+          resolved = client;
+          resolvedGeneration = this.generation;
+          return client;
+        });
+      });
+    };
     const deferredClient: DataClient<TExecution> = {
       search: async (r) => get().then((c) => c.search(r)),
       count: async (r) => get().then((c) => c.count(r)),

@@ -18,6 +18,7 @@ export const createDataClientJestMock = () => {
     initSetup: mockDataClientBundleInitSetup,
     initStart: mockDataClientBundleInitStart,
     stop: mockDataClientBundleStop,
+    switchSource: jest.fn().mockResolvedValue(undefined),
     createWorkflowDataClient: jest.fn(() => createMockWorkflowDataClient()),
     createStepDataClient: jest.fn(() => createMockStepDataClient()),
   };
