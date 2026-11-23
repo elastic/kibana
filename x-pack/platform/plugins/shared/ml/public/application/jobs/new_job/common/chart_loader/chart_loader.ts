@@ -13,6 +13,12 @@ import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import { mlResultsServiceProvider } from '../../../../services/results_service';
 import { getCategoryFields as getCategoryFieldsOrig } from './searches';
+import {
+  loadEsqlEventRate,
+  loadEsqlFieldValues,
+  loadEsqlLineCharts,
+  type EsqlSearch,
+} from './esql_searches';
 import { aggFieldPairsCanBeCharted } from '../job_creator/util/general';
 import type { MlApi } from '../../../../services/ml_api_service';
 
@@ -37,6 +43,11 @@ export class ChartLoader {
   private _newJobPopulationsChart;
   private _getEventRateData;
   private _getCategoryFields;
+  private _esql: { query: string; search: EsqlSearch; summaryCountField: string | null } | null =
+    null;
+  private _loadEsqlLineCharts = memoizeOne(loadEsqlLineCharts, eq);
+  private _loadEsqlEventRate = memoizeOne(loadEsqlEventRate, eq);
+  private _loadEsqlFieldValues = memoizeOne(loadEsqlFieldValues, eq);
 
   constructor(mlApi: MlApi, indexPattern: DataView | null, query: object) {
     this._mlApi = mlApi;
@@ -57,6 +68,28 @@ export class ChartLoader {
   public setDataView(dataView: DataView) {
     this._dataView = dataView;
     this._timeFieldName = typeof dataView.timeFieldName === 'string' ? dataView.timeFieldName : '';
+  }
+
+  /**
+   * Loads the line charts, event rate and field values by running this ES|QL query. Counts sum
+   * summaryCountField when the query aggregates its data.
+   */
+  public setEsqlQuery(query: string, search: EsqlSearch, summaryCountField: string | null) {
+    this._esql = { query, search, summaryCountField };
+  }
+
+  private _getEsqlSource(projectRouting?: string) {
+    if (this._esql === null) {
+      return null;
+    }
+    const { query, search, summaryCountField } = this._esql;
+    return {
+      search,
+      esqlQuery: query,
+      timeField: this._timeFieldName,
+      projectRouting,
+      summaryCountField,
+    };
   }
 
   private _getIndexPattern(): string {
@@ -85,6 +118,19 @@ export class ChartLoader {
 
       const splitFieldName = splitField !== null ? splitField.name : null;
       const aggFieldPairNames = aggFieldPairs.map(getAggFieldPairNames);
+
+      const esqlSource = this._getEsqlSource(projectRouting);
+      if (esqlSource !== null) {
+        return this._loadEsqlLineCharts(
+          esqlSource,
+          start,
+          end,
+          intervalMs,
+          aggFieldPairNames,
+          splitFieldName,
+          splitFieldValue
+        );
+      }
 
       const resp = await this._newJobLineChart(
         this._getIndexPattern(),
@@ -153,6 +199,11 @@ export class ChartLoader {
     projectRouting?: string
   ): Promise<LineChartPoint[]> {
     if (this._timeFieldName !== '') {
+      const esqlSource = this._getEsqlSource(projectRouting);
+      if (esqlSource !== null) {
+        return this._loadEsqlEventRate(esqlSource, start, end, intervalMs * 3);
+      }
+
       const resp = await this._getEventRateData(
         this._getIndexPattern(),
         this._query,
@@ -182,6 +233,11 @@ export class ChartLoader {
     indicesOptions?: IndicesOptions,
     projectRouting?: string
   ): Promise<string[]> {
+    const esqlSource = this._getEsqlSource(projectRouting);
+    if (esqlSource !== null) {
+      return this._loadEsqlFieldValues(esqlSource, field.name, 10);
+    }
+
     const { results } = await this._getCategoryFields(
       this._mlApi,
       this._getIndexPattern(),

@@ -9,12 +9,14 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import {
   buildEsqlCardinalityRequest,
   buildEsqlMetricRequest,
+  buildEsqlTopValuesRequest,
   ESQL_MAX_CHART_BUCKETS,
   escapeEsqlIdentifier,
   getEsqlChartBucketCount,
   getEsqlMetricExpression,
   isEsqlDatafeed,
   parseEsqlMetricResponse,
+  parseEsqlTopValuesResponse,
   type EsqlMetricQueryOptions,
 } from './esql_metric_query';
 
@@ -141,6 +143,45 @@ describe('esql_metric_query', () => {
         params: [],
         filter: { range: { '@timestamp': { gte: 0, lte: HOUR, format: 'epoch_millis' } } },
       });
+    });
+  });
+
+  describe('buildEsqlTopValuesRequest', () => {
+    it('counts the values of the column and keeps the most frequent', () => {
+      const { query } = buildEsqlTopValuesRequest({
+        esqlQuery: 'FROM logs | EVAL host = TO_LOWER(host.name) ',
+        fieldName: 'host',
+        size: 10,
+      });
+
+      expect(query).toBe(
+        [
+          'FROM logs | EVAL host = TO_LOWER(host.name)',
+          '| WHERE `host` IS NOT NULL',
+          '| STATS `__ml_value_count` = COUNT(*) BY `host`',
+          '| SORT `__ml_value_count` DESC',
+          '| LIMIT 10',
+        ].join('\n')
+      );
+    });
+  });
+
+  describe('parseEsqlTopValuesResponse', () => {
+    it('returns the column values as strings, skipping nulls', () => {
+      const response = {
+        columns: [{ name: '__ml_value_count' }, { name: 'status' }],
+        values: [
+          [5, 200],
+          [3, null],
+          [1, 'error'],
+        ],
+      };
+
+      expect(parseEsqlTopValuesResponse(response, 'status')).toEqual(['200', 'error']);
+    });
+
+    it('returns no values when the column is missing', () => {
+      expect(parseEsqlTopValuesResponse({ columns: [], values: [] }, 'status')).toEqual([]);
     });
   });
 

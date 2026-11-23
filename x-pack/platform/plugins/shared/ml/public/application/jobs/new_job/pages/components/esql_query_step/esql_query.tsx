@@ -31,7 +31,11 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '@kbn/ml-common-types/storage';
-import { getESQLAdHocDataview, getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getESQLQueryColumnsRaw,
+  getProjectRoutingFromEsqlQuery,
+} from '@kbn/esql-utils';
 import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
@@ -42,6 +46,7 @@ import type { TimeRange } from '../../../common/components';
 import { TimeRangePicker } from '../../../common/components';
 import { useEsqlTimeField } from './use_esql_time_field';
 import { extractSourceQuery } from './extract_source_query';
+import { getEsqlSummaryCountField } from './get_esql_summary_count_field';
 import { useEsqlQueryExecution } from './use_esql_query_execution';
 import { EsqlResultsTable } from './esql_results_table';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -180,6 +185,8 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     setIsCreatingDataView(true);
     try {
       jobCreator.esqlQuery = query.esql;
+      // a query that aggregates with STATS returns one row per group, with its document count
+      jobCreator.summaryCountFieldName = getEsqlSummaryCountField(query.esql);
       const dataView = await getESQLAdHocDataview({
         dataViewsService: data.dataViews,
         query: query.esql,
@@ -191,13 +198,15 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       }
       jobCreator.indexPattern = dataView;
       chartLoader.setDataView(dataView);
-      // The field and aggregation lists in the Choose fields step come from this service.
-      await jobCreator.newJobCapsService.initializeFromDataVIew(
-        dataView,
-        true,
-        true,
-        projectRouting
-      );
+      chartLoader.setEsqlQuery(query.esql, data.search.search, jobCreator.summaryCountFieldName);
+      // The field and aggregation lists in the Choose fields step come from this service,
+      // so fill it with the query's output columns rather than the source index's fields.
+      const columns = await getESQLQueryColumnsRaw({
+        esqlQuery: query.esql,
+        search: data.search.search,
+        projectRouting,
+      });
+      jobCreator.newJobCapsService.initializeFromEsqlColumns(columns);
       jobCreatorUpdate();
       setCurrentStep(WIZARD_STEPS.PICK_FIELDS);
     } catch (error) {
@@ -215,6 +224,7 @@ export const EsqlQueryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
     chartLoader,
     query.esql,
     data.dataViews,
+    data.search.search,
     http,
     projectRouting,
     timeField,

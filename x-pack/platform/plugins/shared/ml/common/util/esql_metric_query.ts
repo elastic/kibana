@@ -19,6 +19,9 @@ export const ESQL_MAX_CHART_BUCKETS = 10000;
 
 const ESQL_CARDINALITY_COLUMN_PREFIX = '__ml_cardinality_';
 
+/** Column name holding the document count of each value in the generated top values query. */
+export const ESQL_TOP_VALUES_COUNT_COLUMN = '__ml_value_count';
+
 export interface EsqlEntityField {
   readonly fieldName: string;
   readonly fieldValue?: string | number | null;
@@ -231,6 +234,47 @@ export const buildEsqlCardinalityRequest = ({
     params: [],
     filter: buildSourceTimeFilter(sourceTimeField, earliestMs, latestMs),
   };
+};
+
+/**
+ * Builds an ES|QL request that lists the most frequent values of an output column of an
+ * ES|QL query, most frequent first.
+ */
+export const buildEsqlTopValuesRequest = ({
+  esqlQuery,
+  fieldName,
+  size,
+}: {
+  readonly esqlQuery: string;
+  readonly fieldName: string;
+  readonly size: number;
+}): Pick<EsqlRequest, 'query'> => {
+  const field = escapeEsqlIdentifier(fieldName);
+  const count = escapeEsqlIdentifier(ESQL_TOP_VALUES_COUNT_COLUMN);
+  return {
+    query: [
+      esqlQuery.trim(),
+      `| WHERE ${field} IS NOT NULL`,
+      `| STATS ${count} = COUNT(*) BY ${field}`,
+      `| SORT ${count} DESC`,
+      `| LIMIT ${Math.max(1, Math.trunc(size))}`,
+    ].join('\n'),
+  };
+};
+
+/** Returns the values of a column from the rows of an ES|QL top values response. */
+export const parseEsqlTopValuesResponse = (
+  response: { columns: ReadonlyArray<{ name: string }>; values: ReadonlyArray<readonly unknown[]> },
+  fieldName: string
+): string[] => {
+  const fieldIndex = response.columns.findIndex(({ name }) => name === fieldName);
+  if (fieldIndex === -1) {
+    return [];
+  }
+  return response.values
+    .map((row) => row[fieldIndex])
+    .filter((value) => value !== null && value !== undefined)
+    .map((value) => String(value));
 };
 
 /**

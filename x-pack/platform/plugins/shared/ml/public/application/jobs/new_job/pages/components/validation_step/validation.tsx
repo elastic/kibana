@@ -14,6 +14,8 @@ import { JobCreatorContext } from '../job_creator_context';
 import { ValidateJob } from '../../../../../components/validate_job';
 import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SkipValidationButton } from './skip_validatoin';
+import { isEsqlJobCreator } from '../../../common/job_creator';
+import { splitIndexPatternNames } from '../../../../../../../common/util/job_utils';
 
 const idFilterList = [
   'job_id_valid',
@@ -35,7 +37,13 @@ export const ValidationStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
   function getJobConfig() {
     return {
       ...jobCreator.jobConfig,
-      datafeed_config: jobCreator.datafeedConfig,
+      datafeed_config: isEsqlJobCreator(jobCreator)
+        ? // ES|QL datafeeds have no indices, but validation checks the query's source indices
+          {
+            ...jobCreator.datafeedConfig,
+            indices: splitIndexPatternNames(jobCreator.indexPatternTitle),
+          }
+        : jobCreator.datafeedConfig,
     };
   }
 

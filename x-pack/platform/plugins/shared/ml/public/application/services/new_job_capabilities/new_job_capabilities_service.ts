@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -13,12 +14,19 @@ import {
   type AggId,
   type FieldId,
   EVENT_RATE_FIELD_ID,
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
 } from '@kbn/ml-anomaly-utils';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useMlApi } from '../../contexts/kibana';
-import { getGeoFields, filterCategoryFields } from '../../../../common/util/fields_utils';
+import {
+  combineFieldsAndAggs,
+  getGeoFields,
+  filterCategoryFields,
+} from '../../../../common/util/fields_utils';
 import type { MlApi } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
+import { esqlColumnsToFields, type EsqlColumn } from './esql_columns_to_fields';
 
 export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
@@ -65,33 +73,50 @@ export class NewJobCapsService extends NewJobCapabilitiesServiceBase {
         projectRouting
       );
 
-      const { fields: allFields, aggs } = createObjects(resp, dataView.getIndexPattern());
-
-      if (this._includeEventRateField === true) {
-        addEventRateField(aggs, allFields);
-      }
-
-      const { fieldsPreferringKeyword, fieldsPreferringText } =
-        processTextAndKeywordFields(allFields);
-      const catFields = fieldsPreferringText.filter(
-        (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
-      );
-      const dateFields = fieldsPreferringText.filter((f) => f.type === ES_FIELD_TYPES.DATE);
-      const geoFields = getGeoFields(allFields);
-      const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
-
-      // set the main fields list to contain fields which have been filtered to prefer
-      // keyword fields over text fields.
-      // e.g. if foo.keyword and foo exist, don't add foo to the list.
-      this._fields = fields;
-      // set the category fields to contain fields which have been filtered to prefer text fields.
-      this._catFields = catFields;
-      this._dateFields = dateFields;
-      this._geoFields = geoFields;
-      this._aggs = aggs;
+      const { fields, aggs } = createObjects(resp, dataView.getIndexPattern());
+      this._setFieldsAndAggs(fields, aggs);
     } catch (error) {
       console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
     }
+  }
+
+  /** Loads the fields and aggregations from the output columns of an ES|QL query. */
+  public initializeFromEsqlColumns(
+    columns: readonly EsqlColumn[],
+    includeEventRateField = true,
+    removeTextFields = true
+  ) {
+    this._includeEventRateField = includeEventRateField;
+    this._removeTextFields = removeTextFields;
+
+    const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
+    const { fields } = combineFieldsAndAggs(esqlColumnsToFields(columns), aggs, {});
+    this._setFieldsAndAggs(fields, aggs);
+  }
+
+  private _setFieldsAndAggs(allFields: Field[], aggs: Aggregation[]) {
+    if (this._includeEventRateField === true) {
+      addEventRateField(aggs, allFields);
+    }
+
+    const { fieldsPreferringKeyword, fieldsPreferringText } =
+      processTextAndKeywordFields(allFields);
+    const catFields = fieldsPreferringText.filter(
+      (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.TEXT
+    );
+    const dateFields = fieldsPreferringText.filter((f) => f.type === ES_FIELD_TYPES.DATE);
+    const geoFields = getGeoFields(allFields);
+    const fields = this._removeTextFields ? fieldsPreferringKeyword : allFields;
+
+    // set the main fields list to contain fields which have been filtered to prefer
+    // keyword fields over text fields.
+    // e.g. if foo.keyword and foo exist, don't add foo to the list.
+    this._fields = fields;
+    // set the category fields to contain fields which have been filtered to prefer text fields.
+    this._catFields = catFields;
+    this._dateFields = dateFields;
+    this._geoFields = geoFields;
+    this._aggs = aggs;
   }
 }
 

@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { getESQLResults } from '@kbn/esql-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { injectTimeFilter } from './extract_source_query';
+import { appendTimeFilter } from './extract_source_query';
 
 export interface EsqlResultColumn {
   id: string;
@@ -72,7 +72,7 @@ export const useEsqlQueryExecution = (): EsqlQueryExecution => {
 
       try {
         const { response } = await getESQLResults({
-          esqlQuery: timeField ? injectTimeFilter(trimmed, timeField) : trimmed,
+          esqlQuery: timeField ? appendTimeFilter(trimmed, timeField) : trimmed,
           search: data.search.search,
           signal: abortController.signal,
           dropNullColumns: true,

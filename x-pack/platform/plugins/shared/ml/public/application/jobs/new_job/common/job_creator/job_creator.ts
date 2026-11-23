@@ -523,7 +523,8 @@ export class JobCreator {
   }
 
   public get indices(): string[] {
-    return this._datafeed_config.indices;
+    // ES|QL datafeeds have no indices
+    return this._datafeed_config.indices ?? [];
   }
 
   public set indices(indics: string[]) {

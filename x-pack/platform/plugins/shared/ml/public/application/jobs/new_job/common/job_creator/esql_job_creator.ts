@@ -6,14 +6,30 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Field, Aggregation, SplitField, AggFieldPair } from '@kbn/ml-anomaly-utils';
+import {
+  ML_JOB_AGGREGATION,
+  type Field,
+  type Aggregation,
+  type SplitField,
+  type AggFieldPair,
+} from '@kbn/ml-anomaly-utils';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Job, Detector, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
 import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
+
+const COUNT_FUNCTIONS: readonly string[] = [
+  ML_JOB_AGGREGATION.COUNT,
+  ML_JOB_AGGREGATION.HIGH_COUNT,
+  ML_JOB_AGGREGATION.LOW_COUNT,
+  ML_JOB_AGGREGATION.NON_ZERO_COUNT,
+  ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT,
+  ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT,
+];
 
 /** Job creator for the ES|QL wizard, which starts without a data view. */
 export class EsqlJobCreator extends JobCreator {
@@ -25,6 +41,9 @@ export class EsqlJobCreator extends JobCreator {
   constructor(mlApi: MlApi, newJobCapsService: NewJobCapsService) {
     super(mlApi, newJobCapsService);
     this.createdBy = CREATED_BY_LABEL.ESQL;
+    // ES|QL datafeeds read data with esql_query, so they have no DSL query or indices
+    delete this._datafeed_config.query;
+    delete (this._datafeed_config as Partial<Datafeed>).indices;
     this._wizardInitialized$.next(true);
   }
 
@@ -34,6 +53,42 @@ export class EsqlJobCreator extends JobCreator {
 
   public set esqlQuery(query: string) {
     this._datafeed_config.esql_query = query;
+  }
+
+  /** Match-all query for the charts and bucket span estimate, which search the query's source indices. */
+  public get query(): object {
+    return getDefaultDSLQuery();
+  }
+
+  /** Ignored, as the datafeed has no DSL query. */
+  public set query(_query: object) {}
+
+  public get bucketSpan(): BucketSpan {
+    return super.bucketSpan;
+  }
+
+  /** Also sets the datafeed's grouping_interval, which Elasticsearch still requires for ES|QL datafeeds. */
+  public set bucketSpan(bucketSpan: BucketSpan) {
+    super.bucketSpan = bucketSpan;
+    if (bucketSpan === '') {
+      delete this._datafeed_config.grouping_interval;
+    } else {
+      this._datafeed_config.grouping_interval = String(bucketSpan);
+    }
+  }
+
+  public get timeFieldName(): string {
+    return super.timeFieldName;
+  }
+
+  /** Also sets the datafeed's source_time_field, which Elasticsearch still requires for ES|QL datafeeds. */
+  public set timeFieldName(fieldName: string) {
+    super.timeFieldName = fieldName;
+    if (fieldName === '') {
+      delete this._datafeed_config.source_time_field;
+    } else {
+      this._datafeed_config.source_time_field = fieldName;
+    }
   }
 
   public get dataView(): DataView | null {
@@ -73,14 +128,17 @@ export class EsqlJobCreator extends JobCreator {
 
   public addDetector(agg: Aggregation, field: Field) {
     this._addDetector(this._createDetector(agg, field), agg, field);
+    this._updateDelayedDataCheck();
   }
 
   public editDetector(agg: Aggregation, field: Field, index: number) {
     this._editDetector(this._createDetector(agg, field), agg, field, index);
+    this._updateDelayedDataCheck();
   }
 
   public removeDetector(index: number) {
     this._removeDetector(index);
+    this._updateDelayedDataCheck();
   }
 
   public get aggFieldPairs(): AggFieldPair[] {
@@ -98,8 +156,22 @@ export class EsqlJobCreator extends JobCreator {
     return detector;
   }
 
+  // The delayed data check needs a count detector for ES|QL datafeeds, so turn it off without one.
+  private _updateDelayedDataCheck() {
+    const hasCountDetector = this._detectors.some(
+      ({ function: fn }) => fn !== undefined && COUNT_FUNCTIONS.includes(fn)
+    );
+    if (hasCountDetector) {
+      delete (this._datafeed_config as Partial<Datafeed>).delayed_data_check_config;
+    } else {
+      this._datafeed_config.delayed_data_check_config = { enabled: false };
+    }
+  }
+
   public cloneFromExistingJob(job: Job, datafeed: Datafeed) {
     this._overrideConfigs(job, datafeed);
+    delete this._datafeed_config.query;
+    delete (this._datafeed_config as Partial<Datafeed>).indices;
     this.createdBy = CREATED_BY_LABEL.ESQL;
   }
 }

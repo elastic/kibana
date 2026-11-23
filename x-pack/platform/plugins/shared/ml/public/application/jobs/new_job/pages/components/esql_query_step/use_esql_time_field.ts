@@ -6,12 +6,14 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
-import { getESQLQueryColumnsRaw, getESQLTimeField } from '@kbn/esql-utils';
+import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { extractSourceQuery } from './extract_source_query';
 
 const DEFAULT_TIME_FIELD = '@timestamp';
 const DATE_FIELD_TYPES = new Set(['date', 'date_nanos', 'datetime']);
+// wait for typing to pause before asking Elasticsearch for the query's columns
+const COLUMNS_DEBOUNCE_MS = 500;
 
 export interface TimeFieldOption {
   value: string;
@@ -29,8 +31,8 @@ const pickTimeField = (dateFields: string[], currentTimeField: string): string =
 };
 
 /**
- * Lists the date fields of the query's source and keeps the selected time field valid,
- * falling back to the ES|QL time field API when the source has no date columns.
+ * Lists the date columns the query returns and keeps the selected time field valid.
+ * While the query can't be run, e.g. part way through typing, the last list is kept.
  */
 export const useEsqlTimeField = ({
   query,
@@ -44,77 +46,68 @@ export const useEsqlTimeField = ({
   projectRouting?: string;
 }): { timeFieldOptions: TimeFieldOption[]; hasSourceQuery: boolean; isLoading: boolean } => {
   const {
-    services: { data, http },
+    services: { data },
   } = useMlKibana();
-  const sourceQuery = useMemo(() => extractSourceQuery(query), [query]);
+  const hasSourceQuery = useMemo(() => extractSourceQuery(query) !== '', [query]);
+  const trimmedQuery = query.trim();
   const [dateFields, setDateFields] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!sourceQuery) {
+    if (!hasSourceQuery) {
       setDateFields([]);
+      setIsLoading(false);
       return;
     }
 
     const abortController = new AbortController();
     setIsLoading(true);
 
-    const loadDateFields = async (): Promise<string[]> => {
+    const timeout = setTimeout(async () => {
       try {
         const columns = await getESQLQueryColumnsRaw({
-          esqlQuery: sourceQuery,
+          esqlQuery: trimmedQuery,
           search: data.search.search,
           signal: abortController.signal,
           projectRouting,
         });
-        const fields = columns
-          .filter(({ type }) => DATE_FIELD_TYPES.has(type))
-          .map(({ name }) => name)
-          .sort();
-        if (fields.length > 0) {
-          return fields;
+        if (!abortController.signal.aborted) {
+          setDateFields(
+            columns
+              .filter(({ type }) => DATE_FIELD_TYPES.has(type))
+              .map(({ name }) => name)
+              .sort()
+          );
         }
       } catch {
-        // Fall through to the time field API below.
-      }
-      const apiTimeField = await getESQLTimeField({ query: sourceQuery, http, projectRouting });
-      return apiTimeField ? [apiTimeField] : [];
-    };
-
-    loadDateFields()
-      .then((fields) => {
-        if (!abortController.signal.aborted) {
-          setDateFields(fields);
-        }
-      })
-      .catch(() => {
-        if (!abortController.signal.aborted) {
-          setDateFields([]);
-        }
-      })
-      .finally(() => {
+        // the query is invalid or incomplete, so keep the previous columns
+      } finally {
         if (!abortController.signal.aborted) {
           setIsLoading(false);
         }
-      });
+      }
+    }, COLUMNS_DEBOUNCE_MS);
 
-    return () => abortController.abort();
-  }, [sourceQuery, data.search.search, http, projectRouting]);
+    return () => {
+      clearTimeout(timeout);
+      abortController.abort();
+    };
+  }, [hasSourceQuery, trimmedQuery, data.search.search, projectRouting]);
 
   useEffect(() => {
-    if (!sourceQuery || isLoading) {
+    if (!hasSourceQuery || isLoading) {
       return;
     }
     const nextTimeField = pickTimeField(dateFields, timeField);
     if (nextTimeField !== timeField) {
       onTimeFieldChange(nextTimeField);
     }
-  }, [sourceQuery, isLoading, dateFields, timeField, onTimeFieldChange]);
+  }, [hasSourceQuery, isLoading, dateFields, timeField, onTimeFieldChange]);
 
   const timeFieldOptions = useMemo(
     () => dateFields.map((name) => ({ value: name, text: name })),
     [dateFields]
   );
 
-  return { timeFieldOptions, hasSourceQuery: sourceQuery !== '', isLoading };
+  return { timeFieldOptions, hasSourceQuery, isLoading };
 };

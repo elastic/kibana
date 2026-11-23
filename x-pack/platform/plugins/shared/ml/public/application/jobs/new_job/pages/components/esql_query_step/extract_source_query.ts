@@ -7,6 +7,7 @@
 
 import { Parser } from '@elastic/esql';
 import { getAnySourceCommandFromESQLQuery } from '@kbn/esql-utils';
+import { escapeEsqlIdentifier } from '../../../../../../../common/util/esql_metric_query';
 
 /** Returns the source command (e.g. `FROM logs-*`) of an ES|QL query, or '' if there is none. */
 export const extractSourceQuery = (query: string): string => {
@@ -33,25 +34,15 @@ export const extractSourceQuery = (query: string): string => {
   }
 };
 
-/** Inserts a time range WHERE clause, using the ?_tstart/?_tend params, directly after the source command. */
-export const injectTimeFilter = (query: string, timeField: string): string => {
+/**
+ * Appends a time range WHERE clause on an output column, using the ?_tstart/?_tend params, so the
+ * time field can be any column the query returns.
+ */
+export const appendTimeFilter = (query: string, timeField: string): string => {
   const trimmed = query.trim();
   if (!trimmed) {
     return trimmed;
   }
-
-  try {
-    const { root } = Parser.parse(trimmed);
-    const sourceCmd = root.commands.find((c) => c.name === 'from' || c.name === 'ts');
-    if (!sourceCmd) {
-      return trimmed;
-    }
-
-    const before = trimmed.slice(0, sourceCmd.location.max + 1).trimEnd();
-    const after = trimmed.slice(sourceCmd.location.max + 1).trimStart();
-    const whereClause = `| WHERE ${timeField} >= ?_tstart AND ${timeField} <= ?_tend`;
-    return after ? `${before}\n${whereClause}\n${after}` : `${before}\n${whereClause}`;
-  } catch {
-    return trimmed;
-  }
+  const field = escapeEsqlIdentifier(timeField);
+  return `${trimmed}\n| WHERE ${field} >= ?_tstart AND ${field} <= ?_tend`;
 };

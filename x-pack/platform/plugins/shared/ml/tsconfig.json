@@ -58,6 +58,7 @@
     "@kbn/es-ui-shared-plugin",
     "@kbn/esql",
     "@kbn/esql-utils",
+    "@kbn/esql-types",
     "@kbn/features-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
