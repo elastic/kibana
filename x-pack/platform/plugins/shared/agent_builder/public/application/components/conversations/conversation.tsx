@@ -136,7 +136,7 @@ export const Conversation: React.FC<{}> = () => {
       height: ${scrollMaskHeight};
       pointer-events: none;
       z-index: 1;
-      background: linear-gradient(to top, ${euiTheme.colors.backgroundBasePlain}, transparent);
+      background-color: ${euiTheme.colors.backgroundBaseRecessed};
     }
   `;
 

@@ -28,10 +28,5 @@ export const fullWidthAndHeightStyles = css`
 `;
 
 export const conversationBackgroundStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  background: linear-gradient(
-    180deg,
-    ${euiTheme.colors.backgroundBasePlain} 21.09%,
-    ${euiTheme.colors.backgroundBaseSubdued} 51.44%,
-    ${euiTheme.colors.backgroundBasePlain} 87.98%
-  );
+  background-color: ${euiTheme.colors.backgroundBaseRecessed};
 `;
