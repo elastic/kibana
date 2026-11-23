@@ -31,6 +31,25 @@ import {
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('../../hooks/use_episode_details_header_data');
+
+const mockEuiFlyout = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const react = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiFlyout: (props: Record<string, unknown>) => {
+      mockEuiFlyout(props);
+      return react.createElement(actual.EuiFlyout, props);
+    },
+  };
+});
+
+const episodeFlyoutProps = () =>
+  mockEuiFlyout.mock.calls
+    .filter(([props]) => props['data-test-subj'] === 'alertingV2EpisodeFlyout')
+    .at(-1)![0];
 jest.mock('../../hooks/use_invalidate_episode_queries', () => ({
   useInvalidateEpisodeQueries: () => jest.fn(),
 }));
@@ -162,6 +181,15 @@ describe('AlertEpisodeDetailsFlyout', () => {
     // EUI hardcodes data-test-subj="euiFlyoutCloseButton" on the close button and ignores
     // closeButtonProps['data-test-subj'], so we assert the EUI default here.
     expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+  });
+
+  it('opens standalone in the shared alert details frame without pagination', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(episodeFlyoutProps().flyoutMenuProps).toEqual({
+      title: 'Alert details',
+      pagination: undefined,
+    });
   });
 
   it('exposes view details behind the footer take action menu', () => {
@@ -314,6 +342,37 @@ describe('AlertEpisodeDetailsFlyout', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
+  });
+
+  describe('while the alert loads', () => {
+    beforeEach(() => {
+      mockUseEpisodeDetailsHeaderData.mockReturnValue({
+        ...baseHeaderData,
+        isLoading: true,
+        ruleState: { status: RuleStateStatus.idle },
+        isActionStateLoaded: false,
+      });
+    });
+
+    it('holds the title, status and header values with skeletons', () => {
+      render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+      expect(screen.getByTestId('alertDetailsTitleSkeleton')).toBeInTheDocument();
+      // Description, status badge, severity, assignee and duration.
+      expect(screen.getAllByTestId('alertDetailsValueSkeleton')).toHaveLength(5);
+    });
+
+    it('keeps the metadata tab and shows a skeleton until the rule loads', () => {
+      render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+      fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
+
+      expect(screen.getByRole('progressbar', { name: 'Loading data container' })).toHaveAttribute(
+        'data-test-subj',
+        'alertingV2EpisodeFlyoutMetadataSkeleton'
+      );
+      expect(screen.queryByTestId('metadataSectionStub')).not.toBeInTheDocument();
+    });
   });
 
   it('calls onClose when the footer close button is clicked', () => {

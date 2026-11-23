@@ -54,7 +54,11 @@ import {
   type UnifiedDataTableSettings,
 } from '@kbn/unified-data-table';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
-import { AlertEpisodeDetailsFlyout } from '../details/details_flyout';
+import {
+  ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ,
+  AlertEpisodeDetailsFlyoutContent,
+} from '../details/details_flyout';
+import { AlertDetailsFrame } from '../details/alert_details_frame';
 import type { AlertEpisodeDetailsServices } from '../details/types';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import {
@@ -68,7 +72,10 @@ import {
   EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from '../episodes_table_cell_renderers';
-import { ClassicAlertDetailsFlyout } from '../classic_alert_details_flyout';
+import {
+  CLASSIC_ALERT_DETAILS_FLYOUT_TEST_SUBJ,
+  ClassicAlertDetailsFlyoutContent,
+} from '../classic_alert_details_flyout';
 import { OPEN_ALERT_EVENTS_HISTORY_ACTION_ID, type EpisodeAction } from '../../actions';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '../../constants';
 import { episodeSupportsTimeline } from '../../queries/episodes_query';
@@ -82,6 +89,7 @@ import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_ep
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { alertEpisodeToDataTableRecord } from '../../utils/alert_episode_to_data_table_record';
 import { dataTableRecordToEpisode } from '../../utils/data_table_record_to_episode';
+import { getFlyoutPagination } from '../../utils/get_flyout_pagination';
 import {
   DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS,
   DEFAULT_EPISODES_TABLE_CONFIG,
@@ -489,45 +497,59 @@ export const EpisodesTable = ({
   );
 
   const renderDocumentView = useCallback<RenderDocumentViewCallback>(
-    (hit) => {
-      if (!episodeSupportsTimeline(dataTableRecordToEpisode(hit))) {
-        return (
-          <ClassicAlertDetailsFlyout
-            alertId={hit.flattened['episode.id'] as string}
-            onClose={closeFlyout}
-            services={{ http: services.http }}
-            actions={actions}
-            onSuccess={invalidateEpisodeQueries}
-          />
-        );
-      }
+    (hit, displayedRows) => {
+      const pagination = getFlyoutPagination(displayedRows, hit.id, expandDoc);
+      const isClassic = !episodeSupportsTimeline(dataTableRecordToEpisode(hit));
+      // One frame for both kinds keeps the flyout open while paging between Classic and
+      // Universal alerts; only the declared details inside it change.
       return (
-        <AlertEpisodeDetailsFlyout
-          episodeId={hit.flattened['episode.id'] as string}
-          groupHash={hit.flattened.group_hash as string | undefined}
-          sourceId={hit.flattened.source_id as string | undefined}
+        <AlertDetailsFrame
           onClose={closeFlyout}
-          actions={actions}
-          getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
-          getEpisodeDetailsHref={getEpisodeDetailsHref}
-          services={{
-            agentBuilder: services.agentBuilder,
-            application: services.application,
-            data: services.data,
-            http: services.http,
-            expressions: services.expressions,
-            userProfile: services.userProfile,
-            spaces: services.spaces,
-            uiSettings: services.uiSettings,
-            unifiedDocViewer: services.unifiedDocViewer,
-            dataViews: services.dataViews,
-          }}
-        />
+          pagination={pagination}
+          data-test-subj={
+            isClassic
+              ? CLASSIC_ALERT_DETAILS_FLYOUT_TEST_SUBJ
+              : ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ
+          }
+        >
+          {isClassic ? (
+            <ClassicAlertDetailsFlyoutContent
+              alertId={hit.flattened['episode.id'] as string}
+              onClose={closeFlyout}
+              services={{ http: services.http }}
+              actions={actions}
+              onSuccess={invalidateEpisodeQueries}
+            />
+          ) : (
+            <AlertEpisodeDetailsFlyoutContent
+              episodeId={hit.flattened['episode.id'] as string}
+              groupHash={hit.flattened.group_hash as string | undefined}
+              sourceId={hit.flattened.source_id as string | undefined}
+              onClose={closeFlyout}
+              actions={actions}
+              getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
+              getEpisodeDetailsHref={getEpisodeDetailsHref}
+              services={{
+                agentBuilder: services.agentBuilder,
+                application: services.application,
+                data: services.data,
+                http: services.http,
+                expressions: services.expressions,
+                userProfile: services.userProfile,
+                spaces: services.spaces,
+                uiSettings: services.uiSettings,
+                unifiedDocViewer: services.unifiedDocViewer,
+                dataViews: services.dataViews,
+              }}
+            />
+          )}
+        </AlertDetailsFrame>
       );
     },
     [
       actions,
       closeFlyout,
+      expandDoc,
       getEpisodeDetailsHref,
       getRuleDetailsHref,
       invalidateEpisodeQueries,

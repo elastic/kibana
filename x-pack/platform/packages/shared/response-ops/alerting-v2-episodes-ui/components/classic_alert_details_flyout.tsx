@@ -26,8 +26,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { FLYOUT_TAKE_ACTION, formatMetadataListDuration } from './details/translations';
 import { buildEpisodeMenuPanels } from './details/build_episode_menu_panels';
-import { AlertEpisodeDescriptionListSkeleton } from './details/section_skeletons';
-import { useAlertDetailsFlyoutWidth } from './details/use_alert_details_flyout_width';
+import {
+  AlertDetailsTitleSkeleton,
+  AlertEpisodeDescriptionListSkeleton,
+} from './details/section_skeletons';
+import { AlertDetailsFrame } from './details/alert_details_frame';
 import { CLASSIC_SOURCE_LABEL, ELASTIC_SOURCE_ICON } from '../source_labels';
 import type { EpisodeAction } from '../actions';
 import { mapClassicAlertToEpisode } from '../classic_alerts/utils/map_alert';
@@ -82,6 +85,8 @@ export interface ClassicAlertDetailsFlyoutProps {
   onSuccess?: () => void;
 }
 
+export const CLASSIC_ALERT_DETAILS_FLYOUT_TEST_SUBJ = 'classicAlertEpisodeDetailsFlyout';
+
 /**
  * Observability alert details page path. Only observability rule types have a
  * dedicated details page (stack alerts don't).
@@ -135,11 +140,12 @@ const formatDurationUs = (value: unknown): string => {
 };
 
 /**
- * Classic alert details flyout. Built on `FlyoutTemplate` like the v2 episode flyout, so rows in
- * the unified table open with the same chrome; content stays classic-alert specific (overview
- * fields + fields table).
+ * Classic alert details, declared as `FlyoutTemplate` content. Render it inside an
+ * `AlertDetailsFrame` (shared with the Universal details), or use `ClassicAlertDetailsFlyout`
+ * for a standalone flyout. The content stays classic-alert specific (overview fields + fields
+ * table).
  */
-export const ClassicAlertDetailsFlyout = ({
+export const ClassicAlertDetailsFlyoutContent = ({
   alertId,
   onClose,
   services,
@@ -147,7 +153,6 @@ export const ClassicAlertDetailsFlyout = ({
   onSuccess,
 }: ClassicAlertDetailsFlyoutProps) => {
   const [selectedTabId, setSelectedTabId] = useState<TabId>('overview');
-  const initialWidth = useAlertDetailsFlyoutWidth();
   const ruleTypeIds =
     useAdditionalEpisodesDataSource()?.ruleTypeIds ?? CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS;
 
@@ -180,6 +185,9 @@ export const ClassicAlertDetailsFlyout = ({
   const isLoaded = !isLoading && !isError;
   const loadedAlert = isLoaded ? alert : undefined;
   const loadedEpisode = isLoaded ? data?.episode : undefined;
+  // The tabs show while the alert loads, so the tab bar does not appear late. A failed load shows
+  // the error without them.
+  const showTabs = isLoading || Boolean(loadedAlert);
   const episodes = useMemo(() => (loadedEpisode ? [loadedEpisode] : []), [loadedEpisode]);
   // Keep actions the table shows while disabled, such as Unresolve on a resolved classic alert.
   const menuActions = useMemo(
@@ -256,23 +264,23 @@ export const ClassicAlertDetailsFlyout = ({
     [menuActions, episodes, alertDetailsHref, onSuccess]
   );
 
+  const loadingSkeleton = (
+    <AlertEpisodeDescriptionListSkeleton
+      aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
+      rows={OVERVIEW_ROW_COUNT}
+      data-test-subj="classicAlertEpisodeDetailsLoading"
+    />
+  );
+
   return (
     <FlyoutTemplate
-      type="overlay"
-      ownFocus={false}
-      resizable
-      // The header title starts as a fallback and becomes the rule name, which would make the
-      // flyout reopen on first load. A constant menu title keeps its registration stable.
-      flyoutMenuProps={{ title: i18n.CLASSIC_ALERT_DETAILS_TITLE }}
-      size={initialWidth}
       onClose={onClose}
-      data-test-subj="classicAlertEpisodeDetailsFlyout"
-      tabs={loadedAlert ? TABS : undefined}
+      tabs={showTabs ? TABS : undefined}
       tabBarProps={TAB_BAR_PROPS}
       selectedTabId={selectedTabId}
       onTabChange={(tabId) => setSelectedTabId(tabId as TabId)}
     >
-      <FlyoutTemplate.Header title={title} isLoading={isLoading}>
+      <FlyoutTemplate.Header title={isLoading ? <AlertDetailsTitleSkeleton /> : title}>
         <FlyoutTemplate.Header.Badge
           color="hollow"
           iconType={ELASTIC_SOURCE_ICON}
@@ -283,16 +291,35 @@ export const ClassicAlertDetailsFlyout = ({
       </FlyoutTemplate.Header>
 
       <FlyoutTemplate.Body>
-        {isLoading ? (
-          // The skeleton has no accessible name of its own, so the wrapper announces what loads.
-          <div
-            role="progressbar"
-            aria-label={i18n.CLASSIC_ALERT_DETAILS_LOADING}
-            data-test-subj="classicAlertEpisodeDetailsLoading"
-          >
-            <AlertEpisodeDescriptionListSkeleton rows={OVERVIEW_ROW_COUNT} />
-          </div>
-        ) : !loadedAlert ? (
+        {showTabs ? (
+          <>
+            <FlyoutTemplate.Body.TabPanel
+              tabId="overview"
+              data-test-subj="classicAlertEpisodeOverviewTabPanel"
+            >
+              {isLoading ? (
+                loadingSkeleton
+              ) : (
+                <EuiDescriptionList
+                  listItems={overviewItems}
+                  type="column"
+                  columnWidths={[1, 3]}
+                  compressed
+                />
+              )}
+            </FlyoutTemplate.Body.TabPanel>
+            <FlyoutTemplate.Body.TabPanel
+              tabId="fields"
+              data-test-subj="classicAlertEpisodeFieldsTabPanel"
+            >
+              {loadedAlert ? (
+                <AlertFieldsTable alert={toAlertFieldsTableAlert(loadedAlert)} />
+              ) : (
+                loadingSkeleton
+              )}
+            </FlyoutTemplate.Body.TabPanel>
+          </>
+        ) : (
           <EuiEmptyPrompt
             iconType="alert"
             color="danger"
@@ -300,26 +327,6 @@ export const ClassicAlertDetailsFlyout = ({
             body={<p>{i18n.CLASSIC_ALERT_DETAILS_ERROR_BODY}</p>}
             data-test-subj="classicAlertEpisodeDetailsError"
           />
-        ) : (
-          <>
-            <FlyoutTemplate.Body.TabPanel
-              tabId="overview"
-              data-test-subj="classicAlertEpisodeOverviewTabPanel"
-            >
-              <EuiDescriptionList
-                listItems={overviewItems}
-                type="column"
-                columnWidths={[1, 3]}
-                compressed
-              />
-            </FlyoutTemplate.Body.TabPanel>
-            <FlyoutTemplate.Body.TabPanel
-              tabId="fields"
-              data-test-subj="classicAlertEpisodeFieldsTabPanel"
-            >
-              <AlertFieldsTable alert={toAlertFieldsTableAlert(loadedAlert)} />
-            </FlyoutTemplate.Body.TabPanel>
-          </>
         )}
       </FlyoutTemplate.Body>
 
@@ -337,5 +344,17 @@ export const ClassicAlertDetailsFlyout = ({
         />
       </FlyoutTemplate.Footer>
     </FlyoutTemplate>
+  );
+};
+
+/**
+ * Classic alert details in a standalone flyout.
+ */
+export const ClassicAlertDetailsFlyout = (props: ClassicAlertDetailsFlyoutProps) => {
+  const { onClose } = props;
+  return (
+    <AlertDetailsFrame onClose={onClose} data-test-subj={CLASSIC_ALERT_DETAILS_FLYOUT_TEST_SUBJ}>
+      <ClassicAlertDetailsFlyoutContent {...props} />
+    </AlertDetailsFrame>
   );
 };

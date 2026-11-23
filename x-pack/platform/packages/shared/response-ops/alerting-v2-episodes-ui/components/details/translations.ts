@@ -97,6 +97,13 @@ export const FLYOUT_TAB_METADATA = i18n.translate(
   }
 );
 
+export const FLYOUT_METADATA_LOADING = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.metadataLoading',
+  {
+    defaultMessage: 'Loading data container',
+  }
+);
+
 export const FLYOUT_ACCORDION_ABOUT = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.accordion.about',
   {

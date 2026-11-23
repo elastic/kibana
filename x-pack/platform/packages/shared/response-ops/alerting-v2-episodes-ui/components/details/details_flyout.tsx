@@ -6,14 +6,7 @@
  */
 
 import React, { Suspense, useMemo, useState } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiLink,
-  EuiPanel,
-  EuiSkeletonTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { alertAttachmentConverter, useManualAddToChat } from '@kbn/alerting-v2-browser-shared';
 import type { FocusedEpisode } from '@kbn/alerting-v2-browser-shared';
@@ -50,6 +43,12 @@ import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
 import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
+import { ALERT_DETAILS_FLYOUT_HISTORY_KEY, AlertDetailsFrame } from './alert_details_frame';
+import {
+  AlertDetailsTitleSkeleton,
+  AlertDetailsValueSkeleton,
+  AlertEpisodeDescriptionListSkeleton,
+} from './section_skeletons';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -58,12 +57,7 @@ import { FlappingPopover } from '../flapping/flapping_badge';
 
 type TabId = 'overview' | 'timeline' | 'metadata';
 
-/**
- * Groups the episode flyout and anything opened from it into one navigation history.
- */
-const FLYOUT_HISTORY_KEY = Symbol('alertingV2EpisodeDetails');
-
-const FLYOUT_TEST_SUBJ = 'alertingV2EpisodeFlyout';
+export const ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ = 'alertingV2EpisodeFlyout';
 const FLYOUT_FOOTER_TEST_SUBJ = 'alertingV2EpisodeFlyoutFooter';
 const METADATA_PANEL_TEST_SUBJ = 'alertingV2EpisodeFlyoutMetadataPanel';
 /** Marks our wrapper, so the styles below can match on it instead of a test subject. */
@@ -160,7 +154,11 @@ export interface AlertEpisodeDetailsFlyoutProps {
   getEpisodeDetailsHref: (episodeId: string) => string;
 }
 
-export const AlertEpisodeDetailsFlyout = ({
+/**
+ * Universal alert details, declared as `FlyoutTemplate` content. Render it inside an
+ * `AlertDetailsFrame`, or use `AlertEpisodeDetailsFlyout` for a standalone flyout.
+ */
+export const AlertEpisodeDetailsFlyoutContent = ({
   episodeId,
   groupHash,
   sourceId,
@@ -192,6 +190,8 @@ export const AlertEpisodeDetailsFlyout = ({
   const sourceIcon = connectorSource ? ConnectorIconsMap.get(`.${connectorSource}`) : systemIcon;
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
+  // The Metadata tab shows while the rule may still load, so the tab bar does not change late.
+  const showMetadataTab = showRuleDependentTabs || isLoading;
   // Related episodes are matched by rule or external source. Until the episode loads the
   // section renders its own loading or error state, so the panel stays.
   const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
@@ -263,7 +263,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Metadata tab is only available when the rule is loaded.
   // Fall back to overview silently rather than leaving the user on a blank tab.
-  const effectiveTab: TabId = !showRuleDependentTabs && tab === 'metadata' ? 'overview' : tab;
+  const effectiveTab: TabId = !showMetadataTab && tab === 'metadata' ? 'overview' : tab;
 
   const tabs = [
     {
@@ -276,7 +276,7 @@ export const AlertEpisodeDetailsFlyout = ({
       label: i18n.FLYOUT_TAB_TIMELINE,
       'data-test-subj': 'alertingV2EpisodeFlyoutTabTimeline',
     },
-    ...(showRuleDependentTabs
+    ...(showMetadataTab
       ? [
           {
             id: 'metadata' as const,
@@ -296,7 +296,7 @@ export const AlertEpisodeDetailsFlyout = ({
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
   const titleNode = isLoading ? (
-    <EuiSkeletonTitle size="xs" />
+    <AlertDetailsTitleSkeleton />
   ) : (
     ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
   );
@@ -304,7 +304,11 @@ export const AlertEpisodeDetailsFlyout = ({
   // Header description: triggered timestamp.
   const triggeredAt = episode?.triggered_at ?? undefined;
   const dateFormat = services.uiSettings.get('dateFormat') ?? undefined;
-  const descriptionNode = triggeredAt ? formatDateTime(triggeredAt, dateFormat) : undefined;
+  const descriptionSkeleton = isLoading ? <AlertDetailsValueSkeleton width={160} /> : undefined;
+  const descriptionNode = triggeredAt
+    ? formatDateTime(triggeredAt, dateFormat)
+    : descriptionSkeleton;
+  const emptyValue = isLoading ? <AlertDetailsValueSkeleton /> : EMPTY_VALUE;
 
   // Info block values
   const durationMs = episode?.duration;
@@ -330,310 +334,319 @@ export const AlertEpisodeDetailsFlyout = ({
     : null;
 
   return (
-    <>
-      <FlyoutTemplate
-        type="overlay"
-        // Overlay without a mask, so the episodes table stays visible and clickable
-        // behind the flyout. EUI only renders the mask when `ownFocus` is set.
-        ownFocus={false}
-        resizable
-        // Main flyout in the episode history group. Anything opened from here with the
-        // same historyKey navigates on top of it and can go back to it.
-        session="start"
-        // Our header title starts as a skeleton and becomes the rule name, which causes the flyout
-        // to reopen quickly on first loads. Setting a constant title keeps the registration stable.
-        flyoutMenuProps={{ title: i18n.FLYOUT_ARIA_LABEL }}
-        historyKey={FLYOUT_HISTORY_KEY}
-        size={initialWidth}
-        aria-label={i18n.FLYOUT_ARIA_LABEL}
-        data-test-subj={FLYOUT_TEST_SUBJ}
-        onClose={onClose}
-        tabs={tabs}
-        selectedTabId={effectiveTab}
-        onTabChange={handleTabChange}
-      >
-        <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
-          {status && (
-            <FlyoutTemplate.Header.Badge color="hollow">
+    <FlyoutTemplate
+      onClose={onClose}
+      tabs={tabs}
+      selectedTabId={effectiveTab}
+      onTabChange={handleTabChange}
+    >
+      <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
+        {(status || isLoading) && (
+          <FlyoutTemplate.Header.Badge color="hollow">
+            {status ? (
               <AlertEpisodeStatusHealth status={status} />
-            </FlyoutTemplate.Header.Badge>
-          )}
+            ) : (
+              <AlertDetailsValueSkeleton width={56} height={12} />
+            )}
+          </FlyoutTemplate.Header.Badge>
+        )}
 
-          {/* Flapping badge */}
-          {isFlapping && (
-            <FlyoutTemplate.Header.Badge color="hollow" iconType="chartGauge">
-              <FlappingBadgeLabel />
-            </FlyoutTemplate.Header.Badge>
-          )}
+        {/* Flapping badge */}
+        {isFlapping && (
+          <FlyoutTemplate.Header.Badge color="hollow" iconType="chartGauge">
+            <FlappingBadgeLabel />
+          </FlyoutTemplate.Header.Badge>
+        )}
 
-          {/* Snoozed badge */}
-          {isSnoozed && (
-            <FlyoutTemplate.Header.Badge iconType="bellSlash">
-              <SnoozedBadgeLabel expiry={groupAction?.snoozedUntil} dateFormat={dateFormat} />
-            </FlyoutTemplate.Header.Badge>
-          )}
+        {/* Snoozed badge */}
+        {isSnoozed && (
+          <FlyoutTemplate.Header.Badge iconType="bellSlash">
+            <SnoozedBadgeLabel expiry={groupAction?.snoozedUntil} dateFormat={dateFormat} />
+          </FlyoutTemplate.Header.Badge>
+        )}
 
-          {/* Acknowledged badge */}
-          {isAcked && (
-            <FlyoutTemplate.Header.Badge iconType="checkCircle">
-              {i18n.FLYOUT_BADGE_ACKNOWLEDGED}
-            </FlyoutTemplate.Header.Badge>
-          )}
+        {/* Acknowledged badge */}
+        {isAcked && (
+          <FlyoutTemplate.Header.Badge iconType="checkCircle">
+            {i18n.FLYOUT_BADGE_ACKNOWLEDGED}
+          </FlyoutTemplate.Header.Badge>
+        )}
 
-          {/* Tag badges. The template handles +N overflow automatically above 5. */}
-          {tags.map((tag) => (
-            <FlyoutTemplate.Header.Badge key={tag} color="hollow">
-              {tag}
-            </FlyoutTemplate.Header.Badge>
-          ))}
+        {/* Tag badges. The template handles +N overflow automatically above 5. */}
+        {tags.map((tag) => (
+          <FlyoutTemplate.Header.Badge key={tag} color="hollow">
+            {tag}
+          </FlyoutTemplate.Header.Badge>
+        ))}
 
-          {/* Alert ID, shortened and copyable. Same treatment as the table's unavailable rule cell. */}
-          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_ALERT_ID}>
-            <CopyableShortId
-              id={episodeId}
-              copyTooltip={i18n.getFlyoutCopyAlertIdTooltip(episodeId)}
-              copiedTooltip={i18n.FLYOUT_ALERT_ID_COPIED}
-              data-test-subj="alertingV2EpisodeFlyoutAlertId"
-            />
-          </FlyoutTemplate.Header.InfoBlock>
+        {/* Alert ID, shortened and copyable. Same treatment as the table's unavailable rule cell. */}
+        <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_ALERT_ID}>
+          <CopyableShortId
+            id={episodeId}
+            copyTooltip={i18n.getFlyoutCopyAlertIdTooltip(episodeId)}
+            copiedTooltip={i18n.FLYOUT_ALERT_ID_COPIED}
+            data-test-subj="alertingV2EpisodeFlyoutAlertId"
+          />
+        </FlyoutTemplate.Header.InfoBlock>
 
-          {/* Source: which alerting system the alert came from. */}
-          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SOURCE}>
-            <Suspense fallback={null}>
-              <EuiBadge
-                color="hollow"
-                iconType={sourceIcon}
-                data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
-              >
-                {sourceLabel}
-              </EuiBadge>
-            </Suspense>
-          </FlyoutTemplate.Header.InfoBlock>
+        {/* Source: which alerting system the alert came from. */}
+        <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SOURCE}>
+          <Suspense fallback={null}>
+            <EuiBadge
+              color="hollow"
+              iconType={sourceIcon}
+              data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
+            >
+              {sourceLabel}
+            </EuiBadge>
+          </Suspense>
+        </FlyoutTemplate.Header.InfoBlock>
 
-          {normalizedSeverity && (
-            <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SEVERITY}>
+        {(normalizedSeverity || isLoading) && (
+          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SEVERITY}>
+            {normalizedSeverity ? (
               <span data-test-subj="alertingV2EpisodeFlyoutSeverity">
                 <AlertEpisodeSeverityBadge severity={normalizedSeverity} />
               </span>
-            </FlyoutTemplate.Header.InfoBlock>
-          )}
+            ) : (
+              emptyValue
+            )}
+          </FlyoutTemplate.Header.InfoBlock>
+        )}
 
-          {/*
-           * Assignee. The action's control anchors the picker to itself and covers both
-           * the assigned and unassigned states, so it replaces the plain cell whenever
-           * the action is available.
-           */}
-          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_ASSIGNEE}>
-            {assigneeInlineControl ?? (
+        {/*
+         * Assignee. The action's control anchors the picker to itself and covers both
+         * the assigned and unassigned states, so it replaces the plain cell whenever
+         * the action is available.
+         */}
+        <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_ASSIGNEE}>
+          {isLoading ? (
+            <AlertDetailsValueSkeleton />
+          ) : (
+            assigneeInlineControl ?? (
               <AlertEpisodeAssigneeCell
                 assigneeUid={assigneeUid}
                 userProfile={services.userProfile}
               />
-            )}
+            )
+          )}
+        </FlyoutTemplate.Header.InfoBlock>
+
+        {/* Duration */}
+        <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_DURATION}>
+          {durationMs != null ? formatMetadataListDuration(durationMs) : emptyValue}
+        </FlyoutTemplate.Header.InfoBlock>
+
+        {alertUrl && (
+          <FlyoutTemplate.Header.InfoBlock title={i18n.METADATA_LIST_SOURCE_URL_LABEL}>
+            <EuiLink
+              href={alertUrl}
+              target="_blank"
+              external
+              data-test-subj="alertingV2EpisodeFlyoutAlertUrl"
+            >
+              {i18n.METADATA_LIST_SOURCE_URL_LINK}
+            </EuiLink>
           </FlyoutTemplate.Header.InfoBlock>
+        )}
 
-          {/* Duration */}
-          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_DURATION}>
-            {durationMs != null ? formatMetadataListDuration(durationMs) : EMPTY_VALUE}
+        {isAcked && (
+          <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY}>
+            <UserProfileDisplay
+              userProfileUid={episodeAction?.lastAckActor}
+              userProfile={services.userProfile}
+            />
           </FlyoutTemplate.Header.InfoBlock>
+        )}
 
-          {alertUrl && (
-            <FlyoutTemplate.Header.InfoBlock title={i18n.METADATA_LIST_SOURCE_URL_LABEL}>
-              <EuiLink
-                href={alertUrl}
-                target="_blank"
-                external
-                data-test-subj="alertingV2EpisodeFlyoutAlertUrl"
-              >
-                {i18n.METADATA_LIST_SOURCE_URL_LINK}
-              </EuiLink>
-            </FlyoutTemplate.Header.InfoBlock>
-          )}
+        {isResolved && (
+          <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_RESOLVED_BY}>
+            <UserProfileDisplay
+              userProfileUid={episodeAction?.lastDeactivateActor}
+              userProfile={services.userProfile}
+            />
+          </FlyoutTemplate.Header.InfoBlock>
+        )}
 
-          {isAcked && (
-            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_ACKNOWLEDGED_BY}>
-              <UserProfileDisplay
-                userProfileUid={episodeAction?.lastAckActor}
-                userProfile={services.userProfile}
-              />
-            </FlyoutTemplate.Header.InfoBlock>
-          )}
+        {isSnoozed && (
+          <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_SNOOZED_BY}>
+            <UserProfileDisplay
+              userProfileUid={groupAction?.lastSnoozeActor}
+              userProfile={services.userProfile}
+            />
+          </FlyoutTemplate.Header.InfoBlock>
+        )}
+      </FlyoutTemplate.Header>
 
-          {isResolved && (
-            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_RESOLVED_BY}>
-              <UserProfileDisplay
-                userProfileUid={episodeAction?.lastDeactivateActor}
-                userProfile={services.userProfile}
-              />
-            </FlyoutTemplate.Header.InfoBlock>
-          )}
-
-          {isSnoozed && (
-            <FlyoutTemplate.Header.InfoBlock title={i18n.ACTIONS_OVERVIEW_SNOOZED_BY}>
-              <UserProfileDisplay
-                userProfileUid={groupAction?.lastSnoozeActor}
-                userProfile={services.userProfile}
-              />
-            </FlyoutTemplate.Header.InfoBlock>
-          )}
-        </FlyoutTemplate.Header>
-
-        <FlyoutTemplate.Body>
-          {/* Overview tab: About / Investigation / Rule accordions */}
-          <FlyoutTemplate.Body.TabPanel tabId="overview">
-            {/* Accordions sit closer together than their own content, so they get a wider gap. */}
-            <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
-              <FlyoutAccordion
-                title={i18n.FLYOUT_ACCORDION_ABOUT}
-                initialIsOpen
-                hasBorder={false}
-                data-test-subj="alertingV2EpisodeFlyoutAccordionAbout"
-              >
-                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  <AlertEpisodeGroupingSection
-                    episodeId={episodeId}
-                    services={services}
-                    compressed
-                  />
-                  <AlertEpisodeTrendChartSection
-                    episodeId={episodeId}
-                    services={services}
-                    compressed
-                  />
-                  <AlertEpisodeTimelineHeatmapsSection
-                    episodeId={episodeId}
-                    services={services}
-                    compressed
-                  />
-                </EuiFlexGroup>
-              </FlyoutAccordion>
-
-              {(showRuleDependentTabs || showRelated) && (
-                <FlyoutAccordion
-                  title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
-                  initialIsOpen
-                  hasBorder={false}
-                  data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
-                >
-                  <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                    {/* No rule means no runbook, so the panel goes too. */}
-                    {showRuleDependentTabs && (
-                      <EuiPanel hasBorder paddingSize="m">
-                        <AlertEpisodeRunbookSection
-                          episodeId={episodeId}
-                          services={services}
-                          compressed
-                          showTitle
-                          onShowFullGuide={() => setIsRunbookOpen(true)}
-                        />
-                      </EuiPanel>
-                    )}
-                    {/* No rule or source means nothing to relate by, so the panel goes too. */}
-                    {showRelated && (
-                      <EuiPanel hasBorder paddingSize="m">
-                        <AlertEpisodesRelatedSection
-                          episodeId={episodeId}
-                          services={services}
-                          getEpisodeDetailsHref={getEpisodeDetailsHref}
-                          showHeading
-                          compressed
-                        />
-                      </EuiPanel>
-                    )}
-                  </EuiFlexGroup>
-                </FlyoutAccordion>
-              )}
-
-              <FlyoutAccordion
-                title={i18n.FLYOUT_ACCORDION_RULE}
-                initialIsOpen
-                hasBorder={false}
-                data-test-subj="alertingV2EpisodeFlyoutAccordionRule"
-              >
-                <AlertEpisodeRuleOverviewPanelSection
+      <FlyoutTemplate.Body>
+        {/* Overview tab: About / Investigation / Rule accordions */}
+        <FlyoutTemplate.Body.TabPanel tabId="overview">
+          {/* Accordions sit closer together than their own content, so they get a wider gap. */}
+          <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+            <FlyoutAccordion
+              title={i18n.FLYOUT_ACCORDION_ABOUT}
+              initialIsOpen
+              hasBorder={false}
+              data-test-subj="alertingV2EpisodeFlyoutAccordionAbout"
+            >
+              <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                <AlertEpisodeGroupingSection episodeId={episodeId} services={services} compressed />
+                <AlertEpisodeTrendChartSection
                   episodeId={episodeId}
                   services={services}
-                  getRuleDetailsHref={getRuleDetailsHref}
-                  // The Rule accordion already titles this section.
-                  showTitle={false}
                   compressed
                 />
-              </FlyoutAccordion>
-            </EuiFlexGroup>
-          </FlyoutTemplate.Body.TabPanel>
-
-          {/* Timeline tab */}
-          <FlyoutTemplate.Body.TabPanel tabId="timeline">
-            <AlertEpisodeTimelineSection
-              episodeId={episodeId}
-              seriesId={episode ? episode.series_id ?? null : undefined}
-              groupHash={episode?.group_hash}
-              services={services}
-            />
-          </FlyoutTemplate.Body.TabPanel>
-
-          {/* Metadata tab, only mounted when the rule is loaded */}
-          {showRuleDependentTabs && (
-            <FlyoutTemplate.Body.TabPanel
-              tabId="metadata"
-              data-test-subj={METADATA_PANEL_TEST_SUBJ}
-            >
-              <Global styles={metadataBodyStyles} />
-              <div
-                className={METADATA_SCOPE_CLASS}
-                css={metadataTabStyles}
-                data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
-              >
-                <AlertEpisodeMetadataSection
+                <AlertEpisodeTimelineHeatmapsSection
                   episodeId={episodeId}
                   services={services}
-                  decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
-                  calloutMarginSize="m"
-                  controlsPaddingSize="m"
+                  compressed
                 />
-              </div>
-            </FlyoutTemplate.Body.TabPanel>
+              </EuiFlexGroup>
+            </FlyoutAccordion>
+
+            {(showRuleDependentTabs || showRelated) && (
+              <FlyoutAccordion
+                title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
+                initialIsOpen
+                hasBorder={false}
+                data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
+              >
+                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                  {/* No rule means no runbook, so the panel goes too. */}
+                  {showRuleDependentTabs && (
+                    <EuiPanel hasBorder paddingSize="m">
+                      <AlertEpisodeRunbookSection
+                        episodeId={episodeId}
+                        services={services}
+                        compressed
+                        showTitle
+                        onShowFullGuide={() => setIsRunbookOpen(true)}
+                      />
+                    </EuiPanel>
+                  )}
+                  {/* No rule or source means nothing to relate by, so the panel goes too. */}
+                  {showRelated && (
+                    <EuiPanel hasBorder paddingSize="m">
+                      <AlertEpisodesRelatedSection
+                        episodeId={episodeId}
+                        services={services}
+                        getEpisodeDetailsHref={getEpisodeDetailsHref}
+                        showHeading
+                        compressed
+                      />
+                    </EuiPanel>
+                  )}
+                </EuiFlexGroup>
+              </FlyoutAccordion>
+            )}
+
+            <FlyoutAccordion
+              title={i18n.FLYOUT_ACCORDION_RULE}
+              initialIsOpen
+              hasBorder={false}
+              data-test-subj="alertingV2EpisodeFlyoutAccordionRule"
+            >
+              <AlertEpisodeRuleOverviewPanelSection
+                episodeId={episodeId}
+                services={services}
+                getRuleDetailsHref={getRuleDetailsHref}
+                // The Rule accordion already titles this section.
+                showTitle={false}
+                compressed
+              />
+            </FlyoutAccordion>
+          </EuiFlexGroup>
+          {/* Full runbook as its own top-level flyout. Declared in zone content, so the frame
+                treats it as a flyout of its own rather than as its content. */}
+          {isRunbookOpen && (
+            <FlyoutTemplate
+              type="overlay"
+              // Matches the episode flyout: no mask, so both levels of the history group look
+              // the same
+              ownFocus={false}
+              resizable
+              session="start"
+              historyKey={ALERT_DETAILS_FLYOUT_HISTORY_KEY}
+              size={initialWidth}
+              aria-label={i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL}
+              data-test-subj="alertingV2EpisodeRunbookFlyout"
+              onClose={() => {
+                setIsRunbookOpen(false);
+              }}
+            >
+              <FlyoutTemplate.Header title={i18n.RUNBOOK_TITLE} description={ruleName} />
+              <FlyoutTemplate.Body>
+                <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
+              </FlyoutTemplate.Body>
+            </FlyoutTemplate>
           )}
-        </FlyoutTemplate.Body>
+        </FlyoutTemplate.Body.TabPanel>
 
-        <FlyoutTemplate.Footer data-test-subj={FLYOUT_FOOTER_TEST_SUBJ}>
-          <FlyoutTemplate.Footer.SecondaryAction
-            label={i18n.FLYOUT_CLOSE}
-            onClick={onClose}
-            data-test-subj="alertingV2EpisodeFlyoutCloseButton"
+        {/* Timeline tab */}
+        <FlyoutTemplate.Body.TabPanel tabId="timeline">
+          <AlertEpisodeTimelineSection
+            episodeId={episodeId}
+            seriesId={episode ? episode.series_id ?? null : undefined}
+            groupHash={episode?.group_hash}
+            services={services}
           />
-          <FlyoutTemplate.Footer.PrimaryActionMenu
-            label={i18n.FLYOUT_TAKE_ACTION}
-            aria-label={i18n.FLYOUT_TAKE_ACTION}
-            panels={takeActionPanels}
-            data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
-          />
-        </FlyoutTemplate.Footer>
-      </FlyoutTemplate>
+        </FlyoutTemplate.Body.TabPanel>
 
-      {/* Full runbook as its own top-level flyout */}
-      {isRunbookOpen && (
-        <FlyoutTemplate
-          type="overlay"
-          // Matches the episode flyout: no mask, so both levels of the history group look
-          // the same
-          ownFocus={false}
-          resizable
-          session="start"
-          historyKey={FLYOUT_HISTORY_KEY}
-          size={initialWidth}
-          aria-label={i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL}
-          data-test-subj="alertingV2EpisodeRunbookFlyout"
-          onClose={() => {
-            setIsRunbookOpen(false);
-          }}
-        >
-          <FlyoutTemplate.Header title={i18n.RUNBOOK_TITLE} description={ruleName} />
-          <FlyoutTemplate.Body>
-            <AlertEpisodeRunbookSection episodeId={episodeId} services={services} />
-          </FlyoutTemplate.Body>
-        </FlyoutTemplate>
-      )}
-    </>
+        {/* Metadata tab: a skeleton while the rule loads, then the rule's metadata */}
+        {showMetadataTab && (
+          <FlyoutTemplate.Body.TabPanel tabId="metadata" data-test-subj={METADATA_PANEL_TEST_SUBJ}>
+            {showRuleDependentTabs ? (
+              <>
+                <Global styles={metadataBodyStyles} />
+                <div
+                  className={METADATA_SCOPE_CLASS}
+                  css={metadataTabStyles}
+                  data-test-subj="alertingV2EpisodeFlyoutMetadataScope"
+                >
+                  <AlertEpisodeMetadataSection
+                    episodeId={episodeId}
+                    services={services}
+                    decreaseAvailableHeightBy={DOC_VIEWER_FLEX_HEIGHT_SENTINEL}
+                    calloutMarginSize="m"
+                    controlsPaddingSize="m"
+                  />
+                </div>
+              </>
+            ) : (
+              <AlertEpisodeDescriptionListSkeleton
+                aria-label={i18n.FLYOUT_METADATA_LOADING}
+                data-test-subj="alertingV2EpisodeFlyoutMetadataSkeleton"
+              />
+            )}
+          </FlyoutTemplate.Body.TabPanel>
+        )}
+      </FlyoutTemplate.Body>
+
+      <FlyoutTemplate.Footer data-test-subj={FLYOUT_FOOTER_TEST_SUBJ}>
+        <FlyoutTemplate.Footer.SecondaryAction
+          label={i18n.FLYOUT_CLOSE}
+          onClick={onClose}
+          data-test-subj="alertingV2EpisodeFlyoutCloseButton"
+        />
+        <FlyoutTemplate.Footer.PrimaryActionMenu
+          label={i18n.FLYOUT_TAKE_ACTION}
+          aria-label={i18n.FLYOUT_TAKE_ACTION}
+          panels={takeActionPanels}
+          data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
+        />
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
+  );
+};
+
+/**
+ * Universal alert details in a standalone flyout.
+ */
+export const AlertEpisodeDetailsFlyout = (props: AlertEpisodeDetailsFlyoutProps) => {
+  const { onClose } = props;
+  return (
+    <AlertDetailsFrame onClose={onClose} data-test-subj={ALERT_EPISODE_DETAILS_FLYOUT_TEST_SUBJ}>
+      <AlertEpisodeDetailsFlyoutContent {...props} />
+    </AlertDetailsFrame>
   );
 };

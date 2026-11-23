@@ -147,6 +147,12 @@ const renderFlyout = (props?: Partial<React.ComponentProps<typeof ClassicAlertDe
     { wrapper: createWrapper() }
   );
 
+/** The tabs show while loading too, so the loaded state is the loading skeleton going away. */
+const waitForLoadedAlert = () =>
+  waitFor(() => {
+    expect(screen.queryByTestId('classicAlertEpisodeDetailsLoading')).not.toBeInTheDocument();
+  });
+
 describe('ClassicAlertDetailsFlyout', () => {
   beforeEach(() => {
     mockHttpPost.mockResolvedValue({ data: [] });
@@ -165,6 +171,17 @@ describe('ClassicAlertDetailsFlyout', () => {
       type: 'overlay',
       ownFocus: false,
       resizable: true,
+    });
+  });
+
+  it('opens standalone in the shared alert details frame without pagination', () => {
+    mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
+
+    renderFlyout();
+
+    expect(forwardedFlyoutProps()).toMatchObject({
+      'data-test-subj': 'classicAlertEpisodeDetailsFlyout',
+      flyoutMenuProps: { title: 'Alert details', pagination: undefined },
     });
   });
 
@@ -187,7 +204,7 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     mockFetchClassicAlertById.mockResolvedValue(activeClassicAlert);
     renderFlyout({ onClose });
-    await screen.findByTestId('classicAlertEpisodeDetailsTabs');
+    await waitForLoadedAlert();
 
     fireEvent.click(screen.getByTestId('classicAlertEpisodeDetailsCloseButton'));
     expect(onClose).toHaveBeenCalledTimes(3);
@@ -200,6 +217,20 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     expect(screen.getByTestId('classicAlertEpisodeDetailsLoading')).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: 'Loading classic alert' })).toBeInTheDocument();
+    // The title and tab bar hold their place, so the layout does not shift when the alert loads.
+    expect(screen.getByTestId('alertDetailsTitleSkeleton')).toBeInTheDocument();
+    expect(screen.queryByText('Classic rule alert')).not.toBeInTheDocument();
+    expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
+  });
+
+  it('shows the loading skeleton on the Fields tab while the classic alert is being fetched', () => {
+    mockFetchClassicAlertById.mockReturnValue(new Promise(() => {}));
+
+    renderFlyout();
+    fireEvent.click(screen.getByTestId('classicAlertEpisodeFieldsTab'));
+
+    expect(screen.getByTestId('classicAlertEpisodeFieldsTabPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('classicAlertEpisodeDetailsLoading')).toBeInTheDocument();
   });
 
   it('renders the overview and fields tabs when the alert loads', async () => {
@@ -217,9 +248,7 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     renderFlyout();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
-    });
+    await waitForLoadedAlert();
 
     expect(screen.getByRole('heading', { name: 'CPU usage' })).toBeInTheDocument();
     expect(screen.getByText('active')).toBeInTheDocument();
@@ -248,9 +277,7 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     renderFlyout();
 
-    await waitFor(() => {
-      expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
-    });
+    await waitForLoadedAlert();
 
     expect(screen.queryByTestId('alertingV2EpisodeFlyoutTakeActionButton')).not.toBeInTheDocument();
   });
@@ -321,9 +348,7 @@ describe('ClassicAlertDetailsFlyout', () => {
 
     renderFlyout({ actions: [mockAction] });
 
-    await waitFor(() => {
-      expect(screen.getByTestId('classicAlertEpisodeDetailsTabs')).toBeInTheDocument();
-    });
+    await waitForLoadedAlert();
 
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
     expect(
