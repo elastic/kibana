@@ -51,8 +51,19 @@ const changes = {
   ],
 };
 
+const citing = (stored: Record<string, Record<string, unknown>>, uri: string) =>
+  Object.values(stored)
+    .filter(({ references }) =>
+      (references as Array<{ uri: string }> | undefined)?.some((reference) => reference.uri === uri)
+    )
+    .map((source) => ({ inner_hits: { latest: { hits: { hits: [{ _source: source }] } } } }));
+
 const createEsClient = (stored: Record<string, Record<string, unknown>>) => ({
   search: jest.fn(async ({ query }: { query: { term?: { id?: string } } }) => {
+    const citedUri = JSON.stringify(query).match(/"references\.uri":"([^"]+)"/)?.[1];
+    if (citedUri) {
+      return { hits: { hits: citing(stored, citedUri) } };
+    }
     const kiId = JSON.stringify(query).match(/"id":"([^"]+)"/)?.[1];
     const source = kiId ? stored[kiId] : undefined;
     return {
@@ -272,6 +283,64 @@ describe('getApplyDreamChangesStepDefinition', () => {
           { uri: 'ki://mem-1', relation: 'derived_from' },
           { uri: 'ki://mem-2', relation: 'derived_from' },
         ],
+      })
+    );
+  });
+
+  it('records a new sighting of a merged-away entity on the entity that superseded it', async () => {
+    const absorbed = {
+      id: 'entity-city--montreal',
+      type: 'entity.city',
+      title: 'Montreal',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+    const survivor = {
+      id: 'entity-city--montreal-quebec',
+      type: 'entity.city',
+      title: 'Montréal, Québec',
+      content: 'Largest city in Québec.',
+      attributes: { 'memory.number_of_occurrences': 3 },
+      references: [
+        { uri: 'ki://mem-1', relation: 'derived_from' },
+        { uri: `ki://${absorbed.id}`, relation: 'supersedes' },
+      ],
+    };
+    const stored: Record<string, Record<string, unknown>> = {
+      [absorbed.id]: absorbed,
+      [survivor.id]: survivor,
+    };
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [{ id: 'mem-2', updated_at: '2026-11-02T18:40:12.000Z', title: 'Montreal' }],
+        changes: {
+          entities: [
+            {
+              ref: 'new:1',
+              type: 'city',
+              title: 'Montreal',
+              content: 'A city.',
+              source_memory_ids: ['mem-2'],
+            },
+          ],
+        },
+      },
+      esClient: createEsClient(stored),
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual(expect.objectContaining({ created: 0, updated: 1, rejected: [] }));
+    expect(stored[absorbed.id]).toBe(absorbed);
+    expect(stored[survivor.id]).toEqual(
+      expect.objectContaining({
+        title: 'Montréal, Québec',
+        content: 'Largest city in Québec.',
+        attributes: {
+          'memory.number_of_occurrences': 4,
+          'memory.last_seen_at': '2026-11-02T18:40:12.000Z',
+        },
+        references: [...survivor.references, { uri: 'ki://mem-2', relation: 'derived_from' }],
       })
     );
   });
