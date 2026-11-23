@@ -15,5 +15,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./agent_policy_root_integrations'));
     loadTestFile(require.resolve('./create_standalone_api_key'));
     loadTestFile(require.resolve('./cleanup_agent_policy_revisions'));
+    loadTestFile(require.resolve('./agent_policy_overrides'));
   });
 }

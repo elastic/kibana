@@ -57,6 +57,4 @@ fileGroups:
     - common/**/*
     - __fixtures__/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

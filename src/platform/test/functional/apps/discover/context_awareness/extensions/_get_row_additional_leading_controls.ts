@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.existOrFail('exampleLogsControl_visBarVerticalStacked');
@@ -39,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await common.navigateToApp('discover', {
           hash: `/?_a=${state}`,
+          skipUrlValidation: true,
         });
         await discover.waitUntilSearchingHasFinished();
         await testSubjects.missingOrFail('exampleLogsControl_visBarVerticalStacked');

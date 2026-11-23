@@ -239,6 +239,38 @@ export default function ({ getService }: FtrProviderContext) {
         expect(apiResponse.body.authentication_provider).to.eql({ type: 'oidc', name: 'oidc' });
         expect(apiResponse.body.authentication_type).to.be('token');
       });
+
+      describe('with URL hash fragment', () => {
+        async function loginWithURLHash(urlHash: string) {
+          const handshakeResponse = await supertest
+            .get(`/abc/xyz/handshake?one=two three&auth_url_hash=${encodeURIComponent(urlHash)}`)
+            .expect(302);
+
+          const { state, nonce } = getStateAndNonce(handshakeResponse.headers.location);
+          await supertest
+            .post('/api/oidc_provider/setup')
+            .set('kbn-xsrf', 'xxx')
+            .send({ nonce })
+            .expect(200);
+
+          const oidcAuthenticationResponse = await supertest
+            .get(`/api/security/oidc/callback?code=code1&state=${state}`)
+            .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+            .expect(302);
+
+          return oidcAuthenticationResponse.headers.location;
+        }
+
+        it('should redirect user to the URL with an empty hash fragment', async () => {
+          expect(await loginWithURLHash('')).to.be('/abc/xyz/handshake?one=two+three');
+        });
+
+        for (const urlHash of ['some-fragment', '/some-path']) {
+          it(`should ignore URL hash fragment that does not start with "#" ("${urlHash}")`, async () => {
+            expect(await loginWithURLHash(urlHash)).to.be('/abc/xyz/handshake?one=two+three');
+          });
+        }
+      });
     });
 
     describe('Complete third party initiated authentication', () => {
@@ -670,7 +702,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../../packages/helpers/audit/oidc.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../../test_plugins/security_api_integration/packages/helpers/audit/oidc.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
