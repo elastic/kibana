@@ -43,7 +43,7 @@ cmd="node scripts/deduplicate_dependencies.js && pnpm kbn bootstrap --no-frozen-
 eval "$cmd"
 
 commit_message_parts=()
-if [[ -n "$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')" ]]; then
+if [[ -n "$(get_git_changes)" ]]; then
   commit_message_parts+=("pnpm lockfile")
 fi
 
@@ -58,18 +58,36 @@ if [[ ${#commit_message_parts[@]} -gt 0 ]]; then
   commit_message="$commit_message ${joined%, }"
 fi
 
-check_for_changed_files "Renovate helper auto-fixes" true "$commit_message" true
-
 echo --- Additional helpers
 # We only want the deploy label on the main branch instead of all branches in the Renovate group
 if [ "$GITHUB_PR_BRANCH" = "renovate/main-chainguard" ] && ! is_pr_with_label "ci:cloud-deploy"; then
   echo "Adding deploy label to main chainguard PR"
   gh api "repos/elastic/kibana/issues/${GITHUB_PR_NUMBER}/labels" --method POST -f "labels[]=ci:cloud-deploy" >/dev/null
 
-  # Sync GITHUB_PR_LABELS variable since we're passing it along to the PR pipeline
+  # Sync GITHUB_PR_LABELS since trigger_pr.sh passes it along to the PR pipeline
   if [ -n "${GITHUB_PR_LABELS:-}" ]; then
     export GITHUB_PR_LABELS="${GITHUB_PR_LABELS},ci:cloud-deploy"
   else
     export GITHUB_PR_LABELS="ci:cloud-deploy"
   fi
 fi
+
+git_changes="$(get_git_changes)"
+if [[ -z "$git_changes" ]]; then
+  # The PR bot doesn't build Renovate's own commits, so trigger CI for this one.
+  retry 2 15 .buildkite/scripts/steps/renovate/trigger_pr.sh
+  exit 0
+fi
+
+echo --- Commit and push changes
+echo "Renovate helper changed the following files:"
+echo "$git_changes"
+
+if is_auto_commit_disabled; then
+  echo "ci:no-auto-commit is set; run the Renovate helper steps locally and push the result."
+  exit 1
+fi
+
+# The PR bot builds this push, so CI isn't triggered for the outdated commit.
+commit_changes_to_pr "$commit_message"
+push_as_github_token
