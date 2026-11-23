@@ -16,11 +16,9 @@ project:
   channel: ''
   owner: '@elastic/workflows-eng'
   sourceRoot: x-pack/platform/packages/shared/kbn-secrets
-dependsOn:
-  - '@kbn/core-http-server'
-  - '@kbn/core-http-server-mocks'
+dependsOn: []
 tags:
-  - shared-server
+  - shared-common
   - package
   - prod
   - group-platform

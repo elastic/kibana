@@ -84,6 +84,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/secrets'
   - '@kbn/secrets-plugin'
+  - '@kbn/secrets-ui'
   - '@kbn/data-plugin'
   - '@kbn/rrule'
   - '@kbn/resizable-layout'

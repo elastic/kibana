@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SecretsClient } from '@kbn/secrets';
+import type { SecretsClient, SecretsListResponse } from '@kbn/secrets';
 import { handleSecretsRouteError } from './handle_secrets_route_error';
 import {
   createSecretBodySchema,
@@ -14,8 +14,11 @@ import {
   secretNameParamsSchema,
 } from './route_schemas';
 import { SECRETS_LIST_SECURITY, SECRETS_MANAGE_SECURITY } from './route_security';
-import type { WorkflowSecretsListResponse } from '../../common/lib/secrets/api';
-import { WORKFLOW_SECRET_ROUTE, WORKFLOW_SECRETS_ROUTE } from '../../common/lib/secrets/api';
+import {
+  WORKFLOW_SECRET_ROUTE,
+  WORKFLOW_SECRET_TEST_ROUTE,
+  WORKFLOW_SECRETS_ROUTE,
+} from '../../common/lib/secrets/api';
 import { withAvailabilityCheck } from '../api/routes/utils/with_availability_check';
 import type { WorkflowsRouter } from '../types';
 
@@ -26,7 +29,7 @@ export interface SecretsRouteDependencies {
 }
 
 /**
- * Registers the routes that list, create, replace and delete workflow secrets.
+ * Registers the routes that list, create, replace, delete and test workflow secrets.
  * No route returns a value.
  * TODO: version these routes (`router.versioned`, `INTERNAL_API_VERSION`) like the other
  * internal Workflows routes. They are unversioned during the POC so that Dev Tools can call them.
@@ -45,7 +48,7 @@ export const registerSecretsRoutes = ({
     withAvailabilityCheck(async (_context, request, response) => {
       try {
         const client = await getSecretsClient(request);
-        const body: WorkflowSecretsListResponse = { secrets: await client.list() };
+        const body: SecretsListResponse = { secrets: await client.list() };
         return response.ok({ body });
       } catch (error) {
         return handleSecretsRouteError({ response, error });
@@ -100,6 +103,23 @@ export const registerSecretsRoutes = ({
         const client = await getSecretsClient(request);
         await client.delete(request.params);
         return response.noContent();
+      } catch (error) {
+        return handleSecretsRouteError({ response, error });
+      }
+    })
+  );
+
+  router.post(
+    {
+      path: WORKFLOW_SECRET_TEST_ROUTE,
+      security: SECRETS_MANAGE_SECURITY,
+      options: { access: 'internal' },
+      validate: { params: secretNameParamsSchema },
+    },
+    withAvailabilityCheck(async (_context, request, response) => {
+      try {
+        const client = await getSecretsClient(request);
+        return response.ok({ body: await client.test(request.params) });
       } catch (error) {
         return handleSecretsRouteError({ response, error });
       }

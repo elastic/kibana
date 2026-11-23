@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SECRET_PROVIDER_TYPE } from './constants';
 
 export type SecretProviderType = (typeof SECRET_PROVIDER_TYPE)[keyof typeof SECRET_PROVIDER_TYPE];
@@ -53,6 +52,12 @@ export type SecretEntry = KibanaSecretEntry | ConnectorSecretEntry;
 /** What list and write operations return: a secret without its value. */
 export type SecretMetadata = Omit<KibanaSecretEntry, 'value'> | ConnectorSecretEntry;
 
+/** What a consumer's route that lists secrets returns. */
+export interface SecretsListResponse {
+  /** The secrets the consumer may use, without their values. */
+  readonly secrets: SecretMetadata[];
+}
+
 /**
  * What a caller supplies to create a secret, or to replace the source of an existing one.
  * On replace, an omitted description keeps the current one and an empty one clears it.
@@ -62,6 +67,8 @@ export interface WriteSecretParams extends Pick<SecretDetails, 'name' | 'descrip
 }
 
 export type DeleteSecretParams = Pick<SecretDetails, 'name'>;
+
+export type TestSecretParams = Pick<SecretDetails, 'name'>;
 
 export interface ResolveSecretsParams {
   readonly names: readonly string[];
@@ -87,6 +94,15 @@ export interface SecretProvider<TEntry extends SecretEntry = SecretEntry> {
   resolve(params: { entry: TEntry }): Promise<string>;
 }
 
+/** Whether a secret's value could be obtained. Never carries the value. */
+export type SecretTestResult =
+  | { readonly resolved: true }
+  | {
+      readonly resolved: false;
+      /** Why the value could not be obtained. */
+      readonly message: string;
+    };
+
 /** Reads values from external secret managers through connectors. */
 export interface ConnectorSecretProvider extends SecretProvider<ConnectorSecretEntry> {
   /**
@@ -109,12 +125,12 @@ export interface SecretsClient {
   create(params: WriteSecretParams): Promise<SecretMetadata>;
   replace(params: WriteSecretParams): Promise<SecretMetadata>;
   delete(params: DeleteSecretParams): Promise<void>;
+  /**
+   * Checks that a stored secret can be read, the way a run reads it, and never returns its
+   * value. It needs no access to the connector of the secret. Throws `SecretNotFoundError`
+   * when the secret does not exist.
+   */
+  test(params: TestSecretParams): Promise<SecretTestResult>;
   /** The only operation that returns values. Server-side use only. */
   resolve(params: ResolveSecretsParams): Promise<ResolvedSecrets>;
-}
-
-export interface GetSecretsClientParams {
-  readonly request: KibanaRequest;
-  /** Id of the feature asking, checked against each secret's allowed consumers. */
-  readonly consumer: string;
 }

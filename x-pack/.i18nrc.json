@@ -187,6 +187,7 @@
     "xpack.securitySolutionEss": "solutions/security/plugins/security_solution_ess",
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
+    "xpack.secretsUi": "platform/packages/shared/kbn-secrets-ui",
     "xpack.sharedComponents": "platform/packages/shared/kbn-shared-components",
     "xpack.changeHistoryUi": "platform/packages/shared/kbn-change-history-ui",
     "xpack.significantEvents": [

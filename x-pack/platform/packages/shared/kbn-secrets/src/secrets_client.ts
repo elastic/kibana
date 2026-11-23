@@ -70,6 +70,28 @@ export const createSecretsClient = ({
     return providers.connector.resolve({ entry });
   };
 
+  const resolve: SecretsClient['resolve'] = async ({ names }) => {
+    const values = new Map<string, string>();
+    const missing: string[] = [];
+    const failed: SecretResolutionFailure[] = [];
+
+    const resolveOne = async (name: string): Promise<void> => {
+      try {
+        const entry = await find(name);
+        if (entry) {
+          values.set(name, await getValue(entry));
+        } else {
+          missing.push(name);
+        }
+      } catch (error) {
+        failed.push({ name, message: error instanceof Error ? error.message : String(error) });
+      }
+    };
+
+    await Promise.all([...new Set(names)].map(resolveOne));
+    return { values, missing, failed };
+  };
+
   return {
     list: async () => (await storage.list()).filter(isUsable),
 
@@ -116,26 +138,17 @@ export const createSecretsClient = ({
       await storage.delete({ name });
     },
 
-    resolve: async ({ names }) => {
-      const values = new Map<string, string>();
-      const missing: string[] = [];
-      const failed: SecretResolutionFailure[] = [];
-
-      const resolveOne = async (name: string): Promise<void> => {
-        try {
-          const entry = await find(name);
-          if (entry) {
-            values.set(name, await getValue(entry));
-          } else {
-            missing.push(name);
-          }
-        } catch (error) {
-          failed.push({ name, message: error instanceof Error ? error.message : String(error) });
-        }
-      };
-
-      await Promise.all([...new Set(names)].map(resolveOne));
-      return { values, missing, failed };
+    test: async ({ name }) => {
+      const { missing, failed } = await resolve({ names: [name] });
+      if (missing.length > 0) {
+        throw new SecretNotFoundError(name);
+      }
+      // The value is dropped here: only whether it could be read leaves the client.
+      return failed.length > 0
+        ? { resolved: false, message: failed[0].message }
+        : { resolved: true };
     },
+
+    resolve,
   };
 };

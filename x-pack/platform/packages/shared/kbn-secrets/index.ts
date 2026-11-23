@@ -28,7 +28,6 @@ export type {
   ConnectorSecretEntry,
   ConnectorSecretSource,
   DeleteSecretParams,
-  GetSecretsClientParams,
   KibanaSecretEntry,
   KibanaSecretSource,
   ResolvedSecrets,
@@ -36,6 +35,7 @@ export type {
   SecretDetails,
   SecretEntry,
   SecretMetadata,
+  SecretsListResponse,
   SecretProvider,
   SecretProviders,
   ConnectorSecretProvider,
@@ -43,5 +43,7 @@ export type {
   SecretResolutionFailure,
   SecretsClient,
   SecretSource,
+  SecretTestResult,
+  TestSecretParams,
   WriteSecretParams,
 } from './src/types';

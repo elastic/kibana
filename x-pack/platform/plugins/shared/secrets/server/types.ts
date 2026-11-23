@@ -9,9 +9,16 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { GetSecretsClientParams, SecretsClient } from '@kbn/secrets';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SecretsClient } from '@kbn/secrets';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+
+export interface GetSecretsClientParams {
+  readonly request: KibanaRequest;
+  /** Id of the feature asking, checked against each secret's allowed consumers. */
+  readonly consumer: string;
+}
 
 /**
  * Setup contract of the secrets plugin. It has no members yet: dependants use its presence
