@@ -626,6 +626,20 @@ node scripts/synthtrace infra_hosts_minimal_host --from=now-15m --to=now --clean
 node scripts/synthtrace infra_hosts_minimal_host --scenarioOpts.hostName=my-host --from=now-15m --to=now --clean
 ```
 
+#### `infra_hosts_with_processes`
+
+Generates ECS hosts with process metrics for the Processes tab of the host details flyout. The Processes tab only shows the last minute of data, so run it with `--live`.
+
+**Options:**
+
+- `numHosts` (number, default: `1`): Number of hosts to generate, named `host-with-processes-<index>`.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace infra_hosts_with_processes --live
+```
+
 #### `infra_docker_containers`
 
 Generates Docker container metrics.

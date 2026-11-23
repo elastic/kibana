@@ -306,6 +306,10 @@ function getRoutingTransform() {
         document._index = 'metrics-system.diskio-default';
       } else if (metricset === 'core') {
         document._index = 'metrics-system.core-default';
+      } else if (metricset === 'process') {
+        document._index = 'metrics-system.process-default';
+      } else if (metricset === 'process_summary') {
+        document._index = 'metrics-system.process.summary-default';
       } else if ('container.id' in document) {
         document._index = 'metrics-docker.container-default';
         document._index = 'metrics-kubernetes.container-default';
