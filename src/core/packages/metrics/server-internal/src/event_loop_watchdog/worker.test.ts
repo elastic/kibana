@@ -1248,7 +1248,7 @@ describe('runWatchdogWorker', () => {
     });
 
     it('keeps the whole message and drops the profile data when non-ASCII names push the line past 4,094 bytes', async () => {
-      // The ASCII worst case is 4,049 bytes; '€' takes 3 bytes, so these names add well over the 45 left.
+      // The ASCII worst case is 4,016 bytes; '€' takes 3 bytes, so these names add well over the 78 left.
       const { line, droppedLogLines } = await logCaptureLine('€'.repeat(84));
       expect(droppedLogLines).toBe(0);
       expect(Buffer.byteLength(line, 'utf8')).toBeLessThanOrEqual(4_094);

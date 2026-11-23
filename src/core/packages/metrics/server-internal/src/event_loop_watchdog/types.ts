@@ -122,8 +122,9 @@ export interface ProfilingStats {
   /** Blocks past `startAfter` that ended without a capture because of the cooldown. */
   skippedCooldown: number;
   /**
-   * Time captures were running in the period, from each request until its profile reached the
-   * worker. Event loop utilization (ELU) rises while a capture runs; compare the two with this.
+   * Time captures were running in the period, from each request until its profile was summarised
+   * and, if admitted, its file write finished. Event loop utilization (ELU) rises while the
+   * profiler samples; the write runs in the worker, so this can be longer than that rise.
    */
   profilingActiveMs: number;
   /** Largest `stopHeartbeatGapMs` of the captures that ended in the period. */

@@ -401,8 +401,8 @@ export const runWatchdogWorker = (
   /** Starts or stops a capture after each poll; `ended` is the block this poll saw end. */
   const updateCapture = (nowMs: number, ended: DetectedBlock | undefined) => {
     const block = detector.current;
-    // A profiling flag change can't reach a running capture: captures only run during a block,
-    // and the main thread handles flag changes. The slot only gates starting one.
+    // A profiling flag change doesn't stop a running capture or its write. The slot only gates
+    // starting one.
     if (capture) {
       if (capture.stopReason) {
         return;
