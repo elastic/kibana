@@ -119,7 +119,7 @@ const InboundIngressCredentialsComponent: React.FC<InboundIngressCredentialsProp
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.inboundIngress.copyTokenNowDescription"
-              defaultMessage="You won't be able to view it again. Save it somewhere secure, such as a password manager. The external tool needs both this token and the webhook URL to send requests."
+              defaultMessage="This token authenticates requests to the webhook URL. You won't be able to view it again. Save it somewhere secure, such as a password manager. The external tool needs both this token and the webhook URL to send requests."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
