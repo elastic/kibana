@@ -462,6 +462,258 @@ export const RETENTION_DISABLED = i18n.translate('xpack.searchBoost.matches.rete
   defaultMessage: 'Disabled',
 });
 
+export const AFFECTED_CONTENT_LABEL = i18n.translate('xpack.searchBoost.modals.affectedContent', {
+  defaultMessage: 'the affected indices and data streams',
+});
+
+export const LOAD_AFFECTED_ERROR_TITLE = i18n.translate(
+  'xpack.searchBoost.modals.loadAffectedError',
+  {
+    defaultMessage: 'Unable to load the affected indices and data streams',
+  }
+);
+
+export const AFFECTED_TARGET_COLUMNS: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.searchBoost.modals.affectedIndexColumn', {
+    defaultMessage: 'Affected index',
+  }),
+  data_streams: i18n.translate('xpack.searchBoost.modals.affectedDataStreamColumn', {
+    defaultMessage: 'Affected data stream',
+  }),
+};
+
+export const NEW_RULE_COLUMN = i18n.translate('xpack.searchBoost.modals.newRuleColumn', {
+  defaultMessage: 'New rule',
+});
+
+export const NEW_PROFILE_COLUMN = i18n.translate('xpack.searchBoost.modals.newProfileColumn', {
+  defaultMessage: 'New profile',
+});
+
+export const BOOST_RULE_COLUMN = i18n.translate('xpack.searchBoost.modals.boostRuleColumn', {
+  defaultMessage: 'Boost rule',
+});
+
+export const UNDO_WARNING = i18n.translate('xpack.searchBoost.modals.undoWarning', {
+  defaultMessage: "You can't undo this action.",
+});
+
+export const getDeleteRuleTitle = (name: string): string =>
+  i18n.translate('xpack.searchBoost.deleteRuleModal.title', {
+    defaultMessage: 'Delete boost rule "{name}"?',
+    values: { name },
+  });
+
+export const getDeleteRuleBodyWithFallbacks = (
+  type: BoostProfileType,
+  count: number,
+  isEveryFallbackKnown: boolean
+): string =>
+  isEveryFallbackKnown
+    ? i18n.translate('xpack.searchBoost.deleteRuleModal.bodyWithFallbacks', {
+        defaultMessage:
+          "Deleting this rule will cause the {targets} below to switch to the next matching rule and its boost profile. The boost profile for this rule won't be deleted. You can't undo this action.",
+        values: { targets: formatTargetCount(type, count) },
+      })
+    : i18n.translate('xpack.searchBoost.deleteRuleModal.bodyWithSomeFallbacks', {
+        defaultMessage:
+          "Deleting this rule will cause the {targets} below to switch to the next matching rule and its boost profile, if there is one. The boost profile for this rule won't be deleted. You can't undo this action.",
+        values: { targets: formatTargetCount(type, count) },
+      });
+
+export const DELETE_RULE_BODY = i18n.translate('xpack.searchBoost.deleteRuleModal.body', {
+  defaultMessage:
+    "This permanently deletes the rule. The boost profile for this rule won't be deleted. You can't undo this action.",
+});
+
+export const getDeleteRuleTableLabel = (type: BoostProfileType): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.deleteRuleModal.dataStreamsTableLabel', {
+        defaultMessage:
+          'Data streams this rule applies to, and the rule and profile each will switch to',
+      })
+    : i18n.translate('xpack.searchBoost.deleteRuleModal.indicesTableLabel', {
+        defaultMessage:
+          'Indices this rule applies to, and the rule and profile each will switch to',
+      });
+
+export const DELETE_RULE_CONFIRM = i18n.translate('xpack.searchBoost.deleteRuleModal.confirm', {
+  defaultMessage: 'Delete rule',
+});
+
+export const getDeleteProfileTitle = (name: string): string =>
+  i18n.translate('xpack.searchBoost.deleteProfileModal.title', {
+    defaultMessage: 'Delete boost profile "{name}"?',
+    values: { name },
+  });
+
+export const DELETE_PROFILE_BODY = i18n.translate('xpack.searchBoost.deleteProfileModal.body', {
+  defaultMessage: "This permanently deletes the profile. You can't undo this action.",
+});
+
+export const getDeleteProfileRulesDeleted = (count: number): string =>
+  i18n.translate('xpack.searchBoost.deleteProfileModal.rulesDeleted', {
+    defaultMessage:
+      '{count, plural, one {Deleting this profile will also delete the boost rule that uses it.} other {Deleting this profile will also delete the # boost rules that use it.}}',
+    values: { count },
+  });
+
+export const getDeleteProfileFallBack = (
+  type: BoostProfileType,
+  count: number,
+  isEveryFallbackKnown: boolean
+): string => {
+  if (isEveryFallbackKnown) {
+    return type === 'data_streams'
+      ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsFallBack', {
+          defaultMessage:
+            '{count, plural, one {The # affected data stream will fall back to the next matching rule.} other {The # affected data streams will fall back to the next matching rule.}}',
+          values: { count },
+        })
+      : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesFallBack', {
+          defaultMessage:
+            '{count, plural, one {The # affected index will fall back to the next matching rule.} other {The # affected indices will fall back to the next matching rule.}}',
+          values: { count },
+        });
+  }
+  return type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsSomeFallBack', {
+        defaultMessage:
+          '{count, plural, one {The # affected data stream will fall back to the next matching rule, if there is one.} other {The # affected data streams will fall back to the next matching rule, if there is one.}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesSomeFallBack', {
+        defaultMessage:
+          '{count, plural, one {The # affected index will fall back to the next matching rule, if there is one.} other {The # affected indices will fall back to the next matching rule, if there is one.}}',
+        values: { count },
+      });
+};
+
+export const DELETED_RULES_LIST_LABEL = i18n.translate(
+  'xpack.searchBoost.deleteProfileModal.rulesListLabel',
+  {
+    defaultMessage: 'Boost rules to be deleted',
+  }
+);
+
+export const getDeletedRuleTableLabel = (type: BoostProfileType, ruleName: string): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.deleteProfileModal.dataStreamsTableLabel', {
+        defaultMessage:
+          'Data streams that {ruleName} applies to, and the rule and profile each will switch to',
+        values: { ruleName },
+      })
+    : i18n.translate('xpack.searchBoost.deleteProfileModal.indicesTableLabel', {
+        defaultMessage:
+          'Indices that {ruleName} applies to, and the rule and profile each will switch to',
+        values: { ruleName },
+      });
+
+export const DELETE_PROFILE_CONFIRM = i18n.translate(
+  'xpack.searchBoost.deleteProfileModal.confirm',
+  {
+    defaultMessage: 'Delete profile',
+  }
+);
+
+export const getDeleteProfileWithRulesConfirm = (ruleCount: number): string =>
+  i18n.translate('xpack.searchBoost.deleteProfileModal.confirmWithRules', {
+    defaultMessage:
+      'Delete {profileCount, plural, one {# profile} other {# profiles}} and {ruleCount, plural, one {# rule} other {# rules}}',
+    values: { profileCount: 1, ruleCount },
+  });
+
+export const getUpdateProfileTitle = (profileName: string): string =>
+  i18n.translate('xpack.searchBoost.updateProfileModal.title', {
+    defaultMessage: 'Update boost profile "{profileName}"?',
+    values: { profileName },
+  });
+
+export const getUpdateProfileBody = (type: BoostProfileType, count: number): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.updateProfileModal.dataStreamsBody', {
+        defaultMessage:
+          '{count, plural, one {Saving these profile changes will affect the # data stream that currently uses it. Alternatively, you may save it as a new boost profile to avoid affecting this data stream.} other {Saving these profile changes will affect the # data streams that currently use it. Alternatively, you may save it as a new boost profile to avoid affecting these data streams.}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.searchBoost.updateProfileModal.indicesBody', {
+        defaultMessage:
+          '{count, plural, one {Saving these profile changes will affect the # index that currently uses it. Alternatively, you may save it as a new boost profile to avoid affecting this index.} other {Saving these profile changes will affect the # indices that currently use it. Alternatively, you may save it as a new boost profile to avoid affecting these indices.}}',
+        values: { count },
+      });
+
+export const UPDATE_PROFILE_UNUSED_BODY: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.searchBoost.updateProfileModal.indicesUnusedBody', {
+    defaultMessage:
+      "Saving these profile changes won't affect any indices, since no boost rule applies this profile to one.",
+  }),
+  data_streams: i18n.translate('xpack.searchBoost.updateProfileModal.dataStreamsUnusedBody', {
+    defaultMessage:
+      "Saving these profile changes won't affect any data streams, since no boost rule applies this profile to one.",
+  }),
+};
+
+export const getUpdateProfileTableLabel = (type: BoostProfileType): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.searchBoost.updateProfileModal.dataStreamsTableLabel', {
+        defaultMessage: 'Data streams this profile applies to, and the rule that applies it',
+      })
+    : i18n.translate('xpack.searchBoost.updateProfileModal.indicesTableLabel', {
+        defaultMessage: 'Indices this profile applies to, and the rule that applies it',
+      });
+
+export const SAVE_AS_NEW_LABEL = i18n.translate('xpack.searchBoost.updateProfileModal.saveAsNew', {
+  defaultMessage: 'Save as new',
+});
+
+export const SAVE_LABEL = i18n.translate('xpack.searchBoost.updateProfileModal.save', {
+  defaultMessage: 'Save',
+});
+
+export const SAVE_AS_NEW_TITLE = i18n.translate(
+  'xpack.searchBoost.updateProfileModal.saveAsNewTitle',
+  {
+    defaultMessage: 'Save as new boost profile',
+  }
+);
+
+export const PROFILE_NAME_HELP = i18n.translate('xpack.searchBoost.profileNameHelp', {
+  defaultMessage: 'Only lowercase letters, numbers, hyphens, and underscores allowed.',
+});
+
+export const BACK_LABEL = i18n.translate('xpack.searchBoost.updateProfileModal.back', {
+  defaultMessage: 'Back',
+});
+
+export const VIEW_ERROR_DETAILS_LABEL = i18n.translate(
+  'xpack.searchBoost.errorDetails.viewDetails',
+  {
+    defaultMessage: 'View details',
+  }
+);
+
+export const ERROR_DETAILS_TITLE = i18n.translate('xpack.searchBoost.errorDetails.title', {
+  defaultMessage: 'What went wrong',
+});
+
+export const ERROR_DETAILS_TABLE_LABEL = i18n.translate(
+  'xpack.searchBoost.errorDetails.tableLabel',
+  {
+    defaultMessage: 'Failed items and their reasons',
+  }
+);
+
+export const ERROR_DETAILS_COLUMNS = {
+  error: i18n.translate('xpack.searchBoost.errorDetails.errorColumn', { defaultMessage: 'Error' }),
+  reason: i18n.translate('xpack.searchBoost.errorDetails.reasonColumn', {
+    defaultMessage: 'Reason',
+  }),
+};
+
+export const CLOSE_LABEL = i18n.translate('xpack.searchBoost.errorDetails.close', {
+  defaultMessage: 'Close',
+});
+
 export const SETTINGS_TITLE = i18n.translate('xpack.searchBoost.details.settingsTitle', {
   defaultMessage: 'Settings',
 });

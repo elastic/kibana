@@ -82,3 +82,23 @@ export interface GetBoostProfilesResponse {
 export interface GetBoostRulesResponse {
   rules: BoostRuleListItem[];
 }
+
+export interface AffectedTarget {
+  name: string;
+}
+
+/** An index or data stream that a deleted rule applies to, and what it falls back to. */
+export interface FallbackTarget extends AffectedTarget {
+  nextRuleName?: string;
+  nextProfileName?: string;
+}
+
+/** A rule deleted along with its profile, and what it applies to. */
+export interface DeletedRule {
+  name: string;
+  fallbacks: FallbackTarget[];
+}
+
+export interface ProfileTarget extends AffectedTarget {
+  ruleName: string;
+}
