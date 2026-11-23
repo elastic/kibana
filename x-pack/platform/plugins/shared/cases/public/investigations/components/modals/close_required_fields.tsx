@@ -14,6 +14,7 @@ import { useRecord } from '../../hooks';
 import { ExtendedFieldsForm } from '../fields/extended_fields_form';
 import type { ExtendedFieldsFormApi } from '../fields/extended_fields_form';
 import { getFieldKey, isEmptyFieldValue, isFieldVisible } from '../fields/field_utils';
+import { useGlobalFields } from '../fields/use_global_fields';
 import { useTypeFields } from '../fields/use_type_fields';
 import * as i18n from './translations';
 
@@ -99,10 +100,22 @@ export const CloseRequiredFields: React.FC<CloseRequiredFieldsProps> = ({
 }) => {
   const { data, isLoading: isLoadingRecord } = useRecord(recordId);
   const template = data?.case.template ?? null;
-  const { fields, isLoading: isLoadingFields } = useTypeFields(template?.id, template?.version);
+  const { fields: templateFields, isLoading: isLoadingTemplateFields } = useTypeFields(
+    template?.id,
+    template?.version
+  );
+  const { fields: globalFields, isLoading: isLoadingGlobalFields } = useGlobalFields(
+    template?.id,
+    template?.version
+  );
+  // Global fields come first, as Cases lists them; they belong to every investigation.
+  const fields = useMemo(
+    () => [...globalFields, ...templateFields],
+    [globalFields, templateFields]
+  );
   const [missing, setMissing] = useState<InlineField[] | null>(null);
 
-  const isLoading = isLoadingRecord || isLoadingFields;
+  const isLoading = isLoadingRecord || isLoadingTemplateFields || isLoadingGlobalFields;
   const values = data?.case.extended_fields;
 
   useEffect(() => {

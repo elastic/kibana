@@ -16,17 +16,17 @@ export const OPTIONAL = i18n.translate(`${PREFIX}.optional`, { defaultMessage: '
 
 /* Determination */
 export const DETERMINATION_TITLE = i18n.translate(`${PREFIX}.determinationTitle`, {
-  defaultMessage: 'Set your determination',
+  defaultMessage: 'Set your verdict',
 });
 export const DETERMINATION_EDIT_TITLE = i18n.translate(`${PREFIX}.determinationEditTitle`, {
-  defaultMessage: 'Edit your determination',
+  defaultMessage: 'Edit your verdict',
 });
 export const DETERMINATION_INTRO = i18n.translate(`${PREFIX}.determinationIntro`, {
   defaultMessage:
-    'Your determination becomes the final verdict. The agent verdict stays on record as superseded.',
+    'Your verdict replaces the AI verdict. The AI verdict stays on record as superseded.',
 });
 export const DETERMINATION_OPTIONS_LABEL = i18n.translate(`${PREFIX}.determinationOptionsLabel`, {
-  defaultMessage: 'Determination',
+  defaultMessage: 'Verdict',
 });
 export const DETERMINATION_TRUE_POSITIVE_HELP = i18n.translate(
   `${PREFIX}.determinationTruePositiveHelp`,
@@ -56,16 +56,16 @@ export const DETERMINATION_REASON_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'What decided it for you?' }
 );
 export const DETERMINATION_SAVE = i18n.translate(`${PREFIX}.determinationSave`, {
-  defaultMessage: 'Save determination',
+  defaultMessage: 'Save verdict',
 });
 export const DETERMINATION_SAVED = i18n.translate(`${PREFIX}.determinationSaved`, {
-  defaultMessage: 'Determination saved. It is now the final verdict.',
+  defaultMessage: 'Verdict saved. It is now the final verdict.',
 });
 export const DETERMINATION_REVERT = i18n.translate(`${PREFIX}.determinationRevert`, {
-  defaultMessage: 'Revert to agent verdict',
+  defaultMessage: 'Revert to AI verdict',
 });
 export const DETERMINATION_REVERTED = i18n.translate(`${PREFIX}.determinationReverted`, {
-  defaultMessage: 'Reverted. The agent verdict is current again.',
+  defaultMessage: 'Reverted. The AI verdict is current again.',
 });
 
 /* Close */
@@ -228,31 +228,6 @@ export const REPORT_DOWNLOADED = (filename: string) =>
     values: { filename },
   });
 
-/* Change history */
-export const HISTORY_TITLE = i18n.translate(`${PREFIX}.historyTitle`, {
-  defaultMessage: 'Change history',
-});
-export const HISTORY_INTRO = i18n.translate(`${PREFIX}.historyIntro`, {
-  defaultMessage:
-    'Every version of the description, conclusions and closing summary, with who or what changed it.',
-});
-export const HISTORY_LOADING = i18n.translate(`${PREFIX}.historyLoading`, {
-  defaultMessage: 'Loading the change history',
-});
-export const HISTORY_ERROR = i18n.translate(`${PREFIX}.historyError`, {
-  defaultMessage: 'Could not load the change history',
-});
-export const HISTORY_EMPTY_TITLE = i18n.translate(`${PREFIX}.historyEmptyTitle`, {
-  defaultMessage: 'No changes recorded yet',
-});
-export const HISTORY_EMPTY_BODY = i18n.translate(`${PREFIX}.historyEmptyBody`, {
-  defaultMessage:
-    'When the description, a conclusion or the closing summary changes, each version shows up here.',
-});
-export const HISTORY_CURRENT = i18n.translate(`${PREFIX}.historyCurrent`, {
-  defaultMessage: 'Current',
-});
-
 /* Merge */
 export const MERGE_TITLE = i18n.translate(`${PREFIX}.mergeTitle`, {
   defaultMessage: 'Merge with another investigation',
@@ -378,7 +353,7 @@ export const MERGE_SUCCESS = (merged: string, primary: string, moved: number) =>
 
 /* Restrict access (the Cases restricted model: members are the assignees) */
 export const RESTRICT_TITLE = i18n.translate(`${PREFIX}.restrictTitle`, {
-  defaultMessage: 'Restrict this investigation to its assignees',
+  defaultMessage: 'Restrict to assigned people',
 });
 export const RESTRICT_INTRO = i18n.translate(`${PREFIX}.restrictIntro`, {
   defaultMessage:
@@ -480,7 +455,7 @@ export const CHANGE_TYPE_PLACEHOLDER = i18n.translate(`${PREFIX}.changeTypePlace
 });
 export const CHANGE_TYPE_HINT = i18n.translate(`${PREFIX}.changeTypeHint`, {
   defaultMessage:
-    "The current template's fields will be hidden, but their saved values stay on the investigation. Values with the same field name and kind are kept in the new template.",
+    "The current template's fields will be hidden, but their saved values stay on the investigation. Values with the same field name and kind are kept in the new template. Global fields do not belong to a template and keep their values.",
 });
 export const CHANGE_TYPE_NO_TYPES = i18n.translate(`${PREFIX}.changeTypeNoTypes`, {
   defaultMessage: 'There are no investigation templates to choose from.',
@@ -500,7 +475,7 @@ export const CLOSE_FIELDS_TITLE = i18n.translate(`${PREFIX}.closeFieldsTitle`, {
   defaultMessage: 'Required before closing',
 });
 export const CLOSE_FIELDS_HELP = i18n.translate(`${PREFIX}.closeFieldsHelp`, {
-  defaultMessage: 'The template of this investigation needs these fields filled in to close it.',
+  defaultMessage: 'These fields need a value before this investigation can close.',
 });
 
 /* Pause time tracking */
@@ -525,7 +500,7 @@ export const PAUSE_REASON_REQUIRED = i18n.translate(`${PREFIX}.pauseReasonRequir
   defaultMessage: 'Pick a reason to continue.',
 });
 export const PAUSE_NO_REASONS = i18n.translate(`${PREFIX}.pauseNoReasons`, {
-  defaultMessage: 'No pause reasons are configured. Add one in the Cases settings.',
+  defaultMessage: 'No pause reasons are configured. Add one in the Investigation settings.',
 });
 export const PAUSE_LOADING = i18n.translate(`${PREFIX}.pauseLoading`, {
   defaultMessage: 'Loading the pause reasons',

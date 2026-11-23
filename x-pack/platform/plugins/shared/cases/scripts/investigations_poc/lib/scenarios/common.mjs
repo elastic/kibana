@@ -193,12 +193,15 @@ export const buildExtendedFields = async (typeName, values) => {
   return out;
 };
 
-/** Values for the close-required fields of each type; close-required fields are left empty on open records. */
+/**
+ * Values for the close-required fields of each type; close-required fields are left empty on open records. Closed
+ * records also get the optional global field `customer_impact` (setup.mjs creates it); nothing relies on it.
+ */
 export const CLOSE_VALUES = {
-  Malware: { remediation: 'Removed malware' },
-  Phishing: { purge_status: 'Purged' },
-  'Account compromise': { credentials_reset: 'Yes' },
-  'Alert triage': { tuning_action: 'None' },
+  Malware: { remediation: 'Removed malware', customer_impact: 'Low' },
+  Phishing: { purge_status: 'Purged', customer_impact: 'None' },
+  'Account compromise': { credentials_reset: 'Yes', customer_impact: 'Moderate' },
+  'Alert triage': { tuning_action: 'None', customer_impact: 'None' },
 };
 
 const UNIT_OPTIONS = ['IT Infrastructure', 'Engineering', 'Finance', 'Data Platform', 'Sales', 'Support', 'Legal', 'HR', 'Operations', 'Marketing'];
@@ -224,7 +227,9 @@ const prototypeFieldValues = (ctx) => {
  */
 const SCENARIO_FIELD_VALUES = {
   A: () => ({ alert_count: 40, reviewer: ['priya.k'] }),
+  // The global fields (`external_reference`, `customer_impact`) come from setup.mjs and apply to every type.
   B: () => ({
+    customer_impact: 'Low',
     file_hash: '9f2c4be71d0a6e83b5c2f19d7a40e6c8d35b1f72a9e04c6d8b7f3a21e5c0a1e4',
     hosts_affected: 1,
     observed_behaviors: ['Credential access', 'Command and control'],
@@ -232,6 +237,8 @@ const SCENARIO_FIELD_VALUES = {
   }),
   C: (ctx) => ({
     ticket: 'SEC-7712',
+    external_reference: 'HELP-48213',
+    customer_impact: 'Moderate',
     sender: 'billing@inv0ice-portal.example',
     reported_at: ctx.clock.iso(ctx.t(9, 38, 0)),
     affected_users: 14,
@@ -240,7 +247,7 @@ const SCENARIO_FIELD_VALUES = {
     credentials_entered: 'Unknown',
     escalation_contacts: ['dana.r', 'marcus.r'],
   }),
-  D: () => ({ data_exfiltrated: 'Unknown', escalation_contacts: ['marcus.r', 'jun.t'] }),
+  D: () => ({ data_exfiltrated: 'Unknown', escalation_contacts: ['marcus.r', 'jun.t'], customer_impact: 'Severe' }),
   E: () => ({ data_exfiltrated: 'No', escalation_contacts: ['braxton.w'] }),
 };
 

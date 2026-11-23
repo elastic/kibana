@@ -6,7 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import type { FieldValue, InvestigationType } from '../../../../common/investigations/types';
+import type {
+  FieldValue,
+  InvestigationType,
+  InvestigationTypeField,
+} from '../../../../common/investigations/types';
 import { useInvestigationTypes } from '../../hooks';
 
 /** One form field of the investigation types, as the queue filters and shows it. */
@@ -21,10 +25,16 @@ export interface QueueFieldDef {
 
 const CHOICE_CONTROLS = new Set(['SELECT_BASIC', 'RADIO_GROUP', 'CHECKBOX_GROUP']);
 
-/** The union of the fields of all types, one entry per mirror key, in the order types list them. */
-export const getQueueFieldDefs = (types: InvestigationType[]): QueueFieldDef[] => {
+/**
+ * The union of the global fields and the fields of all types, one entry per mirror key: global
+ * fields first, then the types' fields in the order types list them.
+ */
+export const getQueueFieldDefs = (
+  types: InvestigationType[],
+  globalFields: InvestigationTypeField[] = []
+): QueueFieldDef[] => {
   const byKey = new Map<string, QueueFieldDef>();
-  types.forEach(({ fields }) =>
+  [globalFields, ...types.map(({ fields }) => fields)].forEach((fields) =>
     fields
       .filter(({ display_only: displayOnly }) => !displayOnly)
       .forEach(({ mirror_key: mirrorKey, label, control, options }) => {
@@ -48,10 +58,13 @@ export const getQueueFieldDefs = (types: InvestigationType[]): QueueFieldDef[] =
   return Array.from(byKey.values());
 };
 
-/** Fields for the queue's Fields filter and optional columns, from `GET _types`. */
+/** Fields for the queue's Fields filter and optional columns: global fields and types' fields from `GET _types`. */
 export const useQueueFields = (): { fields: QueueFieldDef[]; isLoading: boolean } => {
   const { data, isLoading } = useInvestigationTypes();
-  const fields = useMemo(() => getQueueFieldDefs(data?.types ?? []), [data]);
+  const fields = useMemo(
+    () => getQueueFieldDefs(data?.types ?? [], data?.global_fields ?? []),
+    [data]
+  );
   return { fields, isLoading };
 };
 

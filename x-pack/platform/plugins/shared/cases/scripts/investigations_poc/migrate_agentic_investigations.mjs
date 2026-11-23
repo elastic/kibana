@@ -521,6 +521,8 @@ const migrateConversation = async (hit) => {
     await kbn('POST', `${BASE}/${encodeURIComponent(recordId)}/_close`, {
       extended_fields: {
         ...(closeKey && { [closeKey]: closeValue }),
+        // The optional global field (created by setup.mjs); migrated conversations carry no customer data.
+        customer_impact_as_keyword: 'None',
         root_cause_notes_as_keyword: closeNotes(close, closeSummary),
       },
       close_reason: close.close_reason,

@@ -203,13 +203,13 @@ export const FILTER_FIELDS_NO = i18n.translate('xpack.cases.investigations.queue
 });
 export const FILTER_FIELDS_NONE = i18n.translate(
   'xpack.cases.investigations.queue.filterFieldsNone',
-  { defaultMessage: 'The investigation templates have no fields to filter by.' }
+  { defaultMessage: 'There are no global or template fields to filter by.' }
 );
 export const FILTER_FIELDS_HELP = i18n.translate(
   'xpack.cases.investigations.queue.filterFieldsHelp',
   {
     defaultMessage:
-      'Fields come from the investigation templates. Text fields match the exact value.',
+      'Fields come from the global fields and the investigation templates. Text fields match the exact value.',
   }
 );
 export const COLUMNS_BUTTON = i18n.translate('xpack.cases.investigations.queue.columnsButton', {
