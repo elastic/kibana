@@ -338,7 +338,8 @@ it is kept in the URL (`browser`, `os`, `device`, `country`, `pageUrl`, `percent
   the Overview counted; the page is left out there. The breakdowns aggregate the same fields the
   filters do, so each row is a value a filter takes. Web vitals, errors and clicks carry no page URL
   yet, and an HTTP request's `url.full` is the URL requested, so the page narrows the page loads,
-  with their load time, trend, pages and breakdowns only; the page says so while a page is selected.
+  with their load time, trend, pages and breakdowns, and the frustration signals only; the page says
+  so while a page is selected.
 - **Percentile:** the load time (its KPI and its trend) is the 50th, 75th (default), 90th, 95th or
   99th percentile, picked above the trends. The Core Web Vitals stay at the 75th percentile, which
   is how their good, needs improvement and poor ratings are defined.

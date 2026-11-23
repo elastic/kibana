@@ -549,7 +549,7 @@ describe('OtelOverview', () => {
     await findPageLoads('1,533');
 
     expect(screen.getByTestId('digitalExperienceOverviewPageFilterNote')).toHaveTextContent(
-      'apply to page loads only'
+      'apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only'
     );
     unmount();
 

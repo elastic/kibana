@@ -55,7 +55,7 @@ import { EMPTY_USAGE, usageRequestOf } from './utils/usage_request';
 
 const PAGE_FILTER_NOTE = i18n.translate('xpack.digitalExperience.overview.filters.pageNote', {
   defaultMessage:
-    'The page filters apply to page loads only, with their load time, trend, pages and breakdowns: web vitals, JS errors, clicks and HTTP requests carry no page URL yet.',
+    'The page filters apply to page loads, with their load time, trend, pages and breakdowns, and to frustration signals only: web vitals, JS errors, other clicks and HTTP requests carry no page URL yet.',
 });
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {

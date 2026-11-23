@@ -38,6 +38,8 @@ const ENVIRONMENT = 'dx-sessions-contract-env';
 // Uppercase, as EDOT iOS writes them: the hash ranges take any id.
 const SESSION = 'DX-CONTRACT-SESSION-1';
 const SESSION_AFTER_NEW_KEY = 'DX-CONTRACT-SESSION-2';
+/** In the window of `SESSION`, without its frustration signals, for the frustration filter to leave out. */
+const CALM_SESSION = 'DX-CONTRACT-SESSION-3';
 
 /** The element of the rage clicks; the dead click is on another one. */
 const FRUSTRATED_TARGET = '#pay';
@@ -149,12 +151,22 @@ const buildEvents = (sessionId: string, startMs: number) => {
   };
 };
 
-const ingestEvents = async (esClient: EsClient, sessionId: string, startMs: number) => {
+const FRUSTRATION_EVENT_NAMES: readonly string[] = [EVENT_RAGE_CLICK, EVENT_DEAD_CLICK];
+
+const ingestEvents = async (
+  esClient: EsClient,
+  sessionId: string,
+  startMs: number,
+  { frustrated = true }: { frustrated?: boolean } = {}
+) => {
   const { logs, spans } = buildEvents(sessionId, startMs);
+  const logsToIngest = frustrated
+    ? logs
+    : logs.filter(({ event_name: eventName }) => !FRUSTRATION_EVENT_NAMES.includes(eventName));
   const { errors, items } = await esClient.bulk({
     refresh: 'wait_for',
     operations: [
-      ...logs.flatMap((document) => [{ create: { _index: LOGS_INDEX } }, document]),
+      ...logsToIngest.flatMap((document) => [{ create: { _index: LOGS_INDEX } }, document]),
       ...spans.flatMap((document) => [{ create: { _index: TRACES_INDEX } }, document]),
     ],
   });
@@ -252,6 +264,7 @@ apiTest.describe(
 
         await apiTest.step('builds the expected summary from the events', async () => {
           await ingestEvents(esClient, SESSION, startMs);
+          await ingestEvents(esClient, CALM_SESSION, startMs, { frustrated: false });
           const status = await enable(apiClient);
           expect(status).toMatchObject({ installed: true, apiKeyInvalid: false });
 
@@ -259,7 +272,10 @@ apiTest.describe(
             .poll(
               async () => {
                 await runSessionsTask(kbnClient);
-                return (await getSummary(esClient, SESSION)) !== undefined;
+                const summaries = await Promise.all(
+                  [SESSION, CALM_SESSION].map((sessionId) => getSummary(esClient, sessionId))
+                );
+                return summaries.every((summary) => summary !== undefined);
               },
               { timeout: SUMMARIZE_TIMEOUT_MS, intervals: [POLL_MS] }
             )
@@ -343,6 +359,13 @@ apiTest.describe(
             expect(response).toHaveStatusCode(200);
             return response.body as SessionListResponse;
           };
+
+          const all = await list({});
+          expect(all.sessions.map(({ sessionId }) => sessionId).sort()).toStrictEqual([
+            SESSION,
+            CALM_SESSION,
+          ]);
+          expect(all.kpis.sessionsWithFrustration).toBe(1);
 
           const frustrated = await list({ withFrustration: 'true' });
           expect(frustrated.sessions.map(({ sessionId }) => sessionId)).toStrictEqual([SESSION]);
