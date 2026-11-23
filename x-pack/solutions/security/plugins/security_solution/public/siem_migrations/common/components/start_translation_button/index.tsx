@@ -10,44 +10,54 @@ import React, { useCallback, useMemo } from 'react';
 import * as i18n from './translations';
 import type { MigrationStats } from '../../types';
 
-export interface StartTranslationButtonProps {
-  migrationStats: MigrationStats;
+export interface StartTranslationButtonProps<
+  T extends Pick<MigrationStats, 'id'> = MigrationStats
+> {
+  migrationStats: T;
   isStopped: boolean;
-  startMigration: (migrationStats: MigrationStats) => void;
+  startMigration: (migrationStats: T) => void;
   isStarting: boolean;
 }
 
-export const StartTranslationButton = React.memo<StartTranslationButtonProps>(
-  ({ migrationStats, isStopped, startMigration, isStarting }) => {
-    const onStartMigration = useCallback(() => {
-      startMigration(migrationStats);
-    }, [migrationStats, startMigration]);
+const StartTranslationButtonComponent = <T extends Pick<MigrationStats, 'id'> = MigrationStats>({
+  migrationStats,
+  isStopped,
+  startMigration,
+  isStarting,
+}: StartTranslationButtonProps<T>) => {
+  const onStartMigration = useCallback(() => {
+    startMigration(migrationStats);
+  }, [migrationStats, startMigration]);
 
-    const text = useMemo(() => {
-      if (isStopped) {
-        return isStarting
-          ? i18n.MIGRATION_RESUMING_TRANSLATION_BUTTON
-          : i18n.MIGRATION_RESUME_TRANSLATION_BUTTON;
-      } else {
-        return isStarting
-          ? i18n.MIGRATION_STARTING_TRANSLATION_BUTTON
-          : i18n.MIGRATION_START_TRANSLATION_BUTTON;
-      }
-    }, [isStopped, isStarting]);
+  const text = useMemo(() => {
+    if (isStopped) {
+      return isStarting
+        ? i18n.MIGRATION_RESUMING_TRANSLATION_BUTTON
+        : i18n.MIGRATION_RESUME_TRANSLATION_BUTTON;
+    } else {
+      return isStarting
+        ? i18n.MIGRATION_STARTING_TRANSLATION_BUTTON
+        : i18n.MIGRATION_START_TRANSLATION_BUTTON;
+    }
+  }, [isStopped, isStarting]);
 
-    return (
-      <EuiButton
-        data-test-subj={'startMigrationButton'}
-        aria-label={text}
-        fill={!isStopped}
-        onClick={onStartMigration}
-        isLoading={isStarting}
-        size="s"
-      >
-        {text}
-      </EuiButton>
-    );
-  }
-);
+  return (
+    <EuiButton
+      data-test-subj={'startMigrationButton'}
+      aria-label={text}
+      fill={!isStopped}
+      onClick={onStartMigration}
+      isLoading={isStarting}
+      size="s"
+    >
+      {text}
+    </EuiButton>
+  );
+};
 
-StartTranslationButton.displayName = 'StartTranslationButton';
+// `React.memo` loses the generic type parameter, restore it
+export const StartTranslationButton = React.memo(
+  StartTranslationButtonComponent
+) as typeof StartTranslationButtonComponent;
+
+(StartTranslationButton as React.FC).displayName = 'StartTranslationButton';

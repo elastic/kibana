@@ -74,6 +74,21 @@ export const TRANSLATED_DASHBOARDS_RESULT_TABLE = {
   DASHBOARD_NAME: getDataTestSubjectSelector('viewDashboardTranslationSummary'),
 };
 
+export const TRANSLATED_WORKFLOWS_RESULT_TABLE = {
+  TABLE: getDataTestSubjectSelector('workflows-translation-table'),
+  ROWS: `${getDataTestSubjectSelectorStartWith('workflows-translation-table')} .euiTableRow`,
+  STATUS: (status: string) => getDataTestSubjectSelector(`translationStatus-${status}`),
+  WORKFLOW_NAME: getDataTestSubjectSelector('workflowName'),
+  DETAILS_BTN: getDataTestSubjectSelector('workflowDetailsButton'),
+};
+
+export const WORKFLOW_MIGRATION_READY_PANEL = getDataTestSubjectSelector(
+  'workflowMigrationReadyPanel'
+);
+export const WORKFLOW_MIGRATION_PROGRESS_PANEL = getDataTestSubjectSelector(
+  'workflowMigrationProgressPanel'
+);
+
 export const TRANSLATED_RULE_DETAILS_FLYOUT = getDataTestSubjectSelector(
   'ruleMigrationDetailsFlyout'
 );
