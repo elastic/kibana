@@ -535,11 +535,12 @@ feature IDs are unique only within a source.
   batch `source_id` values, so the referenced topology stays in scope.
 - **Result.** A seed is a topology node only when this search returned it. When the first search was
   filtered by `feature_ids` and none is in the result, make one extra call with `feature_ids`
-  omitted and the same `slugs`, without paginating. A first search that already omitted
-  `feature_ids` is the broad fallback: do not repeat it. Otherwise stop after page 1, unless
-  `has_more` is true and a referenced ID is missing: then request `next_page` once. The returned
-  topology already expands dependency endpoints and their matching entity identity fields, so no
-  further call is needed.
+  omitted and `slugs` set to the union of the matched-query source IDs and all distinct batch source
+  IDs, without paginating. A first search that already omitted `feature_ids` is the broad fallback:
+  do not repeat it. Otherwise stop after page 1, unless `has_more` is true and any seed is missing,
+  whether a referenced ID or a row-value name: then request `next_page` once. The returned topology
+  already expands dependency endpoints and their matching entity identity fields, so no further call
+  is needed.
 
 A fetched feature reads as follows: `properties` are stable identity and topology facts;
 `evidence[]` supports hypotheses; `meta` contains diagnostic hints, not current-state proof;
