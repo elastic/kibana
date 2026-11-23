@@ -40,8 +40,10 @@ import {
   RECORD_USAGE_INTERVAL,
 } from './audit_service';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { createMinimallyAuthenticatedUser } from '../authentication/providers/base';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
+import { sessionMock } from '../session_management/session.mock';
 
 jest.useFakeTimers({ legacyFakeTimers: true });
 
@@ -64,8 +66,16 @@ const getSpaceId = jest.fn().mockReturnValue('default');
 const getSID = jest.fn().mockResolvedValue('SESSION_ID');
 const recordAuditLoggingUsage = jest.fn();
 
+// Lets a `log` call that nobody awaits, such as the one from the post-auth hook, finish.
+const flushMicrotasks = async () => {
+  for (let i = 0; i < 10; i++) {
+    await Promise.resolve();
+  }
+};
+
 beforeEach(() => {
   logger.info.mockClear();
+  logger.error.mockClear();
   logging.configure.mockClear();
   logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
@@ -357,7 +367,8 @@ describe('#asScoped', () => {
 
     const logWithConfig = async (
       auditConfig: Partial<ConfigType['audit']>,
-      isServerless: boolean
+      isServerless: boolean,
+      getCurrentUserForRequest: jest.Mock = getCurrentUserWithRealm
     ) => {
       const audit = new AuditService(logger);
       const auditSetup = audit.setup({
@@ -367,7 +378,7 @@ describe('#asScoped', () => {
         status,
         http,
         isServerless,
-        getCurrentUser: getCurrentUserWithRealm,
+        getCurrentUser: getCurrentUserForRequest,
         getSpaceId,
         getSID,
         recordAuditLoggingUsage,
@@ -405,6 +416,81 @@ describe('#asScoped', () => {
       const user = await logWithConfig(otelAppender, false);
       expect(user).not.toHaveProperty('domain');
     });
+
+    it('omits it for a minimally authenticated user, and still logs the event', async () => {
+      const minimalUser = createMinimallyAuthenticatedUser(
+        sessionMock.createValue({ username: 'jdoe', userProfileId: 'uid' })
+      );
+
+      expect(
+        await logWithConfig(otelAppender, true, jest.fn().mockReturnValue(minimalUser))
+      ).toEqual({ id: 'uid', name: 'jdoe', roles: [] });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs the request event for a minimally authenticated user from the post-auth hook', async () => {
+      const minimalUser = createMinimallyAuthenticatedUser(
+        sessionMock.createValue({ username: 'jdoe', userProfileId: 'uid' })
+      );
+      const audit = new AuditService(logger);
+      audit.setup({
+        license,
+        config: createAuditConfig(otelAppender),
+        logging,
+        status,
+        http,
+        isServerless: true,
+        getCurrentUser: jest.fn().mockReturnValue(minimalUser),
+        getSpaceId,
+        getSID,
+        recordAuditLoggingUsage,
+      });
+      const [[onPostAuth]] = http.registerOnPostAuth.mock.calls;
+      const request = httpServerMock.createKibanaRequest({ auth: { isAuthenticated: true } });
+
+      await onPostAuth(
+        request,
+        httpServerMock.createResponseFactory(),
+        httpServiceMock.createOnPostAuthToolkit()
+      );
+      await flushMicrotasks();
+
+      expect(logger.info).toHaveBeenLastCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'http_request' }),
+          user: { id: 'uid', name: 'jdoe', roles: [] },
+        })
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+      audit.stop();
+    });
+  });
+
+  it('does not reject, and logs an error, when the event cannot be written', async () => {
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      status,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID: jest.fn().mockRejectedValue(new Error('Session index is unavailable.')),
+      recordAuditLoggingUsage,
+    });
+
+    await expect(
+      auditSetup
+        .asScoped(httpServerMock.createKibanaRequest())
+        .log({ message: 'MESSAGE', event: { action: 'ACTION' } })
+    ).resolves.toBeUndefined();
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      'Failed to write audit event [action=ACTION]: Session index is unavailable.'
+    );
+    audit.stop();
   });
 
   it('logs event enriched with meta data from fake request', async () => {

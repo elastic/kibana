@@ -16,6 +16,8 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
+import { addCloudApiKeyAuthErrorGuidance } from './cloud_api_key_auth_error_guidance';
+import { normalizeExecutionStatusErrorReason } from './normalize_rule_execution_reasons';
 import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import type { RunRuleResult } from '../task_runner/types';
@@ -74,7 +76,9 @@ export function executionStatusFromState({
     // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
     error = {
       reason: RuleExecutionStatusErrorReasons.Unknown,
-      message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
+      message: addCloudApiKeyAuthErrorGuidance(
+        errorsFromLastRun.map((lastRunError) => lastRunError.message).join(',')
+      ),
     };
   }
 
@@ -108,7 +112,7 @@ export function executionStatusFromError(
       status: 'error',
       error: {
         reason: getReasonFromError(error),
-        message: getEsErrorMessage(error),
+        message: addCloudApiKeyAuthErrorGuidance(getEsErrorMessage(error)),
       },
     },
     metrics: null,
@@ -165,7 +169,10 @@ export function ruleExecutionStatusFromRaw(
   }
 
   if (error) {
-    executionStatus.error = error;
+    executionStatus.error = {
+      ...error,
+      reason: normalizeExecutionStatusErrorReason(error.reason),
+    };
   }
 
   if (warning) {

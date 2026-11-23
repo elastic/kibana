@@ -13,7 +13,7 @@ import type { Logger } from '@kbn/core/server';
 import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_COMPOSITE_TYPE } from '../../saved_objects';
 import { DefaultCompositeSLORepository } from './composite_slo_repository';
-import { createCompositeSlo } from '../fixtures/composite_slo';
+import { createCompositeSlo, toStoredCompositeSlo } from '../fixtures/composite_slo';
 
 describe('DefaultCompositeSLORepository', () => {
   let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -39,14 +39,21 @@ describe('DefaultCompositeSLORepository', () => {
       const result = await repository.create(compositeSlo);
 
       expect(result).toEqual(compositeSlo);
-      expect(soClient.create).toHaveBeenCalledWith(SO_SLO_COMPOSITE_TYPE, compositeSlo);
+      expect(soClient.create).toHaveBeenCalledWith(
+        SO_SLO_COMPOSITE_TYPE,
+        expect.objectContaining({
+          timeWindow: { duration: '30d', type: 'rolling' },
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        })
+      );
     });
 
     it('throws SLOIdConflict when a composite SLO with the same id exists', async () => {
       const compositeSlo = createCompositeSlo();
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
+        saved_objects: [{ id: 'so-id-1', attributes: toStoredCompositeSlo(compositeSlo) }],
         page: 1,
         per_page: 1,
       } as any);
@@ -60,7 +67,7 @@ describe('DefaultCompositeSLORepository', () => {
       const compositeSlo = createCompositeSlo();
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
+        saved_objects: [{ id: 'so-id-1', attributes: toStoredCompositeSlo(compositeSlo) }],
         page: 1,
         per_page: 1,
       } as any);
@@ -68,10 +75,11 @@ describe('DefaultCompositeSLORepository', () => {
       const result = await repository.update(compositeSlo);
 
       expect(result).toEqual(compositeSlo);
-      expect(soClient.create).toHaveBeenCalledWith(SO_SLO_COMPOSITE_TYPE, compositeSlo, {
-        id: 'so-id-1',
-        overwrite: true,
-      });
+      expect(soClient.create).toHaveBeenCalledWith(
+        SO_SLO_COMPOSITE_TYPE,
+        toStoredCompositeSlo(compositeSlo),
+        { id: 'so-id-1', overwrite: true }
+      );
     });
 
     it('throws SLONotFound when the composite SLO does not exist', async () => {
@@ -92,15 +100,14 @@ describe('DefaultCompositeSLORepository', () => {
       const compositeSlo = createCompositeSlo();
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
+        saved_objects: [{ id: 'so-id-1', attributes: toStoredCompositeSlo(compositeSlo) }],
         page: 1,
         per_page: 1,
       } as any);
 
       const result = await repository.findById(compositeSlo.id);
 
-      expect(result.id).toEqual(compositeSlo.id);
-      expect(result.name).toEqual(compositeSlo.name);
+      expect(result).toEqual(compositeSlo);
       expect(soClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
           type: SO_SLO_COMPOSITE_TYPE,
@@ -126,7 +133,7 @@ describe('DefaultCompositeSLORepository', () => {
       const compositeSlo = createCompositeSlo();
       soClient.find.mockResolvedValueOnce({
         total: 1,
-        saved_objects: [{ id: 'so-id-1', attributes: compositeSlo }],
+        saved_objects: [{ id: 'so-id-1', attributes: toStoredCompositeSlo(compositeSlo) }],
         page: 1,
         per_page: 1,
       } as any);

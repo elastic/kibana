@@ -7,10 +7,13 @@
 
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import { SEARCH_BOOST_APP_ID } from '../common/constants';
+import { registerRoutes } from './routes';
 import type { SearchBoostSetupDependencies } from './types';
 
 export class SearchBoostPlugin implements Plugin<void, void, SearchBoostSetupDependencies> {
-  public setup(_core: CoreSetup, { features }: SearchBoostSetupDependencies) {
+  public setup(core: CoreSetup, { features }: SearchBoostSetupDependencies) {
+    registerRoutes(core.http.createRouter());
+
     // Profiles and rules are shown together, so each level needs the privilege for both.
     features.registerElasticsearchFeature({
       id: SEARCH_BOOST_APP_ID,
