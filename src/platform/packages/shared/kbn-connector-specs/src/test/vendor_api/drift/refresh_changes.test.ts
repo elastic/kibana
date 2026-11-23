@@ -230,13 +230,13 @@ describe('describeChanges', () => {
     ).toEqual(object('Response', '- x: object', '+ x: string (now required)'));
   });
 
-  it('shows a field that gained discriminator keys as the concrete types it can now be', () => {
+  it('shows keys added to the base a field extends by that base, with the type of the field', () => {
     const added = (keys: string) =>
       change(
         'response-property-discriminator-mapping-added',
         `added \`${keys}\` discriminator mapping keys to the \`calendarView/items/allOf[#/components/schemas/outlookItem]\` response property`,
-        'object',
-        'object'
+        'microsoft.graph.event[]',
+        'microsoft.graph.event[]'
       );
 
     expect(
@@ -247,8 +247,7 @@ describe('describeChanges', () => {
     ).toEqual(
       object(
         'Response',
-        '- calendarView: outlookItem',
-        '+ calendarView: outlookItem | microsoft.graph.a | microsoft.graph.b | microsoft.graph.c and 1 more'
+        '! calendarView: microsoft.graph.event[] (outlookItem: + microsoft.graph.a, microsoft.graph.b, microsoft.graph.c and 1 more)'
       )
     );
   });
@@ -270,17 +269,37 @@ describe('describeChanges', () => {
     );
   });
 
-  it('names the root of a shape by its schema', () => {
+  it('shows keys added to the base the response body extends as a change of the body', () => {
     expect(
       describeChanges([
         change(
           'response-property-discriminator-mapping-added',
           'added `#microsoft.graph.group` discriminator mapping keys to the `allOf[#/components/schemas/microsoft.graph.baseItem]/allOf[subschema #1: entity]` response property',
+          'microsoft.graph.site',
+          'microsoft.graph.site'
+        ),
+      ])
+    ).toEqual(
+      object(
+        'Response',
+        '! (response body): microsoft.graph.site (entity: + microsoft.graph.group)'
+      )
+    );
+  });
+
+  it('shows keys added to a choice of what a field can be as the types it can now be', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#microsoft.graph.group` discriminator mapping keys to the `value/items/hits/items/resource/anyOf[subschema #1: entity]` response property',
           'object',
           'object'
         ),
       ])
-    ).toEqual(object('Response', '- entity: entity', '+ entity: entity | microsoft.graph.group'));
+    ).toEqual(
+      object('Response', '- resource: entity', '+ resource: entity | microsoft.graph.group')
+    );
   });
 
   it('shows the type of a field that gained a variant, or the variants when the type is unknown', () => {

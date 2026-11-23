@@ -21,6 +21,7 @@
  */
 
 import type { SpecChange } from './detect_drift';
+import { ownerOfPart } from './field_type';
 import { requestParameterOf } from './oasdiff_text';
 
 const MAX_NAME_LENGTH = 80;
@@ -413,6 +414,32 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
         : RESPONSE_BODY
       : fieldOf(second);
     const location = parameter?.location === undefined ? [] : [parameter.location];
+    const partOf =
+      /discriminator-mapping/.test(id) && !body && second !== undefined ? second : undefined;
+    const owner = partOf === undefined ? undefined : ownerOfPart(partOf);
+    if (partOf !== undefined && owner !== undefined) {
+      // Keys added to a part of the field, such as the base type a chat extends, say what that part
+      // may be elsewhere in the API, not what the field holds: they go in brackets, by the part.
+      const part = baseNameOf(partOf);
+      // Only parts left once the owner's selectors go: the part is of the body itself.
+      const ofBody =
+        owner.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\//g, '') === '';
+      return [
+        {
+          area: entryArea,
+          sign: '!',
+          name: ofBody ? (entryArea === 'Request' ? REQUEST_BODY : RESPONSE_BODY) : fieldName,
+          type,
+          typeBefore: change.typeBefore,
+          details: [
+            ...location,
+            ...variantNames(list).map(
+              (key) => `${part === undefined ? '' : `${part}: `}${sign} ${key}`
+            ),
+          ],
+        },
+      ];
+    }
     if (/discriminator-mapping/.test(id)) {
       // The keys of a discriminator aren't a part of the type: they are more concrete types the
       // field can have, and are put with its type once all the changes of the field are known.
@@ -517,7 +544,8 @@ interface Field {
   readonly details: Set<string>;
 }
 
-const LISTED_DETAIL = /^([+-] )(.+)$/;
+// `+ a`, or `entity: + a` for a part of the field; those of the same prefix are one list.
+const LISTED_DETAIL = /^((?:[^\s:]+: )?[+-] )(.+)$/;
 
 /**
  * What changed about a field, for the brackets after it: the values and variants that were added or

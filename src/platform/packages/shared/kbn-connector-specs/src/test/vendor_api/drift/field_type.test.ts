@@ -255,6 +255,85 @@ describe('fieldTypeOf', () => {
     expect(fieldTypeOf(widened('text/csv'), { current: document })).toBeUndefined();
   });
 
+  it('gives the type of the field, not of its base, for keys added to the base it extends', () => {
+    const graph = {
+      paths: {
+        '/me/chats': {
+          get: {
+            responses: {
+              '200': {
+                content: {
+                  'application/json': {
+                    schema: {
+                      allOf: [
+                        { properties: { '@odata.nextLink': { type: 'string' } } },
+                        {
+                          properties: {
+                            value: { type: 'array', items: schema('microsoft.graph.chat') },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: {
+        schemas: {
+          'microsoft.graph.entity': {
+            properties: { id: { type: 'string' } },
+            discriminator: { propertyName: '@odata.type' },
+          },
+          'microsoft.graph.chat': {
+            allOf: [
+              schema('microsoft.graph.entity'),
+              { properties: { topic: { type: 'string' } } },
+            ],
+          },
+        },
+      },
+    };
+
+    expect(
+      fieldTypeOf(
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#microsoft.graph.distributionList` discriminator mapping keys to the `allOf[subschema #2]/value/items/allOf[subschema #1: entity]` response property for the response status `200`',
+          'GET /me/chats'
+        ),
+        { current: graph }
+      )
+    ).toBe('microsoft.graph.chat[]');
+    expect(
+      fieldTypeOf(
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#microsoft.graph.distributionList` discriminator mapping keys to the `allOf[subschema #1: entity]` response property for the response status `200`',
+          'GET /chats/{chat-id}'
+        ),
+        {
+          current: {
+            ...graph,
+            paths: {
+              '/chats/{chat-id}': {
+                get: {
+                  responses: {
+                    '200': {
+                      content: { 'application/json': { schema: schema('microsoft.graph.chat') } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }
+      )
+    ).toBe('microsoft.graph.chat');
+  });
+
   it('finds a parameter whose new enum value looks like a location', () => {
     const document = {
       paths: {

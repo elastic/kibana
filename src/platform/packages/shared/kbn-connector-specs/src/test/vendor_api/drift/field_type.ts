@@ -231,10 +231,29 @@ const responseOf = (responses: unknown, text: string): unknown => {
 const VARIANT_RULE = /discriminator-mapping|-(one|any|all)-of-(added|removed)$/;
 
 /** The field the change names: for an enum value or a variant, the field they are of. */
+// A path that ends in the `allOf` part of a field, `value/items/allOf[subschema #1: entity]`.
+const PART_OF_FIELD = /(?:\/?allOf\[[^\]]*\])+$/;
+
+/**
+ * For a path that ends in an `allOf` part, such as the base type a chat extends, the path of what
+ * it is a part of: `value/items/allOf[subschema #1: entity]` as `value`, '' for the body itself.
+ */
+export const ownerOfPart = (path: string): string | undefined =>
+  PART_OF_FIELD.test(path)
+    ? path.replace(PART_OF_FIELD, '').replace(/(?:\/items)+$/, '')
+    : undefined;
+
 const fieldPathOf = (id: string, names: readonly string[]): string | undefined => {
   if (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id)) {
     const field = names[1];
-    return field === undefined || ['oneOf', 'anyOf', 'allOf'].includes(field) ? undefined : field;
+    if (field === undefined || ['oneOf', 'anyOf', 'allOf'].includes(field)) return undefined;
+    // Keys added to a part, such as the base type a chat extends, are not the field's type: that
+    // is the field's own, `value` as a list of chats rather than its items' base.
+    const owner = /discriminator-mapping/.test(id) ? ownerOfPart(field) : undefined;
+    if (owner !== undefined) {
+      return owner === '' ? undefined : owner;
+    }
+    return field;
   }
   return names[0];
 };
@@ -298,9 +317,12 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
     return undefined;
   }
   // A new enum value or variant is about what the field is made of, so a named schema is shown
-  // by its values or variants.
+  // by its values or variants; keys added to a part of it leave the field's own name.
+  const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
   const shown =
-    /-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id) ? deref(document, node) : node;
+    !ofPart && (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id))
+      ? deref(document, node)
+      : node;
   return lengthened(typeOf(document, shown));
 };
 
