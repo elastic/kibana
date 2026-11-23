@@ -29,12 +29,14 @@ export const countToolCalls = (rounds: Array<Pick<ConversationRound, 'steps'>>):
   rounds.reduce((total, { steps }) => total + steps.filter(isToolCallStep).length, 0);
 
 // The sandbox reaches the internet only through credproxy. It refuses an HTTPS tunnel to a host
-// outside the space's egress rules (`CONNECT tunnel failed, response 403` from git and curl), and
+// outside the space's egress rules (`CONNECT tunnel failed, response 403` from git and curl,
+// `Tunnel connection failed: 403` from Python's urllib and pip), and
 // answers a refused request it inspected with a `sandbox_egress_denied` body. github.com is the only
 // host whose rules are checked per request, so a bare 403 counts only when it is github.com's: a
 // 403 from any other host (a connector's cluster) is that service's own answer. git drops the body
 // and prints the status with the URL. This is a best-effort eval signal, not a shell parser.
-const EGRESS_REFUSED = /CONNECT tunnel failed, response 403|sandbox_egress_denied/;
+const EGRESS_REFUSED =
+  /CONNECT tunnel failed, response 403|Tunnel connection failed: 403|sandbox_egress_denied/;
 const GIT_HTTP_403 = /unable to access '([^']*)': The requested URL returned error: 403/g;
 // `curl -f` drops the body too and doesn't name the URL, so the command must request github.com.
 const CURL_HTTP_403 = /curl: \(22\) The requested URL returned error: 403/;

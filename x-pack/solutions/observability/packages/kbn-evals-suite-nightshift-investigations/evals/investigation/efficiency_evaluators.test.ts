@@ -101,6 +101,17 @@ describe('countSandboxEgressDenials', () => {
           bash([
             { type: 'other', data: { stdout: '{"error":"sandbox_egress_denied"}', exit_code: 0 } },
           ]),
+          // Python's urllib and pip word a refused tunnel differently.
+          bash([
+            {
+              type: 'other',
+              data: {
+                stderr:
+                  "ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden'))",
+                exit_code: 1,
+              },
+            },
+          ]),
           bash([{ type: 'other', data: { stdout: 'ok', exit_code: 0 } }]),
         ],
       },
@@ -110,7 +121,7 @@ describe('countSandboxEgressDenials', () => {
         ],
       },
     ] as unknown as ConversationRound[];
-    expect(countSandboxEgressDenials(rounds)).toBe(3);
+    expect(countSandboxEgressDenials(rounds)).toBe(4);
   });
 
   it('counts requests the firewall refused after letting the tunnel through', () => {
