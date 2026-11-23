@@ -40,7 +40,6 @@ export const createConnectorSkillDefinition = (
   // library and out of the default capabilities.
   hidden: true,
   excludeFromElasticCapabilities: true,
-  // The skill tells the model to run workflows, so it is left out when the caller cannot run them.
   requiresAllAssociatedTools: true,
   getRegistryTools: () => [platformCoreTools.executeWorkflow],
   // Lets the agent find the connector id to run the workflows with, without loading the connector
