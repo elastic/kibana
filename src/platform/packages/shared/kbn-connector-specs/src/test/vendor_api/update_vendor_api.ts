@@ -40,19 +40,20 @@ import {
 } from './manifest';
 import type { VendorApiLog } from './load_vendor_specs';
 import {
-  applyOverlayToSources,
+  applyOverlayWithFindings,
   FIXTURES,
   MANIFEST,
   OVERLAY,
   readOptional,
-  SILENT_LOG,
   snapshotFile,
 } from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
 import { loadProtocolSpec, parseProtocolSnapshot, projectProtocolSpec } from './protocol_sources';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
-import type { RecordingFinding } from './record_actions';
+import type { DriftProblem } from './drift_problem';
+import { otherProblem, problemTextOf } from './drift_problem';
+import type { ActionsRecording, RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
@@ -77,6 +78,8 @@ export interface UpdateVendorApiOptions {
   readonly refresh?: boolean;
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
+  /** Records which response fields each action reads, copies and returns. */
+  readonly trackFields?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
   /** When the document `fetchText` returned for a URL was fetched, if not just now. */
   readonly fetchedAt?: (url: string) => Date | undefined;
@@ -89,6 +92,20 @@ export interface UpdateVendorApiResult {
   readonly changed: readonly string[];
   /** What makes the artifacts untrustworthy; the script fails when there are any. */
   readonly problems: readonly string[];
+  /** The `problems` of each action, without the action's name in front. */
+  readonly problemsByAction: Readonly<Record<string, readonly string[]>>;
+  /** The `problems` that concern no single action, e.g. a missing pagination declaration. */
+  readonly otherProblems: readonly DriftProblem[];
+  /** The specs the actions were recorded against, by source, without the overlay. */
+  readonly specs: Readonly<Record<string, OpenApiDocument>>;
+  /**
+   * The zero-based indexes of the overlay actions that match nothing in any source; only
+   * assessed when every source was fetched, as a snapshot lacks what the connector doesn't call.
+   */
+  readonly staleOverlayActions: readonly number[];
+  /** With `trackFields`, as `recordActions` reports them. */
+  readonly fieldUse?: ActionsRecording['fieldUse'];
+  readonly untracked?: ActionsRecording['untracked'];
 }
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
@@ -104,26 +121,32 @@ const listSnapshots = async (directory: string): Promise<string[]> => {
   }
 };
 
+/** The action a finding is about, when it is about one. */
+const actionOf = (finding: RecordingFinding): string | undefined =>
+  'action' in finding ? finding.action : undefined;
+
+/**
+ * What a finding says, without naming the action it is about: {@link actionOf} has that, and
+ * `problemText` puts the two together for the list the script prints.
+ */
 const describeFinding = (finding: RecordingFinding): string => {
   switch (finding.kind) {
     case 'no-input':
-      return `${finding.action}: no generated input passes the action's schema; add an input to ${FIXTURES}`;
+      return `no generated input passes the action's schema; add an input to ${FIXTURES}`;
     case 'handler-error':
-      return `${finding.action}: the handler threw: ${finding.message}`;
+      return `the handler threw: ${finding.message}`;
     case 'no-auth-type':
-      return `${
-        finding.action
-      }: threw before sending a request under every auth type: ${Object.entries(finding.errors)
+      return `threw before sending a request under every auth type: ${Object.entries(finding.errors)
         .map(([authType, message]) => `${authType}: ${message}`)
         .join('; ')}`;
     case 'auth-type-error':
       return `auth type ${finding.authType} can't be used against the contract mock, so no action was recorded with it: ${finding.message}`;
     case 'request-violation':
-      return `${finding.action}: ${finding.request} breaks the spec: ${finding.violations
+      return `${finding.request} breaks the spec: ${finding.violations
         .map(({ message }) => message)
         .join('; ')}`;
     case 'insufficient-scope':
-      return `${finding.action}: under auth type ${finding.authType}, ${
+      return `under auth type ${finding.authType}, ${
         finding.operation
       } needs OAuth scopes the auth type doesn't request: ${finding.violations
         .map(({ message }) => message)
@@ -131,14 +154,21 @@ const describeFinding = (finding: RecordingFinding): string => {
           '; '
         )}; add one to the auth type's default "scope", or correct the spec's scopes in ${OVERLAY}`;
     case 'read-scope':
-      return `${finding.action}: has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
+      return `has scope 'read' but sent ${finding.request}; if the operation only queries, add it to the action's "queries" in ${FIXTURES}, otherwise correct the scope`;
     case 'unused-query':
-      return `${finding.action}: lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
+      return `lists ${finding.operation} in "queries" in ${FIXTURES}, but no request of a 'read' scoped run needed it; remove it`;
     case 'rejected-response':
-      return `${finding.action}: the response override for ${
-        finding.operation
-      } breaks the spec: ${finding.violations.map(({ message }) => message).join('; ')}`;
+      return `the response override for ${finding.operation} breaks the spec: ${finding.violations
+        .map(({ message }) => message)
+        .join('; ')}`;
   }
+};
+
+/** A finding as the script lists it: the action it is about, then what it says. */
+const problemText = (finding: RecordingFinding): string => {
+  const action = actionOf(finding);
+  const described = describeFinding(finding);
+  return action === undefined ? described : `${action}: ${described}`;
 };
 
 const isProblem = ({ kind }: RecordingFinding): boolean =>
@@ -164,6 +194,7 @@ export const updateVendorApi = async ({
   endpoints: endpointFlags = {},
   refresh = false,
   check = false,
+  trackFields = false,
   fetchText,
   fetchedAt: fetchedAtOf,
   now,
@@ -265,22 +296,63 @@ export const updateVendorApi = async ({
     }
   }
 
+  // Protocol sources are loaded apart from `raw`, so every source is counted through `urls`.
   const fetchedEverySource = loaded.size === Object.keys(urls).length;
-  const specs = applyOverlayToSources(raw, overlay, fetchedEverySource ? log : SILENT_LOG);
+  const { specs, unmatchedActions } = applyOverlayWithFindings(raw, overlay);
+  // A snapshot only has the operations the connector calls, so an overlay action matching
+  // nothing there may still be needed.
+  const staleOverlayActions = fetchedEverySource ? unmatchedActions : [];
+  for (const index of staleOverlayActions) {
+    log.warning(
+      `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
+    );
+  }
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
   );
+  // A path several sources describe stays on the source it was recorded from, so the latest
+  // specs adding it to another source doesn't move the actions there. Named operations, which
+  // GraphQL and MCP sources record, are matched by name rather than by path.
+  const preferredOperations = Object.values(previous?.operations ?? {})
+    .flat()
+    .filter((call): call is ManifestOperation => !isNamedCall(call));
   const recording = await recordActions({
     connector,
     specs: { ...specs, ...protocols },
     fixtures,
+    trackFields,
+    preferredOperations,
+    invalidSchemas: 'skip',
   });
   // Each generated input reports its own findings, which are often the same.
   const problems = new Set<string>();
+  const problemsByAction = new Map<string, Set<string>>();
+  const otherProblems = new Map<string, DriftProblem>();
+  // The list the script prints names the action a problem is about; `problemsByAction` keys by it.
+  // A problem about no action keeps its parts, so an issue can table it; `addOtherProblem` takes
+  // the parts, and `addProblem` the text of one that has none of its own.
+  const addOtherProblem = (problem: DriftProblem, text = problemTextOf(problem)) => {
+    problems.add(text);
+    otherProblems.set(text, problem);
+  };
+  const addProblem = (text: string, action?: string) => {
+    if (action === undefined) {
+      addOtherProblem(otherProblem(text), text);
+      return;
+    }
+    problems.add(`${action}: ${text}`);
+    const own = problemsByAction.get(action) ?? new Set<string>();
+    own.add(text);
+    problemsByAction.set(action, own);
+  };
   const warnings = new Set<string>();
   for (const finding of recording.findings) {
-    (isProblem(finding) ? problems : warnings).add(describeFinding(finding));
+    if (isProblem(finding)) {
+      addProblem(describeFinding(finding), actionOf(finding));
+    } else {
+      warnings.add(problemText(finding));
+    }
   }
 
   const operationKey = ({ source, method, path: operationPath }: ManifestOperation) =>
@@ -309,9 +381,13 @@ export const updateVendorApi = async ({
         `${key}: proposed "pagination" from ${proposed.basis} in ${MANIFEST}; review it`
       );
     } else if (assessment.listLike) {
-      problems.add(
-        `${key} looks like it returns a collection, as ${assessment.reason}; declare its "pagination" in ${MANIFEST}, or "none" if it returns everything at once`
-      );
+      const { source, method, path: operationPath } = operation;
+      addOtherProblem({
+        kind: 'undeclared-pagination',
+        operation: `${method.toUpperCase()} ${operationPath}`,
+        source,
+        reason: assessment.reason,
+      });
     }
     declared.set(key, proposed?.pagination);
     return proposed?.pagination;
@@ -328,8 +404,22 @@ export const updateVendorApi = async ({
       }),
     ])
   );
+  for (const { operation, location, message } of recording.invalidOperations) {
+    warnings.add(
+      `${operation} is left out of the mock, as its schema in the spec is invalid (${location}): ${message}`
+    );
+  }
   warnings.forEach((warning) => log.warning(warning));
 
+  // Operations the mock left out for their broken schemas, which their requests match instead.
+  const brokenOperationOf = (method: string, requestPath: string) =>
+    recording.invalidOperations.find(({ operation }) => {
+      const [brokenMethod, template] = operation.split(' ');
+      return (
+        brokenMethod.toLowerCase() === method.toLowerCase() &&
+        matchesPathTemplate(template, requestPath)
+      );
+    });
   const unmatched: Record<string, UnmatchedRequest[]> = {};
   for (const [action, requests] of Object.entries(recording.unmatched)) {
     for (const { method, path: requestPath } of requests) {
@@ -340,10 +430,19 @@ export const updateVendorApi = async ({
         if (!unmatched[action]?.includes(acknowledged)) {
           unmatched[action] = [...(unmatched[action] ?? []), acknowledged];
         }
+        continue;
+      }
+      const broken = brokenOperationOf(method, requestPath);
+      if (broken) {
+        addProblem(
+          `calls ${broken.operation}, whose schema in the spec is invalid (${broken.location}): ${broken.message}; correct the spec in ${OVERLAY}`,
+          action
+        );
       } else {
         const refreshHint = fetchAll ? '' : '; if it is new to the connector, rerun with --refresh';
-        problems.add(
-          `${action}: ${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`
+        addProblem(
+          `${method.toUpperCase()} ${requestPath} matches no operation of any source; correct the spec in ${OVERLAY}, or add it to "unmatched" in ${MANIFEST} with a reason${refreshHint}`,
+          action
         );
       }
     }
@@ -418,5 +517,16 @@ export const updateVendorApi = async ({
       }
     }
   }
-  return { changed, problems: [...problems] };
+  return {
+    changed,
+    problems: [...problems],
+    problemsByAction: Object.fromEntries(
+      [...problemsByAction].map(([action, own]) => [action, [...own]])
+    ),
+    otherProblems: [...otherProblems.values()],
+    specs: raw,
+    staleOverlayActions,
+    ...(recording.fieldUse ? { fieldUse: recording.fieldUse } : {}),
+    ...(recording.untracked ? { untracked: recording.untracked } : {}),
+  };
 };

@@ -6,11 +6,13 @@
  */
 
 import { KibanaContainerModule } from '@kbn/core-di';
+import { bindEngine } from './setup/bind_engine';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
 import { bindRoutes } from './setup/bind_routes';
 import { bindServiceAccount } from './setup/bind_service_account';
 import { bindServices } from './setup/bind_services';
+import { bindSignals } from './setup/bind_signals';
 import { bindStrategies } from './setup/bind_strategies';
 import { bindState } from './setup/bind_state';
 
@@ -18,7 +20,9 @@ export { config } from './config';
 
 /** The plugin is a DI module only: Core loads it and every service is bound in `setup/`. */
 const pluginModule = new KibanaContainerModule((options) => {
+  bindEngine(options);
   bindServices(options);
+  bindSignals(options);
   bindStrategies(options);
   bindState(options);
   bindServiceAccount(options);

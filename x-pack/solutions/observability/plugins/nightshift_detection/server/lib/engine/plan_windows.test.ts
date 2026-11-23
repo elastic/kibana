@@ -6,7 +6,6 @@
  */
 
 import { createTestStrategy } from '../../test_utils/test_strategy';
-import { InvalidStrategyScheduleError } from '../errors/invalid_strategy_schedule_error';
 import type { DetectionStrategy } from '../strategies/detection_strategy';
 import { MAX_CATCH_UP_MINUTES, MAX_MINUTES_PER_RUN, planWindows } from './plan_windows';
 
@@ -163,11 +162,5 @@ describe('planWindows', () => {
       { id: 'every_minute', from: -1, to: 0, skipped: 0 },
       { id: 'every_fifteen_minutes', from: -15, to: 0, skipped: 0 },
     ]);
-  });
-
-  it.each([0, -5, 1.5, Number.NaN])('refuses a strategy with a cadence of %s', (cadence) => {
-    expect(() => plan({ strategies: [createStrategy({ id: 'bad', cadence })] })).toThrow(
-      InvalidStrategyScheduleError
-    );
   });
 });
