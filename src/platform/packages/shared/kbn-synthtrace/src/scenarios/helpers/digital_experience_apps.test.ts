@@ -22,7 +22,9 @@ import {
   generateOngoingPerMinute,
   generatePerMinute,
   getDefaultSeed,
+  getTimestamp,
   parseDigitalExperienceScenarioOpts,
+  type OngoingSessionStore,
 } from './digital_experience_apps';
 import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
@@ -52,6 +54,7 @@ const collect = (
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
+    frustration: true,
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
   );
@@ -71,6 +74,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
+        frustration: true,
       });
     });
 
@@ -88,6 +92,7 @@ describe('digital experience apps', () => {
             sessionLength: 'typical',
             ongoingSessions: false,
             scale: 3,
+            frustration: false,
           },
           FROM
         )
@@ -103,6 +108,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 3,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -115,6 +121,7 @@ describe('digital experience apps', () => {
             environments: 'true',
             edgeCases: 'true',
             scale: '2.5',
+            frustration: 'false',
           },
           FROM
         )
@@ -130,6 +137,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
+        frustration: false,
       });
     });
 
@@ -169,6 +177,17 @@ describe('digital experience apps', () => {
       );
       expect(() => parseDigitalExperienceScenarioOpts({ edgeCases: 'many' }, FROM)).toThrow(
         'edgeCases must be true or false'
+      );
+    });
+
+    it('keeps the share of signed-in sessions of each app unless set', () => {
+      expect(parseDigitalExperienceScenarioOpts(undefined, FROM).signedInRate).toBeUndefined();
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: '0.5' }, FROM).signedInRate).toBe(
+        0.5
+      );
+      expect(parseDigitalExperienceScenarioOpts({ signedInRate: 0 }, FROM).signedInRate).toBe(0);
+      expect(() => parseDigitalExperienceScenarioOpts({ signedInRate: 2 }, FROM)).toThrow(
+        'signedInRate must be a number from 0 to 1'
       );
     });
   });
@@ -224,6 +243,233 @@ describe('digital experience apps', () => {
       });
     });
 
+    describe('users', () => {
+      const generate = (
+        opts: { withSessionId?: boolean; signedInRate?: number } = {},
+        to = at(1800)
+      ) =>
+        generateEdotBrowserSessions(timerange(at(0), to), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'users', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const userOf = (doc: EdotBrowserDocument) => doc.attributes?.['user.id'];
+      const docs = generate();
+      // The users of each session, from its records that have one
+      const sessionUsers = (all: EdotBrowserDocument[], serviceName: string) => {
+        const users = new Map<unknown, Set<unknown>>();
+        all
+          .filter((doc) => doc.resource?.attributes?.['service.name'] === serviceName)
+          .forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            if (sessionId === undefined) {
+              return;
+            }
+            const sessionUserIds = users.get(sessionId) ?? new Set();
+            if (userOf(doc) !== undefined) {
+              sessionUserIds.add(userOf(doc));
+            }
+            users.set(sessionId, sessionUserIds);
+          });
+        return [...users.values()];
+      };
+
+      it('signs in about the share of sessions of each app, with a single user per session', () => {
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, signedInRate }) => {
+          const sessions = sessionUsers(docs, serviceName);
+          const signedIn = sessions.filter((users) => users.size > 0).length / sessions.length;
+
+          expect(Math.abs(signedIn - signedInRate)).toBeLessThan(0.2);
+          sessions.forEach((users) => expect(users.size).toBeLessThanOrEqual(1));
+        });
+      });
+
+      it('brings users back to several sessions', () => {
+        const sessions = sessionUsers(docs, 'checkout-web').filter((users) => users.size > 0);
+        const users = new Set(sessions.flatMap((sessionUserIds) => [...sessionUserIds]));
+
+        expect(users.size).toBeLessThan(sessions.length);
+      });
+
+      it('signs some users in during the session, after the first page load', () => {
+        const checkout = docs.filter(
+          (doc) => doc.resource?.attributes?.['service.name'] === 'checkout-web'
+        );
+        const signedInSessions = new Set(
+          checkout.filter(userOf).map((doc) => doc.attributes?.['session.id'])
+        );
+        const signingIn = new Set(
+          checkout
+            .filter((doc) => !userOf(doc) && signedInSessions.has(doc.attributes?.['session.id']))
+            .map((doc) => doc.attributes?.['session.id'])
+        );
+
+        expect(signingIn.size).toBeGreaterThan(0);
+        expect(signingIn.size).toBeLessThan(signedInSessions.size);
+      });
+
+      it('writes the account of the users of B2B apps only', () => {
+        const accountOf = (doc: EdotBrowserDocument) => doc.attributes?.['elastic.user.account'];
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, accounts }) => {
+          const signedIn = docs.filter(
+            (doc) => doc.resource?.attributes?.['service.name'] === serviceName && userOf(doc)
+          );
+
+          expect(signedIn.length).toBeGreaterThan(0);
+          signedIn.forEach((doc) =>
+            accounts
+              ? expect(accounts).toContain(accountOf(doc))
+              : expect(accountOf(doc)).toBeUndefined()
+          );
+        });
+      });
+
+      it('gives the same user the same details in every session', () => {
+        const details = new Map<unknown, string>();
+        docs.filter(userOf).forEach(({ resource, attributes = {} }) => {
+          const key = `${resource?.attributes?.['service.name']}:${attributes['user.id']}`;
+          const userDetails = JSON.stringify([
+            attributes['user.email'],
+            attributes['user.full_name'],
+            attributes['elastic.user.account'],
+          ]);
+          expect(details.get(key) ?? userDetails).toBe(userDetails);
+          details.set(key, userDetails);
+        });
+
+        const withName = docs.filter((doc) => doc.attributes?.['user.full_name']);
+        expect(withName.length).toBeGreaterThan(0);
+        expect(withName.length).toBeLessThan(docs.filter(userOf).length);
+      });
+
+      it('signs in the share of sessions of every app that signedInRate sets', () => {
+        expect(generate({ signedInRate: 0 }).some(userOf)).toBe(false);
+        // Long enough for the sessions that expired before a return to be in range too
+        const allSignedIn = generate({ signedInRate: 1 }, at(5400));
+        const sessionIds = new Set<unknown>(
+          allSignedIn.flatMap((doc) => doc.attributes?.['session.id'] ?? [])
+        );
+        const userBySession = new Map(
+          allSignedIn.filter(userOf).map((doc) => [doc.attributes?.['session.id'], userOf(doc)])
+        );
+        // Only an expiry points to a session that was generated: a follow-up's previous ID is random
+        const expiries = allSignedIn.flatMap(({ attributes = {} }) =>
+          sessionIds.has(attributes['session.previous_id'])
+            ? [[attributes['session.previous_id'], attributes['session.id']]]
+            : []
+        );
+        expect(expiries.length).toBeGreaterThan(0);
+        expiries.forEach(([expired, returning]) =>
+          expect(userBySession.get(expired)).toBe(userBySession.get(returning))
+        );
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName }) =>
+          sessionUsers(allSignedIn, serviceName).forEach((users) => expect(users.size).toBe(1))
+        );
+      });
+
+      it('keeps every session anonymous without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(userOf)).toBe(false);
+      });
+    });
+
+    describe('frustration', () => {
+      const generate = (opts: { withSessionId?: boolean; frustration?: boolean } = {}) =>
+        generateEdotBrowserSessions(timerange(at(0), at(1800)), {
+          ...parseDigitalExperienceScenarioOpts({ seed: 'frustration', ...opts }, FROM),
+          environment: 'test',
+          from: FROM,
+        }).flatMap((generator) =>
+          Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+        );
+      const eventNameOf = (doc: EdotBrowserDocument) =>
+        'event_name' in doc ? doc.event_name : undefined;
+      const isFrustration = (doc: EdotBrowserDocument) =>
+        String(eventNameOf(doc)).startsWith('browser.frustration.');
+      const docs = generate();
+      const signals = docs.filter(isFrustration);
+      const ofKind = (kind: string) =>
+        signals.filter((doc) => eventNameOf(doc) === `browser.frustration.${kind}`);
+
+      it('reports rage, dead and error clicks on the clicked element', () => {
+        ['rage_click', 'dead_click', 'error_click'].forEach((kind) =>
+          expect(ofKind(kind).length).toBeGreaterThan(0)
+        );
+        signals.forEach((doc) => {
+          expect(doc.attributes).toEqual(
+            expect.objectContaining({
+              'browser.tag_name': expect.any(String),
+              'browser.page.x': expect.any(Number),
+              'browser.page.y': expect.any(Number),
+              'url.full': expect.stringMatching(/^https:\/\//),
+              'session.id': expect.any(String),
+            })
+          );
+          const click = docs.find(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other['@timestamp'] === doc['@timestamp'] &&
+              other.attributes?.['session.id'] === doc.attributes?.['session.id']
+          );
+          expect(click?.attributes?.['browser.css_selector']).toBe(
+            doc.attributes?.['browser.css_selector']
+          );
+        });
+      });
+
+      it('repeats the click of a rage click, and counts the clicks', () => {
+        ofKind('rage_click').forEach(({ attributes = {}, ...doc }) => {
+          const count = attributes['browser.frustration.click_count'] as number;
+          const burst = docs.filter(
+            (other) =>
+              eventNameOf(other) === 'browser.user_action.click' &&
+              other.attributes?.['session.id'] === attributes['session.id'] &&
+              other.attributes?.['browser.page.x'] === attributes['browser.page.x'] &&
+              Number(other['@timestamp']) >= Number(doc['@timestamp']) &&
+              Number(other['@timestamp']) < Number(doc['@timestamp']) + count * 300
+          );
+          expect(count).toBeGreaterThanOrEqual(3);
+          // Each click at a time of its own, even right before the user navigates away
+          expect(new Set(burst.map((click) => click['@timestamp'])).size).toBeGreaterThanOrEqual(
+            count
+          );
+        });
+      });
+
+      it('carries the exception of an error click', () => {
+        ofKind('error_click').forEach(({ attributes = {} }) =>
+          expect(attributes['exception.message']).toEqual(expect.any(String))
+        );
+      });
+
+      it('leaves the sessions without frustration signals as they were', () => {
+        const bySession = (all: EdotBrowserDocument[]) => {
+          const sessions = new Map<unknown, EdotBrowserDocument[]>();
+          all.forEach((doc) => {
+            const sessionId = doc.attributes?.['session.id'];
+            sessions.set(sessionId, [...(sessions.get(sessionId) ?? []), doc]);
+          });
+          return sessions;
+        };
+        const withSignals = new Set(signals.map((doc) => doc.attributes?.['session.id']));
+        const without = bySession(generate({ frustration: false }));
+        const unchanged = [...bySession(docs)].filter(
+          ([sessionId]) => sessionId !== undefined && !withSignals.has(sessionId)
+        );
+
+        expect(unchanged.length).toBeGreaterThan(0);
+        unchanged.forEach(([sessionId, sessionDocs]) =>
+          expect(sessionDocs).toEqual(without.get(sessionId))
+        );
+        expect([...without.values()].flat().some(isFrustration)).toBe(false);
+      });
+
+      it('reports none without session IDs', () => {
+        expect(generate({ withSessionId: false }).some(isFrustration)).toBe(false);
+      });
+    });
+
     describe('seed', () => {
       const generate = (
         seed?: string,
@@ -232,7 +478,14 @@ describe('digital experience apps', () => {
           from = timeRange.from.getTime(),
           withSessionId = true,
           scale = 1,
-        }: { timeRange?: Timerange; from?: number; withSessionId?: boolean; scale?: number } = {}
+          frustration = true,
+        }: {
+          timeRange?: Timerange;
+          from?: number;
+          withSessionId?: boolean;
+          scale?: number;
+          frustration?: boolean;
+        } = {}
       ) =>
         generateEdotBrowserSessions(timeRange, {
           environment: 'test',
@@ -249,6 +502,7 @@ describe('digital experience apps', () => {
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
+          frustration,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -318,13 +572,25 @@ describe('digital experience apps', () => {
           },
           attributes: Object.fromEntries(
             Object.entries(attributes ?? {}).filter(
-              ([key]) => !['session.id', 'session.previous_id', 'browser.tab.id'].includes(key)
+              ([key]) =>
+                ![
+                  'session.id',
+                  'session.previous_id',
+                  'browser.tab.id',
+                  'user.id',
+                  'user.email',
+                  'user.full_name',
+                  'elastic.user.account',
+                ].includes(key)
             )
           ),
         });
         // Without session IDs a session is a single visit. With them, some get more visits, an idle
-        // tab and a session.start log, and all get session attributes.
-        const withSessionIds = new Set(sorted(generate('seed-a').map(asWithoutSessions)));
+        // tab and a session.start log, all get session attributes and some get a user. Rage clicks,
+        // which need sessions, add clicks that INP can be reported for.
+        const withSessionIds = new Set(
+          sorted(generate('seed-a', { frustration: false }).map(asWithoutSessions))
+        );
 
         expect(withoutSessionIds.length).toBeGreaterThan(0);
         sorted(withoutSessionIds).forEach((doc) => expect(withSessionIds.has(doc)).toBe(true));
@@ -554,6 +820,7 @@ describe('digital experience apps', () => {
         ongoingSessions: false,
         scale: 2,
         seed: 'digital-experience-test',
+        frustration: true,
       }).flatMap((generator) =>
         Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
       );
@@ -791,6 +1058,7 @@ describe('digital experience apps', () => {
           ongoingSessions: false,
           scale: 1,
           seed: 'digital-experience-test',
+          frustration: true,
         }).flatMap((generator) =>
           Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
         );
@@ -1039,11 +1307,13 @@ describe('digital experience ongoing sessions', () => {
     const startOf = (index: number) => (index + 1) * 30_000 - 1;
     const from = END - 10 * MINUTE;
 
+    const store: OngoingSessionStore<EdotBrowserDocument> = new Map();
     const generate =
       (key: string, created: number[] = []) =>
       (timeRange: Timerange) =>
         [
           generateOngoingPerMinute(timeRange, 2, {
+            store,
             key,
             maxDuration: MAX_DURATION,
             create: ({ time, index }) => {
@@ -1088,6 +1358,34 @@ describe('digital experience ongoing sessions', () => {
       expect(describeDocs(docsOf(restarted))).toEqual(
         describeDocs(whole.filter((doc) => timeOf(doc) >= restartAt))
       );
+    });
+
+    it('writes every event in the window of its release time, when one is given', () => {
+      const releaseDelay = 45_000;
+      const batches = runInBatches(from, END, 1000, (timeRange) => [
+        generateOngoingPerMinute(timeRange, 2, {
+          store,
+          key: 'release',
+          maxDuration: MAX_DURATION,
+          create: ({ time, index }) =>
+            OFFSETS.map(
+              (offset) =>
+                new Serializable<EdotBrowserDocument>({
+                  '@timestamp': time + offset,
+                  event_name: String(index),
+                })
+            ),
+          releaseTime: (event) => getTimestamp(event) + releaseDelay,
+        }),
+      ]);
+
+      batches.forEach(({ from: batchFrom, to: batchTo, docs }) =>
+        docs.forEach((doc) => {
+          expect(timeOf(doc) + releaseDelay).toBeGreaterThanOrEqual(batchFrom);
+          expect(timeOf(doc) + releaseDelay).toBeLessThan(batchTo);
+        })
+      );
+      expect(docsOf(batches).length).toBeGreaterThan(0);
     });
 
     it('creates each session once while the batches follow each other', () => {

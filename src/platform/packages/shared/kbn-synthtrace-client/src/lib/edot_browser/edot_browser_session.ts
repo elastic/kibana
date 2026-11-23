@@ -11,6 +11,7 @@ import type { OtelLogDocument } from '../otel_logs';
 import type { Serializable } from '../serializable';
 import type {
   EdotBrowserClient,
+  EdotBrowserUser,
   HttpInstrumentation,
   NavigationTimingType,
   ResourceTimingValues,
@@ -158,6 +159,17 @@ export type EdotBrowserSessionOptions = SessionAnchor & {
    * resources, so they take as long: only the timing entries are left out.
    */
   reportResourceTimings?: boolean;
+  /**
+   * The user signs in during the session: page loads from `atDocument` on (counted from 0) carry
+   * the user, like an app that calls `setUser()` after its login page. A session with fewer page
+   * loads signs in on its last one.
+   */
+  signIn?: { user: EdotBrowserUser; atDocument: number };
+  /**
+   * Reports rage, dead and error clicks, like EDOT Browser's frustration detection, drawing from
+   * this source of its own so that the rest of the session stays as it is. None when unset.
+   */
+  frustrationRandom?: () => number;
   random?: () => number;
 };
 
@@ -290,8 +302,9 @@ const DEFAULT_CLICK_TARGETS: readonly EdotBrowserClickTarget[] = [
  * - `loadDocument` emits the page load (navigation, resource and navigation timing, TTFB, FCP
  *   and LCP) from the load plan, and derives the `DocumentState` the later steps share.
  * - `interactWithPage` emits what the user does on each page view: requests fired by the page,
- *   clicks, the requests they fire, and uncaught exceptions. `routeChange` emits the soft
- *   navigation of each SPA route change.
+ *   clicks, the requests they fire, uncaught exceptions and, with `frustrationRandom`, the rage,
+ *   dead and error clicks among them. `routeChange` emits the soft navigation of each SPA route
+ *   change.
  * - `hideDocument` emits CLS and INP, which web-vitals reports once the document is hidden.
  *
  * Planning and simulation draw from the same `random` source, planning first. A seed therefore
@@ -307,6 +320,7 @@ interface SessionContext {
   slowdown: number;
   reportExceptions: boolean;
   reportResourceTimings: boolean;
+  frustrationRandom?: () => number;
 }
 
 /** One page shown during the session. Its events stay within `[start, end]`. */
@@ -509,8 +523,8 @@ const sendRequest = (
   request: EdotBrowserRequest,
   requestedTime: number,
   latestEnd: number,
-  /** Called with the time of the uncaught exception that a failure throws, if it throws one. */
-  onException?: (time: number) => void
+  /** Called with the uncaught exception that a failure throws, if it throws one. */
+  onException?: (time: number, exception: EdotBrowserExceptionTemplate) => void
 ): EdotBrowserEvent[] => {
   // The request, and with it its 1ms minimum duration, must end within the page view
   const time = Math.min(requestedTime, latestEnd - 1);
@@ -591,7 +605,7 @@ const sendRequest = (
           stacks: [REQUEST_FAILURE_STACK],
         };
     events.push(exceptionEvent(ctx, exception).timestamp(endTime));
-    onException?.(endTime);
+    onException?.(endTime, exception);
   }
   return events;
 };
@@ -798,37 +812,54 @@ const interactWithPage = (
   ctx: SessionContext,
   document: DocumentState,
   { page, from, end: slotEnd }: PageView
-): { events: EdotBrowserEvent[]; clickTimes: number[]; exceptionTimes: number[] } => {
-  const { client, site, health, random, reportExceptions } = ctx;
+): {
+  events: EdotBrowserEvent[];
+  clickTimes: number[];
+  repeatedClickTimes: number[];
+  exceptionTimes: number[];
+} => {
+  const { client, site, health, random, reportExceptions, frustrationRandom } = ctx;
   const events: EdotBrowserEvent[] = [];
   const clickTimes: number[] = [];
+  const repeatedClickTimes: number[] = [];
   // Uncaught exceptions come from failed requests as well as from the page itself
-  const exceptionTimes: number[] = [];
-  const onException = (time: number) => exceptionTimes.push(time);
+  const exceptions: PageException[] = [];
+  const onException =
+    (clickTime?: number) => (time: number, exception: EdotBrowserExceptionTemplate) =>
+      exceptions.push({ time, exception, clickTime });
 
   (page.requests ?? []).forEach((request) => {
     const time = Math.min(from + Math.floor(between(random, 5, 50)), slotEnd);
-    events.push(...sendRequest(ctx, document, request, time, slotEnd, onException));
+    events.push(...sendRequest(ctx, document, request, time, slotEnd, onException()));
   });
 
+  const clicks: PageClick[] = [];
   const clickCount = Math.floor(between(random, 0, 4));
   const clickTargets = page.clickTargets?.length ? page.clickTargets : DEFAULT_CLICK_TARGETS;
   for (let c = 0; c < clickCount; c++) {
     const clickTime = Math.floor(between(random, from, slotEnd));
     const { request, ...target } = pick(random, clickTargets);
-    clickTimes.push(clickTime);
-    events.push(
-      client
-        .click({
-          ...target,
-          pageX: between(random, 0, client.isMobile ? 390 : 1440),
-          pageY: between(random, 0, 2400),
-        })
-        .timestamp(clickTime)
-    );
+    const pageX = between(random, 0, client.isMobile ? 390 : 1440);
+    const pageY = between(random, 0, 2400);
+    const burst = frustrationRandom
+      ? rageBurst(frustrationRandom, health, clickTime, slotEnd)
+      : [clickTime];
+    clickTimes.push(...burst);
+    repeatedClickTimes.push(...burst.slice(1));
+    events.push(...burst.map((time) => client.click({ ...target, pageX, pageY }).timestamp(time)));
+    const deadDraw = frustrationRandom?.() ?? 1;
+    clicks.push({
+      time: clickTime,
+      target,
+      pageX,
+      pageY,
+      count: burst.length,
+      // A request is a reaction of the page
+      dead: !request && deadDraw < health.deadClickRate,
+    });
     if (request) {
       const time = Math.min(clickTime + Math.floor(between(random, 1, 20)), slotEnd);
-      events.push(...sendRequest(ctx, document, request, time, slotEnd, onException));
+      events.push(...sendRequest(ctx, document, request, time, slotEnd, onException(clickTime)));
     }
   }
 
@@ -841,12 +872,101 @@ const interactWithPage = (
       ({ weight = 1 }) => weight
     );
     const exceptionTime = Math.floor(between(random, from, slotEnd));
-    exceptionTimes.push(exceptionTime);
+    exceptions.push({ time: exceptionTime, exception });
     events.push(exceptionEvent(ctx, exception).timestamp(exceptionTime));
   }
 
-  return { events, clickTimes, exceptionTimes };
+  if (frustrationRandom) {
+    events.push(...frustrationEvents(ctx, toUrl(site, page.path), clicks, exceptions));
+  }
+
+  return {
+    events,
+    clickTimes,
+    repeatedClickTimes,
+    exceptionTimes: exceptions.map(({ time }) => time),
+  };
 };
+
+interface PageClick {
+  time: number;
+  target: Omit<EdotBrowserClickTarget, 'request'>;
+  pageX: number;
+  pageY: number;
+  /** Clicks in the burst, more than 1 for a rage click. */
+  count: number;
+  dead: boolean;
+}
+
+interface PageException {
+  time: number;
+  exception: EdotBrowserExceptionTemplate;
+  /** The click that fired the request that threw it, if any. */
+  clickTime?: number;
+}
+
+// EDOT Browser's frustration detection: a burst of 3 clicks or more on the same element, each
+// within a second of the previous one, is a rage click, and an uncaught exception within a second
+// of a click, or of the response to a request it fired up to 10 seconds after it, an error click.
+const FRUSTRATION_WINDOW_MS = 1_000;
+const MAX_ERROR_CLICK_WINDOW_MS = 10_000;
+
+/** The times of a click and, for a rage click, of the ones that the user repeats it with. */
+const rageBurst = (
+  random: () => number,
+  health: HealthProfile,
+  clickTime: number,
+  slotEnd: number
+): number[] => {
+  const [rageDraw, countDraw] = [random(), random()];
+  if (rageDraw >= health.rageClickRate) {
+    return [clickTime];
+  }
+  const times = [clickTime];
+  const count = 3 + Math.floor(countDraw * 5);
+  while (times.length < count) {
+    const time = times[times.length - 1] + Math.floor(between(random, 80, 300));
+    // The user navigated away before repeating the click
+    if (time > slotEnd) {
+      break;
+    }
+    times.push(time);
+  }
+  return times.length >= 3 ? times : [clickTime];
+};
+
+const frustrationEvents = (
+  { client }: SessionContext,
+  url: string,
+  clicks: PageClick[],
+  exceptions: PageException[]
+): EdotBrowserEvent[] =>
+  clicks.flatMap(({ time, target, pageX, pageY, count, dead }) => {
+    const signal = { ...target, pageX, pageY, url };
+    const [error] = exceptions
+      .filter(
+        (exception) =>
+          exception.time >= time &&
+          (exception.time <= time + FRUSTRATION_WINDOW_MS ||
+            (exception.clickTime === time && exception.time <= time + MAX_ERROR_CLICK_WINDOW_MS))
+      )
+      .sort((a, b) => a.time - b.time);
+    return [
+      ...(count > 1
+        ? [client.frustration({ kind: 'rage_click', clickCount: count, ...signal })]
+        : []),
+      ...(dead ? [client.frustration({ kind: 'dead_click', ...signal })] : []),
+      ...(error
+        ? [
+            client.frustration({
+              kind: 'error_click',
+              exception: { type: error.exception.type, message: error.exception.message },
+              ...signal,
+            }),
+          ]
+        : []),
+    ].map((event) => event.timestamp(time));
+  });
 
 /** An SPA route change, which the navigation instrumentation reports as a soft navigation. */
 const routeChange = (
@@ -947,6 +1067,7 @@ const simulateDocument = (
       start: loadView.start,
       end: hiddenAt,
       clickTimes,
+      repeatedClickTimes: visits.flatMap((visit) => visit.repeatedClickTimes),
       exceptionTimes: visits.flatMap((visit) => visit.exceptionTimes),
     },
   };
@@ -965,6 +1086,8 @@ export interface EdotBrowserSessionDocument {
   /** When the document was hidden, right before the next one loaded. */
   end: number;
   clickTimes: number[];
+  /** The clicks of `clickTimes` that repeat the previous click on the same element, in rage clicks. */
+  repeatedClickTimes?: number[];
   exceptionTimes: number[];
 }
 
@@ -986,6 +1109,8 @@ export const sessionWithDocuments = (
     resumed = false,
     reportExceptions = true,
     reportResourceTimings = true,
+    signIn,
+    frustrationRandom,
     random = Math.random,
   } = options;
   if (site.pages.length === 0) {
@@ -999,14 +1124,22 @@ export const sessionWithDocuments = (
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
     reportExceptions,
     reportResourceTimings,
+    frustrationRandom,
   };
   const documents = planDocuments(ctx, { pageViews, dwell, hardNavigationRate });
   const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
   const start = options.start !== undefined ? options.start : options.end - duration;
 
+  const signedIn: SessionContext | undefined = signIn && {
+    ...ctx,
+    client: client.withUser(signIn.user),
+  };
+  const signInDocument = signIn ? Math.min(signIn.atDocument, documents.length - 1) : Infinity;
   const simulated = documents
     .map((document) => shiftDocument(document, start))
-    .map((document) => simulateDocument(ctx, document));
+    .map((document, index) =>
+      simulateDocument(signedIn && index >= signInDocument ? signedIn : ctx, document)
+    );
 
   return {
     events: [

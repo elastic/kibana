@@ -7,11 +7,11 @@
 
 export { AiIndexCreatedCallout } from './ai_index_created_callout';
 export { AutomationRow } from './automation_row';
+export { AutomationsLockedDescription } from './automations_locked_description';
 export { AutomationsPanel } from './automations_panel';
+export { AutomationsSection } from './automations_section';
 export { ConnectAgentPanel } from './connect_agent_panel';
-export { DescriptionPanel } from './description_panel';
-export { DreamingPanel } from './dreaming_panel';
 export { LockedSectionPanel } from './locked_section_panel';
 export { SignalsPanel } from './signals_panel';
-export { SourcesPanel } from './sources_panel';
+export { SourcesPanel } from './sources/sources_panel';
 export { TracesPanel } from './traces_panel';

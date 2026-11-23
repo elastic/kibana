@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render as rtlRender, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { ApplicationPage } from './application_page';
@@ -15,6 +15,7 @@ import { useRouteBreadcrumb } from '../../breadcrumbs/use_route_breadcrumb';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useApplicationLinks } from '../../hooks/use_application_links';
+import { useShareAction } from '../../hooks/use_share_action';
 
 const historyReplace = jest.fn();
 jest.mock('react-router-dom', () => {
@@ -38,6 +39,8 @@ jest.mock('./otel_overview/otel_overview', () => ({
   ),
 }));
 jest.mock('../../hooks/use_application_links');
+// Its own test covers what it shares; here the page only has to give it to the header.
+jest.mock('../../hooks/use_share_action');
 jest.mock('../errors/errors_tab', () => {
   return {
     ErrorsTab: ({ serviceName }: { serviceName: string }) => {
@@ -49,6 +52,13 @@ jest.mock('../network/network_tab', () => {
   return {
     NetworkTab: ({ serviceName }: { serviceName: string }) => {
       return <div data-test-subj="networkTab">{serviceName}</div>;
+    },
+  };
+});
+jest.mock('../reports/reports_tab', () => {
+  return {
+    ReportsTab: () => {
+      return <div data-test-subj="reportsTab" />;
     },
   };
 });
@@ -79,6 +89,7 @@ beforeEach(() => {
     overviewPath: '/my-app?source=classic',
     errorsHref: '/errors-href',
     networkHref: '/network-href',
+    reportsHref: '/reports-href',
     sessionsHref: () => '/sessions-href',
     sessionHref: () => '/session-href',
   });
@@ -131,6 +142,31 @@ describe('ApplicationPage', () => {
       'href',
       '/app/digital_experience/?rangeFrom=now-7d&rangeTo=now'
     );
+  });
+
+  it('gives the Share action of the tab to the header', () => {
+    const onClick = jest.fn();
+    jest.mocked(useShareAction).mockReturnValue({ onClick });
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="errors" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(useShareAction).toHaveBeenCalledWith({
+      serviceName: 'my-app',
+      source: 'otel',
+      tab: 'errors',
+    });
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('has no Share button without a Share action', () => {
+    jest.mocked(useShareAction).mockReturnValue(undefined);
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
+
+    expect(screen.queryByRole('button', { name: 'Share' })).not.toBeInTheDocument();
   });
 
   it('opens the Classic RUM dashboard in the environment selected in the list', async () => {
@@ -202,7 +238,7 @@ describe('ApplicationPage', () => {
     expect(screen.queryByTestId('digitalExperienceOverviewEmpty')).not.toBeInTheDocument();
   });
 
-  it('links the Overview, Sessions, Errors and Network tabs of an EDOT Browser application', () => {
+  it('links the Overview, Sessions, Errors, Network and Reports tabs of an EDOT Browser application', () => {
     useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
 
     render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="overview" />);
@@ -217,12 +253,19 @@ describe('ApplicationPage', () => {
       'digitalExperienceTab-sessions',
       'digitalExperienceTab-errors',
       'digitalExperienceTab-network',
+      'digitalExperienceTab-reports',
     ]);
     expect(
       tabs.map((tab) => {
         return tab.getAttribute('href');
       })
-    ).toEqual(['/overview-href', '/sessions-href', '/errors-href', '/network-href']);
+    ).toEqual([
+      '/overview-href',
+      '/sessions-href',
+      '/errors-href',
+      '/network-href',
+      '/reports-href',
+    ]);
   });
 
   it('renders the errors of the application on the Errors tab', () => {
@@ -250,7 +293,19 @@ describe('ApplicationPage', () => {
     ]);
   });
 
-  it.each(['errors', 'network'] as const)(
+  it('renders the report templates on the Reports tab', () => {
+    useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);
+
+    render(<ApplicationPage serviceName="my-app" source="otel" selectedTab="reports" />);
+
+    expect(screen.getByTestId('reportsTab')).toBeInTheDocument();
+    expect(useRouteBreadcrumb).toHaveBeenCalledWith([
+      { text: 'my-app', href: '/overview-href' },
+      { text: 'Reports' },
+    ]);
+  });
+
+  it.each(['errors', 'network', 'reports'] as const)(
     'replaces the %s route of a Classic RUM application with its Overview',
     (tab) => {
       useKibanaServicesMock.mockReturnValue({} as ReturnType<typeof useKibanaServices>);

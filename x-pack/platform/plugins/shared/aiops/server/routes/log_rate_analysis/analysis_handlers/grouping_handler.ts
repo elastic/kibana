@@ -22,7 +22,7 @@ import {
   addSignificantItemsGroup,
   addSignificantItemsGroupHistogram,
   updateLoadingState,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+} from '@kbn/aiops-log-rate-analysis/api/stream_actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import { fetchFrequentItemSets } from '@kbn/aiops-log-rate-analysis/queries/fetch_frequent_item_sets';

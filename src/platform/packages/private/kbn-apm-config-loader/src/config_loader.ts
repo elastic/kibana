@@ -44,3 +44,8 @@ export const getConfiguration = (serviceName: string): AgentConfigOptions | unde
   }
   return undefined;
 };
+
+/**
+ * Returns the Kibana instance name (`server.name`), or `undefined` if the configuration hasn't been loaded.
+ */
+export const getKibanaName = (): string | undefined => apmConfig?.getKibanaName();

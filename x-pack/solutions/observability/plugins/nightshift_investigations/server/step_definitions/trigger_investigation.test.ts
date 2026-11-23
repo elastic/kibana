@@ -31,7 +31,8 @@ const logger = loggingSystemMock.createLogger();
 const createContext = (
   input: Record<string, unknown>,
   triggeredBy = 'scheduled',
-  metadata: Record<string, string> = {}
+  metadata: Record<string, string> = {},
+  event?: Record<string, unknown>
 ) =>
   ({
     input,
@@ -41,6 +42,7 @@ const createContext = (
       getContext: jest.fn().mockReturnValue({
         workflow: { id: 'wf-1', spaceId: 'test-space' },
         execution: { triggeredBy },
+        event,
         metadata,
         kibanaUrl: 'https://kibana.example.com',
       }),
@@ -421,6 +423,34 @@ describe('triggerInvestigationStepDefinition', () => {
       expect.objectContaining({
         subject: { type: 'slack_thread', id: expectedId, summary: undefined },
         slack_thread: slackThread,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('summarizes a Slack thread by the message that started the run, not the step summary', async () => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(
+      createContext(
+        {
+          subject_type: 'slack_thread',
+          summary: 'Investigate alerts posted in #alerts',
+          message: 'Slack message from O11y Alert in channel C1: ...',
+          slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+        },
+        'slack2.message',
+        {},
+        { text: '*CRITICAL:* burn rate above 20 <https://kibana.example.com/a|Alert details>' }
+      )
+    );
+
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: expect.objectContaining({
+          summary: 'CRITICAL: burn rate above 20 Alert details',
+        }),
       }),
       expect.anything()
     );

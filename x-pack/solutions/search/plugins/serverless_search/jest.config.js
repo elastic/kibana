@@ -13,6 +13,6 @@ module.exports = {
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/plugins/serverless_search',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/search/plugins/search_connectors/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/solutions/search/plugins/serverless_search/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

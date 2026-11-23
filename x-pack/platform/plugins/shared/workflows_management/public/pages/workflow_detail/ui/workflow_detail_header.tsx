@@ -1,0 +1,516 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiPageTemplate } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { selectUnit } from '@formatjs/intl-utils';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux-v7';
+import { useLocation, useParams } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { AppHeader } from '@kbn/app-header';
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { WorkflowAccessControlModal } from './workflow_access_control_modal';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
+import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
+import {
+  selectHasChanges,
+  selectHasYamlSchemaValidationErrors,
+  selectIsSaveInProgress,
+  selectIsYamlSynced,
+  selectIsYamlSyntaxValid,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { useDisableWorkflowsConfirmation } from '../../../features/linked_rules/model/use_disable_workflows_confirmation';
+import { useSaveYamlWithConfirmation } from '../../../features/linked_rules/model/use_save_yaml_with_confirmation';
+import { useWorkflowDependentsContext } from '../../../features/workflow_dependents/model/workflow_dependents_context';
+import {
+  getCalledWorkflowsBadge,
+  getDependentsBadge,
+} from '../../../features/workflow_dependents/ui/get_dependents_badge';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
+import { getAddConnectorsMenuItem } from '../../../shared/ui/get_add_connectors_menu_item';
+import {
+  getReturnDestinationFromSearch,
+  navigateToWorkflowsList,
+  type WorkflowDetailRouteState,
+} from '../../../shared/utils/workflow_navigation';
+
+const executionsTabReadExecutionDisabledTooltip = i18n.translate(
+  'workflows.workflowDetailHeader.executionsTabReadExecutionDisabledTooltip',
+  {
+    defaultMessage:
+      'You need the Workflows "Read Workflow Execution" privilege to view workflow executions.',
+  }
+);
+
+const executionsTabReadManagedExecutionDisabledTooltip = i18n.translate(
+  'workflows.workflowDetailHeader.executionsTabReadManagedExecutionDisabledTooltip',
+  {
+    defaultMessage:
+      'You need the Workflows "Read workflow executions" and "Read managed workflow executions" privileges to view managed workflow executions.',
+  }
+);
+
+const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
+  const { application } = useKibana().services;
+  const location = useLocation<WorkflowDetailRouteState | undefined>();
+  const appList = useObservable(application.applications$);
+
+  // Honor `returnApp`/`returnPath` query params when the app is known.
+  return useMemo<AppHeaderBack>(() => {
+    const returnDestination = getReturnDestinationFromSearch(location.search);
+    const returnApp = returnDestination && appList?.get(returnDestination.returnAppId);
+
+    if (returnDestination && returnApp) {
+      return {
+        href: application.getUrlForApp(returnDestination.returnAppId, {
+          path: returnDestination.returnPath,
+        }),
+        label: returnApp.title,
+        onClick: (event) => {
+          event.preventDefault();
+          application.navigateToApp(
+            returnDestination.returnAppId,
+            returnDestination.returnPath ? { path: returnDestination.returnPath } : undefined
+          );
+        },
+      };
+    }
+
+    return {
+      href: `/app/${PLUGIN_ID}`,
+      label: i18n.translate('workflows.workflowDetailHeader.backLinkLabel', {
+        defaultMessage: 'Workflows',
+      }),
+      onClick: (event) => {
+        event.preventDefault();
+        void navigateToWorkflowsList(application, location.state);
+      },
+    };
+  }, [application, appList, location.search, location.state]);
+};
+
+export interface WorkflowDetailHeaderProps {
+  isLoading: boolean;
+  // TODO: manage it in a workflow state context
+  highlightDiff: boolean;
+  setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
+  /** When provided, Executions opens the flyout list instead of switching editor tabs. */
+  onOpenExecutionList?: () => void;
+}
+
+export const WorkflowDetailHeader = React.memo(
+  ({
+    isLoading,
+    highlightDiff,
+    setHighlightDiff,
+    onOpenExecutionList,
+  }: WorkflowDetailHeaderProps) => {
+    const { id: workflowId } = useParams<{ id?: string }>();
+    const { application } = useKibana().services;
+    const back = useWorkflowDetailHeaderBack();
+    const styles = useMemoCss(componentStyles);
+    const [isAccessOpen, setIsAccessOpen] = useState(false);
+    const {
+      canCreateWorkflow,
+      canUpdateWorkflow: hasUpdatePrivilege,
+      canReadWorkflow,
+      canReadWorkflowExecution,
+      canReadManagedWorkflowExecution,
+    } = useWorkflowsCapabilities();
+
+    const { activeTab, isViewingExecution, setActiveTab } = useWorkflowUrlState();
+    const isExecutionsTab = activeTab === 'executions';
+
+    const workflow = useSelector(selectWorkflow);
+    const canUpdateWorkflow = hasUpdatePrivilege && workflow?.permissions?.edit !== false;
+    const canManageAccess = hasUpdatePrivilege && workflow?.permissions?.manage === true;
+    const isManagedWorkflow = workflow?.managed === true;
+    const canReadVisibleWorkflowExecution =
+      canReadWorkflowExecution && (!isManagedWorkflow || canReadManagedWorkflowExecution);
+    const executionsTabDisabledTooltip = isManagedWorkflow
+      ? executionsTabReadManagedExecutionDisabledTooltip
+      : executionsTabReadExecutionDisabledTooltip;
+    const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+    const hasYamlSchemaValidationErrors = useSelector(selectHasYamlSchemaValidationErrors);
+    const hasUnsavedChanges = useSelector(selectHasChanges);
+    const isYamlSynced = useSelector(selectIsYamlSynced);
+
+    const { name, isEnabled, lastUpdatedAt } = useMemo(
+      () => ({
+        name: workflow?.name ?? 'New workflow',
+        isEnabled: workflow?.enabled ?? false,
+        lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
+      }),
+      [workflow]
+    );
+
+    const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
+    const saveYaml = useSaveYamlWithConfirmation(confirmDisable);
+    const isSaving = useSelector(selectIsSaveInProgress);
+    const handleSaveWorkflow = useCallback(() => {
+      saveYaml();
+    }, [saveYaml]);
+
+    const workflowDependents = useWorkflowDependentsContext();
+    const openLinks = workflowDependents?.openLinks;
+    const openDependents = useCallback(() => openLinks?.('usedBy'), [openLinks]);
+    const openCalledWorkflows = useCallback(() => openLinks?.('runs'), [openLinks]);
+
+    const updateWorkflow = useUpdateWorkflow();
+
+    const [savedLabel, setSavedLabel] = useState<string>('');
+
+    useEffect(() => {
+      if (hasUnsavedChanges || !workflowId || !lastUpdatedAt) {
+        return;
+      }
+
+      const formatter = new Intl.RelativeTimeFormat(i18n.getLocale(), {
+        numeric: 'auto',
+        style: 'short',
+      });
+
+      const updateLabel = () => {
+        const { value, unit } = selectUnit(lastUpdatedAt);
+        if (unit === 'second') {
+          setSavedLabel(
+            i18n.translate('workflows.savedJustNow', {
+              defaultMessage: 'Saved just now',
+            })
+          );
+        } else {
+          setSavedLabel(
+            i18n.translate('workflows.savedAgo', {
+              defaultMessage: 'Saved {relativeTime}',
+              values: { relativeTime: formatter.format(value, unit) },
+            })
+          );
+        }
+      };
+
+      updateLabel();
+      const interval = setInterval(updateLabel, 30_000);
+
+      return () => clearInterval(interval);
+    }, [hasUnsavedChanges, workflowId, lastUpdatedAt]);
+
+    // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
+    // workflow?.valid !== false covers the initial page load before Monaco validates.
+    const isSchemaValid =
+      isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
+
+    const saveWorkflowTooltipContent = useMemo(() => {
+      const isCreate = !workflowId;
+      return getSaveWorkflowTooltipContent({
+        isExecutionsTab: isViewingExecution,
+        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
+        isCreate,
+        hasUnsavedChanges,
+        isManagedWorkflow,
+      });
+    }, [
+      isViewingExecution,
+      workflowId,
+      canCreateWorkflow,
+      canUpdateWorkflow,
+      hasUnsavedChanges,
+      isManagedWorkflow,
+    ]);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
+
+    const enabledSwitchTooltipContent = useMemo(() => {
+      if (hasUnsavedChanges) {
+        return i18n.translate('workflows.workflowDetailHeader.unsaved', {
+          defaultMessage: 'Save changes to enable/disable workflow',
+        });
+      }
+      if (!isSchemaValid) {
+        return i18n.translate('workflows.workflowDetailHeader.invalid', {
+          defaultMessage: 'Fix validation errors to enable workflow',
+        });
+      }
+      return undefined;
+    }, [hasUnsavedChanges, isSchemaValid]);
+
+    const toggleExecutionsPanel = useCallback(() => {
+      if (onOpenExecutionList) {
+        onOpenExecutionList();
+        return;
+      }
+      setActiveTab(isExecutionsTab ? 'workflow' : 'executions');
+    }, [isExecutionsTab, onOpenExecutionList, setActiveTab]);
+
+    const executionsToggleItem = useMemo<AppMenuItemType>(
+      () => ({
+        id: 'toggleExecutions',
+        order: 0,
+        label: i18n.translate('workflows.workflowDetailHeader.executionsButton', {
+          defaultMessage: 'Executions',
+        }),
+        iconType: 'videoPlayer',
+        isSelected: isExecutionsTab,
+        run: toggleExecutionsPanel,
+        disableButton: !canReadVisibleWorkflowExecution,
+        tooltipContent: !canReadVisibleWorkflowExecution ? executionsTabDisabledTooltip : undefined,
+        testId: 'workflowDetailExecutionsButton',
+      }),
+      [
+        isExecutionsTab,
+        toggleExecutionsPanel,
+        canReadVisibleWorkflowExecution,
+        executionsTabDisabledTooltip,
+      ]
+    );
+
+    const changeHistoryModal = useContext(ChangeHistoryModalContext);
+    const openHistoryModal = useCallback(() => {
+      changeHistoryModal?.openModal();
+    }, [changeHistoryModal]);
+    const showHistoryButton = Boolean(canReadWorkflow && !isViewingExecution && changeHistoryModal);
+
+    const historyItem = useMemo<AppMenuItemType | undefined>(() => {
+      if (!showHistoryButton) {
+        return undefined;
+      }
+
+      return {
+        id: 'workflowHistory',
+        order: 2,
+        label: i18n.translate('workflows.workflowDetailHeader.historyButton', {
+          defaultMessage: 'History',
+        }),
+        iconType: 'clock',
+        run: openHistoryModal,
+        testId: 'workflowDetailHistoryButton',
+      };
+    }, [showHistoryButton, openHistoryModal]);
+
+    const enabledSwitchConfig = useMemo<NonNullable<AppMenuConfig['switch']> | undefined>(() => {
+      if (!workflowId) {
+        return undefined;
+      }
+
+      return {
+        id: 'enabledSwitch',
+        label: i18n.translate('workflows.workflowDetailHeader.enabled', {
+          defaultMessage: 'Enabled',
+        }),
+        labelProps: {},
+        checked: isEnabled,
+        onChange: async (checked: boolean) => {
+          if (!checked && !(await confirmDisable([workflowId]))) {
+            return;
+          }
+          updateWorkflow({ workflow: { enabled: checked } });
+        },
+        disabled: isLoading || !canUpdateWorkflow || !isSchemaValid || hasUnsavedChanges,
+        tooltipContent: enabledSwitchTooltipContent,
+        'data-test-subj': 'workflowEnabledSwitch',
+      };
+    }, [
+      workflowId,
+      isEnabled,
+      confirmDisable,
+      updateWorkflow,
+      isLoading,
+      canUpdateWorkflow,
+      isSchemaValid,
+      hasUnsavedChanges,
+      enabledSwitchTooltipContent,
+    ]);
+
+    const addConnectorsMenuItem = useMemo(
+      () => getAddConnectorsMenuItem(application),
+      [application]
+    );
+
+    const badges = useMemo<AppHeaderBadge[]>(() => {
+      const result: AppHeaderBadge[] = [];
+
+      if (isManagedWorkflow) {
+        result.push({
+          label: i18n.translate('workflows.managedWorkflowBadge.label', {
+            defaultMessage: 'Managed',
+          }),
+          color: 'primary',
+          tooltip: i18n.translate('workflows.managedWorkflowBadge.tooltip', {
+            defaultMessage: 'Elastic manages this workflow.',
+          }),
+          'data-test-subj': 'workflowDetailManagedBadge',
+        });
+      }
+
+      if (hasUnsavedChanges) {
+        result.push({
+          label: i18n.translate('workflows.unsavedChangesBadge', {
+            defaultMessage: 'Unsaved changes',
+          }),
+          color: 'primary',
+          // A new workflow has no saved version to diff against, so the badge is not a toggle.
+          ...(workflowId && {
+            onClick: () => setHighlightDiff((state) => !state),
+            onClickAriaLabel: highlightDiff
+              ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
+                  defaultMessage: 'Unsaved changes, hide diff highlighting',
+                })
+              : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
+                  defaultMessage: 'Unsaved changes, show diff highlighting',
+                }),
+          }),
+          'data-test-subj': 'workflowUnsavedChangesBadge',
+        });
+      } else if (workflowId && savedLabel) {
+        result.push({
+          label: savedLabel,
+          color: 'primary',
+          'data-test-subj': 'workflowSavedChangesBadge',
+        });
+      }
+
+      const dependentsBadge = getDependentsBadge({
+        analysis: workflowDependents?.dependents.analysis,
+        onClick: openDependents,
+      });
+      if (dependentsBadge) {
+        result.push(dependentsBadge);
+      }
+      const calledBadge = getCalledWorkflowsBadge({
+        calledWorkflows: workflowDependents?.dependents.calledWorkflows,
+        onClick: openCalledWorkflows,
+      });
+      if (calledBadge) {
+        result.push(calledBadge);
+      }
+
+      return result;
+    }, [
+      isManagedWorkflow,
+      hasUnsavedChanges,
+      workflowId,
+      savedLabel,
+      highlightDiff,
+      setHighlightDiff,
+      workflowDependents?.dependents.analysis,
+      workflowDependents?.dependents.calledWorkflows,
+      openDependents,
+      openCalledWorkflows,
+    ]);
+
+    const appMenu = useMemo<AppMenuConfig>(() => {
+      const items: AppMenuItemType[] = [];
+      if (workflowId) {
+        items.push(executionsToggleItem);
+      }
+      if (historyItem) {
+        items.push(historyItem);
+      }
+      if (addConnectorsMenuItem) {
+        items.push(addConnectorsMenuItem);
+      }
+
+      return {
+        primaryActionItem: {
+          id: 'saveWorkflow',
+          label: i18n.translate('workflows.saveButtonText', {
+            defaultMessage: 'Save',
+          }),
+          iconType: 'save',
+          run: handleSaveWorkflow,
+          disableButton:
+            isViewingExecution ||
+            !canSaveWorkflow ||
+            isLoading ||
+            isSaving ||
+            isManagedWorkflow ||
+            !isYamlSynced ||
+            !hasUnsavedChanges,
+          isLoading: isSaving,
+          tooltipContent: saveWorkflowTooltipContent ?? undefined,
+          testId: 'saveWorkflowHeaderButton',
+        },
+        switch: enabledSwitchConfig,
+        items,
+      };
+    }, [
+      isViewingExecution,
+      workflowId,
+      executionsToggleItem,
+      historyItem,
+      addConnectorsMenuItem,
+      enabledSwitchConfig,
+      handleSaveWorkflow,
+      canSaveWorkflow,
+      isLoading,
+      isSaving,
+      isManagedWorkflow,
+      isYamlSynced,
+      hasUnsavedChanges,
+      saveWorkflowTooltipContent,
+    ]);
+
+    const share = useMemo(() => {
+      if (!workflowId || isManagedWorkflow) return undefined;
+      return {
+        label: i18n.translate('workflows.access.buttonLabel', { defaultMessage: 'Access control' }),
+        onClick: () => setIsAccessOpen(true),
+        isDisabled: !canManageAccess,
+        tooltip: !canManageAccess
+          ? {
+              content:
+                workflow?.permissions?.manage === false
+                  ? i18n.translate('workflows.access.ownerOnlyTooltip', {
+                      defaultMessage:
+                        'Only the workflow owner and administrators can manage access.',
+                    })
+                  : i18n.translate('workflows.access.updatePrivilegeTooltip', {
+                      defaultMessage: 'You need the Workflows Update privilege to manage access.',
+                    }),
+            }
+          : undefined,
+      };
+    }, [canManageAccess, isManagedWorkflow, workflow?.permissions?.manage, workflowId]);
+
+    return (
+      <>
+        <EuiPageTemplate offset={0} minHeight={0} grow={false} css={styles.pageTemplate}>
+          <AppHeader
+            title={name}
+            back={back}
+            badges={badges}
+            share={share}
+            menu={appMenu}
+            docLink={WORKFLOWS_DOCUMENTATION_URL}
+            spacing="compact"
+          />
+        </EuiPageTemplate>
+        {isAccessOpen && workflow && (
+          <WorkflowAccessControlModal workflow={workflow} onClose={() => setIsAccessOpen(false)} />
+        )}
+        {disableConfirmModal}
+      </>
+    );
+  }
+);
+WorkflowDetailHeader.displayName = 'WorkflowDetailHeader';
+
+const componentStyles = {
+  pageTemplate: css({
+    flexGrow: 0,
+  }),
+};

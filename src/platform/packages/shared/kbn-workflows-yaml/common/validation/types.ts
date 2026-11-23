@@ -113,6 +113,10 @@ interface YamlValidationResultConnectorIdError extends YamlValidationDiagnosticB
   owner: 'connector-id-validation';
 }
 
+interface YamlValidationResultServiceAccount extends YamlValidationDiagnosticBase {
+  owner: 'service-account-validation';
+}
+
 interface YamlValidationResultJsonSchemaDefault extends YamlValidationDiagnosticBase {
   owner: 'json-schema-default-validation';
 }
@@ -171,6 +175,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'variable-validation',
   'liquid-template-validation',
   'connector-id-validation',
+  'service-account-validation',
   'json-schema-default-validation',
   'step-property-validation',
   'workflow-inputs-validation',
@@ -200,6 +205,7 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultMonacoYaml
   | YamlValidationResultLiquidTemplate
   | YamlValidationResultConnectorIdError
+  | YamlValidationResultServiceAccount
   | YamlValidationResultJsonSchemaDefault
   | YamlValidationResultStepPropertyError
   | YamlValidationResultWorkflowInputsError

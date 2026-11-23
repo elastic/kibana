@@ -18,7 +18,7 @@ import { QUEUE_CHUNKING_SIZE } from '@kbn/aiops-log-rate-analysis/queue_field_ca
 import {
   addSignificantItemsHistogram,
   updateLoadingState,
-} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
+} from '@kbn/aiops-log-rate-analysis/api/stream_actions';
 import { fetchMiniHistogramsForSignificantItems } from '@kbn/aiops-log-rate-analysis/queries/fetch_mini_histograms_for_significant_items';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 

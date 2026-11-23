@@ -119,6 +119,38 @@ describe('ServiceAccountsTable', () => {
     expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 
+  it('shows all roles directly when an account has three roles', () => {
+    renderTable({
+      serviceAccounts: [{ ...firstAccount, roles: ['role-1', 'role-2', 'role-3'] }],
+    });
+
+    const displayedRoles = screen.getByTestId('serviceAccountDisplayedRoles');
+    expect(within(displayedRoles).getAllByText(/role-/)).toHaveLength(3);
+    expect(screen.queryByTestId('serviceAccountMoreRoles')).not.toBeInTheDocument();
+  });
+
+  it('keeps a long role list in a scrollable popover', async () => {
+    const roles = Array.from({ length: 50 }, (_, index) => `role-${index + 1}`);
+    renderTable({ serviceAccounts: [{ ...firstAccount, roles }] });
+
+    const displayedRoles = screen.getByTestId('serviceAccountDisplayedRoles');
+    expect(within(displayedRoles).getAllByText(/role-/)).toHaveLength(3);
+    const moreRoles = screen.getByTestId('serviceAccountMoreRoles');
+    expect(moreRoles).toHaveTextContent('+47 more');
+    expect(moreRoles).toHaveAccessibleName('Show all 50 roles for nightshift-relay');
+    expect(screen.queryByTestId('serviceAccountAllRoles')).not.toBeInTheDocument();
+
+    fireEvent.click(moreRoles);
+
+    const allRoles = await screen.findByTestId('serviceAccountAllRoles');
+    expect(within(allRoles).getAllByText(/role-/)).toHaveLength(50);
+    expect(within(allRoles).getByText('role-50')).toBeInTheDocument();
+    expect(allRoles).toHaveStyle({ overflowY: 'auto' });
+    expect(allRoles).toHaveAccessibleName('Roles for nightshift-relay');
+    act(() => allRoles.focus());
+    expect(allRoles).toHaveFocus();
+  });
+
   it.each([
     [{ type: 'user' as const, username: 'operator' }, 'operator'],
     [

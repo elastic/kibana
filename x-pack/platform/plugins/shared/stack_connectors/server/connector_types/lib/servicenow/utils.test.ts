@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios, { AxiosError } from 'axios';
+import { applyNetworkErrorMessage } from '@kbn/actions-plugin/server/lib/network_error_message';
 
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
@@ -19,7 +21,7 @@ import {
   getAxiosInstance,
   throwIfAdditionalFieldsNotSupported,
 } from './utils';
-import type { ResponseError } from './types';
+import type { ResponseError, ServiceNowError } from './types';
 import { ServiceNowApiError } from './types';
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
@@ -38,6 +40,19 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 const createAxiosInstanceMock = axios.create as jest.Mock;
+
+const createServiceNowAxiosError = (
+  message: string,
+  code: string,
+  response?: Partial<AxiosResponse<ServiceNowError>>
+): ResponseError =>
+  new AxiosError<ServiceNowError>(
+    message,
+    code,
+    undefined,
+    undefined,
+    response as AxiosResponse<ServiceNowError> | undefined
+  );
 const axiosInstanceMock = {
   interceptors: {
     request: { eject: jest.fn(), use: jest.fn() },
@@ -137,7 +152,6 @@ describe('utils', () => {
     describe('OAuth errors', () => {
       test('it extracts error and error_description from JSON in error message', async () => {
         const error = new Error('{"error":"invalid_grant","error_description":"User not found"}');
-        // @ts-expect-error
         expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
           '[Action][ServiceNow]: Unable to do action. Error: invalid_grant Reason: User not found'
         );
@@ -145,7 +159,6 @@ describe('utils', () => {
 
       test('it handles OAuth error without error_description', async () => {
         const error = new Error('{"error":"invalid_grant"}');
-        // @ts-expect-error
         expect(addServiceMessageToError(error, 'Unable to do action').message).toBe(
           '[Action][ServiceNow]: Unable to do action. Error: invalid_grant'
         );
@@ -185,7 +198,7 @@ describe('utils', () => {
       const err = createServiceNowApiError('forced', { status: 200, body: {} });
 
       expect(
-        addServiceMessageToError(err as unknown as ResponseError, 'Unable to do action', {
+        addServiceMessageToError(err, 'Unable to do action', {
           endpoint: 'import_set',
           method: 'post',
         }).message
@@ -193,13 +206,10 @@ describe('utils', () => {
     });
 
     test('falls back to error.code when no status is available', () => {
-      const err = Object.assign(new Error('Unsupported protocol foo:'), {
-        isAxiosError: true as const,
-        code: 'ERR_BAD_REQUEST',
-      });
+      const err = createServiceNowAxiosError('Unsupported protocol foo:', 'ERR_BAD_REQUEST');
 
       expect(
-        addServiceMessageToError(err as unknown as ResponseError, 'Unable to do action', {
+        addServiceMessageToError(err, 'Unable to do action', {
           endpoint: 'table',
           method: 'post',
         }).message
@@ -207,7 +217,7 @@ describe('utils', () => {
     });
 
     test('falls back to "none" when no signal is available', () => {
-      const err = new Error('something broke') as unknown as ResponseError;
+      const err = new Error('something broke');
 
       expect(
         addServiceMessageToError(err, 'Unable to do action', { endpoint: 'other' }).message
@@ -252,67 +262,75 @@ describe('utils', () => {
 
   describe('maxContentLength classification', () => {
     test('tags axios maxContentLength errors as USER', () => {
-      const err = Object.assign(new Error('maxContentLength size of 1024 exceeded'), {
-        isAxiosError: true as const,
-        code: 'ERR_BAD_RESPONSE',
-      });
+      const err = createServiceNowAxiosError(
+        'maxContentLength size of 1024 exceeded',
+        'ERR_BAD_RESPONSE'
+      );
 
-      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+      addServiceMessageToError(err, 'Unable to create incident', {
         endpoint: 'import_set',
         method: 'post',
       });
 
-      expect(getErrorSource(err as unknown as Error)).toBe(TaskErrorSource.USER);
+      expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
     });
 
     test('tags axios maxContentLength errors as USER even when response metadata is present', () => {
-      const err = Object.assign(new Error('maxContentLength size of 20971520 exceeded'), {
-        isAxiosError: true as const,
-        code: 'ERR_BAD_RESPONSE',
-        response: { status: 200, headers: { 'content-length': '104857600' } },
-      });
+      const err = createServiceNowAxiosError(
+        'maxContentLength size of 20971520 exceeded',
+        'ERR_BAD_RESPONSE',
+        { status: 200 }
+      );
 
-      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+      addServiceMessageToError(err, 'Unable to create incident', {
         endpoint: 'import_set',
         method: 'post',
       });
 
-      expect(getErrorSource(err as unknown as Error)).toBe(TaskErrorSource.USER);
+      expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
     });
 
     test('does not tag a plain HTTP 4xx as USER via this path (response present)', () => {
-      const err = Object.assign(new Error('Request failed'), {
-        isAxiosError: true as const,
-        code: 'ERR_BAD_REQUEST',
-        response: { status: 413, data: {} },
-      });
+      const err = createServiceNowAxiosError('Request failed', 'ERR_BAD_REQUEST', { status: 413 });
 
-      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+      addServiceMessageToError(err, 'Unable to create incident', {
         endpoint: 'table',
         method: 'post',
       });
 
-      expect(getErrorSource(err as unknown as Error)).toBeUndefined();
+      expect(getErrorSource(err)).toBeUndefined();
     });
 
     test('does not tag a generic network error as USER', () => {
-      const err = Object.assign(new Error('connect ECONNREFUSED'), {
-        isAxiosError: true as const,
-        code: 'ECONNREFUSED',
-      });
+      const err = createServiceNowAxiosError('connect ECONNREFUSED', 'ECONNREFUSED');
 
-      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+      addServiceMessageToError(err, 'Unable to create incident', {
         endpoint: 'table',
         method: 'post',
       });
 
-      expect(getErrorSource(err as unknown as Error)).toBeUndefined();
+      expect(getErrorSource(err)).toBeUndefined();
+    });
+
+    test('reports a connection reset with a descriptive message when getting choices', () => {
+      const err = createServiceNowAxiosError('read ECONNRESET', 'ECONNRESET');
+      err.cause = Object.assign(new Error('read ECONNRESET'), { code: 'ECONNRESET' });
+      applyNetworkErrorMessage(err);
+
+      addServiceMessageToError(err, 'Unable to get choices', {
+        endpoint: 'table',
+        method: 'get',
+      });
+
+      expect(err.message).toBe(
+        '[Action][ServiceNow]: Unable to get choices. Error: The connection was interrupted before a response was received (read ECONNRESET) [status=ECONNRESET] [method=get] [endpoint=table]'
+      );
     });
 
     test('does not tag a plain Error as USER even if message mentions maxContentLength', () => {
       const err = new Error('maxContentLength was set somewhere');
 
-      addServiceMessageToError(err as unknown as ResponseError, 'Unable to create incident', {
+      addServiceMessageToError(err, 'Unable to create incident', {
         endpoint: 'table',
         method: 'post',
       });

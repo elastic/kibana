@@ -58,6 +58,11 @@ export const AutomationTriggerSection = ({
   return (
     <>
       <SectionHeader title={triggerLabels.triggers} />
+      {trigger && isSlackTrigger(trigger) && (
+        <EuiText size="xs" color="subdued" data-test-subj="automationSlackTriggerMentionHelp">
+          {triggerLabels.slackMentionHelp}
+        </EuiText>
+      )}
       <EuiSpacer size="s" />
       <EuiPanel hasBorder hasShadow={false} paddingSize={trigger && !readOnly ? 's' : 'm'}>
         {!trigger && (
