@@ -136,22 +136,24 @@ describe('alerting_v2 config schema', () => {
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(
+        NON_STREAMING_MAX_ROWS
+      );
     });
 
     it('uses alerts.max for the arrow response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(500);
     });
   });
 
@@ -329,6 +331,28 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ dispatcher: { run: { timeout: 'abc' } } })).toThrow(
         /Invalid duration/
       );
+    });
+  });
+
+  describe('dispatcher.run.hydration.maxResponseSize', () => {
+    it('defaults to 50mb', () => {
+      expect(
+        configSchema.validate({}).dispatcher.run.hydration.maxResponseSize.getValueInBytes()
+      ).toBe(50 * 1024 * 1024);
+    });
+
+    it('accepts a lower value', () => {
+      expect(
+        configSchema
+          .validate({ dispatcher: { run: { hydration: { maxResponseSize: '10mb' } } } })
+          .dispatcher.run.hydration.maxResponseSize.getValueInBytes()
+      ).toBe(10 * 1024 * 1024);
+    });
+
+    it.each(['512kb', '101mb'])('rejects %s, outside 1mb–100mb', (maxResponseSize) => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { hydration: { maxResponseSize } } } })
+      ).toThrow();
     });
   });
 

@@ -4,7 +4,7 @@
 
 ## Query generation workflow
 
-Run these steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools (e.g. `write_todos`) to track it — they only add tool calls that re-send the full feature context.
+Run these steps directly, in order. This sequence is fixed and short: do not use planning, to-do, or note-taking tools to track it — they only add tool calls that re-send the full feature context.
 
 1. **Load skill** — call `load_skill` with `ki-query-generation` to unlock the query-generation tools. Note whether the optional `platform_sig_events_event_search` tool is present.
 2. **Fetch features** — call `platform_sig_events_ki_features_get` (without filters).

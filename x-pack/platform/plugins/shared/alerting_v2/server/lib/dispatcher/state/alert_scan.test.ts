@@ -32,6 +32,35 @@ describe('AlertScan', () => {
     it('defaults truncated to false', () => {
       expect(AlertScan.of({ alerts: [createAlert()] }).truncated).toBe(false);
     });
+
+    it('is never deferred', () => {
+      expect(AlertScan.of({ alerts: [createAlert()], truncated: true }).deferred).toBe(false);
+      expect(AlertScan.empty().deferred).toBe(false);
+    });
+  });
+
+  describe('withDeferredTail', () => {
+    it('cuts before the first deferred alert and marks the scan truncated and deferred', () => {
+      const scan = AlertScan.of({
+        alerts: [
+          createAlert({ alert_id: 'e1' }),
+          createAlert({ alert_id: 'e2' }),
+          createAlert({ alert_id: 'e3' }),
+        ],
+      }).withDeferredTail(({ alert_id: alertId }) => alertId === 'e2');
+
+      expect(scan.alerts.map(({ alert_id: alertId }) => alertId)).toEqual(['e1']);
+      expect(scan.truncated).toBe(true);
+      expect(scan.deferred).toBe(true);
+    });
+
+    it('keeps every alert when none is deferred', () => {
+      const alerts = [createAlert({ alert_id: 'e1' })];
+      const scan = AlertScan.of({ alerts }).withDeferredTail(() => false);
+
+      expect(scan.alerts).toBe(alerts);
+      expect(scan.deferred).toBe(true);
+    });
   });
 
   describe('truncationEdge', () => {

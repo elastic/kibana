@@ -17,6 +17,11 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { ACTIONS_INDEX, ACTION_EXPIRATION_WEEKS, QUERY_TIMEOUT } from '../../../common/constants';
+import {
+  ensureActionsIndexMappings,
+  OriginMappingConflictError,
+} from '../../create_indices/create_transforms_indices';
+import type { ActionOrigin } from './action_origin';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObject } from '../../common/types';
 import { CustomHttpRequestError } from '../../common/error';
@@ -26,8 +31,33 @@ import {
   QUERY_NOT_PROVIDED,
 } from '../../../common/translations/errors';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import {
+  agentLimitMessage,
+  NO_AGENTS_FOUND_MESSAGE,
+  RouteErrorCode,
+} from '../../../common/workflows/contract/route_messages';
 import type { DispatchEntryPoint } from './dispatch_source';
 import { resolveRuleRunDispatchSource } from './dispatch_source';
+
+/**
+ * How long a write waits for the `origin` mapping. Fleet has already dispatched the query by
+ * then, so a slow mapping update must not hold the response past the caller's HTTP timeout.
+ */
+export const ORIGIN_MAPPING_TIMEOUT_MS = 5_000;
+
+const withTimeout = async <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`timed out after ${ms} ms`)), ms);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+};
 
 interface Metadata {
   currentUser: string | undefined;
@@ -52,6 +82,10 @@ interface CreateActionHandlerOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
   dispatch: DispatchEntryPoint;
+  /** When set, reject before any Fleet action is written if the selection is larger. */
+  maxAgents?: number;
+  /** What started the action, resolved by the server. Absent for manual and rule dispatches. */
+  origin?: ActionOrigin;
 }
 
 export const createActionHandler = async (
@@ -68,7 +102,7 @@ export const createActionHandler = async (
     actionSpaceId
   );
 
-  const { metadata, alertData, error, dispatch } = options;
+  const { metadata, alertData, error, dispatch, origin } = options;
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
   const {
     agent_all: agentAll,
@@ -90,7 +124,15 @@ export const createActionHandler = async (
   );
 
   if (!selectedAgents.length) {
-    throw new CustomHttpRequestError('No agents found for selection', 400);
+    throw new CustomHttpRequestError(NO_AGENTS_FOUND_MESSAGE, 400, RouteErrorCode.NO_AGENTS_FOUND);
+  }
+
+  if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {
+    throw new CustomHttpRequestError(
+      agentLimitMessage(selectedAgents.length, options.maxAgents),
+      400,
+      RouteErrorCode.AGENT_LIMIT_EXCEEDED
+    );
   }
 
   // Resolve the dispatch source once per entry point.
@@ -190,6 +232,7 @@ export const createActionHandler = async (
     tags: [],
     space_id: actionSpaceId,
     queries: queriesWithEmptySqlFixed,
+    ...(origin ? { origin } : {}),
   };
 
   const actionQueries = osqueryAction.queries as OsqueryActionQuery[];
@@ -225,6 +268,30 @@ export const createActionHandler = async (
   });
 
   if (actionsComponentTemplateExists) {
+    if (origin) {
+      // `origin` is the newest mapped field. Make sure its mapping exists before the first
+      // document carrying it is written, so it is never mapped dynamically.
+      const logger = osqueryContext.logFactory.get('osquery');
+      try {
+        // The setup keeps running after a timeout and is cached once it succeeds.
+        await withTimeout(
+          ensureActionsIndexMappings(esClientInternal, logger),
+          ORIGIN_MAPPING_TIMEOUT_MS
+        );
+      } catch (mappingError) {
+        // Fleet actions are already dispatched, so keep the action readable without risking
+        // dynamically mapped origin fields. The response must match the stored document.
+        delete osqueryAction.origin;
+        const reason = mappingError instanceof Error ? mappingError.message : String(mappingError);
+        const message = `Osquery action ${osqueryAction.action_id}: origin mapping unavailable (${reason}); storing without origin`;
+        if (mappingError instanceof OriginMappingConflictError) {
+          logger.debug(message);
+        } else {
+          logger.warn(message);
+        }
+      }
+    }
+
     const bulkResponse = await esClientInternal.bulk({
       refresh: 'wait_for',
       operations: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
@@ -241,7 +308,14 @@ export const createActionHandler = async (
   }
 
   osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id', 'user_profile_uid', 'error']),
+    ...omit(osqueryAction, [
+      'type',
+      'input_type',
+      'user_id',
+      'user_profile_uid',
+      'error',
+      'origin',
+    ]),
     agents: osqueryAction.agents.length,
   });
 

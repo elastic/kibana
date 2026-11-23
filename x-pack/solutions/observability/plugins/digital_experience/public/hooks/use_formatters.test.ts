@@ -38,11 +38,31 @@ describe('useFormatters', () => {
     expect(formatPercent(0.125)).toBe('13%');
   });
 
+  it('signs a change unless it rounds to 0 under the pattern', () => {
+    const { formatSignedNumber, formatSignedPercent } = renderFormatters({
+      'format:number:defaultPattern': '0.[0]',
+      'format:percent:defaultPattern': '0%',
+    });
+
+    expect(formatSignedNumber(1.5)).toBe('+1.5');
+    expect(formatSignedNumber(-1.5)).toBe('-1.5');
+    expect(formatSignedNumber(-0.0004)).toBe('0');
+    expect(formatSignedPercent(0.2)).toBe('+20%');
+    expect(formatSignedPercent(-0.2)).toBe('-20%');
+    expect(formatSignedPercent(0.001)).toBe('0%');
+    expect(formatSignedPercent(-0.001)).toBe('0%');
+  });
+
   it('formats dates with the date format in the configured time zone', () => {
     const { formatDate, timeZone } = renderFormatters({ 'dateFormat:tz': 'America/New_York' });
 
     expect(formatDate('2021-01-18T12:25:00.000Z')).toBe('Jan 18, 2021 @ 07:25:00.000');
     expect(timeZone).toBe('America/New_York');
+  });
+
+  it('names the zones Elasticsearch rejects by the zones they link to', () => {
+    expect(renderFormatters({ 'dateFormat:tz': 'EST' }).timeZone).toBe('America/Panama');
+    expect(renderFormatters({ 'dateFormat:tz': 'ROC' }).timeZone).toBe('Asia/Taipei');
   });
 
   it("uses the browser's time zone, by its IANA name, when Kibana follows the browser", () => {

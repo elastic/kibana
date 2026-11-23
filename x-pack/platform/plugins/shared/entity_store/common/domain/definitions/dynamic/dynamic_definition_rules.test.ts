@@ -14,6 +14,8 @@ import {
   NO_IDENTITY_ATTRIBUTE_RULE,
   RESERVED_LAST_SEEN_FIELD,
   SERVABLE_IDENTITY_RULE,
+  SUGGESTED_FILTER_RULE,
+  getIdentityCompositions,
   getPresenceFilter,
 } from './dynamic_definition_rules';
 import {
@@ -364,6 +366,55 @@ describe('dynamic definition rules', () => {
 
     it('accepts an attribute on a different field', () => {
       expectAccepted(withAttribute(hostIdentity, 'host.os.name'));
+    });
+  });
+
+  describe('suggested filters are attributes or identity fields', () => {
+    const withSuggestedFilters = (identityField: EntityIdentity, suggestedFilters: string[]) =>
+      definition(identityField, { dynamic: { ...dynamic, suggestedFilters } });
+
+    it('accepts an attribute of a source', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['os_name']));
+    });
+
+    it('accepts the single identity field', () => {
+      expectAccepted(withSuggestedFilters({ singleField: 'k8s.pod.uid' }, ['k8s.pod.uid']));
+    });
+
+    it('accepts a field of a ranking and an attribute together', () => {
+      expectAccepted(withSuggestedFilters(hostIdentity, ['host.name', 'os_name']));
+    });
+
+    it('rejects the entity id, even when it is the identity field', () => {
+      expectRejected(
+        withSuggestedFilters({ singleField: 'entity.id' }, ['entity.id']),
+        ['dynamic', 'suggestedFilters', 0],
+        SUGGESTED_FILTER_RULE
+      );
+    });
+
+    it('rejects a name that is neither an attribute nor an identity field', () => {
+      expectRejected(
+        withSuggestedFilters(hostIdentity, ['os_name', 'missing']),
+        ['dynamic', 'suggestedFilters', 1],
+        SUGGESTED_FILTER_RULE
+      );
+    });
+  });
+
+  describe('getIdentityCompositions', () => {
+    it('lists the fields of each composition, separators dropped', () => {
+      expect(getIdentityCompositions({ singleField: 'service.name' })).toEqual([['service.name']]);
+      expect(
+        getIdentityCompositions({
+          euidRanking: {
+            branches: [
+              { ranking: [[{ field: 'a' }, { sep: '/' }, { field: 'b' }], [{ field: 'c' }]] },
+            ],
+          },
+          documentsFilter: getPresenceFilter([['a', 'b'], ['c']]),
+        })
+      ).toEqual([['a', 'b'], ['c']]);
     });
   });
 

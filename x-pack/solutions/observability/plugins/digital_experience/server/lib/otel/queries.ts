@@ -29,16 +29,8 @@ import {
   SPAN_STATUS_ERROR,
   WEB_VITAL_NAME,
   WEB_VITAL_VALUE,
+  ENVIRONMENT_FIELDS,
 } from '../../../common/otel_data';
-
-/**
- * `service.environment` aliases the deprecated `deployment.environment`, which newer SDKs replace
- * with `deployment.environment.name`.
- */
-export const ENVIRONMENT_FIELDS = [
-  SERVICE_ENVIRONMENT,
-  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
-];
 
 /** The browser SDK documents of the time range, for every application. */
 export const browserDocuments = (start: number, end: number) => [
@@ -49,6 +41,28 @@ export const browserDocuments = (start: number, end: number) => [
 
 /** The documents of one application, by its exact name. */
 export const serviceDocuments = (serviceName: string) => termQuery(SERVICE_NAME, serviceName);
+
+/**
+ * The browser SDK documents of one application in the time range, and only those `kuery` (the
+ * Overview's KQL, as a query) matches when it is given.
+ */
+export const applicationDocuments = ({
+  serviceName,
+  start,
+  end,
+  kuery,
+}: {
+  serviceName: string;
+  start: number;
+  end: number;
+  kuery?: estypes.QueryDslQueryContainer;
+}) => {
+  return [
+    ...browserDocuments(start, end),
+    ...serviceDocuments(serviceName),
+    ...(kuery ? [kuery] : []),
+  ];
+};
 
 /** A filter aggregation counting the documents of one event, e.g. the page loads. */
 export const eventCount = (eventName: string) => ({
@@ -72,14 +86,29 @@ export const otelSearchDefaults = (index: string) => ({
   allow_partial_search_results: false,
 });
 
-/** Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one. */
-export const byEnvironment = (
+/** The documents of the environment, and of the other `filters` when given. */
+export const inEnvironmentFilter = (
   environment: string | undefined,
-  aggs: Record<string, estypes.AggregationsAggregationContainer>
+  filters: estypes.QueryDslQueryContainer[] = []
+): estypes.QueryDslQueryContainer =>
+  filters.length > 0
+    ? { bool: { filter: [environmentFilter(ENVIRONMENT_FIELDS, environment), ...filters] } }
+    : environmentFilter(ENVIRONMENT_FIELDS, environment);
+
+/**
+ * Up to 100 environments for the picker, whatever the selected one, and `aggs` in that one, and in
+ * the documents of `filters` too.
+ */
+export const byEnvironment = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer>
+>(
+  environment: string | undefined,
+  aggs: TAggs,
+  filters: estypes.QueryDslQueryContainer[] = []
 ) => ({
   ...environmentTerms(MAX_ENVIRONMENTS),
   environmentNotDefined: { filter: environmentNotDefinedFilter(ENVIRONMENT_FIELDS) },
-  inEnvironment: { filter: environmentFilter(ENVIRONMENT_FIELDS, environment), aggs },
+  inEnvironment: { filter: inEnvironmentFilter(environment, filters), aggs },
 });
 
 /** One vital's samples (the filter's doc count) and stats, matching `cls` and `CLS` alike. */

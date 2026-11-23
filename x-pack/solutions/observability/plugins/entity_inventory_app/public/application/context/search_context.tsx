@@ -7,13 +7,14 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
-import { UI_SETTINGS } from '@kbn/data-service';
 import type { EntityInventoryEntityCategory } from '../../types';
-import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
+import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { useKibana } from '../../hooks/use_kibana';
-import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
-import { clampTimeRange } from '../utils/clamp_time_range';
+import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_NOT_ALLOWED_TOAST_TITLE } from '../translations';
+import { checkTimeRange } from '../utils/check_time_range';
+import { validateQuery } from '../utils/validate_query';
+import type { FilterControlsSelection } from '../filters/utils/selection';
+import { useUrlSearchState } from './use_url_search_state';
 
 export interface EntityInventorySearchSubmitPayload {
   dateRange: TimeRange;
@@ -26,15 +27,18 @@ export interface EntityInventorySearchContextValue {
   filters: Filter[];
   dateRange: TimeRange;
   setFilters: (filters: Filter[]) => void;
+  filterControls: FilterControlsSelection;
+  setFilterControls: (selection: FilterControlsSelection) => void;
+  refreshToken: number;
+  /** False when `xpack.entityInventoryApp.timeRangeLimit.disabled` turns the time range limit off. */
+  isTimeRangeLimited: boolean;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
 
-const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
-
 const EntityInventorySearchContext = createContext<EntityInventorySearchContextValue | null>(null);
 
-/** Holds the page's controlled search state; it never writes to the global query services. */
+/** Holds the page's search state in the URL; it never writes to the global query services. */
 export const EntityInventorySearchProvider = ({
   entityCategory,
   children,
@@ -43,50 +47,81 @@ export const EntityInventorySearchProvider = ({
   children?: React.ReactNode;
 }) => {
   const {
-    services: { notifications, uiSettings },
+    services: { notifications, uiSettings, config },
   } = useKibana();
-  const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
+  const isTimeRangeLimited = !config.timeRangeLimit.disabled;
+  const maxDays = isTimeRangeLimited ? ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS : Infinity;
+  const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState({
+    maxDays,
+  });
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const setFilters = useCallback(
+    (nextFilters: Filter[]) => updateSearchState({ filters: nextFilters }),
+    [updateSearchState]
+  );
+
+  const setFilterControls = useCallback(
+    (selection: FilterControlsSelection) => updateSearchState({ filterControls: selection }),
+    [updateSearchState]
+  );
 
   const submit = useCallback(
     ({ dateRange: submittedRange, query: submittedQuery }: EntityInventorySearchSubmitPayload) => {
       let queryToCommit = submittedQuery;
       // SearchBar submits the raw query text without parsing it; reject invalid KQL here so the
       // last valid query is kept and consumers never receive a query that fails to parse.
-      if (submittedQuery?.language === 'kuery') {
-        try {
-          fromKueryExpression(submittedQuery.query, {
-            allowLeadingWildcards: uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
-          });
-        } catch (error) {
-          notifications.toasts.addError(error, { title: INVALID_QUERY_TOAST_TITLE });
-          queryToCommit = undefined;
-        }
+      const queryError = submittedQuery && validateQuery(submittedQuery, uiSettings);
+      if (queryError) {
+        notifications.toasts.addError(queryError, { title: INVALID_QUERY_TOAST_TITLE });
+        queryToCommit = undefined;
       }
 
-      const { range, wasClamped, isValid } = clampTimeRange(
-        submittedRange,
-        ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS
-      );
-      const effectiveRange = isValid ? range : dateRange;
-
-      if (wasClamped) {
-        notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
+      const rangeCheck = checkTimeRange(submittedRange, maxDays);
+      const isRangeAccepted = rangeCheck === 'valid';
+      if (rangeCheck === 'not_allowed') {
+        notifications.toasts.addWarning({ title: TIME_RANGE_NOT_ALLOWED_TOAST_TITLE });
       }
-      if (queryToCommit) {
-        setQuery(queryToCommit);
+      if (queryToCommit || isRangeAccepted) {
+        updateSearchState({
+          ...(queryToCommit && { query: queryToCommit }),
+          ...(isRangeAccepted && { dateRange: submittedRange }),
+        });
       }
-      setDateRange(effectiveRange);
+      if (isRangeAccepted) {
+        setRefreshToken((token) => token + 1);
+      }
 
-      return effectiveRange;
+      return isRangeAccepted ? submittedRange : dateRange;
     },
-    [dateRange, notifications, uiSettings]
+    [dateRange, maxDays, notifications, updateSearchState, uiSettings]
   );
 
   const value = useMemo(
-    () => ({ entityCategory, query, filters, dateRange, setFilters, submit }),
-    [entityCategory, query, filters, dateRange, submit]
+    () => ({
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      setFilters,
+      filterControls,
+      setFilterControls,
+      refreshToken,
+      isTimeRangeLimited,
+      submit,
+    }),
+    [
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      setFilters,
+      filterControls,
+      setFilterControls,
+      refreshToken,
+      isTimeRangeLimited,
+      submit,
+    ]
   );
 
   return (

@@ -5,16 +5,24 @@
  * 2.0.
  */
 
+import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { CORE_WEB_VITAL, getVitalRating } from '../../../../common/core_web_vitals';
 import type {
-  ApplicationSource,
   ApplicationSummary,
   PageLoadsOverTime,
   TimeSeriesPoint,
+  ApplicationSource,
+  WebApplicationSummary,
 } from '../../../../common/types/applications';
+import { isWebApplication } from './filter_applications';
 
 export interface ApplicationsSummary {
   applications: number;
+  /**
+   * Sessions that started in the time range, of the EDOT Browser applications. `null` when they
+   * were not counted: the raw events don't, nor does Classic RUM.
+   */
+  sessions: number | null;
   pageLoads: number;
   /** JS errors per page load over all the applications, `null` without page loads. */
   errorsPerPageLoad: number | null;
@@ -27,25 +35,39 @@ export interface ApplicationsSummary {
 const ratio = (numerator: number, denominator: number): number | null =>
   denominator > 0 ? numerator / denominator : null;
 
-const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: ApplicationSummary): boolean =>
+const hasPoorCoreWebVitals = ({ webVitals: { lcp, inp, cls } }: WebApplicationSummary): boolean =>
   (lcp.p75Ms !== null && getVitalRating(CORE_WEB_VITAL.lcp, lcp.p75Ms) === 'poor') ||
   (inp.p75Ms !== null && getVitalRating(CORE_WEB_VITAL.inp, inp.p75Ms) === 'poor') ||
   (cls.p75 !== null && getVitalRating(CORE_WEB_VITAL.cls, cls.p75) === 'poor');
 
-const countNames = (applications: ApplicationSummary[]): number =>
+const countNames = (applications: Array<{ serviceName: string }>): number =>
   new Set(applications.map(({ serviceName }) => serviceName)).size;
+
+/**
+ * The sessions of the rows that count them. Only EDOT Browser rows read from the sessions index do,
+ * and all of them do or none, as they come from one source, so Classic RUM rows have none to add.
+ */
+const countSessions = (applications: WebApplicationSummary[]): number | null => {
+  const counts = applications.flatMap(({ sessions }) => (sessions ? [sessions.count] : []));
+  return counts.length > 0 ? counts.reduce((total, count) => total + count, 0) : null;
+};
 
 /**
  * The totals of every source's rows, for the summary above the table; a name with data in both
  * sources counts as one application.
  */
-export const summarizeApplications = (applications: ApplicationSummary[]): ApplicationsSummary => {
-  const total = (count: (application: ApplicationSummary) => number) =>
+export const summarizeApplications = (
+  allApplications: ApplicationSummary[]
+): ApplicationsSummary => {
+  // Mobile applications have no page loads, vitals or HTTP requests to total.
+  const applications = allApplications.filter(isWebApplication);
+  const total = (count: (application: WebApplicationSummary) => number) =>
     applications.reduce((sum, application) => sum + count(application), 0);
 
   const pageLoads = total(({ pageLoads: { count } }) => count);
   return {
     applications: countNames(applications),
+    sessions: countSessions(applications),
     pageLoads,
     errorsPerPageLoad: ratio(
       total(({ jsErrors: { count } }) => count),
@@ -59,9 +81,18 @@ export const summarizeApplications = (applications: ApplicationSummary[]): Appli
   };
 };
 
+/**
+ * The sessions over time of the selected source, `null` when they are not counted. Only EDOT Browser
+ * has sessions, so Classic RUM has none, and so has a list read from the raw events.
+ */
+export const sessionsOfSource = (
+  sessionsOverTime: TimeSeriesPoint[] | null,
+  source: ApplicationSource | undefined
+): TimeSeriesPoint[] | null => (source === APPLICATION_SOURCE.classic ? null : sessionsOverTime);
+
 /** Page loads over time of one source, or of both added up when no source is selected. */
 export const pageLoadsOfSources = (
-  pageLoadsOverTime: PageLoadsOverTime,
+  pageLoadsOverTime: Pick<PageLoadsOverTime, ApplicationSource>,
   source: ApplicationSource | undefined
 ): TimeSeriesPoint[] => {
   if (source) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IndicesGetFieldMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { actionsMapping } from './actions_mapping';
 import { actionResponsesMapping } from './action_responses_mapping';
 import {
@@ -35,6 +36,7 @@ interface MockEsClient {
     putIndexTemplate: jest.Mock<Promise<{ acknowledged: boolean }>>;
     create: jest.Mock<Promise<{ acknowledged: boolean }>>;
     getIndexTemplate: jest.Mock<Promise<IndexTemplateResponse>>;
+    getFieldMapping: jest.Mock<Promise<IndicesGetFieldMappingResponse>>;
     putMapping: jest.Mock<Promise<{ acknowledged: boolean }>>;
   };
 }
@@ -42,6 +44,32 @@ interface MockEsClient {
 interface EsIndexMappings {
   properties: Record<string, unknown>;
 }
+
+const ORIGIN_FIELDS = ['origin.type', 'origin.run_id', 'origin.verified'] as const;
+type OriginField = (typeof ORIGIN_FIELDS)[number];
+
+const originFieldMappings = (
+  overrides: Partial<Record<OriginField, string>> = {}
+): IndicesGetFieldMappingResponse => {
+  const types: Record<OriginField, string> = {
+    'origin.type': 'keyword',
+    'origin.run_id': 'keyword',
+    'origin.verified': 'boolean',
+    ...overrides,
+  };
+
+  return {
+    [ACTIONS_INDEX_DEFAULT_NS]: {
+      mappings: Object.fromEntries(
+        ORIGIN_FIELDS.map((field) => {
+          const leaf = field.slice('origin.'.length);
+
+          return [field, { full_name: field, mapping: { [leaf]: { type: types[field] } } }];
+        })
+      ),
+    },
+  } as IndicesGetFieldMappingResponse;
+};
 
 const createMockEsClient = (): MockEsClient => ({
   indices: {
@@ -60,6 +88,7 @@ const createMockEsClient = (): MockEsClient => ({
         },
       ],
     }),
+    getFieldMapping: jest.fn().mockResolvedValue(originFieldMappings()),
     putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
   },
 });
@@ -124,6 +153,14 @@ function makeEsIndexMappings(
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
       tags: { ignore_above: 256, type: 'keyword' },
+      origin: {
+        dynamic: false,
+        properties: {
+          type: { ignore_above: 256, type: 'keyword' },
+          run_id: { ignore_above: 256, type: 'keyword' },
+          verified: { type: 'boolean' },
+        },
+      },
       ...overrides,
     },
   };
@@ -404,6 +441,52 @@ describe('createTransformIndices', () => {
       );
     });
 
+    it('should update the actions template and index mapping when the origin field is missing', async () => {
+      const currentMappings = {
+        properties: Object.fromEntries(
+          Object.entries(actionsMapping.properties ?? {}).filter(([field]) => field !== 'origin')
+        ),
+      };
+
+      mockEsClient.indices.exists.mockResolvedValueOnce(true);
+      mockEsClient.indices.getIndexTemplate.mockResolvedValueOnce({
+        index_templates: [
+          {
+            name: ACTIONS_INDEX_NAME,
+            index_template: { template: { mappings: currentMappings } },
+          },
+        ],
+      });
+
+      await createIndexIfNotExists(
+        mockEsClient as unknown as ElasticsearchClient,
+        ACTIONS_INDEX_NAME,
+        ACTIONS_INDEX_DEFAULT_NS,
+        actionsMapping,
+        logger
+      );
+
+      expect(mockEsClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+        name: ACTIONS_INDEX_NAME,
+        index_patterns: ACTIONS_INDEX_DEFAULT_NS,
+        template: { mappings: actionsMapping },
+        priority: 500,
+      });
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith({
+        index: ACTIONS_INDEX_DEFAULT_NS,
+        body: { properties: actionsMapping.properties },
+      });
+      expect(actionsMapping.properties?.origin).toEqual({
+        dynamic: false,
+        properties: {
+          type: { type: 'keyword', ignore_above: 256 },
+          run_id: { type: 'keyword', ignore_above: 256 },
+          verified: { type: 'boolean' },
+        },
+      });
+      expect(mockEsClient.indices.create).not.toHaveBeenCalled();
+    });
+
     it('should log error if index creation fails', async () => {
       const error = new Error('Failed to create index');
       mockEsClient.indices.exists.mockRejectedValueOnce(error);
@@ -473,5 +556,140 @@ describe('createTransformIndices', () => {
         'Failed to create the index template: osquery_manager.actions'
       );
     });
+  });
+
+  describe('ensureActionsIndexMappings', () => {
+    // The setup promise is module state, so each test loads a fresh copy of the module.
+    const loadModule = () => {
+      let mod: typeof import('./create_transforms_indices') | undefined;
+      jest.isolateModules(() => {
+        mod = jest.requireActual('./create_transforms_indices');
+      });
+
+      return mod!;
+    };
+
+    beforeEach(() => {
+      mockEsClient = createMockEsClient();
+      jest.clearAllMocks();
+    });
+
+    it('shares one in-flight mapping check between concurrent calls', async () => {
+      const { ensureActionsIndexMappings } = loadModule();
+      const esClient = mockEsClient as unknown as ElasticsearchClient;
+      let finishCheck: () => void = jest.fn();
+      mockEsClient.indices.getFieldMapping.mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishCheck = () => resolve(originFieldMappings());
+        })
+      );
+      const first = ensureActionsIndexMappings(esClient, logger);
+      const second = ensureActionsIndexMappings(esClient, logger);
+      expect(second).toBe(first);
+      finishCheck();
+      await Promise.all([first, second]);
+      expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledWith({
+        index: ACTIONS_INDEX_DEFAULT_NS,
+        fields: [...ORIGIN_FIELDS],
+      });
+      expect(mockEsClient.indices.putMapping).not.toHaveBeenCalled();
+    });
+
+    it('makes no ES calls after a successful check', async () => {
+      const { ensureActionsIndexMappings } = loadModule();
+      const esClient = mockEsClient as unknown as ElasticsearchClient;
+      await ensureActionsIndexMappings(esClient, logger);
+      jest.clearAllMocks();
+      await ensureActionsIndexMappings(esClient, logger);
+      for (const method of Object.values(mockEsClient.indices)) {
+        expect(method).not.toHaveBeenCalled();
+      }
+    });
+
+    it('checks mappings even when startup swallowed an error', async () => {
+      const mod = loadModule();
+      const esClient = mockEsClient as unknown as ElasticsearchClient;
+      mockEsClient.indices.exists.mockRejectedValueOnce(new Error('startup failed'));
+      await mod.initializeTransformsIndices(esClient, logger);
+      expect(logger.error).toHaveBeenCalled();
+      jest.clearAllMocks();
+      await mod.ensureActionsIndexMappings(esClient, logger);
+      expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([...ORIGIN_FIELDS])('repairs missing %s and re-checks', async (field) => {
+      const { ensureActionsIndexMappings } = loadModule();
+      const missing = originFieldMappings();
+      Reflect.deleteProperty(missing[ACTIONS_INDEX_DEFAULT_NS].mappings, field);
+      mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(missing);
+      await ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger);
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledWith({
+        index: ACTIONS_INDEX_DEFAULT_NS,
+        properties: { origin: actionsMapping.properties?.origin },
+      });
+      expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(2);
+      const [firstCheck, secondCheck] =
+        mockEsClient.indices.getFieldMapping.mock.invocationCallOrder;
+      const [putMapping] = mockEsClient.indices.putMapping.mock.invocationCallOrder;
+      expect(firstCheck).toBeLessThan(putMapping);
+      expect(putMapping).toBeLessThan(secondCheck);
+    });
+
+    it.each([
+      ['origin.type', 'text'],
+      ['origin.run_id', 'text'],
+      ['origin.verified', 'keyword'],
+    ] as const)(
+      'caches conflicting %s (%s) and logs it once without trying to repair it',
+      async (field, conflictingType) => {
+        const { ensureActionsIndexMappings, OriginMappingConflictError } = loadModule();
+        const esClient = mockEsClient as unknown as ElasticsearchClient;
+        mockEsClient.indices.getFieldMapping.mockResolvedValueOnce(
+          originFieldMappings({ [field]: conflictingType })
+        );
+        const first = ensureActionsIndexMappings(esClient, logger);
+        await expect(first).rejects.toThrow(OriginMappingConflictError);
+        const second = ensureActionsIndexMappings(esClient, logger);
+        expect(second).toBe(first);
+        await expect(second).rejects.toThrow(field);
+        expect(mockEsClient.indices.getFieldMapping).toHaveBeenCalledTimes(1);
+        expect(mockEsClient.indices.putMapping).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledTimes(1);
+        const expectedType = field === 'origin.verified' ? 'boolean' : 'keyword';
+        expect(logger.error).toHaveBeenCalledWith(
+          `Expected ${field} to be mapped as ${expectedType}; origin will not be recorded until the actions index is reindexed or its mapping is fixed`
+        );
+      }
+    );
+
+    it('rejects when fields remain missing after putMapping', async () => {
+      const { ensureActionsIndexMappings } = loadModule();
+      mockEsClient.indices.getFieldMapping.mockResolvedValue({});
+      await expect(
+        ensureActionsIndexMappings(mockEsClient as unknown as ElasticsearchClient, logger)
+      ).rejects.toThrow('origin.type');
+      expect(mockEsClient.indices.putMapping).toHaveBeenCalledTimes(1);
+    });
+
+    it.each(['getFieldMapping', 'putMapping'] as const)(
+      'rejects a %s error and retries on the next call',
+      async (method) => {
+        const { ensureActionsIndexMappings } = loadModule();
+        const esClient = mockEsClient as unknown as ElasticsearchClient;
+        const error = new Error('ES unavailable');
+        if (method === 'putMapping') {
+          mockEsClient.indices.getFieldMapping.mockResolvedValueOnce({});
+        }
+
+        mockEsClient.indices[method].mockRejectedValueOnce(error);
+        await expect(ensureActionsIndexMappings(esClient, logger)).rejects.toBe(error);
+        await expect(ensureActionsIndexMappings(esClient, logger)).resolves.toBeUndefined();
+        expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(2);
+      }
+    );
   });
 });

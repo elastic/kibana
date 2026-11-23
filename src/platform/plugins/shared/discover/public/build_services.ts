@@ -65,6 +65,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { SearchSessionsManagementPluginStart } from '@kbn/search-sessions-management-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -173,6 +174,7 @@ export interface DiscoverServices {
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
+  licensing?: LicensingPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
   feedback?: DiscoverStartPlugins['feedback'];
@@ -303,6 +305,7 @@ export const buildServices = ({
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
     cps: plugins.cps,
+    licensing: plugins.licensing,
     embeddableEditor: new EmbeddableEditorService(
       plugins.embeddable.getStateTransfer(),
       core.application

@@ -17,6 +17,9 @@ import { useDestinationsTable } from './destinations_context';
 import { getDestinationIndices } from './destination_models';
 import { getDestinationTypeLabel } from './destination_type_config';
 import type { DestinationViewModel } from './types';
+import { sourceConnectedDestinationIds } from '../sources/source_models';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
 export const DestinationsTab = () => {
   const destinationsController = useDestinationsTable();
@@ -47,7 +50,11 @@ export const DestinationsTab = () => {
     closeCreateModal,
     deleteDestination,
     isUnitSaving,
+    unitDefinition,
   } = destinationsController;
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
   const showOnCanvas = useCallback(
     (destination: DestinationViewModel) => navigateToCanvasSearch(destination.name),
@@ -76,7 +83,9 @@ export const DestinationsTab = () => {
             destination.description,
             ...(destination.type === 'elasticsearch'
               ? [...getDestinationIndices(destination), destination.mode]
-              : [destination.bucket]),
+              : destination.type === 's3'
+              ? [destination.bucket]
+              : [destination.endpoint, ...Object.values(destination.indexBySignal)]),
             destination.signals.join(' '),
             getDestinationTypeLabel(destination.type),
           ]
@@ -125,6 +134,12 @@ export const DestinationsTab = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
+          {!canManage && (
+            <>
+              <UnitReadOnlyCallout />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <DestinationsToolbar
             query={query}
             selectedTypes={selectedTypes}
@@ -132,7 +147,7 @@ export const DestinationsTab = () => {
             onQueryChange={setQuery}
             onSelectedTypesChange={setSelectedTypes}
             onRefresh={refreshUnit}
-            onAddDestination={openCreateModal}
+            onAddDestination={canManage ? openCreateModal : undefined}
             isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
@@ -150,6 +165,7 @@ export const DestinationsTab = () => {
             resolvedIndicesStatus={resolvedIndicesStatus}
             resolvedIndicesError={resolvedIndicesError}
             destinationDetailRefs={destinationDetailRefs}
+            sourceConnectedDestinationIds={sourceConnectedDestinationIds(unitDefinition)}
             onShowDestinationDetail={showDestinationDetail}
             onHideDestinationDetail={hideDestinationDetail}
             hasActiveFilters={query.trim().length > 0 || selectedTypes.length > 0}
@@ -160,11 +176,11 @@ export const DestinationsTab = () => {
             onPaginationChange={setPagination}
             onSortingChange={setSortingColumns}
             onShowOnCanvas={showOnCanvas}
-            onRequestDelete={setDestinationPendingDeletion}
+            onRequestDelete={canManage ? setDestinationPendingDeletion : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isCreateModalOpen && (
+      {canManage && isCreateModalOpen && (
         <CreateDestinationModal destinations={destinationsController} onClose={closeCreateModal} />
       )}
       {destinationPendingDeletion && (

@@ -8,6 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
+  ChatTriggerMode,
   Conversation,
   ConversationRound,
   ConversationRoundAuthor,
@@ -22,6 +23,7 @@ import type {
   ExecutionStatus,
   InteractivityConfig,
   SerializedExecutionError,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { HttpSelfService, KibanaRequest } from '@kbn/core-http-server';
@@ -29,6 +31,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type {
   ModelProvider,
+  ModelSource,
   ScopedRunner,
   ToolProvider,
   WritableToolResultStore,
@@ -38,10 +41,10 @@ import type {
   ConversationStateManager,
   SkillsService,
   PluginsService,
+  ConnectorSkillsService,
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
-  TodoStateManager,
   IFilesystemService,
   IBashService,
   ConversationTemplatesService,
@@ -60,6 +63,14 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
+  /** The conversation with the document version the steer drain compares `peekVersion` against. */
+  getWithVersion(
+    conversationId: string
+  ): Promise<{ conversation: Conversation; seqNo: number; primaryTerm: number }>;
+  /** The document version alone, for a cheap change probe. */
+  peekVersion(conversationId: string): Promise<{ seqNo: number; primaryTerm: number }>;
+  /** The user the client acts as; the run owner when the client runs an execution. */
+  getUser(): UserIdAndName;
   /**
    * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
    * `metadata_updated` activity event attributed via `options.activity` (default: current user).
@@ -101,12 +112,21 @@ export interface SubAgentExecutionResult {
   events$: Observable<ChatEvent>;
 }
 
+/** Options of a sub-agent run as its own task, outliving the run that spawned it. */
+export interface SubAgentBackgroundOptions {
+  /** How the parent gets the result; unset, the result waits for the parent's next run. */
+  parentTriggerMode?: ChatTriggerMode;
+}
+
 /** Parameters for a one-shot standalone sub-agent execution. */
 export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
-  connectorId?: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -116,12 +136,15 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
 }
@@ -133,7 +156,9 @@ export interface SendToSubAgentParams {
   /** Existing child conversation id */
   conversationId: string;
   prompt: string;
-  connectorId?: string;
+  background?: SubAgentBackgroundOptions;
+  /** Model source the sub-agent runs on; undefined to let its own configuration decide. */
+  modelSource?: ModelSource;
   abortSignal?: AbortSignal;
 }
 
@@ -173,8 +198,8 @@ export interface ExperimentalFeatures {
   sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the todo list tool and task-management prompt are enabled */
-  todos: boolean;
+  /** Whether a finished background sub-agent wakes its parent; follows the Agent Builder experimental setting */
+  backgroundWake: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
@@ -252,9 +277,10 @@ export interface AgentHandlerContext {
    */
   deployment: DeploymentContext;
   /**
-   * The resolved connector ID for this execution, if any.
+   * The model source this execution runs on: an explicit connector or an inference feature.
+   * Undefined when the model comes from the Agent Builder default.
    */
-  defaultConnectorId?: string;
+  defaultModel?: ModelSource;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -317,6 +343,10 @@ export interface AgentHandlerContext {
    */
   plugins: PluginsService;
   /**
+   * Resolves the skills contributed by the types of an agent's connectors.
+   */
+  connectorSkills: ConnectorSkillsService;
+  /**
    * Tool manager to manage active tools for the agent.
    */
   toolManager: ToolManager;
@@ -333,10 +363,6 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
-  /**
-   * Manages the active todo list for this conversation execution.
-   */
-  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */
@@ -463,6 +489,8 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.

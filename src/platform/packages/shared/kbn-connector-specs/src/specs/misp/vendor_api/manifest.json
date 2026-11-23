@@ -1,0 +1,116 @@
+{
+  "operations": {
+    "addAttribute": [
+      {
+        "method": "post",
+        "path": "/attributes/add/{eventId}",
+        "source": "v2"
+      }
+    ],
+    "addSighting": [
+      {
+        "method": "post",
+        "pagination": "none",
+        "path": "/sightings/add",
+        "source": "v2"
+      }
+    ],
+    "addTagToEvent": [
+      {
+        "method": "post",
+        "path": "/events/addTag",
+        "source": "v2"
+      }
+    ],
+    "checkIndicator": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "in": "body",
+            "pageParam": "page",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "response.Attribute"
+          },
+          "style": "page"
+        },
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ],
+    "checkWarninglist": [
+      {
+        "method": "post",
+        "path": "/warninglists/checkValue",
+        "source": "v2"
+      }
+    ],
+    "createEvent": [
+      {
+        "method": "post",
+        "path": "/events/add",
+        "source": "v2"
+      }
+    ],
+    "getEvent": [
+      {
+        "method": "get",
+        "path": "/events/view/{eventId}",
+        "source": "v2"
+      }
+    ],
+    "publishEvent": [
+      {
+        "method": "post",
+        "path": "/events/publish/{eventId}",
+        "source": "v2"
+      }
+    ],
+    "searchAttributes": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "in": "body",
+            "pageParam": "page",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "response.Attribute"
+          },
+          "style": "page"
+        },
+        "path": "/attributes/restSearch",
+        "source": "v2"
+      }
+    ],
+    "searchEvents": [
+      {
+        "method": "post",
+        "pagination": {
+          "request": {
+            "in": "body",
+            "pageParam": "page",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "response"
+          },
+          "style": "page"
+        },
+        "path": "/events/restSearch",
+        "source": "v2"
+      }
+    ]
+  },
+  "sources": {
+    "v2": {
+      "apiVersion": "2.5",
+      "fetchedAt": "2026-10-07T20:57:32.681Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/MISP/MISP/2.5/app/webroot/doc/openapi.yaml"
+    }
+  }
+}

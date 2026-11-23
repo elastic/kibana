@@ -16,6 +16,7 @@ import {
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
+  isDecisionShown,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
@@ -165,6 +166,7 @@ jest.mock('../hooks/use_proposals_api', () => ({
   useIsDecliningProposal: jest.fn(),
   useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
   useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../hooks/use_current_user_profile', () => ({
@@ -180,6 +182,7 @@ jest.mock('@kbn/user-profile-components', () => ({
 const useProposalMock = useProposal as jest.MockedFunction<typeof useProposal>;
 const useApproveProposalMock = useApproveProposal as jest.MockedFunction<typeof useApproveProposal>;
 const useDismissProposalMock = useDismissProposal as jest.MockedFunction<typeof useDismissProposal>;
+const isDecisionShownMock = isDecisionShown as jest.MockedFunction<typeof isDecisionShown>;
 const useIsApprovingProposalMock = useIsApprovingProposal as jest.MockedFunction<
   typeof useIsApprovingProposal
 >;
@@ -240,6 +243,7 @@ const setupMocks = (
   >);
   useIsApprovingProposalMock.mockReturnValue(false);
   useIsDecliningProposalMock.mockReturnValue(false);
+  isDecisionShownMock.mockReturnValue(false);
   useCurrentUserProfileMock.mockReturnValue({ data: null } as unknown as ReturnType<
     typeof useCurrentUserProfile
   >);
@@ -586,6 +590,15 @@ describe('ProposalApprovalCard', () => {
       useIsApprovingProposalMock.mockReturnValue(true);
       const { getByTestId } = render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
       expect(getByTestId('approval-is-submitting')).toHaveTextContent('applying');
+    });
+
+    it('tells the decision hooks whether the data of its own proposal shows a decision', () => {
+      setupMocks();
+      isDecisionShownMock.mockReturnValue(true);
+      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
+
+      expect(useIsApprovingProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
+      expect(useIsDecliningProposalMock).toHaveBeenCalledWith(PROPOSAL_ID, true);
     });
 
     it('rejects with a friendly message rather than the raw generic error', async () => {

@@ -145,7 +145,7 @@ export async function runCheckFtrConfigsCli() {
         // FTR config file should have default export
         try {
           loadingConfigs.push(file);
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @kbn/compat/typescript-no-var-requires
           const exports = require(file);
           const defaultExport = exports.__esModule ? exports.default : exports;
           return !!defaultExport;

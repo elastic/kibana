@@ -59,6 +59,19 @@ export const getRuleChangeHistoryEventParamsSchema = lazySchema(() =>
 );
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
+export const restoreRuleChangeParamsSchema = lazySchema(() =>
+  z
+    .object({
+      change_id: z
+        .string()
+        .min(1)
+        .max(ID_MAX_LENGTH)
+        .describe('The change-history event identifier to restore.'),
+    })
+    .strict()
+);
+export type RestoreRuleChangeParams = z.infer<typeof restoreRuleChangeParamsSchema>;
+
 /**
  * Actor for a change-history row. Unattributed writes may carry an empty
  * `name` (the write path stores `username ?? ''`).

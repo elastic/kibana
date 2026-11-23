@@ -34,7 +34,7 @@ import { EntityIconByType } from '../entity_store/entity_icon_by_type';
 import {
   EntitySourceValue,
   toEntitySourceArray,
-} from '../../../flyout/entity_details/shared/components/entity_source_value';
+} from '../../../flyout_v2/entity/shared/components/entity_source_value';
 import type { EntityFilters } from './entities_grid';
 import type { RowsMode } from './entities_grid/common';
 import { useEntityFilterBarCounts } from './use_entity_filter_bar_counts';
@@ -135,6 +135,8 @@ interface Props {
   spaceId: string | undefined;
   rowsMode: RowsMode;
   esFilter?: QueryDslQueryContainer;
+  searchExpression?: string;
+  isSearchOverridesPending?: boolean;
   watchlistNames: Map<string, string>;
 }
 
@@ -144,6 +146,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
   spaceId,
   rowsMode,
   esFilter,
+  searchExpression,
+  isSearchOverridesPending,
   watchlistNames,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -151,6 +155,8 @@ export const EntityFiltersBar: React.FC<Props> = ({
     spaceId,
     rowsMode,
     filter: esFilter,
+    searchExpression,
+    isSearchOverridesPending,
   });
 
   // static options

@@ -20,4 +20,5 @@ export const SCOUT_MODULE_GRAPH_IGNORE: readonly string[] = [
   '**/*.md',
   '**/CHANGELOG*', // documentation noise
   '**/*.test.ts', // Jest tests — only Jest needs to run, not Playwright
+  'packages/kbn-rspack-optimizer/limits.yml', // validated in Build Kibana Distribution; otherwise expands via @kbn/storybook to UI plugins
 ];

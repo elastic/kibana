@@ -11,10 +11,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
+import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getConversationId, getSandboxCallContext } from './tool_utils';
+import { getConversationId, getSandboxCallContext, getSandboxCaller } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
@@ -38,7 +39,7 @@ const INLINE_TAIL_CHARS = 4_000;
 const TOOL_OUTPUT_DIR = '/workspace/.tool-output';
 
 const capOutput = async (
-  session: SandboxSession,
+  session: AuditedSandboxSession,
   stream: 'stdout' | 'stderr',
   text: string
 ): Promise<string> => {
@@ -60,6 +61,16 @@ const capOutput = async (
     INLINE_HEAD_CHARS
   )}\n[... ${omitted} chars omitted; ${pointer} ...]\n${text.slice(-INLINE_TAIL_CHARS)}`;
 };
+
+const hasAllowRuleForHost = (rules: readonly string[], host: string): boolean =>
+  rules.some((rule) => {
+    if (rule.startsWith('deny ')) return false;
+
+    // Space rules are canonical: a bare host or `allow SCHEME HOST[:PORT] ...`.
+    // Preserve any existing host-level allow's scheme, port, method and path restrictions.
+    const ruleHost = (rule.startsWith('allow ') ? rule.split(' ')[2] : rule).split(':')[0];
+    return ruleHost === host || (ruleHost.startsWith('*.') && host.endsWith(ruleHost.slice(1)));
+  });
 
 const RESOURCE_EXHAUSTED_HINT =
   ' The output was too large for the sandbox transport; redirect it to a file, then grep or summarize it.';
@@ -97,7 +108,7 @@ export const createSandboxBashTool = ({
   sandboxAllowlistClient,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
@@ -139,9 +150,13 @@ export const createSandboxBashTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxCaller(context)
+      );
     } catch (err) {
       return {
         results: [
@@ -165,6 +180,7 @@ export const createSandboxBashTool = ({
     let credentialEnv: Record<string, string> = {};
     let secretEnvKeys: SecretEnvKey[] = [];
     let secretValues: readonly string[] = [];
+    let connectorAllowedHosts: string[] = [];
     if (connector_id) {
       if (!resolveConnectorCredentials) {
         return {
@@ -185,6 +201,7 @@ export const createSandboxBashTool = ({
       credentialEnv = resolved.env;
       secretEnvKeys = resolved.secretEnvKeys;
       secretValues = resolved.secretValues;
+      connectorAllowedHosts = resolved.allowedHosts;
     }
 
     let spaceAllowedHosts: string[] = [];
@@ -208,6 +225,13 @@ export const createSandboxBashTool = ({
       }
     }
 
+    const allowedHosts = [
+      ...new Set([
+        ...spaceAllowedHosts,
+        ...connectorAllowedHosts.filter((host) => !hasAllowRuleForHost(spaceAllowedHosts, host)),
+      ]),
+    ];
+
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
@@ -224,7 +248,7 @@ export const createSandboxBashTool = ({
         directory: working_directory,
         env: mergedEnv,
         ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
-        ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
+        ...(allowedHosts.length > 0 ? { allowed_hosts: allowedHosts } : {}),
         timeout_seconds:
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
