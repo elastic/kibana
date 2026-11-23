@@ -153,7 +153,7 @@ export const AddBlockedItemInputSchema = lazySchema(() =>
       .string()
       .length(64)
       .regex(/^[0-9a-fA-F]+$/, 'Must be a 64-character hexadecimal SHA-256 hash'),
-    comment: z.string().min(1).max(1000),
+    comment: z.string().min(1).max(1000).optional(),
   })
 );
 export type AddBlockedItemInput = z.infer<typeof AddBlockedItemInputSchema>;
@@ -162,7 +162,7 @@ export const AddAllowedItemInputSchema = lazySchema(() =>
   z.object({
     type: z.enum(['path', 'sha256', 'certificateSigner', 'posixPath']),
     properties: z.record(z.string(), z.string().max(2048)),
-    comment: z.string().min(1).max(1000),
+    comment: z.string().min(1).max(1000).optional(),
   })
 );
 export type AddAllowedItemInput = z.infer<typeof AddAllowedItemInputSchema>;

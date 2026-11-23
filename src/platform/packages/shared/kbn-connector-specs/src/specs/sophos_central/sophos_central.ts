@@ -113,8 +113,9 @@ function sleep(ms: number): Promise<void> {
 }
 
 async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = true): Promise<T> {
+  const effectiveMax = idempotent ? maxAttempts : 1;
   let lastError: unknown;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  for (let attempt = 0; attempt < effectiveMax; attempt++) {
     try {
       return await fn();
     } catch (err) {
@@ -122,14 +123,11 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 3, idempotent = 
       if (status !== undefined && NO_RETRY_ON.has(status)) {
         throw err;
       }
-      if (!idempotent && attempt > 0) {
-        throw err;
-      }
       if (status !== undefined && !RETRY_ON.has(status)) {
         throw err;
       }
       lastError = err;
-      if (attempt < maxAttempts - 1) {
+      if (attempt < effectiveMax - 1) {
         // Full-jitter backoff: random(0, min(30000, 1000 * 2^attempt))
         const cap = 30_000;
         const base = 1_000 * Math.pow(2, attempt);
@@ -157,7 +155,11 @@ async function request<T = unknown>(
         headers: { 'X-Tenant-ID': tenantId },
         timeout: 30_000,
       };
-      if (options?.params) config.params = options.params;
+      if (options?.params) {
+        config.params = options.params;
+        // Sophos APIs expect repeated keys (severity=a&severity=b), not brackets
+        config.paramsSerializer = { indexes: null };
+      }
       if (options?.data !== undefined) config.data = options.data;
       const response = await ctx.client.request<T>(config);
       return response.data;
@@ -194,11 +196,21 @@ function checkBatchErrors(
 
 function throwApiError(err: unknown, fallback: string): never {
   const axiosErr = err as AxiosError<{ error?: string; message?: string }>;
-  const status = axiosErr?.response?.status;
-  const body = axiosErr?.response?.data;
-  const detail = body?.error && body?.message ? `${body.error}: ${body.message}` : body?.message;
-  const statusText = status ? ` (HTTP ${status})` : '';
-  throw new Error(detail ? `${detail}${statusText}` : `${fallback}${statusText}`);
+  const response = axiosErr?.response;
+  if (response) {
+    const { status, headers, data: body } = response;
+    const detail =
+      body?.error && body?.message ? `${body.error}: ${body.message}` : body?.message;
+    const msg = detail ? `${detail} (HTTP ${status})` : `${fallback} (HTTP ${status})`;
+    const wrapped = new Error(msg);
+    // Preserve structured fields for callers that inspect the error
+    (wrapped as Error & { status: number }).status = status;
+    if (headers?.['retry-after']) {
+      (wrapped as Error & { retryAfter: string }).retryAfter = headers['retry-after'] as string;
+    }
+    throw wrapped;
+  }
+  throw err instanceof Error ? err : new Error(fallback);
 }
 
 // ---------------------------------------------------------------------------
@@ -297,22 +309,20 @@ export const SophosCentral: ConnectorSpec = {
     '1. Call `listEndpoints` with `isolationStatus=notIsolated` to find endpoints that are not yet isolated.',
     '2. Call `getEndpoint` to confirm the isolation state and read health status.',
     '3. Call `isolateEndpoint` with the endpoint IDs to block network access.',
-    '4. Call `scanEndpoint` to trigger an on-demand malware scan.',
-    '5. After scanning, call `deisolateEndpoint` to restore network access.',
+    '4. Call `scanEndpoint` to trigger an on-demand malware scan. The scan runs asynchronously.',
+    '5. Call `deisolateEndpoint` only after an analyst confirms the threat is remediated.',
     '',
     '### IOC management',
     '- Call `addBlockedItem` with a SHA-256 hash to add a file to the tenant-wide block list.',
     '- Call `addAllowedItem` with type and properties to add a path, hash, certificate signer, or POSIX path to the allow list.',
     '- Call `listBlockedItems` to audit the current block list.',
-    '- Call `deleteBlockedItem` with the item ID to remove an entry from the block list.',
     '',
     '### Tamper protection',
     '- Call `getTamperProtection` to check whether tamper protection is enabled and get the recovery password.',
-    '- Call `updateTamperProtection` with `enabled: false` only after analyst approval.',
     '',
     '### XDR detections (requires XDR licence)',
     '- Call `listDetections` to query XDR detections. The connector submits the query asynchronously, ' +
-      'polls until complete (up to 120 s), and returns paginated results.',
+      'polls until complete (up to 90 s), and returns paginated results.',
     '',
     '### Pagination',
     '- `listAlerts` and `listEndpoints` use cursor pagination: pass the returned `pages.nextKey` as `pageFromKey` to get the next page.',
@@ -455,7 +465,7 @@ export const SophosCentral: ConnectorSpec = {
           if (input.isolationStatus) params.isolationStatus = input.isolationStatus;
           if (input.tamperProtectionEnabled !== undefined)
             params.tamperProtectionEnabled = input.tamperProtectionEnabled;
-          if (input.hostnameContains) params.hostnameContains = input.hostnameContains;
+          if (input.hostnameContains?.trim()) params.hostnameContains = input.hostnameContains;
           if (input.pageFromKey) params.pageFromKey = input.pageFromKey;
           if (input.pageSize) params.pageSize = input.pageSize;
           return await request(ctx, 'GET', '/endpoint/v1/endpoints', { params });
@@ -732,7 +742,7 @@ export const SophosCentral: ConnectorSpec = {
       scope: 'read',
       description:
         'Query XDR detections for the Sophos Central tenant (requires XDR licence). ' +
-        'The connector submits the query, polls until it completes (up to 120 s), and ' +
+        'The connector submits the query, polls until it completes (up to 90 s), and ' +
         'returns a paginated page of results. Increment `page` to retrieve further pages.',
       input: ListDetectionsInputSchema,
       handler: async (ctx, input: ListDetectionsInput) => {
@@ -775,7 +785,7 @@ export const SophosCentral: ConnectorSpec = {
 
         // Step 2: poll until terminal state
         const TERMINAL = new Set(['succeeded', 'canceled', 'failed', 'notAvailable', 'timedOut']);
-        const pollTimeoutMs = 120_000;
+        const pollTimeoutMs = 90_000;
         const pollIntervalMs = 5_000;
         const deadline = Date.now() + pollTimeoutMs;
 
@@ -783,10 +793,15 @@ export const SophosCentral: ConnectorSpec = {
         while (!TERMINAL.has(runState)) {
           if (Date.now() > deadline) {
             throw new Error(
-              'Sophos Central listDetections: query run did not complete within 120 seconds'
+              'Sophos Central listDetections: query run did not complete within 90 seconds'
             );
           }
           await sleep(pollIntervalMs);
+          if (Date.now() > deadline) {
+            throw new Error(
+              'Sophos Central listDetections: query run did not complete within 90 seconds'
+            );
+          }
           const pollRes = await ctx.client.request<{ result?: string; status?: string }>({
             method: 'GET',
             url: `${dataRegion}/detections/v1/queries/detections/${runId}`,

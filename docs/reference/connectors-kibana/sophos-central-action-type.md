@@ -1,12 +1,12 @@
 ---
 navigation_title: "Sophos Central"
+type: reference
+description: "Manage Sophos Central alerts, isolate and scan endpoints, maintain IOC block and allow lists, control tamper protection, and query XDR detections with the Sophos Central REST API connector."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sophos-central-action-type.html
 applies_to:
-  stack: all
-  serverless:
-    observability: ga
-    security: ga
+  stack: preview 9.7
+  serverless: preview
 ---
 
 # Sophos Central connector [sophos-central-action-type]
@@ -26,7 +26,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Sophos Central connectors have the following configuration properties:
 
 API URL
-:   The Sophos Central global API base URL. Defaults to `https://api.central.sophos.com`. The connector discovers your tenant ID and regional host automatically via the whoami endpoint. Use the default unless Sophos Support instructs otherwise. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
+:   The Sophos Central global API base URL. Defaults to `https://api.central.sophos.com`. The connector discovers your tenant ID and regional host automatically via the whoami endpoint. Use the default unless Sophos Support instructs otherwise. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure all three hosts are added to the allowed hosts: `id.sophos.com` (OAuth token endpoint), `api.central.sophos.com` (global API / whoami), and the regional data-center host returned by whoami (for example `api-us03.central.sophos.com`).
 
 Authentication
 :   Uses **OAuth 2.0 Client Credentials**. Provide the Client ID and Client Secret from Sophos Central (My Products > General Settings > API Credentials > Add Credential). The credential needs `alerts:read`, `alerts:action`, `endpoint-state:read`, `endpoint-state:update`, and `detections.queries.detections:create` scopes.
@@ -93,4 +93,4 @@ The Sophos Central connector exposes the following actions:
 :   Remove a blocked item from the tenant's global blocked list by its item ID. Deletion is permanent.
 
 `listDetections`
-:   Query XDR detections (requires XDR licence). The connector submits the query, polls until it completes (up to 120 s), and returns a paginated page of results.
+:   Query XDR detections (requires XDR licence). The connector submits the query, polls until it completes (up to 90 s), and returns a paginated page of results.
