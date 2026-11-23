@@ -60,7 +60,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
-A sample task can be found in the [x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/](../../../../../x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin/server/plugin.ts) folder.
+A sample task can be found in the [x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin/](../../../test_plugins/response_ops/plugin_api_integration/sample_task_plugin/server/plugin.ts) folder.
 
 ```js
 export class Plugin {
@@ -678,7 +678,7 @@ The task manager's public API is create / delete / list. Updates aren't directly
   Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
   ```
-  yarn test:jest x-pack/platform/plugins/shared/task_manager --watch
+  pnpm test:jest x-pack/platform/plugins/shared/task_manager --watch
   ```
 
 - Integration tests:

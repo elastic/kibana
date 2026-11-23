@@ -77,12 +77,17 @@ describe('bulkMarkApiKeysForInvalidation', () => {
     const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
     unsecuredSavedObjectsClient.bulkCreate.mockRejectedValueOnce(e);
     await bulkMarkApiKeysForInvalidation(
-      { apiKeys: [Buffer.from('123').toString('base64'), Buffer.from('456').toString('base64')] },
+      {
+        apiKeys: [
+          Buffer.from('123:abc').toString('base64'),
+          Buffer.from('456:essu_uiam_key_value').toString('base64'),
+        ],
+      },
       logger,
       unsecuredSavedObjectsClient
     );
     expect(logger.error).toHaveBeenCalledWith(
-      'Failed to bulk mark list of API keys ["MTIz", "NDU2"] for invalidation: Fail',
+      'Failed to bulk mark list of API keys ["123", "456"] for invalidation: Fail',
       { error: { stack_trace: e.stack } }
     );
   });

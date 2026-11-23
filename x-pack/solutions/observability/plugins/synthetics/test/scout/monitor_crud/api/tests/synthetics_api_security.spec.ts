@@ -24,16 +24,6 @@ interface SweepRoute {
   anyRequiredPrivileges?: string[];
 }
 
-/**
- * GET routes that intentionally require `uptime-write` in addition to
- * `uptime-read`. Mirrors the FTR allow-list: any other GET route is expected to
- * be gated by `[uptime-read]` only, so the 403 message check below acts as a
- * tripwire against accidental `writeAccess: true` on a GET route.
- */
-const GET_ROUTES_REQUIRING_WRITE_ACCESS: ReadonlySet<string> = new Set([
-  COMMON_API_URLS.SYNTHETICS_DIAGNOSTICS,
-]);
-
 const allRoutes: SweepRoute[] = syntheticsAppRestApiRoutes
   .concat(syntheticsAppPublicRestApiRoutes)
   .map((routeFn) => {
@@ -67,11 +57,14 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
   }
 
   if (method === 'GET') {
-    return GET_ROUTES_REQUIRING_WRITE_ACCESS.has(path)
-      ? readUser
-        ? '[uptime-write]'
-        : '[uptime-read,uptime-write]'
-      : '[uptime-read]';
+    // Diagnostics also requires the private-location manage privilege. Any other
+    // GET that starts requiring write access fails this expected-tag check.
+    if (path === COMMON_API_URLS.SYNTHETICS_DIAGNOSTICS) {
+      return readUser
+        ? '[private-location-write,uptime-write]'
+        : '[uptime-read,private-location-write,uptime-write]';
+    }
+    return '[uptime-read]';
   }
 
   if (!writeAccess) {

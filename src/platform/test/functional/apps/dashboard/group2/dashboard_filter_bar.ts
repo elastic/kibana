@@ -197,32 +197,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('filter with non-existent index pattern renders if it matches a field', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('name', 'moo', false);
-        expect(hasBadFieldFilter).to.be(true);
+        await filterBar.expectFilter('name', 'moo', false);
       });
 
       it('filter with non-existent field renders in warning mode', async function () {
-        const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'warn', false);
-        expect(hasBadFieldFilter).to.be(true);
+        await filterBar.expectFilter('baad-field', 'warn', false);
       });
 
       it('filter from unrelated index pattern is still applicable if field name is found', async function () {
-        const hasUnrelatedIndexPatternFilterPhrase = await filterBar.hasFilter(
-          '@timestamp',
-          '123',
-          true
-        );
-        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
+        await filterBar.expectFilter('@timestamp', '123', true);
       });
 
       it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
-        const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
-        expect(hasWarningFieldFilter).to.be(true);
+        await filterBar.expectFilter('extension', 'warn', true);
       });
 
       it('filter without an index pattern is rendred as a warning, if the dashboard has an index pattern', async function () {
-        const noIndexPatternFilter = await filterBar.hasFilter('banana', 'warn', true);
-        expect(noIndexPatternFilter).to.be(true);
+        await filterBar.expectFilter('banana', 'warn', true);
       });
     });
   });

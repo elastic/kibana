@@ -1,7 +1,6 @@
 {
   "_no_owner": {
-    "oas_docs/pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
-    "oas_docs/pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
+    "oas_docs": "'oas_docs' should be kebab-case",
     "packages/kbn-tsconfig": "'kbn-tsconfig' should be snake_case",
     "pnpm-lock.yaml": "'pnpm-lock.yaml' should be snake_case",
     "pnpm-workspace.yaml": "'pnpm-workspace.yaml' should be snake_case",
@@ -94,10 +93,10 @@
     "docs/reference/user-activity/_snippets": "'_snippets' should be kebab-case"
   },
   "@elastic/fleet": {
-    "x-pack/platform/plugins/shared/fleet/cypress/packages/input_package-1.0.0.zip": "'input_package-1.0.0.zip' should be snake_case",
-    "x-pack/platform/plugins/shared/fleet/cypress/packages/logs_int_no_dataset-1.0.0.zip": "'logs_int_no_dataset-1.0.0.zip' should be snake_case",
-    "x-pack/platform/plugins/shared/fleet/cypress/packages/logs_integration-1.0.0.zip": "'logs_integration-1.0.0.zip' should be snake_case",
-    "x-pack/platform/plugins/shared/fleet/cypress/packages/otel_input_package-1.0.0.zip": "'otel_input_package-1.0.0.zip' should be snake_case",
+    "x-pack/platform/plugins/shared/fleet-cypress/packages/input_package-1.0.0.zip": "'input_package-1.0.0.zip' should be snake_case",
+    "x-pack/platform/plugins/shared/fleet-cypress/packages/logs_int_no_dataset-1.0.0.zip": "'logs_int_no_dataset-1.0.0.zip' should be snake_case",
+    "x-pack/platform/plugins/shared/fleet-cypress/packages/logs_integration-1.0.0.zip": "'logs_integration-1.0.0.zip' should be snake_case",
+    "x-pack/platform/plugins/shared/fleet-cypress/packages/otel_input_package-1.0.0.zip": "'otel_input_package-1.0.0.zip' should be snake_case",
     "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture/__tests__/mockData.ts": "'mockData.ts' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/bundled_packages/endpoint-8.6.1.zip": "'endpoint-8.6.1.zip' should be snake_case",
     "x-pack/platform/test/fleet_api_integration/apis/fixtures/bundled_packages/nginx-1.1.0.zip": "'nginx-1.1.0.zip' should be snake_case",
@@ -234,10 +233,10 @@
   "@elastic/kibana-operations": {
     "packages/kbn-ts-projects/config-paths.json": "'config-paths.json' should be snake_case",
     "src/platform/packages/private/kbn-repo-packages/package-map.json": "'package-map.json' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_integration_node/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_integration/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_node/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_integration_node/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_integration/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_node/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest-preset.js": "'jest-preset.js' should be snake_case",
     "src/platform/test/package/Vagrantfile": "'Vagrantfile' should be snake_case",
     "src/setup_node_env": "'setup_node_env' should be kebab-case",
     "x-pack/dev-tools": "'dev-tools' should be snake_case"
@@ -413,12 +412,9 @@
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.test.ts": "'customIncompatibleAntivirusEvaluator.test.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customIncompatibleAntivirusEvaluator.ts": "'customIncompatibleAntivirusEvaluator.ts' should be snake_case",
     "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.test.ts": "'customPolicyResponseFailureEvaluator.test.ts' should be snake_case",
-    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case",
-    "x-pack/solutions/security/test/security_solution_endpoint": "'security_solution_endpoint' should be kebab-case"
+    "x-pack/solutions/security/plugins/elastic_assistant/server/lib/defend_insights/evaluation/helpers/get_custom_evaluator/customPolicyResponseFailureEvaluator.ts": "'customPolicyResponseFailureEvaluator.ts' should be snake_case"
   },
   "@elastic/security-detection-engineering": {
-    "x-pack/solutions/security/test/security_solution_api_integration": "'security_solution_api_integration' should be kebab-case",
-    "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response": "'detections_response' should be kebab-case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-empty-security_detection_engine-99.0.0.zip": "'mock-empty-security_detection_engine-99.0.0.zip' should be snake_case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip": "'mock-security_detection_engine-99.0.0.zip' should be snake_case"
   },

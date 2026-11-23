@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { Direction } from '../../../search_strategy';
 
-export const order = z.enum([Direction.asc, Direction.desc]);
+export const order = lazySchema(() => z.enum([Direction.asc, Direction.desc]));

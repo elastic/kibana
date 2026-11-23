@@ -65,7 +65,7 @@ node scripts/build_rspack_bundles.js --dist
 node scripts/build_rspack_bundles.js --watch
 
 # Or via environment variable (dev mode)
-KBN_USE_RSPACK=true yarn start
+KBN_USE_RSPACK=true pnpm start
 ```
 
 ### CLI Options

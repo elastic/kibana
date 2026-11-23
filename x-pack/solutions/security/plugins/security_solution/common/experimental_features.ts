@@ -18,7 +18,7 @@ export const allowedExperimentalValues = Object.freeze({
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
+   * @see test_suites/test-suites-security-solution-apis/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
 
@@ -281,12 +281,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables entity ML anomaly details API
    */
   entityAnalyticsAnomalyDetails: true,
-
-  /**
-   * Enables the deprecated prebuilt rules UI
-   * Release: 9.4
-   */
-  prebuiltRulesDeprecationUIEnabled: true,
 
   /**
    * Enables the Detection Rule Changes History API endpoint

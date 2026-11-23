@@ -10,44 +10,46 @@ import { ToolType } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { prioritizeAlerts } from './services/alert_triage_service';
 
 export const ALERT_TRIAGE_TOOL_ID = `${internalNamespaces.security}.alert-triage`;
 
-const prioritizeAlertsSchema = z.object({
-  timeWindowHours: z
-    .number()
-    .min(1)
-    .max(168)
-    .default(24)
-    .describe('How far back to look for alerts in hours (1–168, default 24)'),
-  maxAlerts: z
-    .number()
-    .min(1)
-    .max(500)
-    .default(100)
-    .describe(
-      'Maximum number of alerts to fetch and score before grouping (1–500, default 100). ' +
-        'The tool always returns at most 10 ranked groups regardless of this value.'
-    ),
-  workflowStatus: z
-    .enum(['open', 'open+acknowledged'])
-    .default('open')
-    .describe(
-      'Which alert workflow statuses to include. "open" is the default. ' +
-        'Use "open+acknowledged" to include acknowledged alerts.'
-    ),
-  alertIds: z
-    .array(z.string().min(1).max(512))
-    .max(500)
-    .optional()
-    .describe(
-      'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
-        'When provided, exactly these alerts are scored regardless of their workflow status or age — ' +
-        'timeWindowHours and workflowStatus are ignored so a selected alert is never silently dropped.'
-    ),
-});
+const prioritizeAlertsSchema = lazySchema(() =>
+  z.object({
+    timeWindowHours: z
+      .number()
+      .min(1)
+      .max(168)
+      .default(24)
+      .describe('How far back to look for alerts in hours (1–168, default 24)'),
+    maxAlerts: z
+      .number()
+      .min(1)
+      .max(500)
+      .default(100)
+      .describe(
+        'Maximum number of alerts to fetch and score before grouping (1–500, default 100). ' +
+          'The tool always returns at most 10 ranked groups regardless of this value.'
+      ),
+    workflowStatus: z
+      .enum(['open', 'open+acknowledged'])
+      .default('open')
+      .describe(
+        'Which alert workflow statuses to include. "open" is the default. ' +
+          'Use "open+acknowledged" to include acknowledged alerts.'
+      ),
+    alertIds: z
+      .array(z.string().min(1).max(512))
+      .max(500)
+      .optional()
+      .describe(
+        'Optional: specific alert IDs to triage (e.g. from an alert attachment or user selection). ' +
+          'When provided, exactly these alerts are scored regardless of their workflow status or age — ' +
+          'timeWindowHours and workflowStatus are ignored so a selected alert is never silently dropped.'
+      ),
+  })
+);
 
 const createAlertTriageTool = (): BuiltinSkillBoundedTool<typeof prioritizeAlertsSchema> => ({
   id: ALERT_TRIAGE_TOOL_ID,

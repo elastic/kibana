@@ -350,16 +350,11 @@ describe('StepAboutRuleComponent', () => {
       />
     );
 
-    await submitForm();
-
-    await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith(
-        expect.objectContaining({ riskScore: expect.objectContaining({ value: 21 }) }),
-        true
-      );
-    });
-
-    handleSubmit.mockClear();
+    expect(
+      within(screen.getByTestId('detectionEngineStepAboutRuleRiskScore-defaultRisk')).getByRole(
+        'spinbutton'
+      )
+    ).toHaveValue(21);
 
     await user.click(
       within(screen.getByTestId('detectionEngineStepAboutRuleSeverity')).getByTestId('select')

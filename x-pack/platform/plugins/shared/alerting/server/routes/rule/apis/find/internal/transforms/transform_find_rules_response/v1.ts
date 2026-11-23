@@ -131,5 +131,6 @@ export const transformFindRulesInternalResponse = (
     per_page: result.perPage,
     total: result.total,
     data: result.data.map((rule) => transformPartialRule(rule as RuleWithSnoozedInstances, fields)),
+    ...(result.errors ? { errors: result.errors } : {}),
   };
 };

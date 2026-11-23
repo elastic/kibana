@@ -18,6 +18,7 @@ import { uniqBy } from 'lodash';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  LENS_DATATABLE_DEFAULT_COLOR_STEPS,
 } from '@kbn/lens-common/visualizations/datatable/constants';
 
 import type { LensAttributes } from '../../../../types';
@@ -556,6 +557,9 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     sortEsqlDatasourceColumns,
     alignLegacyTypes,
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
-    getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),
+    getPaletteNormalizer<DatatableAttributes>(
+      'state.visualization.columns.*.palette',
+      LENS_DATATABLE_DEFAULT_COLOR_STEPS
+    ),
   ])(attributes);
 };

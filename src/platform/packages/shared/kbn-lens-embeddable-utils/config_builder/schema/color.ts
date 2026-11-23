@@ -389,7 +389,6 @@ export const colorMappingSchema = schema.oneOf(
       description:
         'Color mapping for dimension values, either categorical (for specific values) or as a gradient.',
     },
-    defaultValue: DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE,
   }
 );
 

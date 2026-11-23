@@ -28,11 +28,13 @@ main () {
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  pnpm make:defs $PARENT_DIR/elasticsearch
+  pnpm lint:fix:definitions
 
   report_main_step "Generate inline function docs"
 
-  yarn make:docs $PARENT_DIR/elasticsearch
+  pnpm make:docs $PARENT_DIR/elasticsearch
+  pnpm lint:fix:docs
 
   report_main_step "Run i18n check"
 
@@ -59,7 +61,7 @@ main () {
   PR_BODY='This PR updates the function definitions and inline docs based on the latest metadata from Elasticsearch.'
 
   # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME"  --limit 1 --json title -q ".[].title")
+  pr_search_result=$(gh pr list --search "$PR_TITLE (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" --state open --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
     echo "PR already exists. Exiting."

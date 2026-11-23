@@ -67,6 +67,7 @@ interface CreateChatCompleteApiOptions {
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -124,6 +125,7 @@ export function createChatCompleteCallbackApi({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -154,6 +156,7 @@ export function createChatCompleteCallbackApi({
         isTokenUsageTrackingEnabled,
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       })
     ).pipe(
       retryWithExponentialBackoff({
@@ -320,6 +323,7 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -338,12 +342,14 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }) {
   return from(
     throwIfConnectorNotAllowed({
       connectorId,
       isDefaultConnectorOnly,
       getDefaultConnectorId,
+      resolveConnectorId,
       logger,
     }).then(() => endpointIdCache.has(connectorId))
   ).pipe(
@@ -493,11 +499,13 @@ async function throwIfConnectorNotAllowed({
   connectorId,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
   logger,
 }: {
   connectorId: string;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
   logger: Logger;
 }): Promise<void> {
   if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
@@ -516,6 +524,14 @@ async function throwIfConnectorNotAllowed({
   }
   if (connectorId === defaultConnectorId) {
     return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
   }
   throw createInferenceRequestError(
     `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${

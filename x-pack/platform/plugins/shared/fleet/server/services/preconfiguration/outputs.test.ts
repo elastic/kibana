@@ -713,7 +713,7 @@ describe('Outputs preconfiguration', () => {
         expect.objectContaining({
           is_preconfigured: true,
         }),
-        { fromPreconfiguration: true, secretHashes: expect.anything() }
+        { fromPreconfiguration: true, secretHashes: expect.anything(), declaresAllSecrets: true }
       );
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
     });
@@ -1109,6 +1109,70 @@ describe('Outputs preconfiguration', () => {
       expect(mockedOutputService.create).not.toBeCalled();
       expect(mockedOutputService.update).not.toBeCalled();
       expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+    });
+
+    it('should not update output on repeated setup if stored otel_disable_beatsauth is false and preconfigured does not set it', async () => {
+      mockedOutputService.bulkGet.mockResolvedValue([
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          is_preconfigured: true,
+          otel_disable_beatsauth: false,
+        } as Output,
+      ]);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const preconfiguredOutputs = [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch' as const,
+          hosts: ['http://es.co:80'],
+        },
+      ];
+
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, preconfiguredOutputs);
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, preconfiguredOutputs);
+
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should update output if stored otel_disable_beatsauth is true and preconfigured does not set it', async () => {
+      mockedOutputService.bulkGet.mockResolvedValue([
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+          is_preconfigured: true,
+          otel_disable_beatsauth: true,
+        } as Output,
+      ]);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-es-output-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'ES Output 1',
+          type: 'elasticsearch',
+          hosts: ['http://es.co:80'],
+        },
+      ]);
+
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {

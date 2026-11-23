@@ -142,18 +142,19 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       scrollTopRef.current = scrollContainer.scrollTop;
 
       if (nearBottom) {
-        setPageSize(
+        // Only ever grows the budget, so a scroll event can't undo what `onToggle` just reserved
+        setPageSize((currentPageSize) =>
           Math.max(
-            PAGINATION_SIZE,
+            currentPageSize,
             Math.min(
-              pageSize + PAGINATION_SIZE * 0.5,
+              currentPageSize + PAGINATION_SIZE * 0.5,
               getDisplayedFieldsLength<T>(fieldGroups, accordionState)
             )
           )
         );
       }
     }
-  }, [scrollContainer, scrollTopRef, setPageSize, pageSize, fieldGroups, accordionState]);
+  }, [scrollContainer, scrollTopRef, setPageSize, fieldGroups, accordionState]);
 
   const paginatedFields = useMemo(() => {
     let remainingItems = pageSize;
