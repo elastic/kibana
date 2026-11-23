@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ignoredErrorsFilter, RESIZE_OBSERVER_LOOP_ERROR } from './ignored_errors_filter';
+import {
+  ignoredErrorsFilter,
+  RESIZE_OBSERVER_LOOP_ERROR,
+  SCRIPT_ERROR,
+} from './ignored_errors_filter';
 import type { Payload } from './types';
 
 describe('ignoredErrorsFilter', () => {
@@ -16,13 +20,18 @@ describe('ignoredErrorsFilter', () => {
       transactions: [],
       errors: [
         { exception: { type: '', message: RESIZE_OBSERVER_LOOP_ERROR } },
+        { exception: { type: '', message: SCRIPT_ERROR } },
+        { exception: { type: 'Error', message: `${SCRIPT_ERROR} in bundle.js` } },
         { exception: { type: 'Error', message: 'Unexpected error' } },
       ],
     };
 
     expect(ignoredErrorsFilter(payload)).toEqual({
       transactions: [],
-      errors: [{ exception: { type: 'Error', message: 'Unexpected error' } }],
+      errors: [
+        { exception: { type: 'Error', message: `${SCRIPT_ERROR} in bundle.js` } },
+        { exception: { type: 'Error', message: 'Unexpected error' } },
+      ],
     });
   });
 
