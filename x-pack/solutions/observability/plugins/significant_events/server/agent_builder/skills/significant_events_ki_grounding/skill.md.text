@@ -199,8 +199,8 @@ One call: `kind: ["query"]`, `rule_ids`, `query_types: ["match"]`, `rule_backed:
 `per_page: 50`. Omit `slugs`; `rule_ids` already limits the search to the batch. Then:
 
 1. Match results to detections by exact `rule.id`.
-2. Collect and deduplicate each matched query's `query.features[].id` (the referenced feature IDs)
-   and each matched query's `source_id`.
+2. Retain each matched query's `{ source_id, feature_id }` pair for every `query.features[].id`.
+   Feature IDs are unique only within their source, so do not deduplicate IDs across sources.
 
 The features are fetched later, in the Consolidate step, once the rows are analyzed.
 
@@ -561,8 +561,10 @@ write anything that uses it: never conclude an absence (no edge, no entity) from
    - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
      any value its predicate pins to a field that identifies an entity (e.g: a service, host, pod, database,
      or queue), matched exactly and uniquely to a fetched feature's `feature.id` or `properties.name`.
-     Resolve a `query.features[]` ID only within the query KI's `source_id`; the same feature ID in
-     another batch source is unrelated. Use its title and description only to disambiguate. Use the components
+     For a `query.features[]` ID, first restrict fetched features to the query KI's `source_id`, then
+     match `feature.id`; the same ID in another batch source is unrelated. Match `properties.name`
+     only for predicate or row values, never to resolve a `query.features[]` ID. Use its title and
+     description only to disambiguate. Use the components
      named in the found rows only when the KI identifies none, or to corroborate. The found rows are
      the sample rows, the `examples`, and every `breakdown` value whose share of its own lines is not
      near zero: each such value that names a service is a source, not only the sampled row's. A
