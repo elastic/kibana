@@ -1,0 +1,12 @@
+// A unitless 0 is invalid inside calc(), which would drop the whole declaration
+// stylelint-disable-next-line length-zero-no-unit
+@mixin kibanaFullBodyHeight($additionalOffset: 0px) {
+  // The `--kbnAppHeadersOffset` CSS variable is automatically updated by
+  // styles/rendering/_base.scss, based on whether the Kibana chrome has a
+  // header banner, app menu, and is visible or hidden
+  height: calc(
+    100vh
+    - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0))
+    - #{$additionalOffset}
+  );
+}

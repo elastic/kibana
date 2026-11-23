@@ -48,7 +48,7 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
 
     it('Shows no warnings callout if there are no deprecations', async () => {
       await PageObjects.upgradeAssistant.clickResetLastCheckpointButton();
-      expect(await testSubjects.exists('noWarningsCallout')).toBe(true);
+      await testSubjects.existOrFail('noWarningsCallout');
     });
   });
 }

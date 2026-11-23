@@ -171,15 +171,7 @@ export function getWebpackConfig(
                 sourceMap: !worker.dist,
               },
             },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !worker.dist,
-                postcssOptions: {
-                  config: require.resolve('../../postcss.config.js'),
-                },
-              },
-            },
+            { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
           ],
         },
         {
@@ -198,15 +190,7 @@ export function getWebpackConfig(
                     sourceMap: !worker.dist,
                   },
                 },
-                {
-                  loader: 'postcss-loader',
-                  options: {
-                    sourceMap: !worker.dist,
-                    postcssOptions: {
-                      config: require.resolve('../../postcss.config.js'),
-                    },
-                  },
-                },
+                { loader: require.resolve('@kbn/optimizer-webpack-helpers/lightningcss_loader') },
                 {
                   loader: 'sass-loader',
                   options: {
@@ -216,7 +200,7 @@ export function getWebpackConfig(
                           loaderContext.context || loaderContext.rootContext,
                           Path.resolve(
                             worker.repoRoot,
-                            `src/core/public/styles/core_app/_globals_${theme}.scss`
+                            `src/core/packages/core/public/styles/core_app/_globals_${theme}.scss`
                           )
                         )
                       );
@@ -259,13 +243,19 @@ export function getWebpackConfig(
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
-        // emits a separate file and exports the URL. Previously achievable by using file-loader.
+        // MapLibre's module worker loads the shared module by relative filename.
         {
-          include: [
-            require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js'),
-            require.resolve('maplibre-gl/dist/maplibre-gl-csp-worker'),
-          ],
+          test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl-(?:worker|shared)\.mjs$/,
+          resourceQuery: /asUrl/,
           type: 'asset/resource',
+          sideEffects: true,
+          generator: { filename: 'maplibre-gl/[name][ext]' },
+        },
+        // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
+        {
+          include: [require.resolve('@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js')],
+          type: 'asset/resource',
+          generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
         },
         // exports the source code of the asset. Previously achievable by using raw-loader.
         {
@@ -295,7 +285,7 @@ export function getWebpackConfig(
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
-          'src/core/public/styles/core_app/images'
+          'src/core/packages/core/public/styles/core_app/images'
         ),
         'react-dom$':
           worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',

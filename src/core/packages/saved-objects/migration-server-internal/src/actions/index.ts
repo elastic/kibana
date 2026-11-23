@@ -93,6 +93,8 @@ export type { CreateIndexParams, ClusterShardLimitExceeded } from './create_inde
 
 export { synchronizeMigrators } from './synchronize_migrators';
 
+export { releaseRelocationWaitGroups } from './release_relocation_wait_groups';
+
 export { createIndex } from './create_index';
 
 export { checkTargetTypesMappings } from './check_target_mappings';

@@ -87,6 +87,4 @@ fileGroups:
     - server/**/*
     - public/common/schemas/*/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
