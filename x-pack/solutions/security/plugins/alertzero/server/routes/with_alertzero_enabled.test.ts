@@ -40,7 +40,7 @@ describe('withAlertZeroEnabled', () => {
     expect(response.notFound).toHaveBeenCalled();
   });
 
-  it('responds 404 without calling the handler in a space that uses the Classic solution view', async () => {
+  it('responds 404 without calling the handler in an unsupported space', async () => {
     const handler = jest.fn();
     const response = httpServerMock.createResponseFactory();
 

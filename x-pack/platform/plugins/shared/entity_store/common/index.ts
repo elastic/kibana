@@ -144,6 +144,7 @@ export {
 export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
 export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
 export {
+  MAX_FIELD_PATH_LENGTH,
   getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,

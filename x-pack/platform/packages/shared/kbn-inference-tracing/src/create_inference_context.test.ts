@@ -6,7 +6,7 @@
  */
 
 import { context, propagation, trace, TraceFlags } from '@opentelemetry/api';
-import { AsyncHooksContextManager } from '@opentelemetry/context-async-hooks';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from './baggage';
 import { createInferenceContext } from './create_inference_context';
 
@@ -18,10 +18,10 @@ const TEST_SPAN_CONTEXT = {
 } as const;
 
 describe('createInferenceContext', () => {
-  let contextManager: AsyncHooksContextManager;
+  let contextManager: AsyncLocalStorageContextManager;
 
   beforeEach(() => {
-    contextManager = new AsyncHooksContextManager();
+    contextManager = new AsyncLocalStorageContextManager();
     context.setGlobalContextManager(contextManager);
     contextManager.enable();
   });
