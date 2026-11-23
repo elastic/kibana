@@ -16,10 +16,14 @@ import { handleEsError } from '../../../shared_imports';
 import type { KibanaFramework } from '../../../lib/kibana_framework';
 
 export const requestBodySchema = schema.object({
-  pattern: schema.string(),
-  rawEvent: schema.string(),
+  pattern: schema.string({ maxLength: 10000 }),
+  rawEvent: schema.string({ maxLength: 100000 }),
   // Dynamic pattern-name keys with string definitions, e.g. { POSTFIX_QUEUEID: '[0-9A-F]{10,11}' }
-  customPatterns: schema.recordOf(schema.string(), schema.string(), { defaultValue: {} }),
+  customPatterns: schema.recordOf(
+    schema.string({ maxLength: 1000 }),
+    schema.string({ maxLength: 10000 }),
+    { defaultValue: {} }
+  ),
 });
 
 export function registerGrokSimulateRoute(framework: KibanaFramework) {

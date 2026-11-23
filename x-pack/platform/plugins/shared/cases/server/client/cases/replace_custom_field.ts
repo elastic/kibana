@@ -15,10 +15,24 @@ import { createCaseError } from '../../common/error';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CaseCustomField } from '../../../common/types/domain';
 import { CaseCustomFieldRt } from '../../../common/types/domain';
-import { validateCustomFieldTypesInRequest } from './validators';
+import {
+  validateCustomFieldTypesInRequest,
+  validateCaseExtendedFields,
+  resolveGlobalFields,
+} from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 import { validateMaxUserActions } from '../../common/validators';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
+import {
+  buildActiveLinkMaps,
+  incrementPairedWriteCounter,
+  pairUpdatedCaseFields,
+  throwIfInvalidLinkedFieldValues,
+} from '../../common/utils/pair_field_representations';
 
 export interface ReplaceCustomFieldArgs {
   /**
@@ -46,11 +60,10 @@ export const replaceCustomField = async (
   casesClient: CasesClient
 ): Promise<CaseCustomField> => {
   const {
-    services: { caseService, userActionService },
+    services: { caseService, userActionService, templatesService, fieldDefinitionsService },
     user,
     logger,
     authorization,
-    config,
   } = clientArgs;
 
   try {
@@ -114,32 +127,74 @@ export const replaceCustomField = async (
 
     const updatedAt = new Date().toISOString();
 
-    // Mirror customFields into extended_fields so that automations writing to the legacy API
-    // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
-    // value always overrides the mirror; a null value clears the mirror key.
+    // Pair the replaced customField with its linked extended_fields entry so one
+    // case write persists a consistent pair (values go through the reversible
+    // per-type codecs — never String(value)). Runs independently of the
+    // templates feature flag: once a link exists, live sync must not depend on
+    // it (addendum A1).
     //
-    // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
-    // value-identical — that signals "no change needed" and we must not spread extended_fields
-    // into the patch payload (it would be a spurious write that also triggers an extra user action).
+    // Pass only the single field being replaced, not the full reconstructed
+    // decodedCustomFields. The reconstructed array includes all stored
+    // customFields from the case, and stored-null optional fields would clear
+    // unrelated linked keys the caller never touched.
+    //
+    // Same-reference results mean "unchanged" — we must not spread
+    // extended_fields into the patch payload then (it would be a spurious write
+    // that also triggers an extra user action).
     const existingExtendedFields = caseToUpdate.attributes.extended_fields;
-    // Pass only the single field being replaced, not the full reconstructed decodedCustomFields.
-    // The reconstructed array includes all stored customFields from the case, and stored-null
-    // optional fields would hit the merge's delete branch and wipe unrelated mirror keys.
-    const mergedExtendedFields = config.templates.enabled
-      ? mergeCustomFieldsIntoExtendedFields(
-          [{ key: customFieldId, type: foundCustomField.type, value }],
-          existingExtendedFields
-        )
-      : undefined;
-    const extendedFieldsChanged = mergedExtendedFields !== existingExtendedFields;
+    const linkIndexes = await loadFieldLinkIndexes(
+      caseToUpdate.attributes.owner,
+      fieldDefinitionsService
+    );
+    const links = buildActiveLinkMaps(configurations[0].customFields, linkIndexes);
+    const paired = pairUpdatedCaseFields({
+      requestCustomFields: [{ key: customFieldId, type: foundCustomField.type, value }],
+      requestExtendedFields: undefined,
+      baseCustomFields: decodedCustomFields,
+      baseExtendedFields: existingExtendedFields,
+      links,
+    });
+    throwIfMalformedFieldLinkage(paired.malformedFields);
+    throwIfInvalidLinkedFieldValues(paired.invalidValues);
+    logUnresolvedMirrorKeys(paired.unresolvedKeys, {
+      owner: caseToUpdate.attributes.owner,
+      logger,
+    });
+    const extendedFieldsChanged = paired.extendedFields !== existingExtendedFields;
+    incrementPairedWriteCounter(clientArgs.usageCounter, paired, extendedFieldsChanged);
+
+    // Definition-aware validation of the FINAL map, matching create.ts/bulk_create.ts/bulk_update.ts:
+    // the pairing-derived extended_fields entry must also be a valid key with a valid value
+    // against the linked definition. `partial: true` — pairing never makes an absent field
+    // "required-missing".
+    if (extendedFieldsChanged && paired.extendedFields != null) {
+      const globalFields = await resolveGlobalFields(
+        caseToUpdate.attributes.owner,
+        fieldDefinitionsService
+      );
+      await validateCaseExtendedFields({
+        extendedFields: paired.extendedFields as Record<string, string>,
+        templateId: caseToUpdate.attributes.template?.id,
+        globalFields,
+        templatesService,
+        fieldDefinitionsService,
+        owner: caseToUpdate.attributes.owner,
+        partial: true,
+      });
+    }
 
     const patchCasesPayload = {
       caseId,
       originalCase: caseToUpdate,
+      ...(Object.keys(paired.pairedKeyToStorageKey).length > 0 && {
+        pairedCustomFieldStorageKeys: paired.pairedKeyToStorageKey,
+      }),
       updatedAttributes: {
         customFields: decodedCustomFields,
         ...(extendedFieldsChanged &&
-          mergedExtendedFields != null && { extended_fields: mergedExtendedFields }),
+          paired.extendedFields != null && {
+            extended_fields: paired.extendedFields as Record<string, string>,
+          }),
         updated_at: updatedAt,
         updated_by: user,
       },

@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   EuiBadgeGroup,
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCheckbox,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
-  EuiPopover,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -31,13 +26,14 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { BULK_FILTER_MAX_RULES, getRootEsqlQuery, type RuleKind } from '@kbn/alerting-v2-schemas';
+import { getRootEsqlQuery, type RuleKind } from '@kbn/alerting-v2-schemas';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RuleKindBadge } from '../../components/rule_details/rule_summary_header';
 import { RuleActionsMenu } from './rule_actions_menu';
+import { RulesBulkActions } from './rules_bulk_actions';
 
 const labelsContainerStyle = css`
   display: flex;
@@ -154,23 +150,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     `,
     [euiTheme.breakpoint.m]
   );
-
-  const [isBulkActionsOpen, setIsBulkActionsOpen] = useState(false);
-
-  const handleBulkEnable = () => {
-    setIsBulkActionsOpen(false);
-    onBulkEnable();
-  };
-
-  const handleBulkDisable = () => {
-    setIsBulkActionsOpen(false);
-    onBulkDisable();
-  };
-
-  const handleBulkDelete = () => {
-    setIsBulkActionsOpen(false);
-    onBulkDelete();
-  };
 
   const pagination = {
     pageIndex: page - 1,
@@ -447,120 +426,16 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             />
           </EuiText>
         </EuiFlexItem>
-        {selectedCount > 0 ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    onClick={() => setIsBulkActionsOpen((open) => !open)}
-                    data-test-subj="bulkActionsButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectedCount"
-                      defaultMessage="{count} Selected"
-                      values={{ count: selectedCount }}
-                    />
-                  </EuiButtonEmpty>
-                }
-                isOpen={isBulkActionsOpen}
-                closePopover={() => setIsBulkActionsOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-                aria-label={i18n.translate('xpack.alertingV2.rulesList.bulkAction.menu', {
-                  defaultMessage: 'Bulk actions',
-                })}
-              >
-                <EuiContextMenuPanel
-                  items={[
-                    <EuiContextMenuItem
-                      key="enable"
-                      icon={<EuiIcon type="checkCircle" size="m" aria-hidden={true} />}
-                      onClick={handleBulkEnable}
-                      data-test-subj="bulkEnableRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.enable', {
-                        defaultMessage: 'Enable',
-                      })}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="disable"
-                      icon={<EuiIcon type="crossInCircle" size="m" aria-hidden={true} />}
-                      onClick={handleBulkDisable}
-                      data-test-subj="bulkDisableRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.disable', {
-                        defaultMessage: 'Disable',
-                      })}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="delete"
-                      icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
-                      onClick={handleBulkDelete}
-                      data-test-subj="bulkDeleteRules"
-                    >
-                      {i18n.translate('xpack.alertingV2.rulesList.bulkAction.delete', {
-                        defaultMessage: 'Delete',
-                      })}
-                    </EuiContextMenuItem>,
-                  ]}
-                />
-              </EuiPopover>
-            </EuiFlexItem>
-            {isAllSelected && totalItemCount > BULK_FILTER_MAX_RULES ? (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued" data-test-subj="bulkSelectAllLimitDisclosure">
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.bulkSelectAllLimitDisclosure"
-                    defaultMessage="Only the first {maxRules, number} rules can be selected for bulk actions."
-                    values={{ maxRules: BULK_FILTER_MAX_RULES }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            ) : null}
-            {!isAllSelected ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="pagesSelect"
-                  onClick={onSelectAll}
-                  data-test-subj="selectAllRulesButton"
-                >
-                  {totalItemCount > BULK_FILTER_MAX_RULES ? (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectFirstMaxRules"
-                      defaultMessage="Select first {maxRules, number} rules"
-                      values={{ maxRules: BULK_FILTER_MAX_RULES }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.selectAll"
-                      defaultMessage="Select all {total} {total, plural, one {rule} other {rules}}"
-                      values={{ total: totalItemCount }}
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType="cross"
-                color="danger"
-                onClick={onClearSelection}
-                data-test-subj="clearSelectionButton"
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.clearSelection"
-                  defaultMessage="Clear selection"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </>
-        ) : null}
+        <RulesBulkActions
+          selectedCount={selectedCount}
+          totalItemCount={totalItemCount}
+          isAllSelected={isAllSelected}
+          onSelectAll={onSelectAll}
+          onClearSelection={onClearSelection}
+          onBulkEnable={onBulkEnable}
+          onBulkDisable={onBulkDisable}
+          onBulkDelete={onBulkDelete}
+        />
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />

@@ -27,7 +27,6 @@ import { errors, getFunctionDefinition } from '..';
 import { isTypeConversionFunction } from '../functions';
 import { FunctionDefinitionTypes } from '../../../../..';
 import { getLocationInfo } from '../../../registry/location';
-import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { Location } from '../../../registry/types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
 import type {
@@ -123,7 +122,7 @@ class FunctionValidator {
     // Return early so the source-incompatibility error takes priority over the generic
     // "not allowed here" check below — the location may technically match, but the function
     // is invalid regardless because the pipeline source is TS.
-    if (isTimeseriesSourceCommand(this.ast) && this.definition.tsdbCompatible === false) {
+    if (this.isTimeseriesSource && this.definition.tsdbCompatible === false) {
       this.report(errors.tsdbIncompatibleFunction(this.fn));
       return;
     }
@@ -311,7 +310,7 @@ class FunctionValidator {
     if (
       this.definition?.locationsAvailable.includes(Location.STATS_TIMESERIES) &&
       locationId === Location.STATS &&
-      isTimeseriesSourceCommand(this.ast)
+      this.isTimeseriesSource
     ) {
       return true;
     }
@@ -319,11 +318,21 @@ class FunctionValidator {
     return false;
   }
 
+  /** Whether the function belongs to a TS pipeline. */
+  private get isTimeseriesSource(): boolean {
+    return this.context.isTimeseriesSource === true;
+  }
+
   /**
    * Gets information about the location of the current function
    */
   private get location(): { displayName: string; id: Location } {
-    return getLocationInfo(this.fn, this.parentCommand, this.ast, !!this.parentAggFunction);
+    return getLocationInfo(
+      this.fn,
+      this.parentCommand,
+      this.isTimeseriesSource,
+      !!this.parentAggFunction
+    );
   }
 
   /**

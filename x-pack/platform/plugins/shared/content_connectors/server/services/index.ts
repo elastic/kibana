@@ -12,10 +12,11 @@ import {
   buildPolicyIdOrVariantsKuery,
 } from '@kbn/fleet-plugin/common';
 import type {
+  AgentClient,
   AgentlessPoliciesService,
-  AgentService,
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
+import { FleetUnauthorizedError } from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
@@ -68,21 +69,18 @@ export class AgentlessConnectorsInfraService {
   private esClient: ElasticsearchClient;
   private packagePolicyService: PackagePolicyClient;
   private agentlessPolicyService: AgentlessPoliciesService;
-  private agentService: AgentService;
 
   constructor(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyService: PackagePolicyClient,
     agentlessPolicyService: AgentlessPoliciesService,
-    agentService: AgentService,
     logger: Logger
   ) {
     this.logger = logger;
     this.soClient = soClient;
     this.esClient = esClient;
     this.packagePolicyService = packagePolicyService;
-    this.agentService = agentService;
     this.agentlessPolicyService = agentlessPolicyService;
   }
 
@@ -252,8 +250,10 @@ export class AgentlessConnectorsInfraService {
 
   public getAgentPolicyForConnectorId = async ({
     connectorId,
+    agentClient,
   }: {
     connectorId: string;
+    agentClient: AgentClient;
   }): Promise<PackagePolicyAndAgentMetadata | null> => {
     const allPolicies = await this.getConnectorPackagePolicies();
 
@@ -268,10 +268,21 @@ export class AgentlessConnectorsInfraService {
     if (policy && policy.agent_policy_ids.length > 0) {
       const policyId = policy!.agent_policy_ids[0];
 
-      const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
-        kuery: buildPolicyIdOrVariantsKuery(policyId, 'fleet-agents.policy_id'),
-        showInactive: false,
-      });
+      let listAgentsResponse;
+      try {
+        listAgentsResponse = await agentClient.listAgents({
+          kuery: buildPolicyIdOrVariantsKuery(policyId, 'fleet-agents.policy_id'),
+          showInactive: false,
+        });
+      } catch (error) {
+        if (error instanceof FleetUnauthorizedError) {
+          this.logger.debug(
+            `Skipping agent metadata for connector ${connectorId}: user lacks Fleet agent privileges`
+          );
+          return policy;
+        }
+        throw error;
+      }
 
       if (!listAgentsResponse || listAgentsResponse.agents.length === 0) {
         // If no agents assigned to policy, just return the policy

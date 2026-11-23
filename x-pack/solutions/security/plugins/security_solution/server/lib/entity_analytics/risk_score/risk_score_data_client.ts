@@ -51,6 +51,7 @@ import {
   createEventIngestedPipeline,
   getIngestPipelineName,
 } from '../utils/event_ingested_pipeline';
+import { riskScoreSeriesEntityBatchSize } from '../utils/elasticsearch_terms_limits';
 
 interface RiskScoringDataClientOpts {
   logger: Logger;
@@ -128,46 +129,56 @@ export class RiskScoreDataClient {
     const idFieldPath = `${entityType}.risk.id_field`;
     const idValuePath = `${entityType}.risk.id_value`;
 
-    const response = await esClient.search({
-      index,
-      size: 0,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      query: {
-        bool: {
-          filter: [
-            { term: { [idFieldPath]: 'entity.id' } },
-            { terms: { [idValuePath]: [...entityIds] } },
-            { range: { '@timestamp': range } },
-          ],
+    // Each request nests a daily date_histogram under a per-entity terms agg, so its
+    // bucket count grows as `entities × days-in-lookback`. Batch entities small enough
+    // that a single request stays under both the terms-query limit and Elasticsearch's
+    // `search.max_buckets` ceiling; larger lookbacks shrink the batch further.
+    const batchSize = riskScoreSeriesEntityBatchSize(range);
+
+    for (let offset = 0; offset < entityIds.length; offset += batchSize) {
+      const batch = entityIds.slice(offset, offset + batchSize);
+
+      const response = await esClient.search({
+        index,
+        size: 0,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { [idFieldPath]: 'entity.id' } },
+              { terms: { [idValuePath]: [...batch] } },
+              { range: { '@timestamp': range } },
+            ],
+          },
         },
-      },
-      aggs: {
-        by_entity: {
-          terms: { field: idValuePath, size: entityIds.length },
-          aggs: {
-            scores_over_time: {
-              date_histogram: { field: '@timestamp', calendar_interval: 'day' },
-              aggs: {
-                avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+        aggs: {
+          by_entity: {
+            terms: { field: idValuePath, size: batch.length },
+            aggs: {
+              scores_over_time: {
+                date_histogram: { field: '@timestamp', calendar_interval: 'day' },
+                aggs: {
+                  avg_score: { avg: { field: `${entityType}.risk.calculated_score_norm` } },
+                },
               },
             },
           },
         },
-      },
-    });
+      });
 
-    const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
-      []) as Array<{
-      key: string;
-      scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
-    }>;
+      const buckets = ((response.aggregations?.by_entity as Record<string, unknown>)?.buckets ??
+        []) as Array<{
+        key: string;
+        scores_over_time: { buckets: Array<{ avg_score: { value: number | null } }> };
+      }>;
 
-    for (const bucket of buckets) {
-      const scores = bucket.scores_over_time.buckets
-        .map((b) => b.avg_score.value)
-        .filter((v): v is number => v != null);
-      result.set(bucket.key, scores);
+      for (const bucket of buckets) {
+        const scores = bucket.scores_over_time.buckets
+          .map((b) => b.avg_score.value)
+          .filter((v): v is number => v != null);
+        result.set(bucket.key, scores);
+      }
     }
 
     return result;

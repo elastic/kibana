@@ -1,11 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "module": "esnext",
-    // node resolution is deprecated in TS6; the root base no longer carries
-    // ignoreDeprecations, so silence it locally while this package stays on node.
-    "ignoreDeprecations": "6.0",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "target/types",
     "esModuleInterop": true,
     "strict": true,

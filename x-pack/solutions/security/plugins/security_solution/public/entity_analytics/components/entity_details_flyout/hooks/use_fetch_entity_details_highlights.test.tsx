@@ -456,6 +456,26 @@ describe('useFetchEntityDetailsHighlights', () => {
       });
     });
 
+    it('clears the result when switching to an entity that has no stored summary', () => {
+      const { result, rerender } = renderHook(
+        (props: Parameters<typeof useFetchEntityDetailsHighlights>[0]) =>
+          useFetchEntityDetailsHighlights(props),
+        {
+          initialProps: {
+            ...mockProps,
+            storedSummary: mockStoredSummary as PersistedEntityAiSummary | null,
+          },
+        }
+      );
+
+      expect(result.current.result).not.toBeNull();
+
+      // Switch to an entity with no persisted summary
+      rerender({ ...mockProps, entityIdentifier: 'entity-without-summary', storedSummary: null });
+
+      expect(result.current.result).toBeNull();
+    });
+
     it('does not overwrite a freshly generated result when a stored summary arrives later', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);

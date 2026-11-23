@@ -19,7 +19,10 @@ import type {
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
 import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type InputNumberProps = z.infer<typeof InputNumberFieldSchema> & ConditionRenderProps;
+type InputNumberProps = z.infer<typeof InputNumberFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const isEmptyNumeric = (value: unknown): boolean => {
   if (value === undefined || value === null) return true;
@@ -39,13 +42,15 @@ export const InputNumber = ({
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }: InputNumberProps) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   const rules = useMemo(() => {
     const validate: Record<string, (value: unknown) => true | string> = {};

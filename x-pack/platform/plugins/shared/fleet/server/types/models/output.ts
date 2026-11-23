@@ -14,6 +14,7 @@ import {
   kafkaPartitionType,
   kafkaSaslMechanism,
   kafkaVerificationModes,
+  MAX_HOSTS,
   outputType,
 } from '../../../common/constants';
 
@@ -55,6 +56,22 @@ const secretRefSchema = schema.oneOf([
   }),
   schema.string(),
 ]);
+
+// an update removes a secret by setting it to `null`: leaving it out keeps the saved one
+const nullableSecretRefSchema = schema.oneOf([
+  schema.literal(null),
+  schema.object({
+    id: schema.string(),
+    hash: schema.maybe(schema.string()),
+  }),
+  schema.string(),
+]);
+
+const BeatsUpdateSecretsSchema = schema.maybe(
+  schema.object({
+    ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
+  })
+);
 
 /**
  * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
@@ -125,6 +142,7 @@ const UpdateSchema = {
   name: schema.maybe(schema.string()),
   is_default: schema.maybe(schema.boolean()),
   is_default_monitoring: schema.maybe(schema.boolean()),
+  secrets: BeatsUpdateSecretsSchema,
 };
 
 const PresetSchema = schema.oneOf([
@@ -142,7 +160,10 @@ const PresetSchema = schema.oneOf([
 export const ElasticSearchSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Elasticsearch),
-  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 }),
+  hosts: schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+    minSize: 1,
+    maxSize: MAX_HOSTS,
+  }),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
 };
@@ -151,7 +172,10 @@ const ElasticSearchUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Elasticsearch)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
+    })
   ),
   preset: schema.maybe(PresetSchema),
   write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
@@ -183,8 +207,8 @@ const RemoteElasticSearchUpdateSchema = {
   service_token: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   secrets: schema.maybe(
     schema.object({
-      service_token: schema.maybe(secretRefSchema),
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      service_token: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: schema.maybe(nullableSecretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
@@ -202,7 +226,7 @@ export const LogstashSchema = {
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
     minSize: 1,
-    maxSize: 10,
+    maxSize: MAX_HOSTS,
   }),
 };
 
@@ -210,21 +234,31 @@ const LogstashUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Logstash)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1, maxSize: 10 })
-  ),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    schema.arrayOf(schema.string({ validate: validateLogstashHost }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
     })
   ),
 };
 
 export const KafkaSchema = {
   ...BaseSchema,
+  // Kafka does not support proxies. proxy_id is accepted to avoid breaking existing preconfigured
+  // outputs but is silently cleared to null on save and never written into the compiled agent
+  // policy (#267281). Marked deprecated so API consumers are not misled.
+  proxy_id: schema.maybe(
+    schema.oneOf([schema.literal(null), schema.string()], {
+      meta: {
+        deprecated: true,
+        description:
+          'Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.',
+      },
+    })
+  ),
   type: schema.literal(outputType.Kafka),
   hosts: schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
     minSize: 1,
-    maxSize: 10,
+    maxSize: MAX_HOSTS,
   }),
   version: schema.maybe(schema.string()),
   key: schema.maybe(schema.string()),
@@ -302,7 +336,10 @@ const KafkaUpdateSchema = {
   ...KafkaSchema,
   type: schema.maybe(schema.literal(outputType.Kafka)),
   hosts: schema.maybe(
-    schema.arrayOf(schema.string({ validate: validateKafkaHost }), { minSize: 1, maxSize: 10 })
+    schema.arrayOf(schema.string({ validate: validateKafkaHost }), {
+      minSize: 1,
+      maxSize: MAX_HOSTS,
+    })
   ),
   auth_type: schema.maybe(
     schema.oneOf([
@@ -311,6 +348,12 @@ const KafkaUpdateSchema = {
       schema.literal(kafkaAuthType.Ssl),
       schema.literal(kafkaAuthType.Kerberos),
     ])
+  ),
+  secrets: schema.maybe(
+    schema.object({
+      password: schema.maybe(nullableSecretRefSchema),
+      ssl: schema.maybe(schema.object({ key: nullableSecretRefSchema })),
+    })
   ),
 };
 

@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(200);
 
-      jestExpect(response.body).toEqual({
+      jestExpect(response.body).toMatchObject({
         username: 'second_client',
         roles: [],
         full_name: null,
@@ -451,7 +451,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/pki.log');
+      const logFilePath = resolve(
+        __dirname,
+        '../../../../test_plugins/security_api_integration/packages/helpers/audit/pki.log'
+      );
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {
@@ -487,8 +490,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'success' } },
+          { event: { action: 'user_logout', outcome: 'unknown' } },
+        ]);
 
         expect(auditEvents).to.have.length(2);
 
@@ -510,8 +515,9 @@ export default function ({ getService }: FtrProviderContext) {
       it('should log authentication failure correctly', async () => {
         await supertest.get('/security/account').ca(CA_CERT).pfx(UNTRUSTED_CLIENT_CERT).expect(401);
 
-        await logFile.isWritten();
-        const auditEvents = await logFile.readJSON();
+        const auditEvents = await logFile.waitForAuditEvents([
+          { event: { action: 'user_login', outcome: 'failure' } },
+        ]);
 
         expect(auditEvents).to.have.length(1);
         expect(auditEvents[0]).to.be.ok();

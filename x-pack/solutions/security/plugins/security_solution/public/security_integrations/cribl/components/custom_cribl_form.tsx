@@ -32,6 +32,10 @@ import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import {
+  DATA_ID_MAX_LENGTH,
+  isValidDataId,
+} from '../../../../common/security_integrations/cribl/sanitize';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
@@ -72,6 +76,15 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
       ? isValidNamespace(routeEntry.namespace, false)
       : undefined;
     const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
+    const isDataIdInvalid = !!routeEntry.dataId && !isValidDataId(routeEntry.dataId);
+    const dataIdError = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.invalidDataId',
+      {
+        defaultMessage:
+          "Invalid Cribl dataId. Only letters, numbers, '.', '_', and '-' are allowed (max {maxLength} characters).",
+        values: { maxLength: DATA_ID_MAX_LENGTH },
+      }
+    );
 
     const options = datastreamOpts.map((o) => ({
       label: o,
@@ -88,9 +101,14 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Cribl _dataId field">
+            <EuiFormRow
+              label="Cribl _dataId field"
+              isInvalid={isDataIdInvalid}
+              error={isDataIdInvalid ? dataIdError : undefined}
+            >
               <EuiFieldText
                 value={routeEntry.dataId}
+                isInvalid={isDataIdInvalid}
                 onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)}
               />
             </EuiFormRow>
@@ -258,12 +276,16 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       const allNamespacesValid = updatedRouteEntries.every(
         (entry) => !entry.namespace || isValidNamespace(entry.namespace, false).valid
       );
+      const allDataIdsValid = updatedRouteEntries.every(
+        (entry) => !entry.dataId || isValidDataId(entry.dataId)
+      );
 
       // must have at least one filled in and all entries must have both filled in or neither
       const isValid =
         hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
         allRouteEntriesArePaired(updatedRouteEntries) &&
-        allNamespacesValid;
+        allNamespacesValid &&
+        allDataIdsValid;
 
       onChange({
         isValid,

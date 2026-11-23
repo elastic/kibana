@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '../../../../../../common';
 import type { ResolutionClient } from '../../..';
-import { NAMESPACE_PRIORITY, selectTarget } from '../../..';
+import { NAMESPACE_PRIORITY } from '../../..';
 import { getFieldValue } from '../../../../../../common/domain/euid/commons';
 import { ENTITY_ID_FIELD } from '../../../../../../common/domain/definitions/common_fields';
 import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_maintainers/maintainer_telemetry_client';
@@ -29,7 +29,7 @@ const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENTITY_NAMESPACE_FIELD = 'entity.namespace';
 const FIRST_SEEN_FIELD = 'entity.lifecycle.first_seen';
-// The alias resolution seeds and target priority intentionally use the same IDP namespace set.
+// Seed collection uses the same IDP namespace set as NAMESPACE_PRIORITY.
 const IDP_NAMESPACES = NAMESPACE_PRIORITY;
 const RIGHT_MATCH_FIELDS = ['user.id', 'user.name', 'user.email', 'user.full_name'] as const;
 const LOCAL_NAMESPACE = 'local';
@@ -217,9 +217,10 @@ const findCandidates = async ({
  *
  * For each unresolved IDP seed, read the seed's own entityanalytics source
  * record, clean its related.user values, collect unambiguous entity-store
- * candidates across all values, then link the whole group once by namespace
- * priority. The source read is EUID-confirmed so records that merely mention
- * the seed do not become alias-resolution input.
+ * candidates across all values, then cascade-link those candidates onto the
+ * seed (the asserting IDP is always the resolution target). The source read
+ * is EUID-confirmed so records that merely mention the seed do not become
+ * alias-resolution input.
  */
 export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
@@ -287,21 +288,14 @@ export async function runRelatedUserAliasResolution(
       }
     }
 
-    const group = [seed, ...candidatesForSeed.values()];
-    if (group.length < 2) {
+    const candidates = [...candidatesForSeed.values()];
+    if (candidates.length === 0) {
       continue;
     }
 
     try {
-      const target = selectTarget(group);
-      const aliasIds = group
-        .filter((entity) => entity.entityId !== target.entityId)
-        .map((entity) => entity.entityId);
-      if (aliasIds.length === 0) {
-        continue;
-      }
-
-      const result = await resolutionClient.cascadeLinkEntities(target.entityId, aliasIds);
+      const aliasIds = candidates.map((entity) => entity.entityId);
+      const result = await resolutionClient.cascadeLinkEntities(seed.entityId, aliasIds);
       lastRun.linksCreated += result.linked.length;
       lastRun.cascadeRetargeted += result.retargeted.length;
       lastRun.cascadesBlocked += result.cascadesBlocked;

@@ -6,12 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type {
-  MappingRuntimeFields,
-  MlDetector,
-  QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/types';
-import type { EntityType } from '@kbn/entity-store/common';
+import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { Entity, EntityType } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyHit, EnrichedAnomalyHit } from './types';
@@ -92,25 +88,26 @@ interface QuerySharedOpts {
   detector: MlDetector;
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
   jobConfig: JobConfig;
   jobId: string;
   logger: Logger;
-  runtimeMappings: MappingRuntimeFields;
+  entityFilter: QueryDslQueryContainer;
 }
 
 const fetchRareBaselineForAnomaly = async ({
   anomaly,
   entityId,
+  entityFilter,
   esClient,
   fromMs,
   toMs,
   jobConfig,
   jobId,
   logger,
-  runtimeMappings,
 }: QuerySharedOpts): Promise<EnrichedAnomalyHit> => {
   try {
     if (!anomaly.byFieldName) {
@@ -128,12 +125,11 @@ const fetchRareBaselineForAnomaly = async ({
       index: jobConfig.sourceIndex,
       ignore_unavailable: true,
       size: 0,
-      runtime_mappings: runtimeMappings,
       query: {
         bool: {
           filter: [
             jobConfig.datafeedQuery,
-            { term: { entity_id: entityId } },
+            entityFilter,
             ...additionalFilters,
             {
               range: {
@@ -191,13 +187,13 @@ const fetchTimeBaselineForAnomaly = async ({
   detector,
   entityId,
   entityType,
+  entityFilter,
   esClient,
   fromMs,
   toMs,
+  logger,
   jobConfig,
   jobId,
-  logger,
-  runtimeMappings,
 }: QuerySharedOpts): Promise<EnrichedAnomalyHit> => {
   try {
     const termsFields = getNonEntityGroupFields(detector, entityType);
@@ -231,7 +227,6 @@ const fetchTimeBaselineForAnomaly = async ({
       ignore_unavailable: true,
       size: 0,
       runtime_mappings: {
-        ...runtimeMappings,
         hour_of_day: {
           type: 'long' as const,
           script: { source: "emit(doc['@timestamp'].value.getHour())" },
@@ -246,7 +241,7 @@ const fetchTimeBaselineForAnomaly = async ({
         bool: {
           filter: [
             jobConfig.datafeedQuery,
-            { term: { entity_id: entityId } },
+            entityFilter,
             ...additionalFilters,
             {
               range: {
@@ -284,6 +279,7 @@ interface FetchBaselineBehaviorOpts {
   anomaly: AnomalyHit;
   entityId: string;
   entityType: EntityType;
+  entityRecord: Entity;
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
@@ -296,6 +292,7 @@ export const fetchBaselineBehavior = async ({
   anomaly,
   entityId,
   entityType,
+  entityRecord,
   esClient,
   fromMs,
   toMs,
@@ -308,22 +305,28 @@ export const fetchBaselineBehavior = async ({
       return anomaly;
     }
 
+    const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+    if (!entityFilter) {
+      logger.warn(
+        `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+      );
+      return anomaly;
+    }
+
     const detector = jobConfig.detectors[anomaly.detectorIndex];
-    const runtimeMappings: MappingRuntimeFields = {
-      entity_id: euid.painless.getEuidRuntimeMapping(entityType),
-    };
     const opts = {
       anomaly,
       detector,
       entityId,
       entityType,
+      entityRecord,
       esClient,
       fromMs,
       toMs,
       jobConfig,
       jobId,
       logger,
-      runtimeMappings,
+      entityFilter,
     };
 
     if (detector?.function === 'rare') {

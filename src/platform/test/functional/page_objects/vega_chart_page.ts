@@ -20,6 +20,7 @@ export class VegaChartPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
+  private readonly browser = this.ctx.getService('browser');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
 
   public getEditor() {
@@ -32,10 +33,6 @@ export class VegaChartPageObject extends FtrService {
 
   public getControlContainer() {
     return this.find.byCssSelector('div.vgaVis__controls');
-  }
-
-  public getYAxisContainer() {
-    return this.find.byCssSelector('[aria-label^="Y-axis"]');
   }
 
   public async getSpec() {
@@ -69,14 +66,20 @@ export class VegaChartPageObject extends FtrService {
   }
 
   public async getYAxisLabels() {
-    const yAxis = await this.getYAxisContainer();
-    const tickGroup = await yAxis.findByClassName('role-axis-label');
-    const labels = await tickGroup.findAllByCssSelector('text');
-    const labelTexts: string[] = [];
-
-    for (const label of labels) {
-      labelTexts.push(await label.getVisibleText());
-    }
+    // Read every tick label in a single browser-side pass so a Vega resize
+    // redraw cannot detach the SVG nodes between separate WebDriver reads.
+    let labelTexts: string[] = [];
+    await this.retry.waitFor('Vega Y-axis labels to be present', async () => {
+      labelTexts = await this.browser.execute<[], string[]>(() => {
+        const tickGroup = document
+          .querySelector('[aria-label^="Y-axis"]')
+          ?.querySelector('.role-axis-label');
+        return tickGroup
+          ? Array.from(tickGroup.querySelectorAll('text')).map((el) => el.textContent ?? '')
+          : [];
+      });
+      return labelTexts.length > 0;
+    });
     return labelTexts;
   }
 }

@@ -50,6 +50,7 @@ import {
   PackagePolicyRequestError,
 } from '../../errors';
 import {
+  assertPackagePoliciesUpgradeAcknowledged,
   getInstallation,
   getInstallations,
   getPackageInfo,
@@ -414,11 +415,17 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   }
 
   if (limitedToPackages && limitedToPackages.length) {
-    const packageName = packagePolicy?.package?.name;
-    if (packageName && !limitedToPackages.includes(packageName)) {
-      return response.forbidden({
-        body: { message: `Update for package name ${packageName} is not authorized.` },
-      });
+    // Enforce the package scope against both the existing package policy and the
+    // package supplied in the update body. Checking only the saved package would
+    // allow a scoped caller to retarget the policy to a package outside its scope.
+    const existingPackageName = packagePolicy?.package?.name;
+    const requestedPackageName = request.body.package?.name;
+    for (const packageName of [existingPackageName, requestedPackageName]) {
+      if (packageName && !limitedToPackages.includes(packageName)) {
+        return response.forbidden({
+          body: { message: `Update for package name ${packageName} is not authorized.` },
+        });
+      }
     }
   }
 
@@ -559,7 +566,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       request.params.packagePolicyId,
       newData,
       { user, force },
-      packagePolicy.package?.version
+      context
     );
     return response.ok({
       body: {
@@ -688,6 +695,15 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const packagePolicyIds = deduplicateIds(request.body.packagePolicyIds);
 
   await throwIfTargetsAgentlessPolicies(soClient, packagePolicyIds);
+
+  if (!request.body.acknowledge_breaking_changes) {
+    // Reject the whole request before upgrading anything, so a rejected request leaves all the
+    // package policies unchanged.
+    const packagePolicies =
+      (await packagePolicyService.getByIDs(soClient, packagePolicyIds, { ignoreMissing: true })) ??
+      [];
+    await assertPackagePoliciesUpgradeAcknowledged(packagePolicies);
+  }
 
   const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,

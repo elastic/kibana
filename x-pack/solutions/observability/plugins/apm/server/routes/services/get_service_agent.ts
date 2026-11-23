@@ -9,7 +9,7 @@ import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { ServiceAgentResponse } from '@kbn/apm-api-shared';
-import { getAgentName } from '@kbn/elastic-agent-utils';
+import { getAgentName, isOpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
@@ -25,14 +25,17 @@ import {
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
 import { maybe } from '../../../common/utils/maybe';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 export async function getServiceAgent({
   serviceName,
+  environment,
   apmEventClient,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
@@ -66,6 +69,7 @@ export async function getServiceAgent({
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
           ...rangeQuery(start, end),
+          ...environmentQuery(environment),
           {
             bool: {
               should: [
@@ -96,6 +100,11 @@ export async function getServiceAgent({
         ],
       },
     },
+    aggs: {
+      // The single sampled hit above is not guaranteed to expose `telemetry.sdk.*`, which select the ingestion path.
+      telemetrySdkName: { terms: { field: TELEMETRY_SDK_NAME } },
+      telemetrySdkLanguage: { terms: { field: TELEMETRY_SDK_LANGUAGE } },
+    },
     fields,
     sort: { '@timestamp': { order: 'desc' as const }, _score: { order: 'desc' as const } },
   };
@@ -107,6 +116,24 @@ export async function getServiceAgent({
   }
 
   const event = accessKnownApmEventFields(hit.fields);
+
+  // The aggregations may surface `telemetry.sdk.*` from other documents in the range. Combining them
+  // with a classic agent name would describe an ingestion path that doesn't exist (e.g. a native OTel
+  // dashboard key for a classic Java agent), so only fall back to them when the sampled document is
+  // not from a classic APM agent.
+  const hitAgentName = event[AGENT_NAME];
+  const canUseRangeAggregations = !hitAgentName || isOpenTelemetryAgentName(hitAgentName);
+
+  const telemetrySdkName =
+    event[TELEMETRY_SDK_NAME] ??
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkName.buckets[0]?.key as string | undefined)
+      : undefined);
+  const telemetrySdkLanguage =
+    event[TELEMETRY_SDK_LANGUAGE] ??
+    (canUseRangeAggregations
+      ? (response.aggregations?.telemetrySdkLanguage.buckets[0]?.key as string | undefined)
+      : undefined);
 
   const serverlessType = getServerlessTypeFromCloudData(
     event[CLOUD_PROVIDER],
@@ -120,14 +147,14 @@ export async function getServiceAgent({
   const agentName =
     getAgentName(
       event[AGENT_NAME] ?? null,
-      event[TELEMETRY_SDK_LANGUAGE] ?? null,
-      event[TELEMETRY_SDK_NAME] ?? null
+      telemetrySdkLanguage ?? null,
+      telemetrySdkName ?? null
     ) ?? undefined;
 
   return {
     agentName,
-    telemetrySdkName: event[TELEMETRY_SDK_NAME],
-    telemetrySdkLanguage: event[TELEMETRY_SDK_LANGUAGE],
+    telemetrySdkName,
+    telemetrySdkLanguage,
     runtimeName: event[SERVICE_RUNTIME_NAME],
     runtimeVersion,
     serverlessType,

@@ -107,6 +107,7 @@ export const EditDataLifecycleFlyoutBody = (props: EditDataLifecycleFlyoutBodyPr
             ...(downsampleStepCount > 0 ? [strings.downsampleStepsLabel(downsampleStepCount)] : []),
           ],
           inspectable: policy.serializedPolicy !== undefined,
+          isManaged: policy.isManaged,
         };
       }),
     [ilmPolicies]

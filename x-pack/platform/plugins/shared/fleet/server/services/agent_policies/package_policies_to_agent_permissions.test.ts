@@ -8,6 +8,9 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
@@ -21,7 +24,9 @@ import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
   UNIVERSAL_PROFILING_PERMISSIONS,
+  UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
+import { getRoleDescriptorNames } from './role_descriptor_name';
 
 const packageInfoCache = new Map();
 packageInfoCache.set('test_package-0.0.0', {
@@ -437,6 +442,113 @@ packageInfoCache.set('non_dynamic_pkg-1.0.0', {
   assets: { kibana: {}, elasticsearch: {} },
 });
 
+// Package that is NOT agentless-eligible (no policy template enables the agentless deployment mode).
+packageInfoCache.set('non_agentless_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'non_agentless_pkg',
+  title: 'Non Agentless Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'logs',
+      title: 'Logs',
+      description: 'Collect logs.',
+      inputs: [{ type: 'logfile', title: 'Logs', description: 'Collect logs.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'non_agentless_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'non_agentless_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
+// Package that IS agentless-eligible (a policy template enables the agentless deployment mode).
+packageInfoCache.set('agentless_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'agentless_pkg',
+  title: 'Agentless Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'agentless',
+      title: 'Agentless',
+      description: 'Agentless-eligible template.',
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'agentless_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'agentless_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
+// Mixed-mode package: one template is agentless-eligible, another is default-only. The package is
+// agentless-eligible overall, but a policy whose enabled input belongs to the default-only template
+// is not a valid agentless deployment.
+packageInfoCache.set('mixed_mode_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'mixed_mode_pkg',
+  title: 'Mixed Mode Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [
+    {
+      name: 'agentless_tmpl',
+      title: 'Agentless',
+      description: 'Agentless-eligible template.',
+      deployment_modes: { agentless: { enabled: true } },
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
+    },
+    {
+      name: 'default_tmpl',
+      title: 'Default only',
+      description: 'Default-only template.',
+      deployment_modes: { default: { enabled: true } },
+      inputs: [{ type: 'httpjson', title: 'HTTP JSON', description: 'Collect over HTTP.' }],
+    },
+  ],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'mixed_mode_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'mixed_mode_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
+} as any);
+
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
@@ -520,6 +632,310 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           },
         ],
       },
+    });
+  });
+
+  describe('agentless permissions', () => {
+    let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+    beforeEach(() => {
+      mockLogger = loggingSystemMock.createLogger();
+      jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+    });
+
+    const buildAgentlessPackagePolicy = (
+      pkgName: string,
+      supportsAgentless: boolean,
+      input: { type?: string; policyTemplate?: string } = {}
+    ): PackagePolicy =>
+      ({
+        id: `package-policy-${pkgName}`,
+        name: 'agentless-test-policy',
+        namespace: 'test',
+        enabled: true,
+        supports_agentless: supportsAgentless,
+        package: { name: pkgName, version: '1.0.0', title: pkgName },
+        inputs: [
+          {
+            type: input.type ?? 'httpjson',
+            policy_template: input.policyTemplate,
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-0',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: `${pkgName}.logs` },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      } as PackagePolicy);
+
+    const hasAgentlessGrant = (descriptor: SecurityRoleDescriptor | undefined) =>
+      (descriptor?.indices ?? []).some((index) => [index.names].flat().includes('agentless-*'));
+
+    const expectNormalGrant = (descriptor: SecurityRoleDescriptor | undefined, pkgName: string) =>
+      // The normal data stream grant must survive so the integration keeps ingesting; a dropped
+      // descriptor would also report no agentless grant and hide a regression.
+      expect(descriptor?.indices).toEqual(
+        expect.arrayContaining([expect.objectContaining({ names: [`logs-${pkgName}.logs-test`] })])
+      );
+
+    it('does NOT grant agentless-* permissions when the package is not agentless-eligible, even with the flag set', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('non_agentless_pkg', true),
+      ]);
+
+      const descriptor = permissions?.['package-policy-non_agentless_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      expectNormalGrant(descriptor, 'non_agentless_pkg');
+    });
+
+    it('grants agentless-* permissions when the package is agentless-eligible and the flag is set', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('agentless_pkg', true, { policyTemplate: 'agentless' }),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-agentless_pkg'])).toBe(true);
+    });
+
+    it('does NOT grant agentless-* permissions for an eligible package when the flag is not set', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('agentless_pkg', false, { policyTemplate: 'agentless' }),
+      ]);
+
+      const descriptor = permissions?.['package-policy-agentless_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      expectNormalGrant(descriptor, 'agentless_pkg');
+    });
+
+    it('does NOT grant agentless-* permissions when the enabled input is not agentless-eligible, even if the package has an agentless template', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('mixed_mode_pkg', true, {
+          policyTemplate: 'default_tmpl',
+        }),
+      ]);
+
+      const descriptor = permissions?.['package-policy-mixed_mode_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      expectNormalGrant(descriptor, 'mixed_mode_pkg');
+    });
+
+    it('grants agentless-* permissions when the enabled input belongs to the agentless template', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildAgentlessPackagePolicy('mixed_mode_pkg', true, {
+          policyTemplate: 'agentless_tmpl',
+        }),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
+    });
+
+    // A policy with an eligible input and a default-only input: every ENABLED input must qualify,
+    // and disabled inputs must be ignored.
+    const buildMixedInputsPackagePolicy = (defaultInputEnabled: boolean): PackagePolicy =>
+      ({
+        id: 'package-policy-mixed_mode_pkg',
+        name: 'agentless-test-policy',
+        namespace: 'test',
+        enabled: true,
+        supports_agentless: true,
+        package: { name: 'mixed_mode_pkg', version: '1.0.0', title: 'mixed_mode_pkg' },
+        inputs: [
+          {
+            type: 'httpjson',
+            policy_template: 'agentless_tmpl',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-agentless',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'mixed_mode_pkg.logs' },
+              },
+            ],
+          },
+          {
+            type: 'httpjson',
+            policy_template: 'default_tmpl',
+            enabled: defaultInputEnabled,
+            streams: [
+              {
+                id: 'stream-default',
+                enabled: defaultInputEnabled,
+                data_stream: { type: 'logs', dataset: 'mixed_mode_pkg.default' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      } as PackagePolicy);
+
+    it('does NOT grant agentless-* permissions when any enabled input is not agentless-eligible', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildMixedInputsPackagePolicy(true),
+      ]);
+
+      const descriptor = permissions?.['package-policy-mixed_mode_pkg'];
+      expect(hasAgentlessGrant(descriptor)).toBe(false);
+      // The eligible input's normal data-stream grant must still be present, so withholding the
+      // agentless grant does not also drop the whole descriptor and block ingestion.
+      expectNormalGrant(descriptor, 'mixed_mode_pkg');
+    });
+
+    it('grants agentless-* permissions when the only non-eligible input is disabled', async () => {
+      const permissions = await storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildMixedInputsPackagePolicy(false),
+      ]);
+
+      expect(hasAgentlessGrant(permissions?.['package-policy-mixed_mode_pkg'])).toBe(true);
+    });
+
+    describe('warning when agentless permissions are withheld', () => {
+      it('logs the package reason when the package is not agentless-eligible', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildAgentlessPackagePolicy('non_agentless_pkg', true),
+        ]);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Package policy "package-policy-non_agentless_pkg" has agentless enabled but is not eligible (package "non_agentless_pkg" does not support agentless deployment mode)'
+          )
+        );
+      });
+
+      it('logs the disallowed input types when an enabled input is not agentless-eligible', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildMixedInputsPackagePolicy(true),
+        ]);
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('input(s) not allowed in agentless deployment mode: httpjson')
+        );
+      });
+
+      it('does not log when the policy is a valid agentless deployment', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildMixedInputsPackagePolicy(false),
+        ]);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+
+      it('does not log when agentless is not enabled on the policy', () => {
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+          buildAgentlessPackagePolicy('non_agentless_pkg', false),
+        ]);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('role descriptor names', () => {
+    const buildPackagePolicy = (id: string, dataset = 'some-logs'): PackagePolicy => ({
+      id,
+      name: 'test-policy',
+      namespace: 'test',
+      enabled: true,
+      package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+      inputs: [
+        {
+          type: 'test-logs',
+          enabled: true,
+          streams: [
+            {
+              id: 'test-logs',
+              enabled: true,
+              data_stream: { type: 'logs', dataset },
+            },
+          ],
+        },
+      ],
+      created_at: '',
+      updated_at: '',
+      created_by: '',
+      updated_by: '',
+      revision: 1,
+      policy_id: '',
+      policy_ids: [''],
+    });
+
+    it('keeps the package policy ID as the name when ES accepts it', () => {
+      const id = 'aws ec2 eu-west-3-synthetics-default-d9b5d343-0c46-4edf-9960-fef47b72a449';
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+
+      expect(Object.keys(permissions!)).toEqual([id]);
+    });
+
+    it('replaces a package policy ID that ES rejects with a valid, deterministic name', () => {
+      const id = 'モニター-synthetics-default-d9b5d343-0c46-4edf-9960-fef47b72a449';
+
+      const first = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+      const second = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(id),
+      ]);
+
+      const names = Object.keys(first!);
+      expect(names).toHaveLength(1);
+      expect(names[0]).not.toBe(id);
+      expect(names[0]).toMatch(/^[\x21-\x7e](?:[\x20-\x7e]*[\x21-\x7e])?$/);
+      expect(Object.keys(second!)).toEqual(names);
+      expect(first![names[0]]).toMatchObject({
+        indices: [{ names: ['logs-some-logs-test'] }],
+      });
+    });
+
+    it('keeps the permissions of both policies when a valid ID equals the name generated for a rejected ID', () => {
+      const rejectedId = 'monitor-é-loc';
+      const [generatedName] = getRoleDescriptorNames([rejectedId]);
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(rejectedId, 'rejected-id-logs'),
+        buildPackagePolicy(generatedName, 'valid-id-logs'),
+      ]);
+
+      expect(Object.keys(permissions!)).toHaveLength(2);
+      expect(permissions![generatedName]).toMatchObject({
+        indices: [{ names: ['logs-valid-id-logs-test'] }],
+      });
+      const [otherName] = Object.keys(permissions!).filter((name) => name !== generatedName);
+      expect(permissions![otherName]).toMatchObject({
+        indices: [{ names: ['logs-rejected-id-logs-test'] }],
+      });
+    });
+
+    it('keeps the permissions of every package policy when only some IDs are rejected', () => {
+      const validId = 'package-policy-uuid-test-123';
+      const invalidIds = ['monitor-é-loc', 'monitor-ü-loc'];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(packageInfoCache, 'test', [
+        buildPackagePolicy(validId),
+        ...invalidIds.map((id) => buildPackagePolicy(id)),
+      ]);
+
+      const names = Object.keys(permissions!);
+      expect(names).toHaveLength(3);
+      expect(names).toContain(validId);
+      expect(names).not.toContain(invalidIds[0]);
+      expect(names).not.toContain(invalidIds[1]);
     });
   });
 
@@ -691,6 +1107,113 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Filters out disallowed cluster privileges and logs a warning', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor', 'all'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        cluster: ['monitor'],
+      },
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('all'));
+  });
+
+  it('Omits cluster descriptor when all declared cluster privileges are disallowed', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['all', 'manage_security'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions?.['package-policy-uuid-test-123']).not.toHaveProperty('cluster');
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+  });
+
   it('Returns the dataset for osquery_manager package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
@@ -777,6 +1300,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           {
             names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+          {
+            names: ['.profiling-sq-*'],
+            privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
           },
         ],
       },

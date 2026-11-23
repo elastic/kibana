@@ -82,7 +82,12 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         // params when the tools list is empty. Only forward tools/tool_choice when tools exist.
         ...(hasTools
           ? {
-              tool_choice: toolChoiceToOpenAI(toolChoice, { connector, tools }),
+              tool_choice: toolChoiceToOpenAI(toolChoice, {
+                connector,
+                tools,
+                modelId: modelName ?? connector.config?.defaultModel,
+                logger,
+              }),
               tools: openAiTools,
             }
           : {}),
@@ -114,7 +119,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       return connectorResult$.pipe(
         handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
         processOpenAIStream(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     } else {
@@ -123,7 +128,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
           parseData: (data) => data as OpenAI.ChatCompletion,
         }),
         processOpenAIResponse(),
-        emitTokenCountEstimateIfMissing({ request }),
+        emitTokenCountEstimateIfMissing({ request, logger }),
         useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : passThrough
       );
     }

@@ -126,7 +126,7 @@ describe('InsightsTabCsp', () => {
   });
 
   describe('when only one tab is available', () => {
-    it('should render button group as disabled for misconfigurations only', () => {
+    it('should hide button group for misconfigurations only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -144,15 +144,11 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show misconfiguration table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('misconfiguration-table')).toBeInTheDocument();
     });
 
-    it('should render button group as disabled for vulnerabilities only', () => {
+    it('should hide button group for vulnerabilities only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -170,15 +166,11 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show vulnerabilities table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('vulnerabilities-table')).toBeInTheDocument();
     });
 
-    it('should render button group as disabled for alerts only', () => {
+    it('should hide button group for alerts only', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
@@ -196,41 +188,8 @@ describe('InsightsTabCsp', () => {
         </TestProviders>
       );
 
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toBeInTheDocument();
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Should show alerts table
+      expect(screen.queryByTestId('insightButtonGroupsTestId')).not.toBeInTheDocument();
       expect(screen.getByTestId('alerts-table')).toBeInTheDocument();
-    });
-
-    it('should not allow tab changes when disabled', () => {
-      mockUseExpandableFlyoutState.mockReturnValue({
-        left: {
-          params: {
-            hasMisconfigurationFindings: true,
-            hasVulnerabilitiesFindings: false,
-            hasNonClosedAlerts: false,
-            path: { subTab: undefined },
-          },
-        },
-      } as unknown as ExpandableFlyoutState);
-
-      render(
-        <TestProviders>
-          <InsightsTabCsp {...defaultProps} />
-        </TestProviders>
-      );
-
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toHaveAttribute('disabled');
-
-      // Clicking should not change the active tab (no state change)
-      const misconfigurationButton = screen.getByTestId('misconfigurationTabDataTestId');
-      fireEvent.click(misconfigurationButton);
-
-      // Should still show misconfiguration table (no change)
-      expect(screen.getByTestId('misconfiguration-table')).toBeInTheDocument();
     });
   });
 
@@ -473,12 +432,12 @@ describe('InsightsTabCsp', () => {
   });
 
   describe('accessibility', () => {
-    it('should have proper legend for screen readers', () => {
+    it('should have proper legend for screen readers when multiple tabs are available', () => {
       mockUseExpandableFlyoutState.mockReturnValue({
         left: {
           params: {
             hasMisconfigurationFindings: true,
-            hasVulnerabilitiesFindings: false,
+            hasVulnerabilitiesFindings: true,
             hasNonClosedAlerts: false,
             path: { subTab: undefined },
           },
@@ -494,28 +453,6 @@ describe('InsightsTabCsp', () => {
       const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
       // EuiButtonGroup uses legend prop which creates a fieldset with legend element
       expect(buttonGroup).toBeInTheDocument();
-    });
-
-    it('should maintain disabled state accessibility when single tab', () => {
-      mockUseExpandableFlyoutState.mockReturnValue({
-        left: {
-          params: {
-            hasMisconfigurationFindings: true,
-            hasVulnerabilitiesFindings: false,
-            hasNonClosedAlerts: false,
-            path: { subTab: undefined },
-          },
-        },
-      } as unknown as ExpandableFlyoutState);
-
-      render(
-        <TestProviders>
-          <InsightsTabCsp {...defaultProps} />
-        </TestProviders>
-      );
-
-      const buttonGroup = screen.getByTestId('insightButtonGroupsTestId');
-      expect(buttonGroup).toHaveAttribute('disabled');
     });
   });
 });

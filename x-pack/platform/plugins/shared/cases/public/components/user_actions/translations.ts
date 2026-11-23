@@ -60,6 +60,13 @@ export const UNSAVED_DRAFT_DESCRIPTION = i18n.translate(
   }
 );
 
+export const RESUME_EDITING_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.description.resumeEditing',
+  {
+    defaultMessage: 'Resume editing',
+  }
+);
+
 export const SHOW_MORE = i18n.translate('xpack.cases.caseView.userActions.showMore', {
   defaultMessage: 'Show more',
 });

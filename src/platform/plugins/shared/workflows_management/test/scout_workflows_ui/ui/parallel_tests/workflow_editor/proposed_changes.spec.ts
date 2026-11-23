@@ -86,9 +86,6 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
   let llmConnectorId: string | undefined;
 
   test.beforeAll(async ({ scoutSpace, apiServices }) => {
-    await scoutSpace.uiSettings.set({
-      'agentBuilder:experimentalFeatures': true,
-    });
     const connector = await apiServices.alerting.connectors.create(
       {
         name: LLM_CONNECTOR_NAME,
@@ -113,7 +110,6 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
-    await scoutSpace.uiSettings.unset('agentBuilder:experimentalFeatures');
     if (llmConnectorId) {
       await apiServices.alerting.connectors.delete(llmConnectorId, scoutSpace.id);
     }

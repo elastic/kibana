@@ -6,6 +6,7 @@
  */
 
 import { setTimeout } from 'timers/promises';
+import { errors } from '@elastic/elasticsearch';
 import type {
   BulkOperationType,
   BulkResponseItem,
@@ -39,6 +40,17 @@ export function errorCauseMentionsInference(cause: ErrorCause): boolean {
   }
   if (cause.suppressed?.some(errorCauseMentionsInference)) {
     return true;
+  }
+  return false;
+}
+
+export function isRetryableInferenceRejection(error: unknown): error is Error {
+  if (error instanceof errors.TimeoutError) {
+    return true;
+  }
+  if (error instanceof errors.ResponseError) {
+    const cause = error.body?.error;
+    return !!cause && errorCauseMentionsInference(cause);
   }
   return false;
 }
@@ -97,7 +109,28 @@ export async function bulkCreateWithInferenceFallback(
   attempt: (opts: { includeEmbedding: boolean }) => Promise<BulkResponse>
 ): Promise<BulkResponse> {
   for (let attemptNumber = 1; attemptNumber <= MAX_INFERENCE_ATTEMPTS; attemptNumber++) {
-    const response = await attempt({ includeEmbedding: true });
+    const isLastAttempt = attemptNumber === MAX_INFERENCE_ATTEMPTS;
+
+    let response: BulkResponse;
+    try {
+      response = await attempt({ includeEmbedding: true });
+    } catch (error) {
+      if (!isRetryableInferenceRejection(error)) {
+        throw error;
+      }
+      if (isLastAttempt) {
+        logger.warn(
+          `Bulk write threw an inference/timeout error ("${error.message}") after ${attemptNumber} attempts -- falling back to writing without semantic_text embedding`
+        );
+        break;
+      }
+      const delayMs = Math.pow(2, attemptNumber - 1) * BASE_BACKOFF_MS;
+      logger.warn(
+        `Bulk write threw an inference/timeout error ("${error.message}") -- retrying in ${delayMs}ms (attempt ${attemptNumber}/${MAX_INFERENCE_ATTEMPTS})`
+      );
+      await setTimeout(delayMs);
+      continue;
+    }
 
     if (!response.errors) {
       return response;
@@ -118,7 +151,6 @@ export async function bulkCreateWithInferenceFallback(
       );
     }
 
-    const isLastAttempt = attemptNumber === MAX_INFERENCE_ATTEMPTS;
     if (isLastAttempt) {
       logger.warn(
         `Bulk write failed due to inference error (${inference}/${total} items) after ${attemptNumber} attempts -- falling back to writing without semantic_text embedding`

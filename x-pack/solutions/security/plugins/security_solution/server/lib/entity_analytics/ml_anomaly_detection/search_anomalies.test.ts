@@ -16,11 +16,15 @@ jest.mock('./get_security_ml_job_ids', () => ({
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    painless: {
-      getEuidRuntimeMapping: jest.fn().mockReturnValue({ type: 'keyword', source: 'mock-script' }),
+    dsl: {
+      getEuidFilterBasedOnEntityRecord: jest
+        .fn()
+        .mockReturnValue({ term: { 'user.name': 'alice' } }),
     },
   },
 }));
+
+const mockEntityFilter = { term: { 'user.name': 'alice' } };
 
 let mockMlAnomalySearch: jest.Mock;
 let mockMl: MlPluginSetup;
@@ -28,9 +32,12 @@ let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 const soClient = savedObjectsClientMock.create();
 const request = httpServerMock.createKibanaRequest();
 
+const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
+
 const defaultOpts = {
   entityType: 'user' as const,
   entityId: 'user:alice',
+  entityRecord: mockEntityRecord,
   request,
 };
 
@@ -75,11 +82,12 @@ describe('searchEntityAnomalies', () => {
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-    expect(euid.painless.getEuidRuntimeMapping).toHaveBeenCalledWith('user');
+    expect(euid.dsl.getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
+      'user',
+      mockEntityRecord
+    );
     expect(mockMlAnomalySearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        fields: ['entity_id'],
-        runtime_mappings: { entity_id: { type: 'keyword', source: 'mock-script' } },
         query: {
           bool: {
             filter: expect.arrayContaining([
@@ -87,13 +95,17 @@ describe('searchEntityAnomalies', () => {
               { term: { is_interim: false } },
               { range: { record_score: { gte: 1 } } },
               { range: { timestamp: { gte: 'now-30d' } } },
-              { term: { entity_id: 'user:alice' } },
+              mockEntityFilter,
               { terms: { job_id: ['security-job-1', 'security-job-2'] } },
             ]),
           },
         },
       }),
       []
+    );
+    expect(mockMlAnomalySearch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ runtime_mappings: expect.anything() }),
+      expect.anything()
     );
   });
 
@@ -330,11 +342,16 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits).toEqual([]);
   });
 
-  it('skips hits where entity_id runtime field is missing', async () => {
-    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([makeHit({ noEntityId: true })]));
+  it('returns empty result and logs a warning when entity filter cannot be built', async () => {
+    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    euid.dsl.getEuidFilterBasedOnEntityRecord.mockReturnValueOnce(undefined);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
     expect(result.hits).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(mockMlAnomalySearch).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Cannot build entity filter'));
   });
 
   it('skips hits where _source is missing', async () => {

@@ -102,6 +102,24 @@ describe('toLegacyDurationUnits', () => {
     });
   });
 
+  it('strips GA-only `decimals`/`compact` from duration formats (not in the legacy schema)', () => {
+    expect(
+      toLegacyDurationUnits({
+        type: 'duration',
+        from: 'ms',
+        to: 'auto',
+        decimals: 0,
+        compact: true,
+        suffix: ' elapsed',
+      })
+    ).toEqual({
+      type: 'duration',
+      from: 'milliseconds',
+      to: 'humanizePrecise',
+      suffix: ' elapsed',
+    });
+  });
+
   it('leaves non-duration values unchanged', () => {
     expect(toLegacyDurationUnits({ type: 'number', decimals: 2 })).toEqual({
       type: 'number',

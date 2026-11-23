@@ -22,6 +22,7 @@ import { IlmPolicyJsonTab } from './ilm_policy_json_tab';
 import { inspectIlmPolicyFlyoutStrings as strings } from './strings';
 import type { InspectIlmPolicyFlyoutProps } from './types';
 import { FlyoutWithTabs, type NonEmptyFlyoutTabs } from '../flyout_with_tabs';
+import { ManagedPolicyBadge } from '../managed_policy_badge';
 
 type TabId = 'summary' | 'json';
 
@@ -65,9 +66,16 @@ export const InspectIlmPolicyFlyout = ({
   const primaryActionTestSubj =
     primaryAction['data-test-subj'] ?? 'inspectIlmPolicyFlyoutSelectAndApplyButton';
 
+  const isManaged = policy._meta?.managed === true;
+
   return (
     <FlyoutWithTabs
       title={strings.title(policyName)}
+      titleAppend={
+        isManaged ? (
+          <ManagedPolicyBadge data-test-subj="inspectIlmPolicyFlyoutManagedBadge" />
+        ) : undefined
+      }
       showBackButton
       tabsAriaLabel={strings.tabsAriaLabel}
       tabs={TABS}

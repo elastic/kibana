@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -16,13 +16,15 @@ import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
 
-const bodySchema = z.object({
-  entityTypes: z
-    .array(EntityType)
-    .optional()
-    .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to stop. Defaults to all running types.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .optional()
+      .default(ALL_ENTITY_TYPES)
+      .describe('Entity types to stop. Defaults to all running types.'),
+  })
+);
 
 export function registerStop(router: EntityStorePluginRouter) {
   router.versioned
@@ -58,7 +60,6 @@ export function registerStop(router: EntityStorePluginRouter) {
           logger,
           assetManagerClient: assetManager,
           entityMaintainersClient,
-          preferencesClient,
         } = entityStoreCtx;
         const { entityTypes } = req.body;
 
@@ -79,8 +80,6 @@ export function registerStop(router: EntityStorePluginRouter) {
             await entityMaintainersClient.stopAll(req);
           }
         }
-
-        await preferencesClient.update({ autoInstall: false });
 
         return res.ok({
           body: {

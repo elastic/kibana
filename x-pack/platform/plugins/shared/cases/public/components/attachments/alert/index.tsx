@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiAvatar } from '@elastic/eui';
 import { UserActionTitle } from '@kbn/cases-components';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common';
 import {
@@ -31,7 +30,7 @@ const StackAlertTabContentLazy = React.lazy(() =>
 
 type StackAlertViewProps = UnifiedReferenceAttachmentViewProps<AlertAttachmentMetadata>;
 
-const getAttachmentViewObject = (props: StackAlertViewProps) => {
+const getCreationActivity = (props: StackAlertViewProps) => {
   const { savedObjectId, attachmentId, metadata } = props;
   const alertIds = toStringArray(attachmentId);
   const totalAlerts = alertIds.length;
@@ -55,14 +54,6 @@ const getAttachmentViewObject = (props: StackAlertViewProps) => {
         dataTestSubj={`alerts-user-action-${savedObjectId}`}
       />
     ),
-    timelineAvatar: (
-      <EuiAvatar
-        name="alert"
-        color="subdued"
-        iconType="bell"
-        aria-label={i18n.ALERT_AVATAR_ARIA_LABEL}
-      />
-    ),
     getActions: () => [
       {
         type: AttachmentActionType.CUSTOM as const,
@@ -70,11 +61,11 @@ const getAttachmentViewObject = (props: StackAlertViewProps) => {
         render: () => <ShowTableButton tabId={CASE_VIEW_PAGE_TABS.ALERTS} />,
       },
     ],
-    deleteSuccessTitle: i18n.DELETE_ALERTS_SUCCESS_TITLE(Math.max(totalAlerts, 1)),
+    deleteSuccessToast: i18n.DELETE_ALERTS_SUCCESS_TOAST(Math.max(totalAlerts, 1)),
   };
 };
 
-const getAttachmentRemovalObject = (props: StackAlertViewProps) => {
+const getRemovalActivity = (props: StackAlertViewProps) => {
   const alertIds = toStringArray(props.attachmentId);
   if (alertIds.length <= 1) {
     return { event: i18n.REMOVED_ALERT_LABEL_TITLE };
@@ -85,11 +76,11 @@ const getAttachmentRemovalObject = (props: StackAlertViewProps) => {
 export const getStackAlertAttachmentType = () =>
   defineAttachment({
     id: STACK_ALERT_ATTACHMENT_TYPE,
-    displayName: i18n.ALERT_DISPLAY_NAME,
-    icon: 'bell',
-    getAttachmentViewObject,
-    getAttachmentRemovalObject,
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => i18n.ALERT_DISPLAY_NAME,
+    getIcon: () => 'bell',
+    getCreationActivity,
+    getRemovalActivity,
+    getAttachmentList: () => ({
       children: StackAlertTabContentLazy,
     }),
     schema: StackAlertAttachmentPayloadSchema,

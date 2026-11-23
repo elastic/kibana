@@ -16,28 +16,29 @@ describe('checkEntityExists', () => {
     listEntities.mockReset();
   });
 
-  it('returns true when a matching entity is found', async () => {
-    listEntities.mockResolvedValue({ entities: [{ entity: { id: 'host:abc123' } }] });
+  it('returns the entity record when a matching entity is found', async () => {
+    const entity = { entity: { id: 'host:abc123' } };
+    listEntities.mockResolvedValue({ entities: [entity] });
 
-    const exists = await checkEntityExists({
+    const result = await checkEntityExists({
       crudClient,
       entityId: 'host:abc123',
       entityType: 'host',
     });
 
-    expect(exists).toBe(true);
+    expect(result).toBe(entity);
   });
 
-  it('returns false when no matching entity is found', async () => {
+  it('returns null when no matching entity is found', async () => {
     listEntities.mockResolvedValue({ entities: [] });
 
-    const exists = await checkEntityExists({
+    const result = await checkEntityExists({
       crudClient,
       entityId: 'host:does-not-exist',
       entityType: 'host',
     });
 
-    expect(exists).toBe(false);
+    expect(result).toBeNull();
   });
 
   it('filters by both entity.id and entity.EngineMetadata.Type', async () => {

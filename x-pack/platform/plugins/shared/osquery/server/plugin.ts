@@ -134,13 +134,18 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     });
 
     if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerUnified(osqueryUnifiedAttachment);
+      plugins.cases.attachmentFramework.registerAttachment(osqueryUnifiedAttachment);
     }
 
     return {
       createActionService: this.createActionService,
-      checkResponseActionAuthz: (request, actionParams) =>
-        checkResponseActionAuthz(core, request, actionParams),
+      checkResponseActionAuthz: async (request, actionParams) =>
+        checkResponseActionAuthz(
+          core,
+          request,
+          actionParams,
+          plugins.spaces?.spacesService.getSpaceId(request)
+        ),
     } satisfies OsqueryPluginSetup;
   }
 

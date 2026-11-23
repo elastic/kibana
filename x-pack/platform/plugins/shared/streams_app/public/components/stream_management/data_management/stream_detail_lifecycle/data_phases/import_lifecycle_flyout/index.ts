@@ -6,4 +6,4 @@
  */
 
 export { ImportLifecycleFlyout } from './import_lifecycle_flyout';
-export type { ImportLifecycleFlyoutProps } from './types';
+export type { ImportLifecycleFlyoutProps, ImportLifecycleOption } from './types';

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -30,7 +31,22 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 
-const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
+/* dshDashboardViewport--panelExpanded: dashboard_viewport.tsx
+   dshLayout-isMaximizedPanel: dashboard_grid.tsx */
+const dashboardExpandedStyles = {
+  '&:has(.dshDashboardViewport--panelExpanded)': {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    flex: '1 1 auto',
+    height: '100%',
+    minHeight: 0,
+  },
+};
+
+const dashboardViewFlexGroupStyle = {
+  minHeight: 'calc(100vh - 140px)',
+  ...dashboardExpandedStyles,
+};
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -61,7 +77,22 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
-    useDashboardRenderer();
+    useDashboardRenderer(savedObjectId);
+  const [dashboardDataViews, setDashboardDataViews] = useState<DataView[] | undefined>();
+  useEffect(() => {
+    if (!dashboardContainer) {
+      setDashboardDataViews(undefined);
+      return;
+    }
+
+    const subscription = dashboardContainer.dataViews$.subscribe((publishedDataViews) => {
+      setDashboardDataViews(publishedDataViews?.length ? publishedDataViews : undefined);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dashboardContainer]);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
@@ -70,9 +101,13 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
+        <SiemSearchBar
+          dataView={dataView}
+          additionalDataViews={dashboardDataViews}
+          id={InputsModelId.global}
+        />
       </FiltersGlobal>
-      <SecuritySolutionPageWrapper>
+      <SecuritySolutionPageWrapper css={dashboardExpandedStyles}>
         <EuiFlexGroup
           direction="column"
           css={dashboardViewFlexGroupStyle}
@@ -100,7 +135,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
             )}
           </EuiFlexItem>
           {!errorState && (
-            <EuiFlexItem grow>
+            <EuiFlexItem css={dashboardExpandedStyles} grow>
               <DashboardRenderer
                 query={query}
                 filters={filters}

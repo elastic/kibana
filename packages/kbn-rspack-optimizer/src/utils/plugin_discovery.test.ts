@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Path from 'path';
 import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { discoverPlugins } from './plugin_discovery';
 
 describe('plugin_discovery', () => {
@@ -91,6 +93,37 @@ describe('plugin_discovery', () => {
     });
   });
 
+  describe('discoverPlugins with allowlistPluginGroups', () => {
+    let allPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+    let platformPlugins: Awaited<ReturnType<typeof discoverPlugins>>;
+
+    beforeAll(async () => {
+      allPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+      });
+      platformPlugins = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+        allowlistPluginGroups: ['platform'],
+      });
+    }, 60000);
+
+    it('discovers fewer plugins when restricted to the platform group', () => {
+      expect(platformPlugins.length).toBeLessThan(allPlugins.length);
+      expect(platformPlugins.length).toBeGreaterThan(0);
+    });
+
+    it('keeps platform plugins and drops solution plugins', () => {
+      const ids = new Set(platformPlugins.map((p) => p.id));
+      expect(ids.has('data')).toBe(true);
+      expect(ids.has('discover')).toBe(true);
+      expect(ids.has('securitySolution')).toBe(false);
+    });
+  });
+
   describe('discoverPlugins with testPlugins', () => {
     let pluginsWithTest: Awaited<ReturnType<typeof discoverPlugins>>;
     let pluginsWithoutTest: Awaited<ReturnType<typeof discoverPlugins>>;
@@ -111,5 +144,86 @@ describe('plugin_discovery', () => {
     it('should discover more plugins when testPlugins=true', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
+
+    it('only discovers relocated test plugins when requested', () => {
+      for (const id of ['analyticsFtrHelpers', 'applicationUsageTest']) {
+        expect(pluginsWithTest.some((plugin) => plugin.id === id)).toBe(true);
+        expect(pluginsWithoutTest.some((plugin) => plugin.id === id)).toBe(false);
+      }
+    });
+
+    it('excludes response ops fixtures unless test plugins are requested', () => {
+      expect(pluginsWithoutTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(false);
+      expect(pluginsWithTest.some((plugin) => plugin.id === 'alertingFixture')).toBe(true);
+    });
   });
+
+  it('keeps relocated server-only plugins out of default discovery', () => {
+    const statusPlugin = getPackages(REPO_ROOT).find(
+      (pkg) => pkg.manifest.id === '@kbn/status-plugin-a-plugin'
+    );
+    if (!statusPlugin) {
+      throw new Error('statusPluginA test fixture was not found');
+    }
+
+    expect(getPluginPackagesFilter({ server: true })(statusPlugin)).toBe(false);
+    expect(getPluginPackagesFilter({ server: true, testPlugins: true })(statusPlugin)).toBe(true);
+  });
+});
+
+describe('discoverPlugins with explicit paths', () => {
+  it('keeps the user storage test plugin opt-in', async () => {
+    const pluginPath = Path.resolve(REPO_ROOT, 'src/platform/test_plugins/user_storage');
+    const [defaultPlugins, testPlugins, explicitPlugins] = await Promise.all([
+      discoverPlugins({ repoRoot: REPO_ROOT }),
+      discoverPlugins({ repoRoot: REPO_ROOT, testPlugins: true }),
+      discoverPlugins({ repoRoot: REPO_ROOT, paths: [pluginPath] }),
+    ]);
+
+    expect(defaultPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(false);
+    expect(testPlugins.some((plugin) => plugin.id === 'userStorageTest')).toBe(true);
+    expect(explicitPlugins).toContainEqual(
+      expect.objectContaining({ id: 'userStorageTest', contextDir: pluginPath })
+    );
+  }, 60000);
+
+  it('includes an explicitly selected test plugin', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'src/platform/test_plugins/analytics/analytics_ftr_helpers'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'analyticsFtrHelpers',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
+
+  it('includes an explicitly selected response ops fixture', async () => {
+    const pluginPath = Path.resolve(
+      REPO_ROOT,
+      'x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts'
+    );
+    const plugins = await discoverPlugins({
+      repoRoot: REPO_ROOT,
+      examples: false,
+      testPlugins: false,
+      paths: [pluginPath],
+    });
+
+    expect(plugins).toContainEqual(
+      expect.objectContaining({
+        id: 'alertingFixture',
+        contextDir: pluginPath,
+      })
+    );
+  }, 30000);
 });

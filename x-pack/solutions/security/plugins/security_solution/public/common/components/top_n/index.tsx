@@ -67,7 +67,8 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-const connector = connect(makeMapStateToProps);
+type StateProps = ReturnType<ReturnType<typeof makeMapStateToProps>>;
+const connector = connect<StateProps, {}, OwnProps, State>(makeMapStateToProps);
 
 //  * `indexToAdd`, which enables the alerts index to be appended to
 //    the `indexPattern` returned by `useWithSource`, may only be populated when

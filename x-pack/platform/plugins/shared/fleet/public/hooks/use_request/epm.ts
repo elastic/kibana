@@ -29,6 +29,7 @@ import type {
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
 } from '../../types';
+import type { NamespaceConflictWarning } from '../../../common/types/rest_spec/epm';
 import type {
   BulkUpgradePackagesRequest,
   BulkOperationPackagesResponse,
@@ -342,8 +343,19 @@ export const sendGetFileByPath = (filePath: string) => {
   });
 };
 
-export const sendInstallPackage = (pkgName: string, pkgVersion: string, force: boolean = false) => {
-  const body = force ? { force } : undefined;
+export const sendInstallPackage = (
+  pkgName: string,
+  pkgVersion: string,
+  force: boolean = false,
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
+  const body =
+    force || options?.acknowledgeBreakingChanges
+      ? {
+          ...(force ? { force } : {}),
+          ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+        }
+      : undefined;
   return sendRequest<InstallPackageResponse, FleetErrorResponse>({
     path: epmRouteService.getInstallPath(pkgName, pkgVersion),
     method: 'post',
@@ -518,6 +530,27 @@ export const useUpdatePackageMutation = () => {
       queryClient.invalidateQueries([pkgName]);
       queryClient.invalidateQueries(['get-packages']);
     },
+  });
+};
+
+interface NamespacePreflightCheckArgs {
+  pkgName: string;
+  namespaces: string[];
+}
+
+interface NamespacePreflightCheckResponse {
+  warnings: NamespaceConflictWarning[];
+}
+
+export const useNamespacePreflightCheckMutation = () => {
+  return useMutation<NamespacePreflightCheckResponse, RequestError, NamespacePreflightCheckArgs>({
+    mutationFn: ({ pkgName, namespaces }: NamespacePreflightCheckArgs) =>
+      sendRequestForRq<NamespacePreflightCheckResponse>({
+        path: epmRouteService.getNamespacePreflightCheckPath(pkgName),
+        method: 'post',
+        version: API_VERSIONS.internal.v1,
+        body: { namespaces },
+      }),
   });
 };
 

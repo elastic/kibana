@@ -92,7 +92,6 @@ const mockHit: DataTableRecord = {
 const defaultProps: CorrelationsOverviewProps = {
   hit: mockHit,
   scopeId: 'scopeId',
-  isRulePreview: false,
   showIcon: true,
   onShowCorrelationsDetails: jest.fn(),
 };
@@ -224,7 +223,6 @@ describe('<CorrelationsOverview />', () => {
         <CorrelationsOverview
           hit={mockHit}
           scopeId="scopeId"
-          isRulePreview={false}
           showIcon={true}
           onShowCorrelationsDetails={mockNavigateToLeftPanel}
         />

@@ -24,6 +24,7 @@ import {
 import {
   CASE_DETAILS_DESCRIPTION,
   CASE_DETAILS_PAGE_TITLE,
+  CASE_DETAILS_PARTICIPANT_AVATARS,
   CASE_DETAILS_PARTICIPANTS_PANEL,
   CASE_DETAILS_REPORTER,
   CASE_DETAILS_STATUS,
@@ -41,9 +42,9 @@ import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
 import {
-  forceCasesTableView,
   goToCaseDetails,
   goToCreateNewCase,
+  seedCasesTableView,
   withCasesRedesign,
 } from '../../../tasks/all_cases';
 import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
@@ -83,10 +84,9 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
 
   it('Creates a new case with timeline and opens the timeline', function () {
     login();
-    visit(CASES_URL);
-    // The redesign list defaults to a card view; force the table view so the column-based
-    // assertions below keep working. No-op in the legacy design.
-    forceCasesTableView();
+    // The redesign list defaults to a card view; seed the table view before load so the
+    // column-based assertions below keep working. No-op in the legacy design.
+    visit(CASES_URL, { visitOptions: { onBeforeLoad: seedCasesTableView } });
     goToCreateNewCase();
     fillCasesMandatoryfields(this.mycase);
     attachTimeline(this.mycase);
@@ -128,10 +128,13 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
           cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
         },
         whenRedesign: () => {
-          // Reporter is shown in the app header metadata; participants render as avatars
-          // (name in a hover tooltip) inside the sidebar panel.
+          // Reporter is shown in the app header metadata; participants render as avatars inside
+          // the sidebar panel. EUI exposes the avatar's user label as its accessible name.
           cy.get(CASE_DETAILS_REPORTER).should('contain', username);
           cy.get(CASE_DETAILS_PARTICIPANTS_PANEL).should('exist');
+          cy.get(CASE_DETAILS_PARTICIPANT_AVATARS)
+            .invoke('attr', 'aria-label')
+            .should('contain', username);
         },
       });
     });

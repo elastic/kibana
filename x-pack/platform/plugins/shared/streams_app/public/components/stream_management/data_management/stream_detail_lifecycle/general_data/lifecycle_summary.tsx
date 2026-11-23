@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { Streams, IngestStreamLifecycle, IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import {
   Streams as StreamsSchema,
@@ -277,6 +277,7 @@ const IlmLifecycleSummary = ({
     isActive: isPreviewActive,
     timelineDownsampleSteps: previewTimelineDownsampleSteps,
     timelinePhases: previewTimelinePhases,
+    releaseHoldAfterRefresh,
   } = useLifecyclePreview();
   const shouldShowInheritedBadge = shouldShowLifecycleInheritedBadge(definition);
 
@@ -288,6 +289,19 @@ const IlmLifecycleSummary = ({
     updateStreamLifecycle,
     isMetricsStream,
   });
+
+  // Release a held preview only once the ILM stats have finished loading, otherwise the held
+  // preview would be swapped for a loading skeleton. `loading` starts false and flips true after
+  // the fetch effect runs, so release on the true->false transition, not on `!loading`. No-op
+  // unless a clear is held.
+  const wasIlmLoadingRef = useRef(ilmSummary.loading);
+  useEffect(() => {
+    const wasLoading = wasIlmLoadingRef.current;
+    wasIlmLoadingRef.current = ilmSummary.loading;
+    if (wasLoading && !ilmSummary.loading) {
+      releaseHoldAfterRefresh();
+    }
+  }, [ilmSummary.loading, releaseHoldAfterRefresh]);
 
   const isEditLifecycleFlyoutOpen = ilmSummary.isEditLifecycleFlyoutOpen;
   const invalidPhases = ilmSummary.flyoutInvalidPhases;
@@ -412,6 +426,7 @@ const IlmLifecycleSummary = ({
             // phase/downsample clicks must not open ILM's own edit-phases flyout.
             disableInteractions: isBlockedByOtherFlyout,
             invalidPhases,
+            isPreviewActive,
           }}
         />
       )}
@@ -791,6 +806,7 @@ const NonIlmLifecycleSummary = ({
           disableInteractions: isBlockedByOtherFlyout,
           invalidStepIndices,
           invalidPhases: dataPhaseInvalidPhases,
+          isPreviewActive,
         }}
         frozenPhaseCallouts={frozenPhaseCallouts}
       />

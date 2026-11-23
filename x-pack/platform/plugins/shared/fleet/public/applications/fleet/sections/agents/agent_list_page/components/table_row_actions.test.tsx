@@ -767,4 +767,24 @@ describe('TableRowActions', () => {
       expect(res).toBe(null);
     });
   });
+
+  describe('agentless agents', () => {
+    it('should not render any action except view agent', async () => {
+      const { utils } = renderTableRowActions({
+        agent: {
+          active: true,
+          status: 'online',
+          policy_id: 'policy-1',
+          local_metadata: { elastic: { agent: { version: '9.6.0' } } },
+        } as any,
+        agentPolicy: { is_managed: false, supports_agentless: true } as AgentPolicy,
+      });
+
+      expect(utils.queryByTestId('agentRestartBtn')).not.toBeInTheDocument();
+      expect(utils.queryByTestId('upgradeBtn')).not.toBeInTheDocument();
+      expect(utils.queryByTestId('agentUnenrollBtn')).not.toBeInTheDocument();
+      expect(utils.queryByTestId('viewAgentDetailsJsonBtn')).not.toBeInTheDocument();
+      expect(utils.queryByTestId('requestAgentDiagnosticsBtn')).not.toBeInTheDocument();
+    });
+  });
 });

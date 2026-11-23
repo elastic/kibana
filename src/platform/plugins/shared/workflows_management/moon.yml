@@ -123,13 +123,13 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/deeplinks-workflows'
   - '@kbn/core-chrome-app-menu-components'
-  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -141,6 +141,4 @@ fileGroups:
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

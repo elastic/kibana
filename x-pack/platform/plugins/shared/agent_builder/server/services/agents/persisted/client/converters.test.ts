@@ -647,4 +647,57 @@ describe('updateRequestToEs', () => {
     expect(docProperties.visibility).toBeUndefined();
     expect(docProperties.acl).toBeUndefined();
   });
+
+  it('backfills created_by_id when the owner updates a legacy agent that only stored created_by_name', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
+      created_by_name: 'legacy-owner',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'renamed' },
+      updateDate: new Date(),
+      user: { id: 'profile-or-realm-id', username: 'legacy-owner' },
+    });
+
+    expect(docProperties.created_by_id).toBe('profile-or-realm-id');
+    expect(docProperties.created_by_name).toBe('legacy-owner');
+  });
+
+  it('does not backfill created_by_id for a non-owner updater', () => {
+    const agentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+      created_by_name: 'legacy-owner',
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const docProperties = updateRequestToEs({
+      agentId: 'id',
+      currentProps: agentProps,
+      update: { name: 'renamed' },
+      updateDate: new Date(),
+      user: { id: 'editor-id', username: 'someone-else' },
+    });
+
+    expect(docProperties.created_by_id).toBeUndefined();
+  });
 });

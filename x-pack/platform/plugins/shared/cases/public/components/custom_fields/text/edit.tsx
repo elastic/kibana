@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -39,8 +39,8 @@ import {
   POPULATED_WITH_DEFAULT,
 } from '../translations';
 import { getTextFieldConfig } from './config';
-import { InlineFieldActions } from '../../templates_v2/field_types/controls/inline_field_actions';
 import { OptionalFieldLabel } from '../../optional_field_label';
+import { FieldValueRow } from '../../templates_v2/field_types/field_value_view';
 
 interface FormState {
   value: string;
@@ -278,36 +278,40 @@ const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
       : undefined;
   const effectiveInitialValue =
     isEmpty(initialValue) && defaultValueAsString != null ? defaultValueAsString : initialValue;
-  const [formResetKey, setFormResetKey] = useState(0);
   const [formState, setFormState] = useState<FormState>({
     isValid: undefined,
     submit: async () => ({ isValid: false, data: { value: '' } }),
     value: effectiveInitialValue,
   });
 
-  const onCancel = useCallback(() => {
-    setFormResetKey((key) => key + 1);
-  }, []);
-
-  const onSubmitCustomField = useCallback(async () => {
-    const { isValid, data } = await formState.submit();
-
-    if (isValid) {
-      const value = isEmpty(data.value) ? null : data.value;
-
-      onSubmit({
-        ...customField,
-        key: customField?.key ?? customFieldConfiguration.key,
-        type: CustomFieldTypes.TEXT,
-        value,
-      });
-    }
-  }, [customField, customFieldConfiguration.key, formState, onSubmit]);
-
   const hasPendingChange = formState.value !== effectiveInitialValue;
-  const isTextFieldValid =
-    formState.isValid ||
-    (formState.value === customFieldConfiguration.defaultValue && !initialValue);
+
+  // Section-edit mode has no separate confirm step (see CustomFieldsSection): as soon as the
+  // value differs from what's committed, validate it and buffer it into the section. Validating
+  // through `submit()` (rather than trusting the reactive `formState.isValid`, which can be
+  // momentarily stale right after a change) mirrors exactly what the old confirm click used to do,
+  // just fired automatically. The only way back is the section's own per-field Revert or
+  // whole-section Cancel, which discard the change by remounting this component via `resetTokens`
+  // (see custom_fields.tsx) — there is no local cancel affordance to fall out of sync with.
+  useEffect(() => {
+    if (!hasPendingChange) {
+      return;
+    }
+    let ignore = false;
+    formState.submit().then(({ isValid, data }) => {
+      if (!ignore && isValid) {
+        onSubmit({
+          ...customField,
+          key: customField?.key ?? customFieldConfiguration.key,
+          type: CustomFieldTypes.TEXT,
+          value: isEmpty(data.value) ? null : data.value,
+        });
+      }
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [hasPendingChange, formState, customField, customFieldConfiguration.key, onSubmit]);
 
   return (
     <EuiFlexGroup
@@ -317,7 +321,6 @@ const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     >
       <EuiFlexItem>
         <FormWrapperComponent
-          key={formResetKey}
           initialValue={initialValue}
           isLoading={isLoading}
           canUpdate={canUpdate}
@@ -326,27 +329,49 @@ const InlineEdit: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
           customFieldConfiguration={customFieldConfiguration}
         />
       </EuiFlexItem>
-      {hasPendingChange && canUpdate && !isLoading && (
-        <InlineFieldActions
-          name={customFieldConfiguration.key}
-          onConfirm={onSubmitCustomField}
-          onCancel={onCancel}
-          isLoading={isLoading}
-          isDisabled={!isTextFieldValid}
-        />
-      )}
     </EuiFlexGroup>
   );
 };
 
 InlineEdit.displayName = 'InlineEdit';
 
+/**
+ * Section-edit mode's view state: a label/value row identical to the template fields section's
+ * own (`FieldValueRow`), reusing this type's `View` for the value itself. Clicking anywhere on the
+ * row asks the *section* to enter edit mode — every field in it switches to `InlineEdit` together,
+ * there is no independent per-field edit state here.
+ */
+const InlineView: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
+  customField,
+  customFieldConfiguration,
+  isLoading,
+  canUpdate,
+  onRequestSectionEdit,
+}) => (
+  <FieldValueRow
+    name={customFieldConfiguration.key}
+    label={customFieldConfiguration.label}
+    isTextValue
+    onEdit={!isLoading && canUpdate ? onRequestSectionEdit : undefined}
+  >
+    <View customField={customField} />
+  </FieldValueRow>
+);
+
+InlineView.displayName = 'InlineView';
+
 const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
   editVariant = 'classic',
+  isSectionEditing = true,
+  onRequestSectionEdit,
   ...props
 }) => {
   if (editVariant === 'inline') {
-    return <InlineEdit {...props} />;
+    return isSectionEditing ? (
+      <InlineEdit {...props} />
+    ) : (
+      <InlineView {...props} onRequestSectionEdit={onRequestSectionEdit} />
+    );
   }
 
   return <ClassicEdit {...props} />;

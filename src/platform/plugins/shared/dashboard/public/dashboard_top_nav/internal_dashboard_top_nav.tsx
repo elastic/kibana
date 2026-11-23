@@ -39,6 +39,7 @@ import {
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppMenu } from '@kbn/core-chrome-app-menu';
+import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { UI_SETTINGS } from '../../common/constants';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
@@ -58,6 +59,7 @@ import { getDashboardRecentlyAccessedService } from '../services/dashboard_recen
 import {
   coreServices,
   dataService,
+  screenshotModeService,
   serverlessService,
   unifiedSearchService,
 } from '../services/kibana_services';
@@ -409,16 +411,25 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      <AppMenu
-        setAppMenu={coreServices.chrome.setAppMenu}
-        config={
-          visibilityProps.showTopNavMenu
-            ? viewMode === 'edit'
-              ? editModeTopNavConfig
-              : viewModeTopNavConfig
-            : undefined
-        }
-      />
+      {embedSettings?.isEmbeddedViaUrl ? (
+        // Chrome is hidden for embed=true, so the chrome-hosted app menu would never render.
+        visibilityProps.showTopNavMenu && (
+          <AppMenuComponent
+            config={viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig}
+          />
+        )
+      ) : (
+        <AppMenu
+          setAppMenu={coreServices.chrome.setAppMenu}
+          config={
+            visibilityProps.showTopNavMenu
+              ? viewMode === 'edit'
+                ? editModeTopNavConfig
+                : viewModeTopNavConfig
+              : undefined
+          }
+        />
+      )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
@@ -461,7 +472,15 @@ export function InternalDashboardTopNav({
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
 
-      {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
+      <span
+        // ControlsRenderer must always be rendered
+        // so that control filters are applied to dashboard
+        //
+        // do not display ControlsRenderer in reports
+        style={screenshotModeService.isScreenshotMode() ? { display: 'none' } : undefined}
+      >
+        <DashboardControlsRenderer />
+      </span>
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
     </div>

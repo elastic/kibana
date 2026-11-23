@@ -68,9 +68,12 @@ export default async () => {
   // "Fake" SAML provider
   const idpPath = resolve(
     __dirname,
-    '../../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../../test_plugins/security_api_integration/plugins/saml_provider/metadata.xml'
   );
-  const samlIdPPlugin = resolve(__dirname, '../../security_api_integration/plugins/saml_provider');
+  const samlIdPPlugin = resolve(
+    __dirname,
+    '../../../test_plugins/security_api_integration/plugins/saml_provider'
+  );
 
   const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
 
@@ -201,6 +204,7 @@ export default async () => {
         `--xpack.security.uiam.ssl.certificate=${KBN_CERT_PATH}`,
         `--xpack.security.uiam.ssl.key=${KBN_KEY_PATH}`,
         '--xpack.security.uiam.ssl.verificationMode=none',
+        '--xpack.fleet.experimentalFeatures.installIntegrationsKnowledge=false',
       ],
     },
 

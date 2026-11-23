@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import YAML from 'yaml';
-import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod';
+import { getSchemaAtPath, unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { z } from '@kbn/zod/v4';
 import { getDetailedTypeDescription } from './zod_type_description';
 
@@ -442,28 +442,6 @@ function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<an
 
   const elementType = getTypeDescriptionForError(elementSchema);
   return `${fieldName} expects a list of ${elementType}`;
-}
-
-function unwrapSchema(schema: z.ZodType): z.ZodType {
-  let current = schema;
-
-  while (true) {
-    if (current instanceof z.ZodOptional) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodNullable) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodDefault) {
-      current = current.unwrap() as z.ZodType;
-    } else if (current instanceof z.ZodLazy) {
-      // So that `z.array(z.lazy(stepUnion))` resolves to the union branch in
-      // `generateArrayErrorMessage` / `generateSchemaErrorMessage`.
-      current = current.unwrap() as z.ZodType;
-    } else {
-      break;
-    }
-  }
-
-  return current;
 }
 
 function getObjectPropertiesDescription(

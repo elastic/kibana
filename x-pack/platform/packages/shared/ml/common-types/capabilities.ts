@@ -48,7 +48,6 @@ export const userMlCapabilities = {
   canUseMlAlerts: false,
   // Trained models
   canGetTrainedModels: false,
-  canTestTrainedModels: false,
   canGetFieldInfo: false,
   canGetMlInfo: false,
   // AIOps
@@ -91,6 +90,7 @@ export const adminMlCapabilities = {
   canCreateTrainedModels: false,
   canDeleteTrainedModels: false,
   canStartStopTrainedModels: false,
+  canTestTrainedModels: false,
   // Inference models
   canCreateInferenceEndpoint: false,
 };

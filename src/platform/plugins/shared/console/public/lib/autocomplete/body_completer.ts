@@ -10,7 +10,12 @@
 /* eslint-disable max-classes-per-file */
 
 import _ from 'lodash';
-import { WalkingState, walkTokenPath, wrapComponentWithDefaults } from './engine';
+import {
+  getTermsForWalkingStates,
+  WalkingState,
+  walkTokenPath,
+  wrapComponentWithDefaults,
+} from './engine';
 import {
   ConstantComponent,
   SharedComponent,
@@ -20,11 +25,10 @@ import {
 } from './components';
 import type { AutoCompleteContext, ResultTerm } from './types';
 import { isRecord } from '../../../common/utils/record_utils';
-import { asArray } from '../utils/array_utils';
 import type {
   AutocompleteComponent,
+  AutocompleteContinuationState,
   AutocompleteMatch,
-  AutocompleteMatchResult,
   AutocompleteTermDefinition,
 } from './components/autocomplete_component';
 
@@ -68,20 +72,31 @@ type BodyCompleterContext = AutoCompleteContext & {
  * which should return the top level components for the given endpoint
  */
 
-function resolvePathToComponents(
+function resolvePathToWalkingStates(
   tokenPath: string[],
   context: BodyCompleterContext,
   editor: unknown,
   components: AutocompleteComponent[]
-): AutocompleteComponent[] {
+): WalkingState[] {
   const walkStates = walkTokenPath(
     tokenPath,
     [new WalkingState('ROOT', components, [])],
     context,
-    editor
+    editor,
+    true
   );
-  return walkStates.reduce<AutocompleteComponent[]>((acc, ws) => acc.concat(ws.components), []);
+  return walkStates.filter((state) => state.depth === tokenPath.length);
 }
+
+const toContinuationState = (state: WalkingState): AutocompleteContinuationState => ({
+  parentName: state.parentName,
+  components: state.components,
+  contextExtensionList: state.contextExtensionList,
+  fallbackGroups: state.fallbackGroups,
+  preferredFallbackGroups: state.preferredFallbackGroups,
+  priority: state.priority,
+  specificity: state.specificity,
+});
 
 class ScopeResolver extends SharedComponent {
   private link: unknown;
@@ -101,10 +116,15 @@ class ScopeResolver extends SharedComponent {
     this.compilingContext = compilingContext;
   }
 
-  resolveLinkToComponents(context: BodyCompleterContext, editor: unknown): AutocompleteComponent[] {
+  resolveLinkToWalkingStates(context: BodyCompleterContext, editor: unknown): WalkingState[] {
     if (_.isFunction(this.link)) {
       const desc = this.link(context, editor);
-      return compileDescription(desc, this.compilingContext);
+      return resolvePathToWalkingStates(
+        [],
+        context,
+        editor,
+        compileDescription(desc, this.compilingContext)
+      );
     }
     if (!_.isString(this.link)) {
       throw new Error(`unsupported link format: ${String(this.link)}`);
@@ -129,34 +149,34 @@ class ScopeResolver extends SharedComponent {
     } catch (e) {
       throw new Error('failed to resolve link [' + this.link + ']: ' + e);
     }
-    return resolvePathToComponents(path, context, editor, components ?? []);
+    return resolvePathToWalkingStates(path, context, editor, components ?? []);
   }
 
   getTerms(context: BodyCompleterContext, editor: unknown): AutocompleteTermDefinition[] {
-    const options: AutocompleteTermDefinition[] = [];
-    const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function (component) {
-      const terms = component.getTerms(context, editor);
-      if (terms) {
-        options.push(...terms);
-      }
-    });
-    return options;
+    return getTermsForWalkingStates(
+      this.resolveLinkToWalkingStates(context, editor),
+      context,
+      editor
+    );
   }
 
   match(token: unknown, context: BodyCompleterContext, editor: unknown): AutocompleteMatch {
-    const result: AutocompleteMatchResult & { next: AutocompleteComponent[] } = {
-      next: [],
-    };
-    const components = this.resolveLinkToComponents(context, editor);
-    _.each(components, function (component) {
-      const componentResult = component.match(token, context, editor);
-      if (componentResult && componentResult.next) {
-        result.next.push(...asArray(componentResult.next));
-      }
-    });
+    if (!_.isString(token) && !Array.isArray(token)) {
+      return false;
+    }
+    const walkingStates = this.resolveLinkToWalkingStates(context, editor);
+    const nextDepth = (walkingStates[0]?.depth ?? -1) + 1;
+    const nextWalkingStates = walkTokenPath(
+      [token as string | string[]],
+      walkingStates,
+      context,
+      editor,
+      true
+    ).filter((state) => state.depth === nextDepth);
 
-    return result;
+    return nextWalkingStates.length
+      ? { nextStates: nextWalkingStates.map(toContinuationState) }
+      : false;
   }
 }
 
@@ -265,7 +285,15 @@ function compileDescription(
     return [compileParametrizedValue(description, compilingContext)];
   }
 
-  return [new ConstantComponent(_.isString(description) ? description : String(description))];
+  if (typeof description === 'boolean' || typeof description === 'number') {
+    return [
+      new ConstantComponent(String(description), undefined, {
+        name: description,
+      }),
+    ];
+  }
+
+  return [new ConstantComponent(String(description))];
 }
 
 function compileParametrizedValue(

@@ -9,10 +9,14 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AgentPolicy } from '../../../types';
+import type { Agent, AgentPolicy } from '../../../types';
 
-export const MetricNonAvailable: React.FC<{ agentPolicy?: AgentPolicy }> = ({ agentPolicy }) => {
+export const MetricNonAvailable: React.FC<{ agentPolicy?: AgentPolicy; agent?: Agent }> = ({
+  agentPolicy,
+  agent,
+}) => {
   const isMonitoringEnabled = agentPolicy?.monitoring_enabled?.includes('metrics');
+  const isOffline = agent?.status === 'offline';
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -29,6 +33,11 @@ export const MetricNonAvailable: React.FC<{ agentPolicy?: AgentPolicy }> = ({ ag
               <FormattedMessage
                 id="xpack.fleet.agent.metricsNotAvailableMonitoringNotEnabled"
                 defaultMessage="Agent monitoring is not enabled for this agent policy. Visit agent policy settings to enable monitoring."
+              />
+            ) : isOffline ? (
+              <FormattedMessage
+                id="xpack.fleet.agentList.metricsNotAvailableOffline"
+                defaultMessage="This agent is offline, so metrics are not currently available. Metrics will resume once the agent reconnects."
               />
             ) : (
               <FormattedMessage

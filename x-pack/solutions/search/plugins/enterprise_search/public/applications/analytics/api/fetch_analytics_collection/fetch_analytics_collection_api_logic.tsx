@@ -14,7 +14,7 @@ export type FetchAnalyticsCollectionApiLogicResponse = AnalyticsCollection;
 
 export const fetchAnalyticsCollection = async ({ name }: { name: string }) => {
   const { http } = HttpLogic.values;
-  const route = `/internal/elasticsearch/analytics/collections/${name}`;
+  const route = `/internal/elasticsearch/analytics/collections/${encodeURIComponent(name)}`;
   const response = await http.get<AnalyticsCollection>(route);
 
   return response;

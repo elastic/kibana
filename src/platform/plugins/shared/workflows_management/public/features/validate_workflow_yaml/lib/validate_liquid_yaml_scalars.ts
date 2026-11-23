@@ -24,6 +24,7 @@ import {
   getAllForLoopScopes,
   getTemplateLocalContext,
   isLiquidRangeLiteral,
+  isLiquidStringLiteral,
   resolveAssignChain,
 } from '../../workflow_context/lib/extract_template_local_context';
 import { getContextSchemaForStep } from '../../workflow_context/lib/get_context_for_path';
@@ -219,6 +220,16 @@ function collectForLoopCollectionResults(
 
     const { assignVars } = getTemplateLocalContext(templateString, scope.bodyStart);
     const resolvedCollectionPath = resolveAssignChain(scope.collectionPath, assignVars);
+    if (
+      isLiquidRangeLiteral(resolvedCollectionPath) ||
+      isLiquidStringLiteral(resolvedCollectionPath)
+    ) {
+      // A literal collection has no context path to check. `{% assign acc = "" | split: "" %}`
+      // — the idiomatic empty accumulator — resolves to a bare string literal, and its real
+      // type comes from the filter chain, so there is nothing to validate statically.
+      // eslint-disable-next-line no-continue
+      continue;
+    }
     const absRange = resolveCollectionRange(ctx.yamlString, node, scope);
 
     let schemaAtCollection = stepSchema;
