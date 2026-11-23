@@ -210,17 +210,14 @@ apiTest.describe(
         const [{ rounding }] = meta?.routing?.segments ?? [];
         expect(['M', 'w', 'd']).toContain(rounding);
 
-        // 2020-03-15 is a Sunday: the monthly, weekly and daily indices differ, and the date is before any
-        // segment other than the first one
+        // The simulation returns the date math index expression of the document: the date of its timestamp
+        // and the rounding of the routing segment in effect at that time (the first one for an old date).
         const simulation = await esClient.ingest.simulate({
           id: sliPipelineId,
           docs: [{ _source: { '@timestamp': '2020-03-15T12:00:00.000Z' } }],
         });
-        const indexSuffixByRounding = { M: '2020-03-01', w: '2020-03-09', d: '2020-03-15' };
         expect(simulation.docs[0].doc?._index).toBe(
-          `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.${
-            indexSuffixByRounding[rounding as keyof typeof indexSuffixByRounding]
-          }`
+          `<.slo-observability.sli-v${SLO_RESOURCES_VERSION}.{2020-03-15||/${rounding}{yyyy-MM-dd|UTC}}>`
         );
       }
     );
