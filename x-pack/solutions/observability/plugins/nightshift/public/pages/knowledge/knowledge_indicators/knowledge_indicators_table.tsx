@@ -216,7 +216,6 @@ export function KnowledgeIndicatorsTable(): React.ReactElement {
         `}
       >
         <EuiInMemoryTable<KnowledgeIndicator>
-          // On a phone the table collapses into cards instead of scrolling sideways.
           css={css`
             min-width: ${isMobile ? '0' : '1100px'};
           `}

@@ -106,8 +106,6 @@ export const DetectionPage = ({
   const history = useHistory();
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
-  // On a phone the workspace stacks and the page scrolls as one; its panes only scroll on their
-  // own (inside a viewport-high page) on larger screens.
   const isMobile = useIsMobile();
   const sectionPaddingSize = usePageSectionPaddingSize();
   const maintenanceStatus = useMaintenanceStatus();
@@ -119,7 +117,8 @@ export const DetectionPage = ({
   const { view, onCreationStateChange, retryHistoryLookup } = useDetectionOnboardingState();
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   const selection = useEntitySelection();
-  const [isOverviewCompact, setIsOverviewCompact] = useState(false);
+  const [isOverviewScrolledCompact, setIsOverviewCompact] = useState(false);
+  const isOverviewCompact = isMobile || isOverviewScrolledCompact;
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
   useEffect(() => setIsOverviewCompact(false), [tab]);
   const handleTabBodyScroll = useCallback(

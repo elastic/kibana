@@ -7,10 +7,6 @@
 
 import { css } from '@emotion/css';
 
-/**
- * Sidebar and content panels of the Wiki, Memory and Decision Trees tabs. Side by side they fill the
- * viewport height and scroll on their own; on a phone they stack and each gets a fixed height.
- */
 export const getSplitLayoutStyles = (isMobile: boolean) => ({
   group: isMobile
     ? css`

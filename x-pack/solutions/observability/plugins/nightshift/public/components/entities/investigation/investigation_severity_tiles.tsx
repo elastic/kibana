@@ -26,6 +26,7 @@ import type { Severity, SeverityCounts } from '@kbn/nightshift-investigations-pl
 import { getSeverityLabel, SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SEVERITY_TILE_ICON, SEVERITY_TILE_ICON_COLORS } from '../../../common/severity';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 
 const LOADING_COUNT_ARIA_LABEL = i18n.translate(
   'xpack.nightshift.investigations.severityTileCountLoadingAriaLabel',
@@ -56,7 +57,7 @@ const getSeverityTileStyles = (
 ): {
   iconBox: Readonly<Record<Severity, SeverityIconBoxStyles>>;
   iconGlyphRotateUp: SerializedStyles;
-  tile: SerializedStyles;
+  mobileTile: SerializedStyles;
   label: SerializedStyles;
   labelMuted: SerializedStyles;
   count: SerializedStyles;
@@ -100,10 +101,8 @@ const getSeverityTileStyles = (
     iconGlyphRotateUp: css`
       transform: rotate(-90deg);
     `,
-    // Four tiles share a row; where they no longer fit, they wrap into a grid instead of
-    // overflowing the page.
-    tile: css`
-      flex: 1 1 calc(${euiTheme.size.xxl} * 3);
+    mobileTile: css`
+      flex: 1 1 calc(50% - ${euiTheme.size.base} / 2);
       min-width: 0;
     `,
     // Match EuiButtonEmpty: medium weight (EuiText has no weight prop).
@@ -161,9 +160,10 @@ export const InvestigationSeverityTiles = ({
 }: InvestigationSeverityTilesProps): React.ReactElement => {
   const euiThemeContext = useEuiTheme();
   const styles = useMemo(() => getSeverityTileStyles(euiThemeContext), [euiThemeContext]);
+  const isMobile = useIsMobile();
 
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap={isMobile}>
       {SEVERITY_OPTIONS.map((severity) => {
         const count = severityCounts[severity];
         const isPresent = presentSeverities.has(severity);
@@ -180,7 +180,7 @@ export const InvestigationSeverityTiles = ({
         const countIsMuted = isMuted || count === 0;
 
         return (
-          <EuiFlexItem key={severity} css={styles.tile}>
+          <EuiFlexItem key={severity} css={isMobile ? styles.mobileTile : undefined}>
             <EuiPanel
               hasBorder
               hasShadow={false}

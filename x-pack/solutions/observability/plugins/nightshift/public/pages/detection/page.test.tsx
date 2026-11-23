@@ -577,7 +577,6 @@ describe('DetectionPage', () => {
       window.innerWidth = originalInnerWidth;
     });
 
-    // The page section wraps the content element that holds the workspace.
     const getWorkspaceSection = () =>
       screen.getByTestId('nightshiftDetectionOverviewFullSlot').parentElement?.parentElement;
 
@@ -594,6 +593,20 @@ describe('DetectionPage', () => {
       expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
 
       expect(getWorkspaceSection()).not.toHaveStyle({ overflow: 'hidden' });
+    });
+
+    it('shows the compact overview on a phone, where the tab body does not scroll on its own', async () => {
+      window.innerWidth = 400;
+      renderPage();
+      expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+
+      expect(screen.getByTestId('nightshiftDetectionOverviewFullSlot')).toHaveAttribute(
+        'data-collapsed',
+        'true'
+      );
+      expect(screen.getByTestId('nightshiftDetectionOverviewCompactSlot')).not.toHaveAttribute(
+        'data-collapsed'
+      );
     });
   });
 });

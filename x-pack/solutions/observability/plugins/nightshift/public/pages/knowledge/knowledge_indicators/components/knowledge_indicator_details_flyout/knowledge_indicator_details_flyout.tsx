@@ -309,7 +309,6 @@ export function KnowledgeIndicatorDetailsFlyout({
 
   const title = getKnowledgeIndicatorTitle(knowledgeIndicator);
 
-  // Four cards don't fit a row on a phone, so they wrap two to a row instead of being squeezed.
   const metadataCardCss = isMobile ? { minWidth: '40%' } : undefined;
 
   const hasPagination =

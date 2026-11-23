@@ -198,7 +198,6 @@ function ConnectorTypeRow({
   const isMobile = useIsMobile();
   const hasConnectors = connectors.length > 0;
 
-  // The labelled button doesn't fit next to the connector type's name on a phone.
   const createButton = isMobile ? (
     <EuiToolTip
       position="top"
@@ -228,6 +227,14 @@ function ConnectorTypeRow({
       {createLabel}
     </EuiButton>
   );
+  const createAction =
+    createDisabledReason === undefined || isMobile ? (
+      createButton
+    ) : (
+      <EuiToolTip position="top" content={createDisabledReason}>
+        {createButton}
+      </EuiToolTip>
+    );
 
   return (
     <EuiPanel hasBorder hasShadow={false} paddingSize="m" data-test-subj={`${actionType.id}-row`}>
@@ -269,15 +276,7 @@ function ConnectorTypeRow({
           </EuiFlexGroup>
         }
         buttonProps={{ 'data-test-subj': `${actionType.id}-toggle` }}
-        extraAction={
-          createDisabledReason === undefined || isMobile ? (
-            createButton
-          ) : (
-            <EuiToolTip position="top" content={createDisabledReason}>
-              {createButton}
-            </EuiToolTip>
-          )
-        }
+        extraAction={createAction}
       >
         {hasConnectors && (
           <>
@@ -356,6 +355,18 @@ function ConnectorTypeRow({
           </>
         )}
       </EuiAccordion>
+      {isMobile && createDisabledReason !== undefined && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj={`${actionType.id}-createDisabledReason`}
+          >
+            {createDisabledReason}
+          </EuiText>
+        </>
+      )}
     </EuiPanel>
   );
 }

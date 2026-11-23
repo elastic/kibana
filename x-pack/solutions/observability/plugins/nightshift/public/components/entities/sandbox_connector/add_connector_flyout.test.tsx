@@ -171,6 +171,15 @@ describe('AddConnectorFlyout', () => {
     setup({ capabilities: { show: true, save: false, delete: true } });
 
     expect(await screen.findByTestId('.github-create')).toBeDisabled();
+    expect(screen.queryByTestId('.github-createDisabledReason')).not.toBeInTheDocument();
+  });
+
+  it('spells out why Create connector is locked on a phone, where there is no hover', async () => {
+    window.innerWidth = 390;
+    setup({ capabilities: { show: true, save: false, delete: true } });
+
+    expect(await screen.findByTestId('.github-create')).toBeDisabled();
+    expect(screen.getByTestId('.github-createDisabledReason')).toBeVisible();
   });
 
   it('locks Enable when the user cannot edit the agent', async () => {

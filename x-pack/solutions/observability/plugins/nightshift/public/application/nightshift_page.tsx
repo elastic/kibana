@@ -162,8 +162,6 @@ export const DetectionRoute = ({
 
 export function NightshiftPage(): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
-  // Below the tablet breakpoint the detection workspace stacks and scrolls as one page; it only
-  // fills the viewport and scrolls its panes on its own on larger screens.
   const isMobile = useIsMobile();
   const sectionPaddingSize = usePageSectionPaddingSize();
   const {

@@ -26,6 +26,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useIsMobile } from '../../../hooks/use_is_mobile';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import {
   statusLabels,
@@ -83,6 +84,7 @@ export const AutomationsToolbar = ({
   const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
   const { width } = useResizeObserver(toolbar);
   const isCompact = width > 0 && width < COLLAPSE_CREATE_BELOW_PX;
+  const isMobile = useIsMobile();
   const statusIcons: Record<string, React.ReactNode> = {
     [statusLabels.enabled]: <EuiIcon type="play" color="success" aria-hidden={true} />,
     [statusLabels.paused]: <EuiIcon type="pause" color="subdued" aria-hidden={true} />,
@@ -111,9 +113,8 @@ export const AutomationsToolbar = ({
   return (
     <>
       <div ref={setToolbar}>
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
-          {/* Wrapping keeps the filters and actions reachable when the toolbar gets narrow. */}
-          <EuiFlexItem grow={true} css={css({ minWidth: SEARCH_MIN_WIDTH_PX })}>
+        <EuiFlexGroup gutterSize="s" responsive={false} wrap={isMobile}>
+          <EuiFlexItem grow={true} css={css({ minWidth: isMobile ? SEARCH_MIN_WIDTH_PX : 0 })}>
             <EuiFieldSearch
               compressed
               placeholder={listLabels.search}

@@ -83,7 +83,6 @@ export function SourceFlyout({
     notifications: { toasts },
   } = useKibana().services;
   const { createSource, updateSource } = useSourcesApi();
-  // Side by side the form and the preview don't both fit a phone, so they stack there.
   const isMobile = useIsMobile();
   const titleId = useGeneratedHtmlId();
   // Only the query the user ran is previewed, so typing does not search on every keystroke.
