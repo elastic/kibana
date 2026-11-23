@@ -16,6 +16,7 @@ import {
   renderIndexMetadataTemplate,
   renderTargetedKiWriterTemplate,
   renderUnitProfileTemplate,
+  setWorkflowName,
   type AutomationTemplateId,
   type DocumentOrchestrationTemplateValues,
   type IndexMetadataTemplateValues,
@@ -99,7 +100,7 @@ export const renderAutomationTemplate = (
   } catch (error) {
     throw new InvalidTemplateParamsError(error instanceof Error ? error.message : String(error));
   }
-  return yaml.replace(/^name: .*/m, `name: ${JSON.stringify(params.name)}`);
+  return setWorkflowName(yaml, params.name);
 };
 
 /**

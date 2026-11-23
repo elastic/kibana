@@ -11,9 +11,8 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AiIndexChangeEvent } from '../ai_indices/changes';
 import type { AiIndexService } from '../ai_indices/service';
 import {
-  chooseCategoryField,
+  inspectSource,
   createSourceAutomationsChangeHandler,
-  esqlSourceTargets,
   reconcileSourceAutomations,
   sourceAutomationName,
   type AutomationWorkflowsApi,
@@ -29,18 +28,25 @@ const esClientWith = ({
     _index: { _index: { aggregatable: true } },
   },
   distinct = [4, 12],
+  documents = 500,
+  indices = ['orders'],
 }: {
   fields?: Record<string, Record<string, { aggregatable: boolean }>>;
   distinct?: number[];
+  documents?: number;
+  indices?: string[];
 } = {}) => {
   const esql = jest.fn(async () => ({
-    columns: distinct.map((_, index) => ({ name: `c${index}`, type: 'long' })),
-    values: [distinct],
+    columns: [
+      { name: 'total', type: 'long' },
+      ...distinct.map((_, index) => ({ name: `c${index}`, type: 'long' })),
+    ],
+    values: [[documents, ...distinct]],
   }));
   return {
     esql,
     client: {
-      fieldCaps: jest.fn(async () => ({ fields })),
+      fieldCaps: jest.fn(async () => ({ indices, fields })),
       esql: { query: esql },
     } as unknown as ElasticsearchClient,
   };
@@ -64,11 +70,16 @@ const aiIndex = (
   date_modified: '2026-11-01T00:00:00.000Z',
 });
 
-describe('esqlSourceTargets and sourceAutomationName', () => {
+describe('sourceAutomationName', () => {
   it('names an automation after what its source reads, unique per query', () => {
-    expect(esqlSourceTargets(logs.value)).toEqual(['logs-*', 'metrics-*']);
     expect(sourceAutomationName(logs.value)).toMatch(
       /^Index metadata: logs-\*, metrics-\* \([0-9a-f]{8}\)$/
+    );
+    expect(sourceAutomationName('FROM remote:logs-*, orders')).toMatch(
+      /^Index metadata: remote:logs-\*, orders \([0-9a-f]{8}\)$/
+    );
+    expect(sourceAutomationName('FROM orders | LOOKUP JOIN customers ON id')).toMatch(
+      /^Index metadata: orders \(/
     );
     expect(sourceAutomationName('FROM orders')).not.toBe(sourceAutomationName(orders.value));
     expect(sourceAutomationName(` ${orders.value} `)).toBe(sourceAutomationName(orders.value));
@@ -76,14 +87,18 @@ describe('esqlSourceTargets and sourceAutomationName', () => {
   });
 });
 
-describe('chooseCategoryField', () => {
+describe('inspectSource', () => {
   it('prefers a category-like keyword field with a few values, skipping ids and text', async () => {
     const { client, esql } = esClientWith();
 
-    await expect(chooseCategoryField(client, ['orders'])).resolves.toBe('status');
+    await expect(inspectSource(client, ['orders'])).resolves.toEqual({
+      matched: true,
+      documents: 500,
+      categoryField: 'status',
+    });
     expect(esql).toHaveBeenCalledWith({
       query:
-        'FROM "orders" | LIMIT 10000 | STATS c0 = COUNT_DISTINCT(`status`), c1 = COUNT_DISTINCT(`region`)',
+        'FROM "orders" | LIMIT 10000 | STATS total = COUNT(*), c0 = COUNT_DISTINCT(`status`), c1 = COUNT_DISTINCT(`region`)',
     });
   });
 
@@ -97,15 +112,34 @@ describe('chooseCategoryField', () => {
       distinct: [1, 900, 7],
     });
 
-    await expect(chooseCategoryField(client, ['orders'])).resolves.toBe('c');
+    await expect(inspectSource(client, ['orders'])).resolves.toEqual(
+      expect.objectContaining({ categoryField: 'c' })
+    );
   });
 
-  it('finds none without a keyword field of few enough values', async () => {
+  it('finds no category field without a keyword field of few enough values', async () => {
     const textOnly = esClientWith({ fields: { message: { text: { aggregatable: false } } } });
-    await expect(chooseCategoryField(textOnly.client, ['orders'])).resolves.toBeUndefined();
+    await expect(inspectSource(textOnly.client, ['orders'])).resolves.toEqual({
+      matched: true,
+      documents: 500,
+      categoryField: undefined,
+    });
     await expect(
-      chooseCategoryField(esClientWith({ distinct: [1, 5000] }).client, ['orders'])
-    ).resolves.toBeUndefined();
+      inspectSource(esClientWith({ distinct: [1, 5000] }).client, ['orders'])
+    ).resolves.toEqual(expect.objectContaining({ matched: true, categoryField: undefined }));
+  });
+
+  it('counts the documents, and stops short of querying when no index matches', async () => {
+    await expect(inspectSource(esClientWith({ documents: 0 }).client, ['orders'])).resolves.toEqual(
+      expect.objectContaining({ matched: true, documents: 0 })
+    );
+
+    const none = esClientWith({ indices: [], fields: {} });
+    await expect(inspectSource(none.client, ['orders-*'])).resolves.toEqual({
+      matched: false,
+      documents: 0,
+    });
+    expect(none.esql).not.toHaveBeenCalled();
   });
 });
 
@@ -159,11 +193,13 @@ describe('reconcileSourceAutomations', () => {
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
       deleteWorkflows: jest.fn(),
+      validateWorkflow: jest.fn(),
     } as unknown as jest.Mocked<AutomationWorkflowsApi>;
     workflows.getWorkflow.mockResolvedValue(installedWorkflow(orders.value));
     workflows.createWorkflow.mockResolvedValue({ id: 'wf-new', valid: true });
     workflows.updateWorkflow.mockResolvedValue({ valid: true });
     workflows.deleteWorkflows.mockResolvedValue({ failures: [] });
+    workflows.validateWorkflow.mockResolvedValue({ diagnostics: [] });
     aiIndexService = {
       get: jest.fn(async () =>
         aiIndex([], { automations: [{ type: 'workflow', value: 'wf-old' }] })
@@ -214,6 +250,24 @@ describe('reconcileSourceAutomations', () => {
     expect(workflows.createWorkflow).not.toHaveBeenCalled();
   });
 
+  it('reports a delete that throws like one that fails', async () => {
+    workflows.deleteWorkflows.mockRejectedValue(new Error('workflows unavailable'));
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([]))
+    );
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: expect.stringContaining(
+          'was detached but could not be deleted: workflows unavailable'
+        ),
+      },
+    ]);
+  });
+
   it('detaches and deletes the automation of a source taken off', async () => {
     await reconcileSourceAutomations(
       deps(),
@@ -240,13 +294,56 @@ describe('reconcileSourceAutomations', () => {
     expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
   });
 
-  it('keeps the workflow, detached, when the saving user cannot delete workflows', async () => {
+  it('keeps the workflow, detached, and warns when the saving user cannot delete workflows', async () => {
     canManage.mockResolvedValue(false);
 
-    await reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])));
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([]))
+    );
 
     expect(aiIndexService.removeAutomation).toHaveBeenCalled();
     expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: expect.stringContaining("workflow 'wf-old' was kept because you cannot delete"),
+      },
+    ]);
+  });
+
+  it('detaches the workflow before deleting it', async () => {
+    const calls: string[] = [];
+    aiIndexService.removeAutomation.mockImplementation(async () => calls.push('detach'));
+    workflows.deleteWorkflows.mockImplementation(async () => {
+      calls.push('delete');
+      return { failures: [] };
+    });
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([]))
+    );
+
+    expect(calls).toEqual(['detach', 'delete']);
+    expect(warnings).toEqual([]);
+  });
+
+  it('does not delete the workflow when detaching it fails', async () => {
+    aiIndexService.removeAutomation.mockRejectedValue(new Error('modified concurrently'));
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([]))
+    );
+
+    expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: 'The index metadata automation could not be removed: modified concurrently',
+      },
+    ]);
   });
 
   it('finds the workflow of a removed source when the save also dropped the automations', async () => {
@@ -259,15 +356,24 @@ describe('reconcileSourceAutomations', () => {
     });
   });
 
-  it('keeps the workflow attached when deleting it fails', async () => {
+  it('warns that the workflow was detached but kept when deleting it fails', async () => {
     workflows.deleteWorkflows.mockResolvedValue({
       failures: [{ id: 'wf-old', error: 'managed workflow' }],
     });
 
-    await expect(
-      reconcileSourceAutomations(deps(), event(aiIndex([orders], attached), aiIndex([])))
-    ).rejects.toThrow("workflow 'wf-old' could not be deleted: managed workflow");
-    expect(aiIndexService.removeAutomation).not.toHaveBeenCalled();
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(aiIndex([orders], attached), aiIndex([]))
+    );
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message:
+          "The index metadata automation could not be removed: workflow 'wf-old' was detached but could not be deleted: managed workflow",
+      },
+    ]);
+    expect(aiIndexService.removeAutomation).toHaveBeenCalledTimes(1);
   });
 
   it('replaces the automation of a source whose query changed', async () => {
@@ -291,24 +397,150 @@ describe('reconcileSourceAutomations', () => {
     workflows.getWorkflow.mockResolvedValue(null);
     aiIndexService.addAutomation.mockRejectedValue(new Error('modified concurrently'));
 
-    await expect(
-      reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])))
-    ).rejects.toThrow('modified concurrently');
+    const warnings = await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: 'The index metadata automation could not be installed: modified concurrently',
+      },
+    ]);
     expect(workflows.deleteWorkflows).toHaveBeenCalledWith(['wf-new'], 'default', request);
   });
 
-  it('installs nothing for a user who cannot create workflows, or with no category field', async () => {
+  it('keeps a workflow that is created not valid, attached, and warns with why', async () => {
+    workflows.getWorkflow.mockResolvedValue(null);
+    workflows.createWorkflow.mockResolvedValue({ id: 'wf-new', valid: false });
+    workflows.validateWorkflow.mockResolvedValue({
+      diagnostics: [
+        { severity: 'error', message: 'unknown step type' },
+        { severity: 'warning', message: 'unused const' },
+      ],
+    });
+
+    const warnings = await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message:
+          'The automation was saved but is not valid, so it cannot be enabled or run: unknown step type',
+      },
+    ]);
+    expect(aiIndexService.addAutomation).toHaveBeenCalledWith('shop', 'default', {
+      type: 'workflow',
+      value: 'wf-new',
+    });
+    expect(workflows.deleteWorkflows).not.toHaveBeenCalled();
+  });
+
+  it('warns with why when updating leaves the workflow not valid', async () => {
+    workflows.updateWorkflow.mockResolvedValue({ valid: false, validationErrors: ['bad step'] });
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(undefined, aiIndex([orders], attached))
+    );
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message:
+          'The automation was saved but is not valid, so it cannot be enabled or run: bad step',
+      },
+    ]);
+  });
+
+  it('does not update the workflow of a user who cannot update workflows', async () => {
+    canManage.mockImplementation(async (_request, _space, operation) => operation !== 'update');
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(undefined, aiIndex([orders], attached))
+    );
+
+    expect(warnings).toEqual([
+      { source: orders, message: expect.stringContaining('you cannot update workflows') },
+    ]);
+    expect(workflows.updateWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('warns, and installs nothing, for a user who cannot create workflows', async () => {
     workflows.getWorkflow.mockResolvedValue(null);
     canManage.mockResolvedValue(false);
-    await expect(
-      reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])))
-    ).rejects.toThrow('cannot create workflows');
 
-    canManage.mockResolvedValue(true);
-    esClient = esClientWith({ distinct: [1, 1] }).client;
-    await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('has no keyword field'));
+    const warnings = await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: expect.stringContaining('you cannot create workflows'),
+      },
+    ]);
     expect(workflows.createWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('installs the automation of an index with no category field, without grouping', async () => {
+    workflows.getWorkflow.mockResolvedValue(null);
+    esClient = esClientWith({ fields: { message: { text: { aggregatable: false } } } }).client;
+
+    const warnings = await reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders])));
+
+    expect(warnings).toEqual([]);
+    expect(parse(workflows.createWorkflow.mock.calls[0][0].yaml).consts.sources).toEqual([
+      { index: 'orders', category_field: '' },
+    ]);
+  });
+
+  it('warns why a source got no automation, rather than installing nothing silently', async () => {
+    workflows.getWorkflow.mockResolvedValue(null);
+    const remote = { type: 'esql' as const, value: 'FROM remote:orders | LIMIT 10' };
+    const row = { type: 'esql' as const, value: 'ROW a = 1' };
+    const missing = { type: 'esql' as const, value: 'FROM missing-*' };
+    const empty = { type: 'esql' as const, value: 'FROM brand-new' };
+    esClient = {
+      fieldCaps: jest.fn(async ({ index }: { index: string[] }) =>
+        index[0] === 'missing-*' ? { indices: [], fields: {} } : { indices: index, fields: {} }
+      ),
+      esql: { query: jest.fn(async () => ({ columns: [{ name: 'total' }], values: [[0]] })) },
+    } as unknown as ElasticsearchClient;
+
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(undefined, aiIndex([remote, row, missing, empty]))
+    );
+
+    expect(warnings).toEqual([
+      { source: remote, message: 'The query reads a remote cluster, which is not profiled.' },
+      {
+        source: row,
+        message: 'The query reads no index with FROM or TS, so there is nothing to profile.',
+      },
+      {
+        source: missing,
+        message: 'No index matching missing-* was found, or you do not have read access to it.',
+      },
+      {
+        source: empty,
+        message: expect.stringContaining('brand-new has no documents yet'),
+      },
+    ]);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('reads a remote cluster'));
+    expect(workflows.createWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('profiles only what a source reads with FROM, not what it joins or enriches', async () => {
+    workflows.getWorkflow.mockResolvedValue(null);
+    const joined = {
+      type: 'esql' as const,
+      value: 'FROM orders | LOOKUP JOIN customers ON id | ENRICH region-policy ON region',
+    };
+
+    await reconcileSourceAutomations(deps(), event(undefined, aiIndex([joined])));
+
+    expect(parse(workflows.createWorkflow.mock.calls[0][0].yaml).consts.sources).toEqual([
+      { index: 'orders', category_field: 'status' },
+    ]);
   });
 
   it('tries every source before reporting the ones that failed', async () => {
@@ -317,9 +549,17 @@ describe('reconcileSourceAutomations', () => {
       .mockRejectedValueOnce(new Error('invalid yaml'))
       .mockResolvedValue({ id: 'wf-new', valid: true });
 
-    await expect(
-      reconcileSourceAutomations(deps(), event(undefined, aiIndex([orders, logs])))
-    ).rejects.toThrow(`installing "${sourceAutomationName(orders.value)}": invalid yaml`);
+    const warnings = await reconcileSourceAutomations(
+      deps(),
+      event(undefined, aiIndex([orders, logs]))
+    );
+
+    expect(warnings).toEqual([
+      {
+        source: orders,
+        message: 'The index metadata automation could not be installed: invalid yaml',
+      },
+    ]);
     expect(workflows.createWorkflow).toHaveBeenCalledTimes(2);
   });
 

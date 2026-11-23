@@ -30,7 +30,7 @@ consts:
   automation_name: __AUTOMATION_NAME__
   # The indices being profiled, one KI each. `index` is also what every generated ES|QL for that
   # profile reads FROM; `category_field` is a keyword field whose distribution grounds the profile,
-  # the one an analyst would group by first.
+  # the one an analyst would group by first, or "" for an index without one.
   sources: __SOURCES__
   # The AI connector the profiles are written with. "" uses Context Engine's default model.
   connector_id: ""
@@ -114,13 +114,13 @@ steps:
         type: elasticsearch.esql.query
         with:
           format: json
-          query: "FROM {{ steps.source_context.output.index }} | STATS count = COUNT(*) BY `{{ steps.source_context.output.category_field }}` | SORT count DESC | LIMIT 50"
+          query: "FROM {{ steps.source_context.output.index }} | STATS count = COUNT(*){% if steps.source_context.output.category_field != blank %} BY `{{ steps.source_context.output.category_field }}` | SORT count DESC | LIMIT 50{% endif %}"
 
       - name: esql_totals
         type: elasticsearch.esql.query
         with:
           format: json
-          query: "FROM {{ steps.source_context.output.index }} | STATS total = COUNT(*), distinct_categories = COUNT_DISTINCT(`{{ steps.source_context.output.category_field }}`)"
+          query: "FROM {{ steps.source_context.output.index }} | STATS total = COUNT(*){% if steps.source_context.output.category_field != blank %}, distinct_categories = COUNT_DISTINCT(`{{ steps.source_context.output.category_field }}`){% endif %}"
 
       # `== blank` covers an empty or missing `connector_id`; an empty `connector-id` is unset.
       - name: generate_index_profile
@@ -139,10 +139,10 @@ steps:
             Sample of ~20 random documents from the index:
             {{ steps.sample_documents.output.hits.hits | json }}
 
-            Grounding aggregation — document count by {{ steps.source_context.output.category_field }}:
+            Grounding aggregation — {% if steps.source_context.output.category_field != blank %}document count by {{ steps.source_context.output.category_field }}{% else %}total document count{% endif %}:
             {{ steps.esql_category_counts.output | json }}
 
-            Grounding totals — total document count and distinct {{ steps.source_context.output.category_field }} count:
+            Grounding totals — total document count{% if steps.source_context.output.category_field != blank %} and distinct {{ steps.source_context.output.category_field }} count{% endif %}:
             {{ steps.esql_totals.output | json }}
 
             {{ consts.instructions }}

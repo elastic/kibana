@@ -29,6 +29,16 @@ responses:
             description: "Example response after an existing AI Index is replaced"
             value:
               status: updated
+          putAiIndexUpdatedWithWarningsExample:
+            summary: "AI Index updated, with a warning"
+            description: "The AI Index was replaced, but the index metadata automation of one of its ES|QL sources could not be installed"
+            value:
+              status: updated
+              warnings:
+                - source:
+                    type: esql
+                    value: FROM support-cases-* | LIMIT 100
+                  message: No index matching support-cases-* was found, or you do not have read access to it.
   201:
     content:
       application/json:

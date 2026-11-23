@@ -694,10 +694,30 @@ export const aiIndexHttpItemResponseSchema = () =>
     feedback_analysis: schema.maybe(feedbackAnalysisResponseSchema()),
   });
 
+const saveWarningsResponseSchema = () =>
+  schema.maybe(
+    // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
+    schema.arrayOf(
+      schema.object({
+        source: aiIndexSourceResponseSchema(),
+        message: schema.string({
+          meta: { description: 'What did not happen for the source, and why.' },
+        }),
+      }),
+      {
+        meta: {
+          description:
+            'Things the save was meant to do beyond storing the AI Index that did not happen, such as installing the index metadata automation of an ES|QL source. The AI Index was saved either way. Missing when nothing went wrong.',
+        },
+      }
+    )
+  );
+
 export const createAiIndexResponseSchema = () =>
   schema.object(
     {
       status: schema.literal('created'),
+      warnings: saveWarningsResponseSchema(),
     },
     { meta: { description: 'Confirms that the AI Index was created.' } }
   );
@@ -706,6 +726,7 @@ export const updateAiIndexResponseSchema = () =>
   schema.object(
     {
       status: schema.literal('updated'),
+      warnings: saveWarningsResponseSchema(),
     },
     { meta: { description: 'Confirms that the AI Index was updated.' } }
   );

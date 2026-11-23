@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isEqual } from 'lodash';
-import type { AiIndexItem } from '../../common/http_api/ai_indices';
+import type { AiIndexItem, AiIndexSaveWarning } from '../../common/http_api/ai_indices';
 
 /** Fields of an AI index a save can change; the id and timestamps are not compared. */
 export type AiIndexChangeField = Exclude<
@@ -52,7 +52,8 @@ export interface AiIndexChangeHandler {
    * on delete and when a partial save wrote one of them.
    */
   when?: 'changed' | 'saved';
-  onChange: (event: AiIndexChangeEvent) => Promise<void>;
+  /** Resolves to the warnings the save's caller should see; a handler that throws is only logged. */
+  onChange: (event: AiIndexChangeEvent) => Promise<void | AiIndexSaveWarning[]>;
 }
 
 /** The top-level fields whose value differs between two versions of an AI index. */
@@ -92,8 +93,9 @@ const shouldRun = (
 };
 
 /**
- * Tells the handlers registered at setup that an AI index was saved, and what changed.
- * A handler that fails is logged and does not stop the others: the save itself already happened.
+ * Tells the handlers registered at setup that an AI index was saved, and what changed, and
+ * returns the warnings they raise. A handler that fails is logged and does not stop the others:
+ * the save itself already happened.
  */
 export class AiIndexChangeNotifier {
   private readonly handlers = new Map<string, AiIndexChangeHandler>();
@@ -116,19 +118,23 @@ export class AiIndexChangeNotifier {
     this.frozen = true;
   }
 
-  async notify({ saved, ...change }: AiIndexChange): Promise<void> {
+  async notify({ saved, ...change }: AiIndexChange): Promise<AiIndexSaveWarning[]> {
     const event: AiIndexChangeEvent = {
       ...change,
       changed: diffAiIndex(change.previous, change.current),
       ...(saved !== undefined && { saved: new Set(saved) }),
     };
     const handlers = [...this.handlers.values()].filter((handler) => shouldRun(handler, event));
-    await Promise.all(handlers.map((handler) => this.run(handler, event)));
+    const warnings = await Promise.all(handlers.map((handler) => this.run(handler, event)));
+    return warnings.flat();
   }
 
-  private async run(handler: AiIndexChangeHandler, event: AiIndexChangeEvent): Promise<void> {
+  private async run(
+    handler: AiIndexChangeHandler,
+    event: AiIndexChangeEvent
+  ): Promise<AiIndexSaveWarning[]> {
     try {
-      await handler.onChange(event);
+      return (await handler.onChange(event)) ?? [];
     } catch (error) {
       this.logger.warn(
         `${event.current ? 'Saved' : 'Deleted'} AI index '${event.aiIndexId}' in space '${
@@ -137,6 +143,7 @@ export class AiIndexChangeNotifier {
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return [];
     }
   }
 }

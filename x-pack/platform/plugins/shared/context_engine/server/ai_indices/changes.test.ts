@@ -194,6 +194,15 @@ describe('AiIndexChangeNotifier', () => {
     });
   });
 
+  it('returns the warnings the handlers raise, and none for a handler that returns nothing', async () => {
+    const notifier = new AiIndexChangeNotifier(logger);
+    const warning = { source: { type: 'esql' as const, value: 'FROM logs' }, message: 'Skipped.' };
+    notifier.register(handler({ id: 'warns', onChange: jest.fn().mockResolvedValue([warning]) }));
+    notifier.register(handler({ id: 'quiet' }));
+
+    await expect(notifier.notify({ ...change, previous: aiIndex })).resolves.toEqual([warning]);
+  });
+
   it('logs a failing handler and still runs the others', async () => {
     const notifier = new AiIndexChangeNotifier(logger);
     const failing = handler({
@@ -204,7 +213,7 @@ describe('AiIndexChangeNotifier', () => {
     notifier.register(failing);
     notifier.register(healthy);
 
-    await expect(notifier.notify({ ...change, previous: aiIndex })).resolves.toBeUndefined();
+    await expect(notifier.notify({ ...change, previous: aiIndex })).resolves.toEqual([]);
 
     expect(healthy.onChange).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(
