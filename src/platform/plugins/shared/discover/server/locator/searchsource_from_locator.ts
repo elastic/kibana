@@ -58,8 +58,9 @@ const getFilters = (
   if (timeFieldName) {
     const timeRange = params.timeRange ?? savedSearchTimeRange;
 
-    if (timeRange?.from && timeRange?.to) {
-      // `field` identifies the time filter, so it can be re-anchored to `forceNow` for scheduled reports
+    if (timeRange) {
+      // `meta.field` identifies the time filter: `overrideTimeRange` (@kbn/generate-csv) looks for it to
+      // re-anchor a relative range to `forceNow`, which reporting sets when it runs a scheduled report.
       const timeRangeFilter: RangeFilter = {
         meta: { index: index.id, field: timeFieldName, params: {}, type: 'range' },
         query: {

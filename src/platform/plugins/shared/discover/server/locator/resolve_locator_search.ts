@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
@@ -33,11 +34,18 @@ const isSortOrderPair = (item: unknown): boolean =>
 
 /**
  * The locator params of a report job are not validated beyond being a record, so the fields
- * that are used to build the request are validated here.
+ * that are used to build the request are validated here. An invalid value fails the report: skipping
+ * it would silently export more data than requested, for example without a time range filter.
  */
-const validateParams = ({ columns, sort }: DiscoverAppLocatorParams): void => {
+const validateParams = ({ columns, sort, timeRange }: DiscoverAppLocatorParams): void => {
   if (columns !== undefined && !(Array.isArray(columns) && columns.every(isString))) {
     throw new Error('Invalid DiscoverAppLocatorParams: "columns" must be an array of strings');
+  }
+
+  if (timeRange !== undefined && !(isString(timeRange?.from) && isString(timeRange?.to))) {
+    throw new Error(
+      'Invalid DiscoverAppLocatorParams: "timeRange" must have a "from" and a "to" string'
+    );
   }
 
   if (sort !== undefined && !(Array.isArray(sort) && sort.every(isSortOrderPair))) {
@@ -52,7 +60,9 @@ const validateParams = ({ columns, sort }: DiscoverAppLocatorParams): void => {
  *
  * - `savedSearchId`: the saved search provides the base search source and data view.
  * - `dataViewId`: the data view is loaded by id. When combined with `savedSearchId`, it takes
- *   precedence over the saved search's data view.
+ *   precedence over the saved search's data view. This is expected: Discover sends both when the data
+ *   view of a saved session was changed in the UI. Columns that don't exist in it are still requested
+ *   (`include_unmapped`).
  *
  * Ad hoc data views (`dataViewSpec` only) are not supported on the server.
  * @internal
@@ -90,6 +100,12 @@ export const resolveLocatorSearch = async (
 
     return { savedSearch, dataView, searchSource };
   } catch (error) {
+    // Boom errors (for example a saved object that is not found, or is forbidden) are rethrown as they
+    // are, to keep their status code. Their message already names the object.
+    if (Boom.isBoom(error)) {
+      throw error;
+    }
+
     const context = [
       savedSearchId && `savedSearchId: ${savedSearchId}`,
       dataViewId && `dataViewId: ${dataViewId}`,

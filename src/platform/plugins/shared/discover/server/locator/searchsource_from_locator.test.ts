@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { IUiSettingsClient, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ISearchStartSearchSource, SearchSource, TimeRange } from '@kbn/data-plugin/common';
@@ -467,18 +468,34 @@ describe('filters', () => {
     expect(filter).not.toBe(testFilter);
   });
 
-  test('does not add a time range filter if the time range is incomplete', async () => {
-    const provider = searchSourceFromLocatorFactory(mockServices);
-    const searchSource = await provider({
-      savedSearchId: mockSavedSearchId,
-      timeRange: { from: 'now-15m' } as unknown as TimeRange,
-    });
-
-    expect(searchSource.getSerializedFields().filter).toBeUndefined();
-  });
+  test.each([
+    ['without "to"', { from: 'now-15m' }],
+    ['without "from"', { to: 'now' }],
+    ['that is not an object', 'now-15m'],
+    ['that is null', null],
+  ])(
+    'throws for a time range %s, instead of exporting without a time filter',
+    async (_d, range) => {
+      const provider = searchSourceFromLocatorFactory(mockServices);
+      await expect(
+        provider({ savedSearchId: mockSavedSearchId, timeRange: range as unknown as TimeRange })
+      ).rejects.toThrow('"timeRange" must have a "from" and a "to" string');
+    }
+  );
 });
 
 describe('errors', () => {
+  test('rethrows Boom errors as they are', async () => {
+    const boomError = Boom.notFound('Saved object [index-pattern/missing-data-view] not found');
+    dataViewsService.get.mockRejectedValueOnce(boomError);
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const error = await provider({ dataViewId: 'missing-data-view' }).catch((e) => e);
+
+    expect(error).toBe(boomError);
+    expect(error.output.statusCode).toBe(404);
+  });
+
   test('adds context to the message and keeps the original error as the cause', async () => {
     const originalError = Object.assign(new Error('Saved object not found'), { statusCode: 404 });
     dataViewsService.get.mockRejectedValueOnce(originalError);
@@ -493,4 +510,44 @@ describe('errors', () => {
     // the original error is not modified
     expect(originalError.message).toBe('Saved object not found');
   });
+});
+
+describe('time field', () => {
+  test('applies the time range filter, but does not add the time column, if the time column is hidden', async () => {
+    (uiSettingsClient.get as jest.Mock).mockImplementation((key: string) =>
+      key === DOC_HIDE_TIME_COLUMN_SETTING ? true : undefined
+    );
+    const timeRange = { from: 'now-15m', to: 'now' };
+
+    const provider = searchSourceFromLocatorFactory(mockServices);
+    const searchSource = await provider({ savedSearchId: mockSavedSearchId, timeRange });
+
+    const { fields, filter } = searchSource.getSerializedFields();
+    expect(filter).toEqual([
+      expect.objectContaining({
+        meta: expect.objectContaining({ field: 'timestamp' }),
+        query: {
+          range: { timestamp: { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' } },
+        },
+      }),
+    ]);
+    expect(fields).toEqual(
+      ['response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
+        field,
+        include_unmapped: true,
+      }))
+    );
+  });
+});
+
+test('uses the columns of the saved search as fields, with the time field first', async () => {
+  const provider = searchSourceFromLocatorFactory(mockServices);
+  const searchSource = await provider({ savedSearchId: mockSavedSearchId });
+
+  expect(searchSource.getSerializedFields().fields).toEqual(
+    ['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags'].map((field) => ({
+      field,
+      include_unmapped: true,
+    }))
+  );
 });
