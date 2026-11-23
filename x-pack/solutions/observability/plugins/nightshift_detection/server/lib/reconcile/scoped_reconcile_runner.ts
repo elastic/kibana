@@ -22,9 +22,9 @@ import {
   type SkippedSource,
   type StrategyAlertingRule,
   type StrategyError,
-} from './alerting_rule_reconciler';
-import { ManagedRuleReader } from './managed_rule_reader';
-import { SpaceRulesLock } from './space_rules_lock';
+} from '../rules/alerting_rule_reconciler';
+import { ManagedRuleReader } from '../rules/managed_rule_reader';
+import { SpaceReconcileLock } from './space_reconcile_lock';
 
 /**
  * How long a call waits for a reconciliation already running in the space. The workflow cancels a
@@ -49,7 +49,7 @@ export class ScopedReconcileRunner {
   constructor(
     @inject(AccountScope) private readonly accountScope: AccountScope,
     @inject(StrategyCatalog) private readonly catalog: StrategyCatalog,
-    @inject(SpaceRulesLock) private readonly lock: Pick<SpaceRulesLock, 'run'>,
+    @inject(SpaceReconcileLock) private readonly lock: Pick<SpaceReconcileLock, 'run'>,
     @inject(CoreLogger) private readonly logger: Logger,
     @inject(PluginSetup<CPSServerSetup>('cps'))
     @optional()

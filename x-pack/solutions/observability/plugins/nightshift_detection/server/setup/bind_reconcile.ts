@@ -8,15 +8,15 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Logger } from '@kbn/core-di';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
-import { ScopedReconcileRunner } from '../lib/rules/scoped_reconcile_runner';
-import { SpaceRulesLock } from '../lib/rules/space_rules_lock';
+import { ScopedReconcileRunner } from '../lib/reconcile/scoped_reconcile_runner';
+import { SpaceReconcileLock } from '../lib/reconcile/space_reconcile_lock';
 
-/** Binds what reconciles the space's managed alerting rules with what the strategies want. */
-export function bindRules({ bind }: ContainerModuleLoadOptions): void {
+/** Binds what reconciles the resources the strategies need, such as their alerting rules. */
+export function bindReconcile({ bind }: ContainerModuleLoadOptions): void {
   // Shares `.kibana_locks` with the run and setup locks; the purposes never block each other.
-  bind(SpaceRulesLock)
+  bind(SpaceReconcileLock)
     .toResolvedValue(
-      (esClient, logger) => new SpaceRulesLock(esClient, logger.get('rules-lock')),
+      (esClient, logger) => new SpaceReconcileLock(esClient, logger.get('reconcile-lock')),
       [DetectionEngineSystemClient, Logger]
     )
     .inSingletonScope();

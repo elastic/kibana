@@ -7,11 +7,11 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { apiTest, COMMON_HEADERS, RECONCILE_RULES_PATH, setNightshiftEnabled } from '../fixtures';
+import { apiTest, COMMON_HEADERS, RECONCILE_PATH, setNightshiftEnabled } from '../fixtures';
 
 const RULES_PATH = 'api/alerting/v2/rules';
-const RULE_RECONCILE_WORKFLOW_PATH =
-  'api/workflows/workflow/system-nightshift-detection-rule-reconcile-default';
+const RECONCILE_WORKFLOW_PATH =
+  'api/workflows/workflow/system-nightshift-detection-reconcile-default';
 
 interface ReconcileResponse {
   status: 'completed' | 'busy';
@@ -20,7 +20,7 @@ interface ReconcileResponse {
 }
 
 apiTest.describe(
-  'POST /internal/nightshift/detection/rules/_reconcile',
+  'POST /internal/nightshift/detection/_reconcile',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let cookieHeader: Record<string, string>;
@@ -41,7 +41,7 @@ apiTest.describe(
     apiTest(
       'the space setup installs and turns on the reconcile workflow',
       async ({ apiClient }) => {
-        const response = await apiClient.get(RULE_RECONCILE_WORKFLOW_PATH, {
+        const response = await apiClient.get(RECONCILE_WORKFLOW_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader, 'elastic-api-version': '2023-10-31' },
           responseType: 'json',
         });
@@ -73,7 +73,7 @@ apiTest.describe(
       const ruleId: string = created.body.id;
 
       // The route waits out a reconciliation the workflow may be running, so one call is enough.
-      const reconcile = await apiClient.post<ReconcileResponse>(RECONCILE_RULES_PATH, {
+      const reconcile = await apiClient.post<ReconcileResponse>(RECONCILE_PATH, {
         headers,
         body: {},
         responseType: 'json',

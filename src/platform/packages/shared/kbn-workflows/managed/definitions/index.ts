@@ -76,7 +76,7 @@ import {
 } from './endpoint/configuration_troubleshooting';
 import { ENDPOINT_KNOWLEDGE_SEARCH_WORKFLOW } from './endpoint/knowledge_search';
 import { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW } from './nightshift_detection/continuous_detection';
-import { NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW } from './nightshift_detection/rule_reconcile';
+import { NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW } from './nightshift_detection/reconcile';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW } from './nightshift_investigations/agent_optimize';
 import {
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
@@ -177,7 +177,7 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from './nightshift_detection/continuous_detection';
-export { NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW_ID } from './nightshift_detection/rule_reconcile';
+export { NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID } from './nightshift_detection/reconcile';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';
@@ -319,7 +319,7 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW,
-  NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW,
+  NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,

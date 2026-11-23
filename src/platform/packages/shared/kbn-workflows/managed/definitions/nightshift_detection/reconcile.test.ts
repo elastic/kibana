@@ -8,10 +8,10 @@
  */
 
 import { parse } from 'yaml';
-import { NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW } from './rule_reconcile';
+import { NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW } from './reconcile';
 
 const workflow = parse(
-  NIGHTSHIFT_DETECTION_RULE_RECONCILE_WORKFLOW.yamlTemplate({
+  NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW.yamlTemplate({
     serviceAccountId: 'kibana/nightshift_detection',
   })
 ) as {

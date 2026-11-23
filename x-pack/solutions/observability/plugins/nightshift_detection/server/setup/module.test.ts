@@ -20,8 +20,8 @@ import { AvailabilityService } from '../lib/availability/availability_service';
 import { DetectionEngineSystemClient } from '../lib/engine/es_client_tokens';
 import { SpaceRunLock } from '../lib/engine/space_run_lock';
 import { ScopedTickRunner } from '../lib/engine/scoped_tick_runner';
-import { ScopedReconcileRunner } from '../lib/rules/scoped_reconcile_runner';
-import { SpaceRulesLock } from '../lib/rules/space_rules_lock';
+import { ScopedReconcileRunner } from '../lib/reconcile/scoped_reconcile_runner';
+import { SpaceReconcileLock } from '../lib/reconcile/space_reconcile_lock';
 import { DetectionAccountService } from '../lib/service_account/detection_account';
 import { DetectionSetupService } from '../lib/service_account/setup_service';
 import { SpaceSetupLock } from '../lib/service_account/space_setup_lock';
@@ -116,7 +116,7 @@ describe('module', () => {
     container.get(SpaceRunLock);
     container.get(SpaceSetupLock);
     container.get(ScopedReconcileRunner);
-    container.get(SpaceRulesLock);
+    container.get(SpaceReconcileLock);
     container.getAll(OnStart);
     container.getAll(OnSetup).forEach((onSetup) => onSetup(container));
 
@@ -183,11 +183,11 @@ describe('module', () => {
         throw new Error('knowledge unreadable');
       },
     });
-    await container.unbind(SpaceRulesLock);
-    const lock: Pick<SpaceRulesLock, 'run'> = {
+    await container.unbind(SpaceReconcileLock);
+    const lock: Pick<SpaceReconcileLock, 'run'> = {
       run: async ({ callback }) => ({ ran: true, result: await callback() }),
     };
-    container.bind(SpaceRulesLock).toConstantValue(lock as unknown as SpaceRulesLock);
+    container.bind(SpaceReconcileLock).toConstantValue(lock as unknown as SpaceReconcileLock);
 
     const result = await container.get(ScopedReconcileRunner).run({
       accountRequest: httpServerMock.createKibanaRequest(),
