@@ -8,6 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
+import {
+  findOtlpAuthHeaderConflict,
+  isValidOtlpAuthCredential,
+  isValidOtlpHeaderName,
+  OTLP_HEADER_NAME_MAX_LENGTH,
+} from '../../../../../../../common/services/otlp_auth';
+
 import { validateSslPathInput, validateSslPathsCombo } from '../ssl_form_validators';
 export { validateSslPathInput, validateSslPathsCombo };
 
@@ -855,8 +862,34 @@ export function validateOtlpShortString(value: string) {
   }
 }
 
-export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>) {
+/**
+ * Validates the headers of the OTLP output. `authHeaderName` is the header that the authentication
+ * sets, which the headers cannot set too.
+ */
+export function validateOtlpHeaders(
+  pairs: Array<{ key: string; value: string }>,
+  authHeaderName?: string
+) {
   const errors = [...(validateKafkaHeaders(pairs) ?? [])];
+
+  if (authHeaderName) {
+    const conflict = findOtlpAuthHeaderConflict(
+      pairs.map(({ key }) => key),
+      authHeaderName
+    );
+    const index = conflict === undefined ? -1 : pairs.findIndex(({ key }) => key === conflict);
+    if (index >= 0) {
+      errors.push({
+        message: i18n.translate('xpack.fleet.settings.outputForm.otlpHeaderSetByAuth', {
+          defaultMessage: 'The {header} header is set by the authentication',
+          values: { header: conflict },
+        }),
+        index,
+        hasKeyError: true,
+        hasValueError: false,
+      });
+    }
+  }
 
   pairs.forEach(({ key, value }, index) => {
     if (key.length > 256 || value.length > 1000) {
@@ -876,9 +909,6 @@ export function validateOtlpHeaders(pairs: Array<{ key: string; value: string }>
   return errors.length ? errors : undefined;
 }
 
-// RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
-const OTLP_HEADER_NAME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
-
 export function validateOtlpAuthHeaderName(value: string) {
   const name = value?.trim() ?? '';
   if (!name) {
@@ -888,22 +918,31 @@ export function validateOtlpAuthHeaderName(value: string) {
       }),
     ];
   }
-  if (name.length > 256 || !OTLP_HEADER_NAME_REGEX.test(name)) {
+  if (!isValidOtlpHeaderName(name)) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpAuthHeaderNameInvalid', {
         defaultMessage:
-          'Header name must be at most 256 characters and only contain letters, digits and {chars}',
-        values: { chars: "!#$%&'*+-.^_`|~" },
+          'Header name must be at most {max} characters and only contain letters, digits and {chars}',
+        values: { max: OTLP_HEADER_NAME_MAX_LENGTH, chars: "!#$%&'*+-.^_`|~" },
       }),
     ];
   }
 }
 
 export function validateOtlpAuthCredential(value: string) {
-  if (!value) {
+  // the credential is sent trimmed
+  const credential = value?.trim() ?? '';
+  if (!credential) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialRequired', {
         defaultMessage: 'Credential is required',
+      }),
+    ];
+  }
+  if (!isValidOtlpAuthCredential(credential)) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpAuthCredentialInvalid', {
+        defaultMessage: 'Credential cannot contain line breaks or other control characters',
       }),
     ];
   }

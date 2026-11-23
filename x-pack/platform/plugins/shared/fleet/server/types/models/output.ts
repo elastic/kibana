@@ -24,6 +24,10 @@ import {
   otlpProtocol,
   outputType,
 } from '../../../common/constants';
+import {
+  isValidOtlpHeaderName,
+  OTLP_HEADER_NAME_MAX_LENGTH,
+} from '../../../common/services/otlp_auth';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
@@ -766,21 +770,14 @@ const OtlpExporterResponseSchema = schema.discriminatedUnion('protocol', [
   OtlpHttpExporterResponseSchema,
 ]);
 
-// RFC 9110 field name (token): the header is sent as an HTTP header or as gRPC metadata
-const OTLP_HEADER_NAME_REGEX = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
-
 export function validateOtlpHeaderName(name: string): string | undefined {
-  if (!OTLP_HEADER_NAME_REGEX.test(name)) {
+  if (!isValidOtlpHeaderName(name)) {
     return "Invalid header name. It can only contain letters, digits and !#$%&'*+-.^_`|~";
   }
 }
 
-/**
- * How the OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
- * credential is in `secrets.auth.credential`, it is placed verbatim in the header.
- */
-const OtlpAuthSchema = schema.oneOf([
-  schema.object({
+const OtlpAuthHeaderSchema = schema.object(
+  {
     type: schema.literal(otlpAuthType.AuthHeader),
     scheme: schema.oneOf(
       [schema.literal(otlpAuthScheme.ApiKey), schema.literal(otlpAuthScheme.BearerToken)],
@@ -791,16 +788,36 @@ const OtlpAuthSchema = schema.oneOf([
         },
       }
     ),
-  }),
-  schema.object({
+  },
+  { meta: { id: 'otlp_auth_header' } }
+);
+
+const OtlpCustomAuthHeaderSchema = schema.object(
+  {
     type: schema.literal(otlpAuthType.CustomHeader),
     name: schema.string({
       minLength: 1,
-      maxLength: 256,
+      maxLength: OTLP_HEADER_NAME_MAX_LENGTH,
       validate: validateOtlpHeaderName,
       meta: { description: 'The name of the header that is sent with the credential as value.' },
     }),
-  }),
+  },
+  { meta: { id: 'otlp_custom_auth_header' } }
+);
+
+/**
+ * How the OTLP output authenticates with an endpoint that is not the managed OTLP endpoint. The
+ * credential is in `secrets.auth.credential`, it is placed verbatim in the header.
+ */
+const OtlpAuthSchema = schema.discriminatedUnion('type', [
+  OtlpAuthHeaderSchema,
+  OtlpCustomAuthHeaderSchema,
+]);
+
+// the response schema allows unknown keys: it has its own ids, as the exporter ones
+const OtlpAuthResponseSchema = schema.discriminatedUnion('type', [
+  OtlpAuthHeaderSchema.extends({}, { meta: { id: 'otlp_response_auth_header' } }),
+  OtlpCustomAuthHeaderSchema.extends({}, { meta: { id: 'otlp_response_custom_auth_header' } }),
 ]);
 
 const OtlpSecretsSchema = schema.maybe(
@@ -856,6 +873,7 @@ export const OtlpSchema = {
 const OtlpResponseSchema = {
   ...OtlpSchema,
   otlp_exporter: schema.maybe(OtlpExporterResponseSchema),
+  auth: schema.maybe(schema.oneOf([schema.literal(null), OtlpAuthResponseSchema])),
 };
 
 export const OtlpUpdateSchema = {

@@ -848,7 +848,11 @@ function generateOtelcolExporter(
         protocol === otlpProtocol.Grpc ? `otlp/${outputID}` : `otlphttp/${outputID}`;
       const tlsSecrets = dataOutput.secrets?.otlp_exporter?.tls;
       // the credential is a secret reference in the header value, Fleet Server replaces it
-      const authHeaders = getOtlpAuthHeaders(dataOutput.auth, dataOutput.secrets?.auth?.credential);
+      const authHeaders = getOtlpAuthHeaders(
+        dataOutput.auth,
+        dataOutput.secrets?.auth?.credential,
+        dataOutput.otlp_exporter.endpoint
+      );
       return {
         extensions: {},
         exporters: {

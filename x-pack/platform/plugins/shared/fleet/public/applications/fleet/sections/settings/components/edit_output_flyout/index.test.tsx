@@ -2357,6 +2357,64 @@ describe('EditOutputFlyout', () => {
         });
       });
 
+      it('should trim the credential', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'auth_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: ' my-token ' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPostOutput).toHaveBeenCalledWith(
+            expect.objectContaining({ secrets: { auth: { credential: 'my-token' } } })
+          );
+        });
+      });
+
+      it('should show an error on a header that the authentication sets', async () => {
+        const { utils } = renderFlyout();
+        selectOtlpType(utils);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'my otlp' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput'), {
+          target: { value: 'collector.example.com:4317' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderName0'), {
+          target: { value: 'X-Api-Key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderValue0'), {
+          target: { value: 'value' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthTypeInput'), {
+          target: { value: 'custom_header' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthHeaderNameInput'), {
+          target: { value: 'x-api-key' },
+        });
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpAuthCredentialInput'), {
+          target: { value: 'my-key' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('The X-Api-Key header is set by the authentication')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPostOutput).not.toHaveBeenCalled();
+      });
+
       it('should require a credential', async () => {
         const { utils } = renderFlyout();
         selectOtlpType(utils);

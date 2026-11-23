@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
+
 import type {
   NewOtlpOutput,
   OtlpExporterConfig,
@@ -16,6 +18,8 @@ import {
   otlpCompressionType,
   otlpProtocol,
 } from '../../../../../../../common/constants';
+
+import { isManagedOtlpEndpointUrl } from '../../../../../../../common/services/managed_otlp_endpoint';
 
 import { useInput, useKeyValueInput, useSwitchInput } from '../../../../hooks';
 
@@ -57,7 +61,12 @@ const toInputValue = (value: string | number | null | undefined) =>
 export function useOtlpInputs(
   otlpOutput: NewOtlpOutput | undefined,
   isSelected: boolean,
-  disabled: boolean
+  disabled: boolean,
+  auth: {
+    /** The header that the selected authentication sets, which the headers cannot set too. */
+    headerName: string | undefined;
+    managedOtlpUrl: string | undefined;
+  } = { headerName: undefined, managedOtlpUrl: undefined }
 ) {
   const exporter = otlpOutput?.otlp_exporter;
   const grpc: Partial<OtlpGrpcExporterConfig> | undefined =
@@ -84,10 +93,21 @@ export function useOtlpInputs(
     validateIfSelected(validateOtlpDuration),
     disabled
   );
+  // the managed OTLP endpoint has no authentication
+  const authHeaderName = isManagedOtlpEndpointUrl(
+    otlpEndpointInput.value.trim(),
+    auth.managedOtlpUrl
+  )
+    ? undefined
+    : auth.headerName;
+  const validateHeaders = useCallback(
+    (pairs: Array<{ key: string; value: string }>) => validateOtlpHeaders(pairs, authHeaderName),
+    [authHeaderName]
+  );
   const otlpHeadersInput = useKeyValueInput(
     'otlpHeadersComboBox',
     headersToRows(exporter?.headers),
-    validateIfSelected(validateOtlpHeaders),
+    validateIfSelected(validateHeaders),
     disabled
   );
 

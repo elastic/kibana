@@ -10,7 +10,11 @@ import type {
   OtlpAuthScheme,
   OtlpOutputAuth,
 } from '../../../../../../../common/types/models';
-import { otlpAuthScheme, otlpAuthType } from '../../../../../../../common/constants';
+import {
+  OTLP_AUTHORIZATION_HEADER,
+  otlpAuthScheme,
+  otlpAuthType,
+} from '../../../../../../../common/constants';
 
 import { isManagedOtlpEndpointUrl } from '../../../../../../../common/services/managed_otlp_endpoint';
 
@@ -68,6 +72,16 @@ export const isOtlpAuthAvailable = (endpoint: string, managedOtlpUrl: string | u
 export const isOtlpAuthSelected = (inputs: OtlpAuthInputs) =>
   inputs.otlpAuthTypeInput.value !== OTLP_AUTH_TYPE_NONE;
 
+/** The name of the header that the selected authentication sets, if any. */
+export const getSelectedOtlpAuthHeaderName = (inputs: OtlpAuthInputs): string | undefined => {
+  if (!isOtlpAuthSelected(inputs)) {
+    return undefined;
+  }
+  return inputs.otlpAuthTypeInput.value === otlpAuthType.CustomHeader
+    ? inputs.otlpAuthHeaderNameInput.value.trim() || undefined
+    : OTLP_AUTHORIZATION_HEADER;
+};
+
 /** Validates every input, so all the errors are shown. Returns whether they are all valid. */
 export const validateOtlpAuthInputs = (inputs: OtlpAuthInputs): boolean =>
   !isOtlpAuthSelected(inputs) ||
@@ -94,10 +108,12 @@ export function buildOtlpAuth(
           type: otlpAuthType.AuthHeader,
           scheme: inputs.otlpAuthSchemeInput.value as OtlpAuthScheme,
         };
+  // a pasted value often ends with a line break, which would make the header invalid
   const credential = inputs.otlpAuthCredentialInput.value;
+  const trimmedCredential = typeof credential === 'string' ? credential.trim() : '';
 
   return {
     auth,
-    ...(typeof credential === 'string' && credential ? { secrets: { auth: { credential } } } : {}),
+    ...(trimmedCredential ? { secrets: { auth: { credential: trimmedCredential } } } : {}),
   };
 }

@@ -11,7 +11,9 @@ import {
   getOtlpAuthHeaders,
   omitRemovedOtlpAuthSettings,
   validateOtlpAuth,
+  validateOtlpAuthCredential,
   withRemovedOtlpAuthSettings,
+  withTrimmedOtlpAuthCredential,
 } from './otlp_auth';
 
 jest.mock('../app_context');
@@ -26,30 +28,78 @@ describe('OTLP output authentication', () => {
   });
 
   describe('getOtlpAuthHeaders', () => {
+    const endpoint = 'https://collector.example.com:4318';
+
     it.each([
       ['api_key' as const, 'ApiKey $co.elastic.secret{id1}'],
       ['bearer_token' as const, 'Bearer $co.elastic.secret{id1}'],
     ])('returns the Authorization header for the %s scheme', (scheme, expected) => {
-      expect(getOtlpAuthHeaders({ type: 'auth_header', scheme }, { id: 'id1' })).toEqual({
+      expect(getOtlpAuthHeaders({ type: 'auth_header', scheme }, { id: 'id1' }, endpoint)).toEqual({
         Authorization: expected,
       });
     });
 
     it('returns the custom header with the secret reference as value', () => {
       expect(
-        getOtlpAuthHeaders({ type: 'custom_header', name: 'x-api-key' }, { id: 'id1' })
+        getOtlpAuthHeaders({ type: 'custom_header', name: 'x-api-key' }, { id: 'id1' }, endpoint)
       ).toEqual({ 'x-api-key': '$co.elastic.secret{id1}' });
     });
 
     it('returns nothing without authentication or without a stored credential', () => {
-      expect(getOtlpAuthHeaders(undefined, { id: 'id1' })).toBeUndefined();
+      expect(getOtlpAuthHeaders(undefined, { id: 'id1' }, endpoint)).toBeUndefined();
       expect(
-        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, undefined)
+        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, undefined, endpoint)
       ).toBeUndefined();
       // a plain text value is never put in the policy
       expect(
-        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, 'plain' as any)
+        getOtlpAuthHeaders({ type: 'auth_header', scheme: 'api_key' }, 'plain' as any, endpoint)
       ).toBeUndefined();
+    });
+
+    it('returns nothing for the managed OTLP endpoint', () => {
+      expect(
+        getOtlpAuthHeaders(
+          { type: 'auth_header', scheme: 'api_key' },
+          { id: 'id1' },
+          'managed.ingest.elastic.cloud:443'
+        )
+      ).toBeUndefined();
+    });
+  });
+
+  describe('validateOtlpAuthCredential', () => {
+    it('accepts a new value', () => {
+      expect(() => validateOtlpAuthCredential('my-key')).not.toThrow();
+    });
+
+    it('rejects a value with control characters', () => {
+      expect(() => validateOtlpAuthCredential('my\nkey')).toThrow(
+        'secrets.auth.credential cannot contain control characters'
+      );
+    });
+
+    it('accepts the reference to the credential of the output', () => {
+      expect(() => validateOtlpAuthCredential({ id: 'stored' }, { id: 'stored' })).not.toThrow();
+    });
+
+    it('rejects the reference to any other secret', () => {
+      const error =
+        'secrets.auth.credential must be a new value, or the reference to the credential of this output';
+      expect(() => validateOtlpAuthCredential({ id: 'other' })).toThrow(error);
+      expect(() => validateOtlpAuthCredential({ id: 'other' }, { id: 'stored' })).toThrow(error);
+    });
+  });
+
+  describe('withTrimmedOtlpAuthCredential', () => {
+    it('trims the credential', () => {
+      expect(
+        withTrimmedOtlpAuthCredential({ secrets: { auth: { credential: ' my-key\n' } } })
+      ).toEqual({ secrets: { auth: { credential: 'my-key' } } });
+    });
+
+    it('returns the output as it is without a value to trim', () => {
+      const output = { secrets: { auth: { credential: { id: 'stored' } } } };
+      expect(withTrimmedOtlpAuthCredential(output)).toBe(output);
     });
   });
 

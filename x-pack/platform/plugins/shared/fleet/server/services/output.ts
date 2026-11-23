@@ -110,7 +110,9 @@ import { getOutputSecretFields } from './outputs/secret_fields';
 import {
   omitRemovedOtlpAuthSettings,
   validateOtlpAuth,
+  validateOtlpAuthCredential,
   withRemovedOtlpAuthSettings,
+  withTrimmedOtlpAuthCredential,
 } from './outputs/otlp_auth';
 import { checkKafkaAuthMethodAllowed } from './outputs/kafka_auth_gate';
 import type { KafkaAuthMethod, KafkaAuthOutput } from './outputs/kafka_auth';
@@ -795,6 +797,13 @@ class OutputService {
       await this.assertKafkaAuthMethodsAllowed(output, esClient, soClient);
     }
 
+    if (isOtlpOutput(output)) {
+      const otlpOutput = withTrimmedOtlpAuthCredential(output);
+      // a new output has no credential yet: it can only be sent as a value
+      validateOtlpAuthCredential(otlpOutput.secrets?.auth?.credential);
+      output = otlpOutput;
+    }
+
     if (output.type === outputType.Kafka && output.secrets) {
       // do not store the secrets of an authentication method the output does not use
       output = {
@@ -1319,6 +1328,15 @@ class OutputService {
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
+
+    if (mergedType === outputType.Otlp) {
+      data = withTrimmedOtlpAuthCredential(data);
+      // checked before the saved credential is added to the update
+      validateOtlpAuthCredential(
+        (data as Partial<NewOtlpOutput>).secrets?.auth?.credential,
+        isOtlpOutput(originalOutput) ? originalOutput.secrets?.auth?.credential : undefined
+      );
+    }
 
     if (mergedType === outputType.Kafka) {
       // an update that does not touch the authentication keeps its settings and secrets

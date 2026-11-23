@@ -111,6 +111,7 @@ import { buildOtlpExporterConfig, useOtlpInputs, validateOtlpInputs } from './us
 import type { OtlpAuthInputs } from './use_otlp_auth_inputs';
 import {
   buildOtlpAuth,
+  getSelectedOtlpAuthHeaderName,
   isOtlpAuthAvailable,
   useOtlpAuthInputs,
   validateOtlpAuthInputs,
@@ -785,17 +786,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
   const isOtlp = typeInput.value === outputType.Otlp;
 
-  const isOtlpExporterDisabled = isDisabled('otlp_exporter');
-  const otlpInputs = useOtlpInputs(
-    output && isOtlpOutput(output) ? output : undefined,
-    isOtlp,
-    isOtlpExporterDisabled
-  );
   const isOtlpAuthDisabled = isDisabled('auth');
   const otlpAuthInputs = useOtlpAuthInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,
     isOtlpAuthDisabled
+  );
+  const isOtlpExporterDisabled = isDisabled('otlp_exporter');
+  const otlpInputs = useOtlpInputs(
+    output && isOtlpOutput(output) ? output : undefined,
+    isOtlp,
+    isOtlpExporterDisabled,
+    {
+      headerName: getSelectedOtlpAuthHeaderName(otlpAuthInputs),
+      managedOtlpUrl: cloud?.managedOtlp?.url,
+    }
   );
   const isOtlpAuthEnabled = isOtlpAuthAvailable(
     otlpInputs.otlpEndpointInput.value,

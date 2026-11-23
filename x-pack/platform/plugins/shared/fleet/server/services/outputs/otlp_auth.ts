@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import { OTLP_AUTH_SCHEME_PREFIX, otlpAuthType } from '../../../common/constants';
 import {
-  OTLP_AUTH_SCHEME_PREFIX,
-  OTLP_AUTHORIZATION_HEADER,
-  otlpAuthType,
-} from '../../../common/constants';
+  findOtlpAuthHeaderConflict,
+  getOtlpAuthHeaderName,
+  isValidOtlpAuthCredential,
+} from '../../../common/services/otlp_auth';
 import type { OtlpOutputAuth, SOSecret } from '../../../common/types';
 import { OutputInvalidError } from '../../errors';
 import { toCompiledSecretRef } from '../secrets/common';
 import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
-/** The name of the header that carries the credential of the authentication. */
-export function getOtlpAuthHeaderName(auth: OtlpOutputAuth): string {
-  return auth.type === otlpAuthType.AuthHeader ? OTLP_AUTHORIZATION_HEADER : auth.name;
-}
-
 /**
  * The header that the OTLP exporter sends to authenticate: the credential is a reference to a
  * secret, that Fleet Server replaces with its value. The credential is sent verbatim, Fleet does
- * not encode it.
+ * not encode it. There is none for the managed OTLP endpoint, which Fleet authenticates itself.
  */
 export function getOtlpAuthHeaders(
   auth: OtlpOutputAuth | null | undefined,
-  credential: SOSecret | null | undefined
+  credential: SOSecret | null | undefined,
+  endpoint: string
 ): Record<string, string> | undefined {
   if (!auth || typeof credential !== 'object' || !credential?.id) {
+    return undefined;
+  }
+  if (isManagedOtlpEndpoint(endpoint)) {
     return undefined;
   }
   const secretRef = toCompiledSecretRef(credential.id);
@@ -39,6 +39,49 @@ export function getOtlpAuthHeaders(
       : secretRef;
 
   return { [getOtlpAuthHeaderName(auth)]: value };
+}
+
+/**
+ * Returns the secrets with the credential trimmed: a pasted value often ends with a line break,
+ * which would make the header invalid.
+ */
+export function withTrimmedOtlpAuthCredential<T extends { secrets?: unknown }>(output: T): T {
+  const secrets = output.secrets as { auth?: { credential?: unknown } } | null | undefined;
+  const credential = secrets?.auth?.credential;
+  if (typeof credential !== 'string' || credential === credential.trim()) {
+    return output;
+  }
+
+  return {
+    ...output,
+    secrets: { ...secrets, auth: { ...secrets!.auth, credential: credential.trim() } },
+  };
+}
+
+/**
+ * Throws if the credential that an output sends is not one it can save: a new value, or the
+ * reference to the secret the output already has. A reference to any other secret is rejected, as
+ * the value of that secret would be sent to the endpoint of the output.
+ */
+export function validateOtlpAuthCredential(
+  credential: SOSecret | null | undefined,
+  storedCredential?: SOSecret | null
+): void {
+  if (typeof credential === 'string') {
+    if (!isValidOtlpAuthCredential(credential)) {
+      throw new OutputInvalidError('secrets.auth.credential cannot contain control characters');
+    }
+    return;
+  }
+  if (!credential) {
+    return;
+  }
+  const storedId = typeof storedCredential === 'object' ? storedCredential?.id : undefined;
+  if (!storedId || credential.id !== storedId) {
+    throw new OutputInvalidError(
+      'secrets.auth.credential must be a new value, or the reference to the credential of this output'
+    );
+  }
 }
 
 /**
@@ -74,9 +117,9 @@ export function validateOtlpAuth({
     throw new OutputInvalidError('secrets.auth.credential is required when auth is set');
   }
 
-  const headerName = getOtlpAuthHeaderName(auth).toLowerCase();
-  const conflictingHeader = Object.keys(headers ?? {}).find(
-    (name) => name.toLowerCase() === headerName
+  const conflictingHeader = findOtlpAuthHeaderConflict(
+    Object.keys(headers ?? {}),
+    getOtlpAuthHeaderName(auth)
   );
   if (conflictingHeader) {
     throw new OutputInvalidError(

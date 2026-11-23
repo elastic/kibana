@@ -2159,6 +2159,40 @@ describe('Output Service', () => {
           }
         });
 
+        it('rejects a reference to a secret instead of a credential', async () => {
+          await expect(
+            outputService.create(
+              getMockedSoClient(),
+              esClientMock,
+              {
+                ...newOtlpOutput,
+                auth: { type: 'auth_header', scheme: 'api_key' },
+                secrets: { auth: { credential: { id: 'another-secret-id' } } },
+              },
+              { id: 'output-test' }
+            )
+          ).rejects.toThrow(
+            'secrets.auth.credential must be a new value, or the reference to the credential of this output'
+          );
+        });
+
+        it('trims the credential', async () => {
+          await outputService.create(
+            getMockedSoClient(),
+            esClientMock,
+            {
+              ...newOtlpOutput,
+              auth: { type: 'auth_header', scheme: 'api_key' },
+              secrets: { auth: { credential: ' my-key\n' } },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(mockedExtractAndWriteOutputSecrets.mock.lastCall![0].output).toEqual(
+            expect.objectContaining({ secrets: { auth: { credential: 'my-key' } } })
+          );
+        });
+
         it('rejects an authentication when secret storage is disabled', async () => {
           mockedIsOutputSecretStorageEnabled.mockResolvedValue(false);
 
@@ -5338,6 +5372,34 @@ describe('Output Service', () => {
               { secrets: { auth: { credential: null } } } as any
             )
           ).rejects.toThrow('secrets.auth.credential is required when auth is set');
+        });
+
+        it('accepts the reference to the stored credential', async () => {
+          await outputService.update(
+            getMockedSoClient({}),
+            esClientMock,
+            'existing-otlp-output-with-auth',
+            { secrets: { auth: { credential: { id: 'credential-secret-id' } } } } as any
+          );
+
+          expect(
+            mockedExtractAndUpdateOutputSecrets.mock.lastCall![0].outputUpdate.secrets
+          ).toEqual({
+            auth: { credential: { id: 'credential-secret-id' } },
+          });
+        });
+
+        it('rejects the reference to a secret that is not the stored credential', async () => {
+          await expect(
+            outputService.update(
+              getMockedSoClient({}),
+              esClientMock,
+              'existing-otlp-output-with-auth',
+              { secrets: { auth: { credential: { id: 'another-secret-id' } } } } as any
+            )
+          ).rejects.toThrow(
+            'secrets.auth.credential must be a new value, or the reference to the credential of this output'
+          );
         });
 
         it('rejects an authentication added without a credential', async () => {
