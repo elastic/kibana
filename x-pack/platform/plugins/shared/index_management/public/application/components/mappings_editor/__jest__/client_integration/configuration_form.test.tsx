@@ -167,6 +167,31 @@ describe('Mappings editor: configuration form', () => {
         expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/disabled/i);
         expect(screen.getByTestId('sourceValueField')).not.toHaveTextContent(/synthetic/i);
       });
+
+      it('keeps the initial option if the user switches back to it while the request is pending', async () => {
+        let resolveStatus: (value: { syntheticSourceFallbackToStoredSource: boolean }) => void;
+        loadSyntheticSourceStatusMock.mockReturnValue(
+          new Promise((resolve) => {
+            resolveStatus = resolve;
+          })
+        );
+
+        setup({ esNodesPlugins: [], indexMode: 'logsdb' }, getContext(true, true));
+
+        // Disabled -> Stored (the initial option) before the status request resolves
+        fireEvent.click(screen.getByTestId('sourceValueField'));
+        fireEvent.click(await screen.findByTestId('disabledSourceFieldOption'));
+        fireEvent.click(screen.getByTestId('sourceValueField'));
+        fireEvent.click(await screen.findByTestId('storedSourceFieldOption'));
+        expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/stored/i);
+
+        await act(async () => {
+          resolveStatus({ syntheticSourceFallbackToStoredSource: false });
+        });
+
+        expect(screen.getByTestId('sourceValueField')).toHaveTextContent(/stored/i);
+        expect(screen.getByTestId('sourceValueField')).not.toHaveTextContent(/synthetic/i);
+      });
     });
   });
 });

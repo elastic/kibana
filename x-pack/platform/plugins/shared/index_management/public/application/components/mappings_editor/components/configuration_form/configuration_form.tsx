@@ -221,9 +221,10 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins, indexMode 
       // and if the user has selected a `logsdb` or `time_series` index mode in the Logistics step,
       // update the form data with synthetic _source
       const sourceOptionField = getFields()['sourceField.option'];
-      if (sourceOptionField?.isModified) {
-        // The user picked an option while the synthetic source status request was pending:
-        // don't override their selection with the default.
+      if (sourceOptionField?.isDirty) {
+        // The user interacted with the option while the synthetic source status request was
+        // pending: don't override their selection with the default. We use `isDirty` rather than
+        // `isModified` so that switching back to the initial option is still treated as a choice.
         return;
       }
 
