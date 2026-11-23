@@ -11,7 +11,11 @@ import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common
 import { getPrivilegedRoleName } from '../../../../common';
 import type { ApiClientResponse } from './api_client';
 import type { ApiKey, RequestAuthFixture } from './api_key';
-import { PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS, requestAuthFixture } from './api_key';
+import {
+  API_KEY_EXPIRATION,
+  PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS,
+  requestAuthFixture,
+} from './api_key';
 import { coreWorkerFixtures } from './saml_auth';
 
 jest.mock('./saml_auth', () => ({ coreWorkerFixtures: { extend: jest.fn() } }));
@@ -35,6 +39,7 @@ jest.mock('../../../../common', () => {
 type RoleDescriptor = KibanaRole | ElasticsearchRoleDescriptor;
 interface CreatePayload {
   name: string;
+  expiration: string;
   metadata: Record<string, never>;
   role_descriptors?: Record<string, ElasticsearchRoleDescriptor>;
   kibana_role_descriptors?: Record<string, KibanaRole>;
@@ -84,8 +89,8 @@ const flushMicrotasks = () => new Promise<void>((resolve) => realSetImmediate(re
 
 const createDependencies = () => {
   let keyCount = 0;
-  const create = jest.fn<Promise<ApiClientResponse<ApiKey>>, [CreatePayload, AbortSignal?]>(
-    async ({ name }) => response(makeKey(`key-${++keyCount}`, name))
+  const create = jest.fn<Promise<ApiClientResponse<ApiKey>>, [CreatePayload]>(async ({ name }) =>
+    response(makeKey(`key-${++keyCount}`, name))
   );
   const invalidate = jest.fn<Promise<InvalidateResponse>, [InvalidatePayload]>(async ({ ids }) =>
     invalidated(ids)
@@ -125,11 +130,10 @@ const createDependencies = () => {
             body: CreatePayload;
             headers: Record<string, string>;
             responseType: 'json';
-            signal?: AbortSignal;
           }
         ) => {
           if (url === 'internal/security/api_key') {
-            return create(options.body, options.signal);
+            return create(options.body);
           }
           throw new Error(`Unexpected API request: ${url}`);
         }
@@ -270,14 +274,12 @@ describe('requestAuth worker fixture', () => {
 
       const { apiKey } = await auth.getApiKeyForCustomRole(descriptor);
 
-      expect(harness.create).toHaveBeenCalledWith(
-        {
-          name: 'myTestApiKey-0-custom_role_worker_1-worker-1',
-          metadata: {},
-          [field]: { [samlAuth.customRoleName]: originalDescriptor },
-        },
-        expect.any(AbortSignal)
-      );
+      expect(harness.create).toHaveBeenCalledWith({
+        name: 'myTestApiKey-0-custom_role_worker_1-worker-1',
+        expiration: API_KEY_EXPIRATION,
+        metadata: {},
+        [field]: { [samlAuth.customRoleName]: originalDescriptor },
+      });
       expect(descriptor).toEqual(originalDescriptor);
       expect(samlAuth.session.getApiCredentialsForRole).toHaveBeenCalledWith('admin');
       expect(samlAuth.fetchBuiltInRoleDescriptor).not.toHaveBeenCalled();
@@ -535,6 +537,16 @@ describe('requestAuth worker fixture', () => {
       result: invalidated(['other']),
       message: 'missing IDs: key-1',
     },
+    ...(
+      ['error_count', 'invalidated_api_keys', 'previously_invalidated_api_keys'] as const
+    ).flatMap((field) =>
+      [undefined, null].map((value) => ({
+        name: `with ${value} ${field}`,
+        // Matching IDs alone must not count as confirmation when another field is malformed.
+        result: { ...invalidated(['key-1']), [field]: value } as unknown as InvalidateResponse,
+        message: 'Invalid API key invalidation response',
+      }))
+    ),
   ])('surfaces invalidation $name instead of logging success', async ({ result, message }) => {
     const harness = createHarness();
     harness.invalidate.mockResolvedValueOnce(result);
@@ -594,41 +606,46 @@ describe('requestAuth worker fixture', () => {
     expect(harness.invalidate.mock.calls).toEqual([[idsOf(knownKeys)], [{ ids: ['late'] }]]);
   });
 
+  it('revokes late keys without waiting for a slow known-key invalidation', async () => {
+    const harness = createHarness();
+    const { auth, close, done } = await harness.start();
+    const { apiKey: knownKey } = await auth.getApiKeyForAdmin();
+    const knownInvalidation = Promise.withResolvers<InvalidateResponse>();
+    harness.invalidate.mockImplementationOnce(() => knownInvalidation.promise);
+    const lateResponse = Promise.withResolvers<ApiClientResponse<ApiKey>>();
+    harness.create.mockImplementationOnce(() => lateResponse.promise);
+    const lateCreate = auth.getApiKeyForAdmin();
+    await flushMicrotasks();
+    await close();
+
+    lateResponse.resolve(response(makeKey('late')));
+    await lateCreate;
+    await flushMicrotasks();
+    expect(harness.invalidate.mock.calls).toEqual([[idsOf([knownKey])], [{ ids: ['late'] }]]);
+
+    knownInvalidation.resolve(invalidated([knownKey.id]));
+    await done;
+  });
+
   describe('when a credential operation stalls', () => {
     beforeEach(() => jest.useFakeTimers());
     afterEach(() => jest.useRealTimers());
 
-    const startStalledCreate = async ({ honorAbort }: { honorAbort: boolean }) => {
+    const startStalledCreate = async () => {
       const harness = createHarness();
       const { auth, close, done } = await harness.start();
       const { apiKey: knownKey } = await auth.getApiKeyForAdmin();
       const stalledResponse = Promise.withResolvers<ApiClientResponse<ApiKey>>();
-      let createSignal: AbortSignal | undefined;
-      harness.create.mockImplementationOnce((_payload, signal) => {
-        createSignal = signal;
-        if (honorAbort) {
-          signal?.addEventListener('abort', () => stalledResponse.reject(new Error('aborted')));
-        }
-        return stalledResponse.promise;
-      });
+      harness.create.mockImplementationOnce(() => stalledResponse.promise);
       const stalledCreate = auth.getApiKeyForAdmin();
       void stalledCreate.catch(() => {});
       await jest.advanceTimersByTimeAsync(0);
       await close();
-      return {
-        harness,
-        done,
-        knownKey,
-        stalledCreate,
-        stalledResponse,
-        getSignal: () => createSignal,
-      };
+      return { harness, done, knownKey, stalledCreate, stalledResponse };
     };
 
     it('revokes known keys before the drain deadline and fails once it passes', async () => {
-      const { harness, done, knownKey, stalledCreate, getSignal } = await startStalledCreate({
-        honorAbort: true,
-      });
+      const { harness, done, knownKey } = await startStalledCreate();
       expect(harness.invalidate.mock.calls).toEqual([[idsOf([knownKey])]]);
 
       const rejectedDone = expect(done).rejects.toThrow(
@@ -636,19 +653,16 @@ describe('requestAuth worker fixture', () => {
       );
       await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
       await rejectedDone;
-      expect(getSignal()?.aborted).toBe(true);
-      await expect(stalledCreate).rejects.toThrow('aborted');
+      expect(harness.invalidate).toHaveBeenCalledTimes(1);
     });
 
-    it('revokes a key that arrives after the drain deadline', async () => {
-      const { harness, done, stalledCreate, stalledResponse } = await startStalledCreate({
-        honorAbort: false,
-      });
+    it('keeps the abandoned request open and revokes its key when it arrives', async () => {
+      const { harness, done, stalledCreate, stalledResponse } = await startStalledCreate();
       const rejectedDone = expect(done).rejects.toThrow('Timed out');
       await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
       await rejectedDone;
 
-      // A transport that ignores abort can still deliver the key after teardown gave up on it.
+      // The request is not aborted, so the server's response, and the key ID, still arrives.
       stalledResponse.resolve(response(makeKey('straggler')));
       await expect(stalledCreate).rejects.toThrow('teardown timed out');
       expect(harness.invalidate).toHaveBeenLastCalledWith({ ids: ['straggler'] });

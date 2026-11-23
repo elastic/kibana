@@ -82,6 +82,21 @@ export interface RequestAuthFixture {
 const MAX_INVALIDATION_BATCH_SIZE = 1000;
 // Leaves room in the worker teardown budget to revoke keys that arrive during the drain.
 export const PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS = 20_000;
+// Backstop for keys whose IDs never reach the fixture; outlives any worker so tests never hit it.
+export const API_KEY_EXPIRATION = '1d';
+
+// Throws the only failure as-is, or every failure together, from a set of settled results.
+const throwIfAnyRejected = (results: PromiseSettledResult<unknown>[], message: string) => {
+  const failures = results.flatMap((result) =>
+    result.status === 'rejected' ? [result.reason] : []
+  );
+  if (failures.length === 1) {
+    throw failures[0];
+  }
+  if (failures.length > 1) {
+    throw new AggregateError(failures, message);
+  }
+};
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
   {},
@@ -95,9 +110,9 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
     async ({ log, config, esClient, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
       const pendingOperations = new Set<Promise<RoleApiCredentials>>();
-      const drainAbortController = new AbortController();
-      const { signal: drainSignal } = drainAbortController;
       let acceptingCredentials = true;
+      // Set when the drain deadline passes; requests are left running so late keys can be revoked.
+      let pendingOperationsAbandoned = false;
 
       const runCredentialOperation = (
         create: () => Promise<RoleApiCredentials>
@@ -127,6 +142,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
 
         return {
           name: apiKeyName,
+          expiration: API_KEY_EXPIRATION,
           metadata: {},
           ...(isElasticsearchRole(roleDescriptor)
             ? { role_descriptors: descriptors }
@@ -147,7 +163,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }`;
 
         const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
-        throwIfDrainAborted();
+        throwIfAbandoned();
 
         const payload = createApiKeyPayload(apiKeyName, roleName, roleDescriptors);
         const response = await apiClient.post<ApiKey>('internal/security/api_key', {
@@ -158,7 +174,6 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           },
           body: payload,
           responseType: 'json',
-          signal: drainSignal,
         });
 
         if (response.statusCode !== 200) {
@@ -168,10 +183,10 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }
 
         const apiKey = response.body;
-        if (drainSignal.aborted) {
+        if (pendingOperationsAbandoned) {
           // Teardown has stopped collecting keys, so revoke this one before reporting the failure.
           await invalidateApiKeys([apiKey]);
-          throwIfDrainAborted();
+          throwIfAbandoned();
         }
 
         const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
@@ -191,7 +206,14 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           previously_invalidated_api_keys: previouslyInvalidatedIds,
         } = await esClient.security.invalidateApiKey({ ids });
 
-        if (errorCount > 0) {
+        if (
+          typeof errorCount !== 'number' ||
+          !Array.isArray(invalidatedIds) ||
+          !Array.isArray(previouslyInvalidatedIds)
+        ) {
+          throw new Error('Invalid API key invalidation response');
+        }
+        if (errorCount !== 0) {
           throw new Error(
             `API key invalidation reported ${errorCount} error(s): ${JSON.stringify(errorDetails)}`
           );
@@ -218,21 +240,15 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           batches.push(apiKeys.slice(start, start + MAX_INVALIDATION_BATCH_SIZE));
         }
         // Attempt every batch so one failure does not leave the remaining keys active.
-        const results = await Promise.allSettled(batches.map(invalidateApiKeyBatch));
-        const failures = results.flatMap((result) =>
-          result.status === 'rejected' ? [result.reason] : []
+        throwIfAnyRejected(
+          await Promise.allSettled(batches.map(invalidateApiKeyBatch)),
+          'API key invalidation failed'
         );
-        if (failures.length === 1) {
-          throw failures[0];
-        }
-        if (failures.length > 1) {
-          throw new AggregateError(failures, 'API key invalidation failed');
-        }
         log.info(`Invalidated ${apiKeys.length} API keys`);
       };
 
-      const throwIfDrainAborted = () => {
-        if (drainSignal.aborted) {
+      const throwIfAbandoned = () => {
+        if (pendingOperationsAbandoned) {
           throw new Error('API credential request abandoned because teardown timed out');
         }
       };
@@ -252,32 +268,29 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
 
         if (didTimeOut) {
           const stalledCount = pendingOperations.size;
-          drainAbortController.abort();
+          pendingOperationsAbandoned = true;
           throw new Error(
             `Timed out after ${PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS}ms waiting for ${stalledCount} pending API credential operation(s)`
           );
         }
       };
 
-      // Revoke known keys right away while admitted operations drain, then revoke keys they created.
+      // Revoke known keys right away; revoke late keys as soon as the drain settles, independently.
       const cleanUpApiKeys = async () => {
         const knownKeys = generatedApiKeys.slice();
-        const [knownResult, drainResult] = await Promise.allSettled([
-          invalidateApiKeys(knownKeys),
-          drainPendingOperations(),
+        const drainThenRevokeLateKeys = async () => {
+          const drainResults = await Promise.allSettled([drainPendingOperations()]);
+          // After a timeout, abandoned operations revoke their own keys instead of recording them.
+          const lateResults = await Promise.allSettled([
+            invalidateApiKeys(generatedApiKeys.slice(knownKeys.length)),
+          ]);
+          return [...drainResults, ...lateResults];
+        };
+        const [knownResult, lateResults] = await Promise.all([
+          Promise.allSettled([invalidateApiKeys(knownKeys)]),
+          drainThenRevokeLateKeys(),
         ]);
-        const lateResult = (
-          await Promise.allSettled([invalidateApiKeys(generatedApiKeys.slice(knownKeys.length))])
-        )[0];
-        const failures = [knownResult, drainResult, lateResult].flatMap((result) =>
-          result.status === 'rejected' ? [result.reason] : []
-        );
-        if (failures.length === 1) {
-          throw failures[0];
-        }
-        if (failures.length > 1) {
-          throw new AggregateError(failures, 'API key cleanup failed');
-        }
+        throwIfAnyRejected([...knownResult, ...lateResults], 'API key cleanup failed');
       };
 
       const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
@@ -340,18 +353,10 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           return cleanUpApiKeys();
         }),
       ]);
-      const failures = [...useResults, ...cleanupResults].filter(
-        (result) => result.status === 'rejected'
+      throwIfAnyRejected(
+        [...useResults, ...cleanupResults],
+        'API credential use and cleanup failed'
       );
-      if (failures.length === 1) {
-        throw failures[0].reason;
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(
-          failures.map(({ reason }) => reason),
-          'API credential use and cleanup failed'
-        );
-      }
 
       // The dependent samlAuth cleanup can now proceed after credential cleanup.
     },
