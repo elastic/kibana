@@ -18,6 +18,7 @@ import { OtlpSelectSetting, OtlpTextSetting } from './otlp_setting_fields';
 import { OtlpHeaders } from './output_form_otlp_headers';
 import { OtlpGrpcSettings } from './output_form_otlp_grpc';
 import { OtlpHttpSettings } from './output_form_otlp_http';
+import { OtlpRetrySettings, OtlpSendingQueueSettings } from './output_form_otlp_queue_retry';
 
 const GRPC_COMPRESSION_OPTIONS = [
   otlpCompressionType.Gzip,
@@ -140,6 +141,10 @@ export const OutputFormOtlpSection: React.FunctionComponent<{ inputs: OutputForm
       <OtlpHeaders inputs={inputs} />
       <EuiSpacer size="m" />
       {isGrpc ? <OtlpGrpcSettings inputs={inputs} /> : <OtlpHttpSettings inputs={inputs} />}
+      <EuiSpacer size="m" />
+      <OtlpSendingQueueSettings inputs={inputs} />
+      <EuiSpacer size="m" />
+      <OtlpRetrySettings inputs={inputs} />
       <EuiSpacer size="m" />
     </>
   );

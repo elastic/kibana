@@ -2002,6 +2002,46 @@ describe('EditOutputFlyout', () => {
   });
 
   describe('OTLP output', () => {
+    const storedQueue = {
+      enabled: true,
+      num_consumers: 4,
+      queue_size: 500,
+      sizer: 'items' as const,
+      wait_for_result: true,
+      block_on_overflow: true,
+      batch: {
+        flush_timeout: '2s',
+        min_size: 100,
+        max_size: 200,
+        sizer: 'items' as const,
+        partition: { metadata_keys: ['tenant', 'env'] },
+      },
+    };
+    const storedRetry = {
+      enabled: true,
+      initial_interval: '2s',
+      randomization_factor: 0.3,
+      multiplier: 2,
+      max_interval: '1m',
+      max_elapsed_time: '10m',
+    };
+    // what the form sends for a queue and a retry that are left as the recommended defaults
+    const recommendedQueuePayload = {
+      enabled: true,
+      num_consumers: null,
+      queue_size: 50000000,
+      sizer: 'bytes',
+      wait_for_result: false,
+      block_on_overflow: true,
+      batch: {
+        flush_timeout: '1s',
+        min_size: 1000000,
+        max_size: 4000000,
+        sizer: 'bytes',
+        partition: null,
+      },
+    };
+
     const otlpOutput: Output = {
       id: 'outputOtlp',
       name: 'otlp output',
@@ -2021,6 +2061,8 @@ describe('EditOutputFlyout', () => {
         wait_for_ready: true,
         user_agent: 'my-agent',
         authority: 'collector.internal',
+        sending_queue: storedQueue,
+        retry_on_failure: storedRetry,
       },
     };
 
@@ -2210,6 +2252,8 @@ describe('EditOutputFlyout', () => {
             wait_for_ready: false,
             user_agent: null,
             authority: null,
+            sending_queue: recommendedQueuePayload,
+            retry_on_failure: null,
           },
         });
       });
@@ -2269,6 +2313,8 @@ describe('EditOutputFlyout', () => {
               wait_for_ready: true,
               user_agent: null,
               authority: null,
+              sending_queue: storedQueue,
+              retry_on_failure: storedRetry,
             },
           })
         );
@@ -2319,6 +2365,8 @@ describe('EditOutputFlyout', () => {
           force_attempt_http2: false,
           compression_params: { level: 9 },
           cookies: { enabled: true },
+          sending_queue: storedQueue,
+          retry_on_failure: storedRetry,
         },
       };
 

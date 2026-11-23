@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import type {
   NewOtlpOutput,
   OtlpExporterConfig,
@@ -12,6 +14,7 @@ import type {
   OtlpHttpExporterConfig,
 } from '../../../../../../../common/types/models';
 import {
+  MANAGED_OTLP_EXPORTER_DEFAULTS,
   OTLP_GRPC_ONLY_COMPRESSION_TYPES,
   otlpCompressionType,
   otlpProtocol,
@@ -23,11 +26,13 @@ import {
   validateOtlpByteSize,
   validateOtlpCompressionLevel,
   validateOtlpCount,
+  validateOtlpDecimal,
   validateOtlpDuration,
   validateOtlpEndpoint,
   validateOtlpHeaders,
   validateOtlpHttpEndpoint,
   validateOtlpHttpUrl,
+  validateOtlpMetadataKeys,
   validateOtlpProxyUrl,
   validateOtlpShortString,
 } from './output_form_validators';
@@ -38,6 +43,18 @@ type OtlpHttpEncoding = NonNullable<OtlpHttpExporterConfig['encoding']>;
 export const OTLP_HTTP_DEFAULT_ENCODING: OtlpHttpEncoding = 'proto';
 // the spec enables it by default, so the switch is on unless an output turned it off
 const OTLP_HTTP_DEFAULT_FORCE_ATTEMPT_HTTP2 = true;
+
+// The sending queue is prefilled with the settings that Elastic recommends, for a new output. The
+// other settings of the sending queue and the retry have no value, so the spec defaults apply.
+const QUEUE_DEFAULTS = MANAGED_OTLP_EXPORTER_DEFAULTS.sending_queue;
+
+/** The spec defaults of the settings that have a switch or a select, so they can not be empty. */
+export const OTLP_QUEUE_SPEC_DEFAULT_SIZER = 'requests';
+export const OTLP_BATCH_SPEC_DEFAULT_SIZER = 'items';
+
+type OtlpQueueConfig = NonNullable<OtlpExporterConfig['sending_queue']>;
+type OtlpQueueSizer = NonNullable<OtlpQueueConfig['sizer']>;
+type OtlpBatchSizer = 'items' | 'bytes';
 
 const headersToRows = (
   headers: Record<string, string> | null | undefined
@@ -217,6 +234,89 @@ export function useOtlpInputs(
   );
   const otlpCookiesEnabledInput = useSwitchInput(http?.cookies?.enabled ?? false, disabled);
 
+  // sending queue and retry, shared by both protocols
+  const queue = exporter?.sending_queue;
+  // a new output starts with the recommended queue, an existing one with what it has stored
+  const queueInitial: OtlpQueueConfig | null | undefined = otlpOutput ? queue : QUEUE_DEFAULTS;
+  const batchInitial = queueInitial?.batch;
+  const otlpQueueEnabledInput = useSwitchInput(queueInitial?.enabled ?? true, disabled);
+  const otlpQueueNumConsumersInput = useInput(
+    toInputValue(queueInitial?.num_consumers),
+    validateIfSelected(validateOtlpCount),
+    disabled
+  );
+  const otlpQueueSizeInput = useInput(
+    toInputValue(queueInitial?.queue_size),
+    validateIfSelected(validateOtlpCount),
+    disabled
+  );
+  const otlpQueueSizerInput = useInput(
+    queueInitial?.sizer ?? OTLP_QUEUE_SPEC_DEFAULT_SIZER,
+    undefined,
+    disabled
+  );
+  const otlpQueueWaitForResultInput = useSwitchInput(
+    queueInitial?.wait_for_result ?? false,
+    disabled
+  );
+  const otlpQueueBlockOnOverflowInput = useSwitchInput(
+    queueInitial?.block_on_overflow ?? false,
+    disabled
+  );
+  const otlpBatchFlushTimeoutInput = useInput(
+    toInputValue(batchInitial?.flush_timeout),
+    validateIfSelected(validateOtlpDuration),
+    disabled
+  );
+  const otlpBatchMinSizeInput = useInput(
+    toInputValue(batchInitial?.min_size),
+    validateIfSelected(validateOtlpCount),
+    disabled
+  );
+  const otlpBatchMaxSizeInput = useInput(
+    toInputValue(batchInitial?.max_size),
+    validateIfSelected(validateOtlpCount),
+    disabled
+  );
+  const otlpBatchSizerInput = useInput(
+    batchInitial?.sizer ?? OTLP_BATCH_SPEC_DEFAULT_SIZER,
+    undefined,
+    disabled
+  );
+  const otlpBatchMetadataKeysInput = useInput(
+    (batchInitial?.partition?.metadata_keys ?? []).join(', '),
+    validateIfSelected(validateOtlpMetadataKeys),
+    disabled
+  );
+
+  const retry = exporter?.retry_on_failure;
+  const otlpRetryEnabledInput = useSwitchInput(retry?.enabled ?? true, disabled);
+  const otlpRetryInitialIntervalInput = useInput(
+    toInputValue(retry?.initial_interval),
+    validateIfSelected(validateOtlpDuration),
+    disabled
+  );
+  const otlpRetryRandomizationFactorInput = useInput(
+    toInputValue(retry?.randomization_factor),
+    validateIfSelected(validateOtlpDecimal),
+    disabled
+  );
+  const otlpRetryMultiplierInput = useInput(
+    toInputValue(retry?.multiplier),
+    validateIfSelected(validateOtlpDecimal),
+    disabled
+  );
+  const otlpRetryMaxIntervalInput = useInput(
+    toInputValue(retry?.max_interval),
+    validateIfSelected(validateOtlpDuration),
+    disabled
+  );
+  const otlpRetryMaxElapsedTimeInput = useInput(
+    toInputValue(retry?.max_elapsed_time),
+    validateIfSelected(validateOtlpDuration),
+    disabled
+  );
+
   return {
     otlpProtocolInput,
     otlpEndpointInput,
@@ -250,6 +350,23 @@ export function useOtlpInputs(
     otlpForceAttemptHttp2Input,
     otlpCompressionLevelInput,
     otlpCookiesEnabledInput,
+    otlpQueueEnabledInput,
+    otlpQueueNumConsumersInput,
+    otlpQueueSizeInput,
+    otlpQueueSizerInput,
+    otlpQueueWaitForResultInput,
+    otlpQueueBlockOnOverflowInput,
+    otlpBatchFlushTimeoutInput,
+    otlpBatchMinSizeInput,
+    otlpBatchMaxSizeInput,
+    otlpBatchSizerInput,
+    otlpBatchMetadataKeysInput,
+    otlpRetryEnabledInput,
+    otlpRetryInitialIntervalInput,
+    otlpRetryRandomizationFactorInput,
+    otlpRetryMultiplierInput,
+    otlpRetryMaxIntervalInput,
+    otlpRetryMaxElapsedTimeInput,
   };
 }
 
@@ -299,6 +416,65 @@ export const hasOtlpHttpSettings = (inputs: OtlpInputs) =>
   inputs.otlpForceAttemptHttp2Input.value !== OTLP_HTTP_DEFAULT_FORCE_ATTEMPT_HTTP2 ||
   inputs.otlpCookiesEnabledInput.value;
 
+const batchTextInputs = (inputs: OtlpInputs) => [
+  inputs.otlpBatchFlushTimeoutInput,
+  inputs.otlpBatchMinSizeInput,
+  inputs.otlpBatchMaxSizeInput,
+  inputs.otlpBatchMetadataKeysInput,
+];
+
+const queueTextInputs = (inputs: OtlpInputs) => [
+  inputs.otlpQueueNumConsumersInput,
+  inputs.otlpQueueSizeInput,
+  ...batchTextInputs(inputs),
+];
+
+const retryTextInputs = (inputs: OtlpInputs) => [
+  inputs.otlpRetryInitialIntervalInput,
+  inputs.otlpRetryRandomizationFactorInput,
+  inputs.otlpRetryMultiplierInput,
+  inputs.otlpRetryMaxIntervalInput,
+  inputs.otlpRetryMaxElapsedTimeInput,
+];
+
+const isBatchUnset = (inputs: OtlpInputs) =>
+  batchTextInputs(inputs).every((input) => !input.value.trim()) &&
+  inputs.otlpBatchSizerInput.value === OTLP_BATCH_SPEC_DEFAULT_SIZER;
+
+/** Whether the sending queue is left to the spec defaults: nothing is set. */
+const isQueueUnset = (inputs: OtlpInputs) =>
+  queueTextInputs(inputs).every((input) => !input.value.trim()) &&
+  inputs.otlpQueueEnabledInput.value &&
+  !inputs.otlpQueueWaitForResultInput.value &&
+  !inputs.otlpQueueBlockOnOverflowInput.value &&
+  inputs.otlpQueueSizerInput.value === OTLP_QUEUE_SPEC_DEFAULT_SIZER &&
+  isBatchUnset(inputs);
+
+/** Whether the retry is left to the spec defaults: nothing is set. */
+const isRetryUnset = (inputs: OtlpInputs) =>
+  retryTextInputs(inputs).every((input) => !input.value.trim()) &&
+  inputs.otlpRetryEnabledInput.value;
+
+const isQueueRecommended = (inputs: OtlpInputs) =>
+  inputs.otlpQueueEnabledInput.value === QUEUE_DEFAULTS.enabled &&
+  inputs.otlpQueueSizerInput.value === QUEUE_DEFAULTS.sizer &&
+  inputs.otlpQueueSizeInput.value === `${QUEUE_DEFAULTS.queue_size}` &&
+  inputs.otlpQueueBlockOnOverflowInput.value === QUEUE_DEFAULTS.block_on_overflow &&
+  !inputs.otlpQueueWaitForResultInput.value &&
+  !inputs.otlpQueueNumConsumersInput.value.trim() &&
+  inputs.otlpBatchFlushTimeoutInput.value === QUEUE_DEFAULTS.batch.flush_timeout &&
+  inputs.otlpBatchMinSizeInput.value === `${QUEUE_DEFAULTS.batch.min_size}` &&
+  inputs.otlpBatchMaxSizeInput.value === `${QUEUE_DEFAULTS.batch.max_size}` &&
+  inputs.otlpBatchSizerInput.value === QUEUE_DEFAULTS.batch.sizer &&
+  !inputs.otlpBatchMetadataKeysInput.value.trim();
+
+/** Whether the sending queue has a setting that is neither empty nor the recommended default. */
+export const hasOtlpQueueSettings = (inputs: OtlpInputs) =>
+  !isQueueUnset(inputs) && !isQueueRecommended(inputs);
+
+/** Whether the retry has a setting. */
+export const hasOtlpRetrySettings = (inputs: OtlpInputs) => !isRetryUnset(inputs);
+
 /**
  * Selects the protocol, and resets the settings of both protocols: the settings of the previous
  * protocol do not apply to the new one. The settings shared by both protocols are kept, except a
@@ -346,7 +522,32 @@ export const validateOtlpInputs = (inputs: OtlpInputs): boolean =>
     ...(isOtlpGrpc(inputs) ? grpcTextInputs(inputs) : httpTextInputs(inputs)).map((input) =>
       input.validate()
     ),
+    ...[...queueTextInputs(inputs), ...retryTextInputs(inputs)].map((input) => input.validate()),
+    validateOtlpBatchSizes(inputs),
   ].every(Boolean);
+
+/** The maximum size of a batch can not be less than its minimum size, unless it has no limit (0). */
+export function validateOtlpBatchSizes(inputs: OtlpInputs): boolean {
+  const { otlpBatchMinSizeInput: minInput, otlpBatchMaxSizeInput: maxInput } = inputs;
+  const min = minInput.value.trim();
+  const max = maxInput.value.trim();
+  if (
+    min &&
+    max &&
+    !minInput.errors &&
+    !maxInput.errors &&
+    Number(max) !== 0 &&
+    Number(max) < Number(min)
+  ) {
+    maxInput.setErrors([
+      i18n.translate('xpack.fleet.settings.outputForm.otlpBatchMaxSizeTooSmall', {
+        defaultMessage: 'The maximum size can not be less than the minimum size, unless it is 0',
+      }),
+    ]);
+    return false;
+  }
+  return true;
+}
 
 // An update is deep merged into the stored output, so a cleared setting is sent as `null` to
 // remove the stored value rather than left out.
@@ -356,9 +557,65 @@ const integer = (input: { value?: string }) => {
   return value ? Number(value) : null;
 };
 
+const decimal = (input: { value?: string }) => {
+  const value = input.value?.trim();
+  return value ? Number(value) : null;
+};
+
+const metadataKeys = (input: { value: string }) => {
+  const keys = input.value
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean);
+  return keys.length ? keys : null;
+};
+
+/**
+ * The sending queue and retry of the payload. A section with nothing set is sent as `null`, to
+ * remove what an update would otherwise keep. A section with a setting sends `null` for the
+ * settings that are empty.
+ */
+function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
+  const batch = isBatchUnset(inputs)
+    ? null
+    : {
+        flush_timeout: text(inputs.otlpBatchFlushTimeoutInput),
+        min_size: integer(inputs.otlpBatchMinSizeInput),
+        max_size: integer(inputs.otlpBatchMaxSizeInput),
+        sizer: inputs.otlpBatchSizerInput.value as OtlpBatchSizer,
+        partition: metadataKeys(inputs.otlpBatchMetadataKeysInput)
+          ? { metadata_keys: metadataKeys(inputs.otlpBatchMetadataKeysInput) }
+          : null,
+      };
+
+  return {
+    sending_queue: isQueueUnset(inputs)
+      ? null
+      : {
+          enabled: inputs.otlpQueueEnabledInput.value,
+          num_consumers: integer(inputs.otlpQueueNumConsumersInput),
+          queue_size: integer(inputs.otlpQueueSizeInput),
+          sizer: inputs.otlpQueueSizerInput.value as OtlpQueueSizer,
+          wait_for_result: inputs.otlpQueueWaitForResultInput.value,
+          block_on_overflow: inputs.otlpQueueBlockOnOverflowInput.value,
+          batch,
+        },
+    retry_on_failure: isRetryUnset(inputs)
+      ? null
+      : {
+          enabled: inputs.otlpRetryEnabledInput.value,
+          initial_interval: text(inputs.otlpRetryInitialIntervalInput),
+          randomization_factor: decimal(inputs.otlpRetryRandomizationFactorInput),
+          multiplier: decimal(inputs.otlpRetryMultiplierInput),
+          max_interval: text(inputs.otlpRetryMaxIntervalInput),
+          max_elapsed_time: text(inputs.otlpRetryMaxElapsedTimeInput),
+        },
+  };
+}
+
 /**
  * Builds the `otlp_exporter` of the payload from the settings this form edits. The settings it
- * does not edit yet (TLS, sending queue, retry) are left out, so an update keeps them.
+ * does not edit yet (TLS) are left out, so an update keeps them.
  *
  * Only the settings of the selected protocol are sent: the schema of a protocol rejects the
  * settings of the other one. When an update changes the protocol, the server removes the stored
@@ -376,6 +633,7 @@ export function buildOtlpExporterConfig(inputs: OtlpInputs): OtlpExporterConfig 
     endpoint: inputs.otlpEndpointInput.value.trim(),
     timeout: text(inputs.otlpTimeoutInput),
     headers: headers.size ? Object.fromEntries(headers) : null,
+    ...buildOtlpQueueAndRetry(inputs),
   };
 
   if (!isOtlpGrpc(inputs)) {

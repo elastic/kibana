@@ -764,6 +764,37 @@ export function validateOtlpCount(value: string) {
   }
 }
 
+/** An optional number that is not negative, such as a multiplier. */
+export function validateOtlpDecimal(value: string) {
+  const decimal = value?.trim() ?? '';
+  if (!decimal) {
+    return;
+  }
+  if (!/^\d+(\.\d+)?$/.test(decimal) || !Number.isFinite(Number(decimal))) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpDecimalInvalid', {
+        defaultMessage: 'Specify a number, 0 or more',
+      }),
+    ];
+  }
+}
+
+/** Optional metadata keys, separated by commas. */
+export function validateOtlpMetadataKeys(value: string) {
+  const keys = (value ?? '').split(',').map((key) => key.trim());
+  if (!value?.trim()) {
+    return;
+  }
+  if (keys.some((key) => !key) || keys.some((key) => key.length > 256) || keys.length > 100) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysInvalid', {
+        defaultMessage: 'Specify up to {max} metadata keys, separated by commas',
+        values: { max: 100 },
+      }),
+    ];
+  }
+}
+
 const OTLP_COMPRESSION_LEVEL_MIN = -2;
 const OTLP_COMPRESSION_LEVEL_MAX = 9;
 
