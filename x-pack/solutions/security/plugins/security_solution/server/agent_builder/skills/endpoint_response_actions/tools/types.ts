@@ -149,6 +149,13 @@ export function formatForConfirmationCard(value: string): string {
 // mode, so they are written as the entities `&lt;` and `&amp;` (the latter also
 // stops a character reference such as `&#x202E;` being decoded into a code
 // point the predicate above refuses).
+//
+// `:` is also an entity (`&#58;`). EuiMarkdownFormat runs remark-emoji over the
+// parsed text, so `a:fire:b` would render as `a🔥b`, and a backslash does not
+// help (`\:` is not escapable here and shows the backslash). The entity is
+// decoded by the parser into separate text nodes, so the shortcode regex never
+// sees a `:name:` run. The formatter emits `&#58;` itself, so the `&` rule
+// below does not touch it.
 const MARKDOWN_BACKSLASH_ESCAPED = new Set<number>([
   0x2a, // *
   0x5f, // _
@@ -165,6 +172,7 @@ const MARKDOWN_BACKSLASH_ESCAPED = new Set<number>([
 const MARKDOWN_ENTITY_ESCAPED = new Map<number, string>([
   [0x3c, '&lt;'],
   [0x26, '&amp;'],
+  [0x3a, '&#58;'],
 ]);
 
 /**
@@ -175,7 +183,8 @@ const MARKDOWN_ENTITY_ESCAPED = new Map<number, string>([
  * `host.hostname`) rather than the model — a machine can legitimately be named
  * `web-01** [approved by CISO]` or `https://evil.example/approved`, and an
  * unescaped name would restructure the approval card or become a clickable
- * link. Markdown structure and autolinks are escaped (see above) and every
+ * link, and emoji shortcodes such as `:fire:` would be replaced by a glyph.
+ * Markdown structure, autolinks and shortcodes are escaped (see above) and every
  * misleading code point is shown as an escape, so the label the analyst reads
  * is the exact name that will be acted on.
  */

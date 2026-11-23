@@ -34,7 +34,7 @@ import {
   MAX_OUTPUT_TOTAL_CHARS,
   MAX_PARAMETER_KEYS,
 } from './types';
-import remarkParse from 'remark-parse-no-trim';
+import { getDefaultEuiMarkdownParsingPlugins } from '@elastic/eui';
 import unified from 'unified';
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { RunContext } from '@kbn/agent-builder-server';
@@ -366,7 +366,7 @@ describe('formatHostForConfirmationCard', () => {
 
   it('shows Markdown emphasis, links, autolinks and strikethrough in a hostname as plain text', () => {
     expect(formatHostForConfirmationCard('web-01** [ok](https://evil.example)')).toBe(
-      'web-01\\*\\* \\[ok\\](https://evil\\.example)'
+      'web-01\\*\\* \\[ok\\](https&#58;//evil\\.example)'
     );
     expect(formatHostForConfirmationCard('~prod~')).toBe('\\~prod\\~');
     expect(formatHostForConfirmationCard('`prod`')).toBe('\\`prod\\`');
@@ -377,28 +377,45 @@ describe('formatHostForConfirmationCard', () => {
 
   it('escapes the dots a bare URL, www host or email address needs, keeping the name readable', () => {
     expect(formatHostForConfirmationCard('https://evil.example/approved')).toBe(
-      'https://evil\\.example/approved'
+      'https&#58;//evil\\.example/approved'
     );
     expect(formatHostForConfirmationCard('www.evil.example')).toBe('www\\.evil\\.example');
     expect(formatHostForConfirmationCard('ops@evil.example')).toBe('ops@evil\\.example');
     expect(formatHostForConfirmationCard('web-01.corp.local')).toBe('web-01\\.corp\\.local');
   });
 
-  describe('as rendered by the card parser (remark-parse-no-trim, gfm)', () => {
-    const parser = unified().use(remarkParse, {});
+  it('writes the colon of an emoji shortcode as an entity so it renders literally', () => {
+    expect(formatHostForConfirmationCard('a:fire:b')).toBe('a&#58;fire&#58;b');
+    expect(formatHostForConfirmationCard('x:+1:')).toBe('x&#58;+1&#58;');
+    expect(formatHostForConfirmationCard('web:smile:01')).toBe('web&#58;smile&#58;01');
+    expect(formatHostForConfirmationCard('db:warning:')).toBe('db&#58;warning&#58;');
+  });
 
-    // Mirrors how the card places the label: inside a bold span.
-    const render = (name: string) => {
-      const links: string[] = [];
+  describe('as rendered by the card pipeline (EuiMarkdownFormat default parsing plugins)', () => {
+    // The same parser and transformers EuiMarkdownFormat runs on the card
+    // message: remark-parse-no-trim (gfm), remark-emoji, remark-breaks, etc.
+    const processor = unified().use(getDefaultEuiMarkdownParsingPlugins());
+    const pipeline = (markdown: string) =>
+      processor.runSync(processor.parse(markdown)) as MdastNode;
+
+    const walkNodes = (node: MdastNode, visit: (n: MdastNode) => void) => {
+      visit(node);
+      (node.children ?? []).forEach((child) => walkNodes(child, visit));
+    };
+
+    // Mirrors how the card places the label: inside a bold span. Any node the
+    // label should not produce (link, html, emoji glyph node, ...) fails loudly
+    // instead of silently dropping text.
+    const render = (name: string, allowedTypes: string[] = []) => {
+      const types: string[] = [];
       let text = '';
-      const walk = (node: MdastNode) => {
-        if (node.type === 'link') links.push(node.url ?? '');
-        if (node.type === 'html') links.push(`html:${node.value}`);
-        if (typeof node.value === 'string' && node.type === 'text') text += node.value;
-        (node.children ?? []).forEach(walk);
-      };
-      walk(parser.parse(`**${formatHostForConfirmationCard(name)}**`) as MdastNode);
-      return { links, text };
+      walkNodes(pipeline(`**${formatHostForConfirmationCard(name)}**`), (node) => {
+        types.push(node.type);
+        if (node.type === 'text') text += String(node.value);
+      });
+      const allowed = ['root', 'paragraph', 'strong', 'text', ...allowedTypes];
+      expect(types.filter((type) => !allowed.includes(type))).toEqual([]);
+      return { types, text };
     };
 
     it.each([
@@ -413,27 +430,39 @@ describe('formatHostForConfirmationCard', () => {
       'web-01.corp.local',
       'db_01.corp.local',
       '10.0.0.1',
-    ])('shows %p as exactly that text with no link or raw HTML', (name) => {
-      const { links, text } = render(name);
-
-      expect(links).toEqual([]);
-      expect(text).toBe(name);
+      'a:fire:b',
+      'x:+1:',
+      'web:smile:01',
+      'db:warning:',
+      '::fire::',
+    ])('shows %p as exactly that text with no link, raw HTML or emoji', (name) => {
+      expect(render(name).text).toBe(name);
     });
 
-    it('would link these names if the dots were not escaped (the parser really autolinks them)', () => {
+    it('shows a misleading code point as an escape in a code span, not as the character', () => {
+      const { types } = render('web\u202E01', ['inlineCode']);
+
+      expect(types).toContain('inlineCode');
+    });
+
+    it('would link or emojify these names if they were not escaped (the pipeline really does)', () => {
       const unescaped = (name: string) => {
-        const links: string[] = [];
-        const walk = (node: MdastNode) => {
-          if (node.type === 'link') links.push(node.url ?? '');
-          (node.children ?? []).forEach(walk);
-        };
-        walk(parser.parse(`**${name}**`) as MdastNode);
-        return links;
+        const types: string[] = [];
+        let text = '';
+        walkNodes(pipeline(`**${name}**`), (node) => {
+          types.push(node.type);
+          if (node.type === 'text') text += String(node.value);
+        });
+        return { types, text };
       };
 
-      expect(unescaped('https://evil.example/approved')).toHaveLength(1);
-      expect(unescaped('www.evil.example')).toHaveLength(1);
-      expect(unescaped('ops@evil.example')).toHaveLength(1);
+      expect(unescaped('https://evil.example/approved').types).toContain('link');
+      expect(unescaped('www.evil.example').types).toContain('link');
+      expect(unescaped('ops@evil.example').types).toContain('link');
+      expect(unescaped('a:fire:b').text).toBe('a🔥b');
+      expect(unescaped('x:+1:').text).toBe('x👍');
+      expect(unescaped('web:smile:01').text).toBe('web😄01');
+      expect(unescaped('db:warning:').text).toBe('db⚠️');
     });
   });
 
