@@ -2978,7 +2978,8 @@ describe('Agent policy', () => {
             policy_ids: ['mocked'],
           },
         ],
-        expect.anything()
+        // The new agent policy has no agents to check
+        expect.objectContaining({ acknowledgeAgentVersionIncompatibility: true })
       );
       expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
@@ -2990,7 +2991,8 @@ describe('Agent policy', () => {
             policy_id: 'policy_1',
             policy_ids: ['policy_1', 'policy_2', 'mocked'],
           },
-        ]
+        ],
+        { acknowledgeAgentVersionIncompatibility: true }
       );
     });
 

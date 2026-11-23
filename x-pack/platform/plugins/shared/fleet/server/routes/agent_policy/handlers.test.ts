@@ -478,6 +478,37 @@ describe('Agent policy API handlers', () => {
         expect.anything()
       );
     });
+
+    it('counts the agents of users without agent policies read privilege with the inactivity timeouts', async () => {
+      agentPolicyServiceMock.getByIds.mockResolvedValueOnce([
+        { id: 'policy-1', name: 'Policy 1', inactivity_timeout: 3600 },
+      ] as AgentPolicy[]);
+      const listAgents = jest.fn().mockResolvedValue({
+        aggregations: {
+          policies: { buckets: {} },
+          active_policies: {
+            buckets: { 'policy-1': { versions: { buckets: [{ key: '9.3.0', doc_count: 1 }] } } },
+          },
+        },
+      });
+      (await context.fleet).agentClient.asCurrentUser.listAgents = listAgents;
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['policy-1'] } });
+      // Agents read only: no agent policies read
+      (request as any).authzResult = {
+        [FLEET_API_PRIVILEGES.AGENTS.READ]: true,
+        [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ]: false,
+      };
+
+      await bulkGetAgentPoliciesHandler(context, request, response);
+
+      expect(
+        listAgents.mock.calls[0][0].aggregations.active_policies.filters.filters['policy-1'].bool
+          .must_not
+      ).toEqual(buildAgentVersionConditionAgentsFilter(3600).must_not);
+      const [item] = (response.ok as jest.Mock).mock.calls[0][0].body.items;
+      expect(item.active_agents_per_version).toEqual([{ version: '9.3.0', count: 1 }]);
+      expect(item).not.toHaveProperty('inactivity_timeout');
+    });
   });
 
   describe('getAgentPoliciesPackagePoliciesSummaryHandler', () => {
