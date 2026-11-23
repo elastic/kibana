@@ -140,7 +140,7 @@ const getRulesSubRoutes = (
           main: withSecurityRoutePageWrapper(
             AlertAnalysisWorkflowPage,
             SecurityPageName.alertAnalysisWorkflow,
-            { omitSpyRoute: true }
+            { omitSpyRoute: true, skipLinkAuthorization: true }
           ),
           exact: true,
         },

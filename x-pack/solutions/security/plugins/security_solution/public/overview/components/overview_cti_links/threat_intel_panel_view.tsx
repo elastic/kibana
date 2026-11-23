@@ -24,7 +24,9 @@ const columns: Array<EuiTableFieldDataColumnType<LinkPanelListItem>> = [
   {
     name: 'Indicator',
     field: 'count',
-    render: shortenCountIntoString,
+    render: (count: number) => (
+      <span data-test-subj="cti-feed-indicator-count">{shortenCountIntoString(count)}</span>
+    ),
     sortable: true,
     truncateText: true,
     width: '70px',

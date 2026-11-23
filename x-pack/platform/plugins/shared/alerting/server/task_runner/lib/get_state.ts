@@ -25,6 +25,7 @@ export function getState({
   logger,
   stackTraceLog,
   originalState,
+  persistedAlertsState = null,
 }: {
   runRuleResult: Result<RunRuleResult, Error>;
   startedAt: Date | null;
@@ -34,6 +35,7 @@ export function getState({
   logger: Logger;
   stackTraceLog: RuleRunnerErrorStackTraceLog | null;
   originalState: RuleTaskState;
+  persistedAlertsState?: RuleTaskState | null;
 }) {
   return map<RunRuleResult, ElasticsearchError, RuleTaskState>(
     runRuleResult,
@@ -60,7 +62,7 @@ export function getState({
           error: { stack_trace: stack },
         });
       }
-      return originalState;
+      return persistedAlertsState ?? originalState;
     }
   );
 }

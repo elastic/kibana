@@ -28,7 +28,9 @@ export const postConnectorConfiguration = async ({
   connectorId,
   http,
 }: PostConnectorConfigurationArgs) => {
-  const route = `/internal/content_connectors/connectors/${connectorId}/configuration`;
+  const route = `/internal/content_connectors/connectors/${encodeURIComponent(
+    connectorId
+  )}/configuration`;
 
   const responseConfig = await http?.post<ConnectorConfiguration>(route, {
     body: JSON.stringify(configuration),

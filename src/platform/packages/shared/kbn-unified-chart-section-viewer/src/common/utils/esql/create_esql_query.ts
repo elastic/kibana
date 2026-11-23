@@ -25,6 +25,7 @@ interface CreateESQLQueryParams {
   metricItem: ParsedMetricItem;
   splitAccessors?: string[];
   whereStatements?: string[];
+  metadataFields?: string[];
   originalSource?: string;
 }
 
@@ -36,6 +37,7 @@ interface CreateESQLQueryParams {
  * @param metric - The full metric field object, including dimension type information.
  * @param splitAccessors - An array of field names to use as split accessors in the BY clause.
  * @param whereStatements - Optional WHERE clause statements.
+ * @param metadataFields - Optional metadata fields (such as `_ignored`) that the WHERE statements use.
  * @param originalSource - The source the user typed in their query. When it is a single
  *   concrete index (e.g., a backing index), it is used as the chart query source instead
  *   of `metricItem.indexName` so the chart's scope matches the scope METRICS_INFO scanned.
@@ -45,6 +47,7 @@ export function createESQLQuery({
   metricItem,
   splitAccessors = [],
   whereStatements = [],
+  metadataFields = [],
   originalSource,
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, indexName } = metricItem;
@@ -66,7 +69,7 @@ export function createESQLQuery({
     return '';
   }
 
-  const query = esql.ts(index);
+  const query = esql.ts([index], metadataFields);
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0

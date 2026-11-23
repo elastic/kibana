@@ -140,6 +140,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
@@ -431,4 +432,5 @@ export {
   appendTimeBucketToEsqlQuery,
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
+  queryHasTsSourceCommand,
 } from './esql/trendline_query';

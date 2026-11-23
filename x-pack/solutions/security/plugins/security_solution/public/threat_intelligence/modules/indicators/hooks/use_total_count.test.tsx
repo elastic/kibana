@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
 import { useKibana } from '../../../../common/lib/kibana';
+import { buildTransformSourceExclusionMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -38,6 +39,24 @@ describe('useIndicatorsTotalCount()', () => {
 
     it('should query the database for threat indicators', async () => {
       expect(mockedSearchService.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('should exclude raw indicator copies stored by integration transforms', () => {
+      expect(mockedSearchService.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            query: {
+              bool: {
+                must: [
+                  { term: { 'event.category': { value: 'threat' } } },
+                  { term: { 'event.type': { value: 'indicator' } } },
+                ],
+                must_not: [buildTransformSourceExclusionMock()],
+              },
+            },
+          }),
+        })
+      );
     });
   });
 

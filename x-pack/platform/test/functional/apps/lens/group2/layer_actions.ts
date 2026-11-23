@@ -68,9 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsLayerSettings');
       // annotations settings have only ignore filters
       await testSubjects.click('lns-layerSettings-ignoreGlobalFilters');
-      expect(
-        await testSubjects.exists('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-0 > lnsChangeIndexPatternIgnoringFilters');
       await testSubjects.click('lns-indexPattern-dimensionContainerBack');
     });
 
@@ -90,9 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // add annotation layer
       await lens.createLayer('annotations');
 
-      expect(
-        await testSubjects.exists('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-1 > lnsChangeIndexPatternIgnoringFilters', {
+        timeout: 5000,
+      });
 
       await lens.ensureLayerTabIsActive(1);
       await testSubjects.click('lnsLayerSettings');
@@ -164,9 +162,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(
         await testSubjects.getVisibleText('lns-layerPanel-3 > lnsChangeIndexPatternSamplingInfo')
       ).to.be('1%');
-      expect(
-        await testSubjects.exists('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters')
-      ).to.be(true);
+      await testSubjects.existOrFail('lns-layerPanel-3 > lnsChangeIndexPatternIgnoringFilters', {
+        timeout: 5000,
+      });
     });
 
     it('should switch to pie chart and have layer settings available', async () => {

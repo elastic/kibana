@@ -30,6 +30,14 @@ export const MESSAGE_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const MESSAGE_FIELD_HELP = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.messageFieldHelpText',
+  {
+    defaultMessage:
+      'Opsgenie limits this field to 130 characters. Messages up to 15,000 characters are truncated when the action runs; longer messages are rejected.',
+  }
+);
+
 export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.descriptionLabel',
   {

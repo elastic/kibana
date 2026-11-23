@@ -6,10 +6,10 @@ The generated documentation is validated and will emit warnings when invalid que
 ## Requirements
 
 - a running Kibana instance
-- an installed Generative AI connector
+- an Elasticsearch `chat_completion` inference endpoint
 
 ### Run
-yarn es snapshot --license trial
+pnpm es snapshot --license trial
 node scripts/kibana --dev --no-base-path
 
 ## Incremental Updates
@@ -39,15 +39,15 @@ To deterministically get the ES|QL docs from the Elastic's documentation markdow
 node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js
 ```
 
-To connect to a connector/LLM to read the built docs and then enrich the extracted docs, you must first have an installed Generative AI connector. Then, pass in the connectorId. Enrichment involves explaining in natural language what the ES|QL examples are doing.
+To call an LLM and enrich the extracted docs, pass an Elasticsearch `chat_completion` inference endpoint id. Enrichment explains in natural language what the ES|QL examples are doing. Without `--inferenceId` the script only extracts documentation and does not prompt for a connection.
 
 ```
-node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --connectorId example-connector-id
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-4.1-chat_completion
 ```
 
 You can also combine flags:
 ```
-node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --connectorId example-connector-id --force
+node x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js --inferenceId .openai-gpt-4.1-chat_completion --force
 ```
 
 ### Checking syntax errors for generated files

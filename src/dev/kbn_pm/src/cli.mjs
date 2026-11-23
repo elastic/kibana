@@ -8,7 +8,7 @@
  */
 
 /**
- * This is the script that's run by `yarn kbn`. This script has as little logic
+ * This is the script that's run by `pnpm kbn`. This script has as little logic
  * as possible so that it can:
  *  - run without being built and without any dependencies
  *  - can bootstrap the repository, installing all deps and building all packages

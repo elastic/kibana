@@ -28,3 +28,6 @@ export function isPackageUnverified(
 
 export const isVerificationError = (err?: FleetErrorResponse | RequestError) =>
   err && 'attributes' in err && err.attributes?.type === 'verification_failed';
+
+export const isBreakingChangesNotAcknowledgedError = (err?: FleetErrorResponse | RequestError) =>
+  err && 'attributes' in err && err.attributes?.type === 'breaking_changes_not_acknowledged';

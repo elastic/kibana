@@ -40,6 +40,7 @@ export interface CasesTableFiltersProps {
   availableSolutions: string[];
   isSelectorView?: boolean;
   onCreateCasePressed?: () => void;
+  canCreateCase: boolean;
   isLoading: boolean;
   currentUserProfile: CurrentUserProfile;
   filterOptions: FilterOptions;
@@ -69,6 +70,7 @@ const CasesTableFiltersComponent = ({
   availableSolutions,
   isSelectorView = false,
   onCreateCasePressed,
+  canCreateCase,
   isLoading,
   currentUserProfile,
   filterOptions,
@@ -182,7 +184,9 @@ const CasesTableFiltersComponent = ({
             background-color: transparent;
           `}
         >
-          {activeFilters.map((filter) => filter.render({ filterOptions }))}
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>{filter.render({ filterOptions })}</React.Fragment>
+          ))}
           {isSelectorView || (
             <MoreFiltersSelectable
               options={selectableOptions}
@@ -217,6 +221,7 @@ const CasesTableFiltersComponent = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
+                disabled={!canCreateCase}
                 onClick={handleOnCreateCasePressed}
                 iconType="plusCircle"
                 data-test-subj="cases-table-add-case-filter-bar"

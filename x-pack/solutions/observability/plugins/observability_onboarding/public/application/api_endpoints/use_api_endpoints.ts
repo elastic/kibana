@@ -29,6 +29,7 @@ export function useApiEndpoints(): {
   endpoints: ResolvedApiEndpoint[];
   isLoading: boolean;
   isError: boolean;
+  isForbidden: boolean;
 } {
   const {
     services: {
@@ -42,11 +43,12 @@ export function useApiEndpoints(): {
     false
   );
 
-  const { data, status } = useFetcher(
+  const { data, status, error } = useFetcher(
     (callApi) => callApi('GET /internal/observability_onboarding/api_endpoints'),
     [],
     { showToastOnError: false }
   );
+  const isForbidden = error?.response?.status === 403;
 
   const endpoints = useMemo(() => {
     const endpointContext: ApiEndpointContext = {
@@ -76,6 +78,7 @@ export function useApiEndpoints(): {
   return {
     endpoints,
     isLoading: isPending(status),
-    isError: status === FETCH_STATUS.FAILURE,
+    isError: status === FETCH_STATUS.FAILURE && !isForbidden,
+    isForbidden,
   };
 }

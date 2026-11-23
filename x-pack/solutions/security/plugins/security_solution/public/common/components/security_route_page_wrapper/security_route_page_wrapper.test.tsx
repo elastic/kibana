@@ -110,6 +110,20 @@ describe('SecurityRoutePageWrapper', () => {
     expect(getByTestId('noPrivilegesPage')).toBeInTheDocument();
   });
 
+  it('should render children when the page handles its own unauthorized state', () => {
+    mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unauthorized: true });
+
+    const { getByTestId, queryByTestId } = render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} skipLinkAuthorization>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+    expect(queryByTestId('noPrivilegesPage')).not.toBeInTheDocument();
+  });
+
   it('should redirect when unavailable', () => {
     mockUseLinkInfo.mockReturnValue({ ...defaultLinkInfo, unavailable: true });
 

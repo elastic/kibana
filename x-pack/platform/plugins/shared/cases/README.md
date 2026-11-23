@@ -89,7 +89,7 @@ cases.getCases({
     read: true,
   },
   owner: ['securitySolution'],
-  features: { alerts: { sync: false }, metrics: ['alerts.count', 'lifespan'] }
+  features: { metrics: ['alerts.count', 'lifespan'] }
   timelineIntegration: {
     plugins: {
       parsingPlugin,

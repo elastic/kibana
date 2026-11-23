@@ -33,8 +33,13 @@ import { SettingsPanel } from './settings_panel';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { useDateRangePickerPanelNavigation } from '../date_range_picker_panel_navigation';
 import { mainPanelStyles } from './main_panel.styles';
-import { getOptionDisplayLabel, getOptionShorthand, getOptionInputText } from '../utils';
-import { mainPanelTexts } from '../translations';
+import {
+  getOptionDisplayLabel,
+  getOptionShorthand,
+  getOptionInputText,
+  hasRoundedOffset,
+} from '../utils';
+import { inputControlTexts, mainPanelTexts } from '../translations';
 import { panelDividerStyles } from '../date_range_picker_panel_ui.styles';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
@@ -97,6 +102,11 @@ const OptionsList = ({ options, showShorthand, showExtraActions }: OptionsListPr
           }
         >
           {getOptionDisplayLabel(option, transformOptions)}
+          {hasRoundedOffset(option) && (
+            <span css={styles.roundedSuffix} data-test-subj="dateRangePickerPresetRoundedSuffix">
+              {inputControlTexts.roundedSuffix}
+            </span>
+          )}
         </PanelListItem>
       ))}
     </ul>

@@ -8,7 +8,7 @@
 module.exports = {
   bail: true,
   forceExit: true,
-  preset: '@kbn/test/jest_integration_node',
+  preset: '@kbn/jest/jest_integration_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/encrypted_saved_objects'],
   testMatch: ['/**/integration_tests/**/*.test.{js,mjs,ts,tsx}'],

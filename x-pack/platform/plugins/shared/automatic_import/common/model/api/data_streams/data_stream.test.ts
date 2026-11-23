@@ -343,6 +343,26 @@ describe('data stream schemas', () => {
       expectParseError(result);
     });
 
+    it('accepts a sample of 100000 characters', () => {
+      const payload = {
+        samples: ['x'.repeat(100000)],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects a sample longer than 100000 characters', () => {
+      const payload = {
+        samples: ['x'.repeat(100001)],
+        originalSource: validOriginalSource,
+      };
+
+      const result = UploadSamplesToDataStreamRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
+
     it('accepts file source type', () => {
       const payload = {
         samples: ['Sample 1'],

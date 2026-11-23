@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-securitysolution-hook-utils'],
 };
