@@ -37,8 +37,8 @@ import * as Logger from './logger';
 import type { LensEmbeddableStartServices } from './types';
 import { waitFor } from '@testing-library/dom';
 import { XY_OVERLAYS_VARIABLE } from '@kbn/expression-xy-plugin/common';
-import type { LensXYOverlayProvidersConfig } from '@kbn/lens-common';
-import { loadXYOverlays } from '../xy_overlay_providers';
+import type { LensXYOverlay, LensXYOverlayProvidersConfig } from '@kbn/lens-common';
+import { isXYOverlayProviderMessageId, loadXYOverlays } from '../xy_overlay_providers';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
@@ -897,7 +897,12 @@ describe('Data Loader', () => {
           visOverrides: { id: 'lnsXY' },
           dataOverrides: { id: 'formBased' },
         }),
-        documentToExpression: jest.fn().mockResolvedValue({ ast: 'expression_string' }),
+        // visualization and datasource states let badges list the runtime overlay messages
+        documentToExpression: jest.fn().mockResolvedValue({
+          ast: 'expression_string',
+          activeVisualizationState: {},
+          activeDatasourceState: {},
+        }),
       };
       const { cleanup } = loadEmbeddableData(
         faker.string.uuid(),
@@ -934,6 +939,70 @@ describe('Data Loader', () => {
         },
       };
     };
+
+    const createOverlay = (title: string): LensXYOverlay => ({
+      type: 'points',
+      providerId: 'test.provider',
+      layerId: 'layer1',
+      title,
+      data: [],
+      xAccessor: 'x',
+      yAccessor: 'y',
+      clickable: false,
+    });
+
+    const hasOverlayBadge = (internalApi: LensInternalApi) =>
+      internalApi.messages$
+        .getValue()
+        .some(({ uniqueId }) => isXYOverlayProviderMessageId(uniqueId));
+
+    it('clears the overlay warning badge when a later overlay load succeeds', async () => {
+      const { params, xyOverlayProviders$, internalApi, cleanup } = await setup();
+      loadXYOverlaysMock.mockResolvedValueOnce({
+        overlays: [],
+        failures: [{ providerId: 'test.provider', layerId: 'layer1', error: new Error('boom') }],
+        truncations: [],
+      });
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+      await waitFor(() => expect(hasOverlayBadge(internalApi)).toBe(true));
+
+      xyOverlayProviders$.next({ 'test.provider': true });
+      await waitFor(() => expect(loadXYOverlaysMock).toHaveBeenCalledTimes(2));
+      await waitFor(() => expect(hasOverlayBadge(internalApi)).toBe(false));
+
+      cleanup();
+    });
+
+    it('drops the result of an overlay load that a newer load aborted', async () => {
+      const { params, xyOverlayProviders$, overlayEmissions, cleanup } = await setup();
+      let resolveFirstLoad: (result: Awaited<ReturnType<typeof loadXYOverlays>>) => void = () => {};
+      loadXYOverlaysMock
+        .mockImplementationOnce(() => new Promise((resolve) => (resolveFirstLoad = resolve)))
+        .mockResolvedValueOnce({
+          overlays: [createOverlay('Newer')],
+          failures: [],
+          truncations: [],
+        });
+
+      params.onData$({ type: 'datatable', rows: [], columns: [] });
+      xyOverlayProviders$.next({ 'test.provider': true });
+      await waitFor(() =>
+        expect(overlayEmissions).toHaveBeenLastCalledWith([
+          expect.objectContaining({ title: 'Newer' }),
+        ])
+      );
+
+      resolveFirstLoad({ overlays: [createOverlay('Stale')], failures: [], truncations: [] });
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(overlayEmissions).not.toHaveBeenCalledWith([
+        expect.objectContaining({ title: 'Stale' }),
+      ]);
+
+      cleanup();
+    });
 
     it('loads overlays only after a final, successful base result', async () => {
       const { params, cleanup } = await setup();
