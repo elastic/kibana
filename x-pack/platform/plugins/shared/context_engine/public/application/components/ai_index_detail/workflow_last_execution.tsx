@@ -42,54 +42,48 @@ const neverRunLabel = i18n.translate('xpack.contextEngine.workflowLastExecution.
   defaultMessage: 'Never run',
 });
 
+const SUCCESS_ICON = { type: 'checkCircleFill', color: 'success' } as const;
+const DANGER_ICON = { type: 'errorFill', color: 'danger' } as const;
+const SUBDUED_ICON = { type: 'minusCircle', color: 'subdued' } as const;
+
+const TERMINAL_STATUS_DISPLAY: Partial<
+  Record<ExecutionStatusUnion, WorkflowExecutionStatusDisplay>
+> = {
+  [ExecutionStatus.COMPLETED]: {
+    ...SUCCESS_ICON,
+    label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.completed', {
+      defaultMessage: 'Succeeded',
+    }),
+  },
+  [ExecutionStatus.FAILED]: {
+    ...DANGER_ICON,
+    label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.failed', {
+      defaultMessage: 'Failed',
+    }),
+  },
+  [ExecutionStatus.TIMED_OUT]: {
+    ...DANGER_ICON,
+    label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.timedOut', {
+      defaultMessage: 'Timed out',
+    }),
+  },
+  [ExecutionStatus.CANCELLED]: {
+    ...SUBDUED_ICON,
+    label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.cancelled', {
+      defaultMessage: 'Cancelled',
+    }),
+  },
+  [ExecutionStatus.SKIPPED]: {
+    ...SUBDUED_ICON,
+    label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.skipped', {
+      defaultMessage: 'Skipped',
+    }),
+  },
+};
+
 const getTerminalStatusDisplay = (
   status: ExecutionStatusUnion
-): WorkflowExecutionStatusDisplay | undefined => {
-  switch (status) {
-    case ExecutionStatus.COMPLETED:
-      return {
-        type: 'checkCircleFill',
-        color: 'success',
-        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.completed', {
-          defaultMessage: 'Succeeded',
-        }),
-      };
-    case ExecutionStatus.FAILED:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.failed', {
-          defaultMessage: 'Failed',
-        }),
-      };
-    case ExecutionStatus.TIMED_OUT:
-      return {
-        type: 'errorFill',
-        color: 'danger',
-        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.timedOut', {
-          defaultMessage: 'Timed out',
-        }),
-      };
-    case ExecutionStatus.CANCELLED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.cancelled', {
-          defaultMessage: 'Cancelled',
-        }),
-      };
-    case ExecutionStatus.SKIPPED:
-      return {
-        type: 'minusCircle',
-        color: 'subdued',
-        label: i18n.translate('xpack.contextEngine.workflowLastExecution.status.skipped', {
-          defaultMessage: 'Skipped',
-        }),
-      };
-    default:
-      return undefined;
-  }
-};
+): WorkflowExecutionStatusDisplay | undefined => TERMINAL_STATUS_DISPLAY[status];
 
 const IN_PROGRESS_STATUS_DISPLAY: WorkflowExecutionStatusDisplay = {
   type: 'clock',

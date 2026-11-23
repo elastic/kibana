@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { minBy } from 'lodash';
 import { ExecutionStatus, type ExecutionStatusUnion } from '@kbn/workflows';
 import type { WorkflowLatestExecution } from '../../../hooks/use_latest_workflow_execution';
 
@@ -26,17 +27,5 @@ const STATUS_RANK: Readonly<Record<ExecutionStatusUnion, number>> = {
 /** Execution with the most severe status; first one wins on ties. */
 export const getWorstExecution = (
   executions: readonly WorkflowLatestExecution[]
-): WorkflowLatestExecution | undefined => {
-  let worst: WorkflowLatestExecution | undefined;
-  let worstRank = Number.POSITIVE_INFINITY;
-
-  for (const item of executions) {
-    const rank = STATUS_RANK[item.execution.status];
-    if (rank < worstRank) {
-      worstRank = rank;
-      worst = item;
-    }
-  }
-
-  return worst;
-};
+): WorkflowLatestExecution | undefined =>
+  minBy(executions, ({ execution }) => STATUS_RANK[execution.status]);

@@ -429,28 +429,25 @@ export const createDreamingScheduleService = ({
         attachedWorkflows.map((workflow) => startWorkflow({ workflow, aiIndex, spaceId, request }))
       );
 
-      const executions: RunAiIndexDreamingResponse['executions'] = [];
-      const failed: string[] = [];
-      const skipped: string[] = [];
+      const outcomes = results.flatMap((result) => {
+        if (result.status === 'fulfilled') {
+          return [result.value];
+        }
+        log.warn(
+          `Dreaming manual run failed for AI index '${aiIndex.id}': ${
+            result.reason instanceof Error ? result.reason.message : String(result.reason)
+          }`
+        );
+        return [];
+      });
 
-      for (const result of results) {
-        if (result.status === 'rejected') {
-          log.warn(
-            `Dreaming manual run failed for AI index '${aiIndex.id}': ${
-              result.reason instanceof Error ? result.reason.message : String(result.reason)
-            }`
-          );
-          continue;
-        }
-        const value = result.value;
-        if ('failed' in value) {
-          failed.push(value.failed);
-        } else if ('skipped' in value) {
-          skipped.push(value.skipped);
-        } else {
-          executions.push(value);
-        }
-      }
+      const failed = outcomes.flatMap((outcome) => ('failed' in outcome ? [outcome.failed] : []));
+      const skipped = outcomes.flatMap((outcome) =>
+        'skipped' in outcome ? [outcome.skipped] : []
+      );
+      const executions = outcomes.flatMap((outcome) =>
+        'failed' in outcome || 'skipped' in outcome ? [] : [outcome]
+      );
 
       if (executions.length === 0 && skipped.length === 0) {
         throw new DreamingRunNothingStartedError(aiIndex.id);
