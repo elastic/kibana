@@ -50,6 +50,7 @@ import type {
 } from '@kbn/proposals-common';
 import type { ReviseProposalRequest } from '@kbn/proposals-common';
 import { parseActionMetadata } from './action_catalog';
+import { PROPOSALS_TRIGGER_SOURCE } from './create_proposal';
 import {
   anchorQuery,
   bucketedEventQuery,
@@ -119,6 +120,8 @@ export interface ProposalUpdateCaller {
   request: KibanaRequest;
   /** The release mark a gateless approval started this resolve run for, as its `releasedAt` input. */
   releasedAt?: string;
+  /** How the run was started, as the engine recorded it. No route lets a user choose it. */
+  triggeredBy?: string;
 }
 
 export interface ProposalUpdateOptions {
@@ -129,6 +132,11 @@ export interface ProposalUpdateOptions {
    * link an unrelated run of the same workflow.
    */
   linkActionExecution?: boolean;
+  /**
+   * The caller skipped the `manage_proposals` check, so it may only write to a proposal it
+   * owns: a gated proposal's own gate execution, or a gateless one's resolve run.
+   */
+  unprivileged?: boolean;
 }
 
 export interface ProposalsServiceDeps {
@@ -221,17 +229,19 @@ const isReleasedGatelessAction = (
 
 /**
  * Whether `caller` is the resolve run a gateless approval started. The run can
- * write before the approval records it, so until then it is known by the mark
- * it was started for: a run of an earlier, lifted approval carries another.
+ * write before the approval records it, so until then it is known by how it was
+ * started — by this plugin, which no route can claim to be — and by the mark it
+ * was started for: a run of an earlier, lifted approval carries another. Its
+ * first write records it (see `update`), so the window ends there.
  */
 const isOwningResolveRun = (
   proposal: Pick<Proposal, 'actionWorkflowId' | 'gateReleasedAt' | 'resolveExecutionId'>,
-  { workflowId, executionId, releasedAt }: Omit<ProposalUpdateCaller, 'request'>
+  { workflowId, executionId, releasedAt, triggeredBy }: Omit<ProposalUpdateCaller, 'request'>
 ): boolean =>
   isReleasedGatelessAction(proposal) &&
   workflowId === RESOLVE_PROPOSAL_WORKFLOW_ID &&
   (proposal.resolveExecutionId === undefined
-    ? releasedAt === proposal.gateReleasedAt
+    ? triggeredBy === PROPOSALS_TRIGGER_SOURCE && releasedAt === proposal.gateReleasedAt
     : proposal.resolveExecutionId === executionId);
 
 /** An undecided gateless approval whose resolve run went unrecorded for too long. */
@@ -310,6 +320,11 @@ export class ProposalsService {
       throw new ProposalInvalidIdError(
         `A proposal id must be 1 to ${MAX_PROPOSAL_ID_LENGTH} characters long`
       );
+    }
+    // A browser resolves these as path segments even when encoded, so the
+    // proposal routes could never reach the record.
+    if (params.id === '.' || params.id === '..') {
+      throw new ProposalInvalidIdError(`A proposal id cannot be "${params.id}"`);
     }
     const id = params.id ?? uuidv4();
     // Omission is the gated path, so a document written before the field
@@ -748,6 +763,7 @@ export class ProposalsService {
     // Ahead of the write, so a refusal leaves no annotation behind, exactly as
     // on the gated path.
     this.assertDecidable(proposal);
+    this.assertLiveRevision(proposal);
     this.assertNotReleased(proposal);
 
     return this.applyUpdate(
@@ -793,6 +809,7 @@ export class ProposalsService {
   ): Promise<Proposal> {
     const { id, actionWorkflowId } = proposal;
     this.assertDecidable(proposal);
+    this.assertLiveRevision(proposal);
     this.assertNotReleased(proposal);
     if (actionInput !== undefined && !sameInput(actionInput, proposal.actionInput)) {
       throw new ProposalConflictError(
@@ -825,6 +842,9 @@ export class ProposalsService {
             decidedBy: username,
             releasedAt: released.proposal.gateReleasedAt,
           },
+          // Not `manual`, so the inputs reach the run as the literals validated here rather
+          // than as expressions, and so `update` can tell this run from one a user started.
+          triggeredBy: PROPOSALS_TRIGGER_SOURCE,
           waitForCompletion: false,
         }));
     } catch (error) {
@@ -844,10 +864,11 @@ export class ProposalsService {
    * reloaded and retried on a conflict, and `update()` re-applies the run's own
    * write when this is the only thing that landed under it.
    *
-   * Best effort. A run that is not recorded still decides the proposal; only a
-   * run that ends without settling it is left for nobody to follow up. Skipped
-   * once the mark is gone, since the run it named has then ended and been
-   * followed up already.
+   * Best effort. A run that is not recorded here records itself with its first
+   * write (see `update`); only a run that ends before writing anything is left
+   * for the five-minute lift. Skipped once the mark is gone, since the run it
+   * named has then ended and been followed up already, and once the run has
+   * recorded itself.
    */
   private async recordResolveExecution(
     { id, spaceId, gateReleasedAt }: StoredProposalRecord,
@@ -861,6 +882,10 @@ export class ProposalsService {
           : await this.load(id, spaceId);
         if (proposal.gateReleasedAt !== gateReleasedAt) {
           return undefined;
+        }
+        // The run recorded itself with its first write.
+        if (proposal.resolveExecutionId !== undefined) {
+          return proposal;
         }
         const recorded: StoredProposalRecord = { ...proposal, resolveExecutionId };
         const { id: _id, ...document } = recorded;
@@ -904,6 +929,20 @@ export class ProposalsService {
   }
 
   /**
+   * A gateless proposal is decided on the revision it names. Behind a gate, a
+   * decision on an older revision reaches the live one through the gate they
+   * share; with no gate, it would land on a row nothing reads any more, and an
+   * approval would start a run that refuses to decide the live one.
+   */
+  private assertLiveRevision(proposal: StoredProposalRecord): void {
+    if (proposal.supersededBy !== undefined) {
+      throw new ProposalConflictError(
+        `Proposal [${proposal.id}] was superseded by [${proposal.supersededBy}]; decide its latest revision instead`
+      );
+    }
+  }
+
+  /**
    * A gateless proposal is released only by an approval that started its
    * resolve run. Until that run decides, a second approval would start a
    * second run, and a dismissal would race the first one's decision.
@@ -942,9 +981,14 @@ export class ProposalsService {
     { dismissReason, rationale }: Pick<ReleaseGateParams, 'dismissReason' | 'rationale'>,
     { seqNo, primaryTerm }: WriteVersion
   ): Promise<StoredProposal> {
+    // Later than any mark a read lifted, even on an instance whose clock is
+    // behind the one that stamped it: the UI tells a retry from the lifted
+    // approval by comparing the two.
+    const lifted = Date.parse(proposal.liftedGateReleasedAt ?? '');
+    const releasedAt = Number.isNaN(lifted) ? Date.now() : Math.max(Date.now(), lifted + 1);
     const released: StoredProposalRecord = {
       ...proposal,
-      gateReleasedAt: new Date().toISOString(),
+      gateReleasedAt: new Date(releasedAt).toISOString(),
       ...(dismissReason !== undefined ? { dismissReason } : {}),
       ...(rationale !== undefined ? { rationale } : {}),
     };
@@ -990,17 +1034,24 @@ export class ProposalsService {
     params: UpdateProposalParams,
     spaceId: string,
     caller: ProposalUpdateCaller,
-    { linkActionExecution = false }: ProposalUpdateOptions = {}
+    { linkActionExecution = false, unprivileged = false }: ProposalUpdateOptions = {}
   ): Promise<Proposal> {
     const stored = await this.load(params.id, spaceId);
 
     // This is the gate workflow's entry point, behind `proposals.updateProposal`
     // and `proposals.settleIncompleteProposal`, and any workflow can call the
-    // latter on any id without `manage_proposals`. A gateless proposal has no
-    // workflow to advance it, so a write arriving here is addressed to the
-    // wrong record — unless it comes from the resolve run its approval started.
-    // The direct path writes through `applyUpdate` instead.
-    if (isGatelessProposal(stored.proposal) && !isOwningResolveRun(stored.proposal, caller)) {
+    // latter without `manage_proposals`. A gateless proposal has no workflow to
+    // advance it, so a write arriving here is addressed to the wrong record —
+    // unless it comes from the resolve run its approval started. The direct
+    // path writes through `applyUpdate` instead. A gated proposal is open to any
+    // workflow that holds the privilege, as a Worker expiring proposals it raised
+    // earlier does; without it, only to its own gate.
+    const isGateless = isGatelessProposal(stored.proposal);
+    if (
+      isGateless
+        ? !isOwningResolveRun(stored.proposal, caller)
+        : unprivileged && stored.proposal.workflowExecutionId !== caller.executionId
+    ) {
       throw new ProposalConflictError(
         `Proposal [${params.id}] is not owned by this workflow execution, so it cannot update it`
       );
@@ -1009,7 +1060,13 @@ export class ProposalsService {
     const actionExecutionId = linkActionExecution
       ? await this.findActionExecutionId(stored.proposal, params.status, caller, spaceId)
       : undefined;
-    const update = { ...params, actionExecutionId };
+    // The run's first write records it, so a run whose approval could not record
+    // it is still followed up on read, and nothing else can pass for it after.
+    const resolveExecutionId =
+      isGateless && stored.proposal.resolveExecutionId === undefined
+        ? caller.executionId
+        : undefined;
+    const update = { ...params, actionExecutionId, resolveExecutionId };
     try {
       return await this.applyUpdate(stored, update);
     } catch (error) {
@@ -1074,7 +1131,7 @@ export class ProposalsService {
   /** `update` against a record already loaded, written under that load's sequence number. */
   private async applyUpdate(
     { proposal, seqNo, primaryTerm }: StoredProposal,
-    params: UpdateProposalParams & { actionExecutionId?: string }
+    params: UpdateProposalParams & { actionExecutionId?: string; resolveExecutionId?: string }
   ): Promise<Proposal> {
     const { id } = params;
 
@@ -1141,6 +1198,9 @@ export class ProposalsService {
       ...(params.executionError !== undefined ? { executionError: params.executionError } : {}),
       ...(params.actionExecutionId !== undefined
         ? { actionExecutionId: params.actionExecutionId }
+        : {}),
+      ...(params.resolveExecutionId !== undefined
+        ? { resolveExecutionId: params.resolveExecutionId }
         : {}),
     };
     const { id: _id, ...document } = updated;

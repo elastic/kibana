@@ -108,18 +108,24 @@ export class WorkflowRunFixture {
     inputs,
     event,
     workflowId = 'fake_foreach_id',
+    triggeredBy = 'system',
+    executionId = 'fake_workflow_execution_id',
   }: {
     workflowYaml: string;
     inputs?: Record<string, unknown>;
     event?: Record<string, unknown>;
     /** The id the execution runs under, which steps read from their context. */
     workflowId?: string;
+    /** How the execution was started, which steps read from their context. */
+    triggeredBy?: string;
+    /** The execution's id, which steps read from their context. */
+    executionId?: string;
   }) {
     // clean up before running workflow
     this.cleanup();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
-      id: 'fake_workflow_execution_id',
+      id: executionId,
       spaceId: this.spaceId,
       workflowId,
       isTestRun: false,
@@ -131,14 +137,14 @@ export class WorkflowRunFixture {
       status: ExecutionStatus.PENDING,
       createdAt: new Date().toISOString(),
       createdBy: 'system',
-      triggeredBy: 'system', // <-- new field for scheduled workflows
+      triggeredBy, // <-- new field for scheduled workflows
     };
     this.workflowExecutionRepositoryMock.workflowExecutions.set(
-      'fake_workflow_execution_id',
+      executionId,
       workflowExecution as EsWorkflowExecution
     );
     return runWorkflow({
-      workflowRunId: 'fake_workflow_execution_id',
+      workflowRunId: executionId,
       spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       dependencies: this.dependencies,

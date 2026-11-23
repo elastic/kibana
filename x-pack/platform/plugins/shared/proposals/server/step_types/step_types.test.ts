@@ -663,6 +663,25 @@ describe('proposals.updateProposal step', () => {
     );
   });
 
+  it('should name how its run was started, as the engine recorded it', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'proposal-1', status: 'executing' });
+    const context = createContext({ proposalId: 'proposal-1', status: 'executing' });
+    const runContext = context.contextManager.getContext();
+    jest.mocked(context.contextManager.getContext).mockReturnValue({
+      ...runContext,
+      execution: { ...runContext.execution, triggeredBy: 'proposals' },
+    });
+
+    await updateDefinition(update).handler(context);
+
+    expect(update).toHaveBeenCalledWith(
+      expect.anything(),
+      SPACE_ID,
+      { ...CALLER, triggeredBy: 'proposals' },
+      { linkActionExecution: true }
+    );
+  });
+
   it('should resolve the decider from the execution request, not the passed username', async () => {
     const update = jest
       .fn()
@@ -1080,7 +1099,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ id: 'proposal-2', status: 'expired', executionError: 'timed out' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
     expect(result.output).toEqual({
       proposalId: 'proposal-2',
@@ -1103,7 +1123,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'expired' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
   });
 
@@ -1125,7 +1146,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
     expect(result.output?.status).toBe('failed');
     expect(result.output?.decision).toBe('approved');
@@ -1147,7 +1169,8 @@ describe('proposals.settleIncompleteProposal step', () => {
     expect(service.update).toHaveBeenCalledWith(
       expect.objectContaining({ status: 'failed' }),
       SPACE_ID,
-      CALLER
+      CALLER,
+      { unprivileged: true }
     );
   });
 
@@ -1164,6 +1187,9 @@ describe('proposals.settleIncompleteProposal step', () => {
       createContext({ proposalId: 'proposal-1', status: 'expired' })
     );
 
-    expect(service.update).toHaveBeenCalled();
+    // It writes only to what its own run owns instead, which the service checks.
+    expect(service.update).toHaveBeenCalledWith(expect.anything(), SPACE_ID, CALLER, {
+      unprivileged: true,
+    });
   });
 });

@@ -20,7 +20,8 @@ import { toStepError } from './to_step_error';
  * is running under a resumer who lacks `manage_proposals`. Privilege checks
  * live on the decide path (`checkDecidePrivileges` + `updateProposal`); this
  * step deliberately skips them so gate expiry, attempt-budget exhaustion, and
- * the workflow-level fallback can still leave the record terminal.
+ * the workflow-level fallback can still leave the record terminal. In exchange
+ * it may only settle a proposal its own run owns.
  */
 export const getSettleIncompleteProposalStepDefinition = ({
   getProposalsService,
@@ -54,7 +55,8 @@ export const getSettleIncompleteProposalStepDefinition = ({
             executionError: input.executionError,
           },
           spaceId,
-          getWorkflowCaller(workflowContext, request)
+          getWorkflowCaller(workflowContext, request),
+          { unprivileged: true }
         );
 
         return {

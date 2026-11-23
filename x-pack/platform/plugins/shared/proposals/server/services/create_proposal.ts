@@ -62,7 +62,8 @@ export interface NewProposal {
   /**
    * The id to create the proposal under, for a caller that derives it from what it proposes. An
    * id that already exists is refused with `ProposalAlreadyExistsError` on the gateless path, and
-   * fails the gate's create step on the gated one.
+   * fails the gate's create step on the gated one. Unique across spaces, not within one, so
+   * derive it from the space too.
    */
   id?: string;
 }

@@ -277,11 +277,19 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Runs inline to completion, as a dispatch from inside Task Manager does,
     // so the service records the run on a proposal the run already wrote to.
     executeWorkflow: jest.fn(
-      async ({ workflowId, inputs }: { workflowId: string; inputs: Record<string, unknown> }) => {
+      async ({
+        workflowId,
+        inputs,
+        triggeredBy,
+      }: {
+        workflowId: string;
+        inputs: Record<string, unknown>;
+        triggeredBy?: string;
+      }) => {
         if (workflowId !== RESOLVE_PROPOSAL_WORKFLOW_ID) {
           throw new Error(`Workflow [${workflowId}] not found`);
         }
-        return runResolution(inputs);
+        return runResolution(inputs, triggeredBy);
       }
     ),
   };
@@ -365,29 +373,30 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   const resolveStepExecutions: EsWorkflowStepExecution[] = [];
   let resolutions = 0;
   const runResolution = async (
-    inputs?: Record<string, unknown>
+    inputs?: Record<string, unknown>,
+    triggeredBy?: string
   ): Promise<{ workflowExecutionId: string }> => {
+    // Run under an id of its own, the one its steps write as and the one returned.
+    resolutions += 1;
+    const workflowExecutionId = `resolve-proposal-${resolutions}`;
     await resolveEngine.runWorkflow({
       workflowYaml: resolveWorkflowYaml,
       inputs,
       workflowId: RESOLVE_PROPOSAL_WORKFLOW_ID,
+      triggeredBy,
+      executionId: workflowExecutionId,
     });
     const execution =
-      resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.get(FIXTURE_EXECUTION_ID)!;
+      resolveEngine.workflowExecutionRepositoryMock.workflowExecutions.get(workflowExecutionId)!;
     if (!isTerminalStatus(execution.status)) {
       throw new Error(`The resolution stopped as ${execution.status}, which nothing here resumes`);
     }
     resolveStepExecutions.push(
       ...resolveEngine.stepExecutionRepositoryMock.stepExecutions.values()
     );
-    // Copied under an id of its own, where the gate's sync step and the
-    // service's settle-on-read both read it back.
-    resolutions += 1;
-    const workflowExecutionId = `resolve-proposal-${resolutions}`;
-    engine.workflowExecutionRepositoryMock.workflowExecutions.set(workflowExecutionId, {
-      ...execution,
-      id: workflowExecutionId,
-    });
+    // Copied into the gate's engine, where its sync step and the service's
+    // settle-on-read both read it back.
+    engine.workflowExecutionRepositoryMock.workflowExecutions.set(workflowExecutionId, execution);
     return { workflowExecutionId };
   };
   engine.workflowsExecutionEngineMock.executeWorkflow.mockImplementation(

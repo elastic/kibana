@@ -23,5 +23,6 @@ export const getWorkflowCaller = (
     executionId: execution.id,
     request,
     releasedAt: typeof releasedAt === 'string' ? releasedAt : undefined,
+    triggeredBy: execution.triggeredBy,
   };
 };
