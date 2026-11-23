@@ -134,7 +134,7 @@ export const createCausalChecklistEvaluator = (deps: JudgeDeps): RecoveryEvaluat
           earlier_answers: renderEarlierAnswers(earlierRounds(input)),
           transcript: renderRound(evidence),
         },
-        RECOVERY_CHECKLIST_TOOL_NAME
+        { tool: RECOVERY_CHECKLIST_TOOL_NAME }
       );
       result = recoveryChecklistOutputSchema.parse(raw);
     } catch (error) {
@@ -178,7 +178,7 @@ export const createRootCauseEvidenceEvaluator = (deps: JudgeDeps): RecoveryEvalu
           earlier_context: renderEarlierRounds(earlierRounds(input)),
           transcript: renderRound(evidence),
         },
-        RECOVERY_ROOT_CAUSE_TOOL_NAME
+        { tool: RECOVERY_ROOT_CAUSE_TOOL_NAME }
       );
       // The schema snaps each evidence score to 0, 0.5 or 1.
       result = recoveryRootCauseOutputSchema.parse(raw);
@@ -226,7 +226,7 @@ export const createEvidenceFamiliesEvaluator = (deps: JudgeDeps): RecoveryEvalua
         EVIDENCE_FAMILIES_EVALUATOR,
         recoveryEvidenceFamiliesPrompt,
         { family_list: familyListText(OFFLINE_FAMILIES), transcript: renderRound(evidence) },
-        RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME
+        { tool: RECOVERY_EVIDENCE_FAMILIES_TOOL_NAME }
       );
       reached = queriedFamilies(
         recoveryEvidenceFamiliesOutputSchema.parse(raw),
