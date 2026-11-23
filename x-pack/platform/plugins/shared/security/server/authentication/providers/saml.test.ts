@@ -1789,6 +1789,16 @@ describe('SAMLAuthenticationProvider', () => {
     });
   });
 
+  it('keeps the intermediate session while SAML request IDs remain', () => {
+    expect(provider.shouldInvalidateIntermediateSessionAfterLogin()).toBe(true);
+    expect(provider.shouldInvalidateIntermediateSessionAfterLogin({ requestIdMap: {} })).toBe(true);
+    expect(
+      provider.shouldInvalidateIntermediateSessionAfterLogin({
+        requestIdMap: { pending: { redirectURL: '/app/home' } },
+      })
+    ).toBe(false);
+  });
+
   it('`getHTTPAuthenticationScheme` method', () => {
     expect(provider.getHTTPAuthenticationScheme()).toBe('bearer');
   });
