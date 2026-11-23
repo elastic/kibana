@@ -19,6 +19,8 @@ export const MAX_FILTER_LENGTH = 2000;
 export const MAX_ATTRIBUTES_PER_SOURCE = 32;
 /** Longest attribute name. */
 export const MAX_ATTRIBUTE_NAME_LENGTH = 64;
+/** Most attributes one block may offer as suggested filters. */
+export const MAX_SUGGESTED_FILTERS = 16;
 /** Longest literal field path. */
 export const MAX_FIELD_PATH_LENGTH = 512;
 /** Most entries in one attribute's `valueLabels`. */
@@ -140,18 +142,33 @@ export const dynamicBlockSchema = lazySchema(() =>
       // User-facing text for identity fields and attributes. Presentation only: query generation
       // never reads it.
       displayLabels: z.array(dynamicDisplayLabelSchema).max(MAX_DISPLAY_LABELS).optional(),
+      // Names of the columns the inventory offers as dropdown filters, in display order. Each is an
+      // attribute or an identity field, which the whole-definition rules check.
+      suggestedFilters: z.array(literalFieldPathSchema).max(MAX_SUGGESTED_FILTERS).optional(),
     })
-    .superRefine(({ displayLabels = [] }, ctx) => {
-      const seen = new Set<string>();
+    .superRefine(({ displayLabels = [], suggestedFilters = [] }, ctx) => {
+      const seenLabels = new Set<string>();
       displayLabels.forEach(({ name }, index) => {
-        if (seen.has(name)) {
+        if (seenLabels.has(name)) {
           ctx.addIssue({
             code: 'custom',
             path: ['displayLabels', index, 'name'],
             message: `display label name "${name}" is already declared; names are unique within a block`,
           });
         }
-        seen.add(name);
+        seenLabels.add(name);
+      });
+
+      const seenFilters = new Set<string>();
+      suggestedFilters.forEach((name, index) => {
+        if (seenFilters.has(name)) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['suggestedFilters', index],
+            message: `suggested filter "${name}" is listed more than once`,
+          });
+        }
+        seenFilters.add(name);
       });
     })
 );

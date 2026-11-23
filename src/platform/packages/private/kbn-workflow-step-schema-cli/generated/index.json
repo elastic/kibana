@@ -125,8 +125,11 @@
     "alertzero.triage.headroom",
     "alertzero.triage.joinProposal",
     "alertzero.triage.loadAlerts",
+    "alertzero.triage.matchFpDecisions",
     "alertzero.triage.planSweep",
     "alertzero.triage.retagProposalAlerts",
+    "alertzero.triage.revokeFpDecision",
+    "alertzero.triage.storeFpDecisions",
     "alertzero.triage.tagPatternKeys",
     "alienvault-otx.getIndicator",
     "alienvault-otx.getPulse",
@@ -1092,6 +1095,7 @@
     "servicenow_search.work_note_added",
     "significant-events.eventCreated",
     "significant-events.eventStatusChanged",
+    "significant-events.knowledgeIndicatorsChanged",
     "slack2.app_mention",
     "slack2.channel_created",
     "slack2.file_public",
@@ -1106,11 +1110,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "d43936f0a8c54cc632c533eaf84168650069e9dd69001b7d6ff451ed91f7624b"
+      "sha256": "ee6589e0ed4fdb9d9b956996472514642a898ed5edf30e000f5f9dbc38756400"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "120bc0a834b408b96a9cfd6c5a164d2b4e3c176760fa439923f2570d49dcb58b"
+      "sha256": "6b075a35e8479cd3114245ee64ec477b466c75f69ca9c8339dd42ba97ed407c3"
     }
   }
 }

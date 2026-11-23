@@ -148,6 +148,7 @@ export type {
   DynamicSource,
 } from './domain/definitions/dynamic';
 export {
+  MAX_FIELD_PATH_LENGTH,
   getIdentityCompositions,
   getIdentityFields,
   getPresenceFilter,

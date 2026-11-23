@@ -64,5 +64,6 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
         ],
       },
     ],
+    suggestedFilters: ['k8s.cluster.name', 'kubernetes.namespace'],
   },
 };

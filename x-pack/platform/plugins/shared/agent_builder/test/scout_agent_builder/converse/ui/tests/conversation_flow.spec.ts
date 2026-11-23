@@ -59,7 +59,7 @@ test.describe(
 
       const toolCallStep = page.testSubj.locator('agentBuilderToolCallStep');
       await expect(toolCallStep).toContainText('tool: platform.core.search', { timeout: 60_000 });
-      await expect(toolCallStep).toContainText('ran');
+      await expect(toolCallStep).not.toContainText(/\bran\b|running…/);
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {

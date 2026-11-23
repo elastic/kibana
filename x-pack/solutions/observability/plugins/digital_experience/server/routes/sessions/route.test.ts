@@ -9,7 +9,11 @@ import { isBoom } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { SESSIONS_LOOKBACK_DAYS, type SessionsStatus } from '../../../common/sessions';
+import {
+  SESSIONS_LOOKBACK_DAYS,
+  type SessionsStatus,
+  type SessionsStatusResponse,
+} from '../../../common/sessions';
 import {
   NO_ENCRYPTION_KEY_MESSAGE,
   SessionsEnableError,
@@ -19,7 +23,10 @@ import {
 import { SessionsPrivilegesError } from '../../services/sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../services/sessions/sessions_restricted_read_error';
 import { createSessionsReadableCache } from '../../services/sessions/sessions_readable';
-import { getSessionsStatus } from '../../services/sessions/sessions_status';
+import {
+  getSessionsStatus,
+  getSessionsStatusResponse,
+} from '../../services/sessions/sessions_status';
 import type { SessionsServices } from '../create_digital_experience_server_route';
 import { getSession } from './get_session';
 import { listSessions } from './list_sessions';
@@ -57,6 +64,11 @@ const status: SessionsStatus = {
   lastError: null,
   enabledBy: 'ana',
   retentionDays: SESSIONS_LOOKBACK_DAYS,
+};
+
+const statusResponse: SessionsStatusResponse = {
+  ...status,
+  mobile: { ...status, health: 'lagging' },
 };
 
 const LOAD_FAILED_MESSAGE =
@@ -136,6 +148,7 @@ const querySchemaOf = () =>
 describe('sessions routes', () => {
   beforeEach(() => {
     jest.mocked(getSessionsStatus).mockResolvedValue(status);
+    jest.mocked(getSessionsStatusResponse).mockResolvedValue(statusResponse);
     jest.mocked(enableSessions).mockResolvedValue();
   });
 
@@ -171,8 +184,8 @@ describe('sessions routes', () => {
           authzResult: { manage_digital_experience_sessions: canManage },
         });
 
-        expect(await result).toEqual(status);
-        expect(getSessionsStatus).toHaveBeenCalledWith({
+        expect(await result).toEqual(statusResponse);
+        expect(getSessionsStatusResponse).toHaveBeenCalledWith({
           taskManager: services.taskManager,
           settings,
           withDetails: canManage,
@@ -191,7 +204,7 @@ describe('sessions routes', () => {
 
       await result;
 
-      expect(getSessionsStatus).toHaveBeenCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: undefined,
         settings,
         withDetails: false,
@@ -199,7 +212,7 @@ describe('sessions routes', () => {
     });
 
     it('answers 500 without the details when the status read fails', async () => {
-      jest.mocked(getSessionsStatus).mockRejectedValue(esError(500));
+      jest.mocked(getSessionsStatusResponse).mockRejectedValue(esError(500));
       const { result, logger } = runHandler(SESSIONS_STATUS_ENDPOINT);
 
       expect(await clientErrorOf(result)).toEqual(
@@ -218,7 +231,7 @@ describe('sessions routes', () => {
       // The handler reads the user after awaiting the request context.
       coreContext.security.authc.getCurrentUser.mockReturnValue({ username: 'ana' } as never);
 
-      expect(await result).toEqual(status);
+      expect(await result).toEqual(statusResponse);
       expect(enableSessions).toHaveBeenCalledWith({
         esClient: coreContext.elasticsearch.client,
         request,
@@ -228,7 +241,7 @@ describe('sessions routes', () => {
         isServerless: true,
         logger,
       });
-      expect(getSessionsStatus).toHaveBeenCalledWith({
+      expect(getSessionsStatusResponse).toHaveBeenCalledWith({
         taskManager: services.taskManager,
         settings,
         withDetails: true,
@@ -352,7 +365,7 @@ describe('sessions routes', () => {
     });
 
     it('answers 403 when the user cannot read the status after enabling', async () => {
-      jest.mocked(getSessionsStatus).mockRejectedValue(esError(403));
+      jest.mocked(getSessionsStatusResponse).mockRejectedValue(esError(403));
       const { result, coreContext } = runHandler(SESSIONS_ENABLE_ENDPOINT);
 
       expect((await clientErrorOf(result)).statusCode).toBe(403);

@@ -8,7 +8,7 @@
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { hostLikeFixture, k8sDeploymentFixture, k8sNodeFixture } from '../__fixtures__/definitions';
 import { probeAllAs } from '../__fixtures__/source_probes';
-import { buildColumns, planColumnNames } from './columns';
+import { buildColumns, fieldOfColumn, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
 import { resolveIdentityPlan } from './identity';
 import { planSources } from './source_plans';
@@ -187,5 +187,30 @@ describe('planColumnNames', () => {
         'last_seen',
       ],
     ]);
+  });
+});
+
+describe('fieldOfColumn', () => {
+  // Plan 0 reads the first source, which declares `cluster`; plan 1 the second, which declares
+  // `cluster` and `paused`.
+  const plans = plansOf(k8sDeploymentFixture);
+  const columns = columnsOf(k8sDeploymentFixture);
+
+  it("reads an attribute from the field of the plan's source", () => {
+    expect(fieldOfColumn(columns, 'cluster', plans[0])).toBe('orchestrator.cluster.name');
+    expect(fieldOfColumn(columns, 'paused', plans[1])).toBe('kubernetes.deployment.paused');
+  });
+
+  it('has no field for an attribute the plan source does not declare', () => {
+    expect(fieldOfColumn(columns, 'paused', plans[0])).toBeUndefined();
+  });
+
+  it('reads an identity column from its own field in every plan', () => {
+    expect(fieldOfColumn(columns, 'kubernetes.namespace', plans[0])).toBe('kubernetes.namespace');
+    expect(fieldOfColumn(columns, 'kubernetes.namespace', plans[1])).toBe('kubernetes.namespace');
+  });
+
+  it.each(['entity.id', 'last_seen', 'unknown'])('has no field for the column %s', (name) => {
+    expect(fieldOfColumn(columns, name, plans[0])).toBeUndefined();
   });
 });

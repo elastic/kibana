@@ -582,6 +582,7 @@ src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-emulate @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
+src/platform/packages/shared/kbn-connector-topics @elastic/workflows-eng @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-discover
 src/platform/packages/shared/kbn-core-server-benchmarks @elastic/kibana-core
 src/platform/packages/shared/kbn-cps-server-utils @elastic/kibana-core
@@ -3308,6 +3309,10 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 /x-pack/solutions/security/plugins/alertzero/server/telemetry/workers/hunt.md @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/alert_analysis_workflow @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
+
+# AlertZero Triage Watch
+/x-pack/solutions/security/plugins/alertzero/server/alert_triage @elastic/security-investigations
+/x-pack/solutions/security/plugins/alertzero/server/step_types/alert_triage @elastic/security-investigations
 
 # AlertZero Worker settings contract
 # Keep this section below every AlertZero Worker section: CODEOWNERS uses the last match.

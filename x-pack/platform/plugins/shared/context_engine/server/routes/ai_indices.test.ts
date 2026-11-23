@@ -1841,6 +1841,7 @@ describe('ai indices routes', () => {
           dest: aiIndexItem.dest,
           kiId: 'ki-1',
           ki: { content: 'Updated content' },
+          personEdit: true,
         })
       );
       expect(analyticsService.reportKiWrite).toHaveBeenCalledWith(
