@@ -10,6 +10,7 @@ import {
   generateDEK,
   encryptDEKWithRSA,
   encryptField,
+  encryptDocumentAsJson,
   DIAGNOSTIC_QUERIES_ENCRYPT_VERSION,
 } from './encryption';
 
@@ -190,6 +191,52 @@ describe('Security Solution - Health Diagnostic Encryption', () => {
       expect(() => Buffer.from(parts[3], 'base64')).not.toThrow();
       expect(() => Buffer.from(parts[4], 'base64')).not.toThrow();
       expect(() => Buffer.from(parts[5], 'base64')).not.toThrow();
+    });
+  });
+
+  describe('encryptDocumentAsJson', () => {
+    const { publicKey: testPublicKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+    });
+
+    it('returns a v1 wire format string with 6 colon-delimited parts', () => {
+      const dek = generateDEK();
+      const encryptedDEK = encryptDEKWithRSA(dek, testPublicKey);
+      const doc = { 'process.name': 'cmd.exe', count: 42 };
+
+      const result = encryptDocumentAsJson(doc, dek, encryptedDEK, 'test-key');
+
+      const parts = result.split(':');
+      expect(parts).toHaveLength(6);
+      expect(parts[0]).toBe('v1');
+      expect(parts[1]).toBe('test-key');
+    });
+
+    it('produces different ciphertext for the same document with a different DEK', () => {
+      const dek1 = generateDEK();
+      const dek2 = generateDEK();
+      const encDEK1 = encryptDEKWithRSA(dek1, testPublicKey);
+      const encDEK2 = encryptDEKWithRSA(dek2, testPublicKey);
+      const doc = { a: 'value' };
+
+      const r1 = encryptDocumentAsJson(doc, dek1, encDEK1, 'k');
+      const r2 = encryptDocumentAsJson(doc, dek2, encDEK2, 'k');
+
+      expect(r1).not.toBe(r2);
+    });
+
+    it('produces different ciphertext on repeated calls with the same DEK (fresh IV)', () => {
+      const dek = generateDEK();
+      const encryptedDEK = encryptDEKWithRSA(dek, testPublicKey);
+      const doc = { a: 'value' };
+
+      const r1 = encryptDocumentAsJson(doc, dek, encryptedDEK, 'k');
+      const r2 = encryptDocumentAsJson(doc, dek, encryptedDEK, 'k');
+
+      // IVs differ, so ciphertexts differ even though DEK and doc are the same
+      expect(r1).not.toBe(r2);
     });
   });
 });

@@ -73,8 +73,6 @@ jest.mock('../../../use_breadcrumbs', () => ({
   useCasesTemplatesBreadcrumbs: jest.fn(),
 }));
 
-const observablesEnabledFeatures = { observables: { enabled: true, autoExtract: true } };
-
 /**
  * The template name is the editable page title, so naming a template is a header interaction rather
  * than a trip to the Configuration tab.
@@ -212,7 +210,7 @@ describe('CreateTemplatePage', () => {
 
   it('defaults a new template to sync alerts + extract observables on (Security) in the saved definition', async () => {
     render(
-      <TestProviders features={observablesEnabledFeatures}>
+      <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -233,10 +231,8 @@ describe('CreateTemplatePage', () => {
   });
 
   it('defaults extract observables off where the feature is unavailable (e.g. Observability/Stack)', async () => {
-    // Default test context uses DEFAULT_FEATURES (observables autoExtract off) and a basic license,
-    // so the toggle is hidden and the persisted default must be off.
     render(
-      <TestProviders>
+      <TestProviders owner={['observability']}>
         <CreateTemplatePage />
       </TestProviders>
     );
@@ -252,7 +248,7 @@ describe('CreateTemplatePage', () => {
       mockMutateAsync.mock.calls[0][0] as { template: { definition: string } }
     ).template;
     const parsed = yamlParse(definition) as { settings?: Record<string, boolean> };
-    expect(parsed.settings).toEqual({ syncAlerts: true, extractObservables: false });
+    expect(parsed.settings).toEqual({ syncAlerts: false, extractObservables: false });
   });
 
   it('resets the panel config (settings/connector) draft to the defaults on successful creation', async () => {
@@ -266,7 +262,7 @@ describe('CreateTemplatePage', () => {
     );
 
     render(
-      <TestProviders features={observablesEnabledFeatures}>
+      <TestProviders>
         <CreateTemplatePage />
       </TestProviders>
     );

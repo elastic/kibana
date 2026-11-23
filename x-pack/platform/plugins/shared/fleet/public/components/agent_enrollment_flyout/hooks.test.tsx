@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor, act } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 
 import { useStartServices } from '../../hooks';
 import { sendGetOneAgentPolicyFull } from '../../hooks/use_request/agent_policy';
@@ -31,6 +31,9 @@ jest.mock('../../hooks/use_request', () => ({
 jest.mock('../../services/yaml_formatters', () => ({
   getYamlFormatters: jest.fn(),
 }));
+
+// These tests run in ~5ms, so the 5s default only ever fails to a CI wall-clock stall.
+jest.setTimeout(30_000);
 
 const mockNotificationsToasts = { addError: jest.fn() };
 
@@ -70,7 +73,8 @@ describe('useFetchFullPolicy — downloadYaml', () => {
     });
 
     const { result } = renderHook(() => useFetchFullPolicy(mockAgentPolicy, 'IS_KUBERNETES'));
-    await waitFor(() => expect(result.current.yaml).toBe(yamlWithComment));
+    await act(async () => {});
+    expect(result.current.yaml).toBe(yamlWithComment);
 
     const mockLink = mockAnchorElement();
     act(() => result.current.downloadYaml());
@@ -88,7 +92,8 @@ describe('useFetchFullPolicy — downloadYaml', () => {
     });
 
     const { result } = renderHook(() => useFetchFullPolicy(mockAgentPolicy, 'IS_KUBERNETES'));
-    await waitFor(() => expect(result.current.yaml).toBe(yamlWithSpecialChars));
+    await act(async () => {});
+    expect(result.current.yaml).toBe(yamlWithSpecialChars);
 
     const mockLink = mockAnchorElement();
     act(() => result.current.downloadYaml());
@@ -109,7 +114,8 @@ describe('useFetchFullPolicy — downloadYaml', () => {
     });
 
     const { result } = renderHook(() => useFetchFullPolicy(mockAgentPolicy, 'IS_NOT_KUBERNETES'));
-    await waitFor(() => expect(result.current.yaml).toBe(formattedYaml));
+    await act(async () => {});
+    expect(result.current.yaml).toBe(formattedYaml);
 
     const mockLink = mockAnchorElement();
     act(() => result.current.downloadYaml());

@@ -27,6 +27,4 @@ fileGroups:
   src:
     - index.d.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

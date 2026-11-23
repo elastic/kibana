@@ -35,7 +35,6 @@ export const registerFetchRoute = ({
         const { patterns } = await client.asCurrentUser.ccr.getAutoFollowPattern();
         return response.ok({
           body: {
-            // @ts-expect-error Once #98266 is merged, test this again.
             patterns: deserializeListAutoFollowPatterns(patterns),
           },
         });

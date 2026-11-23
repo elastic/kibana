@@ -126,19 +126,40 @@ describe('evaluateStreamlangCondition', () => {
       expect(evaluateStreamlangCondition({ a: 'x' }, { field: 'a', exists: false })).toBe(false);
     });
 
-    it('includes: returns true when field value includes substring', () => {
-      expect(
-        evaluateStreamlangCondition({ a: 'hello world' }, { field: 'a', includes: 'world' })
-      ).toBe(true);
+    it('includes: returns true when a single-valued field equals the value', () => {
       expect(evaluateStreamlangCondition({ a: 'okta' }, { field: 'a', includes: 'okta' })).toBe(
         true
       );
     });
 
-    it('includes: returns false when field does not include substring', () => {
-      expect(evaluateStreamlangCondition({ a: 'hello' }, { field: 'a', includes: 'world' })).toBe(
-        false
-      );
+    it('includes: returns true when any value of a multi-valued field equals the value', () => {
+      expect(
+        evaluateStreamlangCondition({ a: ['info', 'user'] }, { field: 'a', includes: 'user' })
+      ).toBe(true);
+      expect(
+        evaluateStreamlangCondition({ a: ['user', 'info'] }, { field: 'a', includes: 'user' })
+      ).toBe(true);
+      expect(
+        evaluateStreamlangCondition(
+          { event: { type: ['info', 'user'] } },
+          { field: 'event.type', includes: 'user' }
+        )
+      ).toBe(true);
+    });
+
+    it('includes: does not match substrings', () => {
+      expect(
+        evaluateStreamlangCondition({ a: 'hello world' }, { field: 'a', includes: 'world' })
+      ).toBe(false);
+      expect(
+        evaluateStreamlangCondition({ a: ['assets'] }, { field: 'a', includes: 'asset' })
+      ).toBe(false);
+    });
+
+    it('includes: returns false when no value equals the value', () => {
+      expect(
+        evaluateStreamlangCondition({ a: ['info', 'start'] }, { field: 'a', includes: 'user' })
+      ).toBe(false);
     });
 
     it('includes: returns false when field is missing', () => {

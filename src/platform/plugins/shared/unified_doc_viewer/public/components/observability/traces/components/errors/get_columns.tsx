@@ -11,16 +11,16 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiText, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { ErrorData, ErrorsByTraceId } from '@kbn/apm-types';
 import { where } from '@kbn/esql-composer';
 import {
   TRACE_ID,
   SPAN_ID,
   PROCESSOR_EVENT,
-  EVENT_NAME,
   ERROR_ID,
   EXCEPTION_MESSAGE,
+  OTEL_EVENT_NAME,
 } from '@kbn/apm-types';
 import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
@@ -37,12 +37,10 @@ const errorEbt = {
 function createWhereClause({
   traceId,
   docId,
-  source,
   item,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }) {
   let queryString = `${TRACE_ID} == ?traceId`;
@@ -53,17 +51,21 @@ function createWhereClause({
     params.push({ docId });
   }
 
-  if (source === 'apm') {
+  if (item.source === 'apm') {
     queryString += ` AND ${PROCESSOR_EVENT} == ?processorEvent`;
     params.push({ processorEvent: 'error' });
 
-    queryString += ` AND ${ERROR_ID} == ?errorId`;
-    params.push({ errorId: item.error.id });
+    if (item.error.id) {
+      queryString += ` AND ${ERROR_ID} == ?errorId`;
+      params.push({ errorId: item.error.id });
+    }
   }
 
-  if (source === 'unprocessedOtel') {
+  if (item.source === 'unprocessedOtel') {
+    // OTEL_EVENT_NAME is the flattened name `event_name` as stored in the doc.
+    // EVENT_NAME (`event.name`) is a different field — using it here would match nothing.
     if (item?.eventName) {
-      queryString += ` AND ${EVENT_NAME} == ?eventName`;
+      queryString += ` AND ${OTEL_EVENT_NAME} == ?eventName`;
       params.push({ eventName: item.eventName });
     }
     if (item?.error?.exception?.message) {
@@ -78,23 +80,30 @@ function createWhereClause({
 const ErrorMessageLinkCell = ({
   traceId,
   docId,
-  source,
   item,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
   item: ErrorsByTraceId['traceErrors'][0];
 }) => {
   const { indexes } = useDataSourcesContext();
   const errorLabel = getErrorMessage(item.error);
+  const whereClause = useMemo(
+    () => createWhereClause({ traceId, docId, item }),
+    [traceId, docId, item]
+  );
+
+  // Unprocessed OTel errors only live in the configured log sources; the APM error pattern would
+  // miss datasets such as `logs-generic.otel-default`. Never fall back to it — while `indexes.logs`
+  // is unresolved `DiscoverEsqlLink` renders plain text rather than a link to an empty result.
+  const indexPattern = item.source === 'unprocessedOtel' ? indexes.logs : indexes.apm.errors;
 
   const content = <EuiTextTruncate data-test-subj="error-exception-message" text={errorLabel} />;
 
   return (
     <DiscoverEsqlLink
-      indexPattern={indexes.apm.errors}
-      whereClause={createWhereClause({ traceId, docId, source, item })}
+      indexPattern={indexPattern}
+      whereClause={whereClause}
       tabLabel={errorLabel}
       dataTestSubj="error-group-link"
       ebt={errorEbt}
@@ -119,11 +128,9 @@ const getErrorMessage = (error: ErrorData) => {
 export const getColumns = ({
   traceId,
   docId,
-  source,
 }: {
   traceId: string;
   docId?: string;
-  source: ErrorsByTraceId['source'];
 }): Array<EuiBasicTableColumn<ErrorsByTraceId['traceErrors'][0]>> => [
   {
     field: 'name',
@@ -139,7 +146,7 @@ export const getColumns = ({
             width: 100%;
           `}
         >
-          <ErrorMessageLinkCell traceId={traceId} docId={docId} source={source} item={item} />
+          <ErrorMessageLinkCell traceId={traceId} docId={docId} item={item} />
           <EuiText size="s" />
 
           <EuiText size="xs" color="subdued">

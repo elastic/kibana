@@ -118,6 +118,38 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
+    apiTest('POST persists include_frozen', async ({ asAdmin }) => {
+      const testTool = {
+        ...mockTool,
+        id: 'include-frozen-search-test-tool',
+        configuration: { ...mockTool.configuration, include_frozen: true },
+      };
+      const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+        body: testTool,
+        responseType: 'json',
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      createdToolIds.push(testTool.id);
+
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools/${testTool.id}`, {
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.configuration.include_frozen).toBe(true);
+    });
+
+    apiTest('POST validates include_frozen is boolean', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+        body: {
+          ...mockTool,
+          id: 'invalid-include-frozen-tool',
+          configuration: { ...mockTool.configuration, include_frozen: 'yes' },
+        },
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
+
     apiTest('GET retrieves index search tool', async ({ asAdmin }) => {
       const testTool = { ...mockTool, id: 'get-search-test-tool' };
       await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
@@ -202,6 +234,16 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
         expect(response.body.configuration.row_limit).toBe(200);
         expect(response.body.configuration.custom_instructions).toBe('Updated custom instructions');
+      });
+
+      apiTest('PUT updates include_frozen', async ({ asAdmin }) => {
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-search-test-tool`, {
+          body: { configuration: { include_frozen: true } },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.configuration.include_frozen).toBe(true);
+        expect(response.body.configuration.pattern).toBe(testIndex);
       });
     });
 

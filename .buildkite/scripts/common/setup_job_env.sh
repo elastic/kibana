@@ -15,17 +15,29 @@ source .buildkite/scripts/common/util.sh
   BUILDKITE_TOKEN="$(vault_get buildkite-ci buildkite_token_all_jobs)"
   export BUILDKITE_TOKEN
 
-  GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+  case "$BUILDKITE_PIPELINE_SLUG" in
+    kibana-deploy-cloud-from-pr | \
+    kibana-deploy-project-from-pr | \
+    kibana-chromium-linux-build | \
+    kibana-console-definitions-sync | \
+    kibana-emergency-release | \
+    kibana-es-ql-grammar-sync | \
+    kibana-opentelemetry-semantic-conventions-sync | \
+    kibana-purge-cloud-deployments | \
+    kibana-renovate-helper | \
+    kibana-scout-update-metadata | \
+    kibana-serverless-release-readiness | \
+    kibana-tests | \
+    kibana-tests-emergency)
+      GITHUB_TOKEN="$VAULT_GITHUB_TOKEN"
+      ;;
+    *)
+      GITHUB_TOKEN=$(vault_get kibanamachine github_token)
+      ;;
+  esac
   export GITHUB_TOKEN
 
-  KIBANA_DOCKER_USERNAME="$(vault_get container-registry username)"
-  KIBANA_DOCKER_PASSWORD="$(vault_get container-registry password)"
-  function docker_login() {
-      if (command -v docker && docker version) &> /dev/null; then
-        echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-      fi
-  }
-  retry 5 15 docker_login
+  retry 5 15 docker_login_for_pipeline
 }
 
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
@@ -89,15 +101,6 @@ EOF
 
 # Set up misc keys
 {
-  EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
-  export EC_API_KEY
-
-  PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
-  export PROJECT_API_KEY
-
-  PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
-  export PROJECT_API_DOMAIN
-
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
@@ -167,21 +170,6 @@ EOF
   fi
 }
 
-# Set up GCS Service Account for CDN
-{
-  GCS_SA_CDN_KEY="$(vault_get gcs-sa-cdn-prod key)"
-  export GCS_SA_CDN_KEY
-
-  GCS_SA_CDN_EMAIL="$(vault_get gcs-sa-cdn-prod email)"
-  export GCS_SA_CDN_EMAIL
-
-  GCS_SA_CDN_BUCKET="$(vault_get gcs-sa-cdn-prod bucket)"
-  export GCS_SA_CDN_BUCKET
-
-  GCS_SA_CDN_URL="$(vault_get gcs-sa-cdn-prod cdn)"
-  export GCS_SA_CDN_URL
-}
-
 # Setup Failed Test Reporter Elasticsearch credentials
 {
   TEST_FAILURES_ES_CLOUD_ID=$(vault_get failed_tests_reporter_es cloud_id)
@@ -207,37 +195,25 @@ EOF
 
 # Setup GCS Service Account Proxy for CI
 {
-  KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
-  export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
-  vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
-}
-
-# Acquire credentials for legacy vault if needed
-{
-  VAULT_ROLE_ID="$(vault_get kibana-buildkite-vault-credentials role-id)"
-  export VAULT_ROLE_ID
-  VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
-  export VAULT_SECRET_ID
+  KIBANA_WIF_CREDENTIALS_DIR="$(mktemp -d)"
+  export KIBANA_WIF_CREDENTIALS_DIR
+  export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1
 }
 
 # Set up EIS Cloud Connected Mode (CCM) API key
-# Note: This secret is in the legacy vault, requires approle authentication
 {
   if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
-    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
-    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
-    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
-    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
-    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+    KIBANA_EIS_CCM_API_KEY="$(vault_get kibana-eis-ccm key)"
+    export KIBANA_EIS_CCM_API_KEY
   fi
 }
 
-# Inject moon remote-cache credentials on CI
-if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
-  MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
-  export MOON_REMOTE_CACHE_TOKEN
-fi
+# Moon remote cache is disabled (see .moon/workspace.yml)
+# if [[ "${CI:-}" =~ ^(1|true)$ ]]; then
+#   MOON_REMOTE_CACHE_TOKEN=$(vault_get moon-remote-cache token)
+#   export MOON_REMOTE_CACHE_TOKEN
+# fi
 
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then

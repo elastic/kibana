@@ -186,7 +186,7 @@ export function UnifiedSearchBar({
   const { dataView } = useAdHocApmDataView();
   const { urlParams } = useLegacyUrlParams();
   const processorEvent = useProcessorEvent();
-  const { incrementTimeRangeId } = useTimeRangeId();
+  const { incrementTimeRangeId, isAutoRefreshPaused } = useTimeRangeId();
   const searchbarPlaceholder = getSearchBarPlaceholder(placeholder, processorEvent);
 
   const customFilters =
@@ -205,10 +205,18 @@ export function UnifiedSearchBar({
     } as Filter;
   });
 
-  const onRefresh = () => {
+  const doRefresh = () => {
     clearCache();
     incrementTimeRangeId();
     onPageRefreshStart();
+  };
+
+  // onAutoRefresh is wired to the SearchBar timer tick — guard it so the timer
+  // fires silently while a flyout is open. doRefresh is kept unguarded for the
+  // handleSubmit path where the user explicitly requests a refresh.
+  const onAutoRefresh = () => {
+    if (isAutoRefreshPaused) return;
+    doRefresh();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {
@@ -258,7 +266,7 @@ export function UnifiedSearchBar({
         });
       } else {
         action = SearchQueryActions.Refresh;
-        onRefresh();
+        doRefresh();
       }
       telemetry.reportSearchQuerySubmitted({
         kueryFields,
@@ -290,7 +298,7 @@ export function UnifiedSearchBar({
         showSubmitButton={showSubmitButton}
         displayStyle="inPage"
         onQuerySubmit={handleSubmit}
-        onRefresh={onRefresh}
+        onRefresh={onAutoRefresh}
         onRefreshChange={onRefreshChange}
         isClearable={isClearable}
         dataTestSubj="apmUnifiedSearchBar"

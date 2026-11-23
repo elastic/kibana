@@ -176,6 +176,23 @@ paths:
                           responded: 1
                           successful: 1
                           status: 'completed'
+        '404':
+          description: >
+            No live query with this `id` exists in the current space. Live queries
+            issued from another space also return 404.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Action not found'
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: 'Action not found'
 
   /api/osquery/live_queries/{id}/results/{actionId}/_export:
     post:
@@ -412,3 +429,21 @@ paths:
                               id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
                             osquery:
                               total_seconds: '67890'
+        '404':
+          description: >
+            No live query with this `id`, or no query with this `actionId`, exists
+            in the current space. Live queries issued from another space also
+            return 404.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Action not found'
+              examples:
+                actionNotFound:
+                  summary: The live query does not exist in the current space
+                  value:
+                    message: 'Action not found'

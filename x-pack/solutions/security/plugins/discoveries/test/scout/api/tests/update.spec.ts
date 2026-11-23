@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
+import { apiTest } from '../fixtures';
 import { SCHEDULE_TAGS } from '../fixtures/constants';
 import {
   deleteAllWorkflowSchedules,
-  enableWorkflowsFeatureFlag,
+  getAlertsIndexPatternForSpace,
   getScheduleAdminRoleDescriptor,
   getSimpleWorkflowSchedule,
   getWorkflowSchedulesApis,
@@ -18,30 +18,31 @@ import {
 
 apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let spaceId: string;
 
-  apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
-    await enableWorkflowsFeatureFlag(apiServices);
+  apiTest.beforeAll(async ({ samlAuth, scheduleSpace }) => {
+    spaceId = scheduleSpace.id;
 
     const credentials = await samlAuth.asInteractiveUser(getScheduleAdminRoleDescriptor());
     defaultHeaders = { ...credentials.cookieHeader };
   });
 
-  apiTest.afterEach(async ({ apiClient }) => {
-    await deleteAllWorkflowSchedules(apiClient, defaultHeaders);
+  apiTest.afterEach(async ({ discoveriesApi }) => {
+    await deleteAllWorkflowSchedules(discoveriesApi, defaultHeaders, spaceId);
   });
 
-  apiTest('should update a schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should update a schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const updateBody = {
       actions: [],
       name: 'Updated schedule name',
       params: {
-        alerts_index_pattern: '.alerts-security.alerts-default',
+        alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
         api_config: {
           action_type_id: '.gen-ai',
           connector_id: 'updated-connector-id',
@@ -68,17 +69,17 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     expect(params.size).toBe(50);
   });
 
-  apiTest('should return 400 when name is missing from update', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 400 when name is missing from update', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const response = await apis.updateSchedule(createdId, {
       actions: [],
       params: {
-        alerts_index_pattern: '.alerts-security.alerts-default',
+        alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
         api_config: {
           action_type_id: '.gen-ai',
           connector_id: 'test-connector-id',
@@ -94,14 +95,14 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     expect(body.message).toContain('name');
   });
 
-  apiTest('should return 404 when updating non-existent schedule', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should return 404 when updating non-existent schedule', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
     const response = await apis.updateSchedule('non-existent-id-12345', {
       actions: [],
       name: 'Does not exist',
       params: {
-        alerts_index_pattern: '.alerts-security.alerts-default',
+        alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
         api_config: {
           action_type_id: '.gen-ai',
           connector_id: 'test-connector-id',
@@ -116,18 +117,18 @@ apiTest.describe('Workflow schedule API - update', { tag: SCHEDULE_TAGS }, () =>
     expect(body.message).toBeDefined();
   });
 
-  apiTest('should update workflow_config fields', async ({ apiClient }) => {
-    const apis = getWorkflowSchedulesApis(apiClient, defaultHeaders);
+  apiTest('should update workflow_config fields', async ({ discoveriesApi }) => {
+    const apis = getWorkflowSchedulesApis(discoveriesApi, defaultHeaders, spaceId);
 
-    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule());
-    expect(createResult.statusCode).toBe(200);
+    const createResult = await apis.createSchedule(getSimpleWorkflowSchedule(spaceId));
+    expect(createResult).toHaveStatusCode(200);
     const createdId = (createResult.body as Record<string, unknown>).id as string;
 
     const updateBody = {
       actions: [],
       name: 'Updated with workflow config',
       params: {
-        alerts_index_pattern: '.alerts-security.alerts-default',
+        alerts_index_pattern: getAlertsIndexPatternForSpace(spaceId),
         api_config: {
           action_type_id: '.gen-ai',
           connector_id: 'test-connector-id',

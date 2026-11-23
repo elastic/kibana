@@ -34,15 +34,21 @@ export const MonitorsMWsCallout = () => {
     [allConfigs, outdatedLocationIds]
   );
 
-  const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
+  const { activeMWs, hasPendingChanges, isSyncOverdue } = useHasPendingMwChanges(monitorMWIds);
 
   if (activeMWs.length) {
-    return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
+    return (
+      <MwsCalloutContent
+        activeMWs={activeMWs}
+        hasOutdatedAgent={hasOutdatedAgent}
+        isSyncOverdue={isSyncOverdue}
+      />
+    );
   }
 
   if (hasPendingChanges) {
     return (
-      <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
+      <MwsPendingSyncCallout hasOutdatedAgent={hasOutdatedAgent} isSyncOverdue={isSyncOverdue} />
     );
   }
 

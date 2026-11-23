@@ -106,6 +106,7 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
           withSteps={withSteps}
           draftStorageKey={draftStorageKey}
           configuration={currentConfiguration}
+          selectedOwner={selectedOwner}
         />
       </>
     );

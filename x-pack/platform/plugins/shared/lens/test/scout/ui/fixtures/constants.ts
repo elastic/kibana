@@ -7,7 +7,21 @@
 
 export const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
+  KIBANA_SAMPLE_DATA_LOGS_TSDB:
+    'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
 };
+
+export const KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX = 'kibana_sample_data_logstsdb';
+
+export const TSDB_ISO_TIME_RANGE = {
+  start: '2023-04-16T00:00:00.000Z',
+  end: '2023-06-16T00:00:00.000Z',
+} as const;
+
+export const TSDB_IN_RANGE_DATES = {
+  from: 'Apr 16, 2023 @ 00:00:00.000',
+  to: 'Jun 16, 2023 @ 00:00:00.000',
+} as const;
 
 export const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',

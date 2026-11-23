@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   AiSummaryMetadataDoc,
   GetPersistedAiSummaryResponse,
@@ -25,11 +25,13 @@ import { APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { withLicense } from '../../../siem_migrations/common/api/util/with_license';
 
-const GetAiSummaryRequestQuery = z.object({
-  entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
-  // Not used server-side (the read filters by entity.id); accepted for symmetry with the write route.
-  entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH).optional(),
-});
+const GetAiSummaryRequestQuery = lazySchema(() =>
+  z.object({
+    entityId: z.string().max(MAX_ENTITY_ID_LENGTH),
+    // Not used server-side (the read filters by entity.id); accepted for symmetry with the write route.
+    entityType: z.string().max(MAX_ENTITY_TYPE_LENGTH).optional(),
+  })
+);
 
 /**
  * Maps a raw metadata datastream doc (Ai_summary.* prefixed fields) to the flat
