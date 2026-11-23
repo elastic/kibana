@@ -11,7 +11,7 @@ import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common
 import { getPrivilegedRoleName } from '../../../../common';
 import type { ApiClientResponse } from './api_client';
 import type { ApiKey, RequestAuthFixture } from './api_key';
-import { requestAuthFixture } from './api_key';
+import { PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS, requestAuthFixture } from './api_key';
 import { coreWorkerFixtures } from './saml_auth';
 
 jest.mock('./saml_auth', () => ({ coreWorkerFixtures: { extend: jest.fn() } }));
@@ -33,7 +33,6 @@ jest.mock('../../../../common', () => {
 });
 
 type RoleDescriptor = KibanaRole | ElasticsearchRoleDescriptor;
-type KeyReference = Pick<ApiKey, 'id' | 'name'>;
 interface CreatePayload {
   name: string;
   metadata: Record<string, never>;
@@ -41,12 +40,13 @@ interface CreatePayload {
   kibana_role_descriptors?: Record<string, KibanaRole>;
 }
 interface InvalidatePayload {
-  apiKeys: KeyReference[];
-  isAdmin: boolean;
+  ids: string[];
 }
 interface InvalidateResponse {
-  itemsInvalidated: KeyReference[] | null;
-  errors: Array<KeyReference & { error?: { message: string } }> | null;
+  error_count: number;
+  error_details?: Array<{ type: string; reason: string }>;
+  invalidated_api_keys: string[];
+  previously_invalidated_api_keys: string[];
 }
 
 const noAccessRole: ElasticsearchRoleDescriptor = { cluster: [], indices: [], applications: [] };
@@ -67,22 +67,36 @@ const response = <T>(body: T, statusCode = 200): ApiClientResponse<T> => ({
   body,
 });
 
-const createDependencies = (onTeardown: () => void) => {
+const invalidated = (
+  ids: string[],
+  overrides: Partial<InvalidateResponse> = {}
+): InvalidateResponse => ({
+  error_count: 0,
+  invalidated_api_keys: ids,
+  previously_invalidated_api_keys: [],
+  ...overrides,
+});
+const idsOf = (keys: Array<Pick<ApiKey, 'id'>>) => ({ ids: keys.map(({ id }) => id) });
+// Captured before any test installs fake timers, which would otherwise replace it.
+const realSetImmediate = setImmediate;
+// Lets every queued microtask run, so a released fixture reaches its next real wait point.
+const flushMicrotasks = () => new Promise<void>((resolve) => realSetImmediate(resolve));
+
+const createDependencies = () => {
   let keyCount = 0;
-  const create = jest.fn<Promise<ApiClientResponse<ApiKey>>, [CreatePayload]>(async ({ name }) =>
-    response(makeKey(`key-${++keyCount}`, name))
+  const create = jest.fn<Promise<ApiClientResponse<ApiKey>>, [CreatePayload, AbortSignal?]>(
+    async ({ name }) => response(makeKey(`key-${++keyCount}`, name))
   );
-  const invalidate = jest.fn<Promise<ApiClientResponse<InvalidateResponse>>, [InvalidatePayload]>(
-    async ({ apiKeys }) => response({ itemsInvalidated: apiKeys, errors: [] })
+  const invalidate = jest.fn<Promise<InvalidateResponse>, [InvalidatePayload]>(async ({ ids }) =>
+    invalidated(ids)
   );
   const dependencies = {
     log: {
-      debug: jest.fn((message: string) => {
-        if (message === 'Waiting for pending API credential operations') onTeardown();
-      }),
+      debug: jest.fn<void, [string]>(),
       info: jest.fn<void, [string]>(),
     },
     config: { serverless: true, projectType: 'security' as const },
+    esClient: { security: { invalidateApiKey: invalidate } },
     samlAuth: {
       customRoleName: 'custom_role_worker_1',
       setCustomRole: jest.fn<Promise<void>, [RoleDescriptor]>().mockResolvedValue(undefined),
@@ -108,16 +122,14 @@ const createDependencies = (onTeardown: () => void) => {
         (
           url: string,
           options: {
-            body: CreatePayload | InvalidatePayload;
+            body: CreatePayload;
             headers: Record<string, string>;
             responseType: 'json';
+            signal?: AbortSignal;
           }
         ) => {
-          if (url === 'internal/security/api_key' && 'name' in options.body) {
-            return create(options.body);
-          }
-          if (url === 'internal/security/api_key/invalidate' && 'apiKeys' in options.body) {
-            return invalidate(options.body);
+          if (url === 'internal/security/api_key') {
+            return create(options.body, options.signal);
           }
           throw new Error(`Unexpected API request: ${url}`);
         }
@@ -142,8 +154,7 @@ const [runFixture, fixtureOptions] = registration.requestAuth;
 const createHarness = () => {
   const ready = Promise.withResolvers<RequestAuthFixture>();
   const endUse = Promise.withResolvers<void>();
-  const teardownStarted = Promise.withResolvers<void>();
-  const mocks = createDependencies(() => teardownStarted.resolve());
+  const mocks = createDependencies();
   return {
     ...mocks,
     start: async (use: (auth: RequestAuthFixture) => Promise<void> = () => endUse.promise) => {
@@ -162,7 +173,8 @@ const createHarness = () => {
         done,
         close: async () => {
           endUse.resolve();
-          await teardownStarted.promise;
+          // Teardown closes admission synchronously after use settles; no I/O happens in between.
+          await flushMicrotasks();
         },
       };
     },
@@ -213,13 +225,9 @@ describe('requestAuth worker fixture', () => {
 
     await close();
     await done;
-    expect(harness.invalidate).toHaveBeenCalledWith({
-      apiKeys: harness.create.mock.calls.map(([{ name }], index) => ({
-        id: `key-${index + 1}`,
-        name,
-      })),
-      isAdmin: true,
-    });
+    expect(harness.invalidate.mock.calls).toEqual([
+      [{ ids: harness.create.mock.calls.map((_call, index) => `key-${index + 1}`) }],
+    ]);
     expect(harness.dependencies.log.info).toHaveBeenLastCalledWith('Invalidated 7 API keys');
   });
 
@@ -262,11 +270,14 @@ describe('requestAuth worker fixture', () => {
 
       const { apiKey } = await auth.getApiKeyForCustomRole(descriptor);
 
-      expect(harness.create).toHaveBeenCalledWith({
-        name: 'myTestApiKey-0-custom_role_worker_1-worker-1',
-        metadata: {},
-        [field]: { [samlAuth.customRoleName]: originalDescriptor },
-      });
+      expect(harness.create).toHaveBeenCalledWith(
+        {
+          name: 'myTestApiKey-0-custom_role_worker_1-worker-1',
+          metadata: {},
+          [field]: { [samlAuth.customRoleName]: originalDescriptor },
+        },
+        expect.any(AbortSignal)
+      );
       expect(descriptor).toEqual(originalDescriptor);
       expect(samlAuth.session.getApiCredentialsForRole).toHaveBeenCalledWith('admin');
       expect(samlAuth.fetchBuiltInRoleDescriptor).not.toHaveBeenCalled();
@@ -274,10 +285,7 @@ describe('requestAuth worker fixture', () => {
       await done;
       expect(samlAuth.setCustomRole.mock.calls).toEqual([[existingRole]]);
       expect(persistedRole).toBe(existingRole);
-      expect(harness.invalidate).toHaveBeenCalledWith({
-        apiKeys: [{ id: apiKey.id, name: apiKey.name }],
-        isAdmin: true,
-      });
+      expect(harness.invalidate).toHaveBeenCalledWith(idsOf([apiKey]));
     }
   );
 
@@ -297,7 +305,8 @@ describe('requestAuth worker fixture', () => {
     const rejectedHook = expect(resumedHook).rejects.toThrow('after teardown has started');
     await createStarted.promise;
     await close();
-    expect(harness.invalidate).not.toHaveBeenCalled();
+    // Known keys are revoked without waiting for the pending create.
+    expect(harness.invalidate.mock.calls).toEqual([[idsOf([first.apiKey])]]);
 
     const lateKey = makeKey('late');
     lateResponse.resolve(response(lateKey));
@@ -305,10 +314,7 @@ describe('requestAuth worker fixture', () => {
     await done;
     expect(harness.dependencies.samlAuth.setCustomRole).not.toHaveBeenCalled();
     expect(harness.create).toHaveBeenCalledTimes(2);
-    expect(harness.invalidate).toHaveBeenCalledWith({
-      apiKeys: [first.apiKey, lateKey].map(({ id, name }) => ({ id, name })),
-      isAdmin: true,
-    });
+    expect(harness.invalidate.mock.calls).toEqual([[idsOf([first.apiKey])], [idsOf([lateKey])]]);
   });
 
   it.each(['custom session fetch', 'built-in lookup'] as const)(
@@ -396,10 +402,7 @@ describe('requestAuth worker fixture', () => {
     successfulResponse.resolve(response(makeKey('successful')));
     await successfulCreate;
     await done;
-    expect(harness.invalidate).toHaveBeenCalledWith({
-      apiKeys: [{ id: 'successful', name: 'successful' }],
-      isAdmin: true,
-    });
+    expect(harness.invalidate.mock.calls).toEqual([[{ ids: ['successful'] }]]);
   });
 
   it('drains a rejected custom credential session fetch without starting a key request', async () => {
@@ -489,10 +492,7 @@ describe('requestAuth worker fixture', () => {
       await auth.getApiKeyForCustomRole(kibanaRole);
     });
     await expect(done).rejects.toBe(failure);
-    expect(harness.invalidate).toHaveBeenCalledWith({
-      apiKeys: [{ id: 'successful', name: 'successful' }],
-      isAdmin: true,
-    });
+    expect(harness.invalidate.mock.calls).toEqual([[{ ids: ['successful'] }]]);
   });
 
   it('also closes admission when use throws synchronously', async () => {
@@ -518,48 +518,22 @@ describe('requestAuth worker fixture', () => {
 
   it.each([
     {
-      name: 'HTTP failure',
-      result: response({ itemsInvalidated: [], errors: [] }, 503),
-      message: 'HTTP 503',
-    },
-    {
-      name: 'per-item failure',
-      result: response({
-        itemsInvalidated: [],
-        errors: [{ id: 'key-1', name: 'failed', error: { message: 'forbidden' } }],
+      name: 'reported error',
+      result: invalidated([], {
+        error_count: 1,
+        error_details: [{ type: 'security_exception', reason: 'forbidden' }],
       }),
-      message: 'API key invalidation errors',
+      message: 'API key invalidation reported 1 error(s)',
     },
     {
-      name: 'missing key',
-      result: response({ itemsInvalidated: [], errors: [] }),
+      name: 'unconfirmed key without an error',
+      result: invalidated([]),
       message: 'Incomplete API key invalidation',
     },
     {
-      name: 'malformed itemsInvalidated array',
-      result: response({ itemsInvalidated: null, errors: [] }),
-      message: 'Invalid API key invalidation response',
-    },
-    {
-      name: 'malformed errors array',
-      result: response({ itemsInvalidated: [{ id: 'key-1', name: 'first' }], errors: null }),
-      message: 'Invalid API key invalidation response',
-    },
-    {
-      name: 'wrong key with matching count',
-      result: response({ itemsInvalidated: [{ id: 'other', name: 'other' }], errors: [] }),
-      message: 'Incomplete API key invalidation',
-    },
-    {
-      name: 'extra result',
-      result: response({
-        itemsInvalidated: [
-          { id: 'key-1', name: 'first' },
-          { id: 'extra', name: 'extra' },
-        ],
-        errors: [],
-      }),
-      message: 'Incomplete API key invalidation',
+      name: 'wrong key',
+      result: invalidated(['other']),
+      message: 'missing IDs: key-1',
     },
   ])('surfaces invalidation $name instead of logging success', async ({ result, message }) => {
     const harness = createHarness();
@@ -573,16 +547,112 @@ describe('requestAuth worker fixture', () => {
     ).toBe(false);
   });
 
-  it('detects a duplicate invalidation result even when the response count matches', async () => {
+  it('accepts keys that Elasticsearch reports as previously invalidated', async () => {
     const harness = createHarness();
     const { auth, close, done } = await harness.start();
     const { apiKey } = await auth.getApiKeyForAdmin();
-    await auth.getApiKeyForViewer();
     harness.invalidate.mockResolvedValueOnce(
-      response({ itemsInvalidated: [apiKey, apiKey], errors: [] })
+      invalidated([], { previously_invalidated_api_keys: [apiKey.id] })
     );
     await close();
-    await expect(done).rejects.toThrow('missing IDs: key-2');
+    await done;
+    expect(harness.dependencies.log.info).toHaveBeenLastCalledWith('Invalidated 1 API keys');
+  });
+
+  it('splits invalidation into batches of at most 1,000 keys and attempts every batch', async () => {
+    const harness = createHarness();
+    const failure = new Error('first batch failed');
+    harness.invalidate.mockRejectedValueOnce(failure);
+    const { auth, close, done } = await harness.start();
+    const keys = [];
+    for (let index = 0; index < 1001; index++) {
+      keys.push((await auth.getApiKeyForAdmin()).apiKey);
+    }
+    await close();
+    await expect(done).rejects.toBe(failure);
+    expect(harness.invalidate.mock.calls).toEqual([
+      [idsOf(keys.slice(0, 1000))],
+      [idsOf(keys.slice(1000))],
+    ]);
+  });
+
+  it('batches late keys separately so a late arrival cannot overflow a full batch', async () => {
+    const harness = createHarness();
+    const { auth, close, done } = await harness.start();
+    const knownKeys = [];
+    for (let index = 0; index < 1000; index++) {
+      knownKeys.push((await auth.getApiKeyForAdmin()).apiKey);
+    }
+    const lateResponse = Promise.withResolvers<ApiClientResponse<ApiKey>>();
+    harness.create.mockImplementationOnce(() => lateResponse.promise);
+    const lateCreate = auth.getApiKeyForAdmin();
+    await flushMicrotasks();
+    await close();
+    lateResponse.resolve(response(makeKey('late')));
+    await lateCreate;
+    await done;
+    expect(harness.invalidate.mock.calls).toEqual([[idsOf(knownKeys)], [{ ids: ['late'] }]]);
+  });
+
+  describe('when a credential operation stalls', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    const startStalledCreate = async ({ honorAbort }: { honorAbort: boolean }) => {
+      const harness = createHarness();
+      const { auth, close, done } = await harness.start();
+      const { apiKey: knownKey } = await auth.getApiKeyForAdmin();
+      const stalledResponse = Promise.withResolvers<ApiClientResponse<ApiKey>>();
+      let createSignal: AbortSignal | undefined;
+      harness.create.mockImplementationOnce((_payload, signal) => {
+        createSignal = signal;
+        if (honorAbort) {
+          signal?.addEventListener('abort', () => stalledResponse.reject(new Error('aborted')));
+        }
+        return stalledResponse.promise;
+      });
+      const stalledCreate = auth.getApiKeyForAdmin();
+      void stalledCreate.catch(() => {});
+      await jest.advanceTimersByTimeAsync(0);
+      await close();
+      return {
+        harness,
+        done,
+        knownKey,
+        stalledCreate,
+        stalledResponse,
+        getSignal: () => createSignal,
+      };
+    };
+
+    it('revokes known keys before the drain deadline and fails once it passes', async () => {
+      const { harness, done, knownKey, stalledCreate, getSignal } = await startStalledCreate({
+        honorAbort: true,
+      });
+      expect(harness.invalidate.mock.calls).toEqual([[idsOf([knownKey])]]);
+
+      const rejectedDone = expect(done).rejects.toThrow(
+        `Timed out after ${PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS}ms waiting for 1 pending`
+      );
+      await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+      await rejectedDone;
+      expect(getSignal()?.aborted).toBe(true);
+      await expect(stalledCreate).rejects.toThrow('aborted');
+    });
+
+    it('revokes a key that arrives after the drain deadline', async () => {
+      const { harness, done, stalledCreate, stalledResponse } = await startStalledCreate({
+        honorAbort: false,
+      });
+      const rejectedDone = expect(done).rejects.toThrow('Timed out');
+      await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+      await rejectedDone;
+
+      // A transport that ignores abort can still deliver the key after teardown gave up on it.
+      stalledResponse.resolve(response(makeKey('straggler')));
+      await expect(stalledCreate).rejects.toThrow('teardown timed out');
+      expect(harness.invalidate).toHaveBeenLastCalledWith({ ids: ['straggler'] });
+    });
   });
 
   it('propagates invalidation transport failures', async () => {

@@ -78,10 +78,10 @@ export interface RequestAuthFixture {
   getApiKeyForBuiltInRole: (roleName: string) => Promise<RoleApiCredentials>;
 }
 
-interface InvalidateApiKeysResponse {
-  itemsInvalidated: Array<Pick<ApiKey, 'id' | 'name'>>;
-  errors: Array<Pick<ApiKey, 'id' | 'name'>>;
-}
+// Bounded so cleanup requests stay small and match Kibana's invalidation route limit.
+const MAX_INVALIDATION_BATCH_SIZE = 1000;
+// Leaves room in the worker teardown budget to revoke keys that arrive during the drain.
+export const PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS = 20_000;
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
   {},
@@ -92,9 +92,11 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
   }
 >({
   requestAuth: [
-    async ({ log, config, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
+    async ({ log, config, esClient, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
       const pendingOperations = new Set<Promise<RoleApiCredentials>>();
+      const drainAbortController = new AbortController();
+      const { signal: drainSignal } = drainAbortController;
       let acceptingCredentials = true;
 
       const runCredentialOperation = (
@@ -145,6 +147,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }`;
 
         const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+        throwIfDrainAborted();
 
         const payload = createApiKeyPayload(apiKeyName, roleName, roleDescriptors);
         const response = await apiClient.post<ApiKey>('internal/security/api_key', {
@@ -155,6 +158,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           },
           body: payload,
           responseType: 'json',
+          signal: drainSignal,
         });
 
         if (response.statusCode !== 200) {
@@ -164,6 +168,12 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }
 
         const apiKey = response.body;
+        if (drainSignal.aborted) {
+          // Teardown has stopped collecting keys, so revoke this one before reporting the failure.
+          await invalidateApiKeys([apiKey]);
+          throwIfDrainAborted();
+        }
+
         const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
 
         log.info(`Created API key for ${roleName} role: ${apiKey.name}`);
@@ -171,55 +181,103 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return { apiKey, apiKeyHeader };
       };
 
+      const invalidateApiKeyBatch = async (apiKeys: ApiKey[]) => {
+        const ids = apiKeys.map(({ id }) => id);
+        // Elasticsearch reports per-key revocation results; Kibana's internal route discards them.
+        const {
+          error_count: errorCount,
+          error_details: errorDetails,
+          invalidated_api_keys: invalidatedIds,
+          previously_invalidated_api_keys: previouslyInvalidatedIds,
+        } = await esClient.security.invalidateApiKey({ ids });
+
+        if (errorCount > 0) {
+          throw new Error(
+            `API key invalidation reported ${errorCount} error(s): ${JSON.stringify(errorDetails)}`
+          );
+        }
+
+        const revokedIds = new Set([...invalidatedIds, ...previouslyInvalidatedIds]);
+        const missingIds = ids.filter((id) => !revokedIds.has(id));
+        if (missingIds.length > 0) {
+          throw new Error(
+            `Incomplete API key invalidation: ${missingIds.length} of ${
+              ids.length
+            } key(s) not confirmed as invalidated; missing IDs: ${missingIds.join(', ')}`
+          );
+        }
+      };
+
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
         if (apiKeys.length === 0) {
           return;
         }
 
-        // Get admin credentials once for all invalidations
-        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
-
-        // Batch invalidate all API keys in a single request (API supports up to 1000 keys)
-        const response = await apiClient.post<InvalidateApiKeysResponse>(
-          'internal/security/api_key/invalidate',
-          {
-            headers: {
-              'kbn-xsrf': 'some-xsrf-token',
-              'x-elastic-internal-origin': 'kibana',
-              ...adminCookieHeader,
-            },
-            body: {
-              apiKeys: apiKeys.map((apiKey) => ({ id: apiKey.id, name: apiKey.name })),
-              isAdmin: true,
-            },
-            responseType: 'json',
-          }
+        const batches: ApiKey[][] = [];
+        for (let start = 0; start < apiKeys.length; start += MAX_INVALIDATION_BATCH_SIZE) {
+          batches.push(apiKeys.slice(start, start + MAX_INVALIDATION_BATCH_SIZE));
+        }
+        // Attempt every batch so one failure does not leave the remaining keys active.
+        const results = await Promise.allSettled(batches.map(invalidateApiKeyBatch));
+        const failures = results.flatMap((result) =>
+          result.status === 'rejected' ? [result.reason] : []
         );
+        if (failures.length === 1) {
+          throw failures[0];
+        }
+        if (failures.length > 1) {
+          throw new AggregateError(failures, 'API key invalidation failed');
+        }
+        log.info(`Invalidated ${apiKeys.length} API keys`);
+      };
 
-        if (response.statusCode !== 200) {
+      const throwIfDrainAborted = () => {
+        if (drainSignal.aborted) {
+          throw new Error('API credential request abandoned because teardown timed out');
+        }
+      };
+
+      const drainPendingOperations = async () => {
+        if (pendingOperations.size === 0) {
+          return;
+        }
+
+        let timer: NodeJS.Timeout | undefined;
+        const timedOut = new Promise<boolean>((resolve) => {
+          timer = setTimeout(() => resolve(true), PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+        });
+        const settled = Promise.allSettled(pendingOperations).then(() => false);
+        const didTimeOut = await Promise.race([settled, timedOut]);
+        clearTimeout(timer);
+
+        if (didTimeOut) {
+          const stalledCount = pendingOperations.size;
+          drainAbortController.abort();
           throw new Error(
-            `Failed to invalidate API keys: HTTP ${response.statusCode}: ${response.statusMessage}`
+            `Timed out after ${PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS}ms waiting for ${stalledCount} pending API credential operation(s)`
           );
         }
+      };
 
-        const { itemsInvalidated, errors } = response.body;
-        if (!Array.isArray(itemsInvalidated) || !Array.isArray(errors)) {
-          throw new Error('Invalid API key invalidation response');
+      // Revoke known keys right away while admitted operations drain, then revoke keys they created.
+      const cleanUpApiKeys = async () => {
+        const knownKeys = generatedApiKeys.slice();
+        const [knownResult, drainResult] = await Promise.allSettled([
+          invalidateApiKeys(knownKeys),
+          drainPendingOperations(),
+        ]);
+        const lateResult = (
+          await Promise.allSettled([invalidateApiKeys(generatedApiKeys.slice(knownKeys.length))])
+        )[0];
+        const failures = [knownResult, drainResult, lateResult].flatMap((result) =>
+          result.status === 'rejected' ? [result.reason] : []
+        );
+        if (failures.length === 1) {
+          throw failures[0];
         }
-        if (errors.length > 0) {
-          throw new Error(`API key invalidation errors: ${JSON.stringify(errors)}`);
+        if (failures.length > 1) {
+          throw new AggregateError(failures, 'API key cleanup failed');
         }
-
-        const invalidatedIds = new Set(itemsInvalidated.map(({ id }) => id));
-        const missingIds = apiKeys.filter(({ id }) => !invalidatedIds.has(id)).map(({ id }) => id);
-        if (missingIds.length > 0 || itemsInvalidated.length !== apiKeys.length) {
-          throw new Error(
-            `Incomplete API key invalidation: expected ${apiKeys.length}, received ${
-              itemsInvalidated.length
-            }; missing IDs: ${missingIds.join(', ')}`
-          );
-        }
-        log.info(`Invalidated ${itemsInvalidated.length} API keys`);
       };
 
       const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
@@ -274,14 +332,12 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         ),
       ]);
 
-      // Hook timeouts do not cancel requests: stop new calls and drain admitted credential operations.
+      // Hook timeouts do not cancel requests: stop new calls, then clean up known and late keys.
       acceptingCredentials = false;
-      log.debug('Waiting for pending API credential operations');
-      await Promise.allSettled(pendingOperations);
       const cleanupResults = await Promise.allSettled([
         measurePerformanceAsync(log, `Delete all API Keys`, async () => {
           log.debug(`Delete all API Keys`);
-          return invalidateApiKeys(generatedApiKeys);
+          return cleanUpApiKeys();
         }),
       ]);
       const failures = [...useResults, ...cleanupResults].filter(
