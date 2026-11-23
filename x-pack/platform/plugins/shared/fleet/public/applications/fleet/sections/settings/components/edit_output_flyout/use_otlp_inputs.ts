@@ -21,6 +21,8 @@ import {
   otlpProtocol,
 } from '../../../../../../../common/constants';
 
+import { isManagedOtlpEndpointUrl } from '../../../../../../../common/services/managed_otlp_endpoint';
+
 import { useInput, useKeyValueInput, useSwitchInput } from '../../../../hooks';
 
 import {
@@ -104,7 +106,8 @@ const toInputValue = (value: string | number | null | undefined) =>
 export function useOtlpInputs(
   otlpOutput: NewOtlpOutput | undefined,
   isSelected: boolean,
-  disabled: boolean
+  disabled: boolean,
+  managedOtlpUrl?: string
 ) {
   const exporter = otlpOutput?.otlp_exporter;
   const grpc: Partial<OtlpGrpcExporterConfig> | undefined =
@@ -320,10 +323,12 @@ export function useOtlpInputs(
         return error;
       }
       // the sizes are compared when both use the same unit, and a blank minimum is the spec default
-      const batchSizer = getEffectiveBatchSizer(
-        otlpBatchSizerInput.value,
-        otlpQueueSizerInput.value
-      );
+      // Fleet gives a batch of the managed endpoint that has no unit the bytes
+      const batchSizer =
+        !otlpBatchSizerInput.value &&
+        isManagedOtlpEndpointUrl(otlpEndpointInput.value.trim(), managedOtlpUrl)
+          ? 'bytes'
+          : getEffectiveBatchSizer(otlpBatchSizerInput.value, otlpQueueSizerInput.value);
       const queueSize = otlpQueueSizeInput.value.trim()
         ? Number(otlpQueueSizeInput.value)
         : OTLP_QUEUE_SPEC_DEFAULT_SIZE;
@@ -375,6 +380,7 @@ export function useOtlpInputs(
     otlpQueueSizeInput.value,
     otlpQueueSizerInput.value,
     otlpBatchSizerInput.value,
+    otlpEndpointInput.value,
   ]);
   useRevalidateWhenChanged(otlpBatchMaxSizeInput, [otlpBatchMinSizeInput.value]);
   useRevalidateWhenChanged(otlpQueueNumConsumersInput, [otlpQueueEnabledInput.value]);

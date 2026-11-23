@@ -778,7 +778,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const otlpInputs = useOtlpInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,
-    isOtlpExporterDisabled
+    isOtlpExporterDisabled,
+    cloud?.managedOtlp?.url
   );
 
   const inputs: OutputFormInputsType = {

@@ -104,7 +104,7 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
 describe('EditOutputFlyout', () => {
-  const mockStartServices = (isServerlessEnabled?: boolean) => {
+  const mockStartServices = (isServerlessEnabled?: boolean, managedOtlpUrl?: string) => {
     mockUseStartServices.mockReturnValue({
       notifications: {
         toasts: {
@@ -121,6 +121,7 @@ describe('EditOutputFlyout', () => {
       },
       cloud: {
         isServerlessEnabled,
+        managedOtlp: managedOtlpUrl ? { url: managedOtlpUrl } : undefined,
       },
     });
   };
@@ -2871,6 +2872,35 @@ describe('EditOutputFlyout', () => {
               }),
             })
           );
+        });
+      });
+
+      describe('minimum batch size of a batch without a unit', () => {
+        const itemsQueue = (endpoint: string) =>
+          ({
+            ...otlpOutput,
+            otlp_exporter: {
+              protocol: 'grpc',
+              endpoint,
+              sending_queue: { enabled: true, sizer: 'items', queue_size: 1000, batch: {} },
+            },
+          } as Output);
+
+        it('should compare it with the queue size on an endpoint that is not managed', () => {
+          mockStartServices(false, 'https://managed.example.com');
+          const { utils } = renderFlyout(itemsQueue('collector.example.com:4317'));
+          fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+
+          // the batch inherits the unit of the queue: 8192 items do not fit in 1000 items
+          expect(utils.getByText(/minimum size \(8192\) can not be more than/)).toBeInTheDocument();
+        });
+
+        it('should not compare it on the managed endpoint, where the unit is bytes', () => {
+          mockStartServices(false, 'https://managed.example.com');
+          const { utils } = renderFlyout(itemsQueue('managed.example.com:443'));
+          fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpBatchMinSizeInput'));
+
+          expect(utils.queryByText(/minimum size \(8192\) can not be more than/)).toBeNull();
         });
       });
 
