@@ -87,6 +87,12 @@ export const RANK_SEPARATION = 120;
 export const NODE_SEPARATION = 80;
 export const GRAPH_MARGIN = 50;
 
+/** Space between the members of an open group and the edge of its box. */
+export const GROUP_BOX_PADDING = 24;
+
+/** Room at the top of an open group's box for its label and close button. */
+export const GROUP_BOX_HEADER_HEIGHT = 48;
+
 /**
  * Below this node count the service map is never folded into serpentine bands: small maps already
  * fit the viewport, and folding them just adds visual noise.
