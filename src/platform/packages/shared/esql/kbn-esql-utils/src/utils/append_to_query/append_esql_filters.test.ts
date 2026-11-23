@@ -50,7 +50,7 @@ describe('appendEsqlFiltersToESQLQuery', () => {
     const filter = getFilter({ type: FILTERS.PHRASES, params: ['big', 'small'] });
 
     expect(await appendEsqlFiltersToESQLQuery(query, [filter])).toMatch(
-      /WHERE \(MV_CONTAINS\(TO_STRING\(`size`\), "big"\) OR MV_CONTAINS\(TO_STRING\(`size`\), "small"\)\)$/
+      /WHERE MV_INTERSECTS\(TO_STRING\(`size`\), \["big", "small"\]\)$/
     );
   });
 

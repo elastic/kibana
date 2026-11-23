@@ -176,18 +176,34 @@ const wrapWithNot = (expression: string | null, negate: boolean): string | null 
 };
 
 /**
- * Checks that a column, that can have several values, has the value. An operator like IN evaluates to null on a
- * multivalued column, and MV_CONTAINS needs the same type on both sides. The type of the column is not known, so
- * the numbers are compared as doubles and the other values as strings, which works for any type of column.
+ * Checks that a column, that can have several values, has any of the values, like the phrases filters of DSL.
+ * An operator like IN evaluates to null on a multivalued column, and MV_INTERSECTS needs the same type on both
+ * sides. The type of the column is not known, so the numbers are compared as doubles and the other values as
+ * strings, which works for any type of column.
+ * There is one call for all the values of a type, as Elasticsearch rejects an expression with too many
+ * parentheses, which a chain of checks with one per value reaches with a few hundred values.
  */
-const getMultiValueCheck = (escapedField: string, value: string | number | boolean): string => {
-  if (typeof value === 'number') {
-    return `MV_CONTAINS(TO_DOUBLE(${escapedField}), TO_DOUBLE(${formatESQLValue(value)}))`;
+const getMultiValueCheck = (
+  escapedField: string,
+  values: Array<string | number | boolean>
+): string => {
+  const strings = values.filter((value): value is string => typeof value === 'string');
+  const numbers = values.filter((value): value is number => typeof value === 'number');
+  const booleans = values.filter((value): value is boolean => typeof value === 'boolean');
+  const formatValues = (valuesToFormat: Array<string | number | boolean>) =>
+    valuesToFormat.map(formatESQLValue).join(', ');
+
+  const checks: string[] = [];
+  if (strings.length) {
+    checks.push(`MV_INTERSECTS(TO_STRING(${escapedField}), [${formatValues(strings)}])`);
   }
-  if (typeof value === 'boolean') {
-    return `MV_CONTAINS(${escapedField}, ${formatESQLValue(value)})`;
+  if (numbers.length) {
+    checks.push(`MV_INTERSECTS(TO_DOUBLE(${escapedField}), TO_DOUBLE([${formatValues(numbers)}]))`);
   }
-  return `MV_CONTAINS(TO_STRING(${escapedField}), ${formatESQLValue(value)})`;
+  if (booleans.length) {
+    checks.push(`MV_INTERSECTS(${escapedField}, [${formatValues(booleans)}])`);
+  }
+  return checks.length === 1 ? checks[0] : `(${checks.join(' OR ')})`;
 };
 
 /**
@@ -231,9 +247,7 @@ const translatePhrasesFilter = (
   const escapedField = escapeFieldName(field);
 
   if (mode === 'exact') {
-    // Any of the values, like the phrases filters of DSL
-    const checks = values.map((value) => getMultiValueCheck(escapedField, value));
-    return checks.length === 1 ? checks[0] : `(${checks.join(' OR ')})`;
+    return getMultiValueCheck(escapedField, values);
   }
 
   if (values.length === 1) {

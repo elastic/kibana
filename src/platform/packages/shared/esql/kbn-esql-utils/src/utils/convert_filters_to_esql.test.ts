@@ -477,38 +477,43 @@ describe('ES|QL filters', () => {
     });
 
     describe('several values', () => {
-      it('checks each value with MV_CONTAINS, as an operator like IN evaluates to null on a multivalued column', () => {
+      it('checks them with MV_INTERSECTS, as an operator like IN evaluates to null on a multivalued column', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])])).toBe(
-          '(MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_STRING(`size`), "b"))'
+          'MV_INTERSECTS(TO_STRING(`size`), ["a", "b"])'
         );
       });
 
       it('matches any of the values, like the phrases filters of DSL, and not all of them', () => {
-        // MV_CONTAINS(col, [a, b]) needs both, so a column that has only one of them would not match
         const expression = convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'])]);
 
-        expect(expression).toContain(' OR ');
-        expect(expression).not.toContain('[');
+        // MV_CONTAINS would need all of them, so a column that has only one of them would not match
+        expect(expression).toContain('MV_INTERSECTS');
+        expect(expression).not.toContain('MV_CONTAINS');
       });
 
-      it('does not need an OR for a single value', () => {
-        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a'])])).toBe(
-          'MV_CONTAINS(TO_STRING(`size`), "a")'
-        );
+      it('does not grow with the number of values, as Elasticsearch rejects an expression with too many parentheses', () => {
+        const values = Array.from({ length: 10000 }, (_, index) => `value-${index}`);
+        const expression = convertEsqlFiltersToESQLExpression([getPhrases(values)]);
+
+        expect(expression.match(/\(/g)).toHaveLength(2);
+        expect(expression).toContain('"value-9999"');
       });
 
-      it('compares the numbers as doubles, as MV_CONTAINS needs the same type and the one of the column is not known', () => {
+      it('compares the numbers as doubles, as MV_INTERSECTS needs the same type and the one of the column is not known', () => {
         expect(convertEsqlFiltersToESQLExpression([getPhrases([1, 2.5])])).toBe(
-          '(MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(1)) OR MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(2.5)))'
+          'MV_INTERSECTS(TO_DOUBLE(`size`), TO_DOUBLE([1, 2.5]))'
         );
       });
 
-      it('compares the booleans as they are, and handles values of different types', () => {
-        expect(convertEsqlFiltersToESQLExpression([getPhrases([true])])).toBe(
-          'MV_CONTAINS(`size`, true)'
+      it('compares the booleans as they are', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases([true, false])])).toBe(
+          'MV_INTERSECTS(`size`, [true, false])'
         );
-        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 1, false])])).toBe(
-          '(MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_DOUBLE(`size`), TO_DOUBLE(1)) OR MV_CONTAINS(`size`, false))'
+      });
+
+      it('has a check for each type of value, as an array of ES|QL has one type', () => {
+        expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 1, false, 'b'])])).toBe(
+          '(MV_INTERSECTS(TO_STRING(`size`), ["a", "b"]) OR MV_INTERSECTS(TO_DOUBLE(`size`), TO_DOUBLE([1])) OR MV_INTERSECTS(`size`, [false]))'
         );
       });
     });
@@ -520,7 +525,7 @@ describe('ES|QL filters', () => {
         ])
       ).toBe('(`size` IS NULL OR NOT (`size` == "big"))');
       expect(convertEsqlFiltersToESQLExpression([getPhrases(['a', 'b'], { negate: true })])).toBe(
-        '(`size` IS NULL OR NOT ((MV_CONTAINS(TO_STRING(`size`), "a") OR MV_CONTAINS(TO_STRING(`size`), "b"))))'
+        '(`size` IS NULL OR NOT (MV_INTERSECTS(TO_STRING(`size`), ["a", "b"])))'
       );
     });
 
