@@ -8,6 +8,7 @@
  */
 
 import { isBinaryExpression, isIdentifier, isSource, isSubQuery } from '@elastic/esql';
+import { uniqBy } from 'lodash';
 import type {
   ESQLAstCommand,
   ESQLAstHeaderCommand,
@@ -68,17 +69,11 @@ export const getNamedSubqueriesAvailableTo = (
   return index < 0 ? [] : namedSubqueries.slice(0, index);
 };
 
-/**
- * Returns the index sources of a source command, replacing LET references with the sources of their
- * bodies. With `maxDepth`, only the sources of inline subqueries up to that depth are read; a LET
- * reference doesn't add a level, its body is read at the depth of the reference. Sources with the same
- * name are not deduplicated.
- */
+/** Returns the index sources of a source command, replacing LET references with the sources of their bodies. */
 export const resolveNamedSubquerySources = (
   sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[],
-  maxDepth?: number
-): ESQLSource[] => walkSources(sourceCommand, namedSubqueries, maxDepth).sources;
+  namedSubqueries: readonly NamedSubquery[]
+): ESQLSource[] => uniqBy(walkSources(sourceCommand, namedSubqueries).sources, 'name');
 
 /**
  * Returns the named subqueries that a source command reads, directly or through other bindings,
@@ -117,15 +112,12 @@ interface PendingArg {
   readonly arg: ESQLAstItem;
   // How many leading bindings the arg can reference: a body sees only the bindings declared before it.
   readonly scope: number;
-  // How many inline subqueries the arg is nested in.
-  readonly depth: number;
 }
 
 // Depth-first with an explicit stack and a name lookup: a LET chain can be as long as the query.
 const walkSources = (
   sourceCommand: ESQLAstCommand | undefined,
-  namedSubqueries: readonly NamedSubquery[],
-  maxDepth?: number
+  namedSubqueries: readonly NamedSubquery[]
 ): { sources: ESQLSource[]; referenced: Set<NamedSubquery> } => {
   // The first declaration of a name wins, as with `find`.
   const indexByName = new Map<string, number>();
@@ -137,24 +129,23 @@ const walkSources = (
 
   const sources: ESQLSource[] = [];
   const referenced = new Set<NamedSubquery>();
-  // The lowest depth each binding was expanded at: deeper expansions read a subset of its sources.
-  const expandedAt = new Map<NamedSubquery, number>();
+  const expanded = new Set<NamedSubquery>();
   const pending: PendingArg[] = [];
   // Pushed in reverse, so the args are visited in query order.
-  const pushArgs = (command: ESQLAstCommand | undefined, scope: number, depth: number) => {
+  const pushArgs = (command: ESQLAstCommand | undefined, scope: number) => {
     const args = command?.args ?? [];
     for (let i = args.length - 1; i >= 0; i--) {
-      pending.push({ arg: args[i], scope, depth });
+      pending.push({ arg: args[i], scope });
     }
   };
 
-  pushArgs(sourceCommand, namedSubqueries.length, 0);
+  pushArgs(sourceCommand, namedSubqueries.length);
 
   for (let next = pending.pop(); next; next = pending.pop()) {
-    const { arg, scope, depth } = next;
+    const { arg, scope } = next;
 
     if (isSubQuery(arg)) {
-      pushArgs(arg.child.commands[0], scope, depth + 1);
+      pushArgs(arg.child.commands[0], scope);
       continue;
     }
 
@@ -165,23 +156,18 @@ const walkSources = (
     const index = canReferenceNamedSubquery(arg) ? indexByName.get(arg.name) : undefined;
 
     if (index === undefined) {
-      if (maxDepth === undefined || depth <= maxDepth) {
-        sources.push(arg);
-      }
+      sources.push(arg);
       continue;
     }
 
     const namedSubquery = namedSubqueries[index];
     referenced.add(namedSubquery);
 
-    // Without a depth limit, every depth reads the same sources.
-    const level = maxDepth === undefined ? 0 : Math.min(depth, maxDepth + 1);
-
     // Elasticsearch rejects a binding declared later or itself: keep it, but don't read its sources.
-    // Shared dependencies only need to be expanded once per level.
-    if (index < scope && level < (expandedAt.get(namedSubquery) ?? Infinity)) {
-      expandedAt.set(namedSubquery, level);
-      pushArgs(namedSubquery.query.commands[0], index, depth);
+    // Shared dependencies only need to be expanded once.
+    if (index < scope && !expanded.has(namedSubquery)) {
+      expanded.add(namedSubquery);
+      pushArgs(namedSubquery.query.commands[0], index);
     }
   }
 

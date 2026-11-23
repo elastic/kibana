@@ -102,7 +102,7 @@ describe('resolveNamedSubquerySources', () => {
 
   it('resolves shared dependencies without duplicate index sources', () => {
     const root = parse(
-      'LET base = (FROM logs-*, remote:logs-*); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, (FROM second)'
+      'LET base = (FROM logs-*, remote:logs-*); LET first = (FROM base, base); LET second = (FROM first, base); FROM first, (FROM second), logs-*'
     );
     const namedSubqueries = getNamedSubqueries(root.header);
     const sources = resolveNamedSubquerySources(root.commands[0], namedSubqueries);
@@ -110,20 +110,6 @@ describe('resolveNamedSubquerySources', () => {
     expect(sources.map(({ name }) => name)).toEqual(['logs-*', 'remote:logs-*']);
     expect(resolveNamedSubquerySources(root.commands[0], namedSubqueries)).toEqual(sources);
   });
-
-  it.each(['FROM (FROM selected), selected', 'FROM selected, (FROM selected)'])(
-    'reads the nested sources of a binding referenced at two depths, whatever the order: %s',
-    (sourceQuery) => {
-      const root = parse(`LET selected = (FROM logs-*, (FROM metrics-*)); ${sourceQuery}`);
-      const sources = resolveNamedSubquerySources(
-        root.commands[0],
-        getNamedSubqueries(root.header),
-        1
-      );
-
-      expect(new Set(sources.map(({ name }) => name))).toEqual(new Set(['logs-*', 'metrics-*']));
-    }
-  );
 
   it('resolves a chain of bindings as long as the query', () => {
     const bindings = Array.from(

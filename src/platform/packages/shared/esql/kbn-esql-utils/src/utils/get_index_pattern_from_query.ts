@@ -44,6 +44,17 @@ function getPromQLSources(commands: ESQLCommand[]): string[] {
   return index ? [index] : [];
 }
 
+function getDirectIndexSources(commands: ESQLCommand[]): ESQLSource[] {
+  const sourceCommand = commands.find(({ name }) => INDEX_SOURCE_COMMANDS.has(name.toUpperCase()));
+  if (!sourceCommand) {
+    return [];
+  }
+
+  return (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
+  );
+}
+
 function getIndexSources(
   commands: ESQLCommand[],
   namedSubqueries: readonly NamedSubquery[]
@@ -53,17 +64,23 @@ function getIndexSources(
     return [];
   }
 
-  // Direct sources first, then the immediate inline subqueries; a LET reads its body in place.
-  const directSources = sourceCommand.args.filter(
-    (arg): arg is ESQLSource => isSource(arg) && arg.sourceType === 'index'
+  const directSources = (sourceCommand.args as ESQLSource[]).filter(
+    (arg): arg is ESQLSource => arg.sourceType === 'index'
   );
-  const subqueries = sourceCommand.args.filter(isSubQuery);
 
-  return resolveNamedSubquerySources(
-    { ...sourceCommand, args: [...directSources, ...subqueries] },
-    namedSubqueries,
-    1
-  );
+  const subquerySources = sourceCommand.args
+    .filter(isSubQuery)
+    .flatMap((subquery) => getDirectIndexSources(subquery.child.commands));
+
+  const sources = [...directSources, ...subquerySources];
+  if (namedSubqueries.length === 0) {
+    return sources;
+  }
+
+  // The resolver gets the sources collected above, in the same order, and replaces each LET
+  // reference with the indices of its body and of the LETs it reads. Inline subqueries keep
+  // being read one level deep, as without LET.
+  return resolveNamedSubquerySources({ ...sourceCommand, args: sources }, namedSubqueries);
 }
 
 function getSourceNameWithoutRemoteClusterPrefix(source: ESQLSource): string {

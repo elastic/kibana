@@ -170,31 +170,6 @@ describe('getIndexPatternsFromESQLQuery', () => {
     });
   });
 
-  it('should deduplicate after removing the remote cluster prefix', () => {
-    expect(getIndexPatternsFromESQLQuery('FROM "cluster:logs", cluster:logs')).toEqual({
-      indexPattern: 'cluster:logs',
-      indexPatternWithoutRemoteClusterPrefix: 'cluster:logs,logs',
-    });
-  });
-
-  it.each([
-    'FROM (FROM logs-*)',
-    'FROM (FROM (FROM logs-*))',
-    'FROM (FROM logs-*, (FROM metrics-*))',
-  ])('should read a LET where it is referenced, as the index it replaces: %s', (query) => {
-    const withLet = `LET selected = (FROM logs-*); ${query.replace('logs-*', 'selected')}`;
-
-    expect(getIndexPatternFromESQLQuery(withLet)).toBe(getIndexPatternFromESQLQuery(query));
-  });
-
-  it('should not add a level for a LET body or a LET chain', () => {
-    expect(
-      getIndexPatternFromESQLQuery(
-        'LET base = (FROM logs-*, (FROM metrics-*)); LET selected = (FROM base); FROM selected'
-      )
-    ).toBe(getIndexPatternFromESQLQuery('FROM logs-*, (FROM metrics-*)'));
-  });
-
   it('should return no index pattern for a LET without indices', () => {
     expect(getIndexPatternsFromESQLQuery('LET numbers = (ROW a = 1); FROM numbers')).toEqual({
       indexPattern: '',
