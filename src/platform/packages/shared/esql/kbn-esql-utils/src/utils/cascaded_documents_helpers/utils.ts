@@ -9,8 +9,14 @@
 
 import { getDataViewFieldSubtypeMulti } from '@kbn/es-query';
 import { type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { Builder, isColumn, isFunctionExpression, mutate, Walker } from '@elastic/esql';
-import type { EsqlQuery } from '@elastic/esql';
+import {
+  Builder,
+  isColumn,
+  isFunctionExpression,
+  mutate,
+  Walker,
+  type EsqlQuery,
+} from '@elastic/esql';
 import type {
   ESQLAstExpression,
   ESQLFunction,
@@ -431,9 +437,9 @@ export const buildValuesAggregateFilterExpressions = ({
         // the values of several rows can be collected into a single cascade node,
         // so the same value can be present more than once
         new Set(
-          (Array.isArray(displayedValues) ? displayedValues : [displayedValues])
-            .filter((value): value is string | number => value !== undefined && value !== null)
-            .filter((value) => value !== '')
+          (Array.isArray(displayedValues) ? displayedValues : [displayedValues]).filter(
+            (value): value is string | number => value !== undefined && value !== null
+          )
         )
       );
 
@@ -459,12 +465,37 @@ export const buildValuesAggregateFilterExpressions = ({
         return filters;
       }
 
-      const valueExpressions = aggregateValues.map((value) =>
-        Builder.expression.func.call(matchFunction, [
+      const valueExpressions = aggregateValues.map((value) => {
+        // An empty string is a value the row displays like any other, but no full text predicate
+        // can single it out, because analysing it yields no term to match against. So we choose
+        // to identify these documents by the length of what they hold instead.
+        //
+        // MV_MIN stands between the field and the measurement because a scalar function reads a
+        // multivalued field as null, which would drop the very documents this predicate exists to
+        // reach. The empty string sorts ahead of every other value, so the minimum is empty
+        // exactly when the document holds an empty value.
+        //
+        // Only a string field can be measured this way, so a field reached through MATCH keeps
+        // the full text treatment, and so does a value made of whitespace: the documents really
+        // hold it, and measuring it would read it as empty.
+        if (value === '' && matchFunction === 'match_phrase') {
+          return Builder.expression.func.binary('==', [
+            Builder.expression.func.call('length', [
+              Builder.expression.func.call('mv_min', [
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: aggregatedColumnName })],
+                }),
+              ]),
+            ]),
+            Builder.expression.literal.integer(0),
+          ]);
+        }
+
+        return Builder.expression.func.call(matchFunction, [
           Builder.identifier({ name: aggregatedColumnName }),
           buildAggregateValueLiteral(value),
-        ])
-      );
+        ]);
+      });
 
       filters.push(
         // the row displays every value the aggregate holds, a document only needs to match one of them

@@ -1058,6 +1058,120 @@ describe('cascaded documents helpers utils', () => {
           );
         });
 
+        describe('values the row displays that no full text predicate can express', () => {
+          // the reducer that fills these collects the values of a filtering aggregate into an
+          // array, so a lone value still arrives as an array of one
+          const buildCascadeQueryForDisplayedValues = (
+            displayedValues: Array<string | number> | null
+          ) => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                TS kibana_sample_data_logstsdb | STATS values(tags) BY host.name
+              `,
+            };
+
+            mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+            return constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['host.name'],
+              nodePathMap: { 'host.name': 'www.elastic.co' },
+              nodeAggregatedValues: { 'values(tags)': displayedValues },
+            });
+          };
+
+          it('collapses the field before measuring it, so documents holding several values are still reached', () => {
+            // the row displays the empty value, so the documents holding it belong to the row,
+            // which a predicate built only from the values that can be matched would hide.
+            // MV_MIN earns its place here: measuring the field directly reads a document holding
+            // several values as null and drops it, which is the shape VALUES is reached for
+            const cascadeQuery = buildCascadeQueryForDisplayedValues(['']);
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND LENGTH(MV_MIN(tags)) == 0'
+            );
+          });
+
+          it('keeps the empty value alongside the values it displays next to it', () => {
+            const cascadeQuery = buildCascadeQueryForDisplayedValues(['', 'info']);
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (LENGTH(MV_MIN(tags)) == 0 OR MATCH_PHRASE(tags, "info"))'
+            );
+          });
+
+          it('measures the length once for an empty value collected from several result rows', () => {
+            const cascadeQuery = buildCascadeQueryForDisplayedValues(['', 'info', '']);
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND (LENGTH(MV_MIN(tags)) == 0 OR MATCH_PHRASE(tags, "info"))'
+            );
+          });
+
+          it.each([
+            [' ', ' '],
+            ['  ', '  '],
+            // the printer escapes a tab on its way into the literal
+            ['\t', '\\t'],
+          ])(
+            'matches on the value itself when the row displays %p, which the documents really hold',
+            (whitespaceValue, printedValue) => {
+              // measuring the length would read these as empty and exclude the very documents
+              // the row was built from
+              const cascadeQuery = buildCascadeQueryForDisplayedValues([whitespaceValue]);
+
+              expect(cascadeQuery).toBeDefined();
+              expect(cascadeQuery!.esql).toBe(
+                `FROM kibana_sample_data_logstsdb | WHERE \`host.name\` == "www.elastic.co" AND MATCH_PHRASE(tags, "${printedValue}")`
+              );
+            }
+          );
+
+          it('tells an empty value apart from an aggregate the row reported as null', () => {
+            // an empty value says the documents hold the field and it is empty, a null says they
+            // do not hold it at all, so the two cannot share a predicate
+            const emptyValueQuery = buildCascadeQueryForDisplayedValues(['']);
+            const nullAggregateQuery = buildCascadeQueryForDisplayedValues(null);
+
+            expect(emptyValueQuery!.esql).toContain('LENGTH(MV_MIN(tags)) == 0');
+            expect(emptyValueQuery!.esql).not.toContain('IS NULL');
+            expect(nullAggregateQuery!.esql).toContain('tags IS NULL');
+            expect(nullAggregateQuery!.esql).not.toContain('LENGTH');
+          });
+
+          it('keeps measuring the length when the value sits among the numbers of another aggregate', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                TS kibana_sample_data_logstsdb | STATS values(tags), count = COUNT(*) BY host.name
+              `,
+            };
+
+            mockDataViewFields({ 'host.name': keywordField, tags: keywordField });
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath: ['host.name'],
+              nodePathMap: { 'host.name': 'www.elastic.co' },
+              // COUNT has no per document equivalent, so it contributes nothing either way
+              nodeAggregatedValues: { 'values(tags)': [''], count: 12 },
+            });
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logstsdb | WHERE `host.name` == "www.elastic.co" AND LENGTH(MV_MIN(tags)) == 0'
+            );
+          });
+        });
+
         it.each([
           ['a DROP command names the aggregate', '| DROP tags_seen'],
           ['a DROP command matches the aggregate through a wildcard pattern', '| DROP tags_*'],
