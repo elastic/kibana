@@ -13455,7 +13455,7 @@ paths:
                           breach:
                             segment: WHERE avg_cpu > 0.9
                         reason:
-                          template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -13600,7 +13600,7 @@ paths:
                     breach:
                       segment: WHERE avg_cpu > 0.9
                   reason:
-                    template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -13646,7 +13646,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -13802,7 +13802,7 @@ paths:
                         breach:
                           segment: WHERE avg_cpu > 0.9
                       reason:
-                        template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -13835,7 +13835,7 @@ paths:
                         breach:
                           segment: WHERE avg_cpu > 0.9
                       reason:
-                        template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                        template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                       recovery:
                         strategy: no_breach
                       schedule:
@@ -13883,7 +13883,7 @@ paths:
                           breach:
                             segment: WHERE avg_cpu > 0.9
                         reason:
-                          template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -13923,7 +13923,7 @@ paths:
                           breach:
                             segment: WHERE avg_cpu > 0.9
                         reason:
-                          template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -14449,7 +14449,7 @@ paths:
                           breach:
                             segment: WHERE avg_cpu > 0.9
                         reason:
-                          template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                          template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                         recovery:
                           strategy: no_breach
                         schedule:
@@ -15329,7 +15329,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15514,7 +15514,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15692,7 +15692,7 @@ paths:
                     breach:
                       segment: WHERE avg_cpu > 0.9
                   reason:
-                    template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                    template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                   recovery:
                     strategy: no_breach
                   schedule:
@@ -15738,7 +15738,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15788,7 +15788,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -15958,7 +15958,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -16146,7 +16146,7 @@ paths:
                       breach:
                         segment: WHERE avg_cpu > 0.9
                     reason:
-                      template: 'CPU on {{host.name}} is high: {{avg_cpu}}'
+                      template: 'CPU on {{data.host.name}} is high: {{data.avg_cpu}}'
                     recovery:
                       strategy: no_breach
                     schedule:
@@ -156483,7 +156483,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         reason:
           additionalProperties: false
-          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
           type: object
           properties:
             template:
@@ -156909,7 +156909,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         reason:
           additionalProperties: false
-          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset. Null is not accepted.
           type: object
           properties:
             template:
@@ -157043,7 +157043,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         reason:
           additionalProperties: false
-          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to leave it unset on create or clear it when replacing an existing rule. Null is not accepted.
           type: object
           properties:
             template:
@@ -157597,7 +157597,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         reason:
           additionalProperties: false
-          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Absent when no reason template is set.
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Absent when no reason template is set.
           type: object
           properties:
             template:
@@ -157876,7 +157876,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query_patch'
         reason:
           additionalProperties: false
-          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{host.name}} was {{cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to preserve the current value; send null to clear it.
+          description: Alert reason configuration. Only allowed when kind is "alert". `template` is the alert reason template, for example "CPU on {{data.host.name}} was {{data.cpu_pct}}%." Maximum 1024 characters. Whitespace is preserved; empty or whitespace-only templates are rejected. Omit to preserve the current value; send null to clear it.
           nullable: true
           type: object
           properties:
