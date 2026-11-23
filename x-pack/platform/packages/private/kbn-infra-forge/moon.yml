@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/infra-forge'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/actionable-obs-team'
+  defaultOwner: '@elastic/nightshift-sre-agent-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/infra-forge'
   description: Moon project for @kbn/infra-forge
   channel: ''
-  owner: '@elastic/actionable-obs-team'
+  owner: '@elastic/nightshift-sre-agent-team'
   sourceRoot: x-pack/platform/packages/private/kbn-infra-forge
 dependsOn:
   - '@kbn/tooling-log'

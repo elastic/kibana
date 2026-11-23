@@ -256,7 +256,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await pageObjects.apiKeys.deleteAllApiKeyOneByOne();
+        await clearAllApiKeys(es, log);
       });
 
       after(async () => {

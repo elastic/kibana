@@ -166,6 +166,55 @@ describe('console parser', () => {
     expect(requests).toEqual([{ startOffset: 0, endOffset: 30 }]);
   });
 
+  it('leaves the request end unset after an inline triple quote and later syntax error', () => {
+    const input = 'POST _query\n{\n  "query": """ FROM my-index | """,\n\n}';
+    const { requests } = parser(input)!;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+  });
+
+  it('leaves the request end unset after a multiline triple quote and later syntax error', () => {
+    const input = 'POST _query\n{\n  "script": """\n  some content\n  """,\n  "\n}';
+    const { requests } = parser(input)!;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+  });
+
+  it('leaves the request end unset for an unterminated triple-quoted value', () => {
+    const input = 'POST _query\n{\n  "script": """\n  some content';
+    const { requests, errors } = parser(input)!;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
+  });
+
+  it('does not treat request-like lines inside an unterminated triple-quoted string as requests', () => {
+    const input = 'POST _query\n{\n  "script": """\n  GET _all\n  {\n\n  }';
+    const { requests, errors } = parser(input)!;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
+  });
+
+  it('does not snap to comment-like lines inside an unterminated triple-quoted string', () => {
+    const input = 'POST _query\n{\n  "script": """\n  some content\n# a comment\nGET _search';
+    const { requests, errors } = parser(input)!;
+
+    expect(requests).toEqual([{ startOffset: 0 }]);
+    expect(errors).toEqual([{ text: 'failed to find closing \'"""\'', offset: 29 }]);
+  });
+
+  it('recovers the next request after a syntax error following a triple-quoted value', () => {
+    const input = 'POST _query\n{\n  "script": """foo""",\n}\n\nGET _search';
+    const { requests, errors } = parser(input)!;
+
+    expect(errors).toEqual([{ text: 'Bad string', offset: 38 }]);
+    expect(requests).toEqual([
+      { startOffset: 0, endOffset: 37 },
+      { startOffset: 40, endOffset: 51 },
+    ]);
+  });
+
   it('emits duplicate-key error and continues parsing next request', () => {
     const input = 'GET _search\n{ "a": 1, "a": 2 }\n\nPOST _test';
     const { requests, errors } = parser(input)!;

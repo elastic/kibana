@@ -11,7 +11,7 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Identifier} Identifier */
 
-const traverse = require('eslint-traverse');
+const traverse = require('../helpers/traverse');
 
 const isApiTestCall = (node) => node.callee.type === 'Identifier' && node.callee.name === 'apiTest';
 

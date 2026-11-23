@@ -9,6 +9,7 @@ import {
   getTemplateLifecycle,
   updateDataStreamsFailureStore,
   updateDataStreamsLifecycle,
+  updateDataStreamsMappings,
 } from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
@@ -426,5 +427,70 @@ describe('updateDataStreamsFailureStore', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Error updating data stream failure store: Template simulation error'
     );
+  });
+});
+
+describe('updateDataStreamsMappings', () => {
+  interface MappingsEsClient {
+    transport: { request: jest.Mock };
+    indices: { rollover: jest.Mock };
+  }
+
+  let mockEsClient: MappingsEsClient;
+  let mockLogger: jest.Mocked<MockLogger>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      transport: {
+        request: jest.fn().mockResolvedValue({
+          data_streams: [{ name: 'logs-test-default', applied_to_data_stream: true }],
+        }),
+      },
+      indices: {
+        rollover: jest.fn().mockResolvedValue({}),
+      },
+    };
+    mockLogger = createMockLogger();
+  });
+
+  it('sets the override with streams _meta when mappings are provided', async () => {
+    await updateDataStreamsMappings({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      name: 'logs-test-default',
+      mappings: { 'foo.bar': { type: 'keyword' } },
+    });
+
+    expect(mockEsClient.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_data_stream/logs-test-default/_mappings',
+      body: {
+        properties: { 'foo.bar': { type: 'keyword' } },
+        _meta: { managed_by: 'streams' },
+      },
+    });
+    expect(mockEsClient.indices.rollover).toHaveBeenCalledWith({
+      alias: 'logs-test-default',
+      lazy: true,
+    });
+  });
+
+  it('resets the override with an empty body when no mappings are provided', async () => {
+    await updateDataStreamsMappings({
+      esClient: mockEsClient as unknown as ElasticsearchClient,
+      logger: mockLogger as unknown as Logger,
+      name: 'logs-test-default',
+      mappings: undefined,
+    });
+
+    expect(mockEsClient.transport.request).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_data_stream/logs-test-default/_mappings',
+      body: {},
+    });
+    expect(mockEsClient.indices.rollover).toHaveBeenCalledWith({
+      alias: 'logs-test-default',
+      lazy: true,
+    });
   });
 });

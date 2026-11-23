@@ -148,6 +148,19 @@ describe('processFetchParams', () => {
     expect(result.breakdown).toBeUndefined();
   });
 
+  it('returns undefined breakdown field if the data view field is not aggregatable', () => {
+    const params: UnifiedHistogramFetchParamsExternal = {
+      ...commonParams,
+      breakdownField: 'message',
+    };
+    const result = processFetchParams({
+      params,
+      services,
+      initialBreakdownField: undefined,
+    });
+    expect(result.breakdown).toEqual({ field: undefined });
+  });
+
   it('returns correct breakdown for ESQL query with matching column', () => {
     const params: UnifiedHistogramFetchParamsExternal = {
       ...commonParams,
@@ -161,6 +174,21 @@ describe('processFetchParams', () => {
       initialBreakdownField: undefined,
     });
     expect(result.breakdown?.field?.name).toBe('foo');
+  });
+
+  it('returns undefined breakdown field for ESQL query with non-groupable column', () => {
+    const params: UnifiedHistogramFetchParamsExternal = {
+      ...commonParams,
+      columns: [{ id: '1', name: 'foo', meta: { type: 'unknown' } }] as any,
+      query: { esql: 'from logs' },
+      breakdownField: 'foo',
+    };
+    const result = processFetchParams({
+      params,
+      services,
+      initialBreakdownField: undefined,
+    });
+    expect(result.breakdown).toEqual({ field: undefined });
   });
 
   it('returns undefined breakdown for ESQL query with transformational command', () => {

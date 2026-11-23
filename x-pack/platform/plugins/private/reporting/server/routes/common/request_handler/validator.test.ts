@@ -100,17 +100,7 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     };
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"custom\\",
-          \\"path\\": [
-            \\"browserTimezone\\"
-          ],
-          \\"message\\": \\"Invalid timezone\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow('browserTimezone: Invalid timezone');
   });
 
   it('validates objectType', () => {
@@ -123,18 +113,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"expected\\": \\"string\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"objectType\\"
-          ],
-          \\"message\\": \\"Invalid input: expected string, received boolean\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'objectType: Invalid input: expected string, received boolean'
+    );
   });
 
   it('validates title', () => {
@@ -147,18 +128,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"expected\\": \\"string\\",
-          \\"code\\": \\"invalid_type\\",
-          \\"path\\": [
-            \\"title\\"
-          ],
-          \\"message\\": \\"Invalid input: expected string, received boolean\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'title: Invalid input: expected string, received boolean'
+    );
   });
 
   it('validates version', () => {
@@ -171,20 +143,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"origin\\": \\"string\\",
-          \\"code\\": \\"too_big\\",
-          \\"maximum\\": 32,
-          \\"inclusive\\": true,
-          \\"path\\": [
-            \\"version\\"
-          ],
-          \\"message\\": \\"Too big: expected string to have <=32 characters\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'version: Too big: expected string to have <=32 characters'
+    );
   });
 
   it('validates forceNow', () => {
@@ -197,20 +158,9 @@ describe('validateJobParams', () => {
       forceNow: 'very long version that exceeds the maximum length of thirty-two characters',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"origin\\": \\"string\\",
-          \\"code\\": \\"too_big\\",
-          \\"maximum\\": 32,
-          \\"inclusive\\": true,
-          \\"path\\": [
-            \\"forceNow\\"
-          ],
-          \\"message\\": \\"Too big: expected string to have <=32 characters\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'forceNow: Too big: expected string to have <=32 characters'
+    );
   });
 
   it('validates pagingStrategy', () => {
@@ -224,21 +174,9 @@ describe('validateJobParams', () => {
       pagingStrategy: 'invalid_strategy',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"invalid_value\\",
-          \\"values\\": [
-            \\"pit\\",
-            \\"scroll\\"
-          ],
-          \\"path\\": [
-            \\"pagingStrategy\\"
-          ],
-          \\"message\\": \\"Invalid option: expected one of \\\\\\"pit\\\\\\"|\\\\\\"scroll\\\\\\"\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'pagingStrategy: Invalid option: expected one of "pit"|"scroll"'
+    );
   });
 
   it('validates layout', () => {
@@ -251,27 +189,12 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"invalid_value\\",
-          \\"values\\": [
-            \\"preserve_layout\\",
-            \\"print\\",
-            \\"canvas\\",
-            \\"png\\"
-          ],
-          \\"path\\": [
-            \\"layout\\",
-            \\"id\\"
-          ],
-          \\"message\\": \\"Invalid option: expected one of \\\\\\"preserve_layout\\\\\\"|\\\\\\"print\\\\\\"|\\\\\\"canvas\\\\\\"|\\\\\\"png\\\\\\"\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.id: Invalid option: expected one of "preserve_layout"|"print"|"canvas"|"png"'
+    );
   });
 
-  it('validates layout width', () => {
+  it('validates layout width minimum', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
@@ -281,22 +204,54 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"origin\\": \\"number\\",
-          \\"code\\": \\"too_small\\",
-          \\"minimum\\": 0,
-          \\"inclusive\\": false,
-          \\"path\\": [
-            \\"layout\\",
-            \\"dimensions\\",
-            \\"width\\"
-          ],
-          \\"message\\": \\"Too small: expected number to be >0\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.width: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout width maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 14401, height: 600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.width: Dashboard width exceeds the maximum dimensions (14400px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+    );
+  });
+
+  it('validates layout height minimum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: -600 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Too small: expected number to be >0'
+    );
+  });
+
+  it('validates layout height maximum', () => {
+    const validParams = {
+      title: 'Monthly Report',
+      version: '8.0.0',
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 16001 } },
+      browserTimezone: 'UTC',
+      objectType: 'dashboard',
+      forceNow: '2024-01-01T00:00:00',
+    } as unknown as BaseParams;
+
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions.height: Dashboard height exceeds the maximum dimensions (16000px) supported by Chromium rendering engine. Try splitting the dashboard into smaller chunks or using print format PDF'
+    );
   });
 
   it('validates layout unknown fields', () => {
@@ -313,20 +268,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unknownField\\"
-          ],
-          \\"path\\": [
-            \\"layout\\"
-          ],
-          \\"message\\": \\"Unrecognized key: \\\\\\"unknownField\\\\\\"\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout: Unrecognized key: "unknownField"'
+    );
   });
 
   it('validates layout dimensions unknown fields', () => {
@@ -342,21 +286,9 @@ describe('validateJobParams', () => {
       forceNow: '2024-01-01T00:00:00',
     } as unknown as BaseParams;
 
-    expect(() => validateJobParams(validParams)).toThrowErrorMatchingInlineSnapshot(`
-      "[
-        {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unknownField\\"
-          ],
-          \\"path\\": [
-            \\"layout\\",
-            \\"dimensions\\"
-          ],
-          \\"message\\": \\"Unrecognized key: \\\\\\"unknownField\\\\\\"\\"
-        }
-      ]"
-    `);
+    expect(() => validateJobParams(validParams)).toThrow(
+      'layout.dimensions: Unrecognized key: "unknownField"'
+    );
   });
 
   it('validates multiple locator params', () => {
