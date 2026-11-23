@@ -100,12 +100,13 @@ const matchesUpdatedAgent = (
  * Whether the retry of an update tags action leaves out the agents the update already changed.
  *
  * It restarts behind the action's kuery, so it leaves them out when they can no longer match it.
- * That is so for an update that adds one tag or removes one tag, which `updateAgentTags` narrows
- * the kuery for, and it can be so for another update through a kuery of the caller's: the tag
- * rename in the UI searches for the agents that have the old tag, which the renamed agents no
- * longer have. So the kuery is read, as the search of the agents reads it, and the answer is yes
- * only when the tags it names, whole, and only in the places that decide it, show that an updated
- * agent does not match.
+ * That is what the kuery is read for, and not the number of tags the update adds or removes: for
+ * an update of one tag `updateAgentTags` adds `(NOT (tags:x))` or `(tags:x)` to it, but a tag with
+ * a wildcard in it, `prod*`, makes that a wildcard clause that an agent with another tag, like
+ * `production`, still matches. The tag rename in the UI searches for the agents that have the old
+ * tag, which the renamed agents no longer have. The kuery is read as the search of the agents
+ * reads it, and the answer is yes only when the tags it names, whole, and only in the places that
+ * decide it, show that an updated agent does not match.
  *
  * It is only used for a batch that is cancelled on every run: the agents it updated are recorded
  * when the retry is going to leave them out, as nothing else will. Whatever the kuery does not
@@ -118,12 +119,6 @@ export const retrySkipsUpdatedAgents = (
   tagsToRemove: string[] = [],
   kuery: string = ''
 ): boolean => {
-  if (
-    (tagsToAdd.length === 1 && tagsToRemove.length === 0) ||
-    (tagsToRemove.length === 1 && tagsToAdd.length === 0)
-  ) {
-    return true;
-  }
   if (kuery.trim() === '') {
     return false;
   }

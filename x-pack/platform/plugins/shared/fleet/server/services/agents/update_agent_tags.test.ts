@@ -624,15 +624,24 @@ describe('update_agent_tags', () => {
 
   describe('retrySkipsUpdatedAgents', () => {
     it.each([
-      // the update adds one tag or removes one tag
-      [['a'], [], '', true],
-      [[], ['a'], '', true],
-      // a rename, or several tags, with a kuery that does not leave out the updated agents
+      // the kuery of an update of one tag, as `updateAgentTags` builds it
+      [['a'], [], '(NOT (tags:a))', true],
+      [[], ['a'], '(tags:a)', true],
+      [[], ['a'], '((namespaces:"default")) AND (status:online) AND (tags:a)', true],
+      // no kuery to read says nothing, whatever the update is
+      [['a'], [], '', false],
+      [[], ['a'], '', false],
       [['a'], ['b'], '', false],
+      [[], [], '', false],
+      // a tag with a wildcard in it: an agent with another tag still matches the clause
+      [[], ['prod*'], '(tags:prod*)', false],
+      [['prod*'], [], '(NOT (tags:prod*))', false],
+      // an unquoted value in a kuery can have a space in it, and is then the whole tag
+      [[], ['my tag'], '(tags:my tag)', true],
+      // a rename, or several tags, with a kuery that does not leave out the updated agents
       [['a'], ['b'], 'status:online', false],
       [['a', 'b'], [], 'status:online', false],
-      [[], ['a', 'b'], '', false],
-      [[], [], '', false],
+      [[], ['a', 'b'], 'status:online', false],
       // the tag rename in the UI: agents with the old tag, which the renamed agents no longer have
       [['new'], ['old'], 'tags:"old"', true],
       [['new'], ['old'], 'tags:old', true],
