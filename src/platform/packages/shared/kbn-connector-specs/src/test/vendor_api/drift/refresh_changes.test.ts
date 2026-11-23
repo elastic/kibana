@@ -686,10 +686,25 @@ describe('describeChanges', () => {
     ).toEqual(
       object(
         'Other',
-        '! search: its readOnlyHint changed',
-        '! Field "Board.url" was added to object type "Board".'
+        '! Field "Board.url" was added to object type "Board".',
+        '! search: its readOnlyHint changed'
       )
     );
+  });
+
+  it('shows the first ten GraphQL or MCP texts it has no words for and counts the rest', () => {
+    const lines = describeChanges(
+      Array.from({ length: 12 }, (_, index) =>
+        change('FIELD_ADDED', `Field "Board.f${String(index).padStart(2, '0')}" was added.`)
+      )
+    );
+
+    expect(lines.slice(-4)).toEqual([
+      '! Field "Board.f08" was added.',
+      '! Field "Board.f09" was added.',
+      '  … and 2 more changed',
+      '```',
+    ]);
   });
 
   it('keeps the rule of a change it has no words for', () => {

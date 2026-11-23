@@ -631,12 +631,16 @@ export const areaLines = ({ heading, parts }: ChangeArea): string[] => [
 export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   const entries: Entry[] = [];
   const otherRules = new Map<string, number>();
+  // An `oasdiff` text can carry a long schema path, so its rule stands for it; a GraphQL or MCP
+  // text is a short sentence, kept in a list the description's size can cut.
+  const otherTexts = new Map<string, number>();
   for (const change of changes) {
     const found = entriesOf(change);
     if (found === undefined) {
-      // An `oasdiff` text can carry a long schema path, a GraphQL or MCP one is a short sentence.
-      const label = isProtocolRule(change.id) ? change.text : change.id;
-      otherRules.set(label, (otherRules.get(label) ?? 0) + 1);
+      const [others, label] = isProtocolRule(change.id)
+        ? [otherTexts, change.text]
+        : [otherRules, change.id];
+      others.set(label, (others.get(label) ?? 0) + 1);
     } else {
       entries.push(...found);
     }
@@ -650,21 +654,31 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
   return AREAS.flatMap((area): ChangeArea[] => {
     const heading = `**${area}**`;
     if (area === 'Other') {
-      return otherRules.size === 0
-        ? []
-        : [
-            {
-              heading,
-              parts: [
-                fixed(
-                  [...otherRules.values()].reduce((total, count) => total + count, 0),
-                  ...[...otherRules.entries()].map(
-                    ([id, count]) => `! ${id}${count > 1 ? ` ×${count}` : ''}`
-                  )
-                ),
-              ],
-            },
-          ];
+      const counted = ([label, count]: [string, number]) =>
+        `! ${label}${count > 1 ? ` ×${count}` : ''}`;
+      const texts = [...otherTexts.entries()].sort(([a], [b]) => byText(a, b)).map(counted);
+      const parts: ChangePart[] = [
+        ...(otherRules.size === 0
+          ? []
+          : [
+              fixed(
+                [...otherRules.values()].reduce((total, count) => total + count, 0),
+                ...[...otherRules.entries()].map(counted)
+              ),
+            ]),
+        ...(texts.length === 0
+          ? []
+          : [
+              {
+                kind: 'list' as const,
+                sign: '!' as const,
+                items: texts.map((line) => [line]),
+                moreLabel: SIGN_WORDS['!'],
+                shown: Math.min(texts.length, DEFAULT_NAMES_SHOWN),
+              },
+            ]),
+      ];
+      return parts.length === 0 ? [] : [{ heading, parts }];
     }
     if (area === 'Auth scopes' && regrouped) {
       return [{ heading, parts: [fixed(0, '! same scopes, regrouped')] }];
