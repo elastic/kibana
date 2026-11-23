@@ -359,10 +359,11 @@ describe('action_type_model_utils', () => {
           name: 'Datadog',
           config: { site: 'datadoghq.com', authType: 'none', selectedActions: [] },
           secrets: { authType: 'none' },
+          __internal__: { runActions: false },
         });
       });
 
-      it('serializer leaves the auth and actions when Run actions is on, and drops the flag', () => {
+      it('serializer leaves the auth and actions when Run actions is on', () => {
         const serialized = dualFormModel().connectorForm?.serializer?.({
           ...formData,
           __internal__: { runActions: true },
@@ -371,6 +372,7 @@ describe('action_type_model_utils', () => {
         expect(serialized).toEqual({
           ...formData,
           config: { ...formData.config, authType: 'basic' },
+          __internal__: { runActions: true },
         });
       });
 

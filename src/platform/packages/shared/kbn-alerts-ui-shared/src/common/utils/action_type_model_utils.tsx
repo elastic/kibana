@@ -264,18 +264,12 @@ const omitAuthType = (fields: Record<string, unknown> = {}): Record<string, unkn
   Object.fromEntries(Object.entries(fields).filter(([key]) => key !== 'authType'));
 
 function serializeConnectorForm(formData: InternalConnectorForm): InternalConnectorForm {
-  const { __internal__: internalFields, ...connector } = formData;
-  const { runActions, ...otherInternalFields } = internalFields ?? {};
-  const { config, secrets } = connector;
-  const serialized: InternalConnectorForm =
-    Object.keys(otherInternalFields).length > 0
-      ? { ...connector, __internal__: otherInternalFields }
-      : connector;
+  const { config, secrets, __internal__: internalFields } = formData;
 
   // Run actions off: the connector only receives events, so it saves no auth and no actions.
-  if (runActions === false) {
+  if (internalFields?.runActions === false) {
     return {
-      ...serialized,
+      ...formData,
       secrets: { authType: NO_AUTH_TYPE_ID },
       config: { ...config, authType: NO_AUTH_TYPE_ID, selectedActions: [] },
     };
@@ -290,7 +284,7 @@ function serializeConnectorForm(formData: InternalConnectorForm): InternalConnec
     delete updatedConfig.selectedActions;
   }
 
-  return { ...serialized, config: updatedConfig };
+  return { ...formData, config: updatedConfig };
 }
 
 function createConnectorFormDeserializer(showsRunActionsSwitch: boolean) {
