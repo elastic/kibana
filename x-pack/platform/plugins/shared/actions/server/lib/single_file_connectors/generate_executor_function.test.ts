@@ -818,8 +818,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'direct handler failure',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
 
@@ -1278,8 +1277,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'handler failed',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
 
@@ -1300,8 +1298,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: { contentLengthBytes: 10 * 1024 * 1024 },
       });
     });
@@ -1338,8 +1335,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: { contentLengthBytes: 2048 },
       });
     });
@@ -1365,8 +1361,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'maxContentLength size of 1048576 exceeded',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
         errorMeta: {
           contentLengthBytes: 20 * 1024 * 1024,
           estimatedOutputBytes: 28 * 1024 * 1024,
@@ -1408,9 +1403,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'Request failed with status code 429',
           actionId: connectorId,
-          failureClass: 'vendor_4xx',
-          vendorStatusCode: 429,
-          failureErrorName: 'Error',
+          failure: { class: 'vendor_4xx', statusCode: 429, errorName: 'Error' },
           errorMeta: { statusCode: 429 },
           retry: inSeconds(30),
         });
@@ -1535,7 +1528,7 @@ describe('generateExecutorFunction', () => {
       it('classifies a vendor 5xx so an outage is not read as a connector bug', async () => {
         const result = await executeWithError(makeHttpError(503));
 
-        expect(result).toMatchObject({ status: 'error', failureClass: 'vendor_5xx' });
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'vendor_5xx' } });
       });
 
       it('names a crash on the response, which is what a changed vendor looks like', async () => {
@@ -1550,19 +1543,21 @@ describe('generateExecutorFunction', () => {
 
         const result = await executeWithError(thrown);
 
-        expect(result).toMatchObject({ failureClass: 'handler', failureErrorName: 'TypeError' });
+        expect(result).toMatchObject({
+          failure: { class: 'handler', errorName: 'TypeError' },
+        });
       });
 
       it('names a failure the connector raised deliberately', async () => {
         const result = await executeWithError(new Error('no document id in the response'));
 
-        expect(result).toMatchObject({ failureClass: 'handler', failureErrorName: 'Error' });
+        expect(result).toMatchObject({ failure: { class: 'handler', errorName: 'Error' } });
       });
 
       it('carries the vendor status alongside the class', async () => {
         const result = await executeWithError(makeHttpError(429));
 
-        expect(result).toMatchObject({ failureClass: 'vendor_4xx', vendorStatusCode: 429 });
+        expect(result).toMatchObject({ failure: { class: 'vendor_4xx', statusCode: 429 } });
       });
 
       it('carries the status for a transport that is not axios', async () => {
@@ -1570,13 +1565,13 @@ describe('generateExecutorFunction', () => {
           new RelayRequestError('/chat.postMessage', 503, 'upstream unavailable')
         );
 
-        expect(result).toMatchObject({ failureClass: 'vendor_5xx', vendorStatusCode: 503 });
+        expect(result).toMatchObject({ failure: { class: 'vendor_5xx', statusCode: 503 } });
       });
 
       it('leaves the status out when the vendor never answered', async () => {
         const result = await executeWithError(new Error('no document id in the response'));
 
-        expect(result).not.toHaveProperty('vendorStatusCode');
+        expect(result.failure).not.toHaveProperty('statusCode');
       });
 
       it('classifies a transport failure as network', async () => {
@@ -1587,13 +1582,13 @@ describe('generateExecutorFunction', () => {
 
         const result = await executeWithError(error);
 
-        expect(result).toMatchObject({ status: 'error', failureClass: 'network' });
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'network' } });
       });
 
       it('classifies an allowlist denial as denied, since the call never left Kibana', async () => {
         const result = await executeWithError(new AllowlistDeniedError('target url is not added'));
 
-        expect(result).toMatchObject({ status: 'error', failureClass: 'denied' });
+        expect(result).toMatchObject({ status: 'error', failure: { class: 'denied' } });
       });
 
       it('adds neither to errors without a response status', async () => {
@@ -1607,8 +1602,7 @@ describe('generateExecutorFunction', () => {
           status: 'error',
           message: 'socket hang up',
           actionId: connectorId,
-          failureClass: 'handler',
-          failureErrorName: 'Error',
+          failure: { class: 'handler', errorName: 'Error' },
         });
       });
     });
@@ -1636,7 +1630,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'string error',
         actionId: connectorId,
-        failureClass: 'handler',
+        failure: { class: 'handler' },
       });
     });
 
@@ -1673,8 +1667,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: policyMessage,
         actionId: connectorId,
-        failureClass: 'denied',
-        failureErrorName: 'AllowlistDeniedError',
+        failure: { class: 'denied', errorName: 'AllowlistDeniedError' },
       });
       expect(result).not.toHaveProperty('retry');
     });
@@ -1740,8 +1733,7 @@ describe('generateExecutorFunction', () => {
         status: 'error',
         message: 'connection failed',
         actionId: connectorId,
-        failureClass: 'handler',
-        failureErrorName: 'Error',
+        failure: { class: 'handler', errorName: 'Error' },
       });
     });
   });

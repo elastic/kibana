@@ -34,6 +34,7 @@ import type { ServiceParams } from './sub_action_framework/types';
 export type {
   ActionTypeExecutorRawResult,
   ActionTypeExecutorResult,
+  ConnectorExecuteFailure,
   ConnectorExecuteFailureClass,
 } from '../common';
 export { ActionExecutionSourceType } from './lib';

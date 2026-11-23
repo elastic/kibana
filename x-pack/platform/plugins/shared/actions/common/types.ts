@@ -66,6 +66,15 @@ export type ConnectorExecuteFailureClass =
   | 'denied'
   | 'handler';
 
+/** What the executor knows about a failed action, reported as telemetry and never returned to callers. */
+export interface ConnectorExecuteFailure {
+  class: ConnectorExecuteFailureClass;
+  /** The HTTP status the vendor answered with, over whichever transport the connector used. */
+  statusCode?: number;
+  /** The thrown error's name. Separate from the public `errorName`, which callers branch on. */
+  errorName?: string;
+}
+
 export interface ActionTypeExecutorResult<Data> {
   actionId: string;
   status: ActionTypeExecutorResultStatus;
@@ -79,17 +88,13 @@ export interface ActionTypeExecutorResult<Data> {
 }
 
 /**
- * What the executor returns internally. The fields below are read by the action executor to
+ * What the executor returns internally. `failure` is read by the action executor to
  * label telemetry and are stripped before the result reaches any caller, so they stay out of
  * the `_execute` response and out of the contract Agent Builder and Workflows consume.
  */
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {
   error?: Error;
-  failureClass?: ConnectorExecuteFailureClass;
-  /** The HTTP status the vendor answered with, over whichever transport the connector used. */
-  vendorStatusCode?: number;
-  /** The thrown error's name. Separate from the public `errorName`, which callers branch on. */
-  failureErrorName?: string;
+  failure?: ConnectorExecuteFailure;
 };
 
 export function isActionTypeExecutorResult(

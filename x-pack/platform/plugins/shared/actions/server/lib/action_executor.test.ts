@@ -2111,9 +2111,7 @@ describe('Connector metrics', () => {
       message: 'Request failed with status code 429',
       // What the spec executor returns: `ConnectorType['executor']` is declared with the
       // public result, which deliberately has no room for these.
-      failureClass: 'vendor_4xx',
-      vendorStatusCode: 429,
-      failureErrorName: 'AxiosError',
+      failure: { class: 'vendor_4xx', statusCode: 429, errorName: 'AxiosError' },
     } as ActionTypeExecutorRawResult<void>);
 
     const result = await actionExecutor.execute(executeParams);
@@ -2128,9 +2126,7 @@ describe('Connector metrics', () => {
     );
 
     // Telemetry only: these must not reach the `_execute` response, Agent Builder or Workflows.
-    expect(result).not.toHaveProperty('failureClass');
-    expect(result).not.toHaveProperty('vendorStatusCode');
-    expect(result).not.toHaveProperty('failureErrorName');
+    expect(result).not.toHaveProperty('failure');
     expect(result).toMatchObject({
       status: 'error',
       message: 'Request failed with status code 429',

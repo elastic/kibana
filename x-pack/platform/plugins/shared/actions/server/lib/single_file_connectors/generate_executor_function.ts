@@ -359,9 +359,11 @@ export const generateExecutorFunction = ({
         status: 'error',
         message: errorMessage,
         actionId: connectorId,
-        failureClass: classifyConnectorFailure(error),
-        ...(vendorStatusCode !== undefined ? { vendorStatusCode } : {}),
-        ...(failureErrorName ? { failureErrorName } : {}),
+        failure: {
+          class: classifyConnectorFailure(error),
+          ...(vendorStatusCode !== undefined ? { statusCode: vendorStatusCode } : {}),
+          ...(failureErrorName ? { errorName: failureErrorName } : {}),
+        },
         ...(errorMeta ? { errorMeta } : {}),
         ...(errorSource === TaskErrorSource.USER
           ? { retry: false, errorSource: TaskErrorSource.USER }
