@@ -27561,6 +27561,7 @@ paths:
                         exists_selected: false
                         field_name: response.keyword
                         ignore_validations: false
+                        required: false
                         run_past_timeout: false
                         search_technique: prefix
                         selected_options: []
@@ -175617,6 +175618,10 @@ components:
           default: false
           description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.
           type: boolean
+        required:
+          default: false
+          description: When `true`, dashboard panels do not render until a selection is made in the control. Only applies to pinned controls.
+          type: boolean
         run_past_timeout:
           default: false
           description: When `true`, the options list query continues running even if it exceeds the configured timeout threshold. Defaults to `false`.
@@ -175729,6 +175734,10 @@ components:
         ignore_validations:
           default: false
           description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.
+          type: boolean
+        required:
+          default: false
+          description: When `true`, dashboard panels do not render until a selection is made in the control. Only applies to pinned controls.
           type: boolean
         run_past_timeout:
           default: false
@@ -175962,6 +175971,10 @@ components:
           default: false
           description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.
           type: boolean
+        required:
+          default: false
+          description: When `true`, dashboard panels do not render until a selection is made in the control. Only applies to pinned controls.
+          type: boolean
         step:
           default: 1
           description: The step size between selectable range values.
@@ -176005,6 +176018,10 @@ components:
         ignore_validations:
           default: false
           description: When `true`, the control skips selection validation and does not report which selections are responsible for returning zero results.
+          type: boolean
+        required:
+          default: false
+          description: When `true`, dashboard panels do not render until a selection is made in the control. Only applies to pinned controls.
           type: boolean
         step:
           default: 1
