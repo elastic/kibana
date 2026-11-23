@@ -1031,8 +1031,11 @@ describe('AttackTabContent', () => {
       );
     };
 
-    // EUI's pagination widgets aren't under test, and user-event's full pointer and focus
-    // sequence on them re-renders the whole twelve-row grid several times per click.
+    // The twelve-row tests click with fireEvent. user-event's click also moves focus into the
+    // grid, which re-renders every cell, and each cell's first re-render has EUI scan it with
+    // `tabbable`, reading jsdom's computed style for every candidate. That scan, not the
+    // selection, took most of these tests' time. The checkboxes still select through their own
+    // change handlers.
     const showTenRowsPerPage = async () => {
       fireEvent.click(screen.getByTestId(EUI_PAGINATION_TEST_ID));
       fireEvent.click(await screen.findByTestId(EUI_TEN_ROWS_PER_PAGE_TEST_ID));
@@ -1089,7 +1092,7 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await user.click(selectAllCheckbox());
+      fireEvent.click(selectAllCheckbox());
 
       expect(rowCheckbox('so-0')).toBeChecked();
 
@@ -1113,7 +1116,7 @@ describe('AttackTabContent', () => {
       renderTwelveAttachments();
       await showTenRowsPerPage();
 
-      await user.click(rowCheckbox('so-0'));
+      fireEvent.click(rowCheckbox('so-0'));
       goToPage(2);
       goToPage(1);
 
@@ -1123,7 +1126,7 @@ describe('AttackTabContent', () => {
     it('clears the selection when the page size changes', async () => {
       renderTwelveAttachments();
 
-      await user.click(rowCheckbox('so-0'));
+      fireEvent.click(rowCheckbox('so-0'));
       expect(rowCheckbox('so-0')).toBeChecked();
 
       await showTenRowsPerPage();
