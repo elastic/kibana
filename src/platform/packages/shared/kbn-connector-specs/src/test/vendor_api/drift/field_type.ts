@@ -239,9 +239,7 @@ const PART_OF_FIELD = /(?:\/?allOf\[[^\]]*\])+$/;
  * it is a part of: `value/items/allOf[subschema #1: entity]` as `value`, '' for the body itself.
  */
 export const ownerOfPart = (path: string): string | undefined =>
-  PART_OF_FIELD.test(path)
-    ? path.replace(PART_OF_FIELD, '').replace(/(?:\/items)+$/, '')
-    : undefined;
+  PART_OF_FIELD.test(path) ? path.replace(PART_OF_FIELD, '') : undefined;
 
 const fieldPathOf = (id: string, names: readonly string[]): string | undefined => {
   if (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id)) {
@@ -311,14 +309,22 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
   if (root === undefined) {
     return undefined;
   }
-  const field = fieldPathOf(id, names);
+  const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
+  let field = fieldPathOf(id, names);
+  // The part may be of an array's items, `value/items/allOf[…]`, whose field is the array; but
+  // `items` is only that when what holds it is an array, as a property may have that name.
+  while (ofPart && field !== undefined && /(^|\/)items$/.test(field)) {
+    const parent = field.replace(/\/?items$/, '');
+    const holder = deref(document, parent === '' ? root : walk(document, root, splitPath(parent)));
+    if (!isRecord(holder) || (holder.type !== 'array' && holder.items === undefined)) break;
+    field = parent === '' ? undefined : parent;
+  }
   const node = field === undefined ? root : walk(document, root, splitPath(field));
   if (node === undefined) {
     return undefined;
   }
   // A new enum value or variant is about what the field is made of, so a named schema is shown
   // by its values or variants; keys added to a part of it leave the field's own name.
-  const ofPart = /discriminator-mapping/.test(id) && ownerOfPart(names[1] ?? '') !== undefined;
   const shown =
     !ofPart && (/-enum-value-(added|removed)$/.test(id) || VARIANT_RULE.test(id))
       ? deref(document, node)

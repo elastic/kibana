@@ -334,6 +334,45 @@ describe('fieldTypeOf', () => {
     ).toBe('microsoft.graph.chat');
   });
 
+  it('keeps a property named `items`, which only an array holds as its items', () => {
+    const document = {
+      paths: {
+        '/payloads': {
+          get: {
+            responses: {
+              '200': {
+                content: {
+                  'application/json': {
+                    schema: {
+                      properties: {
+                        payload: {
+                          type: 'object',
+                          properties: { items: schema('SlotContentId') },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      components: { schemas: { SlotContentId: { properties: { id: { type: 'string' } } } } },
+    };
+
+    expect(
+      fieldTypeOf(
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#Key` discriminator mapping keys to the `payload/items/allOf[subschema #1: base]` response property for the response status `200`',
+          'GET /payloads'
+        ),
+        { current: document }
+      )
+    ).toBe('SlotContentId');
+  });
+
   it('finds a parameter whose new enum value looks like a location', () => {
     const document = {
       paths: {

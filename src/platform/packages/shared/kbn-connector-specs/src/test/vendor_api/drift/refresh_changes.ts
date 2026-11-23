@@ -347,7 +347,7 @@ const withSubtypeChanges = (entries: readonly Entry[]): Entry[] => {
 // An MCP tool's change: `search: input.limit was added`, `search: output.items[] type changed`. A
 // property name may hold spaces, so the path runs up to the words that say what changed.
 const MCP_CHANGE =
-  /^[^:]+: ((?:input|output).*?) (was added|was removed|\w+ changed|changed|now only takes .+|is no longer limited to .+|no longer takes .+|can now return .+)$/;
+  /^[^:]+: ((?:input|output).*?) (was added|was removed|is now required|may now be missing|changed from or to required|\w+ changed|changed|now only takes .+|is no longer limited to .+|no longer takes .+|can now return .+)$/;
 
 /** A change to an MCP tool's input or output, as a line of the request or the response. */
 const mcpEntriesOf = ({ id, text, type }: SpecChange): Entry[] | undefined => {
@@ -423,7 +423,10 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
       const part = baseNameOf(partOf);
       // Only parts left once the owner's selectors go: the part is of the body itself.
       const ofBody =
-        owner.replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '').replace(/\//g, '') === '';
+        owner
+          .replace(/(?:allOf|oneOf|anyOf)\[[^\]]*\]/g, '')
+          .replace(/(^|\/)items(?=\/|$)/g, '')
+          .replace(/\//g, '') === '';
       return [
         {
           area: entryArea,
@@ -433,9 +436,8 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
           typeBefore: change.typeBefore,
           details: [
             ...location,
-            ...variantNames(list).map(
-              (key) => `${part === undefined ? '' : `${part}: `}${sign} ${key}`
-            ),
+            // An unnamed part is still named, so its keys aren't taken for a change of the type.
+            ...variantNames(list).map((key) => `${part ?? 'base'}: ${sign} ${key}`),
           ],
         },
       ];
@@ -526,6 +528,8 @@ export interface ListPart {
   readonly items: ReadonlyArray<readonly string[]>;
   /** What the fields are, for the line that counts the ones left out. */
   readonly moreLabel: string;
+  /** How many changes the items stand for, when one can stand for several (`×2`). */
+  readonly count?: number;
   shown: number;
 }
 
@@ -701,6 +705,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
                 kind: 'list' as const,
                 sign: '!' as const,
                 items: texts.map((line) => [line]),
+                count: [...otherTexts.values()].reduce((total, count) => total + count, 0),
                 moreLabel: SIGN_WORDS['!'],
                 shown: Math.min(texts.length, DEFAULT_NAMES_SHOWN),
               },
@@ -732,7 +737,10 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
  * many media types or paths through a shared schema `oasdiff` reported it for.
  */
 export const countChanges = ({ parts }: ChangeArea): number =>
-  parts.reduce((total, part) => total + (part.kind === 'list' ? part.items.length : part.count), 0);
+  parts.reduce(
+    (total, part) => total + (part.kind === 'list' ? part.count ?? part.items.length : part.count),
+    0
+  );
 
 /** The markdown describing the changes to one endpoint, with the default number of names. */
 export const describeChanges = (changes: readonly SpecChange[]): string[] => {

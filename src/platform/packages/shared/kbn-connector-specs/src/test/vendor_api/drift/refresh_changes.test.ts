@@ -696,6 +696,27 @@ describe('describeChanges', () => {
     );
   });
 
+  it("shows a change to whether an MCP tool's property is required with that property", () => {
+    expect(
+      describeChanges([
+        change('mcp-input-required-changed', 'search: input.limit changed from or to required'),
+      ])
+    ).toEqual(object('Request', '! limit (changed from or to required)'));
+  });
+
+  it('keeps the keys added to an unnamed base when the type of the field changed too', () => {
+    expect(
+      describeChanges([
+        change(
+          'response-property-discriminator-mapping-added',
+          'added `#Key` discriminator mapping keys to the `value/items/allOf[subschema #1]` response property',
+          'B[]',
+          'A[]'
+        ),
+      ])
+    ).toEqual(object('Response', '- value: A[]', '+ value: B[] (base: + Key)'));
+  });
+
   it('keeps the text of a GraphQL or MCP change it has no words for', () => {
     expect(
       describeChanges([

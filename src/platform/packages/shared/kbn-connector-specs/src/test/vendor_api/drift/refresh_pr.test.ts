@@ -93,6 +93,18 @@ describe('renderRefreshPr', () => {
     expect(body).toContain('New spec has 1 change to the spec as a whole.');
   });
 
+  it('counts each time a GraphQL or MCP change was reported, as its line does', () => {
+    const graphql = added(
+      undefined,
+      'Field "Board.url" was added to object type "Board".',
+      'FIELD_ADDED'
+    );
+
+    expect(renderRefreshPr([changed('.graphql', [graphql, graphql])])).toContain(
+      'New spec has 2 changes to the spec as a whole.'
+    );
+  });
+
   it('counts the changes to endpoints and to the spec as a whole apart', () => {
     const body = renderRefreshPr([
       changed('.mixed', [
