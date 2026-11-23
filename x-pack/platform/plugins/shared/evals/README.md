@@ -334,6 +334,8 @@ Under `mean`, pass/fail and whole-number scores become decimals when an example'
 
 Each row also shows, per experiment, how many repetitions were used and how many had a null score, and the stability: the mean standard deviation of each paired example's repetitions, null when no example has two. A row is flagged (`repetitionWarning`, `N*` in the reports) when an example has a different number of valid repetitions in the two experiments, or a null score.
 
+Compare selected picks the baseline for you: the run on `main`, or else the older run. To flip them, use Swap on the Compare page.
+
 #### Score direction
 
 Each score a user-defined judge declares carries its own `direction`, so one judge can maximize groundedness while minimizing a hallucination rate:

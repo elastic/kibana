@@ -46,6 +46,11 @@ export const registerSiemWorkflowMigrationsDeleteRoute = (
             const workflowsMigrationsClient =
               ctx.securitySolution.siemMigrations.getWorkflowsClient();
             await siemMigrationAuditLogger.logDeleteMigration({ migrationId });
+            if (workflowsMigrationsClient.task.isMigrationRunning(migrationId)) {
+              return res.conflict({
+                body: 'A running workflow migration cannot be deleted. Please stop the migration first and try again',
+              });
+            }
             await workflowsMigrationsClient.data.deleteMigration(migrationId);
             return res.ok();
           } catch (error) {

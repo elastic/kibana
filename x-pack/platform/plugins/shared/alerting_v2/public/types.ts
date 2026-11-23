@@ -30,5 +30,6 @@ export interface AlertingV2PublicStart {
   AlertsProvider: ComponentType<AlertingV2AlertsProviderProps>;
   ActionPoliciesPage: ComponentType<AlertingV2PageProps>;
   ExecutionHistoryPage: ComponentType<AlertingV2PageProps>;
+  ImportsPage: ComponentType<AlertingV2PageProps>;
   createAlertingV2HostApp: CreateAlertingV2HostApp;
 }
