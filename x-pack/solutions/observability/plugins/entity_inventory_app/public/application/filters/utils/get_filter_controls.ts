@@ -50,13 +50,12 @@ export const getCategories = (types: EntityInventoryTypeDefinition[]): string[] 
   ...new Set(types.map(getCategoryOrTypeId)),
 ];
 
-const getDimensionNames = ({ attributes }: EntityInventoryTypeDefinition): string[] =>
-  attributes.filter(({ dimension }) => dimension).map(({ name }) => name);
-
-const getDimensionNamesInScope = (typesInScope: EntityInventoryTypeDefinition[]): string[] => {
+const getSuggestedFilterNamesInScope = (
+  typesInScope: EntityInventoryTypeDefinition[]
+): string[] => {
   const typeCountByName = new Map<string, number>();
   typesInScope
-    .flatMap((type) => [...new Set(getDimensionNames(type))])
+    .flatMap(({ suggestedFilters }) => [...new Set(suggestedFilters)])
     .forEach((name) => typeCountByName.set(name, (typeCountByName.get(name) ?? 0) + 1));
 
   return [...typeCountByName.entries()].sort(([, a], [, b]) => b - a).map(([name]) => name);
@@ -72,7 +71,7 @@ export const getTypesInScope = (params: FilterControlsParams): EntityInventoryTy
   narrowToType(getTypesOfCategory(params.types, getActiveCategory(params)), params.selectedType);
 
 export const getAttributeNamesInScope = (params: FilterControlsParams): string[] =>
-  getDimensionNamesInScope(getTypesInScope(params));
+  getSuggestedFilterNamesInScope(getTypesInScope(params));
 
 export const getFilterControls = (params: FilterControlsParams): FilterControls => {
   const { types, pageCategory, selectedType } = params;
@@ -87,7 +86,7 @@ export const getFilterControls = (params: FilterControlsParams): FilterControls 
       typesOfCategory.length > 1
         ? typesOfCategory.map(({ type, name }) => ({ name: type, label: name }))
         : [],
-    attributes: getDimensionNamesInScope(typesInScope).map((name) => ({
+    attributes: getSuggestedFilterNamesInScope(typesInScope).map((name) => ({
       name,
       label: getAttributeLabel(typesInScope, name),
     })),

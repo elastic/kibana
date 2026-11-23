@@ -27,7 +27,12 @@ import {
   TEMPLATE_ID_ESCALATION,
   TEMPLATE_ID_INVESTIGATION,
 } from '@kbn/alertzero-common';
-import { TRIAGE_GROUPING_FLAG } from './alert_triage/constants';
+import {
+  TRIAGE_DECISION_AUTO_CLOSE_FLAG,
+  TRIAGE_GROUPING_FLAG,
+  toDecisionAutoCloseMode,
+  type DecisionAutoCloseMode,
+} from './alert_triage/constants';
 import { getSubscriptionAvailability } from '../common/availability';
 import {
   ALERTZERO_API_PRIVILEGE_READ,
@@ -133,6 +138,8 @@ export class AlertZeroPlugin
   private coreStart?: CoreStart;
   private triageGroupingEnabled = true;
   private triageGroupingFlagSubscription?: Subscription;
+  private decisionAutoCloseMode: DecisionAutoCloseMode = 'off';
+  private decisionAutoCloseFlagSubscription?: Subscription;
   private scanFailuresService?: ScanFailuresService;
   private threatIntelSupplyService?: ThreatIntelSupplyService;
 
@@ -275,6 +282,7 @@ export class AlertZeroPlugin
         getWorkflowsManagement: () => this.workflowsManagementApi,
         isGroupingEnabled: async () => this.triageGroupingEnabled,
       },
+      getDecisionAutoCloseMode: async () => this.decisionAutoCloseMode,
       logger: stepsLogger,
     });
 
@@ -360,6 +368,13 @@ export class AlertZeroPlugin
       .getBooleanValue$(TRIAGE_GROUPING_FLAG, true)
       .subscribe((enabled) => {
         this.triageGroupingEnabled = enabled;
+      });
+    // The switch for storing and matching decisions. It is `off` unless a deployment sets `shadow`
+    // or `on`, until the follow-ups that `on` needs have landed.
+    this.decisionAutoCloseFlagSubscription = core.featureFlags
+      .getStringValue$<string>(TRIAGE_DECISION_AUTO_CLOSE_FLAG, 'off')
+      .subscribe((mode) => {
+        this.decisionAutoCloseMode = toDecisionAutoCloseMode(mode);
       });
     this.fleetAgentService = plugins.fleet?.agentService;
     this.proposals = plugins.proposals;
@@ -585,5 +600,6 @@ export class AlertZeroPlugin
 
   stop() {
     this.triageGroupingFlagSubscription?.unsubscribe();
+    this.decisionAutoCloseFlagSubscription?.unsubscribe();
   }
 }
