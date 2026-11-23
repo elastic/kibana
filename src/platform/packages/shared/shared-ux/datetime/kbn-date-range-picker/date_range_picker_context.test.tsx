@@ -43,6 +43,38 @@ const setup = ({ defaultValue = '-15m', roundRelativeTime = false }: SetupProps 
 };
 
 describe('DateRangePickerProvider', () => {
+  describe('displayFullFormattedText', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('omits milliseconds when both bounds fall on whole seconds', () => {
+      const { result } = setup({ defaultValue: '-15m' });
+
+      expect(result.current.displayFullFormattedText).not.toMatch(/\.\d{3}/);
+    });
+
+    it('shows milliseconds when a bound is not on a whole second', () => {
+      const { result } = setup({ defaultValue: '-500ms' });
+
+      expect(result.current.displayFullFormattedText).toMatch(/\.250/);
+      expect(result.current.displayFullFormattedText).toMatch(/\.750/);
+    });
+
+    it('shows milliseconds when only one absolute bound is not on a whole second', () => {
+      const { result } = setup({
+        defaultValue: '2025-07-15T11:00:00.000Z to 2025-07-15T11:30:00.456Z',
+      });
+
+      expect(result.current.displayFullFormattedText).toMatch(/\.456/);
+    });
+  });
+
   describe('applyRange', () => {
     describe('with a textOverride and no range', () => {
       it('parses the override into ISO bounds instead of using the stale context text', () => {

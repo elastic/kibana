@@ -8,6 +8,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { getTimeRangeResolution } from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
@@ -425,6 +426,19 @@ function dateStringToDate(
 }
 
 /**
+ * Resolution `now` is truncated to for a range, or `null` to keep full precision.
+ * `getTimeRangeResolution` only understands ISO absolute bounds, so absolute bounds in
+ * any other accepted format are normalized to ISO first.
+ */
+function getAnchorResolution(start: DateString, end: DateString, formats: string[]) {
+  const toIso = (bound: DateString) =>
+    dateStringToType(bound) === DATE_TYPE_ABSOLUTE
+      ? dateStringToDate(bound, formats)?.toISOString() ?? bound
+      : bound;
+  return getTimeRangeResolution(toIso(start), toIso(end));
+}
+
+/**
  * Builds a complete {@link TimeRange} from start/end datemath strings,
  * resolving dates, types, and offsets automatically.
  */
@@ -437,14 +451,22 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
-  // Anchor both bounds to the same instant
-  const forceNow = new Date();
+  // Anchor both bounds to the same instant, rounded down to the time range resolution
+  // unless a bound carries finer precision, where the extra precision is meaningful.
+  const resolution = getAnchorResolution(start, end, formats);
+  const now = moment();
+  const forceNow = (resolution ? now.startOf(resolution) : now).toDate();
+  const endDate = dateStringToDate(end, formats, { roundUp: true, forceNow });
   const range: TimeRange = {
     value: text,
     start,
     end,
     startDate: dateStringToDate(start, formats, { forceNow }),
-    endDate: dateStringToDate(end, formats, { roundUp: true, forceNow }),
+    // Rounding up (`/d`, `/h`, ...) lands on `.999`; end on the last whole unit instead.
+    endDate:
+      endDate && endType !== DATE_TYPE_ABSOLUTE && resolution
+        ? moment(endDate).startOf(resolution).toDate()
+        : endDate,
     type: [startType, endType],
     isNaturalLanguage,
     startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,

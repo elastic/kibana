@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 dependsOn:
+  - '@kbn/datemath'
   - '@kbn/i18n'
   - '@kbn/test-jest-helpers'
   - '@kbn/ui-callout'

@@ -17,6 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/datemath",
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/ui-callout"
