@@ -48,8 +48,9 @@ export const lensFeatureFlags = {
     fallback: false as boolean,
   },
   /**
-   * Enables ES|QL mode for form-based datasources, allowing Lens to generate
-   * ES|QL queries instead of traditional DSL aggregations.
+   * Makes newly created form-based charts use ES|QL instead of DSL aggregations
+   * behind the scenes by default. The engine itself is selected per chart through
+   * the persisted `useEsql` state, so existing charts are not affected.
    */
   enableEsql: {
     id: 'lens.enable_esql',

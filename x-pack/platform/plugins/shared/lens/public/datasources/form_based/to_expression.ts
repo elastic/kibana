@@ -41,7 +41,6 @@ import {
   isColumnOfType,
   resolveTimeShift,
 } from '@kbn/lens-common';
-import { getLensFeatureFlags } from '../../get_feature_flags';
 import { operationDefinitionMap } from './operations';
 import { dedupeAggs } from './dedupe_aggs';
 import { getSamplingValue } from './utils';
@@ -83,7 +82,8 @@ function getExpressionForLayer(
   dateRange: DateRange,
   nowInstant: Date,
   searchSessionId?: string,
-  forceDSL?: boolean
+  forceDSL?: boolean,
+  useEsql?: boolean
 ): ExpressionAstExpression | null {
   const { columnOrder } = layer;
   if (columnOrder.length === 0 || !indexPattern) {
@@ -180,8 +180,8 @@ function getExpressionForLayer(
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
 
     // esql mode variables
-    const lensESQLEnabled = getLensFeatureFlags().enableEsql;
-    const canUseESQL: boolean = lensESQLEnabled && uiSettings.get(ENABLE_ESQL) && !forceDSL;
+    // ES|QL is opt-in per chart through `useEsql`; the uiSetting is the admin kill switch.
+    const canUseESQL: boolean = Boolean(useEsql) && uiSettings.get(ENABLE_ESQL) && !forceDSL;
 
     // Only generate ES|QL query when ES|QL mode is enabled
     const esqlLayer = canUseESQL
@@ -589,7 +589,8 @@ export function toExpression(
       dateRange,
       nowInstant,
       searchSessionId,
-      forceDSL
+      forceDSL,
+      state.useEsql
     );
   }
 
