@@ -32,6 +32,8 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSessionEventsRoutes } from './routes/session_events';
+import { registerSessionMemoryRoutes } from './routes/session_memory';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -350,6 +352,35 @@ export class ContextEnginePlugin
       },
       // Reads the current value at request time (assigned in start(), after this setup() runs).
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
+    });
+
+    registerSessionEventsRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionEventsService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionEventsService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+    });
+
+    registerSessionMemoryRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSessionMemoryService: async () => {
+        const [, , contextEngineStart] = await coreSetup.getStartServices();
+        return contextEngineStart.getSessionMemoryService();
+      },
+      getAiIndexService,
+      isMemoryEnabled,
+      logger: this.logger.get('session_memory'),
     });
 
     return {
