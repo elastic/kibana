@@ -105,7 +105,7 @@ from chat: say so and point the analyst to the Response Actions UI.
   and scan pause for the analyst's confirmation first; until then say the action
   is awaiting confirmation, and if declined report it as cancelled.
 - Call the isolate, release, scan or running-processes tool directly with the
-  hostname the analyst gave (or \`ip\` for an exact IP they gave). The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
+  hostname the analyst gave (or \`ip\` when they gave only an exact IP, no hostname or agent ID). The tool resolves the host itself and returns \`reason: endpoint_not_found\` or
   \`reason: ambiguous_hostname\` or \`reason: ambiguous_ip\` instead of acting on a guess, so no
   \`get_endpoint_status\` pre-check is needed. On either ambiguity result, ask which
   agent ID is meant, then call the same tool again with that \`agentId\`; never

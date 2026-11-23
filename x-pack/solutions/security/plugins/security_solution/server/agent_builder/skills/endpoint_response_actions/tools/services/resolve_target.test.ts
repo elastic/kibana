@@ -47,4 +47,23 @@ describe('resolveDispatchTarget by ip', () => {
     expect(data.message).not.toContain('Multiple endpoints use');
     expect(data.message).toContain('agentId');
   });
+
+  it.each([
+    ['FE80:0:0:0:0:0:0:1', 'fe80::1'],
+    ['fe80::0001', 'fe80::1'],
+    ['fe80::1', 'fe80::1'],
+    ['10.0.0.7', '10.0.0.7'],
+  ])('echoes %s as the canonical %s when no endpoint holds it', async (spelling, canonical) => {
+    const lookup = {
+      resolveByIp: jest.fn().mockResolvedValue({ kind: 'not_found' }),
+    } as unknown as EndpointLookupService;
+
+    const resolved = await resolveDispatchTarget(lookup, 'isolate', { ip: spelling });
+
+    expect(lookup.resolveByIp).toHaveBeenCalledWith(canonical);
+    expect(resolved).toMatchObject({
+      kind: 'respond',
+      data: { ip: canonical, message: `No endpoint found with IP address '${canonical}'.` },
+    });
+  });
 });

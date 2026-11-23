@@ -23,7 +23,7 @@ import {
   selectEndpointHost,
   toHostStatus,
 } from '../../../../../endpoint/services/endpoint_host_selection';
-import { resolveAgentTypeFromPackages } from '../types';
+import { canonicalizeIp, resolveAgentTypeFromPackages } from '../types';
 
 /**
  * Agent records fetched per page while resolving a hostname. A host keeps one
@@ -772,7 +772,7 @@ export function createEndpointLookupService(
       if (supportedAgentTypes && !supportedAgentTypes.includes('endpoint')) {
         return { kind: 'not_found' };
       }
-      return resolveIpMetadataCandidates(ip);
+      return resolveIpMetadataCandidates(canonicalizeIp(ip));
     },
 
     async resolveByAgentId(agentId: string): Promise<EndpointLookupResult> {

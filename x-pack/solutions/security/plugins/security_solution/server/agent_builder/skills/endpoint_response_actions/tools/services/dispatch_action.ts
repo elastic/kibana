@@ -23,6 +23,7 @@ import type { EndpointAppContextService } from '../../../../../endpoint/endpoint
 import { getActionList } from '../../../../../endpoint/services/actions';
 import {
   formatForConfirmationCard,
+  canonicalizeIp,
   formatHostForConfirmationCard,
   licenseLimitOf,
   licenseTierRequiredResult,
@@ -645,7 +646,10 @@ export const prepareDispatch = async (request: DispatchRequest): Promise<Dispatc
   }
 
   if (ipMismatch && params.ip) {
-    return { kind: 'result', result: ipMismatchResult(params.ip, target.endpoint.agentId) };
+    return {
+      kind: 'result',
+      result: ipMismatchResult(canonicalizeIp(params.ip), target.endpoint.agentId),
+    };
   }
 
   // The policy check runs before the card, so the analyst is never asked to

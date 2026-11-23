@@ -1376,6 +1376,24 @@ describe('createEndpointLookupService', () => {
       );
     });
 
+    it.each([
+      ['FE80:0:0:0:0:0:0:1', 'fe80::1'],
+      ['fe80::0001', 'fe80::1'],
+      ['fe80::1', 'fe80::1'],
+      ['2606:A000:FFC0:0039:11EF:37B9:3371:578C', '2606:a000:ffc0:39:11ef:37b9:3371:578c'],
+      ['10.0.0.7', '10.0.0.7'],
+    ])('queries the stored spelling of %s (%s)', async (spelling, stored) => {
+      const getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
+      const { lookup } = buildService({ getHostMetadataList });
+
+      await lookup.resolveByIp(spelling);
+
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({ kuery: `united.endpoint.host.ip: "${stored}"` }),
+        undefined
+      );
+    });
+
     it('reads policy and OS from the Fleet agent, which is fresher than united metadata', async () => {
       const getAgent = jest.fn().mockResolvedValue({
         id: 'agent-ip',

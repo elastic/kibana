@@ -408,14 +408,16 @@ describe('formatHostForConfirmationCard', () => {
     // instead of silently dropping text.
     const render = (name: string, allowedTypes: string[] = []) => {
       const types: string[] = [];
+      const codeValues: string[] = [];
       let text = '';
       walkNodes(pipeline(`**${formatHostForConfirmationCard(name)}**`), (node) => {
         types.push(node.type);
         if (node.type === 'text') text += String(node.value);
+        if (node.type === 'inlineCode') codeValues.push(String(node.value));
       });
       const allowed = ['root', 'paragraph', 'strong', 'text', ...allowedTypes];
       expect(types.filter((type) => !allowed.includes(type))).toEqual([]);
-      return { types, text };
+      return { types, text, codeValues };
     };
 
     it.each([
@@ -440,9 +442,11 @@ describe('formatHostForConfirmationCard', () => {
     });
 
     it('shows a misleading code point as an escape in a code span, not as the character', () => {
-      const { types } = render('web\u202E01', ['inlineCode']);
+      const { types, text, codeValues } = render('web\u202E01', ['inlineCode']);
 
       expect(types).toContain('inlineCode');
+      expect(codeValues).toEqual(['\\u{202E}']);
+      expect(text).toBe('web01');
     });
 
     it('would link or emojify these names if they were not escaped (the pipeline really does)', () => {

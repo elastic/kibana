@@ -6,6 +6,7 @@
  */
 
 import pRetry from 'p-retry';
+import ipaddr from 'ipaddr.js';
 import type { Logger } from '@kbn/logging';
 import type { RunContext } from '@kbn/agent-builder-server';
 import { getAgentFromRunContext } from '@kbn/agent-builder-server';
@@ -28,6 +29,15 @@ export type { HostInfo };
  */
 export const MAX_HOSTNAME_LENGTH = 256;
 export const MAX_HOSTNAME_FILTER_LENGTH = 256;
+/**
+ * The spelling Defend stores in `host.ip`: IPv6 lowercase and RFC 5952
+ * compressed (`fe80::1`), IPv4 unchanged. The schema accepts any valid IPv6
+ * spelling, but the lookup is an exact keyword match, so `FE80:0:0:0:0:0:0:1`
+ * would report `not_found` for a host that holds `fe80::1`.
+ */
+export const canonicalizeIp = (ip: string): string =>
+  ipaddr.isValid(ip) ? ipaddr.parse(ip).toString() : ip;
+
 /** Fleet agent IDs are UUIDs/ULIDs; generous bound for schema validation. */
 export const MAX_AGENT_ID_LENGTH = 64;
 /** Bounds file/directory path arguments (e.g. execute, runscript). */

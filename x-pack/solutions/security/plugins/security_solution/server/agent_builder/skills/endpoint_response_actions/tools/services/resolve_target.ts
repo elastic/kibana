@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 
 import { HostStatus } from '../../../../../../common/endpoint/types';
-import { endpointNotFoundData, MAX_AGENT_ID_LENGTH, MAX_HOSTNAME_LENGTH } from '../types';
+import {
+  canonicalizeIp,
+  endpointNotFoundData,
+  MAX_AGENT_ID_LENGTH,
+  MAX_HOSTNAME_LENGTH,
+} from '../types';
 import type { EndpointCandidate, EndpointLookupService, ResolvedEndpoint } from './endpoint_lookup';
 
 export type DispatchActionName = 'isolate' | 'unisolate' | 'scan' | 'running-processes';
@@ -19,20 +24,17 @@ export type DispatchActionName = 'isolate' | 'unisolate' | 'scan' | 'running-pro
  * `ambiguous_hostname` / `ambiguous_ip` instruction ("identify the target by
  * agent ID and retry") is something the schema can actually carry out.
  */
+export const IP_DESCRIPTION =
+  'The exact IPv4 or IPv6 address the analyst gave. Use it only when they gave no hostname or agent ID; shared addresses return an ambiguity result instead of selecting a host.';
+
 export const hostTargetFields = (hostNameDescription: string) => ({
   hostName: z
     .string()
     .min(1)
     .max(MAX_HOSTNAME_LENGTH)
     .optional()
-    .describe(`${hostNameDescription} Optional when agentId is supplied.`),
-  ip: z
-    .ipv4()
-    .or(z.ipv6())
-    .optional()
-    .describe(
-      'The exact IPv4 or IPv6 address of the endpoint. Use only when hostname and agent ID are unavailable; shared addresses return an ambiguity result instead of selecting a host.'
-    ),
+    .describe(`${hostNameDescription} Optional when agentId or ip is supplied.`),
+  ip: z.ipv4().or(z.ipv6()).optional().describe(IP_DESCRIPTION),
   agentId: z
     .string()
     .min(1)
@@ -56,7 +58,8 @@ export const requireHostTarget = {
 export const describeTarget = (toolParams: Record<string, unknown>): string => {
   const hostName = toolParams.hostName as string | undefined;
   const agentId = toolParams.agentId as string | undefined;
-  const ip = toolParams.ip as string | undefined;
+  const rawIp = toolParams.ip as string | undefined;
+  const ip = rawIp ? canonicalizeIp(rawIp) : undefined;
 
   if (agentId) {
     return hostName ? `${hostName} (agent ID ${agentId})` : `the host with agent ID ${agentId}`;
@@ -158,7 +161,8 @@ export async function resolveDispatchTarget(
   action: DispatchActionName,
   params: { hostName?: string; ip?: string; agentId?: string }
 ): Promise<ResolvedDispatchTarget> {
-  const { hostName, ip, agentId } = params;
+  const { hostName, agentId } = params;
+  const ip = params.ip ? canonicalizeIp(params.ip) : undefined;
 
   if (agentId) {
     const resolved = await lookup.resolveByAgentId(agentId);
