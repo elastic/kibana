@@ -28,12 +28,28 @@ const USER_REPLY_ERROR_PREFIXES = [
 const USER_ERROR_CODES = new Set([
   'ECONNREFUSED', // wrong host or port
   'ENOTFOUND', // hostname cannot be resolved
+  'ETIMEDOUT', // nothing answered: wrong host or port, a firewall, or TLS enabled against a plain server
   'ERR_TLS_CERT_ALTNAME_INVALID', // certificate does not match the host
   'DEPTH_ZERO_SELF_SIGNED_CERT',
   'SELF_SIGNED_CERT_IN_CHAIN',
   'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
   'CERT_HAS_EXPIRED',
 ]);
+
+// A host that resolves to several addresses fails with an AggregateError whose own message is empty.
+// This keeps its code and gives it a message made from the individual failures.
+const withReadableMessage = (err: Error): Error => {
+  const { errors } = err as { errors?: unknown };
+  if (err.message || !Array.isArray(errors)) return err;
+  const message = errors
+    .map((cause) => (cause as { message?: unknown } | null)?.message ?? String(cause))
+    .map(String)
+    .filter(Boolean)
+    .join('; ');
+  return Object.assign(new Error(message || 'Unable to connect to Redis'), {
+    code: (err as NodeJS.ErrnoException).code,
+  });
+};
 
 export const PROXY_NOT_SUPPORTED_MESSAGE =
   'Redis connections cannot be routed through the configured xpack.actions.proxyUrl: ' +
@@ -55,6 +71,8 @@ export const redisClientType: ClientTypeSpec<Redis> = {
     const headers = await ctx.credential.getAuthHeaders();
     const credentials = parseBasicAuthHeader(headers.Authorization ?? headers.authorization ?? '');
     const { username = '', password = '' } = credentials ?? {};
+    // The schema accepts an IPv6 address in square brackets; Node's socket and TLS layers expect it bare.
+    const socketHost = host.startsWith('[') && host.endsWith(']') ? host.slice(1, -1) : host;
     const { timeout, maxContentLength } = ctx.networkSettings.getResponseSettings();
 
     // Merges the global xpack.actions.ssl settings with any matching customHostSettings entry for this host.
@@ -66,13 +84,13 @@ export const redisClientType: ClientTypeSpec<Redis> = {
     ctx.logger.info(`[redis] Opening connection for ${host}:${port}/${database}`);
     const { Redis: RedisClient } = await import('ioredis');
     const client = new RedisClient({
-      host,
+      host: socketHost,
       port,
       db: database,
       // Redis versions before 6 have a password only; the ACL user name "default" is the same account.
       ...(username ? { username } : {}),
       ...(password ? { password } : {}),
-      ...(tls ? { tls: { ...tls, servername: host } } : {}),
+      ...(tls ? { tls: { ...tls, servername: socketHost } } : {}),
       connectTimeout: timeout,
       commandTimeout: timeout,
       lazyConnect: true,
@@ -93,7 +111,7 @@ export const redisClientType: ClientTypeSpec<Redis> = {
       await client.connect();
     } catch (err) {
       client.disconnect();
-      throw lastError ?? err;
+      throw withReadableMessage(lastError ?? (err as Error));
     }
     setResponseLimit(client, maxContentLength);
     return client;

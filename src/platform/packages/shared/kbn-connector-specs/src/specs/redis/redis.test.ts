@@ -20,19 +20,31 @@ interface MockClient {
   get: jest.Mock;
   call: jest.Mock;
   ping: jest.Mock;
+  duplicate: jest.Mock;
+  dedicated: { on: jest.Mock; connect: jest.Mock; call: jest.Mock; disconnect: jest.Mock };
 }
 
-const createClient = (): MockClient => ({
-  info: jest.fn().mockResolvedValue('# Server\r\nredis_version:7.2.4\r\n'),
-  dbsize: jest.fn().mockResolvedValue(12),
-  scan: jest.fn().mockResolvedValue(['0', []]),
-  type: jest.fn().mockResolvedValue('string'),
-  pttl: jest.fn().mockResolvedValue(-1),
-  strlen: jest.fn().mockResolvedValue(3),
-  get: jest.fn().mockResolvedValue('Ada'),
-  call: jest.fn().mockResolvedValue('OK'),
-  ping: jest.fn().mockResolvedValue('PONG'),
-});
+const createClient = (): MockClient => {
+  const dedicated = {
+    on: jest.fn(),
+    connect: jest.fn().mockResolvedValue(undefined),
+    call: jest.fn().mockResolvedValue('OK'),
+    disconnect: jest.fn(),
+  };
+  return {
+    info: jest.fn().mockResolvedValue('# Server\r\nredis_version:7.2.4\r\n'),
+    dbsize: jest.fn().mockResolvedValue(12),
+    scan: jest.fn().mockResolvedValue(['0', []]),
+    type: jest.fn().mockResolvedValue('string'),
+    pttl: jest.fn().mockResolvedValue(-1),
+    strlen: jest.fn().mockResolvedValue(3),
+    get: jest.fn().mockResolvedValue('Ada'),
+    call: jest.fn().mockResolvedValue('OK'),
+    ping: jest.fn().mockResolvedValue('PONG'),
+    duplicate: jest.fn().mockReturnValue(dedicated),
+    dedicated,
+  };
+};
 
 const makeConfig = (overrides: Record<string, unknown> = {}) => ({
   host: 'redis.example.com',
@@ -211,8 +223,31 @@ describe('RedisConnector', () => {
         args: ['user:1', 'Ada'],
       });
 
-      expect(client.call).toHaveBeenCalledWith('SET', 'user:1', 'Ada');
+      expect(client.dedicated.call).toHaveBeenCalledWith('SET', 'user:1', 'Ada');
       expect(result).toEqual({ reply: 'OK', truncated: false });
+    });
+
+    it('runs on its own connection, not the pooled one, and closes it afterwards', async () => {
+      const client = createClient();
+
+      await RedisConnector.actions.executeCommand.handler(makeContext(client), {
+        command: 'SELECT',
+        args: ['5'],
+      });
+
+      expect(client.call).not.toHaveBeenCalled();
+      expect(client.dedicated.connect).toHaveBeenCalledTimes(1);
+      expect(client.dedicated.disconnect).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes its connection when the command fails', async () => {
+      const client = createClient();
+      client.dedicated.call.mockRejectedValue(new Error('NOPERM'));
+
+      await expect(
+        RedisConnector.actions.executeCommand.handler(makeContext(client), { command: 'FLUSHALL' })
+      ).rejects.toThrow('NOPERM');
+      expect(client.dedicated.disconnect).toHaveBeenCalledTimes(1);
     });
 
     it('runs a command without arguments', async () => {
@@ -222,12 +257,12 @@ describe('RedisConnector', () => {
         command: 'DBSIZE',
       });
 
-      expect(client.call).toHaveBeenCalledWith('DBSIZE');
+      expect(client.dedicated.call).toHaveBeenCalledWith('DBSIZE');
     });
 
     it('cuts a reply that exceeds the Actions response size limit', async () => {
       const client = createClient();
-      client.call.mockResolvedValue(['a'.repeat(50)]);
+      client.dedicated.call.mockResolvedValue(['a'.repeat(50)]);
       setResponseLimit(client, 20);
 
       const result = (await RedisConnector.actions.executeCommand.handler(makeContext(client), {

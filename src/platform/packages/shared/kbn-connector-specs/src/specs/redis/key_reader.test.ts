@@ -8,6 +8,7 @@
  */
 
 import type { Redis } from 'ioredis';
+import { setResponseLimit } from '../../lib/clients/mssql_response_limit';
 import { getKey, listKeys, parseInfo } from './key_reader';
 
 const makeClient = (overrides: Record<string, jest.Mock>): Redis => overrides as unknown as Redis;
@@ -63,6 +64,22 @@ describe('listKeys', () => {
     const result = await listKeys(makeClient({ scan }), { count: 2 });
 
     expect(result.keys).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('leaves out names that getKey would reject', async () => {
+    const scan = jest.fn().mockResolvedValue(['0', ['ok', '', 'x'.repeat(1025), 'y'.repeat(1024)]]);
+
+    const result = await listKeys(makeClient({ scan }), {});
+
+    expect(result.keys).toEqual(['ok', 'y'.repeat(1024)]);
+  });
+
+  it('fails instead of skipping keys when the names exceed the response size limit', async () => {
+    const scan = jest.fn().mockResolvedValue(['0', ['a'.repeat(30), 'b'.repeat(30)]]);
+    const client = makeClient({ scan });
+    setResponseLimit(client, 40);
+
+    await expect(listKeys(client, {})).rejects.toThrow('response size limit');
   });
 
   it('removes keys that SCAN returned more than once', async () => {
@@ -122,6 +139,13 @@ describe('getKey', () => {
     });
   });
 
+  it('reports a key that expired between TYPE and PTTL as missing', async () => {
+    base.type.mockResolvedValue('string');
+    base.pttl.mockResolvedValue(-2);
+
+    expect(await getKey(makeClient(base), { key: 'gone' })).toEqual({ key: 'gone', exists: false });
+  });
+
   it('reports no expiry for a key without a TTL', async () => {
     base.type.mockResolvedValue('string');
     const client = makeClient({
@@ -151,12 +175,24 @@ describe('getKey', () => {
     expect(result).toMatchObject({ size: 1_000_000, truncated: true });
   });
 
+  it('cuts a collection that exceeds the response size limit', async () => {
+    base.type.mockResolvedValue('list');
+    const lrange = jest.fn().mockResolvedValue(['a'.repeat(10), 'b'.repeat(10), 'c'.repeat(10)]);
+    const client = makeClient({ ...base, llen: jest.fn().mockResolvedValue(3), lrange });
+    setResponseLimit(client, 30);
+
+    const result = (await getKey(client, { key: 'l' })) as { value: string[]; truncated: boolean };
+
+    expect(result.value).toEqual(['a'.repeat(10), 'b'.repeat(10)]);
+    expect(result.truncated).toBe(true);
+  });
+
   it('reads a small hash whole', async () => {
     base.type.mockResolvedValue('hash');
     const client = makeClient({
       ...base,
       hlen: jest.fn().mockResolvedValue(2),
-      hgetall: jest.fn().mockResolvedValue({ a: '1', b: '2' }),
+      hscan: jest.fn().mockResolvedValue(['0', ['a', '1', 'b', '2']]),
     });
 
     expect(await getKey(client, { key: 'h', limit: 5 })).toMatchObject({
@@ -166,15 +202,40 @@ describe('getKey', () => {
     });
   });
 
-  it('samples a hash larger than the limit with HSCAN instead of HGETALL', async () => {
+  it('keeps a hash field named __proto__', async () => {
     base.type.mockResolvedValue('hash');
-    const hgetall = jest.fn();
+    const hscan = jest.fn().mockResolvedValue(['0', ['__proto__', 'x', 'a', '1']]);
+    const client = makeClient({ ...base, hlen: jest.fn().mockResolvedValue(2), hscan });
+
+    const result = await getKey(client, { key: 'h', limit: 5 });
+
+    const { value } = result as { value: Record<string, string> };
+    expect(Object.keys(value)).toEqual(['__proto__', 'a']);
+    expect(value.__proto__).toBe('x');
+    expect(JSON.parse(JSON.stringify(value))).toEqual(JSON.parse('{"__proto__":"x","a":"1"}'));
+  });
+
+  it('follows the HSCAN cursor to read a whole small hash and drops repeated fields', async () => {
+    base.type.mockResolvedValue('hash');
+    const hscan = jest
+      .fn()
+      .mockResolvedValueOnce(['7', ['a', '1']])
+      .mockResolvedValueOnce(['0', ['a', '1', 'b', '2']]);
+    const client = makeClient({ ...base, hlen: jest.fn().mockResolvedValue(2), hscan });
+
+    const result = await getKey(client, { key: 'h', limit: 5 });
+
+    expect(hscan).toHaveBeenNthCalledWith(2, 'h', '7', 'COUNT', 5);
+    expect(result).toMatchObject({ value: { a: '1', b: '2' }, truncated: false });
+  });
+
+  it('samples a hash larger than the limit', async () => {
+    base.type.mockResolvedValue('hash');
     const hscan = jest.fn().mockResolvedValue(['9', ['a', '1', 'b', '2', 'c', '3']]);
-    const client = makeClient({ ...base, hlen: jest.fn().mockResolvedValue(1000), hgetall, hscan });
+    const client = makeClient({ ...base, hlen: jest.fn().mockResolvedValue(1000), hscan });
 
     const result = await getKey(client, { key: 'h', limit: 2 });
 
-    expect(hgetall).not.toHaveBeenCalled();
     expect(hscan).toHaveBeenCalledWith('h', '0', 'COUNT', 2);
     expect(result).toMatchObject({ value: { a: '1', b: '2' }, size: 1000, truncated: true });
   });
@@ -226,7 +287,22 @@ describe('getKey', () => {
     });
   });
 
-  it('turns stream entries into id and field objects', async () => {
+  it('keeps infinite sorted set scores as strings', async () => {
+    base.type.mockResolvedValue('zset');
+    const zrange = jest.fn().mockResolvedValue(['lo', '-inf', 'hi', 'inf']);
+    const client = makeClient({ ...base, zcard: jest.fn().mockResolvedValue(2), zrange });
+
+    const result = await getKey(client, { key: 'z', limit: 10 });
+
+    expect(result).toMatchObject({
+      value: [
+        { member: 'lo', score: '-inf' },
+        { member: 'hi', score: 'inf' },
+      ],
+    });
+  });
+
+  it('turns stream entries into an id and ordered field pairs', async () => {
     base.type.mockResolvedValue('stream');
     const xrange = jest.fn().mockResolvedValue([['1-0', ['temp', '21', 'unit', 'C']]]);
     const client = makeClient({ ...base, xlen: jest.fn().mockResolvedValue(5), xrange });
@@ -235,7 +311,15 @@ describe('getKey', () => {
 
     expect(xrange).toHaveBeenCalledWith('events', '-', '+', 'COUNT', 1);
     expect(result).toMatchObject({
-      value: [{ id: '1-0', fields: { temp: '21', unit: 'C' } }],
+      value: [
+        {
+          id: '1-0',
+          fields: [
+            ['temp', '21'],
+            ['unit', 'C'],
+          ],
+        },
+      ],
       size: 5,
       truncated: true,
     });

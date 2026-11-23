@@ -12,7 +12,7 @@ applies_to:
 The Redis connector connects directly to a Redis server so you can browse keys, read values, and inspect the server from chat conversations.
 
 ::::{note}
-This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+This connector is available in **Agent Builder** only. Actions marked _(not yet available)_ are not exposed to agents, and you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
 :::{include} _snippets/native-driver-memory-note.md
@@ -20,7 +20,7 @@ This connector is currently available in **Agent Builder** only. Workflow suppor
 
 ## Requirements [redis-requirements]
 
-The Redis connector connects directly to Redis over the native Redis protocol (default port 6379). Your server must be network-accessible from your {{kib}} instance, and connections can't be routed through a forward proxy. TLS is required by default.
+The Redis connector connects directly to Redis over the native Redis protocol (default port 6379). Your server must be network-accessible from your {{kib}} instance, and connections can't be routed through a forward proxy. TLS is required by default. The connector supports a single Redis server. It doesn't support Redis Cluster, because it connects to one node and can't follow redirects to other shards.
 
 To use the Redis connector, you need:
 
@@ -34,11 +34,11 @@ To configure the connector:
 
 1. Identify the hostname or IP address and the port of the Redis server.
 2. Create a Redis user with the permissions your use case needs. If your server uses a single password and no ACL users, use `default` as the user name.
-3. Decide which numbered database to read. The default is `0`, and Redis Cluster only supports `0`.
+3. Decide which numbered database to read. The default is `0`, and Redis Cluster is not supported.
 
 ## Create connectors in {{kib}} [define-redis-ui]
 
-You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
+You can create connectors in **{{stack-manage-app}}** → **{{connectors-ui}}**.
 
 ### Connector configuration [redis-connector-configuration]
 
@@ -62,7 +62,7 @@ Password
 TLS
 :   Whether to encrypt the connection. **Required** (default) uses {{kib}} TLS settings. Use **Disabled** only for servers that don't offer TLS.
 
-## Test connectors [redis-action-configuration]
+### Test connectors [redis-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test sends a `PING` to the server.
 
@@ -75,7 +75,7 @@ Server Info
     - **section** (optional): The `INFO` section to return: `server` (default), `clients`, `memory`, `persistence`, `stats`, `replication`, `cpu`, `errorstats`, or `keyspace`.
 
 List Keys
-:   List key names that match a pattern, using `SCAN` so the server isn't blocked. The result includes `nextCursor` when more keys remain.
+:   List key names that match a pattern, using `SCAN` so the server isn't blocked. The result includes `nextCursor` when more keys remain. Names that are empty or longer than 1024 characters aren't listed. If the key names exceed the response size limit, the action fails; use a narrower pattern or a smaller **count**.
     - **pattern** (optional): A glob-style pattern such as `user:*` (default: `*`).
     - **type** (optional): Only return keys of this type: `string`, `hash`, `list`, `set`, `zset`, or `stream`.
     - **count** (optional): The number of keys to aim for (1-1000, default: 100).
@@ -87,7 +87,7 @@ Get Key
     - **limit** (optional): The maximum number of elements for a hash, list, set, sorted set, or stream (1-500, default: 100).
 
 Execute Command _(not yet available)_
-:   Run any single Redis command with its arguments. No restrictions: `SET`, `DEL`, `HSET`, `FLUSHDB`, and every other command the user is allowed to run are permitted. Use only when a write or destructive operation is explicitly required. Not exposed to AI agents; becomes usable when workflow support is added. Use **Get Key** and **List Keys** for reading.
+:   Run any single Redis command with its arguments. No restrictions: `SET`, `DEL`, `HSET`, `FLUSHDB`, and every other command the user is allowed to run are permitted. Use only when a write or destructive operation is explicitly required. The command runs on its own connection, so a command such as `SELECT` doesn't change the database used by the other actions. Not exposed to AI agents; run it through the Run a connector API. Use **Get Key** and **List Keys** for reading.
     - **command** (required): The command name, for example `SET`.
     - **args** (optional): The command arguments, in order, each as a string.
 
@@ -105,7 +105,11 @@ For chat conversations, where the goal is to browse and read data, use a dedicat
 ACL SETUSER kibana_reader on >'<password>' ~app:* resetchannels -@all +scan +type +pttl +strlen +get +getrange +hlen +hgetall +hscan +llen +lrange +scard +smembers +sscan +zcard +zrange +xlen +xrange +info +dbsize +ping +select
 ```
 
-The **Server Info**, **List Keys**, and **Get Key** actions only send commands that read data. The ACL is the reliable protection: with it, the user can't run any other command, and can't read keys outside the pattern.
+The **Server Info**, **List Keys**, and **Get Key** actions only send commands that read data. The ACL is the reliable protection: with it, the user can't run any other command, and can't read the values of keys outside the pattern.
+
+::::{important}
+The key pattern doesn't hide key names. Redis applies key patterns to the keys named in a command, not to the names `SCAN` returns, so **List Keys** can return names outside `app:*` even though **Get Key** can't read their values. If key names must stay private, use a dedicated Redis instance for the data you want to expose.
+::::
 
 ::::{note}
 **Execute Command** can run any command the user is permitted to run, including destructive ones such as `FLUSHALL`. Don't grant broader permissions unless your use case requires them.
@@ -116,5 +120,7 @@ The **Server Info**, **List Keys**, and **Get Key** actions only send commands t
 If your use case requires write access, grant the matching commands and key patterns to the Redis user. Scope permissions as narrowly as possible.
 
 ```text
-ACL SETUSER kibana_writer on >'<password>' ~app:* +@read +@write -@dangerous
+ACL SETUSER kibana_writer on >'<password>' ~app:* +@read +@write -@dangerous +ping +select +info +dbsize
 ```
+
+`PING`, `SELECT`, `INFO`, and `DBSIZE` aren't part of `@read` or `@write`, but the connector needs them to test the connection, select the database, and run **Server Info**.

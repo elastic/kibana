@@ -144,6 +144,22 @@ describe('redisClientType', () => {
       expect(lastOptions()).toMatchObject({ host: 'cache.corp', port: 6380, db: 3 });
     });
 
+    it('passes an IPv6 address to the driver without brackets but checks the allowlist as configured', async () => {
+      const networkSettings = makeNetworkSettings();
+      await redisClientType.build(
+        makeCtx({
+          networkSettings,
+          config: { host: '[2001:db8::1]', port: 6379, database: 0, ssl: 'required' },
+        })
+      );
+
+      expect(networkSettings.ensureHostnameAllowed).toHaveBeenCalledWith('[2001:db8::1]');
+      expect(lastOptions()).toMatchObject({
+        host: '2001:db8::1',
+        tls: { servername: '2001:db8::1' },
+      });
+    });
+
     it('defaults the database to 0 and TLS to required', async () => {
       const buildTlsOptions = jest.fn().mockReturnValue({ rejectUnauthorized: true });
       const ctx = makeCtx({
@@ -223,6 +239,30 @@ describe('redisClientType', () => {
       expect(mockDisconnect).toHaveBeenCalledTimes(1);
     });
 
+    it('gives an empty AggregateError a readable message and keeps its code', async () => {
+      const refused = Object.assign(new Error('connect ECONNREFUSED ::1:6379'), {
+        code: 'ECONNREFUSED',
+      });
+      const refused4 = Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:6379'), {
+        code: 'ECONNREFUSED',
+      });
+      const aggregate = Object.assign(new AggregateError([refused, refused4], ''), {
+        code: 'ECONNREFUSED',
+      });
+      mockConnect.mockImplementationOnce(() => {
+        const listener = mockOn.mock.calls.find(([event]) => event === 'error')?.[1];
+        listener(aggregate);
+        return Promise.reject(new Error('Connection is closed.'));
+      });
+
+      const failure = await redisClientType.build(makeCtx()).catch((e: Error) => e);
+
+      expect((failure as Error).message).toBe(
+        'connect ECONNREFUSED ::1:6379; connect ECONNREFUSED 127.0.0.1:6379'
+      );
+      expect(redisClientType.isUserError?.(failure)).toBe(true);
+    });
+
     it('throws the error behind a failed connect so a wrong host or port is a user error', async () => {
       // ioredis rejects connect() with a generic message and emits the real error, with its code, on 'error'.
       mockConnect.mockImplementationOnce(() => {
@@ -261,14 +301,15 @@ describe('redisClientType', () => {
       expect(redisClientType.isUserError?.(new Error(message))).toBe(true);
     });
 
-    it.each(['ECONNREFUSED', 'ENOTFOUND', 'ERR_TLS_CERT_ALTNAME_INVALID', 'CERT_HAS_EXPIRED'])(
-      'classifies %s as a user error',
-      (code) => {
-        expect(redisClientType.isUserError?.(Object.assign(new Error('boom'), { code }))).toBe(
-          true
-        );
-      }
-    );
+    it.each([
+      'ECONNREFUSED',
+      'ENOTFOUND',
+      'ETIMEDOUT',
+      'ERR_TLS_CERT_ALTNAME_INVALID',
+      'CERT_HAS_EXPIRED',
+    ])('classifies %s as a user error', (code) => {
+      expect(redisClientType.isUserError?.(Object.assign(new Error('boom'), { code }))).toBe(true);
+    });
 
     it('classifies the proxy refusal as a user error', () => {
       expect(redisClientType.isUserError?.(new Error(PROXY_NOT_SUPPORTED_MESSAGE))).toBe(true);

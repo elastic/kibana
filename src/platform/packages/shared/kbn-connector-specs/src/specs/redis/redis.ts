@@ -24,8 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Redis } from 'ioredis';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
-import { getResponseLimit } from '../../lib/clients/mssql_response_limit';
-import { getKey, listKeys, parseInfo } from './key_reader';
+import { getKey, getMaxContentLength, listKeys, parseInfo } from './key_reader';
 import {
   type ExecuteCommandInput,
   ExecuteCommandInputSchema,
@@ -36,8 +35,6 @@ import {
   type ServerInfoInput,
   ServerInfoInputSchema,
 } from './types';
-
-const DEFAULT_MAX_CONTENT_LENGTH = 100 * 1024 * 1024;
 
 const withClient = async <T>(ctx: ActionContext, fn: (client: Redis) => Promise<T>): Promise<T> =>
   fn(await ctx.getClient('redis'));
@@ -123,7 +120,7 @@ export const RedisConnector: ConnectorSpec = {
           placeholder: '0',
           helpText: i18n.translate('connectorSpecs.redis.config.database.helpText', {
             defaultMessage:
-              'The numbered database to select after connecting (default: 0). Redis Cluster only supports 0.',
+              'The numbered database to select after connecting (default: 0). Redis Cluster is not supported.',
           }),
         }),
       ssl: z
@@ -168,7 +165,7 @@ export const RedisConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List key names matching a glob pattern, optionally of one data type, using SCAN so the server is never blocked. Use this to discover keys before reading them with getKey. Returns { keys, nextCursor }; pass nextCursor back as cursor to continue, and nextCursor is null when the scan is complete. A page can contain no matches and still have a nextCursor.',
+        'List key names matching a glob pattern, optionally of one data type, using SCAN so the server is never blocked. Use this to discover keys before reading them with getKey. Names that are empty or longer than 1024 characters are not listed. Returns { keys, nextCursor }; pass nextCursor back as cursor to continue, and nextCursor is null when the scan is complete. A page can contain no matches and still have a nextCursor.',
       input: ListKeysInputSchema,
       handler: async (ctx, input: ListKeysInput) =>
         withClient(ctx, (client) => listKeys(client, input)),
@@ -178,7 +175,7 @@ export const RedisConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'Read one key by its data type: a string value, a hash as an object, a list in order, a set, a sorted set as { member, score } pairs, or a stream as { id, fields } entries. Collections return at most limit elements and report truncated: true when there are more. Returns { key, type, ttlSeconds, size, value, truncated }, or { key, exists: false } when the key does not exist. ttlSeconds is null when the key never expires. Use listKeys to find key names.',
+        'Read one key by its data type: a string value, a hash as an object, a list in order, a set, a sorted set as { member, score } pairs (an infinite score is the string "inf" or "-inf"), or a stream as { id, fields } entries where fields is an ordered list of [field, value] pairs. Collections return at most limit elements and report truncated: true when there are more. Returns { key, type, ttlSeconds, size, value, truncated }, or { key, exists: false } when the key does not exist. ttlSeconds is null when the key never expires. Use listKeys to find key names.',
       input: GetKeyInputSchema,
       handler: async (ctx, input: GetKeyInput) =>
         withClient(ctx, (client) => getKey(client, input)),
@@ -188,15 +185,24 @@ export const RedisConnector: ConnectorSpec = {
       isTool: false,
       scope: 'destroy',
       description:
-        'Run any single Redis command with its arguments and return the reply. No restrictions: SET, DEL, HSET, EXPIRE, FLUSHDB and every other command the user is allowed to run are permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer getKey and listKeys for reading. Returns { reply }, truncated to the response size limit.',
+        'Run any single Redis command with its arguments and return the reply. No restrictions: SET, DEL, HSET, EXPIRE, FLUSHDB and every other command the user is allowed to run are permitted. Use only when the workflow explicitly requires a write or destructive operation. Prefer getKey and listKeys for reading. Runs on its own connection, so a command such as SELECT does not change the database used by the other actions. Returns { reply }, truncated to the response size limit.',
       input: ExecuteCommandInputSchema,
       handler: async (ctx, input: ExecuteCommandInput) =>
-        withClient(ctx, async (client) => {
-          const reply = await client.call(input.command, ...(input.args ?? []));
-          const serialized = JSON.stringify(reply) ?? 'null';
-          const limit = getResponseLimit(client) ?? DEFAULT_MAX_CONTENT_LENGTH;
-          if (serialized.length <= limit) return { reply, truncated: false };
-          return { reply: serialized.slice(0, limit), truncated: true };
+        withClient(ctx, async (pooled) => {
+          // A command can change the session (SELECT, MULTI, WATCH, CLIENT, a blocking read), which would leave the
+          // pooled connection that getKey and listKeys share in a different state. It runs on its own connection.
+          const dedicated = pooled.duplicate();
+          dedicated.on('error', () => {});
+          try {
+            await dedicated.connect();
+            const reply = await dedicated.call(input.command, ...(input.args ?? []));
+            const serialized = JSON.stringify(reply) ?? 'null';
+            const limit = getMaxContentLength(pooled);
+            if (serialized.length <= limit) return { reply, truncated: false };
+            return { reply: serialized.slice(0, limit), truncated: true };
+          } finally {
+            dedicated.disconnect();
+          }
         }),
     },
   },
@@ -215,7 +221,7 @@ export const RedisConnector: ConnectorSpec = {
   skill: [
     '## Redis Connector',
     '',
-    'Access to a Redis server. `serverInfo`, `listKeys` and `getKey` are read-only and safe to call freely. `executeCommand` is unrestricted: use it only when a write or destructive operation is explicitly required.',
+    'Access to a Redis server. `serverInfo`, `listKeys` and `getKey` are read-only and safe to call freely. `executeCommand` is unrestricted and is not available to agents.',
     '',
     '### Discovery pattern (keys unknown)',
     '1. `serverInfo` with section `keyspace`: see which numbered databases hold keys and how many.',
@@ -228,6 +234,6 @@ export const RedisConnector: ConnectorSpec = {
     '- A `listKeys` page with no keys can still have a `nextCursor`: that is how SCAN works, not a failure.',
     '- Values are returned as UTF-8 text. A binary value shows as garbled characters, and a string over 64 KiB is cut short with `truncated: true`.',
     '- `ttlSeconds: null` means the key has no expiry; a key that expires between `listKeys` and `getKey` comes back as `exists: false`.',
-    '- A key of a Redis module type (JSON, TimeSeries, and others) returns its `type` with a null `value`; read those with `executeCommand` and the module command.',
+    '- A key of a Redis module type (JSON, TimeSeries, and others) returns its `type` with a null `value`. You can identify the type, but you cannot read the value.',
   ].join('\n'),
 };

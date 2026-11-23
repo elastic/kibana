@@ -76,12 +76,15 @@ export const ListKeysInputSchema = lazySchema(() =>
 );
 export type ListKeysInput = z.infer<typeof ListKeysInputSchema>;
 
+// Longer or empty names are skipped by listKeys, so every name listKeys returns can be passed to getKey.
+export const MAX_KEY_LENGTH = 1024;
+
 export const GetKeyInputSchema = lazySchema(() =>
   z.object({
     key: z
       .string()
       .min(1)
-      .max(1024)
+      .max(MAX_KEY_LENGTH)
       .describe(
         'Exact name of the key to read, as returned by listKeys (for example "user:1001").'
       ),
