@@ -30,17 +30,21 @@ To receive requests with this connector, you need:
 To create an Inbound Webhook connector:
 
 1. Go to **{{stack-manage-app}}** → **{{connectors-ui}}**, select **Create connector**, then select **Inbound Webhook**.
-2. Enter a name for the connector, then select **Save**. The flyout stays open and shows the **Webhook URL** and the **Ingest token**.
-3. Before you close the flyout, copy the token and store it with the URL. {{kib}} shows the token only once. If you lose it, you can [rotate the token](#inbound-webhook-rotate-token) to get a new one.
+2. Enter a name for the connector. {{kib}} fills in **Connector ID** from the name as you type. To use a different ID, change it now, because you can't change it after you save.
+3. Select **Save**. The flyout stays open and shows the **Webhook URL** and the **Ingest token**.
+4. Before you close the flyout, copy the token and store it with the URL. {{kib}} shows the token only once. If you lose it, you can [rotate the token](#inbound-webhook-rotate-token) to get a new one.
 
 If the flyout warns that `server.publicBaseUrl` isn't set, the **Webhook URL** is a relative path that external tools can't use. Set [`server.publicBaseUrl`](/reference/configuration-reference/general-settings.md#server-publicbaseurl) to the {{kib}} host that the tool sends requests to.
 
 ### Connector configuration [inbound-webhook-connector-configuration]
 
-Inbound Webhook connectors have the following configuration property:
+Inbound Webhook connectors have the following configuration properties:
 
 Connector name
-:   The name of the connector. Renaming the connector doesn't change its webhook URL or ingest token.
+:   The name that the connectors list shows. You can change it at any time without changing the connector's ID, webhook URL, or ingest token.
+
+Connector ID
+:   A unique ID that {{kib}} fills in from the name. You can change it before you save the connector, but not afterward. It can be up to 36 characters long and contain only lowercase letters, numbers, and hyphens. The ID is the last part of the [webhook URL](#inbound-webhook-url-format) and the value of a workflow trigger's [`connector-id`](#inbound-webhook-workflows) field.
 
 ## Connect an external tool [inbound-webhook-url]
 
@@ -103,7 +107,7 @@ Rotating the token doesn't change which user the workflows run as. To run the wo
 To run a workflow for each request, add the `inboundWebhook.received` trigger to the workflow. The workflow editor lists this trigger as **Inbound Webhook - Received**. Set these fields on the trigger:
 
 `connector-id`
-:   The connector's ID, which is the last part of its webhook URL. To run the workflow for every Inbound Webhook connector in the space, use `"*"`.
+:   The [connector's ID](#inbound-webhook-connector-configuration), which is the last part of its webhook URL. To run the workflow for every Inbound Webhook connector in the space, use `"*"`.
 
 `on.condition`
 :   Optional. A {{kib}} Query Language (KQL) query on the [`event` fields](#inbound-webhook-event-fields). The workflow runs only for requests that match the query.
