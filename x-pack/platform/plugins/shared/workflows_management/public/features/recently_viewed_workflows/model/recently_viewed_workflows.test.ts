@@ -124,4 +124,35 @@ describe('startRecentlyViewedWorkflows', () => {
     expect(history.get()).toEqual([viewed('wf-1', 'First')]);
     expect(emitted.at(-1)).toEqual([viewed('wf-1', 'First')]);
   });
+
+  it('applies removals made before the current user is known', async () => {
+    viewWorkflow(await startAsUser({ profile_uid: 'alice' }), 'wf-1', 'Deleted');
+    let resolveUser: (user: CurrentUser) => void = () => {};
+    const history = startAs(() => new Promise((resolve) => (resolveUser = resolve)));
+
+    history.remove('wf-1');
+    resolveUser(mockAuthenticatedUser({ profile_uid: 'alice' }));
+    await flushPromises();
+
+    expect(history.get()).toEqual([]);
+    expect((await startAsUser({ profile_uid: 'alice' })).get()).toEqual([]);
+  });
+
+  it('looks up the current user again on the next view after a failed lookup', async () => {
+    const getCurrentUser = jest
+      .fn<Promise<CurrentUser>, []>()
+      .mockRejectedValueOnce(new Error('Service unavailable'))
+      .mockResolvedValue(mockAuthenticatedUser({ profile_uid: 'alice' }));
+    const history = startAs(getCurrentUser);
+    const emitted: RecentlyAccessedHistoryItem[][] = [];
+    history.get$().subscribe((items) => emitted.push(items));
+    await flushPromises();
+
+    viewWorkflow(history, 'wf-1', 'First');
+    await flushPromises();
+
+    expect(getCurrentUser).toHaveBeenCalledTimes(2);
+    expect(history.get()).toEqual([viewed('wf-1', 'First')]);
+    expect(emitted.at(-1)).toEqual([viewed('wf-1', 'First')]);
+  });
 });

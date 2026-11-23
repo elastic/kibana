@@ -257,20 +257,19 @@ export function useWorkflowActions() {
       });
     },
     onSuccess: ({ failures }, variables) => {
-      // Report telemetry for successful deletion
+      const failureErrors = new Map(failures.map(({ id, error }) => [id, error]));
       variables.ids.forEach((workflowId) => {
+        const failureError = failureErrors.get(workflowId);
         telemetry.reportWorkflowDeleted({
           workflowIds: [workflowId],
           isBulkDelete: variables.ids.length > 1,
           origin: 'workflow_list',
-          error: undefined,
+          error: failureError === undefined ? undefined : new Error(failureError),
         });
+        if (failureError === undefined) {
+          workflowsManagement.recentlyViewed.remove(workflowId);
+        }
       });
-
-      const failedIds = new Set(failures.map(({ id }) => id));
-      variables.ids
-        .filter((workflowId) => !failedIds.has(workflowId))
-        .forEach((workflowId) => workflowsManagement.recentlyViewed.remove(workflowId));
 
       // Refetch to ensure data is in sync with server
       queryClient.invalidateQueries({ queryKey: ['workflows'] });

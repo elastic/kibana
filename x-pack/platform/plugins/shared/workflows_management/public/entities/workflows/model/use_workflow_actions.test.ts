@@ -1372,6 +1372,33 @@ describe('useWorkflowActions – import mutations', () => {
         })
       );
     });
+
+    it('should report the server error for each workflow that was not deleted', async () => {
+      mockWorkflowApi.bulkDeleteWorkflows.mockResolvedValueOnce({
+        total: 2,
+        deleted: 1,
+        failures: [{ id: 'wf-2', error: 'Workflow has a running execution' }],
+      });
+
+      const { result } = renderHook(() => useWorkflowActions(), { wrapper });
+
+      act(() => {
+        result.current.deleteWorkflows.mutate({ ids: ['wf-1', 'wf-2'] });
+      });
+
+      await waitFor(() => expect(result.current.deleteWorkflows.isSuccess).toBe(true));
+
+      expect(mockTelemetry.reportWorkflowDeleted.mock.calls).toEqual([
+        [expect.objectContaining({ workflowIds: ['wf-1'], isBulkDelete: true, error: undefined })],
+        [
+          expect.objectContaining({
+            workflowIds: ['wf-2'],
+            isBulkDelete: true,
+            error: new Error('Workflow has a running execution'),
+          }),
+        ],
+      ]);
+    });
   });
 
   // ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, map, type Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, map, type Observable, of, switchMap } from 'rxjs';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { ProjectNavigationLinkItem } from '@kbn/core-chrome-browser';
 import { Sha256 } from '@kbn/crypto-browser';
@@ -33,11 +33,10 @@ const getCurrentUserId = async ({ authc }: CoreStart['security']): Promise<strin
 const startUserHistory = async ({
   http,
   security,
-}: Pick<CoreStart, 'http' | 'security'>): Promise<RecentlyAccessed> => {
+}: Pick<CoreStart, 'http' | 'security'>): Promise<RecentlyAccessed | undefined> => {
   const userId = await getCurrentUserId(security);
-  // A failed lookup does not prove that there is no user, so no history is safer than a shared one.
   if (!userId) {
-    return NO_HISTORY;
+    return undefined;
   }
   // Hashing gives the user part a fixed length, so it cannot collide with the space suffix of another key.
   const userHash = new Sha256().update(userId, 'utf8').digest('base64');
@@ -55,21 +54,33 @@ const startUserHistory = async ({
 export const startRecentlyViewedWorkflows = (
   core: Pick<CoreStart, 'http' | 'security'>
 ): RecentlyAccessed => {
-  let history = NO_HISTORY;
-  const ready = startUserHistory(core).then((userHistory) => {
-    history = userHistory;
-    return userHistory;
-  });
+  const history$ = new BehaviorSubject(NO_HISTORY);
+  let ready: Promise<RecentlyAccessed> | undefined;
+
+  const getUserHistory = (): Promise<RecentlyAccessed> => {
+    ready ??= startUserHistory(core).then((userHistory) => {
+      // A failed lookup does not prove that there is no user, so no history is safer than a
+      // shared one. The next write looks up the user again.
+      if (!userHistory) {
+        ready = undefined;
+        return NO_HISTORY;
+      }
+      history$.next(userHistory);
+      return userHistory;
+    });
+    return ready;
+  };
+  getUserHistory();
 
   return {
     add: (link, label, id) => {
-      ready.then((userHistory) => userHistory.add(link, label, id));
+      getUserHistory().then((userHistory) => userHistory.add(link, label, id));
     },
     remove: (id) => {
-      ready.then((userHistory) => userHistory.remove(id));
+      getUserHistory().then((userHistory) => userHistory.remove(id));
     },
-    get: () => history.get(),
-    get$: () => from(ready).pipe(switchMap((userHistory) => userHistory.get$())),
+    get: () => history$.value.get(),
+    get$: () => history$.pipe(switchMap((userHistory) => userHistory.get$())),
   };
 };
 
