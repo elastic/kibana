@@ -4489,6 +4489,39 @@ paths:
 
         ---
 
+        `model_reasoning_chunk`
+
+        Streams partial reasoning (thinking) text returned by the model provider, when the model emits reasoning.
+
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "text_chunk": "partial reasoning text"
+        }
+        ```
+
+        **Note:** `message_id` matches the `message_id` of the `message_chunk` events streamed for the same model response.
+
+        ---
+
+        `model_reasoning`
+
+        Returns the full reasoning text of one model response, once the response is complete. It is persisted as a `model_reasoning` step of the round. Model reasoning is never sent back to the model.
+
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "reasoning": "full reasoning text",
+          "tool_call_group_id": "uuid"
+        }
+        ```
+
+        **Note:** `tool_call_group_id` is only set when the model response requested tool calls.
+
+        ---
+
         `tool_call`
 
         Triggers when a tool is invoked.
@@ -4597,14 +4630,15 @@ paths:
 
         A typical conversation round emits events in this sequence:
 
-        1. `reasoning` (potentially multiple, some transient)
-        2. `tool_call` (if tools are used)
-        3. `tool_progress` (zero or more progress updates)
-        4. `tool_result` (when tool completes)
-        5. `thinking_complete`
-        6. `message_chunk` (multiple, as text streams)
-        7. `message_complete`
-        8. `round_complete`
+        1. `model_reasoning_chunk` (multiple, if the model emits reasoning), then `model_reasoning`
+        2. `reasoning` (potentially multiple, some transient)
+        3. `tool_call` (if tools are used)
+        4. `tool_progress` (zero or more progress updates)
+        5. `tool_result` (when tool completes)
+        6. `thinking_complete`
+        7. `message_chunk` (multiple, as text streams)
+        8. `message_complete`
+        9. `round_complete`
 
         <br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-converse-async
@@ -26293,6 +26327,814 @@ paths:
           source: |
             GET kbn:/api/context_engine/ai_index/customer_support/_describe
       x-state: Experimental; added in 9.6.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/memory/_forget:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/memory/_forget</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Forgets session memories by ID for the target user. The route reports a memory of another user or another space as `not_found`, so it does not reveal whether the memory exists.
+
+        Requires the `contextEngine:write` privilege. Without `user_id`, the route forgets the caller's own memories, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.
+
+        Forgetting writes a tombstone so reads stop returning the memory after the next Elasticsearch refresh, while Elasticsearch keeps its revisions until retention removes them. A read immediately after forgetting can still return the memory, and forgetting a memory right after writing it can return `not_found` until that write is visible. If Elasticsearch rejects a tombstone, the route returns `failed` with `error` and the caller can retry that ID.
+
+        After authorization, validation, and feature-flag checks pass, the route writes one `memory_forget` audit event per unique memory ID. Forgetting still works when memory is turned off.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
+      operationId: post-context-engine-memory-forget
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              forgetRequestExample:
+                description: Example request to forget two of the caller's memories, keeping their revisions until retention removes them
+                summary: Forget memories
+                value:
+                  ids:
+                    - 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                    - 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ids:
+                  description: The ids of the memories to forget. The route collapses duplicates.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  minItems: 1
+                  type: array
+                user_id:
+                  description: The Kibana user profile UID that the memories belong to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                failedForgetResponseExample:
+                  description: One memory was forgotten and Elasticsearch rejected the other tombstone
+                  summary: Failed to forget a memory
+                  value:
+                    results:
+                      - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                        outcome: forgotten
+                      - error: 'index [.ds-.context-engine-session-memory-2026.11.16-000001] blocked by: [TOO_MANY_REQUESTS/12/disk usage exceeded flood-stage watermark, index has read-only-allow-delete block];'
+                        id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+                        outcome: failed
+                forgetResponseExample:
+                  description: One memory was forgotten, and the other does not exist for this user
+                  summary: Memories forgotten
+                  value:
+                    results:
+                      - id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                        outcome: forgotten
+                      - id: 0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44
+                        outcome: not_found
+              schema:
+                additionalProperties: false
+                description: The outcome for every requested memory.
+                type: object
+                properties:
+                  results:
+                    description: One result per unique id, in request order.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          description: Why the tombstone failed when `outcome` is `failed`.
+                          type: string
+                        id:
+                          description: The memory id.
+                          type: string
+                        outcome:
+                          description: 'What happened to the memory: `forgotten` if a tombstone was written, `already_forgotten` if it was already tombstoned, `not_found` if it does not exist or belongs to another user or space, or `failed` if Elasticsearch rejected the tombstone.'
+                          enum:
+                            - forgotten
+                            - already_forgotten
+                            - not_found
+                            - failed
+                          type: string
+                      required:
+                        - id
+                        - outcome
+                    maxItems: 100
+                    type: array
+                required:
+                  - results
+          description: The outcome for every requested memory.
+        '403':
+          content:
+            application/json:
+              examples:
+                manageMemoryRequiredExample:
+                  description: The request names another user in `user_id` and the caller lacks the manage memory privilege
+                  summary: Missing manage memory privilege
+                  value:
+                    error: Forbidden
+                    message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+                    statusCode: 403
+                noUserProfileExample:
+                  description: '`user_id` is missing and the caller has no user profile'
+                  summary: No user profile
+                  value:
+                    error: Forbidden
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: '`user_id` is missing and the caller has no user profile, or `user_id` names another user and the caller lacks `contextEngine:manage_memory`.'
+        '404':
+          content:
+            application/json:
+              examples:
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine is turned off in this space.
+      summary: Forget session memories
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_forget" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "kbn-xsrf: true" \
+              -d '{
+                "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/memory/_forget
+            {
+              "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10", "0d4e8a91-6c2b-4f3a-8d15-9b7e1c5a2f44"]
+            }
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/memory/_remember:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/memory/_remember</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Writes one memory to the session memory store. Pass `id` to revise an existing memory. The revision replaces the memory in full.
+
+        Returns 202 with the memory id and writes the memory in the background, because semantic indexing runs inside the write. The memory becomes searchable after the background write completes.
+
+        Requires the `contextEngine:write` privilege. Without `user_id`, the route writes the memory for the caller's user profile, and a caller without a user profile gets a 403. Naming another user in `user_id` also requires `contextEngine:manage_memory`.
+
+        Each AI index in `ai_index_ids` must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index. Otherwise, the route rejects the request and writes nothing.
+
+        After authorization, validation, and feature-flag checks pass, the route writes one `memory_remember` audit event per request, when the background write finishes or when it rejects the request. The route does not report a failed background write in the response. Instead, it logs the error to the Kibana logs and writes a failure audit event.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
+      operationId: post-context-engine-memory-remember
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              rememberRequestExample:
+                description: Example request that stores a session memory for the caller and targets an AI index for dreaming
+                summary: Remember a session memory
+                value:
+                  ai_index_ids:
+                    - ops-memory
+                  attributes:
+                    incident: INC-4211
+                  content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.
+                  session_id: 8f3c2a1e
+              reviseRequestExample:
+                description: Example request that replaces an existing session memory by passing its `id`
+                summary: Revise an existing session memory
+                value:
+                  ai_index_ids:
+                    - ops-memory
+                  attributes:
+                    incident: INC-4211
+                  content: checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy; mitigated by raising max_connections to 200.
+                  id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+                  session_id: 8f3c2a1e
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ai_index_ids:
+                  description: The AI indices that dreaming promotes the memory into. Each must exist in this space, and the caller requires the Elasticsearch `write` privilege on its backing index.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
+                attributes:
+                  additionalProperties:
+                    maxLength: 1024
+                    type: string
+                  description: String hints about the memory for dreaming. Accepts up to 50 entries, with non-blank keys of 1 to 256 characters.
+                  type: object
+                content:
+                  description: The memory text. Elasticsearch indexes this field for semantic search.
+                  maxLength: 65536
+                  minLength: 1
+                  type: string
+                id:
+                  description: The id of an existing memory to revise. The revision replaces the memory in full, and the route does not check whether the id exists. Omit this field to generate a new id.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                session_id:
+                  description: The session the memory comes from.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                user_id:
+                  description: The Kibana user profile UID that the memory belongs to. Omit this field to use the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - session_id
+                - content
+      responses:
+        '202':
+          content:
+            application/json:
+              examples:
+                rememberResponseExample:
+                  description: The route accepted the memory and is writing it in the background. It becomes searchable after the write completes
+                  summary: Memory accepted
+                  value:
+                    id: 7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  id:
+                    description: The id of the memory. Pass it as `id` to revise the memory.
+                    type: string
+                required:
+                  - id
+          description: The route accepted the memory and is writing it in the background. It becomes searchable after the write completes.
+        '403':
+          content:
+            application/json:
+              examples:
+                aiIndexNotWritableExample:
+                  description: The caller lacks the Elasticsearch `write` privilege on an AI index's backing index
+                  summary: AI index not writable
+                  value:
+                    error: Forbidden
+                    message: AI index 'ops-memory' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index.
+                    statusCode: 403
+                manageMemoryRequiredExample:
+                  description: '`user_id` names another user and the caller lacks `contextEngine:manage_memory`'
+                  summary: Missing manage memory privilege
+                  value:
+                    error: Forbidden
+                    message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+                    statusCode: 403
+                noUserProfileExample:
+                  description: '`user_id` is missing and the caller has no user profile'
+                  summary: No user profile
+                  value:
+                    error: Forbidden
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: '`user_id` is missing and the caller has no user profile, `user_id` names another user and the caller lacks `contextEngine:manage_memory`, or the caller cannot write to one of the AI indices.'
+        '404':
+          content:
+            application/json:
+              examples:
+                aiIndexNotFoundExample:
+                  description: An AI index in `ai_index_ids` does not exist in this space
+                  summary: AI index not found
+                  value:
+                    error: Not Found
+                    message: AI index 'ops-memory' not found
+                    statusCode: 404
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                memoryDisabledExample:
+                  description: Context Engine memory is turned off
+                  summary: Memory turned off
+                  value:
+                    error: Not Found
+                    message: Context Engine memory is turned off.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine or memory is turned off, or an AI index does not exist.
+      summary: Remember a session memory
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_remember" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "kbn-xsrf: true" \
+              -d '{
+                "session_id": "8f3c2a1e",
+                "ai_index_ids": ["ops-memory"],
+                "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+                "attributes": { "incident": "INC-4211" }
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/memory/_remember
+            {
+              "session_id": "8f3c2a1e",
+              "ai_index_ids": ["ops-memory"],
+              "content": "checkout-service latency alert fired. Root cause is a connection pool limit after the 3.2 deploy.",
+              "attributes": { "incident": "INC-4211" }
+            }
+      x-state: Experimental; added in 9.7.0
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/context_engine/memory/_save_event:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/context_engine/memory/_save_event</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Saves the events of an agent session, one document per event, so the session can be searched later. User and assistant messages are indexed for semantic search.
+
+        Takes 1 to 1000 events and a body of up to 10 MB. A request that fails validation is rejected as a whole. Any field an event carries beyond the documented ones, such as a tool event's `result` or a tool call's `args`, is stored as sent, whatever its JSON type.
+
+        Each event gets its own result, in request order. A `failed` event, for example when its content could not be embedded, does not fail the request; resend it to retry. A resent event is stored again, and readers drop duplicates by session and event id.
+
+        The route needs the `contextEngine:write` privilege. Without `user_id` the events belong to the caller's user profile, and a caller without one gets a 403. Naming another user in `user_id` also needs `contextEngine:manage_memory`. Each AI index in `ai_index_ids` must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index. Otherwise the request is rejected and nothing is saved.
+
+        After authorization, validation, and feature-flag checks pass, each request writes one `memory_save_event` audit event.
+
+        Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`), when memory is turned off (`contextEngine:memoryEnabled`), or when an AI index in `ai_index_ids` does not exist.
+
+        **For more information, refer to the [Context Engine documentation](https://www.elastic.co/docs/explore-analyze/ai-features/context-engine).**<br/><br/>[Required authorization] Route required privileges: contextEngine:write. Extended privileges (optional, expand functionality when granted): contextEngine:manage_memory.
+      operationId: post-context-engine-memory-save-event
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              saveTurnRequestExample:
+                description: "Example request to save one turn: the user's question, a tool call that fails, and the final answer. The tool event's `result` and `duration_ms` are stored as sent."
+                summary: Save a turn of a session
+                value:
+                  ai_index_ids:
+                    - ops-memory
+                  events:
+                    - content: Why is checkout latency up since this morning?
+                      event_at: '2026-11-16T09:58:00.000Z'
+                      id: evt-001
+                      seq: 1
+                      turn_id: turn-1
+                      type: user
+                    - event_at: '2026-11-16T09:58:02.000Z'
+                      id: evt-002
+                      seq: 2
+                      tool_calls:
+                        - args:
+                            index: logs-checkout*
+                            since: now-6h
+                          id: call-1
+                          name: search_logs
+                      turn_id: turn-1
+                      type: assistant
+                    - duration_ms: 30000
+                      event_at: '2026-11-16T09:58:32.000Z'
+                      id: evt-003
+                      result: Search timed out after 30 seconds
+                      seq: 3
+                      status: failed
+                      tool_call_id: call-1
+                      tool_name: search_logs
+                      turn_id: turn-1
+                      type: tool
+                    - content: The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back.
+                      event_at: '2026-11-16T09:58:35.000Z'
+                      id: evt-004
+                      seq: 4
+                      turn_id: turn-1
+                      type: assistant
+                  session_id: 3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                ai_index_ids:
+                  description: The AI indices the agent could use in the session. Each must exist in this space, and the caller needs the Elasticsearch `write` privilege on its backing index.
+                  items:
+                    maxLength: 256
+                    minLength: 1
+                    type: string
+                  maxItems: 100
+                  type: array
+                events:
+                  description: The events to save.
+                  items:
+                    discriminator:
+                      mapping:
+                        assistant: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_assistant'
+                        meta: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_meta'
+                        reasoning: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_reasoning'
+                        tool: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_tool'
+                        user: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_user'
+                      propertyName: type
+                    oneOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_user'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_assistant'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_reasoning'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_tool'
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs_context_engine_session_event_meta'
+                  maxItems: 1000
+                  minItems: 1
+                  type: array
+                session_id:
+                  description: The session the events belong to.
+                  maxLength: 256
+                  minLength: 1
+                  type: string
+                user_id:
+                  description: The Kibana user profile UID that the events belong to. Defaults to the caller's user profile. Naming another user requires `contextEngine:manage_memory`.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
+              required:
+                - session_id
+                - events
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                failedEventResponseExample:
+                  description: Three events were saved. The last one could not be embedded and can be resent.
+                  summary: An event failed
+                  value:
+                    results:
+                      - id: evt-001
+                        status: created
+                      - id: evt-002
+                        status: created
+                      - id: evt-003
+                        status: created
+                      - error: Exception when running inference id [.elser-2-elasticsearch] on field [content.semantic_text]
+                        id: evt-004
+                        status: failed
+                saveTurnResponseExample:
+                  description: Each event was saved, in request order
+                  summary: Every event saved
+                  value:
+                    results:
+                      - id: evt-001
+                        status: created
+                      - id: evt-002
+                        status: created
+                      - id: evt-003
+                        status: created
+                      - id: evt-004
+                        status: created
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  results:
+                    description: One result per event, in request order.
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          description: Why the event failed. Resend it to retry.
+                          type: string
+                        id:
+                          description: The event id.
+                          type: string
+                        status:
+                          description: Whether the event was stored.
+                          enum:
+                            - created
+                            - failed
+                          type: string
+                      required:
+                        - id
+                        - status
+                    maxItems: 1000
+                    type: array
+                required:
+                  - results
+          description: The result for every event.
+        '403':
+          content:
+            application/json:
+              examples:
+                aiIndexNotWritableExample:
+                  description: The caller lacks the Elasticsearch `write` privilege on an AI index's backing index
+                  summary: An AI index the caller cannot write to
+                  value:
+                    error: Forbidden
+                    message: AI index 'ops-memory' is not writable. Writing to it needs the Elasticsearch 'write' privilege on its backing index.
+                    statusCode: 403
+                manageMemoryRequiredExample:
+                  description: '`user_id` names another user and the caller lacks `contextEngine:manage_memory`'
+                  summary: Another user without manage memory
+                  value:
+                    error: Forbidden
+                    message: Acting on the memory of another user requires the [contextEngine:manage_memory] privilege.
+                    statusCode: 403
+                noUserProfileExample:
+                  description: '`user_id` is missing and the caller has no user profile'
+                  summary: No user to attribute the events to
+                  value:
+                    error: Forbidden
+                    message: The caller has no user profile, so the request cannot be attributed to a user. Log in to Kibana once to create a profile, use an API key whose owner has one, or set `user_id` if you have the `contextEngine:manage_memory` privilege.
+                    statusCode: 403
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: '`user_id` is missing and the caller has no user profile, `user_id` names another user and the caller lacks `contextEngine:manage_memory`, or the caller cannot write to one of the AI indices.'
+        '404':
+          content:
+            application/json:
+              examples:
+                aiIndexNotFoundExample:
+                  description: An AI index in `ai_index_ids` does not exist in this space
+                  summary: Unknown AI index
+                  value:
+                    error: Not Found
+                    message: AI index 'ops-memory' not found
+                    statusCode: 404
+                contextEngineDisabledExample:
+                  description: Context Engine is turned off in this space
+                  summary: Context Engine turned off
+                  value:
+                    error: Not Found
+                    message: Not Found
+                    statusCode: 404
+                memoryDisabledExample:
+                  description: Context Engine memory is turned off
+                  summary: Memory turned off
+                  value:
+                    error: Not Found
+                    message: Context Engine memory is turned off.
+                    statusCode: 404
+              schema:
+                additionalProperties: false
+                description: Generic error response.
+                type: object
+                properties:
+                  error:
+                    description: The HTTP status text.
+                    type: string
+                  message:
+                    description: A human-readable error message.
+                    type: string
+                  statusCode:
+                    description: The HTTP status code.
+                    type: number
+                required:
+                  - message
+          description: Context Engine or memory is turned off, or an AI index does not exist.
+      summary: Save session events
+      tags:
+        - context engine
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl \
+              -X POST "https://${KIBANA_URL}/api/context_engine/memory/_save_event" \
+              -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -H "kbn-xsrf: true" \
+              -d '{
+                "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+                "ai_index_ids": ["ops-memory"],
+                "events": [
+                  {
+                    "id": "evt-001",
+                    "type": "user",
+                    "turn_id": "turn-1",
+                    "event_at": "2026-11-16T09:58:00.000Z",
+                    "seq": 1,
+                    "content": "Why is checkout latency up since this morning?"
+                  },
+                  {
+                    "id": "evt-002",
+                    "type": "assistant",
+                    "turn_id": "turn-1",
+                    "event_at": "2026-11-16T09:58:02.000Z",
+                    "seq": 2,
+                    "tool_calls": [
+                      { "id": "call-1", "name": "search_logs", "args": { "index": "logs-checkout*", "since": "now-6h" } }
+                    ]
+                  },
+                  {
+                    "id": "evt-003",
+                    "type": "tool",
+                    "turn_id": "turn-1",
+                    "event_at": "2026-11-16T09:58:32.000Z",
+                    "seq": 3,
+                    "tool_call_id": "call-1",
+                    "tool_name": "search_logs",
+                    "status": "failed",
+                    "result": "Search timed out after 30 seconds",
+                    "duration_ms": 30000
+                  },
+                  {
+                    "id": "evt-004",
+                    "type": "assistant",
+                    "turn_id": "turn-1",
+                    "event_at": "2026-11-16T09:58:35.000Z",
+                    "seq": 4,
+                    "content": "The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back."
+                  }
+                ]
+              }'
+        - lang: Console
+          source: |
+            POST kbn:/api/context_engine/memory/_save_event
+            {
+              "session_id": "3f9c2e1a-7b4d-4c8e-9a61-5d2f0b7e8c43",
+              "ai_index_ids": ["ops-memory"],
+              "events": [
+                {
+                  "id": "evt-001",
+                  "type": "user",
+                  "turn_id": "turn-1",
+                  "event_at": "2026-11-16T09:58:00.000Z",
+                  "seq": 1,
+                  "content": "Why is checkout latency up since this morning?"
+                },
+                {
+                  "id": "evt-002",
+                  "type": "assistant",
+                  "turn_id": "turn-1",
+                  "event_at": "2026-11-16T09:58:02.000Z",
+                  "seq": 2,
+                  "tool_calls": [
+                    { "id": "call-1", "name": "search_logs", "args": { "index": "logs-checkout*", "since": "now-6h" } }
+                  ]
+                },
+                {
+                  "id": "evt-003",
+                  "type": "tool",
+                  "turn_id": "turn-1",
+                  "event_at": "2026-11-16T09:58:32.000Z",
+                  "seq": 3,
+                  "tool_call_id": "call-1",
+                  "tool_name": "search_logs",
+                  "status": "failed",
+                  "result": "Search timed out after 30 seconds",
+                  "duration_ms": 30000
+                },
+                {
+                  "id": "evt-004",
+                  "type": "assistant",
+                  "turn_id": "turn-1",
+                  "event_at": "2026-11-16T09:58:35.000Z",
+                  "seq": 4,
+                  "content": "The log search timed out, so I could not confirm it from the logs. The checkout-service deploy at 08:40 is the most likely cause. Check its connection pool settings, or roll it back."
+                }
+              ]
+            }
+      x-state: Experimental; added in 9.7.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -75401,12 +76243,12 @@ paths:
             description: Comma-separated list of user IDs to filter live query history.
             example: elastic,admin
             type: string
-        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+        - description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
           in: query
           name: sourceFilters
           required: false
           schema:
-            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+            description: Comma-separated list of source types to include. Valid values are `live`, `rule`, `scheduled`, and `workflow`.
             example: live,scheduled
             type: string
         - description: The start of the time range filter (ISO 8601).
@@ -163476,12 +164318,14 @@ components:
           nullable: true
           type: string
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fips_agents:
           type: number
         fleet_server_host_id:
@@ -168105,6 +168949,230 @@ components:
         - source
         - is_testable
       title: connector_type_response
+      type: object
+    Kibana_HTTP_APIs_context_engine_session_event_assistant:
+      additionalProperties: true
+      description: An assistant message or tool call request event.
+      properties:
+        content:
+          description: The assistant message. It is indexed for semantic search.
+          maxLength: 1048576
+          type: string
+        event_at:
+          description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
+          maxLength: 64
+          type: string
+        id:
+          description: The event id, unique within the session. Readers drop resent duplicates by session and event id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        seq:
+          description: An integer order key for events within the session.
+          maximum: 9007199254740991
+          minimum: 0
+          type: number
+        tool_calls:
+          description: The tool calls the assistant made in this message. Any other field of a call, such as `args` as a string or an object, is stored as sent.
+          items:
+            additionalProperties: true
+            type: object
+            properties:
+              id:
+                description: The tool call id that a later tool event refers to in `tool_call_id`.
+                maxLength: 256
+                minLength: 1
+                type: string
+              name:
+                description: The name of the called tool.
+                maxLength: 256
+                minLength: 1
+                type: string
+            required:
+              - id
+              - name
+          maxItems: 128
+          type: array
+        turn_id:
+          description: The turn the event belongs to. Events are grouped into turns by this id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - assistant
+          type: string
+      required:
+        - id
+        - turn_id
+        - event_at
+        - type
+      title: context_engine_session_event_assistant
+      type: object
+    Kibana_HTTP_APIs_context_engine_session_event_meta:
+      additionalProperties: true
+      description: A session metadata event carrying custom fields.
+      properties:
+        event_at:
+          description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
+          maxLength: 64
+          type: string
+        id:
+          description: The event id, unique within the session. Readers drop resent duplicates by session and event id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        seq:
+          description: An integer order key for events within the session.
+          maximum: 9007199254740991
+          minimum: 0
+          type: number
+        turn_id:
+          description: The turn the event belongs to. Events are grouped into turns by this id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - meta
+          type: string
+      required:
+        - id
+        - turn_id
+        - event_at
+        - type
+      title: context_engine_session_event_meta
+      type: object
+    Kibana_HTTP_APIs_context_engine_session_event_reasoning:
+      additionalProperties: true
+      description: A model reasoning text event.
+      properties:
+        content:
+          description: The reasoning text. It is stored but not indexed.
+          maxLength: 1048576
+          type: string
+        event_at:
+          description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
+          maxLength: 64
+          type: string
+        id:
+          description: The event id, unique within the session. Readers drop resent duplicates by session and event id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        seq:
+          description: An integer order key for events within the session.
+          maximum: 9007199254740991
+          minimum: 0
+          type: number
+        turn_id:
+          description: The turn the event belongs to. Events are grouped into turns by this id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - reasoning
+          type: string
+      required:
+        - id
+        - turn_id
+        - event_at
+        - type
+      title: context_engine_session_event_reasoning
+      type: object
+    Kibana_HTTP_APIs_context_engine_session_event_tool:
+      additionalProperties: true
+      description: A tool execution result event.
+      properties:
+        event_at:
+          description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
+          maxLength: 64
+          type: string
+        id:
+          description: The event id, unique within the session. Readers drop resent duplicates by session and event id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        seq:
+          description: An integer order key for events within the session.
+          maximum: 9007199254740991
+          minimum: 0
+          type: number
+        status:
+          description: Whether the tool succeeded. Leave it out or send null when unknown; it is stored as `unknown`.
+          enum:
+            - successful
+            - failed
+            - null
+          nullable: true
+          type: string
+        tool_call_id:
+          description: The id of the tool call this event answers.
+          maxLength: 256
+          minLength: 1
+          type: string
+        tool_name:
+          description: The name of the tool that ran.
+          maxLength: 256
+          minLength: 1
+          type: string
+        turn_id:
+          description: The turn the event belongs to. Events are grouped into turns by this id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - tool
+          type: string
+      required:
+        - id
+        - turn_id
+        - event_at
+        - type
+        - tool_call_id
+        - tool_name
+      title: context_engine_session_event_tool
+      type: object
+    Kibana_HTTP_APIs_context_engine_session_event_user:
+      additionalProperties: true
+      description: A user message event.
+      properties:
+        content:
+          description: The user message. It is indexed for semantic search.
+          maxLength: 1048576
+          type: string
+        event_at:
+          description: When the agent created the event, as an ISO 8601 date and time such as `2026-11-16T09:58:00.000Z`.
+          maxLength: 64
+          type: string
+        id:
+          description: The event id, unique within the session. Readers drop resent duplicates by session and event id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        seq:
+          description: An integer order key for events within the session.
+          maximum: 9007199254740991
+          minimum: 0
+          type: number
+        turn_id:
+          description: The turn the event belongs to. Events are grouped into turns by this id.
+          maxLength: 256
+          minLength: 1
+          type: string
+        type:
+          enum:
+            - user
+          type: string
+      required:
+        - id
+        - turn_id
+        - event_at
+        - type
+        - content
+      title: context_engine_session_event_user
       type: object
     Kibana_HTTP_APIs_copy_agent_policy_request:
       additionalProperties: false
@@ -183394,12 +184462,14 @@ components:
           type: string
           x-kibana-planned-max-length: 512
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fleet_server_host_id:
           minLength: 0
           nullable: true
@@ -189122,7 +190192,7 @@ components:
             description: A list of data source names or wildcard patterns to which the permissions in this entry apply.
             maxLength: 1000
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
@@ -189151,7 +190221,7 @@ components:
           items:
             description: Cluster privileges that define the cluster level actions that users can perform.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
         global:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_global_privileges'
@@ -189163,7 +190233,7 @@ components:
         remote_cluster:
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_security_role_remote_cluster_privileges'
-          maxItems: 100
+          maxItems: 1000
           type: array
         remote_indices:
           items:
@@ -189174,7 +190244,7 @@ components:
           items:
             description: A username that members of this role can impersonate.
             type: string
-          maxItems: 100
+          maxItems: 1000
           type: array
       title: security_role_elasticsearch
       type: object
@@ -189247,14 +190317,14 @@ components:
           items:
             description: The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that the role members have for the data streams and indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
@@ -189314,7 +190384,7 @@ components:
             items:
               description: The privileges that the role member has for the feature.
               type: string
-            maxItems: 100
+            maxItems: 1000
             type: array
           type: object
         spaces:
@@ -189400,14 +190470,14 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
       required:
@@ -189426,7 +190496,7 @@ components:
           items:
             description: A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         field_security:
@@ -189441,14 +190511,14 @@ components:
           items:
             description: A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         privileges:
           items:
             description: The index level privileges that role members have for the specified indices.
             type: string
-          maxItems: 100
+          maxItems: 1000
           minItems: 1
           type: array
         query:
@@ -193767,12 +194837,14 @@ components:
           type: string
           x-kibana-planned-max-length: 512
         download_source_ids:
+          description: An ordered list of agent binary download sources. When downloading an upgrade, Elastic Agent tries them in order until a download succeeds. Elastic Agent versions earlier than 9.6.0 only use the first source. All sources use the first source's proxy, SSL, authentication, and `reserve_diskspace` settings. If the first source uses a proxy, Fleet uses the proxy's SSL settings instead of the source's. An empty list uses the default download source. On update, omitting this field keeps the current list. If you set only the deprecated `download_source_id`, Fleet replaces the list with that source, or clears it if the value is `null`.
           items:
             description: A download source ID, or the reserved value 'default' to dynamically reference whichever source is currently set as default.
             maxLength: 500
             type: string
           maxItems: 3
           type: array
+          x-state: Generally available; added in 9.6.0
         fleet_server_host_id:
           minLength: 0
           nullable: true
@@ -220391,6 +221463,25 @@ components:
             expiration:
               format: date-time
               type: string
+            origin:
+              description: What started the live query. Absent for live queries started from the UI, the API or a rule.
+              type: object
+              properties:
+                run_id:
+                  description: The workflow execution (run) ID that made the request.
+                  type: string
+                type:
+                  description: The kind of origin. `workflow` means a workflow run made the request.
+                  enum:
+                    - workflow
+                  type: string
+                verified:
+                  description: Whether Kibana verified that the run exists and made the request. Always `false` for now.
+                  type: boolean
+              required:
+                - type
+                - run_id
+                - verified
             pack_id:
               type: string
             pack_name:
@@ -221134,6 +222225,9 @@ components:
               additionalProperties: true
               description: ECS mapping configuration used for the query.
               type: object
+            originVerified:
+              description: Set on `Workflow` rows only. Whether Kibana verified that the workflow run made the request. Always `false` until workflow runs can be verified.
+              type: boolean
             queriesTotal:
               description: The total number of sub-queries in the live action.
               type: integer
@@ -221144,10 +222238,11 @@ components:
               description: The saved query ID, if the live query was based on a saved query.
               type: string
             source:
-              description: Whether this was a manually run live query or triggered by a rule.
+              description: Whether the live query was run manually, by a rule, or by a workflow. `Workflow` comes from an unverified request header and is for display only.
               enum:
                 - Live
                 - Rule
+                - Workflow
               type: string
             sourceType:
               description: Identifies this as a live query history row.

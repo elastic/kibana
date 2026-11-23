@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { mockTimelineData } from '../../../../../../common/mock';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
-import { waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -28,26 +26,28 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../../../common/components/link_to');
 
 describe('SuricataDetails', () => {
-  const mount = useMountAppended();
-
-  const getWrapper = async (childrenComponent: JSX.Element) => {
-    const wrapper = mount(childrenComponent);
-    await waitFor(() => wrapper.find('[data-test-subj="suricataRefs"]').exists()); // check for presence of query input
-    return wrapper;
-  };
   describe('rendering', () => {
-    test('it renders the default SuricataDetails', () => {
-      const wrapper = shallow(<SuricataDetails data={mockTimelineData[2].ecs} scopeId="test" />);
-      expect(wrapper).toMatchSnapshot();
-    });
-
-    test('it returns text if the data does contain suricata data', async () => {
-      const wrapper = await getWrapper(
+    test('it renders the default SuricataDetails', async () => {
+      render(
         <TestProviders>
           <SuricataDetails data={mockTimelineData[2].ecs} scopeId="test" />
         </TestProviders>
       );
-      const removeEuiIconText = removeExternalLinkText(wrapper.text()).replaceAll(
+      await waitFor(() => expect(screen.getByTestId('suricataRefs')).toBeInTheDocument());
+      expect(screen.getByText('ET')).toBeInTheDocument();
+      expect(screen.getByText('EXPLOIT')).toBeInTheDocument();
+      expect(screen.getByText('Source')).toBeInTheDocument();
+      expect(screen.getByText('Destination')).toBeInTheDocument();
+    });
+
+    test('it returns text if the data does contain suricata data', async () => {
+      const { container } = render(
+        <TestProviders>
+          <SuricataDetails data={mockTimelineData[2].ecs} scopeId="test" />
+        </TestProviders>
+      );
+      await waitFor(() => expect(screen.getByTestId('suricataRefs')).toBeInTheDocument());
+      const removeEuiIconText = removeExternalLinkText(container.textContent).replaceAll(
         'External link',
         ''
       );
@@ -57,8 +57,10 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns null for text if the data contains no suricata data', () => {
-      const wrapper = shallow(<SuricataDetails data={mockTimelineData[0].ecs} scopeId="test" />);
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      const { container } = render(
+        <SuricataDetails data={mockTimelineData[0].ecs} scopeId="test" />
+      );
+      expect(container).toBeEmptyDOMElement();
     });
   });
 });
