@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import type { WorkflowMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
-import { MIGRATION_START_TRANSLATION_BUTTON } from '../../../common/components/start_translation_button/translations';
+import { StartTranslationButton } from '../../../common/components/start_translation_button';
+import type { MigrationSettingsBase } from '../../../common/types';
+import { useStartMigration } from '../../service/hooks/use_start_migration';
+import { useStartWorkflowsMigrationModal } from '../../service/hooks/use_start_workflows_migration_modal';
 import { PanelText } from '../../../../common/components/panel_text';
 
 export interface MigrationReadyPanelProps {
@@ -31,48 +34,63 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     return i18n.WORKFLOW_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
   }, [migrationStats.last_execution?.error, migrationStats.items.total, migrationStats.status]);
 
+  const isStopped = migrationStats.status === SiemMigrationTaskStatus.STOPPED;
+
+  const { startMigration, isLoading: isStarting } = useStartMigration();
+  const onStartMigrationWithSettings = useCallback(
+    (settings: MigrationSettingsBase) => startMigration(migrationStats, settings),
+    [migrationStats, startMigration]
+  );
+  const { modal: startMigrationModal, showModal: showStartMigrationModal } =
+    useStartWorkflowsMigrationModal({ migrationStats, onStartMigrationWithSettings });
+  // A stopped migration is resumed with the connector it was running with, no need to pick one again
+  const onResumeMigration = useCallback(
+    () => startMigration(migrationStats),
+    [migrationStats, startMigration]
+  );
+
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      paddingSize="m"
-      data-test-subj="workflowMigrationReadyPanel"
-    >
-      <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s">
-            <EuiFlexItem>
-              <MigrationPanelTitle migrationStats={migrationStats} migrationType="workflow" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <PanelText data-test-subj="workflowMigrationDescription" size="s" subdued>
-                <span>{migrationPanelDescription}</span>
-              </PanelText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {/* Starting a translation is not available yet, it is wired together with the start modal. */}
-          <EuiButton
-            data-test-subj="startMigrationButton"
-            aria-label={MIGRATION_START_TRANSLATION_BUTTON}
-            fill
-            size="s"
-          >
-            {MIGRATION_START_TRANSLATION_BUTTON}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {migrationStats.last_execution?.error && (
-        <>
-          <EuiSpacer size="m" />
-          <MigrationsLastError
-            message={migrationStats.last_execution.error}
-            migrationType="workflow"
-          />
-        </>
-      )}
-    </EuiPanel>
+    <>
+      {startMigrationModal}
+      <EuiPanel
+        hasShadow={false}
+        hasBorder
+        paddingSize="m"
+        data-test-subj="workflowMigrationReadyPanel"
+      >
+        <EuiFlexGroup direction="row" gutterSize="m" alignItems="flexEnd">
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <MigrationPanelTitle migrationStats={migrationStats} migrationType="workflow" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <PanelText data-test-subj="workflowMigrationDescription" size="s" subdued>
+                  <span>{migrationPanelDescription}</span>
+                </PanelText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <StartTranslationButton
+              migrationStats={migrationStats}
+              isStopped={isStopped}
+              startMigration={isStopped ? onResumeMigration : showStartMigrationModal}
+              isStarting={isStarting}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {migrationStats.last_execution?.error && (
+          <>
+            <EuiSpacer size="m" />
+            <MigrationsLastError
+              message={migrationStats.last_execution.error}
+              migrationType="workflow"
+            />
+          </>
+        )}
+      </EuiPanel>
+    </>
   );
 });
 MigrationReadyPanel.displayName = 'MigrationReadyPanel';
