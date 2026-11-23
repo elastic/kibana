@@ -50,8 +50,13 @@ test.describe('Dev Tools feature controls', { tag: tags.stateful.classic }, () =
     await browserAuth.loginAsNoDevToolsPrivileges();
     await page.gotoApp('discover');
 
-    const navLinks = await collapsibleNav.getNavLinks();
-    expect(navLinks).toContain('Discover');
+    // The nav toggle click can be swallowed while the header is still hydrating
+    // after navigation, so retry opening the nav until the links are rendered.
+    let navLinks: string[] = [];
+    await expect(async () => {
+      navLinks = await collapsibleNav.getNavLinks();
+      expect(navLinks).toContain('Discover');
+    }).toPass({ timeout: 30_000 });
     expect(navLinks).not.toContain('Dev Tools');
 
     for (const { hash } of testData.DEV_TOOL_APPS) {
