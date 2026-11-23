@@ -14,8 +14,8 @@ export const NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID = 'system-nightshift-det
 
 /**
  * Keeps what the detection strategies need in a space, today their alerting rules, up to date:
- * started by `significant-events.knowledgeIndicatorsChanged` when knowledge indicators change, by
- * the engine's `nightshift-detection.rulesStale` when sources change, and every six hours.
+ * started by `significant-events.knowledgeIndicatorsChanged` when knowledge indicators change, and
+ * every six hours, which picks up a source being enabled or disabled.
  * Installed per space and bound to the detection engine service account, it calls
  * `POST /internal/nightshift/detection/_reconcile` as that account, so the rules run with the
  * account's API key.

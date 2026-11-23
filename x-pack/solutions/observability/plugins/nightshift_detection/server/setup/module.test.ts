@@ -81,9 +81,7 @@ function createContainer() {
   container.bind(PluginStart('workflowsExtensions')).toConstantValue({});
   container.bind(PluginSetup('workflowsExtensions')).toConstantValue({
     registerManagedWorkflowOwner: jest.fn(),
-    registerTriggerDefinition: jest.fn(),
   });
-  container.bind(PluginSetup('nightshiftSources')).toConstantValue({ onSourceChange: jest.fn() });
   container.bind(PluginSetup('workflowsManagement')).toConstantValue({});
   container.load(module);
 

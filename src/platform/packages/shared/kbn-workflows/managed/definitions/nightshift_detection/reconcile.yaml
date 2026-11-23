@@ -1,6 +1,7 @@
 # Installed per space, bound to the detection engine service account, by the space's setup. It
-# calls the engine's reconcile route as that account whenever knowledge indicators or sources
-# change, and every six hours to catch a change whose event was lost.
+# calls the engine's reconcile route as that account whenever knowledge indicators change (deleting
+# a source or changing its query deletes its indicators, so those count), and every six hours,
+# which picks up a source being enabled or disabled and any change whose event was lost.
 version: "1"
 name: "Nightshift Detection Reconcile"
 description: "Keeps what the Nightshift detection strategies need in the space, today their alerting rules, up to date with its knowledge indicators and sources."
@@ -22,7 +23,6 @@ settings:
     strategy: cancel-in-progress
     max: 1
 triggers:
-  - type: nightshift-detection.rulesStale
   - type: significant-events.knowledgeIndicatorsChanged
   - type: scheduled
     with:
@@ -33,7 +33,7 @@ steps:
   # `triggeredBy`.
   - name: refuse_direct_runs
     type: if
-    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "nightshift-detection.rulesStale" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged")'
+    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged")'
     steps:
       - name: refuse
         type: workflow.fail

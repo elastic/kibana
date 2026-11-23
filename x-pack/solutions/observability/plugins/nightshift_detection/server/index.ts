@@ -6,7 +6,6 @@
  */
 
 import { KibanaContainerModule } from '@kbn/core-di';
-import { bindChangeListeners } from './setup/bind_change_listeners';
 import { bindEngine } from './setup/bind_engine';
 import { bindOnSetup } from './setup/bind_on_setup';
 import { bindOnStart } from './setup/bind_on_start';
@@ -33,7 +32,6 @@ const pluginModule = new KibanaContainerModule((options) => {
   bindWorkflows(options);
   bindTick(options);
   bindReconcile(options);
-  bindChangeListeners(options);
   bindRoutes(options);
   bindOnSetup(options);
   bindOnStart(options);
