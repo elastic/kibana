@@ -171,6 +171,17 @@ export const tactics: MitreTactic[] = [
 export const techniques: MitreTechnique[] = [
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.aiEnabledExfiltrationDescription',
+      { defaultMessage: 'AI-Enabled Exfiltration (T1700)' }
+    ),
+    id: 'T1700',
+    name: 'AI-Enabled Exfiltration',
+    reference: 'https://attack.mitre.org/techniques/T1700/',
+    tactics: ['exfiltration'],
+    value: 'aiEnabledExfiltration',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.abuseElevationControlMechanismDescription',
       { defaultMessage: 'Abuse Elevation Control Mechanism (T1548)' }
     ),
@@ -267,6 +278,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1557/',
     tactics: ['credential-access', 'collection'],
     value: 'adversaryInTheMiddle',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.antiAutomationEvasionDescription',
+      { defaultMessage: 'Anti-Automation Evasion (T1696)' }
+    ),
+    id: 'T1696',
+    name: 'Anti-Automation Evasion',
+    reference: 'https://attack.mitre.org/techniques/T1696/',
+    tactics: ['stealth'],
+    value: 'antiAutomationEvasion',
   },
   {
     label: i18n.translate(
@@ -828,6 +850,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1652/',
     tactics: ['discovery'],
     value: 'deviceDriverDiscovery',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.directPromptInjectionDescription',
+      { defaultMessage: 'Direct Prompt Injection (T1699)' }
+    ),
+    id: 'T1699',
+    name: 'Direct Prompt Injection',
+    reference: 'https://attack.mitre.org/techniques/T1699/',
+    tactics: ['execution'],
+    value: 'directPromptInjection',
   },
   {
     label: i18n.translate(
@@ -1400,6 +1433,17 @@ export const techniques: MitreTechnique[] = [
     reference: 'https://attack.mitre.org/techniques/T1202/',
     tactics: ['stealth'],
     value: 'indirectCommandExecution',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.indirectPromptInjectionDescription',
+      { defaultMessage: 'Indirect Prompt Injection (T1698)' }
+    ),
+    id: 'T1698',
+    name: 'Indirect Prompt Injection',
+    reference: 'https://attack.mitre.org/techniques/T1698/',
+    tactics: ['execution'],
+    value: 'indirectPromptInjection',
   },
   {
     label: i18n.translate(
@@ -2228,6 +2272,17 @@ export const techniques: MitreTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackTechniques.stealApplicationSpecificPasswordsDescription',
+      { defaultMessage: 'Steal Application Specific Passwords (T1697)' }
+    ),
+    id: 'T1697',
+    name: 'Steal Application Specific Passwords',
+    reference: 'https://attack.mitre.org/techniques/T1697/',
+    tactics: ['credential-access'],
+    value: 'stealApplicationSpecificPasswords',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackTechniques.stealWebSessionCookieDescription',
       { defaultMessage: 'Steal Web Session Cookie (T1539)' }
     ),
@@ -2628,6 +2683,18 @@ export const subtechniques: MitreSubTechnique[] = [
   },
   {
     label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.aiResultPoisoningT1608Description',
+      { defaultMessage: 'AI Result Poisoning (T1608.007)' }
+    ),
+    id: 'T1608.007',
+    name: 'AI Result Poisoning',
+    reference: 'https://attack.mitre.org/techniques/T1608/007/',
+    tactics: ['resource-development'],
+    techniqueId: 'T1608',
+    value: 'aiResultPoisoning',
+  },
+  {
+    label: i18n.translate(
       'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.arpCachePoisoningT1557Description',
       { defaultMessage: 'ARP Cache Poisoning (T1557.002)' }
     ),
@@ -2961,6 +3028,30 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['execution'],
     techniqueId: 'T1059',
     value: 'autoHotKeyAutoIt',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.automateCaptchaCompletionT1696Description',
+      { defaultMessage: 'Automate CAPTCHA Completion (T1696.001)' }
+    ),
+    id: 'T1696.001',
+    name: 'Automate CAPTCHA Completion',
+    reference: 'https://attack.mitre.org/techniques/T1696/001/',
+    tactics: ['stealth'],
+    techniqueId: 'T1696',
+    value: 'automateCaptchaCompletion',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.avoidCaptchaT1696Description',
+      { defaultMessage: 'Avoid CAPTCHA (T1696.002)' }
+    ),
+    id: 'T1696.002',
+    name: 'Avoid CAPTCHA',
+    reference: 'https://attack.mitre.org/techniques/T1696/002/',
+    tactics: ['stealth'],
+    techniqueId: 'T1696',
+    value: 'avoidCaptcha',
   },
   {
     label: i18n.translate(
@@ -5097,6 +5188,18 @@ export const subtechniques: MitreSubTechnique[] = [
     tactics: ['privilege-escalation', 'persistence'],
     techniqueId: 'T1546',
     value: 'imageFileExecutionOptionsInjection',
+  },
+  {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.impairAutonomousDefensesT1685Description',
+      { defaultMessage: 'Impair Autonomous Defenses (T1685.007)' }
+    ),
+    id: 'T1685.007',
+    name: 'Impair Autonomous Defenses',
+    reference: 'https://attack.mitre.org/techniques/T1685/007/',
+    tactics: ['defense-impairment'],
+    techniqueId: 'T1685',
+    value: 'impairAutonomousDefenses',
   },
   {
     label: i18n.translate(
