@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/significant-events-plugin'
   - '@kbn/spaces-plugin'
+  - '@kbn/std'
   - '@kbn/workflows'
   - '@kbn/workflows-extensions'
   - '@kbn/workflows-management-plugin'

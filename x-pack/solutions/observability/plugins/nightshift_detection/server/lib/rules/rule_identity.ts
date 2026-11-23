@@ -7,6 +7,7 @@
 
 import { v5 as uuidv5 } from 'uuid';
 import { MAX_NAME_LENGTH, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { stableStringify } from '@kbn/std';
 
 /** Namespace of the engine's rule ids. Changing it gives every managed rule a new id. */
 const RULE_ID_NAMESPACE = 'e04d28ab-9856-4cf7-bda8-1341f14f17b5';
@@ -48,21 +49,9 @@ const cutToLength = (text: string, maxLength: number): string => {
 };
 
 /**
- * `JSON.stringify` with object keys sorted, so the same rule built with its keys in another order
- * serializes, and hashes, the same.
- */
-const stringifyCanonical = (value: unknown): string =>
-  JSON.stringify(value, (_key, nested: unknown) =>
-    nested !== null && typeof nested === 'object' && !Array.isArray(nested)
-      ? Object.fromEntries(
-          Object.entries(nested).sort(([left], [right]) => (left < right ? -1 : 1))
-        )
-      : nested
-  );
-
-/**
  * The id of a managed rule. It hashes everything the rule runs with (the final query, project
- * routing included, its schedule, lookback and grouping), so any change to them gives a new rule:
+ * routing included, its schedule, lookback and grouping) with its keys sorted, so the same rule
+ * always gets the same id and any change to it gives a new rule:
  * the reconciler never edits a rule, it deletes the old one and creates the new one. Name and tags
  * are left out, since they don't change what the rule finds.
  */
@@ -76,7 +65,7 @@ export const computeRuleId = ({
   strategy: string;
   sourceId: string;
   rule: Omit<CreateRuleData, 'metadata'>;
-}): string => uuidv5(stringifyCanonical([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
+}): string => uuidv5(stableStringify([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
 
 /** The tags the engine puts on a managed rule, after the strategy's own. */
 export const getManagedRuleTags = ({
