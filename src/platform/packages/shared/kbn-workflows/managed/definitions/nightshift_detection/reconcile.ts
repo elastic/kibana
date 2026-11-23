@@ -13,9 +13,16 @@ import { defineBoundWorkflow } from '../../define_bound_workflow';
 export const NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID = 'system-nightshift-detection-reconcile';
 
 /**
+ * The `triggeredBy` of a run the detection engine starts when a source changes. Not a registered
+ * trigger: the engine passes it to `runWorkflow` from server code, which no HTTP caller can set.
+ */
+export const NIGHTSHIFT_DETECTION_SOURCE_CHANGED = 'nightshift-detection.sourceChanged';
+
+/**
  * Keeps what the detection strategies need in a space, today their alerting rules, up to date:
- * started by `significant-events.knowledgeIndicatorsChanged` when knowledge indicators change, and
- * every six hours, which picks up a source being enabled or disabled.
+ * started by `significant-events.knowledgeIndicatorsChanged` when knowledge indicators change, by
+ * the engine itself when a source changes, and every six hours to catch a change whose start was
+ * lost.
  * Installed per space and bound to the detection engine service account, it calls
  * `POST /internal/nightshift/detection/_reconcile` as that account, so the rules run with the
  * account's API key.

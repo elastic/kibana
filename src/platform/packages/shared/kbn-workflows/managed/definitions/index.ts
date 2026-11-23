@@ -177,7 +177,10 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { NIGHTSHIFT_CONTINUOUS_DETECTION_WORKFLOW_ID } from './nightshift_detection/continuous_detection';
-export { NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID } from './nightshift_detection/reconcile';
+export {
+  NIGHTSHIFT_DETECTION_RECONCILE_WORKFLOW_ID,
+  NIGHTSHIFT_DETECTION_SOURCE_CHANGED,
+} from './nightshift_detection/reconcile';
 export { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from './nightshift_investigations/decision_tree_hydrate';
 export { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from './nightshift_investigations/sandbox_materialize_workspace';
 export { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from './nightshift_investigations/agent_optimize';

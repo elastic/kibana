@@ -1,7 +1,7 @@
 # Installed per space, bound to the detection engine service account, by the space's setup. It
-# calls the engine's reconcile route as that account whenever knowledge indicators change (deleting
-# a source or changing its query deletes its indicators, so those count), and every six hours,
-# which picks up a source being enabled or disabled and any change whose event was lost.
+# calls the engine's reconcile route as that account whenever knowledge indicators change, when the
+# engine starts it after a source changes (`triggeredBy: nightshift-detection.sourceChanged`, set by
+# server code), and every six hours to catch a change whose start was lost.
 version: "1"
 name: "Nightshift Detection Reconcile"
 description: "Keeps what the Nightshift detection strategies need in the space, today their alerting rules, up to date with its knowledge indicators and sources."
@@ -21,7 +21,7 @@ settings:
   # gets a group of its own, since the group is applied before any step: in the shared one it would
   # cancel the reconciliation in flight.
   concurrency:
-    key: 'nightshift-detection-reconcile{% unless execution.triggeredBy == "scheduled" or execution.triggeredBy == "significant-events.knowledgeIndicatorsChanged" %}-refused{% endunless %}'
+    key: 'nightshift-detection-reconcile{% unless execution.triggeredBy == "scheduled" or execution.triggeredBy == "significant-events.knowledgeIndicatorsChanged" or execution.triggeredBy == "nightshift-detection.sourceChanged" %}-refused{% endunless %}'
     strategy: cancel-in-progress
     max: 1
 triggers:
@@ -30,12 +30,12 @@ triggers:
     with:
       every: "6h"
 steps:
-  # Only the schedule and the triggers above start this workflow. Anyone allowed to run
-  # workflows could otherwise change rules as the service account. Only server code sets
-  # `triggeredBy`.
+  # Only the schedule, the triggers above and the engine on a source change start this workflow.
+  # Anyone allowed to run workflows could otherwise change rules as the service account. Only
+  # server code sets `triggeredBy`.
   - name: refuse_direct_runs
     type: if
-    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged")'
+    condition: 'not (execution.triggeredBy : "scheduled" or execution.triggeredBy : "significant-events.knowledgeIndicatorsChanged" or execution.triggeredBy : "nightshift-detection.sourceChanged")'
     steps:
       - name: refuse
         type: workflow.fail
