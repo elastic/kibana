@@ -178952,7 +178952,9 @@ components:
                           type: string
                       required:
                         - id
-                    - type: string
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: false
               type: object
@@ -181538,7 +181540,9 @@ components:
                           type: string
                       required:
                         - id
-                    - type: string
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
             otlp_exporter:
               additionalProperties: true
               type: object
@@ -189382,7 +189386,9 @@ components:
                           type: string
                       required:
                         - id
-                    - type: string
+                    - maxLength: 8192
+                      minLength: 1
+                      type: string
                   nullable: true
             otlp_exporter:
               additionalProperties: false
