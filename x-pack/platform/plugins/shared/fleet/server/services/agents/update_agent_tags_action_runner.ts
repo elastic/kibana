@@ -6,8 +6,6 @@
  */
 
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { fromKueryExpression } from '@kbn/es-query';
-import type { KueryNode } from '@kbn/es-query';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
@@ -38,103 +36,6 @@ import { updateByQueryAndWait } from './update_by_query_task';
  */
 const UPDATE_BY_QUERY_MAX_ATTEMPTS = 2;
 
-type TagsMatch = 'yes' | 'no' | 'unknown';
-
-/**
- * Whether an agent the update has just changed matches a kuery, as far as its tags can tell.
- *
- * Such an agent has every tag the update adds, and none that it removes (unless it also adds it).
- * That decides a clause on the `tags` field for those tags, and with `not`, `and` and `or` the
- * clauses around it. Everything else, another field, a wildcard, a tag the update does not touch,
- * is `unknown`.
- */
-const matchesUpdatedAgent = (
-  node: KueryNode | undefined,
-  tagsToAdd: Set<string>,
-  tagsToRemove: Set<string>
-): TagsMatch => {
-  if (node?.type !== 'function') {
-    return 'unknown';
-  }
-  const args: KueryNode[] = node.arguments ?? [];
-  const matches = (arg: KueryNode | undefined) => matchesUpdatedAgent(arg, tagsToAdd, tagsToRemove);
-
-  switch (node.function) {
-    case 'is': {
-      const [field, value] = args;
-      if (field?.type !== 'literal' || field.value !== 'tags' || value?.type !== 'literal') {
-        return 'unknown';
-      }
-      const tag = String(value.value);
-      if (tagsToAdd.has(tag)) {
-        return 'yes';
-      }
-      return tagsToRemove.has(tag) ? 'no' : 'unknown';
-    }
-    case 'not': {
-      const match = matches(args[0]);
-      return match === 'unknown' ? 'unknown' : match === 'yes' ? 'no' : 'yes';
-    }
-    case 'and': {
-      const results = args.map(matches);
-      if (results.includes('no')) {
-        return 'no';
-      }
-      return results.length > 0 && results.every((result) => result === 'yes') ? 'yes' : 'unknown';
-    }
-    case 'or': {
-      const results = args.map(matches);
-      if (results.includes('yes')) {
-        return 'yes';
-      }
-      return results.length > 0 && results.every((result) => result === 'no') ? 'no' : 'unknown';
-    }
-    default:
-      return 'unknown';
-  }
-};
-
-/**
- * Whether the retry of an update tags action leaves out the agents the update already changed.
- *
- * It restarts behind the action's kuery, so it leaves them out when they can no longer match it.
- * That is so for an update that adds one tag or removes one tag, which `updateAgentTags` narrows
- * the kuery for, and it can be so for another update through a kuery of the caller's: the tag
- * rename in the UI searches for the agents that have the old tag, which the renamed agents no
- * longer have. So the kuery is read, and the answer is yes only when the tags it names, whole,
- * and only in the places that decide it, show that an updated agent does not match.
- *
- * Whatever the kuery does not settle (another field, a wildcard, a tag the update does not touch)
- * counts as no: the retry is taken to go through every agent again, so nothing is recorded for a
- * cancelled batch and the retry records each agent once. The guess the other way would count agents
- * twice whenever it is wrong. This one is wrong only for a kuery that leaves updated agents out by
- * other means than their tags, for example by `updated_at`, which the update sets.
- */
-export const retrySkipsUpdatedAgents = (
-  tagsToAdd: string[] = [],
-  tagsToRemove: string[] = [],
-  kuery: string = ''
-): boolean => {
-  if (
-    (tagsToAdd.length === 1 && tagsToRemove.length === 0) ||
-    (tagsToRemove.length === 1 && tagsToAdd.length === 0)
-  ) {
-    return true;
-  }
-  if (kuery.trim() === '') {
-    return false;
-  }
-  try {
-    return (
-      matchesUpdatedAgent(fromKueryExpression(kuery), new Set(tagsToAdd), new Set(tagsToRemove)) ===
-      'no'
-    );
-  } catch (error) {
-    // Not a kuery that can be read, so there is nothing in it to leave agents out.
-    return false;
-  }
-};
-
 export class UpdateAgentTagsActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
     return await updateTagsBatch(
@@ -145,11 +46,6 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
       {
         tagsToAdd: this.actionParams?.tagsToAdd,
         tagsToRemove: this.actionParams?.tagsToRemove,
-        retrySkipsUpdated: retrySkipsUpdatedAgents(
-          this.actionParams?.tagsToAdd,
-          this.actionParams?.tagsToRemove,
-          this.actionParams?.kuery
-        ),
         actionId: this.actionParams.actionId,
         total: this.actionParams.total,
         spaceId: this.actionParams.spaceId,
@@ -179,8 +75,6 @@ export async function updateTagsBatch(
     kuery?: string;
     retryCount?: number;
     spaceId?: string;
-    /** See {@link retrySkipsUpdatedAgents}: whether a retry leaves out the agents updated here. */
-    retrySkipsUpdated?: boolean;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
   // Only the restriction errors of agents the caller can access are persisted in the action results.

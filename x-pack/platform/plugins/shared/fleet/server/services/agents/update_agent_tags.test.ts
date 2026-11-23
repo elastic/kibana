@@ -16,11 +16,7 @@ import { UpdateByQueryCancelledError } from '../../errors';
 import { createClientMock } from './action.mock';
 import { MAX_RETRY_COUNT } from './retry_helper';
 import { updateAgentTags } from './update_agent_tags';
-import {
-  UpdateAgentTagsActionRunner,
-  retrySkipsUpdatedAgents,
-  updateTagsBatch,
-} from './update_agent_tags_action_runner';
+import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../spaces/helpers');
 jest.mock('../app_context', () => {
@@ -547,46 +543,6 @@ describe('update_agent_tags', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledTimes(2);
       expect(esClient.create).not.toHaveBeenCalled();
     });
-  });
-
-  describe('retrySkipsUpdatedAgents', () => {
-    it.each([
-      // the update adds one tag or removes one tag
-      [['a'], [], '', true],
-      [[], ['a'], '', true],
-      // a rename, or several tags, with a kuery that does not leave out the updated agents
-      [['a'], ['b'], '', false],
-      [['a'], ['b'], 'status:online', false],
-      [['a', 'b'], [], 'status:online', false],
-      [[], ['a', 'b'], '', false],
-      [[], [], '', false],
-      // the tag rename in the UI: agents with the old tag, which the renamed agents no longer have
-      [['new'], ['old'], 'tags:"old"', true],
-      [['new'], ['old'], 'tags:old', true],
-      [['new'], ['old'], '(tags:"old") AND status:online', true],
-      [['new'], ['old'], 'tags:old OR NOT tags:new', true],
-      [['x'], ['a', 'b'], 'tags:(a or b)', true],
-      // a tag the update adds, in a clause that is negated
-      [['a', 'b'], [], 'NOT tags:a', true],
-      [['a', 'b'], [], 'not (tags:a or tags:b)', true],
-      // clauses that the updated agents still match, or that nothing is known about
-      [['a', 'b'], [], 'tags:a', false],
-      [['new'], ['old'], 'tags:"old" OR status:online', false],
-      [['new'], ['old'], 'tags:other', false],
-      [['new'], ['old'], 'tags:old*', false],
-      [['new'], ['old'], 'NOT tags:other', false],
-      [['a'], ['a'], 'tags:a', false],
-      // a tag only counts whole
-      [['linux', 'web'], [], 'tags:linux-prod', false],
-      [['', 'b'], [], 'status:online', false],
-      // not a kuery that can be read
-      [['a', 'b'], [], 'tags:(', false],
-    ])(
-      'tagsToAdd %j, tagsToRemove %j, kuery %j -> %s',
-      (tagsToAdd, tagsToRemove, kuery, expected) => {
-        expect(retrySkipsUpdatedAgents(tagsToAdd, tagsToRemove, kuery)).toBe(expected);
-      }
-    );
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
