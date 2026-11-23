@@ -51,6 +51,8 @@ describe('nightshift online evals workflow', () => {
             { name: 'nightshift_conclusion_quality' },
             { name: 'nightshift_missing_data' },
             { name: 'nightshift_tool_call_health' },
+            { name: 'nightshift_wiki_pages_read' },
+            { name: 'nightshift_wiki_page_influence' },
           ],
           entry_point: '${{ inputs.entry_point }}',
         }),

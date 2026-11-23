@@ -87,6 +87,8 @@ steps:
         - name: nightshift_conclusion_quality
         - name: nightshift_missing_data
         - name: nightshift_tool_call_health
+        - name: nightshift_wiki_pages_read
+        - name: nightshift_wiki_page_influence
       investigation_started_at: '{{ inputs.investigation_started_at }}'
       # `${{ }}` passes a missing optional input as undefined; `{{ }}` would pass an empty string.
       investigation_ended_at: '${{ inputs.investigation_ended_at }}'
