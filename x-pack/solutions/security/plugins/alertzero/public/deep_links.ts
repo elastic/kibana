@@ -12,7 +12,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 import * as i18n from './components/app_chrome/translations';
 
 /**
- * Deep links for Security solution nav + global search (Discover + Dashboards are owned elsewhere).
+ * Deep links for Security solution nav, Classic nav + global search (Discover + Dashboards are owned elsewhere).
  *
  * Ids are `SecurityPageName` values so the solution navigation can reference the same registry the
  * rest of Security uses, via `alertZeroLink()`.
@@ -33,7 +33,13 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
             id: SecurityPageName.alertZeroEscalations,
             title: i18n.NAV_ESCALATIONS,
             path: '/escalations',
-            visibleIn: ['globalSearch', 'projectSideNav'] as AppDeepLink['visibleIn'],
+            // Right after the AlertZero app link (`order: -3`), above every Security entry in the Classic nav.
+            order: -2,
+            visibleIn: [
+              'globalSearch',
+              'classicSideNav',
+              'projectSideNav',
+            ] as AppDeepLink['visibleIn'],
           },
         ]
       : []),
@@ -41,7 +47,8 @@ export const getAlertZeroDeepLinks = (capabilities?: Capabilities): AppDeepLink[
       id: SecurityPageName.alertZeroWatches,
       title: i18n.NAV_WATCHES,
       path: '/watches',
-      visibleIn: ['globalSearch', 'projectSideNav'],
+      order: -1,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     },
   ];
 };

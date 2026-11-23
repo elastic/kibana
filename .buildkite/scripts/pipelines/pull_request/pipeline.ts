@@ -735,8 +735,8 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
       // Scout suite: changes to its own Scout tests must still trigger it.
       (await doAnyChangesMatch([
-        /^src\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
-        /^src\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
+        /^x-pack\/platform\/plugins\/shared\/workflows_management\/common\/schema/,
+        /^x-pack\/platform\/plugins\/shared\/workflows_management\/server\/.*internal_actions/,
         /^src\/platform\/packages\/shared\/workflows\//,
         /^\.buildkite\/pipeline-utils\/step-library\/steps\/workflows_oom_testing\.ts/,
         /^\.buildkite\/scripts\/steps\/test\/scout\/workflows_oom_testing\.sh/,

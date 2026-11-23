@@ -6,9 +6,9 @@
  */
 
 import { TimelineId } from '../../../../../../common/types/timeline';
-import { mount, shallow } from 'enzyme';
 import { cloneDeep } from 'lodash';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { mockTimelineData } from '../../../../../common/mock';
@@ -20,15 +20,6 @@ describe('plain_row_renderer', () => {
     mockDatum = cloneDeep(mockTimelineData[0].ecs);
   });
 
-  test('renders correctly against snapshot', () => {
-    const children = plainRowRenderer.renderRow({
-      data: mockDatum,
-      scopeId: TimelineId.test,
-    });
-    const wrapper = shallow(<span>{children}</span>);
-    expect(wrapper).toMatchSnapshot();
-  });
-
   test('should always return isInstance true', () => {
     expect(plainRowRenderer.isInstance(mockDatum)).toBe(true);
   });
@@ -38,7 +29,7 @@ describe('plain_row_renderer', () => {
       data: mockDatum,
       scopeId: TimelineId.test,
     });
-    const wrapper = mount(<span>{children}</span>);
-    expect(wrapper.text()).toEqual('');
+    const { container } = render(<span>{children}</span>);
+    expect(container.textContent).toBe('');
   });
 });

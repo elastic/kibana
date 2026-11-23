@@ -289,6 +289,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
   id: mockedRawRuleSO.id,
   ...mockedRawRuleSO.attributes,
   nextRun: undefined,
+  lastRun: undefined,
   createdAt: new Date(mockedRawRuleSO.attributes.createdAt),
   updatedAt: new Date(mockedRawRuleSO.attributes.updatedAt),
   lastEnabledAt: mockedRawRuleSO.attributes.lastEnabledAt

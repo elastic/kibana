@@ -117,6 +117,7 @@ export const fetchEventsAndScopedAlerts = async (
   pageSize = PROCESS_EVENTS_PER_PAGE
 ) => {
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
+  const size = Math.min(pageSize, PROCESS_EVENTS_PER_PAGE);
 
   const search = await client.search({
     index: [index],
@@ -145,7 +146,7 @@ export const fetchEventsAndScopedAlerts = async (
         ],
       },
     },
-    size: Math.min(pageSize, PROCESS_EVENTS_PER_PAGE),
+    size,
     sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
     search_after: cursorMillis ? [cursorMillis] : undefined,
     fields: PROCESS_EVENT_FIELDS,
@@ -172,9 +173,22 @@ export const fetchEventsAndScopedAlerts = async (
     const lastEvent = _.last(events)?._source as ProcessEvent;
 
     let range;
+    let alertsRange;
 
     if (firstEvent?.['@timestamp'] && lastEvent?.['@timestamp']) {
       range = [firstEvent['@timestamp'], lastEvent['@timestamp']];
+
+      // An alert is raised after the process event that caused it, so it can be newer than every event of its
+      // session. Nothing bounds the alerts from above on the last page of the session (a short forward page),
+      // and a backward page holds the events up to its cursor, so it covers the alerts up to its cursor, which
+      // can be newer than its last event.
+      if (forward && events.length < size) {
+        alertsRange = [range[0]];
+      } else if (!forward && cursor) {
+        alertsRange = [range[0], cursor];
+      } else {
+        alertsRange = range;
+      }
     }
 
     const alertsBody = await searchAlerts(
@@ -182,7 +196,7 @@ export const fetchEventsAndScopedAlerts = async (
       sessionEntityId,
       ALERTS_PER_PROCESS_EVENTS_PAGE,
       undefined,
-      range
+      alertsRange
     );
 
     const processesWithIOEvents = await searchProcessWithIOEvents(
