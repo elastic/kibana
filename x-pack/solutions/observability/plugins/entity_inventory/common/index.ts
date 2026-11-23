@@ -22,8 +22,23 @@ export type InventoryRow = Record<string, ESQLValue>;
 /** Entity id to attribute column to the index pattern of the source that supplied the value. */
 export type Provenance = Record<string, Record<string, string>>;
 
-/** A failed query against one source, safe to return to the caller. */
+/**
+ * Why a probe or query's rows were lost, safe to return to the caller; never a stack.
+ * - `failed`: Elasticsearch answered with an error or did not answer.
+ * - `unusable`: the response was read and judged unusable; its rows are dropped.
+ */
 export interface SourceError {
+  kind: 'failed' | 'unusable';
+  /** The HTTP status of a `failed` request; null when there was no response, and for `unusable`. */
+  status: number | null;
+  reason: string;
+}
+
+/**
+ * A source of the filter values route whose values were lost or may be incomplete, safe to return
+ * to the caller; never a stack.
+ */
+export interface AttributeValuesSourceError {
   indexPattern: string;
   /** The HTTP status Elasticsearch answered with, null when there was no response. */
   status: number | null;
@@ -111,18 +126,20 @@ export interface QueryExecutionStats {
   isPartial: boolean | null;
 }
 
-/** One plan query sent to Elasticsearch; a failed query has null stats and `rowCount` 0 (see `errors`). */
+/** One plan query sent to Elasticsearch; a failed query has null stats and `rowCount` 0. */
 export interface ListQueryDiagnostic extends QueryExecutionStats {
   indexPattern: string;
   engine: QueryEngine;
   esql: string;
   params: NamedParams;
   rowCount: number;
+  /** Why the query's rows were lost; null when they were kept, partial results included. */
+  error: SourceError | null;
 }
 
 /**
  * What the probe of one source pattern decided: `time_series` and `no_time_series` plan queries,
- * `failed` runs none (see `errors`).
+ * `failed` runs none (see the probe's `error`).
  */
 export type ProbeOutcomeKind = 'time_series' | 'no_time_series' | 'failed';
 
@@ -132,6 +149,8 @@ export interface ListProbeDiagnostic extends QueryExecutionStats {
   esql: string;
   params: NamedParams;
   outcome: ProbeOutcomeKind;
+  /** Why the probe failed, always of kind `failed`; null unless `outcome` is `failed`. */
+  error: SourceError | null;
 }
 
 /**
@@ -159,14 +178,13 @@ export interface ListResponse {
   rows: InventoryRow[];
   /** For each returned row's `entity.id`, the index pattern that supplied each attribute value. */
   provenance: Provenance;
-  /** True only when the row limit left rows out; a failed or partial plan is reported in `errors`. */
+  /** True only when the row limit left rows out; a failed or partial query does not set it. */
   truncated: boolean;
-  /** One entry per plan query sent, in plan order; probes are in `probes`. */
+  /** One entry per plan query sent, in plan order, each with its own `error`; probes are in `probes`. */
   queries: ListQueryDiagnostic[];
-  /** One entry per distinct source pattern probed, in source order. */
+  /** One entry per distinct source pattern probed, in source order; a failed probe runs no query. */
   probes: ListProbeDiagnostic[];
   timings: ListTimings;
-  errors: SourceError[];
   unavailableColumns: UnavailableColumn[];
 }
 
@@ -181,8 +199,10 @@ export interface EsqlRequestBody {
 export interface PlanProbe {
   indexPattern: string;
   request: EsqlRequestBody;
-  /** Whether the probe found a readable time-series index; null when the probe failed (see `errors`). */
+  /** Whether the probe found a readable time-series index; null when the probe failed. */
   hasTimeSeries: boolean | null;
+  /** Why the probe failed, always of kind `failed`; null when it did not. */
+  error: SourceError | null;
 }
 
 /** One list query `_list` would send for the same request. */
@@ -194,12 +214,10 @@ export interface PlanQuery {
 
 /** The probes the planning ran and the list queries `_list` would send; only the probes are executed. */
 export interface PlanResponse {
-  /** One entry per distinct source pattern, in source order. */
+  /** One entry per distinct source pattern, in source order; a failed probe runs no query. */
   probes: PlanProbe[];
   /** One entry per plan query `_list` would send, in plan order; a source whose probe failed has none. */
   queries: PlanQuery[];
-  /** One entry per source whose probe failed. */
-  errors: SourceError[];
 }
 
 /** The values a dropdown can offer, merged across the sources of the types in scope. */
@@ -210,5 +228,5 @@ export interface AttributeValuesResponse {
   invalidSelections: string[];
   /** True only when the limit left values out; a failed source is reported in `errors`. */
   truncated: boolean;
-  errors: SourceError[];
+  errors: AttributeValuesSourceError[];
 }

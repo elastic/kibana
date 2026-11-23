@@ -17,18 +17,20 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { InventoryType, SourceError } from '@kbn/entity-inventory-plugin/common';
+import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useEntityList } from '../../hooks/use_entity_list';
+import type { SourceProblem } from '../../utils/list_source_problems';
+import { listSourceProblems } from '../../utils/list_source_problems';
 import { EntityTable } from '../entity_table/entity_table';
 import {
   ENTITY_COUNT_LABEL,
   SOURCE_ERRORS_TITLE,
   getEntityCountValue,
-  getSourceErrorText,
+  getSourceProblemText,
 } from './translations';
 
-/** A warning icon whose tooltip lists each source of `errors` that failed. */
-const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) => (
+/** A warning icon whose tooltip lists each problem with a source. */
+const SourceErrorsIndicator = ({ problems }: { problems: readonly SourceProblem[] }) => (
   <EuiIconTip
     type="warning"
     color="warning"
@@ -37,8 +39,8 @@ const SourceErrorsIndicator = ({ errors }: { errors: readonly SourceError[] }) =
     content={
       <ul>
         {/* Both plans of one source can fail, so an index pattern can appear twice. */}
-        {errors.map((sourceError, index) => (
-          <li key={index}>{getSourceErrorText(sourceError)}</li>
+        {problems.map((problem, index) => (
+          <li key={index}>{getSourceProblemText(problem)}</li>
         ))}
       </ul>
     }
@@ -57,6 +59,7 @@ export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionPr
   const listResult = useEntityList(type);
   const { data: list, loading, error } = listResult;
   const { truncated } = list;
+  const sourceProblems = listSourceProblems(list);
   const showEntityCount = !error && (!loading || list.rows.length > 0);
 
   useEffect(() => {
@@ -86,9 +89,9 @@ export const EntitySection = ({ entityType, onTruncatedChange }: EntitySectionPr
         extraAction={
           showEntityCount && (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              {list.errors.length > 0 && (
+              {sourceProblems.length > 0 && (
                 <EuiFlexItem grow={false}>
-                  <SourceErrorsIndicator errors={list.errors} />
+                  <SourceErrorsIndicator problems={sourceProblems} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>

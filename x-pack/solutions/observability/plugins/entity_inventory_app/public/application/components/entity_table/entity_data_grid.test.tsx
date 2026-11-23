@@ -67,7 +67,6 @@ const smallList = (rows: InventoryRow[]): ListResponse => ({
     processingMs: 0,
     totalMs: 0,
   },
-  errors: [],
   unavailableColumns: [],
 });
 
@@ -121,7 +120,6 @@ const WIDGET_LIST: ListResponse = {
     processingMs: 0,
     totalMs: 0,
   },
-  errors: [],
   unavailableColumns: [],
 };
 

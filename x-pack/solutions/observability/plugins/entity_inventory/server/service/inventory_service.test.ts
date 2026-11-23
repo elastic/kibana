@@ -356,7 +356,7 @@ describe('InventoryService.list', () => {
     ]);
   });
 
-  it('reports a failed probe in errors and runs no plan of that source', async () => {
+  it('reports a failed probe on the probe and runs no plan of that source', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(
       esClient,
@@ -371,8 +371,15 @@ describe('InventoryService.list', () => {
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response.errors).toEqual([
-      { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
+    expect(response.probes.map(({ indexPattern, error }) => ({ indexPattern, error }))).toEqual([
+      {
+        indexPattern: STATE_PATTERN,
+        error: { kind: 'failed', status: 503, reason: 'timeout_exception: timed out' },
+      },
+      { indexPattern: OTEL_PATTERN, error: null },
+    ]);
+    expect(response.queries.map(({ indexPattern, error }) => ({ indexPattern, error }))).toEqual([
+      { indexPattern: OTEL_PATTERN, error: null },
     ]);
     expect(response.rows).toHaveLength(1);
     expect(response).toMatchObject({ truncated: false });
@@ -403,11 +410,8 @@ describe('InventoryService.list', () => {
     });
     expect(response.rows[1]).toMatchObject({ resource_id: null, 'k8s.cluster.name': null });
     expect(response.columns.map(({ name }) => name)).toEqual(ALL_COLUMNS);
-    expect(response).toMatchObject({
-      truncated: false,
-      errors: [],
-      unavailableColumns: [],
-    });
+    expect(response).toMatchObject({ truncated: false, unavailableColumns: [] });
+    expect(response.queries.map(({ error }) => error)).toEqual([null, null]);
   });
 
   it('returns the same columns as listTypes for the type', async () => {
@@ -448,7 +452,7 @@ describe('InventoryService.list', () => {
     expect(response.rows.map((row) => row['entity.id'])).toEqual([
       'k8s.deployment:scout-cluster/checkout/cart-api',
     ]);
-    expect(response).toMatchObject({ errors: [] });
+    expect(response.queries.map(({ error }) => error)).toEqual([null, null]);
   });
 
   it('starts every list query before any resolves', async () => {
@@ -471,7 +475,7 @@ describe('InventoryService.list', () => {
     await expect(listing).resolves.toMatchObject({ rows: [] });
   });
 
-  it('reports a failed query in errors with its status and reason and returns the other source', async () => {
+  it('reports a failed query on the query with its status and reason and returns the other source', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esError(400, 'verification_exception', 'Unknown column [x]'),
@@ -481,14 +485,11 @@ describe('InventoryService.list', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
     expect(response.rows).toHaveLength(1);
-    expect(response.errors).toEqual([
-      {
-        indexPattern: STATE_PATTERN,
-        status: 400,
-        reason: 'verification_exception: Unknown column [x]',
-      },
+    expect(response.queries.map(({ error }) => error)).toEqual([
+      { kind: 'failed', status: 400, reason: 'verification_exception: Unknown column [x]' },
+      null,
     ]);
-    expect(JSON.stringify(response.errors)).not.toContain('at ');
+    expect(JSON.stringify(response.queries[0].error)).not.toContain('at ');
     expect(response).toMatchObject({ truncated: false });
   });
 
@@ -502,14 +503,14 @@ describe('InventoryService.list', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
     expect(response.rows).toEqual([]);
-    expect(response.errors).toEqual([
+    expect(response.queries.map(({ error }) => error)).toEqual([
       {
-        indexPattern: STATE_PATTERN,
+        kind: 'unusable',
         status: null,
         reason: `no readable index behind "${STATE_PATTERN}" maps @timestamp`,
       },
       {
-        indexPattern: OTEL_PATTERN,
+        kind: 'unusable',
         status: null,
         reason: expect.stringContaining(`no index behind "${OTEL_PATTERN}" maps every field`),
       },
@@ -526,7 +527,8 @@ describe('InventoryService.list', () => {
 
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
-    expect(response).toMatchObject({ rows: [], truncated: false, errors: [] });
+    expect(response).toMatchObject({ rows: [], truncated: false });
+    expect(response.queries.map(({ error }) => error)).toEqual([null, null]);
     expect(response.columns).toHaveLength(13);
   });
 
@@ -542,9 +544,15 @@ describe('InventoryService.list', () => {
     expect(response).toMatchObject({
       rows: [],
       truncated: false,
-      errors: [
-        { indexPattern: STATE_PATTERN, status: 403, reason: 'security_exception: unauthorized' },
-        { indexPattern: OTEL_PATTERN, status: null, reason: 'connect ECONNREFUSED' },
+      queries: [
+        {
+          indexPattern: STATE_PATTERN,
+          error: { kind: 'failed', status: 403, reason: 'security_exception: unauthorized' },
+        },
+        {
+          indexPattern: OTEL_PATTERN,
+          error: { kind: 'failed', status: null, reason: 'connect ECONNREFUSED' },
+        },
       ],
     });
   });
@@ -605,7 +613,7 @@ describe('InventoryService.list', () => {
     expect(response).toMatchObject({ truncated: true });
   });
 
-  it('reports a partial result in errors, keeping its rows and not truncating', async () => {
+  it('marks a partial result partial, keeping its rows, not truncating and with no error', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, {
       [STATE_PATTERN]: esqlResponse(
@@ -621,17 +629,64 @@ describe('InventoryService.list', () => {
     const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
     expect(response.rows).toHaveLength(2);
-    expect(response).toMatchObject({
-      truncated: false,
-      errors: [
-        {
-          indexPattern: STATE_PATTERN,
-          status: null,
-          reason: 'partial result: some shards or clusters did not answer, so rows may be missing',
-        },
-      ],
+    expect(response).toMatchObject({ truncated: false });
+    expect(response.queries[0]).toMatchObject({
+      indexPattern: STATE_PATTERN,
+      isPartial: true,
+      error: null,
     });
-    expect(response.queries[0]).toMatchObject({ indexPattern: STATE_PATTERN, isPartial: true });
+  });
+
+  it('marks a partial result that is also unusable partial, with an unusable error', async () => {
+    const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
+    answerByPattern(esClient, {
+      [STATE_PATTERN]: esqlResponse(STATE_COLUMNS, [], {
+        nullTyped: STATE_COLUMNS,
+        isPartial: true,
+      }),
+      [OTEL_PATTERN]: esqlResponse(OTEL_COLUMNS, []),
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    expect(response.queries[0]).toMatchObject({
+      isPartial: true,
+      error: { kind: 'unusable', status: null, reason: expect.any(String) },
+    });
+  });
+
+  it('puts each query error on its own query when one pattern backs two sources', async () => {
+    const [stateSource, otelSource] = k8sDeploymentOtelAndAgentFixture.dynamic?.sources ?? [];
+    const legacyFilter = 'metricset.name == "state_deployment_legacy"';
+    const definition = {
+      ...k8sDeploymentOtelAndAgentFixture,
+      dynamic: { sources: [stateSource, otelSource, { ...stateSource, filter: legacyFilter }] },
+    };
+    const { service, esClient } = createService([definition]);
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isProbe(query)) {
+        return probeResponse(false);
+      }
+      if (query.includes('state_deployment_legacy')) {
+        throw esError(403, 'security_exception', 'unauthorized').throws;
+      }
+      return patternOf(query) === STATE_PATTERN
+        ? esqlResponse(STATE_COLUMNS, [stateRow('payments', '2026-11-01T10:01:00.000Z')])
+        : esqlResponse(OTEL_COLUMNS, []);
+    });
+
+    const response = await service.list({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
+
+    const failed = response.queries.filter(({ error }) => error !== null);
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({
+      indexPattern: STATE_PATTERN,
+      rowCount: 0,
+      error: { kind: 'failed', status: 403, reason: 'security_exception: unauthorized' },
+    });
+    expect(failed[0].esql).toContain('state_deployment_legacy');
+    expect(response.queries[0]).toMatchObject({ indexPattern: STATE_PATTERN, error: null });
+    expect(response.rows).toHaveLength(1);
   });
 
   it.each([
@@ -775,6 +830,7 @@ describe('InventoryService.list diagnostics', () => {
       shards: null,
       isPartial: false,
       rowCount: 1,
+      error: null,
     });
   });
 
@@ -907,6 +963,7 @@ describe('InventoryService.list diagnostics', () => {
       bytesRead: null,
       shards: null,
       isPartial: false,
+      error: null,
     });
   });
 
@@ -1031,10 +1088,10 @@ describe('InventoryService.plan', () => {
       { indexPattern: OTEL_PATTERN, engine: 'TS' },
       { indexPattern: OTEL_PATTERN, engine: 'FROM' },
     ]);
-    expect(plan.errors).toEqual([]);
+    expect(plan.probes.map(({ error }) => error)).toEqual([null, null]);
   });
 
-  it('reports a failed probe in errors, with no time-series answer and none of its queries', async () => {
+  it('reports a failed probe on the probe, with no time-series answer and none of its queries', async () => {
     const { service, esClient } = createService([k8sDeploymentOtelAndAgentFixture]);
     answerByPattern(esClient, answers, {
       timeSeries: [OTEL_PATTERN],
@@ -1044,13 +1101,18 @@ describe('InventoryService.plan', () => {
     const plan = await service.plan({ type: 'k8s.deployment', window: WINDOW, limit: 10 });
 
     expect(
-      plan.probes.map(({ indexPattern, hasTimeSeries }) => ({ indexPattern, hasTimeSeries }))
+      plan.probes.map(({ indexPattern, hasTimeSeries, error }) => ({
+        indexPattern,
+        hasTimeSeries,
+        error,
+      }))
     ).toEqual([
-      { indexPattern: STATE_PATTERN, hasTimeSeries: null },
-      { indexPattern: OTEL_PATTERN, hasTimeSeries: true },
-    ]);
-    expect(plan.errors).toEqual([
-      { indexPattern: STATE_PATTERN, status: 503, reason: 'timeout_exception: timed out' },
+      {
+        indexPattern: STATE_PATTERN,
+        hasTimeSeries: null,
+        error: { kind: 'failed', status: 503, reason: 'timeout_exception: timed out' },
+      },
+      { indexPattern: OTEL_PATTERN, hasTimeSeries: true, error: null },
     ]);
     expect(plan.queries.map(({ indexPattern, engine }) => ({ indexPattern, engine }))).toEqual([
       { indexPattern: OTEL_PATTERN, engine: 'TS' },

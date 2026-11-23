@@ -9,7 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RegisteredEntityDefinition } from '@kbn/entity-store/server';
 import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
 import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
-import { executeEsql, planRowLimit, probeSources, toSourceError } from '../inventory/executor';
+import { executeEsql, planRowLimit, probeSources, toErrorDetail } from '../inventory/executor';
 import type { EsqlQueryResult } from '../inventory/executor';
 import {
   ATTRIBUTE_VALUE_COLUMN,
@@ -22,7 +22,7 @@ import {
 import type { GeneratedQuery, QueryPlan } from '../inventory/generator';
 import { noReadableIndexReason, partialValuesReason } from '../inventory/reasons';
 import type { ListAttributeValuesRequest } from '../inventory/types';
-import type { AttributeValuesResponse, SourceError } from '../../common';
+import type { AttributeValuesResponse, AttributeValuesSourceError } from '../../common';
 
 /** What listing the values of an attribute reads from the plugin. */
 export interface AttributeValuesDependencies {
@@ -39,10 +39,10 @@ interface AttributeValuesPlan {
   plans: QueryPlan[];
   queries: GeneratedQuery[];
   /** One entry per source whose probe failed. */
-  probeErrors: SourceError[];
+  probeErrors: AttributeValuesSourceError[];
 }
 
-const uniqueErrors = (errors: SourceError[]): SourceError[] => [
+const uniqueErrors = (errors: AttributeValuesSourceError[]): AttributeValuesSourceError[] => [
   ...new Map(errors.map((error) => [JSON.stringify(error), error])).values(),
 ];
 
@@ -85,7 +85,7 @@ const planAttributeValues = async (
             .map(({ indexPattern }) => indexPattern),
           { signal }
         );
-        const probeErrors: SourceError[] = [];
+        const probeErrors: AttributeValuesSourceError[] = [];
         probes.forEach((probe, indexPattern) => {
           if (probe.failed) {
             probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
@@ -167,12 +167,12 @@ export const listAttributeValues = async (
   // Settled, not raced: one failing source must not hide the values of the others.
   const outcomes = await Promise.allSettled(runnable.map(({ query }) => run(query)));
 
-  const errors: SourceError[] = typePlans.flatMap(({ probeErrors }) => probeErrors);
+  const errors: AttributeValuesSourceError[] = typePlans.flatMap(({ probeErrors }) => probeErrors);
   const offered = new Set<string>();
   outcomes.forEach((outcome, position) => {
     const { plan } = runnable[position];
     if (outcome.status === 'rejected') {
-      errors.push(toSourceError(plan.indexPattern, outcome.reason));
+      errors.push({ indexPattern: plan.indexPattern, ...toErrorDetail(outcome.reason) });
       return;
     }
     // `last_seen` is `MAX(@timestamp)`: typed `null` when no readable index behind the pattern maps

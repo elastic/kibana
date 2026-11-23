@@ -40,7 +40,6 @@ import {
   getEmptyWithFailuresTitle,
   getTypeNotAvailableTitle,
 } from '../entity_states/translations';
-import { getSourceErrorText } from '../entity_section/translations';
 
 // EuiDataGrid's render cost is largely fixed and can exceed the default 5s budget under parallel CI load.
 jest.setTimeout(30_000);
@@ -217,22 +216,36 @@ describe('EntityCategoryResults', () => {
   });
 
   describe('source errors', () => {
-    const getScenarioErrors = (scenario: FixtureScenario) =>
-      buildScenarioListResponse('host', scenario)?.errors ?? [];
+    const getTooltipProblems = async (section: HTMLElement) => {
+      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
+      const tooltip = await screen.findByRole('tooltip');
+      return within(tooltip)
+        .getAllByRole('listitem')
+        .map(({ textContent }) => textContent);
+    };
 
-    it('keeps the table and lists the failed sources in the tooltip of an indicator in the section header', async () => {
+    it('keeps the table and lists the failed probes, then the partial and failed queries, in the tooltip of an indicator in the section header', async () => {
       renderScenario('withDiagnostics');
 
       const section = await screen.findByTestId('entityInventoryTypeSection');
       expect(await within(section).findByTestId('entityInventoryTable')).toBeInTheDocument();
-      fireEvent.mouseOver(within(section).getByTestId('entityInventorySourceErrorsIndicator'));
 
-      const tooltip = await screen.findByRole('tooltip');
-      const errors = getScenarioErrors('withDiagnostics');
-      expect(errors.length).toBeGreaterThan(0);
-      errors.forEach((sourceError) =>
-        expect(tooltip).toHaveTextContent(getSourceErrorText(sourceError))
-      );
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-hostmetricsreceiver.otel-*: timeout: the query did not complete in time',
+        'metrics-system.*-*: partial result: some shards or clusters did not answer, so rows may be missing',
+      ]);
+    });
+
+    it('lists a failed query with its HTTP status', async () => {
+      renderScenario('allSourcesFailed');
+
+      const section = await screen.findByTestId('entityInventoryTypeSection');
+      await within(section).findByTestId('entityInventoryTableEmpty');
+
+      expect(await getTooltipProblems(section)).toEqual([
+        'metrics-hostmetricsreceiver.otel-*: timeout: the query did not complete in time',
+        'metrics-system.*-* (403): security_exception: action [indices:data/read/esql] is unauthorized',
+      ]);
     });
 
     it('never shows the unavailable columns of the response', async () => {

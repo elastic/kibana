@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { toSourceError } from './source_error';
+import { toErrorDetail } from './source_error';
 
 const responseError = (statusCode: number, body: Record<string, unknown>) =>
   new errors.ResponseError({
@@ -17,7 +17,7 @@ const responseError = (statusCode: number, body: Record<string, unknown>) =>
     meta: {} as never,
   });
 
-describe('toSourceError', () => {
+describe('toErrorDetail', () => {
   it('reads the status and the type and reason of an Elasticsearch body', () => {
     const error = responseError(400, {
       error: {
@@ -27,8 +27,7 @@ describe('toSourceError', () => {
       status: 400,
     });
 
-    expect(toSourceError('metrics-*', error)).toEqual({
-      indexPattern: 'metrics-*',
+    expect(toErrorDetail(error)).toEqual({
       status: 400,
       reason: 'verification_exception: Found 1 problem\nline 1:1: Unknown column [cpu]',
     });
@@ -37,8 +36,7 @@ describe('toSourceError', () => {
   it('uses the reason alone when the body has no type', () => {
     const error = { meta: { statusCode: 500, body: { error: { reason: 'shard failure' } } } };
 
-    expect(toSourceError('logs-*', error)).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail(error)).toEqual({
       status: 500,
       reason: 'shard failure',
     });
@@ -47,34 +45,29 @@ describe('toSourceError', () => {
   it('falls back to the message and a top-level status code', () => {
     const error = Object.assign(new Error('connection refused'), { statusCode: 503 });
 
-    expect(toSourceError('logs-*', error)).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail(error)).toEqual({
       status: 503,
       reason: 'connection refused',
     });
   });
 
   it('has a null status when there is none', () => {
-    expect(toSourceError('logs-*', new Error('aborted'))).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail(new Error('aborted'))).toEqual({
       status: null,
       reason: 'aborted',
     });
   });
 
   it('handles a non-Error throwable', () => {
-    expect(toSourceError('logs-*', 'socket hang up')).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail('socket hang up')).toEqual({
       status: null,
       reason: 'socket hang up',
     });
-    expect(toSourceError('logs-*', undefined)).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail(undefined)).toEqual({
       status: null,
       reason: 'unknown error',
     });
-    expect(toSourceError('logs-*', 42)).toEqual({
-      indexPattern: 'logs-*',
+    expect(toErrorDetail(42)).toEqual({
       status: null,
       reason: 'unknown error',
     });
@@ -85,9 +78,9 @@ describe('toSourceError', () => {
       error: { type: 'parsing_exception', reason: 'bad query', stack_trace: 'at Foo.bar' },
     });
 
-    const result = toSourceError('metrics-*', error);
+    const result = toErrorDetail(error);
 
-    expect(Object.keys(result).sort()).toEqual(['indexPattern', 'reason', 'status']);
+    expect(Object.keys(result).sort()).toEqual(['reason', 'status']);
     expect(result).not.toHaveProperty('stack');
     expect(Object.getPrototypeOf(result)).toBe(Object.prototype);
     expect(JSON.parse(JSON.stringify(result))).toEqual(result);

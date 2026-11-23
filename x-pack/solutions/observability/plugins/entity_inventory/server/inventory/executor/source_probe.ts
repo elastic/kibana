@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildProbeQuery } from '../generator';
 import type { GeneratedQuery } from '../generator';
-import { isVerificationError, toSourceError } from './errors/source_error';
+import { isVerificationError, toErrorDetail } from './errors/source_error';
 import { executeEsql } from './esql_client';
 import type { EsqlQueryResult, EsqlStats } from './esql_client';
 
@@ -67,11 +67,11 @@ const fromResponse = ({ columns }: EsqlQueryResult): ProbeOutcome => {
 // A concrete index that is not time series and a name that does not exist both fail verification,
 // and both mean there is no time-series index. Any other failure is not that answer: the `FROM`
 // plan excludes time-series indices, so reading it as "none" would silently leave them out.
-const fromError = (pattern: string, error: unknown): ProbeOutcome => {
+const fromError = (error: unknown): ProbeOutcome => {
   if (isVerificationError(error)) {
     return { failed: false, hasTimeSeries: false };
   }
-  const { status, reason } = toSourceError(pattern, error);
+  const { status, reason } = toErrorDetail(error);
   return { failed: true, status, reason };
 };
 
@@ -107,7 +107,7 @@ export const probeSources = async (
         {
           ...(outcome.status === 'fulfilled'
             ? fromResponse(outcome.value)
-            : fromError(pattern, outcome.reason)),
+            : fromError(outcome.reason)),
           query: probes[position],
           execution: toExecution(outcome),
         },

@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import type { InventoryType } from '@kbn/entity-inventory-plugin/common';
 import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
 import type { EntityListResult } from '../../hooks/use_entity_list';
+import { listSourceProblems } from '../../utils/list_source_problems';
 import { TableSkeleton } from '../table_skeleton/table_skeleton';
 import { EntityDataGrid } from './entity_data_grid';
 import { EntityTableEmpty, EntityTableLoadError } from '../entity_states/entity_states';
@@ -29,7 +30,7 @@ export const EntityTable = ({ entityType, listResult }: EntityTableProps) => {
     return <EntityTableLoadError ebtDetail={type} message={error.message} onRetry={refresh} />;
   }
 
-  const { rows, errors } = list;
+  const { rows } = list;
   const isEmpty = rows.length === 0;
 
   if (loading && isEmpty) {
@@ -50,7 +51,7 @@ export const EntityTable = ({ entityType, listResult }: EntityTableProps) => {
       )}
       <EuiFlexItem>
         {isEmpty ? (
-          <EntityTableEmpty typeName={name} isIncomplete={errors.length > 0} />
+          <EntityTableEmpty typeName={name} isIncomplete={listSourceProblems(list).length > 0} />
         ) : (
           <EntityDataGrid
             entityType={entityType}

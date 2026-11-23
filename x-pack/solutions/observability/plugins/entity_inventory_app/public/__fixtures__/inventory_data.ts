@@ -199,7 +199,6 @@ export const buildListResponseFixture = (type: string): ListResponse | undefined
       processingMs: 0,
       totalMs: 0,
     },
-    errors: [],
     unavailableColumns: [],
   };
 };

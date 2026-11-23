@@ -12,12 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ENTITY_INVENTORY_PERFORMANCE_OVERLAY_ENABLED } from '../../../common/feature_flags';
 import { createAppServicesMock, createCoreStartMock } from '../../mocks';
-import {
-  ERRORS_FIXTURE,
-  PROBES_FIXTURE,
-  QUERIES_FIXTURE,
-  TIMINGS_FIXTURE,
-} from './__fixtures__/list_diagnostics';
+import { PROBES_FIXTURE, QUERIES_FIXTURE, TIMINGS_FIXTURE } from './__fixtures__/list_diagnostics';
 import { PerformanceOverlay } from './performance_overlay';
 import type { PerformanceRecorder } from './performance_recorder';
 import { createPerformanceRecorder } from './performance_recorder';
@@ -35,7 +30,6 @@ const recordList = (recorder: PerformanceRecorder, browserMs: number) =>
       probes: PROBES_FIXTURE,
       timings: TIMINGS_FIXTURE,
       truncated: false,
-      errors: ERRORS_FIXTURE,
       unavailableColumns: [
         { column: 'os', indexPattern: 'logs-*', field: 'host.os.name' },
         { column: 'os', indexPattern: 'logs-*', field: 'host.os.name' },
@@ -105,7 +99,7 @@ describe('PerformanceOverlay', () => {
     expect(screen.queryByTestId('entityInventoryPerformanceBadge')).not.toBeInTheDocument();
   });
 
-  it('opens a flyout showing the timings, every query and probe, and the errors of the latest list call', async () => {
+  it('opens a flyout showing the timings and every query and probe of the latest list call', async () => {
     const { recorder } = renderOverlay(true);
     act(() => {
       recorder.record({
@@ -124,7 +118,7 @@ describe('PerformanceOverlay', () => {
 
     const historyRows = screen.getAllByTestId('entityInventoryPerformanceHistoryRow');
     expect(historyRows).toHaveLength(2);
-    expect(historyRows[0]).toHaveTextContent('61.3 ms52.0 ms3');
+    expect(historyRows[0]).toHaveTextContent('61.3 ms52.0 ms2');
 
     await screen.findByTestId('entityInventoryPerformanceListDetail');
     const subtitle = screen.getByTestId('entityInventoryPerformanceDetailSubtitle');
@@ -175,14 +169,7 @@ describe('PerformanceOverlay', () => {
     expect(queryRows[0]).toHaveTextContent('1,500 docs');
     expect(queryRows[0]).toHaveTextContent('120 rows');
     expect(queryRows[0]).not.toHaveTextContent('2.0 KB');
-    // A query shows a status only when partial; failures are listed in the errors table.
-    expect(
-      within(queryRows[0]).queryByTestId('entityInventoryPerformanceRowStatus')
-    ).not.toBeInTheDocument();
     expect(queryRows[1]).toHaveTextContent('logs-*');
-    expect(
-      within(queryRows[1]).queryByTestId('entityInventoryPerformanceRowStatus')
-    ).not.toBeInTheDocument();
 
     // Every row starts collapsed.
     expect(screen.queryByTestId('entityInventoryPerformanceRowDetail')).not.toBeInTheDocument();
@@ -207,28 +194,16 @@ describe('PerformanceOverlay', () => {
     expect(probeRows[2]).toHaveTextContent('logs-appOKFROM only');
     expect(within(probes).queryByTestId('entityInventoryPerformanceRowDetail')).toBeNull();
 
-    // The response's errors, as they came.
-    const errorsSection = screen.getByTestId('entityInventoryPerformanceErrors');
-    const errorRows = within(errorsSection).getAllByRole('row').slice(1);
-    expect(errorRows.map((row) => row.textContent)).toEqual([
-      expect.stringMatching(/logs-\*.*400.*Unknown column \[host\.name\]/),
-      expect.stringMatching(/traces-\*.*403.*security_exception/),
-      expect.stringMatching(/apm-\*.*503.*Cluster unavailable/),
-    ]);
-
     expect(screen.getByTestId('entityInventoryPerformanceUnavailableColumns')).toHaveTextContent(
       'Unavailable columns (1)'
     );
   });
 
-  it('shows a partial query as Partial and its reason in the errors table', async () => {
+  it('shows each query and probe as OK, Partial, Unusable or Failed, and why when expanded', async () => {
     const { recorder } = renderOverlay(true);
     const [query] = QUERIES_FIXTURE;
-    const partial = {
-      indexPattern: query.indexPattern,
-      status: null,
-      reason: 'partial result: some shards or clusters did not answer, so rows may be missing',
-    };
+    const [probe] = PROBES_FIXTURE;
+    const failed = { kind: 'failed', status: 400, reason: 'Unknown column [host.name]' } as const;
     act(() =>
       recorder.record({
         route: 'host/_list',
@@ -238,11 +213,19 @@ describe('PerformanceOverlay', () => {
         serverMs: TIMINGS_FIXTURE.totalMs,
         errorMessage: null,
         list: {
-          queries: [{ ...query, isPartial: true }],
-          probes: [],
+          queries: [
+            query,
+            { ...query, isPartial: true },
+            {
+              ...query,
+              isPartial: true,
+              error: { kind: 'unusable', status: null, reason: 'no @timestamp' },
+            },
+            { ...query, isPartial: null, error: failed },
+          ],
+          probes: [probe, { ...probe, isPartial: true }, { ...probe, error: failed }],
           timings: TIMINGS_FIXTURE,
           truncated: false,
-          errors: [partial],
           unavailableColumns: [],
           rowCount: 0,
         },
@@ -250,47 +233,38 @@ describe('PerformanceOverlay', () => {
     );
 
     fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
+
+    const expandableRows = (section: HTMLElement) =>
+      within(section)
+        .getAllByRole('row')
+        .filter((row) => within(row).queryByTestId('entityInventoryPerformanceRowExpand'));
+    const statusOf = (row: HTMLElement) =>
+      within(row).getByTestId('entityInventoryPerformanceRowStatus').textContent;
+    const detailOf = (section: HTMLElement, row: HTMLElement) => {
+      fireEvent.click(within(row).getByTestId('entityInventoryPerformanceRowExpand'));
+      const [detail] = within(section).getAllByTestId('entityInventoryPerformanceRowDetail');
+      fireEvent.click(within(row).getByTestId('entityInventoryPerformanceRowExpand'));
+      return detail;
+    };
 
     const queries = await screen.findByTestId('entityInventoryPerformanceQueries');
-    expect(within(queries).getByTestId('entityInventoryPerformanceRowStatus')).toHaveTextContent(
-      /^Partial$/
+    const queryRows = expandableRows(queries);
+    expect(queryRows.map(statusOf)).toEqual(['OK', 'Partial', 'Unusable', 'Failed']);
+    expect(detailOf(queries, queryRows[1])).toHaveTextContent(
+      'Partial result: some shards or clusters did not answer'
     );
-    const errorRows = within(screen.getByTestId('entityInventoryPerformanceErrors'))
-      .getAllByRole('row')
-      .slice(1);
-    expect(errorRows.map((row) => row.textContent)).toEqual([
-      expect.stringMatching(/metrics-\*.*partial result/),
-    ]);
-  });
-
-  it('shows a partial probe as Partial', async () => {
-    const { recorder } = renderOverlay(true);
-    const [probe] = PROBES_FIXTURE;
-    act(() =>
-      recorder.record({
-        route: 'host/_list',
-        startedAt: 0,
-        browserMs: 60,
-        status: 'ok',
-        serverMs: TIMINGS_FIXTURE.totalMs,
-        errorMessage: null,
-        list: {
-          queries: [],
-          probes: [{ ...probe, isPartial: true }],
-          timings: TIMINGS_FIXTURE,
-          truncated: false,
-          errors: [],
-          unavailableColumns: [],
-          rowCount: 0,
-        },
-      })
+    const unusable = detailOf(queries, queryRows[2]);
+    expect(unusable).toHaveTextContent('Unusable: no @timestamp');
+    expect(unusable).toHaveTextContent('Partial result: some shards or clusters did not answer');
+    expect(detailOf(queries, queryRows[3])).toHaveTextContent(
+      'Failed (HTTP 400): Unknown column [host.name]'
     );
 
-    fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
-
-    const probes = await screen.findByTestId('entityInventoryPerformanceProbes');
-    expect(within(probes).getByTestId('entityInventoryPerformanceRowStatus')).toHaveTextContent(
-      /^Partial$/
+    const probes = screen.getByTestId('entityInventoryPerformanceProbes');
+    const probeRows = expandableRows(probes);
+    expect(probeRows.map(statusOf)).toEqual(['OK', 'Partial', 'Failed']);
+    expect(detailOf(probes, probeRows[2])).toHaveTextContent(
+      'Failed (HTTP 400): Unknown column [host.name]'
     );
   });
 
@@ -344,7 +318,6 @@ describe('PerformanceOverlay', () => {
           probes: [],
           timings: { ...TIMINGS_FIXTURE, planningMs: 4.0, probesMs: 4.4 },
           truncated: false,
-          errors: [],
           unavailableColumns: [],
           rowCount: 0,
         },
@@ -374,7 +347,6 @@ describe('PerformanceOverlay', () => {
           probes: PROBES_FIXTURE.slice(0, 1),
           timings: TIMINGS_FIXTURE,
           truncated: true,
-          errors: [],
           unavailableColumns: [],
           rowCount: 1,
         },
@@ -388,7 +360,7 @@ describe('PerformanceOverlay', () => {
     );
   });
 
-  it('leaves the errors section out of a call without errors', async () => {
+  it('leaves the unavailable columns and every row detail out of a call without them', async () => {
     const { recorder } = renderOverlay(true);
     act(() =>
       recorder.record({
@@ -403,7 +375,6 @@ describe('PerformanceOverlay', () => {
           probes: PROBES_FIXTURE.slice(0, 1),
           timings: TIMINGS_FIXTURE,
           truncated: false,
-          errors: [],
           unavailableColumns: [],
           rowCount: 120,
         },
@@ -413,7 +384,6 @@ describe('PerformanceOverlay', () => {
     fireEvent.click(await screen.findByTestId('entityInventoryPerformanceBadge'));
 
     expect(await screen.findByTestId('entityInventoryPerformanceListDetail')).toBeInTheDocument();
-    expect(screen.queryByTestId('entityInventoryPerformanceErrors')).not.toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryPerformanceRowDetail')).not.toBeInTheDocument();
     expect(
       screen.queryByTestId('entityInventoryPerformanceUnavailableColumns')

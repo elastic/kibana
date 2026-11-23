@@ -29,7 +29,6 @@ export const INITIAL_LIST_RESPONSE: ListResponse = {
     processingMs: 0,
     totalMs: 0,
   },
-  errors: [],
   unavailableColumns: [],
 };
 

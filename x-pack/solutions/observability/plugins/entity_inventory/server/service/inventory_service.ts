@@ -36,7 +36,7 @@ import {
   probeSources,
   summarizeResults,
   toEsqlRequestBody,
-  toSourceError,
+  toErrorDetail,
 } from '../inventory/executor';
 import type { EsqlQueryResult, EsqlStats, PlanResult, ProbeResult } from '../inventory/executor';
 import {
@@ -49,19 +49,17 @@ import {
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
 import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
-import { partialRowsReason } from '../inventory/reasons';
 import { listAttributeValues } from './list_attribute_values';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
   /** The probe of each distinct source pattern, in source order. */
   probes: Map<string, ProbeResult>;
+  /** The plans to run; a source whose probe failed has none here or in `queries`. */
   plans: QueryPlan[];
   identity: IdentityPlan;
   columns: OutputColumn[];
   queries: GeneratedQuery[];
-  /** One entry per source whose probe failed; its plans are left out of `plans` and `queries`. */
-  probeErrors: SourceError[];
   /** Wall time of the concurrent probes, in fractional milliseconds. */
   probesMs: number;
 }
@@ -120,9 +118,10 @@ const toExecutionStats = (stats: EsqlStats | null): ExecutionStats => {
 const toQueryDiagnostic = (
   { indexPattern, engine }: QueryPlan,
   { esql, params }: GeneratedQuery,
-  outcome: PromiseSettledResult<EsqlQueryResult>
+  outcome: PromiseSettledResult<EsqlQueryResult>,
+  error: SourceError | null
 ): ListQueryDiagnostic => {
-  const base = { indexPattern, engine, esql, params };
+  const base = { indexPattern, engine, esql, params, error };
   if (outcome.status === 'rejected') {
     return { ...base, ...NO_EXECUTION_STATS, rowCount: 0, isPartial: null };
   }
@@ -137,6 +136,9 @@ const toProbeOutcome = (probe: ProbeResult): ListProbeDiagnostic['outcome'] => {
   return probe.hasTimeSeries ? 'time_series' : 'no_time_series';
 };
 
+const toProbeError = (probe: ProbeResult): SourceError | null =>
+  probe.failed ? { kind: 'failed', status: probe.status, reason: probe.reason } : null;
+
 const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeDiagnostic => {
   const {
     query: { esql, params },
@@ -149,6 +151,7 @@ const toProbeDiagnostic = (indexPattern: string, probe: ProbeResult): ListProbeD
     outcome: toProbeOutcome(probe),
     ...toExecutionStats(stats),
     isPartial,
+    error: toProbeError(probe),
   };
 };
 
@@ -200,9 +203,9 @@ export class InventoryService {
    * query per plan concurrently (a `TS` plan beside the `FROM` plan of a source that has a
    * time-series index) and merges the rows by `entity.id`, newest `last_seen` first.
    * Throws `InventoryTypeNotFoundError` when no `dynamic` definition is registered for the type and `InventoryTypeDefinitionError` when the definition cannot be turned into queries. A
-   * source whose probe failed runs no plan, and a query that fails or reads nothing usable is
-   * reported in `errors[]`; neither fails the request. A partial result is also reported in
-   * `errors[]` and its rows are kept. `truncated` is true only when the row limit left rows out.
+   * source whose probe failed runs no plan, and a query that fails or reads nothing usable loses its
+   * rows; each is reported in the `error` of its probe or query and never fails the request. A
+   * partial result keeps its rows. `truncated` is true only when the row limit left rows out.
    * `queries[]` lists every plan query sent and `probes[]` every probe, each with the stats
    * Elasticsearch returned; `provenance` covers the returned rows only, and `timings` gives the wall time
    * of the whole call (`totalMs`) and of each phase, measured with `performance.now()`.
@@ -211,8 +214,12 @@ export class InventoryService {
     const startedAtMs = performance.now();
     const definition = await this.getDynamicDefinition(type);
     const definedAtMs = performance.now();
-    const { probes, plans, identity, columns, queries, probeErrors, probesMs } =
-      await this.planList(definition, window, limit, signal);
+    const { probes, plans, identity, columns, queries, probesMs } = await this.planList(
+      definition,
+      window,
+      limit,
+      signal
+    );
     const plannedAtMs = performance.now();
 
     // Settled, not raced: one failing source must not hide the rows of the others.
@@ -221,30 +228,20 @@ export class InventoryService {
     );
     const queriedAtMs = performance.now();
 
-    const errors: SourceError[] = [...probeErrors];
+    // One per plan: why its rows were lost, null when they were kept.
+    const queryErrors: Array<SourceError | null> = plans.map(() => null);
     const unavailableColumns: UnavailableColumn[] = [];
     const results = outcomes.flatMap((outcome, planIndex): PlanResult[] => {
       const plan = plans[planIndex];
       if (outcome.status === 'rejected') {
-        errors.push(toSourceError(plan.indexPattern, outcome.reason));
+        queryErrors[planIndex] = { kind: 'failed', ...toErrorDetail(outcome.reason) };
         return [];
       }
-      const { columns: resultColumns, rows, isPartial } = outcome.value;
+      const { columns: resultColumns, rows } = outcome.value;
       const result: PlanResult = { plan, columns: resultColumns, rows };
-      if (isPartial) {
-        errors.push({
-          indexPattern: plan.indexPattern,
-          status: null,
-          reason: partialRowsReason(),
-        });
-      }
       const { usable, reason, unavailableFields } = interpretPlanResult(result, identity, columns);
       if (!usable) {
-        errors.push({
-          indexPattern: plan.indexPattern,
-          status: null,
-          reason: reason ?? 'unusable',
-        });
+        queryErrors[planIndex] = { kind: 'unusable', status: null, reason: reason ?? 'unusable' };
         return [];
       }
       unavailableColumns.push(...toUnavailableColumns(plan, unavailableFields, columns));
@@ -263,7 +260,7 @@ export class InventoryService {
       provenance: restrictProvenance(merged.provenance, rows),
       truncated,
       queries: outcomes.map((outcome, planIndex) =>
-        toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome)
+        toQueryDiagnostic(plans[planIndex], queries[planIndex], outcome, queryErrors[planIndex])
       ),
       probes: [...probes].map(([indexPattern, probe]) => toProbeDiagnostic(indexPattern, probe)),
       timings: {
@@ -274,7 +271,6 @@ export class InventoryService {
         processingMs: processedAtMs - queriedAtMs,
         totalMs: processedAtMs - startedAtMs,
       },
-      errors,
       unavailableColumns,
     };
   };
@@ -297,24 +293,19 @@ export class InventoryService {
    */
   plan = async ({ type, window, limit, signal }: ListRequest): Promise<PlanResponse> => {
     const definition = await this.getDynamicDefinition(type);
-    const { probes, plans, queries, probeErrors } = await this.planList(
-      definition,
-      window,
-      limit,
-      signal
-    );
+    const { probes, plans, queries } = await this.planList(definition, window, limit, signal);
     return {
       probes: [...probes].map(([indexPattern, probe]) => ({
         indexPattern,
         request: toEsqlRequestBody(probe.query),
         hasTimeSeries: probe.failed ? null : probe.hasTimeSeries,
+        error: toProbeError(probe),
       })),
       queries: plans.map(({ indexPattern, engine }, position) => ({
         indexPattern,
         engine,
         request: toEsqlRequestBody(queries[position]),
       })),
-      errors: probeErrors,
     };
   };
 
@@ -341,7 +332,7 @@ export class InventoryService {
    * Probes every source pattern, then plans one `FROM` query per source and a `TS` query before it
    * where the probe found a time-series index. The columns and queries come from every plan, so a
    * definition error never depends on a probe; a source whose probe failed keeps its columns but
-   * runs no query, and is reported in `probeErrors`. Rethrows `InventoryDefinitionError` as
+   * runs no query, and its probe carries the error. Rethrows `InventoryDefinitionError` as
    * `InventoryTypeDefinitionError` after logging it at error level: a registered definition that
    * cannot be queried is a server bug, not a problem with the request.
    */
@@ -360,13 +351,9 @@ export class InventoryService {
         { signal }
       );
       const probesMs = performance.now() - probesStartedAtMs;
-      const probeErrors: SourceError[] = [];
-      probes.forEach((probe, indexPattern) => {
-        if (probe.failed) {
-          probeErrors.push({ indexPattern, status: probe.status, reason: probe.reason });
-        }
-      });
-      const failedPatterns = new Set(probeErrors.map(({ indexPattern }) => indexPattern));
+      const failedPatterns = new Set(
+        [...probes].flatMap(([indexPattern, { failed }]) => (failed ? [indexPattern] : []))
+      );
 
       const allPlans = planSources(
         definition,
@@ -387,7 +374,6 @@ export class InventoryService {
         identity,
         columns,
         queries: runnable.map(({ query }) => query),
-        probeErrors,
         probesMs,
       };
     } catch (error) {

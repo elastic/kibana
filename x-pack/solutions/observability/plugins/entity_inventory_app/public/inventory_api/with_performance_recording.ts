@@ -18,14 +18,12 @@ const toListDiagnostics = ({
   timings,
   truncated,
   rows,
-  errors,
   unavailableColumns,
 }: ListResponse): ListCallDiagnostics => ({
   queries,
   probes,
   timings,
   truncated,
-  errors,
   unavailableColumns,
   rowCount: rows.length,
 });

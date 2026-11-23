@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { UnavailableColumn } from '@kbn/entity-inventory-plugin/common';
-import { ErrorsTable, ProbesTable, QueriesTable } from './diagnostic_tables';
+import { ProbesTable, QueriesTable } from './diagnostic_tables';
 import { formatCount, formatMs, formatRequest } from './format';
 import type { ListCallDiagnostics, RecordedCall } from './performance_recorder';
 import { ElasticsearchTable, TimingsTable } from './summary_tables';
@@ -75,7 +75,7 @@ export interface ListCallDetailProps {
   list: ListCallDiagnostics;
 }
 
-/** Browser and server times of one `_list` call, its errors, and the stats of each probe and query. */
+/** Browser and server times of one `_list` call, and the status and stats of each probe and query. */
 export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
   const { euiTheme } = useEuiTheme();
   // Below these widths a table would squeeze its labels, so the Elasticsearch table wraps under the timings.
@@ -89,7 +89,7 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
     prefix: 'entityInventoryPerformanceUnavailable',
   });
   const { browserMs, route, startedAt, status } = call;
-  const { timings, queries, probes, rowCount, truncated, errors, unavailableColumns } = list;
+  const { timings, queries, probes, rowCount, truncated, unavailableColumns } = list;
   const unavailable = dedupeUnavailableColumns(unavailableColumns);
 
   const subtitle = [
@@ -128,12 +128,6 @@ export const ListCallDetail = ({ call, list }: ListCallDetailProps) => {
           </Section>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      {errors.length > 0 && (
-        <Section title={SECTION_TITLES.errors} testSubj="entityInventoryPerformanceErrors">
-          <ErrorsTable errors={errors} />
-        </Section>
-      )}
 
       <Section title={SECTION_TITLES.queries} testSubj="entityInventoryPerformanceQueries">
         <QueriesTable queries={queries} />

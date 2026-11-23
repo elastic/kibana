@@ -6,14 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SourceError } from '@kbn/entity-inventory-plugin/common';
+import type { SourceProblem } from '../../utils/list_source_problems';
 
 export const SOURCE_ERRORS_TITLE = i18n.translate(
   'xpack.entityInventoryApp.entityTable.sourceErrors.title',
   { defaultMessage: 'Some data sources failed' }
 );
 
-export const getSourceErrorText = ({ indexPattern, status, reason }: SourceError) =>
+export const getSourceProblemText = ({ indexPattern, status, reason }: SourceProblem) =>
   status === null
     ? i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.sourceError', {
         defaultMessage: '{indexPattern}: {reason}',

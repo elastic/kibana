@@ -10,7 +10,12 @@
  * the app imports this file, so it stays out of the plugin bundle.
  */
 
-import type { ListResponse } from '@kbn/entity-inventory-plugin/common';
+import type {
+  ListProbeDiagnostic,
+  ListQueryDiagnostic,
+  ListResponse,
+  SourceError,
+} from '@kbn/entity-inventory-plugin/common';
 import type { EntityInventoryApiClient } from '../inventory_api/client';
 import { LIST_FIXTURES_BY_TYPE, NORMAL_ROW_COUNT } from './inventory_data';
 import { createFixtureEntityInventoryApiClient, throwIfAborted } from './inventory_client';
@@ -25,22 +30,57 @@ export type FixtureScenario =
 
 const TRUNCATED_ROW_COUNT = 250;
 
-const SOURCE_ERRORS = [
-  {
-    indexPattern: 'metrics-system.*-*',
-    status: 403,
-    reason: 'security_exception: action [indices:data/read/esql] is unauthorized',
-  },
-  {
-    indexPattern: 'metrics-hostmetricsreceiver.otel-*',
+const SYSTEM_PATTERN = 'metrics-system.*-*';
+const OTEL_PATTERN = 'metrics-hostmetricsreceiver.otel-*';
+
+const NO_STATS = {
+  took: null,
+  documentsFound: null,
+  valuesLoaded: null,
+  rowsEmitted: null,
+  cpuNanos: null,
+  driverNanos: null,
+  bytesRead: null,
+  shards: null,
+};
+
+const probe = (indexPattern: string, error: SourceError | null = null): ListProbeDiagnostic => ({
+  indexPattern,
+  esql: `TS ${indexPattern} | LIMIT 1`,
+  params: [],
+  outcome: error ? 'failed' : 'no_time_series',
+  ...NO_STATS,
+  isPartial: error ? null : false,
+  error,
+});
+
+const query = (
+  indexPattern: string,
+  { isPartial = false, error = null }: Partial<Pick<ListQueryDiagnostic, 'isPartial' | 'error'>>
+): ListQueryDiagnostic => ({
+  indexPattern,
+  engine: 'FROM',
+  esql: `FROM ${indexPattern}`,
+  params: [],
+  rowCount: 0,
+  ...NO_STATS,
+  isPartial,
+  error,
+});
+
+// The OpenTelemetry source's probe fails, so it runs no query; only the system source's runs.
+const PROBES = [
+  probe(SYSTEM_PATTERN),
+  probe(OTEL_PATTERN, {
+    kind: 'failed',
     status: null,
     reason: 'timeout: the query did not complete in time',
-  },
+  }),
 ];
 
 const UNAVAILABLE_COLUMNS = [
   {
-    indexPattern: 'metrics-hostmetricsreceiver.otel-*',
+    indexPattern: OTEL_PATTERN,
     column: 'k8s.cluster.name',
     field: 'k8s.cluster.name',
   },
@@ -69,7 +109,6 @@ export const buildScenarioListResponse = (
       processingMs: 0,
       totalMs: 0,
     },
-    errors: [],
     unavailableColumns: [],
   };
 
@@ -82,14 +121,30 @@ export const buildScenarioListResponse = (
         ...base,
         rows,
         truncated: false,
-        errors: SOURCE_ERRORS.slice(0, 1),
+        probes: PROBES,
+        queries: [query(SYSTEM_PATTERN, { isPartial: true })],
         unavailableColumns: UNAVAILABLE_COLUMNS,
       };
     }
     case 'empty':
       return { ...base, rows: [], truncated: false };
     case 'allSourcesFailed':
-      return { ...base, rows: [], truncated: false, errors: SOURCE_ERRORS };
+      return {
+        ...base,
+        rows: [],
+        truncated: false,
+        probes: PROBES,
+        queries: [
+          query(SYSTEM_PATTERN, {
+            isPartial: null,
+            error: {
+              kind: 'failed',
+              status: 403,
+              reason: 'security_exception: action [indices:data/read/esql] is unauthorized',
+            },
+          }),
+        ],
+      };
     case 'normal': {
       const rows = buildRows(NORMAL_ROW_COUNT);
       return { ...base, rows, truncated: false };

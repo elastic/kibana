@@ -9,7 +9,6 @@ import type {
   ListProbeDiagnostic,
   ListQueryDiagnostic,
   ListTimings,
-  SourceError,
 } from '@kbn/entity-inventory-plugin/common';
 
 const STATS = {
@@ -46,6 +45,7 @@ export const NO_TIME_SERIES_PROBE: ListProbeDiagnostic = {
   params: [],
   outcome: 'no_time_series',
   ...NO_STATS,
+  error: null,
 };
 
 export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
@@ -56,6 +56,7 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     params: [],
     outcome: 'time_series',
     took: 3,
+    error: null,
   },
   {
     indexPattern: 'traces-*',
@@ -63,6 +64,7 @@ export const PROBES_FIXTURE: ListProbeDiagnostic[] = [
     params: [],
     outcome: 'failed',
     ...NO_STATS,
+    error: { kind: 'failed', status: 403, reason: TRACES_FORBIDDEN },
   },
   NO_TIME_SERIES_PROBE,
 ];
@@ -76,6 +78,7 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     params: [{ from: '2026-11-19T10:00:00.000Z' }],
     rowCount: 120,
     took: 38,
+    error: null,
   },
   {
     indexPattern: 'logs-*',
@@ -92,13 +95,8 @@ export const QUERIES_FIXTURE: ListQueryDiagnostic[] = [
     bytesRead: null,
     shards: null,
     isPartial: null,
+    error: { kind: 'failed', status: 400, reason: 'Unknown column [host.name]' },
   },
-];
-
-export const ERRORS_FIXTURE: SourceError[] = [
-  { indexPattern: 'logs-*', status: 400, reason: 'Unknown column [host.name]' },
-  { indexPattern: 'traces-*', status: 403, reason: TRACES_FORBIDDEN },
-  { indexPattern: 'apm-*', status: 503, reason: 'Cluster unavailable' },
 ];
 
 export const TIMINGS_FIXTURE: ListTimings = {
