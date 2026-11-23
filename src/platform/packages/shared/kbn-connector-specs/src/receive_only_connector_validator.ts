@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ConnectorValidator } from '@kbn/actions-types';
-
 const NO_AUTH_TYPE_ID = 'none';
+
+type ReceiveOnlyConnectorValidator = (
+  config: Record<string, unknown>,
+  secrets: Record<string, unknown>
+) => string | null;
 
 /**
  * With no authentication a dual connector can only receive events, so every outbound action
@@ -17,7 +20,7 @@ const NO_AUTH_TYPE_ID = 'none';
  * for dual specs.
  */
 export const createReceiveOnlyConnectorValidator =
-  (connectorName: string): ConnectorValidator =>
+  (connectorName: string): ReceiveOnlyConnectorValidator =>
   (config, secrets) => {
     const { selectedActions } = config;
     if (

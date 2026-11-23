@@ -16,7 +16,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { AxiosHeaderValue } from 'axios';
-import type { ConnectorValidator } from '@kbn/actions-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
@@ -332,7 +331,7 @@ export type WorkflowActionType<
     params?: ValidatorType<Params>;
     config: ValidatorType<Config>;
     secrets: ValidatorType<Secrets>;
-    connector?: ConnectorValidator<Config, Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
 };
 
@@ -347,7 +346,7 @@ export type ClassicActionType<
     params: ValidatorType<Params>;
     config: ValidatorType<Config>;
     secrets: ValidatorType<Secrets>;
-    connector?: ConnectorValidator<Config, Secrets>;
+    connector?: (config: Config, secrets: Secrets) => string | null;
   };
 };
 
