@@ -72,6 +72,13 @@ const response = <T>(body: T, statusCode = 200): ApiClientResponse<T> => ({
   body,
 });
 
+interface QueryApiKeysRequest {
+  query: { ids: { values: string[] } };
+  size: number;
+}
+interface QueryApiKeysResponse {
+  api_keys: Array<{ id: string; invalidated: boolean }> | null;
+}
 const invalidated = (
   ids: string[],
   overrides: Partial<InvalidateResponse> = {}
@@ -95,13 +102,19 @@ const createDependencies = () => {
   const invalidate = jest.fn<Promise<InvalidateResponse>, [InvalidatePayload]>(async ({ ids }) =>
     invalidated(ids)
   );
+  // By default every queried key is still active, so unreported IDs stay unconfirmed.
+  const queryApiKeys = jest.fn<Promise<QueryApiKeysResponse>, [QueryApiKeysRequest]>(
+    async ({ query }) => ({
+      api_keys: query.ids.values.map((id) => ({ id, invalidated: false })),
+    })
+  );
   const dependencies = {
     log: {
       debug: jest.fn<void, [string]>(),
       info: jest.fn<void, [string]>(),
     },
     config: { serverless: true, projectType: 'security' as const },
-    esClient: { security: { invalidateApiKey: invalidate } },
+    esClient: { security: { invalidateApiKey: invalidate, queryApiKeys } },
     samlAuth: {
       customRoleName: 'custom_role_worker_1',
       setCustomRole: jest.fn<Promise<void>, [RoleDescriptor]>().mockResolvedValue(undefined),
@@ -140,7 +153,7 @@ const createDependencies = () => {
       ),
     },
   };
-  return { dependencies, create, invalidate };
+  return { dependencies, create, invalidate, queryApiKeys };
 };
 
 type RegisteredFixture = (
@@ -530,7 +543,7 @@ describe('requestAuth worker fixture', () => {
     {
       name: 'unconfirmed key without an error',
       result: invalidated([]),
-      message: 'Incomplete API key invalidation',
+      message: 'Incomplete API key invalidation: 1 of 1 key(s) still active',
     },
     {
       name: 'wrong key',
@@ -569,6 +582,46 @@ describe('requestAuth worker fixture', () => {
     await close();
     await done;
     expect(harness.dependencies.log.info).toHaveBeenLastCalledWith('Invalidated 1 API keys');
+  });
+
+  it.each([
+    { name: 'already invalidated', apiKeys: [{ id: 'key-1', invalidated: true }] },
+    { name: 'no longer present', apiKeys: [] },
+  ])(
+    'accepts an unreported key that is $name, such as one a test revoked itself',
+    async ({ apiKeys }) => {
+      const harness = createHarness();
+      harness.invalidate.mockResolvedValueOnce(invalidated([]));
+      harness.queryApiKeys.mockResolvedValueOnce({ api_keys: apiKeys });
+      const { auth, close, done } = await harness.start();
+      await auth.getApiKeyForAdmin();
+      await close();
+      await done;
+      expect(harness.queryApiKeys).toHaveBeenCalledWith({
+        query: { ids: { values: ['key-1'] } },
+        size: 1,
+      });
+      expect(harness.dependencies.log.info).toHaveBeenLastCalledWith('Invalidated 1 API keys');
+    }
+  );
+
+  it('does not look up keys that the invalidation response confirmed', async () => {
+    const harness = createHarness();
+    const { auth, close, done } = await harness.start();
+    await auth.getApiKeyForAdmin();
+    await close();
+    await done;
+    expect(harness.queryApiKeys).not.toHaveBeenCalled();
+  });
+
+  it('fails cleanup when the key lookup response is malformed', async () => {
+    const harness = createHarness();
+    harness.invalidate.mockResolvedValueOnce(invalidated([]));
+    harness.queryApiKeys.mockResolvedValueOnce({ api_keys: null });
+    const { auth, close, done } = await harness.start();
+    await auth.getApiKeyForAdmin();
+    await close();
+    await expect(done).rejects.toThrow('Invalid API key query response');
   });
 
   it('splits invalidation into batches of at most 1,000 keys and attempts every batch', async () => {
@@ -656,7 +709,30 @@ describe('requestAuth worker fixture', () => {
       expect(harness.invalidate).toHaveBeenCalledTimes(1);
     });
 
-    it('keeps the abandoned request open and revokes its key when it arrives', async () => {
+    it('does not start a SAML login for a built-in lookup that resolves after the deadline', async () => {
+      const harness = createHarness();
+      const lookupResult = Promise.withResolvers<typeof noAccessRole>();
+      harness.dependencies.samlAuth.fetchBuiltInRoleDescriptor.mockImplementationOnce(
+        () => lookupResult.promise
+      );
+      const { auth, close, done } = await harness.start();
+      const stalledCreate = auth.getApiKeyForBuiltInRole('monitoring_user');
+      void stalledCreate.catch(() => {});
+      await jest.advanceTimersByTimeAsync(0);
+      await close();
+      const rejectedDone = expect(done).rejects.toThrow('Timed out');
+      await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
+      await rejectedDone;
+
+      lookupResult.resolve(noAccessRole);
+      await expect(stalledCreate).rejects.toThrow('teardown timed out');
+      expect(harness.dependencies.samlAuth.session.getApiCredentialsForRole).not.toHaveBeenCalled();
+      expect(harness.create).not.toHaveBeenCalled();
+    });
+
+    // Covers a late response while the worker is still alive. After the worker exits, nothing can
+    // revoke the key, and API_KEY_EXPIRATION bounds how long it stays active.
+    it('keeps the abandoned request open and revokes its key if it arrives before the worker exits', async () => {
       const { harness, done, stalledCreate, stalledResponse } = await startStalledCreate();
       const rejectedDone = expect(done).rejects.toThrow('Timed out');
       await jest.advanceTimersByTimeAsync(PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS);
@@ -690,5 +766,9 @@ describe('requestAuth worker fixture', () => {
     });
     await expect(done).rejects.toBeInstanceOf(AggregateError);
     await expect(done).rejects.toHaveProperty('errors', [useFailure, cleanupFailure]);
+    // Reporters record only the message, so it must name every underlying failure.
+    await expect(done).rejects.toThrow(
+      'API credential use and cleanup failed: use failed; cleanup failed'
+    );
   });
 });

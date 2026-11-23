@@ -82,8 +82,12 @@ export interface RequestAuthFixture {
 const MAX_INVALIDATION_BATCH_SIZE = 1000;
 // Leaves room in the worker teardown budget to revoke keys that arrive during the drain.
 export const PENDING_CREDENTIALS_DRAIN_TIMEOUT_MS = 20_000;
-// Backstop for keys whose IDs never reach the fixture; outlives any worker so tests never hit it.
+// Backstop for keys whose IDs never reach the fixture, for example when a create is still running
+// after the worker exits; outlives any worker so tests never hit it.
 export const API_KEY_EXPIRATION = '1d';
+
+const describeFailure = (reason: unknown): string =>
+  reason instanceof Error ? reason.message : String(reason);
 
 // Throws the only failure as-is, or every failure together, from a set of settled results.
 const throwIfAnyRejected = (results: PromiseSettledResult<unknown>[], message: string) => {
@@ -94,7 +98,11 @@ const throwIfAnyRejected = (results: PromiseSettledResult<unknown>[], message: s
     throw failures[0];
   }
   if (failures.length > 1) {
-    throw new AggregateError(failures, message);
+    // Reporters record only message and stack, so the message carries every underlying failure.
+    throw new AggregateError(
+      failures,
+      `${message}: ${failures.map((reason) => describeFailure(reason)).join('; ')}`
+    );
   }
 };
 
@@ -162,6 +170,8 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           workerInfo.parallelIndex + 1
         }`;
 
+        // Avoid starting a SAML login for an operation that can no longer record its key.
+        throwIfAbandoned();
         const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
         throwIfAbandoned();
 
@@ -196,6 +206,26 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return { apiKey, apiKeyHeader };
       };
 
+      // Elasticsearch omits already-invalidated keys from invalidation results, so look them up.
+      const findActiveApiKeyIds = async (ids: string[]): Promise<string[]> => {
+        if (ids.length === 0) {
+          return [];
+        }
+
+        const { api_keys: apiKeys } = await esClient.security.queryApiKeys({
+          query: { ids: { values: ids } },
+          size: ids.length,
+        });
+        if (!Array.isArray(apiKeys)) {
+          throw new Error('Invalid API key query response');
+        }
+        // A key that is no longer returned has been removed, so it cannot authenticate.
+        const activeIds = new Set(
+          apiKeys.filter(({ invalidated }) => invalidated !== true).map(({ id }) => id)
+        );
+        return ids.filter((id) => activeIds.has(id));
+      };
+
       const invalidateApiKeyBatch = async (apiKeys: ApiKey[]) => {
         const ids = apiKeys.map(({ id }) => id);
         // Elasticsearch reports per-key revocation results; Kibana's internal route discards them.
@@ -220,12 +250,13 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }
 
         const revokedIds = new Set([...invalidatedIds, ...previouslyInvalidatedIds]);
-        const missingIds = ids.filter((id) => !revokedIds.has(id));
+        const unreportedIds = ids.filter((id) => !revokedIds.has(id));
+        const missingIds = await findActiveApiKeyIds(unreportedIds);
         if (missingIds.length > 0) {
           throw new Error(
             `Incomplete API key invalidation: ${missingIds.length} of ${
               ids.length
-            } key(s) not confirmed as invalidated; missing IDs: ${missingIds.join(', ')}`
+            } key(s) still active after invalidation; missing IDs: ${missingIds.join(', ')}`
           );
         }
       };
@@ -267,6 +298,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         clearTimeout(timer);
 
         if (didTimeOut) {
+          // Late keys are revoked only while this worker is alive; API_KEY_EXPIRATION covers the rest.
           const stalledCount = pendingOperations.size;
           pendingOperationsAbandoned = true;
           throw new Error(
