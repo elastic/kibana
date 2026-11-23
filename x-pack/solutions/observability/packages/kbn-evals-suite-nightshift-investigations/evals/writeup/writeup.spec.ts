@@ -17,6 +17,7 @@ import {
   loadWriteupDataset,
 } from './datasets';
 import { goldensByCase, goldensDirFor, readGoldens } from './goldens';
+import { fillPrompt } from './replay';
 import { createWriteupEvaluators } from './evaluators';
 import {
   formatReport,
@@ -74,13 +75,14 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
       const baselineSpec = baselinePromptSpec();
       const loaded = baselineSpec ? loadPromptArm(baselineSpec) : undefined;
       // The same prompt on both sides is a comparison with itself: noise at twice the cost, and
-      // both arms would share one cache key. So an unchanged prompt runs one arm.
-      const baseline = loaded && loaded.hash !== arm.hash ? loaded : undefined;
-      if (loaded && !baseline) {
-        log.info(
-          `Baseline ${loaded.label} has the same prompt (${loaded.hash}); skipping the head to head`
-        );
-      }
+      // both arms would share one cache key. So an unchanged prompt runs one arm. Compared as the
+      // model gets it, after the replay's own placeholder fills.
+      const unchanged = loaded && fillPrompt(loaded.prompt) === fillPrompt(arm.prompt);
+      const baseline = unchanged ? undefined : loaded;
+      const noBaseline = unchanged
+        ? `Baseline ${loaded.label} has the same prompt (${loaded.hash}), so the head to head was skipped.`
+        : undefined;
+      if (noBaseline) log.info(noBaseline);
       log.info(
         `Rewriting the final reply of ${dataset.examples.length} rounds of ${dataset.name} with prompt ${arm.label} (${arm.hash})` +
           (baseline ? ` against baseline ${baseline.label} (${baseline.hash})` : '')
@@ -97,6 +99,7 @@ evaluate.describe('Nightshift investigations: writeup', { tag: suiteTags }, () =
           log,
           votes,
           goldens,
+          noBaseline,
         })
       );
       // Keyed by round, model, prompt and repetition; delete the cache folder to regenerate.

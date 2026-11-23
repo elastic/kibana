@@ -69,7 +69,11 @@ export const replyGeneratedEvaluator: WriteupEvaluator = {
     explanation: output.reply
       ? `Replied after ${output.extra_calls.length} extra tool call(s).`
       : `No reply: ${output.error}`,
-    metadata: { extra_calls: output.extra_calls, cached: Boolean(output.cached) },
+    metadata: {
+      extra_calls: output.extra_calls,
+      cached: Boolean(output.cached),
+      retried: Boolean(output.retried),
+    },
   }),
 };
 
@@ -113,6 +117,8 @@ interface JudgeDeps {
   votes: number;
   /** Goldens kept in the repository, by example case ID; they win over one stored in the dataset. */
   goldens?: ReadonlyMap<string, string>;
+  /** Why there's no baseline to compare against, when the run decided to skip one. */
+  noBaseline?: string;
 }
 
 const getModelFactory = (evaluationConnector: EvalConnector) => () => {
@@ -215,7 +221,8 @@ export const createReplyVsBaselineEvaluator = (deps: JudgeDeps) =>
     extraTurns: output.baseline?.extra_turns,
     missing: output.baseline
       ? `The baseline prompt produced no reply: ${output.baseline.error}`
-      : 'No baseline prompt: NIGHTSHIFT_WRITEUP_BASELINE_PROMPT is unset and this is not a PR build.',
+      : deps.noBaseline ??
+        'No baseline prompt: NIGHTSHIFT_WRITEUP_BASELINE_PROMPT is unset and this is not a PR build.',
   }));
 
 export const createWriteupEvaluators = (deps: JudgeDeps): WriteupEvaluator[] => [
