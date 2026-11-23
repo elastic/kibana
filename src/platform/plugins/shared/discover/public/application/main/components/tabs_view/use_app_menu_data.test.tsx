@@ -130,7 +130,7 @@ describe('useAppMenuData', () => {
     );
   });
 
-  it('omits "Switch to classic" when the project has no data view', async () => {
+  it('keeps "Switch to classic" when the project has no data view', async () => {
     const { toolkit, hook } = await setup();
 
     await act(async () => {
@@ -147,9 +147,10 @@ describe('useAppMenuData', () => {
 
     const items = hook.result.current.getAdditionalTabMenuItems?.(toolkit.getCurrentTab());
 
-    expect(items).not.toContainEqual(
+    expect(items).toContainEqual(
       expect.objectContaining({
         'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
+        label: 'Switch to classic',
       })
     );
   });

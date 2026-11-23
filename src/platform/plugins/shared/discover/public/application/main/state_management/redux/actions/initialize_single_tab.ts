@@ -15,6 +15,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { DATASETS_ROUTE, type EsqlDatasetsResult } from '@kbn/esql-types';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import {
@@ -50,6 +51,11 @@ import type { TabsUrlState } from '../../../../../../common/types';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { isNonEmptyEsqlQuery } from '../../utils/is_non_empty_esql_query';
+import {
+  getFederatedDefaultEsqlQuery,
+  isGeneratedEsqlDefault,
+  isGeneratedTimeSortedEsql,
+} from '../../utils/get_federated_default_esql_query';
 import { fetchData, updateAttributes } from './tab_state';
 import { initializeAndSync } from './tab_sync';
 import { resolveEsqlSource } from '../../../data_fetching/resolve_esql_source';
@@ -208,9 +214,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     // A saved search keeps the query stored on it. Profile, space, and URL
     // defaults would otherwise prefill this screen.
     const blankEditor =
-      esqlEnabled &&
-      !hasESData &&
-      !isNonEmptyEsqlQuery(persistedTab?.serializedSearchSource.query);
+      esqlEnabled && !hasESData && !isNonEmptyEsqlQuery(persistedTab?.serializedSearchSource.query);
 
     if (!hasESData && !hasDataView) {
       if (!esqlEnabled) {
@@ -278,6 +282,38 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       dataView: DataView;
       esqlSource?: EsqlSource;
     }> => {
+      // The logs default, including its @timestamp sort, names columns a dataset does not have.
+      // A saved search or a query the user wrote stays. The generated default does not.
+      const urlQuery = urlAppState?.query;
+      const urlEsql = isOfAggregateQueryType(urlQuery) ? urlQuery.esql : undefined;
+      const urlIsGenerated =
+        isGeneratedEsqlDefault(urlEsql, defaultProfileEsqlQuery?.query) ||
+        isGeneratedTimeSortedEsql(urlEsql);
+      const keepExistingQuery =
+        Boolean(persistedTab?.serializedSearchSource.query) ||
+        (Boolean(urlQuery) && !urlIsGenerated);
+      if (esqlEnabled && !keepExistingQuery) {
+        const hasLocalOrRemoteESData = await services.dataViews.hasData
+          .hasESData()
+          .catch(() => false);
+        const datasetName = hasLocalOrRemoteESData
+          ? undefined
+          : await services.core.http
+              .get<EsqlDatasetsResult>(DATASETS_ROUTE)
+              .then((result) => result?.datasets?.[0]?.name)
+              .catch(() => undefined);
+        const federatedQuery = getFederatedDefaultEsqlQuery({
+          hasLocalOrRemoteESData,
+          datasetName,
+        });
+        if (federatedQuery) {
+          return {
+            query: { esql: federatedQuery },
+            ...(await resolveEsqlQuerySource(federatedQuery)),
+          };
+        }
+      }
+
       if (openedWithoutData && !isNonEmptyEsqlQuery(initialQuery)) {
         // No schema lookup: an empty query has nothing to resolve, and waiting on it
         // is the loading state the empty project should not show.
@@ -334,9 +370,22 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     // URL app state is spread over the opening query, so a default already stored
-    // in the address bar would replace the blank query decided above.
+    // in the address bar would replace the query decided above.
+    const urlEsql = isOfAggregateQueryType(urlAppState?.query) ? urlAppState.query.esql : undefined;
+    const openingEsql = isOfAggregateQueryType(openingQuery) ? openingQuery.esql : undefined;
+    const urlHoldsGeneratedQuery =
+      isGeneratedEsqlDefault(urlEsql, defaultProfileEsqlQuery?.query) ||
+      isGeneratedTimeSortedEsql(urlEsql);
+    const overrideUrlQuery = blankEditor || (urlHoldsGeneratedQuery && openingEsql !== urlEsql);
+    const {
+      query: urlQueryToReplace,
+      dataSource: urlDataSourceToReplace,
+      ...urlStateWithoutQuery
+    } = urlAppState ?? {};
     const initialAppState = getInitialAppState({
-      initialUrlState: blankEditor ? { ...urlAppState, query: { esql: '' } } : urlAppState,
+      initialUrlState: overrideUrlQuery
+        ? { ...urlStateWithoutQuery, ...(openingQuery ? { query: openingQuery } : {}) }
+        : urlAppState,
       hasGlobalState,
       persistedTab,
       dataView,

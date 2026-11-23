@@ -113,13 +113,8 @@ export const useTopNavLinks = ({
   const dataStateContainer = useCurrentTabDataStateContainer();
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
-  const {
-    canSwitchLanguageMode,
-    isDataViewMode,
-    isSwitchToClassicDisabled,
-    openInspector,
-    switchLanguageMode,
-  } = useCurrentTabMenuActions({ currentDataView });
+  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
+    useCurrentTabMenuActions({ currentDataView });
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -275,14 +270,6 @@ export const useTopNavLinks = ({
     }
 
     if (canSwitchLanguageMode) {
-      const switchToClassicTooltip = isSwitchToClassicDisabled
-        ? i18n.translate('discover.localMenu.switchToClassicNeedsDataViewTooltip', {
-            defaultMessage: 'Create a data view to switch to Classic',
-          })
-        : i18n.translate('discover.localMenu.switchToClassicTooltip', {
-            defaultMessage: 'Search your data with data views and KQL in Classic Discover',
-          });
-
       items.push({
         id: AppMenuActionId.switchLanguageMode,
         order: 2,
@@ -293,13 +280,15 @@ export const useTopNavLinks = ({
           : i18n.translate('discover.localMenu.switchToClassicTitle', {
               defaultMessage: 'Switch to Classic',
             }),
-        disableButton: isSwitchToClassicDisabled,
+        disableButton: false,
         tooltipContent: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTooltip', {
               defaultMessage:
                 'Search, transform, join and aggregate your data with ES|QL or PromQL',
             })
-          : switchToClassicTooltip,
+          : i18n.translate('discover.localMenu.switchToClassicTooltip', {
+              defaultMessage: 'Search your data with data views and KQL in Classic Discover',
+            }),
         iconType: isDataViewMode ? 'code' : 'productDiscover',
         testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
         run: switchLanguageMode,
@@ -326,7 +315,6 @@ export const useTopNavLinks = ({
     return items;
   }, [
     canSwitchLanguageMode,
-    isSwitchToClassicDisabled,
     services,
     discoverParams,
     appId,

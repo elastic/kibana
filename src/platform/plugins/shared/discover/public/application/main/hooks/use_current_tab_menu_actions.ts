@@ -19,7 +19,6 @@ import {
   useCurrentTabAction,
   useCurrentTabSelector,
   useInternalStateDispatch,
-  useInternalStateSelector,
 } from '../state_management/redux';
 
 interface UseCurrentTabMenuActionsParams {
@@ -44,13 +43,10 @@ export const useCurrentTabMenuActions = ({
 
   const isEsqlEnabled = services.uiSettings.get(ENABLE_ESQL);
   const isDataViewMode = isDataViewSource(currentTab.appState.dataSource);
-  const hasDataView = useInternalStateSelector((state) => state.initializationState.hasDataView);
   const canSwitchLanguageMode = Boolean(currentDataView) && isEsqlEnabled;
-  // Classic searches a data view. An empty project or federated sources alone have none.
-  const isSwitchToClassicDisabled = !isDataViewMode && !hasDataView;
 
   const switchLanguageMode = useCallback(() => {
-    if (!currentDataView || !isEsqlEnabled || isSwitchToClassicDisabled) {
+    if (!currentDataView || !isEsqlEnabled) {
       return;
     }
 
@@ -67,7 +63,6 @@ export const useCurrentTabMenuActions = ({
     dispatch,
     isDataViewMode,
     isEsqlEnabled,
-    isSwitchToClassicDisabled,
     services,
     switchToEsqlMetric,
     transitionFromDataViewToESQL,
@@ -77,7 +72,6 @@ export const useCurrentTabMenuActions = ({
   return {
     canSwitchLanguageMode,
     isDataViewMode,
-    isSwitchToClassicDisabled,
     openInspector,
     switchLanguageMode,
   };

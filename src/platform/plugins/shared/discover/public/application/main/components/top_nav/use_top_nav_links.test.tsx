@@ -183,7 +183,7 @@ describe('useTopNavLinks', () => {
       );
     });
 
-    it('disables switch to classic when the project has no data view', async () => {
+    it('keeps switch to classic enabled when the project has no data view', async () => {
       const appMenuConfig = await setup({
         isEsqlMode: true,
         hasDataView: false,
@@ -193,9 +193,9 @@ describe('useTopNavLinks', () => {
         (item) => item.testId === 'select-classic-mode-btn'
       );
 
-      expect(switchLanguageModeItem?.disableButton).toBe(true);
+      expect(switchLanguageModeItem?.disableButton).toBe(false);
       expect(switchLanguageModeItem?.tooltipContent).toBe(
-        'Create a data view to switch to Classic'
+        'Search your data with data views and KQL in Classic Discover'
       );
     });
   });

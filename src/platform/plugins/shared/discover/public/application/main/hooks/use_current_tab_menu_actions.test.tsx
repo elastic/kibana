@@ -166,7 +166,7 @@ describe('useCurrentTabMenuActions', () => {
     });
   });
 
-  it('does not switch to classic when the project has no data view', async () => {
+  it('switches to classic when the project has no data view', async () => {
     const { services, toolkit, tabId } = await setup();
 
     toolkit.internalState.dispatch(
@@ -189,13 +189,15 @@ describe('useCurrentTabMenuActions', () => {
     );
 
     expect(result.current.isDataViewMode).toBe(false);
-    expect(result.current.isSwitchToClassicDisabled).toBe(true);
 
     await act(async () => {
       result.current.switchLanguageMode();
     });
 
-    expect(services.trackUiMetric).not.toHaveBeenCalled();
-    expect(result.current.isDataViewMode).toBe(false);
+    expect(services.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.CLICK,
+      'esql:back_to_classic_clicked'
+    );
+    expect(result.current.isDataViewMode).toBe(true);
   });
 });
