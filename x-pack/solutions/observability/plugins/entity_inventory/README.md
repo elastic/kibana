@@ -159,7 +159,7 @@ registers them.
 
 Attributes only for now; metrics, detail and the document filter are later phases.
 
-**Planning.** `planSources(definition, probes)` takes one `SourceProbe` per source, in source order: `{ hasTimeSeries }`, whether a readable time-series index exists behind its pattern. Every source gives a `FROM` plan; one with `hasTimeSeries` also gives a `TS` plan, listed first. Plans are numbered in the resulting order, carry `sourceIndex` and the pattern as the author wrote it, and the 32-plan budget counts them after the split. No concrete index name reaches a query.
+**Planning.** `planSources(definition, probes)` takes one `SourceProbe` per source, in source order: `{ hasTimeSeries }`, whether a readable time-series index exists behind its pattern. Every source gives a `FROM` plan; one with `hasTimeSeries` also gives a `TS` plan, listed first. Plans are numbered in the resulting order, carry `sourceIndex` and the pattern as the author wrote it, and the 32-plan budget counts them after the split. No concrete index name reaches a query: `dynamic` source `indexPattern` is rejected at registration when it names a backing or concrete index (`.ds-…-00000N`, hidden names, generation suffixes without `*`). Use the data stream or a pattern such as `metrics-kubernetes.state_container-*`.
 
 **List query**, one per plan:
 

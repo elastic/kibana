@@ -58,6 +58,23 @@ export const LITERAL_FIELD_PATH_PATTERN = /^[A-Za-z0-9_@-]+(?:\.[A-Za-z0-9_@-]+)
 /** One index pattern per source: no whitespace and no comma-separated list. */
 export const INDEX_PATTERN_PATTERN = /^[^\s,]+$/;
 
+/**
+ * True when `pattern` names a concrete or data-stream backing index rather than a data stream
+ * or index pattern. Sources must use the data stream name (e.g. `metrics-kubernetes.state_container-*`)
+ * so Elasticsearch resolves backing generations; never `.ds-…-000002` or other concrete names.
+ */
+export const isConcreteIndexPattern = (pattern: string): boolean => {
+  // Hidden / system / data-stream backing indices (`.ds-…-00000N`, `.internal-…`, remote `cluster:.ds-…`).
+  if (pattern.startsWith('.') || pattern.includes(':.') || pattern.includes('/.ds-')) {
+    return true;
+  }
+  // Generation-suffixed concrete index with no wildcard (e.g. `…-000002`).
+  if (!pattern.includes('*') && /-\d{6}$/.test(pattern)) {
+    return true;
+  }
+  return false;
+};
+
 /** Whether `value` is a non-empty literal field path within `MAX_FIELD_PATH_LENGTH`. */
 export const isLiteralFieldPath = (value: string): boolean =>
   value.length > 0 &&
@@ -82,10 +99,18 @@ const attributeNameSchema = lazySchema(() =>
 );
 
 const indexPatternSchema = lazySchema(() =>
-  z.string().min(1).max(MAX_INDEX_PATTERN_LENGTH).regex(INDEX_PATTERN_PATTERN, {
-    message:
-      'must be a single index pattern without whitespace or commas; declare one source per pattern',
-  })
+  z
+    .string()
+    .min(1)
+    .max(MAX_INDEX_PATTERN_LENGTH)
+    .regex(INDEX_PATTERN_PATTERN, {
+      message:
+        'must be a single index pattern without whitespace or commas; declare one source per pattern',
+    })
+    .refine((pattern) => !isConcreteIndexPattern(pattern), {
+      message:
+        'must be a data stream or index pattern, not a concrete or backing index (no `.ds-…-00000N`, hidden names, or generation suffixes without `*`)',
+    })
 );
 
 const valueLabelStringSchema = lazySchema(() => z.string().min(1).max(MAX_VALUE_LABEL_LENGTH));

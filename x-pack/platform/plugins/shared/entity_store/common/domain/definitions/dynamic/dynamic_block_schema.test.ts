@@ -19,6 +19,7 @@ import {
   dynamicBlockSchema,
   dynamicMetricSchema,
   dynamicSourceSchema,
+  isConcreteIndexPattern,
   isLiteralFieldPath,
   literalFieldPathSchema,
   type DynamicAttribute,
@@ -169,6 +170,14 @@ describe('dynamicSourceSchema', () => {
       );
     });
 
+    it('accepts a data stream name without a wildcard', () => {
+      expect(
+        dynamicSourceSchema.safeParse(
+          source({ indexPattern: 'metrics-hostmetricsreceiver.otel-default' })
+        ).success
+      ).toBe(true);
+    });
+
     it('rejects a comma-separated list', () => {
       expect(
         dynamicSourceSchema.safeParse(source({ indexPattern: 'metrics-a,metrics-b' })).success
@@ -183,6 +192,32 @@ describe('dynamicSourceSchema', () => {
 
     it('rejects an empty pattern', () => {
       expect(dynamicSourceSchema.safeParse(source({ indexPattern: '' })).success).toBe(false);
+    });
+
+    it('rejects a data-stream backing index (`.ds-…-00000N`)', () => {
+      const backing =
+        '.ds-metrics-kubernetes.state_container-default-2026.11.20-000002';
+      const result = dynamicSourceSchema.safeParse(source({ indexPattern: backing }));
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.some((issue) => issue.message.includes('concrete'))).toBe(true);
+      }
+    });
+
+    it('rejects a remote-cluster backing index', () => {
+      expect(
+        dynamicSourceSchema.safeParse(
+          source({ indexPattern: 'cluster:.ds-metrics-kubernetes.state_container-default-000001' })
+        ).success
+      ).toBe(false);
+    });
+
+    it('rejects a generation-suffixed concrete index without a wildcard', () => {
+      expect(
+        dynamicSourceSchema.safeParse(
+          source({ indexPattern: 'metrics-kubernetes.state_container-default-000002' })
+        ).success
+      ).toBe(false);
     });
 
     it(`accepts ${MAX_INDEX_PATTERN_LENGTH} characters and rejects one more`, () => {
@@ -443,5 +478,23 @@ describe('literal field paths', () => {
     for (const value of cases) {
       expect(isLiteralFieldPath(value)).toBe(literalFieldPathSchema.safeParse(value).success);
     }
+  });
+});
+
+describe('isConcreteIndexPattern', () => {
+  it('accepts data streams and wildcards', () => {
+    expect(isConcreteIndexPattern('metrics-kubernetes.state_container-*')).toBe(false);
+    expect(isConcreteIndexPattern('metrics-hostmetricsreceiver.otel-default')).toBe(false);
+    expect(isConcreteIndexPattern('cluster:metrics-*')).toBe(false);
+  });
+
+  it('rejects backing and generation-suffixed concrete indices', () => {
+    expect(
+      isConcreteIndexPattern('.ds-metrics-kubernetes.state_container-default-2026.11.20-000002')
+    ).toBe(true);
+    expect(
+      isConcreteIndexPattern('cluster:.ds-metrics-kubernetes.state_container-default-000001')
+    ).toBe(true);
+    expect(isConcreteIndexPattern('metrics-kubernetes.state_container-default-000002')).toBe(true);
   });
 });
