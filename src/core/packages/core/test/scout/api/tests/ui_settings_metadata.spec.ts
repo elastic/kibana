@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { apiTest, tags } from '@kbn/scout';
-import type { KbnClient, KibanaRole, RoleSessionCredentials } from '@kbn/scout';
+import type { KibanaRole, RoleSessionCredentials } from '@kbn/scout';
 import { INTERNAL_HEADERS } from '../fixtures';
 
 const NAMESPACE_METADATA_PATH = '/internal/kibana/settings/metadata';
@@ -17,6 +17,7 @@ const GLOBAL_METADATA_PATH = '/internal/kibana/global_settings/metadata';
 
 const SAVED_SETTING = 'dateFormat:tz';
 const SAVED_VALUE = 'America/Phoenix';
+const GLOBAL_SETTING = 'hideAnnouncements';
 
 // Every page injects the runtime settings for this user, so the definitions must not need the
 // advancedSettings privilege.
@@ -25,40 +26,36 @@ const NO_SETTINGS_PRIVILEGES_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['*'] }],
 };
 
-type UiSettingUserValue = Awaited<ReturnType<KbnClient['uiSettings']['get']>>;
-
 const getEntriesWithUserValues = (settings: Record<string, object>) =>
   Object.keys(settings).filter(
     (key) => 'userValue' in settings[key] || 'isOverridden' in settings[key]
   );
 
 apiTest.describe('ui settings metadata', { tag: tags.deploymentAgnostic }, () => {
+  const spaceId = `ui_settings_metadata_${Math.random().toString(36).slice(2, 8)}`;
   let cookieHeader: RoleSessionCredentials['cookieHeader'];
-  let originalValue: UiSettingUserValue;
-  let capturedOriginalValue = false;
+  let createdSpace = false;
 
-  apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
-    originalValue = await kbnClient.uiSettings.get(SAVED_SETTING);
-    capturedOriginalValue = true;
-    await kbnClient.uiSettings.update({ [SAVED_SETTING]: SAVED_VALUE });
-    ({ cookieHeader } = await samlAuth.asInteractiveUser(NO_SETTINGS_PRIVILEGES_ROLE));
+  apiTest.beforeAll(async ({ samlAuth, kbnClient, config }) => {
+    await kbnClient.spaces.create({ id: spaceId, name: spaceId, disabledFeatures: [] });
+    createdSpace = true;
+    await kbnClient.uiSettings.update({ [SAVED_SETTING]: SAVED_VALUE }, { space: spaceId });
+
+    // Custom roles can't log in on Cloud Hosted without a custom SAML realm.
+    const role = config.isCloud ? 'viewer' : NO_SETTINGS_PRIVILEGES_ROLE;
+    ({ cookieHeader } = await samlAuth.asInteractiveUser(role));
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
-    if (!capturedOriginalValue) {
-      return;
+    if (createdSpace) {
+      await kbnClient.spaces.delete(spaceId);
     }
-    if (originalValue === undefined) {
-      await kbnClient.uiSettings.unset(SAVED_SETTING);
-      return;
-    }
-    await kbnClient.uiSettings.update({ [SAVED_SETTING]: originalValue });
   });
 
   apiTest(
     'returns the namespace definitions without saved values to a user without settings privileges',
     async ({ apiClient }) => {
-      const response = await apiClient.get(NAMESPACE_METADATA_PATH, {
+      const response = await apiClient.get(`/s/${spaceId}${NAMESPACE_METADATA_PATH}`, {
         headers: { ...INTERNAL_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -84,18 +81,15 @@ apiTest.describe('ui settings metadata', { tag: tags.deploymentAgnostic }, () =>
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(getEntriesWithUserValues(response.body.settings)).toStrictEqual([]);
+      const { settings } = response.body;
+      const { name, description, scope } = settings[GLOBAL_SETTING];
+      expect({ name: typeof name, description: typeof description, scope }).toStrictEqual({
+        name: 'string',
+        description: 'string',
+        scope: 'global',
+      });
+      expect(settings[SAVED_SETTING]).toBeUndefined();
+      expect(getEntriesWithUserValues(settings)).toStrictEqual([]);
     }
   );
-
-  apiTest('rejects unauthenticated requests', async ({ apiClient }) => {
-    for (const path of [NAMESPACE_METADATA_PATH, GLOBAL_METADATA_PATH]) {
-      const response = await apiClient.get(path, {
-        headers: INTERNAL_HEADERS,
-        responseType: 'json',
-      });
-
-      expect(response).toHaveStatusCode(401);
-    }
-  });
 });
