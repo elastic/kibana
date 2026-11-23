@@ -14,7 +14,7 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
   type ActionPolicyEventAction,
-} from '../../../dispatcher/steps/constants';
+} from '../constants';
 
 /**
  * Filter inputs shared by the action-policy event queries.

@@ -30,12 +30,12 @@ describe('getInspectedElementData', () => {
     element: mockElement,
     fiber: {
       type: 'p',
-      _debugSource: {
-        fileName: '/path/to/capybara.tsx',
-        lineNumber: 42,
-        columnNumber: 10,
-      },
       _debugOwner: { type: { displayName: 'EuiButton' } },
+    },
+    source: {
+      fileName: '/path/to/capybara.tsx',
+      lineNumber: 42,
+      columnNumber: 10,
     },
   };
 
@@ -86,7 +86,7 @@ describe('getInspectedElementData', () => {
 
     expect(fetchComponentData).toHaveBeenCalledWith({
       httpService: mockHttpService,
-      fileName: mockTarget.fiber._debugSource.fileName,
+      fileName: mockTarget.source.fileName,
     });
 
     expect(result).toBeNull();
@@ -106,7 +106,7 @@ describe('getInspectedElementData', () => {
 
     expect(result).toEqual({
       fileData: {
-        ...mockTarget.fiber._debugSource,
+        ...mockTarget.source,
         ...mockResponse,
       },
       euiData: mockEuiDocs,

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export { consumeRunQuota, releaseRunQuota } from './consume';
+export { consumeInvestigationRunQuota, consumeRunQuota, releaseRunQuota } from './consume';
+export type { InvestigationRunQuotaConsumeResult } from './consume';
 export { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 export {
   createRunQuotaInternalRepository,
@@ -22,4 +23,4 @@ export {
   RUN_QUOTA_SETTINGS_SO_TYPE,
 } from './saved_objects';
 export type { RunQuotaLedgerAttributes, RunQuotaSettingsAttributes } from './saved_objects';
-export { dayKey, resolveDailyWindow } from './window';
+export { dayKey, resolveDailyWindow } from '@kbn/nightshift-shared';

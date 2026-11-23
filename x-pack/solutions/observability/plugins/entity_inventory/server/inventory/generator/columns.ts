@@ -6,6 +6,7 @@
  */
 
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import type { OutputColumnKind } from '../../../common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
 import type { IdentityPlan } from './identity';
@@ -14,9 +15,6 @@ import type { QueryPlan } from './types';
 
 /** The column holding the newest `@timestamp` of an entity. */
 export const LAST_SEEN_COLUMN = 'last_seen';
-
-/** What an output column holds. */
-export type OutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
 
 /** One column of the inventory output. */
 export interface OutputColumn {
@@ -34,7 +32,7 @@ const RESERVED_COLUMNS: ReadonlySet<string> = new Set([ENTITY_ID_COLUMN, LAST_SE
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
-  plans: QueryPlan[],
+  plans: ReadonlyArray<Pick<QueryPlan, 'index' | 'attributes'>>,
   { groupingFields, helperColumns }: IdentityPlan
 ): OutputColumn[] => {
   getDynamicBlock(definition);
@@ -76,6 +74,23 @@ export const buildColumns = (
     ),
     { name: LAST_SEEN_COLUMN, kind: 'last_seen' },
   ];
+};
+
+/**
+ * The field a plan reads for a column, for a column the inventory can filter on: an attribute reads
+ * the field its source declares, and an identity column is its own field in every plan. `undefined`
+ * when the column does not exist, is neither, or the plan carries no field for it.
+ */
+export const fieldOfColumn = (
+  columns: OutputColumn[],
+  name: string,
+  plan: Pick<QueryPlan, 'index'>
+): string | undefined => {
+  const column = columns.find((candidate) => candidate.name === name);
+  if (column?.kind === 'attribute') {
+    return column.fieldByPlan?.[plan.index];
+  }
+  return column?.kind === 'identity' ? column.name : undefined;
 };
 
 /** Names of the columns a plan produces, in column order; attributes it does not carry are left out. */

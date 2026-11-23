@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
 import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
@@ -27,11 +27,13 @@ jest.mock('./home_page', () => ({
 
 const mockHasSeenOnboarding = jest.mocked(hasSeenOnboarding);
 
+const onOnboardingExit = jest.fn();
+
 const renderRoutes = (initialEntry: string): MemoryHistory => {
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
   render(
     <Router history={history}>
-      <AppRoutes />
+      <AppRoutes onOnboardingExit={onOnboardingExit} />
     </Router>
   );
   return history;
@@ -59,6 +61,40 @@ describe('AppRoutes', () => {
 
       expect(history.location.pathname).toBe(GETTING_STARTED_PATH);
       expect(screen.getByTestId('onboardingLandingPage')).toBeInTheDocument();
+    });
+  });
+
+  describe('onOnboardingExit', () => {
+    it('is not called while navigating within the wizard', () => {
+      const history = renderRoutes(GETTING_STARTED_PATH);
+
+      act(() => history.push(`${GETTING_STARTED_PATH}/ingest`));
+
+      expect(screen.getByTestId('ingestStep')).toBeInTheDocument();
+      expect(onOnboardingExit).not.toHaveBeenCalled();
+    });
+
+    it('is called when leaving the wizard', () => {
+      const history = renderRoutes(`${GETTING_STARTED_PATH}/search`);
+
+      act(() => history.push('/'));
+
+      expect(screen.getByTestId('homePage')).toBeInTheDocument();
+      expect(onOnboardingExit).toHaveBeenCalled();
+    });
+
+    it('is called when the home page renders without the wizard being entered', () => {
+      renderRoutes('/');
+
+      expect(onOnboardingExit).toHaveBeenCalledTimes(1);
+    });
+
+    it('is not called when a first-time user is redirected into the wizard', () => {
+      mockHasSeenOnboarding.mockReturnValue(false);
+
+      renderRoutes('/');
+
+      expect(onOnboardingExit).not.toHaveBeenCalled();
     });
   });
 

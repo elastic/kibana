@@ -21,7 +21,10 @@ import {
 import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
-import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
+import {
+  isCopyKeyboardShortcut,
+  isEscapeKey,
+} from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../../__mocks__/mocks';
 
 jest.mock('@elastic/eui', () => ({
@@ -45,6 +48,7 @@ jest.mock('../../../lib/get_inspected_element_data', () => ({
 
 jest.mock('../../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
   isKeyboardShortcut: jest.fn(),
+  isCopyKeyboardShortcut: jest.fn(),
   isMac: jest.fn(),
   isEscapeKey: jest.fn(),
 }));
@@ -80,7 +84,8 @@ describe('InspectOverlay', () => {
     (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
     (findFiberWithDebugSource as jest.Mock).mockReturnValue({
       element: fakeTarget,
-      fiber: { type: 'div', _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 } },
+      fiber: { type: 'div' },
+      source: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 },
     });
     (findSourceComponentName as jest.Mock).mockReturnValue('FakeComponent');
 
@@ -132,7 +137,7 @@ describe('InspectOverlay', () => {
     const setFlyoutOverlayRef = jest.fn();
     const setIsInspecting = jest.fn();
     const fakeSource = { fileName: '/repo/src/save_button.tsx', lineNumber: 1, columnNumber: 1 };
-    const fakeFiber = { type: 'button', _debugSource: fakeSource };
+    const fakeFiber = { type: 'button' };
     const expectedContext = '<div>Save</div>\n  in SaveButton (/repo/src/save_button.tsx:42:7)';
     let fakeTarget: HTMLElement;
 
@@ -145,6 +150,7 @@ describe('InspectOverlay', () => {
       (findFiberWithDebugSource as jest.Mock).mockReturnValue({
         element: fakeTarget,
         fiber: fakeFiber,
+        source: fakeSource,
       });
       (findSourceComponentName as jest.Mock).mockReturnValue('SaveButton');
       (getComponentStack as jest.Mock).mockReturnValue([
@@ -190,6 +196,23 @@ describe('InspectOverlay', () => {
       expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
       expect(mockCoreStart.overlays.openFlyout).not.toHaveBeenCalled();
       expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
+      expect(setIsInspecting).not.toHaveBeenCalled();
+    });
+
+    it('should copy the hovered element context on the copy shortcut and show feedback', () => {
+      (isCopyKeyboardShortcut as jest.Mock).mockReturnValue(true);
+      const pressCopyShortcut = () =>
+        fireEvent.keyDown(window, { key: 'c', code: 'KeyC', metaKey: true });
+
+      // Nothing is hovered yet, so the browser's own copy must be left alone
+      pressCopyShortcut();
+      expect(copyToClipboard).not.toHaveBeenCalled();
+
+      hoverTarget();
+      pressCopyShortcut();
+
+      expect(copyToClipboard).toHaveBeenCalledWith(expectedContext);
+      expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
       expect(setIsInspecting).not.toHaveBeenCalled();
     });
 

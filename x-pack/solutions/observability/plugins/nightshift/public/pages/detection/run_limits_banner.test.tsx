@@ -16,19 +16,33 @@ jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
 jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
+jest.mock('../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      },
+    },
+  }),
+}));
 
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 100,
     investigation: 30,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 0,
   },
   counts: {
     detection: 100,
     investigation: 5,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 500,
   },
   window: {
@@ -47,11 +61,15 @@ describe('RunLimitsBanner', () => {
         limits: {
           detection: 100,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
         counts: {
           detection: 100,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
       }),
@@ -72,6 +90,27 @@ describe('RunLimitsBanner', () => {
     );
     expect(callout).not.toHaveTextContent('Investigation');
     expect(callout).not.toHaveTextContent('Knowledge indicators extraction');
+    expect(screen.getByTestId('nightshiftRunQuotaReachedSettingsLink-detection')).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/detections?origin=detections'
+    );
+  });
+
+  it('hides the settings link from users who cannot manage limits', () => {
+    mockUseRunQuotas.mockReturnValue({
+      data: response({ canManage: false }),
+    } as ReturnType<typeof useRunQuotas>);
+
+    render(
+      <I18nProvider>
+        <RunLimitsBanner />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('nightshiftRunQuotaReached-detection')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('nightshiftRunQuotaReachedSettingsLink-detection')
+    ).not.toBeInTheDocument();
   });
 
   it('stays hidden when only another quota group has reached its limit', () => {
@@ -80,6 +119,8 @@ describe('RunLimitsBanner', () => {
         limits: {
           detection: 101,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
       }),

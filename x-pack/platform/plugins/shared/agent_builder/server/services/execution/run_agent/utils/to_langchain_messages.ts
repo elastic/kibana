@@ -13,19 +13,27 @@ import type {
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import {
+  EventActorType,
   getConversationRoundAuthorDisplayName,
   isAskUserQuestionStep,
   isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import { createAIMessage, createUserMessage } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
-import type { CompactionSummary } from '@kbn/agent-builder-common';
+import type {
+  ProcessedAttachment,
+  ProcessedRoundInput,
+  ProcessedUserMessageEvent,
+} from '@kbn/agent-builder-server';
+import type { CompactionSummary, DynamicToolDefinition } from '@kbn/agent-builder-common';
 import {
   formatAwaitingPromptNotice,
   formatInterruptionNotice,
   formatSubagentRosterNotice,
+  formatBackgroundReportNotice,
+  formatUnreadSteerNotice,
 } from '../prompts/utils/notices';
+import { formatDynamicToolsNotice } from '../prompts/utils/dynamic_tools';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
 import {
@@ -92,6 +100,11 @@ export interface ConversationToLangchainOptions {
    * user/assistant message pair representing the compacted history.
    */
   compactionSummary?: CompactionSummary;
+  /**
+   * Definitions of the dynamic tools still available, re-injected after the compaction summary
+   * since it hides the tool results that first carried them. Ignored without a summary.
+   */
+  dynamicToolDefinitions?: DynamicToolDefinition[];
   /** What the summary leaves visible (see `resolveVisibility`); everything by default. */
   visibility?: ContextVisibility;
   /**
@@ -114,6 +127,7 @@ export const prepareMessages = async ({
   roundResultTransformer,
   ignoreSteps = false,
   compactionSummary,
+  dynamicToolDefinitions,
   visibility = FULLY_VISIBLE,
   conversationTimestamp,
   attachmentNotices,
@@ -126,7 +140,11 @@ export const prepareMessages = async ({
 
   if (compactionSummary) {
     messages.push(
-      ...compactionSummaryMessages(compactionSummary, conversation.subagentRosterFallback)
+      ...compactionSummaryMessages(
+        compactionSummary,
+        conversation.subagentRosterFallback,
+        dynamicToolDefinitions
+      )
     );
   }
 
@@ -149,13 +167,7 @@ export const prepareMessages = async ({
       continue;
     }
     // a standalone user message: no execution to render
-    messages.push(
-      formatUserInput({
-        input: entry.userMessage.data,
-        timestamp: entry.userMessage.created_at,
-        notices,
-      })
-    );
+    messages.push(standaloneUserMessageToLangchain(entry.userMessage, notices));
   }
 
   messages.push(formatUserInput({ input, timestamp: inputTimestamp, notices }));
@@ -163,10 +175,14 @@ export const prepareMessages = async ({
   return messages;
 };
 
-/** The summary as a user/assistant exchange, followed by the sub-agent roster it would hide. */
+/**
+ * The summary as a user/assistant exchange, followed by what it would hide: the sub-agent roster
+ * and the definitions of the dynamic tools still available.
+ */
 export const compactionSummaryMessages = (
   summary: CompactionSummary,
-  subagentRosterFallback?: ProcessedConversation['subagentRosterFallback']
+  subagentRosterFallback?: ProcessedConversation['subagentRosterFallback'],
+  dynamicTools?: DynamicToolDefinition[]
 ): BaseMessage[] => {
   const messages: BaseMessage[] = [
     createUserMessage('[Previous conversation context was compacted]'),
@@ -178,6 +194,9 @@ export const compactionSummaryMessages = (
       conversation_id: entry.conversation_id,
     }));
     messages.push(createUserMessage(formatSubagentRosterNotice(fallbackRoster)));
+  }
+  if (dynamicTools && dynamicTools.length > 0) {
+    messages.push(createUserMessage(formatDynamicToolsNotice(dynamicTools)));
   }
   return messages;
 };
@@ -284,6 +303,17 @@ export const standaloneEventToLangchain = (
   return createUserMessage(instructions ? `${block}\n\n${instructions}` : block);
 };
 
+/** A standalone user message: a user turn, or earlier context when it is a steer its run never read. */
+export const standaloneUserMessageToLangchain = (
+  event: ProcessedUserMessageEvent,
+  notices: AttachmentNoticeRenderer
+): HumanMessage =>
+  event.unread_steer
+    ? createUserMessage(
+        formatUnreadSteerNotice({ actor: event.actor, message: event.data.message })
+      )
+    : formatUserInput({ input: event.data, timestamp: event.created_at, notices });
+
 export const formatUserInput = ({
   input,
   timestamp,
@@ -300,7 +330,13 @@ export const formatUserInput = ({
     attachment_refs,
     attachment_events: inputEvents = [],
     author,
+    actor,
   } = input;
+
+  // An agent's message is a notice to the model, in the shape a running parent gets, never a user turn.
+  if (actor?.type === EventActorType.agent) {
+    return createUserMessage(formatBackgroundReportNotice({ agentId: actor.id, report: message }));
+  }
 
   let content = message;
 

@@ -14,6 +14,8 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
+import { registerSessionEventsRoutes } from './session_events';
+import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -51,27 +53,46 @@ const disabledContext = {
   core: Promise.resolve({ uiSettings: { client: { get: async () => false } } }),
 } as unknown as RequestHandlerContext;
 
+const routerCapturingRoutes = {
+  versioned: {
+    get: captureMethod('GET'),
+    post: captureMethod('POST'),
+    put: captureMethod('PUT'),
+    patch: captureMethod('PATCH'),
+    delete: captureMethod('DELETE'),
+  },
+} as unknown as IRouter;
+
 registerAiIndexRoutes({
-  router: {
-    versioned: {
-      get: captureMethod('GET'),
-      post: captureMethod('POST'),
-      put: captureMethod('PUT'),
-      patch: captureMethod('PATCH'),
-      delete: captureMethod('DELETE'),
-    },
-  } as unknown as IRouter,
+  router: routerCapturingRoutes,
   logger: loggerMock.create(),
   analyticsService: { reportKiWrite: jest.fn() } as never,
   getAiIndexService: jest.fn(),
   getAiIndexDataReadService: jest.fn(),
   getImprovementsService: jest.fn(),
-  getScheduleService: jest.fn(),
+  aiIndexChanges: { notify: jest.fn() },
   isMemoryEnabled: async () => false,
   getActions: jest.fn(),
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),
   getSpaces: jest.fn(),
+});
+
+registerSessionEventsRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionEventsService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+});
+
+registerSessionMemoryRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionMemoryService: jest.fn(),
+  getAiIndexService: jest.fn(),
+  isMemoryEnabled: async () => false,
+  logger: loggerMock.create(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -95,12 +116,25 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
     lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
   );
 
-describe('AI index route examples', () => {
+const codeSampleRequest = ({ lang, source }: CodeSample) => {
+  const match =
+    lang === 'curl'
+      ? /-X (\w+) "https:\/\/\$\{KIBANA_URL\}(\/[^"?]*)/.exec(source)
+      : /^(\w+) kbn:(\/[^\s?]*)/.exec(source);
+  return match ? `${match[1]} ${match[2]}` : undefined;
+};
+
+const routePattern = (route: string) =>
+  new RegExp(
+    `^${route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\\{[^}]+\\\}/g, '[^/]+')}$`
+  );
+
+describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(7);
+    expect(routesWithExamples).toHaveLength(10);
   });
 
-  describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {
+  describe.each(routesWithExamples)('$route', ({ route, validation, examples, handler }) => {
     const responseSchemas = validation.response ?? {};
     const declaredStatuses = Object.keys(responseSchemas).filter((key) => /^\d+$/.test(key));
 
@@ -140,6 +174,13 @@ describe('AI index route examples', () => {
         }
       );
     }
+
+    it.each(examples['x-codeSamples'] ?? [])(
+      '$lang code sample targets the route method and path',
+      (sample) => {
+        expect(codeSampleRequest(sample)).toMatch(routePattern(route));
+      }
+    );
 
     if (examples.requestBody) {
       const [[, requestExample]] = examplesOf(examples.requestBody);

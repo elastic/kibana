@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Distribution, HealthProfileName } from '../edot_shared/health_profiles';
+
+export { sample, type Distribution, type HealthProfileName } from '../edot_shared/health_profiles';
+
 export type WebVitalName = 'lcp' | 'inp' | 'cls' | 'fcp' | 'ttfb';
 export type WebVitalRating = 'good' | 'needs-improvement' | 'poor';
-export type HealthProfileName = 'healthy' | 'slow' | 'erroring' | 'critical';
-
-/** Log-normal distribution described by its median and the standard deviation of its log. */
-export interface Distribution {
-  median: number;
-  sigma: number;
-}
 
 export interface HealthProfile {
   name: HealthProfileName;
@@ -34,6 +31,10 @@ export interface HealthProfile {
   networkErrorRate: number;
   /** Probability of an uncaught JS exception per page view. */
   jsErrorRate: number;
+  /** Share of clicks that the user repeats in a burst, out of frustration. */
+  rageClickRate: number;
+  /** Share of clicks that don't fire a request and get no reaction from the page. */
+  deadClickRate: number;
 }
 
 // https://web.dev/articles/defining-core-web-vitals-thresholds, as used by the web-vitals library
@@ -53,16 +54,6 @@ export const getWebVitalRating = (name: WebVitalName, value: number): WebVitalRa
   return value > good ? 'needs-improvement' : 'good';
 };
 
-const gaussian = (random: () => number) => {
-  // Box-Muller transform; `1 - random()` avoids `log(0)`
-  return Math.sqrt(-2 * Math.log(1 - random())) * Math.cos(2 * Math.PI * random());
-};
-
-export const sample = (
-  { median, sigma }: Distribution,
-  random: () => number = Math.random
-): number => median * Math.exp(sigma * gaussian(random));
-
 export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>> = {
   healthy: {
     name: 'healthy',
@@ -77,6 +68,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.005,
     networkErrorRate: 0.001,
     jsErrorRate: 0.005,
+    rageClickRate: 0.01,
+    deadClickRate: 0.02,
   },
   slow: {
     name: 'slow',
@@ -91,6 +84,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.01,
     networkErrorRate: 0.003,
     jsErrorRate: 0.01,
+    rageClickRate: 0.05,
+    deadClickRate: 0.04,
   },
   erroring: {
     name: 'erroring',
@@ -105,6 +100,8 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.05,
     networkErrorRate: 0.02,
     jsErrorRate: 0.12,
+    rageClickRate: 0.04,
+    deadClickRate: 0.08,
   },
   critical: {
     name: 'critical',
@@ -119,5 +116,7 @@ export const HEALTH_PROFILES: Readonly<Record<HealthProfileName, HealthProfile>>
     httpFailureRate: 0.25,
     networkErrorRate: 0.05,
     jsErrorRate: 0.3,
+    rageClickRate: 0.1,
+    deadClickRate: 0.12,
   },
 };

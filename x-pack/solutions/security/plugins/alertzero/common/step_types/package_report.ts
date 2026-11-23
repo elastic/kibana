@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
@@ -14,13 +13,6 @@ import { MAX_HUNT_TECHNIQUE_IDS } from '../hunt_technique_limit';
 import { convergedProposalSchema, mintSuppressionSchema } from './resolve_proposals';
 
 export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
-
-/** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
-export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
-
-// Context Engine owns how an AI index id maps to a backing store, so ask it rather than
-// rebuilding the prefix here and drifting when it changes.
-export const HUNT_COVERAGE_AI_INDEX_DEST = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
 
 /**
  * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
@@ -75,10 +67,9 @@ export const packageReportInputSchema = lazySchema(() =>
      *
      * Optional, not required: this workflow is a plain `yaml` definition, so its own content
      * hash propagates to every space on the next reconciliation regardless of version, but the
-     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
-     * whose hash covers only the function source, not the imported YAML it renders -- an
-     * already-installed Worker only picks up the call site that supplies this field once its own
-     * `version` bumps. Making it required here would fail every such Worker's packaging call in
+     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition --
+     * an already-installed Worker only picks up the call site that supplies this field once it is
+     * re-rendered. Making it required here would fail every such Worker's packaging call in
      * the gap between the two. Omitting it instead skips the shortfall check below, which is the
      * same as not having this fix yet -- never a hard failure.
      */

@@ -38,6 +38,7 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isDetached, isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import type { StreamOwner } from './types';
 import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
@@ -54,6 +55,11 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
+  /**
+   * Called when the server rejects the request before any event arrives. Returning true means
+   * the caller dealt with it and no toast is shown.
+   */
+  onRejected?: (error: unknown) => boolean;
 }
 
 export interface SendMessageMutationBindings {
@@ -64,7 +70,7 @@ export interface SendMessageMutationBindings {
     attachments?: OptimisticAttachments
   ) => void;
   clearPendingMessage: (conversationId: string) => void;
-  clearActiveStream: (conversationId: string) => void;
+  clearActiveStream: (conversationId: string, streamId: string) => void;
   markStreamStarted: (conversationId: string) => void;
 }
 
@@ -157,7 +163,7 @@ export const useSendMessageMutation = ({
 
   const { mutate, isLoading } = useMutation({
     mutationKey: mutationKeys.sendMessage,
-    mutationFn: async (vars: SendMessageVars) => {
+    mutationFn: async (vars: SendMessageVars & StreamOwner) => {
       const streamActions = createConversationActions({
         conversationId: vars.conversationId,
         queryClient,
@@ -237,9 +243,13 @@ export const useSendMessageMutation = ({
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
         }).catch((error: unknown) => {
-          if (!streamEventArrived && isRequestRejectedError(error)) {
-            addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
+          if (streamEventArrived || !isRequestRejectedError(error)) {
+            return;
           }
+          if (vars.onRejected?.(error)) {
+            return;
+          }
+          addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
         });
 
         if (isDetached(handle)) {
@@ -248,7 +258,7 @@ export const useSendMessageMutation = ({
 
         // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
         vars.resetAttachments?.();
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         await releaseLocalContent({
           refetch: streamActions.refetchConversation,
           triggerEventId,
@@ -261,7 +271,7 @@ export const useSendMessageMutation = ({
             ),
         });
       } finally {
-        clearActiveStream(vars.conversationId);
+        clearActiveStream(vars.conversationId, vars.streamId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);
         }

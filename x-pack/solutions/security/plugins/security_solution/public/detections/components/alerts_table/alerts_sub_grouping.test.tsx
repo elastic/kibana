@@ -41,7 +41,7 @@ const mockedTelemetry = createTelemetryServiceMock();
       set: jest.fn(),
     },
     uiSettings: {
-      get: jest.fn(),
+      get: jest.fn((key: string) => (key === 'query:allowLeadingWildcards' ? true : undefined)),
     },
   },
 });
@@ -218,6 +218,50 @@ describe('GroupedSubLevelComponent', () => {
       expect(mockUseQueryAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           fetchMethod: fetchQueryUnifiedAlerts,
+        })
+      );
+    });
+  });
+
+  it('keeps a leading wildcard KQL filter in the grouping query', async () => {
+    render(
+      <TestProviders>
+        <GroupedSubLevelComponent
+          {...testProps}
+          globalQuery={{ query: 'kibana.alert.rule.name: *DGA*', language: 'kuery' }}
+        />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      const groupingQuery = mockUseQueryAlerts.mock.calls.find(([args]) => args?.query)?.[0]?.query;
+      expect(groupingQuery).toEqual(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                expect.objectContaining({
+                  bool: expect.objectContaining({
+                    filter: expect.arrayContaining([
+                      {
+                        bool: {
+                          minimum_should_match: 1,
+                          should: [
+                            {
+                              query_string: {
+                                fields: ['kibana.alert.rule.name'],
+                                query: '*DGA*',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    ]),
+                  }),
+                }),
+              ]),
+            }),
+          }),
         })
       );
     });

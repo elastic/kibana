@@ -95,7 +95,8 @@
     "@kbn/core-notifications-browser",
     "@kbn/cps-common",
     "@kbn/mock-idp-utils",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/shared-ux-label-formatter"
   ],
   "exclude": ["target/**/*"]
 }

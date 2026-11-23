@@ -51,9 +51,7 @@ test.describe(
         await expect(page.testSubj.locator('agentBuilderResponseMessage')).toContainText(
           MOCKED_RESPONSE
         );
-        await expect(page.testSubj.locator('agentBuilderConversationTitleButton')).toContainText(
-          MOCKED_TITLE
-        );
+        await expect(page.testSubj.locator('appHeaderTitle')).toContainText(MOCKED_TITLE);
         await expect(
           page.testSubj.locator(`agentBuilderSidebarConversation-${conversationId}`)
         ).toContainText(MOCKED_TITLE);
@@ -61,7 +59,7 @@ test.describe(
 
       const toolCallStep = page.testSubj.locator('agentBuilderToolCallStep');
       await expect(toolCallStep).toContainText('tool: platform.core.search', { timeout: 60_000 });
-      await expect(toolCallStep).toContainText('ran');
+      await expect(toolCallStep).not.toContainText(/\bran\b|running…/);
 
       await pageObjects.agentBuilder.clickNewConversationButton();
       await expect(async () => {

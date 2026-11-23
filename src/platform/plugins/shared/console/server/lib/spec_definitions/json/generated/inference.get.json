@@ -13,7 +13,9 @@
         "rerank",
         "completion",
         "chat_completion",
-        "embedding"
+        "embedding",
+        "document_extraction",
+        "decision"
       ]
     },
     "methods": [

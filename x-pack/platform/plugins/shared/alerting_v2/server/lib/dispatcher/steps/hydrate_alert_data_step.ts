@@ -17,7 +17,7 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
-import { parseDataJson } from './utils/parse_alert_data';
+import { parseAlertDataForMatching } from './utils/parse_alert_data';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawAlertData {
@@ -51,7 +51,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
 
     const responses = await Promise.all(
       getAlertDataQueries(alertIds, { gte, lte }).map((request) =>
-        this.queryService.executeQueryRows<RawAlertData>({
+        this.queryService.executeQuery<RawAlertData>({
           query: request.query,
           abortSignal: signal,
         })
@@ -77,7 +77,7 @@ export class HydrateAlertDataStep implements DispatcherStep {
     const hydratedTriage = triage.mapDispatchable((alert) => {
       const raw = dataByAlertId.get(alert.alert_id);
       if (raw == null) return alert;
-      return { ...alert, data: parseDataJson(raw) };
+      return { ...alert, data: parseAlertDataForMatching(raw) };
     });
 
     return { type: 'continue', data: { triage: hydratedTriage } };

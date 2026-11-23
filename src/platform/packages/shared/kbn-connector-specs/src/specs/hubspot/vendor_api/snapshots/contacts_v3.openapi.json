@@ -1,0 +1,703 @@
+{
+  "components": {
+    "responses": {
+      "Error": {
+        "content": {
+          "*/*": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "AssociatedId": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type"
+        ],
+        "type": "object"
+      },
+      "CollectionResponseAssociatedId": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/AssociatedId"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "CollectionResponseSimplePublicObjectWithAssociationsForwardPaging": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/ForwardPaging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SimplePublicObjectWithAssociations"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "type": "object"
+      },
+      "CollectionResponseWithTotalSimplePublicObject": {
+        "properties": {
+          "paging": {
+            "$ref": "#/components/schemas/Paging"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SimplePublicObject"
+            },
+            "type": "array"
+          },
+          "total": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "results",
+          "total"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "correlationId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": "array"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "correlationId",
+          "message"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "in": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "subCategory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      },
+      "Filter": {
+        "properties": {
+          "highValue": {
+            "type": "string"
+          },
+          "operator": {
+            "enum": [
+              "BETWEEN",
+              "CONTAINS_TOKEN",
+              "EQ",
+              "GT",
+              "GTE",
+              "HAS_PROPERTY",
+              "IN",
+              "LT",
+              "LTE",
+              "NEQ",
+              "NOT_CONTAINS_TOKEN",
+              "NOT_HAS_PROPERTY",
+              "NOT_IN"
+            ],
+            "type": "string"
+          },
+          "propertyName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "operator",
+          "propertyName"
+        ],
+        "type": "object"
+      },
+      "FilterGroup": {
+        "properties": {
+          "filters": {
+            "items": {
+              "$ref": "#/components/schemas/Filter"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "filters"
+        ],
+        "type": "object"
+      },
+      "ForwardPaging": {
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/NextPage"
+          }
+        },
+        "type": "object"
+      },
+      "NextPage": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "after"
+        ],
+        "type": "object"
+      },
+      "Paging": {
+        "properties": {
+          "next": {
+            "$ref": "#/components/schemas/NextPage"
+          },
+          "prev": {
+            "$ref": "#/components/schemas/PreviousPage"
+          }
+        },
+        "type": "object"
+      },
+      "PreviousPage": {
+        "properties": {
+          "before": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "before"
+        ],
+        "type": "object"
+      },
+      "PublicObjectSearchRequest": {
+        "properties": {
+          "after": {
+            "type": "string"
+          },
+          "filterGroups": {
+            "items": {
+              "$ref": "#/components/schemas/FilterGroup"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "properties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query": {
+            "type": "string"
+          },
+          "sorts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "after",
+          "filterGroups",
+          "limit",
+          "properties",
+          "sorts"
+        ],
+        "type": "object"
+      },
+      "PublicObjectWarning": {
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "context": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "category",
+          "context",
+          "message"
+        ],
+        "type": "object"
+      },
+      "SimplePublicObject": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "objectWriteTraceId": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "propertiesWithHistory": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ValueWithTimestamp"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/PublicObjectWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "archived",
+          "createdAt",
+          "id",
+          "properties",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "SimplePublicObjectWithAssociations": {
+        "properties": {
+          "archived": {
+            "type": "boolean"
+          },
+          "archivedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "associations": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CollectionResponseAssociatedId"
+            },
+            "type": "object"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "objectWriteTraceId": {
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "propertiesWithHistory": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/ValueWithTimestamp"
+              },
+              "type": "array"
+            },
+            "type": "object"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/PublicObjectWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "archived",
+          "createdAt",
+          "id",
+          "properties",
+          "updatedAt"
+        ],
+        "type": "object"
+      },
+      "ValueWithTimestamp": {
+        "properties": {
+          "sourceId": {
+            "type": "string"
+          },
+          "sourceLabel": {
+            "type": "string"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedByUserId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sourceType",
+          "timestamp",
+          "value"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Contacts"
+  },
+  "openapi": "3.0.1",
+  "paths": {
+    "/crm/v3/objects/contacts": {
+      "get": {
+        "operationId": "get-/crm/v3/objects/contacts_getPage",
+        "parameters": [
+          {
+            "explode": true,
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "associations",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "format": "int32",
+              "type": "integer"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "properties",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "propertiesWithHistory",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponseSimplePublicObjectWithAssociationsForwardPaging"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/crm/v3/objects/contacts/search": {
+      "post": {
+        "operationId": "post-/crm/v3/objects/contacts/search_doSearch",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicObjectSearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionResponseWithTotalSimplePublicObject"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    },
+    "/crm/v3/objects/contacts/{contactId}": {
+      "get": {
+        "operationId": "get-/crm/v3/objects/contacts/{contactId}_getById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contactId",
+            "required": true,
+            "schema": {
+              "pattern": ".+",
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "associations",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "idProperty",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "properties",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "propertiesWithHistory",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimplePublicObjectWithAssociations"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Error"
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.hubapi.com"
+    }
+  ]
+}

@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { LiveStateSlotRenderProps } from '@kbn/agentic-investigations-common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
+import { GradientLabel } from '../gradient_label';
+import { InvestigatingTypingDots } from '../investigating_typing_dots';
 import { RUNNING_LABEL } from '../translations';
 
 /**
@@ -29,12 +31,10 @@ export const InvestigationLiveState: React.FC<LiveStateSlotRenderProps> = ({ con
             data-test-subj="investigationRunningState"
           >
             <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="s" />
+              <GradientLabel>{RUNNING_LABEL}</GradientLabel>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {RUNNING_LABEL}
-              </EuiText>
+              <InvestigatingTypingDots />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

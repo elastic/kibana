@@ -87,7 +87,7 @@ export interface MaxLengthBrand {
 }
 
 /** A non-empty string the list API accepts, at most `maxLength` long. */
-const filterValueRt = (maxLength: number) =>
+export const filterValueRt = (maxLength: number) =>
   t.brand(
     nonEmptyStringRt,
     (value): value is t.Branded<NonEmptyString, MaxLengthBrand> => value.length <= maxLength,
@@ -123,7 +123,8 @@ export const sessionsListQueryRt = t.partial({
   os: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.os),
   country: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.country),
   entryPage: filterValueRt(SESSIONS_LIST_MAX_FACET_LENGTHS.entryPage),
-  hasErrors: booleanParamRt,
+  withJsErrors: booleanParamRt,
+  withFailedRequests: booleanParamRt,
   duration: durationBucketRt,
   sortField: sortFieldRt,
   sortDirection: t.keyof({ asc: null, desc: null }),
@@ -139,7 +140,8 @@ const SESSIONS_LIST_QUERY_KEYS = [
   'os',
   'country',
   'entryPage',
-  'hasErrors',
+  'withJsErrors',
+  'withFailedRequests',
   'duration',
   'sortField',
   'sortDirection',

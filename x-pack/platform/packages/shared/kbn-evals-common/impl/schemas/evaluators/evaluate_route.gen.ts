@@ -61,11 +61,150 @@ export type EvaluateResultScore = z.infer<typeof EvaluateResultScore>;
 
 export const EvaluateResultError = lazySchema(() =>
   z.object({
-    code: z.literal('evidence_unmet').optional(),
+    /**
+     * `evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.
+     */
+    code: z
+      .enum(['evidence_unmet', 'not_applicable'])
+      .optional()
+      .describe(
+        '`evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.'
+      ),
     message: z.string().max(8192),
   })
 );
 export type EvaluateResultError = z.infer<typeof EvaluateResultError>;
+
+export const EvaluateResultUsageCall = lazySchema(() =>
+  z.object({
+    status: z.enum(['ok', 'error']),
+    /**
+     * Model the provider reported serving the call, when it did.
+     */
+    model: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Model the provider reported serving the call, when it did.'),
+    /**
+     * Input tokens, including cached ones. Absent when no usage was reported.
+     */
+    input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Input tokens, including cached ones. Absent when no usage was reported.'),
+    /**
+     * Input tokens served from the prompt cache, when reported.
+     */
+    cached_input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Input tokens served from the prompt cache, when reported.'),
+    /**
+     * Output tokens, including reasoning ones. Absent when no usage was reported.
+     */
+    output_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Output tokens, including reasoning ones. Absent when no usage was reported.'),
+    /**
+     * Reasoning tokens, when reported.
+     */
+    reasoning_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Reasoning tokens, when reported.'),
+    error: z
+      .object({
+        /**
+         * The inference client's error code, such as `providerError` or `requestError`, when the error carries one.
+         */
+        code: z
+          .string()
+          .max(64)
+          .optional()
+          .describe(
+            "The inference client's error code, such as `providerError` or `requestError`, when the error carries one."
+          ),
+        message: z.string().max(8192),
+      })
+      .optional(),
+  })
+);
+export type EvaluateResultUsageCall = z.infer<typeof EvaluateResultUsageCall>;
+
+/**
+ * Tokens used by the evaluator's model calls, summed over every call it made. A call the inference client retried counts once, with the tokens of its final attempt, so tokens spent by the retried attempts aren't counted; a call that failed counts once with no tokens. Absent when the evaluator made no model call. Named like Agent Builder's round usage, so the two can be summed.
+ */
+export const EvaluateResultUsage = lazySchema(() =>
+  z.object({
+    /**
+     * Input tokens, including tokens served from the prompt cache.
+     */
+    input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .describe('Input tokens, including tokens served from the prompt cache.'),
+    /**
+     * Input tokens served from the prompt cache (part of `input_tokens`), when reported.
+     */
+    cached_input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Input tokens served from the prompt cache (part of `input_tokens`), when reported.'
+      ),
+    /**
+     * Output tokens, including reasoning tokens.
+     */
+    output_tokens: z.number().int().min(0).describe('Output tokens, including reasoning tokens.'),
+    /**
+     * Reasoning tokens (part of `output_tokens`), when reported.
+     */
+    reasoning_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Reasoning tokens (part of `output_tokens`), when reported.'),
+    /**
+     * Model calls the evaluator attempted, including calls that failed before reaching a model.
+     */
+    llm_calls: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Model calls the evaluator attempted, including calls that failed before reaching a model.'
+      ),
+    /**
+     * Calls with no token counts in the totals: the call failed, or the provider reported no usage.
+     */
+    llm_calls_without_usage: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Calls with no token counts in the totals: the call failed, or the provider reported no usage.'
+      ),
+    /**
+     * Each model call, in the order it finished.
+     */
+    calls: z.array(EvaluateResultUsageCall).describe('Each model call, in the order it finished.'),
+  })
+);
+export type EvaluateResultUsage = z.infer<typeof EvaluateResultUsage>;
 
 export const EvaluateResult = lazySchema(() =>
   z.object({
@@ -73,6 +212,7 @@ export const EvaluateResult = lazySchema(() =>
     evaluator: EvaluateResultEvaluator,
     scores: z.array(EvaluateResultScore).optional(),
     error: EvaluateResultError.optional(),
+    usage: EvaluateResultUsage.optional(),
   })
 );
 export type EvaluateResult = z.infer<typeof EvaluateResult>;

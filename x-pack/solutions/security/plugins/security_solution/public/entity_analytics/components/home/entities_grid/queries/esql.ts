@@ -11,8 +11,6 @@ import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
-import { lastValueFrom } from 'rxjs';
 import { chunk } from 'lodash';
 import pMap from 'p-map';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
@@ -26,7 +24,9 @@ import {
   RISK_SCORE_NORM_FIELD,
   getEntityId,
 } from '../common';
-import type { QueryArgs, Row, SortDir, SortValue, TimeRange } from '../common';
+import type { QueryArgs, Row, SortDir, SortValue } from '../common';
+import { runEsqlQuery } from '../../queries/run_esql_query';
+import type { EsqlContext } from '../../queries/run_esql_query';
 import type { EsqlRunner } from './types';
 
 export const getEntityAlias = (namespace: string) => getEntitiesAlias(ENTITY_LATEST, namespace);
@@ -40,8 +40,6 @@ export const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_t
 
 /** The entity's own score docs: resolution docs hold its group score; untyped older docs are its own. */
 export const OWN_RISK_SCORE_CONDITION = `(${RISK_SCORE_TYPE} IS NULL OR ${RISK_SCORE_TYPE} != "resolution")`;
-
-export const ML_ANOMALY_INDICES = '.ml-anomalies-shared*';
 
 export const ANOMALY_RECORD_FILTER =
   'result_type == "record" AND is_interim == false AND record_score >= 1';
@@ -152,11 +150,6 @@ export const joinAnd = (...parts: Array<string | undefined | null | false>): str
 export const buildLookupJoinClause = (concreteEntityIndexName: string): string =>
   `| LOOKUP JOIN ${concreteEntityIndexName} ON \`entity.id\``;
 
-const TIME_RANGE_DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
-
-/** One date-math start shared by every grid and tile query, so they agree; ES|QL still pushes it down. */
-export const buildLookback = (range: TimeRange): string => `NOW() - ${TIME_RANGE_DAYS[range]} days`;
-
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
 export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [
   `| SORT ${field} ${direction.toUpperCase()} NULLS LAST, ${ENTITY_ID_FIELD} ASC`,
@@ -203,35 +196,18 @@ export const buildEntityAggregations = (
 export const buildStatsByEntityClause = (aggregations: readonly string[]): string =>
   `| STATS ${aggregations.length ? `${aggregations.join(', ')} ` : ''}BY \`entity.id\``;
 
-export const indentForkBranch = (esql: string): string =>
-  esql
-    .split('\n')
-    .map((line) => `    ${line}`)
-    .join('\n');
-
 const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
-/** Pin ES|QL to the current project; CPS space default is often `_alias:*`. */
-const ESQL_PROJECT_ROUTING = '_alias:_origin' as const;
-
 export const createEsqlRunner =
-  (searchService: DataPublicPluginStart['search'], signal?: AbortSignal): EsqlRunner =>
+  (
+    searchService: DataPublicPluginStart['search'],
+    context: EsqlContext,
+    signal?: AbortSignal
+  ): EsqlRunner =>
   async (steps) => {
     const query = steps.join('\n');
-    const { rawResponse } = await lastValueFrom(
-      searchService.search<
-        IKibanaSearchRequest<{ query: string }>,
-        IKibanaSearchResponse<ESQLSearchResponse>
-      >(
-        { params: { query } },
-        {
-          abortSignal: signal,
-          strategy: 'esql_async',
-          projectRouting: ESQL_PROJECT_ROUTING,
-        }
-      )
-    );
+    const rawResponse = await runEsqlQuery(searchService, query, context, signal);
     return toRows(rawResponse);
   };
 

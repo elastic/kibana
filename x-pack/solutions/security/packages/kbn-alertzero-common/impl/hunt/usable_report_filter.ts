@@ -13,8 +13,8 @@ import type { estypes } from '@elastic/elasticsearch';
  * Hunt-usable: supply finished the report. `lineage.extraction_method` is present
  * and not `pending` (enrich still owes work), with title or body text and
  * `severity.level`. It is a denylist on `pending` and on gate rejections
- * (`workflow_v4_rejected`, `extracted.gate.is_intelligence: false`), so
- * `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
+ * (`REJECTED_EXTRACTION_METHODS`, `extracted.gate.is_intelligence: false`), so
+ * `enrich_workflow`, the legacy `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
  * value count; a missing `extraction_method` does not.
  *
  * Consumers: the threat intel find route, the readiness route, and the AlertZero
@@ -26,6 +26,19 @@ import type { estypes } from '@elastic/elasticsearch';
  *
  * Future work: a CVE-to-environment vuln hunt.
  */
+
+/**
+ * `lineage.extraction_method` values that mark a report rejected: the current,
+ * version-independent value and the legacy one already stored on existing reports.
+ * The enrich workflow YAML lists the same values; keep them in sync.
+ */
+export const REJECTED_EXTRACTION_METHODS = [
+  'enrich_workflow_rejected',
+  'workflow_v4_rejected',
+] as const;
+/** True when an extraction method marks the report rejected. */
+export const isRejectedExtractionMethod = (method: string | undefined): boolean =>
+  REJECTED_EXTRACTION_METHODS.some((rejected) => rejected === method);
 
 /** Hunt-usable bar; see the contract comment at the top of this file. */
 export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
@@ -45,7 +58,7 @@ export const HUNT_USABLE_FILTER: estypes.QueryDslQueryContainer = {
     ],
     must_not: [
       { term: { 'lineage.extraction_method': 'pending' } },
-      { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+      { terms: { 'lineage.extraction_method': [...REJECTED_EXTRACTION_METHODS] } },
       { term: { 'extracted.gate.is_intelligence': false } },
     ],
   },

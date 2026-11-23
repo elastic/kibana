@@ -120,6 +120,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    */
   if (options.createPlatformFolders) {
     await globalRun(Tasks.CreateArchivesSources);
+    await globalRun(Tasks.BundleProductDocArtifacts);
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);

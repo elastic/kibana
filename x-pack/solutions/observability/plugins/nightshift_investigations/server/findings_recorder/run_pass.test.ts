@@ -118,6 +118,40 @@ describe('runFindingsPass', () => {
     expect(Object.keys(call.tools)).toContain('structuredOutput');
   });
 
+  it('reports the usage of a pass as a findings_recorder background activity', async () => {
+    const { deps, memory } = setup();
+    const telemetry = { reportBackgroundActivity: jest.fn() };
+    const model = await jest.mocked(createOptimizeModel)({} as never);
+    jest.mocked(createOptimizeModel).mockImplementation(async ({ modelUsage }) => {
+      modelUsage?.addModelProvider(() => ({
+        calls: [
+          {
+            connectorId: 'eis-claude',
+            model: 'claude-sonnet',
+            tokens: { prompt: 100, completion: 10, total: 110 },
+          },
+        ],
+      }));
+      return model;
+    });
+
+    await run({ ...deps, telemetry: telemetry as never }, memory);
+
+    expect(telemetry.reportBackgroundActivity).toHaveBeenCalledWith({
+      activity: 'findings_recorder',
+      outcome: 'success',
+      conversation_id: 'c1',
+      duration_ms: expect.any(Number),
+      connector_id: 'eis-claude',
+      model: 'claude-sonnet',
+      llm_calls: 1,
+      input_tokens: 100,
+      output_tokens: 10,
+      cached_input_tokens: 0,
+      reasoning_tokens: 0,
+    });
+  });
+
   it('tells the recorder a user changed the severity, and does not write one', async () => {
     const { deps, patchMetadata, chatComplete, memory } = setup({
       events: [
@@ -960,6 +994,7 @@ describe('runFindingsPass with workspace files', () => {
       expect(prompt).toContain('noun phrase of at most eight words');
       expect(prompt).toContain('**Tested:**');
       expect(prompt).toContain('**Result:**');
+      expect(prompt).toContain('**Settled by:**');
       expect(prompt).toContain('never "I checked..."');
     }
     expect(final).toContain('At most 70 words of Markdown');
