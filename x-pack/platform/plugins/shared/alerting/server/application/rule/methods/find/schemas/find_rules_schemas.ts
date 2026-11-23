@@ -40,4 +40,5 @@ export const findRulesParamsSchema = schema.object({
   options: schema.maybe(findRulesOptionsSchema),
   excludeFromPublicApi: schema.maybe(schema.boolean()),
   includeSnoozeData: schema.maybe(schema.boolean()),
+  allowPartialResults: schema.maybe(schema.boolean()),
 });
