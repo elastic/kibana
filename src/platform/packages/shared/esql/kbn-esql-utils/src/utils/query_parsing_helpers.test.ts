@@ -249,6 +249,14 @@ describe('esql query helpers', () => {
         )
       ).toBe('event.ingested');
     });
+
+    it('should ignore the time field used inside a LET the query does not read', () => {
+      expect(
+        parseTimeFieldFromESQLQuery(
+          'LET unused = (FROM logs | WHERE event.ingested >= ?_tstart); FROM metrics'
+        )
+      ).toBeUndefined();
+    });
   });
 
   describe('getKqlSearchQueries', () => {

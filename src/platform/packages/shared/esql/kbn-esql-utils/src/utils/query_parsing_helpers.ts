@@ -19,7 +19,9 @@ import {
 import {
   CommandNames,
   esqlCommandRegistry,
+  getNamedSubqueries,
   getPromqlBracketsToClose,
+  getReferencedNamedSubqueries,
   TRANSFORMATIONAL_COMMANDS,
 } from '@kbn/esql-language';
 import type { PromQLLabel } from '@elastic/esql';
@@ -237,9 +239,14 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
  */
 export const parseTimeFieldFromESQLQuery = (esql: string) => {
   const { root } = Parser.parse(esql);
+  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
+  const namedSubqueries = sourceCommand
+    ? getReferencedNamedSubqueries(sourceCommand, getNamedSubqueries(root.header))
+    : [];
+  const commands = [...root.commands, ...namedSubqueries.flatMap(({ query }) => query.commands)];
   const functions: ESQLFunction[] = [];
 
-  walk([...(root.header ?? []), ...root.commands], {
+  walk(commands, {
     visitFunction: (node) => functions.push(node),
   });
 
@@ -248,7 +255,7 @@ export const parseTimeFieldFromESQLQuery = (esql: string) => {
     ? '@timestamp'
     : undefined;
 
-  const params = Walker.params(root);
+  const params = Walker.params(commands);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
