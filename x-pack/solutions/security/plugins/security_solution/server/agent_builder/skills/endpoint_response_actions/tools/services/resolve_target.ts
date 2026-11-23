@@ -14,10 +14,10 @@ import type { EndpointCandidate, EndpointLookupService, ResolvedEndpoint } from 
 export type DispatchActionName = 'isolate' | 'unisolate' | 'scan' | 'running-processes';
 
 /**
- * Target fields shared by every dispatching tool. Both are optional on their
- * own and {@link requireHostTarget} enforces that at least one is present, so
- * the `ambiguous_hostname` instruction ("identify the target by agent ID and
- * retry") is something the schema can actually carry out.
+ * Target fields shared by every dispatching tool. Each is optional on its own
+ * and {@link requireHostTarget} enforces that at least one is present, so the
+ * `ambiguous_hostname` / `ambiguous_ip` instruction ("identify the target by
+ * agent ID and retry") is something the schema can actually carry out.
  */
 export const hostTargetFields = (hostNameDescription: string) => ({
   hostName: z
@@ -39,7 +39,7 @@ export const hostTargetFields = (hostNameDescription: string) => ({
     .max(MAX_AGENT_ID_LENGTH)
     .optional()
     .describe(
-      'The endpoint/agent ID. Use it to select one specific host when several share the hostname (an `ambiguous_hostname` result lists the candidate IDs). Takes precedence over hostName.'
+      'The endpoint/agent ID. Use it to select one specific host when several share the hostname (an `ambiguous_hostname` or `ambiguous_ip` result lists the candidate IDs). Takes precedence over hostName and ip; if ip is also given it must belong to this agent, otherwise the call is refused as invalid_argument.'
     ),
 });
 
@@ -200,7 +200,9 @@ export async function resolveDispatchTarget(
           ...(resolved.truncated
             ? { truncated: true as const, totalCandidates: resolved.totalCandidates }
             : {}),
-          message: `Multiple endpoints use the IP address "${ip}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
+          message: resolved.truncated
+            ? `More endpoints use the IP address "${ip}" than could be examined, so it cannot be resolved to a single host. Ask the analyst to identify the target by agent ID, then call this tool again with that agentId.`
+            : `Multiple endpoints use the IP address "${ip}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
         },
       };
     }

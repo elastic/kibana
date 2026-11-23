@@ -23,6 +23,13 @@ export interface PendingConfirmation {
   tool_call_id?: string;
 }
 
+const toolIdOfCall = (steps: unknown[], toolCallId: string): string | undefined => {
+  const step = steps.find(
+    (candidate) => isRecord(candidate) && candidate.tool_call_id === toolCallId
+  );
+  return isRecord(step) && typeof step.tool_id === 'string' ? step.tool_id : undefined;
+};
+
 /**
  * Which tool calls the round paused on, taken from the confirmation prompt ids.
  *
@@ -32,13 +39,6 @@ export interface PendingConfirmation {
  * wording. The model's own contribution (tool id and arguments) stays in
  * `steps`, and `messages` carries only what the model said.
  */
-const toolIdOfCall = (steps: unknown[], toolCallId: string): string | undefined => {
-  const step = steps.find(
-    (candidate) => isRecord(candidate) && candidate.tool_call_id === toolCallId
-  );
-  return isRecord(step) && typeof step.tool_id === 'string' ? step.tool_id : undefined;
-};
-
 const toPendingConfirmations = (prompts: unknown[], steps: unknown[]): PendingConfirmation[] =>
   prompts.flatMap((prompt) => {
     const id = isRecord(prompt) && typeof prompt.id === 'string' ? prompt.id : '';

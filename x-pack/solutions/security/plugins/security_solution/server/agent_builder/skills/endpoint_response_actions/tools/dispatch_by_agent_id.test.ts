@@ -731,6 +731,7 @@ describe.each(CASES)(
         expect(mockAskForConfirmation).not.toHaveBeenCalled();
 
         // An approval on file for that id must not authorise the call either.
+        confirmationStatus.value = 'accepted';
         const out = results(
           await tool.handler({ agentId: 'agent-b', ...extraParams }, unidentified)
         );

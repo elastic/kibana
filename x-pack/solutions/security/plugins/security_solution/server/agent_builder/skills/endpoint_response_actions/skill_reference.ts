@@ -52,7 +52,7 @@ When a counter shows dropped items, say that only a sample is shown and give the
 ## Best Practices
 
 - When the analyst asks which hosts are available, call \`list_endpoints\` first.
-- Call \`isolate_host\` / \`unisolate_host\` directly: they resolve the hostname themselves and return \`endpoint_not_found\` or \`ambiguous_hostname\` rather than guessing, so no \`get_endpoint_status\` pre-check is needed. Use \`get_endpoint_status\` when the analyst asks for the current state.
+- Call \`isolate_host\` / \`unisolate_host\` directly: they resolve a hostname or exact IP themselves and return \`endpoint_not_found\`, \`ambiguous_hostname\` or \`ambiguous_ip\` rather than guessing, so no \`get_endpoint_status\` pre-check is needed. Use \`get_endpoint_status\` when the analyst asks for the current state.
 - Always surface the action ID from write tools when one is returned — it is the audit anchor in Response Actions history. If a write tool reports \`status: pending\` with no outcome, the action was still dispatched: report its ID and check it with \`get_response_action_status\`; never re-issue it. A no-op result (\`noOp: true\`) or a declined confirmation has no action ID because nothing was dispatched.
 - For follow-up on a prior action ("what happened to scan X?"), use \`get_response_action_status\` with the action ID.
 - For this skill's status and response action lookups, use \`list_endpoints\`, \`get_endpoint_status\`, and \`get_response_action_status\` instead of \`platform.core.search\` or raw Elasticsearch queries. Other skills' diagnostic queries are unaffected.

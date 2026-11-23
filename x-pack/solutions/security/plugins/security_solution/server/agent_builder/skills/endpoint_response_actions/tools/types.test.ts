@@ -346,7 +346,7 @@ describe('formatHostForConfirmationCard', () => {
     expect(formatHostForConfirmationCard('db.example.internal')).toBe('db.example.internal');
   });
 
-  it('keeps characters that are legal in a hostname and harmless in Markdown', () => {
+  it('keeps hyphens and dots, and escapes underscores, in a hostname', () => {
     // An underscore only opens emphasis around word boundaries in CommonMark,
     // but it is escaped rather than reasoned about: the label must not depend
     // on the renderer's emphasis rules.
