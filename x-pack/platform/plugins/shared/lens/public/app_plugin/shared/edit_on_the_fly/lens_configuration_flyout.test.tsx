@@ -342,6 +342,18 @@ describe('LensEditConfigurationFlyout', () => {
       });
     });
 
+    it('does not count layers outside the form-based state as unavailable', async () => {
+      // The mock visualization reports `layer1`, but this form-based state has no such layer.
+      await renderConfigFlyout({
+        displayFlyoutHeader: true,
+        coreStart: createCoreStart({ isEsqlEnabled: true }),
+      });
+      await userEvent.click(screen.getByTestId('lnsEsqlOptionsButton'));
+
+      expect(screen.getByTestId('lnsEsqlOptionsUseEsqlSwitch')).toBeEnabled();
+      expect(screen.queryByTestId('lnsEsqlOptionsUnavailableReason')).not.toBeInTheDocument();
+    });
+
     it('hides the convert action while the conversion feature flag is off', async () => {
       await renderConfigFlyout({
         displayFlyoutHeader: true,

@@ -61,8 +61,11 @@ export const useEsqlOptions = ({
       return { isAvailable: true };
     }
 
-    // Reference lines and annotations are not fetched with an aggregation query.
+    // Only layers of this datasource are checked, and reference lines and annotations are not
+    // fetched with an aggregation query.
     const fetchedLayerIds = layerIds.filter((layerId) => {
+      if (!formBasedState.layers[layerId]) return false;
+
       const layerType =
         activeVisualization.getLayerType(layerId, visualization.state) ?? LENS_LAYER_TYPES.DATA;
       return layerType === LENS_LAYER_TYPES.DATA || layerType === LENS_LAYER_TYPES.METRIC_TRENDLINE;
