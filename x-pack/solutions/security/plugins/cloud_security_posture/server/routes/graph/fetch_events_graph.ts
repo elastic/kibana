@@ -12,6 +12,7 @@ import {
   DOCUMENT_TYPE_EVENT,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_PATTERN_REGEX } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 
@@ -43,8 +44,12 @@ import { buildIntegrationRuntimeEvals } from './runtime_evaluations';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
+  /** Origins matched on `event.id` */
   originEventIds: OriginEventId[];
   originAlertIds: OriginEventId[];
+  /** Origins matched on the document `_id` (source documents without `event.id`) */
+  originDocIds: OriginEventId[];
+  originDocAlertIds: OriginEventId[];
   alertsMappingsIncluded: boolean;
   pinnedIds?: string[];
   integrationRuntimeEvalsEnabled?: boolean;
@@ -87,7 +92,10 @@ export const fetchEvents = async ({
   projectRouting?: ProjectRouting;
   integrationRuntimeEvalsEnabled?: boolean;
 }): Promise<EsqlToRecords<EventEsqlRow>> => {
-  const originAlertIds = originEventIds.filter((originEventId) => originEventId.isAlert);
+  const eventOrigins = originEventIds.filter(({ idType }) => idType !== 'doc');
+  const docOrigins = originEventIds.filter(({ idType }) => idType === 'doc');
+  const originAlertIds = eventOrigins.filter((originEventId) => originEventId.isAlert);
+  const originDocAlertIds = docOrigins.filter((originEventId) => originEventId.isAlert);
 
   // FROM clause currently doesn't support parameters, Therefore, we validate the index patterns to prevent injection attacks.
   // Regex to match invalid characters in index patterns: upper case characters, \, /, ?, ", <, >, |, (space), #, or ,
@@ -104,7 +112,8 @@ export const fetchEvents = async ({
   );
 
   const filter = buildDslFilter(
-    originEventIds.map((originEventId) => originEventId.id),
+    eventOrigins.map((originEventId) => originEventId.id),
+    docOrigins.map((originEventId) => originEventId.id),
     showUnknownTarget,
     start,
     end,
@@ -112,15 +121,21 @@ export const fetchEvents = async ({
   );
 
   const params = [
-    ...originEventIds.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
+    ...eventOrigins.map((originEventId, idx) => ({ [`og_id${idx}`]: originEventId.id })),
     ...originAlertIds.map((originEventId, idx) => ({ [`og_alrt_id${idx}`]: originEventId.id })),
+    ...docOrigins.map((originEventId, idx) => ({ [`og_doc_id${idx}`]: originEventId.id })),
+    ...originDocAlertIds.map((originEventId, idx) => ({
+      [`og_doc_alrt_id${idx}`]: originEventId.id,
+    })),
     ...(pinnedIds ?? []).map((id, idx) => ({ [`pinned_id${idx}`]: id })),
   ];
 
   const query = buildEsqlQuery({
     indexPatterns,
-    originEventIds,
+    originEventIds: eventOrigins,
     originAlertIds,
+    originDocIds: docOrigins,
+    originDocAlertIds,
     alertsMappingsIncluded,
     pinnedIds,
     integrationRuntimeEvalsEnabled,
@@ -144,11 +159,12 @@ export const fetchEvents = async ({
 
 const buildDslFilter = (
   eventIds: string[],
+  docIds: string[],
   showUnknownTarget: boolean,
   start: string | number,
   end: string | number,
   esQuery?: EsQuery
-) => ({
+): QueryDslQueryContainer => ({
   bool: {
     filter: [
       {
@@ -178,6 +194,7 @@ const buildDslFilter = (
                   },
                 ]
               : []),
+            ...(docIds.length > 0 ? [{ terms: { _id: docIds } }] : []),
           ],
           minimum_should_match: 1,
         },
@@ -397,10 +414,38 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
+/**
+ * Builds the ES|QL condition matching origin documents by `event.id` and/or by `_id`.
+ * `_id` is never null, so unlike `event.id` it needs no COALESCE guard.
+ */
+const buildOriginMatchEsql = (
+  eventIdOrigins: OriginEventId[],
+  eventIdParamPrefix: string,
+  docIdOrigins: OriginEventId[],
+  docIdParamPrefix: string
+): string => {
+  const conditions = [
+    ...(eventIdOrigins.length > 0
+      ? [
+          `COALESCE(event.id, "") in (${eventIdOrigins
+            .map((_origin, idx) => `?${eventIdParamPrefix}${idx}`)
+            .join(', ')})`,
+        ]
+      : []),
+    ...(docIdOrigins.length > 0
+      ? [`_id in (${docIdOrigins.map((_origin, idx) => `?${docIdParamPrefix}${idx}`).join(', ')})`]
+      : []),
+  ];
+
+  return conditions.length > 0 ? conditions.join(' OR ') : 'false';
+};
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
   originAlertIds,
+  originDocIds,
+  originDocAlertIds,
   alertsMappingsIncluded,
   pinnedIds,
   integrationRuntimeEvalsEnabled,
@@ -471,16 +516,15 @@ ${buildPinnedEsql(['_id', 'actorEntityId', 'targetEntityId'], pinnedIds)}
 // COALESCE the nullable event.id to "" *before* IN (rather than guarding with CASE/AND):
 // origin IDs are always non-empty, so "" never matches, and this keeps a nullable input out
 // of IN/AND, which trips an ES|QL PropagateNullable planner NPE (elastic/elasticsearch#141579).
-| EVAL isOrigin = ${
-    originEventIds.length > 0
-      ? `COALESCE(event.id, "") in (${originEventIds.map((_id, idx) => `?og_id${idx}`).join(', ')})`
-      : 'false'
-  }
+| EVAL isOrigin = ${buildOriginMatchEsql(originEventIds, 'og_id', originDocIds, 'og_doc_id')}
 | EVAL isOriginAlert = ${
-    originAlertIds.length > 0
-      ? `isOrigin AND COALESCE(event.id, "") in (${originAlertIds
-          .map((_id, idx) => `?og_alrt_id${idx}`)
-          .join(', ')})`
+    originAlertIds.length > 0 || originDocAlertIds.length > 0
+      ? `isOrigin AND (${buildOriginMatchEsql(
+          originAlertIds,
+          'og_alrt_id',
+          originDocAlertIds,
+          'og_doc_alrt_id'
+        )})`
       : 'false'
   }
 | EVAL isAlert = _index LIKE "*${SECURITY_ALERTS_PARTIAL_IDENTIFIER}*"

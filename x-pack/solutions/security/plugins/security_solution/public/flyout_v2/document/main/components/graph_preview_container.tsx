@@ -13,7 +13,7 @@ import {
   GraphPreviewPanel,
   type GraphPreviewPanelProps,
 } from '../../../shared/components/graph_preview_panel';
-import { useGraphPreview } from '../hooks/use_graph_preview';
+import { toOriginEventIds, useGraphPreview } from '../hooks/use_graph_preview';
 import { EventKind } from '../constants/event_kinds';
 
 export interface GraphPreviewContainerProps
@@ -23,7 +23,7 @@ export interface GraphPreviewContainerProps
 
 export const GraphPreviewContainer = memo(
   ({ hit, onShowGraph, showIcon }: GraphPreviewContainerProps) => {
-    const { eventIds, timestamp, shouldShowGraph } = useGraphPreview({ hit });
+    const { originIds, timestamp, shouldShowGraph } = useGraphPreview({ hit });
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -33,7 +33,7 @@ export const GraphPreviewContainer = memo(
     const { isLoading, isError, data } = useFetchGraphData({
       req: {
         query: {
-          originEventIds: eventIds.map((id) => ({ id, isAlert })),
+          originEventIds: toOriginEventIds(originIds, isAlert),
           start: `${anchor}||-30m`,
           end: `${anchor}||+30m`,
         },

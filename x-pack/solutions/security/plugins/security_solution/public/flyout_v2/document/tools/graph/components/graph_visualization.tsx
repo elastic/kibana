@@ -38,6 +38,7 @@ import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/scope_time_ranges';
+import { toOriginEventIds, type GraphOriginId } from '../../../main/hooks/use_graph_preview';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -99,8 +100,8 @@ interface EventGraphVisualizationProps extends GraphNodeCallbacks {
    * scope, so restored previews still reach the graph after a reload.
    */
   graphScopeId?: string;
-  /** Event/alert document IDs that are the origin of the graph */
-  eventIds: string[];
+  /** Event/alert identifiers that are the origin of the graph */
+  originIds: GraphOriginId[];
   /** Timestamp of the source event/alert */
   timestamp: string;
   /** Whether the source document is an alert */
@@ -287,7 +288,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
               props.mode === 'event'
                 ? {
                     dataView,
-                    originEventIds: props.eventIds.map((id) => ({ id, isAlert: props.isAlert })),
+                    originEventIds: toOriginEventIds(props.originIds, props.isAlert),
                     timeRange: {
                       from: `${props.timestamp}||-30m`,
                       to: `${props.timestamp}||+30m`,

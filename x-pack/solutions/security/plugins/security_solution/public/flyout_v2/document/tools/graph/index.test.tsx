@@ -14,12 +14,12 @@ import { noopCellActionRenderer } from '../../../shared/components/cell_actions'
 import { GRAPH_TOOLS_TEST_ID, GraphDetails } from '.';
 
 jest.mock('./components/graph_visualization', () => ({
-  GraphVisualization: jest.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
+  GraphVisualization: jest.fn(({ mode, scopeId, originIds, timestamp, isAlert }) => (
     <div
       data-test-subj="mockGraphVisualization"
       data-mode={mode}
       data-scope-id={scopeId}
-      data-event-ids={eventIds?.join(',')}
+      data-origin-ids={originIds?.map(({ id }: { id: string }) => id).join(',')}
       data-timestamp={timestamp}
       data-is-alert={String(isAlert)}
     />
@@ -30,6 +30,7 @@ jest.mock('../../main/hooks/use_graph_preview', () => ({
   useGraphPreview: jest.fn().mockReturnValue({
     timestamp: '2024-01-15T10:00:00.000Z',
     eventIds: ['event-1'],
+    originIds: [{ id: 'event-1', idType: 'event', isAncestor: false }],
     shouldShowGraph: true,
     hasGraphData: true,
   }),
@@ -79,10 +80,10 @@ describe('<GraphDetails />', () => {
     expect(viz).toHaveAttribute('data-scope-id', 'graph');
   });
 
-  it('passes timestamp and eventIds from useGraphPreview', () => {
+  it('passes timestamp and originIds from useGraphPreview', () => {
     renderGraphDetails();
     const viz = screen.getByTestId('mockGraphVisualization');
-    expect(viz).toHaveAttribute('data-event-ids', 'event-1');
+    expect(viz).toHaveAttribute('data-origin-ids', 'event-1');
     expect(viz).toHaveAttribute('data-timestamp', '2024-01-15T10:00:00.000Z');
   });
 
@@ -118,6 +119,7 @@ describe('<GraphDetails />', () => {
     useGraphPreview.mockReturnValueOnce({
       timestamp: null,
       eventIds: ['event-1'],
+      originIds: [{ id: 'event-1', idType: 'event', isAncestor: false }],
       shouldShowGraph: false,
       hasGraphData: false,
     });

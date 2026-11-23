@@ -35,7 +35,7 @@ export { GRAPH_ID } from '../../../../flyout_v2/document/tools/graph/components/
 export const GraphVisualization: React.FC = memo(() => {
   const { searchHit, scopeId } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
-  const { eventIds, timestamp } = useGraphPreview({ hit });
+  const { originIds, timestamp } = useGraphPreview({ hit });
   const isAlert = useMemo(
     () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
     [hit]
@@ -109,7 +109,7 @@ export const GraphVisualization: React.FC = memo(() => {
       mode="event"
       scopeId={scopeId}
       graphScopeId={scopeId}
-      eventIds={eventIds}
+      originIds={originIds}
       timestamp={timestamp ?? new Date().toISOString()}
       isAlert={isAlert}
       onShowDocument={onShowDocument}

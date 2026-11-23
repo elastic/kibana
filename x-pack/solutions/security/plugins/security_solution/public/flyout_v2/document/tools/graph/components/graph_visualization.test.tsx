@@ -96,7 +96,10 @@ const callbacks = {
 const EVENT_PROPS = {
   mode: 'event' as const,
   scopeId: 'test-scope',
-  eventIds: ['event-1', 'event-2'],
+  originIds: [
+    { id: 'event-1', idType: 'event' as const, isAncestor: false },
+    { id: 'event-2', idType: 'event' as const, isAncestor: false },
+  ],
   timestamp: new Date().toISOString(),
   isAlert: false,
   ...callbacks,
@@ -140,7 +143,7 @@ describe('GraphVisualization', () => {
       });
     });
 
-    it('passes originEventIds derived from eventIds and isAlert', async () => {
+    it('passes originEventIds derived from originIds and isAlert', async () => {
       render(<GraphVisualization {...EVENT_PROPS} />);
 
       await waitFor(() => {
@@ -149,10 +152,33 @@ describe('GraphVisualization', () => {
 
       const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.originEventIds).toEqual([
-        { id: 'event-1', isAlert: false },
-        { id: 'event-2', isAlert: false },
+        { id: 'event-1', idType: 'event', isAlert: false },
+        { id: 'event-2', idType: 'event', isAlert: false },
       ]);
       expect(initialState.entityIds).toBeUndefined();
+    });
+
+    it('passes document _id origins through with idType doc', async () => {
+      render(
+        <GraphVisualization
+          {...EVENT_PROPS}
+          isAlert
+          originIds={[
+            { id: 'alert-doc', idType: 'doc', isAncestor: false },
+            { id: 'source-doc', idType: 'doc', isAncestor: true },
+          ]}
+        />
+      );
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      expect(initialState.originEventIds).toEqual([
+        { id: 'alert-doc', idType: 'doc', isAlert: true },
+        { id: 'source-doc', idType: 'doc', isAlert: false },
+      ]);
     });
 
     it('passes a timestamp-anchored timeRange', async () => {

@@ -47,7 +47,7 @@ export const GraphDetails = memo(
   ({ hit, renderCellActions, onAlertUpdated }: GraphDetailsProps) => {
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
-    const { timestamp, eventIds } = useGraphPreview({ hit });
+    const { timestamp, originIds } = useGraphPreview({ hit });
     const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
 
     const open = useOpenFlyout();
@@ -144,7 +144,7 @@ export const GraphDetails = memo(
             <GraphVisualization
               mode="event"
               scopeId={GRAPH_SCOPE_ID}
-              eventIds={eventIds}
+              originIds={originIds}
               timestamp={timestamp}
               isAlert={isAlert}
               onShowDocument={onShowDocument}

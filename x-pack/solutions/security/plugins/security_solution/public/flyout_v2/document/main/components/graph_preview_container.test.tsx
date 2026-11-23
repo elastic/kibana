@@ -26,7 +26,10 @@ import { useGraphPreview } from '../hooks/use_graph_preview';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 
 jest.mock('../../../../common/hooks/use_upselling');
-jest.mock('../hooks/use_graph_preview');
+jest.mock('../hooks/use_graph_preview', () => ({
+  ...jest.requireActual('../hooks/use_graph_preview'),
+  useGraphPreview: jest.fn(),
+}));
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
@@ -66,6 +69,7 @@ const renderContainer = (
 const previewAvailable = {
   timestamp: new Date().toISOString(),
   eventIds: ['eventId'],
+  originIds: [{ id: 'eventId', idType: 'event', isAncestor: false }],
   action: ['action'],
   shouldShowGraph: true,
   hasGraphData: true,
@@ -179,7 +183,7 @@ describe('<GraphPreviewContainer />', () => {
     expect(mockUseFetchGraphData).toHaveBeenCalledWith({
       req: {
         query: {
-          originEventIds: [{ id: 'eventId', isAlert: true }],
+          originEventIds: [{ id: 'eventId', idType: 'event', isAlert: true }],
           start: `${previewAvailable.timestamp}||-30m`,
           end: `${previewAvailable.timestamp}||+30m`,
         },
@@ -189,5 +193,31 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+  });
+
+  it('fetches graph data from document _id origins, flagging only the document itself as the alert', () => {
+    mockUseGraphPreview.mockReturnValue({
+      ...previewAvailable,
+      eventIds: [],
+      originIds: [
+        { id: 'alert-doc-id', idType: 'doc', isAncestor: false },
+        { id: 'source-doc-id', idType: 'doc', isAncestor: true },
+      ],
+    });
+
+    renderContainer();
+
+    expect(mockUseFetchGraphData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        req: expect.objectContaining({
+          query: expect.objectContaining({
+            originEventIds: [
+              { id: 'alert-doc-id', idType: 'doc', isAlert: true },
+              { id: 'source-doc-id', idType: 'doc', isAlert: false },
+            ],
+          }),
+        }),
+      })
+    );
   });
 });

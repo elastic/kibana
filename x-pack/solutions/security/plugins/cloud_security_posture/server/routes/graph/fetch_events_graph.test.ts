@@ -194,6 +194,41 @@ describe('fetchEvents', () => {
     expect(keys.filter((k) => k.startsWith('og_alrt_id'))).toEqual(['og_alrt_id0']);
   });
 
+  it('matches doc origins on _id instead of event.id', async () => {
+    const originEventIds: OriginEventId[] = [
+      { id: 'event-1', isAlert: false },
+      { id: 'alert-doc', isAlert: true, idType: 'doc' },
+      { id: 'source-doc', isAlert: false, idType: 'doc' },
+    ];
+
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 100,
+      end: 200,
+      originEventIds,
+      showUnknownTarget: true,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.params).toEqual([
+      { og_id0: 'event-1' },
+      { og_doc_id0: 'alert-doc' },
+      { og_doc_id1: 'source-doc' },
+      { og_doc_alrt_id0: 'alert-doc' },
+    ]);
+    expect(args.query).toContain(
+      '| EVAL isOrigin = COALESCE(event.id, "") in (?og_id0) OR _id in (?og_doc_id0, ?og_doc_id1)'
+    );
+    expect(args.query).toContain('| EVAL isOriginAlert = isOrigin AND (_id in (?og_doc_alrt_id0))');
+    expect(JSON.stringify(args.filter)).toContain(
+      JSON.stringify({ terms: { _id: ['alert-doc', 'source-doc'] } })
+    );
+  });
+
   describe('Target entity filtering', () => {
     it('should filter unknown targets in ES|QL when showUnknownTarget is false', async () => {
       await fetchEvents({

@@ -139,6 +139,9 @@ export const graphRequestSchema = schema.object({
         schema.object({
           id: schema.string({ maxLength: ES_DOCUMENT_ID_MAX_LENGTH }),
           isAlert: schema.boolean(),
+          // 'event' (default) matches `event.id`; 'doc' matches the document `_id`, used when
+          // the source document has no `event.id`.
+          idType: schema.maybe(schema.oneOf([schema.literal('event'), schema.literal('doc')])),
         }),
         {
           maxSize: ORIGIN_EVENT_IDS_MAX_SIZE,

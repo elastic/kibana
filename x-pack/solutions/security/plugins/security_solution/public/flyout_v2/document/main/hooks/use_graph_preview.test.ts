@@ -252,6 +252,60 @@ describe('useGraphPreview', () => {
     expect(result.current.hasGraphData).toBe(false);
   });
 
+  describe('originIds', () => {
+    it('uses event IDs when present', () => {
+      const { result } = renderHook(() => useGraphPreview({ hit: createMockHit(baseAlert) }));
+
+      expect(result.current.originIds).toEqual([
+        { id: 'original-event-id', idType: 'event', isAncestor: false },
+      ]);
+    });
+
+    it('falls back to the document _id for supported runtime-mappings integrations without event.id', () => {
+      const { result } = renderHook(() =>
+        useGraphPreview({
+          hit: createMockHit({
+            '@timestamp': '2025-01-01T00:00:00.000Z',
+            'event.dataset': 'aws_bedrock.invocation',
+          }),
+        })
+      );
+
+      expect(result.current.originIds).toEqual([{ id: '1', idType: 'doc', isAncestor: false }]);
+    });
+
+    it('adds alert ancestor _ids for supported runtime-mappings integration alerts without event.id', () => {
+      const { result } = renderHook(() =>
+        useGraphPreview({
+          hit: createMockHit({
+            '@timestamp': '2025-01-01T00:00:00.000Z',
+            'event.dataset': 'aws_bedrock.invocation',
+            'event.kind': 'signal',
+            'kibana.alert.ancestors.id': ['source-doc-id'],
+          }),
+        })
+      );
+
+      expect(result.current.originIds).toEqual([
+        { id: '1', idType: 'doc', isAncestor: false },
+        { id: 'source-doc-id', idType: 'doc', isAncestor: true },
+      ]);
+    });
+
+    it('returns no origins for unsupported datasets without event.id', () => {
+      const { result } = renderHook(() =>
+        useGraphPreview({
+          hit: createMockHit({
+            '@timestamp': '2025-01-01T00:00:00.000Z',
+            'event.dataset': 'google_cloud.audit',
+          }),
+        })
+      );
+
+      expect(result.current.originIds).toEqual([]);
+    });
+  });
+
   it('returns shouldShowGraph=false when license is missing', () => {
     mockUseHasGraphVisualizationLicense.mockReturnValue(false);
 

@@ -37,6 +37,7 @@ import { useEventDetailsPopover } from '../popovers/details/use_event_details_po
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
 import {
+  DOCUMENT_ID,
   ENTITY_ID,
   EVENT_ID,
   GRAPH_NODES_LIMIT,
@@ -228,6 +229,11 @@ export interface GraphInvestigationProps {
        * A flag indicating whether the origin event is an alert or not.
        */
       isAlert: boolean;
+
+      /**
+       * 'event' (default) when `id` is an `event.id`; 'doc' when it is the document `_id`.
+       */
+      idType?: 'event' | 'doc';
     }>;
 
     /**
@@ -299,6 +305,31 @@ export interface GraphInvestigationProps {
 const EMPTY_QUERY: Query = { query: '', language: 'kuery' } as const;
 type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
 
+const buildOriginIdsFilter = (field: string, ids: string[], dataViewId: string): Filter => {
+  const meta = {
+    key: field,
+    index: dataViewId,
+    negate: false,
+    disabled: false,
+    field,
+    controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
+  };
+
+  if (ids.length === 1) {
+    return {
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: { ...meta, type: 'phrase', params: { query: ids[0] } },
+      query: { match_phrase: { [field]: ids[0] } },
+    };
+  }
+
+  return {
+    $state: { store: FilterStateStore.APP_STATE },
+    meta: { ...meta, type: 'phrases', params: ids },
+    query: { terms: { [field]: ids } },
+  };
+};
+
 /**
  * Graph investigation view allows the user to expand nodes and view related entities.
  */
@@ -332,42 +363,14 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       // Event mode: show origin event/alert IDs as non-interactive filter pills.
       if (originEventIds && originEventIds.length > 0) {
-        const eventIds = originEventIds.map(({ id }) => id);
-
-        if (eventIds.length === 1) {
-          return [
-            {
-              $state: { store: FilterStateStore.APP_STATE },
-              meta: {
-                key: EVENT_ID,
-                index: dataView.id,
-                negate: false,
-                disabled: false,
-                type: 'phrase' as const,
-                field: EVENT_ID,
-                controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
-                params: { query: eventIds[0] },
-              },
-              query: { match_phrase: { [EVENT_ID]: eventIds[0] } },
-            },
-          ];
-        }
+        const eventIds = originEventIds
+          .filter(({ idType }) => idType !== 'doc')
+          .map(({ id }) => id);
+        const docIds = originEventIds.filter(({ idType }) => idType === 'doc').map(({ id }) => id);
 
         return [
-          {
-            $state: { store: FilterStateStore.APP_STATE },
-            meta: {
-              key: EVENT_ID,
-              index: dataView.id,
-              negate: false,
-              disabled: false,
-              type: 'phrases' as const,
-              field: EVENT_ID,
-              controlledBy: CONTROLLED_BY_GRAPH_INVESTIGATION_DEFAULT_FILTER,
-              params: eventIds,
-            },
-            query: { terms: { [EVENT_ID]: eventIds } },
-          },
+          ...(eventIds.length > 0 ? [buildOriginIdsFilter(EVENT_ID, eventIds, dataView.id)] : []),
+          ...(docIds.length > 0 ? [buildOriginIdsFilter(DOCUMENT_ID, docIds, dataView.id)] : []),
         ];
       }
 
@@ -494,19 +497,23 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       let filters = [...searchFilters];
 
       const hasKqlQuery = query.query.trim() !== '';
-      const originIds = originEventIds?.map(({ id }) => id) ?? [];
+      const originIds =
+        originEventIds?.map(({ id, idType }) => ({
+          id,
+          field: idType === 'doc' ? DOCUMENT_ID : EVENT_ID,
+        })) ?? [];
 
       // Timeline cannot recover the origin constraints passed separately to the Graph API.
       if (originIds.length > 0) {
         if (!hasKqlQuery || searchFilters.length > 0) {
-          filters = originIds.reduce<Filter[]>((acc, id) => {
-            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+          filters = originIds.reduce<Filter[]>((acc, { id, field }) => {
+            return addFilter(dataView?.id ?? '', acc, field, id);
           }, searchFilters);
         }
 
         if (hasKqlQuery) {
           query.query = `(${query.query})${originIds
-            .map((id) => ` OR ${EVENT_ID}: "${escapeQuotes(id)}"`)
+            .map(({ id, field }) => ` OR ${field}: "${escapeQuotes(id)}"`)
             .join('')}`;
         }
       }
@@ -673,14 +680,24 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       [isExternalOverlayOpen]
     );
 
-    const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
+    const {
+      originEventIdsSet,
+      originAlertIdsSet,
+      originDocIdsSet,
+      originDocAlertIdsSet,
+      originEntityIdsSet,
+    } = useMemo(() => {
       const eventIds = new Set<string>();
       const alertIds = new Set<string>();
+      const docIds = new Set<string>();
+      const docAlertIds = new Set<string>();
       const entityIdsWithOrigin = new Set<string>();
 
       // Add origin event IDs (for centering when opening from events flyout)
-      originEventIds?.forEach(({ id, isAlert }) => {
-        if (isAlert) {
+      originEventIds?.forEach(({ id, isAlert, idType }) => {
+        if (idType === 'doc') {
+          (isAlert ? docAlertIds : docIds).add(id);
+        } else if (isAlert) {
           alertIds.add(id);
         } else {
           eventIds.add(id);
@@ -697,6 +714,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       return {
         originEventIdsSet: eventIds,
         originAlertIdsSet: alertIds,
+        originDocIdsSet: docIds,
+        originDocAlertIdsSet: docAlertIds,
         originEntityIdsSet: entityIdsWithOrigin,
       };
     }, [originEventIds, entityIds]);
@@ -741,14 +760,20 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               uniqueAlertsCount: numAlerts,
             });
             const text = node.label ? node.label : node.id;
-            const docEventIds: string[] =
+            const documentsData =
               'documentsData' in node && Array.isArray(node.documentsData)
-                ? node.documentsData.flatMap((d) => (d.event ? d.event.id : []))
+                ? node.documentsData
                 : [];
+            const docEventIds: string[] = documentsData.flatMap((d) => (d.event ? d.event.id : []));
+            const docIds: string[] = documentsData.map((d) => d.id);
             return {
               ...node,
-              isOrigin: docEventIds.some((id) => originEventIdsSet.has(id)),
-              isOriginAlert: docEventIds.some((id) => originAlertIdsSet.has(id)),
+              isOrigin:
+                docEventIds.some((id) => originEventIdsSet.has(id)) ||
+                docIds.some((id) => originDocIdsSet.has(id)),
+              isOriginAlert:
+                docEventIds.some((id) => originAlertIdsSet.has(id)) ||
+                docIds.some((id) => originDocAlertIdsSet.has(id)),
               expandButtonClick: labelExpandButtonClickHandler,
               toolbarItemsFn: labelToolbarItemsFn,
               ipClickHandler: createIpClickHandler(nodeIps),
@@ -781,6 +806,8 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       data?.nodes,
       originEventIdsSet,
       originAlertIdsSet,
+      originDocIdsSet,
+      originDocAlertIdsSet,
       originEntityIdsSet,
       relationshipNodeSources,
       searchFilters,

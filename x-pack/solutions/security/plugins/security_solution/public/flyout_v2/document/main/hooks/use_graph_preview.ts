@@ -29,6 +29,27 @@ export interface UseGraphPreviewParams {
 }
 
 /**
+ * A document identifier the graph starts from.
+ */
+export interface GraphOriginId {
+  id: string;
+  /** 'event' matches `event.id`; 'doc' matches the document `_id` */
+  idType: 'event' | 'doc';
+  /** True for the source event of an alert (from `kibana.alert.ancestors.id`), not the document itself */
+  isAncestor: boolean;
+}
+
+/**
+ * Converts graph origin IDs into the graph API `originEventIds` payload. Only the document itself
+ * can be the origin alert; an alert's source events are origin events.
+ */
+export const toOriginEventIds = (
+  originIds: GraphOriginId[],
+  isAlert: boolean
+): Array<{ id: string; isAlert: boolean; idType: GraphOriginId['idType'] }> =>
+  originIds.map(({ id, idType, isAncestor }) => ({ id, idType, isAlert: isAlert && !isAncestor }));
+
+/**
  * Interface for the result of the useGraphPreview hook
  */
 export interface UseGraphPreviewResult {
@@ -41,6 +62,13 @@ export interface UseGraphPreviewResult {
    * Array of event IDs associated with the alert
    */
   eventIds: string[];
+
+  /**
+   * Identifiers the graph starts from. Same as `eventIds` when the document has an event ID;
+   * for supported runtime-mapping integrations without one, falls back to the document `_id`
+   * (plus the source event `_id` for alerts).
+   */
+  originIds: GraphOriginId[];
 
   /**
    * Action associated with the event
@@ -83,7 +111,29 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
 
   const originalEventId = getFieldsData('kibana.alert.original_event.id');
   const eventId = getFieldsData('event.id');
-  const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
+  const eventIds = useMemo(
+    () => (originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId)),
+    [originalEventId, eventId]
+  );
+
+  const docId = hit.raw._id;
+  const ancestorIds = getFieldsData('kibana.alert.ancestors.id');
+  const originIds = useMemo<GraphOriginId[]>(() => {
+    if (eventIds.length > 0) {
+      return eventIds.map((id) => ({ id, idType: 'event', isAncestor: false }));
+    }
+    if (!isSupportedRuntimeMappingsIntegration || !docId) {
+      return [];
+    }
+    return [
+      { id: docId, idType: 'doc', isAncestor: false },
+      ...getFieldArray(ancestorIds).map((id) => ({
+        id,
+        idType: 'doc' as const,
+        isAncestor: true,
+      })),
+    ];
+  }, [eventIds, isSupportedRuntimeMappingsIntegration, docId, ancestorIds]);
 
   // `useEntityStoreEuidApi` is async-hydrated (see `entity_store/public/euid_api_context.tsx`);
   // it returns `null` until the lazy chunk loads. The `useMemo` recomputes once `euidApi` is available.
@@ -137,6 +187,7 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   return {
     timestamp,
     eventIds,
+    originIds,
     action,
     shouldShowGraph,
     hasGraphData,
