@@ -182,7 +182,7 @@ Use \`${
 - When it lists limits, ask whether to keep the newest items up to each limit; set \`keep_newest_over_limit\` only if the user agrees.
 - The source cases close by default. Set \`close_sources: false\` only when the user wants them left open.
 - A source reported as \`notMerged\` was not fully copied; offer to run the merge again with the destination as \`destination_case_id\`.
-- Search leaves out cases that were merged and closed unless you pass \`merged\` (e.g. \`only\` to list merged cases); similar always leaves them out.
+- Search leaves out cases a merge closed unless you pass \`closedByMerge\` (e.g. \`only\` to list them); similar always leaves them out. A case's activity shows the merges it was part of.
 
 ## Comments and discussion
 

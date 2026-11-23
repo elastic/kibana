@@ -18,6 +18,7 @@ import type { MergeCasesRequest } from '../../../../common/types/api';
 import type { AttachmentV2, Case } from '../../../../common/types/domain';
 import { CaseSeverity, CaseStatuses, UserActionTypes } from '../../../../common/types/domain';
 import { Operations } from '../../../authorization';
+import { createCaseError } from '../../../common/error';
 import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import { basicCaseFields } from '../../../services/test_utils';
 import { createCasesClientMock, createCasesClientMockArgs } from '../../mocks';
@@ -164,16 +165,16 @@ describe('merge', () => {
       }
       return toSavedObject(theCase);
     });
-    caseService.patchCases.mockImplementation(async ({ cases: patched }) => ({
-      saved_objects: patched.map(({ caseId, updatedAttributes }) => {
-        const updated = {
-          ...(stored.get(caseId) as Case),
-          ...(updatedAttributes as Partial<Case>),
-          version: `${caseId}-linked`,
-        };
-        stored.set(caseId, updated);
-        return toSavedObject(updated);
-      }),
+    caseService.getCases.mockImplementation(async ({ caseIds }) => ({
+      saved_objects: caseIds.map((id) => toSavedObject(stored.get(id) as Case)),
+    }));
+    caseService.patchCases.mockImplementation(async ({ cases }) => ({
+      saved_objects: cases.map(({ caseId, updatedAttributes }) => ({
+        id: caseId,
+        type: CASE_SAVED_OBJECT,
+        attributes: updatedAttributes,
+        references: [],
+      })),
     }));
     mockCases([firstCase, secondCase], {
       [firstCase.id]: [alertAttachment('a1', ['alert-1', 'alert-2'])],
@@ -423,25 +424,16 @@ describe('merge', () => {
       );
     });
 
-    it('links and closes every source, then records the merge', async () => {
+    it('closes every source against the version it read, then records the merge', async () => {
       const response = await merge(
         { ...request, note: 'Merged phishing' },
         clientArgs,
         casesClient
       );
 
-      expect(caseService.patchCases).toHaveBeenCalledTimes(2);
-      expect(caseService.patchCases.mock.calls[0][0].cases[0]).toEqual(
-        expect.objectContaining({
-          caseId: firstCase.id,
-          version: firstCase.version,
-          updatedAttributes: expect.objectContaining({
-            merge: expect.objectContaining({ merged_into: [newCase.id], closed_by_merge: false }),
-          }),
-        })
-      );
+      expect(bulkUpdateMock).toHaveBeenCalledTimes(2);
       expect(bulkUpdateMock).toHaveBeenCalledWith(
-        { cases: [{ id: firstCase.id, version: 'case-1-linked', status: CaseStatuses.closed }] },
+        { cases: [{ id: firstCase.id, version: firstCase.version, status: CaseStatuses.closed }] },
         expect.anything(),
         casesClient,
         { skipAlertSync: true, skipRequiredOnClose: true, markClosedByMerge: true }
@@ -451,6 +443,8 @@ describe('merge', () => {
         expect.objectContaining({ caseId: secondCase.id, outcome: 'merged', closed: true }),
       ]);
       expect(response.failures).toEqual([]);
+      // Closing a source flags it as merged in the same write.
+      expect(caseService.patchCases).not.toHaveBeenCalled();
 
       const { userActions } = userActionService.creator.bulkCreateUserAction.mock.calls[0][0];
       expect(userActions.map(({ caseId, type }) => [caseId, type])).toEqual([
@@ -468,16 +462,37 @@ describe('merge', () => {
       });
     });
 
-    it('keeps the sources open when asked to', async () => {
+    it('keeps the sources open when asked to, and flags them as merged', async () => {
       const response = await merge({ ...request, closeSources: false }, clientArgs, casesClient);
 
       expect(bulkUpdateMock).not.toHaveBeenCalled();
       expect(response.sources.every(({ outcome, closed }) => outcome === 'merged' && !closed)).toBe(
         true
       );
+      expect(caseService.patchCases).toHaveBeenCalledWith({
+        cases: [firstCase.id, secondCase.id].map((caseId) =>
+          expect.objectContaining({
+            caseId,
+            updatedAttributes: expect.objectContaining({ merged: true }),
+          })
+        ),
+        refresh: false,
+      });
+      expect(response.failures).toEqual([]);
     });
 
-    it('links a source that was already closed without closing it again', async () => {
+    it('does not flag a source an earlier merge already flagged', async () => {
+      mockCases([{ ...firstCase, merged: true }, secondCase]);
+
+      await merge({ ...request, closeSources: false }, clientArgs, casesClient);
+
+      expect(caseService.getCases).toHaveBeenCalledWith({ caseIds: [secondCase.id] });
+      expect(caseService.patchCases.mock.calls[0][0].cases.map(({ caseId }) => caseId)).toEqual([
+        secondCase.id,
+      ]);
+    });
+
+    it('merges a source that was already closed without closing it again', async () => {
       mockCases([firstCase, { ...secondCase, status: CaseStatuses.closed }]);
 
       const response = await merge(request, clientArgs, casesClient);
@@ -486,11 +501,14 @@ describe('merge', () => {
       expect(response.sources[1]).toEqual(
         expect.objectContaining({ outcome: 'merged', closed: false })
       );
+      expect(caseService.patchCases.mock.calls[0][0].cases.map(({ caseId }) => caseId)).toEqual([
+        secondCase.id,
+      ]);
     });
   });
 
   describe('partial failures', () => {
-    it('does not link a source whose copy failed, and still merges the others', async () => {
+    it('does not close a source whose copy failed, and still merges the others', async () => {
       bulkCreateAttachmentsMock.mockRejectedValueOnce(new Error('index unavailable'));
 
       const response = await merge(request, clientArgs, casesClient);
@@ -502,7 +520,34 @@ describe('merge', () => {
       expect(response.failures).toEqual([
         { step: 'copy', caseId: firstCase.id, reason: 'index unavailable' },
       ]);
-      expect(caseService.patchCases).toHaveBeenCalledTimes(1);
+      expect(bulkUpdateMock).toHaveBeenCalledTimes(1);
+      expect(bulkUpdateMock.mock.calls[0][0].cases[0].id).toBe(secondCase.id);
+      expect(caseService.patchCases).not.toHaveBeenCalled();
+    });
+
+    it('reports a source it could not flag as merged, and still merges it', async () => {
+      caseService.patchCases.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: firstCase.id,
+            type: CASE_SAVED_OBJECT,
+            attributes: {},
+            references: [],
+            error: { statusCode: 503, error: 'Unavailable', message: 'index unavailable' },
+          },
+          { id: secondCase.id, type: CASE_SAVED_OBJECT, attributes: {}, references: [] },
+        ],
+      });
+
+      const response = await merge({ ...request, closeSources: false }, clientArgs, casesClient);
+
+      expect(response.sources).toEqual([
+        expect.objectContaining({ caseId: firstCase.id, outcome: 'merged' }),
+        expect.objectContaining({ caseId: secondCase.id, outcome: 'merged' }),
+      ]);
+      expect(response.failures).toEqual([
+        { step: 'mark', caseId: firstCase.id, reason: 'index unavailable' },
+      ]);
     });
 
     it('leaves observables out below Platinum and still merges the source', async () => {
@@ -520,33 +565,29 @@ describe('merge', () => {
       );
     });
 
-    it('does not link a source another merge linked first', async () => {
+    it('merges a source someone closed during the merge without closing it again', async () => {
       caseService.getCase.mockImplementation(async ({ id }) => {
         const theCase = stored.get(id) as Case;
         return toSavedObject(
           id === firstCase.id
-            ? {
-                ...theCase,
-                version: 'changed',
-                merge: {
-                  merged_into: ['other-destination'],
-                  merged_at: '2024-04-01T00:00:00.000Z',
-                  closed_by_merge: false,
-                },
-              }
+            ? { ...theCase, version: 'closed-meanwhile', status: CaseStatuses.closed }
             : theCase
         );
       });
 
       const response = await merge(request, clientArgs, casesClient);
 
-      expect(response.sources[0]).toEqual(expect.objectContaining({ outcome: 'notMerged' }));
-      expect(response.failures).toEqual([
-        expect.objectContaining({ step: 'mark', caseId: firstCase.id }),
+      expect(response.sources[0]).toEqual(
+        expect.objectContaining({ outcome: 'merged', closed: false })
+      );
+      expect(response.failures).toEqual([]);
+      expect(bulkUpdateMock).toHaveBeenCalledTimes(1);
+      expect(caseService.patchCases.mock.calls[0][0].cases.map(({ caseId }) => caseId)).toEqual([
+        firstCase.id,
       ]);
     });
 
-    it('copies what a source gained during the merge before linking it', async () => {
+    it('copies what a source gained during the merge before closing it', async () => {
       const gained = alertAttachment('a3', ['alert-9']);
       caseService.getCase.mockImplementation(async ({ id }) => {
         const theCase = stored.get(id) as Case;
@@ -576,7 +617,7 @@ describe('merge', () => {
         expect.anything(),
         expect.anything()
       );
-      expect(caseService.patchCases.mock.calls[0][0].cases[0].version).toBe('gained-alert');
+      expect(bulkUpdateMock.mock.calls[0][0].cases[0].version).toBe('gained-alert');
       expect(response.sources[0]).toEqual(
         expect.objectContaining({
           outcome: 'merged',
@@ -585,8 +626,47 @@ describe('merge', () => {
       );
     });
 
+    it('checks the source again when it changed between the read and the close', async () => {
+      bulkUpdateMock.mockRejectedValueOnce(
+        createCaseError({ error: Boom.conflict('The case changed') })
+      );
+
+      const response = await merge(request, clientArgs, casesClient);
+
+      expect(bulkUpdateMock).toHaveBeenCalledTimes(3);
+      expect(response.sources[0]).toEqual(
+        expect.objectContaining({ outcome: 'merged', closed: true })
+      );
+      expect(response.failures).toEqual([]);
+    });
+
+    it('does not merge a source that keeps changing', async () => {
+      bulkUpdateMock.mockImplementation(async ({ cases }) => {
+        if (cases[0].id === firstCase.id) {
+          throw createCaseError({ error: Boom.conflict('The case changed') });
+        }
+        return cases.map(({ id }) => ({
+          ...(stored.get(id) as Case),
+          status: CaseStatuses.closed,
+        }));
+      });
+
+      const response = await merge(request, clientArgs, casesClient);
+
+      expect(response.sources[0]).toEqual(
+        expect.objectContaining({ outcome: 'notMerged', closed: false })
+      );
+      expect(response.failures).toEqual([
+        {
+          step: 'close',
+          caseId: firstCase.id,
+          reason: 'The case kept changing while it was being merged',
+        },
+      ]);
+    });
+
     it('reports a source it could not close and closes the rest', async () => {
-      bulkUpdateMock.mockRejectedValueOnce(new Error('conflict'));
+      bulkUpdateMock.mockRejectedValueOnce(new Error('index unavailable'));
 
       const response = await merge(request, clientArgs, casesClient);
 

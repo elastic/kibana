@@ -69,16 +69,10 @@ export interface CasePersistedAttributes {
    * a response, and only the write codec for new cases keeps it.
    */
   extract_observables_source?: string;
-  /**
-   * The merge marker. The destinations are `merged-into` saved-object references, oldest first;
-   * this holds when the case was last merged and whether that merge closed it.
-   */
-  merge?: CasePersistedMerge | null;
-}
-
-export interface CasePersistedMerge {
-  merged_at: string;
-  closed_by_merge: boolean;
+  /** Whether a merge closed the case. Reopening the case clears it. */
+  closed_by_merge?: boolean;
+  /** Whether the case was merged into another case. It stays set once merged. */
+  merged?: boolean;
 }
 
 type CasePersistedCustomFields = Array<{

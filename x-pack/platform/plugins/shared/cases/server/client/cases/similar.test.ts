@@ -151,38 +151,17 @@ describe('similar', () => {
                 Object {
                   "arguments": Array [
                     Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases.attributes.merge.merged_at",
-                        },
-                        Object {
-                          "type": "wildcard",
-                          "value": "@kuery-wildcard@",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "cases.attributes.closed_by_merge",
                     },
                     Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "cases.attributes.status",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "20",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
+                      "isQuoted": false,
+                      "type": "literal",
+                      "value": "true",
                     },
                   ],
-                  "function": "and",
+                  "function": "is",
                   "type": "function",
                 },
               ],
@@ -358,12 +337,12 @@ describe('similar', () => {
     expect(mockClientArgs.services.caseService.findCases).not.toHaveBeenCalled();
   });
 
-  it('should leave out cases that were merged and closed', async () => {
+  it('should leave out cases that a merge closed', async () => {
     await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
 
     const [[findOptions]] = mockClientArgs.services.caseService.findCases.mock.calls;
     expect(toKqlExpression(findOptions?.filter as KueryNode)).toContain(
-      'NOT (cases.attributes.merge.merged_at: * AND cases.attributes.status: 20)'
+      'NOT cases.attributes.closed_by_merge: true'
     );
   });
 

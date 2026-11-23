@@ -52,6 +52,10 @@ export const InputSchema = lazySchema(() =>
       .optional()
       .describe('Filter by assignee user profile UIDs (not usernames).'),
     category: z.union([CaseCategory, CaseCategories]).optional(),
+    closedByMerge: z
+      .enum(['only', 'exclude'])
+      .optional()
+      .describe('Filter on cases a merge closed: "only" returns them, "exclude" leaves them out.'),
     customFields: z.record(z.string(), z.array(CustomFieldValueSchema)).optional(),
     defaultSearchOperator: FindCasesDefaultSearchOperatorSchema.optional(),
     from: z
@@ -59,12 +63,6 @@ export const InputSchema = lazySchema(() =>
       .max(500)
       .optional()
       .describe('ISO 8601 datetime start (inclusive). Example: "2025-01-15T00:00:00Z".'),
-    merged: z
-      .enum(['only', 'exclude', 'excludeClosed'])
-      .optional()
-      .describe(
-        'Filter on cases merged into another case: "only" returns them, "exclude" leaves them out, "excludeClosed" leaves out merged cases that are closed.'
-      ),
     owner: z
       .union([Owner, Owners])
       .optional()

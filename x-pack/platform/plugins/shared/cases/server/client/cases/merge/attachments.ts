@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import objectHash from 'object-hash';
 import {
   FILE_ATTACHMENT_TYPE,
   MAX_ALERTS_PER_CASE,
@@ -237,11 +238,17 @@ const observableChoiceKey = (caseId: string, observableId: string) =>
   `observables|${caseId}|${observableId}`;
 const otherChoiceKey = (attachmentId: string) => `other|${attachmentId}`;
 
-/** Reference attachments other than alerts and events point at one object; value attachments have no key. */
-const otherDuplicateKey = (payload: UnifiedAttachmentPayload): string | null =>
+/**
+ * Reference attachments other than alerts and events are the same when they point at the same
+ * object; value attachments when they hold the same content.
+ */
+const otherDuplicateKey = (payload: UnifiedAttachmentPayload): string =>
   isUnifiedReferenceAttachmentRequest(payload)
     ? `${payload.type}|${toStringArray(payload.attachmentId).join(',')}`
-    : null;
+    : `${payload.type}|value|${objectHash({
+        data: payload.data,
+        metadata: payload.metadata ?? null,
+      })}`;
 
 interface ParsedAttachment {
   attachment: AttachmentV2;
@@ -323,8 +330,6 @@ interface BuildAttachmentPlanArgs {
   ineligibleAlerts?: ReadonlyMap<string, AlertMergeIneligibility>;
   /** False below Platinum: observables are not copied. */
   copyObservables: boolean;
-  /** Sources already linked to this destination. Their value attachments are not copied again. */
-  alreadyMergedSourceIds?: ReadonlySet<string>;
 }
 
 interface AlertCandidate {
@@ -420,10 +425,7 @@ const addDestinationHoldings = (state: PlanState, destination: SourceAttachments
     } else if (kind === 'other') {
       summaries.other.existing += 1;
       state.limitedOther.existing += isUnifiedPersistableStateOrExternalReference(payload) ? 1 : 0;
-      const key = otherDuplicateKey(payload);
-      if (key != null) {
-        seenKeys.add(key);
-      }
+      seenKeys.add(otherDuplicateKey(payload));
     }
   }
   for (const observable of destination.theCase.observables ?? []) {
@@ -526,8 +528,7 @@ const applyNewest = (state: PlanState, sources: SourceAttachments[]) => {
           .filter(({ id }) => firstSeen(eventKey(id)))
           .forEach(({ id }) => units.events.push({ key: eventKey(id), addedAt, size: 1 }));
       } else if (kind === 'other') {
-        const duplicateKey = otherDuplicateKey(payload);
-        if (duplicateKey == null || firstSeen(duplicateKey)) {
+        if (firstSeen(otherDuplicateKey(payload))) {
           units.other.push({
             key: otherChoiceKey(attachment.id),
             addedAt,
@@ -707,15 +708,10 @@ const decideOther = (
   { attachment, payload }: ParsedAttachment
 ): Decision => {
   const duplicateKey = otherDuplicateKey(payload);
-  if (
-    (duplicateKey != null && state.seenKeys.has(duplicateKey)) ||
-    (duplicateKey == null && state.args.alreadyMergedSourceIds.has(caseId))
-  ) {
+  if (state.seenKeys.has(duplicateKey)) {
     return 'existing';
   }
-  if (duplicateKey != null) {
-    state.seenKeys.add(duplicateKey);
-  }
+  state.seenKeys.add(duplicateKey);
   const key = otherChoiceKey(attachment.id);
   state.choices.other.push({
     key,
@@ -845,8 +841,8 @@ const getLimits = ({ summaries, limitedOther }: PlanState): MergeLimit[] => {
 
 /**
  * Decides what the merge copies: alerts and events per referenced document, attacks with the
- * alerts they alone brought, other reference attachments per referenced object, observables by
- * type and value. Anything the destination or an earlier source already holds is a duplicate;
+ * alerts they alone brought, other reference attachments per referenced object, value attachments
+ * by content, observables by type and value. Anything the destination or an earlier source already holds is a duplicate;
  * items the user, the alert checks or the license leave out stay where they are. Files and
  * comments are counted but never copied.
  */
@@ -857,7 +853,6 @@ export const buildAttachmentPlan = ({
   choices = {},
   ineligibleAlerts = new Map(),
   copyObservables,
-  alreadyMergedSourceIds = new Set(),
 }: BuildAttachmentPlanArgs): MergeAttachmentPlan => {
   const state: PlanState = {
     args: {
@@ -866,7 +861,6 @@ export const buildAttachmentPlan = ({
       choices,
       ineligibleAlerts,
       copyObservables,
-      alreadyMergedSourceIds,
     },
     summaries: {
       alerts: emptySummary(MAX_ALERTS_PER_CASE),
@@ -920,7 +914,7 @@ export const buildAttachmentPlan = ({
 
 /**
  * Items a source gained after the plan was built, such as alerts a rule attached during the merge.
- * They are copied before the source is linked, unless the destination already holds them.
+ * They are copied before the source is closed, unless the destination already holds them.
  */
 export const planGainedItems = ({
   source,
@@ -969,10 +963,8 @@ export const planGainedItems = ({
               ).join(',')
             )
           : otherDuplicateKey(payload);
-      if (duplicateKey == null || !seenKeys.has(duplicateKey)) {
-        if (duplicateKey != null) {
-          seenKeys.add(duplicateKey);
-        }
+      if (!seenKeys.has(duplicateKey)) {
+        seenKeys.add(duplicateKey);
         items.push({ kind, payload, itemCount: 1 });
         counts[kind] += 1;
       }

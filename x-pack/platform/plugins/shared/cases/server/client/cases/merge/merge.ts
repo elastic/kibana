@@ -25,7 +25,7 @@ import {
   copySource,
   createDestination,
   getRemainingRoom,
-  linkSource,
+  markMerged,
   recordFailure,
   relinkDestinationAlerts,
   updateDestination,
@@ -37,9 +37,9 @@ const snapshot = ({ id, title, incremental_id: incrementalId }: Case) => ({
   incrementalId: incrementalId ?? null,
 });
 
-const toSourcePayload = ({ source, copied, existing, leftOut, linked, closed }: SourceResult) => ({
+const toSourcePayload = ({ source, copied, existing, leftOut, merged, closed }: SourceResult) => ({
   ...snapshot(source),
-  outcome: linked ? ('merged' as const) : ('notMerged' as const),
+  outcome: merged ? ('merged' as const) : ('notMerged' as const),
   closed,
   copied,
   existing,
@@ -49,7 +49,7 @@ const toSourcePayload = ({ source, copied, existing, leftOut, linked, closed }: 
 /**
  * Merges cases into a new case or into an open one of them. Every check runs before the first
  * write, so a refused merge changes nothing. Then it writes the destination, copies each source's
- * items, links each source whose items were all copied, closes the linked sources if asked, and
+ * items, closes the sources whose items were all copied if asked, flags the merged sources, and
  * records the merge. A failed write after the destination exists is reported per source and in
  * `failures`, and is never rolled back: running the same merge again finishes it.
  */
@@ -142,27 +142,32 @@ export const merge = async (
     results.push(await copySource(plan.sources[position], source, run));
   }
 
-  // Link only sources whose items were all copied, so a source never links without its content.
+  // Only a source whose items were all copied is merged, and closed when asked.
+  const closeSources = request.closeSources !== false;
   const room = getRemainingRoom(plan);
   for (const [position, result] of results.entries()) {
-    if (result.complete) {
+    if (result.complete && closeSources && result.source.status !== CaseStatuses.closed) {
       try {
-        result.linked = await linkSource(result, plan.sources[position], context, run, room);
+        const { merged, closed } = await closeSource(
+          result,
+          plan.sources[position],
+          context,
+          run,
+          room
+        );
+        result.merged = merged;
+        result.closed = closed;
       } catch (error) {
-        recordFailure(run, 'mark', result.source.id, error);
+        recordFailure(run, 'close', result.source.id, error);
       }
+    } else {
+      result.merged = result.complete;
     }
   }
 
-  if (request.closeSources !== false) {
-    for (const result of results) {
-      if (result.linked && result.source.status !== CaseStatuses.closed) {
-        result.closed = await closeSource(result.source.id, run);
-      }
-    }
-  }
+  await markMerged(results, run);
 
-  const linkedResults = results.filter(({ linked }) => linked);
+  const mergedResults = results.filter(({ merged }) => merged);
   const payload: { merge: MergePayload } = {
     merge: {
       destination: snapshot(destinationCase),
@@ -177,7 +182,7 @@ export const merge = async (
 
   try {
     await userActionService.creator.bulkCreateUserAction({
-      userActions: [destinationCase.id, ...linkedResults.map(({ source }) => source.id)].map(
+      userActions: [destinationCase.id, ...mergedResults.map(({ source }) => source.id)].map(
         (caseId) => ({
           type: UserActionTypes.merge,
           action: UserActionActions.update,
@@ -200,7 +205,7 @@ export const merge = async (
 
   userActionService.creator.auditLogMerge({
     destinationId: destinationCase.id,
-    sourceIds: linkedResults.map(({ source }) => source.id),
+    sourceIds: mergedResults.map(({ source }) => source.id),
   });
 
   return decodeOrThrowZod(MergeCasesResponseSchema)({

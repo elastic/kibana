@@ -43,7 +43,6 @@ export const mergePreviewCase = (
   createdAt: '2024-01-01T00:00:00.000Z',
   totalAlerts: 0,
   template: null,
-  merge: null,
   description: '',
   createdBy: { username: 'elastic', full_name: 'Elastic User', email: null },
   closedAt: null,

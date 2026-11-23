@@ -414,16 +414,6 @@ export const FAILURE_TOAST_BODY = i18n.translate('xpack.cases.mergeCases.failure
     'No cases were changed. Try again. If this keeps happening, contact your administrator.',
 });
 
-export const MERGED_INTO = (caseRef: string) =>
-  i18n.translate('xpack.cases.mergeCases.mergedInto', {
-    defaultMessage: 'Merged into {caseRef}',
-    values: { caseRef },
-  });
-
-export const MERGED = i18n.translate('xpack.cases.mergeCases.merged', {
-  defaultMessage: 'Merged',
-});
-
 export const MERGE_WITH_OTHER_CASES = i18n.translate('xpack.cases.mergeCases.mergeWithOtherCases', {
   defaultMessage: 'Merge with other cases',
 });

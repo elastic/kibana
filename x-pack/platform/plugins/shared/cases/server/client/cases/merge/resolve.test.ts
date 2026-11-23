@@ -40,7 +40,6 @@ const previewCase = (id: string, incrementalId: number, title: string): MergePre
   createdAt: '2026-11-01T00:00:00.000Z',
   totalAlerts: 3,
   template: null,
-  merge: null,
   description: `Description of ${title}`,
   createdBy: { username: 'elastic', full_name: null, email: null },
   closedAt: null,

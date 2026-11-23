@@ -294,12 +294,26 @@ describe('Cases API', () => {
       });
     });
 
+    it.each([['exclude' as const], ['only' as const], [undefined]])(
+      'sends the closed-by-merge filter %s',
+      async (closedByMerge) => {
+        await getCases({
+          filterOptions: { ...DEFAULT_FILTER_OPTIONS, closedByMerge },
+          queryParams: DEFAULT_QUERY_PARAMS,
+          signal: abortCtrl.signal,
+        });
+
+        const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+        expect(body.closedByMerge).toEqual(closedByMerge);
+      }
+    );
+
     it.each([
-      [['exclude' as const], { merged: 'exclude' }],
-      [['only' as const], { merged: 'only' }],
-      [['only' as const, 'exclude' as const], {}],
-      [[], {}],
-    ])('sends the Merged filter %j as %j', async (merged, expected) => {
+      [['exclude' as const], 'exclude'],
+      [['only' as const], 'only'],
+      [[], undefined],
+      [['exclude' as const, 'only' as const], undefined],
+    ])('sends the Merged filter %j as %s', async (merged, expected) => {
       await getCases({
         filterOptions: { ...DEFAULT_FILTER_OPTIONS, merged },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -307,7 +321,7 @@ describe('Cases API', () => {
       });
 
       const body = JSON.parse(fetchMock.mock.calls[0][1].body);
-      expect(body.merged).toEqual((expected as { merged?: string }).merged);
+      expect(body.merged).toEqual(expected);
     });
 
     it('should apply the severity field correctly (with severity value)', async () => {

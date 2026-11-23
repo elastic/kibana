@@ -606,7 +606,7 @@ export interface BulkUpdateCasesOptions {
    * closes. Like `relaxRequiredFields` on bulk create, no route, workflow step or UI can set it.
    */
   skipRequiredOnClose?: boolean;
-  /** Records on the merge marker that this update closed the case as part of a merge. */
+  /** Sets `closed_by_merge` and `merged`: this update closes the case as part of a merge. */
   markClosedByMerge?: boolean;
 }
 
@@ -1440,11 +1440,10 @@ const createPatchCasesPayload = async ({
             createdAt: originalCase.attributes.created_at,
             inProgressAt: originalCase.attributes.in_progress_at,
           }),
-          ...getMergeMarkerForUpdate({
+          ...getMergeFlagsForUpdate({
             originalCase,
             status: trimmedCaseAttributes.status,
             markClosedByMerge,
-            mergedAt: updatedDt,
           }),
           updated_at: updatedDt,
           updated_by: user,
@@ -1461,37 +1460,29 @@ const createPatchCasesPayload = async ({
 };
 
 /**
- * Keeps the merge marker's `closed_by_merge` in step with the status: set when a merge closes the
- * case, cleared when the case is reopened.
+ * Keeps `closed_by_merge` in step with the status: set when a merge closes the case, cleared when
+ * the case is reopened. A merge that closes the case also sets `merged`, which stays set.
  */
-const getMergeMarkerForUpdate = ({
+const getMergeFlagsForUpdate = ({
   originalCase,
   status,
   markClosedByMerge,
-  mergedAt,
 }: {
   originalCase: CaseSavedObjectTransformed;
   status?: CaseStatuses;
   markClosedByMerge: boolean;
-  mergedAt: string;
-}): Partial<Pick<CaseAttributes, 'merge'>> => {
-  const { merge, status: originalStatus } = originalCase.attributes;
+}): Partial<Pick<CaseAttributes, 'closed_by_merge' | 'merged'>> => {
+  const { closed_by_merge: closedByMerge, status: originalStatus } = originalCase.attributes;
   if (status == null || status === originalStatus) {
     return {};
   }
 
   if (status === CaseStatuses.closed && markClosedByMerge) {
-    return {
-      merge: {
-        merged_into: merge?.merged_into ?? [],
-        merged_at: merge?.merged_at ?? mergedAt,
-        closed_by_merge: true,
-      },
-    };
+    return { closed_by_merge: true, merged: true };
   }
 
-  if (originalStatus === CaseStatuses.closed && merge?.closed_by_merge === true) {
-    return { merge: { ...merge, closed_by_merge: false } };
+  if (originalStatus === CaseStatuses.closed && closedByMerge === true) {
+    return { closed_by_merge: false };
   }
 
   return {};

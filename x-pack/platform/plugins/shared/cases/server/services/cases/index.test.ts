@@ -2453,7 +2453,8 @@ describe('CasesService', () => {
       'time_to_resolve',
       'time_to_investigate',
       'template',
-      'merge',
+      'closed_by_merge',
+      'merged',
       CASE_EXTENDED_FIELDS,
       CASE_EXTENDED_FIELDS_LABELS,
       CASE_EXTENDED_FIELDS_CONTROLS
@@ -3985,7 +3986,7 @@ describe('CasesService', () => {
           },
           mttr_scope: {
             filter: {
-              bool: { must_not: [{ term: { 'cases.merge.closed_by_merge': true } }] },
+              bool: { must_not: [{ term: { 'cases.closed_by_merge': true } }] },
             },
             aggs: { mttr: { avg: { field: 'cases.duration' } } },
           },
@@ -4234,84 +4235,6 @@ describe('CasesService', () => {
         expect(dispatchedDoc.attributes.severity).toBe(CasePersistedSeverity.LOW);
         expect(dispatchedDoc.attributes.external_service).not.toHaveProperty('connector_id');
       });
-    });
-  });
-
-  describe('merge links', () => {
-    const mergedInto = (id: string) => ({ id, type: CASE_SAVED_OBJECT, name: 'merged-into' });
-    const mergedCase = (id: string, destinations: string[]) => ({
-      ...createCaseSavedObjectResponse({ caseId: id }),
-      version: `${id}-version`,
-      attributes: {
-        ...createCaseSavedObjectResponse({ caseId: id }).attributes,
-        merge: { merged_at: '2026-01-01T00:00:00.000Z', closed_by_merge: true },
-      },
-      references: destinations.map(mergedInto),
-    });
-
-    it('does not rewrite references an update leaves alone', async () => {
-      unsecuredSavedObjectsClient.update.mockResolvedValue(
-        {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
-      );
-
-      await service.patchCase({
-        caseId: '1',
-        updatedAttributes: { title: 'New title' },
-        originalCase: {
-          references: [mergedInto('destination-1')],
-        } as unknown as CaseSavedObjectTransformed,
-      });
-
-      const updateOptions = unsecuredSavedObjectsClient.update.mock
-        .calls[0][3] as SavedObjectsUpdateOptions<unknown>;
-      expect(updateOptions.references).toBeUndefined();
-    });
-
-    it('removes the links to deleted cases and clears a marker with none left', async () => {
-      const cases = [
-        mergedCase('case-a', ['deleted-1', 'kept']),
-        mergedCase('case-b', ['deleted-1']),
-      ];
-      unsecuredSavedObjectsClient.createPointInTimeFinder.mockReturnValue({
-        close: jest.fn(),
-        async *find() {
-          yield { saved_objects: cases };
-        },
-      } as unknown as ReturnType<typeof unsecuredSavedObjectsClient.createPointInTimeFinder>);
-      unsecuredSavedObjectsClient.get.mockImplementation(
-        async (_type, id) => cases.find((theCase) => theCase.id === id) as never
-      );
-      unsecuredSavedObjectsClient.update.mockResolvedValue(
-        {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
-      );
-
-      await service.removeMergedIntoReferences(['deleted-1']);
-
-      expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
-        expect.objectContaining({
-          hasReference: [{ type: CASE_SAVED_OBJECT, id: 'deleted-1' }],
-          hasReferenceOperator: 'OR',
-        })
-      );
-      const [first, second] = unsecuredSavedObjectsClient.update.mock.calls;
-      expect(first[2]).toEqual(
-        expect.objectContaining({
-          merge: { merged_at: '2026-01-01T00:00:00.000Z', closed_by_merge: true },
-        })
-      );
-      expect(first[3]).toEqual(
-        expect.objectContaining({ version: 'case-a-version', references: [mergedInto('kept')] })
-      );
-      expect(second[2]).toEqual(expect.objectContaining({ merge: null }));
-      expect(second[3]).toEqual(expect.objectContaining({ references: [] }));
-    });
-
-    it('logs instead of throwing when the cleanup fails', async () => {
-      unsecuredSavedObjectsClient.createPointInTimeFinder.mockImplementation(() => {
-        throw new Error('boom');
-      });
-
-      await expect(service.removeMergedIntoReferences(['deleted-1'])).resolves.toBeUndefined();
     });
   });
 });

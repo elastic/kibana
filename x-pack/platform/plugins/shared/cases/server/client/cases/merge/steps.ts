@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import {
   MAX_ALERTS_PER_CASE,
@@ -21,7 +20,9 @@ import type {
 import type { Case, MergeCounts, MergeUpdatedField } from '../../../../common/types/domain';
 import { CaseStatuses } from '../../../../common/types/domain';
 import { getCaseSettings } from '../../../../common/utils/case_settings';
+import { isCaseError, isSOError } from '../../../common/error';
 import type { AlertInfo } from '../../../common/types';
+import type { CaseSavedObjectTransformed } from '../../../common/types/case';
 import type { CasesClient } from '../../client';
 import type { CasesClientArgs } from '../../types';
 import { addComment } from '../../attachments/add';
@@ -304,7 +305,8 @@ export interface SourceResult {
   leftOut: MergeCounts;
   /** Every planned item was copied. */
   complete: boolean;
-  linked: boolean;
+  /** Its items are in the destination; when the merge closes sources, nothing came in since. */
+  merged: boolean;
   closed: boolean;
 }
 
@@ -325,15 +327,20 @@ export const copySource = async (
     existing: { ...sourcePlan.existing },
     leftOut: { ...sourcePlan.leftOut },
     complete,
-    linked: false,
+    merged: false,
     closed: false,
   };
 };
 
-const MAX_LINK_ATTEMPTS = 3;
+const MAX_CLOSE_ATTEMPTS = 3;
+
+interface MergeRoom {
+  alerts: number;
+  observables: number;
+}
 
 /** How much room each limited kind has left in the destination. */
-export const getRemainingRoom = (plan: MergeAttachmentPlan) => ({
+export const getRemainingRoom = (plan: MergeAttachmentPlan): MergeRoom => ({
   alerts: MAX_ALERTS_PER_CASE - plan.summaries.alerts.existing - plan.summaries.alerts.toCopy,
   observables:
     MAX_OBSERVABLES_PER_CASE -
@@ -342,149 +349,169 @@ export const getRemainingRoom = (plan: MergeAttachmentPlan) => ({
 });
 
 /**
- * Links a source whose items were all copied to the destination, checked against the version the
- * merge read. When the source changed since, it copies what the source gained and tries again;
- * when another merge linked it first, it stops and the source is not merged.
+ * Copies what a source gained since the merge read it. Items past a limit stay on the source.
+ * Returns whether everything else was copied.
  */
-export const linkSource = async (
+const copyGainedItems = async (
+  result: SourceResult,
+  sourcePlan: MergeSourcePlan,
+  current: CaseSavedObjectTransformed,
+  context: MergeContext,
+  run: MergeRun,
+  room: MergeRoom
+): Promise<boolean> => {
+  const { source } = result;
+  const gained = planGainedItems({
+    source: sourcePlan,
+    attachments: await run.casesClient.attachments.getAll({ caseID: source.id }),
+    observables: current.attributes.observables ?? [],
+    seenKeys: context.plan.seenKeys,
+    copyObservables: context.hasPlatinumLicense,
+  });
+  const items = gained.items.filter(({ kind, itemCount }) => {
+    if (kind !== 'alerts') {
+      return true;
+    }
+    if (itemCount > room.alerts) {
+      result.leftOut.alerts += itemCount;
+      return false;
+    }
+    room.alerts -= itemCount;
+    return true;
+  });
+  const observables = gained.observables.slice(0, Math.max(0, room.observables));
+  result.leftOut.observables += gained.observables.length - observables.length;
+  room.observables -= observables.length;
+
+  const { copied, complete } = await copyItems(source.id, items, observables, run);
+  addCounts(result.copied, copied);
+  if (!complete) {
+    result.complete = false;
+    return false;
+  }
+  gained.attachmentIds.forEach((id) => sourcePlan.attachmentIds.add(id));
+  gained.observableIds.forEach((id) => sourcePlan.observableIds.add(id));
+  return true;
+};
+
+const isConflict = (error: unknown) =>
+  isCaseError(error) && error.boomify().output.statusCode === 409;
+
+/**
+ * Closes a source whose items were all copied, checked against the version the merge read, so it
+ * never closes holding items the destination lacks: when the source changed since, it first copies
+ * what the source gained. No close reason; its alerts and required-on-close fields are left alone.
+ */
+export const closeSource = async (
   result: SourceResult,
   sourcePlan: MergeSourcePlan,
   context: MergeContext,
   run: MergeRun,
-  room: { alerts: number; observables: number }
-): Promise<boolean> => {
+  room: MergeRoom
+): Promise<Pick<SourceResult, 'merged' | 'closed'>> => {
   const {
     clientArgs: {
-      user,
       services: { caseService },
     },
-    casesClient,
-    destinationId,
   } = run;
   const { source } = result;
-  const knownDestinations = source.merge?.merged_into ?? [];
   let expectedVersion: string | undefined = source.version;
 
-  for (let attempt = 0; attempt < MAX_LINK_ATTEMPTS; attempt++) {
+  for (let attempt = 0; attempt < MAX_CLOSE_ATTEMPTS; attempt++) {
     const current = await caseService.getCase({ id: source.id });
-    const destinations = current.attributes.merge?.merged_into ?? [];
-
-    if (destinations.includes(destinationId)) {
-      // Linked by an earlier run of this merge: linking twice changes nothing.
-      return true;
-    }
-    if (destinations.some((id) => !knownDestinations.includes(id))) {
-      recordFailure(
-        run,
-        'mark',
-        source.id,
-        'Another merge linked this case to its destination first'
-      );
-      return false;
-    }
 
     if (current.version !== expectedVersion) {
-      const gained = planGainedItems({
-        source: sourcePlan,
-        attachments: await casesClient.attachments.getAll({ caseID: source.id }),
-        observables: current.attributes.observables ?? [],
-        seenKeys: context.plan.seenKeys,
-        copyObservables: context.hasPlatinumLicense,
-      });
-      // Items gained past a limit stay on the source.
-      const items = gained.items.filter(({ kind, itemCount }) => {
-        if (kind !== 'alerts') {
-          return true;
-        }
-        if (itemCount > room.alerts) {
-          result.leftOut.alerts += itemCount;
-          return false;
-        }
-        room.alerts -= itemCount;
-        return true;
-      });
-      const observables = gained.observables.slice(0, Math.max(0, room.observables));
-      result.leftOut.observables += gained.observables.length - observables.length;
-      room.observables -= observables.length;
-
-      const { copied, complete } = await copyItems(source.id, items, observables, run);
-      addCounts(result.copied, copied);
-      if (!complete) {
-        result.complete = false;
-        return false;
+      if (!(await copyGainedItems(result, sourcePlan, current, context, run, room))) {
+        return { merged: false, closed: false };
       }
-      gained.attachmentIds.forEach((id) => sourcePlan.attachmentIds.add(id));
-      gained.observableIds.forEach((id) => sourcePlan.observableIds.add(id));
       expectedVersion = current.version;
     }
-
-    const mergedAt = new Date().toISOString();
-    const {
-      saved_objects: [linked],
-    } = await caseService.patchCases({
-      cases: [
-        {
-          caseId: source.id,
-          originalCase: current,
-          version: current.version,
-          updatedAttributes: {
-            merge: {
-              merged_into: [...destinations, destinationId],
-              merged_at: mergedAt,
-              // A case an earlier merge closed stays closed by merge.
-              closed_by_merge: current.attributes.merge?.closed_by_merge ?? false,
-            },
-            updated_at: mergedAt,
-            updated_by: user,
-          },
-        },
-      ],
-      refresh: false,
-    });
-
-    if (!isSavedObjectErrorResult(linked)) {
-      return true;
+    if (current.attributes.status === CaseStatuses.closed) {
+      // Someone else closed it since, such as another merge.
+      return { merged: true, closed: false };
     }
-    if (linked.error.statusCode !== 409) {
-      recordFailure(run, 'mark', source.id, linked.error.message);
-      return false;
+    if (current.version == null) {
+      throw new Error('The case has no version to update against');
+    }
+
+    try {
+      const [closed] = await bulkUpdate(
+        { cases: [{ id: source.id, version: current.version, status: CaseStatuses.closed }] },
+        run.clientArgs,
+        run.casesClient,
+        { skipAlertSync: true, skipRequiredOnClose: true, markClosedByMerge: true }
+      );
+      if (closed != null) {
+        return { merged: true, closed: true };
+      }
+    } catch (error) {
+      if (!isConflict(error)) {
+        recordFailure(run, 'close', source.id, error);
+        return { merged: true, closed: false };
+      }
     }
     // Changed between the read and the write: check what it gained before trying again.
     expectedVersion = undefined;
   }
 
-  recordFailure(run, 'mark', source.id, 'The case kept changing while it was being merged');
-  return false;
+  recordFailure(run, 'close', source.id, 'The case kept changing while it was being merged');
+  return { merged: false, closed: false };
 };
 
 /**
- * Closes one linked source: no close reason, its alerts and required-on-close fields left alone.
- * Returns whether it closed.
+ * Sets `merged` on the merged sources this merge didn't close; closing one already set it. The flag
+ * only feeds the case list's Merged filter, so a source it fails on stays merged.
  */
-export const closeSource = async (caseId: string, run: MergeRun): Promise<boolean> => {
+export const markMerged = async (results: SourceResult[], run: MergeRun): Promise<void> => {
+  const unmarked = results.filter(
+    ({ merged, closed, source }) => merged && !closed && source.merged !== true
+  );
+  if (unmarked.length === 0) {
+    return;
+  }
+
   const {
     clientArgs: {
+      user,
       services: { caseService },
     },
   } = run;
+
   try {
-    const current = await caseService.getCase({ id: caseId });
-    if (current.attributes.status === CaseStatuses.closed) {
-      return false;
+    const { saved_objects: current } = await caseService.getCases({
+      caseIds: unmarked.map(({ source }) => source.id),
+    });
+    const markedAt = new Date().toISOString();
+    const cases = current.flatMap((theCase) => {
+      if (isSOError(theCase)) {
+        recordFailure(run, 'mark', theCase.id, theCase.error.message);
+        return [];
+      }
+      if (theCase.attributes.merged === true) {
+        return [];
+      }
+      return [
+        {
+          caseId: theCase.id,
+          originalCase: theCase,
+          updatedAttributes: { merged: true, updated_at: markedAt, updated_by: user },
+        },
+      ];
+    });
+    if (cases.length === 0) {
+      return;
     }
-    if (current.version == null) {
-      throw new Error('The case has no version to update against');
+
+    const { saved_objects: marked } = await caseService.patchCases({ cases, refresh: false });
+    for (const markedCase of marked) {
+      if (isSOError(markedCase)) {
+        recordFailure(run, 'mark', markedCase.id, markedCase.error.message);
+      }
     }
-    await bulkUpdate(
-      { cases: [{ id: caseId, version: current.version, status: CaseStatuses.closed }] },
-      run.clientArgs,
-      run.casesClient,
-      { skipAlertSync: true, skipRequiredOnClose: true, markClosedByMerge: true }
-    );
-    return true;
   } catch (error) {
-    recordFailure(run, 'close', caseId, error);
-    return false;
+    for (const { source } of unmarked) {
+      recordFailure(run, 'mark', source.id, error);
+    }
   }
 };
 

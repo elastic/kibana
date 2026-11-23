@@ -53,14 +53,6 @@ export const formatCaseList = (references: string[]): string => {
   }
 };
 
-/** The latest destination a merged case links to, or `undefined` when it was never merged. */
-export const getLatestDestinationId = (
-  merge: CaseUI['merge'] | null | undefined
-): string | undefined => {
-  const mergedInto = merge?.mergedInto ?? [];
-  return mergedInto.length > 0 ? mergedInto[mergedInto.length - 1] : undefined;
-};
-
 /**
  * Merging needs update and add-comment on the cases. Create is needed only for a new destination,
  * so a user without it can still merge into one of the open cases.

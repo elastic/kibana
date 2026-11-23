@@ -334,19 +334,24 @@ describe('buildAttachmentPlan', () => {
     expect(result.sources[1].items).toEqual([]);
   });
 
-  it('does not copy value attachments again from a source already linked to the destination', () => {
-    const lens = valueAttachment('l1', LENS_ATTACHMENT_TYPE, { state: {} });
-    const attachments = { [second.id]: [lens] };
+  it('dedupes value attachments by content, so merging again copies only new ones', () => {
+    const result = plan(
+      [first, second],
+      {
+        // The copy an earlier merge made.
+        [first.id]: [valueAttachment('copy', LENS_ATTACHMENT_TYPE, { state: { a: 1 } })],
+        [second.id]: [
+          valueAttachment('l1', LENS_ATTACHMENT_TYPE, { state: { a: 1 } }),
+          valueAttachment('l2', LENS_ATTACHMENT_TYPE, { state: { a: 2 } }),
+        ],
+      },
+      { destinationCaseId: first.id }
+    );
 
-    expect(
-      plan([first, second], attachments, { destinationCaseId: first.id }).sources[0].items
-    ).toHaveLength(1);
-    expect(
-      plan([first, second], attachments, {
-        destinationCaseId: first.id,
-        alreadyMergedSourceIds: new Set([second.id]),
-      }).sources[0].existing.other
-    ).toBe(1);
+    expect(result.sources[0].existing.other).toBe(1);
+    expect(result.sources[0].items.map(({ payload }) => payload.data)).toEqual([
+      { state: { a: 2 } },
+    ]);
   });
 });
 

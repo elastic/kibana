@@ -342,50 +342,52 @@ describe('utils', () => {
     });
   });
 
-  describe('merge filters', () => {
-    const closed = CasePersistedStatus.CLOSED;
-
-    it('returns nothing when merged is not set', () => {
-      expect(buildMergedFilter(undefined)).toBeUndefined();
+  describe('closed-by-merge filter', () => {
+    it('returns nothing when closedByMerge is not set', () => {
       expect(buildClosedByMergeFilter(undefined)).toBeUndefined();
     });
 
     it.each([
-      ['only', 'cases.attributes.merge.merged_at: *'],
-      ['exclude', 'NOT cases.attributes.merge.merged_at: *'],
-      [
-        'excludeClosed',
-        `NOT (cases.attributes.merge.merged_at: * AND cases.attributes.status: ${closed})`,
-      ],
-    ] as const)('builds the %s merged filter', (merged, expected) => {
-      const filter = buildMergedFilter(merged);
-      expect(filter).toBeDefined();
-      expect(toKqlExpression(filter as KueryNode)).toBe(expected);
-    });
-
-    it.each([
-      ['only', 'cases.attributes.merge.closed_by_merge: true'],
-      ['exclude', 'NOT cases.attributes.merge.closed_by_merge: true'],
-    ] as const)('builds the %s closed-by-merge filter', (closedByMerge, expected) => {
+      ['only', 'cases.attributes.closed_by_merge: true'],
+      ['exclude', 'NOT cases.attributes.closed_by_merge: true'],
+    ] as const)('builds the %s filter', (closedByMerge, expected) => {
       const filter = buildClosedByMergeFilter(closedByMerge);
       expect(filter).toBeDefined();
       expect(toKqlExpression(filter as KueryNode)).toBe(expected);
     });
 
-    it('combines the merge filters with the other filters', () => {
-      const { filter } = constructQueryOptions({
-        tags: 'tag1',
-        merged: 'exclude',
-        closedByMerge: 'exclude',
-      });
+    it('combines with the other filters', () => {
+      const { filter } = constructQueryOptions({ tags: 'tag1', closedByMerge: 'exclude' });
       expect(toKqlExpression(filter as KueryNode)).toBe(
-        '(cases.attributes.tags: tag1 AND NOT cases.attributes.merge.merged_at: * AND NOT cases.attributes.merge.closed_by_merge: true)'
+        '(cases.attributes.tags: tag1 AND NOT cases.attributes.closed_by_merge: true)'
       );
     });
 
-    it('strips attributes from the merge filters for search', () => {
-      const { filter } = constructQueryOptions({ merged: 'only', searchType: 'search' });
-      expect(toKqlExpression(filter as KueryNode)).toBe('cases.merge.merged_at: *');
+    it('strips attributes from the filter for search', () => {
+      const { filter } = constructQueryOptions({ closedByMerge: 'only', searchType: 'search' });
+      expect(toKqlExpression(filter as KueryNode)).toBe('cases.closed_by_merge: true');
+    });
+  });
+
+  describe('merged filter', () => {
+    it('returns nothing when merged is not set', () => {
+      expect(buildMergedFilter(undefined)).toBeUndefined();
+    });
+
+    it.each([
+      ['only', 'cases.attributes.merged: true'],
+      ['exclude', 'NOT cases.attributes.merged: true'],
+    ] as const)('builds the %s filter', (merged, expected) => {
+      const filter = buildMergedFilter(merged);
+      expect(filter).toBeDefined();
+      expect(toKqlExpression(filter as KueryNode)).toBe(expected);
+    });
+
+    it('combines with the closed-by-merge filter', () => {
+      const { filter } = constructQueryOptions({ merged: 'only', closedByMerge: 'exclude' });
+      expect(toKqlExpression(filter as KueryNode)).toBe(
+        '(cases.attributes.merged: true AND NOT cases.attributes.closed_by_merge: true)'
+      );
     });
   });
 

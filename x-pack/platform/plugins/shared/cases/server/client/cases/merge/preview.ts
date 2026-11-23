@@ -35,7 +35,6 @@ export const toPreviewCase = (theCase: Case, templates: MergeTemplates): MergePr
   createdAt: theCase.created_at,
   totalAlerts: theCase.totalAlerts,
   template: theCase.template ?? null,
-  merge: theCase.merge ?? null,
   description: theCase.description,
   createdBy: theCase.created_by,
   closedAt: theCase.closed_at,

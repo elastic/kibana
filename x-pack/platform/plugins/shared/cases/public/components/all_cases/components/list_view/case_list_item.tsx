@@ -22,7 +22,6 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { Status } from '@kbn/cases-components/src/status/status';
 
 import type { CaseUI } from '../../../../../common/ui/types';
-import type { MergeCaseSnapshot } from '../../../../../common/types/domain';
 import type { CasesColumnSelection } from '../../types';
 import { ListItemOptionalFields } from './list_item_optional_fields';
 import { CaseUserAvatar } from '../../../user_profiles/user_avatar';
@@ -33,8 +32,6 @@ import { ActionColumnComponent as ActionColumn } from '../../hooks/use_actions';
 import { severities } from '../../../severity/config';
 import { CASE_DETAILS_LINK_ARIA } from '../../../links/translations';
 import * as i18n from '../../translations';
-import { MergedIntoBadge } from '../../../merge_cases/merged_into_badge';
-import { getLatestDestinationId } from '../../../merge_cases/utils';
 
 const LIST_ITEM_HEIGHT = 80;
 const MAX_VISIBLE_ASSIGNEES = 3;
@@ -42,7 +39,6 @@ const MAX_VISIBLE_ASSIGNEES = 3;
 export const CaseListItem: React.FC<{
   theCase: CaseUI;
   userProfiles: Map<string, UserProfileWithAvatar>;
-  mergeDestinations?: Map<string, MergeCaseSnapshot>;
   disableActions: boolean;
   selectedFields: CasesColumnSelection[];
   isSelected: boolean;
@@ -53,7 +49,6 @@ export const CaseListItem: React.FC<{
   ({
     theCase,
     userProfiles,
-    mergeDestinations,
     disableActions,
     selectedFields,
     isSelected,
@@ -214,75 +209,56 @@ export const CaseListItem: React.FC<{
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow css={styles.contentColumn}>
-                  <EuiFlexGroup
-                    alignItems="flexStart"
-                    gutterSize="s"
-                    responsive={false}
-                    wrap={false}
+                  <EuiLink
+                    href={caseUrl}
+                    onClick={handleLinkClick}
+                    css={styles.titleLink}
+                    aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
+                    data-test-subj={`cases-list-item-clickable-${theCase.id}`}
                   >
-                    <EuiFlexItem grow={false} css={styles.contentColumn}>
-                      <EuiLink
-                        href={caseUrl}
-                        onClick={handleLinkClick}
-                        css={styles.titleLink}
-                        aria-label={CASE_DETAILS_LINK_ARIA(theCase.title)}
-                        data-test-subj={`cases-list-item-clickable-${theCase.id}`}
-                      >
-                        <EuiFlexGroup
-                          alignItems="flexStart"
-                          gutterSize="s"
-                          responsive={false}
-                          wrap={false}
-                        >
-                          {theCase.incrementalId != null && (
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s" color="subdued" data-test-subj="cases-list-item-id">
-                                {'#'}
-                                {theCase.incrementalId}
-                              </EuiText>
-                            </EuiFlexItem>
-                          )}
-                          <EuiFlexItem grow={false}>
-                            <EuiText
-                              size="s"
-                              data-test-subj="cases-list-item-title"
-                              css={styles.title}
-                            >
-                              {theCase.title}
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiBadge
-                              color={severities[theCase.severity].badgeColor}
-                              data-test-subj={`case-severity-badge-${theCase.severity}`}
-                            >
-                              {severities[theCase.severity].label}
-                            </EuiBadge>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <Status status={theCase.status} />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiLink>
-                    </EuiFlexItem>
-                    {/* Outside the title link: the merged badge is a link of its own. */}
-                    {getLatestDestinationId(theCase.merge) != null && (
+                    <EuiFlexGroup
+                      alignItems="flexStart"
+                      gutterSize="s"
+                      responsive={false}
+                      wrap={false}
+                    >
+                      {theCase.incrementalId != null && (
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued" data-test-subj="cases-list-item-id">
+                            {'#'}
+                            {theCase.incrementalId}
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
-                        <MergedIntoBadge merge={theCase.merge} destinations={mergeDestinations} />
+                        <EuiText size="s" data-test-subj="cases-list-item-title" css={styles.title}>
+                          {theCase.title}
+                        </EuiText>
                       </EuiFlexItem>
-                    )}
-                    {theCase.totalAlerts > 0 && (
                       <EuiFlexItem grow={false}>
                         <EuiBadge
-                          color="danger"
-                          iconType="warning"
-                          data-test-subj="cases-list-item-alerts-badge"
+                          color={severities[theCase.severity].badgeColor}
+                          data-test-subj={`case-severity-badge-${theCase.severity}`}
                         >
-                          {theCase.totalAlerts}
+                          {severities[theCase.severity].label}
                         </EuiBadge>
                       </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <Status status={theCase.status} />
+                      </EuiFlexItem>
+                      {theCase.totalAlerts > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color="danger"
+                            iconType="warning"
+                            data-test-subj="cases-list-item-alerts-badge"
+                          >
+                            {theCase.totalAlerts}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                  </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
 

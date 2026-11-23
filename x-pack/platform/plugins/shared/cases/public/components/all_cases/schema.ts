@@ -22,7 +22,7 @@ export const AllCasesURLQueryParamsSchema = lazySchema(() =>
       status: z.array(CaseStatusSchema),
       tags: z.array(z.string()),
       category: z.array(z.string()),
-      merged: z.array(z.enum(['only', 'exclude', 'excludeClosed'])),
+      merged: z.array(z.enum(['only', 'exclude'])),
       assignees: z.array(z.union([z.string(), z.null()])),
       customFields: z.record(z.string(), z.array(z.string())),
       extendedFieldFilters: limitedArraySchema({

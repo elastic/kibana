@@ -65,7 +65,7 @@ const casesSchema = lazySchema(() =>
           '- bulk_get: case_ids (keep ≤10)\n' +
           '- similar: similar_to_case_id (+ optional page, perPage)\n' +
           `- by_alert: alert_ids (max ${MAX_ALERT_IDS}) (+ optional owner)\n` +
-          '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, merged, searchFields, sortField, sortOrder, page, perPage. Merged and closed cases are left out unless `merged` is set.'
+          '- search: owner (required) + optional search, severity, status, tags, assignees, reporters, category, from, to, closedByMerge, searchFields, sortField, sortOrder, page, perPage. Cases a merge closed are left out unless `closedByMerge` is set.'
       ),
     ...getCaseStepCommonDefinition.inputSchema.omit({ include_comments: true }).partial().shape,
     ...getCasesStepCommonDefinition.inputSchema.partial().shape,
@@ -197,7 +197,7 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
         assignees,
         reporters,
         category,
-        merged,
+        closedByMerge,
         page,
         perPage,
       },
@@ -366,9 +366,9 @@ Returns metadata only; for comments/alert/event attachments call \`platform.core
               ...(category && { category }),
               ...(from && { from }),
               ...(to && { to }),
-              // Merged and closed cases are left out unless asked for: their investigation goes
-              // on in the case they were merged into.
-              merged: merged ?? 'excludeClosed',
+              // Cases a merge closed are left out unless asked for: their investigation goes on in
+              // the case they were merged into.
+              closedByMerge: closedByMerge ?? 'exclude',
             };
 
             const findResult = await casesClient.cases.find(searchParams);

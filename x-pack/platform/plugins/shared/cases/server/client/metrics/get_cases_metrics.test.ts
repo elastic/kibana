@@ -132,7 +132,7 @@ describe('getCasesMetrics', () => {
                         Object {
                           "isQuoted": false,
                           "type": "literal",
-                          "value": "cases.attributes.merge.closed_by_merge",
+                          "value": "cases.attributes.closed_by_merge",
                         },
                         Object {
                           "isQuoted": false,

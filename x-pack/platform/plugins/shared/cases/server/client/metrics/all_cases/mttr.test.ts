@@ -86,7 +86,7 @@ describe('MTTR', () => {
     await handler.compute();
 
     const filter = caseService.executeAggregations.mock.calls[0][0].options?.filter;
-    expect(JSON.stringify(filter)).toContain('cases.attributes.merge.closed_by_merge');
+    expect(JSON.stringify(filter)).toContain('cases.attributes.closed_by_merge');
     expect(filter).toEqual(
       expect.objectContaining({
         function: 'not',
@@ -94,7 +94,7 @@ describe('MTTR', () => {
           expect.objectContaining({
             function: 'is',
             arguments: [
-              expect.objectContaining({ value: 'cases.attributes.merge.closed_by_merge' }),
+              expect.objectContaining({ value: 'cases.attributes.closed_by_merge' }),
               expect.objectContaining({ value: 'true' }),
             ],
           }),
@@ -186,7 +186,7 @@ describe('MTTR', () => {
                       Object {
                         "isQuoted": false,
                         "type": "literal",
-                        "value": "cases.attributes.merge.closed_by_merge",
+                        "value": "cases.attributes.closed_by_merge",
                       },
                       Object {
                         "isQuoted": false,

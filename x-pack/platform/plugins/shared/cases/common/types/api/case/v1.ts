@@ -300,9 +300,7 @@ const CasesFindRequestSortFieldsValues = [
 export const CasesFindRequestSearchFieldsSchema = z.enum(CasesFindRequestSearchFieldsValues);
 export const CasesFindRequestSortFieldsSchema = z.enum(CasesFindRequestSortFieldsValues);
 
-export const CasesMergedFilterSchema = lazySchema(() =>
-  z.enum(['only', 'exclude', 'excludeClosed'])
-);
+export const CasesMergedFilterSchema = lazySchema(() => z.enum(['only', 'exclude']));
 export const CasesClosedByMergeFilterSchema = lazySchema(() => z.enum(['only', 'exclude']));
 
 const CasesFindRequestBaseFieldsSchema = lazySchema(() =>
@@ -407,13 +405,13 @@ const CasesFindRequestBaseFieldsSchema = lazySchema(() =>
       ])
       .optional(),
     /**
-     * Filters on whether a case was merged into another case: `only` returns merged cases,
-     * `exclude` leaves them out, and `excludeClosed` leaves out merged cases that are closed.
+     * Filters on whether the case was merged into another case: `only` returns merged cases,
+     * `exclude` leaves them out.
      */
     merged: CasesMergedFilterSchema.optional(),
     /**
-     * Filters on whether the latest merge closed the case: `only` returns those cases, `exclude`
-     * leaves them out.
+     * Filters on whether a merge closed the case: `only` returns those cases, `exclude` leaves them
+     * out.
      */
     closedByMerge: CasesClosedByMergeFilterSchema.optional(),
   })

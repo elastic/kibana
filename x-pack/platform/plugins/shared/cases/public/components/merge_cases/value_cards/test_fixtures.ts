@@ -47,7 +47,6 @@ export const previewCase = (
   createdAt: '2026-11-12T09:14:00.000Z',
   totalAlerts: 10,
   template: null,
-  merge: null,
   description: '',
   createdBy: user('Priya Raman'),
   closedAt: null,

@@ -9,12 +9,6 @@ import { schema } from '@kbn/config-schema';
 import { casesSchema as casesSchemaV11 } from './v11';
 
 export const casesSchema = casesSchemaV11.extends({
-  merge: schema.maybe(
-    schema.nullable(
-      schema.object({
-        merged_at: schema.string(),
-        closed_by_merge: schema.boolean(),
-      })
-    )
-  ),
+  closed_by_merge: schema.maybe(schema.boolean()),
+  merged: schema.maybe(schema.boolean()),
 });

@@ -128,8 +128,8 @@ const AddCasesPanel = ({
     filterOptions: {
       ...(owner != null ? { owner: [owner] } : {}),
       search: debouncedSearch,
-      // Like the add-to-case pickers: a closed case that was merged away is done with.
-      merged: ['excludeClosed'],
+      // Like the add-to-case pickers: a case a merge closed is done with.
+      closedByMerge: 'exclude',
     },
     queryParams: {
       perPage: CANDIDATE_COUNT,

@@ -80,8 +80,6 @@ export const casesQueriesKeys = {
       destinationCaseId ?? null,
       fields ?? null,
     ] as const,
-  mergeDestinations: (ids: string[]) =>
-    [...casesQueriesKeys.all, 'merge-destinations', ids] as const,
 };
 
 export const casesMutationsKeys = {

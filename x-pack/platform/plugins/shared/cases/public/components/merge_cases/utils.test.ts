@@ -30,7 +30,6 @@ import {
   getFieldValues,
   getFirstBlockedStep,
   getKeysOutsideNewest,
-  getLatestDestinationId,
   getMergedCasePreview,
   getMergeDisabledReason,
   getNextStep,
@@ -77,22 +76,6 @@ describe('merge cases utils', () => {
   describe('formatCaseList', () => {
     it('joins references the way the locale writes a list', () => {
       expect(formatCaseList(['#118', '#121', '#124'])).toBe('#118, #121, and #124');
-    });
-  });
-
-  describe('getLatestDestinationId', () => {
-    it('returns the last destination', () => {
-      expect(
-        getLatestDestinationId({
-          mergedInto: ['first', 'latest'],
-          mergedAt: '2024-01-01T00:00:00.000Z',
-          closedByMerge: true,
-        })
-      ).toBe('latest');
-    });
-
-    it('returns undefined for a case that was never merged', () => {
-      expect(getLatestDestinationId(null)).toBeUndefined();
     });
   });
 

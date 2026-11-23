@@ -136,20 +136,6 @@ const CaseBasicSchema = z.object({
   ...CaseBaseFields,
 });
 
-/**
- * The merge marker of a case that was merged into one or more cases. `merged_into` holds the
- * destination ids, oldest merge first, so the last one is the latest destination.
- */
-export const CaseMergeSchema = lazySchema(() =>
-  z.object({
-    merged_into: z.array(z.string()),
-    /** When the case was last merged. */
-    merged_at: z.string(),
-    /** Whether the latest merge closed the case. Reopening the case clears it. */
-    closed_by_merge: z.boolean(),
-  })
-);
-
 export const CaseAttributesSchema = lazySchema(() =>
   CaseBasicSchema.extend({
     duration: z.number().nullable(),
@@ -169,9 +155,15 @@ export const CaseAttributesSchema = lazySchema(() =>
     template: CaseTemplateSchema.nullable().optional(),
     [CASE_EXTENDED_FIELDS]: z.record(z.string(), z.string()).optional(),
     /**
-     * Set when the case was merged into another case. Read-only: case update requests cannot set it.
+     * Whether a merge closed the case. Reopening the case clears it. Read-only: case update
+     * requests cannot set it.
      */
-    merge: CaseMergeSchema.nullable().optional(),
+    closed_by_merge: z.boolean().optional(),
+    /**
+     * Whether the case was merged into another case. It stays set once merged. Read-only: case
+     * update requests cannot set it.
+     */
+    merged: z.boolean().optional(),
   })
 );
 
@@ -228,4 +220,3 @@ export type AttachmentTotals = z.infer<typeof AttachmentTotalsSchema>;
 export type CaseBaseOptionalFields = z.infer<typeof CaseBaseOptionalFieldsSchema>;
 export type SimilarCase = z.infer<typeof SimilarCaseSchema>;
 export type SimilarCases = SimilarCase[];
-export type CaseMerge = z.infer<typeof CaseMergeSchema>;

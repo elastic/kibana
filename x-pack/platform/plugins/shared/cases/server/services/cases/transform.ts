@@ -16,17 +16,11 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import { CASE_SAVED_OBJECT, NONE_CONNECTOR_ID } from '../../../common/constants';
-import type {
-  Case,
-  CaseCustomFields,
-  CaseMerge,
-  ExternalService,
-} from '../../../common/types/domain';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import type { Case, CaseCustomFields, ExternalService } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
-  MERGED_INTO_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
   SEVERITY_ESMODEL_TO_EXTERNAL,
   SEVERITY_EXTERNAL_TO_ESMODEL,
@@ -42,7 +36,6 @@ import {
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type {
   CasePersistedAttributes,
-  CasePersistedMerge,
   CaseTransformedAttributes,
   CaseTransformedAttributesWithAttachmentStats,
 } from '../../common/types/case';
@@ -61,7 +54,6 @@ export function transformUpdateResponseToExternalModel(
     customFields,
     settings,
     extended_fields,
-    merge,
     ...restUpdateAttributes
   } =
     updatedCase.attributes ??
@@ -108,30 +100,9 @@ export function transformUpdateResponseToExternalModel(
         extended_fields !== null && {
           extended_fields: extended_fields as Record<string, string>,
         }),
-      ...(merge !== undefined && {
-        merge: transformESMergeToExternalModel(merge, updatedCase.references),
-      }),
     } as Partial<CaseTransformedAttributes>,
   };
 }
-
-/**
- * The API's merge marker: the persisted `merge` attributes plus the destinations, which are
- * stored as `merged-into` references so export and import keep them.
- */
-const transformESMergeToExternalModel = (
-  merge: CasePersistedMerge | null,
-  references: SavedObjectReference[] | undefined
-): CaseMerge | null =>
-  merge === null
-    ? null
-    : {
-        merged_into: (references ?? [])
-          .filter(({ name }) => name === MERGED_INTO_REFERENCE_NAME)
-          .map(({ id }) => id),
-        merged_at: merge.merged_at,
-        closed_by_merge: merge.closed_by_merge,
-      };
 
 export function transformAttributesToESModel(caseAttributes: CaseTransformedAttributes): {
   attributes: CasePersistedAttributes;
@@ -156,7 +127,6 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
     status,
     incremental_id,
     settings,
-    merge,
     ...restAttributes
   } = caseAttributes;
   const { connector_id: pushConnectorId, ...restExternalService } = external_service ?? {};
@@ -193,18 +163,8 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
         },
       }),
       total_observables: restAttributes.observables?.length ?? 0,
-      ...(merge !== undefined && {
-        merge:
-          merge === null
-            ? null
-            : { merged_at: merge.merged_at, closed_by_merge: merge.closed_by_merge },
-      }),
     },
-    referenceHandler: buildReferenceHandler(
-      connector?.id,
-      pushConnectorId,
-      merge === undefined ? undefined : merge?.merged_into ?? []
-    ),
+    referenceHandler: buildReferenceHandler(connector?.id, pushConnectorId),
   };
 }
 
@@ -229,7 +189,6 @@ export function transformESModelToCase(
     total_comments,
     total_events,
     extended_fields,
-    merge,
     // Server-owned: stored for telemetry and never part of the API response.
     extract_observables_source: _extractObservablesSource,
     ...caseAttributes
@@ -273,26 +232,17 @@ export function transformESModelToCase(
       extended_fields !== null && {
         extended_fields: extended_fields as Record<string, string>,
       }),
-    ...(merge !== undefined && { merge: transformESMergeToExternalModel(merge, references) }),
   } as Case;
 }
 
 function buildReferenceHandler(
   connectorId?: string,
-  pushConnectorId?: string | null,
-  mergedIntoIds?: string[]
+  pushConnectorId?: string | null
 ): ConnectorReferenceHandler {
-  return new ConnectorReferenceHandler(
-    [
-      { id: connectorId, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
-      {
-        id: pushConnectorId,
-        name: PUSH_CONNECTOR_ID_REFERENCE_NAME,
-        type: ACTION_SAVED_OBJECT_TYPE,
-      },
-    ],
-    [{ name: MERGED_INTO_REFERENCE_NAME, type: CASE_SAVED_OBJECT, ids: mergedIntoIds }]
-  );
+  return new ConnectorReferenceHandler([
+    { id: connectorId, name: CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+    { id: pushConnectorId, name: PUSH_CONNECTOR_ID_REFERENCE_NAME, type: ACTION_SAVED_OBJECT_TYPE },
+  ]);
 }
 
 export function transformFindResponseToExternalModel(
@@ -326,7 +276,6 @@ export function transformSavedObjectToExternalModel(
     total_alerts,
     total_comments,
     extended_fields: persistedExtendedFields,
-    merge,
     ...caseSavedObjectAttributes
   } = caseSavedObject.attributes ??
   ({
@@ -370,9 +319,6 @@ export function transformSavedObjectToExternalModel(
       incremental_id,
       settings,
       ...(extended_fields !== undefined && { extended_fields }),
-      ...(merge !== undefined && {
-        merge: transformESMergeToExternalModel(merge, caseSavedObject.references),
-      }),
     } as CaseTransformedAttributes,
   };
 }

@@ -307,15 +307,11 @@ export const createCaseSavedObjectType = (
       [CASE_EXTENDED_FIELDS]: {
         type: 'flattened',
       },
-      merge: {
-        properties: {
-          merged_at: {
-            type: 'date',
-          },
-          closed_by_merge: {
-            type: 'boolean',
-          },
-        },
+      closed_by_merge: {
+        type: 'boolean',
+      },
+      merged: {
+        type: 'boolean',
       },
     },
   },

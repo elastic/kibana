@@ -42,6 +42,8 @@ import type {
 } from '../types/domain';
 import type {
   CasePatchRequest,
+  CasesClosedByMergeFilter,
+  CasesMergedFilter,
   CasesSearchResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
@@ -201,14 +203,11 @@ export interface SystemFilterOptions {
   reporters: User[];
   owner: string[];
   category: string[];
-  /**
-   * The case list's Merged filter: `exclude` hides merged cases, `only` shows only them, and
-   * `excludeClosed` (used by the add-to-case pickers) hides merged cases that are closed.
-   */
+  /** The case list's Merged filter: `exclude` hides merged cases, `only` shows only them. */
   merged: CasesMergedFilter[];
+  /** `exclude` leaves out cases a merge closed, as the add-to-case pickers do. */
+  closedByMerge?: CasesClosedByMergeFilter;
 }
-
-export type CasesMergedFilter = 'only' | 'exclude' | 'excludeClosed';
 
 export interface ExtendedFieldFilter {
   label: string;

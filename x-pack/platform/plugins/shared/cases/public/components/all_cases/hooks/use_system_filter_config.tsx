@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { CaseStatuses } from '../../../../common/types/domain';
-import type { CasesMergedFilter } from '../../../../common/ui/types';
+import type { CasesMergedFilter } from '../../../../common/types/api';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../components/multi_select_filter';
 import { SolutionFilter } from '../components/solution_filter';

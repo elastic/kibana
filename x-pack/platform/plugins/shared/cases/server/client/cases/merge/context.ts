@@ -231,13 +231,6 @@ export const loadMergeContext = async (
     choices: attachments,
     ineligibleAlerts: ineligible,
     copyObservables: hasPlatinumLicense,
-    alreadyMergedSourceIds: new Set(
-      destination == null
-        ? []
-        : sources
-            .filter(({ merge }) => merge?.merged_into.includes(destination.id) === true)
-            .map(({ id }) => id)
-    ),
   });
 
   return {

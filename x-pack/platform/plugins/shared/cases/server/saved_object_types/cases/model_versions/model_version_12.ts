@@ -10,24 +10,19 @@ import { casesSchemaV12 } from '../schemas';
 import { createSchemaOverrides } from './create_schema_overrides';
 
 /**
- * Adds the `merge` marker: when the case was last merged and whether that merge closed it. The
- * destinations are `merged-into` saved object references, so they need no mapping. Existing cases
- * have no marker, which reads as not merged.
+ * Adds `closed_by_merge`, whether a merge closed the case, and `merged`, whether the case was
+ * merged into another case. Existing cases have neither, which reads as never merged.
  */
 export const modelVersion12: SavedObjectsModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        merge: {
-          properties: {
-            merged_at: {
-              type: 'date',
-            },
-            closed_by_merge: {
-              type: 'boolean',
-            },
-          },
+        closed_by_merge: {
+          type: 'boolean',
+        },
+        merged: {
+          type: 'boolean',
         },
       },
     },

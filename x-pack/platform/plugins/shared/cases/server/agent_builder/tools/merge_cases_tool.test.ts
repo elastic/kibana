@@ -50,7 +50,6 @@ const previewCase = (id: string, incrementalId: number, status = CaseStatuses.op
   createdAt: '2026-01-01T00:00:00.000Z',
   totalAlerts: 1,
   template: null,
-  merge: null,
   description: '',
   createdBy: { username: 'elastic', full_name: null, email: null },
   closedAt: null,
@@ -172,7 +171,10 @@ const buildContext = (
         prompt: { type: 'confirmation', ...definition },
       })),
     },
-    attachments: { add: jest.fn().mockResolvedValue({ id: 'attachment-1' }) },
+    attachments: {
+      add: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
+      getActive: jest.fn().mockReturnValue([]),
+    },
     events: { sendUiEvent: jest.fn() },
   };
   return context as unknown as ToolHandlerContext & { prompts: typeof context.prompts };

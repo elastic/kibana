@@ -102,20 +102,26 @@ describe('find', () => {
       expect(call.caseOptions).not.toHaveProperty('rootSearchFields');
     });
 
-    it('passes the merged filters to the case and status queries', async () => {
-      const findRequest = createCasesClientMockFindRequest({
-        merged: 'exclude',
-        closedByMerge: 'exclude',
-      });
+    it('passes the closed-by-merge filter to the case and status queries', async () => {
+      const findRequest = createCasesClientMockFindRequest({ closedByMerge: 'exclude' });
       await find(findRequest, clientArgs, casesClientMock);
 
       const { caseOptions } = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
-      const filterString = JSON.stringify(caseOptions.filter);
-      expect(filterString).toContain('cases.attributes.merge.merged_at');
-      expect(filterString).toContain('cases.attributes.merge.closed_by_merge');
+      expect(JSON.stringify(caseOptions.filter)).toContain('cases.attributes.closed_by_merge');
 
       const { searchOptions } = clientArgs.services.caseService.getCaseStatusStats.mock.calls[0][0];
-      expect(JSON.stringify(searchOptions.filter)).toContain('cases.attributes.merge.merged_at');
+      expect(JSON.stringify(searchOptions.filter)).toContain('cases.attributes.closed_by_merge');
+    });
+
+    it('passes the merged filter to the case and status queries', async () => {
+      const findRequest = createCasesClientMockFindRequest({ merged: 'only' });
+      await find(findRequest, clientArgs, casesClientMock);
+
+      const { caseOptions } = clientArgs.services.caseService.findCasesGroupedByID.mock.calls[0][0];
+      expect(JSON.stringify(caseOptions.filter)).toContain('cases.attributes.merged');
+
+      const { searchOptions } = clientArgs.services.caseService.getCaseStatusStats.mock.calls[0][0];
+      expect(JSON.stringify(searchOptions.filter)).toContain('cases.attributes.merged');
     });
 
     it('search with single custom field', async () => {

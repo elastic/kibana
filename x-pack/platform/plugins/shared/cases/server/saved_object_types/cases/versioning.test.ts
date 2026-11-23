@@ -226,13 +226,14 @@ describe('caseSavedObjectType model version transformations', () => {
   });
 
   describe('Model version 11 to 12', () => {
-    it('does not add merged_into to existing cases', () => {
+    it('does not add closed_by_merge or merged to existing cases', () => {
       const migrated = migrator.migrate({
         document: createCaseSavedObjectResponse(),
         fromVersion: 11,
         toVersion: 12,
       });
-      expect(migrated.attributes).not.toHaveProperty('merged_into');
+      expect(migrated.attributes).not.toHaveProperty('closed_by_merge');
+      expect(migrated.attributes).not.toHaveProperty('merged');
     });
   });
 });

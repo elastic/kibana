@@ -77,7 +77,7 @@ describe('MergeAddCases', () => {
     await open();
 
     expect(useGetCasesMock).toHaveBeenLastCalledWith({
-      filterOptions: { owner: ['securitySolution'], search: '', merged: ['excludeClosed'] },
+      filterOptions: { owner: ['securitySolution'], search: '', closedByMerge: 'exclude' },
       queryParams: { perPage: 50, sortField: 'updatedAt', sortOrder: 'desc' },
     });
     expect(within(option('case-2')).getByText('#119')).toBeInTheDocument();

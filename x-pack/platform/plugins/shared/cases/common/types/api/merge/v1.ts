@@ -26,12 +26,7 @@ import {
 } from '../../../constants';
 import { limitedArraySchema, limitedStringSchema } from '../../../schema';
 import { CaseConnectorSchema } from '../../domain/connector/v1';
-import {
-  CaseMergeSchema,
-  CaseSeveritySchema,
-  CaseStatusSchema,
-  CaseTemplateSchema,
-} from '../../domain/case/v1';
+import { CaseSeveritySchema, CaseStatusSchema, CaseTemplateSchema } from '../../domain/case/v1';
 import { CaseUserProfileSchema, UserSchema } from '../../domain/user/v1';
 import { MergeCountsSchema, MergeSourceOutcomeSchema } from '../../domain/user_action/merge/v1';
 import { CaseRequestCustomFieldsSchema } from '../case/v1';
@@ -185,7 +180,6 @@ export const MergePreviewCaseSchema = lazySchema(() =>
     createdAt: z.string(),
     totalAlerts: z.number(),
     template: CaseTemplateSchema.nullable(),
-    merge: CaseMergeSchema.nullable(),
     /** For the case hover card. */
     description: z.string(),
     createdBy: UserSchema,
@@ -550,7 +544,7 @@ export const MergeCasesResolveResponseSchema = lazySchema(() =>
  */
 
 export const MergeFailureStepSchema = lazySchema(() =>
-  z.enum(['copy', 'observables', 'alertLinks', 'mark', 'close', 'activity', 'note'])
+  z.enum(['copy', 'observables', 'alertLinks', 'close', 'mark', 'activity', 'note'])
 );
 
 export const MergeSourceResultSchema = lazySchema(() =>
