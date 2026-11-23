@@ -130,33 +130,75 @@ const fieldOf = (path: string): string => {
 
 const scopeName = (scope: string): string => scope.slice(scope.lastIndexOf('/') + 1);
 
-/** The scopes a security change adds or removes, as names. */
-const scopesOf = ({ id, text }: SpecChange): string[] => {
+/** A scheme an endpoint's security asks for, with one of its scopes when it has any. */
+interface Grant {
+  readonly scheme: string;
+  readonly scope?: string;
+}
+
+/** What a security change adds or removes, or undefined for a rule that isn't about that. */
+const grantsOf = ({ id, text }: SpecChange): Grant[] | undefined => {
   const names = quoted(text);
   if (id === 'api-security-added' || id === 'api-security-removed') {
-    // `Oauth2: [https://…/auth/a, https://…/auth/b]`: a set of scopes one scheme asks for.
-    const list = /^[^[]*\[([^\]]*)\]/.exec(names[0] ?? '');
-    return (list?.[1] ?? '')
+    // `Oauth2: [https://…/auth/a, https://…/auth/b]`, or `apiKey` for a scheme without scopes.
+    const match = /^([^:[]+?)(?::\s*\[([^\]]*)\])?$/.exec(names[0] ?? '');
+    if (match === null) return undefined;
+    const scheme = match[1].trim();
+    const scopes = (match[2] ?? '')
       .split(',')
       .map((scope) => scopeName(scope.trim()))
       .filter((scope) => scope !== '');
+    return scopes.length === 0 ? [{ scheme }] : scopes.map((scope) => ({ scheme, scope }));
   }
-  const scope = id.startsWith('api-security-component') ? names[names.length - 1] : names[0];
-  return scope === undefined ? [] : [scopeName(scope)];
+  if (id === 'api-security-scope-added' || id === 'api-security-scope-removed') {
+    // The security scope `pipeline:write` was added to the endpoint's security scheme `oauth2`.
+    const [scope, scheme] = names;
+    return scope === undefined || scheme === undefined
+      ? undefined
+      : [{ scheme, scope: scopeName(scope) }];
+  }
+  if (/^api-security-component-oauth-scope-(added|removed)$/.test(id)) {
+    // The component security scheme `oauth2` oauth `clientCredentials` flow scope `write` was added.
+    const scheme = names[0];
+    const scope = names[names.length - 1];
+    return names.length < 2 ? undefined : [{ scheme, scope: scopeName(scope) }];
+  }
+  if (id === 'api-security-component-added' || id === 'api-security-component-removed') {
+    return names[0] === undefined ? undefined : [{ scheme: names[0] }];
+  }
+  return undefined;
 };
 
-/** The scopes really added or removed: a set that is only regrouped changes nothing. */
+const isGrantChange = (change: SpecChange): boolean => grantsOf(change) !== undefined;
+
+/**
+ * The schemes and scopes really added or removed: a set that is only regrouped changes nothing.
+ * A scope is named alone while one scheme is involved, and with its scheme when several are.
+ */
 const scopeEntries = (changes: readonly SpecChange[]): Entry[] => {
-  const added = new Set(changes.filter(({ id }) => id.endsWith('-added')).flatMap(scopesOf));
-  const removed = new Set(changes.filter(({ id }) => id.endsWith('-removed')).flatMap(scopesOf));
-  return [
-    ...[...added]
-      .filter((scope) => !removed.has(scope))
-      .map((name) => ({ area: 'Auth scopes' as const, sign: '+' as const, name, details: [] })),
-    ...[...removed]
-      .filter((scope) => !added.has(scope))
-      .map((name) => ({ area: 'Auth scopes' as const, sign: '-' as const, name, details: [] })),
-  ];
+  const keyOf = ({ scheme, scope }: Grant) => `${scheme}\u0000${scope ?? ''}`;
+  const collect = (suffix: string) =>
+    new Map(
+      changes
+        .filter(({ id }) => id.endsWith(suffix))
+        .flatMap((change) => grantsOf(change) ?? [])
+        .map((grant) => [keyOf(grant), grant] as const)
+    );
+  const added = collect('-added');
+  const removed = collect('-removed');
+  const schemes = new Set([...added.values(), ...removed.values()].map(({ scheme }) => scheme));
+  const nameOf = ({ scheme, scope }: Grant): string =>
+    scope === undefined ? `${scheme} (scheme)` : schemes.size > 1 ? `${scope} (${scheme})` : scope;
+  const only = (sign: '+' | '-', these: Map<string, Grant>, others: Map<string, Grant>): Entry[] =>
+    [...these.entries()]
+      .filter(([key]) => !others.has(key))
+      .map(([, grant]) => ({
+        area: 'Auth scopes' as const,
+        sign,
+        name: nameOf(grant),
+        details: [],
+      }));
+  return [...only('+', added, removed), ...only('-', removed, added)];
 };
 
 /** The part of the API a request or response rule is about. */
@@ -267,7 +309,7 @@ const entriesOf = (change: SpecChange): Entry[] | undefined => {
   const names = quoted(text);
   const area = areaOf(id);
 
-  if (id.startsWith('api-security')) {
+  if (isGrantChange(change)) {
     return []; // Netted out over every security change of the endpoint, in `scopeEntries`.
   }
   if (id === 'response-non-success-status-added') {
@@ -503,7 +545,7 @@ export const changeAreas = (changes: readonly SpecChange[]): ChangeArea[] => {
       entries.push(...found);
     }
   }
-  const securityChanges = changes.filter(({ id }) => id.startsWith('api-security'));
+  const securityChanges = changes.filter(isGrantChange);
   const scopes = scopeEntries(securityChanges);
   entries.splice(0, entries.length, ...withSubtypeChanges(entries), ...scopes);
   const regrouped = securityChanges.length > 0 && scopes.length === 0;

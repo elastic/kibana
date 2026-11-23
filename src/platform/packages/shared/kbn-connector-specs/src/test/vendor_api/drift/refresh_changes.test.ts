@@ -417,6 +417,49 @@ describe('describeChanges', () => {
     ).toEqual(object('Auth scopes', '! same scopes, reordered'));
   });
 
+  it('names a scheme without scopes that was added, rather than saying nothing changed', () => {
+    expect(
+      describeChanges([
+        change('api-security-added', 'the endpoint scheme security `apiKey` was added to the API'),
+      ])
+    ).toEqual(object('Auth scopes', '+ apiKey (scheme)'));
+    expect(
+      describeChanges([
+        change('api-security-component-added', 'the component security scheme `apiKey` was added'),
+      ])
+    ).toEqual(object('Auth scopes', '+ apiKey (scheme)'));
+  });
+
+  it('names the scheme of a scope when the same scopes moved to another scheme', () => {
+    expect(
+      describeChanges([
+        change(
+          'api-security-removed',
+          'the endpoint scheme security `Oauth2: [https://x/auth/a]` was removed from the API'
+        ),
+        change(
+          'api-security-added',
+          'the endpoint scheme security `OAuthV2: [https://x/auth/a]` was added to the API'
+        ),
+      ])
+    ).toEqual(object('Auth scopes', '- a (Oauth2)', '+ a (OAuthV2)'));
+  });
+
+  it('reads the scope a scheme gained from its own rules', () => {
+    expect(
+      describeChanges([
+        change(
+          'api-security-scope-added',
+          "the security scope `pipeline:write` was added to the endpoint's security scheme `oauth2`"
+        ),
+        change(
+          'api-security-component-oauth-scope-added',
+          'the component security scheme `oauth2` oauth `clientCredentials` flow scope `write` was added'
+        ),
+      ])
+    ).toEqual(object('Auth scopes', '+ pipeline:write', '+ write'));
+  });
+
   it('counts the scopes left out of a long list as added', () => {
     const lines = describeChanges([
       scheme(
