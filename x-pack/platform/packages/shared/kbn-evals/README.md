@@ -195,6 +195,8 @@ Add GitHub labels to trigger evals in PR CI:
 | `models:judge:<connector-id>` | Override the judge connector                                      |
 | `models:weekly-eis-models`    | Per-suite EIS model alias (resolves from `evals.suites.json`)     |
 | `evals:skip-<suite-id>`       | Skip a suite, e.g. `evals:skip-smoke-tests`                       |
+| `evals:skip`                  | Skip every suite that [requires an evals decision](#requiring-an-evals-decision-on-prs) |
+| `evals:accept-regression`     | Merge despite a [regression gate](#regression-gate) failure       |
 
 Model groups follow the pattern `eis/<modelId>` for EIS or `openrouter/<provider>-<model>` for OpenRouter.
 
@@ -224,6 +226,67 @@ score table. The link points at the Kibana that received the scores: `EVAL_KBN_U
 synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
 links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
 shard, so they show at the top of the build. Logged URLs never include credentials.
+
+#### Requiring an evals decision on PRs
+
+A suite can require PR authors to decide whether its evals run when their PR changes code the suite
+depends on. Opt in with `requireDecisionOnPaths` in the suite's
+[`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json) entry, plus
+`defaultModelGroups` so the run label alone starts a run:
+
+```json
+"defaultModelGroups": ["eis/anthropic-claude-5.5-sonnet"],
+"requireDecisionOnPaths": {
+  "include": ["x-pack/solutions/my_solution/plugins/my_plugin/server/agents/**"],
+  "exclude": ["**/*.test.ts", "**/__snapshots__/**"]
+}
+```
+
+The [`evals-gate`](../../../../../.github/workflows/evals-gate.yml) workflow matches the PR's
+changed files against these globs and posts the `evals gate` commit status. When files match and the
+PR has neither label, the status fails with "Evals decision required" and a comment lists the
+matched files. The comment is removed once the PR has a decision:
+
+- `evals:<suite-id>` runs the suite.
+- `evals:skip` skips every suite that requires a decision. It doesn't affect other suites, such as
+  `smoke-tests`. A skip always wins over a run label.
+
+Prefer directory globs over file lists, so new files are covered without editing the config. A
+config test fails when an include glob stops matching any tracked file, and the weekly runs catch
+what the globs miss. Opting in needs no new GitHub labels.
+
+A run label added while the PR's CI is running takes effect: the eval trigger step reads the labels
+again once the Kibana build is done. A label added after CI finished needs a new push or a `/ci`
+comment.
+
+##### Regression gate
+
+A suite can also block merging when its run regresses. Add `regressionGate`, naming one
+pre-registered dataset and evaluator:
+
+```json
+"regressionGate": {
+  "dataset": "my-golden-dataset",
+  "evaluator": "goal_pass",
+  "minAbsoluteDrop": 0.1,
+  "alpha": 0.05,
+  "maxBaselineAgeDays": 3
+}
+```
+
+The comparison against the latest `main` baseline for the suite's first `defaultModelGroups` model
+posts a `kibana-evals/<suite-id>` status, which the `evals gate` reads:
+
+- **Regression**: the metric got worse by at least `minAbsoluteDrop`, with p < `alpha`. The gate
+  fails until the regression is fixed or the PR gets `evals:accept-regression`.
+- **Pass**: anything else. All other evaluators stay advisory in the comparison comment.
+- **Inconclusive**: no baseline, a baseline older than `maxBaselineAgeDays`, too few paired
+  examples, or a failed comparison. The gate passes and says the result was not enforced; infra
+  problems never block a PR.
+
+`models:*` labels add models to a gated suite's run instead of replacing its default model, so they
+can't bypass the gate. A verdict from an earlier PR commit is reused when no file under
+`requireDecisionOnPaths` changed since, so unrelated pushes don't re-run the suite.
 
 #### Per-spec model groups
 

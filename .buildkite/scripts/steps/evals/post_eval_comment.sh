@@ -49,7 +49,9 @@ if [[ -z "$EVAL_SUITE_IDS" ]]; then
 fi
 
 MARKDOWN_FILE="$(mktemp -t kbn-evals-compare.XXXXXX.md)"
-trap 'rm -f "$MARKDOWN_FILE"' EXIT
+# `compare` writes the regression gate verdict here; an absent file means no verdict.
+VERDICT_DIR="$(mktemp -d -t kbn-evals-verdicts.XXXXXX)"
+trap 'rm -rf "$MARKDOWN_FILE" "$VERDICT_DIR"' EXIT
 
 HAS_RESULTS="false"
 
@@ -61,6 +63,7 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
   echo "--- Comparing eval results for suite: ${suite_id}"
 
   _suite_key_safe="$(printf '%s' "$suite_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  VERDICT_FILE="${VERDICT_DIR}/${_suite_key_safe}.json"
 
   BASE_COMPARE_ARGS=(
     --suite "$suite_id"
@@ -114,6 +117,14 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         if [[ -n "${BUILDKITE_BUILD_URL:-}" ]]; then
           COMPARE_ARGS+=(--refresh-url "${BUILDKITE_BUILD_URL}#kbn-evals-${_suite_key_safe}-refresh-block")
         fi
+        # Empty unless this suite has a regressionGate and this is its gate model's connector.
+        GATE_ARGS=()
+        mapfile -t GATE_ARGS < <(
+          node .buildkite/scripts/steps/evals/regression_gate.ts args "$suite_id" "$connector_id" || true
+        )
+        if [[ ${#GATE_ARGS[@]} -gt 0 ]]; then
+          COMPARE_ARGS+=("${GATE_ARGS[@]}" --verdict-output "$VERDICT_FILE")
+        fi
         if node scripts/evals compare "$CONNECTOR_COMPOSITE" "${COMPARE_ARGS[@]}"; then
           HAS_RESULTS="true"
         else
@@ -150,6 +161,11 @@ for suite_id in "${SUITE_ARRAY[@]}"; do
         echo "Compare failed for suite ${suite_id}; continuing."
       fi
     fi
+  fi
+
+  # Fresh-baseline builds run on main, so they have no PR commit to post the verdict to.
+  if [[ -z "$FRESH_BASELINE_PR_EXPERIMENT_ID" ]]; then
+    node .buildkite/scripts/steps/evals/regression_gate.ts post "$suite_id" "$VERDICT_FILE" || true
   fi
 done
 

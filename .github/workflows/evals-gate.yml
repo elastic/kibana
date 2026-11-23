@@ -1,0 +1,50 @@
+name: evals-gate
+
+# Posts the `evals gate` commit status: PRs that touch an eval suite's `requireDecisionOnPaths`
+# (.buildkite/pipelines/evals/evals.suites.json) need a run or skip label, and a gated suite's run
+# must not regress. Re-runs when a `kibana-evals/<suite>` verdict status arrives from Buildkite.
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
+      - ready_for_review
+      - converted_to_draft
+  status:
+
+permissions: {}
+
+concurrency:
+  group: evals-gate-${{ github.event.pull_request.number || format('status-{0}', github.event.sha) }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Evals gate
+    if: github.event_name != 'status' || startsWith(github.event.context, 'kibana-evals/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+      statuses: write
+    steps:
+      # Base branch only (the pull_request_target default): never check out or run PR code.
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .buildkite/pipelines/evals
+          sparse-checkout-cone-mode: true
+          fetch-depth: 1
+
+      - name: Post the evals gate status
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { runEvalsGateWorkflow } = require('./.buildkite/pipelines/evals/evals_gate_workflow.ts');
+            await runEvalsGateWorkflow({ github, context, core });

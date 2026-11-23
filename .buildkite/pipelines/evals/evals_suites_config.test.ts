@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import Fs from 'fs';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
@@ -162,6 +163,72 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
           .filter((model) => !requested.has(model))
           .map((model) => `${id}: "${model}" is in weeklyEisModelGroups but not in llm_evals.yml`);
       });
+
+    expect(problems).toEqual([]);
+  });
+});
+
+describe('evals.suites.json evals decision', () => {
+  const decisionSuites = suites.filter((suite) => suite.requireDecisionOnPaths !== undefined);
+  const gatedSuites = suites.filter((suite) => suite.regressionGate !== undefined);
+
+  it('lists include globs that each match a tracked file', () => {
+    // A glob that matches nothing (e.g. after a directory move) silently stops requiring a decision.
+    const trackedFiles =
+      decisionSuites.length > 0
+        ? execFileSync('git', ['ls-files'], {
+            cwd: Path.resolve(__dirname, '../../..'),
+            encoding: 'utf-8',
+            maxBuffer: 256 * 1024 * 1024,
+          }).split('\n')
+        : [];
+
+    const problems = decisionSuites.flatMap(({ id, requireDecisionOnPaths }) => {
+      const { include = [], exclude = [] } = requireDecisionOnPaths ?? {};
+      if (include.length === 0) {
+        return [`${id}: requireDecisionOnPaths has no include globs`];
+      }
+      return [
+        ...[...include, ...exclude]
+          .filter((glob) => typeof glob !== 'string' || glob.trim() === '')
+          .map(() => `${id}: requireDecisionOnPaths has an empty glob`),
+        ...include
+          .filter((glob) => {
+            // Narrow to the glob's literal prefix first; a full scan per glob is seconds slow.
+            const prefix = glob.split(/[*?{[]/)[0];
+            return !trackedFiles.some(
+              (file) => file.startsWith(prefix) && Path.matchesGlob(file, glob)
+            );
+          })
+          .map((glob) => `${id}: include glob "${glob}" matches no tracked file`),
+      ];
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every regression gate a default model, decision paths and sane thresholds', () => {
+    const problems = gatedSuites.flatMap(
+      ({ id, regressionGate, defaultModelGroups, requireDecisionOnPaths }) => {
+        if (!regressionGate) return [];
+        const { dataset, evaluator, alpha, minAbsoluteDrop, maxBaselineAgeDays } = regressionGate;
+        return [
+          // The verdict is computed for the default model, so the gate needs one to run.
+          ...(defaultModelGroups?.length ? [] : [`${id}: regressionGate needs defaultModelGroups`]),
+          // The gate only checks suites whose decision paths a PR touches.
+          ...(requireDecisionOnPaths ? [] : [`${id}: regressionGate needs requireDecisionOnPaths`]),
+          ...(dataset?.trim() ? [] : [`${id}: regressionGate.dataset is empty`]),
+          ...(evaluator?.trim() ? [] : [`${id}: regressionGate.evaluator is empty`]),
+          ...(alpha > 0 && alpha < 1 ? [] : [`${id}: regressionGate.alpha must be in (0, 1)`]),
+          ...(minAbsoluteDrop > 0 && minAbsoluteDrop <= 1
+            ? []
+            : [`${id}: regressionGate.minAbsoluteDrop must be in (0, 1]`]),
+          ...(Number.isInteger(maxBaselineAgeDays) && maxBaselineAgeDays > 0
+            ? []
+            : [`${id}: regressionGate.maxBaselineAgeDays must be a positive integer`]),
+        ];
+      }
+    );
 
     expect(problems).toEqual([]);
   });

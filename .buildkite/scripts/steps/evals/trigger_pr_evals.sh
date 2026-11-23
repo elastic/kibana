@@ -17,6 +17,17 @@ post_evals_status() { # $1=state $2=description
     --silent || true
 }
 
+echo "--- Resolving the eval suites to run"
+# Re-reads the PR labels live (a decision label added while CI ran still counts) and skips gated
+# suites whose earlier verdict still holds. This step is also emitted for PRs that touch a suite's
+# requireDecisionOnPaths without eval labels, so finding nothing to run is normal.
+RESOLVED_PR_LABELS="$(node .buildkite/scripts/steps/evals/resolve_pr_eval_labels.ts)"
+if [[ -z "$RESOLVED_PR_LABELS" ]]; then
+  echo "No eval suites to run for the current PR labels; not triggering."
+  exit 0
+fi
+export GITHUB_PR_LABELS="$RESOLVED_PR_LABELS"
+
 # ERR traps don't run on SIGTERM (the 10-min timeout), agent loss, or `set -u` aborts, so post
 # pending up front: any death then leaves a visible kibana-evals. The child overwrites it on success.
 post_evals_status pending "Triggering the LLM Evals pipeline"
@@ -32,7 +43,7 @@ trap on_trigger_error ERR
 
 echo "--- Triggering LLM Evals pipeline (kibana-evals-pr-llm-evals)"
 
-# GITHUB_PR_LABELS is pre-filtered to whitespace-free labels by getEvalTriggerStep
+# GITHUB_PR_LABELS is filtered to whitespace-free labels by resolve_pr_eval_labels.ts
 # (getForwardablePrLabels in eval_pipeline.ts), so it forwards safely alongside the scalar
 # PR-context vars. trigger_pipeline.ts splits its extra-env arg on spaces, so every forwarded
 # value must be whitespace-free — we defensively skip any that isn't.
