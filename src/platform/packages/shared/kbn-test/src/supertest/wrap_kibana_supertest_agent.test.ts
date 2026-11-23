@@ -381,5 +381,50 @@ describe('wrapKibanaSupertestAgent', () => {
         await close();
       }
     });
+
+    it('rejects when the resend hits a socket error instead of hanging', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((req, res) => {
+        attempts++;
+        if (attempts === 1) {
+          overloaded(res);
+          return;
+        }
+        req.socket.destroy();
+      });
+
+      try {
+        await expect(kibanaSupertest(url).get('/').expect(200)).rejects.toThrow(
+          /ECONNRESET|socket hang up/
+        );
+        expect(attempts).toBe(2);
+      } finally {
+        await close();
+      }
+    });
+
+    it('retries once per 429 when onRetry throws', async () => {
+      let attempts = 0;
+      const { url, close } = await startServer((_req, res) => {
+        attempts++;
+        if (attempts === 1) {
+          overloaded(res);
+          return;
+        }
+        res.writeHead(200);
+        res.end();
+      });
+
+      try {
+        const onRetry = jest.fn(() => {
+          throw new Error('callback failed');
+        });
+        await kibanaSupertest(url, undefined, { onRetry }).get('/').expect(200);
+        expect(onRetry).toHaveBeenCalledTimes(1);
+        expect(attempts).toBe(2);
+      } finally {
+        await close();
+      }
+    });
   });
 });

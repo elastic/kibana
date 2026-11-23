@@ -42,6 +42,8 @@ type RetryableTest = SupertestTest & {
   callback: (error?: Error, response?: SupertestResponse) => void;
   _maxRetries?: number;
   _aborted?: boolean;
+  /** the 429 being retried; superagent's socket error handler returns early while it is set */
+  response?: SupertestResponse;
   /** the caller's `.timeout()` deadline in ms */
   _timeout?: number;
   /** set by `.attach()` / `.field()`; the stream is consumed by the first attempt */
@@ -121,7 +123,11 @@ const retryOnEluRateLimit = (
     lastError = error;
     lastResponse = response;
     attempt++;
-    onRetry?.({ method: test.method, url: withoutCredentials(test.url), attempt, delayMs });
+    try {
+      onRetry?.({ method: test.method, url: withoutCredentials(test.url), attempt, delayMs });
+    } catch {
+      // a throwing callback must not change the retry decision
+    }
     return true;
   });
 
@@ -141,6 +147,8 @@ const retryOnEluRateLimit = (
         }
         internals._timeout = remainingMs;
       }
+      // a stale response would make superagent swallow a socket error on the resend and never settle
+      internals.response = undefined;
       originalRetry.call(internals);
     }, nextDelayMs);
     return internals;
