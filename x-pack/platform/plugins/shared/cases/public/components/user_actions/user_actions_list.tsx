@@ -28,6 +28,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { CommentRenderingProvider } from './comment/comment_rendering_context';
 import { useHighlightLinkedComment } from './hooks/use_highlight_linked_comment';
 import { CollapsedActivityPreview } from './collapsed_activity_preview';
+import { LAST_VISIT_DIVIDER_CLASS } from './new_activity';
 import { useRegisterActivityCollapseControls } from './activity_collapse_context';
 import * as i18n from './translations';
 
@@ -142,7 +143,8 @@ export const UserActionsList = React.memo(
           comments.flatMap((comment, index) =>
             comment.children != null &&
             comment.className !== 'isEdit' &&
-            comment.className !== 'showMoreActivities'
+            comment.className !== 'showMoreActivities' &&
+            comment.className !== LAST_VISIT_DIVIDER_CLASS
               ? [`activity-${index}`]
               : []
           )

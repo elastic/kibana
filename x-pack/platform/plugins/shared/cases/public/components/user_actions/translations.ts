@@ -262,3 +262,11 @@ export const NOTHING_TO_COLLAPSE = i18n.translate(
     defaultMessage: 'No comments or attachments to collapse',
   }
 );
+
+export const NEW_ACTIVITY = i18n.translate('xpack.cases.caseView.userActions.newActivity', {
+  defaultMessage: 'New',
+});
+
+export const LAST_VISIT = i18n.translate('xpack.cases.caseView.userActions.lastVisit', {
+  defaultMessage: 'Last visit',
+});

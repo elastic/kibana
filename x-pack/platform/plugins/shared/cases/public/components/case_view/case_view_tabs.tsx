@@ -22,6 +22,8 @@ import {
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab_ebt';
+import { useGetCaseDelta } from './components/whats_new/use_get_case_delta';
+import { NewAttachmentsBadge } from './components/whats_new/new_attachments_badge';
 
 export interface CaseViewTabsProps {
   caseData: CaseUI;
@@ -32,6 +34,7 @@ interface Tab {
   id: CASE_VIEW_PAGE_TABS;
   name: string;
   badge?: ReactNode;
+  newBadge?: ReactNode;
 }
 
 export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
@@ -51,6 +54,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
   });
 
   const isAttachmentsTabActive = ATTACHMENT_TAB_ALIASES.has(activeTab);
+  const { data: delta } = useGetCaseDelta(caseData.id);
+  const newAttachments = (delta?.counts.alerts ?? 0) + (delta?.counts.evidence ?? 0);
 
   const tabs: Tab[] = useMemo(
     () => [
@@ -68,6 +73,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             count={totalAttachments}
           />
         ),
+        newBadge: <NewAttachmentsBadge count={newAttachments} />,
       },
       {
         id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
@@ -81,7 +87,14 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         ),
       },
     ],
-    [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
+    [
+      activeTab,
+      euiTheme,
+      isAttachmentsTabActive,
+      newAttachments,
+      similarCasesData?.total,
+      totalAttachments,
+    ]
   );
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();
@@ -108,6 +121,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
       >
         {tab.name}
         {tab.badge ?? null}
+        {tab.newBadge ?? null}
       </EuiTab>
     ));
   }, [

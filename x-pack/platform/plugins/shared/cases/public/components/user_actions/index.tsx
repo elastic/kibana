@@ -29,6 +29,7 @@ import { useUserPermissions } from './use_user_permissions';
 import { useBuildUserActions } from './hooks/use_build_user_actions';
 import { useBuilderContext } from './hooks/use_builder_context';
 import { useCommentsList } from './hooks/use_comments_list';
+import { useGetCaseDelta } from '../case_view/components/whats_new/use_get_case_delta';
 import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useGetCaseUsers } from '../../containers/use_get_case_users';
@@ -119,16 +120,24 @@ export const UserActions = React.memo((props: UserActionsProps) => {
     handleDeleteComment,
   });
 
+  const { data: delta } = useGetCaseDelta(caseData.id);
+  const newActivity = useMemo(
+    () => (delta?.since != null ? { since: delta.since, currentUserProfile } : undefined),
+    [delta?.since, currentUserProfile]
+  );
+
   const builtInfiniteActions = useBuildUserActions({
     caseUserActions: infiniteCaseUserActions,
     attachments: infiniteLatestAttachments,
     ...builderContext,
+    newActivity,
   });
 
   const builtLastPageActions = useBuildUserActions({
     caseUserActions: lastPageUserActions,
     attachments: lastPageAttachments,
     ...builderContext,
+    newActivity,
   });
 
   const commentEditor = useMemo(
@@ -164,6 +173,7 @@ export const UserActions = React.memo((props: UserActionsProps) => {
     shouldShowCommentEditor,
     currentUserProfile,
     commentEditor,
+    showLastVisitDivider: userActivityQueryParams.sortOrder === 'asc',
   });
 
   return (

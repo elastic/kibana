@@ -30,3 +30,9 @@ export const EVIDENCE = i18n.translate('xpack.cases.caseView.whatsNew.evidence',
 export const MARK_AS_SEEN = i18n.translate('xpack.cases.caseView.whatsNew.markAsSeen', {
   defaultMessage: 'Mark as seen',
 });
+
+export const NEW_ATTACHMENTS_ARIA = (count: number) =>
+  i18n.translate('xpack.cases.caseView.whatsNew.newAttachmentsAria', {
+    defaultMessage: '{count, plural, one {# new attachment} other {# new attachments}}',
+    values: { count },
+  });

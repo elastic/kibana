@@ -16,6 +16,7 @@ import type {
   CaseResolveResponse,
   CasesSearchResponse,
   CaseDeltaResponse,
+  CaseViewedResponse,
   CaseUserActionStatsResponse,
   GetCaseConnectorsResponse,
   SingleCaseMetricsResponse,
@@ -58,6 +59,7 @@ import {
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseDeltaUrl,
+  getCaseDeltaViewedUrl,
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
@@ -270,12 +272,21 @@ export const findCaseUserActions = async (
 
 export const getCaseDelta = async (
   caseId: string,
-  since: string,
   signal?: AbortSignal
 ): Promise<CaseDeltaResponse> =>
   KibanaServices.get().http.fetch<CaseDeltaResponse>(getCaseDeltaUrl(caseId), {
     method: 'GET',
-    query: { since },
+    signal,
+  });
+
+export const recordCaseView = async (
+  caseId: string,
+  markSeen = false,
+  signal?: AbortSignal
+): Promise<CaseViewedResponse> =>
+  KibanaServices.get().http.fetch<CaseViewedResponse>(getCaseDeltaViewedUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify({ markSeen }),
     signal,
   });
 

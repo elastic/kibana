@@ -9,31 +9,32 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TestProviders } from '../../../../common/mock';
+import { NewAttachmentsBadge } from './new_attachments_badge';
 import { WhatsNewPanel } from './whats_new_panel';
-import { useCaseViewedMarker } from './use_case_viewed_marker';
 import { useGetCaseDelta } from './use_get_case_delta';
+import { useMarkCaseSeen } from './use_mark_case_seen';
 
-jest.mock('./use_case_viewed_marker');
 jest.mock('./use_get_case_delta');
+jest.mock('./use_mark_case_seen');
 
-const useCaseViewedMarkerMock = jest.mocked(useCaseViewedMarker);
 const useGetCaseDeltaMock = jest.mocked(useGetCaseDelta);
+const useMarkCaseSeenMock = jest.mocked(useMarkCaseSeen);
 
 const since = '2026-11-17T17:42:00.000Z';
 const counts = { alerts: 6, comments: 4, changes: 2, evidence: 3 };
 
-const mockDelta = (data: { counts: typeof counts } | undefined) =>
-  useGetCaseDeltaMock.mockReturnValue({
-    data: data && { since, ...data },
-  } as unknown as ReturnType<typeof useGetCaseDelta>);
+const mockDelta = (data: { since: string | null; counts: typeof counts } | undefined) =>
+  useGetCaseDeltaMock.mockReturnValue({ data } as unknown as ReturnType<typeof useGetCaseDelta>);
 
 describe('WhatsNewPanel', () => {
   const markSeen = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useCaseViewedMarkerMock.mockReturnValue({ since, isDismissed: false, markSeen });
-    mockDelta({ counts });
+    useMarkCaseSeenMock.mockReturnValue({ mutate: markSeen } as unknown as ReturnType<
+      typeof useMarkCaseSeen
+    >);
+    mockDelta({ since, counts });
   });
 
   it('shows the count of each category', () => {
@@ -46,7 +47,15 @@ describe('WhatsNewPanel', () => {
   });
 
   it('shows nothing on a first visit', () => {
-    useCaseViewedMarkerMock.mockReturnValue({ since: null, isDismissed: false, markSeen });
+    mockDelta({ since: null, counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 } });
+
+    render(<WhatsNewPanel caseId="case-1" />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('case-view-whats-new')).not.toBeInTheDocument();
+  });
+
+  it('shows nothing while the delta loads', () => {
+    mockDelta(undefined);
 
     render(<WhatsNewPanel caseId="case-1" />, { wrapper: TestProviders });
 
@@ -54,7 +63,7 @@ describe('WhatsNewPanel', () => {
   });
 
   it('shows nothing when no category has changes', () => {
-    mockDelta({ counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 } });
+    mockDelta({ since, counts: { alerts: 0, comments: 0, changes: 0, evidence: 0 } });
 
     render(<WhatsNewPanel caseId="case-1" />, { wrapper: TestProviders });
 
@@ -67,5 +76,19 @@ describe('WhatsNewPanel', () => {
     await userEvent.click(screen.getByTestId('case-view-whats-new-dismiss'));
 
     expect(markSeen).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('NewAttachmentsBadge', () => {
+  it('shows the count with a plus sign', () => {
+    render(<NewAttachmentsBadge count={7} />, { wrapper: TestProviders });
+
+    expect(screen.getByTestId('case-view-tab-new-attachments-badge')).toHaveTextContent('+7');
+  });
+
+  it('shows nothing for a zero count', () => {
+    render(<NewAttachmentsBadge count={0} />, { wrapper: TestProviders });
+
+    expect(screen.queryByTestId('case-view-tab-new-attachments-badge')).not.toBeInTheDocument();
   });
 });

@@ -7,12 +7,29 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { CaseDeltaResponse } from '../../../../../common/types/api';
-import { getCaseDelta } from '../../../../containers/api';
+import { getCaseDelta, recordCaseView } from '../../../../containers/api';
 import { casesQueriesKeys } from '../../../../containers/constants';
 
-export const useGetCaseDelta = (caseId: string, since: string | null) =>
-  useQuery<CaseDeltaResponse>(
-    casesQueriesKeys.caseDelta(caseId, since ?? ''),
-    ({ signal }) => getCaseDelta(caseId, since ?? '', signal),
-    { enabled: since != null, staleTime: Infinity }
+/**
+ * Recording the view first lets the server start a new session before it reads the window.
+ * Every component that calls this hook shares one request through the query key.
+ */
+const useRecordCaseView = (caseId: string) =>
+  useQuery(
+    casesQueriesKeys.caseViewRecord(caseId),
+    ({ signal }) => recordCaseView(caseId, false, signal),
+    {
+      staleTime: Infinity,
+      retry: false,
+    }
   );
+
+export const useGetCaseDelta = (caseId: string) => {
+  const { isSuccess: isViewRecorded } = useRecordCaseView(caseId);
+
+  return useQuery<CaseDeltaResponse>(
+    casesQueriesKeys.caseDelta(caseId),
+    ({ signal }) => getCaseDelta(caseId, signal),
+    { enabled: isViewRecorded, staleTime: Infinity }
+  );
+};

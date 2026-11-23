@@ -13,6 +13,7 @@ import { UserToolTip } from '../../user_profiles/user_tooltip';
 import { Username } from '../../user_profiles/username';
 import { CaseUserAvatar } from '../../user_profiles/user_avatar';
 import { ShowMoreActivities } from '../show_more_activities';
+import { createLastVisitDivider, hasAfterLastVisitClass } from '../new_activity';
 import * as i18n from '../translations';
 
 interface UseCommentsListArgs {
@@ -25,6 +26,8 @@ interface UseCommentsListArgs {
   shouldShowCommentEditor: boolean;
   currentUserProfile: CurrentUserProfile;
   commentEditor: React.ReactNode;
+  /** Insert a "Last visit" divider before the first activity after the last visit. */
+  showLastVisitDivider?: boolean;
 }
 
 export const useCommentsList = ({
@@ -37,6 +40,7 @@ export const useCommentsList = ({
   shouldShowCommentEditor,
   currentUserProfile,
   commentEditor,
+  showLastVisitDivider = false,
 }: UseCommentsListArgs): EuiCommentProps[] => {
   const handleShowMore = useCallback(() => {
     if (fetchNextPage) {
@@ -67,6 +71,11 @@ export const useCommentsList = ({
 
     items.push(...builtLastPageActions);
 
+    const firstNewIndex = showLastVisitDivider ? items.findIndex(hasAfterLastVisitClass) : -1;
+    if (firstNewIndex > 0) {
+      items.splice(firstNewIndex, 0, createLastVisitDivider());
+    }
+
     if (shouldShowCommentEditor) {
       items.push({
         username: (
@@ -92,5 +101,6 @@ export const useCommentsList = ({
     shouldShowCommentEditor,
     currentUserProfile,
     commentEditor,
+    showLastVisitDivider,
   ]);
 };

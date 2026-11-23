@@ -22,6 +22,8 @@ import type { RelatedRemovalOptions } from '../../../client/attachment_framework
 import type { CasesPermissions } from '../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../helpers';
 import { builderMap } from '../builder';
+import type { NewActivityContext } from '../new_activity';
+import { markNewActivity } from '../new_activity';
 
 interface UseBuildUserActionsArgs {
   caseUserActions: UserActionUI[];
@@ -38,6 +40,7 @@ interface UseBuildUserActionsArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   euiTheme: EuiThemeComputed<{}>;
+  newActivity?: NewActivityContext;
   handleOutlineComment: (id: string) => void;
   handleDeleteComment: (
     id: string,
@@ -61,6 +64,7 @@ export const useBuildUserActions = ({
   selectedOutlineCommentId,
   loadingCommentIds,
   euiTheme,
+  newActivity,
   handleOutlineComment,
   handleDeleteComment,
 }: UseBuildUserActionsArgs): EuiCommentProps[] => {
@@ -99,7 +103,11 @@ export const useBuildUserActions = ({
         handleOutlineComment,
         handleDeleteComment,
       });
-      return [...userActions, ...userActionBuilder.build()];
+      const built = userActionBuilder.build();
+      return [
+        ...userActions,
+        ...(newActivity ? markNewActivity(built, userAction, newActivity) : built),
+      ];
     }, []);
   }, [
     caseUserActions,
@@ -116,6 +124,7 @@ export const useBuildUserActions = ({
     selectedOutlineCommentId,
     loadingCommentIds,
     euiTheme,
+    newActivity,
     handleOutlineComment,
     handleDeleteComment,
   ]);

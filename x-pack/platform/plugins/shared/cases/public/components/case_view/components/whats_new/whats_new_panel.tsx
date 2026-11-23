@@ -17,8 +17,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { useCaseViewedMarker } from './use_case_viewed_marker';
 import { useGetCaseDelta } from './use_get_case_delta';
+import { useMarkCaseSeen } from './use_mark_case_seen';
 import * as i18n from './translations';
 
 interface WhatsNewPanelProps {
@@ -26,10 +26,10 @@ interface WhatsNewPanelProps {
 }
 
 const WhatsNewPanelComponent: React.FC<WhatsNewPanelProps> = ({ caseId }) => {
-  const { since, isDismissed, markSeen } = useCaseViewedMarker(caseId);
-  const { data } = useGetCaseDelta(caseId, since);
+  const { data } = useGetCaseDelta(caseId);
+  const { mutate: markSeen } = useMarkCaseSeen(caseId);
 
-  if (since == null || isDismissed || data == null) {
+  if (data == null || data.since == null) {
     return null;
   }
 
@@ -53,11 +53,15 @@ const WhatsNewPanelComponent: React.FC<WhatsNewPanelProps> = ({ caseId }) => {
             <h3>{i18n.WHATS_NEW_TITLE}</h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
-            <FormattedRelative value={new Date(since)} />
+            <FormattedRelative value={new Date(data.since)} />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="s" onClick={markSeen} data-test-subj="case-view-whats-new-dismiss">
+          <EuiButtonEmpty
+            size="s"
+            onClick={() => markSeen()}
+            data-test-subj="case-view-whats-new-dismiss"
+          >
             {i18n.MARK_AS_SEEN}
           </EuiButtonEmpty>
         </EuiFlexItem>
