@@ -13,6 +13,7 @@ import {
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { getSLIRoutingPipelineName } from '../../../../common/constants';
 import { cleanupOrphanPipelines, parseSloPipelineId } from './cleanup_orphan_pipelines';
 
 const sliPipeline = (id: string, revision: number) =>
@@ -61,6 +62,10 @@ describe('parseSloPipelineId', () => {
 
   it('returns null for an empty id', () => {
     expect(parseSloPipelineId('')).toBeNull();
+  });
+
+  it('returns null for the shared SLI routing pipeline', () => {
+    expect(parseSloPipelineId(getSLIRoutingPipelineName(3.6))).toBeNull();
   });
 
   it('returns null for non-SLO pipeline ids', () => {

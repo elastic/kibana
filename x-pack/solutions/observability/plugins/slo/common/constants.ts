@@ -67,7 +67,18 @@ export const SLI_INDEX_TEMPLATE_PATTERN = `.slo-observability.sli-v${SLO_RESOURC
 export const SLI_DESTINATION_INDEX_NAME = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}`;
 export const SLI_DESTINATION_INDEX_PATTERN = `.slo-observability.sli-v${SLO_RESOURCES_VERSION_MAJOR}*`;
 
-export const SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX = `.slo-observability.sli-v${SLO_RESOURCES_VERSION}.`;
+/** Returns the dated SLI index name prefix of a resources version. */
+export const getSLIIndexNamePrefix = (version: number): string =>
+  `.slo-observability.sli-v${version}.`;
+
+/** Returns the name of the shared SLI routing pipeline of a resources version. */
+export const getSLIRoutingPipelineName = (version: number): string =>
+  `.slo-observability.sli.routing-v${version}`;
+
+// First resources version routed through a shared routing pipeline.
+export const SLI_ROUTING_MIN_VERSION = 3.6;
+// Every resources version from SLI_ROUTING_MIN_VERSION up to SLO_RESOURCES_VERSION, append on each bump.
+export const SLI_ROUTED_VERSIONS: readonly number[] = [3.6];
 
 export const SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME = `.slo-observability.summary-mappings-v${SLO_RESOURCES_VERSION}`;
 export const SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME = `.slo-observability.summary-settings-v${SLO_RESOURCES_VERSION}`;

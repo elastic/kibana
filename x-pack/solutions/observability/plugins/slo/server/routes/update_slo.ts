@@ -38,10 +38,10 @@ export const updateSLORoute = createSloServerRoute({
     plugins,
     corePlugins,
     getScopedClients,
-    commonResourcesInstalled,
+    resourceInstallState,
   }) => {
     await assertPlatinumLicense(plugins);
-    await commonResourcesInstalled;
+    await resourceInstallState.ensureInstalled();
 
     const {
       scopedClusterClient,

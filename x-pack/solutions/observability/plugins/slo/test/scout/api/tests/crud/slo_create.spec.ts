@@ -5,16 +5,20 @@
  * 2.0.
  */
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 import {
+  getSLIRoutingPipelineName,
   getSLOPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  SLO_RESOURCES_VERSION,
 } from '../../../../../common/constants';
 import {
   apiTest,
+  createSloPipelineAssertions,
   createSloTransformAssertions,
   DEFAULT_SLO,
   mergeSloApiHeaders,
@@ -172,6 +176,39 @@ apiTest.describe(
         pipeline: `.slo-observability.summary.pipeline-${id}-1`,
       });
     });
+
+    apiTest(
+      'installs an SLI pipeline routing through the shared routing pipeline',
+      async ({ apiClient, esClient }) => {
+        const apiResponse = await apiClient.post('api/observability/slos', {
+          headers,
+          body: DEFAULT_SLO,
+          responseType: 'json',
+        });
+        expect(apiResponse).toHaveStatusCode(200);
+        const id = apiResponse.body.id as string;
+        const pipelineHelper = createSloPipelineAssertions(esClient);
+        const routingPipelineName = getSLIRoutingPipelineName(SLO_RESOURCES_VERSION);
+
+        const sliPipelineId = getSLOPipelineId(id, 1);
+        const sliPipelines = await pipelineHelper.assertExists(sliPipelineId);
+        const { processors = [] } = sliPipelines[sliPipelineId] as IngestPipeline;
+        expect(processors.map((processor) => processor?.pipeline?.name)).toContain(
+          routingPipelineName
+        );
+        expect(processors.some((processor) => processor?.date_index_name !== undefined)).toBe(
+          false
+        );
+
+        const routingPipelines = await pipelineHelper.assertExists(routingPipelineName);
+        const { _meta: meta } = routingPipelines[routingPipelineName] as IngestPipeline;
+        expect(meta).toMatchObject({
+          version: SLO_RESOURCES_VERSION,
+          template_version: SLO_RESOURCES_VERSION,
+        });
+        expect(meta?.routing?.segments?.at(-1)).toMatchObject({ rounding: 'M' });
+      }
+    );
 
     apiTest(
       'persists dashboard artifacts and returns them in the definition',

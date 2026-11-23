@@ -78,6 +78,7 @@ describe('CompositeSloSummaryTask', () => {
     healthScanTaskEnabled: true,
     staleInstancesCleanupTaskEnabled: false,
     compositeSloSummaryTaskEnabled: true,
+    sliIndexRounding: 'M',
     enabled: true,
     experimental: {
       ruleFormV2: { enabled: false },

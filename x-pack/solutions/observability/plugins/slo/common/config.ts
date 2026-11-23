@@ -14,6 +14,9 @@ export const configSchema = schema.object({
   healthScanTaskEnabled: schema.boolean({ defaultValue: true }),
   staleInstancesCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   compositeSloSummaryTaskEnabled: schema.boolean({ defaultValue: true }),
+  sliIndexRounding: schema.oneOf([schema.literal('M'), schema.literal('w'), schema.literal('d')], {
+    defaultValue: 'M',
+  }),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({

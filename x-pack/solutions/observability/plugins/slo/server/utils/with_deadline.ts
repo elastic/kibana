@@ -27,7 +27,9 @@ export const withTimeoutSignal = async <T>(
   }
 };
 
-export const isAbortError = (err: unknown): boolean =>
+/** Tells whether an error comes from an aborted request; any error counts once `signal` is aborted. */
+export const isAbortError = (err: unknown, signal?: AbortSignal): boolean =>
+  signal?.aborted === true ||
   err instanceof errors.RequestAbortedError ||
   (typeof err === 'object' && err !== null && 'name' in err && err.name === 'AbortError');
 
