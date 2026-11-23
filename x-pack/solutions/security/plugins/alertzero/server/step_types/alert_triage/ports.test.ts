@@ -15,7 +15,7 @@ import {
   type DecisionCursor,
   fetchTriageAlerts,
   findAlertIdsByTag,
-  findAlertIdsClosedAsOther,
+  findAlertsClosedWithoutFalsePositiveReason,
   findAlertsNotClosedAsFalsePositive,
   findKeyTagsWithVerdicts,
   findAlertIdsWithTag,
@@ -812,7 +812,10 @@ describe('helpers that drive a write, on a partial search result', () => {
       'findKeyTagsWithVerdicts',
       (api) => findKeyTagsWithVerdicts(api, ['k1'], ['az:true_positive']),
     ],
-    ['findAlertIdsClosedAsOther', (api) => findAlertIdsClosedAsOther(api, ['a'])],
+    [
+      'findAlertsClosedWithoutFalsePositiveReason',
+      (api) => findAlertsClosedWithoutFalsePositiveReason(api, ['a']),
+    ],
     ['findAlertIdsByTag', (api) => findAlertIdsByTag(api, 'az:closed_by_decision:fp-decision-1')],
     ['findOpenAlertIds', (api) => findOpenAlertIds(api, ['a'])],
     ['findAlertIdsWithTag', (api) => findAlertIdsWithTag(api, ['a'], 'az:skipped_by_decision:x')],
@@ -856,5 +859,34 @@ describe('helpers that drive a write, on a partial search result', () => {
       .mockResolvedValue({ status: 200, headers: {}, body: { ...complete, timed_out: true } });
 
     await expect(call({ callKibanaApi })).rejects.toThrow('partial result');
+  });
+});
+
+describe('findAlertsClosedWithoutFalsePositiveReason', () => {
+  it('tells a close for another reason apart from a close with no reason, and leaves false positives out of the query', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: {
+        hits: {
+          hits: [
+            { _id: 'tp', _source: { 'kibana.alert.workflow_reason': 'true_positive' } },
+            { _id: 'none', _source: {} },
+          ],
+        },
+      },
+    });
+
+    const found = await findAlertsClosedWithoutFalsePositiveReason({ callKibanaApi }, [
+      'tp',
+      'none',
+      'fp',
+    ]);
+
+    expect(found).toEqual({ closedAsOther: ['tp'], closedWithoutReason: ['none'] });
+    const { query } = callKibanaApi.mock.calls[0][0].body;
+    expect(query.bool.must_not).toEqual([
+      { term: { 'kibana.alert.workflow_reason': 'false_positive' } },
+    ]);
   });
 });

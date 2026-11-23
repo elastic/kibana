@@ -40,6 +40,7 @@ const setup = ({
   bulkResponse = { errors: false, items: [] as unknown[] },
   searchFails = false,
   closedAsOther = [],
+  closedWithoutReason = [],
   mode = 'shadow',
   runSpace = 'default',
 }: {
@@ -50,6 +51,8 @@ const setup = ({
   searchFails?: boolean;
   /** Ids of alerts an analyst closed with a reason other than false positive. */
   closedAsOther?: string[];
+  /** Ids of alerts that are closed with no reason at all. */
+  closedWithoutReason?: string[];
   mode?: 'off' | 'shadow' | 'on';
   /** The space of the workflow run. */
   runSpace?: string;
@@ -66,7 +69,19 @@ const setup = ({
       };
     }
     if (JSON.stringify(body.query).includes('workflow_reason')) {
-      return { body: { hits: { hits: alerts.filter(({ _id }) => closedAsOther.includes(_id)) } } };
+      return {
+        body: {
+          hits: {
+            hits: [
+              ...closedAsOther.map((_id) => ({
+                _id,
+                _source: { 'kibana.alert.workflow_reason': 'true_positive' },
+              })),
+              ...closedWithoutReason.map((_id) => ({ _id, _source: {} })),
+            ],
+          },
+        },
+      };
     }
     return { body: { hits: { hits: alerts } } };
   });
@@ -125,6 +140,30 @@ describe('triage store decisions step', () => {
       expect.objectContaining({ keys_with_other_verdicts: 1, written: 0, skip_reason: 'none' })
     );
     expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not count an alert closed with no reason as evidence of a false positive', async () => {
+    const { run, bulk } = setup({
+      alerts: alertsOf([['a.exe', 3]]),
+      closedWithoutReason: ['a.exe-0'],
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(expect.objectContaining({ keys_below_minimum: 1, written: 0 }));
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not block a pattern for an alert closed with no reason, when the rest is enough evidence', async () => {
+    const { run, bulk } = setup({
+      alerts: alertsOf([['a.exe', 4]]),
+      closedWithoutReason: ['a.exe-0'],
+    });
+
+    const { output } = await run({});
+
+    expect(output).toEqual(expect.objectContaining({ keys_with_other_verdicts: 0, written: 1 }));
+    expect(bulk).toHaveBeenCalled();
   });
 
   it('does not look at close reasons for a dismissal, which needs no evidence', async () => {

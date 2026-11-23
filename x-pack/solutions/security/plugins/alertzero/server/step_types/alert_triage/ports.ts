@@ -962,16 +962,21 @@ export const loadAlertsByIds = async (
 };
 
 /**
- * Which of the given alerts an analyst closed with a reason other than false positive (a true
- * positive, for example). A closed alert with no reason is not one of them. A failed read throws,
- * so no decision is written on a guess.
+ * The given alerts that are closed without the reason false positive, in two lists:
+ * - `closedAsOther`: closed with another reason (a true positive, for example). Such an alert is a
+ *   verdict against the pattern.
+ * - `closedWithoutReason`: closed with no reason at all. It is no evidence of a false positive, and
+ *   the approval's close leaves an already closed alert as it is, so it would stay without one. It
+ *   says nothing against the pattern either.
+ * A failed read throws, so no decision is written on a guess.
  */
-export const findAlertIdsClosedAsOther = async (
+export const findAlertsClosedWithoutFalsePositiveReason = async (
   { callKibanaApi }: KibanaApi,
   alertIds: readonly string[]
-): Promise<string[]> => {
-  const found: string[] = [];
-  // The search reads no `_source` and the filter runs in Elasticsearch, so a chunk can be large.
+): Promise<{ closedAsOther: string[]; closedWithoutReason: string[] }> => {
+  const closedAsOther: string[] = [];
+  const closedWithoutReason: string[] = [];
+  // The filter runs in Elasticsearch and only the reason is read, so a chunk can be large.
   for (let from = 0; from < alertIds.length; from += CLOSE_REASON_CHUNK_SIZE) {
     const ids = alertIds.slice(from, from + CLOSE_REASON_CHUNK_SIZE);
     const { body } = await callKibanaApi<SearchCompleteness & { hits?: { hits?: AlertHit[] } }>({
@@ -979,23 +984,22 @@ export const findAlertIdsClosedAsOther = async (
       path: SIGNALS_SEARCH_PATH,
       body: {
         size: ids.length,
-        _source: false,
+        _source: [ALERT_FIELDS.reason],
         query: {
           bool: {
-            filter: [
-              { ids: { values: ids } },
-              { term: { [ALERT_FIELDS.status]: 'closed' } },
-              { exists: { field: ALERT_FIELDS.reason } },
-            ],
+            filter: [{ ids: { values: ids } }, { term: { [ALERT_FIELDS.status]: 'closed' } }],
             must_not: [{ term: { [ALERT_FIELDS.reason]: 'false_positive' } }],
           },
         },
       },
     });
     assertCompleteSearch(body);
-    found.push(...(body.hits?.hits ?? []).map(({ _id }) => _id));
+    for (const { _id, _source = {} } of body.hits?.hits ?? []) {
+      const reason = readField(_source, ALERT_FIELDS.reason);
+      (typeof reason === 'string' && reason !== '' ? closedAsOther : closedWithoutReason).push(_id);
+    }
   }
-  return found;
+  return { closedAsOther, closedWithoutReason };
 };
 
 const CLOSE_REASON_CHUNK_SIZE = 1000;

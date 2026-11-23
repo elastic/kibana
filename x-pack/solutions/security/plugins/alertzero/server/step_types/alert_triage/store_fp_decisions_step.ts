@@ -24,7 +24,7 @@ import {
   type FpDecisionKind,
 } from '../../alert_triage/fp_decisions';
 import {
-  findAlertIdsClosedAsOther,
+  findAlertsClosedWithoutFalsePositiveReason,
   findKeyTagsWithVerdicts,
   loadAlertsByIds,
   statusCodeOf,
@@ -97,23 +97,25 @@ export const getTriageStoreFpDecisionsStepDefinition = ({
           return result('alerts_missing');
         }
         const entries = alerts.map((doc) => ({ id: String(doc._id), doc }));
-        // The approval keeps earlier closures, so an alert an analyst closed as a true positive can
-        // be in the proposal. It is no evidence of a false positive, and its pattern is blocked.
-        const closedAsOther =
+        // The approval keeps earlier closures, so an alert that is already closed can be in the
+        // proposal. One closed as a true positive is no evidence of a false positive, and its
+        // pattern is blocked. One closed with no reason is no evidence either, but it says nothing
+        // against the pattern, so it only leaves the count.
+        const { closedAsOther, closedWithoutReason } =
           kind === 'false_positive'
-            ? new Set(
-                await findAlertIdsClosedAsOther(
-                  contextManager,
-                  entries.map(({ id }) => id)
-                )
+            ? await findAlertsClosedWithoutFalsePositiveReason(
+                contextManager,
+                entries.map(({ id }) => id)
               )
-            : new Set<string>();
+            : { closedAsOther: [], closedWithoutReason: [] };
+        const blockingIds = new Set(closedAsOther);
+        const noEvidenceIds = new Set([...closedAsOther, ...closedWithoutReason]);
         const conflictedKeys = groupByStrictKey({
-          alerts: entries.filter(({ id }) => closedAsOther.has(id)),
+          alerts: entries.filter(({ id }) => blockingIds.has(id)),
           spaceId,
         }).groups.map(({ hash }) => hash);
         const { groups, alertsWithoutStrictKey } = groupByStrictKey({
-          alerts: entries.filter(({ id }) => !closedAsOther.has(id)),
+          alerts: entries.filter(({ id }) => !noEvidenceIds.has(id)),
           spaceId,
         });
         if (groups.length === 0) {
