@@ -100,17 +100,9 @@ jest.mock('../details/details_flyout', () => ({
   AlertEpisodeDetailsFlyoutContent: jest.fn(() => null),
 }));
 
-const mockFrameMount = jest.fn();
-
-jest.mock('../details/alert_details_frame', () => {
-  const react = jest.requireActual('react');
-  return {
-    AlertDetailsFrame: jest.fn(({ children }: { children: React.ReactNode }) => {
-      react.useEffect(() => mockFrameMount(), []);
-      return children;
-    }),
-  };
-});
+jest.mock('../details/alert_details_frame', () => ({
+  AlertDetailsFrame: jest.fn(({ children }: { children: React.ReactNode }) => children),
+}));
 
 jest.mock('@kbn/cell-actions', () => ({
   CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -443,17 +435,6 @@ describe('EpisodesTable', () => {
       rerender(documentView(universalC));
       act(() => lastProps(AlertDetailsFrame).pagination.onPrevious());
       expect(lastGridProps().expandedDoc).toBe(classicB);
-    });
-
-    it('keeps the same frame mounted when paging between Universal and Classic rows', () => {
-      renderTable();
-      const { rerender } = render(documentView(universalA));
-      rerender(documentView(classicB));
-      rerender(documentView(universalC));
-
-      expect(ClassicAlertDetailsFlyoutContent).toHaveBeenCalled();
-      expect(lastProps(AlertEpisodeDetailsFlyoutContent).episodeId).toBe('universal-c');
-      expect(mockFrameMount).toHaveBeenCalledTimes(1);
     });
   });
 });

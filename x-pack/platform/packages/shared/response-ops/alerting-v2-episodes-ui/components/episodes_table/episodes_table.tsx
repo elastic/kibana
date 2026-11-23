@@ -500,8 +500,10 @@ export const EpisodesTable = ({
     (hit, displayedRows) => {
       const pagination = getFlyoutPagination(displayedRows, hit.id, expandDoc);
       const isClassic = !episodeSupportsTimeline(dataTableRecordToEpisode(hit));
-      // One frame for both kinds keeps the flyout open while paging between Classic and
-      // Universal alerts; only the declared details inside it change.
+      /*
+       * One frame for both kinds keeps the flyout open while paging between Classic and
+       * Universal alerts; only the declared details inside it change.
+       */
       return (
         <AlertDetailsFrame
           onClose={closeFlyout}

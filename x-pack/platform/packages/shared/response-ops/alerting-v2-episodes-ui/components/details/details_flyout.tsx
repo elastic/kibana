@@ -259,8 +259,10 @@ export const AlertEpisodeDetailsFlyoutContent = ({
     setTab(tabId as TabId);
   };
 
-  // Metadata tab is only available when the rule is loaded.
-  // Fall back to overview silently rather than leaving the user on a blank tab.
+  /*
+   * The Metadata tab goes away when the rule cannot load. Fall back to overview silently rather
+   * than leaving the user on a blank tab.
+   */
   const effectiveTab: TabId = !showMetadataTab && tab === 'metadata' ? 'overview' : tab;
 
   const tabs = [
@@ -293,7 +295,12 @@ export const AlertEpisodeDetailsFlyoutContent = ({
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;
-  // The full runbook opens on top of the details, in their history group, so Back returns here.
+  const titleNode = isLoading ? (
+    <AlertDetailsTitleSkeleton />
+  ) : (
+    ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
+  );
+
   const openFullRunbook = () =>
     openStackedFlyout({
       title: i18n.RUNBOOK_TITLE,
@@ -302,11 +309,6 @@ export const AlertEpisodeDetailsFlyoutContent = ({
       'aria-label': i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL,
       'data-test-subj': 'alertingV2EpisodeRunbookFlyout',
     });
-  const titleNode = isLoading ? (
-    <AlertDetailsTitleSkeleton />
-  ) : (
-    ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
-  );
 
   // Header description: triggered timestamp.
   const triggeredAt = episode?.triggered_at ?? undefined;
@@ -575,7 +577,7 @@ export const AlertEpisodeDetailsFlyoutContent = ({
           />
         </FlyoutTemplate.Body.TabPanel>
 
-        {/* Metadata tab: a skeleton while the rule loads, then the rule's metadata */}
+        {/* Metadata tab */}
         {showMetadataTab && (
           <FlyoutTemplate.Body.TabPanel tabId="metadata" data-test-subj={METADATA_PANEL_TEST_SUBJ}>
             {showRuleDependentTabs ? (

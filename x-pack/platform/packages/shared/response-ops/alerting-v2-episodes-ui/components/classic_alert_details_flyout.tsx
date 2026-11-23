@@ -185,8 +185,7 @@ export const ClassicAlertDetailsFlyoutContent = ({
   const isLoaded = !isLoading && !isError;
   const loadedAlert = isLoaded ? alert : undefined;
   const loadedEpisode = isLoaded ? data?.episode : undefined;
-  // The tabs show while the alert loads, so the tab bar does not appear late. A failed load shows
-  // the error without them.
+  // The tabs show while the alert loads, so the tab bar does not appear late.
   const showTabs = isLoading || Boolean(loadedAlert);
   const episodes = useMemo(() => (loadedEpisode ? [loadedEpisode] : []), [loadedEpisode]);
   // Keep actions the table shows while disabled, such as Unresolve on a resolved classic alert.

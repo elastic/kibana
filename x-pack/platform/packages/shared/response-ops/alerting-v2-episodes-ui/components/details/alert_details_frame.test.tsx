@@ -123,7 +123,7 @@ describe('AlertDetailsFrame', () => {
       </AlertDetailsFrame>
     );
 
-    it('opens on top of the details in their history group, so it gets the Back button', () => {
+    it('opens on top of the details in their history group', () => {
       render(renderFrame('a'));
 
       act(() => screen.getByTestId('openStacked').click());
