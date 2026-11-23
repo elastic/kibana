@@ -796,9 +796,11 @@ export function validateOtlpMetadataKeys(value: string) {
       }),
     ];
   }
-  // Go lowercases each character on its own, while `toLowerCase` of a string looks at the context
-  // (a final sigma), so the keys are lowercased one character at a time
-  const lowercase = (key: string) => Array.from(key, (char) => char.toLowerCase()).join('');
+  // Go lowercases a character with its simple mapping. `toLowerCase` looks at the context (a final
+  // sigma), and maps `İ` to two characters, where Go has `i`: so the keys are lowercased one
+  // character at a time, with that exception
+  const lowercase = (key: string) =>
+    Array.from(key, (char) => (char === '\u0130' ? 'i' : char.toLowerCase())).join('');
   if (new Set(keys.map(lowercase)).size !== keys.length) {
     return [
       i18n.translate('xpack.fleet.settings.outputForm.otlpMetadataKeysDuplicate', {
@@ -823,22 +825,24 @@ export function validateOtlpPositiveCount(value: string) {
   }
 }
 
-const GO_DURATION_COMPONENT_REGEX =
-  /(\d+)(?:\.(\d*))?(ns|us|µs|μs|ms|s|m|h)|\.(\d+)(ns|us|µs|μs|ms|s|m|h)/g;
-const GO_DURATION_UNIT_NS: Record<string, bigint> = {
-  ns: BigInt(1),
-  us: BigInt(1e3),
-  µs: BigInt(1e3),
-  μs: BigInt(1e3),
-  ms: BigInt(1e6),
-  s: BigInt(1e9),
-  m: BigInt(60e9),
-  h: BigInt(3600e9),
+const GO_DURATION_COMPONENT_REGEX = /(\d*)(?:\.(\d*))?(ns|us|µs|μs|ms|s|m|h)/g;
+const GO_DURATION_UNIT_NS: Record<string, number> = {
+  ns: 1,
+  us: 1e3,
+  µs: 1e3,
+  μs: 1e3,
+  ms: 1e6,
+  s: 1e9,
+  m: 60e9,
+  h: 3600e9,
 };
+// Go stops reading the digits of a fraction once they would overflow an unsigned 64-bit integer
+const GO_FRACTION_MAX = BigInt(2) ** BigInt(63);
 
 /**
- * The nanoseconds of a valid duration, or undefined if it is empty or not a duration. Like the
- * collector, it counts whole nanoseconds, so a fraction of a nanosecond is dropped.
+ * The nanoseconds of a valid duration, or undefined if it is empty or not a duration. It rounds
+ * like the collector's duration parser (Go's `time.ParseDuration`): the whole part is exact, and a
+ * fraction is converted with floating point numbers and truncated.
  */
 export function parseOtlpDurationNs(value: string): bigint | undefined {
   const duration = value?.trim() ?? '';
@@ -846,16 +850,23 @@ export function parseOtlpDurationNs(value: string): bigint | undefined {
     return undefined;
   }
   return [...duration.matchAll(GO_DURATION_COMPONENT_REGEX)].reduce(
-    (total, [, whole, fraction, unit, leadingFraction, leadingFractionUnit]) => {
-      const unitNs = GO_DURATION_UNIT_NS[unit ?? leadingFractionUnit];
-      const fractionDigits = fraction ?? leadingFraction ?? '';
-      return (
-        total +
-        BigInt(whole ?? 0) * unitNs +
-        (fractionDigits
-          ? (BigInt(fractionDigits) * unitNs) / BigInt(10) ** BigInt(fractionDigits.length)
-          : BigInt(0))
-      );
+    (total, [, whole, fractionDigits, unit]) => {
+      const unitNs = GO_DURATION_UNIT_NS[unit];
+      let nanoseconds = BigInt(whole || 0) * BigInt(unitNs);
+      let fraction = BigInt(0);
+      let scale = 1;
+      for (const digit of fractionDigits ?? '') {
+        const next = fraction * BigInt(10) + BigInt(digit);
+        if (next > GO_FRACTION_MAX) {
+          break;
+        }
+        fraction = next;
+        scale *= 10;
+      }
+      if (fraction > 0) {
+        nanoseconds += BigInt(Math.trunc(Number(fraction) * (unitNs / scale)));
+      }
+      return total + nanoseconds;
     },
     BigInt(0)
   );

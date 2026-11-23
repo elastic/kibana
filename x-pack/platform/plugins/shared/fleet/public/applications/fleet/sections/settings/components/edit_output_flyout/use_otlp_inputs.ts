@@ -61,6 +61,13 @@ const OTLP_RETRY_SPEC_DEFAULT_INITIAL_INTERVAL = '5s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_INTERVAL = '30s';
 const OTLP_RETRY_SPEC_DEFAULT_MAX_ELAPSED_TIME = '5m';
 
+/**
+ * The unit of a batch. With none set it uses the unit of the queue, but a batch can not count
+ * requests: it counts items.
+ */
+const getEffectiveBatchSizer = (batchSizer: string, queueSizer: string) =>
+  batchSizer || (queueSizer === 'requests' ? 'items' : queueSizer);
+
 /** Re-validates an input that shows an error when what its check depends on changes. */
 const useRevalidateWhenChanged = (
   input: { errors?: string[]; validate: () => boolean },
@@ -313,7 +320,10 @@ export function useOtlpInputs(
         return error;
       }
       // the sizes are compared when both use the same unit, and a blank minimum is the spec default
-      const batchSizer = otlpBatchSizerInput.value || otlpQueueSizerInput.value;
+      const batchSizer = getEffectiveBatchSizer(
+        otlpBatchSizerInput.value,
+        otlpQueueSizerInput.value
+      );
       const queueSize = otlpQueueSizeInput.value.trim()
         ? Number(otlpQueueSizeInput.value)
         : OTLP_QUEUE_SPEC_DEFAULT_SIZE;
@@ -369,13 +379,6 @@ export function useOtlpInputs(
   useRevalidateWhenChanged(otlpBatchMaxSizeInput, [otlpBatchMinSizeInput.value]);
   useRevalidateWhenChanged(otlpQueueNumConsumersInput, [otlpQueueEnabledInput.value]);
   useRevalidateWhenChanged(otlpQueueSizeInput, [otlpQueueEnabledInput.value]);
-  // a batch can not use the requests of the queue as its unit, so it does not inherit them
-  useEffect(() => {
-    if (otlpQueueSizerInput.value === 'requests' && !otlpBatchSizerInput.value) {
-      otlpBatchSizerInput.setValue('items');
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [otlpQueueSizerInput.value, otlpBatchSizerInput.value]);
   // the errors of the batch settings do not apply when batching is off
   useEffect(() => {
     if (!otlpBatchEnabledInput.value) {
@@ -698,9 +701,15 @@ function buildOtlpQueueAndRetry(inputs: OtlpInputs) {
         flush_timeout: text(inputs.otlpBatchFlushTimeoutInput),
         min_size: integer(inputs.otlpBatchMinSizeInput),
         max_size: integer(inputs.otlpBatchMaxSizeInput),
-        // no unit is the spec default, and the schema can not unset one: it is left out
-        ...(inputs.otlpBatchSizerInput.value
-          ? { sizer: inputs.otlpBatchSizerInput.value as OtlpBatchSizer }
+        // no unit is the unit of the queue, and the schema can not unset one: it is left out. A queue
+        // that counts requests has no unit for a batch to inherit
+        ...(inputs.otlpBatchSizerInput.value || inputs.otlpQueueSizerInput.value === 'requests'
+          ? {
+              sizer: getEffectiveBatchSizer(
+                inputs.otlpBatchSizerInput.value,
+                inputs.otlpQueueSizerInput.value
+              ) as OtlpBatchSizer,
+            }
           : {}),
         partition: metadataKeys(inputs.otlpBatchMetadataKeysInput)
           ? { metadata_keys: metadataKeys(inputs.otlpBatchMetadataKeysInput) }

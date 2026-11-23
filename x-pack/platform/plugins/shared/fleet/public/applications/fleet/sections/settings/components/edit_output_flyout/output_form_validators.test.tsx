@@ -738,6 +738,14 @@ describe('OTLP validators', () => {
       expect(validateOtlpMetadataKeys('ΟΣ, ος')).toBeUndefined();
     });
 
+    it('should compare the keys with the simple lowercase mapping of the collector', () => {
+      // `İ` is `i` for Go, and the two characters `i` and a combining dot for `toLowerCase`
+      expect(validateOtlpMetadataKeys('İΣ, i\u0307σ')).toBeUndefined();
+      expect(validateOtlpMetadataKeys('İ, i')).toEqual([
+        'Metadata keys must be unique, whatever their case',
+      ]);
+    });
+
     it('should reject an empty key', () => {
       expect(validateOtlpMetadataKeys('a,,b')).toEqual([
         'Specify up to 100 metadata keys, separated by commas',
@@ -805,6 +813,8 @@ describe('OTLP validators', () => {
       ['1s1ms', '1001000000'],
       ['.5s', '500000000'],
       ['0.5ns', '0'],
+      // Go converts a long fraction with floating point numbers, and rounds this up to 1s
+      ['0.999999999999999999s', '1000000000'],
       ['0', '0'],
     ])('should parse %p', (value, expected) => {
       expect(parseOtlpDurationNs(value)?.toString()).toBe(expected);

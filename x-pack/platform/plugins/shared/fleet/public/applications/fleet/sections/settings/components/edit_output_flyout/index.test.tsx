@@ -2803,6 +2803,77 @@ describe('EditOutputFlyout', () => {
         expect(value(utils, 'otlpBatchSizerInput')).toBe('items');
       });
 
+      it('should not mark an output as changed because its queue counts requests', () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            sending_queue: { enabled: true, batch: {} },
+          },
+        } as Output);
+
+        expect(utils.getByText('Save and apply settings').closest('button')).toBeDisabled();
+      });
+
+      it('should send the items unit for a batch under a queue that counts requests', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            sending_queue: { enabled: true, batch: {} },
+          },
+        } as Output);
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'renamed' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  batch: expect.objectContaining({ sizer: 'items' }),
+                }),
+              }),
+            })
+          );
+        });
+      });
+
+      it('should keep a batch unit inherited from the queue after the queue unit was changed back', async () => {
+        const { utils } = renderFlyout({
+          ...otlpOutput,
+          otlp_exporter: {
+            protocol: 'grpc',
+            endpoint: 'collector.example.com:4317',
+            sending_queue: { enabled: true, sizer: 'bytes', queue_size: 50000000, batch: {} },
+          },
+        } as Output);
+        setValue(utils, 'otlpQueueSizerInput', 'requests');
+        setValue(utils, 'otlpQueueSizerInput', 'bytes');
+        fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+          target: { value: 'renamed' },
+        });
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalledWith(
+            'outputOtlp',
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  batch: { flush_timeout: null, min_size: null, max_size: null, partition: null },
+                }),
+              }),
+            })
+          );
+        });
+      });
+
       it('should save a queue that is off with a size of 0', async () => {
         const { utils } = renderFlyout({
           ...otlpOutput,
