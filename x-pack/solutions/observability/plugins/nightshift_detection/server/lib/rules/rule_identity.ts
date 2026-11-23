@@ -28,6 +28,38 @@ export const getStrategyTag = (strategyId: string): string => `${STRATEGY_TAG_PR
 export const getOwningStrategy = (tags: string[]): string | undefined =>
   tags.find((tag) => tag.startsWith(STRATEGY_TAG_PREFIX))?.slice(STRATEGY_TAG_PREFIX.length);
 
+/** The source a rule watches, read from its tags, or `undefined` when none is tagged. */
+export const getWatchedSource = (tags: string[]): string | undefined =>
+  tags.find((tag) => tag.startsWith(SOURCE_TAG_PREFIX))?.slice(SOURCE_TAG_PREFIX.length);
+
+/**
+ * The longest start of `text` within `maxLength` UTF-16 units, the unit Alerting counts a name in,
+ * cut between characters so an emoji is never split into half a surrogate pair.
+ */
+const cutToLength = (text: string, maxLength: number): string => {
+  let cut = '';
+  for (const character of text) {
+    if (cut.length + character.length > maxLength) {
+      break;
+    }
+    cut += character;
+  }
+  return cut;
+};
+
+/**
+ * `JSON.stringify` with object keys sorted, so the same rule built with its keys in another order
+ * serializes, and hashes, the same.
+ */
+const stringifyCanonical = (value: unknown): string =>
+  JSON.stringify(value, (_key, nested: unknown) =>
+    nested !== null && typeof nested === 'object' && !Array.isArray(nested)
+      ? Object.fromEntries(
+          Object.entries(nested).sort(([left], [right]) => (left < right ? -1 : 1))
+        )
+      : nested
+  );
+
 /**
  * The id of a managed rule. It hashes everything the rule runs with (the final query, project
  * routing included, its schedule, lookback and grouping), so any change to them gives a new rule:
@@ -44,7 +76,7 @@ export const computeRuleId = ({
   strategy: string;
   sourceId: string;
   rule: Omit<CreateRuleData, 'metadata'>;
-}): string => uuidv5(JSON.stringify([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
+}): string => uuidv5(stringifyCanonical([spaceId, strategy, sourceId, rule]), RULE_ID_NAMESPACE);
 
 /** The tags the engine puts on a managed rule, after the strategy's own. */
 export const getManagedRuleTags = ({
@@ -72,6 +104,5 @@ export const getManagedRuleName = ({
   const prefix = `${strategyName}: `;
   const suffix = ` (${ruleId.slice(0, 8)})`;
   const room = Math.max(MAX_NAME_LENGTH - prefix.length - suffix.length, 0);
-
-  return `${prefix}${title.slice(0, room)}${suffix}`;
+  return `${prefix}${cutToLength(title, room)}${suffix}`;
 };
