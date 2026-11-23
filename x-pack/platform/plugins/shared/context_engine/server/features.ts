@@ -57,7 +57,7 @@ export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }
           'xpack.contextEngine.featureRegistry.subFeatures.memoryDescription',
           {
             defaultMessage:
-              'Lets the holder read, write and forget the session memory of any user in the space. Not needed for your own session memory, and does not apply to memory in AI indices. Not included in All. Grant only to trusted applications and API keys.',
+              'Lets the holder write and forget the session memory of any user in the space. Not needed for your own session memory, and does not apply to memory in AI indices. Not included in All. Grant only to trusted applications and API keys.',
           }
         ),
         privilegeGroups: [

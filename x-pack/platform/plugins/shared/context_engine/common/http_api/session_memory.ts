@@ -12,3 +12,7 @@ export type ForgetSessionMemoryResult =
 export interface ForgetSessionMemoriesResponse {
   results: ForgetSessionMemoryResult[];
 }
+
+export interface RememberSessionMemoryResponse {
+  id: string;
+}
