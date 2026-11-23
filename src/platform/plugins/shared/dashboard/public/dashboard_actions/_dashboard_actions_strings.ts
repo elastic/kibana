@@ -26,6 +26,10 @@ export const dashboardCopyToDashboardActionStrings = {
     i18n.translate('dashboard.panel.copyToDashboard.newDashboardOptionLabel', {
       defaultMessage: 'New dashboard',
     }),
+  getNewDashboardDisabledTooltip: () =>
+    i18n.translate('dashboard.panel.copyToDashboard.newDashboardDisabledTooltip', {
+      defaultMessage: 'Copying to a new dashboard is only available from a saved dashboard.',
+    }),
   getExistingDashboardOption: () =>
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
       defaultMessage: 'Existing dashboard',
