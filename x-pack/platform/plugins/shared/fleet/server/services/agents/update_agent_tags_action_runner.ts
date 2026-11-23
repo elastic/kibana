@@ -324,6 +324,12 @@ export async function updateTagsBatch(
       // to do that, and logged until then.
       const failures = res.failures ?? [];
       const recordedUpdatedIds = getUuidArray(options.retrySkipsUpdated ? res.updated ?? 0 : 0);
+      if (recordedUpdatedIds.length > 0) {
+        // The retry leaves these agents out only if it sees what the update wrote. A cancelled
+        // update by query does not refresh, whatever its `refresh` is, so it is done here, before
+        // the retry can be scheduled. Without it the retry could select agents that are recorded.
+        await esClient.indices.refresh({ index: AGENTS_INDEX });
+      }
       const recordedFailures = options.retryCount === MAX_RETRY_COUNT ? failures : [];
       if (recordedUpdatedIds.length > 0 || recordedFailures.length > 0) {
         await createAgentAction(esClient, soClient, {

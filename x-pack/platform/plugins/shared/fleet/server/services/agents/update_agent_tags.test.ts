@@ -568,6 +568,27 @@ describe('update_agent_tags', () => {
         expect(getErrorResults(esClient)).toEqual([]);
       });
 
+      it('should make the writes of the cancelled runs visible before the retry can select agents', async () => {
+        mockRuns(cancelledTask, cancelledTask);
+
+        await expect(batch(1, true)).rejects.toThrow(/giving up/);
+
+        expect(esClient.indices.refresh).toHaveBeenCalledTimes(1);
+        expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: '.fleet-agents' });
+        // and before what the retry will leave out is recorded
+        expect(esClient.indices.refresh.mock.invocationCallOrder[0]).toBeLessThan(
+          esClient.create.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('should not refresh when there is nothing recorded for the retry to leave out', async () => {
+        mockRuns(cancelledTask, cancelledTask);
+
+        await expect(batch(1, false)).rejects.toThrow(/giving up/);
+
+        expect(esClient.indices.refresh).not.toHaveBeenCalled();
+      });
+
       it('should record both when no retry of the action is left', async () => {
         mockRuns(cancelledWithFailures, cancelledWithFailures);
 
