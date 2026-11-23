@@ -27,13 +27,13 @@ import { SpaceReconcileLock } from './space_reconcile_lock';
 
 /**
  * How long a call waits for a reconciliation already running in the space. The workflow cancels a
- * run when a newer change comes in, but the cancelled run's call keeps the lock until it finishes,
- * and it may have read the knowledge before that change. Waiting it out lets the newer run read
- * what is there now instead of answering busy and leaving the change for the six-hour schedule.
- * About four minutes: with the workflow's 30-second settle, it fits its five-minute timeout, and a
- * large reconciliation can hold the lock past the two minutes of Kibana's default socket timeout.
+ * run when a newer change comes in, and the cancelled run's call stops before its next request to
+ * Alerting, but it may still hold the lock for a moment, having read the knowledge before that
+ * change. Waiting it out lets the newer run read what is there now instead of answering busy and
+ * leaving the change for the six-hour schedule. Two minutes: with the workflow's 30-second settle,
+ * it leaves the reconciliation half of the workflow's five-minute timeout.
  */
-const LOCK_WAIT_ATTEMPTS = 24;
+const LOCK_WAIT_ATTEMPTS = 12;
 const LOCK_WAIT_INTERVAL_MS = 10_000;
 
 /** What a `_reconcile` call did: the reconciliation, or nothing because another one holds the space. */
@@ -86,6 +86,8 @@ export class ScopedReconcileRunner {
       }
     }
 
+    // An aborted call has nobody to answer, and must not read as another run holding the space.
+    abortSignal.throwIfAborted();
     return { status: 'busy' };
   }
 
@@ -119,9 +121,14 @@ export class ScopedReconcileRunner {
         const { desired, strategyErrors, skippedSources } = await this.collectDesiredRules(context);
 
         // Never paused yet: nothing sets the space's maintenance state so far.
-        return scope
-          .get(AlertingRuleReconciler)
-          .reconcile({ spaceId, desired, paused: false, strategyErrors, skippedSources });
+        return scope.get(AlertingRuleReconciler).reconcile({
+          spaceId,
+          desired,
+          paused: false,
+          strategyErrors,
+          skippedSources,
+          abortSignal,
+        });
       },
     });
   }

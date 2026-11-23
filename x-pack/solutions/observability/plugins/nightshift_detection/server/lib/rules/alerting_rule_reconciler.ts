@@ -8,7 +8,12 @@
 import { isBoom } from '@hapi/boom';
 import { chunk } from 'lodash';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import { MAX_BULK_ITEMS, type BulkResponse, type CreateRuleData } from '@kbn/alerting-v2-schemas';
+import {
+  MAX_BULK_ITEMS,
+  parseDurationToMs,
+  type BulkResponse,
+  type CreateRuleData,
+} from '@kbn/alerting-v2-schemas';
 import type { Logger } from '@kbn/core/server';
 import { Logger as CoreLogger } from '@kbn/core-di';
 import { inject, injectable } from 'inversify';
@@ -48,7 +53,10 @@ export interface ReconcileRulesResult {
   deleted: number;
   enabled: number;
   disabled: number;
-  /** Rules not created because Alerting's schedule budget is spent; the next run tries again. */
+  /**
+   * Rules not created or turned on because Alerting's schedule budget is spent; the next run tries
+   * again.
+   */
   skipped: Array<{ rule_id: string; reason: string }>;
   failures: Array<{ rule_id: string; operation: RuleOperation; message: string }>;
   strategy_errors: StrategyError[];
@@ -63,16 +71,36 @@ interface DesiredRule {
   data: CreateRuleData;
 }
 
-/** Why Alerting refused a rule for the schedule budget, once it has in a run. */
+/**
+ * The cheapest rule Alerting refused for the schedule budget in a run, and why. A rule that runs at
+ * least as often cannot fit either, since the budget only shrinks within a run, so it is skipped
+ * without asking; a rule that runs less often is still asked for.
+ */
 interface ScheduleBudget {
-  refusal?: string;
+  refusal?: { reason: string; runsPerMinute: number };
 }
+
+/** How many runs a minute a rule adds to Alerting's schedule budget once it is on. */
+const getRunsPerMinute = ({ data }: DesiredRule): number =>
+  60_000 / parseDurationToMs(data.schedule.every);
+
+/** Why a rule is skipped without asking: the budget refused one that runs no more often. */
+const getBudgetRefusal = ({
+  budget: { refusal },
+  rule,
+}: {
+  budget: ScheduleBudget;
+  rule: DesiredRule;
+}): string | undefined =>
+  rule.enabled && refusal !== undefined && getRunsPerMinute(rule) >= refusal.runsPerMinute
+    ? refusal.reason
+    : undefined;
 
 /** What the reconciler will do, worked out from what exists and what is wanted. */
 interface RuleChanges {
   toDelete: string[];
   toCreate: DesiredRule[];
-  toEnable: string[];
+  toEnable: DesiredRule[];
   toDisable: string[];
 }
 
@@ -148,12 +176,10 @@ const planRuleChanges = ({
     toCreate: [...desiredById.values()]
       .filter(({ id }) => !existingById.has(id))
       .map((rule) => ({ ...rule, enabled: shouldRun(rule) })),
-    toEnable: kept
-      .filter((rule) => {
-        const wanted = desiredById.get(rule.id);
-        return !rule.enabled && wanted !== undefined && shouldRun(wanted);
-      })
-      .map(({ id }) => id),
+    toEnable: kept.flatMap((rule) => {
+      const wanted = desiredById.get(rule.id);
+      return !rule.enabled && wanted !== undefined && shouldRun(wanted) ? [wanted] : [];
+    }),
     toDisable: kept
       .filter((rule) => {
         const wanted = desiredById.get(rule.id);
@@ -205,7 +231,7 @@ export class AlertingRuleReconciler {
     @inject(DetectionRulesClient)
     private readonly rulesClient: Pick<
       RulesClientApi,
-      'bulkCreateRules' | 'bulkDeleteRules' | 'bulkEnableRules' | 'bulkDisableRules'
+      'bulkCreateRules' | 'bulkDeleteRules' | 'enableRule' | 'bulkDisableRules'
     >,
     @inject(ManagedRuleReader) private readonly reader: Pick<ManagedRuleReader, 'listManaged'>,
     @inject(CoreLogger) private readonly logger: Logger
@@ -215,9 +241,10 @@ export class AlertingRuleReconciler {
    * Reconciles the space's managed rules:
    * 1. List every managed rule of the space.
    * 2. Plan the changes against the desired rules.
-   * 3. Delete first, so a space at its schedule budget frees room before creating.
+   * 3. Delete and turn off first, so a space at its schedule budget frees room before adding.
    * 4. Create what is missing.
-   * 5. Toggle what differs.
+   * 5. Turn on what should run.
+   * An aborted call stops before its next request to Alerting, so it lets go of the space soon.
    */
   public async reconcile({
     spaceId,
@@ -225,12 +252,14 @@ export class AlertingRuleReconciler {
     paused,
     strategyErrors,
     skippedSources,
+    abortSignal,
   }: {
     spaceId: string;
     desired: StrategyAlertingRule[];
     paused: boolean;
     strategyErrors: StrategyError[];
     skippedSources: SkippedSource[];
+    abortSignal: AbortSignal;
   }): Promise<ReconcileRulesResult> {
     const result: ReconcileRulesResult = {
       created: 0,
@@ -254,26 +283,28 @@ export class AlertingRuleReconciler {
       skippedSources: new Set(skippedSources.map(toSourceKey)),
     });
 
-    // 3 to 5. Sequential: deleting before creating is what frees the schedule budget.
+    // 3 to 5. Sequential: deleting and turning off before adding is what frees the schedule budget.
+    const budget: ScheduleBudget = {};
     result.deleted = await this.runBulk({
       result,
       operation: 'delete',
       ids: changes.toDelete,
+      abortSignal,
       run: (ids) => this.rulesClient.bulkDeleteRules({ ids }),
-    });
-    await this.create({ result, rules: changes.toCreate });
-    result.enabled = await this.runBulk({
-      result,
-      operation: 'enable',
-      ids: changes.toEnable,
-      run: (ids) => this.rulesClient.bulkEnableRules({ ids }),
     });
     result.disabled = await this.runBulk({
       result,
       operation: 'disable',
       ids: changes.toDisable,
+      abortSignal,
       run: (ids) => this.rulesClient.bulkDisableRules({ ids }),
     });
+    // One chunk at a time, so a failure is reported against the rules of its own chunk.
+    for (const batch of chunk(changes.toCreate, MAX_BULK_ITEMS)) {
+      abortSignal.throwIfAborted();
+      await this.createBatch({ result, batch, budget });
+    }
+    await this.enable({ result, rules: changes.toEnable, budget, abortSignal });
 
     this.logger.info(
       `Reconciled the detection rules of space [${spaceId}]: ${result.created} created, ${result.deleted} deleted, ${result.enabled} enabled, ${result.disabled} disabled, ${result.skipped.length} skipped, ${result.failures.length} failed, ${result.strategy_errors.length} strategies failed`
@@ -287,17 +318,20 @@ export class AlertingRuleReconciler {
     result,
     operation,
     ids,
+    abortSignal,
     run,
   }: {
     result: ReconcileRulesResult;
     operation: RuleOperation;
     ids: string[];
+    abortSignal: AbortSignal;
     run: (ids: string[]) => Promise<BulkResponse>;
   }): Promise<number> {
     let changed = 0;
 
     // One chunk at a time, so a failure is reported against the rules of its own chunk.
     for (const batch of chunk(ids, MAX_BULK_ITEMS)) {
+      abortSignal.throwIfAborted();
       try {
         const { affected_count: affectedCount, errors } = await run(batch);
         const failed = errors.filter(
@@ -317,26 +351,52 @@ export class AlertingRuleReconciler {
     return changed;
   }
 
-  private async create({
+  /**
+   * Turns rules on one at a time: Alerting checks the schedule budget only when it enables a single
+   * rule, and its bulk enable would let a re-enabled source push the cluster past it.
+   */
+  private async enable({
     result,
     rules,
+    budget,
+    abortSignal,
   }: {
     result: ReconcileRulesResult;
     rules: DesiredRule[];
+    budget: ScheduleBudget;
+    abortSignal: AbortSignal;
   }): Promise<void> {
-    const budget: ScheduleBudget = {};
+    // One rule at a time: each check reads the budget the previous one left.
+    for (const rule of rules) {
+      abortSignal.throwIfAborted();
+      const refusal = getBudgetRefusal({ budget, rule });
+      if (refusal !== undefined) {
+        result.skipped.push({ rule_id: rule.id, reason: refusal });
+        continue;
+      }
 
-    // One chunk at a time, so a failure is reported against the rules of its own chunk.
-    for (const batch of chunk(rules, MAX_BULK_ITEMS)) {
-      await this.createBatch({ result, batch, budget });
+      try {
+        await this.rulesClient.enableRule({ id: rule.id });
+        result.enabled++;
+      } catch (error) {
+        const reason = getErrorMessage(error);
+        if (
+          getAlertingErrorCode(error) === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED
+        ) {
+          budget.refusal = { reason, runsPerMinute: getRunsPerMinute(rule) };
+          result.skipped.push({ rule_id: rule.id, reason });
+        } else {
+          result.failures.push({ rule_id: rule.id, operation: 'enable', message: reason });
+        }
+      }
     }
   }
 
   /**
    * Creates a chunk of rules. A chunk Alerting refuses as a whole for some of its rules is split in
    * halves until those rules are alone, so the rest are still created. Once a single rule does not
-   * fit the schedule budget, the enabled rules after it are skipped without asking: the budget only
-   * shrinks within a run, and asking for each would scan the cluster's schedules every time.
+   * fit the schedule budget, the enabled rules that run at least as often are skipped without
+   * asking: asking for each would scan the cluster's schedules every time.
    */
   private async createBatch({
     result,
@@ -347,15 +407,13 @@ export class AlertingRuleReconciler {
     batch: DesiredRule[];
     budget: ScheduleBudget;
   }): Promise<void> {
-    const { refusal } = budget;
-    const toCreate = refusal === undefined ? batch : batch.filter(({ enabled }) => !enabled);
-    if (refusal !== undefined) {
-      result.skipped.push(
-        ...batch
-          .filter(({ enabled }) => enabled)
-          .map(({ id }) => ({ rule_id: id, reason: refusal }))
-      );
-    }
+    const checked = batch.map((rule) => ({ rule, refusal: getBudgetRefusal({ budget, rule }) }));
+    const toCreate = checked.filter(({ refusal }) => refusal === undefined).map(({ rule }) => rule);
+    result.skipped.push(
+      ...checked.flatMap(({ rule, refusal }) =>
+        refusal === undefined ? [] : [{ rule_id: rule.id, reason: refusal }]
+      )
+    );
     if (toCreate.length === 0) {
       return;
     }
@@ -385,8 +443,9 @@ export class AlertingRuleReconciler {
         return;
       }
       if (code === ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED) {
+        // A single rule by now: the split above leaves a refused chunk of one.
         const reason = getErrorMessage(error);
-        budget.refusal = reason;
+        budget.refusal = { reason, runsPerMinute: getRunsPerMinute(toCreate[0]) };
         result.skipped.push(...toCreate.map(({ id }) => ({ rule_id: id, reason })));
         return;
       }

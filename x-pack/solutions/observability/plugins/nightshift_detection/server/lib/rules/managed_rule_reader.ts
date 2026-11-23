@@ -8,7 +8,8 @@
 import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { Logger as CoreLogger } from '@kbn/core-di';
 import { inject, injectable } from 'inversify';
 import { DetectionEngineSystemClient } from '../engine/tokens';
 import { getStrategyTag, MANAGED_RULE_TAG } from './rule_identity';
@@ -16,6 +17,11 @@ import { DetectionRulesClient } from './tokens';
 
 /** Rules read per page; Alerting v2 caps a find at 500 per page. */
 const FIND_PAGE_SIZE = 500;
+/**
+ * Saved objects count matches only up to 10,000 and cannot page past them, so a list that reaches
+ * this many may be incomplete. Reconciling an incomplete list would leave the rest unmanaged.
+ */
+const MAX_LISTED_RULES = 10_000;
 /** Rows one read returns at most; a window holds about one row per rule run. */
 const MAX_ROWS = 10_000;
 
@@ -49,7 +55,8 @@ interface RuleEventSource {
 export class ManagedRuleReader {
   constructor(
     @inject(DetectionRulesClient) private readonly rulesClient: Pick<RulesClientApi, 'findRules'>,
-    @inject(DetectionEngineSystemClient) private readonly esClient: ElasticsearchClient
+    @inject(DetectionEngineSystemClient) private readonly esClient: ElasticsearchClient,
+    @inject(CoreLogger) private readonly logger: Logger
   ) {}
 
   /** Every managed rule of the space, or only those of one strategy. */
@@ -64,6 +71,11 @@ export class ManagedRuleReader {
         perPage: FIND_PAGE_SIZE,
         page,
       });
+      if (total >= MAX_LISTED_RULES) {
+        throw new Error(
+          `The space has ${MAX_LISTED_RULES} or more rules tagged [${tag}], more than the engine reads.`
+        );
+      }
       rules.push(
         ...items.map(({ id, enabled, created_at: createdAt, metadata }) => ({
           id,
@@ -123,6 +135,16 @@ export class ManagedRuleReader {
       { signal: abortSignal }
     );
     const sourceIndex = response.columns.findIndex(({ name }) => name === '_source');
+    if (response.values.length >= MAX_ROWS) {
+      // Newest first, so the oldest runs of the window are the ones left out.
+      this.logger.warn(
+        `Read only the newest ${MAX_ROWS} rows the ${
+          ruleIds.length
+        } rule(s) wrote in space [${spaceId}] between ${new Date(
+          from
+        ).toISOString()} and ${new Date(to).toISOString()}; older rows of that window are not read.`
+      );
+    }
 
     return response.values.map((row) => {
       const source = row[sourceIndex] as unknown as RuleEventSource;
