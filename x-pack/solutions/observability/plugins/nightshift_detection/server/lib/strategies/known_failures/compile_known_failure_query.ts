@@ -29,7 +29,13 @@ export function canCompileKnownFailureQuery(esql: string): boolean {
   }
 
   const names = root.commands.map((command) => command.name.toLowerCase());
-  return names[0] === 'from' && names.every((name) => FILTER_ONLY_COMMANDS.has(name));
+  // A subquery in `FROM` parses as a `parens` argument and could aggregate before the count.
+  const hasSubquery = root.commands[0]?.args.some(
+    (arg) => !Array.isArray(arg) && arg.type === 'parens'
+  );
+  return (
+    names[0] === 'from' && !hasSubquery && names.every((name) => FILTER_ONLY_COMMANDS.has(name))
+  );
 }
 
 /**
