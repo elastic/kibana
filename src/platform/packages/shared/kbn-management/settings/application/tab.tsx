@@ -24,17 +24,20 @@ export interface TabProps {
   onChangeSelectedTab: () => void;
   /** True if the tab is selected, false otherwise. */
   isSelected: boolean;
+  /** True if the tab can't be selected, false otherwise. */
+  disabled?: boolean;
 }
 
 /**
  * Component for rendering a settings tab.
  */
-export const Tab = ({ id, name, onChangeSelectedTab, isSelected }: TabProps) => {
+export const Tab = ({ id, name, onChangeSelectedTab, isSelected, disabled }: TabProps) => {
   return (
     <EuiTab
       data-test-subj={`${DATA_TEST_SUBJ_PREFIX_TAB}-${id}`}
       onClick={() => onChangeSelectedTab()}
       isSelected={isSelected}
+      disabled={disabled}
     >
       {name}
     </EuiTab>

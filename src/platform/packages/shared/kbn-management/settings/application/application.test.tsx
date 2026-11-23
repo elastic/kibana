@@ -254,6 +254,7 @@ describe('Settings application', () => {
       wrap(<SettingsApplication />, services)
     );
 
+    await waitFor(() => expect(getByTestId(globalTabTestSubj)).toBeEnabled());
     act(() => {
       fireEvent.click(getByTestId(globalTabTestSubj));
     });
@@ -653,6 +654,7 @@ describe('Settings application', () => {
 
       const spaceTab = await findByTestId(spaceSettingsTestSubj);
       const globalTab = getByTestId(globalSettingsTestSubj);
+      await waitFor(() => expect(globalTab).toBeEnabled());
 
       // Initially the Space tab should be selected
       expect(spaceTab.className).toContain('selected');
@@ -674,28 +676,64 @@ describe('Settings application', () => {
       }
     });
 
-    it('saves space settings when the selected Global tab goes away because there are no global settings', async () => {
-      const resolvers: Array<() => void> = [];
+    it('disables a tab that is not selected while its settings load', async () => {
+      let resolveGlobal: () => void = () => {};
       const services: SettingsApplicationServices = {
-        ...createSettingsApplicationServicesMock(),
+        ...createSettingsApplicationServicesMock(true),
         metadataClient: {
-          getAll: (scope: UiSettingsScope) =>
-            new Promise<UiSettingsMetadataState>((resolve) => {
-              resolvers.push(() => resolve(scope === 'namespace' ? getSettingsMock() : {}));
-            }),
+          getAll: (scope: UiSettingsScope) => {
+            if (scope === 'namespace') {
+              return Promise.resolve(getSettingsMock());
+            }
+            return new Promise<UiSettingsMetadataState>((resolve) => {
+              resolveGlobal = () => resolve(getSettingsMock());
+            });
+          },
         },
       };
 
-      const { findByTestId, findByDisplayValue, queryByTestId } = render(
+      const { findByTestId, getByTestId } = render(wrap(<SettingsApplication />, services));
+
+      await findByTestId(`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${spaceCategories[0]}`);
+      expect(getByTestId(spaceSettingsTestSubj)).toBeEnabled();
+      expect(getByTestId(globalSettingsTestSubj)).toBeDisabled();
+
+      await act(async () => {
+        resolveGlobal();
+      });
+
+      expect(getByTestId(globalSettingsTestSubj)).toBeEnabled();
+    });
+
+    it('saves space settings when the selected Global tab goes away because there are no global settings', async () => {
+      let globalAttempts = 0;
+      const services: SettingsApplicationServices = {
+        ...createSettingsApplicationServicesMock(),
+        metadataClient: {
+          getAll: (scope: UiSettingsScope) => {
+            if (scope === 'namespace') {
+              return Promise.resolve(getSettingsMock());
+            }
+            globalAttempts++;
+            if (globalAttempts === 1) {
+              return Promise.reject(new Error('Internal Server Error'));
+            }
+            return Promise.resolve({});
+          },
+        },
+      };
+
+      const { findByTestId, findByDisplayValue, getByTestId, queryByTestId } = render(
         wrap(<SettingsApplication />, services)
       );
 
-      const globalTab = await findByTestId(globalSettingsTestSubj);
+      await waitFor(() => expect(getByTestId(globalSettingsTestSubj)).toBeEnabled());
       act(() => {
-        fireEvent.click(globalTab);
+        fireEvent.click(getByTestId(globalSettingsTestSubj));
       });
-      await act(async () => {
-        resolvers.forEach((resolve) => resolve());
+      const retryButton = await findByTestId(DATA_TEST_SUBJ_SETTING_DEFINITIONS_RETRY);
+      act(() => {
+        fireEvent.click(retryButton);
       });
 
       await waitFor(() => expect(queryByTestId(globalSettingsTestSubj)).toBeNull());

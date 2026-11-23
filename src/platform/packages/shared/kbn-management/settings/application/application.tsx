@@ -208,8 +208,9 @@ export const SettingsApplication = () => {
   // The Global tab shows while settings load, and goes away if there are no global settings.
   const selectedTabId = tabs[requestedTabId] ? requestedTabId : SPACE_SETTINGS_TAB_ID;
   const selectedTab = tabs[selectedTabId];
-  const isSelectedTabLoading =
-    selectedTabId === GLOBAL_SETTINGS_TAB_ID ? isGlobalLoading : isSpaceLoading;
+  const isTabLoading = (id: string) =>
+    id === GLOBAL_SETTINGS_TAB_ID ? isGlobalLoading : isSpaceLoading;
+  const isSelectedTabLoading = isTabLoading(selectedTabId);
 
   const title = (
     <EuiText>
@@ -249,6 +250,8 @@ export const SettingsApplication = () => {
                 name={tabs[id].name}
                 onChangeSelectedTab={() => setRequestedTabId(id)}
                 isSelected={id === selectedTabId}
+                // The form unmounts while a tab loads, which drops its unsaved changes.
+                disabled={id !== selectedTabId && isTabLoading(id)}
               />
             ))}
           </EuiTabs>
