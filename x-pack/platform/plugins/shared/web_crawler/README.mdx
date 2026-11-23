@@ -9,8 +9,9 @@ tags: ['elasticsearch', 'crawler', 'shared']
 ## Overview
 
 This plugin will crawl a website into an Elasticsearch index. It is being built in steps, and so far
-holds only what a crawl needs to find its way around a site: normalizing and filtering the links of
-a page, reading `robots.txt` and sitemaps, and narrowing a crawl to path prefixes.
+holds the crawl itself: finding the pages of a site, having each one fetched and converted to
+markdown by a `document_extraction` inference endpoint, and indexing them. Nothing starts a crawl
+yet.
 
 ## Enabling it
 
@@ -39,3 +40,25 @@ read within a small request budget.
 
 A crawl can be narrowed with path prefixes: with `includePaths` only pages under one of them are
 followed, and pages under an `excludePaths` prefix never are.
+
+## How a crawl runs
+
+Kibana never fetches the site itself: each page, `robots.txt` and sitemap is fetched by a
+`document_extraction` inference endpoint, preferring the Elastic Inference Service one, and Kibana
+only extracts the links from the markdown that comes back.
+
+Ten workers pull pages from a queue that always hands out the shallowest page found so far, which
+keeps the crawl close to breadth-first without one slow page holding up a whole depth level. A
+`Crawl-delay` in `robots.txt` spaces out the requests to that site, up to three seconds. A
+rate-limited extraction is retried twice with a backoff.
+
+A crawl starts from one or more URLs and stays on the sites those are on, each with its own
+`robots.txt`, crawl delay and sitemaps. It takes a maximum depth and a maximum number of pages.
+
+Indexing runs beside extraction. Each page is indexed once, keyed by its URL, with its markdown in
+`content` and copied into the `semantic_text` field `content_semantic`. A bulk request closes at
+twenty pages or one megabyte of content, and up to three run at once.
+
+A crawl that read the whole site ends by deleting the documents earlier crawls indexed and it did
+not find again. One that failed on a page, reached the page maximum or was stopped deletes nothing,
+because it cannot tell a removed page from one it did not get to.

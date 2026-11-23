@@ -1,0 +1,74 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { purgeStaleDocuments } from './purge';
+
+const INDEX_NAME = 'web-crawl-example.com';
+const CRAWL_ID = 'crawl-2';
+
+describe('purgeStaleDocuments', () => {
+  let esClient: ElasticsearchClientMock;
+  let abortController: AbortController;
+
+  const purge = (maxDepth: number = 2, hosts: string[] = ['example.com', 'www.example.com']) =>
+    purgeStaleDocuments({
+      esClient,
+      signal: abortController.signal,
+      indexName: INDEX_NAME,
+      crawlId: CRAWL_ID,
+      maxDepth,
+      hosts,
+    });
+
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    abortController = new AbortController();
+    esClient.deleteByQuery.mockResolvedValue({ deleted: 0 });
+  });
+
+  it.each([
+    [2, ['example.com', 'www.example.com']],
+    [0, ['docs.example.org']],
+  ])(
+    'only deletes the pages of other crawls down to depth %i on the hosts %j',
+    async (maxDepth, hosts) => {
+      await purge(maxDepth, hosts);
+
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+        {
+          index: INDEX_NAME,
+          conflicts: 'proceed',
+          refresh: true,
+          query: {
+            bool: {
+              filter: [{ range: { depth: { lte: maxDepth } } }, { terms: { url_host: hosts } }],
+              must_not: [{ term: { crawl_id: CRAWL_ID } }],
+            },
+          },
+        },
+        { signal: abortController.signal }
+      );
+    }
+  );
+
+  it('returns how many pages were deleted, and 0 when Elasticsearch does not say', async () => {
+    esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 250, version_conflicts: 3 });
+    await expect(purge()).resolves.toBe(250);
+
+    esClient.deleteByQuery.mockResolvedValueOnce({});
+    await expect(purge()).resolves.toBe(0);
+  });
+
+  it('rethrows Elasticsearch errors', async () => {
+    esClient.deleteByQuery.mockRejectedValue(new Error('status 403'));
+
+    await expect(purge()).rejects.toThrow('status 403');
+  });
+});
