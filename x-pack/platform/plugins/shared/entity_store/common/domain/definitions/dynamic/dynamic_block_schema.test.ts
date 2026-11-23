@@ -8,11 +8,16 @@
 import {
   MAX_ATTRIBUTE_NAME_LENGTH,
   MAX_ATTRIBUTES_PER_SOURCE,
+  MAX_BADGE_COLUMNS,
+  MAX_CATEGORY_LENGTH,
+  MAX_DEFAULT_COLUMNS,
   MAX_DISPLAY_LABEL_LENGTH,
   MAX_DISPLAY_LABELS,
   MAX_FIELD_PATH_LENGTH,
   MAX_FILTER_LENGTH,
+  MAX_ICON_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
+  MAX_NAME_FIELDS,
   MAX_SOURCES,
   MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
@@ -280,6 +285,129 @@ describe('dynamicBlockSchema', () => {
       expect(issuePaths(result)).toEqual([
         ['displayLabels', 1, 'name'],
         ['suggestedFilters', 1],
+      ]);
+    });
+  });
+
+  describe('category', () => {
+    const withCategory = (category: string) =>
+      dynamicBlockSchema.safeParse({ sources: [source()], category });
+
+    it('is optional', () => {
+      expect(dynamicBlockSchema.safeParse({ sources: [source()] }).data?.category).toBeUndefined();
+    });
+
+    it('accepts a slug of lowercase letters, digits, `_` and `-`', () => {
+      expect(withCategory('kubernetes').data?.category).toBe('kubernetes');
+      expect(withCategory('cloud_vms-2').success).toBe(true);
+    });
+
+    it('rejects an empty category', () => {
+      expect(withCategory('').success).toBe(false);
+    });
+
+    it('rejects uppercase letters, whitespace and dots', () => {
+      expect(withCategory('Hosts').success).toBe(false);
+      expect(withCategory('my hosts').success).toBe(false);
+      expect(withCategory('k8s.workloads').success).toBe(false);
+    });
+
+    it(`accepts ${MAX_CATEGORY_LENGTH} characters and rejects one more`, () => {
+      expect(withCategory('a'.repeat(MAX_CATEGORY_LENGTH)).success).toBe(true);
+      expect(withCategory('a'.repeat(MAX_CATEGORY_LENGTH + 1)).success).toBe(false);
+    });
+  });
+
+  describe('icon', () => {
+    const withIcon = (icon: string) => dynamicBlockSchema.safeParse({ sources: [source()], icon });
+
+    it('accepts any token, which the store does not interpret', () => {
+      expect(withIcon('logoKubernetes').data?.icon).toBe('logoKubernetes');
+    });
+
+    it('rejects an empty icon', () => {
+      expect(withIcon('').success).toBe(false);
+    });
+
+    it(`accepts ${MAX_ICON_LENGTH} characters and rejects one more`, () => {
+      expect(withIcon('a'.repeat(MAX_ICON_LENGTH)).success).toBe(true);
+      expect(withIcon('a'.repeat(MAX_ICON_LENGTH + 1)).success).toBe(false);
+    });
+  });
+
+  describe.each([
+    ['nameFields', MAX_NAME_FIELDS],
+    ['defaultColumns', MAX_DEFAULT_COLUMNS],
+    ['badgeColumns', MAX_BADGE_COLUMNS],
+  ] as const)('%s', (key, max) => {
+    const withNames = (names: unknown) =>
+      dynamicBlockSchema.safeParse({ sources: [source()], [key]: names });
+    const names = (count: number) => Array.from({ length: count }, (_, index) => `a${index}`);
+
+    it('is optional', () => {
+      expect(dynamicBlockSchema.safeParse({ sources: [source()] }).data?.[key]).toBeUndefined();
+    });
+
+    it('keeps the names in the order given', () => {
+      expect(withNames(['host.name', 'host.hostname', 'host.id']).data?.[key]).toEqual([
+        'host.name',
+        'host.hostname',
+        'host.id',
+      ]);
+    });
+
+    it('rejects a name listed twice, with a path to the duplicate', () => {
+      const result = withNames(['host.name', 'host.id', 'host.name']);
+
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([[key, 2]]);
+      expect(result.error?.issues[0].message).toMatch(/listed more than once/);
+    });
+
+    it('rejects a name that is not a field path', () => {
+      expect(withNames(['host name']).success).toBe(false);
+    });
+
+    it(`accepts a name of ${MAX_FIELD_PATH_LENGTH} characters and rejects one more`, () => {
+      expect(withNames(['a'.repeat(MAX_FIELD_PATH_LENGTH)]).success).toBe(true);
+      expect(withNames(['a'.repeat(MAX_FIELD_PATH_LENGTH + 1)]).success).toBe(false);
+    });
+
+    it(`accepts ${max} names and rejects one more`, () => {
+      expect(withNames(names(max)).success).toBe(true);
+      expect(withNames(names(max + 1)).success).toBe(false);
+    });
+  });
+
+  describe('nameFields', () => {
+    it('rejects an empty list, since the UI would have nothing to name the entity by', () => {
+      expect(dynamicBlockSchema.safeParse({ sources: [source()], nameFields: [] }).success).toBe(
+        false
+      );
+    });
+  });
+
+  describe.each(['defaultColumns', 'badgeColumns'] as const)('%s', (key) => {
+    it('accepts an empty list', () => {
+      expect(dynamicBlockSchema.safeParse({ sources: [source()], [key]: [] }).success).toBe(true);
+    });
+  });
+
+  describe('presentation lists together', () => {
+    it('reports a duplicate in each list under its own path, and a name may appear in several lists', () => {
+      const result = dynamicBlockSchema.safeParse({
+        sources: [source({ attributes: [attribute()] })],
+        suggestedFilters: ['os_name'],
+        nameFields: ['os_name', 'os_name'],
+        defaultColumns: ['os_name', 'last_seen', 'os_name'],
+        badgeColumns: ['os_name', 'os_name'],
+      });
+
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([
+        ['nameFields', 1],
+        ['defaultColumns', 2],
+        ['badgeColumns', 1],
       ]);
     });
   });
