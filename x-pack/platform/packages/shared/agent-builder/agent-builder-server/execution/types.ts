@@ -18,6 +18,7 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ConversationRoundAuthorDecoration,
+  EventActor,
   ExecutionStatus,
   InteractivityConfig,
   InteractivityConfigInput,
@@ -39,6 +40,8 @@ export interface BaseExecutionParams {
   agentId?: string;
   /** Id of the genAI connector to use. */
   connectorId?: string;
+  /** Id of the inference feature the run uses - can't be used with connectorId */
+  inferenceFeatureId?: string;
   /** The input for this execution. */
   nextInput: ConverseInput;
   /** Whether to use structured output mode. */
@@ -52,6 +55,11 @@ export interface BaseExecutionParams {
    * execution's owner, so it must name the running parent, never a value from user or model input.
    */
   parentExecutionId?: string;
+  /**
+   * Set on a background sub-agent: how its parent gets the result when it finishes. `always`
+   * starts the parent conversation, `never` leaves the message for the parent's next run.
+   */
+  parentTriggerMode?: ChatTriggerMode;
   /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature
    * (sets `metadata.connectorTelemetry` on inference calls). When omitted, the default
@@ -113,6 +121,10 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
    * for interactive users. Never affects the actor's `id`, `username` or `type`.
    */
   author?: ConversationRoundAuthorDecoration;
+  /** Actor of the user message this request writes, when it is not the request principal. */
+  actor?: EventActor;
+  /** The background sub-agent the message reports; consumed in the same write, refused once reported. */
+  reportsBackgroundExecution?: string;
   /** Callback delivery configuration for this execution. */
   callback?: {
     /** URL to deliver the execution result to. */
@@ -374,6 +386,13 @@ export interface AgentExecutionService {
    * The chat API's entry point; a caller that always runs the agent calls `executeAgent`.
    */
   maybeExecuteAgent(params: ExecuteAgentParams): Promise<MaybeExecuteAgentResult>;
+
+  /**
+   * Refuses a caller who could not start a run of `agentId` themselves: no `use` access to the
+   * agent, or no invoke privilege when it is bound to a service account. The check `executeAgent`
+   * runs before any write, for callers that join a run instead of starting one.
+   */
+  assertCanRunAgent(params: { request: KibanaRequest; agentId: string }): Promise<void>;
 
   /**
    * Retrieve an agent execution by its ID.

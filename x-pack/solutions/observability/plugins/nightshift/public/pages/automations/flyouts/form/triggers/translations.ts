@@ -6,7 +6,54 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 import type { SlackTriggerKind } from '../automation_form_values';
+
+export const alertSeverityLabels = {
+  any: i18n.translate('xpack.nightshift.automations.alertSeverity.anyLabel', {
+    defaultMessage: 'Any severity',
+  }),
+  title: i18n.translate('xpack.nightshift.automations.alertSeverity.pickerAriaLabel', {
+    defaultMessage: 'Alert severity',
+  }),
+  withSeverity: i18n.translate('xpack.nightshift.automations.alertSeverity.withSeverityLabel', {
+    defaultMessage: 'with severity',
+  }),
+  help: i18n.translate('xpack.nightshift.automations.alertSeverity.activationDescription', {
+    defaultMessage:
+      'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.',
+  }),
+};
+
+export const alertSeverityOptions: Record<AlertSeverity, string> = {
+  critical: i18n.translate(
+    'xpack.nightshift.automations.alertSeverity.criticalDropDownOptionLabel',
+    {
+      defaultMessage: 'Critical',
+    }
+  ),
+  major: i18n.translate('xpack.nightshift.automations.alertSeverity.majorDropDownOptionLabel', {
+    defaultMessage: 'Major',
+  }),
+  high: i18n.translate('xpack.nightshift.automations.alertSeverity.highDropDownOptionLabel', {
+    defaultMessage: 'High',
+  }),
+  medium: i18n.translate('xpack.nightshift.automations.alertSeverity.mediumDropDownOptionLabel', {
+    defaultMessage: 'Medium',
+  }),
+  minor: i18n.translate('xpack.nightshift.automations.alertSeverity.minorDropDownOptionLabel', {
+    defaultMessage: 'Minor',
+  }),
+  low: i18n.translate('xpack.nightshift.automations.alertSeverity.lowDropDownOptionLabel', {
+    defaultMessage: 'Low',
+  }),
+  warning: i18n.translate('xpack.nightshift.automations.alertSeverity.warningDropDownOptionLabel', {
+    defaultMessage: 'Warning',
+  }),
+  info: i18n.translate('xpack.nightshift.automations.alertSeverity.infoDropDownOptionLabel', {
+    defaultMessage: 'Info',
+  }),
+};
 
 export const triggerLabels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
@@ -37,6 +84,10 @@ export const triggerLabels = {
   }),
   searchApps: i18n.translate('xpack.nightshift.automations.flyout.searchApps', {
     defaultMessage: 'Exact app name, app ID or bot ID…',
+  }),
+  slackMentionHelp: i18n.translate('xpack.nightshift.automations.flyout.slackMentionHelp', {
+    defaultMessage:
+      "Messages that mention @Elastic are answered as questions and don't start this automation.",
   }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
@@ -191,6 +242,34 @@ export const triggerLabels = {
 export const slackTriggerLeads: Record<SlackTriggerKind, string> = {
   slack_message: i18n.translate('xpack.nightshift.automations.flyout.slackMessageLead', {
     defaultMessage: 'New message',
+  }),
+};
+
+export const alertSourceLabels = {
+  anySource: i18n.translate('xpack.nightshift.automations.flyout.anySource', {
+    defaultMessage: 'any source',
+  }),
+  title: i18n.translate('xpack.nightshift.automations.flyout.alertSources', {
+    defaultMessage: 'Alert sources',
+  }),
+  include: i18n.translate('xpack.nightshift.automations.flyout.alertSourcesInclude', {
+    defaultMessage: 'Only these sources',
+  }),
+  exclude: i18n.translate('xpack.nightshift.automations.flyout.alertSourcesExclude', {
+    defaultMessage: 'All except these',
+  }),
+  classic: i18n.translate('xpack.nightshift.automations.flyout.alertSourceClassic', {
+    defaultMessage: 'Classic',
+  }),
+  universalRules: i18n.translate('xpack.nightshift.automations.flyout.alertSourceUniversalRules', {
+    defaultMessage: 'Universal rules',
+  }),
+  significantEvents: i18n.translate(
+    'xpack.nightshift.automations.flyout.alertSourceSignificantEvents',
+    { defaultMessage: 'Significant events' }
+  ),
+  external: i18n.translate('xpack.nightshift.automations.flyout.alertSourceExternal', {
+    defaultMessage: 'External sources',
   }),
 };
 

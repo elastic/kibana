@@ -1,0 +1,40 @@
+{
+  "sha1": "6cbf3d153a41b50c61cdbd5c2008c95e9e841a58",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ef53eec30cd633d-a1d02785c3d8653",
+      "title": "Set the default space up with the detection service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "c3dfb9c030cd60b-5ee64f1353dfa20",
+      "title": "POST /internal/nightshift/detection/_tick runs a tick in a set-up space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_detection/test/scout_nightshift_detection/api/tests/tick.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    }
+  ]
+}

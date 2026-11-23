@@ -11,13 +11,13 @@ import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { SignalPicker } from './signal_picker';
 
-const renderPicker = (selected: string[]) => {
+const renderPicker = (selected: string[], options: string[] = ['logs', 'metrics', 'traces']) => {
   const onChange = jest.fn();
   render(
     <EuiProvider>
       <SignalPicker
         label="Signals"
-        options={['logs', 'metrics', 'traces']}
+        options={options}
         selected={selected}
         onChange={onChange}
         dataTestSubj="signalPicker"
@@ -31,7 +31,7 @@ describe('SignalPicker', () => {
   it('keeps the other signals when one is removed', async () => {
     const { onChange } = renderPicker(['logs', 'metrics', 'traces']);
 
-    await userEvent.click(screen.getByLabelText('Remove metrics from selection in this group'));
+    await userEvent.click(screen.getByLabelText('Remove Metrics from selection in this group'));
 
     expect(onChange).toHaveBeenCalledWith(['logs', 'traces']);
   });
@@ -40,8 +40,17 @@ describe('SignalPicker', () => {
     const { onChange } = renderPicker(['logs']);
 
     await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    await userEvent.click(screen.getByRole('option', { name: 'traces' }));
+    await userEvent.click(screen.getByRole('option', { name: 'Traces' }));
 
     expect(onChange).toHaveBeenCalledWith(['logs', 'traces']);
+  });
+
+  it('labels docs as Documents and reports the docs id', async () => {
+    const { onChange } = renderPicker(['logs'], ['logs', 'docs']);
+
+    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
+    await userEvent.click(screen.getByRole('option', { name: 'Documents' }));
+
+    expect(onChange).toHaveBeenCalledWith(['logs', 'docs']);
   });
 });

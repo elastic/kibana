@@ -6,7 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginStart } from '@kbn/core-di';
+import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
@@ -29,7 +29,7 @@ import {
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../errors/error_codes';
-import type { AlertingServerStartDependencies } from '../../types';
+import { SpacesService } from '../services/spaces_service/spaces_service';
 import type { ResolvedSearchIds } from './build_execution_history_item';
 import {
   collectIdsFromEvents,
@@ -60,7 +60,6 @@ const SEARCH_ID_CAP = 500;
 const MAX_RULES_PER_NAME_LOOKUP = 1000;
 
 export interface ListExecutionHistoryArgs {
-  request: KibanaRequest;
   page?: number;
   perPage?: number;
   search?: string;
@@ -102,15 +101,14 @@ export class ActionPolicyExecutionHistoryClient {
     @inject(RulesClient) private readonly rulesClient: RulesClient,
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
-    @inject(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'))
-    private readonly spaces: AlertingServerStartDependencies['spaces'],
+    @inject(SpacesService) private readonly spacesService: SpacesService,
+    @inject(Request) private readonly request: KibanaRequest,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
     this.logger = loggerService.forSubsystem('executionHistory');
   }
 
   public async listExecutionHistory({
-    request,
     page = DEFAULT_PAGE,
     perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
@@ -122,7 +120,7 @@ export class ActionPolicyExecutionHistoryClient {
     sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
     const effectiveFrom = from ?? defaultFrom(to);
-    const spaceId = this.spaces.spacesService.getSpaceId(request);
+    const spaceId = this.spacesService.getSpaceId(this.request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
     const matchingSearchIds = await this.resolveSearchIds(search);
@@ -151,7 +149,7 @@ export class ActionPolicyExecutionHistoryClient {
       alertIds,
     });
 
-    const nameMaps = await this.resolveNames(result.events, spaceId, request);
+    const nameMaps = await this.resolveNames(result.events, spaceId);
     const items = result.events
       .map((event) =>
         buildExecutionHistoryItem(
@@ -209,17 +207,13 @@ export class ActionPolicyExecutionHistoryClient {
     };
   }
 
-  private async resolveNames(
-    events: IValidatedEvent[],
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<NameMaps> {
+  private async resolveNames(events: IValidatedEvent[], spaceId: string): Promise<NameMaps> {
     const { policyIds, ruleIds, workflowIds } = collectIdsFromEvents(events);
 
     const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
       this.lookupRulesByIds(ruleIds),
-      this.workflowsManagement.getClient(request).getWorkflowsByIds(workflowIds, spaceId),
+      this.workflowsManagement.getClient(this.request).getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
     const policies = this.unwrapArray(

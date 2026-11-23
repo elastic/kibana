@@ -6,8 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { sanitizeImageDataUrl } from '@kbn/content-sanitization';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
-import { isValidUserProfileAvatarColor } from '@kbn/user-profile-components/server';
+import {
+  isValidUserProfileAvatarColor,
+  isValidUserProfileAvatarInitials,
+  USER_AVATAR_MAX_INITIALS,
+  USER_AVATAR_MAX_INITIALS_CODE_UNITS,
+} from '@kbn/user-profile-components/server';
 import type { DotKeysOf } from '@kbn/utility-types';
 
 import type { RouteDefinitionParams } from '..';
@@ -41,7 +47,15 @@ const MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS = 64 * 1024;
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
     schema.object({
-      initials: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
+      initials: schema.nullable(
+        schema.string({
+          maxLength: USER_AVATAR_MAX_INITIALS_CODE_UNITS,
+          validate: (value) =>
+            isValidUserProfileAvatarInitials(value)
+              ? undefined
+              : `must have at most ${USER_AVATAR_MAX_INITIALS} characters`,
+        })
+      ),
       color: schema.nullable(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
       imageUrl: schema.nullable(schema.string()),
     })
@@ -117,9 +131,10 @@ export function defineUpdateUserProfileDataRoute({
 
       const currentUser = getAuthenticationService().getCurrentUser(request);
 
-      const userProfileData = request.body;
-      const imageDataUrl = userProfileData.avatar?.imageUrl;
-      if (imageDataUrl && typeof imageDataUrl === 'string') {
+      let userProfileData = request.body;
+      const avatar = userProfileData.avatar;
+      const imageDataUrl = avatar?.imageUrl;
+      if (avatar && imageDataUrl && typeof imageDataUrl === 'string') {
         const matches = imageDataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
         if (!matches || matches.length !== 3) {
           return response.customError({
@@ -136,6 +151,20 @@ export function defineUpdateUserProfileDataRoute({
             statusCode: 415,
           });
         }
+
+        // SVG avatars can carry scripts and event handlers, so strip active content before storing.
+        let sanitizedImageDataUrl: string;
+        try {
+          sanitizedImageDataUrl = sanitizeImageDataUrl(imageDataUrl);
+        } catch (error) {
+          logger.warn(`Failed to sanitize user profile avatar image: ${error.message}`);
+          return response.badRequest({ body: 'Invalid avatar image' });
+        }
+
+        userProfileData = {
+          ...userProfileData,
+          avatar: { ...avatar, imageUrl: sanitizedImageDataUrl },
+        };
       }
 
       const avatarColor = userProfileData.avatar?.color;

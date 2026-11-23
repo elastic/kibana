@@ -9,11 +9,13 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CoreStart, RequestHandler } from '@kbn/core/server';
 import { escapeQuotes } from '@kbn/es-query';
-import { API_VERSIONS } from '../../../common/constants';
+import { EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER } from '@kbn/workflows-extensions/server';
+import { API_VERSIONS, OSQUERY_MAX_AGENTS_HEADER } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
-import { createLiveQueryRoute } from './create_live_query_route';
+import { createLiveQueryRoute, maxAgentsFromHeader } from './create_live_query_route';
 import { createActionHandler } from '../../handlers';
+import { CustomHttpRequestError } from '../../common/error';
 import { packSavedObjectType, savedQuerySavedObjectType } from '../../../common/types';
 
 jest.mock('../../handlers', () => ({
@@ -108,12 +110,15 @@ describe('createLiveQueryRoute', () => {
     coreStart,
     racGet,
     getActiveSpace,
+    workflowsExtensionsEnabled = false,
   }: {
     coreStart: CoreStart;
     racGet?: jest.Mock;
     getActiveSpace?: jest.Mock;
+    workflowsExtensionsEnabled?: boolean;
   }): OsqueryAppContext =>
     ({
+      experimentalFeatures: { workflowsExtensionsEnabled },
       getStartServices: jest.fn().mockResolvedValue([coreStart, { security: {} }]),
       service: {
         getActiveSpace: getActiveSpace ?? jest.fn().mockResolvedValue({ id: 'default' }),
@@ -142,20 +147,28 @@ describe('createLiveQueryRoute', () => {
       coreStart,
       racGet,
       getActiveSpace,
+      workflowsExtensionsEnabled,
+      headers,
     }: {
       coreStart?: CoreStart;
       racGet?: jest.Mock;
       getActiveSpace?: jest.Mock;
+      workflowsExtensionsEnabled?: boolean;
+      headers?: Record<string, string | string[]>;
     } = {}
   ) => {
     const start = coreStart ?? createMockCoreStart({ [SAVED_QUERY_ID]: { query: STORED_QUERY } });
     const mockRouter = createMockRouter();
     createLiveQueryRoute(
       mockRouter,
-      createOsqueryContext({ coreStart: start, racGet, getActiveSpace })
+      createOsqueryContext({ coreStart: start, racGet, getActiveSpace, workflowsExtensionsEnabled })
     );
 
-    const mockRequest = httpServerMock.createKibanaRequest({ body });
+    const mockRequest = httpServerMock.createKibanaRequest({
+      body,
+      // repeated headers arrive as string[] at runtime; the mock type only models string
+      headers: headers as Record<string, string> | undefined,
+    });
     const mockResponse = httpServerMock.createResponseFactory();
 
     await getRouteHandler(mockRouter)({} as never, mockRequest, mockResponse);
@@ -416,6 +429,191 @@ describe('createLiveQueryRoute', () => {
     );
   });
 
+  describe('workflow origin', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+    // What the workflow engine's `callKibanaApi` sends on every call, from osquery steps and
+    // generic `kibana.request` steps alike: the internal-origin marker and the execution ID.
+    const internalOrigin = { 'x-elastic-internal-origin': 'Kibana' };
+    const workflowCallHeaders = {
+      ...internalOrigin,
+      [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1',
+    };
+
+    it.each([
+      ['a workflow call', workflowCallHeaders, 'execution-1'],
+      [
+        'a UUID execution ID',
+        {
+          ...internalOrigin,
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '123e4567-e89b-42d3-a456-426614174000',
+        },
+        '123e4567-e89b-42d3-a456-426614174000',
+      ],
+      [
+        'an execution ID using all allowed characters',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'AZaz09._:-' },
+        'AZaz09._:-',
+      ],
+      [
+        'a single-character execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e' },
+        'e',
+      ],
+      [
+        'an execution ID at the length limit',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(256) },
+        'e'.repeat(256),
+      ],
+    ])('records the workflow origin for %s', async (_name, headers, executionId) => {
+      const response = await invokeRoute(body, { workflowsExtensionsEnabled: true, headers });
+
+      expect(response.ok).toHaveBeenCalled();
+      expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+      expect(mockedCreateActionHandler.mock.calls[0][2]?.origin).toEqual({
+        type: 'workflow',
+        run_id: executionId,
+        verified: false,
+      });
+    });
+
+    it.each([
+      [
+        'a public call without the internal-origin marker',
+        { [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1' },
+        true,
+      ],
+      ['an internal call without an execution ID', internalOrigin, true],
+      [
+        'an oversized execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'e'.repeat(257) },
+        true,
+      ],
+      [
+        'an empty execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '' },
+        true,
+      ],
+      [
+        'a whitespace-only execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: '\t' },
+        true,
+      ],
+      [
+        'an execution ID with embedded whitespace',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution id' },
+        true,
+      ],
+      [
+        'an execution ID containing a slash',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution/id' },
+        true,
+      ],
+      [
+        'a non-ASCII execution ID',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'exécution' },
+        true,
+      ],
+      [
+        'an execution ID containing a control character',
+        { ...internalOrigin, [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution\tid' },
+        true,
+      ],
+      [
+        // Node joins a repeated header into one comma-separated string.
+        'comma-joined repeated execution IDs',
+        {
+          ...internalOrigin,
+          [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'execution-1, execution-2',
+        },
+        true,
+      ],
+      [
+        'only the retired osquery source headers on a public call',
+        {
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'workflow-1',
+        },
+        true,
+      ],
+      [
+        // The headers an earlier revision of the osquery steps sent are no longer trusted.
+        'only the retired osquery source headers',
+        {
+          ...internalOrigin,
+          'x-osquery-dispatch-source': 'workflow',
+          'x-osquery-dispatch-workflow-id': 'workflow-1',
+        },
+        true,
+      ],
+      ['the feature disabled', workflowCallHeaders, false],
+    ])(
+      'records no origin for %s',
+      async (_name, headers: Record<string, string | string[]>, workflowsExtensionsEnabled) => {
+        const response = await invokeRoute(body, { workflowsExtensionsEnabled, headers });
+
+        expect(response.ok).toHaveBeenCalled();
+        expect(mockedCreateActionHandler).toHaveBeenCalledTimes(1);
+        expect(mockedCreateActionHandler.mock.calls[0][2]).not.toHaveProperty('origin');
+      }
+    );
+  });
+
+  describe('max agents header', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY, agent_ids: ['agent-1'] };
+    const headers = { [OSQUERY_MAX_AGENTS_HEADER]: '1000' };
+    const passedMaxAgents = () => mockedCreateActionHandler.mock.calls[0][2].maxAgents;
+
+    it('passes the header value to the action handler with the workflow steps on', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: true, headers });
+
+      expect(passedMaxAgents()).toBe(1000);
+    });
+
+    it('ignores the header while the workflow steps are off', async () => {
+      await invokeRoute(body, { workflowsExtensionsEnabled: false, headers });
+
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
+    it('returns 400 for a present but invalid header rather than dispatching unbounded', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: true,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: `${OSQUERY_MAX_AGENTS_HEADER} must be a positive integer`,
+      });
+      expect(mockedCreateActionHandler).not.toHaveBeenCalled();
+    });
+
+    it('accepts the request when the invalid header is ignored with the steps off', async () => {
+      const response = await invokeRoute(body, {
+        workflowsExtensionsEnabled: false,
+        headers: { [OSQUERY_MAX_AGENTS_HEADER]: 'all' },
+      });
+
+      expect(response.badRequest).not.toHaveBeenCalled();
+      expect(passedMaxAgents()).toBeUndefined();
+    });
+
+    it.each([
+      ['a positive integer', '250', 250],
+      ['the smallest of a repeated header', ['9', '5'], 5],
+      ['the smallest of a comma-joined header', '5, 9', 5],
+      ['a missing header', undefined, undefined],
+      ['zero', '0', null],
+      ['a negative number', '-1', null],
+      ['a decimal', '1.5', null],
+      ['a leading zero', '010', null],
+      ['more than seven digits', '12345678', null],
+      ['text', 'all', null],
+      ['a valid value next to an invalid one', '5, all', null],
+    ])('maxAgentsFromHeader reads %s', (_name, header, expected) => {
+      expect(maxAgentsFromHeader(header)).toBe(expected);
+    });
+  });
+
   it('dispatches ad-hoc SQL for a writeLiveQueries caller without stored fill-in', async () => {
     const coreStart = createMockCoreStart(
       { [SAVED_QUERY_ID]: { query: STORED_QUERY } },
@@ -483,6 +681,34 @@ describe('createLiveQueryRoute', () => {
         }),
       })
     );
+  });
+
+  describe('handler 400s', () => {
+    const body = { saved_query_id: SAVED_QUERY_ID, agent_ids: ['agent-1'] };
+
+    it('returns the machine-readable code in attributes for a coded handler 400', async () => {
+      mockedCreateActionHandler.mockRejectedValue(
+        new CustomHttpRequestError('No agents found for selection', 400, 'NO_AGENTS_FOUND')
+      );
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'No agents found for selection',
+          attributes: { code: 'NO_AGENTS_FOUND' },
+        },
+      });
+    });
+
+    it('returns an uncoded handler 400 unchanged', async () => {
+      const error = new CustomHttpRequestError('bad pack', 400);
+      mockedCreateActionHandler.mockRejectedValue(error);
+
+      const response = await invokeRoute(body);
+
+      expect(response.badRequest).toHaveBeenCalledWith({ body: error });
+    });
   });
 
   it('returns 400 PARAMETER_NOT_FOUND when the handler created no Fleet actions', async () => {

@@ -15,6 +15,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
+import { alertAttachmentConverter, useManualAddToChat } from '@kbn/alerting-v2-browser-shared';
+import type { FocusedEpisode } from '@kbn/alerting-v2-browser-shared';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 // We use this instead of FlyoutTemplate.Body.Accordion because the latter omits `hasBorder`
@@ -216,15 +218,42 @@ export const AlertEpisodeDetailsFlyout = ({
   const initialWidth = useAlertDetailsFlyoutWidth();
 
   const viewDetailsHref = getEpisodeDetailsHref(episodeId);
+  const loadedRule = isRuleLoaded(ruleState) ? ruleState.rule : undefined;
+  const focusedEpisode = useMemo<FocusedEpisode | undefined>(() => {
+    if (!episode) {
+      return undefined;
+    }
+    const { rule_name: episodeDataRuleName } = parseEpisodeDataJson(episode.episode_data);
+    return {
+      episode,
+      ruleName:
+        loadedRule?.metadata.name ??
+        (typeof episodeDataRuleName === 'string' ? episodeDataRuleName : undefined),
+      groupingFields: loadedRule?.grouping?.fields,
+    };
+  }, [episode, loadedRule]);
+  const { addToChat, isAddToChatAvailable } = useManualAddToChat(
+    focusedEpisode,
+    alertAttachmentConverter,
+    { agentBuilder: services.agentBuilder }
+  );
   const takeActionPanels = useMemo(
     () =>
       buildEpisodeMenuPanels({
         actions: menuActions,
         episodes,
         viewDetailsHref,
+        onAddToChat: isAddToChatAvailable ? addToChat : undefined,
         onSuccess: invalidateEpisodeQueries,
       }),
-    [menuActions, episodes, viewDetailsHref, invalidateEpisodeQueries]
+    [
+      menuActions,
+      episodes,
+      viewDetailsHref,
+      isAddToChatAvailable,
+      addToChat,
+      invalidateEpisodeQueries,
+    ]
   );
   const [isRunbookOpen, setIsRunbookOpen] = useState(false);
 
@@ -282,8 +311,8 @@ export const AlertEpisodeDetailsFlyout = ({
   const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
-    typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
-      ? episodeData.alert_url
+    typeof episodeData.source_alert_url === 'string' && episodeData.source_alert_url.length > 0
+      ? episodeData.source_alert_url
       : undefined;
   const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 

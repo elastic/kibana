@@ -98,6 +98,7 @@ export {
   validatePackagePolicyConfig,
   validationHasErrors,
   countValidationErrors,
+  formatAgentConditionErrors,
 } from './validate_package_policy';
 
 export { normalizeHostsForAgents } from './hosts_utils';
@@ -143,6 +144,12 @@ export {
 } from './agent_policy_config';
 
 export {
+  DENIED_AGENT_POLICY_OVERRIDE_KEYS,
+  getDeniedAgentPolicyOverrideKey,
+  sanitizeAgentPolicyOverrides,
+} from './agent_policy_overrides';
+
+export {
   getFleetServerVersionMessage,
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
@@ -159,7 +166,7 @@ export {
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
 // Generic var_group helpers
-export type { VarGroupSelection } from './var_group_helpers';
+export type { VarGroupSelection, VarGroupDeploymentMode } from './var_group_helpers';
 export {
   getSelectedOption,
   getVisibleVarsForOption,
@@ -167,7 +174,11 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  hasConfiguredVarValue,
   inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
+  sanitizeVarGroupSelections,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module

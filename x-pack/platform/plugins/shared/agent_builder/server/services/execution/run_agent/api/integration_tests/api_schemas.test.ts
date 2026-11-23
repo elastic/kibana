@@ -10,6 +10,7 @@ import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
 import { getValidator } from '../validate_params';
 import { prepareApiRequest } from '../prepare_request';
+import { unvalidatedBodyApis } from '../unvalidated_body_apis';
 import { isRecord } from '../types';
 import type { ApiRegistryDefinition } from '../types';
 
@@ -512,6 +513,79 @@ describe('@elastic/schemas registries', () => {
           request: expect.objectContaining({ bulkBody: operations }),
         })
       );
+    });
+  });
+
+  describe('APIs with an unvalidated body', () => {
+    const nestedField = (depth: number): Record<string, unknown> =>
+      depth === 0
+        ? { type: 'keyword' }
+        : { type: 'object', properties: { field: nestedField(depth - 1) } };
+
+    it.each(unvalidatedBodyApis.elasticsearch)(
+      '%s is a known Elasticsearch API taking body params',
+      async (api) => {
+        const { elasticsearch } = await getRegistries();
+        const { definition } = await elasticsearch.loadApi(api);
+
+        expect(paramRoutings(definition.input).some(({ foundIn }) => foundIn === 'body')).toBe(
+          true
+        );
+      }
+    );
+
+    it('prepares a deeply nested mapping without validating it', async () => {
+      // Validating six levels against the mapping schema would take hours, so a regression shows
+      // up here as a timeout.
+      const template = { mappings: { properties: { field: nestedField(6) } } };
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template', template },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual(
+        expect.objectContaining({
+          status: 'prepared',
+          request: expect.objectContaining({ body: { template } }),
+        })
+      );
+    });
+
+    it('still rejects an invalid query param and an unknown param', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template', template: {}, create: 'yes', mappings: {} },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual({
+        status: 'invalid_params',
+        errors: expect.arrayContaining([
+          expect.objectContaining({ path: '#/mappings' }),
+          expect.objectContaining({ path: '#/create' }),
+        ]),
+      });
+    });
+
+    it('still requires a required body param', async () => {
+      const prepared = await prepareApiRequest({
+        target: 'elasticsearch',
+        api: 'cluster.put_component_template',
+        params: { name: 'my-template' },
+        spaceId: 'default',
+      });
+
+      expect(prepared).toEqual({
+        status: 'invalid_params',
+        errors: [
+          expect.objectContaining({
+            message: expect.stringContaining('required property "template"'),
+          }),
+        ],
+      });
     });
   });
 });

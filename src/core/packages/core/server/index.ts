@@ -251,6 +251,7 @@ export type {
   IsAuthenticated,
   AuthStatus,
   GetAuthHeaders,
+  IAuthHeadersStorage,
   IContextContainer,
   HttpAuth,
   HttpServerInfo,
@@ -328,6 +329,7 @@ export type {
   SharedGlobalConfig,
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
+  PluginInitialization,
 } from '@kbn/core-plugins-server';
 export type {
   PluginsServiceSetup,

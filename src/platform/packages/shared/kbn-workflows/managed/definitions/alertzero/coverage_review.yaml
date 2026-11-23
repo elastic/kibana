@@ -521,12 +521,14 @@ steps:
         {{ steps.resolve_rule.error.message }}
 
   # By-reference security.rule attachment: the framework resolves the rule once
-  # from its rule_id and snapshots it, recording the rule as it was when this
-  # review ran. The attachment id carries the rule's signature, so the refreshes
-  # below are deterministic: a resumed review of the same rule finds the earlier
-  # review's copy, the add fails on it, and the update after it writes the rule as
-  # it is now as a new version of that copy. A review that matched a different rule
-  # adds a card of its own, because an attachment cannot change its origin.
+  # from its saved-object id and snapshots it, recording the rule as it was when
+  # this review ran. The rule card reads `origin` as the saved-object id for View
+  # rule, Update rule and Apply to rule form, so `origin` must not be the rule_id.
+  # The attachment id carries that same id, so the refreshes below are
+  # deterministic: a resumed review of the same rule finds the earlier review's
+  # copy, the add fails on it, and the update after it writes the rule as it is
+  # now as a new version of that copy. A review that matched a different rule adds
+  # a card of its own, because an attachment cannot change its origin.
   - name: attach_rule
     type: ai.attachment.add
     if: >-
@@ -534,9 +536,9 @@ steps:
         and steps.resolve_rule.output.id != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      id: "coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}"
+      id: "coverage-rule-{{ steps.resolve_rule.output.id }}"
       type: security.rule
-      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+      origin: "{{ steps.resolve_rule.output.id }}"
       description: "Rule matched to the detection gap: {{ steps.resolve_rule.output.name }}"
       render_inline: true
     on-failure:
@@ -551,7 +553,7 @@ steps:
         and steps.attach_rule.error.message contains 'already exists' }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      attachment_id: "coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}"
+      attachment_id: "coverage-rule-{{ steps.resolve_rule.output.id }}"
       data:
         text: "{{ steps.resolve_rule.output | json }}"
         attachmentLabel: "{{ steps.resolve_rule.output.name }}"
@@ -973,7 +975,7 @@ steps:
         and steps.refetch_rule.output.id != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      attachment_id: "coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}"
+      attachment_id: "coverage-rule-{{ steps.resolve_rule.output.id }}"
       data:
         text: "{{ steps.refetch_rule.output | json }}"
         attachmentLabel: "{{ steps.refetch_rule.output.name }}"
@@ -982,7 +984,8 @@ steps:
       continue: true
 
   # A prebuilt rule has no saved object until the install action runs, so the
-  # by-reference attachment is only possible now.
+  # by-reference attachment is only possible now. The install mints a new
+  # saved-object id, so no earlier review's card can share this one's id.
   - name: attach_installed_rule
     type: ai.attachment.add
     if: >-
@@ -991,29 +994,9 @@ steps:
         and steps.refetch_rule.output.id != null }}
     with:
       conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      id: "coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}"
+      id: "coverage-rule-{{ steps.refetch_rule.output.id }}"
       type: security.rule
-      origin: "{{ steps.coverage_check.output.structured_output.rule_id }}"
-      description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
-      render_inline: true
-    on-failure:
-      continue: true
-
-  # The same rule can already be attached when an earlier review matched it before
-  # it was deleted and this review reinstalled it; then the add fails on that copy
-  # and the installed rule is written as a new version of it.
-  - name: resume_installed_rule_attachment
-    type: ai.attachment.update
-    if: >-
-      ${{ steps.find_or_create_investigation.output.created != true
-        and steps.attach_installed_rule.error != null
-        and steps.attach_installed_rule.error.message contains 'already exists' }}
-    with:
-      conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
-      attachment_id: "coverage-rule-{{ steps.coverage_check.output.structured_output.rule_id }}"
-      data:
-        text: "{{ steps.refetch_rule.output | json }}"
-        attachmentLabel: "{{ steps.refetch_rule.output.name }}"
+      origin: "{{ steps.refetch_rule.output.id }}"
       description: "Prebuilt rule installed for the detection gap: {{ steps.refetch_rule.output.name }}"
       render_inline: true
     on-failure:

@@ -163,6 +163,7 @@ export {
   HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
+  HuntForThreatPerIoc,
   HuntForThreatRequestBody,
   HuntForThreatResponse,
   HuntForThreatResult,
@@ -171,6 +172,13 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_MATCHED_IOCS_MAX,
+  HUNT_HIT_NAME_MAX,
+  HUNT_CASE_INSENSITIVE_IOC_TYPES,
+  huntEvidenceFieldsSchema,
   huntResultSchema,
   isoDatetimeSchema,
   HuntIndexScopeResponse,
@@ -198,7 +206,7 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './impl/schemas';
-export type { HuntResult } from './impl/schemas';
+export type { HuntEvidenceFieldKey, HuntResult } from './impl/schemas';
 
 export { isWorkerEnableBlocked } from './impl/workers/blocking_reasons';
 
@@ -273,9 +281,15 @@ export {
   getSemanticTextInferenceId,
   isReportsIndexManaged,
 } from './threat_intel_mapping';
-export { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from './impl/hunt/usable_report_filter';
+export {
+  HUNT_USABLE_FILTER,
+  INDICATOR_ELIGIBLE_FILTER,
+  REJECTED_EXTRACTION_METHODS,
+  isRejectedExtractionMethod,
+} from './impl/hunt/usable_report_filter';
 export {
   HUNT_ELIGIBLE_IOC_TIERS,
   isHuntEligibleIoc,
   type HuntEligibleIocTier,
 } from './impl/hunt/hunt_eligible_ioc';
+export { isNonRoutableIPv4, isNonRoutableIPv6, isNonRoutableIpIoc } from './impl/ip_ranges';

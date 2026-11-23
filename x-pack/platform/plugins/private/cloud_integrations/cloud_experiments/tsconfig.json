@@ -6,7 +6,6 @@
   "include": [
     ".storybook/**/*",
     "common/**/*",
-    "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*"
   ],
@@ -18,9 +17,7 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/logging-mocks",
-    "@kbn/core-plugins-browser",
     "@kbn/core-plugins-server",
-    "@kbn/core-feature-flags-browser",
     "@kbn/core-feature-flags-server",
     "@kbn/config",
   ],

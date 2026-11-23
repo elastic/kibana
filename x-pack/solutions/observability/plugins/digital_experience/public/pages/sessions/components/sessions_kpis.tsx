@@ -29,7 +29,13 @@ export function SessionsKpis({
   formatters: Formatters;
 }) {
   const total = kpis?.totalSessions;
-  const errorShare = total ? (kpis?.sessionsWithErrors ?? 0) / total : null;
+  const shareOf = (count: number | undefined) =>
+    total && count !== undefined
+      ? i18n.translate('xpack.digitalExperience.sessions.kpis.shareLabel', {
+          defaultMessage: '{share} of sessions',
+          values: { share: formatPercent(count / total) },
+        })
+      : undefined;
 
   const items = [
     {
@@ -40,18 +46,20 @@ export function SessionsKpis({
       }),
     },
     {
-      id: 'withErrors',
-      title: withValue(kpis?.sessionsWithErrors, formatNumber),
-      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withErrorsLabel', {
-        defaultMessage: 'Sessions with errors',
+      id: 'withJsErrors',
+      title: withValue(kpis?.sessionsWithJsErrors, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withJsErrorsLabel', {
+        defaultMessage: 'Sessions with JS errors',
       }),
-      subtitle:
-        errorShare === null
-          ? undefined
-          : i18n.translate('xpack.digitalExperience.sessions.kpis.withErrorsShareLabel', {
-              defaultMessage: '{share} of sessions',
-              values: { share: formatPercent(errorShare) },
-            }),
+      subtitle: shareOf(kpis?.sessionsWithJsErrors),
+    },
+    {
+      id: 'withFailedRequests',
+      title: withValue(kpis?.sessionsWithFailedRequests, formatNumber),
+      description: i18n.translate('xpack.digitalExperience.sessions.kpis.withFailedRequestsLabel', {
+        defaultMessage: 'Sessions with failed requests',
+      }),
+      subtitle: shareOf(kpis?.sessionsWithFailedRequests),
     },
     {
       id: 'medianDuration',
@@ -64,8 +72,9 @@ export function SessionsKpis({
       id: 'avgPageViews',
       // One decimal, in the Advanced Settings number format.
       title: withValue(kpis?.avgPageViews, (value) => formatNumber(Math.round(value * 10) / 10)),
+      // Page views, not page loads: in-app navigations count too.
       description: i18n.translate('xpack.digitalExperience.sessions.kpis.avgPageViewsLabel', {
-        defaultMessage: 'Pages per session',
+        defaultMessage: 'Page views per session',
       }),
     },
     {

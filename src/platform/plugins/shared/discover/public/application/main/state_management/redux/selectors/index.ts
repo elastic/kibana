@@ -22,4 +22,5 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
 } from './unsaved_changes';
-export { selectTabSavedSearch, selectTabSavedSearchByValueAttributes } from './saved_search';
+export { selectTabSavedSearch } from './saved_search';
+export { selectTabEmbeddableTab } from './embeddable_tab';

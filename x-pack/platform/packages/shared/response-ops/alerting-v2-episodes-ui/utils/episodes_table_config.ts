@@ -45,6 +45,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'severity',
   '@timestamp',
   'rule.id',
+  'reason',
   'duration',
   'tags',
   'rule_tags',
@@ -64,6 +65,7 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   alerting_source: { width: 140 },
   severity: { width: 100 },
   suppressed: { width: 250 },
+  reason: { width: 260 },
 };
 
 export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {

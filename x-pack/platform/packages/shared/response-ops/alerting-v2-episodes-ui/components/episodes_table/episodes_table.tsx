@@ -55,9 +55,11 @@ import {
 } from '@kbn/unified-data-table';
 import type { EpisodesFilterState, EpisodesSortState } from '@kbn/alerting-v2-common-queries';
 import { AlertEpisodeDetailsFlyout } from '../details/details_flyout';
+import type { AlertEpisodeDetailsServices } from '../details/types';
 import { AlertEpisodeAssigneeCell } from '../assignee_cell';
 import {
   EpisodeDurationCell,
+  EpisodeReasonCell,
   EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
@@ -74,7 +76,7 @@ import { useAlertingRulesCache } from '../../hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '../../hooks/use_alerting_rule_source_data_views';
 import { useEpisodeActions } from '../../hooks/use_episode_actions';
 import { useEpisodesBulkActions } from '../../hooks/use_episodes_bulk_actions';
-import { useAlertHost } from '../../context/alert_host_context';
+import { useAlertHost, type CachedRule } from '../../context/alert_host_context';
 import { resolveTableHeight, TABLE_ROW_LINE_HEIGHT_PX } from '../../utils/resolve_table_height';
 import { useFetchAlertingEpisodesQuery } from '../../hooks/use_fetch_alerting_episodes_query';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
@@ -90,6 +92,7 @@ import {
 import {
   EPISODES_LIST_COLUMN_ALERT_TAGS,
   EPISODES_LIST_COLUMN_ASSIGNEES,
+  EPISODES_LIST_COLUMN_REASON,
   EPISODES_LIST_COLUMN_SUPPRESSED,
   EPISODES_LIST_COLUMN_RULE_TAGS,
   EPISODES_LIST_COLUMN_SOURCE,
@@ -103,8 +106,10 @@ const SUPPRESSED_COLUMN_ID = 'suppressed';
 
 const EPISODES_TABLE_CONSUMER = 'alertingV2Alerts';
 
-// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
-// falls back to `@timestamp` and only looks like it works.
+/*
+ * Some fields are not in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a
+ * sort on them falls back to `@timestamp` and only looks like it works.
+ */
 const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
@@ -128,6 +133,11 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   [SUPPRESSED_COLUMN_ID]: ({ column }) => ({
     ...column,
     displayAsText: EPISODES_LIST_COLUMN_SUPPRESSED,
+    isSortable: false,
+  }),
+  reason: ({ column }) => ({
+    ...column,
+    displayAsText: EPISODES_LIST_COLUMN_REASON,
     isSortable: false,
   }),
 };
@@ -190,6 +200,7 @@ const getTableCss = (euiTheme: EuiThemeComputed, height: CSSProperties['height']
 `;
 
 export interface EpisodesTableServices {
+  agentBuilder?: AlertEpisodeDetailsServices['agentBuilder'];
   application: ApplicationStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -235,7 +246,11 @@ export interface EpisodesTableProps {
   showLimitedResultsNotice?: boolean;
 
   renderAdditionalToolbarControls?: () => ReactNode;
-  onRuleNameClick?: (ruleId: string, sourceRuleInfo?: { category?: string }) => void;
+  onRuleNameClick?: (
+    ruleId: string,
+    sourceRuleInfo?: { category?: string },
+    cachedRule?: CachedRule
+  ) => void;
   getRuleDetailsHref?: (ruleId: string, isSourceRule?: boolean) => string | undefined;
   getEpisodeDetailsHref?: (episodeId: string) => string;
 }
@@ -314,16 +329,6 @@ export const EpisodesTable = ({
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
 
   const { openRuleFlyout: hostOpenRuleFlyout, closeRuleFlyout: hostCloseRuleFlyout } = host;
-  const onRuleNameClick = useMemo(() => {
-    const open = onRuleNameClickProp ?? hostOpenRuleFlyout;
-    if (!open) {
-      return undefined;
-    }
-    return (ruleId: string, sourceRuleInfo?: { category?: string }) => {
-      setExpandedDoc(undefined);
-      open(ruleId, sourceRuleInfo);
-    };
-  }, [onRuleNameClickProp, hostOpenRuleFlyout]);
 
   const expandDoc = useCallback(
     (doc?: DataTableRecord) => {
@@ -383,6 +388,17 @@ export const EpisodesTable = ({
   );
 
   const { rulesCache, loading: isLoadingRules } = useAlertingRulesCache({ ruleIds, services });
+
+  const onRuleNameClick = useMemo(() => {
+    const open = onRuleNameClickProp ?? hostOpenRuleFlyout;
+    if (!open) {
+      return undefined;
+    }
+    return (ruleId: string, sourceRuleInfo?: { category?: string }) => {
+      setExpandedDoc(undefined);
+      open(ruleId, sourceRuleInfo, rulesCache[ruleId]);
+    };
+  }, [onRuleNameClickProp, hostOpenRuleFlyout, rulesCache]);
 
   const sourceDataViewsByRule = useAlertingRuleSourceDataViews({
     rules: rulesCache,
@@ -495,6 +511,7 @@ export const EpisodesTable = ({
           getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           services={{
+            agentBuilder: services.agentBuilder,
             data: services.data,
             http: services.http,
             expressions: services.expressions,
@@ -583,6 +600,7 @@ export const EpisodesTable = ({
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
       [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeSuppressedCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
+      reason: (props) => <EpisodeReasonCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (

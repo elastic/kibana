@@ -145,6 +145,63 @@ describe('mapEsqlResponseToDatatable', () => {
     expect(result.warning).toBe('some-warning');
   });
 
+  it('keeps all-null columns on the column list and off each row', () => {
+    const result = mapEsqlResponseToDatatable(
+      makeResponse([{ name: 'host', type: 'keyword' }], [['web']], {
+        all_columns: [
+          { name: 'empty', type: 'keyword' },
+          { name: 'host', type: 'keyword' },
+        ],
+      }),
+      { query: 'FROM logs-*' }
+    );
+
+    expect(result.columns.map((column) => ({ name: column.name, isNull: column.isNull }))).toEqual([
+      { name: 'host', isNull: false },
+      { name: 'empty', isNull: true },
+    ]);
+    expect(result.rows).toEqual([{ host: 'web' }]);
+    expect('empty' in result.rows[0]).toBe(false);
+  });
+
+  it('pairs each value with its own column when all-null columns are spread across all_columns', () => {
+    const result = mapEsqlResponseToDatatable(
+      makeResponse(
+        [
+          { name: 'host', type: 'keyword' },
+          { name: 'bytes', type: 'long' },
+        ],
+        [
+          ['web', 10],
+          ['db', 20],
+        ],
+        {
+          all_columns: [
+            { name: 'empty_a', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'empty_b', type: 'keyword' },
+            { name: 'bytes', type: 'long' },
+            { name: 'empty_c', type: 'keyword' },
+          ],
+        }
+      ),
+      { query: 'FROM logs-*' }
+    );
+
+    expect(result.columns.map(({ name, isNull }) => [name, isNull])).toEqual([
+      ['host', false],
+      ['bytes', false],
+      ['empty_a', true],
+      ['empty_b', true],
+      ['empty_c', true],
+    ]);
+    expect(result.rows).toEqual([
+      { host: 'web', bytes: 10 },
+      { host: 'db', bytes: 20 },
+    ]);
+    result.rows.forEach((row) => expect(Object.keys(row)).toEqual(['host', 'bytes']));
+  });
+
   it('includes meta.type = ESQL_TABLE_TYPE and statistics', () => {
     const result = mapEsqlResponseToDatatable(
       makeResponse([{ name: 'host', type: 'keyword' }], [['web']]),

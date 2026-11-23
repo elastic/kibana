@@ -124,7 +124,8 @@ export function registerEntityMaintainerTask({
                 coreStart.executionContext.withContext(
                   buildEaExecutionContext(
                     EA_EXECUTION_CONTEXT_NAMES.ENTITY_MAINTAINERS_TASK,
-                    taskInstance.id
+                    taskInstance.id,
+                    id
                   ),
                   async () => {
                     const status = taskInstance.state;
