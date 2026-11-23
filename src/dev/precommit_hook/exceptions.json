@@ -14,7 +14,6 @@
     "src/platform/packages/shared/kbn-management": "'kbn-management' should be snake_case",
     "src/platform/packages/shared/shared-ux": "'shared-ux' should be snake_case",
     "typings/@a2a-js-sdk": "'@a2a-js-sdk' should be snake_case",
-    "typings/@elastic/opentelemetry-node": "'opentelemetry-node' should be snake_case",
     "typings/@hello-pangea": "'@hello-pangea' should be snake_case",
     "typings/@opentelemetry/semantic-conventions": "'semantic-conventions' should be snake_case",
     "typings/@typescript-eslint": "'@typescript-eslint' should be snake_case",

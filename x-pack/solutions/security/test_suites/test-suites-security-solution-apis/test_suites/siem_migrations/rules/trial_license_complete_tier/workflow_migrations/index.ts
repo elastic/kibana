@@ -15,6 +15,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./workflows/create'));
     loadTestFile(require.resolve('./workflows/get'));
+    loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./stats_all'));
+    loadTestFile(require.resolve('./translation_stats'));
+    loadTestFile(require.resolve('./start'));
+    loadTestFile(require.resolve('./stop'));
     loadTestFile(require.resolve('./authz'));
   });
 }

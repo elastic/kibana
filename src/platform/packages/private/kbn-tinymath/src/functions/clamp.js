@@ -28,7 +28,7 @@ const findClamp = (a, min, max) => {
  * clamp([10, 20, 30, 40], 15, 25) // returns [15, 20, 25, 25]
  * clamp(10, [15, 2, 4, 20], 25) // returns [15, 10, 10, 20]
  * clamp(35, 10, [20, 30, 40, 50]) // returns [20, 30, 35, 35]
- * clamp([1, 9], 3, [4, 5]) // returns [clamp([1, 3, 4]), clamp([9, 3, 5])] = [3, 5]
+ * clamp([1, 9], 3, [4, 5]) // returns [clamp(1, 3, 4), clamp(9, 3, 5)] = [3, 5]
  */
 
 function clamp(a, min, max) {

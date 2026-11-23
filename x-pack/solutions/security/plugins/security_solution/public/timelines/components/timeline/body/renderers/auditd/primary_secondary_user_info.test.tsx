@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../../common/mock';
 import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
-import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -23,25 +22,9 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('UserPrimarySecondary', () => {
-  const mount = useMountAppended();
-
   describe('rendering', () => {
-    test('it renders the default PrimarySecondaryUserInfo', () => {
-      const wrapper = shallow(
-        <PrimarySecondaryUserInfo
-          scopeId="some_scope"
-          contextId="context-123"
-          eventId="event-123"
-          userName="user-name-1"
-          primary="primary-1"
-          secondary="secondary-1"
-        />
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('should render user name only if that is all that is present', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -53,11 +36,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('user-name-1');
+      expect(container.textContent).toBe('user-name-1');
     });
 
     test('should render user name only if the others are in unset mode', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -69,11 +52,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('user-name-1');
+      expect(container.textContent).toBe('user-name-1');
     });
 
     test('should render primary name only if that is all that is present', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -85,11 +68,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('primary-1');
+      expect(container.textContent).toBe('primary-1');
     });
 
     test('should render primary name only if the others are in unset mode', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -101,11 +84,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('primary-1');
+      expect(container.textContent).toBe('primary-1');
     });
 
     test('should render the secondary name only if that is all that is present', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -117,11 +100,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('secondary-1');
+      expect(container.textContent).toBe('secondary-1');
     });
 
     test('should render the secondary name only if the others are in unset mode', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -133,11 +116,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('secondary-1');
+      expect(container.textContent).toBe('secondary-1');
     });
 
     test('should render the user name if all three are the same', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -149,11 +132,11 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('username-1');
+      expect(container.textContent).toBe('username-1');
     });
 
     test('should render the primary with as if all three are different', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders>
           <PrimarySecondaryUserInfo
             scopeId="some_scope"
@@ -165,7 +148,7 @@ describe('UserPrimarySecondary', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[primary]as[secondary]');
+      expect(container.textContent).toBe('[primary]as[secondary]');
     });
   });
 

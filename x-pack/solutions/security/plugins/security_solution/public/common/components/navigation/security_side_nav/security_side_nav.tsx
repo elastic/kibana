@@ -101,9 +101,12 @@ const useSolutionSideNavItems = (
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
   const { application } = useKibana().services;
   const applications = useObservable(application.applications$);
-  // The AlertZero app is only in the Classic nav while its setting, space, license and privileges allow it.
+  // AlertZero's deep links are only in the Classic nav while its setting, space, license and
+  // privileges allow it.
   const isAlertZeroVisible =
-    applications?.get(ALERTZERO_APP_ID)?.visibleIn.includes('classicSideNav') === true;
+    applications
+      ?.get(ALERTZERO_APP_ID)
+      ?.deepLinks.some(({ visibleIn }) => visibleIn.includes('classicSideNav')) === true;
 
   const classicFooterItems = useMemo((): SolutionSideNavItem[] | null => {
     const flatNavLinks = flattenNavigationLinks(navLinks);

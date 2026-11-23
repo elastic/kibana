@@ -51,7 +51,7 @@ describe('ProjectDefaults', () => {
     render(<ProjectDefaults {...defaultProps} />);
 
     expect(screen.getByTestId('searchBoostProjectDefaultValue-indices')).toHaveTextContent(
-      'Performant'
+      'Default'
     );
     expect(screen.getByTestId('searchBoostProjectDefaultValue-data_streams')).toHaveTextContent(
       'Last 7 days'

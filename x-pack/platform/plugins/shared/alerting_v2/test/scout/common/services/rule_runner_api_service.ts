@@ -137,17 +137,17 @@ export const getRuleRunnerApiService = ({
       spaceId = DEFAULT_SPACE_ID,
       timeoutMs,
     }) =>
-      measurePerformanceAsync(log, 'ruleRunner.waitForExecutions', () => {
-        const countRuns = () => ruleExecutorTask.countRuns({ ruleId, since, spaceId });
-        return pollUntilAtLeast(
+      measurePerformanceAsync(log, 'ruleRunner.waitForExecutions', () =>
+        pollUntilAtLeast(
           runs,
-          countRuns,
-          countRuns,
+          () => ruleExecutorTask.countRuns({ ruleId, since, spaceId }),
+          // Monotonic total: a run that started before `since` must still advance the guard below.
+          () => ruleExecutorTask.countRuns({ ruleId, since: new Date(0), spaceId }),
           () => runRule(ruleId, { spaceId }),
           POLL_INTERVAL_MS,
           timeoutMs
-        );
-      }),
+        )
+      ),
 
     waitForReportedRun: ({
       ruleId,
