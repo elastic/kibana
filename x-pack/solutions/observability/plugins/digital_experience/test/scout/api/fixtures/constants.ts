@@ -33,6 +33,18 @@ export const applicationTabPath = (
   return `${APPLICATIONS_PATH}/${encodeURIComponent(serviceName)}/${tabPath}?${query}`;
 };
 
+export const MOBILE_APPLICATIONS_PATH = 'internal/digital_experience/mobile_applications';
+
+/** The KPI route of a mobile application in `TIME_RANGE`; `query` adds params or overrides them. */
+export const mobileKpisPath = (serviceName: string, query: Record<string, string> = {}): string => {
+  const search = new URLSearchParams({
+    start: TIME_RANGE.rangeFrom,
+    end: TIME_RANGE.rangeTo,
+    ...query,
+  });
+  return `${MOBILE_APPLICATIONS_PATH}/${encodeURIComponent(serviceName)}/kpis?${search}`;
+};
+
 export const APPLICATIONS_IN_TIME_RANGE_PATH = `${APPLICATIONS_PATH}?start=${TIME_RANGE.rangeFrom}&end=${TIME_RANGE.rangeTo}`;
 
 export const SESSIONS_ENABLE_PATH = 'internal/digital_experience/sessions/enable';

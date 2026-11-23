@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const SpinnerFlexItem = styled(EuiFlexItem)`
   margin-right: 5px;

@@ -44,6 +44,19 @@ export const WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID = 'workflows:executionStats
 export const WORKFLOWS_LIBRARY_ENABLED_SETTING_ID = 'workflowsManagement:library:enabled';
 
 /**
+ * How a workflow was created from a Workflow Template library template:
+ * `install` (setup form), `import` (template file upload) or `remix`
+ * (Remix with AI, saved from the editor).
+ */
+export const WORKFLOW_TEMPLATE_ORIGINS = ['install', 'import', 'remix'] as const;
+
+/** Template slug stored when the source template is not in the library catalog. */
+export const CUSTOM_WORKFLOW_TEMPLATE_SLUG = 'custom';
+
+/** Template slug stored when no catalog was available to check the source template against. */
+export const UNRESOLVED_WORKFLOW_TEMPLATE_SLUG = 'unresolved';
+
+/**
  * Global Advanced Setting gating the global Workflow Executions view
  * (`/app/workflows/executions`) and the execution flyout on workflow detail.
  * Enabled by default; operators can turn it off in kibana.yml.

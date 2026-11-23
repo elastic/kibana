@@ -183,6 +183,30 @@ describe('proposals', () => {
     expect(parse(undefined)).toBeUndefined();
   });
 
+  it('keeps an action workflow with its input, and drops a blank one', () => {
+    expect(
+      parse([
+        {
+          title: 'Open an issue',
+          comment: 'c',
+          action_workflow_id: ' wf-open-issue ',
+          action_input: { repo: 'checkout' },
+        },
+        { title: 'Restart', comment: 'c', action_workflow_id: '  ', action_input: { a: 1 } },
+        { title: 'No input', comment: 'c', action_workflow_id: 'wf-x' },
+      ])
+    ).toEqual([
+      {
+        title: 'Open an issue',
+        comment: 'c',
+        action_workflow_id: 'wf-open-issue',
+        action_input: { repo: 'checkout' },
+      },
+      { title: 'Restart', comment: 'c' },
+      { title: 'No input', comment: 'c', action_workflow_id: 'wf-x', action_input: {} },
+    ]);
+  });
+
   it('asks for proposals in the final schema only', () => {
     expect(FINDINGS_JSON_SCHEMA.properties).toHaveProperty('proposals');
     expect(LIVE_FINDINGS_JSON_SCHEMA.properties).not.toHaveProperty('proposals');

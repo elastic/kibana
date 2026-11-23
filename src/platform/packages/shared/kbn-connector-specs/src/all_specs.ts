@@ -93,6 +93,7 @@ export * from './specs/google_threat_intelligence/google_threat_intelligence';
 export * from './specs/gitlab/gitlab';
 export * from './specs/elasticsearch/elasticsearch';
 export * from './specs/azure_functions/azure_functions';
+export * from './specs/aws_rds/aws_rds';
 export { ThreatQ } from './specs/threatq/threatq';
 export * from './specs/azure_sql/azure_sql';
 export * from './specs/solarwinds_platform/solarwinds_platform';

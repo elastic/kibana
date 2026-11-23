@@ -10,10 +10,7 @@
     "id": "timelines",
     "browser": true,
     "server": false,
-    "requiredPlugins": [
-      "kibanaReact",
-      "kibanaUtils"
-    ],
+    "requiredPlugins": [],
     "optionalPlugins": []
   }
 }

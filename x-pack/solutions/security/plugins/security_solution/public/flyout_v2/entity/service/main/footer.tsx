@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { TakeAction } from '../../../../flyout/entity_details/shared/components/take_action';
+import { TakeAction } from '../../shared/components/take_action';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';

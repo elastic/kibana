@@ -1,11 +1,11 @@
 {
-  "sha1": "488d68a62b660e197bde908def7783dc3627b1f6",
+  "sha1": "a52e0f7a6f6be9934e3f80113b67e0328bf45c95",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "d375cae3da58c8f-65fd9c357892a20",
+      "id": "3cbb8f12736e4f2-65fd9c357892a20",
       "title": "InternalActions/Cases should run create_get_update_case workflow successfully",
       "expectedStatus": "passed",
       "tags": [
@@ -18,12 +18,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/create_get_update_case.spec.ts",
-        "line": 48,
+        "line": 46,
         "column": 13
       }
     },
     {
-      "id": "a8fdae414c305e1-5f188557aa71c91",
+      "id": "3936e005871c9a8-5f188557aa71c91",
       "title": "InternalActions/Elasticsearch should run national park workflow successfully",
       "expectedStatus": "passed",
       "tags": [
@@ -32,12 +32,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/internal_actions/national_parks.spec.ts",
-        "line": 56,
+        "line": 54,
         "column": 13
       }
     },
     {
-      "id": "eb10b95e21481ba-5fe0bd1ead1560b",
+      "id": "c7962a0117d98b0-5fe0bd1ead1560b",
       "title": "Workflow administrator sharing grants execution access through Access control and preserves the owner",
       "expectedStatus": "passed",
       "tags": [
@@ -46,12 +46,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control_admin.spec.ts",
-        "line": 44,
+        "line": 42,
         "column": 5
       }
     },
     {
-      "id": "478a0cfe64d4fb9-8627e04223e9fc9",
+      "id": "09cdbe50375578c-8627e04223e9fc9",
       "title": "Workflow access dialog saves private and public access through the shared form",
       "expectedStatus": "passed",
       "tags": [
@@ -60,12 +60,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 52,
+        "line": 50,
         "column": 9
       }
     },
     {
-      "id": "478a0cfe64d4fb9-cbce59d83ce1e29",
+      "id": "09cdbe50375578c-cbce59d83ce1e29",
       "title": "Workflow access dialog lets an executor test a saved workflow with enabled=true",
       "expectedStatus": "passed",
       "tags": [
@@ -74,12 +74,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 113,
+        "line": 111,
         "column": 33
       }
     },
     {
-      "id": "478a0cfe64d4fb9-44fe125f3b43fe5",
+      "id": "09cdbe50375578c-44fe125f3b43fe5",
       "title": "Workflow access dialog lets an executor test a saved workflow with enabled=false",
       "expectedStatus": "passed",
       "tags": [
@@ -88,12 +88,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_access_control.spec.ts",
-        "line": 113,
+        "line": 111,
         "column": 33
       }
     },
     {
-      "id": "19444d1b23e18a3-5e19e05711f14c3",
+      "id": "bdbc1e31a9b285a-5e19e05711f14c3",
       "title": "Workflow editor actions menu on the executions tab shows the actions menu only while the workflow is editable",
       "expectedStatus": "passed",
       "tags": [
@@ -106,12 +106,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/actions_menu_executions.spec.ts",
-        "line": 40,
+        "line": 38,
         "column": 24
       }
     },
     {
-      "id": "2a9d2abc63561bd-e237d01d0946069",
+      "id": "8c092f14c194b3c-e237d01d0946069",
       "title": "Variable validation: data.map item and index bindings item and index references inside data.map with.fields are valid",
       "expectedStatus": "passed",
       "tags": [
@@ -124,12 +124,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
-        "line": 30,
+        "line": 28,
         "column": 25
       }
     },
     {
-      "id": "2a9d2abc63561bd-eebb2585dd38aa4",
+      "id": "8c092f14c194b3c-eebb2585dd38aa4",
       "title": "Variable validation: data.map item and index bindings invalid variable inside data.map with.fields is still flagged",
       "expectedStatus": "passed",
       "tags": [
@@ -142,12 +142,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/data_map_variable_validation.spec.ts",
-        "line": 36,
+        "line": 34,
         "column": 25
       }
     },
     {
-      "id": "8171a60e1d701e2-e23cfd203181a44",
+      "id": "277a669a72608e7-e23cfd203181a44",
       "title": "Proposed changes accept and reject accept replace hunk applies the change",
       "expectedStatus": "passed",
       "tags": [
@@ -156,12 +156,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 5
       }
     },
     {
-      "id": "8171a60e1d701e2-2a1bc8fdac48de2",
+      "id": "277a669a72608e7-2a1bc8fdac48de2",
       "title": "Proposed changes accept and reject reject replace hunk restores original",
       "expectedStatus": "passed",
       "tags": [
@@ -170,12 +170,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 119,
+        "line": 117,
         "column": 14
       }
     },
     {
-      "id": "8171a60e1d701e2-170fef60e98b706",
+      "id": "277a669a72608e7-170fef60e98b706",
       "title": "Proposed changes accept and reject accept insert hunk applies the change",
       "expectedStatus": "passed",
       "tags": [
@@ -184,12 +184,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 5
       }
     },
     {
-      "id": "8171a60e1d701e2-dbf4c859cfba6c3",
+      "id": "277a669a72608e7-dbf4c859cfba6c3",
       "title": "Proposed changes accept and reject reject insert hunk restores original",
       "expectedStatus": "passed",
       "tags": [
@@ -198,12 +198,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 119,
+        "line": 117,
         "column": 14
       }
     },
     {
-      "id": "8171a60e1d701e2-d3a7f847e738cac",
+      "id": "277a669a72608e7-d3a7f847e738cac",
       "title": "Proposed changes accept and reject accept delete hunk applies the change",
       "expectedStatus": "passed",
       "tags": [
@@ -212,12 +212,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 5
       }
     },
     {
-      "id": "8171a60e1d701e2-96c28f102915036",
+      "id": "277a669a72608e7-96c28f102915036",
       "title": "Proposed changes accept and reject reject delete hunk restores original",
       "expectedStatus": "passed",
       "tags": [
@@ -226,12 +226,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 119,
+        "line": 117,
         "column": 14
       }
     },
     {
-      "id": "8171a60e1d701e2-d7b875948aafe7e",
+      "id": "277a669a72608e7-d7b875948aafe7e",
       "title": "Proposed changes accept and reject accept all with multiple hunks produces full afterYaml",
       "expectedStatus": "passed",
       "tags": [
@@ -240,12 +240,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 121,
+        "line": 119,
         "column": 25
       }
     },
     {
-      "id": "8171a60e1d701e2-ad09e3a99333fa2",
+      "id": "277a669a72608e7-ad09e3a99333fa2",
       "title": "Proposed changes accept and reject reject all with multiple hunks restores original",
       "expectedStatus": "passed",
       "tags": [
@@ -254,12 +254,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 128,
+        "line": 126,
         "column": 60
       }
     },
     {
-      "id": "8171a60e1d701e2-c533945754fe7f7",
+      "id": "277a669a72608e7-c533945754fe7f7",
       "title": "Proposed changes accept and reject accept first hunk then decline rest produces partial result",
       "expectedStatus": "passed",
       "tags": [
@@ -268,12 +268,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 134,
+        "line": 132,
         "column": 7
       }
     },
     {
-      "id": "8171a60e1d701e2-ed485a258140ebf",
+      "id": "277a669a72608e7-ed485a258140ebf",
       "title": "Proposed changes accept and reject Modifier+Shift+A accepts pending proposals when pointer is over editor",
       "expectedStatus": "passed",
       "tags": [
@@ -282,12 +282,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 147,
+        "line": 145,
         "column": 23
       }
     },
     {
-      "id": "8171a60e1d701e2-06c72f96f33cc85",
+      "id": "277a669a72608e7-06c72f96f33cc85",
       "title": "Proposed changes accept and reject Modifier+Backspace rejects pending proposals when pointer is over editor",
       "expectedStatus": "passed",
       "tags": [
@@ -296,12 +296,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 162,
+        "line": 160,
         "column": 25
       }
     },
     {
-      "id": "8171a60e1d701e2-b6799cdc6085b17",
+      "id": "277a669a72608e7-b6799cdc6085b17",
       "title": "Proposed changes accept and reject undo dismisses all pending proposals",
       "expectedStatus": "passed",
       "tags": [
@@ -310,12 +310,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 175,
+        "line": 173,
         "column": 8
       }
     },
     {
-      "id": "8171a60e1d701e2-e64dc37d828b378",
+      "id": "277a669a72608e7-e64dc37d828b378",
       "title": "Proposed changes accept and reject new proposals work after resolving a previous batch",
       "expectedStatus": "passed",
       "tags": [
@@ -324,12 +324,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 186,
+        "line": 184,
         "column": 23
       }
     },
     {
-      "id": "8171a60e1d701e2-48768f6d4d9859b",
+      "id": "277a669a72608e7-48768f6d4d9859b",
       "title": "Proposed changes accept and reject bulk bar disappears after all proposals are resolved",
       "expectedStatus": "passed",
       "tags": [
@@ -338,12 +338,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 209,
+        "line": 207,
         "column": 25
       }
     },
     {
-      "id": "8171a60e1d701e2-5296679e3249226",
+      "id": "277a669a72608e7-5296679e3249226",
       "title": "Proposed changes accept and reject accept hunk then undo restores proposal and bulk bar",
       "expectedStatus": "passed",
       "tags": [
@@ -352,12 +352,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 219,
+        "line": 217,
         "column": 23
       }
     },
     {
-      "id": "8171a60e1d701e2-03a35bbb5085497",
+      "id": "277a669a72608e7-03a35bbb5085497",
       "title": "Proposed changes accept and reject reject hunk then undo restores AI content and bulk bar",
       "expectedStatus": "passed",
       "tags": [
@@ -366,12 +366,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 234,
+        "line": 232,
         "column": 25
       }
     },
     {
-      "id": "8171a60e1d701e2-676c4cd699672a9",
+      "id": "277a669a72608e7-676c4cd699672a9",
       "title": "Proposed changes accept and reject accept all then undo step-by-step restores hunks individually",
       "expectedStatus": "passed",
       "tags": [
@@ -380,12 +380,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor/proposed_changes.spec.ts",
-        "line": 253,
+        "line": 251,
         "column": 73
       }
     },
     {
-      "id": "a4934baed7bcf96-773061bd6f9afcd",
+      "id": "2b217a37de97646-773061bd6f9afcd",
       "title": "Event autocomplete should be dynamic based on triggers manual trigger: event.* should only suggest spaceId",
       "expectedStatus": "passed",
       "tags": [
@@ -394,12 +394,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_event_autocomplete.spec.ts",
-        "line": 29,
+        "line": 27,
         "column": 58
       }
     },
     {
-      "id": "a4934baed7bcf96-e10677c4ab18791",
+      "id": "2b217a37de97646-e10677c4ab18791",
       "title": "Event autocomplete should be dynamic based on triggers alert trigger: event.* should suggest alerts, rule, params, and spaceId",
       "expectedStatus": "passed",
       "tags": [
@@ -408,12 +408,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor_event_autocomplete.spec.ts",
-        "line": 40,
+        "line": 38,
         "column": 29
       }
     },
     {
-      "id": "bd47170adc03761-1eaf3f4c5859ccb",
+      "id": "f5eed8c15fb0cd9-1eaf3f4c5859ccb",
       "title": "Sanity tests for workflows Create, save, run and view a dummy workflow",
       "expectedStatus": "passed",
       "tags": [
@@ -426,12 +426,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 39,
+        "line": 37,
         "column": 50
       }
     },
     {
-      "id": "bd47170adc03761-e6122565b6ea818",
+      "id": "f5eed8c15fb0cd9-e6122565b6ea818",
       "title": "Sanity tests for workflows should show validation errors for invalid workflow YAML and clear them when fixed",
       "expectedStatus": "passed",
       "tags": [
@@ -444,12 +444,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 62,
+        "line": 60,
         "column": 73
       }
     },
     {
-      "id": "bd47170adc03761-0c2219b52cabf23",
+      "id": "f5eed8c15fb0cd9-0c2219b52cabf23",
       "title": "Sanity tests for workflows should render step type icons styled via mask-image",
       "expectedStatus": "passed",
       "tags": [
@@ -462,12 +462,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 91,
+        "line": 89,
         "column": 7
       }
     },
     {
-      "id": "bd47170adc03761-459fd6ac3eccef8",
+      "id": "f5eed8c15fb0cd9-459fd6ac3eccef8",
       "title": "Sanity tests for workflows should show step type autocompletion suggestions",
       "expectedStatus": "passed",
       "tags": [
@@ -480,12 +480,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 108,
+        "line": 106,
         "column": 25
       }
     },
     {
-      "id": "bd47170adc03761-097049eb176efd2",
+      "id": "f5eed8c15fb0cd9-097049eb176efd2",
       "title": "Sanity tests for workflows should show root-level property suggestions on empty lines",
       "expectedStatus": "passed",
       "tags": [
@@ -498,12 +498,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 142,
+        "line": 140,
         "column": 29
       }
     },
     {
-      "id": "bd47170adc03761-f9053316b789cab",
+      "id": "f5eed8c15fb0cd9-f9053316b789cab",
       "title": "Sanity tests for workflows should not show validation errors for YAML comment lines with liquid variables",
       "expectedStatus": "passed",
       "tags": [
@@ -516,12 +516,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_editor.spec.ts",
-        "line": 160,
+        "line": 158,
         "column": 25
       }
     },
     {
-      "id": "751ff7b8b9bd440-063497b8c9edff4",
+      "id": "da578ddc565d159-063497b8c9edff4",
       "title": "Workflow execution - Alert triggers should trigger workflow from alert",
       "expectedStatus": "passed",
       "tags": [
@@ -534,12 +534,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 157,
+        "line": 155,
         "column": 18
       }
     },
     {
-      "id": "751ff7b8b9bd440-c4010c12909cde8",
+      "id": "da578ddc565d159-c4010c12909cde8",
       "title": "Workflow execution - Alert triggers should not trigger a disabled workflow when alert fires",
       "expectedStatus": "passed",
       "tags": [
@@ -552,12 +552,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/alert_trigger.spec.ts",
-        "line": 281,
+        "line": 279,
         "column": 31
       }
     },
     {
-      "id": "9e4dfe2f4767d9b-fc39598781b03ea",
+      "id": "28bb19809035184-fc39598781b03ea",
       "title": "Workflow execution - Cancellation should cancel a single running execution from the execution details panel",
       "expectedStatus": "passed",
       "tags": [
@@ -566,12 +566,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
-        "line": 23,
+        "line": 21,
         "column": 56
       }
     },
     {
-      "id": "9e4dfe2f4767d9b-54e0484e76de34d",
+      "id": "28bb19809035184-54e0484e76de34d",
       "title": "Workflow execution - Cancellation should cancel all active executions from the execution list via Cancel all active",
       "expectedStatus": "passed",
       "tags": [
@@ -580,12 +580,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
-        "line": 32,
+        "line": 30,
         "column": 23
       }
     },
     {
-      "id": "963f12d1347a0c9-cfea30731e1cb4b",
+      "id": "9363a7e1ddd29f8-cfea30731e1cb4b",
       "title": "Workflow execution - Step scroll clicking a step in execution tree scrolls YAML editor to that step",
       "expectedStatus": "passed",
       "tags": [
@@ -594,12 +594,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/execution_step_scroll.spec.ts",
-        "line": 22,
+        "line": 20,
         "column": 56
       }
     },
     {
-      "id": "d00b30a931c8581-4971c41c22e284c",
+      "id": "04a24ff1186925f-4971c41c22e284c",
       "title": "Workflow execution - Foreach iterations should display execution tree with foreach loops showing multiple iterations",
       "expectedStatus": "passed",
       "tags": [
@@ -608,12 +608,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
-        "line": 28,
+        "line": 26,
         "column": 58
       }
     },
     {
-      "id": "d00b30a931c8581-a5ca930aaeec5bb",
+      "id": "04a24ff1186925f-a5ca930aaeec5bb",
       "title": "Workflow execution - Foreach iterations should display post-foreach steps below all iterations after collapsing and re-expanding",
       "expectedStatus": "passed",
       "tags": [
@@ -622,12 +622,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/foreach_iterations.spec.ts",
-        "line": 82,
+        "line": 80,
         "column": 29
       }
     },
     {
-      "id": "9e0bdca793cccc5-32208d4a04dc870",
+      "id": "ae75f7299eae7b2-32208d4a04dc870",
       "title": "Workflow execution - Parallel step runs static branches concurrently and joins downstream",
       "expectedStatus": "passed",
       "tags": [
@@ -636,12 +636,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
-        "line": 25,
+        "line": 23,
         "column": 56
       }
     },
     {
-      "id": "9e0bdca793cccc5-e2957eab786f150",
+      "id": "ae75f7299eae7b2-e2957eab786f150",
       "title": "Workflow execution - Parallel step fans out a foreach body once per item and joins downstream",
       "expectedStatus": "passed",
       "tags": [
@@ -650,12 +650,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/parallel_step.spec.ts",
-        "line": 44,
+        "line": 42,
         "column": 18
       }
     },
     {
-      "id": "20b91fe3119c6c9-4a99ff2edf7a25b",
+      "id": "974b59147820d8c-4a99ff2edf7a25b",
       "title": "Workflow execution - Test runs should run unsaved workflow as test run with isTestRun: true",
       "expectedStatus": "passed",
       "tags": [
@@ -664,12 +664,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 27,
+        "line": 25,
         "column": 56
       }
     },
     {
-      "id": "20b91fe3119c6c9-65a4054c5ce2fae",
+      "id": "974b59147820d8c-65a4054c5ce2fae",
       "title": "Workflow execution - Test runs should show the test execute modal Event tab and trigger events table",
       "expectedStatus": "passed",
       "tags": [
@@ -678,12 +678,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 40,
+        "line": 38,
         "column": 5
       }
     },
     {
-      "id": "20b91fe3119c6c9-296812a7a4fcbda",
+      "id": "974b59147820d8c-296812a7a4fcbda",
       "title": "Workflow execution - Test runs should run saved workflow from editor as test run with isTestRun: true",
       "expectedStatus": "passed",
       "tags": [
@@ -692,12 +692,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 70,
+        "line": 68,
         "column": 29
       }
     },
     {
-      "id": "20b91fe3119c6c9-70c62d6d98f1350",
+      "id": "974b59147820d8c-70c62d6d98f1350",
       "title": "Workflow execution - Test runs should not allow running a disabled workflow, then enable and run it",
       "expectedStatus": "passed",
       "tags": [
@@ -706,12 +706,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 81,
+        "line": 79,
         "column": 16
       }
     },
     {
-      "id": "20b91fe3119c6c9-b4376d9720aea17",
+      "id": "974b59147820d8c-b4376d9720aea17",
       "title": "Workflow execution - Test runs should run individual step with custom context override",
       "expectedStatus": "passed",
       "tags": [
@@ -720,12 +720,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 119,
+        "line": 117,
         "column": 26
       }
     },
     {
-      "id": "20b91fe3119c6c9-701cccba24f7844",
+      "id": "974b59147820d8c-701cccba24f7844",
       "title": "Workflow execution - Test runs should allow providing \"event\" in manual inputs",
       "expectedStatus": "passed",
       "tags": [
@@ -734,12 +734,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_execution/test_run.spec.ts",
-        "line": 148,
+        "line": 146,
         "column": 26
       }
     },
     {
-      "id": "9b76fdad3740899-c5780f797880878",
+      "id": "41467e316214526-c5780f797880878",
       "title": "Workflow graph view recovery after YAML syntax error restores all graph nodes after fixing a YAML syntax error",
       "expectedStatus": "passed",
       "tags": [
@@ -752,12 +752,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_graph/workflow_graph_recovery.spec.ts",
-        "line": 43,
+        "line": 41,
         "column": 24
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-2aaeb1a8c275eeb",
+      "id": "dd0d9ccdde7c623-2aaeb1a8c275eeb",
       "title": "Variable scope validation: use-before-declaration assign: same-line quoted scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
@@ -770,12 +770,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 39,
+        "line": 37,
         "column": 25
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-602f7647d2dc3e8",
+      "id": "dd0d9ccdde7c623-602f7647d2dc3e8",
       "title": "Variable scope validation: use-before-declaration capture: same-line quoted scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
@@ -788,12 +788,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 48,
+        "line": 46,
         "column": 20
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-9c87ec3e05df52c",
+      "id": "dd0d9ccdde7c623-9c87ec3e05df52c",
       "title": "Variable scope validation: use-before-declaration assign: cross-line block scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
@@ -806,12 +806,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 57,
+        "line": 55,
         "column": 25
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-3a4fdb7ede9e974",
+      "id": "dd0d9ccdde7c623-3a4fdb7ede9e974",
       "title": "Variable scope validation: use-before-declaration capture: cross-line block scalar — use before declaration is flagged, valid after fix",
       "expectedStatus": "passed",
       "tags": [
@@ -824,12 +824,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 67,
+        "line": 65,
         "column": 7
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-ed8b45084a8e5a6",
+      "id": "dd0d9ccdde7c623-ed8b45084a8e5a6",
       "title": "Variable scope validation: use-before-declaration mixed: assign in scope + capture out of scope on same line",
       "expectedStatus": "passed",
       "tags": [
@@ -842,12 +842,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 76,
+        "line": 74,
         "column": 7
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-ed1e52e80f59ae2",
+      "id": "dd0d9ccdde7c623-ed1e52e80f59ae2",
       "title": "Variable scope validation: use-before-declaration multiple assigns interleaved across lines — only out-of-scope reference is flagged",
       "expectedStatus": "passed",
       "tags": [
@@ -860,12 +860,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 84,
+        "line": 82,
         "column": 20
       }
     },
     {
-      "id": "e5bbd6f9df1d7de-f32d207c0b66ef6",
+      "id": "dd0d9ccdde7c623-f32d207c0b66ef6",
       "title": "Variable scope validation: use-before-declaration capture: first reference before block is flagged, second reference after block is valid",
       "expectedStatus": "passed",
       "tags": [
@@ -878,12 +878,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflow_variable_validation.spec.ts",
-        "line": 93,
+        "line": 91,
         "column": 25
       }
     },
     {
-      "id": "0ad5a54073a2263-afa16fc0f50d98a",
+      "id": "30b26b287cfaeb3-afa16fc0f50d98a",
       "title": "Workflows UI availability stateful: workflows list page renders when license is valid",
       "expectedStatus": "passed",
       "tags": [
@@ -892,12 +892,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 15,
+        "line": 13,
         "column": 8
       }
     },
     {
-      "id": "0ad5a54073a2263-dcff524993d5030",
+      "id": "30b26b287cfaeb3-dcff524993d5030",
       "title": "Workflows UI availability stateful: workflows list page renders when using basic (invalid) license",
       "expectedStatus": "passed",
       "tags": [
@@ -906,12 +906,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 22,
+        "line": 20,
         "column": 20
       }
     },
     {
-      "id": "0ad5a54073a2263-f0d666479a28b93",
+      "id": "30b26b287cfaeb3-f0d666479a28b93",
       "title": "Workflows UI availability observability complete: workflows list page renders",
       "expectedStatus": "passed",
       "tags": [
@@ -920,12 +920,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 46,
+        "line": 44,
         "column": 12
       }
     },
     {
-      "id": "0ad5a54073a2263-c5f784bc4d5c3a9",
+      "id": "30b26b287cfaeb3-c5f784bc4d5c3a9",
       "title": "Workflows UI availability security complete: workflows list page renders",
       "expectedStatus": "passed",
       "tags": [
@@ -934,12 +934,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 60,
+        "line": 58,
         "column": 12
       }
     },
     {
-      "id": "0ad5a54073a2263-cca99e1134e2a61",
+      "id": "30b26b287cfaeb3-cca99e1134e2a61",
       "title": "Workflows UI availability security EASE (AI for SOC): workflows list page renders",
       "expectedStatus": "passed",
       "tags": [
@@ -948,12 +948,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 69,
+        "line": 67,
         "column": 21
       }
     },
     {
-      "id": "0ad5a54073a2263-3fc97b37b0c2d57",
+      "id": "30b26b287cfaeb3-3fc97b37b0c2d57",
       "title": "Workflows UI availability search: workflows list page renders",
       "expectedStatus": "passed",
       "tags": [
@@ -962,12 +962,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 78,
+        "line": 76,
         "column": 5
       }
     },
     {
-      "id": "0ad5a54073a2263-e25567fc8ed262d",
+      "id": "30b26b287cfaeb3-e25567fc8ed262d",
       "title": "Workflows UI availability observability logs essentials: shows serverless tier access denied screen",
       "expectedStatus": "passed",
       "tags": [
@@ -976,12 +976,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 85,
+        "line": 83,
         "column": 4
       }
     },
     {
-      "id": "0ad5a54073a2263-c26f554882a5b30",
+      "id": "30b26b287cfaeb3-c26f554882a5b30",
       "title": "Workflows UI availability security essentials: shows serverless tier access denied screen",
       "expectedStatus": "passed",
       "tags": [
@@ -990,12 +990,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_availability.spec.ts",
-        "line": 95,
+        "line": 93,
         "column": 4
       }
     },
     {
-      "id": "b669ba2eadb1e3a-ec8bf7897a8036c",
+      "id": "05ecc1a8c7dc1b4-ec8bf7897a8036c",
       "title": "WorkflowsList/BulkActions should enable disabled workflows",
       "expectedStatus": "passed",
       "tags": [
@@ -1004,12 +1004,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 21,
+        "line": 19,
         "column": 56
       }
     },
     {
-      "id": "b669ba2eadb1e3a-3173b9e49af5f6a",
+      "id": "05ecc1a8c7dc1b4-3173b9e49af5f6a",
       "title": "WorkflowsList/BulkActions should keep list order stable when bulk-enabling N-1 workflows",
       "expectedStatus": "passed",
       "tags": [
@@ -1018,12 +1018,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 32,
+        "line": 30,
         "column": 23
       }
     },
     {
-      "id": "b669ba2eadb1e3a-2fa309b19ed98e8",
+      "id": "05ecc1a8c7dc1b4-2fa309b19ed98e8",
       "title": "WorkflowsList/BulkActions should disable enabled workflows",
       "expectedStatus": "passed",
       "tags": [
@@ -1032,12 +1032,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 71,
+        "line": 69,
         "column": 23
       }
     },
     {
-      "id": "b669ba2eadb1e3a-339604897d68425",
+      "id": "05ecc1a8c7dc1b4-339604897d68425",
       "title": "WorkflowsList/BulkActions should delete workflows",
       "expectedStatus": "passed",
       "tags": [
@@ -1046,12 +1046,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 90,
+        "line": 88,
         "column": 23
       }
     },
     {
-      "id": "b669ba2eadb1e3a-80de18da7957c9c",
+      "id": "05ecc1a8c7dc1b4-80de18da7957c9c",
       "title": "WorkflowsList/BulkActions should clear selection",
       "expectedStatus": "passed",
       "tags": [
@@ -1060,12 +1060,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/bulk_actions.spec.ts",
-        "line": 113,
+        "line": 111,
         "column": 23
       }
     },
     {
-      "id": "41c034019daea35-3e9a84b6df05b24",
+      "id": "10c8c6ed55fdd1c-3e9a84b6df05b24",
       "title": "WorkflowsList/FilterSortSearch should filter workflows by enabling state",
       "expectedStatus": "passed",
       "tags": [
@@ -1074,12 +1074,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 21,
+        "line": 19,
         "column": 56
       }
     },
     {
-      "id": "41c034019daea35-49df984d6fc1b0a",
+      "id": "10c8c6ed55fdd1c-49df984d6fc1b0a",
       "title": "WorkflowsList/FilterSortSearch should filter workflows by disabling state",
       "expectedStatus": "passed",
       "tags": [
@@ -1088,12 +1088,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 40,
+        "line": 38,
         "column": 23
       }
     },
     {
-      "id": "41c034019daea35-7ffd365afdc103e",
+      "id": "10c8c6ed55fdd1c-7ffd365afdc103e",
       "title": "WorkflowsList/FilterSortSearch should search by name and description",
       "expectedStatus": "passed",
       "tags": [
@@ -1102,12 +1102,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 64,
+        "line": 62,
         "column": 23
       }
     },
     {
-      "id": "41c034019daea35-426ba8b5bfd4825",
+      "id": "10c8c6ed55fdd1c-426ba8b5bfd4825",
       "title": "WorkflowsList/FilterSortSearch should rank the exact hyphenated name first",
       "expectedStatus": "passed",
       "tags": [
@@ -1116,12 +1116,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
-        "line": 116,
+        "line": 114,
         "column": 18
       }
     },
     {
-      "id": "d1e08a1928e1103-36230ada0572c5b",
+      "id": "de5e9163489bdc6-36230ada0572c5b",
       "title": "WorkflowsList/ImportExport should import a single YAML workflow via flyout",
       "expectedStatus": "passed",
       "tags": [
@@ -1130,12 +1130,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 45,
+        "line": 43,
         "column": 64
       }
     },
     {
-      "id": "d1e08a1928e1103-3b394365212ab70",
+      "id": "de5e9163489bdc6-3b394365212ab70",
       "title": "WorkflowsList/ImportExport should import ZIP with multiple workflows via flyout",
       "expectedStatus": "passed",
       "tags": [
@@ -1144,12 +1144,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 65,
+        "line": 63,
         "column": 23
       }
     },
     {
-      "id": "d1e08a1928e1103-8fc4d9afbaa7798",
+      "id": "de5e9163489bdc6-8fc4d9afbaa7798",
       "title": "WorkflowsList/ImportExport should show conflict resolution UI when re-importing existing workflows",
       "expectedStatus": "passed",
       "tags": [
@@ -1158,12 +1158,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 100,
+        "line": 98,
         "column": 18
       }
     },
     {
-      "id": "d1e08a1928e1103-952c2205e283055",
+      "id": "de5e9163489bdc6-952c2205e283055",
       "title": "WorkflowsList/ImportExport should create new workflow when choosing \"generate new IDs\" for conflicts",
       "expectedStatus": "passed",
       "tags": [
@@ -1172,12 +1172,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 118,
+        "line": 116,
         "column": 23
       }
     },
     {
-      "id": "d1e08a1928e1103-c301ca289b10e33",
+      "id": "de5e9163489bdc6-c301ca289b10e33",
       "title": "WorkflowsList/ImportExport should overwrite existing workflow when choosing \"overwrite\"",
       "expectedStatus": "passed",
       "tags": [
@@ -1186,12 +1186,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 147,
+        "line": 145,
         "column": 23
       }
     },
     {
-      "id": "d1e08a1928e1103-c2fe4e94332cdd0",
+      "id": "de5e9163489bdc6-c2fe4e94332cdd0",
       "title": "WorkflowsList/ImportExport should close flyout without importing when cancel is clicked",
       "expectedStatus": "passed",
       "tags": [
@@ -1200,12 +1200,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 175,
+        "line": 173,
         "column": 23
       }
     },
     {
-      "id": "d1e08a1928e1103-1c0ebd9363a3fea",
+      "id": "de5e9163489bdc6-1c0ebd9363a3fea",
       "title": "WorkflowsList/ImportExport should export selected workflows via bulk action",
       "expectedStatus": "passed",
       "tags": [
@@ -1214,12 +1214,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 187,
+        "line": 185,
         "column": 16
       }
     },
     {
-      "id": "d1e08a1928e1103-54e320e1fa67f55",
+      "id": "de5e9163489bdc6-54e320e1fa67f55",
       "title": "WorkflowsList/ImportExport should show file size error for oversized files",
       "expectedStatus": "passed",
       "tags": [
@@ -1228,12 +1228,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 23
       }
     },
     {
-      "id": "d1e08a1928e1103-869d74e73bdbfd0",
+      "id": "de5e9163489bdc6-869d74e73bdbfd0",
       "title": "WorkflowsList/ImportExport should show parse error callout when ZIP contains non-YAML entries",
       "expectedStatus": "passed",
       "tags": [
@@ -1242,12 +1242,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 226,
+        "line": 224,
         "column": 86
       }
     },
     {
-      "id": "0d99c035ec953cc-56a4c4afb7d71f1",
+      "id": "848578ae1a60629-56a4c4afb7d71f1",
       "title": "WorkflowsList/SingleActions should run enabled workflow",
       "expectedStatus": "passed",
       "tags": [
@@ -1256,12 +1256,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 21,
+        "line": 19,
         "column": 56
       }
     },
     {
-      "id": "0d99c035ec953cc-0eab26e057be6a4",
+      "id": "848578ae1a60629-0eab26e057be6a4",
       "title": "WorkflowsList/SingleActions should not run disabled workflow",
       "expectedStatus": "passed",
       "tags": [
@@ -1270,12 +1270,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 34,
+        "line": 32,
         "column": 23
       }
     },
     {
-      "id": "0d99c035ec953cc-7ec92a0a3f0adc8",
+      "id": "848578ae1a60629-7ec92a0a3f0adc8",
       "title": "WorkflowsList/SingleActions should enable disabled workflow via toggle",
       "expectedStatus": "passed",
       "tags": [
@@ -1284,12 +1284,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 52,
+        "line": 50,
         "column": 66
       }
     },
     {
-      "id": "0d99c035ec953cc-8658309a41442e2",
+      "id": "848578ae1a60629-8658309a41442e2",
       "title": "WorkflowsList/SingleActions should disable enabled workflow via toggle",
       "expectedStatus": "passed",
       "tags": [
@@ -1298,12 +1298,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 79,
+        "line": 77,
         "column": 6
       }
     },
     {
-      "id": "0d99c035ec953cc-aaa4b68f1a7dc6b",
+      "id": "848578ae1a60629-aaa4b68f1a7dc6b",
       "title": "WorkflowsList/SingleActions should open workflow for editing via edit action",
       "expectedStatus": "passed",
       "tags": [
@@ -1312,12 +1312,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 111,
+        "line": 109,
         "column": 6
       }
     },
     {
-      "id": "0d99c035ec953cc-c8becd78b95d5ff",
+      "id": "848578ae1a60629-c8becd78b95d5ff",
       "title": "WorkflowsList/SingleActions should clone workflow via three dots menu",
       "expectedStatus": "passed",
       "tags": [
@@ -1326,12 +1326,12 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 138,
+        "line": 136,
         "column": 8
       }
     },
     {
-      "id": "0d99c035ec953cc-d99ea2e0aaa0b0d",
+      "id": "848578ae1a60629-d99ea2e0aaa0b0d",
       "title": "WorkflowsList/SingleActions should delete workflow via three dots menu",
       "expectedStatus": "passed",
       "tags": [
@@ -1340,7 +1340,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/single_actions.spec.ts",
-        "line": 149,
+        "line": 147,
         "column": 23
       }
     }

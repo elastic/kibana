@@ -6,7 +6,11 @@
  */
 import apm from 'elastic-apm-node';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import {
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+  TracerProvider,
+} from '@opentelemetry/sdk-trace';
 import type { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { of } from 'rxjs';
 
@@ -214,13 +218,13 @@ function mockPackagePolicySOs(
 
 let mockedLogger: jest.Mocked<Logger>;
 
-let otelExporter: tracing.InMemorySpanExporter;
-let otelProvider: tracing.BasicTracerProvider;
+let otelExporter: InMemorySpanExporter;
+let otelProvider: TracerProvider;
 
 beforeAll(() => {
-  otelExporter = new tracing.InMemorySpanExporter();
-  otelProvider = new tracing.BasicTracerProvider({
-    spanProcessors: [new tracing.SimpleSpanProcessor(otelExporter)],
+  otelExporter = new InMemorySpanExporter();
+  otelProvider = new TracerProvider({
+    spanProcessors: [new SimpleSpanProcessor({ exporter: otelExporter })],
   });
   trace.setGlobalTracerProvider(otelProvider);
 });

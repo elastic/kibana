@@ -1958,6 +1958,69 @@ describe('WorkersService Hunt index coverage', () => {
       });
     });
 
+    it('says only hidden or alerts indices were found when the sweep skipped nothing else', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt).toMatchObject({
+        state: 'degraded',
+        stateReason: `The sweep at 2026-10-28 10:00 UTC found only hidden or alerts indices in this space's default data view, which Hunt does not search`,
+      });
+    });
+
+    it('keeps the hidden-indices reason when the route supplies the now-empty universe', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: [],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const { workers } = await service.list(request, SPACE, async () => []);
+
+      expect(workers.find(({ id }) => id === HUNT)?.stateReason).toContain(
+        'found only hidden or alerts indices'
+      );
+    });
+
+    it('keeps the could-not-see reason when skipped and missing entries are both present', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        ...blockedScope('blocked:empty_universe'),
+        missing: ['custom-1'],
+        policy_skipped: ['.siem-signals-x'],
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.stateReason).toContain('could not see any index');
+    });
+
+    it('is not degraded by a sweep that hunted with skipped names', async () => {
+      const { service, mocks } = await setup();
+      finishedSweep(mocks, {
+        status: 'ok',
+        resolution: 'universe',
+        index_patterns: ['logs-*'],
+        missing: ['custom-edr-1'],
+        policy_skipped: ['.siem-signals-x'],
+        report_matches: [],
+        actionable_indices: [],
+        window: { from: '2026-01-01T00:00:00.000Z', to: '2026-01-31T00:00:00.000Z' },
+        row_limit: 25,
+      });
+
+      const hunt = await huntOf(service);
+
+      expect(hunt?.state).not.toBe('degraded');
+    });
+
     it('is degraded with the resolve reason after a blocked:discovery_failed sweep', async () => {
       const { service, mocks } = await setup();
       finishedSweep(mocks, blockedScope('blocked:discovery_failed'));

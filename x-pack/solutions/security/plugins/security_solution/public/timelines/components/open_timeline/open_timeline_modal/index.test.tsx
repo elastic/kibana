@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import React from 'react';
 
@@ -81,25 +81,21 @@ describe('OpenTimelineModal', () => {
   });
 
   test('it renders the expected modal', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OpenTimelineModal onClose={jest.fn()} />
       </TestProviders>
     );
 
-    wrapper.update();
-
-    expect(wrapper.find('div[data-test-subj="open-timeline-modal"].euiModal').length).toEqual(1);
+    expect(screen.getByTestId('open-timeline-modal')).toBeInTheDocument();
   });
 
   test('it installs elastic prebuilt templates', async () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <OpenTimelineModal onClose={jest.fn()} />
       </TestProviders>
     );
-
-    wrapper.update();
 
     expect(mockInstallPrepackagedTimelines).toHaveBeenCalled();
   });

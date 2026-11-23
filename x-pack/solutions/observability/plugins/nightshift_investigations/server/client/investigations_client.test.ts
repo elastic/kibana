@@ -1473,6 +1473,75 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     });
   const runInputs = () => mockManagement.runWorkflow.mock.calls[0][2];
 
+  describe('records the automation that started a new investigation on its subjects', () => {
+    const startFromAutomation = () =>
+      makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1')] },
+        },
+        {
+          automationId: 'automation-1',
+          automationName: 'Payments alerts',
+          entryPoint: 'automation',
+        }
+      );
+
+    it('in the subjects the run records', async () => {
+      await startFromAutomation();
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-1',
+          via: {
+            label: 'Payments alerts',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-1' },
+            },
+          },
+        }),
+      ]);
+    });
+
+    it('not for a start no automation made', async () => {
+      await startAlerts('alert-1');
+
+      expect(runInputs().subjects[0]).not.toHaveProperty('via');
+    });
+
+    it('only on the subjects a follow-up adds, never on the ones already recorded', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-recent' }]);
+      withConversations(makeConversation({ id: 'inv-recent' }));
+      subjectsClient.listByConversationIds.mockResolvedValue([
+        makeStoredSubject({ conversationId: 'inv-recent', subjectId: 'alert-1' }),
+      ]);
+
+      await makeClient().start(
+        {
+          subject: { type: 'alert', id: 'alert-1' },
+          trigger_type: 'automatic',
+          context: { alerts: [makeAlert('alert-1'), makeAlert('alert-3')] },
+        },
+        { automationId: 'automation-2', automationName: 'Other', entryPoint: 'automation' }
+      );
+
+      expect(runInputs().subjects).toEqual([
+        expect.objectContaining({
+          id: 'alert-3',
+          via: {
+            label: 'Other',
+            locator: {
+              id: 'NIGHTSHIFT_AUTOMATION_LOCATOR',
+              params: { automationId: 'automation-2' },
+            },
+          },
+        }),
+      ]);
+    });
+  });
+
   beforeEach(() => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
@@ -2589,11 +2658,12 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   const THREAD = { workspace: 'T1', channel: 'C1', threadTs: '1712345678.000100' };
   const THREAD_KEY = 'slack:T1:C1:1712345678.000100';
+  const PERMALINK = 'https://app.slack.com/client/T1/C1/thread/C1-1712345678.000100';
   const threadSubject = (slack: Partial<SlackThreadSubject> = {}) =>
     makeStoredSubject({
       subjectType: 'slack_thread',
       subjectId: THREAD_KEY,
-      slack: { channel: 'C1', thread_ts: THREAD.threadTs, ...slack },
+      slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK, ...slack },
     });
   const handled = (eventId: string, executionId = 'exec-1') => ({
     event_id: eventId,
@@ -2827,8 +2897,26 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
         type: 'slack_thread',
         id: THREAD_KEY,
         triggerType: 'manual',
-        slack: { channel: 'C1', thread_ts: THREAD.threadTs },
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK },
         summary: 'why is checkout slow?',
+      },
+    ]);
+  });
+
+  it('links a thread recorded without a link on its next call', async () => {
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
+    withConversations(makeConversation({ id: 'inv-1' }));
+    subjectsClient.listByConversationIds.mockResolvedValue([
+      threadSubject({ permalink: undefined }),
+    ]);
+
+    await makeClient().findOrCreateSlackThread({ ...THREAD, create: false });
+
+    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
+      {
+        type: 'slack_thread',
+        id: THREAD_KEY,
+        slack: { channel: 'C1', thread_ts: THREAD.threadTs, permalink: PERMALINK },
       },
     ]);
   });
@@ -2854,6 +2942,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
           thread_ts: THREAD.threadTs,
           status_message_ts: '2.0',
           seen_events: [handled('Ev1')],
+          permalink: PERMALINK,
         },
       }),
     ]);
