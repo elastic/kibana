@@ -82,6 +82,7 @@ export type BulkExecutionEnqueuer<T> = (
 export enum ExecutionResponseType {
   SUCCESS = 'success',
   QUEUED_ACTIONS_LIMIT_ERROR = 'queuedActionsLimitError',
+  CONNECTOR_NOT_FOUND_ERROR = 'connectorNotFoundError',
 }
 
 export interface ExecutionResponse {
@@ -131,12 +132,20 @@ export function createBulkExecutionEnqueuerFunction({
     const spaceIds: Record<string, SpaceId> = {};
     const connectorIsInMemory: Record<string, boolean> = {};
     const connectorIds = [...new Set(actionsToExecute.map((action) => action.id))];
-    const connectors = await getConnectors(
+    const { connectors, notFoundConnectorIds } = await getConnectors(
       unsecuredSavedObjectsClient,
       inMemoryConnectors,
       connectorIds
     );
     const runnableActions: ExecuteOptions[] = [];
+
+    // A connector that no longer exists must not block the actions of the other connectors.
+    for (const id of notFoundConnectorIds) {
+      logger.warn(`Skipped the actions for the connector: ${id}. Error: connector not found.`);
+    }
+    const actionsWithConnectorNotFound = actionsToExecute.filter((action) =>
+      notFoundConnectorIds.has(action.id)
+    );
 
     for (const c of connectors) {
       const { id, connector, isInMemory } = c;
@@ -224,7 +233,7 @@ export function createBulkExecutionEnqueuerFunction({
     await taskManager.bulkSchedule(taskInstances);
 
     return {
-      errors: actionsOverLimit.length > 0,
+      errors: actionsOverLimit.length > 0 || actionsWithConnectorNotFound.length > 0,
       items: runnableActions
         .map((a) => ({
           id: a.id,
@@ -238,6 +247,14 @@ export function createBulkExecutionEnqueuerFunction({
             uuid: a.uuid,
             actionTypeId: a.actionTypeId,
             response: ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR,
+          }))
+        )
+        .concat(
+          actionsWithConnectorNotFound.map((a) => ({
+            id: a.id,
+            uuid: a.uuid,
+            actionTypeId: a.actionTypeId,
+            response: ExecutionResponseType.CONNECTOR_NOT_FOUND_ERROR,
           }))
         ),
     };
@@ -283,8 +300,9 @@ async function getConnectors(
   unsecuredSavedObjectsClient: SavedObjectsClientContract,
   inMemoryConnectors: InMemoryConnector[],
   connectorIds: string[]
-): Promise<GetConnectorsResult[]> {
+): Promise<{ connectors: GetConnectorsResult[]; notFoundConnectorIds: Set<string> }> {
   const result: GetConnectorsResult[] = [];
+  const notFoundConnectorIds = new Set<string>();
 
   const connectorIdsToFetch = [];
   for (const connectorId of connectorIds) {
@@ -306,7 +324,11 @@ async function getConnectors(
     );
 
     for (const item of bulkGetResult.saved_objects) {
-      if (isSavedObjectErrorResult(item)) throw item.error;
+      if (isSavedObjectErrorResult(item)) {
+        if (item.error.statusCode !== 404) throw item.error;
+        notFoundConnectorIds.add(item.id);
+        continue;
+      }
       result.push({
         isInMemory: false,
         connector: item.attributes,
@@ -315,5 +337,5 @@ async function getConnectors(
     }
   }
 
-  return result;
+  return { connectors: result, notFoundConnectorIds };
 }
