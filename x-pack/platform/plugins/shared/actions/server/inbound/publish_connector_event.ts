@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger, PubSubStart, Topic } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
+
+/** Matches the pubsub event id limit. Ids over this length are rejected and then swallowed here. */
+const PUBSUB_EVENT_ID_MAX_LENGTH = 256;
 
 /** Spoke payload plus the hub fields. Extra spoke fields stay on the published object. */
 export interface ConnectorEventPublishData {
@@ -24,6 +28,24 @@ interface ConnectorEventPublisher {
 }
 
 let activePublisher: ConnectorEventPublisher | undefined;
+
+/**
+ * A vendor correlation key is shared by every connector that receives one delivery.
+ * Scope it to this space and connector so retries for this receiver stay on one id.
+ */
+const publicationId = (data: ConnectorEventPublishData): string => {
+  const { correlationKey, connectorId, spaceId } = data;
+  if (typeof correlationKey !== 'string' || correlationKey.length === 0) {
+    return uuidv4();
+  }
+
+  const scopedId = [spaceId, connectorId, correlationKey].map(encodeURIComponent).join(':');
+  if (scopedId.length <= PUBSUB_EVENT_ID_MAX_LENGTH) {
+    return scopedId;
+  }
+
+  return createHash('sha256').update(scopedId).digest('hex');
+};
 
 /** Installed from plugin start and cleared on stop. Unset, publish is a no-op. */
 export const setConnectorEventPublisher = (
@@ -48,10 +70,7 @@ export const publishConnectorEvent = async (
     return;
   }
 
-  const id =
-    typeof data.correlationKey === 'string' && data.correlationKey.length > 0
-      ? data.correlationKey
-      : uuidv4();
+  const id = publicationId(data);
 
   try {
     await publisher.pubsub.publish(topic, { id, data });

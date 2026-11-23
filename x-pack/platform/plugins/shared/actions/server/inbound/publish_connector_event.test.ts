@@ -42,7 +42,7 @@ describe('publishConnectorEvent', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
-  it('publishes the correlation key and the enriched data', async () => {
+  it('scopes a correlation key to the receiving space and connector', async () => {
     const pubsub = coreMock.createStart().pubsub;
     setConnectorEventPublisher({
       pubsub,
@@ -50,16 +50,52 @@ describe('publishConnectorEvent', () => {
       topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
     });
 
+    const data = { ...message, correlationKey: 'vendor-event-1' };
+    await publishConnectorEvent(slackMessageTopic.name, data);
     await publishConnectorEvent(slackMessageTopic.name, {
-      ...message,
-      correlationKey: 'vendor-event-1',
+      ...data,
+      connectorId: 'connector-2',
+    });
+    await publishConnectorEvent(slackMessageTopic.name, {
+      ...data,
+      correlationKey: 'vendor:event',
     });
 
-    expect(pubsub.publish).toHaveBeenCalledWith(slackMessageTopic, {
-      id: 'vendor-event-1',
-      data: { ...message, correlationKey: 'vendor-event-1' },
+    expect(pubsub.publish).toHaveBeenNthCalledWith(1, slackMessageTopic, {
+      id: 'default:connector-1:vendor-event-1',
+      data,
+    });
+    expect(pubsub.publish).toHaveBeenNthCalledWith(2, slackMessageTopic, {
+      id: 'default:connector-2:vendor-event-1',
+      data: { ...data, connectorId: 'connector-2' },
+    });
+    expect(pubsub.publish).toHaveBeenNthCalledWith(3, slackMessageTopic, {
+      id: 'default:connector-1:vendor%3Aevent',
+      data: { ...data, correlationKey: 'vendor:event' },
     });
     expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps a long scoped id stable and within the bus limit', async () => {
+    const pubsub = coreMock.createStart().pubsub;
+    setConnectorEventPublisher({
+      pubsub,
+      logger,
+      topics: new Map([[slackMessageTopic.name, slackMessageTopic]]),
+    });
+
+    const data = { ...message, correlationKey: 'k'.repeat(300) };
+    await publishConnectorEvent(slackMessageTopic.name, data);
+    await publishConnectorEvent(slackMessageTopic.name, data);
+    await publishConnectorEvent(slackMessageTopic.name, {
+      ...data,
+      spaceId: 'other-space',
+    });
+
+    const firstId = pubsub.publish.mock.calls[0][1].id;
+    expect(firstId).toHaveLength(64);
+    expect(pubsub.publish.mock.calls[1][1].id).toBe(firstId);
+    expect(pubsub.publish.mock.calls[2][1].id).not.toBe(firstId);
   });
 
   it('uses a new id when the correlation key is absent', async () => {
