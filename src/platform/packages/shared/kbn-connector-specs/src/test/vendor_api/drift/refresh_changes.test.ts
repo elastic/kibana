@@ -414,7 +414,7 @@ describe('describeChanges', () => {
         scheme('api-security-added', ['cloud-platform']),
         scheme('api-security-added', ['container']),
       ])
-    ).toEqual(object('Auth scopes', '! same scopes, reordered'));
+    ).toEqual(object('Auth scopes', '! same scopes, regrouped'));
   });
 
   it('names a scheme without scopes that was added, rather than saying nothing changed', () => {
@@ -428,6 +428,23 @@ describe('describeChanges', () => {
         change('api-security-component-added', 'the component security scheme `apiKey` was added'),
       ])
     ).toEqual(object('Auth scopes', '+ apiKey (scheme)'));
+  });
+
+  it('compares scopes whole, and names them whole when their short names would be the same', () => {
+    expect(
+      describeChanges([
+        change(
+          'api-security-removed',
+          'the endpoint scheme security `Oauth2: [https://old.example/auth/read]` was removed from the API'
+        ),
+        change(
+          'api-security-added',
+          'the endpoint scheme security `Oauth2: [https://new.example/auth/read]` was added to the API'
+        ),
+      ])
+    ).toEqual(
+      object('Auth scopes', '- https://old.example/auth/read', '+ https://new.example/auth/read')
+    );
   });
 
   it('names a scope that is a URL ending in a slash by its host', () => {
