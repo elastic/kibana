@@ -6,12 +6,110 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { KbnClient } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import { SCENARIOS, seedScenario, waitForTransformPropagation } from './endpoint_data';
+import {
+  SCENARIOS,
+  seedScenario,
+  waitForEndpointPackage,
+  waitForTransformPropagation,
+} from './endpoint_data';
+
+describe('waitForEndpointPackage', () => {
+  const installed = { item: { status: 'installed' } };
+  const current = { id: 'endpoint.metadata_current-default-9.6.1', state: 'started' };
+  const united = { id: 'endpoint.metadata_united-default-9.6.1', state: 'started' };
+  const healthy = [current, united];
+  const clientsWith = (getTransformStats: jest.Mock) => {
+    const request = jest.fn().mockResolvedValue({ data: installed });
+    const startTransform = jest.fn().mockResolvedValue({ acknowledged: true });
+    const esClient = {
+      transform: { getTransformStats, startTransform },
+    } as unknown as Client;
+    return {
+      kbnClient: { request } as unknown as KbnClient,
+      esClient,
+      startTransform,
+    };
+  };
+  const statsOf = (...transforms: unknown[]) => jest.fn().mockResolvedValue({ transforms });
+  // The wait polls on a fixed interval; advance the fake clock until it settles.
+  const settle = async <T>(promise: Promise<T>): Promise<T> => {
+    let settled = false;
+    const tracked = promise.finally(() => {
+      settled = true;
+    });
+    while (!settled) {
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(5_000);
+    }
+    return tracked;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('fails fast with the reason when a transform is in a failed state', async () => {
+    const { kbnClient, esClient } = clientsWith(
+      statsOf(
+        { ...current, state: 'failed', reason: 'Cannot write to a field alias [updated_at]' },
+        united
+      )
+    );
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).rejects.toThrow(
+      'Endpoint metadata transform failed: endpoint.metadata_current-default-9.6.1: Cannot write to a field alias [updated_at]'
+    );
+  });
+
+  it('does not poll again once a transform has failed', async () => {
+    const getTransformStats = statsOf({ ...current, state: 'failed', reason: 'boom' }, united);
+    const { kbnClient, esClient } = clientsWith(getTransformStats);
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).rejects.toThrow('Endpoint metadata transform failed');
+
+    expect(getTransformStats).toHaveBeenCalledTimes(1);
+  });
+
+  it('restarts a stopped transform and resolves once all transforms run', async () => {
+    const getTransformStats = jest
+      .fn()
+      .mockResolvedValueOnce({ transforms: [{ ...current, state: 'stopped' }, united] })
+      .mockResolvedValueOnce({ transforms: healthy });
+    const { kbnClient, esClient, startTransform } = clientsWith(getTransformStats);
+
+    await settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000));
+
+    expect(startTransform).toHaveBeenCalledTimes(1);
+    expect(startTransform).toHaveBeenCalledWith({ transform_id: current.id });
+  });
+
+  it('keeps waiting through a transient request error', async () => {
+    const getTransformStats = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('connection reset'))
+      .mockResolvedValueOnce({ transforms: healthy });
+    const { kbnClient, esClient } = clientsWith(getTransformStats);
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).resolves.toBeUndefined();
+  });
+});
 
 describe('waitForTransformPropagation', () => {
   it('counts only united docs that endpoint lookups can see', async () => {

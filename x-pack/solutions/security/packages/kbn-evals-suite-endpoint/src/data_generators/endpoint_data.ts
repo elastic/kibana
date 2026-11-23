@@ -31,6 +31,9 @@ export async function waitForEndpointPackage(
   log.info('Waiting for endpoint package to be installed...');
 
   while (Date.now() - start < maxWaitMs) {
+    // Set when a transform is in a failed state; thrown after the try/catch so
+    // the catch below, which tolerates transient request errors, cannot swallow it.
+    let transformFailure: Error | undefined;
     try {
       const response = await kbnClient.request<{ item: { status: string } }>({
         method: 'GET',
@@ -53,6 +56,17 @@ export async function waitForEndpointPackage(
           } catch (e) {
             log.debug(`Failed to restart transform ${t.id}: ${e}`);
           }
+        }
+
+        // A failed transform does not recover on its own (and cannot even be
+        // restarted without a force stop), so waiting would only end in the
+        // package-install timeout below, pointing at the wrong cause.
+        const failedTransforms = statsResponse.transforms.filter((t) => t.state === 'failed');
+        if (failedTransforms.length > 0) {
+          const details = failedTransforms
+            .map((t) => `${t.id}: ${t.reason ?? 'no reason reported'}`)
+            .join('; ');
+          transformFailure = new Error(`Endpoint metadata transform failed: ${details}`);
         }
 
         const hasCurrentTransform = statsResponse.transforms.some((t) =>
@@ -82,6 +96,10 @@ export async function waitForEndpointPackage(
       }
     } catch (err) {
       log.debug(`Error checking endpoint package: ${err}`);
+    }
+
+    if (transformFailure) {
+      throw transformFailure;
     }
 
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
