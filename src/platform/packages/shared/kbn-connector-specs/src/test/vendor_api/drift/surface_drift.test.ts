@@ -278,6 +278,8 @@ describe('renderRefreshPr', () => {
     text,
     ...(operation ? { operation } : {}),
   });
+  const field = (operation: string | undefined, name: string): SpecChange =>
+    added(operation, `added the optional property \`${name}\` to the response`);
   const calling = (action: string, ...operations: string[]): ActionDrift => ({
     action,
     operations: operations.map((operation) => ({ source: 'main', operation })),
@@ -299,7 +301,7 @@ describe('renderRefreshPr', () => {
     const body = renderRefreshPr([
       changed(
         '.other',
-        [added('GET /a', 'added `title`'), added('GET /b', 'added `name`')],
+        [field('GET /a', 'title'), field('GET /b', 'name')],
         [calling('listA', 'GET /a'), calling('getA', 'GET /a'), calling('listB', 'GET /b')]
       ),
     ]);
@@ -310,8 +312,8 @@ describe('renderRefreshPr', () => {
         '',
         '| Endpoint | What changed | Used in action |',
         '|---|---|---|',
-        '| `GET /a` | `response-optional-property-added`: added `title` | `getA` and `listA` |',
-        '| `GET /b` | `response-optional-property-added`: added `name` | `listB` |',
+        '| `GET /a` | **New response fields:** `title` | `getA` and `listA` |',
+        '| `GET /b` | **New response fields:** `name` | `listB` |',
       ].join('\n')
     );
   });
@@ -319,7 +321,7 @@ describe('renderRefreshPr', () => {
   it('lists the connectors alphabetically', () => {
     const body = renderRefreshPr(
       ['.zoom', '.1password', '.bigquery'].map((connector) =>
-        changed(connector, [added('GET /a', 'added `x`')])
+        changed(connector, [field('GET /a', 'x')])
       )
     );
 
@@ -327,58 +329,29 @@ describe('renderRefreshPr', () => {
     expect(order).toEqual(['.1password', '.bigquery', '.zoom']);
   });
 
-  it('counts the changes of a rule on one endpoint and shows one example', () => {
+  it('puts every kind of change of an endpoint in its cell, on its own line', () => {
     const body = renderRefreshPr([
       changed('.other', [
-        added('GET /a', 'added `title`'),
-        added('GET /a', 'added `name`'),
-        added('GET /a', 'added a query parameter', 'new-optional-request-parameter'),
+        field('GET /a', 'title'),
+        added('GET /a', 'response property `old` deprecated', 'response-property-deprecated'),
       ]),
     ]);
 
     expect(body).toContain(
-      '| `GET /a` | `response-optional-property-added` ×2: added `title`<br>`new-optional-request-parameter`: added a query parameter | — |'
+      '| `GET /a` | **Deprecated:** `old`<br>**New response fields:** `title` | — |'
     );
-  });
-
-  it('shows the two most frequent rules of an endpoint and counts the rest', () => {
-    const body = renderRefreshPr([
-      changed(
-        '.other',
-        ['a', 'b', 'c', 'd', 'e'].map((rule) => added('GET /a', 'x', `rule-${rule}`))
-      ),
-    ]);
-
-    expect(body).toContain('<br>and 3 more rules |');
   });
 
   it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {
     const body = renderRefreshPr([
-      changed('.other', [added(undefined, 'servers changed'), added('GET /a', 'added `x`')]),
+      changed('.other', [field(undefined, 'servers'), field('GET /a', 'x')]),
     ]);
 
     const rows = body
       .split('\n')
       .filter((line) => line.startsWith('| ') && !line.includes('Endpoint'));
     expect(rows[0]).toMatch(/^\| `GET \/a` \|/);
-    expect(rows[1]).toMatch(
-      /^\| — \| `response-optional-property-added`: servers changed \| — \|$/
-    );
-  });
-
-  it('prefixes the change with its source only when several sources changed', () => {
-    const two: ConnectorDrift = {
-      ...changed('.other', [added('GET /a', 'added `x`')]),
-      sources: {
-        v1: { status: 'changed', changes: [added('GET /a', 'added `x`')] },
-        v2: { status: 'changed', changes: [added('GET /b', 'added `y`')] },
-      },
-    };
-
-    expect(renderRefreshPr([two])).toContain('`response-optional-property-added`: v1: added `x`');
-    expect(renderRefreshPr([changed('.other', [added('GET /a', 'added `x`')])])).not.toContain(
-      'main: added'
-    );
+    expect(rows[1]).toBe('| — | **New response fields:** `servers` | — |');
   });
 
   it('notes that the actions call other operations, or that the specs changed outside oasdiff', () => {
@@ -391,10 +364,10 @@ describe('renderRefreshPr', () => {
     expect(body).toContain('### `.quiet`\n\n- The specs changed outside what `oasdiff` reports.');
   });
 
-  it('keeps a pipe in a change from breaking the table', () => {
-    const body = renderRefreshPr([changed('.other', [added('GET /a', 'type `a | b` added')])]);
+  it('keeps a pipe in a name from breaking the table', () => {
+    const body = renderRefreshPr([changed('.other', [field('GET /a', 'a | b')])]);
 
-    expect(body).toContain('type `a \\| b` added');
+    expect(body).toContain('`a \\| b`');
   });
 
   it('cuts the table of a connector after 20 endpoints and counts the rest', () => {
@@ -402,7 +375,7 @@ describe('renderRefreshPr', () => {
       changed(
         '.other',
         Array.from({ length: 23 }, (_, index) =>
-          added(`GET /e${String(index).padStart(2, '0')}`, 'x')
+          field(`GET /e${String(index).padStart(2, '0')}`, 'x')
         )
       ),
     ]);
@@ -412,43 +385,27 @@ describe('renderRefreshPr', () => {
     expect(body).toContain('…and 3 more endpoints; the drift report lists them.');
   });
 
+  const wide = (connector: string) =>
+    changed(
+      connector,
+      Array.from({ length: 20 }, (_, endpoint) =>
+        field(`GET /${endpoint}`, `${'y'.repeat(53)}${endpoint}`)
+      )
+    );
+
   it('still fits a small connector after one too big to fit', () => {
-    const big = (connector: string) =>
-      changed(
-        connector,
-        Array.from({ length: 20 }, (_, endpoint) =>
-          added(`GET /${endpoint}`, `added ${'y'.repeat(400)}`, `rule-${endpoint}`)
-        )
-      );
     const body = renderRefreshPr([
-      ...Array.from({ length: 30 }, (_, index) => big(`.big${String(index).padStart(2, '0')}`)),
-      changed('.small', [added('GET /a', 'x')]),
+      ...Array.from({ length: 40 }, (_, index) => wide(`.big${String(index).padStart(2, '0')}`)),
+      changed('.small', [field('GET /a', 'x')]),
     ]);
 
     expect(body).toContain('### `.small`');
     expect(body).toMatch(/The changes of `\.big\d+`/);
   });
 
-  it('cuts the example of a change with a long schema path', () => {
-    const body = renderRefreshPr([
-      changed('.other', [added('GET /a', `added ${'x/'.repeat(2000)}`)]),
-    ]);
-
-    expect(body.length).toBeLessThan(1500);
-    expect(body).toContain('…');
-  });
-
   it('stays under the limit GitHub puts on a description, naming the connectors left out', () => {
-    const connectors = Array.from({ length: 60 }, (_, index) => `.connector${index}`);
     const body = renderRefreshPr(
-      connectors.map((connector) =>
-        changed(
-          connector,
-          Array.from({ length: 200 }, (_, endpoint) =>
-            added(`GET /${endpoint}`, `added ${'y'.repeat(400)}`)
-          )
-        )
-      )
+      Array.from({ length: 60 }, (_, index) => wide(`.connector${index}`))
     );
 
     expect(body.length).toBeLessThan(65_536);
