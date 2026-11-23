@@ -43,8 +43,9 @@ export interface Sources {
 export const Sources = createToken<Sources>('nightshiftDetection.Sources');
 
 /**
- * The space's knowledge indicators, read as the detection service account. Bound per scope, because
- * the reader of `significant_events` is built from the request.
+ * The space's knowledge indicators, read as the internal user: `significant_events` checks no
+ * privilege, so a strategy reads only those of the sources the account listed. Bound per scope,
+ * because the reader is built for the scope's space.
  */
 export const KnowledgeIndicators = createToken<KnowledgeIndicatorReader>(
   'nightshiftDetection.KnowledgeIndicators'

@@ -20,12 +20,14 @@ const createRule = ({
   sourceId = 'source-1',
   query = 'FROM logs | WHERE message : "timeout"',
   lookback = '361m',
+  every = '5m',
   enabled = true,
   strategy = STRATEGY,
 }: {
   sourceId?: string;
   query?: string;
   lookback?: string;
+  every?: string;
   enabled?: boolean;
   strategy?: { id: string; name: string };
 } = {}): StrategyAlertingRule => ({
@@ -38,7 +40,7 @@ const createRule = ({
       kind: 'signal',
       metadata: { name: 'Timeouts' },
       time_field: '@timestamp',
-      schedule: { every: '5m', lookback },
+      schedule: { every, lookback },
       query: { base: query },
     },
   },
@@ -57,15 +59,21 @@ const setUp = (options?: ConstructorParameters<typeof InMemoryRulesClient>[0]) =
   const client = rulesClient as unknown as RulesClientApi;
   const reconciler = new AlertingRuleReconciler(
     client,
-    new ManagedRuleReader(client, {} as ElasticsearchClient),
+    new ManagedRuleReader(client, {} as ElasticsearchClient, loggingSystemMock.createLogger()),
     loggingSystemMock.createLogger()
   );
   const reconcile = (
     desired: StrategyAlertingRule[],
-    { paused = false, failed = [] as string[], skippedSources = [] as string[] } = {}
+    {
+      paused = false,
+      failed = [] as string[],
+      skippedSources = [] as string[],
+      abortSignal = new AbortController().signal,
+    } = {}
   ) =>
     reconciler.reconcile({
       spaceId: SPACE_ID,
+      abortSignal,
       desired,
       paused,
       strategyErrors: failed.map((strategy) => ({ strategy, message: 'boom' })),
@@ -182,13 +190,53 @@ describe('AlertingRuleReconciler', () => {
     const rules = Array.from({ length: 100 }, (_, index) =>
       createRule({ sourceId: `source-${index}` })
     );
-    const { reconcile } = setUp({ maxEnabledRules: 40 });
+    // Forty rules running every five minutes, with room for rounding.
+    const { reconcile } = setUp({ maxRunsPerMinute: 8.01 });
 
     const result = await reconcile(rules);
 
     expect(result.created).toBe(40);
     expect(result.skipped).toHaveLength(60);
     expect(result.failures).toEqual([]);
+  });
+
+  it('still creates a rule that runs less often than one the budget refused', async () => {
+    const frequent = createRule({ sourceId: 'frequent', every: '30s' });
+    const rare = createRule({ sourceId: 'rare', every: '5m' });
+    const { rulesClient, reconcile } = setUp({ maxRunsPerMinute: 1 });
+
+    const result = await reconcile([frequent, rare]);
+
+    expect(result.skipped).toEqual([
+      { rule_id: getRuleId(frequent), reason: 'Too many schedules' },
+    ]);
+    expect([...rulesClient.rules.keys()]).toEqual([getRuleId(rare)]);
+  });
+
+  it('turns a rule off before creating one in its slot, and skips a turn on the budget refuses', async () => {
+    const first = createRule({ sourceId: 'first' });
+    const second = createRule({ sourceId: 'second' });
+    const { rulesClient, reconcile } = setUp({ maxRunsPerMinute: 0.2 });
+    await reconcile([first]);
+
+    await expect(
+      reconcile([createRule({ sourceId: 'first', enabled: false }), second])
+    ).resolves.toMatchObject({ disabled: 1, created: 1, skipped: [] });
+
+    await expect(reconcile([first, second])).resolves.toMatchObject({
+      enabled: 0,
+      skipped: [{ rule_id: getRuleId(first), reason: 'Too many schedules' }],
+    });
+    expect(rulesClient.rules.get(getRuleId(first))?.enabled).toBe(false);
+  });
+
+  it('stops before changing anything once the call is aborted', async () => {
+    const { rulesClient, reconcile } = setUp();
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(reconcile([createRule()], { abortSignal: controller.signal })).rejects.toThrow();
+    expect(rulesClient.createCalls).toEqual([]);
   });
 
   it('creates the rest of a chunk Alerting refuses for one invalid rule', async () => {
@@ -233,6 +281,7 @@ describe('AlertingRuleReconciler', () => {
       enabled: true,
       tags: ['nightshift:source:source-1'],
       query: 'FROM logs',
+      every: '5m',
     });
 
     await reconcile([]);

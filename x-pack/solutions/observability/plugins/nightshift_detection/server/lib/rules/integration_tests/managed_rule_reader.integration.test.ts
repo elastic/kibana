@@ -9,6 +9,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import { ALERT_EVENTS_MAPPINGS } from '@kbn/alerting-v2-schemas';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { ManagedRuleReader } from '../managed_rule_reader';
@@ -62,7 +63,11 @@ describe('ManagedRuleReader.readRows from .rule-events', () => {
       template: { mappings: ALERT_EVENTS_MAPPINGS },
     });
     await esClient.indices.createDataStream({ name: ALERT_EVENTS_DATA_STREAM });
-    reader = new ManagedRuleReader({} as Pick<RulesClientApi, 'findRules'>, esClient);
+    reader = new ManagedRuleReader(
+      {} as Pick<RulesClientApi, 'findRules'>,
+      esClient,
+      loggingSystemMock.createLogger()
+    );
   });
 
   afterAll(async () => {
