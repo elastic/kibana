@@ -38,15 +38,20 @@ describe('waitForEndpointPackage', () => {
   };
   const statsOf = (...transforms: unknown[]) => jest.fn().mockResolvedValue({ transforms });
   // The wait polls on a fixed interval; advance the fake clock until it settles.
+  // Bounded, so a polling regression fails here instead of hanging the worker.
+  const MAX_ADVANCES = 100;
   const settle = async <T>(promise: Promise<T>): Promise<T> => {
     let settled = false;
     const tracked = promise.finally(() => {
       settled = true;
     });
-    while (!settled) {
+    for (let i = 0; i < MAX_ADVANCES && !settled; i++) {
       await Promise.resolve();
       await Promise.resolve();
       jest.advanceTimersByTime(5_000);
+    }
+    if (!settled) {
+      throw new Error(`waitForEndpointPackage did not settle after ${MAX_ADVANCES} poll intervals`);
     }
     return tracked;
   };
@@ -59,30 +64,74 @@ describe('waitForEndpointPackage', () => {
     jest.useRealTimers();
   });
 
-  it('fails fast with the reason when a transform is in a failed state', async () => {
-    const { kbnClient, esClient } = clientsWith(
-      statsOf(
-        { ...current, state: 'failed', reason: 'Cannot write to a field alias [updated_at]' },
-        united
-      )
-    );
-
-    await expect(
-      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
-    ).rejects.toThrow(
-      'Endpoint metadata transform failed: endpoint.metadata_current-default-9.6.1: Cannot write to a field alias [updated_at]'
-    );
-  });
-
-  it('does not poll again once a transform has failed', async () => {
-    const getTransformStats = statsOf({ ...current, state: 'failed', reason: 'boom' }, united);
+  it('keeps polling through a failed transform that the health task recovers', async () => {
+    const getTransformStats = jest
+      .fn()
+      .mockResolvedValueOnce({
+        transforms: [{ ...current, state: 'failed', reason: 'boom' }, united],
+      })
+      .mockResolvedValueOnce({ transforms: healthy });
     const { kbnClient, esClient } = clientsWith(getTransformStats);
 
     await expect(
       settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
-    ).rejects.toThrow('Endpoint metadata transform failed');
+    ).resolves.toBeUndefined();
 
-    expect(getTransformStats).toHaveBeenCalledTimes(1);
+    expect(getTransformStats).toHaveBeenCalledTimes(2);
+  });
+
+  it('names the ES reason when a transform stays failed until the timeout', async () => {
+    const getTransformStats = statsOf(
+      { ...current, state: 'failed', reason: 'Cannot write to a field alias [updated_at]' },
+      united
+    );
+    const { kbnClient, esClient } = clientsWith(getTransformStats);
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).rejects.toThrow(
+      'Timed out after 60000ms waiting for endpoint transforms; last failure: endpoint.metadata_current-default-9.6.1: Cannot write to a field alias [updated_at]'
+    );
+
+    expect(getTransformStats.mock.calls.length).toBeGreaterThan(1);
+  });
+
+  it('does not restart a stopped transform in a poll where another transform is failed', async () => {
+    const getTransformStats = jest
+      .fn()
+      .mockResolvedValueOnce({
+        transforms: [
+          { ...current, state: 'stopped' },
+          { ...united, state: 'failed' },
+        ],
+      })
+      .mockResolvedValueOnce({ transforms: healthy });
+    const { kbnClient, esClient, startTransform } = clientsWith(getTransformStats);
+
+    await settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000));
+
+    expect(startTransform).not.toHaveBeenCalled();
+  });
+
+  it('names the observed transform states when the united transform is missing', async () => {
+    const { kbnClient, esClient } = clientsWith(statsOf(current));
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).rejects.toThrow(
+      'Timed out after 60000ms waiting for endpoint transforms; last observed states (current=true, united=false: endpoint.metadata_current-default-9.6.1=started)'
+    );
+  });
+
+  it('keeps the install message when the package never reaches installed', async () => {
+    const { kbnClient, esClient } = clientsWith(statsOf(...healthy));
+    (kbnClient.request as jest.Mock).mockResolvedValue({
+      data: { item: { status: 'installing' } },
+    });
+
+    await expect(
+      settle(waitForEndpointPackage(kbnClient, esClient, new ToolingLog(), 60_000))
+    ).rejects.toThrow('Timed out waiting for endpoint package to be installed after 60000ms');
   });
 
   it('restarts a stopped transform and resolves once all transforms run', async () => {

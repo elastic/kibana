@@ -30,10 +30,13 @@ export async function waitForEndpointPackage(
   const start = Date.now();
   log.info('Waiting for endpoint package to be installed...');
 
+  let packageInstalled = false;
+  // A failed transform is not terminal: Kibana's metadata health task force-stops
+  // and restarts it, so keep polling and only report the details on timeout.
+  let lastFailure: string | undefined;
+  let lastStates = 'no transforms reported';
+
   while (Date.now() - start < maxWaitMs) {
-    // Set when a transform is in a failed state; thrown after the try/catch so
-    // the catch below, which tolerates transient request errors, cannot swallow it.
-    let transformFailure: Error | undefined;
     try {
       const response = await kbnClient.request<{ item: { status: string } }>({
         method: 'GET',
@@ -41,56 +44,50 @@ export async function waitForEndpointPackage(
       });
 
       if (response.data.item.status === 'installed') {
+        packageInstalled = true;
         log.info('Endpoint package is installed. Verifying transforms are started...');
 
-        const statsResponse = await esClient.transform.getTransformStats({
+        const { transforms } = await esClient.transform.getTransformStats({
           transform_id: 'endpoint*',
         });
 
-        const stoppedTransforms = statsResponse.transforms.filter((t) => t.state === 'stopped');
+        const failedTransforms = transforms.filter((t) => t.state === 'failed');
+        lastFailure = failedTransforms.length
+          ? failedTransforms.map((t) => `${t.id}: ${t.reason ?? 'no reason reported'}`).join('; ')
+          : undefined;
 
-        for (const t of stoppedTransforms) {
-          log.info(`Restarting stopped transform: ${t.id}`);
-          try {
-            await esClient.transform.startTransform({ transform_id: t.id });
-          } catch (e) {
-            log.debug(`Failed to restart transform ${t.id}: ${e}`);
+        // With a failed transform in the same stats, skip the restarts: a hanging
+        // start request must not delay the next poll, which re-reads the stats.
+        if (!lastFailure) {
+          for (const t of transforms.filter((tr) => tr.state === 'stopped')) {
+            log.info(`Restarting stopped transform: ${t.id}`);
+            try {
+              await esClient.transform.startTransform({ transform_id: t.id });
+            } catch (e) {
+              log.debug(`Failed to restart transform ${t.id}: ${e}`);
+            }
           }
         }
 
-        // A failed transform does not recover on its own (and cannot even be
-        // restarted without a force stop), so waiting would only end in the
-        // package-install timeout below, pointing at the wrong cause.
-        const failedTransforms = statsResponse.transforms.filter((t) => t.state === 'failed');
-        if (failedTransforms.length > 0) {
-          const details = failedTransforms
-            .map((t) => `${t.id}: ${t.reason ?? 'no reason reported'}`)
-            .join('; ');
-          transformFailure = new Error(`Endpoint metadata transform failed: ${details}`);
-        }
-
-        const hasCurrentTransform = statsResponse.transforms.some((t) =>
+        const hasCurrentTransform = transforms.some((t) =>
           t.id.startsWith(metadataTransformPrefix)
         );
-        const hasUnitedTransform = statsResponse.transforms.some((t) =>
+        const hasUnitedTransform = transforms.some((t) =>
           t.id.startsWith(METADATA_UNITED_TRANSFORM)
         );
         const allStarted =
-          statsResponse.transforms.length > 0 &&
-          statsResponse.transforms.every((t) => t.state === 'started' || t.state === 'indexing');
+          transforms.length > 0 &&
+          transforms.every((t) => t.state === 'started' || t.state === 'indexing');
 
         if (hasCurrentTransform && hasUnitedTransform && allStarted) {
-          log.info(
-            `All endpoint transforms are running (${statsResponse.transforms.length} total)`
-          );
+          log.info(`All endpoint transforms are running (${transforms.length} total)`);
           return;
         }
 
-        log.debug(
-          `Waiting for endpoint transforms (current=${hasCurrentTransform}, united=${hasUnitedTransform}): ${statsResponse.transforms
-            .map((t) => `${t.id}=${t.state}`)
-            .join(', ')}`
-        );
+        lastStates = `current=${hasCurrentTransform}, united=${hasUnitedTransform}: ${transforms
+          .map((t) => `${t.id}=${t.state}`)
+          .join(', ')}`;
+        log.debug(`Waiting for endpoint transforms (${lastStates})`);
       } else {
         log.debug(`Endpoint package status: ${response.data.item.status}`);
       }
@@ -98,14 +95,17 @@ export async function waitForEndpointPackage(
       log.debug(`Error checking endpoint package: ${err}`);
     }
 
-    if (transformFailure) {
-      throw transformFailure;
-    }
-
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  if (!packageInstalled) {
+    throw new Error(`Timed out waiting for endpoint package to be installed after ${maxWaitMs}ms`);
+  }
+  throw new Error(
+    `Timed out after ${maxWaitMs}ms waiting for endpoint transforms; ${
+      lastFailure ? `last failure: ${lastFailure}` : `last observed states (${lastStates})`
+    }`
+  );
 }
 
 export async function waitForTransformPropagation(
