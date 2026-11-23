@@ -29,6 +29,7 @@ const definition = (
   category,
   sources: indexPatterns.map((indexPattern) => ({ indexPattern })),
   attributes: [],
+  suggestedFilters: [],
 });
 
 const TYPES = [

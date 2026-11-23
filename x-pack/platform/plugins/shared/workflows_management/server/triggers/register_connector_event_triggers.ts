@@ -9,8 +9,6 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import { getConnectorEventTriggerDefinitions } from '../../common/triggers/connector_event_triggers';
 
-export { toConnectorEventTriggerSchema } from '../../common/triggers/connector_event_triggers';
-
 export interface RegisterConnectorEventTriggersParams {
   inboundEventsEnabled: boolean;
   registerTriggerDefinition: (definition: ServerTriggerDefinition) => void;

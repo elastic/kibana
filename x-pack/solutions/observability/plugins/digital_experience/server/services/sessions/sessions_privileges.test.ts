@@ -69,7 +69,7 @@ const grantAll = (client: Client) => {
 const requestedIndexPrivileges = [
   { names: SOURCE_INDICES, privileges: ['read', 'view_index_metadata'] },
   {
-    names: ['digital-experience-sessions-browser-*'],
+    names: ['digital-experience-sessions-browser-*', 'digital-experience-sessions-mobile-*'],
     privileges: ['read', 'view_index_metadata', 'index', 'create_index'],
   },
 ];

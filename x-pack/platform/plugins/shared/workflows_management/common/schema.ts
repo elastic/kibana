@@ -25,6 +25,7 @@ import {
   getStepPrefixDeprecationInfo,
   SystemConnectorsMap,
 } from '@kbn/workflows';
+import type { StepExposure } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
 // Import the singleton instance of StepSchemas
@@ -480,6 +481,11 @@ export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo
 
 export function isDeprecatedStepType(stepType: string): boolean {
   return getDeprecatedStepMetadata(stepType) !== undefined;
+}
+
+/** Returns which workflows a step is meant for. Steps that don't set `exposure`, built-in steps and connectors are `open`. */
+export function getStepExposure(stepType: string): StepExposure {
+  return stepSchemas.getStepDefinition(stepType)?.exposure ?? 'open';
 }
 
 export function getAllConnectorsWithDynamic(

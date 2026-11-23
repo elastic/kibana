@@ -10,6 +10,7 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { builtInStepDefinitions } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { getStepExposure } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { StepDefinitionForAgent } from './get_step_definitions_tool';
@@ -68,6 +69,11 @@ const lookupStepDefinitions = async (
 
   const definitions = [];
   for (const stepType of stepTypes) {
+    // Managed-only steps can't be used in the workflows the agent authors, so their
+    // definitions are never returned, matching get_step_definitions.
+    if (getStepExposure(stepType) === 'managed_only') {
+      continue;
+    }
     const builtIn = builtInMap.get(stepType);
     if (builtIn) {
       definitions.push(compactFields(formatBuiltInStep(builtIn)));
@@ -98,7 +104,7 @@ export function registerValidateWorkflowTool(
     description: `Validate a workflow YAML string against all validation rules.
 Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.
 It checks YAML syntax, schema conformance, step name uniqueness, and Liquid template syntax.
-When validation fails, step type definitions used in the workflow are automatically included to help fix issues.
+When validation fails, step type definitions used in the workflow are automatically included to help fix issues, except for step types reserved for managed workflows.
 If validation fails, fix the issues and re-validate until the YAML is valid.
 
 API documentation — Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,

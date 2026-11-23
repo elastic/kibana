@@ -21,9 +21,20 @@ describe('the query keys of the locator', () => {
     expect(locatorKeys).toEqual(expect.arrayContaining(Object.keys(sessionsListQueryRt.props)));
   });
 
+  it("include the application type and the mobile page's OS and release filters", () => {
+    expect(locatorKeys).toEqual(expect.arrayContaining(['applicationType', 'osName', 'release']));
+  });
+
   it('include the params of the root route and the source', () => {
     expect(locatorKeys).toEqual(
-      expect.arrayContaining(['rangeFrom', 'rangeTo', 'environment', 'sourceFilter', 'source'])
+      expect.arrayContaining([
+        'rangeFrom',
+        'rangeTo',
+        'environment',
+        'sourceFilter',
+        'platformFilter',
+        'source',
+      ])
     );
   });
 });
