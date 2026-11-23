@@ -20,7 +20,7 @@ const scheme = (id: string, scopes: string[]) =>
   );
 
 describe('describeChanges', () => {
-  it('describes the changes to a GKE endpoint in words, most important first', () => {
+  it('describes the changes to a GKE endpoint as a diff, most important first', () => {
     const lines = describeChanges([
       change(
         'response-optional-property-added',
@@ -38,20 +38,32 @@ describe('describeChanges', () => {
         'response-property-enum-value-added',
         'added the new `MIGRATE_TO_ADVANCED_DATAPATH` enum value to the `clusters/items/networkConfig/datapathProvider` response property for the response status `200`'
       ),
-      change(
-        'response-property-enum-value-added',
-        'added the new `MIGRATE_TO_LEGACY_DATAPATH` enum value to the `clusters/items/networkConfig/datapathProvider` response property for the response status `200`'
-      ),
       scheme('api-security-removed', ['cloud-platform', 'container']),
       scheme('api-security-added', ['cloud-platform']),
       scheme('api-security-added', ['container']),
     ]);
 
     expect(lines).toEqual([
-      '**Deprecated:** `clusters/securityPostureConfig/vulnerabilityMode`',
-      '**New enum values:** `MIGRATE_TO_ADVANCED_DATAPATH`, `MIGRATE_TO_LEGACY_DATAPATH` on `clusters/networkConfig/datapathProvider`',
-      '**New response fields:** `clusters/addonsConfig/wizSensorConfig` and `clusters/networkConfig/ambientNetworkingConfig`',
-      '**Auth scopes:** regrouped, same scopes',
+      '! deprecated clusters/securityPostureConfig/vulnerabilityMode',
+      '+ enum value MIGRATE_TO_ADVANCED_DATAPATH on clusters/networkConfig/datapathProvider',
+      '+ response field clusters/addonsConfig/wizSensorConfig',
+      '+ response field clusters/networkConfig/ambientNetworkingConfig',
+      '  auth scopes regrouped, same scopes',
+    ]);
+  });
+
+  it('shows the first three names of a kind and counts the rest', () => {
+    const lines = describeChanges(
+      ['a', 'b', 'c', 'd', 'e'].map((name) =>
+        change('response-optional-property-added', `added the optional property \`${name}\``)
+      )
+    );
+
+    expect(lines).toEqual([
+      '+ response field a',
+      '+ response field b',
+      '+ response field c',
+      '  … and 2 more response fields',
     ]);
   });
 
@@ -71,7 +83,10 @@ describe('describeChanges', () => {
         ),
       ])
     ).toEqual([
-      '**Auth scopes:** added `bigquery` and `pipeline:write`; removed `container` and `pipeline`',
+      '+ auth scope bigquery',
+      '+ auth scope pipeline:write',
+      '- auth scope container',
+      '- auth scope pipeline',
     ]);
   });
 
@@ -85,7 +100,26 @@ describe('describeChanges', () => {
           )
         )
       )
-    ).toEqual(['**New response fields:** `DocumentIdentifiers/CloudProviders`']);
+    ).toEqual(['+ response field DocumentIdentifiers/CloudProviders']);
+  });
+
+  it('says whether what was removed was in the request or the response', () => {
+    expect(
+      describeChanges([
+        change('request-property-removed', 'removed the request property `query/limit`'),
+        change(
+          'response-optional-property-removed',
+          'removed the optional property `count` from the response with the `200` status'
+        ),
+        change('request-parameter-removed', 'deleted the `query` request parameter `alertId`'),
+        change('api-schema-removed', 'removed the schema `statusGroupFilter`'),
+      ])
+    ).toEqual([
+      '- request field query/limit',
+      '- request parameter alertId',
+      '- response field count',
+      '- schema statusGroupFilter',
+    ]);
   });
 
   it('names a parameter, not its location', () => {
@@ -95,9 +129,8 @@ describe('describeChanges', () => {
           'new-optional-request-parameter',
           'added the new optional `query` request parameter `preferFieldAssociatedErrors`'
         ),
-        change('request-parameter-removed', 'deleted the `query` request parameter `alertId`'),
       ])
-    ).toEqual(['**Removed:** `alertId`', '**New request fields:** `preferFieldAssociatedErrors`']);
+    ).toEqual(['+ request parameter preferFieldAssociatedErrors']);
   });
 
   it('counts schema variants instead of naming them', () => {
@@ -116,7 +149,7 @@ describe('describeChanges', () => {
           'added `#microsoft.graph.x` discriminator mapping keys to the `y` response property'
         ),
       ])
-    ).toEqual(['**Schema variants changed:** 2 changes']);
+    ).toEqual(['! schema variants changed (2)']);
   });
 
   it('names new error responses and type or constraint changes', () => {
@@ -135,10 +168,7 @@ describe('describeChanges', () => {
           "the `page_size` request property's min was set to `1.00`"
         ),
       ])
-    ).toEqual([
-      '**Type or constraint changes:** `order_by` and `page_size`',
-      '**New error responses:** `422`',
-    ]);
+    ).toEqual(['! changed order_by', '! changed page_size', '+ error response 422']);
   });
 
   it('keeps the rule of a change it has no words for', () => {
@@ -148,18 +178,31 @@ describe('describeChanges', () => {
         change('something-new', 'y'),
         change('other-rule', 'z'),
       ])
-    ).toEqual(['**Other:** `something-new` ×2, `other-rule`']);
+    ).toEqual(['! something-new ×2', '! other-rule']);
   });
 
   it('cuts a long path at its start, keeping the field', () => {
     const [line] = describeChanges([
       change(
         'response-optional-property-added',
-        `added the optional property \`${'section/'.repeat(12)}finalField\` to the response`
+        `added the optional property \`${'section/'.repeat(20)}finalField\` to the response`
       ),
     ]);
 
-    expect(line).toMatch(/^\*\*New response fields:\*\* `…[^`]*section\/finalField`$/);
-    expect(line.length).toBeLessThan(120);
+    expect(line).toMatch(/^\+ response field ….*section\/finalField$/);
+    expect(line.length).toBeLessThan(110);
+  });
+
+  it('keeps an enum value whole when the field it is on is long', () => {
+    const [line] = describeChanges([
+      change(
+        'response-property-enum-value-added',
+        `added the new \`SPECIFIC\` enum value to the \`${'section/'.repeat(
+          20
+        )}driver\` response property`
+      ),
+    ]);
+
+    expect(line).toMatch(/^\+ enum value SPECIFIC on ….*section\/driver$/);
   });
 });

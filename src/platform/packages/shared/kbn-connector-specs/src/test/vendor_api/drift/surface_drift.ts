@@ -10,7 +10,7 @@
 import type { ConnectorDrift, DriftReportEntry, FailedDrift, SpecChange } from './detect_drift';
 import { connectorOf, DRIFT_ISSUE_LABEL, markerOf } from './issue_marker';
 import { findingsOf, renderDriftIssue } from './issue';
-import { cell, code, listed, plural } from './issue/issue_markdown';
+import { code, listed, plural } from './issue/issue_markdown';
 import { describeChanges } from './refresh_changes';
 import type { VendorApiLog } from '../record/update_vendor_api';
 import { errorMessage } from '../values';
@@ -90,7 +90,11 @@ const NO_ENDPOINT = '—';
 
 const byName = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
-/** A table of the endpoints that changed, what changed on each and the actions that call it. */
+/**
+ * A table of the endpoints that changed, what changed on each and the actions that call it.
+ * It is HTML because a diff block can't sit in a markdown table's cell, and GitHub reads markdown
+ * inside an HTML cell only when blank lines surround it.
+ */
 const changesTable = (drift: ConnectorDrift): string[] => {
   const changes = Object.values(drift.sources).flatMap((source) => source.changes ?? []);
   if (changes.length === 0) {
@@ -111,14 +115,21 @@ const changesTable = (drift: ConnectorDrift): string[] => {
   );
   const hidden = sorted.length - MAX_ENDPOINTS_PER_CONNECTOR;
   return [
-    '| Endpoint | What changed | Used in action |',
-    '|---|---|---|',
-    ...sorted.slice(0, MAX_ENDPOINTS_PER_CONNECTOR).map(([endpoint, group]) => {
+    '<table>',
+    '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',
+    ...sorted.slice(0, MAX_ENDPOINTS_PER_CONNECTOR).flatMap(([endpoint, group]) => {
       const actions = actionsOf(endpoint);
-      return `| ${endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(cell(endpoint))} | ${cell(
-        describeChanges(group).join('<br>')
-      )} | ${actions.length > 0 ? cell(listed(actions.map(code))) : NO_ENDPOINT} |`;
+      return [
+        '<tr>',
+        ...[
+          [endpoint === NO_ENDPOINT ? NO_ENDPOINT : code(endpoint)],
+          ['```diff', ...describeChanges(group), '```'],
+          [actions.length > 0 ? listed(actions.map(code)) : NO_ENDPOINT],
+        ].flatMap((cellLines) => ['<td>', '', ...cellLines, '', '</td>']),
+        '</tr>',
+      ];
     }),
+    '</table>',
     ...(hidden > 0
       ? ['', `…and ${plural(hidden, 'more endpoint')}; the drift report lists them.`]
       : []),
@@ -134,7 +145,7 @@ export const renderRefreshPr = (drifts: readonly ConnectorDrift[]): string => {
   const intro = [
     'Refreshes the `vendor_api` artifacts of connectors whose vendor specs changed without breaking them, as found by the weekly vendor API drift check (`node scripts/connector_vendor_api --drift`). The actions pass against the latest specs.',
     '',
-    'Each table lists the endpoints that changed, what changed on each in short, and the actions that call them. The drift report attached to the build lists every change.',
+    'Each table lists the endpoints that changed, what changed on each as a diff (`+` added, `-` removed, `!` changed or deprecated), and the actions that call them. The drift report attached to the build lists every change.',
     '',
   ].join('\n');
 

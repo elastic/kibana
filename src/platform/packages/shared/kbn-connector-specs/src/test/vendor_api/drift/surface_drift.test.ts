@@ -310,12 +310,31 @@ describe('renderRefreshPr', () => {
       [
         '### `.other`',
         '',
-        '| Endpoint | What changed | Used in action |',
-        '|---|---|---|',
-        '| `GET /a` | **New response fields:** `title` | `getA` and `listA` |',
-        '| `GET /b` | **New response fields:** `name` | `listB` |',
+        '<table>',
+        '<tr><th>Endpoint</th><th>What changed</th><th>Used in action</th></tr>',
+        '<tr>',
+        '<td>',
+        '',
+        '`GET /a`',
+        '',
+        '</td>',
+        '<td>',
+        '',
+        '```diff',
+        '+ response field title',
+        '```',
+        '',
+        '</td>',
+        '<td>',
+        '',
+        '`getA` and `listA`',
+        '',
+        '</td>',
+        '</tr>',
       ].join('\n')
     );
+    expect(body).toContain('+ response field name\n```');
+    expect(body).toContain('`listB`');
   });
 
   it('lists the connectors alphabetically', () => {
@@ -337,9 +356,7 @@ describe('renderRefreshPr', () => {
       ]),
     ]);
 
-    expect(body).toContain(
-      '| `GET /a` | **Deprecated:** `old`<br>**New response fields:** `title` | — |'
-    );
+    expect(body).toContain('```diff\n! deprecated old\n+ response field title\n```');
   });
 
   it('names an endpoint no action is recorded on with a dash, and keeps unlocated changes last', () => {
@@ -347,11 +364,11 @@ describe('renderRefreshPr', () => {
       changed('.other', [field(undefined, 'servers'), field('GET /a', 'x')]),
     ]);
 
-    const rows = body
-      .split('\n')
-      .filter((line) => line.startsWith('| ') && !line.includes('Endpoint'));
-    expect(rows[0]).toMatch(/^\| `GET \/a` \|/);
-    expect(rows[1]).toBe('| — | **New response fields:** `servers` | — |');
+    const endpoints = body
+      .split('<tr>\n<td>\n\n')
+      .slice(1)
+      .map((row) => row.split('\n')[0]);
+    expect(endpoints).toEqual(['`GET /a`', '—']);
   });
 
   it('notes that the actions call other operations, or that the specs changed outside oasdiff', () => {
@@ -364,12 +381,6 @@ describe('renderRefreshPr', () => {
     expect(body).toContain('### `.quiet`\n\n- The specs changed outside what `oasdiff` reports.');
   });
 
-  it('keeps a pipe in a name from breaking the table', () => {
-    const body = renderRefreshPr([changed('.other', [field('GET /a', 'a | b')])]);
-
-    expect(body).toContain('`a \\| b`');
-  });
-
   it('cuts the table of a connector after 20 endpoints and counts the rest', () => {
     const body = renderRefreshPr([
       changed(
@@ -380,8 +391,8 @@ describe('renderRefreshPr', () => {
       ),
     ]);
 
-    expect(body).toContain('| `GET /e19` |');
-    expect(body).not.toContain('| `GET /e20` |');
+    expect(body).toContain('`GET /e19`');
+    expect(body).not.toContain('`GET /e20`');
     expect(body).toContain('…and 3 more endpoints; the drift report lists them.');
   });
 
