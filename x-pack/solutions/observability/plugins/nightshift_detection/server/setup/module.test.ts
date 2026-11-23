@@ -74,7 +74,7 @@ function createContainer() {
   });
   container.bind(PluginStart('significantEvents')).toConstantValue({
     getKnowledgeIndicatorReader: () => ({
-      listQueryLinks: async () => [],
+      listQueries: async () => [],
       listFeatures: async () => [],
     }),
   });

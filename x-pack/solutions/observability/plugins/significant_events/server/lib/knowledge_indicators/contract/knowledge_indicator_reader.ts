@@ -17,10 +17,10 @@ import { REVISION_SIZE_LIMIT } from '../knowledge_indicator_client/revision_read
 export interface KnowledgeIndicatorReader {
   /**
    * The live query knowledge indicators of the given sources, rule-backed or not. Deleted and
-   * expired ones are left out. No sources gives no links. Throws when the read reaches its limit
+   * expired ones are left out. No sources gives no queries. Throws when the read reaches its limit
    * (10,000) rather than return part of them.
    */
-  listQueryLinks(params: { sourceIds: string[] }): Promise<QueryLink[]>;
+  listQueries(params: { sourceIds: string[] }): Promise<QueryLink[]>;
   /**
    * The live features of the given sources, of the given types (`entity`, `dependency`, ...).
    * Deleted, expired and excluded ones are left out. No types gives no features. Returns at most
@@ -36,7 +36,7 @@ export const createKnowledgeIndicatorReader = ({
 }: {
   indicatorReader: Pick<IndicatorReader, 'getQueryLinks' | 'getFeatures'>;
 }): KnowledgeIndicatorReader => ({
-  listQueryLinks: async ({ sourceIds }) => {
+  listQueries: async ({ sourceIds }) => {
     if (sourceIds.length === 0) {
       return [];
     }

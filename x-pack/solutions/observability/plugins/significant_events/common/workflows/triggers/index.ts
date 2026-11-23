@@ -170,7 +170,7 @@ export const knowledgeIndicatorsChangedTriggerCommonDefinition: CommonTriggerDef
     'xpack.significantEvents.workflowTriggers.knowledgeIndicatorsChanged.description',
     {
       defaultMessage:
-        "Emitted after a committed write to the knowledge indicators of a space's sources.",
+        "Emitted after a committed write to the knowledge indicators of a space's sources. Internal to Nightshift: it may change or be removed.",
     }
   ),
   documentation: {
