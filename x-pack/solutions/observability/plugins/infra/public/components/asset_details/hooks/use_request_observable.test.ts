@@ -60,6 +60,8 @@ describe('useRequestObservable', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    isAutoRefreshRequestPendingMock$.next(false);
+    autoRefreshConfig$.next({ interval: 5000, isPaused: false });
     mockDatePickerContext();
     mockUseRequestTimeMock();
     mockUseLoadingStateContextMock();
@@ -103,23 +105,53 @@ describe('useRequestObservable', () => {
     unmount();
   });
 
-  it('should block new requests when isAutoRefreshRequestPending is true', async () => {
+  it('should hold new requests while isAutoRefreshRequestPending is true and run the latest one when it turns false', async () => {
     const { result, unmount } = renderHook(() => useRequestObservable());
+    const outdatedRequest = jest.fn(() => Promise.resolve());
+    const latestRequest = jest.fn(() => Promise.resolve());
+
+    act(() => {
+      isAutoRefreshRequestPendingMock$.next(true);
+      // simulating requests
+      result.current.request$.next(outdatedRequest);
+      result.current.request$.next(latestRequest);
+    });
+
+    expect(requestStateMock$.next).not.toHaveBeenCalled();
 
     act(() => {
       isAutoRefreshRequestPendingMock$.next(false);
-      // simulating requests
-      result.current.request$.next(() => Promise.resolve());
-
-      isAutoRefreshRequestPendingMock$.next(true);
-      // simulating requests
-      result.current.request$.next(() => Promise.resolve());
     });
 
-    await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('running'));
+    await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('done'));
 
+    expect(outdatedRequest).not.toHaveBeenCalled();
+    expect(latestRequest).toHaveBeenCalledTimes(1);
     expect(requestStateMock$.next).toHaveBeenCalledTimes(2);
-    expect(requestStateMock$.next).toHaveBeenCalledWith('done');
+
+    unmount();
+  });
+
+  // e.g. the Processes tab opened during an auto-refresh cycle, then auto-refresh paused before the next tick
+  it('should run a held request when auto-refresh is paused', async () => {
+    const { result, unmount } = renderHook(() => useRequestObservable());
+    const request = jest.fn(() => Promise.resolve());
+
+    act(() => {
+      isAutoRefreshRequestPendingMock$.next(true);
+      // simulating requests
+      result.current.request$.next(request);
+    });
+
+    expect(request).not.toHaveBeenCalled();
+
+    act(() => {
+      autoRefreshConfig$.next({ isPaused: true, interval: 5000 });
+    });
+
+    await waitFor(() => expect(requestStateMock$.next).toHaveBeenCalledWith('done'));
+
+    expect(request).toHaveBeenCalledTimes(1);
 
     unmount();
   });

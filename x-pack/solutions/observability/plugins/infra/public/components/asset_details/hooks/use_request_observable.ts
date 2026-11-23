@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { map, mergeMap, filter } from 'rxjs';
-import { catchError, of, from, BehaviorSubject, withLatestFrom } from 'rxjs';
+import { map, mergeMap, switchMap, first } from 'rxjs';
+import { catchError, of, from, BehaviorSubject, combineLatest } from 'rxjs';
 import { useLoadingStateContext } from './use_loading_state';
 import { useDatePickerContext } from './use_date_picker';
 
@@ -23,14 +23,19 @@ export const useRequestObservable = <T>() => {
     // Subscribe to updates in the request$
     const subscription = request$
       .pipe(
-        // Combine latest values from request$, autoRefreshConfig$, and pendingRequests$
-        withLatestFrom(isAutoRefreshRequestPending$, autoRefreshConfig$),
-        // Filter out requests if there are pending requests or autoRefresh is paused
+        // Hold the request while there are pending requests, unless autoRefresh is paused
         // Prevents aborting running requests when autoRefresh is on
-        filter(([, isAutoRefreshRequestPending, autoRefreshConfig]) => {
-          return !isAutoRefreshRequestPending || autoRefreshConfig?.isPaused === true;
-        }),
-        mergeMap(([requestFn]) => {
+        // A newer request replaces the held one
+        switchMap((requestFn) =>
+          combineLatest([isAutoRefreshRequestPending$, autoRefreshConfig$]).pipe(
+            first(
+              ([isAutoRefreshRequestPending, autoRefreshConfig]) =>
+                !isAutoRefreshRequestPending || autoRefreshConfig?.isPaused === true
+            ),
+            map(() => requestFn)
+          )
+        ),
+        mergeMap((requestFn) => {
           // If request function is not defined, return an observable that emits null
           if (!requestFn) {
             return of(null);
