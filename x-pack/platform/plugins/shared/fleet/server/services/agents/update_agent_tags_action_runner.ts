@@ -172,6 +172,26 @@ export class UpdateAgentTagsActionRunner extends ActionRunner {
   }
 }
 
+/**
+ * The agents of a batch that the update did not select: they are not found with its query, which
+ * holds the ids of the batch and the space, so they were moved out of the space or deleted.
+ */
+async function getSkippedAgentIds(
+  esClient: ElasticsearchClient,
+  agentIds: string[],
+  query: UpdateByQueryRequest['query']
+): Promise<string[]> {
+  const selected = await esClient.search({
+    index: AGENTS_INDEX,
+    query,
+    size: agentIds.length,
+    _source: false,
+    ignore_unavailable: true,
+  });
+  const selectedIds = new Set(selected.hits.hits.map((hit) => hit._id));
+  return agentIds.filter((id) => !selectedIds.has(id));
+}
+
 export async function updateTagsBatch(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -242,7 +262,7 @@ export async function updateTagsBatch(
 
   // The agents were in the caller's space when they were selected. The update can run for minutes,
   // and again after being cancelled, so it checks the space itself too: an agent that has moved out
-  // of it in the meantime is left alone. The agents it leaves are not counted, as they are not updated.
+  // of it in the meantime is left alone, and recorded below as not updated.
   const namespaceQuery = await agentsNamespaceQuery(spaceId);
   const idsQuery = { terms: { _id: agentIds } };
 
@@ -359,6 +379,14 @@ export async function updateTagsBatch(
     appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
   }
 
+  // The agents the update did not go through were moved out of the space, or deleted, after they
+  // were selected. They are not updated or failed, but the action counts them in its total, so
+  // without a result of their own it would never reach it.
+  const skippedAgentIds =
+    res.total !== undefined && res.total < agentIds.length
+      ? await getSkippedAgentIds(esClient, agentIds, request.query)
+      : [];
+
   const updatedCount = res.updated ?? 0;
   const updatedIds = getUuidArray(updatedCount);
 
@@ -378,12 +406,16 @@ export async function updateTagsBatch(
     agents: updatedIds
       .concat(failures.map((failure) => failure.id))
       .concat(isLastRetry ? versionConflictIds : [])
-      .concat(errorAgentIds),
+      .concat(errorAgentIds)
+      .concat(skippedAgentIds),
     namespaces,
     created_at: new Date().toISOString(),
     type: 'UPDATE_TAGS',
     total:
-      options.total ?? (res.total !== undefined ? res.total + errorAgentIds.length : undefined),
+      options.total ??
+      (res.total !== undefined
+        ? res.total + errorAgentIds.length + skippedAgentIds.length
+        : undefined),
   });
   await createErrorActionResults(
     esClient,
@@ -398,6 +430,21 @@ export async function updateTagsBatch(
         updatedCount + failureCount + (isLastRetry ? versionConflictCount : 0)
       } agentIds, updated: ${updatedCount}, failed: ${failureCount}, version_conflicts: ${versionConflictCount}`
     );
+
+  if (skippedAgentIds.length > 0) {
+    await bulkCreateAgentActionResults(
+      esClient,
+      skippedAgentIds.map((agentId) => ({
+        agentId,
+        actionId,
+        namespace: spaceId,
+        error: 'agent not found, or not in the space of the action anymore',
+      }))
+    );
+    appContextService
+      .getLogger()
+      .debug(`action skipped result wrote on ${skippedAgentIds.length} agents`);
+  }
 
   // writing successful action results
   if (updatedCount > 0) {

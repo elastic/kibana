@@ -961,6 +961,33 @@ describe('update_agent_tags', () => {
         });
       });
 
+      it('should record the agents the update skipped, as they left the space after they were selected', async () => {
+        // the update went through 1 of the 2 agents
+        esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 1 } as any);
+        esClient.search.mockResolvedValue({ hits: { hits: [{ _id: 'agent1' }] } } as any);
+
+        await batch('myspace');
+
+        // the agents it did select are looked up with its own query
+        expect(esClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({ query: queryOf(0), size: 2 })
+        );
+        // so that every agent of the batch is accounted for in the action: 1 updated, 1 skipped
+        const agentAction = (esClient.create.mock.calls[0][0] as any).document;
+        expect(agentAction.agents.length).toEqual(2);
+        expect(agentAction.agents).toContain('agent2');
+        expect(
+          getErrorResults(esClient).map((result: any) => [result.agent_id, result.error])
+        ).toEqual([['agent2', 'agent not found, or not in the space of the action anymore']]);
+      });
+
+      it('should not look for skipped agents when the update went through all of them', async () => {
+        await batch('myspace');
+
+        expect(esClient.search).not.toHaveBeenCalled();
+        expect(getErrorResults(esClient)).toEqual([]);
+      });
+
       it('should check the space again when the update is run again after being cancelled', async () => {
         esClient.updateByQuery
           .mockResolvedValueOnce({ task: 'node1:42' } as any)
