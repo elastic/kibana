@@ -30,7 +30,7 @@ To receive requests with this connector, you need:
 
 To create an Inbound Webhook connector:
 
-1. Go to **{{stack-manage-app}}** → **{{connectors-ui}}**, select **Create connector**, then select **Inbound Webhook**.
+1. Find **Connectors** in the navigation menu under **Alerts and Insights** or by using the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). 
 2. Enter a name for the connector. {{kib}} fills in **Connector ID** from the name as you type. To use a different ID, change it now, because you can't change it after you save.
 3. Select **Save**. The flyout stays open and shows the **Webhook URL** and the **Ingest token**.
 4. Before you close the flyout, copy the token and store it with the URL. {{kib}} shows the token only once. If you lose it, you can [rotate the token](#inbound-webhook-rotate-token) to get a new one.
