@@ -170,6 +170,16 @@ export interface RequestedFilterGold {
   substitutes: readonly string[];
 }
 
+/**
+ * The dashboard settings a prompt changes, in the attachment's own shapes. Every setting the gold
+ * does not name must keep its seed value.
+ */
+export interface SettingsGold {
+  options?: NonNullable<DashboardAttachmentData['options']>;
+  refreshInterval?: NonNullable<DashboardAttachmentData['refresh_interval']>;
+  esqlApproximation?: boolean;
+}
+
 /** A visualization attachment by id, as the visualization skill stores it on the conversation. */
 export interface VisualizationAttachment {
   id: string;
@@ -201,6 +211,8 @@ export type DashboardDatasetExample = Example<
     layoutEdit?: LayoutEditGold;
     /** Panels the prompt edits in place, and what each must look like after. */
     panelEdits?: readonly PanelEditGold[];
+    /** Dashboard settings the prompt changes; `{}` when it must change none. */
+    settings?: SettingsGold;
     replaceConfirmation?: ReplaceConfirmationGold;
     /** Requests the agent must neither build nor drop silently. */
     unavailableRequests?: readonly UnavailableRequestGold[];

@@ -12,3 +12,4 @@ export { DASHBOARD_ENHANCE_EXAMPLES } from './enhance';
 export { DASHBOARD_LAYOUT_EDIT_EXAMPLES } from './layout_edit';
 export { DASHBOARD_ML_PANEL_EXAMPLES, ML_PANEL_JOB_IDS } from './ml_panels';
 export { DASHBOARD_ROUTING_EXAMPLES } from './routing';
+export { DASHBOARD_SETTINGS_EXAMPLES } from './settings';

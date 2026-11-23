@@ -16,6 +16,7 @@ import {
   DASHBOARD_ENHANCE_EXAMPLES,
   DASHBOARD_LAYOUT_EDIT_EXAMPLES,
   DASHBOARD_ROUTING_EXAMPLES,
+  DASHBOARD_SETTINGS_EXAMPLES,
 } from '.';
 
 const seedIds = (dashboard: DashboardAttachmentData): Set<string> =>
@@ -52,6 +53,7 @@ const examples = [
   ...DASHBOARD_ENHANCE_EXAMPLES,
   ...DASHBOARD_LAYOUT_EDIT_EXAMPLES,
   ...DASHBOARD_ROUTING_EXAMPLES,
+  ...DASHBOARD_SETTINGS_EXAMPLES,
 ];
 
 describe('dashboard dataset gold', () => {
