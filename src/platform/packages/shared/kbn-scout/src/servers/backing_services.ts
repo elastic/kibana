@@ -170,7 +170,15 @@ export async function runWithBackingServices(
   // serving against it. Tearing the managed processes down (SIGTERM, so a Playwright runner
   // still writes its reports) makes `body` return, and the one shutdown path below stops the
   // rest; that exit is reported rather than whatever the teardown makes fail next.
+  // `ProcRunner.run()` never settles once a teardown is in progress, so a `body` waiting on
+  // Kibana's boot or on the Playwright run would hang after that teardown: the early exit is
+  // raced against both the start and the body instead, and the hung promise is left behind.
   let earlyExitError: Error | undefined;
+  let rejectOnEarlyExit: (error: Error) => void = () => {};
+  const earlyExit = new Promise<never>((_, reject) => {
+    rejectOnEarlyExit = reject;
+  });
+  earlyExit.catch(() => {});
   const onEarlyExit = (msg: string) => {
     if (interrupted) {
       return;
@@ -179,6 +187,7 @@ export async function runWithBackingServices(
     log.info('scout: a backing service exited; shutting the servers down');
     earlyExitError = earlyExitError ?? new Error(msg);
     process.exitCode = 1;
+    rejectOnEarlyExit(earlyExitError);
     procs.teardown('SIGTERM').catch((error) => log.error(error));
   };
 
@@ -186,9 +195,9 @@ export async function runWithBackingServices(
   let started = false;
   try {
     backing = startBackingServices({ config, log, onEarlyExit, es });
-    await backing.ready;
+    await Promise.race([backing.ready, earlyExit]);
     started = true;
-    await body({ onEarlyExit });
+    await Promise.race([body({ onEarlyExit }), earlyExit]);
   } catch (error) {
     runError = asError(error);
     if (!started && !interrupted && earlyExitError === undefined) {

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { packageRegistryDocker } from '@kbn/test-docker-servers';
 import { ToolingLog } from '@kbn/tooling-log';
 import { assertFleetPackageRegistry, getFleetPackageRegistry } from './fleet_package_registry';
 
@@ -61,7 +62,7 @@ describe('getFleetPackageRegistry', () => {
       waitForLogLine: 'package manifests loaded',
       waitForLogLineTimeoutMs: 6 * 60 * 1000,
     });
-    expect(enabled.image).toContain('package-registry');
+    expect(enabled.image).toBe(packageRegistryDocker.image);
 
     expect(getFleetPackageRegistry({}).dockerServer).toMatchObject({ enabled: false });
   });

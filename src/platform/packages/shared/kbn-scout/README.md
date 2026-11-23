@@ -757,7 +757,7 @@ export SCOUT_FLEET_PACKAGE_REGISTRY=true    # start the container and point Kiba
 node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path>
 ```
 
-Scout then pulls the image from `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` (default: the promoted `docker.elastic.co/kibana-ci/package-registry-distribution:lite`, see `@kbn/test-docker-servers`), starts it alongside Elasticsearch and before Kibana, passes `--xpack.fleet.registryUrl=http://localhost:<port>` to Kibana, and stops the container on shutdown. Both variables are required: CI exports `FLEET_PACKAGE_REGISTRY_PORT` for every job, and switching a lane to the docker image is an explicit decision (the EPR image promotion pipeline makes it to validate the candidate image). The container is also started for `node scripts/scout start-server`.
+Scout then pulls the image from `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` (default: the promoted `docker.elastic.co/kibana-ci/package-registry-distribution:lite`, see `@kbn/test-docker-servers`), starts it alongside Elasticsearch and before Kibana, passes `--xpack.fleet.registryUrl=http://localhost:<port>` to Kibana, and stops the container on shutdown. Both variables are required: CI exports `FLEET_PACKAGE_REGISTRY_PORT` for every job, and switching a lane to the docker image is an explicit decision. The EPR image promotion pipeline will make it to validate the candidate image (follow-up: https://github.com/elastic/kibana/pull/306644); until then its Scout lanes still install from the public EPR. The container is also started for `node scripts/scout start-server`.
 
 #### Running Tests Separately
 

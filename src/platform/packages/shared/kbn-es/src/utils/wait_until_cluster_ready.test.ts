@@ -102,6 +102,7 @@ describe('waitUntilClusterReady', () => {
     await waitUntilClusterReady({ client, log, expectedStatus: 'green' });
 
     expect(gracefulExit).toHaveBeenCalledTimes(1);
+    expect(gracefulExit).toHaveBeenCalledWith(130);
     expect(exitSpy).not.toHaveBeenCalled();
     exitSpy.mockRestore();
   });

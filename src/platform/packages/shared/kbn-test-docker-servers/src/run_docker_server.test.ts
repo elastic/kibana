@@ -30,6 +30,10 @@ interface FakeDocker {
   failMonitor: () => void;
   /** What `docker inspect` reports for the container's running state; `undefined` makes it fail. */
   inspectRunning: boolean | undefined;
+  /** Runs while `docker run` is in flight, e.g. to abort at that moment. */
+  runHook?: () => void;
+  /** Makes `docker run` fail with this error. */
+  runError?: Error;
 }
 
 function fakeDocker({
@@ -76,7 +80,10 @@ function fakeDocker({
       case 'rm':
         return Promise.resolve({ stdout: '' });
       case 'run':
-        return Promise.resolve({ stdout: 'container-1\n' });
+        fake.runHook?.();
+        return fake.runError
+          ? Promise.reject(fake.runError)
+          : Promise.resolve({ stdout: 'container-1\n' });
       case 'logs':
         return Object.assign(Promise.resolve({ stdout: '' }), { stdout, stderr });
       case 'wait':
@@ -148,16 +155,16 @@ describe('runDockerServer', () => {
     const running = await pending;
 
     expect(dockerCall(docker.calls, 'pull')).toHaveLength(0);
-    expect(dockerCall(docker.calls, 'run')).toEqual([
-      [
-        'run',
-        '-dit',
-        '-e',
-        'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
-        '-p',
-        '6104:8080',
-        'docker.elastic.co/package-registry/distribution:lite',
-      ],
+    const [runArgs] = dockerCall(docker.calls, 'run');
+    expect(runArgs.slice(0, 2)).toEqual(['run', '-dit']);
+    expect(runArgs[2]).toBe('--name');
+    expect(runArgs[3]).toMatch(/^registry-6104-/);
+    expect(runArgs.slice(4)).toEqual([
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+      '-p',
+      '127.0.0.1:6104:8080',
+      'docker.elastic.co/package-registry/distribution:lite',
     ]);
     expect(running).toMatchObject({
       name: 'registry',
@@ -282,6 +289,27 @@ describe('runDockerServer', () => {
     await expect(pending).rejects.toMatchObject({ name: 'AbortError' });
     expect(pullKilled).toHaveBeenCalledTimes(1);
     expect(dockerCall(docker.calls, 'run')).toHaveLength(0);
+  });
+
+  it('does not report a container as ready when the abort landed while docker run was in flight', async () => {
+    const docker = fakeDocker({ cached: true });
+    const abortCtrl = new AbortController();
+    docker.runHook = () => abortCtrl.abort();
+
+    await expect(
+      runDockerServer({ ...server, waitForLogLine: undefined }, { log, signal: abortCtrl.signal })
+    ).rejects.toMatchObject({ name: 'AbortError' });
+    expect(dockerCall(docker.calls, 'kill')).toEqual([['kill', 'container-1']]);
+  });
+
+  it('removes a container that docker created but could not start', async () => {
+    const docker = fakeDocker({ cached: true });
+    docker.runError = Object.assign(new Error('port is already allocated'), { exitCode: 125 });
+
+    await expect(runDockerServer(server, { log })).rejects.toThrow('already listening on port');
+    const [rmArgs] = dockerCall(docker.calls, 'rm');
+    expect(rmArgs.slice(0, 2)).toEqual(['rm', '-f']);
+    expect(rmArgs[2]).toMatch(/^registry-6104-/);
   });
 
   it('does not run the container when the signal is already aborted', async () => {

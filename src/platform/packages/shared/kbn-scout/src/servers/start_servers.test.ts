@@ -183,6 +183,28 @@ describe('startServers', () => {
     expect(shutdownEs).toHaveBeenCalledTimes(1);
   });
 
+  it('does not hang when a backing service exits while Kibana is still booting', async () => {
+    let dockerEarlyExit: (msg: string) => void = () => {};
+    runDockerServersMock.mockImplementation(async ({ onEarlyExit }) => {
+      dockerEarlyExit = onEarlyExit;
+      return stopDockerServers;
+    });
+    // like ProcRunner.run() once a teardown is in progress: never settles
+    runKibanaServerMock.mockImplementation(
+      () =>
+        new Promise<void>(() => {
+          dockerEarlyExit('[docker:registry] container exited unexpectedly: exit code 137');
+        })
+    );
+
+    await expect(startServers(log, options)).rejects.toThrow(
+      '[docker:registry] container exited unexpectedly: exit code 137'
+    );
+    expect(procs.teardown).toHaveBeenCalledWith('SIGTERM');
+    expect(stopDockerServers).toHaveBeenCalledTimes(1);
+    expect(shutdownEs).toHaveBeenCalledTimes(1);
+  });
+
   it('shuts the servers down when a docker server exits on its own', async () => {
     let onEarlyExit: (msg: string) => void = () => {};
     runDockerServersMock.mockImplementation(async ({ onEarlyExit: handler }) => {

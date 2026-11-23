@@ -86,6 +86,7 @@ describe('waitForSecurityIndex', () => {
     await waitForSecurityIndex({ client, log });
 
     expect(gracefulExit).toHaveBeenCalledTimes(1);
+    expect(gracefulExit).toHaveBeenCalledWith(130);
     expect(exitSpy).not.toHaveBeenCalled();
     expect(process.listeners('SIGINT')).toEqual(listenersBefore);
     exitSpy.mockRestore();

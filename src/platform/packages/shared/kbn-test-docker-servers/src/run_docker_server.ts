@@ -90,6 +90,10 @@ export async function isDockerImageAvailableLocally(image: string): Promise<bool
 
 /** `docker pull`, killed as soon as `signal` aborts so a shutdown does not wait for a slow pull. */
 async function dockerPull(server: DockerServer, log: ToolingLog, signal?: AbortSignal) {
+  if (signal?.aborted) {
+    // aborted during the image-cache lookup: the listener below would never fire
+    throw abortError(server.name);
+  }
   const pull = execa('docker', ['pull', server.image]);
   const onAbort = () => pull.kill('SIGTERM');
   signal?.addEventListener('abort', onAbort, { once: true });
@@ -106,23 +110,37 @@ async function dockerPull(server: DockerServer, log: ToolingLog, signal?: AbortS
   }
 }
 
+/** A name of our own for the container, so the error paths can find it before `docker run` returned its id. */
+function containerName(server: DockerServer) {
+  return `${server.name}-${server.port}-${Date.now().toString(36)}`.replace(
+    /[^a-zA-Z0-9_.-]/g,
+    '-'
+  );
+}
+
 async function dockerRun(server: DockerServer, log: ToolingLog): Promise<string> {
   const { args, name, image, port, portInContainer } = server;
+  const containerNameArg = containerName(server);
   try {
     log.info(`[docker:${name}] running image "${image}"`);
 
     const dockerArgs = [
       'run',
       '-dit',
+      '--name',
+      containerNameArg,
       args || [],
+      // loopback only: Kibana on this host is the only client, nothing else needs the registry
       '-p',
-      `${port}:${portInContainer}`,
+      `127.0.0.1:${port}:${portInContainer}`,
       image,
     ].flat();
     const res = await execa('docker', dockerArgs);
 
     return res.stdout.trim();
   } catch (error) {
+    // docker may have created (even started) the container before failing; do not leave it
+    await execa('docker', ['rm', '-f', containerNameArg]).catch(() => {});
     if (error?.exitCode === 125 && error?.message?.includes('port is already allocated')) {
       throw new Error(
         `
@@ -297,10 +315,11 @@ export async function runDockerServer(
     // the container is gone, watch it again, backing off, and give up after a while.
     const running =
       error instanceof ContainerExitError ? false : await isDockerContainerRunning(containerId);
+    if (stopped) {
+      // stopped while the daemon was being asked: nothing to report either way
+      return;
+    }
     if (running !== false) {
-      if (stopped) {
-        return;
-      }
       monitorRetries += 1;
       if (monitorRetries > MONITOR_RETRY_MAX_ATTEMPTS) {
         log.warning(
@@ -385,9 +404,14 @@ export async function runDockerServer(
     // a container that dies before the readiness line fails here, not after the wait timeout;
     // `stop()` aborts the wait so its timers do not keep the process alive
     await Promise.race([waitUntilReady(server, logLine$, log, abort$), exited]);
-    // an exit that landed just as the readiness race settled must not be lost between the two
+    // an exit that landed just as the readiness race settled must not be lost between the two,
+    // and neither must an abort that landed while `docker run` was in flight (with no readiness
+    // check, the race above was already settled when it was built)
     if (exitDuringStart) {
       throw exitDuringStart;
+    }
+    if (signal?.aborted) {
+      throw abortError(name);
     }
   } catch (error) {
     // the start failure is the one to report; a stop failure on top of it is logged

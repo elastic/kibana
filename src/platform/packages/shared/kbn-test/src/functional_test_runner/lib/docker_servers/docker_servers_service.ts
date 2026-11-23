@@ -139,6 +139,15 @@ export class DockerServersService {
     // ensure container stays running, error if it exits
     lifecycle.cleanup.addSub(
       observeContainerRunning(name, containerId, log).subscribe({
+        complete: () => {
+          // the `docker wait` monitor was ended by a signal (shared implementation); with the
+          // tests still running, a later exit of this container would go unnoticed
+          if (!lifecycle.cleanup.triggered) {
+            log.warning(
+              `[docker:${name}] the container monitor ended; exits are no longer reported`
+            );
+          }
+        },
         error: (error) => {
           lifecycle.cleanup.after$.subscribe(() => {
             log.error(`[docker:${name}] Error ensuring that the container is running`);
