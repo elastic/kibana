@@ -8,6 +8,7 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
+import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
@@ -670,13 +671,10 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
         policy_ids: [''],
       } as PackagePolicy);
 
-    const hasAgentlessGrant = (descriptor: { indices?: Array<{ names?: string[] }> } | undefined) =>
-      (descriptor?.indices ?? []).some((index) => index.names?.includes('agentless-*'));
+    const hasAgentlessGrant = (descriptor: SecurityRoleDescriptor | undefined) =>
+      (descriptor?.indices ?? []).some((index) => [index.names].flat().includes('agentless-*'));
 
-    const expectNormalGrant = (
-      descriptor: { indices?: Array<{ names?: string[] }> } | undefined,
-      pkgName: string
-    ) =>
+    const expectNormalGrant = (descriptor: SecurityRoleDescriptor | undefined, pkgName: string) =>
       // The normal data stream grant must survive so the integration keeps ingesting; a dropped
       // descriptor would also report no agentless grant and hide a regression.
       expect(descriptor?.indices).toEqual(
