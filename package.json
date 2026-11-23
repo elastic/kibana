@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "9.4.9",
+  "version": "9.4.10",
   "branch": "9.4",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "24.22.1",
+    "node": "24.22.3",
     "pnpm": "~12.4.2"
   },
   "resolutions": {
@@ -152,7 +152,7 @@
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.3.4",
-    "@elastic/ems-client": "8.7.0",
+    "@elastic/ems-client": "8.8.1",
     "@elastic/esql": "1.8.0",
     "@elastic/eui": "115.0.0-backport.0",
     "@elastic/eui-theme-borealis": "7.0.0",
@@ -1437,7 +1437,7 @@
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
-    "maplibre-gl": "5.3.0",
+    "maplibre-gl": "6.4.1",
     "markdown-it": "14.3.3",
     "memoize-one": "6.0.0",
     "mime": "2.6.0",
@@ -1541,7 +1541,7 @@
     "type-fest": "4.41.0",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
-    "undici": "7.30.1",
+    "undici": "7.30.2",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -2108,7 +2108,7 @@
     "jest-snapshot": "29.7.0",
     "jest-specific-snapshot": "8.0.0",
     "jest-styled-components": "7.0.3",
-    "json-schema-typed": "8.0.2",
+    "json-schema-typed": "9.0.0",
     "keyv": "5.6.0",
     "license-checker": "25.0.1",
     "lighthouse": "13.4.1",

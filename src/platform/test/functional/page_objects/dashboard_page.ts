@@ -365,16 +365,21 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
 
-    await this.appMenu.clickMenuItem('dashboardViewOnlyMode');
+    // The top nav stays disabled for a moment after a save, and a click on it is silently dropped.
+    await this.appMenu.clickMenuItem('dashboardViewOnlyMode', { waitForEnabled: true });
 
-    if (accept) {
-      const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
-        timeout: 2000,
-      });
-      if (confirmation) {
-        await this.common.clickConfirmOnModal();
-      }
+    if (!accept) return;
+
+    const confirmation = await this.testSubjects.waitForExists('confirmModalTitleText', {
+      timeout: 2000,
+    });
+    if (confirmation) {
+      await this.common.clickConfirmOnModal();
     }
+
+    await this.retry.waitFor('the dashboard to be in view mode', async () => {
+      return this.appMenu.menuItemExists('dashboardEditMode');
+    });
   }
 
   public async clickDiscardChanges(accept = true) {
@@ -741,7 +746,7 @@ export class DashboardPageObject extends FtrService {
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
       if (openInEditMode) {
-        await this.listingTable.clickActionButton('edit-action');
+        await this.listingTable.clickRowActionButton('edit-action', dashboardName);
       } else {
         await this.listingTable.clickItemLink('dashboard', dashboardName);
       }
@@ -749,6 +754,9 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+
+    // The check above also passes for the wrong dashboard; confirm which one opened.
+    await this.expectOnDashboard(dashboardName);
   }
 
   public async loadSavedDashboard(dashboardName: string) {
