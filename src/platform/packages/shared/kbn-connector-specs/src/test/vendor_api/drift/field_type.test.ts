@@ -152,6 +152,23 @@ describe('fieldTypeOf', () => {
     expect(fieldTypeOf(parameter('mode'), { current })).toBe('string | null');
   });
 
+  it("takes the operation's parameter over the one of its path", () => {
+    const overridden = documentOf();
+    Object.assign(overridden.paths['/files/{key}'], {
+      parameters: [{ name: 'limit', in: 'query', schema: { type: 'string' } }],
+    });
+
+    expect(
+      fieldTypeOf(
+        change(
+          'request-parameter-became-nullable',
+          'the `query` request parameter `limit` became nullable'
+        ),
+        { current: overridden }
+      )
+    ).toBe('integer');
+  });
+
   it('gives the type a field had before when it was there before', () => {
     const committed = documentOf({ properties: { tags: { type: 'string' } } });
     const retyped = change(
@@ -194,6 +211,18 @@ describe('fieldTypeOf', () => {
         { current }
       )
     ).toBe('object');
+  });
+
+  it('takes the status from where the text names it, not from a value that looks like one', () => {
+    expect(
+      fieldTypeOf(
+        change(
+          'response-property-enum-value-added',
+          'added the new `default` enum value to the `mode` response property for the response status `200`'
+        ),
+        { current: documentOf({ properties: { mode: { type: 'string', enum: ['a', 'default'] } } }) }
+      )
+    ).toBe('a | default');
   });
 
   it.each([

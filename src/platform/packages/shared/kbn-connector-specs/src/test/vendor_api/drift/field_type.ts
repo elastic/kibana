@@ -204,7 +204,15 @@ const responseOf = (responses: unknown, text: string): unknown => {
   if (!isRecord(responses)) {
     return undefined;
   }
-  const named = quoted(text).find((name) => STATUS.test(name));
+  // The status is named after "status" or before it; a value or field of that form may come first.
+  const phrase = /status `([^`]+)`|`([^`]+)` status/.exec(text);
+  const said = phrase?.[1] ?? phrase?.[2];
+  const named =
+    said !== undefined && STATUS.test(said)
+      ? said
+      : quoted(text)
+          .filter((name) => STATUS.test(name))
+          .pop();
   if (named !== undefined) {
     return responses[named];
   }
@@ -250,9 +258,10 @@ const typeIn = ({ id, text, operation }: SpecChange, document: unknown): string 
     if (at < 0 || names[at + 1] === undefined) {
       return undefined;
     }
+    // The operation's own parameters override those of its path.
     const parameters = [
-      ...(isRecord(pathItem) && Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
       ...(Array.isArray(spec.parameters) ? spec.parameters : []),
+      ...(isRecord(pathItem) && Array.isArray(pathItem.parameters) ? pathItem.parameters : []),
     ].map((parameter) => deref(document, parameter));
     const found = parameters.find(
       (parameter) =>
