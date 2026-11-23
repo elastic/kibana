@@ -16,6 +16,36 @@ const check = (query: string, errors: string[] = []) =>
 
 describe('FILLNULL validation', () => {
   describe('unmapped targets', () => {
+    it.each(['load', 'nullify'])('accepts a field retained by KEEP under %s', async (strategy) => {
+      const { validate: validateQuery } = await setup();
+      const { errors, warnings } = await validateQuery(
+        `SET unmapped_fields="${strategy}"; FROM index | KEEP custom.field | FILLNULL "n/a" ON custom.field`
+      );
+      expect(errors).toEqual([]);
+      expect(warnings).toHaveLength(2);
+      expect(warnings).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            text: expect.stringContaining('"custom.field" column isn\'t mapped'),
+          }),
+        ])
+      );
+    });
+
+    it.each([
+      'KEEP custom.field | FILLNULL "n/a" ON another.field',
+      'KEEP custom.field, keywordField | DROP custom.field | FILLNULL "n/a" ON custom.field',
+    ])('still rejects a field absent from the input after %s', async (pipeline) => {
+      const { validate: validateQuery } = await setup();
+      const { errors } = await validateQuery(
+        `SET unmapped_fields="load"; FROM index | ${pipeline}`
+      );
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toEqual(
+        expect.objectContaining({ text: expect.stringContaining('Unknown column') })
+      );
+    });
+
     it.each(['load', 'load_all', 'nullify'])(
       'rejects an unmatched pattern under %s',
       async (strategy) => {

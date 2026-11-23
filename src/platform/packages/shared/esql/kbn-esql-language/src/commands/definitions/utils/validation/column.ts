@@ -42,8 +42,10 @@ export class ColumnValidator {
   ) {}
 
   validate(): ESQLMessage[] {
-    if (!this.exists || this.isPreviouslyUsedUnmappedColumn) {
-      if (this.isUnmappedColumnAllowed) {
+    const exists = this.exists;
+    if (!exists || this.isPreviouslyUsedUnmappedColumn) {
+      // KEEP disables loading new fields, but already loaded input columns remain valid.
+      if (exists || this.isUnmappedColumnAllowed) {
         return [errors.unmappedColumnWarning(this.column)];
       } else {
         return [errors.unknownColumn(this.column)];
