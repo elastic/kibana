@@ -10,12 +10,17 @@
 const GCS_ORIGIN = 'https://storage.googleapis.com';
 const ES_CLOUD_IMAGE_REPOSITORY = 'docker.elastic.co/kibana-ci/elasticsearch-cloud-ess';
 const DOCKER_TAG_PATTERN = /^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/;
+const SAFE_FILENAME_PATTERN = /^[\w-][\w.-]*$/;
 
 export function isAllowedArchiveUrl(url: string, bucket: string): boolean {
   if (isAllowedCloudImageRef(url)) {
     return true;
   }
   return isAllowedGcsObjectUrl(url, bucket);
+}
+
+export function isSafeArchiveFilename(filename: string): boolean {
+  return SAFE_FILENAME_PATTERN.test(filename);
 }
 
 export function isAllowedGcsObjectUrl(url: string, bucket: string): boolean {

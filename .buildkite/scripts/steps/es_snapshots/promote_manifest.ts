@@ -9,7 +9,11 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import { isAllowedArchiveUrl, isAllowedGcsObjectUrl } from './archive_url.ts';
+import {
+  isAllowedArchiveUrl,
+  isAllowedGcsObjectUrl,
+  isSafeArchiveFilename,
+} from './archive_url.ts';
 import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
 
 const ALLOWED_MANIFEST_URL_PREFIX = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
@@ -63,9 +67,12 @@ function getExpectedSnapshotBucket(version: string, id: string) {
     if (!ES_BRANCH_PATTERN.test(branch)) {
       throw Error(`Invalid branch: ${branch}`);
     }
-    for (const { url } of archives) {
+    for (const { url, filename } of archives) {
       if (!isAllowedArchiveUrl(url, bucket)) {
         throw Error(`Unexpected archive url: ${url}`);
+      }
+      if (!isSafeArchiveFilename(filename)) {
+        throw Error(`Unsafe archive filename: ${filename}`);
       }
     }
 

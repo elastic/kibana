@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAllowedArchiveUrl, isAllowedGcsObjectUrl } from './archive_url.ts';
+import {
+  isAllowedArchiveUrl,
+  isAllowedGcsObjectUrl,
+  isSafeArchiveFilename,
+} from './archive_url.ts';
 
 const BUCKET = 'kibana-ci-es-snapshots-daily/9.6.0/archives/20260930-022144_09876e4a';
 const OBJECT_URL = `https://storage.googleapis.com/${BUCKET}/elasticsearch-9.6.0-SNAPSHOT-linux-x86_64.tar.gz`;
@@ -73,4 +77,17 @@ describe('isAllowedGcsObjectUrl', () => {
     ).toBe(false);
     expect(isAllowedGcsObjectUrl(OBJECT_URL, `${BUCKET}/../../other-bucket`)).toBe(false);
   });
+});
+
+describe('isSafeArchiveFilename', () => {
+  it('allows a plain archive filename', () => {
+    expect(isSafeArchiveFilename('elasticsearch-9.6.0-SNAPSHOT-linux-x86_64.tar.gz')).toBe(true);
+  });
+
+  it.each(['../../.zshrc', '/etc/passwd', '..', '.', 'sub/dir.tar.gz', '..\\evil.tar.gz', ''])(
+    'rejects %s',
+    (filename) => {
+      expect(isSafeArchiveFilename(filename)).toBe(false);
+    }
+  );
 });
