@@ -13,6 +13,7 @@ import {
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
   STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENTITY_ATTACHMENT_TYPE,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesRt,
@@ -88,6 +89,7 @@ export const UnifiedAttachmentRt = rt.intersection([
     version: rt.string,
   }),
 ]);
+export const UnifiedAttachmentsRt = rt.array(UnifiedAttachmentRt);
 
 /**
  * Partial payload props for patch (reference and value). We define these explicitly because
@@ -134,6 +136,7 @@ const UnifiedDocumentAttachmentAttributesRt = rt.intersection([
       rt.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
       rt.literal(STACK_ALERT_ATTACHMENT_TYPE),
       rt.literal(SECURITY_ENTITY_ATTACHMENT_TYPE),
+      rt.literal(SECURITY_ATTACK_ATTACHMENT_TYPE),
     ]),
     attachmentId: rt.union([rt.string, rt.array(rt.string)]),
     owner: rt.string,
@@ -166,6 +169,7 @@ export const DocumentAttachmentAttributesRtV2 = rt.union([
   UnifiedDocumentAttachmentAttributesRt,
 ]);
 export type DocumentAttachmentAttributesV2 = rt.TypeOf<typeof DocumentAttachmentAttributesRtV2>;
+export type UnifiedAttachments = rt.TypeOf<typeof UnifiedAttachmentsRt>;
 
 /**
  * Combined v1 legacy and v2 unified attachment types

@@ -78,11 +78,12 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
-      for (const conversationId of conversationIds) {
-        await asAdmin.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
-        );
-      }
+      // Concurrent deletes share a single index refresh cycle; serially they add up to ~5s each.
+      await Promise.all(
+        [...conversationIds].map((conversationId) =>
+          asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`)
+        )
+      );
 
       await callbackServer.stop();
       llmProxy.close();

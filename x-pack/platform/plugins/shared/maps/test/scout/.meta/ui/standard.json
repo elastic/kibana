@@ -1,5 +1,5 @@
 {
-  "sha1": "eaadc42c2158de123411fd5bd442e34390e1a216",
+  "sha1": "f4a5e2b3cdd32be7303f8e8d05254a07ddfc4235",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 15,
+        "line": 14,
         "column": 11
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/add_to_dashboard.spec.ts",
-        "line": 24,
+        "line": 23,
         "column": 17
       }
     },
@@ -386,7 +386,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/full_screen_mode.spec.ts",
         "line": 18,
-        "column": 43
+        "column": 41
       }
     },
     {
@@ -465,6 +465,19 @@
         "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/lens_choropleth_chart.spec.ts",
         "line": 44,
         "column": 80
+      }
+    },
+    {
+      "id": "b27cbcb714f00fb-8c915524ac2618a",
+      "title": "Maps managed content requires a copy when saving a managed map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maps/test/scout/ui/tests/managed_content.spec.ts",
+        "line": 27,
+        "column": 28
       }
     },
     {

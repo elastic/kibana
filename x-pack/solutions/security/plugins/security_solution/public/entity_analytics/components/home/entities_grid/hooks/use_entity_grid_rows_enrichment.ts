@@ -114,7 +114,18 @@ const fetchEnrichedChunk = (
   return fetchEnrichedRows(
     chunk,
     buildQueryArgs(ready, options),
-    { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
+    {
+      runQuery: createEsqlRunner(
+        context.searchService,
+        {
+          id: 'entities_grid_enrich',
+          meta: { rowsMode: options.rowsMode, timeRange: options.timeRange },
+        },
+        signal
+      ),
+      http: context.http,
+      signal,
+    },
     getPageEnrichers(options.rowsMode, options.columnIds)
   );
 };
@@ -240,5 +251,8 @@ export const useEntityGridRowsEnrichment = (
     isFetching: enrichQueries.some((q) => q.isFetching),
     dataUpdatedAt: Math.max(0, ...enrichQueries.map((q) => q.dataUpdatedAt)),
     error: enrichQueries.find((q) => q.error)?.error,
+    // For the load telemetry: whether the rows asked for so far have their computed columns.
+    hasEnrichedRows: enrichQueries.some(({ data, error }) => data != null || error != null),
+    hasFailedColumns: enrichQueries.some(({ data }) => !!data?.errors.length),
   };
 };

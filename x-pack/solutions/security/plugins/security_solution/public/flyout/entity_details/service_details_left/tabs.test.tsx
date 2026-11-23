@@ -62,4 +62,27 @@ describe('service_details_left useTabs', () => {
       expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
     ]);
   });
+
+  it('includes the Insights tab after Risk inputs when there are non-closed alerts', () => {
+    const { result } = renderHook(
+      () => useTabs('my-service', 'scope-1', 'stored-service-entity-1', true),
+      { wrapper: TestProviders }
+    );
+
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.CSP_INSIGHTS }),
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.GRAPH_VIEW }),
+    ]);
+  });
+
+  it('does not include the Insights tab without non-closed alerts', () => {
+    const { result } = renderHook(() => useTabs('my-service', 'scope-1', undefined, false), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current).toEqual([
+      expect.objectContaining({ id: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+    ]);
+  });
 });

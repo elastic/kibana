@@ -66,7 +66,7 @@ describe('createNavigationTree', () => {
     expect(agentBuilderNode).toBeUndefined();
   });
 
-  it('places agent builder and context engine between Escalations and Watches when the chat experience is Agent', () => {
+  it('places agent builder between Escalations and Watches and context engine after Workflows when the chat experience is Agent', () => {
     const { body } = createNavigationTree(
       createServices(),
       AIChatExperience.Agent,
@@ -77,8 +77,9 @@ describe('createNavigationTree', () => {
     const escalationsIndex = links.indexOf(alertZeroLink(SecurityPageName.alertZeroEscalations));
 
     expect(links[escalationsIndex + 1]).toBe('agent_builder');
-    expect(links[escalationsIndex + 2]).toBe('context_engine');
-    expect(links[escalationsIndex + 3]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
+    expect(links[escalationsIndex + 2]).toBe(alertZeroLink(SecurityPageName.alertZeroWatches));
+    expect(links.indexOf('context_engine')).toBeGreaterThan(links.indexOf('discover'));
+    expect(body[links.indexOf('context_engine') + 1].id).toBe(SecurityPageName.attackDiscovery);
   });
 
   describe('when AlertZero is disabled', () => {

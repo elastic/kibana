@@ -12,6 +12,7 @@ import { parse } from 'yaml';
 import {
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW,
   ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
+  ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE,
 } from '.';
 import { getManagedWorkflowDefinition, managedWorkflowDefinitions } from '../..';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -178,12 +179,19 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
-    // A true-positive or inconclusive review retires its alerts with this tag, so
-    // correlating them again would only persist a near-duplicate attack.
-    it('excludes alerts the review tagged az:ad_correlated', () => {
+    // A true-positive or inconclusive review retires its alerts with
+    // `az:ad_correlated`, and a false positive retires them with `az:ad_fp_chain`.
+    // Correlating either again would only persist a near-duplicate attack.
+    it('excludes alerts tagged az:ad_correlated or az:ad_fp_chain', () => {
       expect(retrieve().with?.filter).toEqual({
         bool: {
-          must_not: [{ terms: { 'kibana.alert.workflow_tags': ['az:ad_correlated'] } }],
+          must_not: [
+            {
+              terms: {
+                'kibana.alert.workflow_tags': ['az:ad_correlated', 'az:ad_fp_chain'],
+              },
+            },
+          ],
         },
       });
     });
@@ -279,6 +287,14 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
     it('has each batch retrieve its own alerts rather than take pre-built alert strings', () => {
       expect(fanOut().steps?.[0].with?.alert_retrieval_mode).toBe('esql');
       expect(fanOut().steps?.[0].with).not.toHaveProperty('alerts');
+    });
+
+    // The YAML cannot import the constant, so this is what keeps the two equal and
+    // stops a deleted key from leaving the Worker deduplicating against manual runs.
+    it('passes the Worker generation source to the run step', () => {
+      expect(fanOut().steps?.[0].with?.generation_source).toBe(
+        ALERTZERO_ATTACK_DISCOVERY_WORKER_GENERATION_SOURCE
+      );
     });
 
     // The offsets and the per-branch slice are a matched pair — an off-by-one

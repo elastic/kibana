@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyServices: string;
     readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
@@ -412,10 +413,19 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly overview: string;
+      readonly setUp: string;
+      readonly proposedActions: string;
+      readonly escalations: string;
+      readonly watches: string;
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;
     readonly kueryQuerySyntax: string;
+    readonly kueryQueryNestedFields: string;
     readonly luceneQuery: string;
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
@@ -817,6 +827,7 @@ export interface DocLinks {
     readonly limitationsKnownIssues: string;
     readonly learnMore: string;
     readonly aiAssistant: string;
+    readonly replaceKnowledgeBaseContent: string;
   };
   readonly applicationConnections: {
     readonly oauthClients: string;

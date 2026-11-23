@@ -237,6 +237,15 @@ kibana_vars=(
     xpack.actions.email.services.enabled
     xpack.actions.enableFooterInEmail
     xpack.actions.enabledActionTypes
+    xpack.actions.inboundEvents.admission.enabled
+    xpack.actions.inboundEvents.admission.maxInFlight
+    xpack.actions.inboundEvents.admission.maxInFlightPerConnector
+    xpack.actions.inboundEvents.rateLimit.connector.limit
+    xpack.actions.inboundEvents.rateLimit.connector.window
+    xpack.actions.inboundEvents.rateLimit.enabled
+    xpack.actions.inboundEvents.rateLimit.maxKeys
+    xpack.actions.inboundEvents.rateLimit.remoteAddress.limit
+    xpack.actions.inboundEvents.rateLimit.remoteAddress.window
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
     xpack.actions.preconfiguredAlertHistoryEsIndex

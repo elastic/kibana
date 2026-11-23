@@ -6,6 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
+import { cloneDeep } from 'lodash';
 import { isExternalUiamCredential } from '@kbn/core-security-server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
@@ -33,6 +34,7 @@ import type {
   RawRuleLastRun,
   RawRuleMonitoring,
   RuleExecutionStatus,
+  RuleTaskState,
   RuleTypeRegistry,
 } from '../types';
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
@@ -90,6 +92,7 @@ import {
 } from '../lib/error_with_type';
 import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
 import { ALERT_STATUS_CHANGED_EVENT_TYPE } from '../lib/workflow_extensions/events';
+import { translations } from '../constants/translations';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -163,6 +166,7 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null;
+  private persistedAlertsState: RuleTaskState | null = null;
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
@@ -478,6 +482,32 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    // Saved as task state if a later step fails, so it matches the alert documents written above.
+    // Copied before actions are scheduled, so alerts whose actions fail to enqueue notify again.
+    // Copied after scoped maintenance windows are added to new alerts, which only happens in the
+    // run that creates them, so the next run still suppresses their actions.
+    // Recovered alerts keep their previous entry, so the next run recovers them again.
+    // The rest of the state, such as the rule type state, stays at the previous run, so the next
+    // run evaluates the same data again instead of skipping the data of this run.
+    if (this.ruleType.autoRecoverAlerts && this.shouldLogAndScheduleActionsForAlerts()) {
+      const { rawActiveAlerts, rawRecoveredAlerts } =
+        alertsClient.getRawAlertInstancesForState(true);
+      const alertInstances = { ...rawActiveAlerts };
+      const alertRecoveredInstances = { ...rawRecoveredAlerts };
+      for (const id of Object.keys(alertsClient.getProcessedAlerts('recovered'))) {
+        const previousAlertInstance = alertsClient.getRawTrackedActiveAlert(id);
+        if (previousAlertInstance) {
+          alertInstances[id] = previousAlertInstance;
+          delete alertRecoveredInstances[id];
+        }
+      }
+      this.persistedAlertsState = cloneDeep({
+        ...this.taskInstance.state,
+        alertInstances,
+        alertRecoveredInstances,
+      });
+    }
+
     const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
     for (const instance of activeInstances) {
       if (!instance.conditions?.length) {
@@ -596,10 +626,19 @@ export class TaskRunner<
     if (this.shouldLogAndScheduleActionsForAlerts()) {
       await withAlertingSpan('alerting:update-alerts', () =>
         this.timer.runWithTimer(TaskRunnerTimerSpan.UpdateAlerts, async () => {
-          await alertsClient.updatePersistedAlerts({
-            alertsToUpdateWithLastScheduledActions,
-            alertsToUpdateWithMaintenanceWindows,
-          });
+          // The alerts are written and their actions enqueued, so this update must not fail the run.
+          try {
+            await alertsClient.updatePersistedAlerts({
+              alertsToUpdateWithLastScheduledActions,
+              alertsToUpdateWithMaintenanceWindows,
+            });
+          } catch (err) {
+            this.ruleResult
+              .getLastRunSetters()
+              .addLastRunWarning(
+                translations.taskRunner.warning.updatePersistedAlerts(err.message)
+              );
+          }
         })
       );
     } else {
@@ -986,6 +1025,7 @@ export class TaskRunner<
 
   async run(): Promise<RuleTaskRunResult> {
     this.runDate = new Date();
+    this.persistedAlertsState = null;
     const {
       params: { alertId: ruleId, spaceId },
       startedAt,
@@ -1036,6 +1076,8 @@ export class TaskRunner<
     // Events follow persisted state, the same as actions do.
     // - If the rule type throws, the run result is an error and nothing is published. The state
     //   falls back to the previous run, so the next run classifies those alerts again.
+    // - If the run fails after the alerts were persisted, the state keeps them, so the events of
+    //   that run are dropped (at most once).
     // - If the rule type only records an error (addLastRunError) and finishes, the new alert
     //   state is persisted and its actions are scheduled, so the events are published too.
     //   Holding them back would lose them, because the next run sees those alerts as ongoing.
@@ -1063,6 +1105,7 @@ export class TaskRunner<
         logger: this.logger,
         stackTraceLog: this.stackTraceLog,
         originalState,
+        persistedAlertsState: this.persistedAlertsState,
       }),
       schedule: getSchedule({
         schedule,

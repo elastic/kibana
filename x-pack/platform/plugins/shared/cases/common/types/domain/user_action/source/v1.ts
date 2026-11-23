@@ -45,6 +45,25 @@ export const ActionSourceRt = rt.intersection([
 
 export type ActionSource = rt.TypeOf<typeof ActionSourceRt>;
 
+/**
+ * Read-side shape. `type` accepts any string so documents written by a newer
+ * version with an unknown source type still decode instead of failing the feed.
+ */
+export const PersistedActionSourceRt = rt.intersection([
+  rt.strict({
+    type: rt.string,
+    id: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      name: rt.string,
+      run_id: rt.string,
+    })
+  ),
+]);
+
+export type PersistedActionSource = rt.TypeOf<typeof PersistedActionSourceRt>;
+
 export const isActionSource = (value: unknown): value is ActionSource => {
   if (!isPlainObject(value)) {
     return false;

@@ -142,6 +142,64 @@ describe('entity risk score V2 calculation route', () => {
     expect(response.status).toEqual(200);
   });
 
+  it.each([true, false])(
+    'passes configured profiling to each scoring stage (enabled: %s)',
+    async (profile) => {
+      const config = configMock.withExperimentalFeature(
+        clients.config,
+        'entityAnalyticsEntityStoreV2'
+      );
+      context.securitySolution.getConfig.mockReturnValue({
+        ...config,
+        entityAnalytics: {
+          ...config.entityAnalytics,
+          riskEngine: {
+            ...config.entityAnalytics.riskEngine,
+            esqlProfiling: profile,
+            esqlProfilingInterval: 3,
+          },
+        },
+      });
+      const sampled: boolean[] = [];
+      jest.mocked(scoreBaseEntities).mockImplementationOnce(async ({ pageTimings }) => {
+        [1, 2, 3, 4].forEach(() => {
+          pageTimings.startPage();
+          sampled.push(pageTimings.shouldProfile());
+        });
+        return {
+          scores: {},
+          scoresCalculated: 0,
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+          pagesProcessed: 0,
+          scoresDroppedNotInStore: 0,
+          scoresMissingFromStore: 0,
+          entitiesCreated: 0,
+          entityCreationsSkipped: 0,
+          entityCreationsFailed: 0,
+        };
+      });
+      jest.mocked(runResolutionScoringStep).mockImplementationOnce(async ({ pageTimings }) => {
+        pageTimings.startPage();
+        sampled.push(pageTimings.shouldProfile());
+        return {
+          scores: {},
+          scoresWrittenRiskIndex: 0,
+          scoresWrittenEntityStore: 0,
+          scoresFailed: 0,
+          pagesProcessed: 0,
+        };
+      });
+      const response = await server.inject(
+        buildRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(200);
+      expect(sampled).toEqual([profile, false, false, profile, profile]);
+    }
+  );
+
   it('only checks the index privileges the calculation needs, not cluster privileges', async () => {
     const security = riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess();
     getStartServicesMock.mockResolvedValue([{}, { security }]);

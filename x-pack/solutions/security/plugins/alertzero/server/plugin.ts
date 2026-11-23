@@ -176,6 +176,7 @@ export class AlertZeroPlugin
       proposals,
       agenticInvestigations,
       contextEngine,
+      cps,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -234,8 +235,8 @@ export class AlertZeroPlugin
       });
       agentBuilder.skills.register(createActionDiscoverySkill(assertAlertZeroAccess));
       // `ai.conversation.updated` is opt-in, so Agent Builder only emits it where a consumer
-      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and Classic
-      // spaces, stay quiet.
+      // subscribes. Scoped per space, like the routes, so spaces without AlertZero, and spaces
+      // with a solution view other than Security or Classic, stay quiet.
       agentBuilder.conversations.enableUpdatedTrigger({
         templateIds: [TEMPLATE_ID_INVESTIGATION, TEMPLATE_ID_ESCALATION],
         isEnabled: async (request) => {
@@ -324,6 +325,8 @@ export class AlertZeroPlugin
       router,
       logger: this.logger,
       getSpaceId: (request) => this.getSpaceId(request),
+      getClusterClient: () => this.requireCoreStart().elasticsearch.client,
+      isCpsEnabled: () => cps?.getCpsEnabled() ?? false,
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
       getConversationProposalsService: () => this.requireConversationProposalsService(),

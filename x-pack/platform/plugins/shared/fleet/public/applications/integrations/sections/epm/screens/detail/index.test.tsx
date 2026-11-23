@@ -425,16 +425,20 @@ describe('When on integration detail', () => {
       });
 
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
     afterEach(() => {
       // @ts-ignore
       lazyComponentWasRendered = undefined;
     });
 
-    it('should display "custom" tab in navigation', () => {
-      expect(renderResult.getByTestId('tab-custom'));
-    });
+    it(
+      'should display "custom" tab in navigation',
+      async () => {
+        expect(await renderResult.findByTestId('tab-custom')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
     it('should display custom content when tab is clicked', async () => {
       act(() => {
@@ -564,6 +568,60 @@ describe('When on integration detail', () => {
     );
   });
 
+  describe('and the package is listed as FIPS incompatible', () => {
+    const renderConnectors = async ({ isFipsEnabled }: { isFipsEnabled: boolean }) => {
+      const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+        ...baseResponse,
+        item: {
+          ...baseResponse.item,
+          name: 'elastic_connectors',
+          // no fips_compatible flag, like the published package
+          policy_templates: baseResponse.item.policy_templates?.map(
+            ({ fips_compatible: _unused, ...template }) => template
+          ),
+        },
+      });
+      mockedApi.responseProvider.fleetSetup.mockReturnValue({
+        isReady: true,
+        missing_requirements: [],
+        missing_optional_features: [],
+        is_fips_enabled: isFipsEnabled,
+      });
+      await render();
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+      await act(() => mockedApi.waitForApi());
+    };
+
+    it(
+      'should show the warning callout and disable the Add integration button when FIPS is enabled',
+      async () => {
+        await renderConnectors({ isFipsEnabled: true });
+
+        expect(await renderResult.findByTestId('fipsIncompatibleCallout')).toBeInTheDocument();
+        expect(
+          renderResult.getByText('This integration is not FIPS compliant')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('addIntegrationPolicyButton')).toBeDisabled();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show the warning callout when FIPS is not enabled',
+      async () => {
+        await renderConnectors({ isFipsEnabled: false });
+
+        await renderResult.findByTestId('tab-settings');
+        expect(renderResult.queryByTestId('fipsIncompatibleCallout')).toBeNull();
+        expect(renderResult.getByTestId('addIntegrationPolicyButton')).not.toBeDisabled();
+      },
+      TESTS_TIMEOUT
+    );
+  });
+
   describe('and the Add integration button is clicked', () => {
     beforeEach(async () => {
       await render();
@@ -662,22 +720,28 @@ describe('When on integration detail', () => {
     beforeEach(async () => {
       testRenderer.mountHistory.push(policiesTabURLPath);
       await render();
-    });
+    }, TESTS_TIMEOUT);
 
-    it('should display policies list', () => {
-      const table = renderResult.getByTestId('integrationPolicyTable');
-      expect(table).not.toBeNull();
-    });
+    it(
+      'should display policies list',
+      async () => {
+        expect(await renderResult.findByTestId('integrationPolicyTable')).not.toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
 
-    it('should link to integration policy detail when an integration policy is clicked', async () => {
-      await mockedApi.waitForApi();
-      const firstPolicy = renderResult.getAllByTestId(
-        'integrationNameLink'
-      )[0] as HTMLAnchorElement;
-      expect(firstPolicy.href).toEqual(
-        'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
-      );
-    });
+    it(
+      'should link to integration policy detail when an integration policy is clicked',
+      async () => {
+        const [firstPolicy] = (await renderResult.findAllByTestId(
+          'integrationNameLink'
+        )) as HTMLAnchorElement[];
+        expect(firstPolicy.href).toEqual(
+          'http://localhost/mock/app/integrations/edit-integration/e8a37031-2907-44f6-89d2-98bd493f60dc'
+        );
+      },
+      TESTS_TIMEOUT
+    );
   });
 });
 

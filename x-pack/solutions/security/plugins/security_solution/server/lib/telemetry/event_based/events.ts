@@ -28,6 +28,7 @@ import type {
   HealthDiagnosticQueryStats,
 } from '../diagnostic/health_diagnostic_service.types';
 
+import { RISK_SCORE_PERFORMANCE_EVENT } from '../../entity_analytics/risk_score/maintainer/instrumentation/events';
 import { ENTITY_ANALYTICS_EVENTS } from './events/entity_analytics';
 import { SIEM_MIGRATIONS_EVENTS } from './events/siem_migrations';
 import type {
@@ -2707,6 +2708,7 @@ export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
+  RISK_SCORE_PERFORMANCE_EVENT,
   RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
   RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,

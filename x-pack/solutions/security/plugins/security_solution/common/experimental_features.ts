@@ -404,7 +404,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
    */
-  siemRuleMigrationsAgentBuilderEnabled: false,
+  siemRuleMigrationsAgentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

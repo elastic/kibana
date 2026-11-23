@@ -22,10 +22,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
-import {
-  UNIFIED_ALERT_TYPES_ARRAY,
-  isAlertAttachmentType,
-} from '../../../common/utils/attachments';
+import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 import {
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
@@ -91,34 +88,6 @@ import {
 } from './operations/utils';
 
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
-
-/**
- * Ensures alert attachments include a rule name
- */
-function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
-  const type = attributes?.type;
-  if (!isAlertAttachmentType(type as string)) {
-    return;
-  }
-
-  if (type === AttachmentType.alert || type === 'alert') {
-    const rule = attributes.rule as { name?: unknown } | null | undefined;
-    if (rule == null || rule.name == null) {
-      throw Boom.badRequest(
-        'Invalid attributes: expected attributes.rule.name for alert attachments'
-      );
-    }
-    return;
-  }
-
-  const metadata = attributes.metadata as { rule?: { name?: unknown } } | null | undefined;
-  const rule = metadata?.rule;
-  if (rule == null || rule.name == null) {
-    throw Boom.badRequest(
-      'Invalid attributes: expected attributes.metadata.rule.name for unified alert attachments'
-    );
-  }
-}
 
 /**
  * Unified attachment shape fields that must NOT appear on the legacy
@@ -665,7 +634,6 @@ export class AttachmentService {
       }
 
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
-      assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
         getAttachmentTypeFromAttributes(decodedAttributes),
         decodedAttributes.owner ?? ''
@@ -736,7 +704,6 @@ export class AttachmentService {
         res
       );
 
-      assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
       const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
         transformedAttachment.attributes
       );
@@ -802,7 +769,6 @@ export class AttachmentService {
             },
           });
         } else {
-          assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
           // Skip when `requestWithoutType` is set: the patch carries no `type`
           // to resolve, and only the typed path can introduce a unified-only type.
           if (!requestWithoutType) {
@@ -958,9 +924,6 @@ export class AttachmentService {
           attachment
         );
 
-        assertAlertAttachmentHasRuleName(
-          transformedAttachment.attributes as Record<string, unknown>
-        );
         const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
           transformedAttachment.attributes
         );

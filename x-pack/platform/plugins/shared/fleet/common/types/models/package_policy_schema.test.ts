@@ -26,12 +26,24 @@ describe('SimplifiedVarsSchema', () => {
     expect(typeof result.myVar).toBe('boolean');
   });
 
-  it('should reject oversized string values', () => {
-    expect(() => SimplifiedVarsSchema.validate({ myVar: 'a'.repeat(10001) })).toThrow();
+  it('should accept string values longer than 10,000 characters', () => {
+    const value = 'a'.repeat(26500);
+    expect(SimplifiedVarsSchema.validate({ myVar: value }).myVar).toBe(value);
   });
 
-  it('should reject oversized string values inside arrays', () => {
-    expect(() => SimplifiedVarsSchema.validate({ myVar: ['a'.repeat(10001)] })).toThrow();
+  it('should accept string values longer than 10,000 characters inside arrays', () => {
+    const value = 'a'.repeat(26500);
+    expect(SimplifiedVarsSchema.validate({ myVar: [value] }).myVar).toEqual([value]);
+  });
+
+  it('should still reject oversized variable names', () => {
+    expect(() => SimplifiedVarsSchema.validate({ ['a'.repeat(1025)]: 'value' })).toThrow();
+  });
+
+  it('should still reject oversized secret reference ids', () => {
+    expect(() =>
+      SimplifiedVarsSchema.validate({ myVar: { id: 'a'.repeat(256), isSecretRef: true } })
+    ).toThrow();
   });
 });
 

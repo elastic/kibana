@@ -341,7 +341,13 @@ export class SecurityPlugin
       getServiceAccounts: () => this.serviceAccountsStart ?? null,
     });
 
-    registerSecurityUsageCollector({ usageCollection, config, license });
+    registerSecurityUsageCollector({
+      usageCollection,
+      config,
+      license,
+      logger: this.logger.get('usage'),
+      getServiceAccounts: () => this.serviceAccountsStart,
+    });
 
     const getCurrentUser = (request: KibanaRequest) =>
       this.getAuthentication().getCurrentUser(request);
@@ -574,6 +580,7 @@ export class SecurityPlugin
       getCurrentUser: this.authenticationStart.getCurrentUser,
       getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
+      getUserProfiles: (uids) => this.getUserProfileService().bulkGet({ uids }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       workloadTypes: this.getWorkloadTypes(),
     });

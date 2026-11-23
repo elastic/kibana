@@ -10,6 +10,7 @@ import moment from 'moment';
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { InferenceSetupDependencies } from './types';
 import {
   createInferenceStreamingResolver,
@@ -17,6 +18,14 @@ import {
   resolveOnFailureMode,
   resolveReplacementsEncryptionKey,
 } from './plugin';
+import { createClient } from './inference_client';
+
+jest.mock('./inference_client', () => ({
+  ...jest.requireActual('./inference_client'),
+  createClient: jest.fn(),
+}));
+
+const createClientMock = jest.mocked(createClient);
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -147,30 +156,34 @@ describe('createInferenceStreamingResolver', () => {
   });
 });
 
+const createPlugin = (workersEnabled: boolean) =>
+  new InferencePlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      workers: {
+        anonymization: {
+          enabled: workersEnabled,
+          minThreads: 0,
+          maxThreads: 3,
+          maxQueue: 20,
+          idleTimeout: moment.duration(30, 'seconds'),
+          taskTimeout: moment.duration(15, 'seconds'),
+        },
+      },
+    })
+  );
+
+const setupDependencies = { actions: {} } as unknown as InferenceSetupDependencies;
+
 describe('InferencePlugin.setup', () => {
   const setupPlugin = (
     workersEnabled: boolean,
     plugins: Partial<InferenceSetupDependencies> = {}
   ) => {
-    const plugin = new InferencePlugin(
-      coreMock.createPluginInitializerContext({
-        enabled: true,
-        workers: {
-          anonymization: {
-            enabled: workersEnabled,
-            minThreads: 0,
-            maxThreads: 3,
-            maxQueue: 20,
-            idleTimeout: moment.duration(30, 'seconds'),
-            taskTimeout: moment.duration(15, 'seconds'),
-          },
-        },
-      })
-    );
-    return plugin.setup(coreMock.createSetup(), {
-      actions: {},
+    return createPlugin(workersEnabled).setup(coreMock.createSetup(), {
+      ...setupDependencies,
       ...plugins,
-    } as unknown as InferenceSetupDependencies);
+    });
   };
 
   for (const workersEnabled of [true, false]) {
@@ -186,5 +199,49 @@ describe('InferencePlugin.setup', () => {
 
   it('does not require the anonymization settings plugin', () => {
     expect(() => setupPlugin(true)).not.toThrow();
+  });
+});
+
+describe('InferencePlugin.start getClient', () => {
+  const request = httpServerMock.createKibanaRequest();
+
+  const getClientOptions = async (coreStart = coreMock.createStart()) => {
+    const plugin = createPlugin(false);
+    plugin.setup(coreMock.createSetup(), setupDependencies);
+    plugin.start(coreStart, { actions: actionsMock.createStart() }).getClient({ request });
+    await plugin.stop();
+    expect(createClientMock).toHaveBeenCalledTimes(1);
+    return createClientMock.mock.calls[0][0];
+  };
+
+  afterEach(() => {
+    createClientMock.mockReset();
+  });
+
+  describe('when the anonymization settings cannot be read', () => {
+    const settingsError = new Error('unable to authenticate with provided credentials');
+
+    const createCoreStartWithFailingSettings = () => {
+      const coreStart = coreMock.createStart();
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+        coreStart.savedObjects.getScopedClient(request)
+      );
+      jest.mocked(uiSettingsClient.get).mockRejectedValue(settingsError);
+      return coreStart;
+    };
+
+    it('does not leave an unhandled rejection when the client is never used', async () => {
+      await getClientOptions(createCoreStartWithFailingSettings());
+
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+
+    it('still rejects with the settings error when the anonymization rules are awaited', async () => {
+      const { anonymizationRulesPromise } = await getClientOptions(
+        createCoreStartWithFailingSettings()
+      );
+
+      await expect(anonymizationRulesPromise).rejects.toBe(settingsError);
+    });
   });
 });

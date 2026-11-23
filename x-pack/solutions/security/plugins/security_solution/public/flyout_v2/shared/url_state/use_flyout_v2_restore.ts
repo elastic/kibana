@@ -503,6 +503,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as
           | EntityType.host
           | EntityType.user
+          | EntityType.service
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,

@@ -29,6 +29,10 @@ import {
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import {
+  regenerateEntityStoreTaskApiKeys,
+  type RegenerateTaskApiKeysResult,
+} from '../../tasks/regenerate_task_api_keys';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
@@ -286,6 +290,16 @@ export class AssetManagerClient {
       });
       throw error;
     }
+  }
+
+  /** Re-grants the API key of every Entity Store task in this namespace as the requesting user. */
+  public async regenerateTaskApiKeys(request: KibanaRequest): Promise<RegenerateTaskApiKeysResult> {
+    return regenerateEntityStoreTaskApiKeys({
+      taskManager: this.taskManager,
+      logger: this.logger,
+      namespace: this.namespace,
+      request,
+    });
   }
 
   /**
@@ -595,6 +609,13 @@ export class AssetManagerClient {
         ? engine.nonPriorityLogExtractionConfig
         : undefined
     );
+  }
+
+  /** Extra source index patterns the installed engines are configured to extract from. */
+  public async getStoredAdditionalIndexPatterns(): Promise<string[]> {
+    const engines = await this.engineDescriptorClient.getAll();
+    const configs = await Promise.all(engines.map(({ type }) => this.getLogExtractionConfig(type)));
+    return [...new Set(configs.flatMap(({ additionalIndexPatterns }) => additionalIndexPatterns))];
   }
 
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {

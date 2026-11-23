@@ -7,6 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { alertsToDocuments } from '@kbn/discoveries/impl/lib/types';
 
@@ -31,6 +32,7 @@ export const invokeGenerationGraph = async ({
   savedObjectsClient,
   size,
   sourceAlerts,
+  telemetryMetadata,
 }: {
   abortSignal?: AbortSignal;
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -50,6 +52,7 @@ export const invokeGenerationGraph = async ({
   savedObjectsClient: SavedObjectsClientContract;
   size?: number;
   sourceAlerts: string[];
+  telemetryMetadata?: TelemetryMetadata;
 }) => {
   const anonymizedDocuments = alertsToDocuments(sourceAlerts);
 
@@ -75,5 +78,6 @@ export const invokeGenerationGraph = async ({
     prompts,
     replacements,
     size,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
   });
 };

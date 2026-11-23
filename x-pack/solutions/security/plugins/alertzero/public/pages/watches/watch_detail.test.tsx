@@ -97,6 +97,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
         getUrlForApp: jest.fn(() => '/app/workflows'),
         navigateToUrl: mockNavigateToUrl,
       },
+      docLinks: {
+        links: {
+          securitySolution: {
+            alertZero: { continuousThreatHunt: 'https://docs.example.com/continuous-threat-hunt' },
+          },
+        },
+      },
       overlays: { openConfirm: mockOpenConfirm },
       appParams: {
         get history() {
@@ -403,7 +410,7 @@ describe('WatchDetailPage', () => {
       within(attackDiscovery).getByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID}`
       )
-    ).toHaveTextContent('Every 24 hours');
+    ).toHaveTextContent('Runs every 24 hours');
     expect(
       within(alertTriage).queryByTestId(
         `alertZeroWorkerScheduleBadge-${SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID}`
@@ -861,8 +868,8 @@ describe('WatchDetailPage', () => {
       within(within(section).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
     ).toBeChecked();
     expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
-    expect(within(section).getAllByTestId('alertZeroAutonomyCardWho')[0]).toHaveTextContent(
-      /Runs a forensics pass for an investigation and attaches findings to it/i
+    expect(within(section).getAllByTestId('alertZeroAutonomyCardFact')[0]).toHaveTextContent(
+      /adds an attack timeline, indicators of compromise, and its rationale to the investigation/i
     );
   });
 

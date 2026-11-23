@@ -22,6 +22,7 @@ import type {
   OnPreRoutingHandler,
 } from './lifecycle';
 import type { HttpSelfUnauthorizedErrorHandler } from './self_client_unauthorized_error_handler';
+import type { HttpSelfCredentialRefresher } from './self_client_credential_refresher';
 import type { IBasePath } from './base_path';
 import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
@@ -486,6 +487,15 @@ export interface HttpServiceSetup<
    * Can only be called once, and is reserved for the security plugin.
    */
   setSelfClientUnauthorizedErrorHandler: (handler: HttpSelfUnauthorizedErrorHandler) => void;
+
+  /**
+   * Set the {@link HttpSelfCredentialRefresher | refresher} consulted before every Kibana self HTTP
+   * call, giving its owner a chance to replace a short-lived credential that would expire while
+   * the target route handler is still running.
+   *
+   * Can only be called once, and is reserved for the security plugin.
+   */
+  setSelfClientCredentialRefresher: (refresher: HttpSelfCredentialRefresher) => void;
 }
 
 /** @public */

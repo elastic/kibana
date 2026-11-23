@@ -19,6 +19,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isAwaitingDecision, PROPOSALS_UI_CAPABILITY_DECIDE } from '@kbn/proposals-common';
 import {
   useApproveProposal,
+  isDecisionShown,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
@@ -82,15 +83,16 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
   const {
-    services: { application },
+    services: { application, http },
   } = useKibana<CoreStart>();
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
   const proposalQuery = useProposal(proposalId);
   const approveMutation = useApproveProposal();
   const dismissMutation = useDismissProposal();
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposalQuery.data);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
   const { data: currentUserProfile } = useCurrentUserProfile();
 
@@ -172,6 +174,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
         onApprove={isPending || isReplaced ? handleApprove : undefined}
         secondaryActions={secondaryActions}
         onDismiss={isPending && !isReplaced ? handleDismiss : undefined}
+        basePath={http.basePath}
         data-test-subj={`proposalCard-${proposalId}`}
       />
       {isReplaced && (

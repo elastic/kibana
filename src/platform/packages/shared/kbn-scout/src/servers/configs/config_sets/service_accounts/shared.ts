@@ -27,9 +27,8 @@ export const serviceAccountsServerArgs = [
 /**
  * UIAM's shortest allowed lifetime for service account exchange tokens, so a test can outlive one
  * and check that Kibana renews it. It applies to every suite on the serverless `service_accounts`
- * config sets, Workflows included. Kibana renews a token after Elasticsearch rejects it, but not
- * after its own HTTP self client is rejected (#290877), so a workload that calls Kibana's own API
- * more than a minute after its token was issued fails here.
+ * config sets, Workflows included. Tests cover renewal after an Elasticsearch 401 and before a
+ * self HTTP call hands the credential to a handler that cannot renew it.
  */
 export const serviceAccountsUiamEphemeralTokenExpiration = 'PT1M';
 

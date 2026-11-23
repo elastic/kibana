@@ -67,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
       metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
+      troubleshootingTooManyServices: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-services`,
       troubleshootingTooManyTransactions: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions`,
     },
     canvas: {
@@ -562,10 +563,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+      alertZero: {
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
+      },
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
-      kueryQuerySyntax: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/kql`,
+      kueryQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/kql`,
+      kueryQueryNestedFields: `${ELASTIC_DOCS}reference/query-languages/kql#_querying_nested_fields`,
       luceneQuery: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query`,
       luceneQuerySyntax: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-query-string-query#query-string-syntax`,
       percolate: `${ELASTIC_DOCS}reference/query-languages/query-dsl/query-dsl-percolate-query`,
@@ -1176,6 +1186,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       limitationsKnownIssues: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/limitations-known-issues`,
       learnMore: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant`,
       aiAssistant: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-assistant`,
+      replaceKnowledgeBaseContent: `${ELASTIC_DOCS}explore-analyze/ai-features/ai-chat-experiences/ai-agent-or-ai-assistant#replace-knowledge-base-content`,
     },
     applicationConnections: {
       oauthClients: `${ELASTIC_DOCS}deploy-manage/app-connections/oauth-clients`,
