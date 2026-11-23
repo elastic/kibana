@@ -1134,6 +1134,64 @@ describe('triage match decisions step in on mode', () => {
       expect(output).toEqual(expect.objectContaining({ closed: 0, close_failures: 1 }));
     });
 
+    it('does not reopen an alert it released because an analyst moved it on, even if the analyst closed it as a false positive later', async () => {
+      const { run, closes } = setup({
+        mode: 'on',
+        movedOn: ['b'],
+        alerts: [
+          ['a', source('C:\\x.exe')],
+          ['b', source('C:\\x.exe')],
+        ],
+        decisions: approved('C:\\x.exe'),
+        revokedAfterWrite: [idOf('C:\\x.exe')],
+      });
+
+      await run();
+
+      // `b` was released when the close left it alone, so the rollback only reopens `a`.
+      expect(closes().map(({ status, signal_ids: ids }) => [status, ids])).toEqual([
+        ['closed', ['a', 'b']],
+        ['open', ['a']],
+      ]);
+    });
+
+    it('takes back from the total no more than the closes of the revoked decision, so other decisions keep theirs', async () => {
+      const [idA, idB] = [idOf('C:\\a.exe'), idOf('C:\\b.exe')];
+      const { run, callKibanaApi } = setup({
+        mode: 'on',
+        alerts: [
+          ['a1', source('C:\\a.exe')],
+          ['a2', source('C:\\a.exe')],
+          ['b1', source('C:\\b.exe')],
+          ['b2', source('C:\\b.exe')],
+          ['b3', source('C:\\b.exe')],
+        ],
+        decisions: { ...approved('C:\\a.exe'), ...approved('C:\\b.exe') },
+        revokedAfterWrite: [idB],
+      });
+      const inner = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const { path, body } = params;
+          // The close of decision B closes its alerts and then throws, so none of them is counted.
+          if (
+            path.endsWith('/signals/status') &&
+            body?.status === 'closed' &&
+            body.query.bool.filter[0].ids.values.includes('b1')
+          ) {
+            throw new Error('close failed');
+          }
+          return inner(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(idA).not.toEqual(idB);
+      // Decision A closed 2 alerts and keeps them. The 3 alerts B reopens were never counted.
+      expect(output).toEqual(expect.objectContaining({ closed: 2, close_failures: 1 }));
+    });
+
     it('takes the dismissal tags off a revoked decision in chunks, however many alerts it tagged', async () => {
       const id = dismissed();
       const ids = Array.from({ length: TAG_CHUNK_SIZE + 1 }, (_unused, i) => `s${i}`);

@@ -74,6 +74,19 @@ const chunked = <T>(list: readonly T[], size: number = TAG_CHUNK_SIZE): T[][] =>
     list.slice(index * size, (index + 1) * size)
   );
 
+/** What the closes of one decision have done so far. */
+interface CloseProgress {
+  /** Alerts a close confirmed as closed, and that the sweep has reconciled. */
+  closedIds: string[];
+  /**
+   * Alerts of a close whose outcome is not known: it threw, or its follow-up read did, before the
+   * sweep could tell which of them it closed. Empty once the sweep has reconciled the chunk.
+   */
+  unknownIds: string[];
+  /** How many closes this decision added to the totals. */
+  counted: number;
+}
+
 const closedTag = (id: string) => `${TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX}${id}`;
 
 /**
@@ -217,17 +230,13 @@ export const createDecisionSweep = ({
   };
 
   /**
-   * Closes the tagged alerts chunk by chunk. It adds the alerts that were closed to `closedIds`,
-   * and every alert a close was asked to close to `attemptedIds`, before the close is made. Both
-   * lists are filled as it goes, so a chunk that fails does not lose the ones before it, and the
-   * caller knows which alerts a close that threw may have reached. Returns whether a close timed
-   * out part way.
+   * Closes the tagged alerts chunk by chunk, and records in `progress` what it did, as it goes, so
+   * a chunk that fails does not lose the ones before it. Before each close the chunk's alerts go
+   * to `unknownIds`, and they leave it once the chunk is reconciled: the ones that were closed move
+   * to `closedIds`, and the ones an analyst moved on are released. A close that throws leaves them
+   * in `unknownIds`. Returns whether a close timed out part way.
    */
-  const closeAlerts = async (
-    id: string,
-    allowed: string[],
-    { closedIds, attemptedIds }: { closedIds: string[]; attemptedIds: string[] }
-  ) => {
+  const closeAlerts = async (id: string, allowed: string[], progress: CloseProgress) => {
     let timedOut = false;
     for (const chunk of chunked(allowed)) {
       // The attempt counts against today's allowance before it is made: a close that fails half
@@ -244,11 +253,12 @@ export const createDecisionSweep = ({
         id,
         chunk,
         chargeAttempt: (alertIds) => {
-          attemptedIds.push(...alertIds);
+          progress.unknownIds = alertIds;
           adjustRoom(id, -alertIds.length);
         },
       });
       totals.closed += updated;
+      progress.counted += updated;
       if (chunkTimedOut) timedOut = true;
       else adjustRoom(id, attempted.length - updated);
       // The alerts a timed-out close did not reach are released like the ones an analyst moved on,
@@ -257,7 +267,8 @@ export const createDecisionSweep = ({
         updated < attempted.length
           ? await releaseMovedOn({ api: contextManager, write, id, alertIds: attempted })
           : [];
-      closedIds.push(...attempted.filter((alertId) => !moved.includes(alertId)));
+      progress.closedIds.push(...attempted.filter((alertId) => !moved.includes(alertId)));
+      progress.unknownIds = [];
     }
     return timedOut;
   };
@@ -276,16 +287,14 @@ export const createDecisionSweep = ({
 
   /**
    * Called after the closes: reads the decision again. If a revoke landed meanwhile, the closes
-   * are undone. This covers every alert a close was asked to close, not only the ones it
-   * confirmed: a close that throws part way may have closed alerts it did not report, and when a
-   * revoke already took the tags off, nothing else can find them. Only alerts that are still
-   * closed as a false positive are reopened. Otherwise the closed alerts get their notes.
+   * are undone: the alerts the sweep confirmed as closed, and the ones whose close is unknown. A
+   * close that threw part way may have closed alerts it did not report, and when a revoke already
+   * took the tags off, nothing else can find them. An alert the sweep reconciled as not closed by
+   * it, because an analyst moved it on, is left alone. Only alerts that are still closed as a
+   * false positive are reopened. Otherwise the closed alerts get their notes.
    */
-  const settleClosed = async (
-    id: string,
-    tagged: string[],
-    { closedIds, attemptedIds }: { closedIds: string[]; attemptedIds: string[] }
-  ) => {
+  const settleClosed = async (id: string, tagged: string[], progress: CloseProgress) => {
+    const { closedIds, unknownIds, counted } = progress;
     if ((await statusAfterWrite(id, 'closed its alerts')) !== 'gone') {
       if (closedIds.length > 0) queueNotes(id, closedIds, 'closed');
       return;
@@ -296,10 +305,11 @@ export const createDecisionSweep = ({
         write,
         id,
         tagged,
-        closedIds: attemptedIds,
+        closedIds: [...closedIds, ...unknownIds],
       });
-      // The count may include alerts a failed close did not report, so it cannot go below zero.
-      totals.closed = Math.max(0, totals.closed - reopened);
+      // The totals hold the closes of every decision. Take back at most what this decision added:
+      // a close that threw may have closed alerts that were never counted.
+      totals.closed -= Math.min(reopened, counted);
     } catch (error) {
       totals.close_failures++;
       warn(`Could not put back the alerts of decision ${id}; run the revoke again`, error);
@@ -312,7 +322,7 @@ export const createDecisionSweep = ({
    * open. When the verdicts or the daily count cannot be read nothing is closed.
    */
   const closeDecision = async (id: string, alertIds: string[]) => {
-    const closed = { closedIds: [] as string[], attemptedIds: [] as string[] };
+    const progress: CloseProgress = { closedIds: [], unknownIds: [], counted: 0 };
     let tagged: string[] = [];
     try {
       if ((await statusOf(id)) !== 'active') {
@@ -324,7 +334,7 @@ export const createDecisionSweep = ({
       if (allowed.length === 0) return;
       tagged = allowed;
       await tagInChunks(write, { alertIds: allowed, add: [closedTag(id)], remove: [] });
-      if (await closeAlerts(id, allowed, closed)) {
+      if (await closeAlerts(id, allowed, progress)) {
         totals.close_failures++;
         logger.warn(`Closing the alerts of decision ${id} timed out part way`);
       }
@@ -334,7 +344,9 @@ export const createDecisionSweep = ({
       await untagAfterFailedClose(id, tagged);
     }
     // What a failed chunk had closed before it keeps its tag and gets its note.
-    if (closed.attemptedIds.length > 0) await settleClosed(id, tagged, closed);
+    if (progress.closedIds.length + progress.unknownIds.length > 0) {
+      await settleClosed(id, tagged, progress);
+    }
   };
 
   /** Closes the alerts of each approved decision. Without the verdicts nothing is closed. */
