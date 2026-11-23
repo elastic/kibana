@@ -49,6 +49,23 @@ describe('createEnqueueSourceReconciliation', () => {
     expect(execute).toHaveBeenCalledWith(args);
   });
 
+  it('stops waiting after 30 seconds so a stuck install cannot hold the source write', async () => {
+    jest.useFakeTimers();
+    try {
+      const { enqueue, execute } = setup({ install: new Promise<void>(() => {}) });
+
+      const pending = enqueue(args);
+      await jest.advanceTimersByTimeAsync(29_999);
+      expect(execute).not.toHaveBeenCalled();
+
+      await jest.advanceTimersByTimeAsync(1);
+      await pending;
+      expect(execute).toHaveBeenCalledWith(args);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('skips without an error when the feature is unavailable', async () => {
     const { enqueue, execute } = setup({ install: Promise.resolve(), available: false });
 
