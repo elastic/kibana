@@ -75,6 +75,15 @@ export interface UpdateVendorApiOptions {
   readonly endpoints?: Readonly<Record<string, readonly string[]>>;
   /** Per Markdown reference, the URL prefixes of the pages to fetch; see `ManifestSource`. */
   readonly pages?: Readonly<Record<string, readonly string[]>>;
+  /** Per MCP source, the tool documents to assemble its tools from; see `ManifestSource`. */
+  readonly tools?: Readonly<Record<string, readonly string[]>>;
+  /**
+   * Sources captured now, by name: the document each URL answered with credentials. It replaces
+   * the source's snapshot and marks the source captured; see `ManifestSource`.
+   */
+  readonly captures?: Readonly<Record<string, string>>;
+  /** Per source, the `note` to write, replacing the manifest's. */
+  readonly notes?: Readonly<Record<string, string>>;
   /**
    * Fetches the full vendor specs. Without it, actions are recorded against the committed
    * snapshots, which only picks up changes on the connector's side.
@@ -196,6 +205,9 @@ export const updateVendorApi = async ({
   formats: formatFlags = {},
   pages: pageFlags = {},
   endpoints: endpointFlags = {},
+  tools: toolFlags = {},
+  captures = {},
+  notes = {},
   refresh = false,
   check = false,
   trackFields = false,
@@ -230,7 +242,7 @@ export const updateVendorApi = async ({
   // Naming a source, or how to read one, means fetching it again.
   const fetchAll =
     refresh ||
-    [sourceFlags, formatFlags, pageFlags, endpointFlags].some(
+    [sourceFlags, formatFlags, pageFlags, endpointFlags, toolFlags].some(
       (flags) => Object.keys(flags).length > 0
     );
 
@@ -238,19 +250,87 @@ export const updateVendorApi = async ({
     ...Object.keys(formatFlags),
     ...Object.keys(pageFlags),
     ...Object.keys(endpointFlags),
+    ...Object.keys(toolFlags),
+    ...Object.keys(captures),
+    ...Object.keys(notes),
   ]) {
     if (!(name in urls)) {
       throw new Error(
-        `--format, --pages and --endpoint name a source, but there is no source "${name}"`
+        `--format, --pages, --endpoint, --tool, --capture and --note name a source, but there is no source "${name}"`
       );
     }
   }
+  for (const name of Object.keys(captures)) {
+    const known = previous?.sources[name];
+    // The note of a source captured before says what capturing it took; any other note doesn't.
+    if (notes[name] === undefined && !known?.captured) {
+      throw new Error(
+        `--capture marks ${name} captured, which needs a note saying what capturing it took; pass --note ${name}="..."`
+      );
+    }
+    if ((toolFlags[name] ?? known?.tools) !== undefined) {
+      throw new Error(
+        `${name} is assembled from --tool documents, which are fetched without credentials; --capture takes a single document`
+      );
+    }
+    if (isMarkdownFormat(formatFlags[name] ?? known?.format)) {
+      throw new Error(
+        `${name} is a Markdown reference, read from an index and the pages it links to; --capture takes a single document`
+      );
+    }
+  }
+  const isCaptured = (name: string): boolean =>
+    name in captures || previous?.sources[name]?.captured === true;
+  // A captured source is loaded from the document captured for it and nothing else: any other URL
+  // it needs, such as an external `$ref`, would only answer to credentials too.
+  const fetchTextOf =
+    (name: string) =>
+    async (url: string): Promise<string> => {
+      if (!(name in captures)) {
+        return fetchText(url);
+      }
+      if (url !== urls[name]) {
+        throw new Error(
+          `${name} is captured from one document, but loading it also needs ${url}; capture a self-contained document`
+        );
+      }
+      return captures[name];
+    };
   const markdownFormatOf = (name: string): MarkdownSourceFormat | undefined => {
     const format = formatFlags[name] ?? previous?.sources[name]?.format;
     return isMarkdownFormat(format) ? format : undefined;
   };
   const pagesOf = (name: string): readonly string[] | undefined =>
     pageFlags[name] ?? previous?.sources[name]?.pages;
+  const toolsOf = (name: string): readonly string[] | undefined =>
+    toolFlags[name] ?? previous?.sources[name]?.tools;
+
+  // A captured source's snapshot is the only copy of it, taken from the URL it names, so neither
+  // can change without capturing it again.
+  const rejectChangesToCapture = (name: string, known: ManifestSource) => {
+    const differs = (flag: unknown, current: unknown) =>
+      flag !== undefined && JSON.stringify(flag) !== JSON.stringify(current);
+    const changes = [
+      differs(sourceFlags[name], known.url),
+      differs(formatFlags[name], known.format),
+      differs(pageFlags[name], known.pages),
+      differs(endpointFlags[name], known.endpoints),
+      differs(toolFlags[name], known.tools),
+    ];
+    if (changes.some(Boolean)) {
+      throw new Error(
+        `${name} is captured from ${known.url}, so --source, --format, --pages, --endpoint and ` +
+          `--tool can't change it without capturing it again: pass --capture ${name}=<file> too.`
+      );
+    }
+  };
+  // Nothing takes the network to a captured source, which only answers to credentials: it is only
+  // ever read from its snapshot, or from the document passed with --capture.
+  const requireCapture = (name: string): never => {
+    throw new Error(
+      `${name} is captured but has no snapshot; capture it again with --capture ${name}=<file>`
+    );
+  };
 
   const raw: Record<string, OpenApiDocument> = {};
   const protocols: Record<string, GraphQLSpec | McpSpec> = {};
@@ -260,16 +340,38 @@ export const updateVendorApi = async ({
   for (const [name, url] of Object.entries(urls)) {
     const known = previous?.sources[name];
     const declaredFormat = formatFlags[name] ?? known?.format;
+    const captured = isCaptured(name);
+    const capturing = name in captures;
+    if (known?.captured && !capturing) {
+      rejectChangesToCapture(name, known);
+    }
+    // A capture replaces the snapshot. A captured source is never fetched again, so a refresh
+    // keeps its snapshot; any other source is fetched in full when a refresh or flag asks for it.
+    const readSnapshot = (format: ManifestSource['format'] | undefined) =>
+      capturing || (fetchAll && !captured) ? undefined : read(snapshotFile(name, format));
     const endpoints = endpointFlags[name] ?? known?.endpoints;
     if (isProtocolFormat(declaredFormat)) {
       if (endpoints === undefined) {
         throw new Error(`${name}: a ${declaredFormat} source needs --endpoint`);
       }
       formats[name] = declaredFormat;
-      const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
+      const tools = toolsOf(name);
+      if (tools !== undefined && declaredFormat !== 'mcp') {
+        throw new Error(`${name}: --tool only applies to MCP sources`);
+      }
+      const snapshot = await readSnapshot(declaredFormat);
       if (snapshot === undefined) {
-        log.info(`Loading ${name} from ${url}`);
-        protocols[name] = await loadProtocolSpec(url, fetchText, declaredFormat, endpoints);
+        if (captured && !capturing) {
+          requireCapture(name);
+        }
+        log.info(capturing ? `Loading ${name} from its capture` : `Loading ${name} from ${url}`);
+        protocols[name] = await loadProtocolSpec({
+          url,
+          fetchText: fetchTextOf(name),
+          format: declaredFormat,
+          endpoints,
+          tools,
+        });
         loaded.set(name, undefined);
       } else {
         protocols[name] = parseProtocolSnapshot(declaredFormat, snapshot, endpoints);
@@ -279,15 +381,21 @@ export const updateVendorApi = async ({
     if (endpointFlags[name] !== undefined) {
       throw new Error(`${name}: --endpoint only applies to GraphQL and MCP sources; pass --format`);
     }
-    const snapshot = fetchAll ? undefined : await read(snapshotFile(name, declaredFormat));
+    if (toolFlags[name] !== undefined) {
+      throw new Error(`${name}: --tool only applies to MCP sources; pass --format`);
+    }
+    const snapshot = await readSnapshot(declaredFormat);
     if (snapshot === undefined) {
+      if (captured && !capturing) {
+        requireCapture(name);
+      }
       const markdownFormat = markdownFormatOf(name);
       const pages = pagesOf(name);
       if (!markdownFormat && pages !== undefined) {
         throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
       }
-      log.info(`Loading ${name} from ${url}`);
-      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText, {
+      log.info(capturing ? `Loading ${name} from its capture` : `Loading ${name} from ${url}`);
+      const { format, apiVersion, document } = await loadVendorSpec(url, fetchTextOf(name), {
         format: markdownFormat,
         pages,
       });
@@ -300,8 +408,9 @@ export const updateVendorApi = async ({
     }
   }
 
-  // Protocol sources are loaded apart from `raw`, so every source is counted through `urls`.
-  const fetchedEverySource = loaded.size === Object.keys(urls).length;
+  // An overlay only applies to the OpenAPI sources, which are the ones in `raw`. A GraphQL or MCP
+  // source, captured or not, has nothing for it to match.
+  const fetchedEverySource = Object.keys(raw).every((name) => loaded.has(name));
   const { specs, unmatchedActions } = applyOverlayWithFindings(raw, overlay);
   // A snapshot only has the operations the connector calls, so an overlay action matching
   // nothing there may still be needed.
@@ -482,15 +591,19 @@ export const updateVendorApi = async ({
     const unchanged = (await read(file)) === files[file];
     const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
     const pages = isMarkdownFormat(formats[name]) ? pagesOf(name) : undefined;
+    // A capture is never read through the spec cache, which may hold an older copy of its URL.
     const fetchedAt = unchanged
       ? previous?.sources[name]?.fetchedAt
-      : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
-    const note = previous?.sources[name]?.note;
+      : ((name in captures ? undefined : fetchedAtOf?.(urls[name])) ?? now()).toISOString();
+    const note = notes[name] ?? previous?.sources[name]?.note;
     const endpoints = endpointFlags[name] ?? previous?.sources[name]?.endpoints;
+    const tools = formats[name] === 'mcp' ? toolsOf(name) : undefined;
     sources[name] = {
       format: formats[name],
       url: urls[name],
       ...(name in protocols && endpoints ? { endpoints: [...endpoints] } : {}),
+      ...(tools === undefined ? {} : { tools: [...tools] }),
+      ...(isCaptured(name) ? { captured: true as const } : {}),
       ...(pages === undefined ? {} : { pages: [...pages] }),
       ...(apiVersion === undefined ? {} : { apiVersion }),
       fetchedAt: fetchedAt ?? now().toISOString(),

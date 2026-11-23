@@ -1,5 +1,5 @@
 {
-  "sha1": "f04a233a257d5fcb52688e23ed6eb957517b54c3",
+  "sha1": "f4c182c3b7abf5e9ac76cc110094b136713e34e2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -743,7 +743,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ai_indices.spec.ts",
         "line": 898,
-        "column": 60
+        "column": 47
       }
     },
     {

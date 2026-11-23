@@ -13,7 +13,6 @@
       "preference": "",
       "realtime": "__flag__",
       "routing": [],
-      "_slice": "",
       "term_statistics": "__flag__",
       "version": "",
       "version_type": [
@@ -83,7 +82,9 @@
     ],
     "patterns": [
       "{index}/_termvectors/{id}",
-      "{index}/_termvectors"
+      "{index}/_termvectors",
+      "{index}/{_slice}/_termvectors/{id}",
+      "{index}/{_slice}/_termvectors"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-termvectors",
     "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-termvectors",

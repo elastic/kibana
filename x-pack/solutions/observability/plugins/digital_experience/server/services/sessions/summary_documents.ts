@@ -58,7 +58,8 @@ export const sessionDocumentId = (serviceName: string, sessionId: string): strin
     .update(JSON.stringify([serviceName, sessionId]))
     .digest('base64url');
 
-const searchValues = (values: Array<string | null>): string[] => [
+/** The lowercased values, without repeats, that a search of the summaries matches. */
+export const searchValues = (values: Array<string | null>): string[] => [
   ...new Set(values.flatMap((value) => (value ? [value.toLowerCase()] : []))),
 ];
 

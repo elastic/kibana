@@ -53,10 +53,7 @@ describe('CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW', () => {
 
     expect(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW.id).not.toBe(CONTEXT_ENGINE_DREAMING_WORKFLOW.id);
     expect(workflow.name).toBe('Trace dreaming: support-cases');
-    expect(workflow.settings.concurrency.key).toBe(
-      'context-engine-trace-dreaming-support-cases-0123456789abcdef'
-    );
-    expect(workflow.settings.concurrency.key).not.toBe(dreaming.settings.concurrency.key);
+    expect(workflow.settings.concurrency).toEqual(dreaming.settings.concurrency);
     expect(workflow.enabled).toBe(false);
     expect(workflow.triggers).toEqual([
       { type: 'scheduled', with: { every: '90m' } },
