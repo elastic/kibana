@@ -314,6 +314,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Agent Builder chat appearing to hang while it silently retried an empty model response. After the first attempt and two retries, it now stops and reports an error [#281616]({{kib-pull}}281616).
 * Fix agent tool calls failing when a model calls a tool by a name that contains characters tool names don't allow, such as dots [#296516]({{kib-pull}}296516).
 * Fix the Agent Builder natural language search tool querying indices that aren't allowed to the tool. The tool now returns an error when no allowed indices are available [#295885]({{kib-pull}}295885).
+* Fix the Agent Builder anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
 * Fix the {{alerting-v2-system-short}} rule-authoring skill in Agent Builder not finding or editing existing rules unless `agentBuilder:experimentalFeatures` is on [#301256]({{kib-pull}}301256).
 % Consider #294871 (release_note:bug): {{kib}} now checks a model's structured answers against their schema, and rejects answers that fail limits such as `max`, `min`, or `enum` [#294871]({{kib-pull}}294871). It is left out because the reader impact is not clear from the PR. The one visible effect is on generated chat titles.
 
@@ -541,6 +542,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Stop Discover from showing the group-by layout for an {{esql}} `STATS` query that groups by more than one field when a later `WHERE` command refers to a grouping column [#291115]({{kib-pull}}291115).
 * Fix the Discover data table showing only the **Summary** column after you switch from Classic to {{esql}} mode. It now shows the columns that your query returns [#302251]({{kib-pull}}302251).
 * Fix an error in Discover when you switch the background chart of an {{esql}} metric from bar to line while a maximum value is configured [#301106]({{kib-pull}}301106).
+* Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705).
 * Keep a renamed background search, or an extended search session expiration, when the session status updates at the same moment. Before, the change could be silently reverted [#296401]({{kib-pull}}296401).
 * Prevent creating two ad hoc data views with the same custom ID. **Use without saving** is now disabled when you enter a custom data view ID [#292738]({{kib-pull}}292738).
 * Fix the Discover field list showing stale field type icons after an index is recreated with a different mapping type for an existing field [#301198]({{kib-pull}}301198).
@@ -607,7 +609,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix calls failing for legacy AI connector configurations when {{kib}} is restricted to the default LLM and the call uses the {{infer}} endpoint behind the default connector. Agent Builder now also uses feature-specific settings that an administrator configured before it uses the default connector [#293855]({{kib-pull}}293855).
 * Fix LLM model resolution failing when you don't have the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533).
 * Fix users without the `searchInferenceEndpoints.read` privilege seeing every available LLM instead of only the LLMs allowed for the feature they use [#290457]({{kib-pull}}290457).
-* Fix the Agent Builder anomaly detection jobs tool failing with `Insufficient privileges to access feature` for every user, including superusers, when an agent runs it in an `ai.agent` workflow step or in Agent Builder chat [#301983]({{kib-pull}}301983).
 * Block chat completion calls that use a non-default model when `genAiSettings:defaultAIConnectorOnly` is on. These calls now fail with a 400 error instead of succeeding [#288107]({{kib-pull}}288107).
 * Fix AI features failing or crashing when a prompt or response contains a model special token, such as `<|endoftext|>`, and fix 400 errors from Claude models caused by empty text content blocks [#283177]({{kib-pull}}283177).
 * Fix {{kib}} becoming unresponsive when an LLM response stream never ends or is very slow [#286849]({{kib-pull}}286849).
@@ -812,7 +813,6 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Fix the APM waterfall silently re-rooting on truncated traces [#284971]({{kib-pull}}284971). Observability solution.
 % * Fix Synthetics monitor status alerts showing the location ID instead of the location name when a pending alert recovers [#300220]({{kib-pull}}300220). Observability solution.
 % * Fix the Synthetics monitor health API logging users out when a monitor is shared to all spaces [#302177]({{kib-pull}}302177). Observability solution.
-% * Fix the Metrics charts in Discover failing with an `Unknown column` error when an {{esql}} `TS` query filters on a metadata field such as `_ignored` [#302705]({{kib-pull}}302705). Observability solution (Metrics experience, Team:obs-signals-metrics). Consider it if you want it under Discover.
 % * Include the run-tests and manage-rules sub-features in the Synthetics **All** privilege [#302481]({{kib-pull}}302481).
 % * Make the daily Synthetics private location clean up optional and faster [#294989]({{kib-pull}}294989).
 % * Make `error.id` optional in the APM trace error lookup so a trace doesn't return a `500` error [#302541]({{kib-pull}}302541).
